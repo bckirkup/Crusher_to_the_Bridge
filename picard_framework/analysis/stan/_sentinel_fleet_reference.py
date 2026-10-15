@@ -70,6 +70,26 @@ class _Layout:
         self.z_r = take(n_ships)
         self.log_crew_ratio = take(1)
         self.beta_repeat = take(1)
+        # Provisioning sources, embarkation markets, and voyage covariates —
+        # dimensioned only when the fleet declares them, same rule as the
+        # wastewater blocks: a channel with no data is prior-only weight the
+        # walk should not pay for.
+        self.n_sources = int(data.get("NS", 0))
+        self.n_markets = int(data.get("NM", 0))
+        self.n_covariates = int(data.get("K", 0))
+        self.has_sources = self.n_sources > 0
+        self.has_markets = self.n_markets > 0
+        self.has_covariates = self.n_covariates > 0
+        if self.has_sources:
+            self.mu_log_prov = take(1)
+            self.log_sigma_source = take(1)
+            self.z_source = take(self.n_sources)
+        if self.has_markets:
+            self.mu_logit_market = take(1)
+            self.log_sigma_market = take(1)
+            self.z_market = take(self.n_markets)
+        if self.has_covariates:
+            self.beta_x = take(self.n_covariates)
         # Wastewater link, only when there is wastewater to explain. With no
         # samples these would be prior-only dimensions: nothing to learn, and a
         # clinical-only fit would walk a wider space than the model it is.
@@ -115,6 +135,22 @@ def _unpack(theta: np.ndarray, layout: _Layout) -> dict[str, Any]:
         "log_crew_ratio": float(theta[layout.log_crew_ratio][0]),
         "beta_repeat": float(theta[layout.beta_repeat][0]),
     }
+    if layout.has_sources:
+        sigma_source = math.exp(float(theta[layout.log_sigma_source][0]))
+        unpacked["sigma_source"] = sigma_source
+        unpacked["log_kappa"] = (
+            float(theta[layout.mu_log_prov][0])
+            + sigma_source * theta[layout.z_source]
+        )
+    if layout.has_markets:
+        sigma_market = math.exp(float(theta[layout.log_sigma_market][0]))
+        unpacked["sigma_market"] = sigma_market
+        unpacked["logit_epsilon"] = (
+            float(theta[layout.mu_logit_market][0])
+            + sigma_market * theta[layout.z_market]
+        )
+    if layout.has_covariates:
+        unpacked["beta_x"] = theta[layout.beta_x]
     if layout.has_wastewater:
         unpacked["ww_logit_base"] = float(theta[layout.ww_logit_base][0])
         unpacked["ww_slope"] = math.exp(float(theta[layout.log_ww_slope][0]))
@@ -157,40 +193,73 @@ def wastewater_params(theta: np.ndarray, data: Mapping[str, Any]) -> WastewaterP
     )
 
 
-def fleet_rates(theta: np.ndarray, data: Mapping[str, Any]) -> FleetRates:
-    """The ``FleetRates`` a parameter vector implies — the hierarchy resolved."""
-    unpacked = _unpack(np.asarray(theta, dtype=float), _Layout(data))
+def _susceptibility(unpacked: Mapping[str, Any], data: Mapping[str, Any]) -> np.ndarray:
+    """``exp(X[v] . beta_x)`` per voyage; ones when no covariates are declared."""
+    if int(data.get("K", 0)) == 0:
+        return np.ones(int(data["V"]), dtype=float)
+    x = np.asarray(data["X"], dtype=float)
+    return np.exp(x @ np.asarray(unpacked["beta_x"], dtype=float))
+
+
+def _rates_from_unpacked(
+    unpacked: Mapping[str, Any],
+    data: Mapping[str, Any],
+) -> FleetRates:
+    """``FleetRates`` resolved off the hierarchy, including the new channels."""
     return FleetRates(
         lambda_visit=np.exp(_log_lambda_visit(unpacked, data)),
         lambda_aboard=np.exp(unpacked["log_lambda_aboard"]),
         r_onboard=np.exp(unpacked["log_r"]),
         crew_ratio=math.exp(unpacked["log_crew_ratio"]),
         beta_repeat=unpacked["beta_repeat"],
+        kappa=(
+            np.exp(np.asarray(unpacked["log_kappa"], dtype=float))
+            if "log_kappa" in unpacked
+            else ()
+        ),
+        epsilon=(
+            _inv_logit(np.asarray(unpacked["logit_epsilon"], dtype=float))
+            if "logit_epsilon" in unpacked
+            else ()
+        ),
+        susceptibility=_susceptibility(unpacked, data),
     )
+
+
+def _inv_logit(x: np.ndarray) -> np.ndarray:
+    return 1.0 / (1.0 + np.exp(-x))
+
+
+def _inv_logit_scalar(x: float) -> float:
+    return 1.0 / (1.0 + math.exp(-x))
+
+
+def fleet_rates(theta: np.ndarray, data: Mapping[str, Any]) -> FleetRates:
+    """The ``FleetRates`` a parameter vector implies — the hierarchy resolved."""
+    unpacked = _unpack(np.asarray(theta, dtype=float), _Layout(data))
+    return _rates_from_unpacked(unpacked, data)
 
 
 def _log_density(theta: np.ndarray, data: Mapping[str, Any], layout: _Layout) -> float:
     u = _unpack(theta, layout)
-    if (
-        max(u["sigma_port"], u["sigma_visit"], u["sigma_time"], u["sigma_ship"])
-        > math.exp(_MAX_LOG_SIGMA)
-    ):
+    sigmas = [u["sigma_port"], u["sigma_visit"], u["sigma_time"], u["sigma_ship"]]
+    sigmas += [u[k] for k in ("sigma_source", "sigma_market") if k in u]
+    if max(sigmas) > math.exp(_MAX_LOG_SIGMA):
         return -math.inf
     log_visit = _log_lambda_visit(u, data)
+    rate_bounds = [
+        float(log_visit.max(initial=-math.inf)),
+        float(np.max(u["log_lambda_aboard"])),
+    ]
+    if "log_kappa" in u:
+        rate_bounds.append(float(np.max(u["log_kappa"])))
     if (
-        float(log_visit.max(initial=-math.inf)) > _MAX_LOG_RATE
-        or float(np.max(u["log_lambda_aboard"])) > _MAX_LOG_RATE
+        max(rate_bounds) > _MAX_LOG_RATE
         or float(np.max(u["log_r"])) > 2.0
     ):
         return -math.inf
 
-    rates = FleetRates(
-        lambda_visit=np.exp(log_visit),
-        lambda_aboard=np.exp(u["log_lambda_aboard"]),
-        r_onboard=np.exp(u["log_r"]),
-        crew_ratio=math.exp(u["log_crew_ratio"]),
-        beta_repeat=u["beta_repeat"],
-    )
+    rates = _rates_from_unpacked(u, data)
     mu_onsets = expected_onsets_fleet(data, rates)
 
     lp = 0.0
@@ -289,14 +358,42 @@ def _log_prior(
         lp += normal(
             u["conc_sigma"], 0.0, float(data["conc_sigma_prior_scale"]),
         ) + math.log(u["conc_sigma"])
+    if layout.has_sources:
+        lp += normal(
+            float(theta[layout.mu_log_prov][0]),
+            float(data["prov_log_prior_mean"]),
+            float(data["prov_log_prior_sd"]),
+        )
+    if layout.has_markets:
+        lp += normal(
+            float(theta[layout.mu_logit_market][0]),
+            float(data["market_logit_prior_mean"]),
+            float(data["market_logit_prior_sd"]),
+        )
+    if layout.has_covariates:
+        lp += -0.5 * float(
+            ((np.asarray(u["beta_x"]) / float(data["x_prior_sd"])) ** 2).sum(),
+        )
     for key in ("z_port", "z_visit", "z_time", "z_ship", "z_r"):
         block = theta[getattr(layout, key)]
         lp += -0.5 * float((block**2).sum())
+    for key in ("z_source", "z_market"):
+        if hasattr(layout, key):
+            block = theta[getattr(layout, key)]
+            lp += -0.5 * float((block**2).sum())
     lp += half_normal_log_scale(u["sigma_port"], float(data["port_sd_prior_scale"]))
     lp += half_normal_log_scale(u["sigma_visit"], float(data["visit_sd_prior_scale"]))
     lp += half_normal_log_scale(u["sigma_time"], float(data["time_sd_prior_scale"]))
     lp += half_normal_log_scale(u["sigma_ship"], float(data["ship_sd_prior_scale"]))
     lp += half_normal_log_scale(u["sigma_r"], float(data["r_sd_prior_scale"]))
+    if layout.has_sources:
+        lp += half_normal_log_scale(
+            u["sigma_source"], float(data["prov_sd_prior_scale"]),
+        )
+    if layout.has_markets:
+        lp += half_normal_log_scale(
+            u["sigma_market"], float(data["market_sd_prior_scale"]),
+        )
     return lp
 
 
@@ -329,6 +426,12 @@ def initial_point(data: Mapping[str, Any]) -> np.ndarray:
         "log_sigma_r",
     ):
         theta[getattr(layout, key)] = math.log(0.25)
+    if layout.has_sources:
+        theta[layout.mu_log_prov] = float(data["prov_log_prior_mean"])
+        theta[layout.log_sigma_source] = math.log(0.25)
+    if layout.has_markets:
+        theta[layout.mu_logit_market] = float(data["market_logit_prior_mean"])
+        theta[layout.log_sigma_market] = math.log(0.25)
     if layout.has_wastewater:
         theta[layout.ww_logit_base] = float(data["ww_base_prior_mean"])
         theta[layout.log_ww_slope] = math.log(
@@ -421,14 +524,7 @@ def _quantities_for_draw(
     visit_port: np.ndarray,
 ) -> dict[str, Any]:
     u = _unpack(row, layout)
-    log_visit = _log_lambda_visit(u, data)
-    rates = FleetRates(
-        lambda_visit=np.exp(log_visit),
-        lambda_aboard=np.exp(u["log_lambda_aboard"]),
-        r_onboard=np.exp(u["log_r"]),
-        crew_ratio=math.exp(u["log_crew_ratio"]),
-        beta_repeat=u["beta_repeat"],
-    )
+    rates = _rates_from_unpacked(u, data)
     incidence, mu = fleet_forward_incidence(data, rates)
     imported_visit = _imported_by_visit(data, rates)
     imported_port = np.zeros(layout.n_ports, dtype=float)
@@ -436,9 +532,12 @@ def _quantities_for_draw(
         imported_port[visit_port[i]] += value
     return {
         "u": u,
-        "log_visit": log_visit,
+        "susc": _susceptibility(u, data),
         "imported_visit": imported_visit,
         "imported_port": imported_port,
+        "imported_source": _imported_by_source(data, rates),
+        "imported_market": _imported_by_market(data, rates),
+        "log_visit": _log_lambda_visit(u, data),
         "aboard_cases": float((np.exp(u["log_lambda_aboard"]) * hours_aboard_ship).sum()),
         "total": float(sum(float(inc.sum()) for inc in incidence)),
         "loglik": _poisson_loglik(data, mu),
@@ -497,6 +596,29 @@ def _put_hierarchy_columns(
     columns["sigma_time"] = [d["u"]["sigma_time"] for d in per_draw]
     columns["sigma_ship"] = [d["u"]["sigma_ship"] for d in per_draw]
     columns["sigma_r"] = [d["u"]["sigma_r"] for d in per_draw]
+    if layout.has_sources:
+        columns["mu_log_prov"] = [
+            float(r[layout.mu_log_prov][0]) for r in samples
+        ]
+        columns["sigma_source"] = [d["u"]["sigma_source"] for d in per_draw]
+    if layout.has_markets:
+        columns["mu_logit_market"] = [
+            float(r[layout.mu_logit_market][0]) for r in samples
+        ]
+        columns["sigma_market"] = [d["u"]["sigma_market"] for d in per_draw]
+    if layout.has_covariates:
+        _put_indexed(
+            columns,
+            "beta_x[{}]",
+            layout.n_covariates,
+            lambda k: [float(d["u"]["beta_x"][k]) for d in per_draw],
+        )
+        _put_indexed(
+            columns,
+            "susceptibility[{}]",
+            int(per_draw[0]["susc"].size),
+            lambda v: [float(d["susc"][v]) for d in per_draw],
+        )
 
 
 def _put_derived_columns(
@@ -510,11 +632,26 @@ def _put_derived_columns(
     columns["aboard_cases"] = [d["aboard_cases"] for d in per_draw]
     columns["total_incidence"] = [d["total"] for d in per_draw]
     columns["secondary_cases"] = [
-        max(0.0, d["total"] - float(d["imported_port"].sum()) - d["aboard_cases"])
+        max(
+            0.0,
+            d["total"]
+            - float(d["imported_port"].sum())
+            - float(d.get("imported_source", np.zeros(0)).sum())
+            - float(d.get("imported_market", np.zeros(0)).sum())
+            - d["aboard_cases"],
+        )
         for d in per_draw
     ]
     columns["import_share"] = [
-        float(d["imported_port"].sum() / max(d["total"], 1e-12)) for d in per_draw
+        float(
+            (
+                d["imported_port"].sum()
+                + d.get("imported_source", np.zeros(0)).sum()
+                + d.get("imported_market", np.zeros(0)).sum()
+            )
+            / max(d["total"], 1e-12),
+        )
+        for d in per_draw
     ]
     columns["loglik_clinical"] = [d["loglik"] for d in per_draw]
 
@@ -544,6 +681,55 @@ def _put_structure_columns(
             float(d["imported_port"][p] / max(d["total"], 1e-12)) for d in per_draw
         ],
     )
+    if layout.has_sources:
+        _put_indexed(
+            columns,
+            "kappa[{}]",
+            layout.n_sources,
+            lambda s: [
+                float(math.exp(d["u"]["log_kappa"][s])) for d in per_draw
+            ],
+        )
+        _put_indexed(
+            columns,
+            "imported_cases_source[{}]",
+            layout.n_sources,
+            lambda s: [float(d["imported_source"][s]) for d in per_draw],
+        )
+        _put_indexed(
+            columns,
+            "attribution_share_source[{}]",
+            layout.n_sources,
+            lambda s: [
+                float(d["imported_source"][s] / max(d["total"], 1e-12))
+                for d in per_draw
+            ],
+        )
+    if layout.has_markets:
+        _put_indexed(
+            columns,
+            "epsilon[{}]",
+            layout.n_markets,
+            lambda m: [
+                float(_inv_logit_scalar(d["u"]["logit_epsilon"][m]))
+                for d in per_draw
+            ],
+        )
+        _put_indexed(
+            columns,
+            "imported_cases_market[{}]",
+            layout.n_markets,
+            lambda m: [float(d["imported_market"][m]) for d in per_draw],
+        )
+        _put_indexed(
+            columns,
+            "attribution_share_market[{}]",
+            layout.n_markets,
+            lambda m: [
+                float(d["imported_market"][m] / max(d["total"], 1e-12))
+                for d in per_draw
+            ],
+        )
     _put_indexed(
         columns,
         "lambda_visit[{}]",
@@ -602,6 +788,40 @@ def _to_columns(
     _put_wastewater_columns(columns, per_draw, layout)
     _put_concentration_columns(columns, per_draw, layout)
     return columns
+
+
+def _imported_by_source(data: Mapping[str, Any], rates: FleetRates) -> np.ndarray:
+    """Cases attributed to each provisioning source — servings x per-serving hazard."""
+    n_sources = int(data.get("NS", 0))
+    imported = np.zeros(n_sources, dtype=float)
+    if not rates.kappa:
+        return imported
+    kappa = np.asarray(list(rates.kappa), dtype=float)
+    susc = np.asarray(list(rates.susceptibility), dtype=float)
+    for v in range(int(data["V"])):
+        horizon = int(data["T"][v])
+        prov = np.asarray(data["prov_servings"][v], dtype=float)[:, :horizon, :]
+        for s in range(n_sources):
+            imported[s] += susc[v] * kappa[s] * float(prov[:, :, s].sum())
+    return imported
+
+
+def _imported_by_market(data: Mapping[str, Any], rates: FleetRates) -> np.ndarray:
+    """Cases attributed to each embarkation market — boarded persons x prevalence."""
+    n_markets = int(data.get("NM", 0))
+    imported = np.zeros(n_markets, dtype=float)
+    if not rates.epsilon:
+        return imported
+    epsilon = np.asarray(list(rates.epsilon), dtype=float)
+    susc = np.asarray(list(rates.susceptibility), dtype=float)
+    market_idx = np.asarray(data["market_idx"], dtype=int)
+    persons = np.asarray(data["embark_persons"], dtype=float)
+    for v in range(int(data["V"])):
+        for g in range(int(data["G"])):
+            m = int(market_idx[v, g]) - 1
+            if m >= 0:
+                imported[m] += susc[v] * epsilon[m] * float(persons[v, g])
+    return imported
 
 
 def _imported_by_visit(data: Mapping[str, Any], rates: FleetRates) -> np.ndarray:

@@ -68,6 +68,36 @@ class VisitHazard:
     person_hours_ashore: float
 
 
+@dataclass(frozen=True)
+class SourceHazard:
+    """Pooled posterior summary for one provisioning source across the fleet."""
+
+    source_id: str
+    hazard_mean: float
+    hazard_q05: float
+    hazard_q95: float
+    n_attributed_cases: float
+    attribution_share: float
+    n_voyages: int
+    total_servings: float
+    home_confounded: bool
+
+
+@dataclass(frozen=True)
+class MarketHazard:
+    """Pooled posterior summary for one embarkation market across the fleet."""
+
+    market_id: str
+    prevalence_mean: float
+    prevalence_q05: float
+    prevalence_q95: float
+    n_attributed_cases: float
+    attribution_share: float
+    n_voyages: int
+    strata: tuple[str, ...]
+    home_confounded: bool
+
+
 def fleet_time_confounded_ports(meta: Mapping[str, Any]) -> frozenset[str]:
     """Ports not separable from the fleet-time effect, from the design alone.
 
@@ -90,6 +120,60 @@ def fleet_time_confounded_ports(meta: Mapping[str, Any]) -> frozenset[str]:
         for port_id, weeks in weeks_by_port.items()
         if all(len(ports_by_week[w]) == 1 for w in weeks)
     )
+
+
+def source_home_confounded(meta: Mapping[str, Any]) -> frozenset[str]:
+    """Sources not separable from the home-port visit hazard, from the design.
+
+    A provisioned source whose every consuming voyage embarked at one shared
+    home port *and* starts serving inside that port's embarkation call shares
+    the embarkation timing with the home-port hazard: the only thing that
+    separates kappa_s from lambda_home and epsilon_m then is the exposure
+    column (servings vs pier-hours vs persons). Reported like
+    ``fleet_time_confounded_ports`` — a checkable property of the itinerary,
+    not an inference from interval width.
+    """
+    voyages = {str(v["voyage_id"]): v for v in meta.get("voyages") or []}
+    out: set[str] = set()
+    for src in meta.get("sources") or []:
+        voyage_ids = [str(v) for v in src.get("voyages") or []]
+        if not voyage_ids or any(v not in voyages for v in voyage_ids):
+            continue
+        homes = {voyages[v].get("home_port") for v in voyage_ids}
+        if len(homes) != 1 or None in homes:
+            continue
+        firsts = src.get("first_service_epoch") or {}
+        if all(
+            firsts.get(v) is not None
+            and voyages[v].get("embark_window") is not None
+            and int(firsts[v]) <= int(voyages[v]["embark_window"][1])
+            for v in voyage_ids
+        ):
+            out.add(str(src["source_id"]))
+    return frozenset(out)
+
+
+def market_home_confounded(meta: Mapping[str, Any]) -> frozenset[str]:
+    """Markets not separable from the home-port embarkation leg.
+
+    Every voyage boarding from market m embarked at one shared home port whose
+    calls generate ashore exposure (an embark or disembark window), so
+    epsilon_m and that port's visit hazard compete on the same voyages.
+    """
+    voyages = {str(v["voyage_id"]): v for v in meta.get("voyages") or []}
+    out: set[str] = set()
+    for market in meta.get("markets") or []:
+        voyage_ids = [str(v) for v in market.get("voyages") or []]
+        if not voyage_ids or any(v not in voyages for v in voyage_ids):
+            continue
+        homes = {voyages[v].get("home_port") for v in voyage_ids}
+        if len(homes) != 1 or None in homes:
+            continue
+        if all(
+            voyages[v].get("home_port_has_ashore") for v in voyage_ids
+        ):
+            out.add(str(market["market_id"]))
+    return frozenset(out)
 
 
 def summarize_fleet_hazards(
@@ -166,6 +250,77 @@ def summarize_visit_hazards(
                 hazard_q95=float(np.quantile(hazard, 0.95)),
                 n_attributed_cases=float(cases.mean()),
                 person_hours_ashore=float(visit["person_hours_ashore"]),
+            ),
+        )
+    return tuple(out)
+
+
+def summarize_source_hazards(
+    posterior: Mapping[str, Sequence[float]],
+    meta: Mapping[str, Any],
+) -> tuple[SourceHazard, ...]:
+    """Pooled per-source summaries in ``meta['sources']`` order.
+
+    ``hazard_mean`` is the per-serving hazard. The home-confounded flag is the
+    design check of the source+market revision — a source flagged there shares
+    embarkation timing with the home-port hazard and its interval is borrowed
+    rather than identified.
+    """
+    sources = meta.get("sources") or []
+    confounded = source_home_confounded(meta)
+    out: list[SourceHazard] = []
+    for i, src in enumerate(sources, start=1):
+        if f"kappa[{i}]" not in posterior:
+            continue  # meta declares the source but the fit did not fit it
+        hazard = parameter_draws(posterior, f"kappa[{i}]")
+        cases = parameter_draws(posterior, f"imported_cases_source[{i}]")
+        share = parameter_draws(posterior, f"attribution_share_source[{i}]")
+        out.append(
+            SourceHazard(
+                source_id=str(src["source_id"]),
+                hazard_mean=float(hazard.mean()),
+                hazard_q05=float(np.quantile(hazard, 0.05)),
+                hazard_q95=float(np.quantile(hazard, 0.95)),
+                n_attributed_cases=float(cases.mean()),
+                attribution_share=float(share.mean()),
+                n_voyages=len(src.get("voyages") or []),
+                total_servings=float(src.get("total_servings") or 0.0),
+                home_confounded=str(src["source_id"]) in confounded,
+            ),
+        )
+    return tuple(out)
+
+
+def summarize_market_hazards(
+    posterior: Mapping[str, Sequence[float]],
+    meta: Mapping[str, Any],
+) -> tuple[MarketHazard, ...]:
+    """Pooled per-market boarding prevalence in ``meta['markets']`` order.
+
+    ``prevalence_mean`` is a probability, not a rate — the share of the
+    boarding pool that arrived infected, pooled across the voyages that drew
+    from this market.
+    """
+    markets = meta.get("markets") or []
+    confounded = market_home_confounded(meta)
+    out: list[MarketHazard] = []
+    for i, market in enumerate(markets, start=1):
+        if f"epsilon[{i}]" not in posterior:
+            continue  # meta declares the market but the fit did not fit it
+        prevalence = parameter_draws(posterior, f"epsilon[{i}]")
+        cases = parameter_draws(posterior, f"imported_cases_market[{i}]")
+        share = parameter_draws(posterior, f"attribution_share_market[{i}]")
+        out.append(
+            MarketHazard(
+                market_id=str(market["market_id"]),
+                prevalence_mean=float(prevalence.mean()),
+                prevalence_q05=float(np.quantile(prevalence, 0.05)),
+                prevalence_q95=float(np.quantile(prevalence, 0.95)),
+                n_attributed_cases=float(cases.mean()),
+                attribution_share=float(share.mean()),
+                n_voyages=len(market.get("voyages") or []),
+                strata=tuple(sorted(market.get("strata") or [])),
+                home_confounded=str(market["market_id"]) in confounded,
             ),
         )
     return tuple(out)
@@ -382,6 +537,42 @@ def visit_hazard_rows(estimates: Sequence[VisitHazard]) -> list[dict[str, Any]]:
     ]
 
 
+def source_hazard_rows(estimates: Sequence[SourceHazard]) -> list[dict[str, Any]]:
+    """Flatten pooled source estimates for CSV output."""
+    return [
+        {
+            "source_id": e.source_id,
+            "hazard_mean": e.hazard_mean,
+            "hazard_q05": e.hazard_q05,
+            "hazard_q95": e.hazard_q95,
+            "n_attributed_cases": e.n_attributed_cases,
+            "attribution_share": e.attribution_share,
+            "n_voyages": e.n_voyages,
+            "total_servings": e.total_servings,
+            "home_confounded": e.home_confounded,
+        }
+        for e in estimates
+    ]
+
+
+def market_hazard_rows(estimates: Sequence[MarketHazard]) -> list[dict[str, Any]]:
+    """Flatten pooled market estimates for CSV output."""
+    return [
+        {
+            "market_id": e.market_id,
+            "prevalence_mean": e.prevalence_mean,
+            "prevalence_q05": e.prevalence_q05,
+            "prevalence_q95": e.prevalence_q95,
+            "n_attributed_cases": e.n_attributed_cases,
+            "attribution_share": e.attribution_share,
+            "n_voyages": e.n_voyages,
+            "strata": "+".join(e.strata),
+            "home_confounded": e.home_confounded,
+        }
+        for e in estimates
+    ]
+
+
 FLEET_HAZARD_COLUMNS = (
     "port_id",
     "pathogen",
@@ -407,4 +598,28 @@ VISIT_HAZARD_COLUMNS = (
     "hazard_q95",
     "n_attributed_cases",
     "person_hours_ashore",
+)
+
+SOURCE_HAZARD_COLUMNS = (
+    "source_id",
+    "hazard_mean",
+    "hazard_q05",
+    "hazard_q95",
+    "n_attributed_cases",
+    "attribution_share",
+    "n_voyages",
+    "total_servings",
+    "home_confounded",
+)
+
+MARKET_HAZARD_COLUMNS = (
+    "market_id",
+    "prevalence_mean",
+    "prevalence_q05",
+    "prevalence_q95",
+    "n_attributed_cases",
+    "attribution_share",
+    "n_voyages",
+    "strata",
+    "home_confounded",
 )

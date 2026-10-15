@@ -55,5 +55,26 @@
       "reported_via": "screening"
     }
   ],
-  "wastewater_samples": []
+  "wastewater_samples": [],
+  "provisioning": {
+    "MIA-PROV-01": {
+      "servings_total": {
+        "passenger": 12000,
+        "crew": 3000
+      },
+      "service_window_epochs": [
+        10,
+        72
+      ]
+    }
+  },
+  "embarkation": {
+    "markets": {
+      "passenger": "NA-CARIB",
+      "crew": "LATAM-CREW"
+    }
+  },
+  "covariates": {
+    "child_fraction": 0.05
+  }
 }

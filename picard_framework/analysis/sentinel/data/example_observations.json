@@ -15,7 +15,9 @@
       "crew": false,
       "pathogen": "norovirus",
       "genotype": null,
-      "hours_ashore": { "MXCZM": 9.5 },
+      "hours_ashore": {
+        "MXCZM": 9.5
+      },
       "reported_via": "sick_call"
     },
     {
@@ -24,7 +26,10 @@
       "crew": false,
       "pathogen": "norovirus",
       "genotype": null,
-      "hours_ashore": { "MXCZM": 8.0, "MXCTM": 5.0 },
+      "hours_ashore": {
+        "MXCZM": 8.0,
+        "MXCTM": 5.0
+      },
       "reported_via": "sick_call",
       "report_epoch": 107
     },
@@ -34,7 +39,9 @@
       "crew": true,
       "pathogen": "norovirus",
       "genotype": null,
-      "hours_ashore": { "MXCZM": 6.0 },
+      "hours_ashore": {
+        "MXCZM": 6.0
+      },
       "reported_via": "screening"
     },
     {
@@ -52,7 +59,9 @@
       "crew": false,
       "pathogen": "norovirus",
       "genotype": null,
-      "hours_ashore": { "KYGEC": 7.5 },
+      "hours_ashore": {
+        "KYGEC": 7.5
+      },
       "reported_via": "wearable"
     }
   ],
@@ -93,5 +102,26 @@
       "clr_anomaly_score": 4.2,
       "concentration_copies_per_l": null
     }
-  ]
+  ],
+  "provisioning": {
+    "MIA-PROV-01": {
+      "servings_total": {
+        "passenger": 12000,
+        "crew": 3000
+      },
+      "service_window_epochs": [
+        10,
+        72
+      ]
+    }
+  },
+  "embarkation": {
+    "markets": {
+      "passenger": "NA-CARIB",
+      "crew": "LATAM-CREW"
+    }
+  },
+  "covariates": {
+    "child_fraction": 0.08
+  }
 }

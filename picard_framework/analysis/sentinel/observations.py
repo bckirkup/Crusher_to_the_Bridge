@@ -26,6 +26,55 @@ REPORTING_CHANNELS = frozenset(
     {"sick_call", "screening", "cascade", "wearable", "unreported"},
 )
 
+_STRATA = frozenset({"passenger", "crew"})
+
+
+@dataclass(frozen=True)
+class ProvisioningSource:
+    """Provisioned servings from one source, consumed per stratum per epoch.
+
+    Two shapes are accepted, mirroring how ashore hours may be per-epoch or a
+    total spread over the call window: explicit ``servings_per_epoch`` rows, or
+    ``servings_total`` plus ``service_window_epochs`` which the data builder
+    spreads uniformly. A ``source_id`` is a supply-chain entity from the
+    PROVISIONED-SOURCE-01 mint ledger, not a port call — it never enters the
+    itinerary's port list.
+    """
+
+    source_id: str
+    servings_per_epoch: Mapping[str, tuple[float, ...]]
+    servings_total: Mapping[str, float]
+    service_window_epochs: tuple[int, int] | None
+
+    @property
+    def first_service_epoch(self) -> int | None:
+        """First epoch the source serves, per whichever shape was given."""
+        if self.servings_per_epoch:
+            first = min(
+                (i + 1 for row in self.servings_per_epoch.values()
+                 for i, s in enumerate(row) if s > 0.0),
+                default=None,
+            )
+            return first
+        if self.service_window_epochs is not None:
+            return self.service_window_epochs[0]
+        return None
+
+
+@dataclass(frozen=True)
+class Embarkation:
+    """The boarding pool: which market each stratum boarded from and how many.
+
+    ``markets`` maps stratum -> market_id because a line's consumer market and
+    its crew labour market are different pools. ``n_boarded`` defaults to the
+    complement (``n_passengers``/``n_crew``) when absent; ``embark_epoch``
+    defaults to the embarkation day's first epoch at fit time.
+    """
+
+    markets: Mapping[str, str]
+    n_boarded: Mapping[str, float]
+    embark_epoch: int | None
+
 
 @dataclass(frozen=True)
 class ClinicalCase:
@@ -139,6 +188,11 @@ class ObservationBundle:
     observation_end_epoch: int | None
     platform_class: str | None
     exposure_totals: Mapping[str, Mapping[str, float]] = field(
+        default_factory=lambda: MappingProxyType({}),
+    )
+    provisioning: tuple[ProvisioningSource, ...] = ()
+    embarkation: Embarkation | None = None
+    covariates: Mapping[str, float] = field(
         default_factory=lambda: MappingProxyType({}),
     )
 
@@ -279,6 +333,141 @@ def _exposure_totals_from_dict(raw: object) -> Mapping[str, Mapping[str, float]]
     return MappingProxyType(totals)
 
 
+def _provisioning_source_from_dict(
+    source_id: str,
+    raw: object,
+) -> ProvisioningSource:
+    if not isinstance(raw, dict):
+        raise ValueError(f"provisioning[{source_id!r}] must be an object")
+    per_epoch: dict[str, tuple[float, ...]] = {}
+    per_epoch_raw = raw.get("servings_per_epoch") or {}
+    if not isinstance(per_epoch_raw, dict):
+        raise ValueError(
+            f"provisioning[{source_id!r}].servings_per_epoch must be an object "
+            "keyed by stratum",
+        )
+    for stratum, row in per_epoch_raw.items():
+        if str(stratum) not in _STRATA:
+            raise ValueError(
+                f"provisioning[{source_id!r}]: unknown stratum {stratum!r}",
+            )
+        values = tuple(float(v) for v in (row or []))
+        if any(v < 0.0 for v in values):
+            raise ValueError(
+                f"provisioning[{source_id!r}] has negative servings",
+            )
+        per_epoch[str(stratum)] = values
+    totals: dict[str, float] = {}
+    totals_raw = raw.get("servings_total") or {}
+    if not isinstance(totals_raw, dict):
+        raise ValueError(
+            f"provisioning[{source_id!r}].servings_total must be an object "
+            "keyed by stratum",
+        )
+    for stratum, value in totals_raw.items():
+        if str(stratum) not in _STRATA:
+            raise ValueError(
+                f"provisioning[{source_id!r}]: unknown stratum {stratum!r}",
+            )
+        total = float(value)
+        if total < 0.0:
+            raise ValueError(
+                f"provisioning[{source_id!r}] has negative servings",
+            )
+        totals[str(stratum)] = total
+    window_raw = raw.get("service_window_epochs")
+    window: tuple[int, int] | None = None
+    if window_raw is not None:
+        if not isinstance(window_raw, (list, tuple)) or len(window_raw) != 2:
+            raise ValueError(
+                f"provisioning[{source_id!r}].service_window_epochs must be "
+                "[first_epoch, last_epoch]",
+            )
+        window = (int(window_raw[0]), int(window_raw[1]))
+        if window[0] < 1 or window[1] < window[0]:
+            raise ValueError(
+                f"provisioning[{source_id!r}].service_window_epochs must be "
+                "1-based and non-empty",
+            )
+    if totals and window is None:
+        raise ValueError(
+            f"provisioning[{source_id!r}]: servings_total requires "
+            "service_window_epochs",
+        )
+    if not per_epoch and not totals:
+        raise ValueError(
+            f"provisioning[{source_id!r}] names no servings "
+            "(servings_per_epoch or servings_total)",
+        )
+    return ProvisioningSource(
+        source_id=str(source_id),
+        servings_per_epoch=MappingProxyType(per_epoch),
+        servings_total=MappingProxyType(totals),
+        service_window_epochs=window,
+    )
+
+
+def _provisioning_from_dict(raw: object) -> tuple[ProvisioningSource, ...]:
+    if raw is None:
+        return ()
+    if not isinstance(raw, dict):
+        raise ValueError("provisioning must be an object keyed by source_id")
+    return tuple(
+        _provisioning_source_from_dict(str(source_id), cell)
+        for source_id, cell in raw.items()
+    )
+
+
+def _embarkation_from_dict(raw: object) -> Embarkation | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise ValueError("embarkation must be an object")
+    markets_raw = raw.get("markets") or {}
+    if not isinstance(markets_raw, dict) or not markets_raw:
+        raise ValueError("embarkation.markets must map stratum to market_id")
+    markets: dict[str, str] = {}
+    for stratum, market_id in markets_raw.items():
+        if str(stratum) not in _STRATA:
+            raise ValueError(
+                f"embarkation.markets: unknown stratum {stratum!r}",
+            )
+        markets[str(stratum)] = str(market_id)
+    boarded_raw = raw.get("n_boarded") or {}
+    if not isinstance(boarded_raw, dict):
+        raise ValueError("embarkation.n_boarded must be an object keyed by stratum")
+    n_boarded: dict[str, float] = {}
+    for stratum, value in boarded_raw.items():
+        if str(stratum) not in _STRATA:
+            raise ValueError(
+                f"embarkation.n_boarded: unknown stratum {stratum!r}",
+            )
+        boarded = float(value)
+        if boarded < 0.0:
+            raise ValueError("embarkation.n_boarded must be non-negative")
+        n_boarded[str(stratum)] = boarded
+    embark_epoch = raw.get("embark_epoch")
+    return Embarkation(
+        markets=MappingProxyType(markets),
+        n_boarded=MappingProxyType(n_boarded),
+        embark_epoch=None if embark_epoch is None else int(embark_epoch),
+    )
+
+
+def _covariates_from_dict(raw: object) -> Mapping[str, float]:
+    if raw is None:
+        return MappingProxyType({})
+    if not isinstance(raw, dict):
+        raise ValueError("covariates must be an object keyed by name")
+    covariates: dict[str, float] = {}
+    for name, value in raw.items():
+        cov = float(value)
+        if cov != cov:  # NaN
+            raise ValueError(f"covariates[{name!r}] is not a finite number")
+        covariates[str(name)] = cov
+    return MappingProxyType(covariates)
+
+
 def bundle_from_dict(payload: dict[str, Any]) -> ObservationBundle:
     """Build an ``ObservationBundle`` from a decoded observation document."""
     cases = [_case_from_dict(c) for c in payload.get("clinical_cases") or []]
@@ -305,6 +494,9 @@ def bundle_from_dict(payload: dict[str, Any]) -> ObservationBundle:
             else str(payload["platform_class"])
         ),
         exposure_totals=_exposure_totals_from_dict(payload.get("exposure_totals")),
+        provisioning=_provisioning_from_dict(payload.get("provisioning")),
+        embarkation=_embarkation_from_dict(payload.get("embarkation")),
+        covariates=_covariates_from_dict(payload.get("covariates")),
     )
 
 

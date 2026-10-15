@@ -46,12 +46,20 @@ from picard_framework.analysis.sentinel.exposure import (
 )
 from picard_framework.analysis.sentinel.fleet import (
     FLEET_HAZARD_COLUMNS,
+    MARKET_HAZARD_COLUMNS,
+    SOURCE_HAZARD_COLUMNS,
     VISIT_HAZARD_COLUMNS,
     crew_exposure_summary,
     fleet_hazard_rows,
     fleet_onboard_summary,
     fleet_time_summary,
+    market_hazard_rows,
+    market_home_confounded,
+    source_hazard_rows,
+    source_home_confounded,
     summarize_fleet_hazards,
+    summarize_market_hazards,
+    summarize_source_hazards,
     summarize_visit_hazards,
     visit_hazard_rows,
     wastewater_summary,
@@ -212,6 +220,20 @@ def write_fleet_outputs(
     write_csv(
         os.path.join(out, "fleet_time.csv"), weeks, list(_FLEET_TIME_COLUMNS),
     )
+    sources = summarize_source_hazards(posterior, meta)
+    if sources:
+        write_csv(
+            os.path.join(out, "source_hazards.csv"),
+            source_hazard_rows(sources),
+            list(SOURCE_HAZARD_COLUMNS),
+        )
+    markets = summarize_market_hazards(posterior, meta)
+    if markets:
+        write_csv(
+            os.path.join(out, "market_hazards.csv"),
+            market_hazard_rows(markets),
+            list(MARKET_HAZARD_COLUMNS),
+        )
     onboard = fleet_onboard_summary(posterior, meta)
     write_json(os.path.join(out, "onboard_summary.json"), onboard)
     crew = crew_exposure_summary(posterior)
@@ -229,6 +251,10 @@ def write_fleet_outputs(
         "fleet_time_confounded": sorted(
             p.port_id for p in ports if p.fleet_time_confounded
         ),
+        "n_sources": len(meta.get("sources") or []),
+        "n_markets": len(meta.get("markets") or []),
+        "source_home_confounded": sorted(source_home_confounded(meta)),
+        "market_home_confounded": sorted(market_home_confounded(meta)),
     }
 
 
