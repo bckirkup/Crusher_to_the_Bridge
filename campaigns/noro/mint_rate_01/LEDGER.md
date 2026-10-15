@@ -14,9 +14,9 @@ burst48) survive at that rate?
 | stage | state | evidence |
 |-------|-------|----------|
 | design frozen | done | `docs/norovirus/noro_mint_rate_01_sweep_design.md`; this package (27 tiers, 33 blocks) |
-| image built | pending | tag `noro-mint-rate01`; eval SHA + digest + jobdef revision recorded here at submit — never a bare tag |
-| local smoke | pending | `fl_exp_12d_scr_p012` index 0: zip contract + scalar override echo (`"lot_object_probability": 0.012`) + object-mode echo |
-| canary (116 cells, exp) | pending | `canary_exp_{mint 48, p024 24, p005 24, ind 8, ship 8, off 4}` — hard gates in design §7 |
+| image built | done | `picard-campaign:noro-mint-rate01` @ `49e1993b` → digest `sha256:05cba8f22b747ca47c13a1e885581263e51b5320ab931250767a33b82bac38ea`; jobdef `picard-noro-mint-rate-01:1` (digest-pinned, ACTIVE, retry ×10 `Host EC2*`); manifest mirrored to `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_mint_rate_01/manifest.json` |
+| local smoke | done | `fl_exp_12d_scr_p012` index 0: 3-member zip contract + scalar echo `"lot_object_probability": 0.012` + object modes; 31 infected, 0 cs objects at E≈0.012 — passed |
+| canary (116 cells, exp) | done — 5/6 gates green; `off` bit-identity FAILED (see Findings: host-level nondeterminism) | arrays `42a34b4d` mint 48, `08a78c9c` p024 24, `745b3af6` p005 24, `6304cc2f` ind 8, `30229fac` ship 8, `4a7bff20` off 4 — 116/116 SUCCEEDED, 0 retries |
 | wave 1 — exp, all 9 arms | pending | 9,000 cells; `fl_exp_12d_scr_mint` first as the probe array |
 | wave 2 — cls + spr, all 9 arms | pending | 18,000 cells |
 
@@ -59,7 +59,19 @@ mint, `ind`-gate mint, mega.
 
 ## Canary readout
 
-(Not yet submitted.)
+Submitted 2026-10-15 on `picard-noro-mint-rate-01:1`, image digest
+`sha256:05cba8f22b…` @ `49e1993b` (merge of #999). 116/116 cells
+SUCCEEDED first attempt. `parameters.common_source` echo verified
+verbatim in every cell.
+
+| block | cells | gate | result |
+|-------|------:|------|--------|
+| `canary_exp_mint` | 48 | ≥1 `provisioned_lot`; echo `[0.02,0.15]`; titres in (1.5e2,5e3); single titre/object | PASS — 4 objects (E≈4.1), titres 272.7/605.0/3213.3/4635.8 GEC/g all in band, 84 minted events, single titre each, interval echo verbatim |
+| `canary_exp_p024` | 24 | scalar echo `0.024` verbatim; zero-lot declared non-failing | PASS — echo verbatim, 0 objects (P(0)≈0.50) |
+| `canary_exp_p005` | 24 | scalar echo `0.005` verbatim; zero-lot declared non-failing | PASS — echo verbatim, 0 objects (P(0)≈0.87) |
+| `canary_exp_ind` | 8 | independent-modes echo; `object_id: null` rows; no object mint | PASS — echo verbatim, 9 events all `object_id: null`, 0 objects minted |
+| `canary_exp_ship` | 8 | shipped echo + `titre_draw_mode` → `two_mode`; handler/diner objects | PASS — echo `[0.001,0.02]` + object modes, `titre_draw_mode` absent→default, 20 handler + 4 diner objects |
+| `canary_exp_off` | 4 | zero-witness + bit-identical to prior `off` | HALF — zero-witness PASS (0 objects, 0 events, dose 0.0); **bit-identity FAIL — see Findings** |
 
 ## Wave submissions
 
@@ -67,4 +79,37 @@ mint, `ind`-gate mint, mega.
 
 ## Findings
 
-(Not yet read out.)
+### F0 (2026-10-15, canary) — bit-identity across runs is host-level,
+not image-level
+
+§9 report-immediately trigger. `canary_exp_off` s8000–8003 diverge
+wholesale from SHAPES-01 `fl_exp_12d_scr_off` (same seeds): ~9k field
+diffs per cell (e.g. s8000 infected 31 vs 38). Controlled
+measurements on the same cell (off, s8000):
+
+- SHAPES-01 canary (`45b2bf18`, Oct-12 Batch) vs SHAPES-01 wave
+  (same image, Oct-12 Batch): near-identical — last-ulp dust in
+  `removal_totals` + RSS/timing fields only.
+- This repo's `.venv` (2× local runs): near-identical to each other
+  and to the new `49e1993b` Batch canary (trajectory-equal).
+- **`noro-food-shapes01` image run on this VM**: trajectory-equal to
+  the `49e1993b` Batch cells (1 ulp-diff), **not** to its own Oct-12
+  wave cells (~9k diffs).
+- Code per-file sha256 inside both images: identical except the new
+  manifest. Python 3.11.17 both; glibc 2.41-12+deb13u4 both; deps
+  hash-locked via `uv sync --locked`.
+
+Conclusion: same image on different hosts gives different
+trajectories — the voyage is host-sensitive (CPU-dependent float
+dispatch is the prime suspect; `PYTHONHASHSEED` is unset but
+same-host reruns are stable, so hash-order does not feed draws).
+Bit-identity bridge clauses (`off`/ship/mint/ind vs SHAPES-01 cells,
+design §3.4) are **unmeasurable in this environment** — the same
+image diverges by host. In-campaign statistical bridges remain valid:
+D1 is defined vs in-campaign `off`, and every arm's cells in a wave
+share the same fleet-day float path as that wave's `off`.
+
+Implication for readout: cross-campaign pairing must be statistical
+(distributional), not bitwise. A fix for true bit-identity would need
+CPU-independent float behaviour or a pinned instance type — an
+engineering change, not config; report to user before any wave.
