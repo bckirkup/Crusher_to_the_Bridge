@@ -310,9 +310,5 @@
       },
       "description": "shell rooms/magazines/cordite fwd"
     }
-  ],
-  "nominal_complement": {
-    "passengers": 0,
-    "crew": 99
-  }
+  ]
 }

@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-15T22:27:17.936793+00:00",
+  "platform_id": "raven_am55",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/am55_raven",
+  "digest_sha256": "beb07f0a5aaba485937dedbe2a8ee48864aa3ece0adc0c9eb6892731a7e8ab55",
+  "svg_sha256": {
+    "page_03_approved.svg": "62f245985100f3facd1faddb10074cac8c83aea33f89290ba8c7aaa624714d3a",
+    "page_04_approved.svg": "d617971e78160086b070aa1319372b7a63262f6b1687bda2d71c11a078fb90f0",
+    "page_05_approved.svg": "9dcb83dabaa357ab41d34d22f0a47eba38a946428436f1162f7d9ee230e5cf56"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 21,
+  "berthing_zones": [
+    "Crew_Quarters",
+    "CPO_Quarters",
+    "Officers_Country"
+  ]
+}

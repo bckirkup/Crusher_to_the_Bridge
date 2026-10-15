@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "platform_id": "castle_class_corvette",
-  "created_utc": "2026-10-15T22:23:56.632938+00:00",
+  "created_utc": "2026-10-15T22:27:18.229531+00:00",
   "description": "Draft Contam orifice checklist from naval GA import. Engineers confirm areas/schedules in ContamW; as-built ducts are out of scope here.",
   "openings": [
     {

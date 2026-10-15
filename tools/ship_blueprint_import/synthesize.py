@@ -520,7 +520,14 @@ def synthesize(
         "graywater_zones": graywater,
         "zones": zones_out,
     }
-    if digest.complement:
+    if (
+        digest.complement
+        and digest.complement.passengers > 0
+        and digest.complement.crew > 0
+    ):
+        # nominal_complement is the run-scored declaration: it is only written
+        # when both groups are nonzero — an all-crew hull keeps its complement
+        # in crew_manifest.json and sources it, like the other naval platforms.
         spatial["nominal_complement"] = {
             "passengers": int(digest.complement.passengers),
             "crew": int(digest.complement.crew),

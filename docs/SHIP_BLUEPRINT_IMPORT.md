@@ -119,7 +119,9 @@ engineers author real ducts from HVAC drawings — those details are not on GAs.
   (`class_id`, `role_group`, `count`, `berth_zone`, `duty_zone`) emitted as
   `crew_manifest.json` with a declared-vs-listed consistency check. This is
   how a sheet's "20 officers/crew + 15 scientists" becomes a proposed crew
-  manifest for the `agent_classes` machinery.
+  manifest for the `agent_classes` machinery. Emitted only when both counts
+  are nonzero (the declaration is run-scored); all-crew hulls source their
+  complement from `crew_manifest.json`.
 - Agent-authored digests: an agent can read rasterized sheets directly and
   write `ship_digest.json` + `page_NN_approved.svg` programmatically (the
   GIMP loop stays available for engineer refinement). Worked imports and the
