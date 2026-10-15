@@ -128,6 +128,8 @@ def simulate(
     r_onboard: float = 0.4,
     crew_ratio: float = 1.0,
     beta_repeat: float = 0.0,
+    kappa: Sequence[float] = (),
+    epsilon: Sequence[float] = (),
     seed: int = 7,
 ) -> dict[str, Any]:
     """Poisson onsets from known per-visit hazards, written back into the data."""
@@ -137,6 +139,8 @@ def simulate(
         r_onboard=[r_onboard] * int(data["S"]),
         crew_ratio=crew_ratio,
         beta_repeat=beta_repeat,
+        kappa=list(kappa),
+        epsilon=list(epsilon),
     )
     mu = expected_onsets_fleet(data, rates)
     rng = np.random.default_rng(seed)
@@ -476,6 +480,65 @@ def test_hours_ashore_are_the_denominator_not_a_covariate() -> None:
         f"doubling hours moved the hazard by {halved / base:.2f}x, not ~0.5x"
     )
     assert meta["ports"][0] == "KYGEC"
+
+
+def test_pooled_recovery_covers_the_new_import_channels() -> None:
+    """κ (per-serving source hazard) and ε (per-capita market prevalence).
+
+    Four voyages share one provisioning source and two embarkation markets, so
+    partial pooling has something to pool towards; at two voyages the sparse
+    onsets leave κ's interval just short of the truth, which is why the test
+    uses the crossover pair over two embarkation weeks like the port tests.
+    The κ truth is measured: at 1e-3 this design's interval ends just below the
+    truth (hi ≈ 9.7e-4); at 2e-3 the pooled fit covers all three channels.
+    """
+    provisioning = {
+        "MIA-PROV-01": {
+            "servings_total": {"passenger": 12000, "crew": 3000},
+            "service_window_epochs": [10, 72],
+        },
+    }
+    embarkation = {"markets": {"passenger": "NA-CARIB", "crew": "LATAM-CREW"}}
+    voyages = [
+        fleet_voyage(
+            voyage_id=f"{ship}-{w}",
+            ship_id=ship,
+            embarkation_date=embark,
+            ports=ports,
+            total_epochs=EPOCHS,
+            provisioning=provisioning,
+            embarkation=embarkation,
+        )
+        for w, embark in enumerate(("2026-03-02", "2026-03-09"))
+        for ship, ports in (
+            ("shipA", ((2, "MXCZM"), (3, "KYGEC"))),
+            ("shipB", ((2, "KYGEC"), (3, "MXCZM"))),
+        )
+    ]
+    data, meta = fleet_data(voyages)
+
+    kappa_truth = 2.0e-3
+    epsilon_truth = {"LATAM-CREW": 3.0e-3, "NA-CARIB": 6.0e-3}
+    simulated = simulate(
+        data,
+        lambda_visit=[1.0e-4] * int(data["NV"]),
+        kappa=[kappa_truth] * int(data["NS"]),
+        epsilon=[epsilon_truth[m["market_id"]] for m in meta["markets"]],
+        seed=29,
+    )
+    posterior = fit(simulated)
+
+    lo, hi = interval(posterior, "kappa[1]")
+    assert lo <= kappa_truth <= hi, (
+        f"source truth {kappa_truth:.1e} outside [{lo:.2e}, {hi:.2e}]"
+    )
+    for m, market in enumerate(meta["markets"], start=1):
+        truth = epsilon_truth[market["market_id"]]
+        lo, hi = interval(posterior, f"epsilon[{m}]")
+        assert lo <= truth <= hi, (
+            f"market {market['market_id']} truth {truth:.1e} "
+            f"outside [{lo:.2e}, {hi:.2e}]"
+        )
 
 
 @pytest.mark.skipif(not cmdstan_available(), reason="CmdStan toolchain not installed")

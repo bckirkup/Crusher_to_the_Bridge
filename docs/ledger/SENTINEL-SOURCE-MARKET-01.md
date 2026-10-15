@@ -40,8 +40,15 @@ and `secondary_cases` net all import channels. New output CSVs
 `source_hazards.csv` / `market_hazards.csv` only when the fleet declares the
 channels.
 
-## Nothing measured
+## Synthetic recovery measured
 
-This entry records a declared model revision plus its contract tests. No
-posterior recovery numbers exist yet; the synthetic recovery path for the new
-channels is the next deliverable. Nothing here may be quoted as a result.
+This entry records a declared model revision. The one measurement so far is of
+the *estimator*, not the world: on the synthetic recovery path (Poisson onsets
+simulated from declared κ/ε truth, numpy reference posterior, 400 draws /
+1600 warmup), a four-voyage crossover sharing one source and two markets
+covers all three declared truths in the 5-95% intervals — κ=2e-3 per serving,
+ε={3e-3, 6e-3} per capita. At κ=1e-3 with ~140 pooled onsets the κ interval
+ends just below the truth, i.e. sparse fleets leave the prior pulling. Test:
+`tests/test_sentinel_fleet_validation.py::
+test_pooled_recovery_covers_the_new_import_channels` (slow tier). Nothing here
+may be quoted as a measurement of any real source or market.
