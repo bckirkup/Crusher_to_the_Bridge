@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "created_utc": "2026-10-15T22:32:14.696062+00:00",
+  "created_utc": "2026-10-15T23:14:17.682712+00:00",
   "platform_id": "raven_am55",
   "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/am55_raven",
-  "digest_sha256": "beb07f0a5aaba485937dedbe2a8ee48864aa3ece0adc0c9eb6892731a7e8ab55",
+  "digest_sha256": "00e5fd3304f9ed4ad2defe783734df7bef13ac1dcca67aeef3b83e316930decb",
   "svg_sha256": {
     "page_03_approved.svg": "62f245985100f3facd1faddb10074cac8c83aea33f89290ba8c7aaa624714d3a",
     "page_04_approved.svg": "d617971e78160086b070aa1319372b7a63262f6b1687bda2d71c11a078fb90f0",
@@ -15,5 +15,6 @@
     "Crew_Quarters",
     "CPO_Quarters",
     "Officers_Country"
-  ]
+  ],
+  "systems_era": "usn_ww2"
 }

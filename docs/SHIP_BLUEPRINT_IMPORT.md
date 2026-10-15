@@ -122,6 +122,25 @@ engineers author real ducts from HVAC drawings — those details are not on GAs.
   manifest for the `agent_classes` machinery. Emitted only when both counts
   are nonzero (the declaration is run-scored); all-crew hulls source their
   complement from `crew_manifest.json`.
+- `systems` — era-typed systems inference for what the sheet DOES draw:
+  `era` (`usn_ww2`, `rn_ww2`, `usn_coldwar`, `usn_modern`, `noaa_research`,
+  `merchant_ww2`, `generic`), `vent_markers` (cowls/mushrooms/goosenecks,
+  skylights, air ports, vent trunks, air shafts, fan rooms, uptakes, the
+  funnel — each with page position, `facing`, optional `serves_zone`, and
+  `evidence` `sheet_read`|`era_plausible`) and `tanks` (named tank labels as
+  plumbing anchors). `tools/ship_blueprint_import/systems.py` maps them
+  through per-era ventilation-practice tables: markers resolve to a served
+  zone (explicit `serves_zone`, else nearest zone on the marker's deck in
+  display coordinates), direction comes from the sheet label else the cowl
+  facing, each zone gets a `vent_mode` and every HVAC group gains
+  `vent_mode` + `evidence` + an `oa_fraction` prior — a hint that declares
+  its own `oa_fraction` always wins. Marker-attributed modes beat era-rule
+  modes on a mixed branch; marker kind refines the mode (funnel/gooseneck
+  on Engineering → `mech_supply_exhaust`, skylight/air_port → `nat_supply`).
+  Sewage/waste/gray-labeled tanks join `graywater_zones`; every step lands
+  in `systems_notes.json` + `systems_notes.md` with its evidence grade
+  (`sheet_read` / `era_plausible` / `era_rule`), which is the engineering
+  starting point for the plumbing/duct handwork.
 - Agent-authored digests: an agent can read rasterized sheets directly and
   write `ship_digest.json` + `page_NN_approved.svg` programmatically (the
   GIMP loop stays available for engineer refinement). Worked imports and the

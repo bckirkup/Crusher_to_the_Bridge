@@ -792,3 +792,110 @@ class TestAuthorContam:
         assert o_skip["duct_hvac_ids"] == []
         assert o_ducts["skip_duct_spines"] is False
         assert o_ducts["duct_hvac_ids"] == ["zone_main"]
+
+
+def _add_systems(data: dict, **overrides) -> None:
+    data["systems"] = {
+        "era": "usn_ww2",
+        "vent_markers": [
+            {
+                "id": "Cowl_Mess",
+                "page": 1,
+                "position_norm": [0.4, 0.4],
+                "deck": "main_deck",
+                "kind": "cowl",
+                "facing": "fore",
+                "serves_zone": "Mess_Hall",
+                "evidence": "sheet_read",
+            },
+            {
+                "id": "Funnel",
+                "page": 1,
+                "position_norm": [0.6, 0.6],
+                "deck": "lower_deck",
+                "kind": "funnel",
+                "facing": "up",
+                "serves_zone": "Engine_Room",
+                "evidence": "sheet_read",
+            },
+        ],
+        "tanks": [],
+    }
+    data["systems"].update(overrides)
+
+
+class TestSystemsInference:
+    def test_era_modes_enrich_groups_and_write_notes(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        spatial, airflow, out = _mutated_platform(
+            tmp_path, roots, "sys", _add_systems
+        )
+        groups = {g["id"]: g for g in airflow["hvac_zones"]}
+        # Marker modes beat era rules on a mixed branch: Mess_Hall's sheet-read
+        # supply cowl gives zone_main nat_supply; Engine_Room's sheet-read
+        # funnel keeps the machinery space mechanical (mech_supply_exhaust).
+        assert groups["zone_main"]["vent_mode"] == "nat_supply"
+        assert groups["zone_main"]["evidence"] == "sheet_read"
+        assert groups["zone_lower"]["vent_mode"] == "mech_supply_exhaust"
+        assert groups["zone_lower"]["evidence"] == "sheet_read"
+        # Hints declare no oa_fraction → era mode prior applies.
+        assert groups["zone_main"]["oa_fraction"] == 1.0
+        assert groups["zone_lower"]["oa_fraction"] == 0.4
+        # Notes artifacts exist with evidence grades.
+        notes = json.loads((out / "systems_notes.json").read_text())
+        assert notes["era"] == "usn_ww2"
+        marker_dirs = {m["id"]: m["direction"] for m in notes["vent_markers"]}
+        assert marker_dirs == {"Cowl_Mess": "supply", "Funnel": "exhaust"}
+        # Zone modes refine marker kind: the funnel keeps Engineering mechanical.
+        assert notes["zone_modes"]["Engine_Room"]["mode"] == "mech_supply_exhaust"
+        assert (out / "systems_notes.md").is_file()
+        # Zone modes separate sheet reads from era rules.
+        assert notes["zone_modes"]["Mess_Hall"]["evidence"] == "sheet_read"
+        assert notes["zone_modes"]["MedBay"]["evidence"] == "era_rule"
+
+    def test_declared_hint_oa_wins_over_era(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        def _mut(data: dict) -> None:
+            _add_systems(data)
+            data["hvac_hints"][1]["oa_fraction"] = 0.9
+
+        _, airflow, _ = _mutated_platform(tmp_path, roots, "sysoa", _mut)
+        groups = {g["id"]: g for g in airflow["hvac_zones"]}
+        assert groups["zone_main"]["oa_fraction"] == 0.9
+        assert groups["zone_upper"]["oa_fraction"] == 1.0  # Bridge Free→nat_supply
+
+    def test_sewage_tank_joins_graywater(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        def _mut(data: dict) -> None:
+            _add_systems(
+                data,
+                tanks=[
+                    {
+                        "label": "SEWAGE HOLDING",
+                        "page": 1,
+                        "position_norm": [0.6, 0.6],
+                        "deck": "lower_deck",
+                    }
+                ],
+            )
+
+        spatial, _, out = _mutated_platform(tmp_path, roots, "syspl", _mut)
+        notes = json.loads((out / "systems_notes.json").read_text())
+        assert notes["tanks"][0]["kind"] == "sewage"
+        added = notes["tanks"][0]["nearest_zone"]
+        assert added in spatial["graywater_zones"]
+        assert notes["plumbing_drains"]
+
+    def test_no_systems_no_notes(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        _, airflow, out = _mutated_platform(
+            tmp_path, roots, "sysnone", lambda d: None
+        )
+        assert not (out / "systems_notes.json").exists()
+        assert all(
+            "vent_mode" not in g for g in airflow["hvac_zones"]
+        )

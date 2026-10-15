@@ -14,13 +14,18 @@ from simulation_utils.paths import (
     resolve_child_path,
     validated_open,
 )
-from tools.ship_blueprint_import.models import ShipDigest, ZoneDigest
+from tools.ship_blueprint_import.models import (
+    HvacHint,
+    ShipDigest,
+    ZoneDigest,
+)
 from tools.ship_blueprint_import.ontology import ach_for_zone_type
 from tools.ship_blueprint_import.svg_io import (
     OverlayPolygon,
     polygons_touch,
     read_overlay_svg,
 )
+from tools.ship_blueprint_import.systems import infer_systems, write_systems_notes
 
 DEFAULT_CROSS_FLOW = 50.0
 APPROVED_OVERLAY_SUFFIX = "_approved.svg"
@@ -208,6 +213,31 @@ def _adjacency_from_polygons(
     return edges
 
 
+def _hint_group(hint: HvacHint, rooms: list[str]) -> dict[str, Any]:
+    group: dict[str, Any] = {
+        "id": hint.id,
+        "rooms": rooms,
+        "ach": float(hint.ach),
+        "description": hint.description or f"AHU branch {hint.id}",
+    }
+    if hint.oa_fraction is not None:
+        group["oa_fraction"] = float(hint.oa_fraction)
+    if hint.filter_preset is not None:
+        group["filter_preset"] = hint.filter_preset
+    return group
+
+
+def _hvac_from_hints(
+    digest: ShipDigest, ducted: list[str]
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for hint in digest.hvac_hints:
+        rooms = [r for r in hint.rooms if r in ducted]
+        if rooms:
+            out.append(_hint_group(hint, rooms))
+    return out
+
+
 def _auto_hvac(
     digest: ShipDigest,
     zone_ids: list[str],
@@ -216,21 +246,9 @@ def _auto_hvac(
 ) -> list[dict[str, Any]]:
     ducted = [z for z in zone_ids if z not in head_ids]
     if digest.hvac_hints:
-        out = []
-        for hint in digest.hvac_hints:
-            rooms = [r for r in hint.rooms if r in ducted]
-            if not rooms:
-                continue
-            out.append(
-                {
-                    "id": hint.id,
-                    "rooms": rooms,
-                    "ach": float(hint.ach),
-                    "description": hint.description or f"AHU branch {hint.id}",
-                }
-            )
-        if out:
-            return out
+        hinted = _hvac_from_hints(digest, ducted)
+        if hinted:
+            return hinted
 
     # Group by deck
     by_deck: dict[str, list[str]] = {}
@@ -676,6 +694,24 @@ def synthesize(
         ],
     }
 
+    systems_notes_path: str | None = None
+    if digest.systems is not None:
+        # Era-typed systems inference: sheet-read vent markers and tank labels
+        # enrich the airflow groups (vent_mode/evidence/oa_fraction) and record
+        # every step in systems_notes.{json,md} with its evidence grade.
+        declared_oa = {
+            h.id for h in digest.hvac_hints if h.oa_fraction is not None
+        }
+        airflow, systems_notes, sewage_ids = infer_systems(
+            digest, zones_out, airflow, declared_oa
+        )
+        sewage_ids = [s for s in sewage_ids if s not in head_set]
+        if sewage_ids:
+            graywater += [s for s in sewage_ids if s not in graywater]
+            spatial["graywater_zones"] = graywater
+        write_systems_notes(output_dir, systems_notes, allowed_roots=allowed_roots)
+        systems_notes_path = resolve_child_path(output_dir, "systems_notes.json")
+
     prepare_output_directory(output_dir, allowed_roots=allowed_roots)
     spatial_path = resolve_child_path(output_dir, "spatial_layout.json")
     airflow_path = resolve_child_path(output_dir, "air_flow_paths.json")
@@ -698,6 +734,8 @@ def synthesize(
         "zone_count": len(zones_out),
         "berthing_zones": berthing,
     }
+    if digest.systems is not None:
+        provenance["systems_era"] = digest.systems.era
     meta_file = os.path.join(workdir, "digest_meta.json")
     if os.path.isfile(meta_file):
         with validated_open(
@@ -725,6 +763,7 @@ def synthesize(
         "spatial_layout": spatial_path,
         "air_flow_paths": airflow_path,
         "crew_manifest": crew_manifest_path,
+        "systems_notes": systems_notes_path,
         "zone_count": len(zones_out),
         "provenance": provenance,
     }
