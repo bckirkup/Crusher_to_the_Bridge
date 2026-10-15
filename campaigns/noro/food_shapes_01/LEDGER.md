@@ -20,6 +20,7 @@ stays in band and D4 keeps?
 | wave 2 — cls/spr factorial core | done — submitted | **PRUNED**: 7 arms × 2 hulls × 1,000 = 14,000 cells (`redraw_mint` dropped by amendment); job IDs + probe spot-check below |
 | wave 3 — cls/spr remainder | **dropped** | `redraw`, `fx_wide`, `fx_narrow` × 2 hulls (6,000 cells) — dropped by the same user-approved amendment; cadence and extent margins measured null on exp (wave-1 readout) |
 | wave-1 readout (exp) | done — measured | `docs/norovirus/noro_food_shapes_01_wave1_readout.md`; tools `tools/noro_diag/food_shapes_01_{scan,report,bridge}.py` |
+| final readout (exp+cls+spr) | done — measured | `docs/norovirus/noro_food_shapes_01_readout.md`; 25,000/25,000 cells scored — exp carried verbatim from wave-1, 14,000 cls+spr cells census re-parsed (0 errors); bridges + dose audits on both hulls |
 
 ## Grid
 
@@ -272,6 +273,39 @@ Wave-1 exp readout (11,000 cells, 0 errors, at `45b2bf18`):
   interiors carry the declared #990/#991 machinery delta with exact
   minted-voyage parity (34/34 `ind_bg`, 78/78 `bg`) — not an RNG break.
 - All six §7.4 integrity gates PASS; no vacuity; no corruption class.
+
+Final 3-hull readout (25,000 cells, `45b2bf18`;
+`docs/norovirus/noro_food_shapes_01_readout.md`):
+
+- **The mint gate is the signature carrier on every hull** — posting
+  at `ind` level (8.6/4.9/3.1% vs `ind` 8.2/4.8/2.7%
+  exp→cls→spr), excursion conversion recovered at `ind`×1.0–1.2
+  (1.02× cls, 1.07× spr), posted voyages burst above rest
+  (0.708/0.454/0.326 on `mint`), posted acq ride the dose tail.
+- **Every absolute gate calibrated on exp compresses with hull**:
+  thin-arm posting marginals +0.6→+0.2→+0.1 pp (D1 band only held on
+  exp); D2 ≥0.04 met only on exp (`mint` 0.0411) — on cls `mint`
+  0.0389 *and `ind` itself 0.0352*, on spr `ind` tops the table
+  (0.0310 vs `mint` 0.0243). `ind` excursion conversion re-measured
+  77.7→50.0→26.3%.
+- **D4 splits on spr**: excursion-vs-rest separation gone on `ind`
+  itself (0.257 vs 0.271) — unreadable at that hull scale — while
+  posted mints still sit above rest (0.326 vs 0.272).
+- Titre denominator margin consistent: `ind−ind_bg` +1.0/+1.1 pp
+  posting, +8–11 pp conversion; object path `mint−bg_mint`
+  +0.5/+0.9 pp.
+- Bridges: `off` 1,000/1,000 bit-identical on cls+spr; all 1,489
+  diverged bridge seeds are cs-active on **both** sides (divergence
+  fraction tracks cs-activity density, diffs downstream-only) — the
+  declared #990/#991 machinery delta, amplified not changed.
+- Mint census: identical mint decisions across cls+spr on the shared
+  seed list (84 cells/96 objects mint-family; 6 cells/7 objects thin)
+  — the seed-paired mint stream is hull-invariant as designed.
+- All §7.4 gates PASS on cls+spr; zero vacuity; zero corruption.
+- **Verdict**: exp admissible; cls/spr admissible-with-caveat — the
+  relative signatures recover on every hull, the exp-calibrated
+  absolute bands do not carry; hull compression is measured, not
+  hypothesized.
 
 Margin map (design §7.2): titre denominator →
 `mint − bg_mint`, `ind − ind_bg` (powered), `ship − bg` (thin);

@@ -69,3 +69,24 @@ Wave-2/3 decision is the user's.
 
 Tools: `tools/noro_diag/food_shapes_01_{scan,report,bridge}.py` +
 `entrain_01_dose_audit.py` re-run on the six dose-relevant arms.
+
+**Measured at `45b2bf18` (final, all 3 hulls — 25,000/25,000 cells,
+0 errors; exp carried from wave 1, 14,000 cls+spr census re-parse):**
+`docs/norovirus/noro_food_shapes_01_readout.md`. The mint gate is the
+signature carrier on every hull: posting at `ind` level
+(8.6/4.9/3.1% vs `ind` 8.2/4.8/2.7%), excursion conversion at
+`ind`×1.0–1.2, posted voyages burst above rest, posted acquisitions
+ride the dose tail. Every exp-calibrated absolute gate compresses with
+hull — D1 thin-arm marginals +0.6→+0.2→+0.1 pp, D2 ≥0.04 met only on
+exp (`mint` 0.0411; cls `mint` 0.0389 with `ind` itself 0.0352; spr
+`ind` tops the table at 0.0310) — and on spr the excursion-vs-rest
+burst48 separation is gone even on `ind` (0.257 vs 0.271) while
+postings still burst (0.326 vs 0.272). `ind` excursion conversion
+re-measures 77.7→50.0→26.3%, the SCORE-01 hull-compression ordering.
+Bridges hold on the binding invariant on both new hulls (`off`
+bit-identical; all diverged seeds cs-active on both sides — the
+declared machinery delta amplified by cs density, not changed). Mint
+census is seed-paired identical across cls/spr (84 cells/96 objects
+mint-family). All §7.4 gates PASS; no vacuity, no corruption. Verdict:
+**exp admissible; cls/spr admissible-with-caveat** — relative
+signatures recover on every hull; the absolute bands don't carry.

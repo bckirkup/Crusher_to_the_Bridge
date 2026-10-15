@@ -4581,8 +4581,8 @@ per-window re-mints resolve the two-mode titre band like the mint
 `fx_wide`/`fx_narrow`/`redraw` arms append to this campaign as
 new blocks on the same seed lists per §4.3's extension rule.
 
-**`NORO-FOOD-SHAPES-01` (declared — design frozen, nothing
-submitted):** the next measurement stage on the SCORE-01/
+**`NORO-FOOD-SHAPES-01` (measured — all 3 hulls, 25,000/25,000 cells
+at `45b2bf18`):** the next measurement stage on the SCORE-01/
 ENTRAIN-01 frame, crossing the three axes the measured baselines
 point at — all config-expressible on the current engine. The
 **implicated titre denominator** axis (`titre_draw_mode` two_mode
@@ -4604,7 +4604,14 @@ voyages on the SCORE-01 seed lists; mega excluded. Frozen
 admissibility (D1–D4), integrity gates and canary-then-STOP in
 `docs/norovirus/noro_food_shapes_01_sweep_design.md`; package
 `campaigns/noro/food_shapes_01/`; entry
-`docs/ledger/NORO-FOOD-SHAPES-01.md`.
+`docs/ledger/NORO-FOOD-SHAPES-01.md`. Ran as 25,000 cells (exp wave 1
++ cls/spr wave-2 factorial core; the cls/spr cadence/extent legs were
+dropped by amendment after wave 1 measured them null). Final readout:
+`docs/norovirus/noro_food_shapes_01_readout.md` — the mint gate
+recovers the `ind` signature relative to the in-campaign denominator
+on every hull; every exp-calibrated absolute band compresses
+(D2 ≥0.04 met only on exp; `ind` excursion conversion 77.7→50.0→
+26.3%). Verdict: exp admissible, cls/spr admissible-with-caveat.
 
 ## 5. Held fixed by assumption
 
