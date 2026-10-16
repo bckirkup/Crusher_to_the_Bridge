@@ -86,6 +86,7 @@ PLATFORMS = [
     "jupiter_ac3",
     "montana_acr13",
     "olympia_c6",
+    "saratoga_cv60",
 ]
 
 ENTERPRISE_IDS = frozenset({

@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:27:39.259798+00:00",
+  "platform": "saratoga_cv60",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 4955
+  },
+  "manifest": [
+    {
+      "class_id": "flag_officers",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Flag_Country_03",
+      "duty_zone": "CIC_03",
+      "notes": "Flag staff, plate-read 5"
+    },
+    {
+      "class_id": "ships_officers",
+      "role_group": "crew",
+      "count": 386,
+      "berth_zone": "Officers_Country_03",
+      "duty_zone": "CIC_03",
+      "notes": "436 officers split ship/air-wing per class-typical"
+    },
+    {
+      "class_id": "air_wing_officers",
+      "role_group": "crew",
+      "count": 50,
+      "berth_zone": "Officers_Country_03",
+      "duty_zone": "Squadron_Ready_03",
+      "notes": "Embarked squadron officers"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 270,
+      "berth_zone": "CPO_Country_3D",
+      "duty_zone": "Shops_3D",
+      "notes": "Chief petty officers, plate-read 270"
+    },
+    {
+      "class_id": "air_wing_enlisted",
+      "role_group": "crew",
+      "count": 1500,
+      "berth_zone": "Crew_Berthing_03_Aft",
+      "duty_zone": "Hangar_Bay_2",
+      "notes": "Air wing squadrons embarked"
+    },
+    {
+      "class_id": "engine_room_gang",
+      "role_group": "crew",
+      "count": 550,
+      "berth_zone": "Crew_Berthing_2D_Aft",
+      "duty_zone": "Machinery_2P_Aft",
+      "notes": "Engineering department"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 1467,
+      "berth_zone": "Crew_Berthing_3D_Mid",
+      "duty_zone": "Flight_Deck",
+      "notes": "Deck/weapons/air ops enlisted, balance of 4177 crew"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 420,
+      "berth_zone": "Crew_Berthing_3D_Aft",
+      "duty_zone": "Crew_Mess_Galley_2D",
+      "notes": "Supply/commissary, galleys+stores"
+    },
+    {
+      "class_id": "medical_admin",
+      "role_group": "crew",
+      "count": 80,
+      "berth_zone": "Crew_Berthing_2D_Fwd",
+      "duty_zone": "Medical_2D",
+      "notes": "Medical dept + admin/yeomen"
+    },
+    {
+      "class_id": "radio_ops",
+      "role_group": "crew",
+      "count": 160,
+      "berth_zone": "Crew_Berthing_02_Mid",
+      "duty_zone": "CIC_03",
+      "notes": "Operations/intel comms ratings"
+    },
+    {
+      "class_id": "marines_detachment",
+      "role_group": "crew",
+      "count": 67,
+      "berth_zone": "Marine_Berthing_3D",
+      "duty_zone": "Marine_Office_01",
+      "notes": "Marine det 66 + 1st Sgt"
+    }
+  ],
+  "source": "Plate 2 accommodations table: flag 5 + ship's officers 436 + CPO 270 + crew 4177 + marines 67",
+  "consistency": {
+    "declared_total": 4955,
+    "manifest_total": 4955,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
