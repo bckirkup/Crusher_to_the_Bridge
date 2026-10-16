@@ -7,5 +7,18 @@
     "credit": "Imported via tools.ship_blueprint_import",
     "license": "Source drawing rights remain with original owner"
   },
-  "deck_plans": {}
+  "deck_plans": {
+    "island": "deck_island.png",
+    "flight_deck": "deck_flight_deck.png",
+    "gallery_deck": "deck_gallery_deck.png",
+    "poop_deck": "deck_poop_deck.png",
+    "forecastle_deck": "deck_forecastle_deck.png",
+    "hangar_deck": "deck_hangar_deck.png",
+    "main_deck": "deck_main_deck.png",
+    "second_deck": "deck_second_deck.png",
+    "third_deck": "deck_third_deck.png",
+    "first_platform": "deck_first_platform.png",
+    "second_platform": "deck_second_platform.png",
+    "hold": "deck_hold.png"
+  }
 }
