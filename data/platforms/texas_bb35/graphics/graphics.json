@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "description": "Per-deck plan crops from the GA booklet (imported; see import_provenance.json)",
+  "plan": null,
+  "deck_plans": {
+    "bridge_deck": "deck_bridge_deck.png",
+    "superstructure_deck": "deck_superstructure_deck.png",
+    "main_deck": "deck_main_deck.png",
+    "second_deck": "deck_second_deck.png",
+    "half_deck": "deck_half_deck.png",
+    "berth_deck": "deck_berth_deck.png",
+    "third_deck": "deck_third_deck.png",
+    "first_platform": "deck_first_platform.png",
+    "second_platform": "deck_second_platform.png",
+    "hold": "deck_hold.png"
+  }
+}

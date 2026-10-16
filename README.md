@@ -597,6 +597,8 @@ airflow definitions:
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 | `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
+| `texas_bb35` | USS Texas BB-35 New York-class battleship, 1944 wartime fit (maritime.org GA import, 92 zones, 1810 crew incl. marines) |
+| `new_york_bb34` | USS New York BB-34 New York-class battleship, 1942 wartime fit (maritime.org GA import, 83 zones, 1617 crew incl. marines; main-deck plan absent from scan — sister-derived) |
 | `astoria_ca34` | USS Astoria CA-34 New Orleans-class heavy cruiser (maritime.org GA import, 65 zones, 982 crew) |
 | `miami_cl89` | USS Miami CL-89 Cleveland-class light cruiser (maritime.org GA import, 81 zones, 1252 crew) |
 | `chicago_cg11` | USS Chicago CG-11 guided missile cruiser on Baltimore-class hull (maritime.org GA import, 87 zones, 1302 crew incl. flag staff + marines) |
