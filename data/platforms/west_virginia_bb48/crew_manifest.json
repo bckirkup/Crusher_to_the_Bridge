@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:35:05.677150+00:00",
+  "platform": "west_virginia_bb48",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1340
+  },
+  "manifest": [
+    {
+      "class_id": "officers_wardroom",
+      "role_group": "crew",
+      "count": 48,
+      "berth_zone": "Wardroom_SR_Rows",
+      "duty_zone": "Wardroom_Mess",
+      "notes": "plate-read: wardroom officers"
+    },
+    {
+      "class_id": "officers_junior",
+      "role_group": "crew",
+      "count": 22,
+      "berth_zone": "JO_Bunk_Room",
+      "duty_zone": "JO_Country",
+      "notes": "plate-read: junior officers"
+    },
+    {
+      "class_id": "officers_flag_co_warrant",
+      "role_group": "crew",
+      "count": 14,
+      "berth_zone": "Admirals_Country",
+      "duty_zone": "Flag_Plot_Radio",
+      "notes": "plate-read: flag officer 1 + CO 1 + warrant 12"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 641,
+      "berth_zone": "Crew_Space_Main_Fwd",
+      "duty_zone": "Fantail",
+      "notes": "plate-read"
+    },
+    {
+      "class_id": "artificer",
+      "role_group": "crew",
+      "count": 118,
+      "berth_zone": "Crew_Space_2nd",
+      "duty_zone": "General_Workshop",
+      "notes": "plate-read"
+    },
+    {
+      "class_id": "engine_room_force",
+      "role_group": "crew",
+      "count": 279,
+      "berth_zone": "Crew_Space_2nd",
+      "duty_zone": "Engine_Room_Fwd",
+      "notes": "plate-read"
+    },
+    {
+      "class_id": "special_branch",
+      "role_group": "crew",
+      "count": 71,
+      "berth_zone": "Crew_Space_D404",
+      "duty_zone": "Radio_Transmitter_3rd",
+      "notes": "plate-read"
+    },
+    {
+      "class_id": "commissary_branch",
+      "role_group": "crew",
+      "count": 25,
+      "berth_zone": "Crew_Space_2nd",
+      "duty_zone": "Crews_Galley",
+      "notes": "plate-read"
+    },
+    {
+      "class_id": "messmen",
+      "role_group": "crew",
+      "count": 35,
+      "berth_zone": "Crew_Space_2nd",
+      "duty_zone": "CPO_Mess_Main",
+      "notes": "plate-read"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 87,
+      "berth_zone": "Crew_Space_3rd",
+      "duty_zone": "Casemates_Port",
+      "notes": "plate-read marine detachment"
+    }
+  ],
+  "source": "plate-read p2 data sheet: officers 84 (flag 1, CO 1, wardroom 48, junior 22, warrant 12) + crew 1169 (seamen 641, artificer 118, engine room 279, special 71, commissary 25, messmen 35) + marines 87 = 1340",
+  "consistency": {
+    "declared_total": 1340,
+    "manifest_total": 1340,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
