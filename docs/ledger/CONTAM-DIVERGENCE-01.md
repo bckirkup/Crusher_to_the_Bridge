@@ -4,6 +4,15 @@
 **Pathogens:** all
 **Status:** measured
 **Measured at:** 1ac4da8a
+**Amended:** 2026-10-16 by `CONTAM-COMMISSION-01` — the "Mechanism"
+paragraph below is **withdrawn**: the "878 m³/h through MedBay" figure was
+a mislabeled readout of the July-era 44-path fixture `.sim` through the
+September 69-path `path_map.json`, and flagged simple-AHS terminals do
+enforce `Fahs × schedule` (they are not pressure-solved free links). The
+ground-truth divergence numbers and the HD-sink finding stand; the actual
+authoring defects were the uniform `ach·ΣV/n` Fahs split and the hobbyist
+duty-schedule double-count. The "defensible construction" is implemented
+by `CONTAM-COMMISSION-01`.
 
 Native `ContamTransportEngine` vs ContamX `ContamXTransportEngine` — same
 propagator, different airflow field. Full write-up:

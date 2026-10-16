@@ -69,6 +69,16 @@ def main(argv: list[str] | None = None) -> int:
         action="store_false",
         help="Emit skeleton ContamW 3.4 only (no wind/ducts/filters/…).",
     )
+    parser.add_argument(
+        "--ahs-terminal-mode",
+        choices=("design", "commissioned"),
+        default=None,
+        help="AHS terminal emission mode: 'design' uniform ach·ΣV/n split "
+             "(default) or 'commissioned' per-room ach·V·duty with constant "
+             "schedule (supply 0 / return ach·V on exhaust-only branches). "
+             "A platform's contam/hobbyist_overrides.json may also set "
+             "'ahs_terminal_mode'.",
+    )
     args = parser.parse_args(argv)
     platforms = args.platforms or list(DEFAULT_PLATFORMS)
 
@@ -82,6 +92,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
         written = export_platform_to_prj(
             platform_dir, out, write_path_map=True, hobbyist=args.hobbyist,
+            ahs_terminal_mode=args.ahs_terminal_mode,
         )
         print(f"  Wrote {written}")
         print(f"  Wrote {os.path.join(os.path.dirname(written), 'path_map.json')}")
