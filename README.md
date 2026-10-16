@@ -576,6 +576,9 @@ airflow definitions:
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 | `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
+| `keppler_dd765` | USS Keppler DD-765 Gearing-class FRAM II destroyer (maritime.org GA import, 79 zones, 308 crew) |
+| `fletcher_dde_dd445` | DD-445 Fletcher-class DDE conversion study drawing (maritime.org GA import, 35 zones, ~300 crew est.) |
+| `hunter_killer_dd692` | DD-692-class long-hull hunter-killer contract plan (maritime.org GA import, 60 zones, 309 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`

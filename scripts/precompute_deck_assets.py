@@ -64,6 +64,9 @@ PLATFORMS = [
     "enterprise_constitution_tos",
     "enterprise_galaxy_tng",
     "midway_cv41",
+    "keppler_dd765",
+    "fletcher_dde_dd445",
+    "hunter_killer_dd692",
 ]
 
 ENTERPRISE_IDS = frozenset({

@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:25:12.650271+00:00",
+  "platform": "hunter_killer_dd692",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 309
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Pilot_House",
+      "notes": "CO + 19 wardroom officers (WR S.R. split main deck fwd / 1P / 01)"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "CPO_1P",
+      "duty_zone": "CPO_Ship_Office",
+      "notes": "chief petty officers (berthing 1P (9) + main deck (4))"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 55,
+      "berth_zone": "Crew_Berthing_1P",
+      "duty_zone": "Fwd_Machinery_1P",
+      "notes": "machinists, boilermen, electricians"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 115,
+      "berth_zone": "Crew_Berthing_1P",
+      "duty_zone": "Focsle_Fwd",
+      "notes": "seamen, 3in/70 crews, torpedomen, ASW deck force"
+    },
+    {
+      "class_id": "ops_electronics",
+      "role_group": "crew",
+      "count": 50,
+      "berth_zone": "Crew_Berthing_Fwd",
+      "duty_zone": "CIC_01",
+      "notes": "CIC/radar/radio/sonar ratings incl. S.Q.G. sonar + UWB plotting"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 33,
+      "berth_zone": "Crew_Berthing_2P",
+      "duty_zone": "Galley",
+      "notes": "cooks, stewards, storekeepers"
+    },
+    {
+      "class_id": "medical_admin",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "Crew_Berthing_2P",
+      "duty_zone": "Berthing_Mid",
+      "notes": "corpsmen (sick bay) + yeomen/office admin"
+    }
+  ],
+  "source": "Plate accommodations table: CO 1 + wardroom 19 + CPO 18 + crew 271 = 309 (plate-read)",
+  "consistency": {
+    "declared_total": 309,
+    "manifest_total": 309,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

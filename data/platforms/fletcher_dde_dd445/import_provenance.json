@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:22:21.092842+00:00",
+  "platform_id": "fletcher_dde_dd445",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/fletcher_dde_dd445",
+  "digest_sha256": "0e957279d3ae0c534b5f188511a76a917168ededd75164661699941693651fc2",
+  "svg_sha256": {
+    "page_01_approved.svg": "a788def4d12d8964181efbb069c9aefa0d14cddbe984f1da321c9ff0a9ed27fb"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 35,
+  "berthing_zones": [
+    "Aft_Deckhouse",
+    "Officers_Country_Main",
+    "Radio_Room_01",
+    "Pilot_House_CIC",
+    "Aft_Stores_1P",
+    "Crew_Berthing_1P",
+    "Ammo_Handling_Aft",
+    "Gen_Wkshop",
+    "IC_Plotting",
+    "Ships_Office",
+    "Officers_Country_1P",
+    "CPO_Berthing_1P",
+    "Ammo_Handling_Fwd",
+    "Fwd_Stores_1P",
+    "Aft_Stores_2P",
+    "Sonar_Block_2P",
+    "Ships_Service_Store",
+    "Crew_Berthing_2P",
+    "Fwd_Stores_2P",
+    "Fwd_Hold"
+  ],
+  "systems_era": "usn_ww2"
+}
