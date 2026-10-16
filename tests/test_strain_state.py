@@ -157,6 +157,38 @@ def test_founders_are_tracked_per_pathogen():
     assert reg.founders("influenza_a") == ()
 
 
+def test_founders_split_by_origin():
+    """Boarding vs supply-chain founders stay separable (issue #1010)."""
+    reg = StrainRegistry()
+    aboard_founder = reg.mint("p", genotype="GII.4")
+    shore = reg.mint("p", genotype="GII.17", origin="shore_import")
+    lot = reg.mint("p", genotype="GII.2", origin="imported:lot")
+    reg.mint(
+        "p",
+        genotype="GII.4m",
+        origin="transmission",
+        parent_strain_ids=(aboard_founder.strain_id,),
+    )
+
+    grouped = reg.founders_by_origin()["p"]
+    assert grouped["founder"] == [aboard_founder.strain_id]
+    assert grouped["shore_import"] == [shore.strain_id]
+    assert grouped["imported:lot"] == [lot.strain_id]
+    assert sum(len(sids) for sids in grouped.values()) == len(
+        reg.founders("p")
+    )
+
+    blob = reg.to_telemetry()
+    assert blob["founders_by_origin"]["p"]["imported:lot"] == [
+        lot.strain_id
+    ]
+    assert blob["founders"]["p"] == [
+        aboard_founder.strain_id,
+        shore.strain_id,
+        lot.strain_id,
+    ]
+
+
 def test_duplicate_registration_is_rejected():
     reg = StrainRegistry()
     strain = reg.mint("p")
