@@ -1,0 +1,498 @@
+{
+  "platform": "winnipeg_j337",
+  "description": "Algerine-class fleet minesweeper GA 'As fitted' (H.M.C.S. Winnipeg J337, Port Arthur): 225ft reciprocating sweeper, 4in gun, AA platforms. Zones read from maritime.org j337.pdf (2 sheets).",
+  "isolation_unit_capacity": 1,
+  "deck_dimensions": {
+    "length_m": 68.6,
+    "beam_m": 10.8
+  },
+  "graywater_zones": [
+    "Engine_Room"
+  ],
+  "zones": [
+    {
+      "id": "Signal_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 248.13,
+      "floor_area_m2": 95.43,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.9,
+      "deck": "signal_deck",
+      "display": {
+        "x": 45.02,
+        "y": 4.25
+      },
+      "description": "signal deck plan inset: flag deck, signal offices; circular AA platform above"
+    },
+    {
+      "id": "Bridge_House",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 334.88,
+      "floor_area_m2": 128.8,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.3,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 43.95,
+        "y": 4.44
+      },
+      "description": "bridge deck: compass platform, wheelhouse, chart house, W/T office"
+    },
+    {
+      "id": "Quarterdeck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 588.66,
+      "floor_area_m2": 226.41,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.7,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 10.73,
+        "y": 4.24
+      },
+      "description": "aft weather deck: sweep deck, AA gun platform octagon, depth-charge handling"
+    },
+    {
+      "id": "Foc_Superstructure",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 681.61,
+      "floor_area_m2": 262.16,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.7,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 35.92,
+        "y": 4.24
+      },
+      "description": "forecastle deckhouse: funnel casing, galley/store flats, boat stowage"
+    },
+    {
+      "id": "Foc_Deck_Open",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 341.48,
+      "floor_area_m2": 131.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.7,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 58.87,
+        "y": 4.4
+      },
+      "description": "fwd weather deck: 4in gun, windlass, breakwater"
+    },
+    {
+      "id": "Quarterdeck_Flat",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 401.48,
+      "floor_area_m2": 154.41,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 6.5,
+        "y": 4.23
+      },
+      "description": "aft upper-deck flat: capstans, sweep gear stowage, DC racks, ammo"
+    },
+    {
+      "id": "ERA_Flat",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 133.83,
+      "floor_area_m2": 51.47,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 18.41,
+        "y": 4.23
+      },
+      "description": "E.R.A.'s mess (5 per table) + engineer's store"
+    },
+    {
+      "id": "HD_Aft",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 35.88,
+      "floor_area_m2": 15.6,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 19.5,
+        "y": 7.34
+      },
+      "serves": [
+        "ERA_Flat",
+        "MS_Mess"
+      ],
+      "description": "W.C./washroom block aft",
+      "base_ach": 19.1,
+      "max_occupancy": 6
+    },
+    {
+      "id": "Machinery_Casing",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 192.63,
+      "floor_area_m2": 74.09,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 25.27,
+        "y": 4.58
+      },
+      "description": "engine room trunked hatch + boiler casings/uptakes through upper deck"
+    },
+    {
+      "id": "MS_Mess",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 91.25,
+      "floor_area_m2": 35.09,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 32.86,
+        "y": 3.46
+      },
+      "max_occupancy": 18,
+      "description": "C.P.O.'s & P.O.'s M/S (motor sweep) mess, 18 per table"
+    },
+    {
+      "id": "Galley_Flat",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 111.52,
+      "floor_area_m2": 42.89,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 35.56,
+        "y": 7.78
+      },
+      "description": "galley + bakery + scullery block"
+    },
+    {
+      "id": "HD_Ups",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 64.58,
+      "floor_area_m2": 28.08,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 38.99,
+        "y": 2.42
+      },
+      "serves": [
+        "MS_Mess",
+        "Seamens_Mess",
+        "Signal_Stwd_Mess"
+      ],
+      "description": "W.C. and bath block amidships",
+      "base_ach": 19.1,
+      "max_occupancy": 10
+    },
+    {
+      "id": "Wardroom_Flat",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 241.29,
+      "floor_area_m2": 92.8,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 46.58,
+        "y": 5.96
+      },
+      "description": "wardroom, officer cabins, canteen, sick berth"
+    },
+    {
+      "id": "Signal_Stwd_Mess",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 85.16,
+      "floor_area_m2": 32.75,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 55.6,
+        "y": 1.47
+      },
+      "max_occupancy": 18,
+      "description": "signalmen, cooks & stewards mess, 18 per table"
+    },
+    {
+      "id": "Seamens_Mess",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 251.43,
+      "floor_area_m2": 96.7,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 59.93,
+        "y": 5.36
+      },
+      "max_occupancy": 35,
+      "description": "seamen's mess fwd, 35 per table"
+    },
+    {
+      "id": "Magazine_Lobby_Up",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 20.28,
+      "floor_area_m2": 7.8,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.1,
+      "deck": "upper_deck",
+      "display": {
+        "x": 67.88,
+        "y": 5.27
+      },
+      "description": "magazine/cable lobby at bow taper"
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 138.3,
+      "floor_area_m2": 53.19,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 2.81,
+        "y": 4.64
+      },
+      "description": "steering gear + stern flats"
+    },
+    {
+      "id": "Generator_Store",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 197.57,
+      "floor_area_m2": 75.99,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 10.55,
+        "y": 5.08
+      },
+      "description": "G.S. generator room + engineer's store aft"
+    },
+    {
+      "id": "Stokers_Mess",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 88.91,
+      "floor_area_m2": 34.19,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 17.94,
+        "y": 6.37
+      },
+      "max_occupancy": 19,
+      "description": "stokers' mess, 19 per table"
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Engineering",
+      "traffic": "high",
+      "volume_m3": 500.0,
+      "floor_area_m2": 192.31,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 25.33,
+        "y": 5.08
+      },
+      "description": "diesel engine room, continues to hold (double height)"
+    },
+    {
+      "id": "Boiler_Rooms",
+      "type": "Engineering",
+      "traffic": "high",
+      "volume_m3": 350.0,
+      "floor_area_m2": 134.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 35.88,
+        "y": 5.08
+      },
+      "description": "aft + ford boiler rooms, continue to hold"
+    },
+    {
+      "id": "Sick_Bay",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 43.22,
+      "floor_area_m2": 16.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 43.97,
+        "y": 3.13
+      },
+      "description": "sick berth fwd of boiler rooms"
+    },
+    {
+      "id": "CPO_Mess",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 69.15,
+      "floor_area_m2": 26.6,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 45.03,
+        "y": 6.91
+      },
+      "max_occupancy": 5,
+      "description": "C.P.O.'s mess, 5 per table"
+    },
+    {
+      "id": "PO_Mess",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 135.83,
+      "floor_area_m2": 52.24,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 50.48,
+        "y": 3.78
+      },
+      "max_occupancy": 17,
+      "description": "P.O.'s mess, 17 per table"
+    },
+    {
+      "id": "Fwd_Stores",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 155.58,
+      "floor_area_m2": 59.84,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.5,
+      "deck": "lower_deck",
+      "display": {
+        "x": 60.51,
+        "y": 4.64
+      },
+      "description": "fwd stores, magazine lobby, capstan-engine flat, bow taper"
+    },
+    {
+      "id": "After_Peak",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 123.28,
+      "floor_area_m2": 47.42,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 2.74,
+        "y": 4.49
+      },
+      "description": "after peak, stern tubes"
+    },
+    {
+      "id": "Provision_Aft",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 202.26,
+      "floor_area_m2": 77.79,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 11.66,
+        "y": 4.32
+      },
+      "description": "gland compartment, provision room, fresh-water tank space"
+    },
+    {
+      "id": "Magazines_Fwd",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 163.73,
+      "floor_area_m2": 62.97,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 48.02,
+        "y": 4.23
+      },
+      "description": "4in magazine + bomb room fwd of boiler rooms"
+    },
+    {
+      "id": "Cold_Stores",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 38.53,
+      "floor_area_m2": 14.82,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 54.88,
+        "y": 3.11
+      },
+      "description": "cold & cool store rooms"
+    },
+    {
+      "id": "Asdic_Fwd",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 66.46,
+      "floor_area_m2": 25.56,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 59.51,
+        "y": 3.89
+      },
+      "description": "A/S dome compartment + gunner's store"
+    },
+    {
+      "id": "Chain_Locker",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 47.19,
+      "floor_area_m2": 18.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 65.0,
+        "y": 4.58
+      },
+      "description": "cable/chain locker, bow"
+    }
+  ]
+}

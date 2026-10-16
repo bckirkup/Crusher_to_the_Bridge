@@ -1,0 +1,262 @@
+{
+  "platform": "cobalt_k124",
+  "era": "rn_ww2",
+  "era_label": "Royal Navy WW2 practice",
+  "era_note": "Mushroom/cowl natural supply; mech exhaust galley/heads/engines; magazines sprinkled + vented.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "lower_deck",
+      "serves_zone": "Boiler_Room",
+      "display": [
+        30.4,
+        -1.41
+      ],
+      "evidence": "sheet_read",
+      "notes": "funnel on profile + forecastle plan over boiler room"
+    },
+    {
+      "id": "ER_Skylight",
+      "kind": "skylight",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Engine_Room",
+      "display": [
+        23.44,
+        3.41
+      ],
+      "evidence": "sheet_read",
+      "notes": "ENGINE ROOM SKYLIGHT drawn on deck plan"
+    },
+    {
+      "id": "Galley_Skylight",
+      "kind": "skylight",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Galley",
+      "display": [
+        37.02,
+        2.11
+      ],
+      "evidence": "sheet_read",
+      "notes": "GALLEY SKYLIGHT on deckhouse plan"
+    },
+    {
+      "id": "Cowls_Foc_Bow",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Seamen_Mess",
+      "display": [
+        51.97,
+        3.41
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENTS P&S TO MESSES + cowls near breakwater"
+    },
+    {
+      "id": "Vents_Waist",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Engine_Room",
+      "display": [
+        25.9,
+        4.4
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT circles on upper deck around engine casing"
+    },
+    {
+      "id": "Vent_Mag",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Fwd_Magazines",
+      "display": [
+        40.33,
+        3.14
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine ventilator per RN WW2 practice"
+    }
+  ],
+  "zone_modes": {
+    "Compass_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bridge_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Foc_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Quarterdeck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stern_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "CO_Cabin": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Officers": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Canteen": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Provision_Issue": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Crew": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Seamen_Mess": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "HD_PO": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Paint_Lamp_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Minesweeping_Store": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Provision_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officer_Cabins": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Boiler_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Wardroom": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_PO_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stokers_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fore_Peak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "After_Peak": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engineers_Store": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Magazines": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Asdic_Compartment": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker_Store": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "OIL FUEL TANK",
+      "kind": "fuel",
+      "nearest_zone": "Fwd_Magazines",
+      "display": [
+        27.25,
+        1.89
+      ],
+      "deck": "hold",
+      "notes": "O.F. tanks P&S abeam boiler room; more at lower-deck bunker sides"
+    },
+    {
+      "label": "FRESH WATER TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Asdic_Compartment",
+      "display": [
+        45.42,
+        4.82
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "RESERVE FEED WATER TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Magazines",
+      "display": [
+        44.69,
+        3.14
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "GALLEY FUEL TANK",
+      "kind": "fuel",
+      "nearest_zone": "Wardroom",
+      "display": [
+        34.49,
+        9.05
+      ],
+      "deck": "lower_deck",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "HD_Officers (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Officers",
+    "HD_Crew (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew",
+    "HD_PO (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_PO"
+  ]
+}
