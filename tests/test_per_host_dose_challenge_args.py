@@ -8,12 +8,25 @@ import pytest
 
 from tools.noro_diag import per_host_dose_challenge as pdc
 
+_SWEEP_KWARGS = frozenset({
+    "high_touch_area_scale",
+    "high_touch_area_scale_by_zone_class",
+    "fomite_representation",
+    "fomite_touch_share",
+    "fomite_touch_share_table",
+    "cabin_confined_fomite",
+})
+
 
 def _spec(**kwargs):
+    sweep_kw = {k: kwargs.pop(k) for k in list(kwargs) if k in _SWEEP_KWARGS}
+    sweep = pdc.TransmissionSweepKnobs(**sweep_kw) if sweep_kw else None
     return pdc.build_spec(
         seed=9000, platform="classic_cruise_1900",
         bundle="active_profiles", epochs=20, num_agents=1910,
-        pathogen_id="norwalk_gi", alpha=None, beta=1.0, **kwargs,
+        pathogen_id="norwalk_gi", alpha=None, beta=1.0,
+        sweep=sweep,
+        **kwargs,
     )
 
 
@@ -125,8 +138,12 @@ def test_run_seed_resolves_the_fomite_arm_and_witnesses_delivery(arm):
     summary = pdc.run_seed(
         seed=9000, platform="classic_cruise_1900",
         bundle="active_profiles", epochs=20, pathogen_id="norwalk_gi",
-        top_hosts=4, fomite_representation=arm, arm_tag=arm,
-        spec_dict=spec,
+        top_hosts=4,
+        options=pdc.RunSeedOptions(
+            sweep=pdc.TransmissionSweepKnobs(fomite_representation=arm),
+            arm_tag=arm,
+            spec_dict=spec,
+        ),
     )
     assert summary["fomite_representation"] == arm
     assert summary["fomite_representation_resolved"] == arm

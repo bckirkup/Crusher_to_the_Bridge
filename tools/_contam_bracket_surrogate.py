@@ -47,67 +47,89 @@ def build_native(plat: str) -> ContamTransportEngine:
     )
 
 
-def shunt_field(
-    plat: str, s: float, pick: str, hd_vent: bool
-) -> ContamTransportEngine:
-    d = f"data/platforms/{plat}"
-    eng = build_native(plat)
+def _hvac_plen_by_zone(eng: ContamTransportEngine) -> dict[str, dict[str, list]]:
     plen: dict[str, dict[str, list]] = {}
     for p in eng.airflow_paths:
         if p.path_type == PATH_TYPE_HVAC_RETURN:
             plen.setdefault(p.to_zone, {}).setdefault("ret", []).append(p)
         elif p.path_type == PATH_TYPE_HVAC_SUPPLY:
             plen.setdefault(p.from_zone, {}).setdefault("sup", []).append(p)
-    for _pl, g in plen.items():
-        rooms = [p.from_zone for p in g.get("ret", [])]
-        if len(rooms) < 2:
-            continue
-        vols = {z: eng.zone_nodes[z].volume_m3 for z in rooms}
-        t = (
-            min(rooms, key=lambda z: vols[z])
-            if pick == "small"
-            else max(rooms, key=lambda z: vols[z])
+    return plen
+
+
+def _terminal_room(rooms: list[str], eng: ContamTransportEngine, pick: str) -> str:
+    vols = {z: eng.zone_nodes[z].volume_m3 for z in rooms}
+    if pick == "small":
+        return min(rooms, key=lambda z, vols=vols: vols[z])
+    return max(rooms, key=lambda z, vols=vols: vols[z])
+
+
+def _shunt_one_plen_group(
+    g: dict[str, list], eng: ContamTransportEngine, s: float, pick: str
+) -> None:
+    rooms = [p.from_zone for p in g.get("ret", [])]
+    if len(rooms) < 2:
+        return
+    t = _terminal_room(rooms, eng, pick)
+    for kind in ("ret", "sup"):
+        tot = sum(
+            p.flow_rate_m3h
+            for p in g.get(kind, [])
+            if (p.from_zone if kind == "ret" else p.to_zone) != t
         )
-        for kind in ("ret", "sup"):
-            tot = sum(
-                p.flow_rate_m3h
-                for p in g.get(kind, [])
-                if (p.from_zone if kind == "ret" else p.to_zone) != t
-            )
-            for p in g.get(kind, []):
-                room = p.from_zone if kind == "ret" else p.to_zone
-                p.flow_rate_m3h *= (1.0 - s) if room != t else 1.0
-            for p in g.get(kind, []):
-                room = p.from_zone if kind == "ret" else p.to_zone
-                if room == t:
-                    p.flow_rate_m3h += s * tot
-    if hd_vent:
-        zones, _elems, paths, _ahs = parse_prj(Path(f"{d}/contam/platform.prj"))
-        zname = {nr: z["name"] for nr, z in zones.items()}
-        ex: dict[str, float] = {}
-        for _nr, p in paths.items():
-            if p["fahs"] > 0 and p["sched"] == 2:
-                tgt = zname.get(p["m"], "")
-                if tgt.startswith("HD_"):
-                    ex[tgt] = ex.get(tgt, 0) + p["fahs"] / RHO * 3600
-        exts = [
-            z
-            for z in eng.zone_nodes
-            if "deck" in z.lower() or "pool" in z.lower() or "outdoor" in z.lower()
-        ]
-        ext = exts[0] if exts else None
-        for z, f in ex.items():
-            if z in eng.zone_nodes and ext:
-                eng.airflow_paths.append(
-                    ContamAirflowPath(
-                        path_id=f"hdvent_{z}",
-                        from_zone=z,
-                        to_zone=ext,
-                        flow_rate_m3h=f,
-                        path_type="cross_zone",
-                        is_hvac_ducted=False,
-                    )
+        for p in g.get(kind, []):
+            room = p.from_zone if kind == "ret" else p.to_zone
+            p.flow_rate_m3h *= (1.0 - s) if room != t else 1.0
+        for p in g.get(kind, []):
+            room = p.from_zone if kind == "ret" else p.to_zone
+            if room == t:
+                p.flow_rate_m3h += s * tot
+
+
+def _hd_exhaust_rates(d: str) -> dict[str, float]:
+    zones, _elems, paths, _ahs = parse_prj(Path(f"{d}/contam/platform.prj"))
+    zname = {nr: z["name"] for nr, z in zones.items()}
+    ex: dict[str, float] = {}
+    for _nr, p in paths.items():
+        if p["fahs"] > 0 and p["sched"] == 2:
+            tgt = zname.get(p["m"], "")
+            if tgt.startswith("HD_"):
+                ex[tgt] = ex.get(tgt, 0) + p["fahs"] / RHO * 3600
+    return ex
+
+
+def _append_hd_vent_paths(eng: ContamTransportEngine, d: str) -> None:
+    ex = _hd_exhaust_rates(d)
+    exts = [
+        z
+        for z in eng.zone_nodes
+        if "deck" in z.lower() or "pool" in z.lower() or "outdoor" in z.lower()
+    ]
+    ext = exts[0] if exts else None
+    for z, f in ex.items():
+        if z in eng.zone_nodes and ext:
+            eng.airflow_paths.append(
+                ContamAirflowPath(
+                    path_id=f"hdvent_{z}",
+                    from_zone=z,
+                    to_zone=ext,
+                    flow_rate_m3h=f,
+                    path_type="cross_zone",
+                    is_hvac_ducted=False,
                 )
+            )
+
+
+def shunt_field(
+    plat: str, s: float, pick: str, hd_vent: bool
+) -> ContamTransportEngine:
+    d = f"data/platforms/{plat}"
+    eng = build_native(plat)
+    plen = _hvac_plen_by_zone(eng)
+    for g in plen.values():
+        _shunt_one_plen_group(g, eng, s, pick)
+    if hd_vent:
+        _append_hd_vent_paths(eng, d)
     return eng
 
 
@@ -150,6 +172,54 @@ SITES = {
 }
 
 
+def _occ_dose_shares(cn: dict[str, float]) -> dict[str, float]:
+    nat_d = {c: sum(cn[z] for z in cn if zclass(z) == c) for c in OCC}
+    total = max(sum(nat_d.values()), 1e-12)
+    return {c: nat_d[c] / total for c in OCC}
+
+
+def _format_native_shares(shares: dict[str, float]) -> str:
+    return ", ".join(f"{c}={shares[c]:.0%}" for c in OCC)
+
+
+def _variant_metrics(
+    eng: ContamTransportEngine, site: str, nat_d: dict[str, float]
+) -> tuple[float, dict[str, float], float, float]:
+    mc, cc, _rc, _ = dose_trace(eng, site, 24)
+    cx_d = {c: sum(cc[z] for z in cc if zclass(z) == c) for c in OCC}
+    ratios = {
+        c: (cx_d[c] / nat_d[c] if nat_d[c] > 1e-6 else np.nan) for c in OCC
+    }
+    rr = [v for v in ratios.values() if np.isfinite(v)]
+    rstar = float(np.exp(np.mean(np.log(rr)))) if rr else float("nan")
+    resid = (max(rr) / min(rr)) if rr else float("nan")
+    return sum(mc.values()), ratios, rstar, resid
+
+
+def _print_variant_line(
+    vn: str, eng: ContamTransportEngine, site: str, nat_d: dict[str, float]
+) -> None:
+    ret, ratios, rstar, resid = _variant_metrics(eng, site, nat_d)
+    print(
+        f"  {vn:13s} ret={ret:.3f} "
+        + " ".join(f"{c}={ratios.get(c, float('nan')):.2f}" for c in OCC)
+        + f" | r*={rstar:.2f} aniso={resid:.1f}x"
+    )
+
+
+def _report_site(
+    site: str, nat: ContamTransportEngine, variants: dict[str, ContamTransportEngine]
+) -> None:
+    _mn, cn, _rn, _vols = dose_trace(nat, site, 24)
+    nat_d = {c: sum(cn[z] for z in cn if zclass(z) == c) for c in OCC}
+    shares = _occ_dose_shares(cn)
+    print(
+        f" inject={site}  native occ-dose share: {_format_native_shares(shares)}"
+    )
+    for vn, eng in variants.items():
+        _print_variant_line(vn, eng, site, nat_d)
+
+
 def main() -> None:
     for plat in SITES:
         nat = build_native(plat)
@@ -160,38 +230,7 @@ def main() -> None:
         }
         print("#" * 12, plat)
         for site in SITES[plat]:
-            _mn, cn, _rn, _vols = dose_trace(nat, site, 24)
-            nat_d = {
-                c: sum(cn[z] for z in cn if zclass(z) == c) for c in OCC
-            }
-            print(
-                f" inject={site}  native occ-dose share: "
-                + ", ".join(
-                    f"{c}={nat_d[c] / max(sum(nat_d.values()), 1e-12):.0%}"
-                    for c in OCC
-                )
-            )
-            for vn, eng in variants.items():
-                mc, cc, _rc, _ = dose_trace(eng, site, 24)
-                cx_d = {
-                    c: sum(cc[z] for z in cc if zclass(z) == c) for c in OCC
-                }
-                ratios = {
-                    c: (cx_d[c] / nat_d[c] if nat_d[c] > 1e-6 else np.nan)
-                    for c in OCC
-                }
-                rr = [v for v in ratios.values() if np.isfinite(v)]
-                rstar = (
-                    float(np.exp(np.mean(np.log(rr)))) if rr else float("nan")
-                )
-                resid = (max(rr) / min(rr)) if rr else float("nan")
-                print(
-                    f"  {vn:13s} ret={sum(mc.values()):.3f} "
-                    + " ".join(
-                        f"{c}={ratios.get(c, float('nan')):.2f}" for c in OCC
-                    )
-                    + f" | r*={rstar:.2f} aniso={resid:.1f}x"
-                )
+            _report_site(site, nat, variants)
 
 
 if __name__ == "__main__":

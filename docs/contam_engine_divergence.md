@@ -1,8 +1,24 @@
 # CONTAM vs native transport — divergence measurement
 
-> **Status:** Measured analysis (2026-10-16, at `1ac4da8a`). Ledger:
+> **Status:** Measured analysis (2026-10-16, at `1ac4da8a`); mechanism
+> corrected 2026-10-16 — ledger
+> [`ledger/CONTAM-COMMISSION-01.md`](ledger/CONTAM-COMMISSION-01.md).
+> Original ledger:
 > [`ledger/CONTAM-DIVERGENCE-01.md`](ledger/CONTAM-DIVERGENCE-01.md). Index:
 > [README.md](README.md).
+>
+> **Correction (2026-10-16):** §2's mechanism is falsified. Flagged
+> simple-AHS terminals **do** enforce `Fahs × schedule` — measured on the
+> native Linux ContamX 3.4.0.3 build now in `third_party/contamx/`. The
+> "878 m³/h through MedBay" figure was the July-era 44-path fixture `.sim`
+> read through the September 69-path `path_map.json`; re-solving the July
+> `.prj` reproduces the fixture exactly — no shunt. The real authoring
+> defects: uniform `ach·ΣV/n` terminal Fahs (ignoring per-room `V·duty`)
+> plus the hobbyist duty schedule re-multiplying an already duty-weighted
+> field. §1's retained-mass divergence and §3's HD-sink finding stand.
+> The commissioned construction §7 prescribes is implemented as
+> `ahs_terminal_mode="commissioned"` with measured solve-back inside
+> 0.2% of declared on destroyer + expedition — see §9.
 
 The repository carries two transport engines over the *same* mass-balance
 propagator (`engines/py_contam_bridge.py` exact linear operator):
@@ -16,7 +32,9 @@ propagator (`engines/py_contam_bridge.py` exact linear operator):
 
 Only the **airflow field** differs; the deposition/removal machinery is
 identical, so "deposition divergence" is purely which paths carry how much
-air. ContamX is a Windows binary and cannot run on Linux CI; this document
+air. ~~ContamX is a Windows binary and cannot run on Linux CI~~ — the
+NIST ContamX 3.4.0.3 Linux-64 build now sits in (gitignored)
+`third_party/contamx/`, so real solves run on this box; this document
 collects what is measurable in-repo and what it implies.
 
 ## 1. Destroyer ground truth (real `.sim` fixture)
@@ -34,24 +52,29 @@ engines, identical 1e6-unit injection into Bridge, η = 0.5, decay = 0,
 Native removes airborne mass ~**2.3× faster** — the remembered "2×" is
 still present, direction native-high, and now attributable.
 
-## 2. What creates it — the AHS shunt
+## 2. What creates it — AHS terminal authoring (corrected 2026-10-16)
 
 The `.prj` terminal legs of each AHS are **element-free paths** (`e# = 0`)
-carrying only a `Fahs` *design annotation* equal to the declared per-room
-supply (e.g. expedition cabins: 1.2041 kg/s ≈ 1800 m³/h ≈ ach 6 · 600 m³ ·
-0.5 duty — the same formula the native star uses; the PRJ was authored from
-the same sourced ACH values). `Fahs` is design intent, **not** an enforced
-flow: with no terminal flow element and no balancing resistance in the
-branch, ContamX's pressure solve redistributes it.
+carrying a `Fahs` value equal to a per-room supply share. The original
+account claimed `Fahs` is a non-enforced design annotation and that
+ContamX's pressure solve "shunted 878 m³/h through MedBay alone" — **both
+claims are falsified** (see the header correction): flagged simple-AHS
+terminals enforce `Fahs × schedule`, and the 878 figure was a stale
+`path_map.json` readout of the 44-path fixture `.sim`.
 
-In the destroyer SIM, `ahs2` runs **878 m³/h through MedBay alone** while
-its sibling terminals (Mess_Hall −2.0, Galley −9.5) carry ≈ 0 — the solve
-shunts nearly the whole branch flow through one room. Declared `Fahs`
-(600/room) does not predict this; an analytic `plr_orfc` surrogate fails
-validation (300 vs 878). The redistribution is **solver-decided** and not
-knowable without a real ContamX run.
+The real authoring defects the commissioned mode fixes:
 
-Consequence: a room the solver starves keeps only its adjacency floor.
+- **Uniform split.** Terminal `Fahs` was `ach·ΣV_rooms / n_rooms` —
+  ignoring the per-room `V·duty` weighting the declared field uses. On
+  destroyer ahs2 that wrote 300/300/300 m³/h for
+  MedBay/Mess_Hall/Galley vs declared 180/480/240: the branch total is
+  right, the distribution wrong — a room-level misallocation, not a
+  solver artefact.
+- **Schedule double-count.** Hobbyist mode pins terminals to the `DutyW`
+  week schedule (×0.5), halving the already duty-weighted declared field.
+
+Consequence (still true, revised attribution): a room whose terminal is
+*under-authored* — not solver-starved — drops toward its adjacency floor.
 Measured floors vs native outflow rates:
 
 | Platform | adjacency-only floor | native `k` | implied dwell factor |
@@ -162,13 +185,17 @@ simultaneous-fit constraint is what dies, not just the region's position.
   ±50% vs native's flat 8–15 m³/h — same order, modest).
 - Transient/pressure-driven flows native cannot do at all.
 
-The defensible hybrid: **hold AHS terminals at design flow** (constant-flow
-terminal elements or balanced branch resistances in the `.prj`) and let
+The defensible hybrid: **hold AHS terminals at design flow** and let
 ContamX solve only the leakage/exhaust network — ContamX corrects what
 native declares flatly rather than re-solving what native already gets
 from sourced values. Under that construction the divergence collapses to
 the HD-vent fix plus adjacency corrections — small, roughly scalar, and the
 permissible-region endorsement plausibly survives.
+
+**Implemented 2026-10-16** as `ahs_terminal_mode="commissioned"` — the
+`Fahs` on a flagged simple-AHS terminal *is* ContamX's constant-flow
+terminal (no bespoke fan model needed). Measured proof and the harness:
+§9 and `tools/contam_commissioned_check.py`.
 
 ## 8. Open measurements
 
@@ -177,8 +204,21 @@ permissible-region endorsement plausibly survives.
   S3 — see ledger entry for the scan evidence. Even if recovered they
   quantify the *unbalanced* solve, not the commissioned field — they bound
   the artefact, not the truth.
-- Which room each AHS shunts to is solver-decided; the bracket spans
-  smallest/largest corners. A real ContamX run (Windows) or a
-  flow-controlled-terminal `.prj` would collapse the bracket.
+- ~~Which room each AHS shunts to is solver-decided~~ — falsified:
+  terminals enforce `Fahs × sched`; the bracket readout was a stale-map
+  artefact. The commissioned `.prj` emission mode exists (§9).
 - The decisive physical measurement is whether a real ship's TAB holds
   design flow — i.e., real-ship airflow sampling.
+
+## 9. Hull → solver commissioning (2026-10-16, CONTAM-COMMISSION-01)
+
+`ahs_terminal_mode="commissioned"` writes each terminal's `Fahs` as the
+per-room declared `ach · V_room · duty` on a constant schedule
+(exhaust-only `hvac_duty ≤ 0` branches: supply 0, return `ach · V`),
+recording `declared_flow_m3h` per terminal in `path_map`.
+`tools/contam_commissioned_check.py` exports, solves with ContamX 3.4.0.3
+and compares per terminal. Measured on both reference hulls — every
+terminal inside 0.2% of declared (residual is the `.sim` mean-density
+conversion): destroyer 18 legs at ratio 1.002; expedition 92 legs at
+1.001; all `HD_*` supplies exactly 0 with returns at the declared exhaust
+rate. Non-FATAL on both.

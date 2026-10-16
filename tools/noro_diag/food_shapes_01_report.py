@@ -311,39 +311,45 @@ def _ar_table(cells: dict) -> list[str]:
     return lines
 
 
+def _ind_excursion_conv(cells: dict) -> float:
+    ind_exc = [_excursion(r) for r in cells.get("ind", [])]
+    ind_post_exc = sum(
+        1 for r in cells.get("ind", [])
+        if _excursion(r) and r["posted"]
+    )
+    return (
+        ind_post_exc / sum(1 for b in ind_exc if b) if any(ind_exc) else 0
+    )
+
+
+def _conversion_arm_line(arm: str, rows: list[dict], ind_conv: float) -> str:
+    exc = [r for r in rows if _excursion(r)]
+    exc_post = sum(1 for r in exc if r["posted"])
+    conv = 100.0 * exc_post / len(exc) if exc else 0.0
+    obj_rows = [r for r in _ok(rows) if _cen(r).get("n_objects", 0)]
+    obj_post = sum(1 for r in obj_rows if r["posted"])
+    conv_o = 100.0 * obj_post / len(obj_rows) if obj_rows else 0.0
+    ratio = f"{(conv / (ind_conv * 100)):.2f}x" if ind_conv else "-"
+    return (
+        f"| {arm} | {len(exc)} | {exc_post} | {conv:.2f}"
+        f" | {ratio} | {len(obj_rows)} | {obj_post} | {conv_o:.2f} |"
+    )
+
+
 def _conversion_table(cells: dict) -> list[str]:
     lines = [
         "| arm | exc voy (cs_food>0) | posted | conv % | vs ind"
         " | obj voy | posted | conv % |",
         _SEP8,
     ]
-    ind_exc = [_excursion(r) for r in cells.get("ind", [])]
-    ind_post_exc = sum(
-        1 for r in cells.get("ind", [])
-        if _excursion(r) and r["posted"]
-    )
-    ind_conv = (
-        ind_post_exc / sum(1 for b in ind_exc if b) if any(ind_exc) else 0
-    )
+    ind_conv = _ind_excursion_conv(cells)
     for arm in _ARM_ORDER:
         if arm == "off":
             continue
         rows = cells.get(arm, [])
         if not rows:
             continue
-        exc = [r for r in rows if _excursion(r)]
-        exc_post = sum(1 for r in exc if r["posted"])
-        conv = 100.0 * exc_post / len(exc) if exc else 0.0
-        obj_rows = [r for r in _ok(rows) if _cen(r).get("n_objects", 0)]
-        obj_post = sum(1 for r in obj_rows if r["posted"])
-        conv_o = 100.0 * obj_post / len(obj_rows) if obj_rows else 0.0
-        ratio = (
-            f"{(conv / (ind_conv * 100)):.2f}x" if ind_conv else "-"
-        )
-        lines.append(
-            f"| {arm} | {len(exc)} | {exc_post} | {conv:.2f}"
-            f" | {ratio} | {len(obj_rows)} | {obj_post} | {conv_o:.2f} |"
-        )
+        lines.append(_conversion_arm_line(arm, rows, ind_conv))
     return lines
 
 
@@ -378,6 +384,25 @@ def _burst_table(cells: dict) -> list[str]:
     return lines
 
 
+def _mint_census_arm_line(arm: str, cen: list[dict]) -> str:
+    lot_cells = sum(1 for r in cen if _cen(r).get("lot_obj_voyage"))
+    objs = [o for r in cen for o in _cen(r).get("lot_objects", [])]
+    draws = [o["titre"] for o in objs if o.get("titre") is not None]
+    pan_n = sum((_cen(r).get("lot_pans") or {}).get("n", 0) for r in cen)
+    pan_oob = sum((_cen(r).get("lot_pans") or {}).get("oob", 0) for r in cen)
+    win = sum(int(o.get("w") or 0) for o in objs)
+    pans = sum(int(o.get("pans") or 0) for o in objs)
+    lo, hi = _IMPLICATED_BAND
+    inband = sum(1 for t in draws if lo <= float(t) <= hi)
+    rng = f"{min(draws):.1f}-{max(draws):.1f}" if draws else "-"
+    return (
+        f"| {arm} | {len(cen)} | {lot_cells} | {_pct(lot_cells, len(cen))}"
+        f" | {len(objs)} | {win} | {pans}"
+        f" | {len(draws)} obj / {pan_n} pan | {inband}/{len(draws)} obj,"
+        f" {pan_n - pan_oob}/{pan_n} pan | {rng} |"
+    )
+
+
 def _mint_census(cells: dict) -> list[str]:
     lines = [
         "| arm | cells | lot-obj cells | frac | lot objects"
@@ -388,32 +413,7 @@ def _mint_census(cells: dict) -> list[str]:
         cen = _ok(cells.get(arm, []))
         if not cen:
             continue
-        lot_cells = sum(
-            1 for r in cen if _cen(r).get("lot_obj_voyage")
-        )
-        objs = [
-            o for r in cen for o in _cen(r).get("lot_objects", [])
-        ]
-        draws = [o["titre"] for o in objs if o.get("titre") is not None]
-        pan_n = sum(
-            (_cen(r).get("lot_pans") or {}).get("n", 0) for r in cen
-        )
-        pan_oob = sum(
-            (_cen(r).get("lot_pans") or {}).get("oob", 0) for r in cen
-        )
-        win = sum(int(o.get("w") or 0) for o in objs)
-        pans = sum(int(o.get("pans") or 0) for o in objs)
-        lo, hi = _IMPLICATED_BAND
-        inband = sum(1 for t in draws if lo <= float(t) <= hi)
-        rng = (
-            f"{min(draws):.1f}-{max(draws):.1f}" if draws else "-"
-        )
-        lines.append(
-            f"| {arm} | {len(cen)} | {lot_cells} | {_pct(lot_cells, len(cen))}"
-            f" | {len(objs)} | {win} | {pans}"
-            f" | {len(draws)} obj / {pan_n} pan | {inband}/{len(draws)} obj,"
-            f" {pan_n - pan_oob}/{pan_n} pan | {rng} |"
-        )
+        lines.append(_mint_census_arm_line(arm, cen))
     return lines
 
 
@@ -598,6 +598,21 @@ def _route_drift_line(cells: dict, off: list[dict]) -> str:
     )
 
 
+def _ship_bg_pair_identical(r: dict, o: dict, diffs: Counter) -> bool:
+    same = True
+    for f in _SHIP_BG_FIELDS:
+        if _cen(r).get(f) != _cen(o).get(f):
+            same = False
+            diffs[f] += 1
+    if (_cen(r).get("obj_arms") or {}) != (_cen(o).get("obj_arms") or {}):
+        same = False
+        diffs["obj_arms"] += 1
+    if (_cen(r).get("end_reasons") or {}) != (_cen(o).get("end_reasons") or {}):
+        same = False
+        diffs["end_reasons"] += 1
+    return same
+
+
 def _ship_bg_identity_line(cells: dict) -> str:
     # ship vs bg non-titre-realized field identity (paired seeds)
     bg_by_seed = {r["seed"]: r for r in _ok(cells.get("bg", []))}
@@ -608,24 +623,32 @@ def _ship_bg_identity_line(cells: dict) -> str:
         if o is None:
             continue
         n_pair += 1
-        same = True
-        for f in _SHIP_BG_FIELDS:
-            if _cen(r).get(f) != _cen(o).get(f):
-                same = False
-                diffs[f] += 1
-        if (_cen(r).get("obj_arms") or {}) != (_cen(o).get("obj_arms") or {}):
-            same = False
-            diffs["obj_arms"] += 1
-        if (_cen(r).get("end_reasons") or {}) != (_cen(o).get("end_reasons") or {}):
-            same = False
-            diffs["end_reasons"] += 1
-        if same:
+        if _ship_bg_pair_identical(r, o, diffs):
             n_id += 1
     return (
         f"- `ship` vs `bg` witness identity (paired seeds): {n_id}/{n_pair}"
         f" identical on object/event counts, takers, pans, windows,"
         f" acquisition counts, obj_arms, end_reasons"
         + (f"; diffs {dict(diffs)}" if diffs else "")
+    )
+
+
+def _margin_pair_line(
+    a: str, b: str, ra: dict, rb: dict, both: list[int],
+) -> str:
+    ka = sum(1 for s in both if ra[s]["posted"])
+    kb = sum(1 for s in both if rb[s]["posted"])
+    gained = sum(1 for s in both if ra[s]["posted"] and not rb[s]["posted"])
+    lost = sum(1 for s in both if rb[s]["posted"] and not ra[s]["posted"])
+    exca = [s for s in both if _excursion(ra[s])]
+    excb = [s for s in both if _excursion(rb[s])]
+    conv_a = 100.0 * sum(ra[s]["posted"] for s in exca) / len(exca) if exca else 0
+    conv_b = 100.0 * sum(rb[s]["posted"] for s in excb) / len(excb) if excb else 0
+    return (
+        f"| {a} − {b} | {len(both)} | {ka} | {kb}"
+        f" | +{gained}/-{lost} | {100.0 * (ka - kb) / len(both):+.2f}"
+        f" | {conv_a:.2f}% (n={len(exca)})"
+        f" | {conv_b:.2f}% (n={len(excb)}) |"
     )
 
 
@@ -641,24 +664,7 @@ def _margins_table(cells: dict) -> list[str]:
         both = sorted(set(ra) & set(rb))
         if not both:
             continue
-        ka = sum(1 for s in both if ra[s]["posted"])
-        kb = sum(1 for s in both if rb[s]["posted"])
-        gained = sum(
-            1 for s in both if ra[s]["posted"] and not rb[s]["posted"]
-        )
-        lost = sum(
-            1 for s in both if rb[s]["posted"] and not ra[s]["posted"]
-        )
-        exca = [s for s in both if _excursion(ra[s])]
-        excb = [s for s in both if _excursion(rb[s])]
-        conv_a = 100.0 * sum(ra[s]["posted"] for s in exca) / len(exca) if exca else 0
-        conv_b = 100.0 * sum(rb[s]["posted"] for s in excb) / len(excb) if excb else 0
-        lines.append(
-            f"| {a} − {b} | {len(both)} | {ka} | {kb}"
-            f" | +{gained}/-{lost} | {100.0 * (ka - kb) / len(both):+.2f}"
-            f" | {conv_a:.2f}% (n={len(exca)})"
-            f" | {conv_b:.2f}% (n={len(excb)}) |"
-        )
+        lines.append(_margin_pair_line(a, b, ra, rb, both))
     return lines
 
 
@@ -901,6 +907,21 @@ def _echo_table(cells: dict) -> list[str]:
     return lines
 
 
+def _load_dose_acqs_by_arm(paths: list[str]) -> dict[str, list[dict]]:
+    by_arm: dict[str, list[dict]] = defaultdict(list)
+    for path in paths:
+        with open(path, encoding="utf-8") as fh:  # NOSONAR -- operator-specified row files in a local diagnostic tool
+            for line in fh:
+                r = json.loads(line)
+                if r.get("error"):
+                    continue
+                for a in r.get("acq") or []:
+                    row = dict(a)
+                    row["posted"] = r.get("posted")
+                    by_arm[r.get("arm") or "?"].append(row)
+    return by_arm
+
+
 def _dose_position_table(paths: list[str] | None) -> list[str]:
     """Per-arm Hill position of delivered doses (entrain_01_dose_audit
     rows): median cumulative dose, Hill p distribution, realized-
@@ -912,17 +933,7 @@ def _dose_position_table(paths: list[str] | None) -> list[str]:
     ]
     if not paths:
         return lines
-    by_arm: dict[str, list[dict]] = defaultdict(list)
-    for path in paths:
-        with open(path, encoding="utf-8") as fh:  # NOSONAR -- operator-specified row files in a local diagnostic tool
-            for line in fh:
-                r = json.loads(line)
-                if r.get("error"):
-                    continue
-                for a in r.get("acq") or []:
-                    a = dict(a)
-                    a["posted"] = r.get("posted")
-                    by_arm[r.get("arm") or "?"].append(a)
+    by_arm = _load_dose_acqs_by_arm(paths)
     for arm in _ARM_ORDER:
         acqs = by_arm.get(arm, [])
         for posted in (False, True):

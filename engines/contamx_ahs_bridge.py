@@ -111,20 +111,26 @@ def _ahs_group_star_paths(
 
     sum_r = sum(returns.values())
     sum_s = sum(supplies.values())
-    if sum_r < _FLOW_EPS or sum_s < _FLOW_EPS:
+    if sum_r < _FLOW_EPS and sum_s < _FLOW_EPS:
         return []
+
+    plenum_id = ahs_plenum_id(ahs_nr)
+    # Exhaust-only groups (commissioned-mode head-deck AHUs: supply 0,
+    # return ach·V) still emit room → plenum legs — the room drains
+    # overboard even though no recirculating supply exists.
+    paths = _ahs_return_paths(ahs_nr, plenum_id, returns)
+    if sum_s < _FLOW_EPS:
+        return paths
     if recirc < _FLOW_EPS:
         # ContamX often reports Rec/OA/exhaust Flow0 as 0 for simple AHS
         # while terminals carry the scheduled duty flow. Recover PRJ
         # recirculation: Rec = (1 − oa) · min(ΣR, ΣS).
         oa = min(max(float(oa_fraction), 0.0), 1.0)
         recirc = (1.0 - oa) * min(sum_r, sum_s)
-    if recirc < _FLOW_EPS:
-        return []
-
-    plenum_id = ahs_plenum_id(ahs_nr)
-    paths = _ahs_return_paths(ahs_nr, plenum_id, returns)
-    paths.extend(_ahs_supply_paths(ahs_nr, plenum_id, supplies, recirc, sum_s))
+    if recirc >= _FLOW_EPS:
+        paths.extend(
+            _ahs_supply_paths(ahs_nr, plenum_id, supplies, recirc, sum_s)
+        )
     return paths
 
 

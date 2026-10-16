@@ -131,14 +131,96 @@ def _med_iqr(values: list[float]) -> str:
     return f"{med:.3f} [{q1:.3f}, {q3:.3f}]"
 
 
+_RUNG_NAMES = (
+    "infected", "symptomatic_course", "symptomatic_onboard",
+    "syndrome_eligible", "eligible_onboard", "reported_infirmary",
+    "lab_sampled", "lab_confirmed", "onset_dated",
+)
+_RATIO_KEYS = (
+    "symptomatic_per_infected", "eligible_per_symptomatic",
+    "reported_per_eligible",
+)
+
+
+def _accumulate_pooled_rungs(
+    d: dict, pooled: dict, rung_names: tuple[str, ...],
+) -> None:
+    for r in rung_names:
+        rec = _rung(d, r)
+        for k in ("total", "passenger", "crew"):
+            pooled[r][k] += int(rec.get(k) or 0)
+
+
+def _accumulate_per_seed_ratios(d: dict, per_seed: defaultdict) -> None:
+    ratios = d.get("ratios") or {}
+    for key in _RATIO_KEYS:
+        v = ratios.get(key)
+        if v is not None:
+            per_seed[key].append(float(v))
+
+
+def _accumulate_cg_engine(engine: dict, cg: defaultdict) -> float:
+    cg["responses"] += float(engine.get("caregiver_responses") or 0)
+    cg["steward_responses"] += float(engine.get("steward_responses") or 0)
+    cg["reports"] += float(engine.get("caregiver_reports") or 0)
+    cg["dose_credited"] += float(engine.get("caregiver_dose_credited") or 0)
+    return float(engine.get("caregiver_responses") or 0) + float(
+        engine.get("steward_responses") or 0,
+    )
+
+
+def _accumulate_caregiver_block(d: dict, cg: defaultdict) -> bool:
+    block = d.get("caregiver") or {}
+    if not block:
+        return False
+    engine = block.get("engine_counters") or {}
+    responses = _accumulate_cg_engine(engine, cg)
+    via = (_rung(d, "reported_infirmary").get("via_caregiver") or {})
+    cg["reported_via"] += int(via.get("total") or 0)
+    cg["dominant_tx"] += int(block.get("transmissions_dominant_caregiver") or 0)
+    cg["any_dose_tx"] += int(block.get("transmissions_any_caregiver_dose") or 0)
+    cg["attributed_tx"] += int(block.get("transmissions_attributed") or 0)
+    cg["stamped"] += int(block.get("stamped_hosts") or 0)
+    cg["stamped_not_reported"] += int(block.get("stamped_not_reported") or 0)
+    cg["nonemetic"] += len(block.get("reports_on_nonemetic_course") or [])
+    if block.get("vomiting_course_hosts") and not responses:
+        cg["zero_response_voyages"] += 1
+    return True
+
+
+def _caregiver_agg_block(cg: defaultdict, cg_voyages: int, rep: int) -> dict:
+    return {
+        "voyages_with_block": cg_voyages,
+        **{k: (int(v) if v == int(v) else v) for k, v in cg.items()},
+        "share_of_reported": (
+            cg["reported_via"] / rep if rep else None
+        ),
+        "share_of_transmissions": (
+            cg["dominant_tx"] / cg["attributed_tx"]
+            if cg["attributed_tx"] else None
+        ),
+    }
+
+
+def _pooled_ratio_fields(pooled: dict) -> dict:
+    inf = pooled["infected"]["total"]
+    sym = pooled["symptomatic_course"]["total"]
+    eli = pooled["syndrome_eligible"]["total"]
+    rep = pooled["reported_infirmary"]["total"]
+    conf = pooled["lab_confirmed"]["total"]
+    dated = pooled["onset_dated"]["total"]
+    return {
+        "symptomatic_per_infected": sym / inf if inf else None,
+        "eligible_per_symptomatic": eli / sym if sym else None,
+        "reported_per_eligible": rep / eli if eli else None,
+        "confirmed_per_reported": conf / rep if rep else None,
+        "dated_per_confirmed": dated / conf if conf else None,
+    }
+
+
 def _agg_cell(dumps: list[dict], takeoff_only: bool) -> dict:
     sel = [d for d in dumps if not takeoff_only or d.get("took_off")]
-    rung_names = [
-        "infected", "symptomatic_course", "symptomatic_onboard",
-        "syndrome_eligible", "eligible_onboard", "reported_infirmary",
-        "lab_sampled", "lab_confirmed", "onset_dated",
-    ]
-    pooled = {r: {"total": 0, "passenger": 0, "crew": 0} for r in rung_names}
+    pooled = {r: {"total": 0, "passenger": 0, "crew": 0} for r in _RUNG_NAMES}
     per_seed = defaultdict(list)
     nonrep = defaultdict(int)
     hazard_epochs = 0
@@ -147,72 +229,22 @@ def _agg_cell(dumps: list[dict], takeoff_only: bool) -> dict:
     cg_voyages = 0
     for d in sel:
         seeds.append(int(d["seed"]))
-        for r in rung_names:
-            rec = _rung(d, r)
-            for k in ("total", "passenger", "crew"):
-                pooled[r][k] += int(rec.get(k) or 0)
-        ratios = d.get("ratios") or {}
-        for key in ("symptomatic_per_infected", "eligible_per_symptomatic",
-                    "reported_per_eligible"):
-            v = ratios.get(key)
-            if v is not None:
-                per_seed[key].append(float(v))
+        _accumulate_pooled_rungs(d, pooled, _RUNG_NAMES)
+        _accumulate_per_seed_ratios(d, per_seed)
         for k, v in (d.get("non_report_decomposition") or {}).items():
             nonrep[k] += int(v)
         if (d.get("channel_totals") or {}).get("beliefs_nonempty_epochs"):
             hazard_epochs += 1
-        block = d.get("caregiver") or {}
-        if not block:
-            continue
-        cg_voyages += 1
-        engine = block.get("engine_counters") or {}
-        cg["responses"] += float(engine.get("caregiver_responses") or 0)
-        cg["steward_responses"] += float(engine.get("steward_responses") or 0)
-        cg["reports"] += float(engine.get("caregiver_reports") or 0)
-        cg["dose_credited"] += float(engine.get("caregiver_dose_credited") or 0)
-        via = (_rung(d, "reported_infirmary").get("via_caregiver") or {})
-        cg["reported_via"] += int(via.get("total") or 0)
-        cg["dominant_tx"] += int(block.get("transmissions_dominant_caregiver") or 0)
-        cg["any_dose_tx"] += int(block.get("transmissions_any_caregiver_dose") or 0)
-        cg["attributed_tx"] += int(block.get("transmissions_attributed") or 0)
-        cg["stamped"] += int(block.get("stamped_hosts") or 0)
-        cg["stamped_not_reported"] += int(block.get("stamped_not_reported") or 0)
-        cg["nonemetic"] += len(block.get("reports_on_nonemetic_course") or [])
-        responses = (
-            float(engine.get("caregiver_responses") or 0)
-            + float(engine.get("steward_responses") or 0)
-        )
-        if block.get("vomiting_course_hosts") and not responses:
-            cg["zero_response_voyages"] += 1
-    inf = pooled["infected"]["total"]
-    sym = pooled["symptomatic_course"]["total"]
-    eli = pooled["syndrome_eligible"]["total"]
+        if _accumulate_caregiver_block(d, cg):
+            cg_voyages += 1
     rep = pooled["reported_infirmary"]["total"]
-    conf = pooled["lab_confirmed"]["total"]
-    dated = pooled["onset_dated"]["total"]
     return {
         "seeds": sorted(seeds),
         "n": len(sel),
         "takeoff": sum(1 for d in sel if d.get("took_off")),
         "pooled": pooled,
-        "caregiver": {
-            "voyages_with_block": cg_voyages,
-            **{k: (int(v) if v == int(v) else v) for k, v in cg.items()},
-            "share_of_reported": (
-                cg["reported_via"] / rep if rep else None
-            ),
-            "share_of_transmissions": (
-                cg["dominant_tx"] / cg["attributed_tx"]
-                if cg["attributed_tx"] else None
-            ),
-        },
-        "ratios": {
-            "symptomatic_per_infected": sym / inf if inf else None,
-            "eligible_per_symptomatic": eli / sym if sym else None,
-            "reported_per_eligible": rep / eli if eli else None,
-            "confirmed_per_reported": conf / rep if rep else None,
-            "dated_per_confirmed": dated / conf if conf else None,
-        },
+        "caregiver": _caregiver_agg_block(cg, cg_voyages, rep),
+        "ratios": _pooled_ratio_fields(pooled),
         "per_seed_median_iqr": {k: _med_iqr(v) for k, v in per_seed.items()},
         "non_report_decomposition": dict(nonrep),
         "hazard_exposure_seeds": hazard_epochs,

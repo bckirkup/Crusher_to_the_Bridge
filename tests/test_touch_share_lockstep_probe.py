@@ -18,7 +18,10 @@ from picard_framework.run_spec import PicardRunSpec
 from picard_framework.simulation.ship_simulation import ShipSimulation
 from simulation_utils.paths import validated_open
 from tools.noro_diag import touch_share_lockstep_probe as probe
-from tools.noro_diag.per_host_dose_challenge import build_spec
+from tools.noro_diag.per_host_dose_challenge import (
+    TransmissionSweepKnobs,
+    build_spec,
+)
 
 EPOCHS = 6
 NUM_AGENTS = 60
@@ -29,9 +32,11 @@ def _spec_dict(seed: int, fomite_representation: str | None = None) -> dict:
         seed=seed, platform="classic_cruise_1900",
         bundle="active_profiles", epochs=EPOCHS, num_agents=NUM_AGENTS,
         pathogen_id="norwalk_gi", alpha=None, beta=1.0,
-        fomite_representation=fomite_representation,
-        fomite_touch_share=(
-            "areal" if fomite_representation == "per_surface" else None
+        sweep=TransmissionSweepKnobs(
+            fomite_representation=fomite_representation,
+            fomite_touch_share=(
+                "areal" if fomite_representation == "per_surface" else None
+            ),
         ),
     )
 

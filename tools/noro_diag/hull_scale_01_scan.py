@@ -117,19 +117,13 @@ def _object_rows_all(objects: list[dict],
     return rows
 
 
-def _fetch(client, bucket: str, key: str) -> dict:
-    row: dict = {"key": key}
-    blob = _s3_member_blob(client, bucket, key, _SUMMARY_MEMBER)
-    if blob is None:
-        row["error"] = "no_summary"
-        return row
-    summary = json.loads(blob)
+def _summary_scan_fields(summary: dict, key: str) -> dict:
     base = _row_from_summary(summary, key.rsplit("/", 1)[-1])
     anchor = base["anchor_row"]
     body = summary.get("summary", {})
     mech = summary.get("mechanisms", {})
     routes = body.get("infections_by_dominant_route") or {}
-    row.update({
+    return {
         "seed": base["seed"],
         "hull": anchor["hull"],
         "num_epochs": int(summary.get("parameters", {}).get("num_epochs") or 0),
@@ -154,28 +148,15 @@ def _fetch(client, bucket: str, key: str) -> dict:
         "cs_food_inf": int(routes.get("common_source_food", 0) or 0),
         "cs_events_summary": int(mech.get("common_source_events", 0) or 0),
         "cs_takers_summary": int(mech.get("common_source_takers", 0) or 0),
-    })
-    blob = _s3_member_blob(client, bucket, key, _CENSUS_MEMBER)
-    if blob is None:
-        row["census_error"] = "no_census"
-        return row
-    tail, saw_cs, _saw_em, _n_emit = _tail_decompress(blob)
-    cs_fields = _tail_fields(tail)
-    if saw_cs and "common_source" not in cs_fields:
-        cs_fields = _tail_fields(gzip.decompress(blob))
-    _tel, events, _exposures, objects = _cs_fields(cs_fields)
-    objs = _object_rows_all(objects, events)
-    lot = [o for o in objs if o["arm"] == "provisioned_lot"]
+    }
+
+
+def _event_chain_stats(events: list[dict]) -> dict:
     v1 = [e for e in events if e.get("object_id") is None]
     all_diners: set = set()
     for e in events:
         all_diners.update(e.get("taker_ids") or ())
-    row.update({
-        "minted": bool(lot),
-        "n_objects": len(objects),
-        "lot_objects": lot,
-        "obj_arms": {a: sum(1 for o in objs if o["arm"] == a)
-                     for a in ("provisioned_lot", "ill_handler", "ill_diner")},
+    return {
         "n_events": len(events),
         "n_v1_events": len(v1),
         "ev_takers_sum": sum(int(e.get("servings_taken", 0) or 0)
@@ -187,9 +168,41 @@ def _fetch(client, bucket: str, key: str) -> dict:
         "distinct_diners": len(all_diners),
         "v1_diners": len({t for e in v1
                           for t in (e.get("taker_ids") or ())}),
+    }
+
+
+def _census_chain_fields(blob: bytes) -> dict:
+    tail, saw_cs, _saw_em, _n_emit = _tail_decompress(blob)
+    cs_fields = _tail_fields(tail)
+    if saw_cs and "common_source" not in cs_fields:
+        cs_fields = _tail_fields(gzip.decompress(blob))
+    _tel, events, _exposures, objects = _cs_fields(cs_fields)
+    objs = _object_rows_all(objects, events)
+    lot = [o for o in objs if o["arm"] == "provisioned_lot"]
+    return {
+        "minted": bool(lot),
+        "n_objects": len(objects),
+        "lot_objects": lot,
+        "obj_arms": {a: sum(1 for o in objs if o["arm"] == a)
+                     for a in ("provisioned_lot", "ill_handler", "ill_diner")},
+        **_event_chain_stats(events),
         "lot_diners": sum(o["diners"] for o in lot),
         "census_error": None,
-    })
+    }
+
+
+def _fetch(client, bucket: str, key: str) -> dict:
+    row: dict = {"key": key}
+    blob = _s3_member_blob(client, bucket, key, _SUMMARY_MEMBER)
+    if blob is None:
+        row["error"] = "no_summary"
+        return row
+    row.update(_summary_scan_fields(json.loads(blob), key))
+    blob = _s3_member_blob(client, bucket, key, _CENSUS_MEMBER)
+    if blob is None:
+        row["census_error"] = "no_census"
+        return row
+    row.update(_census_chain_fields(blob))
     return row
 
 

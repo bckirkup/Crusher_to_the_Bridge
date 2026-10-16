@@ -479,6 +479,48 @@ def sync_vsp_isolation(
 
 # ── FRED compliance ──────────────────────────────────────────────────────
 
+def _fred_admit_delayed_compliance(
+    epoch: int,
+    aid: int,
+    epochs_since: int,
+    state: SimulationState,
+    syndromic: Any,
+) -> None:
+    state.quarantine_refusers.discard(aid)
+    cls = getattr(syndromic, "_compliance_class", {}).get(aid)
+    if cls is not None:
+        state.compliance_class_by_agent[aid] = cls
+    state.compliance_log.append({
+        "epoch": epoch, "agent_id": aid,
+        "action": "delayed_compliance",
+        "delay": epochs_since,
+        "compliance_class": cls,
+    })
+    escort_delay = _escort_delay_epochs(syndromic)
+    if escort_delay > 0:
+        state.escort_pending[aid] = epoch + escort_delay
+    else:
+        state.quarantined_ids.add(aid)
+
+
+def _fred_maybe_enforce_defiant(
+    epoch: int,
+    aid: int,
+    epochs_since: int,
+    state: SimulationState,
+    syndromic: Any,
+) -> None:
+    cls = getattr(syndromic, "_compliance_class", {}).get(aid)
+    if (
+        cls == "defiant"
+        and epochs_since >= _defiant_escalation_epochs(syndromic)
+    ):
+        # DEFIANT-ESC-01: authority compels confinement after the
+        # declared hold-out window — a permanently-free refuser is
+        # untenable aboard a closed hull.
+        _admit_enforced(epoch, aid, state, syndromic)
+
+
 def step_fred_compliance(
     epoch: int,
     state: SimulationState,
@@ -501,31 +543,13 @@ def step_fred_compliance(
             agent_class=agent.get("agent_class"),
             is_symptomatic=agent_requires_confinement(agent) if agent else False,
         ):
-            state.quarantine_refusers.discard(aid)
-            cls = getattr(syndromic, "_compliance_class", {}).get(aid)
-            if cls is not None:
-                state.compliance_class_by_agent[aid] = cls
-            state.compliance_log.append({
-                "epoch": epoch, "agent_id": aid,
-                "action": "delayed_compliance",
-                "delay": epochs_since,
-                "compliance_class": cls,
-            })
-            escort_delay = _escort_delay_epochs(syndromic)
-            if escort_delay > 0:
-                state.escort_pending[aid] = epoch + escort_delay
-            else:
-                state.quarantined_ids.add(aid)
+            _fred_admit_delayed_compliance(
+                epoch, aid, epochs_since, state, syndromic,
+            )
             continue
-        cls = getattr(syndromic, "_compliance_class", {}).get(aid)
-        if (
-            cls == "defiant"
-            and epochs_since >= _defiant_escalation_epochs(syndromic)
-        ):
-            # DEFIANT-ESC-01: authority compels confinement after the
-            # declared hold-out window — a permanently-free refuser is
-            # untenable aboard a closed hull.
-            _admit_enforced(epoch, aid, state, syndromic)
+        _fred_maybe_enforce_defiant(
+            epoch, aid, epochs_since, state, syndromic,
+        )
 
 
 # ── Mid-cruise pathogen introductions ────────────────────────────────────

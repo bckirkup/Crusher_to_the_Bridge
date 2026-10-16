@@ -3391,19 +3391,19 @@ class KorkinShipEngine:
             for anch in pool_anchors:
                 cabin = [anch]
                 orig_ids = set(anch.cabin_mate_ids)
-                for f in list(pool_free):
+                for f in pool_free:
                     if len(cabin) >= cabin_size:
                         break
                     if int(f.agent_id) in orig_ids:
                         cabin.append(f)
                         pool_free.remove(f)
-                for f in list(pool_free):
+                for f in pool_free:
                     if len(cabin) >= cabin_size:
                         break
                     if int(f.agent_id) > int(anch.agent_id):
                         cabin.append(f)
                         pool_free.remove(f)
-                for f in list(pool_free):
+                for f in pool_free:
                     if len(cabin) >= cabin_size:
                         break
                     cabin.append(f)

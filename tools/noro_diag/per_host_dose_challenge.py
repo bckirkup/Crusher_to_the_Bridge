@@ -1490,15 +1490,34 @@ def instrumented(rec: Recorder, top_ids: set[int]) -> Any:
         yield
 
 
+@dataclass(frozen=True)
+class TransmissionSweepKnobs:
+    """Optional ``config_overrides.transmission`` keys for diagnostic arms."""
+
+    high_touch_area_scale: float | None = None
+    high_touch_area_scale_by_zone_class: dict[str, Any] | None = None
+    fomite_representation: str | None = None
+    fomite_touch_share: str | None = None
+    fomite_touch_share_table: dict[str, Any] | None = None
+    cabin_confined_fomite: str | None = None
+    fomite_touch_share_table_path: str | None = None
+
+
+@dataclass(frozen=True)
+class RunSeedOptions:
+    """Per-voyage knobs for :func:`run_seed` beyond the core run identity."""
+
+    alpha_override: float | None = None
+    sweep: TransmissionSweepKnobs | None = None
+    arm_tag: str | None = None
+    spec_dict: dict[str, Any] | None = None
+    natural_history_clock: str | None = None
+
+
 def build_spec(
     *, seed: int, platform: str, bundle: str, epochs: int, num_agents: int,
     pathogen_id: str, alpha: float | None, beta: float,
-    high_touch_area_scale: float | None = None,
-    high_touch_area_scale_by_zone_class: dict[str, Any] | None = None,
-    fomite_representation: str | None = None,
-    fomite_touch_share: str | None = None,
-    fomite_touch_share_table: dict[str, Any] | None = None,
-    cabin_confined_fomite: str | None = None,
+    sweep: TransmissionSweepKnobs | None = None,
 ) -> dict[str, Any]:
     """The shipped run, at one seed.
 
@@ -1512,6 +1531,7 @@ def build_spec(
     NORO-CABIN-01 gate's mode the same way, so the ``off`` arm can be
     re-run on matched seeds.
     """
+    sw = sweep or TransmissionSweepKnobs()
     overrides: dict[str, Any] = {}
     if alpha is not None:
         overrides = {
@@ -1520,23 +1540,23 @@ def build_spec(
             },
         }
     tx_overrides: dict[str, Any] = {}
-    if high_touch_area_scale is not None:
-        tx_overrides["high_touch_area_scale"] = float(high_touch_area_scale)
-    if high_touch_area_scale_by_zone_class is not None:
+    if sw.high_touch_area_scale is not None:
+        tx_overrides["high_touch_area_scale"] = float(sw.high_touch_area_scale)
+    if sw.high_touch_area_scale_by_zone_class is not None:
         tx_overrides["high_touch_area_scale_by_zone_class"] = dict(
-            high_touch_area_scale_by_zone_class,
+            sw.high_touch_area_scale_by_zone_class,
         )
-    if fomite_representation is not None:
-        tx_overrides["fomite_representation"] = str(fomite_representation)
-    if fomite_touch_share is not None:
-        tx_overrides["fomite_touch_share"] = str(fomite_touch_share)
-    if fomite_touch_share_table is not None:
+    if sw.fomite_representation is not None:
+        tx_overrides["fomite_representation"] = str(sw.fomite_representation)
+    if sw.fomite_touch_share is not None:
+        tx_overrides["fomite_touch_share"] = str(sw.fomite_touch_share)
+    if sw.fomite_touch_share_table is not None:
         tx_overrides["fomite_touch_share_table"] = dict(
-            fomite_touch_share_table,
+            sw.fomite_touch_share_table,
         )
-    if cabin_confined_fomite is not None:
+    if sw.cabin_confined_fomite is not None:
         tx_overrides["cabin_confined_fomite"] = {
-            "mode": str(cabin_confined_fomite),
+            "mode": str(sw.cabin_confined_fomite),
         }
     config_overrides: dict[str, Any] = {
         "ship_graph": {"num_agents": int(num_agents)},
@@ -1894,17 +1914,15 @@ def run_seed(
     epochs: int,
     pathogen_id: str,
     top_hosts: int,
-    alpha_override: float | None = None,
-    high_touch_area_scale: float | None = None,
-    high_touch_area_scale_by_zone_class: dict[str, Any] | None = None,
-    fomite_representation: str | None = None,
-    fomite_touch_share: str | None = None,
-    fomite_touch_share_table: str | None = None,
-    arm_tag: str | None = None,
-    spec_dict: dict[str, Any] | None = None,
-    natural_history_clock: str | None = None,
+    options: RunSeedOptions | None = None,
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
+    opts = options or RunSeedOptions()
+    sw = opts.sweep or TransmissionSweepKnobs()
+    spec_dict = opts.spec_dict
+    alpha_override = opts.alpha_override
+    arm_tag = opts.arm_tag
+    natural_history_clock = opts.natural_history_clock
     started_total = time.perf_counter()
     verbatim = spec_dict is not None
     if verbatim:
@@ -1916,20 +1934,24 @@ def run_seed(
     num_agents = declared_total(platform)
     alpha, beta = load_dose_response(pathogen_id, bundle)
     if spec_dict is None:
+        share_table = sw.fomite_touch_share_table
+        if share_table is None and sw.fomite_touch_share_table_path is not None:
+            share_table = load_declared_share_table(
+                sw.fomite_touch_share_table_path,
+            )
         spec_dict = build_spec(
             seed=seed, platform=platform, bundle=bundle,
             epochs=epochs, num_agents=num_agents,
             pathogen_id=pathogen_id, alpha=alpha_override, beta=beta,
-            high_touch_area_scale=high_touch_area_scale,
-            high_touch_area_scale_by_zone_class=(
-                high_touch_area_scale_by_zone_class
-            ),
-            fomite_representation=fomite_representation,
-            fomite_touch_share=fomite_touch_share,
-            fomite_touch_share_table=(
-                load_declared_share_table(fomite_touch_share_table)
-                if fomite_touch_share_table is not None
-                else None
+            sweep=TransmissionSweepKnobs(
+                high_touch_area_scale=sw.high_touch_area_scale,
+                high_touch_area_scale_by_zone_class=(
+                    sw.high_touch_area_scale_by_zone_class
+                ),
+                fomite_representation=sw.fomite_representation,
+                fomite_touch_share=sw.fomite_touch_share,
+                fomite_touch_share_table=share_table,
+                cabin_confined_fomite=sw.cabin_confined_fomite,
             ),
         )
     # The campaign's declared complement for this spec, when it carries one:
@@ -1952,7 +1974,7 @@ def run_seed(
         spec_dict, rec, top_ids, pathogen_id, alpha,
     )
     _check_override_witnesses(
-        rec, fomite_representation, fomite_touch_share,
+        rec, sw.fomite_representation, sw.fomite_touch_share,
     )
     summary = summarise(rec, alpha, beta, seed, epochs)
     summary["dose_response_resolved"] = {
@@ -1971,9 +1993,9 @@ def run_seed(
         result, rec,
     )
     _apply_arm_metadata(
-        summary, arm_tag, high_touch_area_scale,
-        high_touch_area_scale_by_zone_class, fomite_representation,
-        fomite_touch_share, fomite_touch_share_table,
+        summary, arm_tag, sw.high_touch_area_scale,
+        sw.high_touch_area_scale_by_zone_class, sw.fomite_representation,
+        sw.fomite_touch_share, sw.fomite_touch_share_table_path,
     )
     summary["fomite_representation_resolved"] = (
         rec.fomite_representation_seen
@@ -2441,8 +2463,10 @@ def _main_manifest(args: argparse.Namespace) -> int:
             epochs=int(spec["run"]["num_epochs"]),
             pathogen_id=args.pathogen_id,
             top_hosts=args.top_hosts,
-            spec_dict=spec,
-            natural_history_clock=manifest_clock,
+            options=RunSeedOptions(
+                spec_dict=spec,
+                natural_history_clock=manifest_clock,
+            ),
         )
         summary["run_id"] = run_id
         zip_path = _write_run_zip(out_dir, args.tier, run_id, summary)
@@ -2466,19 +2490,23 @@ def main(argv: list[str] | None = None) -> int:
             epochs=args.epochs,
             pathogen_id=args.pathogen_id,
             top_hosts=args.top_hosts,
-            alpha_override=args.alpha,
-            high_touch_area_scale=args.high_touch_area_scale,
-            high_touch_area_scale_by_zone_class=(
-                args.high_touch_area_scale_by_zone_class
+            options=RunSeedOptions(
+                alpha_override=args.alpha,
+                sweep=TransmissionSweepKnobs(
+                    high_touch_area_scale=args.high_touch_area_scale,
+                    high_touch_area_scale_by_zone_class=(
+                        args.high_touch_area_scale_by_zone_class
+                    ),
+                    fomite_representation=args.fomite_representation,
+                    fomite_touch_share=args.fomite_touch_share,
+                    fomite_touch_share_table_path=(
+                        str(args.fomite_touch_share_table)
+                        if args.fomite_touch_share_table is not None
+                        else None
+                    ),
+                ),
+                arm_tag=args.arm_tag,
             ),
-            fomite_representation=args.fomite_representation,
-            fomite_touch_share=args.fomite_touch_share,
-            fomite_touch_share_table=(
-                str(args.fomite_touch_share_table)
-                if args.fomite_touch_share_table is not None
-                else None
-            ),
-            arm_tag=args.arm_tag,
         )
         if args.arm_tag is not None:
             filename = (

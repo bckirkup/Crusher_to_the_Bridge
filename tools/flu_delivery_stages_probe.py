@@ -487,9 +487,6 @@ def run_stage_cell(*, bundle: str, seed: int, platform: str, epochs: int,
         seed=seed, platform=platform, bundle=bundle,
         epochs=epochs, num_agents=declared_total(platform),
         pathogen_id=PATHOGEN, alpha=None, beta=0.0,
-        high_touch_area_scale=None, high_touch_area_scale_by_zone_class=None,
-        fomite_representation=None, fomite_touch_share=None,
-        fomite_touch_share_table=None,
     )
     spec_dict["pathogen_overrides"] = isolate_arm_overrides(
         bundle, PATHOGEN, {PATHOGEN: {"initial_infected": None}},

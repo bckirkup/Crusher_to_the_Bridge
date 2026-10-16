@@ -33,6 +33,7 @@ from enum import Enum
 from typing import Any, Literal
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_PROVISIONING_SOURCES_JSON = "provisioning_sources.json"
 sys.path.insert(0, _REPO_ROOT)
 
 from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
@@ -923,6 +924,35 @@ def _check_protocol_modifier_bounds(
                     )
 
 
+def _check_one_pathogen_probability_bounds(p: Any, report: Report) -> None:
+    """Check one pathogen profile's probability fields are in [0, 1]."""
+    illness = p.illness_probability
+    for key, val in illness.items():
+        if isinstance(val, (int, float)) and (val < 0 or val > 1):
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "MATH_BOUND",
+                f"{p.pathogen_id}.illness_probability.{key} = {val} "
+                f"is outside [0.0, 1.0]",
+            )
+    val = p.symptomatic_fraction
+    if val is not None and (val < 0 or val > 1):
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "MATH_BOUND",
+            f"{p.pathogen_id}.symptomatic_fraction = {val} "
+            f"is outside [0.0, 1.0]",
+        )
+    for label, val in (p.symptomatic_fraction_by_age_band or {}).items():
+        if val < 0 or val > 1:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "MATH_BOUND",
+                f"{p.pathogen_id}.symptomatic_fraction_by_age_band."
+                f"{label} = {val} is outside [0.0, 1.0]",
+            )
+
+
 def _check_pathogen_probability_bounds(
     pathogens: PathogensFile | None,
     report: Report,
@@ -931,31 +961,7 @@ def _check_pathogen_probability_bounds(
     if not pathogens:
         return
     for p in pathogens.pathogens:
-        illness = p.illness_probability
-        for key, val in illness.items():
-            if isinstance(val, (int, float)) and (val < 0 or val > 1):
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "MATH_BOUND",
-                    f"{p.pathogen_id}.illness_probability.{key} = {val} "
-                    f"is outside [0.0, 1.0]",
-                )
-        val = p.symptomatic_fraction
-        if val is not None and (val < 0 or val > 1):
-            report.error(
-                _ACTIVE_PROFILES_JSON,
-                "MATH_BOUND",
-                f"{p.pathogen_id}.symptomatic_fraction = {val} "
-                f"is outside [0.0, 1.0]",
-            )
-        for label, val in (p.symptomatic_fraction_by_age_band or {}).items():
-            if val < 0 or val > 1:
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "MATH_BOUND",
-                    f"{p.pathogen_id}.symptomatic_fraction_by_age_band."
-                    f"{label} = {val} is outside [0.0, 1.0]",
-                )
+        _check_one_pathogen_probability_bounds(p, report)
 
 
 def _check_mathematical_bounds(
@@ -2353,6 +2359,81 @@ def _check_source_genotype_distribution(
         )
 
 
+def _provisioned_source_registry(
+    report: Report,
+) -> tuple[dict[str, Any], dict[str, Any]] | None:
+    registry = _load_json(
+        os.path.join(
+            _REPO_ROOT, "data", "config", _PROVISIONING_SOURCES_JSON))
+    sources = (
+        registry.get("sources") if isinstance(registry, dict) else None
+    )
+    if not isinstance(sources, dict) or not sources:
+        report.error(
+            _PROVISIONING_SOURCES_JSON, "SCHEMA",
+            f"{_PROVISIONING_SOURCES_JSON} declares no sources — the "
+            "provisioned_source mint model has nothing to resolve "
+            "source_id against",
+        )
+        return None
+    return registry, sources
+
+
+def _check_common_source_provisioned_arm(
+    ps: dict[str, Any],
+    report: Report,
+    layout: "SpatialLayout | None",
+) -> None:
+    """Provisioned-source mint model: registry, q_source, genotype mixes."""
+    loaded = _provisioned_source_registry(report)
+    if loaded is None:
+        return
+    registry, sources = loaded
+    default_source = (
+        registry.get("default_source")
+        if isinstance(registry, dict) else None
+    )
+    source_id = ps.get("source_id") or default_source
+    if source_id is not None and source_id not in sources:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            f"provisioned_source.source_id {source_id!r} names no "
+            f"{_PROVISIONING_SOURCES_JSON} entry",
+        )
+    if default_source is not None and default_source not in sources:
+        report.error(
+            _PROVISIONING_SOURCES_JSON, "CONFIG",
+            f"default_source {default_source!r} names no sources entry",
+        )
+    spec = ps.get("q_source")
+    if spec is None and isinstance(source_id, str):
+        spec = (sources.get(source_id) or {}).get("q_source")
+    if spec is not None:
+        _check_q_source_spec(
+            spec, "provisioned_source.q_source", report)
+    _check_source_genotype_distribution(
+        ps.get("genotype_distribution"),
+        "provisioned_source.genotype_distribution",
+        _CONFIG_YAML, report,
+    )
+    for sid, source_entry in sources.items():
+        if isinstance(source_entry, dict):
+            _check_source_genotype_distribution(
+                source_entry.get("genotype_distribution"),
+                f"sources.{sid}.genotype_distribution",
+                _PROVISIONING_SOURCES_JSON, report,
+            )
+    if layout is not None and not any(
+        z.type == "Dining" for z in layout.zones
+    ):
+        report.warn(
+            _CONFIG_YAML, "CONFIG",
+            "lot_mint_model 'provisioned_source' is armed but the "
+            "platform declares no Dining zones — the station census "
+            "resolves N_lots == 0 and no lot object ever mints",
+        )
+
+
 def _check_common_source(
     cfg: dict[str, Any],
     report: Report,
@@ -2400,119 +2481,66 @@ def _check_common_source(
         return
     if mint != "provisioned_source":
         return
-    registry = _load_json(
-        os.path.join(
-            _REPO_ROOT, "data", "config", "provisioning_sources.json"))
-    sources = (
-        registry.get("sources") if isinstance(registry, dict) else None
-    )
-    if not isinstance(sources, dict) or not sources:
-        report.error(
-            "provisioning_sources.json", "SCHEMA",
-            "provisioning_sources.json declares no sources — the "
-            "provisioned_source mint model has nothing to resolve "
-            "source_id against",
-        )
-        return
-    default_source = (
-        registry.get("default_source")
-        if isinstance(registry, dict) else None
-    )
-    source_id = ps.get("source_id") or default_source
-    if source_id is not None and source_id not in sources:
-        report.error(
-            _CONFIG_YAML, "CONFIG",
-            f"provisioned_source.source_id {source_id!r} names no "
-            "provisioning_sources.json entry",
-        )
-    if default_source is not None and default_source not in sources:
-        report.error(
-            "provisioning_sources.json", "CONFIG",
-            f"default_source {default_source!r} names no sources entry",
-        )
-    spec = ps.get("q_source")
-    if spec is None and isinstance(source_id, str):
-        spec = (sources.get(source_id) or {}).get("q_source")
-    if spec is not None:
-        _check_q_source_spec(
-            spec, "provisioned_source.q_source", report)
-    _check_source_genotype_distribution(
-        ps.get("genotype_distribution"),
-        "provisioned_source.genotype_distribution",
-        _CONFIG_YAML, report,
-    )
-    for sid, source_entry in sources.items():
-        if isinstance(source_entry, dict):
-            _check_source_genotype_distribution(
-                source_entry.get("genotype_distribution"),
-                f"sources.{sid}.genotype_distribution",
-                "provisioning_sources.json", report,
-            )
-    if layout is not None and not any(
-        z.type == "Dining" for z in layout.zones
-    ):
-        report.warn(
-            _CONFIG_YAML, "CONFIG",
-            "lot_mint_model 'provisioned_source' is armed but the "
-            "platform declares no Dining zones — the station census "
-            "resolves N_lots == 0 and no lot object ever mints",
-        )
+    _check_common_source_provisioned_arm(ps, report, layout)
 
 
-def _check_ppe_fatigue(cfg: dict[str, Any], report: Report) -> None:
-    """Validate the §7 ppe_types registry and ppe_fatigue policy block.
-
-    Absent is the labelled baseline and always valid. Present means every
-    entry is well-formed, every typed coverage name resolves against the
-    registry, and an enabled channel has something to arm.
-    """
-    registry = cfg.get("ppe_types")
-    if registry is not None and not isinstance(registry, dict):
-        report.error(_CONFIG_YAML, "CONFIG", "ppe_types must be a mapping")
-        return
-    registry = registry or {}
-    for type_id, entry in registry.items():
-        if not isinstance(entry, dict):
+def _check_ppe_fatigue_conditions(
+    type_id: str, conds: list, report: Report,
+) -> None:
+    for cond in conds:
+        if not isinstance(cond, dict):
             report.error(_CONFIG_YAML, "CONFIG",
-                         f"ppe_types.{type_id} must be a mapping")
+                         f"ppe_types.{type_id} condition must be a mapping")
             continue
-        for key in ("fatigue_rate_per_epoch", "heat_load",
-                    "dexterity_impairment"):
-            v = entry.get(key)
-            if not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
-                report.error(_CONFIG_YAML, "MATH_BOUND",
-                             f"ppe_types.{type_id}.{key} = {v!r} "
-                             "must be finite and non-negative")
-        conds = entry.get("fatigue_conditions", [])
-        if conds is None:
-            conds = []
-        if not isinstance(conds, list):
+        if not str(cond.get("condition_id") or "").strip():
             report.error(_CONFIG_YAML, "CONFIG",
-                         f"ppe_types.{type_id}.fatigue_conditions must be a list")
-            continue
-        for cond in conds:
-            if not isinstance(cond, dict):
-                report.error(_CONFIG_YAML, "CONFIG",
-                             f"ppe_types.{type_id} condition must be a mapping")
-                continue
-            if not str(cond.get("condition_id") or "").strip():
-                report.error(_CONFIG_YAML, "CONFIG",
-                             f"ppe_types.{type_id} condition missing "
-                             "condition_id")
-            rate = cond.get("rate_per_wear_hour")
-            if (not isinstance(rate, (int, float)) or not math.isfinite(rate)
-                    or rate < 0):
-                report.error(_CONFIG_YAML, "MATH_BOUND",
-                             f"ppe_types.{type_id} condition rate_per_wear_hour "
-                             f"= {rate!r} must be finite and non-negative")
+                         f"ppe_types.{type_id} condition missing "
+                         "condition_id")
+        rate = cond.get("rate_per_wear_hour")
+        if (not isinstance(rate, (int, float)) or not math.isfinite(rate)
+                or rate < 0):
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"ppe_types.{type_id} condition rate_per_wear_hour "
+                         f"= {rate!r} must be finite and non-negative")
 
-    pf = cfg.get("ppe_fatigue")
-    if pf is None:
-        return
-    if not isinstance(pf, dict):
+
+def _check_ppe_type_entry(
+    type_id: str, entry: Any, report: Report,
+) -> None:
+    if not isinstance(entry, dict):
         report.error(_CONFIG_YAML, "CONFIG",
-                     "ppe_fatigue must be a mapping")
+                     f"ppe_types.{type_id} must be a mapping")
         return
+    for key in ("fatigue_rate_per_epoch", "heat_load",
+                "dexterity_impairment"):
+        v = entry.get(key)
+        if not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"ppe_types.{type_id}.{key} = {v!r} "
+                         "must be finite and non-negative")
+    conds = entry.get("fatigue_conditions", [])
+    if conds is None:
+        conds = []
+    if not isinstance(conds, list):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     f"ppe_types.{type_id}.fatigue_conditions must be a list")
+        return
+    _check_ppe_fatigue_conditions(type_id, conds, report)
+
+
+def _check_ppe_types_registry(
+    registry: dict[str, Any],
+    report: Report,
+) -> None:
+    for type_id, entry in registry.items():
+        _check_ppe_type_entry(type_id, entry, report)
+
+
+def _check_ppe_fatigue_policy(
+    pf: dict[str, Any],
+    registry: dict[str, Any],
+    report: Report,
+) -> None:
     for key in ("fatigue_refusal_threshold",):
         v = pf.get(key)
         if not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
@@ -2535,25 +2563,56 @@ def _check_ppe_fatigue(cfg: dict[str, Any], report: Report) -> None:
                      "ppe_fatigue.enabled is true but ppe_types declares "
                      "no types")
 
-    # Cross-reference: every ppe_type an NPI coverage map names must exist.
+
+def _check_npi_ppe_type_refs(
+    cfg: dict[str, Any],
+    registry: dict[str, Any],
+    report: Report,
+) -> None:
     npi = cfg.get("non_pharmaceutical_interventions")
-    if isinstance(npi, dict):
-        for name, measure in npi.items():
-            coverage = (measure or {}).get("coverage_by_role")
-            if not isinstance(coverage, dict):
-                continue
-            for role, entry in coverage.items():
-                if isinstance(entry, dict):
-                    types = entry.get("ppe_type")
-                    names = types if isinstance(types, list) else [types]
-                    for t in names:
-                        if t is not None and t not in registry:
-                            report.error(
-                                _CONFIG_YAML, "CONFIG",
-                                f"npi.{name}.coverage_by_role.{role} names "
-                                f"ppe_type {t!r}, which has no ppe_types "
-                                "entry",
-                            )
+    if not isinstance(npi, dict):
+        return
+    for name, measure in npi.items():
+        coverage = (measure or {}).get("coverage_by_role")
+        if not isinstance(coverage, dict):
+            continue
+        for role, entry in coverage.items():
+            if isinstance(entry, dict):
+                types = entry.get("ppe_type")
+                names = types if isinstance(types, list) else [types]
+                for t in names:
+                    if t is not None and t not in registry:
+                        report.error(
+                            _CONFIG_YAML, "CONFIG",
+                            f"npi.{name}.coverage_by_role.{role} names "
+                            f"ppe_type {t!r}, which has no ppe_types "
+                            "entry",
+                        )
+
+
+def _check_ppe_fatigue(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the §7 ppe_types registry and ppe_fatigue policy block.
+
+    Absent is the labelled baseline and always valid. Present means every
+    entry is well-formed, every typed coverage name resolves against the
+    registry, and an enabled channel has something to arm.
+    """
+    registry = cfg.get("ppe_types")
+    if registry is not None and not isinstance(registry, dict):
+        report.error(_CONFIG_YAML, "CONFIG", "ppe_types must be a mapping")
+        return
+    registry = registry or {}
+    _check_ppe_types_registry(registry, report)
+
+    pf = cfg.get("ppe_fatigue")
+    if pf is None:
+        return
+    if not isinstance(pf, dict):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     "ppe_fatigue must be a mapping")
+        return
+    _check_ppe_fatigue_policy(pf, registry, report)
+    _check_npi_ppe_type_refs(cfg, registry, report)
 
 
 def _check_fomite_representation(cfg: dict[str, Any], report: Report) -> None:

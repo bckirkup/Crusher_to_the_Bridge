@@ -189,23 +189,21 @@ class TestObservationOverrides:
         from picard_framework.covid_boarding_screen import (
             apply_arm_overrides,
         )
+        raw = self._raw()
+        overrides = {"observation_overrides": {"bogus": True}}
         with pytest.raises(ValueError, match="observation_overrides"):
-            apply_arm_overrides(
-                self._raw(),
-                {"observation_overrides": {"bogus": True}},
-                profile={},
-            )
+            apply_arm_overrides(raw, overrides, profile={})
 
     def test_non_list_waves_refused(self) -> None:
         from picard_framework.covid_boarding_screen import (
             apply_arm_overrides,
         )
+        raw = self._raw()
+        overrides = {
+            "observation_overrides": {"campaign_waves": "crew_wave"},
+        }
         with pytest.raises(ValueError, match="campaign_waves"):
-            apply_arm_overrides(
-                self._raw(),
-                {"observation_overrides": {"campaign_waves": "crew_wave"}},
-                profile={},
-            )
+            apply_arm_overrides(raw, overrides, profile={})
 
 
 # ---------------------------------------------------------- engine mechanics
@@ -295,10 +293,9 @@ class TestRetestTiers:
         assert not (set(second) & first)
 
     def test_retest_tier_outside_day_tiers_refused(self) -> None:
+        days = [_day(0, 5, ("sweep",), retest_tiers=("crew",))]
         with pytest.raises(ValueError, match="retest_tiers"):
-            _campaign([
-                _day(0, 5, ("sweep",), retest_tiers=("crew",)),
-            ])
+            _campaign(days)
 
 
 class TestWaves:

@@ -113,6 +113,7 @@ def export_prj(
     hobbyist: bool = False,
     overrides: dict[str, Any] | None = None,
     filter_efficiency: float | None = None,
+    ahs_terminal_mode: str | None = None,
 ) -> str:
     """Serialize platform JSON to ContamW 3.4 ``.prj`` text."""
     text, _path_map = export_contamw34(
@@ -121,6 +122,7 @@ def export_prj(
         hobbyist=hobbyist,
         overrides=overrides,
         filter_efficiency=filter_efficiency,
+        ahs_terminal_mode=ahs_terminal_mode,
     )
     return text
 
@@ -132,6 +134,7 @@ def export_prj_with_path_map(
     hobbyist: bool = False,
     overrides: dict[str, Any] | None = None,
     filter_efficiency: float | None = None,
+    ahs_terminal_mode: str | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     """Serialize to ContamW 3.4 ``.prj`` text and path_map entries."""
     return export_contamw34(
@@ -140,6 +143,7 @@ def export_prj_with_path_map(
         hobbyist=hobbyist,
         overrides=overrides,
         filter_efficiency=filter_efficiency,
+        ahs_terminal_mode=ahs_terminal_mode,
     )
 
 
@@ -457,6 +461,7 @@ def export_platform_to_prj(
     write_path_map: bool = True,
     hobbyist: bool = False,
     filter_efficiency: float | None = None,
+    ahs_terminal_mode: str | None = None,
 ) -> str:
     """Read a platform directory and write a ContamW 3.4 ``.prj`` (+ path_map)."""
     platform_dir = resolve_repo_path(REPO_ROOT, platform_dir)
@@ -479,6 +484,7 @@ def export_platform_to_prj(
         hobbyist=hobbyist,
         overrides=overrides,
         filter_efficiency=filter_efficiency,
+        ahs_terminal_mode=ahs_terminal_mode,
     )
 
     output_path = resolve_repo_path(REPO_ROOT, output_path)

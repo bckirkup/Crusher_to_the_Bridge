@@ -202,6 +202,51 @@ def _leaf_diffs(
         diffs.append((path, a, b))
 
 
+def _replication_theta_block(
+    theta: float,
+    ref_dir: str,
+    own: dict[tuple[float, int], dict],
+) -> dict[str, Any]:
+    ref_path = os.path.join(REPO_ROOT, ref_dir)
+    if not os.path.isdir(ref_path):
+        return {"skipped": f"ref dir missing: {ref_dir}"}
+    refs = {
+        int(p["cell"]["seed"]): p
+        for p in load_cell_payloads(ref_path).values()
+        if (p.get("cell") or {}).get("arm_id") == BASELINE_ARM
+        and abs(float(p["cell"]["theta"]) - theta) < 1e-9
+    }
+    n_identical = 0
+    n_paired = 0
+    max_abs_delta = 0.0
+    samples: list[dict] = []
+    for (t, seed), p in sorted(own.items()):
+        if abs(t - theta) > 1e-9 or seed not in refs:
+            continue
+        n_paired += 1
+        diffs: list[tuple[str, Any, Any]] = []
+        _leaf_diffs(p, refs[seed], "", diffs)
+        if not diffs:
+            n_identical += 1
+        for path, a, b in diffs:
+            if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+                max_abs_delta = max(max_abs_delta, abs(a - b))
+        for path, a, b in diffs[: max(0, REPLICATION_DIFF_SAMPLE - len(samples))]:
+            samples.append(
+                {"seed": seed, "path": path,
+                 "got": a if a is not _MISSING else "<missing>",
+                 "ref": b if b is not _MISSING else "<missing>"},
+            )
+    return {
+        "ref_dir": ref_dir,
+        "n_paired": n_paired,
+        "n_identical": n_identical,
+        "bit_identical": n_paired > 0 and n_identical == n_paired,
+        "max_abs_delta": max_abs_delta,
+        "diff_sample": samples,
+    }
+
+
 def replication_check(
     cells_dir: str,
     ref_dirs: dict[float, str] | None = None,
@@ -223,48 +268,7 @@ def replication_check(
     out: dict[str, Any] = {}
     for theta, ref_dir in sorted(ref_dirs.items()):
         label = f"theta={theta:.4g}"
-        ref_path = os.path.join(REPO_ROOT, ref_dir)
-        if not os.path.isdir(ref_path):
-            out[label] = {"skipped": f"ref dir missing: {ref_dir}"}
-            continue
-        refs = {
-            int(p["cell"]["seed"]): p
-            for p in load_cell_payloads(ref_path).values()
-            if (p.get("cell") or {}).get("arm_id") == BASELINE_ARM
-            and abs(float(p["cell"]["theta"]) - theta) < 1e-9
-        }
-        n_identical = 0
-        n_paired = 0
-        max_abs_delta = 0.0
-        samples: list[dict] = []
-        for (t, seed), p in sorted(own.items()):
-            if abs(t - theta) > 1e-9 or seed not in refs:
-                continue
-            n_paired += 1
-            diffs: list[tuple[str, Any, Any]] = []
-            _leaf_diffs(p, refs[seed], "", diffs)
-            if not diffs:
-                n_identical += 1
-            for path, a, b in diffs:
-                if (
-                    isinstance(a, (int, float))
-                    and isinstance(b, (int, float))
-                ):
-                    max_abs_delta = max(max_abs_delta, abs(a - b))
-            for path, a, b in diffs[: max(0, REPLICATION_DIFF_SAMPLE - len(samples))]:
-                samples.append(
-                    {"seed": seed, "path": path,
-                     "got": a if a is not _MISSING else "<missing>",
-                     "ref": b if b is not _MISSING else "<missing>"},
-                )
-        out[label] = {
-            "ref_dir": ref_dir,
-            "n_paired": n_paired,
-            "n_identical": n_identical,
-            "bit_identical": n_paired > 0 and n_identical == n_paired,
-            "max_abs_delta": max_abs_delta,
-            "diff_sample": samples,
-        }
+        out[label] = _replication_theta_block(theta, ref_dir, own)
     return out
 
 

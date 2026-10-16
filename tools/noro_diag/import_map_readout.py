@@ -269,24 +269,29 @@ def _tier_table(
     return table, witness
 
 
+def _discordance_tier(tier: str, cells: dict) -> list[dict]:
+    rows = []
+    rungs: dict[float, dict[str, dict]] = defaultdict(dict)
+    for key, entry in cells.items():
+        rungs[key[1] or 0.0][key[0] or ""] = entry["by_seed"]
+    for nsf, arms in rungs.items():
+        rung_names = sorted(arms)
+        for i, a in enumerate(rung_names):
+            for b in rung_names[i + 1:]:
+                shared = set(arms[a]) & set(arms[b])
+                if not shared:
+                    continue
+                rows.append(
+                    _discord_row(tier, nsf, a, b, arms[a], arms[b], shared),
+                )
+    return rows
+
+
 def _discordance(collected: dict) -> list[dict]:
     """Shared-seed ignited/not counts between rung-paired cells."""
     rows = []
     for tier, blob in collected.items():
-        cells = blob["cells"]
-        rungs: dict[float, dict[str, dict]] = defaultdict(dict)
-        for key, entry in cells.items():
-            rungs[key[1] or 0.0][key[0] or ""] = entry["by_seed"]
-        for nsf, arms in rungs.items():
-            rung_names = sorted(arms)
-            for i, a in enumerate(rung_names):
-                for b in rung_names[i + 1:]:
-                    shared = set(arms[a]) & set(arms[b])
-                    if not shared:
-                        continue
-                    rows.append(
-                        _discord_row(tier, nsf, a, b, arms[a], arms[b], shared),
-                    )
+        rows.extend(_discordance_tier(tier, blob["cells"]))
     return rows
 
 

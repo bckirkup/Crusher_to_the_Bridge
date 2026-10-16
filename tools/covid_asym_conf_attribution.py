@@ -64,7 +64,7 @@ ROLES = ("crew", "passenger")
 
 
 def _role_counts() -> dict[str, int]:
-    return {role: 0 for role in ROLES}
+    return dict.fromkeys(ROLES, 0)
 
 
 def _bump(table: dict[str, dict[str, int]], key: str, role: str) -> None:

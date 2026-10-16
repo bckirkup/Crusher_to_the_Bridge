@@ -450,6 +450,54 @@ def _pick_sample(metas: list[dict], per_cell: int) -> list[dict]:
     return picked
 
 
+def _collect_metas(client, bucket: str, prefixes: list[str]) -> list[dict]:
+    metas: list[dict] = []
+    for prefix in prefixes:
+        bucket, pfx = (bucket, prefix) if "://" not in prefix else (
+            lambda t: (t[0], t[1]))(_s3_parse_uri(prefix))
+        for key in _list_zip_keys(client, bucket, pfx):
+            m = _parse_key(key)
+            if m:
+                metas.append(m)
+    return metas
+
+
+def _also_seed_want(specs: list[str]) -> set[tuple[str, int]]:
+    want: set[tuple[str, int]] = set()
+    for spec in specs:
+        substr, _, seeds = spec.partition(":")
+        want.update((substr, int(s)) for s in seeds.split(","))
+    return want
+
+
+def _fetch_voyage_rows(
+    client,
+    bucket: str,
+    picked: list[dict],
+    posted: dict[str, bool],
+    workers: int,
+    rows: list[dict],
+    ckpt,
+) -> int:
+    rows_new = 0
+    errors = 0
+    with ThreadPoolExecutor(workers) as pool:
+        futs = [pool.submit(_fetch_one, client, bucket, m, posted)
+                for m in picked]
+        for i, fut in enumerate(as_completed(futs), 1):
+            row = fut.result()
+            if row and "error" not in row:
+                rows.append(row)
+                rows_new += 1
+                if rows_new % 500 == 0:
+                    ckpt()
+            else:
+                errors += 1
+            if i % 200 == 0:
+                print(f"  {i}/{len(picked)} ({errors} errors)", file=sys.stderr)
+    return errors
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--bucket", default=_BUCKET_DEFAULT)
@@ -473,14 +521,7 @@ def main() -> None:
 
     client = _s3_client()
     prefixes = args.prefixes or _PREFIXES_DEFAULT
-    metas: list[dict] = []
-    for prefix in prefixes:
-        bucket, pfx = (args.bucket, prefix) if "://" not in prefix else (
-            lambda t: (t[0], t[1]))(_s3_parse_uri(prefix))
-        for key in _list_zip_keys(client, bucket, pfx):
-            m = _parse_key(key)
-            if m:
-                metas.append(m)
+    metas = _collect_metas(client, args.bucket, prefixes)
     print(f"keys parsed: {len(metas)}", file=sys.stderr)
 
     posted: dict[str, bool] = {}
@@ -489,10 +530,7 @@ def main() -> None:
                               args.posted_cells, args.workers)
 
     picked = _pick_sample(metas, args.sample_per_cell)
-    want = set()
-    for spec in args.also_seeds:
-        substr, _, seeds = spec.partition(":")
-        want.update((substr, int(s)) for s in seeds.split(","))
+    want = _also_seed_want(args.also_seeds)
     extra = [m for m in metas
              if (any(sub in m["tier"] and s == m["seed"] for sub, s in want)
                  or posted.get(m["key"]))
@@ -518,28 +556,14 @@ def main() -> None:
         print(f"resume: {len(rows)} rows already read", file=sys.stderr)
     picked = [m for m in picked if m["key"] not in done_keys]
 
-    rows_new = 0
-    errors = 0
-
     def _ckpt() -> None:
         if args.resume and args.json_out:
             with _json_open("w") as fh:
                 json.dump(rows, fh, indent=1)
 
-    with ThreadPoolExecutor(args.workers) as pool:
-        futs = [pool.submit(_fetch_one, client, args.bucket, m, posted)
-                for m in picked]
-        for i, fut in enumerate(as_completed(futs), 1):
-            row = fut.result()
-            if row and "error" not in row:
-                rows.append(row)
-                rows_new += 1
-                if rows_new % 500 == 0:
-                    _ckpt()
-            else:
-                errors += 1
-            if i % 200 == 0:
-                print(f"  {i}/{len(picked)} ({errors} errors)", file=sys.stderr)
+    errors = _fetch_voyage_rows(
+        client, args.bucket, picked, posted, args.workers, rows, _ckpt,
+    )
     _ckpt()
 
     cells: dict[str, list[dict]] = {}
