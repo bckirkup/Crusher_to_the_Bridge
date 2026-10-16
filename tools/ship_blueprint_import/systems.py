@@ -143,6 +143,7 @@ _KIND_DIRECTION = {
     "fan_room": "supply",
     "air_port": "supply",
     "skylight": "supply",
+    "hangar_door": "supply",
 }
 _FACING_DIRECTION = {
     "fore": "supply",
@@ -188,7 +189,7 @@ def _marker_zone_mode(
     """
     if zone_type == "Sanitary":
         return "exhaust_only"
-    if kind in ("skylight", "air_port"):
+    if kind in ("skylight", "air_port", "hangar_door"):
         return "nat_supply"
     if kind in ("funnel", "uptake", "fan_room", "air_shaft"):
         return "mech_supply_exhaust"

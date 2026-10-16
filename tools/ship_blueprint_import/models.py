@@ -173,6 +173,7 @@ class ComplementProposal(BaseModel):
 VentKind = Literal[
     "cowl", "mushroom", "gooseneck", "skylight", "air_port",
     "vent_trunk", "air_shaft", "fan_room", "uptake", "funnel",
+    "hangar_door",
 ]
 VentFacing = Literal[
     "fore", "aft", "port", "starboard", "up", "down", "unknown"
