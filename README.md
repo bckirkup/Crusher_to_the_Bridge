@@ -190,6 +190,9 @@ data/
 │   ├── pce_874/                    (maritime.org GA import)
 │   ├── independence_cvl26/         (maritime.org GA import)
 │   ├── midway_cv41/                (maritime.org GA import)
+│   ├── battler_acv6/               (maritime.org GA import)
+│   ├── puncher_cve53/              (maritime.org GA import)
+│   ├── thetis_bay_cve90/           (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -576,6 +579,9 @@ airflow definitions:
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 | `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
+| `battler_acv6` | HMS Battler D-18 Attacker/Bogue-class escort carrier (maritime.org GA import, 55 zones, 800 crew) |
+| `puncher_cve53` | HMS Puncher D-79 Bogue-class escort carrier CVE-53 (maritime.org GA import, 88 zones, 869 crew) |
+| `thetis_bay_cve90` | USS Thetis Bay CVE-90 Casablanca-class escort carrier (maritime.org GA import, 74 zones, 596 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
