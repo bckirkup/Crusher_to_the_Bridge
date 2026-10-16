@@ -108,6 +108,9 @@ PLATFORMS = [
     "hunter_killer_dd692",
     "gosper_apa170",
     "fort_mandan_lsd21",
+    "mercury_aks20",
+    "assistance_ar17",
+    "luzon_arg2",
 ]
 
 ENTERPRISE_IDS = frozenset({

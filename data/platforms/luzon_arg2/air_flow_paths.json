@@ -1,0 +1,570 @@
+{
+  "platform": "luzon_arg2",
+  "description": "HVAC network synthesized for luzon_arg2",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Pilot_House",
+        "Signal_Flag_Room",
+        "Sup_Structure_House",
+        "Officers_Mess_Lounge",
+        "Galley_Upper",
+        "Officer_State_Rms",
+        "Clipping_20mm_Fwd",
+        "Canvas_Store",
+        "Laundry_Rec_Rm",
+        "CPO_Berthing_Main",
+        "Crews_Berthing_Aft",
+        "Engineers_Office",
+        "Crews_Galley",
+        "Crews_Mess",
+        "CPO_Pantry_Mess",
+        "CPO_Berthing_Fwd",
+        "Post_Office",
+        "Crews_Berthing_Fwd",
+        "Lobby_Fwd",
+        "Surgical_Dressing",
+        "Crews_Berthing_2nd_A",
+        "Crews_Berthing_2nd_F",
+        "Bakery_2nd",
+        "Stern_Weather",
+        "Boat_Deck_Aft",
+        "Gun_Weather_Sup",
+        "Chain_Locker_Focsle",
+        "Flat_Chain_Locker"
+      ],
+      "ach": 6.0,
+      "description": "accommodation + weather ventilation",
+      "vent_mode": "nat_supply",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "AC_Room",
+        "Steering_Gear",
+        "Eng_Casing_Main",
+        "Weld_Shop_2nd",
+        "Eng_Boiler_Casing_2nd",
+        "Forepeak_Tank_2nd",
+        "Engine_Room",
+        "Gen_Evap_Rm",
+        "Machinery_Lower_2P",
+        "Machinery_Bilge_Hold",
+        "Pump_Filter_Rms",
+        "Aft_Tanks_1P",
+        "Aft_DO_Tanks_2P",
+        "Aft_Peak_Hold",
+        "Settling_Lub_Tanks",
+        "Cargo_DO_Tanks_2P",
+        "Cargo_DO_Hold_A",
+        "Cargo_DO_Hold_F",
+        "Deep_Tank_2P",
+        "Deep_Tank_Hold"
+      ],
+      "ach": 10.0,
+      "description": "diesel machinery + tank ventilation",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "VENT_Shops_Stores",
+      "rooms": [
+        "Carpenter_Radio_Shops",
+        "Electrical_Shop",
+        "Diesel_Stores_2nd",
+        "CPO_Stores_2nd",
+        "Refrigerator_2nd",
+        "Ships_Store_2nd",
+        "Amm_Mags_2nd",
+        "Aft_Peak_Stores_2nd",
+        "Stern_Peak_1P",
+        "Electrical_Stowage_1P",
+        "Machine_Shop_1P",
+        "ICE_Repair_Shop",
+        "Repair_Stores_1P",
+        "Fwd_Mags_1P",
+        "Fwd_Peak_1P",
+        "Lumber_Stowage_2P",
+        "Fwd_Stores_2P"
+      ],
+      "ach": 6.0,
+      "description": "repair shops + stores ventilation",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_HD_HD_Sup",
+      "rooms": [
+        "HD_Sup"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Sup, 23 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Upper_Deck",
+      "rooms": [
+        "HD_Upper_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Upper_Deck, 9 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Crew_Main",
+      "rooms": [
+        "HD_Crew_Main"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew_Main, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Crew_2nd",
+      "rooms": [
+        "HD_Crew_2nd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew_2nd, 5 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Machinery",
+      "to": "VENT_Shops_Stores",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Sup",
+      "flow_rate_m3h": 2734.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Sup; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Upper_Deck",
+      "flow_rate_m3h": 1070.1,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Upper_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Crew_Main",
+      "flow_rate_m3h": 713.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Crew_2nd",
+      "flow_rate_m3h": 594.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Pilot_House",
+      "to": "Signal_Flag_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Signal_Flag_Room",
+      "to": "Sup_Structure_House",
+      "type": "ladder"
+    },
+    {
+      "from": "Sup_Structure_House",
+      "to": "Officer_State_Rms",
+      "type": "ladder"
+    },
+    {
+      "from": "Officer_State_Rms",
+      "to": "Officers_Mess_Lounge",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Upper",
+      "to": "Officers_Mess_Lounge",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Mess_Lounge",
+      "to": "CPO_Pantry_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Clipping_20mm_Fwd",
+      "to": "Canvas_Store",
+      "type": "passageway"
+    },
+    {
+      "from": "Stern_Weather",
+      "to": "Laundry_Rec_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Laundry_Rec_Rm",
+      "to": "CPO_Berthing_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Berthing_Main",
+      "to": "Crews_Berthing_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Berthing_Aft",
+      "to": "Crews_Berthing_2nd_A",
+      "type": "ladder"
+    },
+    {
+      "from": "Carpenter_Radio_Shops",
+      "to": "Electrical_Shop",
+      "type": "passageway"
+    },
+    {
+      "from": "Electrical_Shop",
+      "to": "Engineers_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Engineers_Office",
+      "to": "Eng_Casing_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Casing_Main",
+      "to": "Eng_Boiler_Casing_2nd",
+      "type": "ladder"
+    },
+    {
+      "from": "Eng_Boiler_Casing_2nd",
+      "to": "Engine_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Machinery_Lower_2P",
+      "type": "ladder"
+    },
+    {
+      "from": "Machinery_Lower_2P",
+      "to": "Machinery_Bilge_Hold",
+      "type": "ladder"
+    },
+    {
+      "from": "Machinery_Lower_2P",
+      "to": "Gen_Evap_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Gen_Evap_Rm",
+      "to": "Pump_Filter_Rms",
+      "type": "ladder"
+    },
+    {
+      "from": "Crews_Galley",
+      "to": "Crews_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Mess",
+      "to": "CPO_Pantry_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Pantry_Mess",
+      "to": "CPO_Berthing_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Berthing_Fwd",
+      "to": "Crews_Berthing_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Berthing_Fwd",
+      "to": "Lobby_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Lobby_Fwd",
+      "to": "Surgical_Dressing",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Berthing_Fwd",
+      "to": "Crews_Berthing_2nd_F",
+      "type": "ladder"
+    },
+    {
+      "from": "Weld_Shop_2nd",
+      "to": "Machine_Shop_1P",
+      "type": "ladder"
+    },
+    {
+      "from": "Machine_Shop_1P",
+      "to": "ICE_Repair_Shop",
+      "type": "passageway"
+    },
+    {
+      "from": "ICE_Repair_Shop",
+      "to": "Repair_Stores_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Repair_Stores_1P",
+      "to": "Fwd_Mags_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Ships_Store_2nd",
+      "to": "Fwd_Stores_2P",
+      "type": "ladder"
+    },
+    {
+      "from": "Electrical_Stowage_1P",
+      "to": "Lumber_Stowage_2P",
+      "type": "ladder"
+    },
+    {
+      "from": "Fwd_Mags_1P",
+      "to": "Amm_Mags_2nd",
+      "type": "ladder"
+    },
+    {
+      "from": "Stern_Peak_1P",
+      "to": "Aft_DO_Tanks_2P",
+      "type": "ladder"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Aft_Peak_Stores_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Stern_Weather",
+      "to": "Steering_Gear",
+      "type": "ladder"
+    },
+    {
+      "from": "Diesel_Stores_2nd",
+      "to": "Electrical_Stowage_1P",
+      "type": "ladder"
+    },
+    {
+      "from": "Officers_Mess_Lounge",
+      "to": "AC_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Berthing_Aft",
+      "to": "Carpenter_Radio_Shops",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Casing_Main",
+      "to": "Crews_Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Casing_Main",
+      "to": "Crews_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Mess",
+      "to": "Post_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Pantry_Mess",
+      "to": "Post_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Berthing_Fwd",
+      "to": "Post_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Surgical_Dressing",
+      "to": "Chain_Locker_Focsle",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Peak_Stores_2nd",
+      "to": "Crews_Berthing_2nd_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Berthing_2nd_A",
+      "to": "Diesel_Stores_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Diesel_Stores_2nd",
+      "to": "Weld_Shop_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Weld_Shop_2nd",
+      "to": "Eng_Boiler_Casing_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Boiler_Casing_2nd",
+      "to": "Bakery_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Boiler_Casing_2nd",
+      "to": "CPO_Stores_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Bakery_2nd",
+      "to": "CPO_Stores_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Bakery_2nd",
+      "to": "Refrigerator_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Stores_2nd",
+      "to": "Refrigerator_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Refrigerator_2nd",
+      "to": "Crews_Berthing_2nd_F",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Berthing_2nd_F",
+      "to": "Ships_Store_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Ships_Store_2nd",
+      "to": "Amm_Mags_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Amm_Mags_2nd",
+      "to": "Forepeak_Tank_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Tanks_1P",
+      "to": "Stern_Peak_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Stern_Peak_1P",
+      "to": "Electrical_Stowage_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Electrical_Stowage_1P",
+      "to": "Engine_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Machine_Shop_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Fwd_Mags_1P",
+      "to": "Fwd_Peak_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_DO_Tanks_2P",
+      "to": "Lumber_Stowage_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Lumber_Stowage_2P",
+      "to": "Machinery_Lower_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Gen_Evap_Rm",
+      "to": "Cargo_DO_Tanks_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Cargo_DO_Tanks_2P",
+      "to": "Fwd_Stores_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Fwd_Stores_2P",
+      "to": "Deep_Tank_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Peak_Hold",
+      "to": "Settling_Lub_Tanks",
+      "type": "passageway"
+    },
+    {
+      "from": "Settling_Lub_Tanks",
+      "to": "Cargo_DO_Hold_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Cargo_DO_Hold_A",
+      "to": "Machinery_Bilge_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Bilge_Hold",
+      "to": "Pump_Filter_Rms",
+      "type": "passageway"
+    },
+    {
+      "from": "Pump_Filter_Rms",
+      "to": "Cargo_DO_Hold_F",
+      "type": "passageway"
+    },
+    {
+      "from": "Cargo_DO_Hold_F",
+      "to": "Deep_Tank_Hold",
+      "type": "passageway"
+    }
+  ]
+}

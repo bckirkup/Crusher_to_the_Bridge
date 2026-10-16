@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Sixty-six ship platforms are included, each with spatial layout and HVAC
+Sixty-nine ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -860,6 +860,9 @@ from `orchestrator_types.py`:
 | `hunter_killer_dd692` | DD-692-class long-hull hunter-killer contract plan (maritime.org GA import, 60 zones, 309 crew) |
 | `gosper_apa170` | USS Gosper APA-170 Haskell-class attack transport (maritime.org GA import, 71 zones, 534 crew + 1561 troops) |
 | `fort_mandan_lsd21` | USS Fort Mandan LSD-21 Casa Grande-class dock landing ship (maritime.org GA import, 51 zones, 301 crew + 214 troops) |
+| `mercury_aks20` | USS Mercury AKS-20 Acubens-class stores issue ship (maritime.org GA import, 61 zones, 309 crew) |
+| `assistance_ar17` | USS Assistance AR-17 EC2-S-C1 Liberty-hull repair ship (maritime.org GA import, 56 zones, ~700 crew est.) |
+| `luzon_arg2` | USS Luzon ARG-2 internal-combustion-engine repair ship (maritime.org GA import, 67 zones, ~600 crew est.) |
 
 ## License
 
