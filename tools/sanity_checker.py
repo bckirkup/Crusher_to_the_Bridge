@@ -2296,6 +2296,42 @@ def _check_q_source_spec(spec: Any, field: str, report: Report) -> None:
         )
 
 
+def _check_source_genotype_weights(
+    weights: Any, field: str, pid: Any,
+    source_file: str, report: Report,
+) -> None:
+    """One pathogen's ``{genotype: weight}`` map: numbers >= 0, sum 1."""
+    if not isinstance(weights, dict) or not weights:
+        report.error(
+            source_file, "CONFIG",
+            f"{field}[{pid!r}] must be a non-empty "
+            "{genotype: weight} mapping",
+        )
+        return
+    total = 0.0
+    for g, w in weights.items():
+        bad = (
+            not isinstance(w, (int, float))
+            or isinstance(w, bool)
+            or w < 0
+        )
+        if not bad and not math.isfinite(float(w)):
+            bad = True
+        if bad:
+            report.error(
+                source_file, "CONFIG",
+                f"{field}[{pid!r}][{g!r}] = {w!r} must be a "
+                "non-negative number",
+            )
+            continue
+        total += float(w)
+    if abs(total - 1.0) > 1e-6:
+        report.error(
+            source_file, "CONFIG",
+            f"{field}[{pid!r}] weights sum to {total}, not 1",
+        )
+
+
 def _check_source_genotype_distribution(
     spec: Any, field: str, source_file: str, report: Report,
 ) -> None:
@@ -2312,35 +2348,9 @@ def _check_source_genotype_distribution(
         )
         return
     for pid, weights in spec.items():
-        if not isinstance(weights, dict) or not weights:
-            report.error(
-                source_file, "CONFIG",
-                f"{field}[{pid!r}] must be a non-empty "
-                "{genotype: weight} mapping",
-            )
-            continue
-        total = 0.0
-        for g, w in weights.items():
-            bad = (
-                not isinstance(w, (int, float))
-                or isinstance(w, bool)
-                or w < 0
-            )
-            if not bad and not math.isfinite(float(w)):
-                bad = True
-            if bad:
-                report.error(
-                    source_file, "CONFIG",
-                    f"{field}[{pid!r}][{g!r}] = {w!r} must be a "
-                    "non-negative number",
-                )
-                continue
-            total += float(w)
-        if abs(total - 1.0) > 1e-6:
-            report.error(
-                source_file, "CONFIG",
-                f"{field}[{pid!r}] weights sum to {total}, not 1",
-            )
+        _check_source_genotype_weights(
+            weights, field, pid, source_file, report,
+        )
 
 
 def _check_common_source(
