@@ -190,9 +190,14 @@ data/
 │   ├── pce_874/                    (maritime.org GA import)
 │   ├── independence_cvl26/         (maritime.org GA import)
 │   ├── midway_cv41/                (maritime.org GA import)
+│   ├── lexington_cv2/              (maritime.org GA import)
+│   ├── saratoga_cv3/               (maritime.org GA import)
 │   ├── sigsbee_dd502/              (maritime.org GA import)
 │   ├── nields_dd616/               (maritime.org GA import)
 │   ├── davison_dd618/              (maritime.org GA import)
+│   ├── idaho_bb42/                 (maritime.org GA import)
+│   ├── west_virginia_bb48/         (maritime.org GA import)
+│   ├── south_dakota_bb49/          (maritime.org GA import)
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
@@ -555,7 +560,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twenty-seven ship platforms are included, each with spatial layout and HVAC
+Thirty-one ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -582,9 +587,14 @@ airflow definitions:
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 | `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
+| `lexington_cv2` | USS Lexington CV-2 Lexington-class carrier, 1941 fit (maritime.org GA import, 97 zones, 2370 crew incl. air group) |
+| `saratoga_cv3` | USS Saratoga CV-3 Lexington-class carrier, wartime 1944 fit (maritime.org GA import, 108 zones, 2954 crew incl. air group) |
 | `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
 | `nields_dd616` | USS Nields DD-616 Benson-class destroyer (maritime.org GA import, 39 zones, 262 crew) |
 | `davison_dd618` | USS Davison DD-618 Gleaves-class FRAM destroyer (maritime.org GA import, 39 zones, 283 crew) |
+| `idaho_bb42` | USS Idaho BB-42 New Mexico-class battleship (maritime.org GA import, 114 zones, ~1084 crew class-typical) |
+| `west_virginia_bb48` | USS West Virginia BB-48 Colorado-class battleship (maritime.org GA import, 198 zones, 1340 crew plate-read) |
+| `south_dakota_bb49` | USS South Dakota BB-49 1918 contract-design battleship, never completed (maritime.org GA import, 55 zones, ~1191 crew class-typical) |
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
