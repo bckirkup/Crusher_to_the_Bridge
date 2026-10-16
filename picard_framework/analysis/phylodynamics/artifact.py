@@ -144,6 +144,26 @@ def _strain_meta(raw: Mapping[str, Any]) -> StrainMeta:
     )
 
 
+def _founders_by_origin(
+    payload: Mapping[str, Any],
+) -> dict[str, dict[str, tuple[str, ...]]]:
+    """The per-origin founder split, or empty on pre-split artifacts."""
+    raw = payload.get("founders_by_origin") or {}
+    if not isinstance(raw, Mapping):
+        raise LineageCensusError("founders_by_origin must be an object")
+    grouped: dict[str, dict[str, tuple[str, ...]]] = {}
+    for pid, per in raw.items():
+        if not isinstance(per, Mapping):
+            raise LineageCensusError(
+                "founders_by_origin entries must be objects"
+            )
+        grouped[str(pid)] = {
+            str(origin): tuple(str(sid) for sid in sids)
+            for origin, sids in per.items()
+        }
+    return grouped
+
+
 def census_from_dict(payload: Mapping[str, Any]) -> CensusArtifact:
     """Parse a ``lineage_census.json`` payload."""
     snapshots = payload.get("snapshots")
@@ -161,19 +181,6 @@ def census_from_dict(payload: Mapping[str, Any]) -> CensusArtifact:
     founders_raw = payload.get("founders") or {}
     if not isinstance(founders_raw, Mapping):
         raise LineageCensusError("founders must be an object")
-    founders_by_origin_raw = payload.get("founders_by_origin") or {}
-    if not isinstance(founders_by_origin_raw, Mapping):
-        raise LineageCensusError("founders_by_origin must be an object")
-    founders_by_origin = {}
-    for pid, per in founders_by_origin_raw.items():
-        if not isinstance(per, Mapping):
-            raise LineageCensusError(
-                "founders_by_origin entries must be objects"
-            )
-        founders_by_origin[str(pid)] = {
-            str(origin): tuple(str(sid) for sid in sids)
-            for origin, sids in per.items()
-        }
     rows = []
     for entry in snapshots:
         if not isinstance(entry, Mapping):
@@ -192,5 +199,5 @@ def census_from_dict(payload: Mapping[str, Any]) -> CensusArtifact:
             str(pid): tuple(str(sid) for sid in sids)
             for pid, sids in founders_raw.items()
         },
-        founders_by_origin=founders_by_origin,
+        founders_by_origin=_founders_by_origin(payload),
     )
