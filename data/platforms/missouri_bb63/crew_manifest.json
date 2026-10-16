@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:47:36.858738+00:00",
+  "platform": "missouri_bb63",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1561
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 82,
+      "berth_zone": "Officers_Qtrs_2D",
+      "duty_zone": "Offices_2D",
+      "notes": "82 officers incl flag staff (plate 2)"
+    },
+    {
+      "class_id": "chief_petty_officers",
+      "role_group": "crew",
+      "count": 55,
+      "berth_zone": "CPO_Quarters_2D",
+      "duty_zone": "Workshops_2D",
+      "notes": "CPOs: ship 53 + marine 2 (plate 2)"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 77,
+      "berth_zone": "Marines_Quarters_2D",
+      "duty_zone": "Fantail_Open",
+      "notes": "Marine detachment (plate 2)"
+    },
+    {
+      "class_id": "ship_enlisted",
+      "role_group": "crew",
+      "count": 1345,
+      "berth_zone": "Berthing_3D_Aft",
+      "duty_zone": "Machinery_Lower_2P",
+      "notes": "Ship's company enlisted (plate 2)"
+    },
+    {
+      "class_id": "aviation_det",
+      "role_group": "crew",
+      "count": 2,
+      "berth_zone": "Berthing_3D_Aft",
+      "duty_zone": "Stern_AvOrd_3D",
+      "notes": "Aviation unit (plate 2)"
+    }
+  ],
+  "source": "plate 2 accommodations/personnel table (1950): 82 officers + 1479 enlisted",
+  "consistency": {
+    "declared_total": 1561,
+    "manifest_total": 1561,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

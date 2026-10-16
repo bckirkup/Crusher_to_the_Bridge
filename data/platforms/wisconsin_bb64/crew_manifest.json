@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:51:13.736860+00:00",
+  "platform": "wisconsin_bb64",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 2560
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 162,
+      "berth_zone": "Officers_Qtrs_2D",
+      "duty_zone": "Offices_2D",
+      "notes": "~162 officers incl staff (plate accommodation table)"
+    },
+    {
+      "class_id": "chief_petty_officers",
+      "role_group": "crew",
+      "count": 110,
+      "berth_zone": "CPO_Quarters_2D",
+      "duty_zone": "Workshops_2D",
+      "notes": "CPO berths columns ~110 (plate accommodation table)"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 114,
+      "berth_zone": "Marines_Quarters_2D",
+      "duty_zone": "Fantail_Open",
+      "notes": "114 marine enlisted (plate accommodation table)"
+    },
+    {
+      "class_id": "ship_enlisted",
+      "role_group": "crew",
+      "count": 2174,
+      "berth_zone": "Berthing_2D_Mid",
+      "duty_zone": "Fantail_Open",
+      "notes": "~2,174 ship's company enlisted incl aviation det"
+    }
+  ],
+  "source": "plate accommodations tables (1956): ~162 officers, ~110 CPO, 114 marines, ~2,175 crew enlisted (berth columns read)",
+  "consistency": {
+    "declared_total": 2560,
+    "manifest_total": 2560,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
