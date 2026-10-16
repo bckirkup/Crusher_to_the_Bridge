@@ -80,6 +80,10 @@ def drainage_fingerprint(b: PlatformBundle, *, epochs: int = 48) -> dict[str, An
         filter_efficiency=_FILTER_EFFICIENCY, natural_decay_rate=0.0,
     )
     zones = eng._real_zone_ids
+    if not zones:
+        raise ValueError(
+            f"{b.platform_id}: no transport zones resolved — unknown platform?"
+        )
     mass = {z: 1.0 for z in zones}
     injected = float(len(zones))
     curve: list[dict[str, float]] = []
@@ -157,17 +161,18 @@ def _pin_resolution(b: PlatformBundle) -> dict[str, Any] | None:
     """Manifest pins vs the engine's real resolution domains.
 
     ``_resolve_class_zones`` resolves ``berth_zone``/``home_zone_preference``
-    inside type Room/Cabin_Corridor zones, and ``duty_zone`` inside
-    Free+Dining zones only. A pin outside its domain does not error — it
-    silently degrades to a random draw. This measures that wiring gap
-    statically (the occupancy smoke measures it dynamically).
+    inside type Room/Cabin_Corridor zones, and ``duty_zone`` against the
+    full zone list (duty stations live wherever the hull puts them —
+    Engineering, Medical, ops). A berth pin outside the Room domain does
+    not error — it silently degrades to a random draw. This measures that
+    wiring gap statically (the occupancy smoke measures it dynamically).
     """
     rows = (b.manifest or {}).get("manifest") or []
     if not rows:
         return None
     types = {str(z.get("id") or z.get("name")): z.get("type") for z in b.zones}
     room = [z for z, t in types.items() if t in ("Room", "Cabin_Corridor")]
-    work_domain = [z for z, t in types.items() if t in ("Free", "Dining")]
+    work_domain = list(types)
 
     def resolves(pin: str, domain: list[str]) -> bool:
         return any(pin.lower() in z.lower() for z in domain)

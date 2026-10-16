@@ -143,9 +143,17 @@ Headline findings (measured, this run):
    `Work_Centers` hold **no agent in any epoch** on every imported hull.
    Consequence for dose modeling: machinery-space airborne/fomite dose is
    computed for rooms nobody is in, and crew work-hour co-location is
-   realized as corridor leisure traffic instead of watch-standing. Two
-   fix directions (engineering call): widen the duty search domain past
-   Free+Dining types, or have the importer type duty stations as Free.
+   realized as corridor leisure traffic instead of watch-standing.
+   **Resolved** — `_resolve_duty_zone` now matches a duty pin against
+   every zone (duty stations live wherever the hull puts them) and keeps
+   the Free+Dining fallback for unmatched pins, so the RNG stream shape
+   is unchanged. Verified on davison_dd618 (12 epochs, seed 42, manifest
+   arm): `Engine_Rm_Fwd`, `Mid_Services`, `CIC_Block`, `Nav_Bridge_Sonar`
+   now hold crew — CIC_Block peaks 38 agents vs cap 12, a real
+   watch-standing density the gap used to hide. Where a pin substring now
+   matches additional zones on authored hulls (e.g. cruise `Engine`),
+   the realized work draw shifts — expected new-mechanism delta, not
+   drift.
 2. **Berth pins resolve but collapse to few blocks — measured
    overcrowding.** `manifest_berth_hit` is 1.0 under the manifest arm
    (berth pin → Room-type zone works), but `home_distinct` collapses to
@@ -190,6 +198,44 @@ Headline findings (measured, this run):
 import's proposed-class ledger. The `manifest` arm exists to measure what
 wiring it into `ship_graph.agent_classes` would realize; today the hulls
 sail on the shipped cruise-taxonomy classes (the `default` arm).
+
+### Berthing deficit table (static, widest domain)
+
+Manifest crew vs total capacity of the berth resolution domain — every
+Room/Cabin_Corridor zone, including duty spaces the manifest could in
+principle pin to, so it *overstates* real berthing. Even against that
+ceiling, 10 of 13 manifest hulls are capacity-short: the deficit is not
+a manifest pin problem, it is either a GA under-read (berthing
+compartments missed, or `max_occupancy` under-plated) or genuine
+wartime overcrowding that should be declared — `hot_bunk_ratio` is the
+in-engine lever, declared on fiction hulls today.
+
+| platform | manifest crew | berth-domain cap | worst assigned zone | verdict |
+|---|---|---|---|---|
+| midway_cv41 | 4712 | 2600 | Crew_Berthing_3D_Mid 2441/600 | short — deep (GA re-read) |
+| independence_cvl26 | 1566 | 1368 | Crew_Berthing_3D 785/490 | short (GA re-read) |
+| ruchamkin_apd89 | 357 | 266 | Troop_Berthing_Fwd 162/70 | short (GA re-read or troop overload) |
+| sigsbee_dd502 | 322 | 267 | Crew_Berthing_Fwd 228/80 | short |
+| davison_dd618 | 283 | 262 | Crew_Qtrs_1P 188/70 | short (marginal — crowding plausible) |
+| passumpsic_ao106 | 280 | 181 | Crew_Qtrs_Fwd 165/60 | short (GA re-read) |
+| nields_dd616 | 262 | 254 | Crew_Qtrs_1P 180/70 | short (marginal — crowding plausible) |
+| cannon_de701 | 216 | 192 | Crew_Berthing_1P 109/80 | short |
+| raven_am55 | 105 | 80 | Crew_Quarters 84/60 | short |
+| pce_874 | 99 | 73 | Crew_Quarters 78/55 | short |
+| bolster_ars38 | 90 | 79 | Crew_Quarters 70/55 | short (marginal) |
+| castle_class_corvette | 99 | 103 | Seamen_Mess 62/45 | **pin-collapse** — `Mess_Mid` unassigned; manifest re-spread, no GA re-read |
+| gordon_gunter_r338 | 35 | 43 | — | ok |
+
+Two mechanisms to separate per hull: (a) WW2-era crowding is real —
+wartime complements ran above design berthing (extra AA crews, troops) —
+so a modest shortfall is a *declared crowding* decision, not an error;
+(b) deep deficits like midway (4712 vs 2600 even counting every Room
+zone, including shops and CIC) exceed any crowding interpretation and
+point at berthing compartments the GA read missed. The decision per
+hull: re-read the plates, or declare `hot_bunk_ratio`/crowded berthing
+as the intended realism. Naming caveat for future audits: stateroom
+zones named `*_SR` (gordon_gunter) dodge the berth-name hints; the
+Room-type domain is the reliable denominator.
 
 ## First fleet run — 2026-10-16, 22 platforms
 
