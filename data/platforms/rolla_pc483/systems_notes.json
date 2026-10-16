@@ -1,0 +1,275 @@
+{
+  "platform": "rolla_pc483",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "first_platform",
+      "serves_zone": "Engine_Rm",
+      "display": [
+        23.19,
+        5.85
+      ],
+      "evidence": "sheet_read",
+      "notes": "single stack aft of deckhouse on outboard profile"
+    },
+    {
+      "id": "vent_trunk_mid",
+      "kind": "gooseneck",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Wardroom",
+      "display": [
+        26.35,
+        1.13
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT TRUNK labels on main-deck deckhouse"
+    },
+    {
+      "id": "galley_vent",
+      "kind": "gooseneck",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "first_platform",
+      "serves_zone": "Galley",
+      "display": [
+        5.27,
+        0.63
+      ],
+      "evidence": "era_plausible",
+      "notes": "galley stove vent trunk to main deck"
+    },
+    {
+      "id": "cowl_fwd",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Crew_Quarters",
+      "display": [
+        43.21,
+        1.94
+      ],
+      "evidence": "era_plausible",
+      "notes": "mushroom vent over fwd berthing"
+    },
+    {
+      "id": "mag_vent",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "first_platform",
+      "serves_zone": "Mag_3in",
+      "display": [
+        12.12,
+        5.22
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine ventilator era-typical"
+    }
+  ],
+  "zone_modes": {
+    "Pilot_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fantail": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Eng_Casing": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engineers_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wardroom": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Chart_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_WC": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Stowage_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Head": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Focsle_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Galley_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Mag_3in": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Engine_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Berthing_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Officers_Berthing": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Berthing_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fore_Peak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Berthing_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ammo_Stow_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Peak_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fuel_Oil_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fuel_Oil_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Cont_Oil": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Void_Shaft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "FUEL OIL C-202-F",
+      "kind": "fuel",
+      "nearest_zone": "Mag_3in",
+      "display": [
+        11.59,
+        9.4
+      ],
+      "deck": "first_platform",
+      "notes": ""
+    },
+    {
+      "label": "FUEL OIL C-302-F",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Oil_Fwd",
+      "display": [
+        18.93,
+        2.54
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "CONT OIL C-303-T",
+      "kind": "fuel",
+      "nearest_zone": "Cont_Oil",
+      "display": [
+        22.59,
+        5.33
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "F.O. / L.O. SETTLING",
+      "kind": "fuel",
+      "nearest_zone": "Stores_2P",
+      "display": [
+        40.39,
+        2.69
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    },
+    {
+      "label": "PEAK TANK A-301-W",
+      "kind": "unknown",
+      "nearest_zone": "Officers_Berthing",
+      "display": [
+        39.53,
+        9.19
+      ],
+      "deck": "first_platform",
+      "notes": ""
+    },
+    {
+      "label": "FRESH WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Ammo_Stow_2P",
+      "display": [
+        45.43,
+        3.18
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Wardroom (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom",
+    "Officers_WC (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Officers_WC",
+    "Crew_Head (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Head",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "Crew_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess"
+  ]
+}

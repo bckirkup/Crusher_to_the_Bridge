@@ -1,0 +1,97 @@
+{
+  "platform_id": "eagle_pe60",
+  "ship_class_label": "Eagle Pe60",
+  "footprint_tier": "representative",
+  "representative_of": "USS Eagle No.60 (PE-60), Ford-built Eagle-class 200ft patrol boat, 1918: geared steam turbine, 2 express boilers, 2x4in RF guns + Y-gun/depth charges. maritime.org booklet, 10 pages incl. data sheet +",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 41",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Chart_House",
+    "Open_Bridge",
+    "Gun_Platform_Fwd",
+    "After_Gun_Platform",
+    "Nav_Bridge",
+    "AA_Gun_Platforms",
+    "Radio_Room",
+    "CPO_Quarters",
+    "Galley",
+    "Officers_Head",
+    "Mess_Room",
+    "Wardroom_Mess",
+    "WR_Staterooms",
+    "Officers_Staterooms",
+    "Fantail",
+    "Berthing_Main_1",
+    "Berthing_Main_2",
+    "Aux_Radio_Room",
+    "Engine_Rm",
+    "Boiler_Rm",
+    "Gun_Deck_Fwd",
+    "Chain_Locker",
+    "Steering_Gear",
+    "Shaft_Alley",
+    "FO_Aft_Port",
+    "FO_Aft_Stbd",
+    "Eng_Rm_Lwr",
+    "Boiler_Rm_Lwr",
+    "Magazine",
+    "FO_Fwd",
+    "Stores_Hold",
+    "Fore_Peak",
+    "Crew_WC",
+    "Stores_Aft",
+    "Berthing_Lwr",
+    "Crew_Mess_Lwr",
+    "Sub_Signal_Rm",
+    "Stores_2P_1",
+    "Stores_2P_2",
+    "FO_Tanks_Platform",
+    "Fore_Peak_Plat"
+  ],
+  "decks": [
+    "bridge_deck",
+    "deckhouse",
+    "gun_platform_aft",
+    "hold",
+    "main_deck",
+    "nav_bridge",
+    "platform"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 63.0,
+    "ymin": -2.0,
+    "ymax": 10.0
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "nav_bridge": "deck_nav_bridge.png",
+      "bridge_deck": "deck_bridge_deck.png",
+      "gun_platform_aft": "deck_gun_platform_aft.png",
+      "deckhouse": "deck_deckhouse.png",
+      "main_deck": "deck_main_deck.png",
+      "platform": "deck_platform.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}

@@ -1,0 +1,446 @@
+{
+  "platform": "bainbridge_dd1",
+  "description": "USS Bainbridge DD-1, 1901 torpedo-boat destroyer, booklet corrected Aug 1917: 4 coal-fired Thornycroft boilers, 2 triple-expansion engines, turtleback bow. 3-sheet booklet: profile + berth deck/platform/hold.",
+  "isolation_unit_capacity": 0,
+  "deck_dimensions": {
+    "length_m": 76.2,
+    "beam_m": 7.2
+  },
+  "graywater_zones": [
+    "Boiler_Room_Aft"
+  ],
+  "zones": [
+    {
+      "id": "Galley_Mess_Deckhouse",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 55.0,
+      "floor_area_m2": 21.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.6,
+      "deck": "spar_deck",
+      "display": {
+        "x": 51.35,
+        "y": 2.74
+      },
+      "max_occupancy": 8,
+      "description": "galley + messing space in deckhouse; position from outboard profile, volume era-typical"
+    },
+    {
+      "id": "Pilot_Chart_House",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 40.0,
+      "floor_area_m2": 15.43,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.6,
+      "deck": "spar_deck",
+      "display": {
+        "x": 56.3,
+        "y": 1.37
+      },
+      "max_occupancy": 4,
+      "description": "bridge/chart space atop deckhouse fwd end"
+    },
+    {
+      "id": "Officers_Mess_Dh",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 25.0,
+      "floor_area_m2": 9.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.6,
+      "deck": "spar_deck",
+      "display": {
+        "x": 59.9,
+        "y": 2.74
+      },
+      "max_occupancy": 6,
+      "description": "officers' mess/warrant officers' space, deckhouse aft"
+    },
+    {
+      "id": "Officers_Country",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 54.68,
+      "floor_area_m2": 21.03,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 1.75,
+        "y": 2.99
+      },
+      "max_occupancy": 4,
+      "description": "officers' cabins + commissary, stern compartment"
+    },
+    {
+      "id": "Wardroom",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 33.81,
+      "floor_area_m2": 13.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 5.03,
+        "y": 3.57
+      },
+      "max_occupancy": 6
+    },
+    {
+      "id": "Boiler_Room_Aft",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 190.0,
+      "floor_area_m2": 73.08,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 10.82,
+        "y": 2.88
+      },
+      "max_occupancy": 4,
+      "description": "FIRE ROOM COMP'T B-2: boiler + aux feed pump + feed tank; rises through berth deck to spar deck"
+    },
+    {
+      "id": "Engine_Rooms",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 160.0,
+      "floor_area_m2": 61.54,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 21.49,
+        "y": 2.88
+      },
+      "max_occupancy": 6,
+      "description": "FORWARD + AFTER ENGINE ROOM COMP'Ts: two triple-expansion engines, condenser, dynamos, pumps"
+    },
+    {
+      "id": "Boiler_Room_Fwd",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 210.0,
+      "floor_area_m2": 80.77,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 31.7,
+        "y": 2.88
+      },
+      "max_occupancy": 4,
+      "description": "forward fire room: boiler rows drawn x0.36-0.50"
+    },
+    {
+      "id": "Coal_Bunker_B3",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 25.36,
+      "floor_area_m2": 9.75,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 39.93,
+        "y": 1.12
+      },
+      "max_occupancy": 1,
+      "description": "COAL BUNKER COMP'T B-3 wing tank"
+    },
+    {
+      "id": "Coal_Bunker_B5",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 29.59,
+      "floor_area_m2": 11.38,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 44.81,
+        "y": 1.12
+      },
+      "max_occupancy": 1,
+      "description": "COAL BUNKER COMP'T B-5 wing tank"
+    },
+    {
+      "id": "Crew_WC",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 23.37,
+      "floor_area_m2": 10.16,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 49.53,
+        "y": 2.4
+      },
+      "max_occupancy": 4,
+      "description": "CREW'S W.C.: urinal, wash bowls, ditty-box racks",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Crew_Quarters",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 118.34,
+      "floor_area_m2": 45.52,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 53.64,
+        "y": 3.36
+      },
+      "max_occupancy": 35,
+      "description": "CREW'S QUARTERS COMP'T A-10: z-pipe berths, stanchions, hatches to stores/platform"
+    },
+    {
+      "id": "Berthing_Fwd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 52.83,
+      "floor_area_m2": 20.32,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 64.01,
+        "y": 3.47
+      },
+      "max_occupancy": 15,
+      "description": "additional z-pipe berths fwd, hatch to platform"
+    },
+    {
+      "id": "Medical_Electrical_Stores",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 12.68,
+      "floor_area_m2": 4.88,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 66.75,
+        "y": 3.57
+      },
+      "max_occupancy": 1,
+      "description": "MEDICAL AND ELECTRICAL STORES + locker/shelf"
+    },
+    {
+      "id": "Shell_Room",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 12.68,
+      "floor_area_m2": 4.88,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 69.8,
+        "y": 3.57
+      },
+      "max_occupancy": 1,
+      "description": "SHELL AND AMMUNITION stowage"
+    },
+    {
+      "id": "Chain_Hawse",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 21.13,
+      "floor_area_m2": 8.13,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.6,
+      "deck": "berth_deck",
+      "display": {
+        "x": 72.39,
+        "y": 3.79
+      },
+      "max_occupancy": 1,
+      "description": "chain pipe / hawse pipe / forepeak W.T. bulkhead"
+    },
+    {
+      "id": "Engineer_Stores",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 48.35,
+      "floor_area_m2": 18.6,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.9,
+      "deck": "platform",
+      "display": {
+        "x": 50.77,
+        "y": 3.31
+      },
+      "max_occupancy": 1,
+      "description": "ENGINEER STORES + desk/drawers/locker, COMP'T A-9"
+    },
+    {
+      "id": "Ordnance_Stores",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 48.35,
+      "floor_area_m2": 18.6,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.9,
+      "deck": "platform",
+      "display": {
+        "x": 55.54,
+        "y": 3.31
+      },
+      "max_occupancy": 1,
+      "description": "STORES, ORDNANCE + WAR HEADS COMP'T A-7 (torpedo warheads)"
+    },
+    {
+      "id": "Paint_Oil_Stores",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 59.51,
+      "floor_area_m2": 22.89,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.9,
+      "deck": "platform",
+      "display": {
+        "x": 61.26,
+        "y": 3.24
+      },
+      "max_occupancy": 1,
+      "description": "STORES, PAINT & OIL COMP'T A-5"
+    },
+    {
+      "id": "Chain_Locker_Plat",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 23.8,
+      "floor_area_m2": 9.16,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.9,
+      "deck": "platform",
+      "display": {
+        "x": 67.14,
+        "y": 3.31
+      },
+      "max_occupancy": 1,
+      "description": "anchor + chain locker region; adjacent compartment label partially legible"
+    },
+    {
+      "id": "Fore_Peak_A1",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 41.66,
+      "floor_area_m2": 16.02,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.9,
+      "deck": "platform",
+      "display": {
+        "x": 72.07,
+        "y": 3.31
+      },
+      "max_occupancy": 1,
+      "description": "COMP'T A-1 fore peak"
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 73.36,
+      "floor_area_m2": 28.22,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.4,
+      "deck": "hold",
+      "display": {
+        "x": 2.44,
+        "y": 2.88
+      },
+      "max_occupancy": 1,
+      "description": "stern compartment: steering gear + after peak"
+    },
+    {
+      "id": "Coal_Bunker_Hold_Aft",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 149.78,
+      "floor_area_m2": 57.61,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.4,
+      "deck": "hold",
+      "display": {
+        "x": 11.89,
+        "y": 2.93
+      },
+      "max_occupancy": 1,
+      "description": "coal bunker cells in hold under fire room"
+    },
+    {
+      "id": "Machinery_Lwr",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 280.0,
+      "floor_area_m2": 107.69,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.4,
+      "deck": "hold",
+      "display": {
+        "x": 26.21,
+        "y": 2.93
+      },
+      "max_occupancy": 4,
+      "description": "hold-level machinery bottoms under engine/boiler rooms"
+    },
+    {
+      "id": "Coal_Bunker_Hold_Fwd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 103.93,
+      "floor_area_m2": 39.97,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.4,
+      "deck": "hold",
+      "display": {
+        "x": 41.76,
+        "y": 3.03
+      },
+      "max_occupancy": 1,
+      "description": "coal bunker cells fwd of machinery"
+    },
+    {
+      "id": "Stores_Hold_Fwd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 121.25,
+      "floor_area_m2": 46.63,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.4,
+      "deck": "hold",
+      "display": {
+        "x": 53.04,
+        "y": 3.03
+      },
+      "max_occupancy": 1,
+      "description": "hold stores under crew quarters"
+    },
+    {
+      "id": "Hold_Fwd_Peak",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 92.72,
+      "floor_area_m2": 35.66,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.4,
+      "deck": "hold",
+      "display": {
+        "x": 67.97,
+        "y": 2.98
+      },
+      "max_occupancy": 1,
+      "description": "fwd hold under platform stores"
+    }
+  ]
+}

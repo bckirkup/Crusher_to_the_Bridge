@@ -1,0 +1,93 @@
+{
+  "platform_id": "palmer_dms5",
+  "ship_class_label": "Palmer Dms5",
+  "footprint_tier": "representative",
+  "representative_of": "USS Palmer DMS-5 (ex-DD-161), Wickes-class flush-deck destroyer converted to high-speed minesweeper, Norfolk Navy Yard booklet corrected 1943. Small source scans (~21x6in sheets): labels read at compa",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 39",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Sound_Room_Bridge",
+    "Chart_House",
+    "Pilot_House",
+    "Paravane_Handling",
+    "Ammo_Stowage_Aft",
+    "Crew_Wash_Room",
+    "Crew_Head",
+    "Store_Aft",
+    "Paravane_Smoke_Stow",
+    "Winch_Room",
+    "Boat_Deck_Uptakes",
+    "Battery_Locker",
+    "Vegetable_Lockers",
+    "Galley",
+    "Ship_Fitters_Shop",
+    "Berthing_Mid",
+    "Engineering_Office",
+    "CPO_Berthing_Main",
+    "Radio_Room",
+    "Sound_Compt",
+    "Officers_Cabins",
+    "Wardroom",
+    "Focsle_Chain",
+    "Crew_Berthing_Aft",
+    "Crew_Berthing_Aft_2",
+    "Store_1P_Aft",
+    "Machinery_2P",
+    "Store_2P",
+    "Crew_Berthing_Fwd_1",
+    "Crew_Berthing_Fwd_2",
+    "Crew_Mess",
+    "Fore_Peak",
+    "Magazine_Aft",
+    "Crew_Stores_Hold",
+    "Boiler_Room_1",
+    "Boiler_Room_2",
+    "Engine_Room",
+    "Stores_Hold_Fwd",
+    "Magazine_Fwd"
+  ],
+  "decks": [
+    "bridge_deck",
+    "first_platform_aft",
+    "first_platform_fwd",
+    "hold",
+    "main_deck",
+    "second_platform"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 97.8,
+    "ymin": -2.0,
+    "ymax": 11.4
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "bridge_deck": "deck_bridge_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "first_platform_aft": "deck_first_platform_aft.png",
+      "second_platform": "deck_second_platform.png",
+      "first_platform_fwd": "deck_first_platform_fwd.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:29:28.800064+00:00",
+  "platform_id": "eagle_pe60",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/eagle_pe60",
+  "digest_sha256": "2bce1480a1b5f8096a1c6b5408aacd5d71c574e6df1eab3b67f285370afab08d",
+  "svg_sha256": {
+    "page_04_approved.svg": "f6b34ebd4eaa2b94fb73e9321bdc7c2548be64b8fadb4d1e813117a23a14b016",
+    "page_05_approved.svg": "bcb2b6abfbc676c2dbb59bfe39372a68c61c56aafcb549be688f4f3f26edcae6",
+    "page_06_approved.svg": "a537b37604afcda7304fe5fdce15859b159b560dcbca2cbe81946515c764d5ba",
+    "page_07_approved.svg": "021e8c308f685aa7cab2a2b1c70a96ed75416a53c88a524d0ebd3e15d355fad3",
+    "page_08_approved.svg": "06bd6283982b877cbe7fc72581f6a78ee807ca57fabc8d6a2086abff619d58ca"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 41,
+  "berthing_zones": [
+    "Chart_House",
+    "Radio_Room",
+    "CPO_Quarters",
+    "WR_Staterooms",
+    "Officers_Staterooms",
+    "Berthing_Main_1",
+    "Berthing_Main_2",
+    "Aux_Radio_Room",
+    "Chain_Locker",
+    "Steering_Gear",
+    "Magazine",
+    "Stores_Hold",
+    "Fore_Peak",
+    "Stores_Aft",
+    "Berthing_Lwr",
+    "Sub_Signal_Rm",
+    "Stores_2P_1",
+    "Stores_2P_2",
+    "Fore_Peak_Plat"
+  ],
+  "systems_era": "usn_ww2"
+}

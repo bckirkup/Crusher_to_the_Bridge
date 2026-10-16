@@ -1,0 +1,329 @@
+{
+  "platform": "eagle_pe60",
+  "description": "HVAC network synthesized for eagle_pe60",
+  "oa_fraction": 0.3,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Chart_House",
+        "Radio_Room",
+        "CPO_Quarters",
+        "Galley",
+        "Mess_Room",
+        "Wardroom_Mess",
+        "WR_Staterooms",
+        "Officers_Staterooms",
+        "Berthing_Main_1",
+        "Berthing_Main_2",
+        "Aux_Radio_Room",
+        "Chain_Locker",
+        "Stores_Aft",
+        "Berthing_Lwr",
+        "Crew_Mess_Lwr",
+        "Sub_Signal_Rm",
+        "Stores_2P_1",
+        "Stores_2P_2",
+        "Fore_Peak_Plat",
+        "Steering_Gear",
+        "Magazine",
+        "Stores_Hold",
+        "Fore_Peak"
+      ],
+      "ach": 6.0,
+      "description": "accommodation + stores ventilation",
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Rm",
+        "Boiler_Rm",
+        "Eng_Rm_Lwr",
+        "Boiler_Rm_Lwr",
+        "Shaft_Alley"
+      ],
+      "ach": 12.0,
+      "description": "machinery ventilation: forced draft + funnel exhaust",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_Officers_Head",
+      "rooms": [
+        "Officers_Head"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Officers_Head, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_Crew_WC",
+      "rooms": [
+        "Crew_WC"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Crew_WC, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_Officers_Head",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Officers_Head; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_Crew_WC",
+      "flow_rate_m3h": 356.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Crew_WC; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Nav_Bridge",
+      "to": "Chart_House",
+      "type": "ladder"
+    },
+    {
+      "from": "AA_Gun_Platforms",
+      "to": "Nav_Bridge",
+      "type": "ladder"
+    },
+    {
+      "from": "Chart_House",
+      "to": "Open_Bridge",
+      "type": "door"
+    },
+    {
+      "from": "Open_Bridge",
+      "to": "Gun_Platform_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Chart_House",
+      "to": "Radio_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "After_Gun_Platform",
+      "to": "Fantail",
+      "type": "ladder"
+    },
+    {
+      "from": "Radio_Room",
+      "to": "CPO_Quarters",
+      "type": "door"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Room",
+      "type": "door"
+    },
+    {
+      "from": "Mess_Room",
+      "to": "Wardroom_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom_Mess",
+      "to": "WR_Staterooms",
+      "type": "door"
+    },
+    {
+      "from": "Officers_Staterooms",
+      "to": "Mess_Room",
+      "type": "door"
+    },
+    {
+      "from": "Officers_Staterooms",
+      "to": "Wardroom_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Fantail",
+      "to": "Steering_Gear",
+      "type": "ladder"
+    },
+    {
+      "from": "Berthing_Main_1",
+      "to": "Berthing_Main_2",
+      "type": "door"
+    },
+    {
+      "from": "Berthing_Main_2",
+      "to": "Aux_Radio_Room",
+      "type": "door"
+    },
+    {
+      "from": "Aux_Radio_Room",
+      "to": "Engine_Rm",
+      "type": "door"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Boiler_Rm",
+      "type": "door"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Eng_Rm_Lwr",
+      "type": "ladder"
+    },
+    {
+      "from": "Boiler_Rm",
+      "to": "Boiler_Rm_Lwr",
+      "type": "ladder"
+    },
+    {
+      "from": "Boiler_Rm",
+      "to": "Galley",
+      "type": "ladder"
+    },
+    {
+      "from": "Berthing_Main_1",
+      "to": "Berthing_Lwr",
+      "type": "ladder"
+    },
+    {
+      "from": "Berthing_Lwr",
+      "to": "Crew_Mess_Lwr",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Mess_Lwr",
+      "to": "Galley",
+      "type": "ladder"
+    },
+    {
+      "from": "Stores_Aft",
+      "to": "Berthing_Lwr",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Mess_Lwr",
+      "to": "Sub_Signal_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Sub_Signal_Rm",
+      "to": "Stores_2P_1",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_2P_1",
+      "to": "Stores_2P_2",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_2P_2",
+      "to": "FO_Tanks_Platform",
+      "type": "passageway"
+    },
+    {
+      "from": "FO_Tanks_Platform",
+      "to": "Fore_Peak_Plat",
+      "type": "passageway"
+    },
+    {
+      "from": "Gun_Deck_Fwd",
+      "to": "Chain_Locker",
+      "type": "door"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Eng_Rm_Lwr",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Rm_Lwr",
+      "to": "Boiler_Rm_Lwr",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Rm_Lwr",
+      "to": "Magazine",
+      "type": "passageway"
+    },
+    {
+      "from": "Magazine",
+      "to": "FO_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "FO_Fwd",
+      "to": "Stores_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_Hold",
+      "to": "Fore_Peak",
+      "type": "passageway"
+    },
+    {
+      "from": "Radio_Room",
+      "to": "Boiler_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Officers_Staterooms",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Room",
+      "to": "WR_Staterooms",
+      "type": "passageway"
+    },
+    {
+      "from": "WR_Staterooms",
+      "to": "Officers_Staterooms",
+      "type": "passageway"
+    },
+    {
+      "from": "Fantail",
+      "to": "Berthing_Main_1",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "FO_Aft_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "FO_Aft_Stbd",
+      "type": "passageway"
+    }
+  ]
+}

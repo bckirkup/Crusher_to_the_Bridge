@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:26:47.918408+00:00",
+  "platform": "rolla_pc483",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 99
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Officers_Berthing",
+      "duty_zone": "Pilot_House",
+      "notes": "CO, exec, engineering + junior officers"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 10,
+      "berth_zone": "Berthing_Mid",
+      "duty_zone": "Crew_Quarters",
+      "notes": "chief/first-class petty officers"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "Crew_Quarters",
+      "duty_zone": "Engine_Rm",
+      "notes": "motor macs, electricians, oilers"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 50,
+      "berth_zone": "Crew_Quarters",
+      "duty_zone": "Focsle_Deck",
+      "notes": "seamen, 3in/20mm crews, depth-charge + sonar detail"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Berthing_Fwd",
+      "duty_zone": "Galley",
+      "notes": "cooks, stewards, ship's service"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 1,
+      "berth_zone": "Berthing_Fwd",
+      "duty_zone": "Wardroom",
+      "notes": "pharmacist's mate (no dedicated sick bay drawn)"
+    },
+    {
+      "class_id": "radio_signal",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Berthing_Fwd",
+      "duty_zone": "Radio_Room",
+      "notes": "radiomen + signalmen + sonarmen"
+    }
+  ],
+  "source": "Class-typical 173ft PC complement ~99 (5 officers + ~94 enlisted); booklet has no complement table",
+  "consistency": {
+    "declared_total": 99,
+    "manifest_total": 99,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

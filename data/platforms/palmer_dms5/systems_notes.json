@@ -1,0 +1,330 @@
+{
+  "platform": "palmer_dms5",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "funnel_1",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Boiler_Room_1",
+      "display": [
+        45.46,
+        6.03
+      ],
+      "evidence": "era_plausible",
+      "notes": "stack over fwd boiler room; plate too small to resolve uptake count (Wickes class carried 4 funnels trunked from 2 boiler rooms)"
+    },
+    {
+      "id": "funnel_2",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Boiler_Room_2",
+      "display": [
+        52.79,
+        6.03
+      ],
+      "evidence": "era_plausible",
+      "notes": "stack over aft boiler room"
+    },
+    {
+      "id": "blower_machinery",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "hold",
+      "serves_zone": "Engine_Room",
+      "display": [
+        48.88,
+        5.42
+      ],
+      "evidence": "era_plausible",
+      "notes": "forced-draft blower at machinery casing base"
+    },
+    {
+      "id": "galley_vent",
+      "kind": "gooseneck",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Galley",
+      "display": [
+        52.79,
+        0.45
+      ],
+      "evidence": "sheet_read",
+      "notes": "galley range exhaust drawn on deckhouse top"
+    },
+    {
+      "id": "cowl_fwd",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Crew_Mess",
+      "display": [
+        82.6,
+        1.34
+      ],
+      "evidence": "era_plausible",
+      "notes": "mushroom/cowl vents over fwd accommodation"
+    },
+    {
+      "id": "cowl_aft",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Crew_Berthing_Aft",
+      "display": [
+        17.11,
+        1.9
+      ],
+      "evidence": "era_plausible",
+      "notes": "mushroom/cowl vents over aft accommodation"
+    },
+    {
+      "id": "mag_vent_aft",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Magazine_Aft",
+      "display": [
+        10.75,
+        2.41
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine ventilator era-typical"
+    },
+    {
+      "id": "mag_vent_fwd",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Magazine_Fwd",
+      "display": [
+        79.18,
+        2.89
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine ventilator era-typical"
+    }
+  ],
+  "zone_modes": {
+    "Sound_Room_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chart_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Pilot_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Paravane_Handling": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ammo_Stowage_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Wash_Room": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Head": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Store_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Paravane_Smoke_Stow": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Winch_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck_Uptakes": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Battery_Locker": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Vegetable_Lockers": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Ship_Fitters_Shop": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Berthing_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engineering_Office": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Berthing_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sound_Compt": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Cabins": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wardroom": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Focsle_Chain": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Crew_Berthing_Aft_2": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Store_1P_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Store_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Fwd_1": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Fwd_2": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Fore_Peak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Magazine_Aft": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Crew_Stores_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boiler_Room_1": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Boiler_Room_2": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Stores_Hold_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Magazine_Fwd": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    }
+  },
+  "tanks": [
+    {
+      "label": "FUEL OIL TANKS (midships double bottoms)",
+      "kind": "fuel",
+      "nearest_zone": "Boiler_Room_2",
+      "display": [
+        43.01,
+        8.44
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "F.O. STOWAGE",
+      "kind": "fuel",
+      "nearest_zone": "Stores_Hold_Fwd",
+      "display": [
+        65.5,
+        4.82
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "RESERVE FEED WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Crew_Stores_Hold",
+      "display": [
+        22.48,
+        3.62
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "FORE PEAK TANK",
+      "kind": "unknown",
+      "nearest_zone": "Magazine_Fwd",
+      "display": [
+        90.91,
+        4.82
+      ],
+      "deck": "hold",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Crew_Wash_Room (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Wash_Room",
+    "Crew_Head (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Head",
+    "Wardroom (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom",
+    "Crew_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess"
+  ]
+}

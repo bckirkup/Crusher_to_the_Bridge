@@ -1,0 +1,77 @@
+{
+  "platform_id": "bainbridge_dd1",
+  "ship_class_label": "Bainbridge Dd1",
+  "footprint_tier": "representative",
+  "representative_of": "USS Bainbridge DD-1, 1901 torpedo-boat destroyer, booklet corrected Aug 1917: 4 coal-fired Thornycroft boilers, 2 triple-expansion engines, turtleback bow. 3-sheet booklet: profile + berth deck/platfo",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 27",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Galley_Mess_Deckhouse",
+    "Pilot_Chart_House",
+    "Officers_Mess_Dh",
+    "Officers_Country",
+    "Wardroom",
+    "Boiler_Room_Aft",
+    "Engine_Rooms",
+    "Boiler_Room_Fwd",
+    "Coal_Bunker_B3",
+    "Coal_Bunker_B5",
+    "Crew_WC",
+    "Crew_Quarters",
+    "Berthing_Fwd",
+    "Medical_Electrical_Stores",
+    "Shell_Room",
+    "Chain_Hawse",
+    "Engineer_Stores",
+    "Ordnance_Stores",
+    "Paint_Oil_Stores",
+    "Chain_Locker_Plat",
+    "Fore_Peak_A1",
+    "Steering_Gear",
+    "Coal_Bunker_Hold_Aft",
+    "Machinery_Lwr",
+    "Coal_Bunker_Hold_Fwd",
+    "Stores_Hold_Fwd",
+    "Hold_Fwd_Peak"
+  ],
+  "decks": [
+    "berth_deck",
+    "hold",
+    "platform",
+    "spar_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 78.2,
+    "ymin": -2.0,
+    "ymax": 9.2
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "spar_deck": "deck_spar_deck.png",
+      "berth_deck": "deck_berth_deck.png",
+      "platform": "deck_platform.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}

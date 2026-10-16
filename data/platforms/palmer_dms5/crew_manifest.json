@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:22:17.040007+00:00",
+  "platform": "palmer_dms5",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 144
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Officers_Cabins",
+      "duty_zone": "Pilot_House",
+      "notes": "wardroom officers (plate-read count)"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 11,
+      "berth_zone": "CPO_Berthing_Main",
+      "duty_zone": "CPO_Mess",
+      "notes": "chief petty officers (plate-read count); duty_zone 'CPO_Mess' not a digest zone"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "Crew_Berthing_Aft",
+      "duty_zone": "Engine_Room",
+      "notes": "water tenders, motor macs, electricians"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 60,
+      "berth_zone": "Crew_Berthing_Fwd_1",
+      "duty_zone": "Winch_Room",
+      "notes": "seamen, gun crews, minesweep detail (winch/paravane)"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "Crew_Berthing_Fwd_2",
+      "duty_zone": "Galley",
+      "notes": "cooks, stewards, ship's service"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 2,
+      "berth_zone": "Crew_Berthing_Fwd_2",
+      "duty_zone": "Wardroom",
+      "notes": "pharmacist's mates (dispensary folded into wardroom area — see uncertainties)"
+    },
+    {
+      "class_id": "radio_signal",
+      "role_group": "crew",
+      "count": 11,
+      "berth_zone": "Berthing_Mid",
+      "duty_zone": "Radio_Room",
+      "notes": "radiomen, signalmen, sonarmen"
+    }
+  ],
+  "source": "Plate-read complement table: 8 wardroom officers + 11 chief petty officers + ~125 crew = TOTAL ON BOARD 144",
+  "consistency": {
+    "declared_total": 144,
+    "manifest_total": 144,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

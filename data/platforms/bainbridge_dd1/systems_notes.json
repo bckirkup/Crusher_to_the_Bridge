@@ -1,0 +1,278 @@
+{
+  "platform": "bainbridge_dd1",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "funnel_1",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "berth_deck",
+      "serves_zone": "Boiler_Room_Aft",
+      "display": [
+        25.91,
+        13.87
+      ],
+      "evidence": "sheet_read",
+      "notes": "first of four thin stacks on profile"
+    },
+    {
+      "id": "funnel_2",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "berth_deck",
+      "serves_zone": "Boiler_Room_Aft",
+      "display": [
+        31.24,
+        13.87
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "funnel_3",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "berth_deck",
+      "serves_zone": "Boiler_Room_Fwd",
+      "display": [
+        35.81,
+        13.87
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "funnel_4",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "berth_deck",
+      "serves_zone": "Boiler_Room_Fwd",
+      "display": [
+        40.39,
+        13.87
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "cowl_crew",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "berth_deck",
+      "serves_zone": "Crew_Quarters",
+      "display": [
+        62.48,
+        15.73
+      ],
+      "evidence": "era_plausible",
+      "notes": "mushroom vent over fwd crew space era-typical"
+    },
+    {
+      "id": "cowl_aft",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "berth_deck",
+      "serves_zone": "Officers_Country",
+      "display": [
+        3.81,
+        15.73
+      ],
+      "evidence": "era_plausible",
+      "notes": "mushroom vent over officers' country era-typical"
+    },
+    {
+      "id": "galley_vent",
+      "kind": "gooseneck",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "spar_deck",
+      "serves_zone": "Galley_Mess_Deckhouse",
+      "display": [
+        51.5,
+        0.69
+      ],
+      "evidence": "era_plausible",
+      "notes": "galley range uptake in deckhouse"
+    }
+  ],
+  "zone_modes": {
+    "Galley_Mess_Deckhouse": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Pilot_Chart_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Mess_Dh": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Officers_Country": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Wardroom": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Room_Aft": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Engine_Rooms": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Room_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Coal_Bunker_B3": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Coal_Bunker_B5": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_WC": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Berthing_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Medical_Electrical_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shell_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chain_Hawse": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engineer_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ordnance_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Paint_Oil_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker_Plat": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fore_Peak_A1": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Coal_Bunker_Hold_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Lwr": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Coal_Bunker_Hold_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_Hold_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hold_Fwd_Peak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "FRESH WATER 500 GALS",
+      "kind": "freshwater",
+      "nearest_zone": "Engineer_Stores",
+      "display": [
+        50.77,
+        3.6
+      ],
+      "deck": "platform",
+      "notes": ""
+    },
+    {
+      "label": "FRESH WATER 400 GALS",
+      "kind": "freshwater",
+      "nearest_zone": "Engineer_Stores",
+      "display": [
+        50.77,
+        5.4
+      ],
+      "deck": "platform",
+      "notes": ""
+    },
+    {
+      "label": "FEED TANK (fire room)",
+      "kind": "unknown",
+      "nearest_zone": "Boiler_Room_Aft",
+      "display": [
+        15.24,
+        2.4
+      ],
+      "deck": "berth_deck",
+      "notes": ""
+    },
+    {
+      "label": "COAL BUNKERS (wing, berth deck)",
+      "kind": "unknown",
+      "nearest_zone": "Coal_Bunker_B3",
+      "display": [
+        40.39,
+        1.33
+      ],
+      "deck": "berth_deck",
+      "notes": ""
+    },
+    {
+      "label": "TRIM TANKS (double bottom)",
+      "kind": "unknown",
+      "nearest_zone": "Stores_Hold_Fwd",
+      "display": [
+        53.34,
+        3.6
+      ],
+      "deck": "hold",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Officers_Mess_Dh (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Officers_Mess_Dh",
+    "Wardroom (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom",
+    "Crew_WC (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_WC"
+  ]
+}

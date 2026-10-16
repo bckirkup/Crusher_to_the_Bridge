@@ -117,6 +117,11 @@ PLATFORMS = [
     "lyon_ap71",
     "apl_24",
     "antietam_cvs36",
+    "cushing_dd376",
+    "palmer_dms5",
+    "bainbridge_dd1",
+    "rolla_pc483",
+    "eagle_pe60",
 ]
 
 ENTERPRISE_IDS = frozenset({

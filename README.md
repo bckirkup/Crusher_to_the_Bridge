@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Seventy-five ship platforms are included, each with spatial layout and HVAC
+Eighty ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -869,6 +869,11 @@ from `orchestrator_types.py`:
 | `lyon_ap71` | USS Lyon AP-71 troop transport, C3-type (maritime.org GA import, sheets 3-4 missing, 59 zones, 407 crew + 2208 troops) |
 | `apl_24` | APL-24 barracks ship, APL-17 class, non-self-propelled (maritime.org GA import, incomplete booklet, 34 zones, 71 crew + 589 berthed) |
 | `antietam_cvs36` | USS Antietam CVS-36 Essex-class ASW carrier, 1955 angled-deck conversion (maritime.org GA import, 66 zones, 2998 crew incl. air group + marines) |
+| `cushing_dd376` | USS Cushing DD-376 Mahan-class destroyer, ~1942 (maritime.org GA import, 41 zones, 250 crew) |
+| `palmer_dms5` | USS Palmer DMS-5 flush-deck high-speed minesweeper, 1943 (maritime.org GA import, 39 zones, 144 crew) |
+| `bainbridge_dd1` | USS Bainbridge DD-1, first USN destroyer, 1901 (maritime.org GA import, 27 zones, 73 crew) |
+| `rolla_pc483` | USS Rolla PC-483 Bluffton-class submarine chaser, 1942 (maritime.org GA import, 30 zones, 99 crew) |
+| `eagle_pe60` | USS Eagle No.60 PE-60 Eagle-class patrol vessel, 1918 (maritime.org GA import, 41 zones, 58 crew) |
 
 ## License
 
