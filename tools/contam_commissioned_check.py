@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -51,10 +52,32 @@ _ABS_EPS_M3H = 0.5  # near-zero legs: absolute slack below relative math
 _DEFAULT_WORKDIR = os.path.join(
     REPO_ROOT, "telemetry_buffer", "contam_commissioned",
 )
+_PLATFORM_ID_RE = re.compile(r"[A-Za-z0-9_]+")
+
+
+def _validated_platform(platform: str) -> str:
+    """Confine a CLI platform id to a directory under data/platforms/."""
+    if not _PLATFORM_ID_RE.fullmatch(platform):
+        raise ValueError(f"invalid platform id {platform!r}")
+    platform_dir = os.path.realpath(
+        os.path.join(REPO_ROOT, "data", "platforms", platform),
+    )
+    if os.path.commonpath((platform_dir, REPO_ROOT)) != REPO_ROOT \
+            or not os.path.isdir(platform_dir):
+        raise ValueError(f"platform {platform!r} not under data/platforms/")
+    return platform_dir
+
+
+def _validated_workdir(workdir: str) -> str:
+    """Confine the artifact workdir to the repo tree (validated_open)."""
+    resolved = os.path.realpath(workdir)
+    if os.path.commonpath((resolved, REPO_ROOT)) != REPO_ROOT:
+        raise ValueError(f"workdir {workdir!r} must be inside the repo")
+    return resolved
 
 
 def _load_platform(platform: str) -> tuple[str, dict, dict]:
-    platform_dir = os.path.join(REPO_ROOT, "data", "platforms", platform)
+    platform_dir = _validated_platform(platform)
     with open(
         os.path.join(platform_dir, "spatial_layout.json"), encoding="utf-8",
     ) as fh:
@@ -122,6 +145,38 @@ def _check_emission(
     return errors
 
 
+def _solved_leg(
+    entry: dict,
+    declared: dict[str, dict[str, float]],
+    flows_m3h: dict[int, float],
+    tolerance: float,
+) -> tuple[str, str | None]:
+    """Format one terminal row; return (row, error-or-None)."""
+    kind = entry["kind"]
+    room = entry["to_zone"] if kind == "ahs_supply" else entry["from_zone"]
+    leg = "supply" if kind == "ahs_supply" else "return"
+    want = declared[room][leg]
+    got = abs(float(flows_m3h.get(int(entry["path_nr"]), 0.0)))
+    if want <= _ABS_EPS_M3H:
+        ok = got <= _ABS_EPS_M3H
+        ratio = float("nan") if ok else float("inf")
+    else:
+        ratio = got / want
+        ok = abs(ratio - 1.0) <= tolerance
+    flag = "" if ok else "  <-- OUT OF TOLERANCE"
+    row = (
+        f"  p{entry['path_nr']:>3} ahs{entry.get('ahs_nr', 0):>2} "
+        f"{leg:<6} {room:<16} declared={want:10.2f} "
+        f"solved={got:10.2f} ratio={ratio:6.3f}{flag}"
+    )
+    if ok:
+        return row, None
+    return row, (
+        f"terminal p{entry['path_nr']} {leg} {room}: solved {got:.2f} "
+        f"vs declared {want:.2f} outside tolerance {tolerance:.0%}"
+    )
+
+
 def _check_solved(
     path_map: list[dict],
     declared: dict[str, dict[str, float]],
@@ -132,30 +187,12 @@ def _check_solved(
     errors: list[str] = []
     rows: list[str] = []
     for entry in path_map:
-        kind = entry.get("kind")
-        if kind not in ("ahs_supply", "ahs_return"):
+        if entry.get("kind") not in ("ahs_supply", "ahs_return"):
             continue
-        room = entry["to_zone"] if kind == "ahs_supply" else entry["from_zone"]
-        leg = "supply" if kind == "ahs_supply" else "return"
-        want = declared[room][leg]
-        got = abs(float(flows_m3h.get(int(entry["path_nr"]), 0.0)))
-        if want <= _ABS_EPS_M3H:
-            ok = got <= _ABS_EPS_M3H
-            ratio = float("nan") if got <= _ABS_EPS_M3H else float("inf")
-        else:
-            ratio = got / want
-            ok = abs(ratio - 1.0) <= tolerance
-        flag = "" if ok else "  <-- OUT OF TOLERANCE"
-        rows.append(
-            f"  p{entry['path_nr']:>3} ahs{entry.get('ahs_nr', 0):>2} "
-            f"{leg:<6} {room:<16} declared={want:10.2f} "
-            f"solved={got:10.2f} ratio={ratio:6.3f}{flag}"
-        )
-        if not ok:
-            errors.append(
-                f"terminal p{entry['path_nr']} {leg} {room}: solved {got:.2f} "
-                f"vs declared {want:.2f} outside tolerance {tolerance:.0%}"
-            )
+        row, err = _solved_leg(entry, declared, flows_m3h, tolerance)
+        rows.append(row)
+        if err is not None:
+            errors.append(err)
     return errors, rows
 
 
@@ -168,7 +205,7 @@ def check_platform(
 ) -> list[str]:
     """Run the commissioning check for one platform; returns error strings."""
     errors: list[str] = []
-    platform_dir, spatial, airflow = _load_platform(platform)
+    platform_dir, spatial, airflow = _load_platform(platform)  # sanitized id
     declared = declared_terminal_flows(spatial, airflow)
 
     prj_path = os.path.join(workdir, f"{platform}.prj")
@@ -233,12 +270,19 @@ def main(argv: list[str] | None = None) -> int:
         print("ERROR: no ContamX binary (CONTAMX_BINARY / third_party/contamx)")
         return 2
 
-    os.makedirs(args.workdir, exist_ok=True)
+    try:
+        workdir = _validated_workdir(args.workdir)
+        for platform in platforms:
+            _validated_platform(platform)
+    except ValueError as exc:
+        print(f"ERROR: {exc}")
+        return 2
+    os.makedirs(workdir, exist_ok=True)
     errors: list[str] = []
     for platform in platforms:
         errors.extend(
             check_platform(
-                platform, args.workdir,
+                platform, workdir,
                 tolerance=args.tolerance, solve=solve,
             )
         )
