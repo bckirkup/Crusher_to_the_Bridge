@@ -58,10 +58,22 @@ _PATH_AHS_EXHAUST = 64
 # Minimal orifice coefficients (plausible small opening / doorway)
 _ORIFICE_PARAMS = "2.70811e-05 0.00848528 0.5 0.01 0.112838 0.6 30 0 0"
 # Smaller envelope leak to ambient — pressure reference for ContamX Jacobian
-# (constant-flow fans / AHS Fahs alone yield FATAL Zero on the diagonal).
+# (measured ContamX 3.4.0.3: flagged simple-AHS terminals enforce Fahs x
+# sched directly, so zones still need a pressure-dependent path to ambient
+# or the airbalance has no free degree and the solver reports FATAL).
 _ENVELOPE_ORIFICE_PARAMS = (
     "2.70811e-07 8.48528e-05 0.5 0.0001 0.0112838 0.6 30 0 0"
 )
+
+# AHS terminal emission modes. ``design`` writes each terminal's Fahs as the
+# group's uniform ach x sum(V)/n split (design annotation, historical
+# behaviour). ``commissioned`` writes the per-room declared field
+# ach x V_room x duty (supply 0 / return ach x V on exhaust-only heads,
+# i.e. hvac_duty <= 0) on a constant schedule, so a ContamX solve of the
+# authored .prj must reproduce the declared per-branch flows — the
+# hull -> solver commissioning check.
+_AHS_TERMINAL_MODES = ("design", "commissioned")
+_DEFAULT_TERMINAL_MODE = "design"
 
 
 def _sanitize_name(name: str) -> str:
@@ -298,6 +310,7 @@ class _NetworkBuilder:
         overrides: dict[str, Any] | None,
         pack: dict[str, Any] | None,
         filter_efficiency: float | None,
+        ahs_terminal_mode: str | None = None,
     ) -> None:
         self.spatial_layout = spatial_layout
         self.zones = list(spatial_layout.get("zones", []))
@@ -308,6 +321,18 @@ class _NetworkBuilder:
         self.pack = pack or (_hobby.load_hobbyist_pack() if hobbyist else {})
         self.hobbyist = hobbyist
         self.filter_efficiency = filter_efficiency
+        self.default_duty = float(air_flow_paths.get("hvac_duty", 1.0) or 0.0)
+        mode = (
+            ahs_terminal_mode
+            or self.overrides.get("ahs_terminal_mode")
+            or _DEFAULT_TERMINAL_MODE
+        )
+        if mode not in _AHS_TERMINAL_MODES:
+            raise ValueError(
+                f"unknown ahs_terminal_mode {mode!r}; "
+                f"expected one of {_AHS_TERMINAL_MODES}"
+            )
+        self.ahs_terminal_mode = mode
 
         self.levels = _build_levels(self.zones)
         self.level_index = {lvl["name"]: i + 1 for i, lvl in enumerate(self.levels)}
@@ -462,6 +487,8 @@ class _NetworkBuilder:
                 "id": hz["id"],
                 "rooms": rooms,
                 "ach": ach,
+                "hvac_duty": hz.get("hvac_duty"),
+                "oa_fraction": hz.get("oa_fraction"),
                 "ret_nr": ret_nr,
                 "sup_nr": sup_nr,
                 "ret_name": ret_name,
@@ -643,6 +670,7 @@ class _NetworkBuilder:
         is_hvac_ducted: bool,
         crusher_transfer: bool,
         fields: PathFields = PathFields(),
+        path_map_extra: dict[str, Any] | None = None,
     ) -> int:
         pnr = len(self.paths) + 1
         self.paths.append({
@@ -662,7 +690,7 @@ class _NetworkBuilder:
             "y": fields.y,
             "w_pmod": fields.w_pmod,
         })
-        self.path_map.append({
+        map_entry = {
             "path_nr": pnr,
             "from_zone": from_name,
             "to_zone": to_name,
@@ -670,7 +698,10 @@ class _NetworkBuilder:
             "kind": kind,
             "crusher_transfer": crusher_transfer,
             "ahs_nr": fields.ahs_group or fields.ahs_nr,
-        })
+        }
+        if path_map_extra:
+            map_entry.update(path_map_extra)
+        self.path_map.append(map_entry)
         return pnr
 
     def _add_envelope_paths(self) -> None:
@@ -908,21 +939,35 @@ class _NetworkBuilder:
         ahs_i: int,
         info: dict[str, Any],
         *,
-        per_room_fahs: float,
+        terminal_flows: dict[str, tuple[float, float]],
+        sched_nr: int,
     ) -> None:
-        duty_sched = self.sched_duty_week if self.hobbyist else 0
+        """Emit supply+return terminal paths per room.
+
+        ``terminal_flows`` maps room -> (supply_m3h, return_m3h), the flows
+        written into each terminal's Fahs. Measured ContamX 3.4.0.3
+        behaviour: a flagged simple-AHS terminal enforces Fahs x schedule,
+        so the authored values are what the solver reproduces. In
+        ``commissioned`` mode each path_map entry also records the declared
+        per-branch flow for the hull -> solver commissioning check.
+        """
+        declared = self.ahs_terminal_mode == "commissioned"
         for room in info["rooms"]:
             rnr = self.zone_name_to_nr[room]
             zrec = self._zone_record_for(room)
+            supply_m3h, return_m3h = terminal_flows[room]
             self._add_path(
                 info["sup_nr"], rnr, 0,
                 from_name=info["sup_name"], to_name=room,
                 kind="ahs_supply", is_hvac_ducted=True, crusher_transfer=False,
                 fields=self.PathFields(
                     ahs_nr=ahs_i, ahs_group=ahs_i, flag=_PATH_AHS_TERMINAL,
-                    fahs=per_room_fahs, wazm=0.0,
-                    sched_nr=duty_sched,
+                    fahs=_flow_m3h_to_fahs_kg_s(supply_m3h), wazm=0.0,
+                    sched_nr=sched_nr,
                     x=float(zrec["x"]), y=float(zrec["y"]),
+                ),
+                path_map_extra=(
+                    {"declared_flow_m3h": supply_m3h} if declared else None
                 ),
             )
             self._add_path(
@@ -931,9 +976,12 @@ class _NetworkBuilder:
                 kind="ahs_return", is_hvac_ducted=True, crusher_transfer=False,
                 fields=self.PathFields(
                     ahs_nr=ahs_i, ahs_group=ahs_i, flag=_PATH_AHS_TERMINAL,
-                    fahs=per_room_fahs, wazm=0.0,
-                    sched_nr=duty_sched,
+                    fahs=_flow_m3h_to_fahs_kg_s(return_m3h), wazm=0.0,
+                    sched_nr=sched_nr,
                     x=float(zrec["x"]), y=float(zrec["y"]),
+                ),
+                path_map_extra=(
+                    {"declared_flow_m3h": return_m3h} if declared else None
                 ),
             )
 
@@ -948,15 +996,31 @@ class _NetworkBuilder:
             rooms = info["rooms"]
             ach = info["ach"]
             total_vol = sum(self._zone_record_for(r)["volume"] for r in rooms)
-            total_flow = ach * total_vol  # m³/h
             oa_frac = (
                 _hobby.oa_fraction_for_hvac(info["id"], self.overrides, self.default_oa)
                 if self.hobbyist else 0.2
             )
-            oa_flow = oa_frac * total_flow
-            recirc_flow = (1.0 - oa_frac) * total_flow
-            per_room_supply = total_flow / max(len(rooms), 1)
-            per_room_fahs = _flow_m3h_to_fahs_kg_s(per_room_supply)
+            duty = (
+                float(info["hvac_duty"])
+                if info.get("hvac_duty") is not None
+                else self.default_duty
+            )
+            if self.ahs_terminal_mode == "commissioned":
+                terminal_flows, terminal_sched = self._commissioned_flows(
+                    rooms, ach, duty,
+                )
+                delivered = sum(s for s, _r in terminal_flows.values())
+                oa_flow = oa_frac * delivered
+                recirc_flow = (1.0 - oa_frac) * delivered
+            else:
+                total_flow = ach * total_vol  # m³/h
+                oa_flow = oa_frac * total_flow
+                recirc_flow = (1.0 - oa_frac) * total_flow
+                per_room_supply = total_flow / max(len(rooms), 1)
+                terminal_flows = {
+                    r: (per_room_supply, per_room_supply) for r in rooms
+                }
+                terminal_sched = self.sched_duty_week if self.hobbyist else 0
             recirc_fahs = _flow_m3h_to_fahs_kg_s(recirc_flow)
             oa_sched = self._oa_week_schedule_nr(oa_frac)
             filt_nr = self._ahs_filter_nr(info["id"])
@@ -965,7 +1029,10 @@ class _NetworkBuilder:
                 ahs_i, info,
                 recirc_fahs=recirc_fahs, filt_nr=filt_nr, oa_sched=oa_sched,
             )
-            self._add_ahs_terminal_paths(ahs_i, info, per_room_fahs=per_room_fahs)
+            self._add_ahs_terminal_paths(
+                ahs_i, info,
+                terminal_flows=terminal_flows, sched_nr=terminal_sched,
+            )
 
             self.ahs_records.append({
                 "nr": ahs_i,
@@ -981,7 +1048,33 @@ class _NetworkBuilder:
                 "total_vol": total_vol,
                 "oa_flow_m3h": oa_flow,
                 "filter_nr": filt_nr,
+                "terminal_mode": self.ahs_terminal_mode,
+                "hvac_duty": duty,
             })
+
+    def _commissioned_flows(
+        self,
+        rooms: list[str],
+        ach: float,
+        duty: float,
+    ) -> tuple[dict[str, tuple[float, float]], int]:
+        """Per-room declared terminal flows (m³/h) + constant schedule.
+
+        Balanced branches deliver ``ach x V_room x duty`` on supply and
+        return. Exhaust-only branches (``hvac_duty`` <= 0, the head-deck
+        AHUs) carry no recirculating service: supply 0 and return at the
+        branch's full exhaust design rate ``ach x V_room``.
+        """
+        exhaust_only = duty <= 0.0
+        flows: dict[str, tuple[float, float]] = {}
+        for room in rooms:
+            vol = float(self._zone_record_for(room)["volume"])
+            if exhaust_only:
+                flows[room] = (0.0, ach * vol)
+            else:
+                q = ach * vol * duty
+                flows[room] = (q, q)
+        return flows, 0
 
     # ── duct leakage spines ───────────────────────────────────────────────
 
@@ -1059,6 +1152,7 @@ def _assemble_network(
     overrides: dict[str, Any] | None = None,
     pack: dict[str, Any] | None = None,
     filter_efficiency: float | None = None,
+    ahs_terminal_mode: str | None = None,
 ) -> dict[str, Any]:
     """Shared builder for ContamW 3.4 zones, elements, paths, and AHS."""
     return _NetworkBuilder(
@@ -1068,6 +1162,7 @@ def _assemble_network(
         overrides=overrides,
         pack=pack,
         filter_efficiency=filter_efficiency,
+        ahs_terminal_mode=ahs_terminal_mode,
     ).build()
 
 
@@ -1079,8 +1174,16 @@ def export_contamw34(
     overrides: dict[str, Any] | None = None,
     pack_dir: str | None = None,
     filter_efficiency: float | None = None,
+    ahs_terminal_mode: str | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
-    """Serialize platform JSON to ContamW 3.4 ``.prj`` text + path_map."""
+    """Serialize platform JSON to ContamW 3.4 ``.prj`` text + path_map.
+
+    ``ahs_terminal_mode`` selects how AHS terminal Fahs is authored:
+    ``"design"`` (default; uniform ``ach x sum(V)/n`` split) or
+    ``"commissioned"`` (per-room ``ach x V_room x duty``, supply 0 /
+    return ``ach x V`` on exhaust-only branches). May also be set via the
+    ``ahs_terminal_mode`` hobbyist-override key.
+    """
     pack = _hobby.load_hobbyist_pack(pack_dir) if hobbyist else None
     net = _assemble_network(
         spatial_layout,
@@ -1089,6 +1192,7 @@ def export_contamw34(
         overrides=overrides,
         pack=pack,
         filter_efficiency=filter_efficiency,
+        ahs_terminal_mode=ahs_terminal_mode,
     )
     return _render_prj_text(net, hobbyist=hobbyist), net["path_map"]
 

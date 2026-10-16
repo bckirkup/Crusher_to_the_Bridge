@@ -122,6 +122,43 @@ CI-friendly: exit 0 always (it reports findings, it does not gate them).
 Synthetic-platform fixtures drive `tests/test_hull_audit.py` and
 `tests/test_hull_dynamics_audit.py`.
 
+## Hull → solver commissioning check (CONTAM-COMMISSION-01)
+
+The static audit verifies the *declared* field is internally consistent;
+the commissioning check verifies the *solver reproduces it*. With the
+`ahs_terminal_mode="commissioned"` emission mode, every AHS terminal's
+`Fahs` carries the per-room declared `ach · V_room · duty` on a constant
+schedule — and measured ContamX 3.4.0.3 behaviour is that a flagged
+simple-AHS terminal enforces `Fahs × sched` directly. So "authored `.prj`
+solves back onto the declared per-branch flows" is a checkable statement:
+
+```bash
+python3 tools/contam_commissioned_check.py              # both reference hulls
+python3 tools/contam_commissioned_check.py --platform destroyer_baseline \
+    --tolerance 0.05                                    # one hull, explicit tol
+python3 tools/contam_commissioned_check.py --emit-only  # emission check only
+```
+
+Requires the ContamX binary (`third_party/contamx/contamx3` — NIST
+Linux-64 drop, gitignored; `find_contamx` resolves it). Exit 1 on FATAL
+solves or any terminal outside tolerance; `--emit-only` still verifies the
+emitter's `declared_flow_m3h` in `path_map` against the field recomputed
+from the platform JSON.
+
+Measured 2026-10-16 (5% tolerance; residual ≈ 0.1–0.2%, the `.sim`
+reader's mean-density conversion vs the 1.2041 kg/m³ authoring constant):
+
+| Platform | paths | terminal legs | non-FATAL | max ratio (solved/declared) |
+|---|---|---|---|---|
+| destroyer_baseline | 69 | 18 | yes | 1.002 |
+| expedition_cruise_450 | 343 | 92 | yes | 1.001 |
+
+Exhaust-only branches (`hvac_duty ≤ 0` head-deck AHUs) emit supply 0 /
+return `ach · V`; they solve to exactly that (HD supplies measured 0.00).
+Design emission (`"design"` — uniform `ach·ΣV/n` split under the hobbyist
+duty schedule) remains the default pending a fleet-wide regeneration
+decision; the committed `contam/platform.prj` artifacts are unchanged.
+
 ## Second fleet run — 2026-10-16, dynamic checks (25 platforms, seed 42, 48 epochs)
 
 `tools/hull_dynamics_audit.py` over every bundle under `data/platforms/`.
