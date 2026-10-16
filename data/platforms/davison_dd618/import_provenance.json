@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:47:29.625329+00:00",
+  "platform_id": "davison_dd618",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/dd618_import",
+  "digest_sha256": "65b9de70ad084cf15cb8e1f6e902050c92b57888b6e8576915cae501f809ab58",
+  "svg_sha256": {
+    "page_05_approved.svg": "32479ddb1565bdf21b206a6a0d930665eaf617f0befdc37fabfd25ec3ce072f3",
+    "page_06_approved.svg": "7c502c1a1df4b931f68e1bfbff5f2a18da7d90e1c6d8bd64962f57c6b29d70bc",
+    "page_07_approved.svg": "d563928389f1d47f2e0d1f68a1cecc815721398150a2e8a4895dd95de28c3bad",
+    "page_08_approved.svg": "acd9a3648e9f965a0a7d3ac998f9dab93f4b4d23a62a6a25145dbd2ffa3e032d",
+    "page_09_approved.svg": "a3cbfd8c7dd486a8d5b9e7f07383e4624b180197d0cc942f6a8fc77189dc28fc",
+    "page_10_approved.svg": "a6e3184a8446bb083a8abe760b416cf460c7da91e33f50bca01fd4f26f54328b"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 39,
+  "berthing_zones": [
+    "Nav_Bridge_Sonar",
+    "CIC_Block",
+    "Radio_Central",
+    "Officers_Country_Focsle",
+    "Aft_Ammo",
+    "Mid_Services",
+    "Workshops_Mid",
+    "WR_Block",
+    "CPO_Quarters",
+    "Aft_Shops",
+    "Crew_Berthing_1P",
+    "Crew_Qtrs_1P",
+    "Fwd_Stores_1P",
+    "Aft_Stores_2P",
+    "Provisions_2P",
+    "Fwd_Stores_Hold"
+  ],
+  "systems_era": "usn_coldwar"
+}

@@ -1,0 +1,255 @@
+{
+  "platform": "nields_dd616",
+  "description": "HVAC network synthesized for nields_dd616",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Nav_Bridge",
+        "Radar_Plot",
+        "Radio_Central",
+        "Officers_Country_Focsle",
+        "WR_Block",
+        "CPO_Quarters",
+        "Mid_Services",
+        "Aft_Ammo",
+        "Aft_Shops",
+        "Fwd_Stores_1P",
+        "Provisions_2P",
+        "Aft_Stores_2P",
+        "Fwd_Stores_Hold",
+        "Workshops_Mid"
+      ],
+      "ach": 6.0,
+      "description": "officers/accommodation + services ventilation",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "HVAC_Berthing",
+      "rooms": [
+        "Crew_Berthing_1P",
+        "Crew_Qtrs_1P",
+        "Galley_Area"
+      ],
+      "ach": 6.0,
+      "description": "berthing + messing ventilation",
+      "vent_mode": "mech_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Rm_Aft",
+        "Fire_Rm_Aft",
+        "Engine_Rm_Fwd",
+        "Fire_Rm_Fwd",
+        "Uptake_Aft",
+        "Uptake_Fwd",
+        "Steering_Gear",
+        "Magazine_Aft_2P",
+        "Magazine_Fwd_2P",
+        "Magazines_Hold",
+        "Fuel_Tanks_2P",
+        "Fuel_Tanks_Hold",
+        "Shaft_Alley",
+        "Peak_Hold"
+      ],
+      "ach": 10.0,
+      "description": "machinery + magazine + tank ventilation",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_HD_HD_Crew_Aft",
+      "rooms": [
+        "HD_Crew_Aft"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew_Aft, 7 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Fwd",
+      "rooms": [
+        "HD_Fwd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Fwd, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "HVAC_Berthing",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Crew_Aft",
+      "flow_rate_m3h": 832.3,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew_Aft; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Fwd",
+      "flow_rate_m3h": 713.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Fwd; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Radar_Plot",
+      "to": "Super_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "Radio_Central",
+      "to": "Officers_Country_Focsle",
+      "type": "passageway"
+    },
+    {
+      "from": "Fantail",
+      "to": "Aft_Ammo",
+      "type": "passageway"
+    },
+    {
+      "from": "Mid_Services",
+      "to": "Uptake_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Uptake_Aft",
+      "to": "Workshops_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Workshops_Mid",
+      "to": "Uptake_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Uptake_Fwd",
+      "to": "Galley_Area",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Area",
+      "to": "WR_Block",
+      "type": "passageway"
+    },
+    {
+      "from": "WR_Block",
+      "to": "CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Bow_Focsle",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Aft_Shops",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Shops",
+      "to": "Crew_Berthing_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_1P",
+      "to": "Engine_Rm_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rm_Aft",
+      "to": "Fire_Rm_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Fire_Rm_Aft",
+      "to": "Engine_Rm_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rm_Fwd",
+      "to": "Fire_Rm_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Fire_Rm_Fwd",
+      "to": "Crew_Qtrs_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Qtrs_1P",
+      "to": "Fwd_Stores_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Stores_2P",
+      "to": "Magazine_Aft_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Magazine_Aft_2P",
+      "to": "Fuel_Tanks_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Tanks_2P",
+      "to": "Provisions_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Provisions_2P",
+      "to": "Magazine_Fwd_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Fuel_Tanks_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Tanks_Hold",
+      "to": "Fwd_Stores_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Fwd_Stores_Hold",
+      "to": "Magazines_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Magazines_Hold",
+      "to": "Peak_Hold",
+      "type": "passageway"
+    }
+  ]
+}

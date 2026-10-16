@@ -68,6 +68,9 @@ PLATFORMS = [
     "miami_cl89",
     "chicago_cg11",
     "wright_cc2",
+    "sigsbee_dd502",
+    "nields_dd616",
+    "davison_dd618",
 ]
 
 ENTERPRISE_IDS = frozenset({

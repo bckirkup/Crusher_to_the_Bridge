@@ -194,6 +194,9 @@ data/
 │   ├── miami_cl89/                 (maritime.org GA import)
 │   ├── chicago_cg11/               (maritime.org GA import)
 │   ├── wright_cc2/                 (maritime.org GA import)
+│   ├── sigsbee_dd502/              (maritime.org GA import)
+│   ├── nields_dd616/               (maritime.org GA import)
+│   ├── davison_dd618/              (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -553,7 +556,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twenty-one ship platforms are included, each with spatial layout and HVAC
+Twenty-four ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -584,6 +587,9 @@ airflow definitions:
 | `miami_cl89` | USS Miami CL-89 Cleveland-class light cruiser (maritime.org GA import, 81 zones, 1252 crew) |
 | `chicago_cg11` | USS Chicago CG-11 guided missile cruiser on Baltimore-class hull (maritime.org GA import, 87 zones, 1302 crew incl. flag staff + marines) |
 | `wright_cc2` | USS Wright CC-2 command ship on Saipan-class CVL hull (maritime.org GA import, 68 zones, 1768 crew) |
+| `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
+| `nields_dd616` | USS Nields DD-616 Benson-class destroyer (maritime.org GA import, 39 zones, 262 crew) |
+| `davison_dd618` | USS Davison DD-618 Gleaves-class FRAM destroyer (maritime.org GA import, 39 zones, 283 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
