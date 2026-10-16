@@ -1,0 +1,459 @@
+{
+  "platform": "wright_cc2",
+  "era": "usn_coldwar",
+  "era_label": "USN cold-war / early mechanical AC",
+  "era_note": "Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery forced draft.",
+  "vent_markers": [
+    {
+      "id": "vm_island_stack",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": null,
+      "serves_zone": "Machinery_2P",
+      "display": null,
+      "evidence": "sheet_read",
+      "notes": "island stack over machinery on inboard profile"
+    },
+    {
+      "id": "vm_plenums_main",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Mid_Voids_Main",
+      "display": [
+        104.17,
+        9.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "PLENUM cells + FAN ROOM labels along main-deck edges"
+    },
+    {
+      "id": "vm_mushrooms_fd",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "flight_deck",
+      "serves_zone": "Flight_Deck_Mid",
+      "display": [
+        92.59,
+        7.45
+      ],
+      "evidence": "sheet_read",
+      "notes": "mushroom vents along flight-deck edges"
+    },
+    {
+      "id": "vm_air_cond_main",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Aft_Rooms_Main",
+      "display": [
+        11.57,
+        9.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "AIR COND EQUIP RM + AIR COND FAN RM labels"
+    },
+    {
+      "id": "vm_uptakes_gal",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "gallery_deck",
+      "serves_zone": "VIP_Gal",
+      "display": [
+        115.74,
+        17.14
+      ],
+      "evidence": "sheet_read",
+      "notes": "uptake tops + building suite labels on gallery"
+    },
+    {
+      "id": "vm_fan_rooms_hangar",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "hangar_deck",
+      "serves_zone": "Command_Support_Hangar",
+      "display": [
+        131.94,
+        15.71
+      ],
+      "evidence": "sheet_read",
+      "notes": "FAN RM cells + AIR INTAKE + STACK NO.2-4 labels on hangar"
+    },
+    {
+      "id": "vm_whip_antennas",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "flight_deck",
+      "serves_zone": "Flight_Deck_Aft",
+      "display": [
+        16.2,
+        3.48
+      ],
+      "evidence": "era_plausible",
+      "notes": "deck-edge ventilator near antenna nests"
+    },
+    {
+      "id": "vm_ac_machy_1p",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "first_platform",
+      "serves_zone": "AC_Refrig_1P",
+      "display": [
+        141.2,
+        9.36
+      ],
+      "evidence": "sheet_read",
+      "notes": "A/C MACHINERY + REFRIGERATION labels on 1P"
+    }
+  ],
+  "zone_modes": {
+    "Bridge_Island": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Island_Rooms": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Flight_Deck_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Elevator_Aft_FD": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Flight_Deck_Mid": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Island_Base_FD": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Flight_Deck_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Gallery": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Ready_Rooms_Gal": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Elevator_Wells_Gal": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crews_Shelters_Gal": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Comms_Aft_Gal": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "VIP_Gal": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Comms_Fwd_Gal": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Island_Gal": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Bow_Gal": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Aft_Shops_Hangar": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Hangar_Bay_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hangar_Bay_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Command_Support_Hangar": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "COC_Hangar": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Staterooms_Hangar": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Bow_Cells_Hangar": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Aft_Rooms_Main": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Aft_Berthing_Main": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Elevator_Pit_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mid_Voids_Main": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Steward_Mess_Main": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Wardroom_Main": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Officers_Main": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Medical_Main": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Bow_Gear_Main": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Aft_Rooms_2nd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_Aft_2nd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Aft_2nd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess_2nd": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Services_Mid_2nd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_Mid_2nd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Issue_Amidships_2nd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Fwd_2nd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_Fwd_2nd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Fwd_Services_2nd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Bow_Stores_2nd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Aft_3rd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Services_Aft_3rd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_Aft_3rd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Uptakes_3rd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Fwd_3rd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_Fwd_3rd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_3rd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Aux_Machinery_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Uptakes_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "AC_Refrig_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Fwd_Stores_1P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Bow_Cells_1P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Aft_Cells_2P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Machinery_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Gen_Machinery_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_2P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Peak_Tank_2P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Stern_Cells_Hold": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "FO_Wing_Port_Hold": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "FO_Wing_Stbd_Hold": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Emerg_Gen_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Cells_Hold": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Peak_Tank_Hold": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.O. CELLS (machinery wings)",
+      "kind": "fuel",
+      "nearest_zone": "Machinery_2P",
+      "display": [
+        92.59,
+        3.9
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    },
+    {
+      "label": "F.O. / BALLAST (hold)",
+      "kind": "fuel",
+      "nearest_zone": "FO_Wing_Stbd_Hold",
+      "display": [
+        92.59,
+        17.35
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "AVIATION FUEL CELLS",
+      "kind": "fuel",
+      "nearest_zone": "Stern_Cells_Hold",
+      "display": [
+        23.15,
+        8.88
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "PEAK TANK",
+      "kind": "unknown",
+      "nearest_zone": "Peak_Tank_Hold",
+      "display": [
+        203.7,
+        10.49
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "VOIDS (fwd)",
+      "kind": "unknown",
+      "nearest_zone": "Fwd_Stores_2P",
+      "display": [
+        178.24,
+        9.36
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Steward_Mess_Main (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Steward_Mess_Main",
+    "Wardroom_Main (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom_Main",
+    "Medical_Main (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Medical_Main",
+    "HD_Crew_Aft_2nd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Aft_2nd",
+    "Crew_Mess_2nd (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_2nd",
+    "HD_Crew_Mid_2nd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Mid_2nd",
+    "HD_Crew_Fwd_2nd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Fwd_2nd",
+    "HD_Crew_Aft_3rd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Aft_3rd",
+    "HD_Crew_Fwd_3rd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Fwd_3rd"
+  ]
+}

@@ -57,10 +57,50 @@ Severity vocabulary:
    overclaim, ACH-by-class, `hvac_duty` scaling notes, systems_notes
    evidence share (`sheet_read` vs `era_rule` vs `era_plausible`).
 
+Dynamic checks (in `tools/hull_dynamics_audit.py`, run — not read):
+
+6. **occupancy smoke** — a no-pathogen voyage (`initial_infected: None`)
+   with per-epoch zone occupancy observed from agent locations. Two arms
+   per manifest hull: `default` (the shipped `ship_graph.agent_classes`
+   taxonomy — cruise-hull prefs `PC_`/`CC_`/`Medical_Center`/`Engine`/
+   `Galley`, which substring-miss most naval zone ids and scatter
+   silently) vs `manifest` (`agent_classes` generated from
+   `crew_manifest.json`, pinning `home_zone_preference`/`duty_zone` to
+   exact zone ids). Outputs: zones never entered, peak occupancy vs
+   `max_occupancy`, night-berthing concentration, and the share of
+   agents whose assigned `home_zone` is a manifest-declared berth.
+7. **drainage fingerprint** — unit mass injected into every real zone
+   and stepped 48 epochs through `ContamTransportEngine` with
+   `natural_decay_rate=0` and the divergence work's
+   `filter_efficiency=0.50`. The retained-mass curve is the hull's
+   drainage signature: ~1.0 = no exhaust path (the mass-trap defect
+   class); the per-zone accumulation table names where mass pools.
+
 Fleet-level passes: era-rule consistency (same era+zone-class, era-inferred
 evidence only — `sheet_read` is trusted), within-era IQR outlier fences, and
 adjacency-type coverage of the ContamX `passive_rates` table (types with no
 explicit rate fall back to 10 m³/h — a coverage gap, not necessarily an error).
+
+### What `max_occupancy` means in the engine
+
+It is **rated capacity of installed fittings and a selection weight — never
+a presence cap**. Three consumers:
+
+- `weighted_zone_choice` and the dining-zone draw weight zones by
+  `capacity` (default 100 when absent): an oversized `max_occupancy`
+  *attracts* traffic rather than excluding it.
+- Fomite per-occupant item counts scale off it (400 seats = 400 place
+  settings).
+- The boxed-meal overflow directive caps diners at
+  `int(round(frac * max_occupancy))` only when that mode is armed.
+
+Consequence: berth oversubscription flags in this audit mean "the manifest
+assigns more crew than fittings rate" — manifests pin classes to
+`berth_zone` regardless, and the over-cap zone *pulls extra weighted
+traffic*. `hot_bunk_ratio` scales capacity before flagging; hot bunking is
+a real practice and the honouring is deliberate. But over-cap findings are
+not absorbable by occupancy caps — they are either under-read fittings or
+correct overcrowding data that will show up in the check-6 overflow table.
 
 ## Usage
 
@@ -70,10 +110,86 @@ python3 tools/hull_audit.py --platforms midway_cv41,raven_am55
 python3 tools/hull_audit.py --json-out reports/hull_audit.json \
     --md-out reports/hull_audit.md
 python3 tools/hull_audit.py --min-severity flag
+
+# dynamic checks (ShipSimulation voyages — minutes to ~an hour fleet-wide)
+python3 tools/hull_dynamics_audit.py --epochs 48 \
+    --json-out reports/hull_dynamics.json --md-out reports/hull_dynamics.md
+python3 tools/hull_dynamics_audit.py --platforms pce_874 --arms default
+python3 tools/hull_dynamics_audit.py --skip-occupancy   # drainage only
 ```
 
 CI-friendly: exit 0 always (it reports findings, it does not gate them).
-Synthetic-platform fixtures drive `tests/test_hull_audit.py`.
+Synthetic-platform fixtures drive `tests/test_hull_audit.py` and
+`tests/test_hull_dynamics_audit.py`.
+
+## Second fleet run — 2026-10-16, dynamic checks (25 platforms, seed 42, 48 epochs)
+
+`tools/hull_dynamics_audit.py` over every bundle under `data/platforms/`.
+Occupancy smoke ran 13 manifest hulls in `default` + `manifest` arms and
+5 nominal-complement cruise hulls in `default` arm only; the 7
+no-crew-source hulls ran the drainage fingerprint only.
+
+Headline findings (measured, this run):
+
+1. **Duty-zone pins cannot resolve on the imported hulls — every duty
+   space holds zero occupants.** `_resolve_class_zones` resolves
+   `duty_zone` only inside Free+Dining-typed zones, so a pin at
+   Engineering/Medical/ops space silently degrades to a random
+   free/dining draw. The pin-resolution pass flags it statically on every
+   manifest hull (`engine_room→Engine_Rm`, `medical→Sick_Bay`,
+   `radio_ops→PriFly_FlagPlot`, `ops_radio→Radar_Plot`…); the smoke
+   confirms it dynamically — under the manifest arm, `Engine_Rm`,
+   `Fire_Rm_*`, `Boiler_Rm`, `Sick_Bay`, `Radio_Rm`, `CIC`, `Radar_Plot`,
+   `Work_Centers` hold **no agent in any epoch** on every imported hull.
+   Consequence for dose modeling: machinery-space airborne/fomite dose is
+   computed for rooms nobody is in, and crew work-hour co-location is
+   realized as corridor leisure traffic instead of watch-standing. Two
+   fix directions (engineering call): widen the duty search domain past
+   Free+Dining types, or have the importer type duty stations as Free.
+2. **Berth pins resolve but collapse to few blocks — measured
+   overcrowding.** `manifest_berth_hit` is 1.0 under the manifest arm
+   (berth pin → Room-type zone works), but `home_distinct` collapses to
+   1–3 zones because manifests assign most crew to one block. Peak
+   occupancy vs `max_occupancy` is measured crowding, not a sim cap:
+   midway `Officers_Country_02` 4712 agents / cap 80, cvl26
+   `Officers_Country` 1566/85, davison `WR_Block` 249/20, cannon
+   `Aft_Berthing_1P` 170/40. These confirm the static oversubscription
+   flags as real crowding (beyond what `hot_bunk_ratio` absorbs) and name
+   the zones to re-read in the GA.
+3. **Wardroom attractor (default arm):** officer wardrooms typed `Dining`
+   absorb the fallback meal draw — midway `Wardroom_02` 1190/60 and
+   `Wardroom_2D` 1570/80, cvl26 `Wardroom` 856/114, ruchamkin
+   `Wardroom` 202/12. Under default classes the dining pref misses and
+   weighted dining choice lands on whatever `Dining` rooms exist,
+   officers' mess included. Same mechanism as (1): a preference that
+   misses its domain degrades into a weighted draw, not an error.
+4. **Drainage fingerprints: no traps fleet-wide.** Retained mass after
+   48 epochs (unit inject, decay 0): 11–56%. All accumulating mass pools
+   in `HD_*` sanitary-exhaust zones — the designed drain path, so the
+   residual is in-transit mass at the exhaust endpoints, not sealed
+   pockets. The cruise reference band (0.27–0.38) brackets most imports;
+   above it: fletcher 0.561, destroyer_baseline 0.548, messy_cruise_500
+   0.539, gordon_gunter 0.425 — slower-draining hulls worth a plumbing
+   review; below it: midway 0.112, cannon 0.132, ruchamkin 0.140,
+   independence 0.182.
+5. **`HD_*` head zones never hold agents** — sanitary spaces are not
+   schedule destinations in the engine at all (fleet-wide, both arms).
+   Expected modeling, recorded so the never-occupied list isn't misread
+   as orphaned compartments.
+6. **Cruise-hull reference behavior** — the attractor artifact exists on
+   the reference hulls too: mega `Engine_Room_Aft` 727/60, classic
+   `Engine_Room` 199/20. The imported hulls' deviations are therefore
+   mostly *coverage* (duty pins unreachable), not a new class of scatter.
+7. **Default-arm scatter measured:** `home_on_manifest_berth_frac` under
+   the shipped taxonomy is 0.19–0.77 across manifest hulls (midway 0.19,
+   davison 0.26, castle 0.75) — i.e., 23–81% of crew get a non-berth
+   home zone when the cruise-class prefs miss naval zone ids. The
+   manifest arm is the meaningful wiring.
+
+`crew_manifest.json` note: the sim does not consume it — it is the GA
+import's proposed-class ledger. The `manifest` arm exists to measure what
+wiring it into `ship_graph.agent_classes` would realize; today the hulls
+sail on the shipped cruise-taxonomy classes (the `default` arm).
 
 ## First fleet run — 2026-10-16, 22 platforms
 
