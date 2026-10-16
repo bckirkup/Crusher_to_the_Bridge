@@ -1,0 +1,684 @@
+{
+  "platform": "lyon_ap71",
+  "description": "HVAC network synthesized for lyon_ap71",
+  "oa_fraction": 0.3,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Troop_Berthing",
+      "rooms": [
+        "Troop_Berthing_Aft_3rd",
+        "Troop_Berthing_Fwd_3rd",
+        "Troop_Berthing_Mid_2nd",
+        "Troop_Berthing_Fwd_2nd",
+        "Troop_Officer_Cabins"
+      ],
+      "ach": 4.0,
+      "description": "troop berthing bays, 2nd+3rd decks",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "HVAC_Crew",
+      "rooms": [
+        "Crew_Berthing_3rd",
+        "Crew_Berthing_Aft_2nd",
+        "CPO_Berthing_Shelter",
+        "Crew_Mess_3rd",
+        "Troop_Mess_2nd",
+        "Officers_Cabins_Port",
+        "Officers_Cabins_Stbd"
+      ],
+      "ach": 5.0,
+      "description": "crew berthing + messes",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "HVAC_Galley",
+      "rooms": [
+        "Bakery",
+        "Galley_Shelter",
+        "Pantry_CPO_Mess",
+        "Reefer_Ice_Stores",
+        "Reefer_Stores_2nd",
+        "Provision_Issue_Hold"
+      ],
+      "ach": 12.0,
+      "description": "galley + bakery + pantry branch",
+      "oa_fraction": 0.4,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "HVAC_Services",
+      "rooms": [
+        "Offices_Laundry",
+        "Services_Barber",
+        "Services_Mid_2nd",
+        "Radio_Central",
+        "Gyro_Battery_Room",
+        "Wheel_House",
+        "Signal_Bridge",
+        "Stores_Fwd_3rd"
+      ],
+      "ach": 6.0,
+      "description": "offices/services/nav branch",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "HVAC_Medical",
+      "rooms": [
+        "Hospital_2nd",
+        "Sick_Bay_3rd"
+      ],
+      "ach": 8.0,
+      "description": "hospital + sick bay branch",
+      "oa_fraction": 0.5,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "HVAC_Machinery",
+      "rooms": [
+        "Shaft_Alley_Hold",
+        "Engine_Room_Hold",
+        "Aux_Machinery_Hold",
+        "Shaft_Alley_3rd",
+        "Aux_Machinery_3rd",
+        "Machinery_Casing_2nd",
+        "Machinery_Casing_Shelter",
+        "Chain_Locker_Fwd_2nd"
+      ],
+      "ach": 15.0,
+      "description": "machinery + shaft alley + cargo supply",
+      "oa_fraction": 1.0,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "HVAC_Holds",
+      "rooms": [
+        "Deep_Tanks_Aft",
+        "Cargo_Hold_2",
+        "Cargo_Hold_3",
+        "Cargo_Hold_4_Fwd"
+      ],
+      "ach": 3.0,
+      "description": "cargo holds + deep tanks ventilation",
+      "oa_fraction": 0.5,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "AHU_HD_HD_Cabin_Officers",
+      "rooms": [
+        "HD_Cabin_Officers"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Cabin_Officers, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Troop_Officers",
+      "rooms": [
+        "HD_Troop_Officers"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Troop_Officers, 19 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Washroom_Shelter",
+      "rooms": [
+        "HD_Washroom_Shelter"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Washroom_Shelter, 10 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_CPO_2nd",
+      "rooms": [
+        "HD_CPO_2nd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_CPO_2nd, 9 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Troop_Mid_2nd",
+      "rooms": [
+        "HD_Troop_Mid_2nd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Troop_Mid_2nd, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Troop_Fwd_2nd",
+      "rooms": [
+        "HD_Troop_Fwd_2nd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Troop_Fwd_2nd, 9 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Crew_3rd",
+      "rooms": [
+        "HD_Crew_3rd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew_3rd, 11 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Troop_3rd",
+      "rooms": [
+        "HD_Troop_3rd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Troop_3rd, 11 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Troop_Berthing",
+      "to": "HVAC_Crew",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Crew",
+      "to": "HVAC_Galley",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Galley",
+      "to": "HVAC_Services",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Services",
+      "to": "HVAC_Medical",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_4",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Medical",
+      "to": "HVAC_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_5",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Machinery",
+      "to": "HVAC_Holds",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_6",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Crew",
+      "to": "AHU_HD_HD_Cabin_Officers",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Cabin_Officers; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Troop_Berthing",
+      "to": "AHU_HD_HD_Troop_Officers",
+      "flow_rate_m3h": 2259.1,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Troop_Officers; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Crew",
+      "to": "AHU_HD_HD_Washroom_Shelter",
+      "flow_rate_m3h": 1189.0,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Washroom_Shelter; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Crew",
+      "to": "AHU_HD_HD_CPO_2nd",
+      "flow_rate_m3h": 1070.1,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_CPO_2nd; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Troop_Berthing",
+      "to": "AHU_HD_HD_Troop_Mid_2nd",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Troop_Mid_2nd; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Troop_Berthing",
+      "to": "AHU_HD_HD_Troop_Fwd_2nd",
+      "flow_rate_m3h": 1070.1,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Troop_Fwd_2nd; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Crew",
+      "to": "AHU_HD_HD_Crew_3rd",
+      "flow_rate_m3h": 1307.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew_3rd; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Troop_Berthing",
+      "to": "AHU_HD_HD_Troop_3rd",
+      "flow_rate_m3h": 1307.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Troop_3rd; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Stern_Weather_Shelter",
+      "to": "Hatch_4_Weather",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Hatch_4_Weather",
+      "to": "Offices_Laundry",
+      "type": "door"
+    },
+    {
+      "from": "Hatch_4_Weather",
+      "to": "CPO_Berthing_Shelter",
+      "type": "door"
+    },
+    {
+      "from": "Troop_Officer_Cabins",
+      "to": "Reefer_Ice_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Offices_Laundry",
+      "to": "Services_Barber",
+      "type": "passageway"
+    },
+    {
+      "from": "Services_Barber",
+      "to": "Machinery_Casing_Shelter",
+      "type": "passageway"
+    },
+    {
+      "from": "Bakery",
+      "to": "Galley_Shelter",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Shelter",
+      "to": "Pantry_CPO_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_Shelter",
+      "to": "Galley_Shelter",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_Shelter",
+      "to": "Quarter_Weather",
+      "type": "door"
+    },
+    {
+      "from": "Pantry_CPO_Mess",
+      "to": "Quarter_Weather",
+      "type": "door"
+    },
+    {
+      "from": "Quarter_Weather",
+      "to": "Hatch_3_Weather",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Hatch_3_Weather",
+      "to": "Bow_Shelter_Weather",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Officers_Cabins_Port",
+      "to": "Officers_Cabins_Stbd",
+      "type": "passageway"
+    },
+    {
+      "from": "Radio_Central",
+      "to": "Boat_Stowage_Port",
+      "type": "door"
+    },
+    {
+      "from": "Gyro_Battery_Room",
+      "to": "Boat_Stowage_Stbd",
+      "type": "door"
+    },
+    {
+      "from": "Boat_Stowage_Port",
+      "to": "Boat_Deck_Walkway",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Boat_Stowage_Stbd",
+      "to": "Boat_Deck_Walkway",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Wheel_House",
+      "to": "Signal_Bridge",
+      "type": "passageway"
+    },
+    {
+      "from": "Signal_Bridge",
+      "to": "Bridge_Wings_Walkway",
+      "type": "door"
+    },
+    {
+      "from": "Signal_Bridge",
+      "to": "House_Top_Platform",
+      "type": "ladder"
+    },
+    {
+      "from": "Wheel_House",
+      "to": "Radio_Central",
+      "type": "ladder"
+    },
+    {
+      "from": "Officers_Cabins_Port",
+      "to": "Troop_Officer_Cabins",
+      "type": "ladder"
+    },
+    {
+      "from": "Bow_Shelter_Weather",
+      "to": "Forecastle_Weather",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Berthing_Aft_2nd",
+      "to": "Services_Mid_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft_2nd",
+      "to": "Hospital_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Hospital_2nd",
+      "to": "Reefer_Stores_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Services_Mid_2nd",
+      "to": "Machinery_Casing_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Services_Mid_2nd",
+      "to": "Troop_Mess_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_2nd",
+      "to": "Troop_Berthing_Mid_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Berthing_Mid_2nd",
+      "to": "Troop_Berthing_Fwd_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Berthing_Fwd_2nd",
+      "to": "Chain_Locker_Fwd_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft_2nd",
+      "to": "Crew_Berthing_3rd",
+      "type": "ladder"
+    },
+    {
+      "from": "Hospital_2nd",
+      "to": "Sick_Bay_3rd",
+      "type": "ladder"
+    },
+    {
+      "from": "Troop_Mess_2nd",
+      "to": "Crew_Mess_3rd",
+      "type": "ladder"
+    },
+    {
+      "from": "Troop_Berthing_Mid_2nd",
+      "to": "Troop_Berthing_Fwd_3rd",
+      "type": "ladder"
+    },
+    {
+      "from": "Machinery_Casing_2nd",
+      "to": "Aux_Machinery_3rd",
+      "type": "ladder"
+    },
+    {
+      "from": "Shaft_Alley_3rd",
+      "to": "Crew_Berthing_3rd",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_3rd",
+      "to": "Sick_Bay_3rd",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_3rd",
+      "to": "Troop_Berthing_Aft_3rd",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Berthing_Aft_3rd",
+      "to": "Aux_Machinery_3rd",
+      "type": "passageway"
+    },
+    {
+      "from": "Aux_Machinery_3rd",
+      "to": "Crew_Mess_3rd",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Mess_3rd",
+      "to": "Troop_Berthing_Fwd_3rd",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Berthing_Fwd_3rd",
+      "to": "Stores_Fwd_3rd",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley_3rd",
+      "to": "Shaft_Alley_Hold",
+      "type": "ladder"
+    },
+    {
+      "from": "Aux_Machinery_3rd",
+      "to": "Engine_Room_Hold",
+      "type": "ladder"
+    },
+    {
+      "from": "Engine_Room_Hold",
+      "to": "Cargo_Hold_2",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room_Hold",
+      "to": "Aux_Machinery_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Cargo_Hold_2",
+      "to": "Cargo_Hold_3",
+      "type": "passageway"
+    },
+    {
+      "from": "Cargo_Hold_3",
+      "to": "Cargo_Hold_4_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Deep_Tanks_Aft",
+      "to": "Provision_Issue_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley_Hold",
+      "to": "Deep_Tanks_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Cabins_Stbd",
+      "to": "Boat_Stowage_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Cabins_Stbd",
+      "to": "Boat_Stowage_Stbd",
+      "type": "passageway"
+    },
+    {
+      "from": "Radio_Central",
+      "to": "Boat_Deck_Walkway",
+      "type": "passageway"
+    },
+    {
+      "from": "Gyro_Battery_Room",
+      "to": "Boat_Deck_Walkway",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Walkway",
+      "to": "Wheel_House",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Walkway",
+      "to": "Signal_Bridge",
+      "type": "passageway"
+    },
+    {
+      "from": "Wheel_House",
+      "to": "Bridge_Wings_Walkway",
+      "type": "passageway"
+    },
+    {
+      "from": "Bridge_Wings_Walkway",
+      "to": "House_Top_Platform",
+      "type": "passageway"
+    },
+    {
+      "from": "Hatch_4_Weather",
+      "to": "Troop_Officer_Cabins",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Officer_Cabins",
+      "to": "Offices_Laundry",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Officer_Cabins",
+      "to": "Services_Barber",
+      "type": "passageway"
+    },
+    {
+      "from": "Troop_Officer_Cabins",
+      "to": "Machinery_Casing_Shelter",
+      "type": "passageway"
+    },
+    {
+      "from": "Reefer_Ice_Stores",
+      "to": "Bakery",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_Shelter",
+      "to": "Bakery",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft_2nd",
+      "to": "Reefer_Stores_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Hospital_2nd",
+      "to": "Services_Mid_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_2nd",
+      "to": "Troop_Mess_2nd",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley_Hold",
+      "to": "Provision_Issue_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Aux_Machinery_Hold",
+      "to": "Cargo_Hold_2",
+      "type": "passageway"
+    },
+    {
+      "from": "Aux_Machinery_Hold",
+      "to": "Cargo_Hold_3",
+      "type": "passageway"
+    },
+    {
+      "from": "Hatch_4_Weather",
+      "to": "Cargo_Hold_4_Fwd",
+      "type": "hatch"
+    },
+    {
+      "from": "Hatch_3_Weather",
+      "to": "Cargo_Hold_3",
+      "type": "hatch"
+    }
+  ]
+}

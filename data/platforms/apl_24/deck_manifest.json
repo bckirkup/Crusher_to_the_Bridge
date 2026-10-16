@@ -1,0 +1,82 @@
+{
+  "platform_id": "apl_24",
+  "ship_class_label": "Apl 24",
+  "footprint_tier": "representative",
+  "representative_of": "APL-24 barracks ship (Pollock-Stockton, 1944): 261'2\" x 49'2\", non-self-propelled berthing barge, permanent crew ~71 (5 officers + 66 enlisted) plus accommodation for 6 officers + 583 enlisted. Zones ",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 34",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Fantail_Main",
+    "Galley_Bakery",
+    "Crew_Cafeteria_Mess",
+    "Ships_Store",
+    "HD_Crew_1",
+    "Scullery",
+    "HD_Crew_2",
+    "Barber_Shop",
+    "Ships_Service",
+    "Shower_Room",
+    "Post_Office",
+    "Library",
+    "Recreation_Room",
+    "Crews_Locker_Office",
+    "Brig",
+    "Fantail_Upper",
+    "Laundry",
+    "Receiving_Rm",
+    "CPO_Pantry",
+    "CPO_Mess",
+    "HD_CPO_1",
+    "HD_CPO_2",
+    "CPO_Berthing",
+    "Officers_Mess_Pantry",
+    "Officers_Staterooms",
+    "Sick_Bay",
+    "Isolation_Ward",
+    "Ships_Office",
+    "Dental_Office",
+    "Dispensary_Lab",
+    "Crew_Washroom",
+    "Crew_Quarters",
+    "Forecastle",
+    "Gun_Platforms"
+  ],
+  "decks": [
+    "gun_platform_deck",
+    "main_deck",
+    "upper_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 81.6,
+    "ymin": -2.0,
+    "ymax": 17.0
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "gun_platform_deck": "deck_gun_platform_deck.png",
+      "upper_deck": "deck_upper_deck.png",
+      "main_deck": "deck_main_deck.png"
+    }
+  }
+}

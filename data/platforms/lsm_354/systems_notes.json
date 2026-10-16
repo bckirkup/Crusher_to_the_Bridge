@@ -1,0 +1,256 @@
+{
+  "platform": "lsm_354",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Smoke_Pipe",
+      "kind": "uptake",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "superstructure_deck",
+      "serves_zone": "Radar_Radio_Chart",
+      "display": [
+        21.09,
+        5.78
+      ],
+      "evidence": "sheet_read",
+      "notes": "smoke pipe drawn amidships"
+    },
+    {
+      "id": "Vents_TankWell",
+      "kind": "mushroom",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Tank_Well",
+      "display": [
+        31.0,
+        1.39
+      ],
+      "evidence": "sheet_read",
+      "notes": "mushroom vents along tank-well galleries"
+    },
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "superstructure_deck",
+      "serves_zone": "Weather_Fwd_Super",
+      "display": [
+        37.07,
+        -11.56
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    }
+  ],
+  "zone_modes": {
+    "Forecastle_Weather": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Signal_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bridge_Wings": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wheel_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Conning_Station": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Weather_Aft_Super": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radar_Radio_Chart": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "WT_Room_Services": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Weather_Fwd_Super": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Stern_Rooms_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engineers_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "General_Work_Shop": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gunners_Ordnance": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Canteen_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aux_Machinery_Main": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Washroom_Main": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Tank_Well": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Galley_Stores_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ships_Office": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Windlass_Mach_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Bosuns_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ramp_Gate_Mach": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Passage_Stbd_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bow_Door_Mach": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "WC_Space_Fwd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Bow_Ramp_Area": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear_Flat": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Aux_Machinery_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Magazine_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess_Hold": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_Hold": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Troop_Mess_Hold": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Troop_Hold": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Galley_Hold": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Ballast_Tanks_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bosun_Chain_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Void_Forepeak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "BALLAST TANK",
+      "kind": "unknown",
+      "nearest_zone": "Ballast_Tanks_Hold",
+      "display": [
+        41.33,
+        4.16
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "D.O. SETTLING TANK",
+      "kind": "unknown",
+      "nearest_zone": "Troop_Berthing_Hold",
+      "display": [
+        31.41,
+        1.56
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "POTABLE H2O",
+      "kind": "freshwater",
+      "nearest_zone": "Aux_Machinery_Main",
+      "display": [
+        17.08,
+        9.71
+      ],
+      "deck": "main_deck",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Washroom_Main (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Washroom_Main",
+    "WC_Space_Fwd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: WC_Space_Fwd",
+    "Crew_Mess_Hold (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_Hold",
+    "HD_Crew_Hold (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Hold",
+    "Troop_Mess_Hold (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Troop_Mess_Hold",
+    "HD_Troop_Hold (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Troop_Hold",
+    "Galley_Hold (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_Hold"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:27:26.902426+00:00",
+  "platform": "lyon_ap71",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 2208,
+    "crew": 407
+  },
+  "manifest": [
+    {
+      "class_id": "ships_officers",
+      "role_group": "crew",
+      "count": 41,
+      "berth_zone": "Officers_Cabins_Port",
+      "duty_zone": "Wheel_House",
+      "notes": "plate: officers 41 (boat+cabin dk staterooms)"
+    },
+    {
+      "class_id": "cpos",
+      "role_group": "crew",
+      "count": 24,
+      "berth_zone": "CPO_Berthing_Shelter",
+      "duty_zone": "Pantry_CPO_Mess",
+      "notes": "plate: CPO 24 (shelter dk berthing)"
+    },
+    {
+      "class_id": "enlisted",
+      "role_group": "crew",
+      "count": 342,
+      "berth_zone": "Crew_Berthing_Aft_2nd",
+      "duty_zone": "Services_Mid_2nd",
+      "notes": "plate: crew 342 (2nd dk frs 149-196 + 3rd dk)"
+    },
+    {
+      "class_id": "troop_officers",
+      "role_group": "passenger",
+      "count": 116,
+      "berth_zone": "Troop_Officer_Cabins",
+      "duty_zone": "Quarter_Weather",
+      "notes": "plate: tr.off 116 (shelter dk + 2nd dk cabins)"
+    },
+    {
+      "class_id": "embarked_troops",
+      "role_group": "passenger",
+      "count": 2092,
+      "berth_zone": "Troop_Berthing_Fwd_2nd",
+      "duty_zone": "Troop_Mess_2nd",
+      "notes": "plate: troops 2092 across 2nd+3rd dk bays"
+    }
+  ],
+  "source": "sheet 2 accommodation plate: off 41 + CPO 24 + crew 342 + troops 2092 + tr.off 116 = 2615",
+  "consistency": {
+    "declared_total": 2615,
+    "manifest_total": 2615,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
