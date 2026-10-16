@@ -210,6 +210,9 @@ data/
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
+│   ├── battler_acv6/               (maritime.org GA import)
+│   ├── puncher_cve53/              (maritime.org GA import)
+│   ├── thetis_bay_cve90/           (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
