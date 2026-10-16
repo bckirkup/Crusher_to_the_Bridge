@@ -85,6 +85,9 @@ PLATFORMS = [
     "savannah_ns",
     "aeolus_arc3",
     "alexander_henry_cgs119",
+    "jupiter_ac3",
+    "montana_acr13",
+    "olympia_c6",
 ]
 
 ENTERPRISE_IDS = frozenset({
@@ -408,3 +411,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
