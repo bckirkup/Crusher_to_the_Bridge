@@ -134,6 +134,29 @@ def _skip_string(buf: bytes, i: int, st: dict) -> int | None:
         i = m.start() + 2  # backslash: skip it and the escaped char
 
 
+def _value_end_step(buf: bytes, i: int, st: dict) -> int | None:
+    """One struct token; ``0`` when the top-level value closed, else next index."""
+    m = _STRUCT.search(buf, i)
+    if m is None:
+        st["pos"] = len(buf)
+        return None
+    c = buf[m.start()]
+    if c == 0x22:
+        nxt = _skip_string(buf, m.start() + 1, st)
+        return nxt
+    if c == 0x5C:
+        return m.start() + 2
+    if c in b"[{":
+        st["depth"] += 1
+        return m.start() + 1
+    st["depth"] -= 1
+    nxt = m.start() + 1
+    if st["depth"] == 0:
+        st["pos"] = nxt
+        return 0
+    return nxt
+
+
 def _value_end(buf: bytes, _start: int, st: dict) -> int | None:
     """Incremental bracket/string scan; end index after the top-level
     value or None when the span is incomplete. State resumes where the
@@ -144,26 +167,12 @@ def _value_end(buf: bytes, _start: int, st: dict) -> int | None:
         if i is None:
             return None
     while True:
-        m = _STRUCT.search(buf, i)
-        if m is None:
-            st["pos"] = len(buf)
+        step = _value_end_step(buf, i, st)
+        if step is None:
             return None
-        c = buf[m.start()]
-        if c == 0x22:
-            i = _skip_string(buf, m.start() + 1, st)
-            if i is None:
-                return None
-        elif c == 0x5C:
-            i = m.start() + 2
-        elif c in b"[{":
-            st["depth"] += 1
-            i = m.start() + 1
-        else:
-            st["depth"] -= 1
-            i = m.start() + 1
-            if st["depth"] == 0:
-                st["pos"] = i
-                return i
+        if step == 0:
+            return st["pos"]
+        i = step
 
 
 def _hazard_fold(span: bytes) -> dict[int, list[tuple[int, float]]]:
@@ -175,6 +184,32 @@ def _hazard_fold(span: bytes) -> dict[int, list[tuple[int, float]]]:
             (int(m.group(1)), float(m.group(3)))
         )
     return out
+
+
+def _store_target_value(
+    out: dict[str, Any],
+    name: bytes,
+    span: bytes,
+    decoder: json.JSONDecoder,
+) -> None:
+    if name == b"hazards":
+        out["hazards"] = _hazard_fold(span)
+    else:
+        out[name.decode()] = decoder.raw_decode(
+            span.decode("utf-8", "replace")
+        )[0]
+
+
+def _marker_value_start(buf: bytes, name: bytes) -> int | None:
+    j = buf.find(b'"' + name + b'":')
+    if j < 0:
+        return None
+    s = j + len(name) + 3
+    while s < len(buf) and buf[s] in b" \t\r\n":
+        s += 1
+    if s >= len(buf):
+        return -1
+    return s
 
 
 def _extract_census(blob: bytes) -> dict[str, Any]:
@@ -194,15 +229,12 @@ def _extract_census(blob: bytes) -> dict[str, Any]:
         while ti < len(_TARGETS):
             name = _TARGETS[ti]
             if val_start is None:
-                j = buf.find(b'"' + name + b'":')
-                if j < 0:
+                s = _marker_value_start(buf, name)
+                if s is None:
                     if len(buf) > _CHUNK:
                         buf = buf[-_TAIL_KEEP:]
                     break
-                s = j + len(name) + 3
-                while s < len(buf) and buf[s] in b" \t\r\n":
-                    s += 1
-                if s >= len(buf):
+                if s < 0:
                     break
                 val_start = s
                 st = {"pos": s, "depth": 0}
@@ -210,12 +242,7 @@ def _extract_census(blob: bytes) -> dict[str, Any]:
             if end is None:
                 break
             span = buf[val_start:end]
-            if name == b"hazards":
-                out["hazards"] = _hazard_fold(span)
-            else:
-                out[name.decode()] = decoder.raw_decode(
-                    span.decode("utf-8", "replace")
-                )[0]
+            _store_target_value(out, name, span, decoder)
             buf = buf[end:]
             val_start = None
             ti += 1

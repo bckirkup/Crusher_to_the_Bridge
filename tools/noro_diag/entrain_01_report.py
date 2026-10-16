@@ -160,6 +160,41 @@ def _posted_ar_table(
     return lines
 
 
+def _conversion_row(
+    hull: str,
+    arm: str,
+    rows: list[dict],
+    summ_rows: list[dict],
+) -> str:
+    cen = [r for r in rows if _cen(r)]
+    unp_cen = [r for r in cen if not r["posted"]]
+    unp_early = sum(1 for r in unp_cen if _has_early(r))
+    n_unp = len(unp_cen)
+    lo, hi = wilson_interval(unp_early, n_unp)
+    p_early = unp_early / n_unp if n_unp else None
+    posted = [r for r in rows if r["posted"]]
+    post_early = sum(1 for r in posted if _has_early(r))
+    n_posted_all = sum(1 for r in summ_rows if r["posted"])
+    n_all = len(summ_rows)
+    n_unposted_all = n_all - n_posted_all
+    post_noearly = n_posted_all - post_early
+    if p_early is None:
+        conv = conv_no = "-"
+    else:
+        est_early = p_early * n_unposted_all
+        est_noearly = (1 - p_early) * n_unposted_all
+        conv = _pct(post_early, post_early + est_early)
+        conv_no = _pct(post_noearly, post_noearly + est_noearly)
+    return (
+        f"| {hull} {_ARM_LABEL.get(arm, arm)} | {n_unp}"
+        f" | {unp_early}"
+        f" | {_pct(unp_early, n_unp)}"
+        f" [{100 * lo:.0f},{100 * hi:.0f}]"
+        f" | {n_posted_all} | {post_early} | {conv}"
+        f" | {conv_no} |"
+    )
+
+
 def _conversion_table(
     cells: dict[tuple[str, str], list[dict]],
     summ_cells: dict[tuple[str, str], list[dict]],
@@ -174,35 +209,11 @@ def _conversion_table(
     ]
     for hull in _HULLS:
         for arm in _ARMS:
-            rows = cells.get((hull, arm), [])
-            cen = [r for r in rows if _cen(r)]
-            unp_cen = [r for r in cen if not r["posted"]]
-            unp_early = sum(1 for r in unp_cen if _has_early(r))
-            n_unp = len(unp_cen)
-            lo, hi = wilson_interval(unp_early, n_unp)
-            p_early = unp_early / n_unp if n_unp else None
-            posted = [r for r in rows if r["posted"]]
-            post_early = sum(1 for r in posted if _has_early(r))
-            n_posted_all = sum(
-                1 for r in summ_cells.get((hull, arm), []) if r["posted"]
-            )
-            n_all = len(summ_cells.get((hull, arm), []))
-            n_unposted_all = n_all - n_posted_all
-            post_noearly = n_posted_all - post_early
-            if p_early is None:
-                conv = conv_no = "-"
-            else:
-                est_early = p_early * n_unposted_all
-                est_noearly = (1 - p_early) * n_unposted_all
-                conv = _pct(post_early, post_early + est_early)
-                conv_no = _pct(post_noearly, post_noearly + est_noearly)
+            key = (hull, arm)
             lines.append(
-                f"| {hull} {_ARM_LABEL.get(arm, arm)} | {n_unp}"
-                f" | {unp_early}"
-                f" | {_pct(unp_early, n_unp)}"
-                f" [{100 * lo:.0f},{100 * hi:.0f}]"
-                f" | {n_posted_all} | {post_early} | {conv}"
-                f" | {conv_no} |"
+                _conversion_row(
+                    hull, arm, cells.get(key, []), summ_cells.get(key, []),
+                )
             )
     return lines
 
@@ -288,6 +299,19 @@ def _size_join(
     return lines
 
 
+def _burst_group_line(arm: str, label: str, group: list[dict]) -> str:
+    b48 = [_cen(r).get("burst48") or 0.0 for r in group]
+    b12 = [_cen(r).get("burst12") or 0.0 for r in group]
+    cen_e = [
+        _cen(r).get("burst48_centre") or 0.0
+        for r in group if _cen(r).get("burst48_centre")
+    ]
+    return (
+        f"| {_ARM_LABEL.get(arm, arm)} | {label} | {len(group)}"
+        f" | {_med(b48)} | {_med(b12)} | {_med(cen_e, 0)} |"
+    )
+
+
 def _burst_table(
     cells: dict[tuple[str, str], list[dict]],
     head_rows: list[dict],
@@ -310,16 +334,7 @@ def _burst_table(
         for label, group in (("posted", posted), ("cs-excursion", exc)):
             if not group:
                 continue
-            b48 = [_cen(r).get("burst48") or 0.0 for r in group]
-            b12 = [_cen(r).get("burst12") or 0.0 for r in group]
-            cen_e = [
-                _cen(r).get("burst48_centre") or 0.0
-                for r in group if _cen(r).get("burst48_centre")
-            ]
-            lines.append(
-                f"| {_ARM_LABEL.get(arm, arm)} | {label} | {len(group)}"
-                f" | {_med(b48)} | {_med(b12)} | {_med(cen_e, 0)} |"
-            )
+            lines.append(_burst_group_line(arm, label, group))
     rest = [r for r in head_rows if _cen(r)]
     if rest:
         b48 = [_cen(r).get("burst48") or 0.0 for r in rest]
@@ -329,6 +344,44 @@ def _burst_table(
             f" | {_med(b48)} | {_med(b12)} | - |"
         )
     return lines
+
+
+def _serving_collect(rows: list[dict]) -> tuple[int, list[dict], Counter[str]]:
+    objs: list[dict] = []
+    voy = 0
+    reasons: Counter[str] = Counter()
+    for r in rows:
+        ors = _obj_rows(r)
+        if ors:
+            voy += 1
+        objs.extend(ors)
+        for o in ors:
+            reasons[o.get("end") or "?"] += 1
+    return voy, objs, reasons
+
+
+def _serving_row(hull: str, arm: str, voy: int, objs: list[dict],
+                 reasons: Counter[str]) -> str:
+    wins = [int(o.get("w") or 0) for o in objs]
+    srvs = [int(o.get("t") or 0) for o in objs]
+    pw = [
+        int(x) for o in objs for x in (o.get("pw") or [])
+    ]
+    lots = [
+        int(o["lot_srv"]) for o in objs
+        if o.get("lot_srv") is not None
+    ]
+    top = ", ".join(
+        f"{k}:{v}" for k, v in reasons.most_common(3)
+    )
+    return (
+        f"| {hull} {_ARM_LABEL.get(arm, arm)} | {voy}"
+        f" | {len(objs)}"
+        f" | {_med(wins, 0)} [{_q(wins, 0.9)}]"
+        f" | {_med(srvs, 0)} [{_q(srvs, 0.9)}]"
+        f" | {_med(pw, 0)} [{_q(pw, 0.9)}]"
+        f" | {_med(lots, 0)} | {top} |"
+    )
 
 
 def _serving_table(
@@ -346,40 +399,26 @@ def _serving_table(
         for arm in _ARMS:
             if arm in ("off", "ind"):
                 continue
-            rows = cells.get((hull, arm), [])
-            objs: list[dict] = []
-            voy = 0
-            reasons: Counter[str] = Counter()
-            for r in rows:
-                ors = _obj_rows(r)
-                if ors:
-                    voy += 1
-                objs.extend(ors)
-                for o in ors:
-                    reasons[o.get("end") or "?"] += 1
+            voy, objs, reasons = _serving_collect(cells.get((hull, arm), []))
             if not objs:
                 continue
-            wins = [int(o.get("w") or 0) for o in objs]
-            srvs = [int(o.get("t") or 0) for o in objs]
-            pw = [
-                int(x) for o in objs for x in (o.get("pw") or [])
-            ]
-            lots = [
-                int(o["lot_srv"]) for o in objs
-                if o.get("lot_srv") is not None
-            ]
-            top = ", ".join(
-                f"{k}:{v}" for k, v in reasons.most_common(3)
-            )
-            lines.append(
-                f"| {hull} {_ARM_LABEL.get(arm, arm)} | {voy}"
-                f" | {len(objs)}"
-                f" | {_med(wins, 0)} [{_q(wins, 0.9)}]"
-                f" | {_med(srvs, 0)} [{_q(srvs, 0.9)}]"
-                f" | {_med(pw, 0)} [{_q(pw, 0.9)}]"
-                f" | {_med(lots, 0)} | {top} |"
-            )
+            lines.append(_serving_row(hull, arm, voy, objs, reasons))
     return lines
+
+
+def _shedder_obj_tallies(cen: list[dict]) -> tuple[int, int, int, int, int]:
+    e_imp = e_acq = o_imp = o_acq = o_none = 0
+    for r in cen:
+        c = _cen(r)
+        e_imp += int(c.get("early_obj_src_import") or 0)
+        e_acq += sum(
+            1 for e in _early_events(r)
+            if e.get("f") == "obj" and e.get("src") == "acq"
+        )
+        o_imp += int(c.get("obj_src_import") or 0)
+        o_acq += int(c.get("obj_src_acq") or 0)
+        o_none += int(c.get("obj_src_none") or 0)
+    return e_imp, e_acq, o_imp, o_acq, o_none
 
 
 def _shedder_table(
@@ -401,17 +440,7 @@ def _shedder_table(
             dc = [r["drawn_crew"] or 0 for r in rows]
             imp = [r["n_imports"] or 0 for r in rows]
             cen = [r for r in rows if _cen(r)]
-            e_imp = e_acq = o_imp = o_acq = o_none = 0
-            for r in cen:
-                c = _cen(r)
-                e_imp += int(c.get("early_obj_src_import") or 0)
-                e_acq += sum(
-                    1 for e in _early_events(r)
-                    if e.get("f") == "obj" and e.get("src") == "acq"
-                )
-                o_imp += int(c.get("obj_src_import") or 0)
-                o_acq += int(c.get("obj_src_acq") or 0)
-                o_none += int(c.get("obj_src_none") or 0)
+            e_imp, e_acq, o_imp, o_acq, o_none = _shedder_obj_tallies(cen)
             lines.append(
                 f"| {hull} {_ARM_LABEL.get(arm, arm)}"
                 f" | {_med(dc, 0)} [{_q(dc, 0.1):g},{_q(dc, 0.9):g}]"
