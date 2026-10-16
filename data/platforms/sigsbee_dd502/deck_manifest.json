@@ -1,0 +1,97 @@
+{
+  "platform_id": "sigsbee_dd502",
+  "ship_class_label": "Sigsbee Dd502",
+  "footprint_tier": "representative",
+  "representative_of": "DD-502 USS Sigsbee, Fletcher class (1944 booklet). 376 ft, ~322 crew. Zones read from maritime.org dd502 plates 5-11.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 41",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Nav_Bridge",
+    "After_Deckhouse",
+    "Midship_Deckhouse",
+    "Superstructure_Radio",
+    "Mt2_Deck",
+    "Fantail",
+    "Aft_Util",
+    "HD_Crew_Aft",
+    "Mid_Shops",
+    "Uptake_Aft",
+    "Galley_Mess",
+    "Uptake_Fwd",
+    "CIC",
+    "Officers_Country",
+    "Torpedo_Workshop",
+    "Focsle_Deck",
+    "Steering_Gear",
+    "Aft_Shops",
+    "Crew_Berthing_Aft",
+    "Engine_Rm_Aft",
+    "Fire_Rm_Aft",
+    "Engine_Rm_Fwd",
+    "Fire_Rm_Fwd",
+    "Crew_Berthing_Fwd",
+    "HD_Fwd",
+    "CPO_Quarters",
+    "Fwd_Stores_1P",
+    "Aft_Stores_2P",
+    "Magazine_Aft_2P",
+    "Fuel_Tanks_2P",
+    "Provisions_2P",
+    "Magazine_Fwd_2P",
+    "Provisions_3P",
+    "Magazine_Fwd_3P",
+    "Sound_Rm",
+    "Boatswain_Chain_3P",
+    "Shaft_Alley",
+    "Tanks_Hold",
+    "Magazines_Hold",
+    "Fwd_Stores_Hold",
+    "Peak_Hold"
+  ],
+  "decks": [
+    "bridge_deck",
+    "first_platform",
+    "hold",
+    "main_deck",
+    "second_platform",
+    "superstructure_deck",
+    "third_platform"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 116.75,
+    "ymin": -2.0,
+    "ymax": 14.02
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "bridge_deck": "deck_bridge_deck.png",
+      "superstructure_deck": "deck_superstructure_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "first_platform": "deck_first_platform.png",
+      "second_platform": "deck_second_platform.png",
+      "third_platform": "deck_third_platform.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}
