@@ -174,7 +174,23 @@ Per-deck crops ride in the same PR, not a follow-up:
    `plan_overview.png` may need a manual ~8000px downscale first (the 13 MB
    castle precedent).
 
-### 9. PR + sibling-merge discipline
+### 9. Museum credit (required)
+
+All maritime.org general plans are hosted by the **San Francisco Maritime
+National Park Association** (the non-profit partner to SF Maritime National
+Historical Park, operator of the USS Pampanito museum). Every document an
+import writes — `systems_notes.md`, `contam/CONTAM_HANDOFF.md`, README rows,
+GA_IMPORT_APPROACH rows — must credit the museum and link back:
+
+> Source: U.S. Navy Booklet of General Plans — courtesy of the
+> [San Francisco Maritime National Park Association](https://maritime.org/about/),
+> [Booklets of General Plans Online](https://maritime.org/doc/plans/index.htm),
+> `<booklet>.pdf` (https://maritime.org/doc/plans/<file>.pdf).
+
+Describe the drawings as museum-provided source material, never as if the
+repo authored them.
+
+### 10. PR + sibling-merge discipline
 
 One PR per leg; do NOT merge (owner/coordinator merges after CI green).
 Shared-file collision surface on every import PR: `README.md` platforms table,
