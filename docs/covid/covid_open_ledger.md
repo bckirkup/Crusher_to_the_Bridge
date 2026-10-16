@@ -523,6 +523,19 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   residuals: the crew-share divergence lives off the service channel
   (~3.6% of crew pickups), and the sect arm is a different voyage
   realization (takeoff 11/20). See `docs/covid/covid_meal_service_02_readout.md`.
+- **`CONTAM-DIVERGENCE-01` is measured — native vs ContamX transport.**
+  On every platform the `.prj` AHS terminals are element-free design
+  annotations (`Fahs`), not enforced flows; the ContamX solve redistributes
+  each AHS through one terminal room (destroyer `ahs2`: 878 m³/h MedBay,
+  siblings ≈0). A bracketed surrogate (destroyer-severity shunt, both
+  terminal corners, `HD_*` vented) on expedition/classic/spirit shows
+  occupied-class dose ratios 0.04×–2320× with an unknowable per-venue
+  sign — the air-weighted anchors' permissible-region endorsement does
+  not carry by structure. The twins bracket *design intent vs
+  uncommissioned build*: the solved field is not privileged over the
+  sourced ACHs without real-ship sampling. Full analysis:
+  `docs/contam_engine_divergence.md`,
+  `docs/ledger/CONTAM-DIVERGENCE-01.md`.
 - **`COVID-HAND-AB-01` (v14) is the declared Diamond Princess re-approach
   under the repaired hand line — three designs, one gate.** The hand
   reservoir gained practice variability + drying under PR #804

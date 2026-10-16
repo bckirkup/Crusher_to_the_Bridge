@@ -71,6 +71,7 @@ seeds. Ledger:
 | FLU-VIS-01 | measured | `ca775a0b` | observation-layer sweep (report scale × eligibility) on the open voyage; reporting saturates — big-hull Ward gap is incidence, not visibility |
 | FLU-SVC-RESIDUAL-01 | measured | `02ab79b8` | f=0 surplus attribution: admission lottery (refused founders) dominant, co-confined pooling confirmed ~15% |
 | DEFIANT-ESC-01 | measured | `19040166` | defiant→enforced escalation at declared 24 h; f=0 surplus 89→-25 pooled on 8112/8184/8120 |
+| CONTAM-DIVERGENCE-01 | measured | `1ac4da8a` | native vs ContamX transport field: AHS terminal shunt is solver-decided (bracket 0.04×–2320× per-venue dose swing); local-dose anchors rise under substitution; permissible-region endorsement does not carry |
 
 Numbers are quoted from the entries above at their `Measured at` SHAs, never
 from this page.
