@@ -4644,8 +4644,8 @@ Design `docs/norovirus/noro_mint_rate_01_sweep_design.md`; package
 `campaigns/noro/mint_rate_01/`; entry
 `docs/ledger/NORO-MINT-RATE-01.md`.
 
-**`PROVISIONED-SOURCE-01` (declared — mechanism + eval designs
-frozen, no cells submitted):** the supply-side replacement for the
+**`PROVISIONED-SOURCE-01` (canary submitted 2026-10-16 — mechanism
+landed, eval frozen + amendment A1, 128 cells in flight):** the supply-side replacement for the
 fiat mint gate MINT-RATE-01 brackets — provisioned_lot mints become a
 derived draw, objects-per-voyage = Binomial(N_lots, q_source) with
 N_lots the served-venue × item-line station census (21/35/63/70 on
