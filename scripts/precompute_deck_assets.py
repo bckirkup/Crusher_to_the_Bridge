@@ -100,6 +100,9 @@ PLATFORMS = [
     "river_class_frigate",
     "fort_william_j311",
     "winnipeg_j337",
+    "battler_acv6",
+    "puncher_cve53",
+    "thetis_bay_cve90",
 ]
 
 ENTERPRISE_IDS = frozenset({

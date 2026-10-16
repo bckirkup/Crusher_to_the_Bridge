@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Fifty-eight ship platforms are included, each with spatial layout and HVAC
+Sixty-one ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -852,6 +852,9 @@ from `orchestrator_types.py`:
 | `river_class_frigate` | RN River-class frigate (maritime.org GA import, 37 zones, 140 crew) |
 | `fort_william_j311` | HMCS Fort William J311 Bangor-class minesweeper (maritime.org GA import, 25 zones, 70 crew) |
 | `winnipeg_j337` | HMCS Winnipeg J337 Algerine-class minesweeper (maritime.org GA import, 31 zones, 122 crew) |
+| `battler_acv6` | HMS Battler D-18 Attacker/Bogue-class escort carrier (maritime.org GA import, 55 zones, 800 crew) |
+| `puncher_cve53` | HMS Puncher D-79 Bogue-class escort carrier CVE-53 (maritime.org GA import, 88 zones, 869 crew) |
+| `thetis_bay_cve90` | USS Thetis Bay CVE-90 Casablanca-class escort carrier (maritime.org GA import, 74 zones, 596 crew) |
 
 ## License
 
