@@ -194,6 +194,8 @@ data/
 │   ├── miami_cl89/                 (maritime.org GA import)
 │   ├── chicago_cg11/               (maritime.org GA import)
 │   ├── wright_cc2/                 (maritime.org GA import)
+│   ├── pope_ap110/                 (maritime.org GA import)
+│   ├── squier_ap130/               (maritime.org GA import)
 │   ├── lexington_cv2/              (maritime.org GA import)
 │   ├── saratoga_cv3/               (maritime.org GA import)
 │   ├── sigsbee_dd502/              (maritime.org GA import)
@@ -202,6 +204,9 @@ data/
 │   ├── idaho_bb42/                 (maritime.org GA import)
 │   ├── west_virginia_bb48/         (maritime.org GA import)
 │   ├── south_dakota_bb49/          (maritime.org GA import)
+│   ├── missouri_bb63/              (maritime.org GA import)
+│   ├── wisconsin_bb64/             (maritime.org GA import)
+│   ├── new_jersey_bb62/            (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -561,7 +566,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twenty-seven ship platforms are included, each with spatial layout and HVAC
+Thirty-two ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -592,6 +597,8 @@ airflow definitions:
 | `miami_cl89` | USS Miami CL-89 Cleveland-class light cruiser (maritime.org GA import, 81 zones, 1252 crew) |
 | `chicago_cg11` | USS Chicago CG-11 guided missile cruiser on Baltimore-class hull (maritime.org GA import, 87 zones, 1302 crew incl. flag staff + marines) |
 | `wright_cc2` | USS Wright CC-2 command ship on Saipan-class CVL hull (maritime.org GA import, 68 zones, 1768 crew) |
+| `pope_ap110` | USS General John Pope AP-110 troop transport (maritime.org GA import, 88 zones, 479 crew + 5313 troops) |
+| `squier_ap130` | USS General G.O. Squier AP-130 C4-S-A1 troop transport (maritime.org GA import, 52 zones, 482 crew + 3262 troops) |
 | `lexington_cv2` | USS Lexington CV-2 Lexington-class carrier, 1941 fit (maritime.org GA import, 97 zones, 2370 crew incl. air group) |
 | `saratoga_cv3` | USS Saratoga CV-3 Lexington-class carrier, wartime 1944 fit (maritime.org GA import, 108 zones, 2954 crew incl. air group) |
 | `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
@@ -600,6 +607,9 @@ airflow definitions:
 | `idaho_bb42` | USS Idaho BB-42 New Mexico-class battleship (maritime.org GA import, 114 zones, ~1084 crew class-typical) |
 | `west_virginia_bb48` | USS West Virginia BB-48 Colorado-class battleship (maritime.org GA import, 198 zones, 1340 crew plate-read) |
 | `south_dakota_bb49` | USS South Dakota BB-49 1918 contract-design battleship, never completed (maritime.org GA import, 55 zones, ~1191 crew class-typical) |
+| `missouri_bb63` | USS Missouri BB-63 Iowa-class battleship, 1950 booklet (maritime.org GA import, 103 zones, 1561 crew) |
+| `wisconsin_bb64` | USS Wisconsin BB-64 Iowa-class battleship, 1956 booklet (maritime.org GA import, 103 zones, ~2560 crew) |
+| `new_jersey_bb62` | USS New Jersey BB-62 Iowa-class battleship, 1984 reactivation booklet (maritime.org GA import, 103 zones, ~1781 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`

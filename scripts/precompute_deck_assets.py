@@ -68,6 +68,8 @@ PLATFORMS = [
     "miami_cl89",
     "chicago_cg11",
     "wright_cc2",
+    "pope_ap110",
+    "squier_ap130",
     "lexington_cv2",
     "saratoga_cv3",
     "sigsbee_dd502",
@@ -76,6 +78,9 @@ PLATFORMS = [
     "idaho_bb42",
     "west_virginia_bb48",
     "south_dakota_bb49",
+    "missouri_bb63",
+    "wisconsin_bb64",
+    "new_jersey_bb62",
 ]
 
 ENTERPRISE_IDS = frozenset({

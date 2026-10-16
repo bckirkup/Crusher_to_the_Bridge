@@ -1,0 +1,343 @@
+{
+  "platform": "squier_ap130",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "sup_fan_rm_port",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "superstructure_deck",
+      "serves_zone": "Officers_Country_Sup",
+      "display": [
+        68.3,
+        12.11
+      ],
+      "evidence": "sheet_read",
+      "notes": "FAN ROOM labels flanking house on superstructure deck"
+    },
+    {
+      "id": "sup_fan_rm_stbd",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "superstructure_deck",
+      "serves_zone": "Officers_Country_Sup",
+      "display": [
+        75.27,
+        15.34
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "main_stack",
+      "kind": "funnel",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": null,
+      "serves_zone": "Engines_Boiler_Casing_2D",
+      "display": [
+        71.79,
+        -34.72
+      ],
+      "evidence": "sheet_read",
+      "notes": "single stack on inboard profile over machinery hatch"
+    },
+    {
+      "id": "hatch_trunks",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "unknown",
+      "deck": "first_platform",
+      "serves_zone": "Troop_Berthing_1P_B",
+      "display": [
+        76.97,
+        10.44
+      ],
+      "evidence": "era_plausible",
+      "notes": "hatch trunks double as hold ventilation paths"
+    }
+  ],
+  "zone_modes": {
+    "Sup_Gun_Tub_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sup_House_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Hatch_Sup": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Officers_Country_Sup": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Lounge_Sup": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fan_Hatch_Block_Sup": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Gun_Platform_Sup": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stern_Deck_Up": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Med_Attend_Berthing": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_Aft_Up": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Up": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "NCO_Mess_Up": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machinery_Hatch_Up": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Troop_Off_Qtrs_Top": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley_Complex_Up": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Ship_Troop_Off_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "NCO_Berthing_Up": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Fwd_Up": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_Up": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Upper": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_Up": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear_Mach": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engines_Boiler_Casing_2D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "NCO_Berthing_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Medical_Complex_2D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Troop_Mess_2D": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Troop_Mess_2D": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Troop_2D": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker_Stores_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Peak_3D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_3D_A": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Hatch_3D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Galley_Bakery_3D": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_3D_B": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Troop_3D": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_3D_C": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Forepeak_3D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley_Aft": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_1P_A": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Reefer_Block_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Provisions_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Casing_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_1P_B": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Troop_Berthing_1P_C": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Forepeak_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Tanks_Aft_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hold_Vegetable_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Tanks_TT": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Tanks_Fwd_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Forepeak_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.O. SETTLING TANK",
+      "kind": "fuel",
+      "nearest_zone": "Machinery_Tanks_TT",
+      "display": [
+        73.9,
+        12.3
+      ],
+      "deck": "tank_top",
+      "notes": "fuel oil settling under machinery"
+    },
+    {
+      "label": "DEEP TANK",
+      "kind": "unknown",
+      "nearest_zone": "Tanks_Aft_TT",
+      "display": [
+        26.73,
+        10.06
+      ],
+      "deck": "tank_top",
+      "notes": "deep tank aft (ballast/FO)"
+    },
+    {
+      "label": "FOREPEAK TANK",
+      "kind": "unknown",
+      "nearest_zone": "Forepeak_TT",
+      "display": [
+        148.59,
+        14.53
+      ],
+      "deck": "tank_top",
+      "notes": ""
+    },
+    {
+      "label": "FUEL OIL (TANK ARRANGEMENT)",
+      "kind": "fuel",
+      "nearest_zone": "Ship_Troop_Off_Mess",
+      "display": [
+        89.4,
+        79.76
+      ],
+      "deck": null,
+      "notes": "tank-arrangement band shows FUEL OIL double-bottom runs"
+    },
+    {
+      "label": "S.W. BALLAST",
+      "kind": "unknown",
+      "nearest_zone": "Troop_Berthing_Up",
+      "display": [
+        122.51,
+        82.95
+      ],
+      "deck": null,
+      "notes": "salt-water ballast on tank-arrangement band"
+    }
+  ],
+  "plumbing_drains": [
+    "NCO_Mess_Up (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: NCO_Mess_Up",
+    "Galley_Complex_Up (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_Complex_Up",
+    "Ship_Troop_Off_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Ship_Troop_Off_Mess",
+    "HD_Upper (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Upper",
+    "Medical_Complex_2D (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Medical_Complex_2D",
+    "Crew_Troop_Mess_2D (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Troop_Mess_2D",
+    "Troop_Mess_2D (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Troop_Mess_2D",
+    "HD_Troop_2D (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Troop_2D",
+    "Galley_Bakery_3D (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_Bakery_3D",
+    "HD_Troop_3D (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Troop_3D"
+  ]
+}
