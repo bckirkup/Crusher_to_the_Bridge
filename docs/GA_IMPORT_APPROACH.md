@@ -57,6 +57,8 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `gordon_gunter_r338` | R-338, 13 sheets, NOAA T-AGOS research vessel | 35 | 20 crew / 15 scientists, 6 classes | `.prj` 226 paths, 4 HVAC groups |
 | `castle_class_corvette` | Castle-class GA, single-sheet multi-view | 19 | 99 crew, 5 classes | `.prj` 138 paths, 2 HVAC groups |
 | `raven_am55` | AM-55 Raven minesweeper (sheets 3-5; platform deck zoned on the inboard profile with explicit ests) | 21 | 105 crew, 6 classes | `.prj` 137 paths, 2 HVAC groups |
+| `bolster_ars38` | ARS-38 Bolster rescue/salvage tug, single-sheet multi-view (5 deck bands on one plate) | 24 | 90 crew incl. divers, 6 classes | `.prj` 175 paths, 2 HVAC groups |
+| `ruchamkin_apd89` | APD-89 Ruchamkin fast transport (DE→APD conversion booklet, plates 5-10) | 32 | 213 crew + 162 troops, 7 classes | `.prj` 301 paths, 3 HVAC groups |
 
 All three carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
 
