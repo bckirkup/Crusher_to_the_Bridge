@@ -71,3 +71,7 @@ Hotel spaces AC; laboratories fume-biased exhaust; machinery forced draft.
 - HD_Main (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Main_Gen_Rm
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy R-338 NOAA Gordon Gunter, Booklet of General Plans, 2008 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [r338.pdf](https://maritime.org/doc/plans/r338.pdf).

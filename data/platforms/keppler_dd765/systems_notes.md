@@ -124,3 +124,7 @@ Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery 
 - CPO_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: CPO_Mess
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy DD-765 USS Keppler (Gearing FRAM II), Booklet of General Plans, 1969 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [dd765.pdf](https://maritime.org/doc/plans/dd765.pdf).

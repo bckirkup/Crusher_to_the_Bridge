@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/lsm_354 --contam-gate
 ```
+
+## Source
+
+U.S. Navy LSM-354 (LSM-1 class), Booklet of General Plans, 1944 (incomplete) — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [lsm354.pdf](https://maritime.org/doc/plans/lsm354.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/ruchamkin_apd89 --contam-gate
 ```
+
+## Source
+
+U.S. Navy APD-89 USS Ruchamkin, Booklet of General Plans, 1961 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [apd89.pdf](https://maritime.org/doc/plans/apd89.pdf).

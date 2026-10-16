@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/miami_cl89 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CL-89 USS Miami (Cleveland class), Booklet of General Plans, 1946 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cl89.pdf](https://maritime.org/doc/plans/cl89.pdf).

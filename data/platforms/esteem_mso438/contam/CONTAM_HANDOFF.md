@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/esteem_mso438 --contam-gate
 ```
+
+## Source
+
+U.S. Navy MSO-438 USS Esteem, Booklet of General Plans, 1958 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [mso438.pdf](https://maritime.org/doc/plans/mso438.pdf).

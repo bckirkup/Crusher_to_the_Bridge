@@ -138,3 +138,7 @@ Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery 
 - HD_Crew_Fwd_3rd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Shaft_Alley_Hold
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy CG-11 USS Chicago (Baltimore class), Booklet of General Plans, 1964 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cg11.pdf](https://maritime.org/doc/plans/cg11.pdf).

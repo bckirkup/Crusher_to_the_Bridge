@@ -47,3 +47,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - HD_Crew (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy PT-564 76' MTB, Plans for PT boats — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [ptboat.pdf](https://maritime.org/doc/plans/ptboat.pdf).

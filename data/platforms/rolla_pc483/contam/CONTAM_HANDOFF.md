@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/rolla_pc483 --contam-gate
 ```
+
+## Source
+
+U.S. Navy PC-483 USS Rolla (Bluffton sub-chaser class), Booklet of General Plans, 1942 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [pc483.pdf](https://maritime.org/doc/plans/pc483.pdf).

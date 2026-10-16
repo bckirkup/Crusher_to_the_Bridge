@@ -97,3 +97,7 @@ Natural cowl supply to accommodation; mechanical exhaust to galley and machinery
 - HD_Eng (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Eng
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy EC2-S-C1 Liberty Cargo, partial drawing set — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [ec2-s-c1.pdf](https://maritime.org/doc/plans/ec2-s-c1.pdf).

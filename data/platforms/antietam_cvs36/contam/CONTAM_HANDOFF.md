@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/antietam_cvs36 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CVS-36 USS Antietam (Essex class), Booklet of General Plans, 1955 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cvs36.pdf](https://maritime.org/doc/plans/cvs36.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/fort_mandan_lsd21 --contam-gate
 ```
+
+## Source
+
+U.S. Navy LSD-21 USS Fort Mandan (Casa Grande class), Booklet of General Plans, 1951 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [lsd21.pdf](https://maritime.org/doc/plans/lsd21.pdf).

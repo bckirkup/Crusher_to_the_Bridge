@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/cannon_de701 --contam-gate
 ```
+
+## Source
+
+U.S. Navy DE-701 USS Osmus (Buckley class), Booklet of General Plans, 1958 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [de701.pdf](https://maritime.org/doc/plans/de701.pdf).

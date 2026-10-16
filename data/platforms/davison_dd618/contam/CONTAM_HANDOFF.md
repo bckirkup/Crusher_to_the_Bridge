@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/davison_dd618 --contam-gate
 ```
+
+## Source
+
+U.S. Navy DD-618 USS Davison (Gleaves class), Booklet of General Plans, 1958 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [dd618.pdf](https://maritime.org/doc/plans/dd618.pdf).

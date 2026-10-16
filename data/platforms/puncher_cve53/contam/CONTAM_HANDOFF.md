@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/puncher_cve53 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CVE-53 / D79 HMS Puncher (Bogue class), Booklet of General Plans, 1944 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cve53-d79.pdf](https://maritime.org/doc/plans/cve53-d79.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/alexander_henry_cgs119 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CGS-119 CGS Alexander Henry, General Plans, 1959 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cgs119.pdf](https://maritime.org/doc/plans/cgs119.pdf).

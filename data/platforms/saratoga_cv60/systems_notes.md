@@ -144,3 +144,7 @@ Mechanical conditioning shipwide except open weather decks.
 - HD_3rd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Shaft_Alley_Hold
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy CV-60 USS Saratoga (Forrestal class, SLEP), Booklet of General Plans, 1993 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cv60.pdf](https://maritime.org/doc/plans/cv60.pdf).

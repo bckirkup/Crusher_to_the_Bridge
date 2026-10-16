@@ -96,3 +96,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - HD_Crew_2nd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_2nd
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy PG-50 USS Erie, Booklet of General Plans, 1936 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [pg50.pdf](https://maritime.org/doc/plans/pg50.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/apl_24 --contam-gate
 ```
+
+## Source
+
+U.S. Navy APL-24 (APL-17 class barracks ship), Booklet of General Plans, 1944 (4 sheets, incomplete) — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [apl24.pdf](https://maritime.org/doc/plans/apl24.pdf).

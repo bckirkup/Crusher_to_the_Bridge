@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/cobalt_k124 --contam-gate
 ```
+
+## Source
+
+U.S. Navy K124 HMCS Cobalt (Flower class corvette), 1941 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [k124.pdf](https://maritime.org/doc/plans/k124.pdf).

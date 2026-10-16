@@ -151,3 +151,7 @@ Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery 
 - Sick_Bay_3D (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay_3D
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy BB-64 USS Wisconsin (Iowa class), Booklet of General Plans, 1956 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [bb64.pdf](https://maritime.org/doc/plans/bb64.pdf).

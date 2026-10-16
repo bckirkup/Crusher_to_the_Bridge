@@ -132,3 +132,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - Crew_Mess_1P (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_1P
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy CL-89 USS Miami (Cleveland class), Booklet of General Plans, 1946 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cl89.pdf](https://maritime.org/doc/plans/cl89.pdf).

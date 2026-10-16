@@ -113,3 +113,7 @@ Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery 
 - HD_Crew_Fwd_3rd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Fwd_3rd
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy CC-2 USS Wright, Booklet of General Plans, 1965 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cc2.pdf](https://maritime.org/doc/plans/cc2.pdf).

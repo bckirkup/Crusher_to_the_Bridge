@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/battler_acv6 --contam-gate
 ```
+
+## Source
+
+U.S. Navy ACV-6 HMS Battler D-18 (Attacker/Bogue class), Reference Plans, 1943 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [acv6.pdf](https://maritime.org/doc/plans/acv6.pdf).

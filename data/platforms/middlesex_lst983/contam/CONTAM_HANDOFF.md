@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/middlesex_lst983 --contam-gate
 ```
+
+## Source
+
+U.S. Navy LST-983 USS Middlesex County (542 class), Booklet of General Plans, 1956 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [lst983.pdf](https://maritime.org/doc/plans/lst983.pdf).

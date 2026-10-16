@@ -112,3 +112,7 @@ Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery 
 - HD_3D (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_3D
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy CVS-36 USS Antietam (Essex class), Booklet of General Plans, 1955 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cvs36.pdf](https://maritime.org/doc/plans/cvs36.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/idaho_bb42 --contam-gate
 ```
+
+## Source
+
+U.S. Navy BB-42 USS Idaho (New Mexico class), Booklet of General Plans (9 sheets, incomplete) — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [bb42.pdf](https://maritime.org/doc/plans/bb42.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/astoria_ca34 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CA-34 USS Astoria (New Orleans class), Booklet of General Plans, 1941 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [ca34.pdf](https://maritime.org/doc/plans/ca34.pdf).

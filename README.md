@@ -570,7 +570,13 @@ grumb_seeding:
 ## Platforms
 
 Eighty ship platforms are included, each with spatial layout and HVAC
-airflow definitions:
+airflow definitions. Platforms marked `(maritime.org GA import)` were
+converted from U.S. Navy Booklets of General Plans — museum source
+material courtesy of the [San Francisco Maritime National Park
+Association](https://maritime.org/about/), [Booklets of General Plans
+Online](https://maritime.org/doc/plans/index.htm); each platform's
+`systems_notes.md` and `contam/CONTAM_HANDOFF.md` credits the specific
+booklet scanned:
 
 | Platform | Description |
 |----------|-------------|

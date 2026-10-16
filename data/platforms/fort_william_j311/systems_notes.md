@@ -58,3 +58,7 @@ Mushroom/cowl natural supply; mech exhaust galley/heads/engines; magazines sprin
 - HD_Low (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Low
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy J311 HMCS Fort William (Bangor class minesweeper), 1942 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [j311.pdf](https://maritime.org/doc/plans/j311.pdf).

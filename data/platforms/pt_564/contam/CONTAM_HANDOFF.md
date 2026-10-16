@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/pt_564 --contam-gate
 ```
+
+## Source
+
+U.S. Navy PT-564 76' MTB, Plans for PT boats — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [ptboat.pdf](https://maritime.org/doc/plans/ptboat.pdf).

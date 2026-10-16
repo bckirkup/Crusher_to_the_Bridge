@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/mercury_aks20 --contam-gate
 ```
+
+## Source
+
+U.S. Navy AKS-20 USS Mercury, Booklet of General Plans, 1949 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [aks20.pdf](https://maritime.org/doc/plans/aks20.pdf).

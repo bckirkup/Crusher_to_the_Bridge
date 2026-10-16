@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/erie_pg50 --contam-gate
 ```
+
+## Source
+
+U.S. Navy PG-50 USS Erie, Booklet of General Plans, 1936 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [pg50.pdf](https://maritime.org/doc/plans/pg50.pdf).

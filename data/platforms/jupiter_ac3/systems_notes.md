@@ -94,3 +94,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - HD_Firemens (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Firemens
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy AC-3 USS Jupiter (later USS Langley CV-1), Plans, 1913 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [ac3.pdf](https://maritime.org/doc/plans/ac3.pdf).
