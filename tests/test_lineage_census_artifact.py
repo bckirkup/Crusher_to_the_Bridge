@@ -101,6 +101,41 @@ def test_census_founders_are_recorded(census_dir: Path) -> None:
     """The founder set is what a diversity trajectory starts from."""
     census = load_census(str(census_dir))
     assert census.founders, "seeded infections should register founder lineages"
+    by_origin = census.founders_by_origin
+    for pid, sids in census.founders.items():
+        assert sorted(
+            sid for sids_per in by_origin.get(pid, {}).values() for sid in sids_per
+        ) == sorted(sids)
+
+
+def test_founders_by_origin_parses_the_channel_split() -> None:
+    """Boarding vs supply-chain founders stay separable after the parse
+    (issue #1010); artifacts written before the split read as empty."""
+    payload = {
+        "epoch_duration_hours": 1.0,
+        "snapshots": [
+            {
+                "epoch": 0,
+                "pathogen_id": "norwalk_gi",
+                "lineage_counts": {"norwalk_gi:1": 2},
+                "total_carriers": 2,
+            },
+        ],
+        "founders": {"norwalk_gi": ["norwalk_gi:1", "norwalk_gi:2"]},
+        "founders_by_origin": {
+            "norwalk_gi": {
+                "founder": ["norwalk_gi:1"],
+                "imported:lot": ["norwalk_gi:2"],
+            },
+        },
+    }
+    census = census_from_dict(payload)
+    assert census.founders_by_origin["norwalk_gi"]["imported:lot"] == (
+        "norwalk_gi:2",
+    )
+    legacy = dict(payload)
+    legacy.pop("founders_by_origin")
+    assert census_from_dict(legacy).founders_by_origin == {}
 
 
 def test_unarmed_run_writes_no_census(tmp_path: Path, run_root: Path) -> None:

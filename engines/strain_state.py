@@ -1062,6 +1062,21 @@ class StrainRegistry:
             return tuple(self._snapshots)
         return tuple(s for s in self._snapshots if s.pathogen_id == pathogen_id)
 
+    def founders_by_origin(
+        self,
+    ) -> dict[str, dict[str, list[str]]]:
+        """Founder ids per pathogen grouped by registry origin — the
+        boarding vs supply-chain split (issue #1010). ``"founder"`` and
+        ``"shore_import"`` founders boarded already formed;
+        ``"imported:lot"`` founders minted on a provisioned lot."""
+        grouped: dict[str, dict[str, list[str]]] = {}
+        for pid, sids in self._founders.items():
+            per: dict[str, list[str]] = {}
+            for sid in sids:
+                per.setdefault(self._strains[sid].origin, []).append(sid)
+            grouped[pid] = per
+        return grouped
+
     def to_telemetry(self) -> dict[str, Any]:
         """Run-level strain artifact: every strain plus the snapshot series."""
         return {
@@ -1069,5 +1084,6 @@ class StrainRegistry:
             "founders": {
                 pid: list(sids) for pid, sids in self._founders.items()
             },
+            "founders_by_origin": self.founders_by_origin(),
             "snapshots": [s.to_telemetry() for s in self._snapshots],
         }

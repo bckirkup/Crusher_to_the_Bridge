@@ -12,7 +12,7 @@ which is the mistake ``docs/history/epoch_time_unit_audit.md`` documents.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
 LINEAGE_CENSUS_SCHEMA_VERSION = "1.0.0"
@@ -61,6 +61,12 @@ class CensusArtifact:
     epochs: tuple[CensusEpoch, ...]
     strains: Mapping[str, StrainMeta]
     founders: Mapping[str, tuple[str, ...]]
+    # Founders grouped by registry origin (issue #1010): boarding
+    # imports ("founder", "shore_import") vs supply-chain imports
+    # ("imported:lot"). Empty on artifacts written before the split.
+    founders_by_origin: Mapping[
+        str, Mapping[str, tuple[str, ...]]
+    ] = field(default_factory=dict)
 
     def hours(self, epoch: int) -> float:
         """Voyage hours elapsed at ``epoch`` (the reporting axis)."""
@@ -155,6 +161,19 @@ def census_from_dict(payload: Mapping[str, Any]) -> CensusArtifact:
     founders_raw = payload.get("founders") or {}
     if not isinstance(founders_raw, Mapping):
         raise LineageCensusError("founders must be an object")
+    founders_by_origin_raw = payload.get("founders_by_origin") or {}
+    if not isinstance(founders_by_origin_raw, Mapping):
+        raise LineageCensusError("founders_by_origin must be an object")
+    founders_by_origin = {}
+    for pid, per in founders_by_origin_raw.items():
+        if not isinstance(per, Mapping):
+            raise LineageCensusError(
+                "founders_by_origin entries must be objects"
+            )
+        founders_by_origin[str(pid)] = {
+            str(origin): tuple(str(sid) for sid in sids)
+            for origin, sids in per.items()
+        }
     rows = []
     for entry in snapshots:
         if not isinstance(entry, Mapping):
@@ -173,4 +192,5 @@ def census_from_dict(payload: Mapping[str, Any]) -> CensusArtifact:
             str(pid): tuple(str(sid) for sid in sids)
             for pid, sids in founders_raw.items()
         },
+        founders_by_origin=founders_by_origin,
     )
