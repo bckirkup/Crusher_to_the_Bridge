@@ -127,7 +127,7 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 | `testing-agent-classes` | Agent class, gender, duty zone, exempt_classes changes |
 | `schema-validation` | Before committing JSON in `data/` or `telemetry_buffer/` |
 | `adding-new-platform` | New vessel spatial layout + HVAC |
-| `importing-naval-blueprint` | GA PDF/image → ShipDigest + SVG overlay → platform JSON |
+| `importing-naval-blueprint` | GA PDF/image → agent-authored ShipDigest + approved SVGs → platform JSON + .prj |
 | `adding-new-pathogen` | New pathogen profile entries |
 | `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
 | `mega-cruise-campaign-local` | Local `--smoke` / `--dry-run` / shard hygiene; synthetic recovery + VSP degradation (`docs/synthetic_recovery_and_vsp_degradation.md`) |
