@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:57:34.507456+00:00",
+  "platform_id": "alexander_henry_cgs119",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/alexander_henry_cgs119",
+  "digest_sha256": "7f7751673d8b9fc983439265a1177758bced112c32e782fcbb974e5f87ee6f43",
+  "svg_sha256": {
+    "page_01_approved.svg": "a1dd35f77e29540d5dd28ca0841ad5dfbe41fd52503576cf3791caa56774e5ec",
+    "page_02_approved.svg": "36db1c17c0764416be03e91772b3fc449c1720566dcbb80bf4477b7b971b58c5"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 28,
+  "berthing_zones": [
+    "Chart_Radio_NB",
+    "Officer_Cabins_Boat",
+    "Officers_Bridge_Deck",
+    "Aft_Cabins",
+    "Laundry",
+    "Officer_Eng_Cabins_U",
+    "Bosun_Paint_Stores",
+    "Stores_Lower",
+    "Crew_Berth_Lower",
+    "Fwd_Tanks_Voids"
+  ],
+  "systems_era": "usn_coldwar",
+  "digest_meta": {
+    "created_utc": "2026-10-16T11:57:26.356806+00:00",
+    "provider": "agent",
+    "model": null,
+    "hint": "agent-authored digest (no LLM)",
+    "digest_sha256": "7bc129126238f2918081cef2e019bd565ebc051a997aa3644231c2fed3318b3b",
+    "draft_overlays": [
+      "page_01_approved.svg",
+      "page_02_approved.svg"
+    ]
+  }
+}
