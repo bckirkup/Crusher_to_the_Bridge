@@ -18,7 +18,7 @@ burst48) survive at that rate?
 | local smoke | done | `fl_exp_12d_scr_p012` index 0: 3-member zip contract + scalar echo `"lot_object_probability": 0.012` + object modes; 31 infected, 0 cs objects at E≈0.012 — passed |
 | canary (116 cells, exp) | done — 5/6 gates green; `off` bit-identity FAILED (see Findings: host-level nondeterminism) | arrays `42a34b4d` mint 48, `08a78c9c` p024 24, `745b3af6` p005 24, `6304cc2f` ind 8, `30229fac` ship 8, `4a7bff20` off 4 — 116/116 SUCCEEDED, 0 retries |
 | wave 1 — exp, all 9 arms | done | 9,000/9,000 cells SUCCEEDED; readout below (D1 bracket ≈[0.005, 0.0105]) |
-| wave 2 — cls + spr, all 9 arms | submitted — in flight | 18,000 cells on `picard-noro-mint-rate-01:1`; probe `fl_cls_12d_scr_mint` 1,000/1,000 SUCCEEDED |
+| wave 2 — cls + spr, all 9 arms | done | 18,000/18,000 cells SUCCEEDED; census scan partitioned as 27-child Fargate array `picard-noro-scan-readout` (rows → `campaign/noro_mint_rate_01/_scan_rows/`); readout `docs/norovirus/noro_mint_rate_01_readout.md` |
 
 ## Grid
 
@@ -251,3 +251,101 @@ located. At in-band rate: conversion ≥ind and burst48 separation
 survive; the posted-AR median does not (0.030 < 0.038) — D2's
 signature needs the powered rate on exp. No §9 trigger beyond F0
 (already reported).
+
+## Wave-2 readout (cls + spr, 18,000 cells — all 9 arms, 0 failures)
+
+Scanned via 27-child Fargate array `picard-noro-scan-readout` (same
+image digest; per-arm prefix partitions →
+`campaign/noro_mint_rate_01/_scan_rows/`); report
+`food_shapes_01_report.py --arm-set mint_rate`. exp re-scanned on the
+same array — reproduces wave-1 verbatim (off 0.70%, ship +0.50,
+p005 +0.90, minted 6/9/11/13/17/20/82, postAR/ind 0.0380, nested 0).
+
+### D1 ladder — cls (off floor 0.30%)
+
+| arm | posted | marginal | minted | verdict |
+|-----|-------:|---------:|-------:|---------|
+| ship | 4 | **+0.10 under** | 6 | thin (<20) |
+| p005 | 9 | **+0.60 — in band** | 9 | thin |
+| p008 | 9 | **+0.60 — in band** | 12 | thin |
+| p012 | 10 | **+0.70 — in band** | 14 | thin |
+| p017 | 11 | **+0.80 — in band** | 18 | thin |
+| p024 | 16 | +1.30 over | 21 | — |
+| mint | 52 | +4.90 over | 84 | over |
+| ind  | 59 | +5.60 over | 0 | over |
+
+In-band window ≈ gate **[0.005, ~0.020]** — wider than predicted
+[0.007, 0.015], shifted low: ship (presence 0.0105) lands UNDER the
+band (+0.10): its U-mints sit the low end and P(post|minted)≈0.5–0.6
+halves yield vs exp's 0.93.
+
+### Signature at rate — cls
+
+- D2 postAR: pooled in-band (p005–p017, 39 posted) med **0.0516 ≥
+  `ind` 0.0359 → SURVIVES** (mirror of exp: per-rung 0.0508–0.0524).
+- D3 conversion: pooled in-band 26.1% vs `ind` 57.1% → **0.46×,
+  does NOT hold at ind level**; mint 51% (0.89×).
+- D4 b48: posted 0.40–0.50 vs rest 0.287 every in-band rung — survives
+  (excursion set itself ≈ rest; the gate selects bursty voyages).
+
+### Integrity — cls
+
+Nested mint sets 0 violations; minted 6/9/12/14/18/21/84 tracks E[p]
+within binomial noise; echo verbatim 9,000/9,000 all arms; all object
++ pan titres in [1.5e2,5e3]; every object single-titre; `off`
+zero-witness; `ind` v1-only (471 pans, 0 objects).
+
+### P(post|minted) — rate independence
+
+exp in-band 0.93 / cls in-band **0.585** (53 minted, 31 posted) — lands
+on the SHAPES-01-anchored per-hull P1 (0.93/0.58); mint arm 0.99/0.61.
+Marginal ≈ minted × P1 confirmed as the mechanism on both hulls.
+
+### D1 ladder — spr (off floor 0.00%)
+
+| arm | posted | marginal | minted | verdict |
+|-----|-------:|---------:|-------:|---------|
+| ship | 2 | +0.20 under | 6 | thin |
+| p005 | 3 | +0.30 under | 9 | thin |
+| p008 | 5 | **+0.50 — in band** | 12 | thin |
+| p012 | 6 | **+0.60 — in band** | 14 | thin |
+| p017 | 7 | **+0.70 — in band** | 18 | thin |
+| p024 | 7 | **+0.70 — in band** | 21 | — |
+| mint | 32 | +3.20 over | 84 | over |
+| ind  | 27 | +2.70 over | 0 | over |
+
+In-band window ≈ gate **[0.008, 0.024]** — shifted high vs predicted
+[0.005, 0.012]: spr's P(post|minted)≈0.37 needs more mints per
+posting.
+
+### Signature at rate — spr
+
+- D2 postAR: pooled in-band (p008–p024, 25 posted) med **0.0319 ≥
+  `ind` 0.0310 → SURVIVES**, thin margin (+0.0009 within noise).
+- D3 conversion: pooled in-band 25/172 = 14.5% vs `ind` 27.8% →
+  **0.52×, does NOT hold at ind level**; mint 27.4% (0.99×).
+- D4 b48: posted 0.303–0.504 vs rest ~0.271 every rung — survives
+  (weak spr form: posted not collapsed to rest).
+
+### Integrity — spr
+
+Minted 6/9/12/14/18/21/84 — **bit-identical to cls per arm** (same
+seed indices → same discrete mint sets; F0 cross-hull identity).
+Nested sets 0 violations; echo verbatim 9,000/9,000; titres
+154.9–4,986.7 ⊂ [1.5e2,5e3]; `off` zero-witness; `ind` v1-only.
+
+### Wave-2 verdict — all three hulls
+
+Per-hull brackets measured: **exp [0.005, 0.0105],
+cls [0.005, ~0.020], spr [0.008, 0.024]** — the operative gate
+rises as P(post|minted) falls (0.93/0.58/0.37).
+
+Signatures SPLIT by hull (the designed discriminating read):
+D2 postAR fails exp but survives cls + spr (spr thin); D3 conversion
+survives exp but fails cls (0.46×) + spr (0.52×); D4 survives all.
+**No hull satisfies D2+D3+D4 jointly at in-band rate.**
+P(post|minted) re-anchors at 0.93/0.58/0.37 as per-hull
+hull+mechanism constants — the linear marginal
+(minted × P1) holds on every hull.
+
+Full tables: `docs/norovirus/noro_mint_rate_01_readout.md`.

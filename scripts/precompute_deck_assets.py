@@ -66,6 +66,9 @@ PLATFORMS = [
     "midway_cv41",
     "pope_ap110",
     "squier_ap130",
+    "sigsbee_dd502",
+    "nields_dd616",
+    "davison_dd618",
 ]
 
 ENTERPRISE_IDS = frozenset({
