@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:28:19.647896+00:00",
+  "platform": "astoria_ca34",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 982
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 44,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Wardroom",
+      "notes": "captain, XO, wardroom + warrant officers"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 38,
+      "berth_zone": "CPO_Quarters",
+      "duty_zone": "CPO_Mess",
+      "notes": "chief petty officers"
+    },
+    {
+      "class_id": "crew",
+      "role_group": "crew",
+      "count": 859,
+      "berth_zone": "Crew_Berthing_Aft",
+      "duty_zone": "Crew_Mess",
+      "notes": "enlisted crew; berth splits across aft/fwd/platform berthing"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 41,
+      "berth_zone": "Crew_Berthing_Fwd",
+      "duty_zone": "Gun_Gallery_01",
+      "notes": "marine detachment, 5-inch AA + small arms"
+    }
+  ],
+  "source": "Sheet 2 accommodation table: Captain 1 + XO 1 + wardroom officers 33 + warrant officers 9 = 44 officers; CPO 38 + crew 859 + marines 41 = 938 enlisted. Flagship detachment (~53) additional per table footnote.",
+  "consistency": {
+    "declared_total": 982,
+    "manifest_total": 982,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

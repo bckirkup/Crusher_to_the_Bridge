@@ -190,6 +190,10 @@ data/
 │   ├── pce_874/                    (maritime.org GA import)
 │   ├── independence_cvl26/         (maritime.org GA import)
 │   ├── midway_cv41/                (maritime.org GA import)
+│   ├── astoria_ca34/               (maritime.org GA import)
+│   ├── miami_cl89/                 (maritime.org GA import)
+│   ├── chicago_cg11/               (maritime.org GA import)
+│   ├── wright_cc2/                 (maritime.org GA import)
 │   ├── pope_ap110/                 (maritime.org GA import)
 │   ├── squier_ap130/               (maritime.org GA import)
 │   ├── lexington_cv2/              (maritime.org GA import)
@@ -203,6 +207,9 @@ data/
 │   ├── missouri_bb63/              (maritime.org GA import)
 │   ├── wisconsin_bb64/             (maritime.org GA import)
 │   ├── new_jersey_bb62/            (maritime.org GA import)
+│   ├── olympia_c6/                 (maritime.org GA import)
+│   ├── montana_acr13/              (maritime.org GA import)
+│   ├── jupiter_ac3/                (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -562,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Thirty-two ship platforms are included, each with spatial layout and HVAC
+Forty-six ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -589,6 +596,10 @@ airflow definitions:
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 | `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
+| `astoria_ca34` | USS Astoria CA-34 New Orleans-class heavy cruiser (maritime.org GA import, 65 zones, 982 crew) |
+| `miami_cl89` | USS Miami CL-89 Cleveland-class light cruiser (maritime.org GA import, 81 zones, 1252 crew) |
+| `chicago_cg11` | USS Chicago CG-11 guided missile cruiser on Baltimore-class hull (maritime.org GA import, 87 zones, 1302 crew incl. flag staff + marines) |
+| `wright_cc2` | USS Wright CC-2 command ship on Saipan-class CVL hull (maritime.org GA import, 68 zones, 1768 crew) |
 | `pope_ap110` | USS General John Pope AP-110 troop transport (maritime.org GA import, 88 zones, 479 crew + 5313 troops) |
 | `squier_ap130` | USS General G.O. Squier AP-130 C4-S-A1 troop transport (maritime.org GA import, 52 zones, 482 crew + 3262 troops) |
 | `lexington_cv2` | USS Lexington CV-2 Lexington-class carrier, 1941 fit (maritime.org GA import, 97 zones, 2370 crew incl. air group) |
@@ -602,10 +613,9 @@ airflow definitions:
 | `missouri_bb63` | USS Missouri BB-63 Iowa-class battleship, 1950 booklet (maritime.org GA import, 103 zones, 1561 crew) |
 | `wisconsin_bb64` | USS Wisconsin BB-64 Iowa-class battleship, 1956 booklet (maritime.org GA import, 103 zones, ~2560 crew) |
 | `new_jersey_bb62` | USS New Jersey BB-62 Iowa-class battleship, 1984 reactivation booklet (maritime.org GA import, 103 zones, ~1781 crew) |
-| `middlesex_lst983` | USS Middlesex County LST-983 tank landing ship, LST-542 class (maritime.org GA import, 40 zones, 123 crew + 129 troops) |
-| `lsm_354` | LSM-354 landing ship medium, LSM-1 class (maritime.org GA import, incomplete booklet, 40 zones, 66 crew + ~48 troops) |
-| `lyon_ap71` | USS Lyon AP-71 troop transport, C3-type (maritime.org GA import, sheets 3-4 missing, 59 zones, 407 crew + 2208 troops) |
-| `apl_24` | APL-24 barracks ship, APL-17 class, non-self-propelled (maritime.org GA import, incomplete booklet, 34 zones, 71 crew + 589 berthed) |
+| `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
+| `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
+| `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
@@ -826,6 +836,10 @@ from `orchestrator_types.py`:
 | `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
 | `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
 | `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
+| `middlesex_lst983` | USS Middlesex County LST-983 tank landing ship, LST-542 class (maritime.org GA import, 40 zones, 123 crew + 129 troops) |
+| `lsm_354` | LSM-354 landing ship medium, LSM-1 class (maritime.org GA import, incomplete booklet, 40 zones, 66 crew + ~48 troops) |
+| `lyon_ap71` | USS Lyon AP-71 troop transport, C3-type (maritime.org GA import, sheets 3-4 missing, 59 zones, 407 crew + 2208 troops) |
+| `apl_24` | APL-24 barracks ship, APL-17 class, non-self-propelled (maritime.org GA import, incomplete booklet, 34 zones, 71 crew + 589 berthed) |
 
 ## License
 

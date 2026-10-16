@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:28:33.156287+00:00",
+  "platform": "miami_cl89",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1252
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 71,
+      "berth_zone": "Officers_Country_2nd",
+      "duty_zone": "Wardroom",
+      "notes": "captain, wardroom + warrant officers (warrants berth WO_Country)"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 47,
+      "berth_zone": "CPO_Berthing_2nd",
+      "duty_zone": "Crew_Messing_2nd",
+      "notes": "chief petty officers incl. 2 marine sgt CPOs"
+    },
+    {
+      "class_id": "crew",
+      "role_group": "crew",
+      "count": 1086,
+      "berth_zone": "Crew_Berthing_3rd",
+      "duty_zone": "Crew_Messing_2nd",
+      "notes": "enlisted crew; berth splits across 3rd/1st-platform berthing"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 48,
+      "berth_zone": "Crew_Berthing_1P",
+      "duty_zone": "Gun_Tubs_01",
+      "notes": "marine detachment, AA + small arms + landing force"
+    }
+  ],
+  "source": "Sheet 2 accommodation table, 'as provided': Captain 1 + wardroom officers 58 + warrant 12 = 71 officers; CPO 45 + marine sgt CPO 2 = 47; crew 1086; marines 48. 'As specified' column totals 992.",
+  "consistency": {
+    "declared_total": 1252,
+    "manifest_total": 1252,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

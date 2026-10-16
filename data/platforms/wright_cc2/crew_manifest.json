@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:42:35.505677+00:00",
+  "platform": "wright_cc2",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1768
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 228,
+      "berth_zone": "Staterooms_Hangar",
+      "duty_zone": "COC_Hangar",
+      "notes": "flag staff + wardroom staterooms/bunkrooms + captain/exec suites"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 105,
+      "berth_zone": "Staterooms_Hangar",
+      "duty_zone": "Crew_Mess_2nd",
+      "notes": "chief petty officers"
+    },
+    {
+      "class_id": "crew",
+      "role_group": "crew",
+      "count": 1207,
+      "berth_zone": "Crew_Berthing_Aft_3rd",
+      "duty_zone": "Crew_Mess_2nd",
+      "notes": "enlisted crew across main/2nd/3rd berthing"
+    },
+    {
+      "class_id": "marine_det",
+      "role_group": "crew",
+      "count": 85,
+      "berth_zone": "Crew_Berthing_Fwd_2nd",
+      "duty_zone": "Island_Gal",
+      "notes": "marine detachment incl. 1st sgt berths"
+    },
+    {
+      "class_id": "hospital_overflow",
+      "role_group": "crew",
+      "count": 143,
+      "berth_zone": "Crew_Berthing_Fwd_3rd",
+      "duty_zone": "Medical_Main",
+      "notes": "balance of 1768 total not covered by read rows (staff/flag overflow) — count split is inferred"
+    }
+  ],
+  "source": "Sheet 2 accommodations: total 1768 berths excl. sea cabins + hospital ward (officer ~228 incl. flag staterooms/wardroom bunkrooms, CPO ~105, crew ~1207, marine det ~85, hospital 2+28 excluded).",
+  "consistency": {
+    "declared_total": 1768,
+    "manifest_total": 1768,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
