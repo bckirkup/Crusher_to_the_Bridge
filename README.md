@@ -194,9 +194,14 @@ data/
 │   ├── miami_cl89/                 (maritime.org GA import)
 │   ├── chicago_cg11/               (maritime.org GA import)
 │   ├── wright_cc2/                 (maritime.org GA import)
+│   ├── lexington_cv2/              (maritime.org GA import)
+│   ├── saratoga_cv3/               (maritime.org GA import)
 │   ├── sigsbee_dd502/              (maritime.org GA import)
 │   ├── nields_dd616/               (maritime.org GA import)
 │   ├── davison_dd618/              (maritime.org GA import)
+│   ├── idaho_bb42/                 (maritime.org GA import)
+│   ├── west_virginia_bb48/         (maritime.org GA import)
+│   ├── south_dakota_bb49/          (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -556,7 +561,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twenty-four ship platforms are included, each with spatial layout and HVAC
+Twenty-seven ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -587,9 +592,14 @@ airflow definitions:
 | `miami_cl89` | USS Miami CL-89 Cleveland-class light cruiser (maritime.org GA import, 81 zones, 1252 crew) |
 | `chicago_cg11` | USS Chicago CG-11 guided missile cruiser on Baltimore-class hull (maritime.org GA import, 87 zones, 1302 crew incl. flag staff + marines) |
 | `wright_cc2` | USS Wright CC-2 command ship on Saipan-class CVL hull (maritime.org GA import, 68 zones, 1768 crew) |
+| `lexington_cv2` | USS Lexington CV-2 Lexington-class carrier, 1941 fit (maritime.org GA import, 97 zones, 2370 crew incl. air group) |
+| `saratoga_cv3` | USS Saratoga CV-3 Lexington-class carrier, wartime 1944 fit (maritime.org GA import, 108 zones, 2954 crew incl. air group) |
 | `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
 | `nields_dd616` | USS Nields DD-616 Benson-class destroyer (maritime.org GA import, 39 zones, 262 crew) |
 | `davison_dd618` | USS Davison DD-618 Gleaves-class FRAM destroyer (maritime.org GA import, 39 zones, 283 crew) |
+| `idaho_bb42` | USS Idaho BB-42 New Mexico-class battleship (maritime.org GA import, 114 zones, ~1084 crew class-typical) |
+| `west_virginia_bb48` | USS West Virginia BB-48 Colorado-class battleship (maritime.org GA import, 198 zones, 1340 crew plate-read) |
+| `south_dakota_bb49` | USS South Dakota BB-49 1918 contract-design battleship, never completed (maritime.org GA import, 55 zones, ~1191 crew class-typical) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
