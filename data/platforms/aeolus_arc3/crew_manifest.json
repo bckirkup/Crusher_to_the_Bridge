@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:57:33.989627+00:00",
+  "platform": "aeolus_arc3",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 200
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "Superstructure_Cabins",
+      "duty_zone": "Wheelhouse",
+      "notes": ""
+    },
+    {
+      "class_id": "cpos",
+      "role_group": "crew",
+      "count": 15,
+      "berth_zone": "Deck_House_Upper",
+      "duty_zone": "Cable_Working_Deck",
+      "notes": ""
+    },
+    {
+      "class_id": "deck_crew",
+      "role_group": "crew",
+      "count": 60,
+      "berth_zone": "Crew_Berth_M",
+      "duty_zone": "Cable_Working_Deck",
+      "notes": ""
+    },
+    {
+      "class_id": "cable_technicians",
+      "role_group": "crew",
+      "count": 30,
+      "berth_zone": "Berth_1P",
+      "duty_zone": "Cable_Workshop",
+      "notes": ""
+    },
+    {
+      "class_id": "engineers",
+      "role_group": "crew",
+      "count": 45,
+      "berth_zone": "Berth_1P",
+      "duty_zone": "Engine_Room",
+      "notes": ""
+    },
+    {
+      "class_id": "stewards_galley",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "Crew_Berth_M",
+      "duty_zone": "Galley",
+      "notes": ""
+    },
+    {
+      "class_id": "ships_company_misc",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "Berth_1P",
+      "duty_zone": "Provisions_Stores_2P",
+      "notes": ""
+    }
+  ],
+  "source": "era-typical ARC-3 complement (58+32 mess seats read; berthing rooms consistent with ~180-220)",
+  "consistency": {
+    "declared_total": 200,
+    "manifest_total": 200,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

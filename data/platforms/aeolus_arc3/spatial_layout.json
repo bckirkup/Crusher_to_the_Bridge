@@ -1,0 +1,671 @@
+{
+  "platform": "aeolus_arc3",
+  "description": "Cable repair/laying ship converted from an LST hull (1955). Long cable working deck forward with cable drum, dynamometer and bow sheaves; superstructure + accommodation aft.",
+  "isolation_unit_capacity": 0,
+  "deck_dimensions": {
+    "length_m": 100.0,
+    "beam_m": 15.2
+  },
+  "graywater_zones": [
+    "Galley",
+    "Crew_Messing",
+    "Butcher_Meats"
+  ],
+  "zones": [
+    {
+      "id": "Top_Of_House",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1063.45,
+      "floor_area_m2": 409.02,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "top_of_house",
+      "display": {
+        "x": 28.36,
+        "y": 6.28
+      },
+      "max_occupancy": 4,
+      "description": "Top of house w/ stack + compass + searchlight tubs"
+    },
+    {
+      "id": "Superstructure_Cabins",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 849.06,
+      "floor_area_m2": 326.56,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.6,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 61.25,
+        "y": 6.56
+      },
+      "max_occupancy": 14,
+      "description": "03-level officers quarters fwd of wheelhouse"
+    },
+    {
+      "id": "Wheelhouse",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 440.59,
+      "floor_area_m2": 169.46,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.2,
+      "deck": "nav_bridge",
+      "display": {
+        "x": 56.25,
+        "y": 5.67
+      },
+      "max_occupancy": 8,
+      "description": "Wheel house B-0301C, navigating bridge"
+    },
+    {
+      "id": "Bridge_Chart_Rms",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 432.58,
+      "floor_area_m2": 166.38,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.2,
+      "deck": "nav_bridge",
+      "display": {
+        "x": 76.5,
+        "y": 5.83
+      },
+      "max_occupancy": 6,
+      "description": "Chart room, gyro repeaters, pilot spaces"
+    },
+    {
+      "id": "HD_Bridge",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 23.62,
+      "floor_area_m2": 10.27,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "nav_bridge",
+      "display": {
+        "x": 63.25,
+        "y": 12.32
+      },
+      "serves": [
+        "Superstructure_Cabins",
+        "Wheelhouse"
+      ],
+      "description": "03-level officers head",
+      "base_ach": 19.1,
+      "max_occupancy": 4
+    },
+    {
+      "id": "Cable_Working_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 2326.53,
+      "floor_area_m2": 894.82,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "upper_deck",
+      "display": {
+        "x": 45.92,
+        "y": 6.14
+      },
+      "description": "Open cable deck: drum, dynamometer, rollers, bow sheaves fwd"
+    },
+    {
+      "id": "Deck_House_Upper",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 413.35,
+      "floor_area_m2": 158.98,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "upper_deck",
+      "display": {
+        "x": 6.33,
+        "y": 5.96
+      },
+      "max_occupancy": 20,
+      "description": "Stern house 01 level: officers office, CPO mess, officers rec, aviation wksp, radio rm, fan rm"
+    },
+    {
+      "id": "Cable_Testing_Rm",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 32.57,
+      "floor_area_m2": 12.53,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "upper_deck",
+      "display": {
+        "x": 3.47,
+        "y": 13.97
+      },
+      "max_occupancy": 4,
+      "description": "Cable measuring + testing rm B-0101C"
+    },
+    {
+      "id": "Bow_Sheave_Area",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 162.86,
+      "floor_area_m2": 62.64,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "upper_deck",
+      "display": {
+        "x": 94.69,
+        "y": 6.43
+      },
+      "description": "Bow sheaves + anchor windlass control"
+    },
+    {
+      "id": "HD_Upper_Deck",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 8.58,
+      "floor_area_m2": 3.73,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 7.800000000000001,
+      "deck": "upper_deck",
+      "display": {
+        "x": 8.67,
+        "y": 14.03
+      },
+      "serves": [
+        "Deck_House_Upper"
+      ],
+      "description": "01-level head",
+      "base_ach": 19.1,
+      "max_occupancy": 1
+    },
+    {
+      "id": "Crew_Messing",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 520.0,
+      "floor_area_m2": 200.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 64.21,
+        "y": 5.38
+      },
+      "max_occupancy": 70,
+      "description": "58+32 crew messing + scullery main deck"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 133.47,
+      "floor_area_m2": 51.33,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 51.37,
+        "y": 5.95
+      },
+      "max_occupancy": 10,
+      "description": "Galley B-101 main deck"
+    },
+    {
+      "id": "Crew_Berth_M",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 572.0,
+      "floor_area_m2": 220.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 28.21,
+        "y": 5.38
+      },
+      "max_occupancy": 60,
+      "description": "4-crew + 2-PO berthing rooms main deck"
+    },
+    {
+      "id": "Crew_Recreation",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 140.4,
+      "floor_area_m2": 54.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 44.63,
+        "y": 5.0
+      },
+      "max_occupancy": 12,
+      "description": "Crew recreation rm"
+    },
+    {
+      "id": "Radio_Electronic_Shops",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 312.0,
+      "floor_area_m2": 120.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 11.37,
+        "y": 5.38
+      },
+      "max_occupancy": 8,
+      "description": "Radio III + electronic shop, gasoline stow"
+    },
+    {
+      "id": "After_Repair_Locker",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 108.33,
+      "floor_area_m2": 41.67,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 3.16,
+        "y": 4.75
+      },
+      "max_occupancy": 4,
+      "description": "After repair party locker + gasoline stowage"
+    },
+    {
+      "id": "Elec_Switchboard",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 163.8,
+      "floor_area_m2": 63.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 79.79,
+        "y": 5.95
+      },
+      "max_occupancy": 4,
+      "description": "Elec switchboard rm + gyro/IC rm + swbd rm"
+    },
+    {
+      "id": "Boiler_Casing_M",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 117.0,
+      "floor_area_m2": 45.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 86.32,
+        "y": 5.95
+      },
+      "max_occupancy": 2,
+      "description": "Boiler casing trunk"
+    },
+    {
+      "id": "Fwd_Stores_M",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 249.6,
+      "floor_area_m2": 96.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 93.89,
+        "y": 5.19
+      },
+      "max_occupancy": 6,
+      "description": "Bosn's stores, chain lkr, canvas/awning, repair store, fire pump rm, rope stow fwd"
+    },
+    {
+      "id": "HD_Main_Deck",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 11.5,
+      "floor_area_m2": 5.0,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 10.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 51.79,
+        "y": 12.35
+      },
+      "serves": [
+        "Crew_Berth_M",
+        "Crew_Messing"
+      ],
+      "description": "T&S wash/toilet blocks main deck",
+      "base_ach": 19.1,
+      "max_occupancy": 2
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 159.32,
+      "floor_area_m2": 61.28,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "first_platform",
+      "display": {
+        "x": 3.58,
+        "y": 5.5
+      },
+      "max_occupancy": 4,
+      "description": "Steering gear rm C-203-1E aft"
+    },
+    {
+      "id": "Workshops_1P",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 650.55,
+      "floor_area_m2": 250.21,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "first_platform",
+      "display": {
+        "x": 16.21,
+        "y": 6.14
+      },
+      "max_occupancy": 10,
+      "description": "Laundry issue, resistor rm, electronic storeroom, test station, sailor shop"
+    },
+    {
+      "id": "Berth_1P",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 525.75,
+      "floor_area_m2": 202.21,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "first_platform",
+      "display": {
+        "x": 37.05,
+        "y": 6.53
+      },
+      "max_occupancy": 40,
+      "description": "4-crew/2-crew berthing first platform"
+    },
+    {
+      "id": "Cable_Workshop",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 371.74,
+      "floor_area_m2": 142.98,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "first_platform",
+      "display": {
+        "x": 54.32,
+        "y": 7.11
+      },
+      "max_occupancy": 10,
+      "description": "Cable workshop level + operating spaces"
+    },
+    {
+      "id": "Ice_Machinery_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 116.83,
+      "floor_area_m2": 44.94,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "first_platform",
+      "display": {
+        "x": 65.68,
+        "y": 7.7
+      },
+      "max_occupancy": 2,
+      "description": "Ice machinery rm A-2-9E"
+    },
+    {
+      "id": "Washroom_Locker_1P",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 127.46,
+      "floor_area_m2": 49.02,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "first_platform",
+      "display": {
+        "x": 72.0,
+        "y": 7.31
+      },
+      "max_occupancy": 6,
+      "description": "Washroom/locker rm A-205-5A"
+    },
+    {
+      "id": "HD_First_Platform",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 11.75,
+      "floor_area_m2": 5.11,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 13.0,
+      "deck": "first_platform",
+      "display": {
+        "x": 41.26,
+        "y": 14.23
+      },
+      "serves": [
+        "Berth_1P"
+      ],
+      "description": "T&S first platform",
+      "base_ach": 19.1,
+      "max_occupancy": 2
+    },
+    {
+      "id": "Fwd_Stores_1P",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 541.69,
+      "floor_area_m2": 208.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "first_platform",
+      "display": {
+        "x": 87.16,
+        "y": 6.92
+      },
+      "max_occupancy": 6,
+      "description": "Stores + escape trunks fwd first platform"
+    },
+    {
+      "id": "Armory",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 177.02,
+      "floor_area_m2": 68.09,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "second_platform",
+      "display": {
+        "x": 11.79,
+        "y": 6.47
+      },
+      "max_occupancy": 4,
+      "description": "Armory C-303-5M + ammunition hoist"
+    },
+    {
+      "id": "Provisions_Stores_2P",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 788.63,
+      "floor_area_m2": 303.32,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "second_platform",
+      "display": {
+        "x": 28.21,
+        "y": 6.53
+      },
+      "max_occupancy": 10,
+      "description": "Ship's stores, dry provisions, unassigned spaces, cofferdam/void fwd"
+    },
+    {
+      "id": "Butcher_Meats",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 212.43,
+      "floor_area_m2": 81.7,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "second_platform",
+      "display": {
+        "x": 49.47,
+        "y": 7.31
+      },
+      "max_occupancy": 4,
+      "description": "Butcher shop + meats A-305-8A"
+    },
+    {
+      "id": "Aux_Machinery_2P",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 451.4,
+      "floor_area_m2": 173.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "second_platform",
+      "display": {
+        "x": 62.95,
+        "y": 7.11
+      },
+      "max_occupancy": 6,
+      "description": "Auxiliary machinery rm B-2-1E + operating platform"
+    },
+    {
+      "id": "Escape_Trunk_2P",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 92.94,
+      "floor_area_m2": 35.74,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "second_platform",
+      "display": {
+        "x": 79.79,
+        "y": 8.41
+      },
+      "max_occupancy": 2,
+      "description": "Escape trunk P/S"
+    },
+    {
+      "id": "Fwd_Stores_2P",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 345.19,
+      "floor_area_m2": 132.77,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "second_platform",
+      "display": {
+        "x": 89.68,
+        "y": 7.11
+      },
+      "max_occupancy": 4,
+      "description": "Stores fwd second platform"
+    },
+    {
+      "id": "Cable_Tanks",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 2500.0,
+      "floor_area_m2": 961.54,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "hold",
+      "display": {
+        "x": 15.79,
+        "y": 6.03
+      },
+      "description": "Cable tank N1 (circular) + cable stowage"
+    },
+    {
+      "id": "Flam_Liquid_Stores",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 206.57,
+      "floor_area_m2": 79.45,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "hold",
+      "display": {
+        "x": 39.58,
+        "y": 5.45
+      },
+      "max_occupancy": 2,
+      "description": "Flammable liquid store + S.D. stores A-402A"
+    },
+    {
+      "id": "Storeroom_Hold",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 140.58,
+      "floor_area_m2": 54.07,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "hold",
+      "display": {
+        "x": 48.21,
+        "y": 5.56
+      },
+      "max_occupancy": 2,
+      "description": "Storeroom A-403A"
+    },
+    {
+      "id": "Rope_Stowage",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 200.83,
+      "floor_area_m2": 77.24,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "hold",
+      "display": {
+        "x": 56.84,
+        "y": 5.56
+      },
+      "max_occupancy": 2,
+      "description": "Rope stowage A-401-A fwd"
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 2200.0,
+      "floor_area_m2": 846.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "hold",
+      "display": {
+        "x": 70.74,
+        "y": 6.5
+      },
+      "max_occupancy": 14,
+      "description": "Fwd machinery space B-1-1E: propulsion motor, aux machinery (multi-level, section sheet 10)"
+    },
+    {
+      "id": "Boiler_Room",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 900.0,
+      "floor_area_m2": 346.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "hold",
+      "display": {
+        "x": 86.32,
+        "y": 6.6
+      },
+      "max_occupancy": 6,
+      "description": "Main boiler + S.D. stores"
+    }
+  ]
+}

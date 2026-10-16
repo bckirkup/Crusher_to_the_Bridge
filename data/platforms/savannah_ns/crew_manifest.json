@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:57:33.649079+00:00",
+  "platform": "savannah_ns",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 60,
+    "crew": 110
+  },
+  "manifest": [
+    {
+      "class_id": "passengers",
+      "role_group": "passenger",
+      "count": 60,
+      "berth_zone": "Pax_Cabins_A_Port",
+      "duty_zone": "Verandah_Lounge",
+      "notes": "60 demonstration-ship passengers"
+    },
+    {
+      "class_id": "deck_officers",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "Boat_Cabins",
+      "duty_zone": "Wheelhouse",
+      "notes": ""
+    },
+    {
+      "class_id": "engineers_nuclear",
+      "role_group": "crew",
+      "count": 25,
+      "berth_zone": "Crew_Cabins_C_Port",
+      "duty_zone": "Engine_Room",
+      "notes": ""
+    },
+    {
+      "class_id": "reactor_operators",
+      "role_group": "crew",
+      "count": 10,
+      "berth_zone": "Crew_Cabins_C_Port",
+      "duty_zone": "Reactor_Control_Rm",
+      "notes": ""
+    },
+    {
+      "class_id": "deck_crew",
+      "role_group": "crew",
+      "count": 25,
+      "berth_zone": "Crew_Cabins_C_Stbd",
+      "duty_zone": "Fwd_Deck_Promenade",
+      "notes": ""
+    },
+    {
+      "class_id": "stewards_galley",
+      "role_group": "crew",
+      "count": 30,
+      "berth_zone": "Crew_Cabins_C_Stbd",
+      "duty_zone": "Galley_B",
+      "notes": ""
+    },
+    {
+      "class_id": "pursers_admin",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Boat_Cabins",
+      "duty_zone": "Promenade_House",
+      "notes": ""
+    }
+  ],
+  "source": "brief values (sheet accommodation count ~consistent; 50+ twin-berth staterooms read on A/B decks)",
+  "consistency": {
+    "declared_total": 170,
+    "manifest_total": 170,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:57:33.982996+00:00",
+  "platform_id": "aeolus_arc3",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/aeolus_arc3",
+  "digest_sha256": "6992437aae8e73ce65f860cf3a73ca2e511f37b6046e51564bd7cef64eb94241",
+  "svg_sha256": {
+    "page_03_approved.svg": "df0169933957a1552de27caace84bec9347df8aa1ea14d5f74d3cc26632f5696",
+    "page_04_approved.svg": "80e68bf513020440c99bbcc074bc01d337e9e7cb686aaf7cf4d31873ff82bf34",
+    "page_05_approved.svg": "591d16646cb0f9932ecb6b7bdbd194f867ee49df569df0bc54d939d93d5ebdfb",
+    "page_06_approved.svg": "41a2a480a391b1acd06e0e58105a883c6f6a21160e97304e4907fc08531fde18",
+    "page_07_approved.svg": "204df9d87412259de275af863981f82901b1972bcbea16427f2043308fb89dea",
+    "page_08_approved.svg": "96a1be42f104061e0c7799bf9b1cf97a2cc6d06696a48ef7b6f9298457a7fe19"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 40,
+  "berthing_zones": [
+    "Superstructure_Cabins",
+    "Bridge_Chart_Rms",
+    "Deck_House_Upper",
+    "Cable_Testing_Rm",
+    "Crew_Berth_M",
+    "Crew_Recreation",
+    "Radio_Electronic_Shops",
+    "After_Repair_Locker",
+    "Fwd_Stores_M",
+    "Workshops_1P",
+    "Berth_1P",
+    "Cable_Workshop",
+    "Washroom_Locker_1P",
+    "Fwd_Stores_1P",
+    "Armory",
+    "Provisions_Stores_2P",
+    "Butcher_Meats",
+    "Fwd_Stores_2P",
+    "Flam_Liquid_Stores",
+    "Storeroom_Hold",
+    "Rope_Stowage"
+  ],
+  "systems_era": "usn_coldwar",
+  "digest_meta": {
+    "created_utc": "2026-10-16T11:57:26.077814+00:00",
+    "provider": "agent",
+    "model": null,
+    "hint": "agent-authored digest (no LLM)",
+    "digest_sha256": "11ff3a8fe05dd65405d0962ab32aade262fe3696aa7d7bb14a1fe52d6ea1b1e3",
+    "draft_overlays": [
+      "page_03_approved.svg",
+      "page_04_approved.svg",
+      "page_05_approved.svg",
+      "page_06_approved.svg",
+      "page_07_approved.svg",
+      "page_08_approved.svg"
+    ]
+  }
+}

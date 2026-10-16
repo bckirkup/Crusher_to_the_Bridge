@@ -1,0 +1,445 @@
+{
+  "platform": "savannah_ns",
+  "era": "usn_coldwar",
+  "era_label": "USN cold-war / early mechanical AC",
+  "era_note": "Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery forced draft.",
+  "vent_markers": [
+    {
+      "id": "VM_gooseneck_fwd",
+      "kind": "gooseneck",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "a_deck",
+      "serves_zone": "Bosun_Stores_A",
+      "display": [
+        162.59,
+        9.51
+      ],
+      "evidence": "sheet_read",
+      "notes": "Gooseneck vents fwd house, A deck"
+    },
+    {
+      "id": "VM_masthouse_skylight",
+      "kind": "skylight",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "promenade_deck",
+      "serves_zone": "Fwd_Deck_Promenade",
+      "display": [
+        147.11,
+        9.4
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "VM_funnel_sav",
+      "kind": "funnel",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "nav_bridge",
+      "serves_zone": "Funnel_Casing",
+      "display": [
+        102.41,
+        17.0
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "VM_hold_supply",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "a_deck",
+      "serves_zone": "Holds_Fwd_A",
+      "display": [
+        138.02,
+        7.81
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "VM_er_exhaust",
+      "kind": "air_shaft",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "d_deck",
+      "serves_zone": "Engine_Room",
+      "display": [
+        81.3,
+        5.86
+      ],
+      "evidence": "era_plausible",
+      "notes": "Machinery exhaust uptake"
+    },
+    {
+      "id": "VM_reactor_vent",
+      "kind": "air_shaft",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "d_deck",
+      "serves_zone": "Reactor_Containment",
+      "display": [
+        103.98,
+        7.49
+      ],
+      "evidence": "era_plausible",
+      "notes": "Containment ventilation (filtered)"
+    }
+  ],
+  "zone_modes": {
+    "Docking_Bridge_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Promenade_Aft_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Swimming_Pool": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Verandah_Lounge": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Promenade_House": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Machinery_Casing_P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Lounge_Fwd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Promenade": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Promenade_Walkway_Port": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Promenade_Walkway_Stbd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Deck_Promenade": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Top_Of_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wheelhouse": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chart_Radio_NB": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Funnel_Casing": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Bridge_Wings": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Cabins": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Emergency_Gen_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Boat_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fantail_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Holds_Aft_A": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Pax_Cabins_A_Port": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Pax_Cabins_A_Stbd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "A_Deck_Lobby": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Galley_A": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machinery_Casing_A": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Reactor_Space_A": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Weather_Deck_Port_A": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Weather_Deck_Stbd_A": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Holds_Fwd_A": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Stevedores_Toilet": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Bosun_Stores_A": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Forecastle_A": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear_B": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Holds_Aft_B": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Pax_Cabins_B_Port": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Pax_Cabins_B_Stbd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Dining_Saloon": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Galley_B": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess_B": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machinery_Casing_B": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_B_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Holds_Fwd_B": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Windlass_Room_B": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Carpenter_Elec_Shops": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Holds_Aft_C": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Cabins_C_Port": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_Cabins_C_Stbd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess_C": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Bakery_Scullery": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Machinery_Space_C": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Reactor_Space_C": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Stores_C": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_C_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Holds_Fwd_C": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bosun_Stores_C": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Aft_Peak_D": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Holds_Aft_D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aux_Machinery_D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Reactor_Containment": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Radiation_Sampling": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Holds_Fwd_D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Deep_Tank_Fwd": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Reactor_Control_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Aux_Machinery_Flat": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Hold_Bottom_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Bottom": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Hold_Bottom_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fore_Peak_Tank": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "FORE PEAK TANK",
+      "kind": "unknown",
+      "nearest_zone": "Fore_Peak_Tank",
+      "display": [
+        173.94,
+        12.29
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "DEEP TANK N1 SW BALLAST",
+      "kind": "unknown",
+      "nearest_zone": "Fore_Peak_Tank",
+      "display": [
+        156.92,
+        13.66
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "AFT PEAK",
+      "kind": "unknown",
+      "nearest_zone": "Aft_Peak_D",
+      "display": [
+        7.56,
+        12.37
+      ],
+      "deck": "d_deck",
+      "notes": ""
+    },
+    {
+      "label": "DEEP TANK",
+      "kind": "unknown",
+      "nearest_zone": "Fore_Peak_Tank",
+      "display": [
+        162.59,
+        12.29
+      ],
+      "deck": "hold",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Verandah_Lounge (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Verandah_Lounge",
+    "HD_Promenade (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Promenade",
+    "HD_Boat_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Boat_Deck",
+    "Galley_A (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_A",
+    "Stevedores_Toilet (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Stevedores_Toilet",
+    "Dining_Saloon (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Dining_Saloon",
+    "Galley_B (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_B",
+    "Crew_Mess_B (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_B",
+    "HD_B_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_B_Deck",
+    "Crew_Mess_C (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_C",
+    "HD_C_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_C_Deck"
+  ]
+}

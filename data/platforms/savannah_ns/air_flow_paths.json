@@ -1,0 +1,559 @@
+{
+  "platform": "savannah_ns",
+  "description": "HVAC network synthesized for savannah_ns",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "AHU_Bridge",
+      "rooms": [
+        "Wheelhouse",
+        "Chart_Radio_NB",
+        "Boat_Cabins"
+      ],
+      "ach": 6.0,
+      "description": "Bridge/boat deck accommodation",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Promenade",
+      "rooms": [
+        "Verandah_Lounge",
+        "Promenade_House",
+        "Lounge_Fwd"
+      ],
+      "ach": 8.0,
+      "description": "Promenade public rooms",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Pax_A",
+      "rooms": [
+        "Pax_Cabins_A_Port",
+        "Pax_Cabins_A_Stbd",
+        "A_Deck_Lobby",
+        "Galley_A"
+      ],
+      "ach": 8.0,
+      "description": "A deck passenger cabins + galley",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Pax_B",
+      "rooms": [
+        "Pax_Cabins_B_Port",
+        "Pax_Cabins_B_Stbd",
+        "Dining_Saloon",
+        "Galley_B",
+        "Crew_Mess_B"
+      ],
+      "ach": 8.0,
+      "description": "B deck cabins + dining saloon",
+      "vent_mode": "mech_exhaust",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_Crew_C",
+      "rooms": [
+        "Crew_Cabins_C_Port",
+        "Crew_Cabins_C_Stbd",
+        "Crew_Mess_C",
+        "Bakery_Scullery",
+        "Crew_Stores_C",
+        "Carpenter_Elec_Shops"
+      ],
+      "ach": 8.0,
+      "description": "C deck crew accommodation",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Machinery",
+      "rooms": [
+        "Engine_Room",
+        "Aux_Machinery_D",
+        "Machinery_Space_C",
+        "Machinery_Bottom",
+        "Shaft_Alley",
+        "Machinery_Casing_A",
+        "Machinery_Casing_B",
+        "Machinery_Casing_P",
+        "Funnel_Casing",
+        "Emergency_Gen_Rm",
+        "Steering_Gear_B",
+        "Aux_Machinery_Flat",
+        "Reactor_Control_Rm",
+        "Reactor_Space_A",
+        "Reactor_Space_C",
+        "Reactor_Containment",
+        "Radiation_Sampling"
+      ],
+      "ach": 12.0,
+      "description": "Machinery + reactor spaces (filtered exhaust)",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_Holds",
+      "rooms": [
+        "Holds_Aft_A",
+        "Holds_Aft_B",
+        "Holds_Aft_C",
+        "Holds_Aft_D",
+        "Holds_Fwd_A",
+        "Holds_Fwd_B",
+        "Holds_Fwd_C",
+        "Holds_Fwd_D",
+        "Hold_Bottom_Aft",
+        "Hold_Bottom_Fwd"
+      ],
+      "ach": 2.0,
+      "description": "Cargo holds natural vent",
+      "oa_fraction": 1.0,
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "AHU_Stores",
+      "rooms": [
+        "Bosun_Stores_A",
+        "Bosun_Stores_C",
+        "Windlass_Room_B",
+        "Aft_Peak_D",
+        "Deep_Tank_Fwd",
+        "Fore_Peak_Tank"
+      ],
+      "ach": 4.0,
+      "description": "Stores/fore-peak",
+      "vent_mode": "nat_supply",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_Weather",
+      "rooms": [
+        "Top_Of_House",
+        "Bridge_Wings",
+        "Boat_Deck_Fwd",
+        "Boat_Deck_Aft",
+        "Docking_Bridge_Aft",
+        "Promenade_Aft_Open",
+        "Swimming_Pool",
+        "Promenade_Walkway_Port",
+        "Promenade_Walkway_Stbd",
+        "Fwd_Deck_Promenade",
+        "Fantail_Aft",
+        "Weather_Deck_Port_A",
+        "Weather_Deck_Stbd_A",
+        "Forecastle_A"
+      ],
+      "ach": 0.0,
+      "description": "Open-air decks",
+      "oa_fraction": 1.0,
+      "vent_mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_HD_Promenade",
+      "rooms": [
+        "HD_Promenade"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Promenade, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Boat_Deck",
+      "rooms": [
+        "HD_Boat_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Boat_Deck, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_Stevedores_Toilet",
+      "rooms": [
+        "Stevedores_Toilet"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Stevedores_Toilet, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_B_Deck",
+      "rooms": [
+        "HD_B_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_B_Deck, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_C_Deck",
+      "rooms": [
+        "HD_C_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_C_Deck, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "AHU_Bridge",
+      "to": "AHU_Promenade",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Promenade",
+      "to": "AHU_Pax_A",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Pax_A",
+      "to": "AHU_Pax_B",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Pax_B",
+      "to": "AHU_Crew_C",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_4",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Crew_C",
+      "to": "AHU_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_5",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Machinery",
+      "to": "AHU_Holds",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_6",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Holds",
+      "to": "AHU_Stores",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_7",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Stores",
+      "to": "AHU_Weather",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_8",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Promenade",
+      "to": "AHU_HD_HD_Promenade",
+      "flow_rate_m3h": 356.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Promenade; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Bridge",
+      "to": "AHU_HD_HD_Boat_Deck",
+      "flow_rate_m3h": 356.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Boat_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Holds",
+      "to": "AHU_HD_Stevedores_Toilet",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Stevedores_Toilet; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Pax_B",
+      "to": "AHU_HD_HD_B_Deck",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_B_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Crew_C",
+      "to": "AHU_HD_HD_C_Deck",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_C_Deck; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Docking_Bridge_Aft",
+      "to": "Promenade_Aft_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "Promenade_Aft_Open",
+      "to": "Promenade_Walkway_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "Promenade_Aft_Open",
+      "to": "Promenade_Walkway_Stbd",
+      "type": "passageway"
+    },
+    {
+      "from": "Swimming_Pool",
+      "to": "Verandah_Lounge",
+      "type": "passageway"
+    },
+    {
+      "from": "Verandah_Lounge",
+      "to": "Promenade_House",
+      "type": "passageway"
+    },
+    {
+      "from": "Promenade_House",
+      "to": "Machinery_Casing_P",
+      "type": "passageway"
+    },
+    {
+      "from": "Promenade_House",
+      "to": "Promenade_Walkway_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_P",
+      "to": "Lounge_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Promenade_Walkway_Port",
+      "to": "Fwd_Deck_Promenade",
+      "type": "passageway"
+    },
+    {
+      "from": "Promenade_Walkway_Stbd",
+      "to": "Fwd_Deck_Promenade",
+      "type": "passageway"
+    },
+    {
+      "from": "Wheelhouse",
+      "to": "Chart_Radio_NB",
+      "type": "passageway"
+    },
+    {
+      "from": "Funnel_Casing",
+      "to": "Bridge_Wings",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Cabins",
+      "to": "Emergency_Gen_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Cabins",
+      "to": "Boat_Deck_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Fantail_Aft",
+      "to": "Holds_Aft_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Pax_Cabins_A_Port",
+      "to": "A_Deck_Lobby",
+      "type": "passageway"
+    },
+    {
+      "from": "Pax_Cabins_A_Port",
+      "to": "Weather_Deck_Stbd_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Pax_Cabins_A_Stbd",
+      "to": "A_Deck_Lobby",
+      "type": "passageway"
+    },
+    {
+      "from": "Pax_Cabins_A_Stbd",
+      "to": "Weather_Deck_Port_A",
+      "type": "passageway"
+    },
+    {
+      "from": "A_Deck_Lobby",
+      "to": "Galley_A",
+      "type": "passageway"
+    },
+    {
+      "from": "A_Deck_Lobby",
+      "to": "Machinery_Casing_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_A",
+      "to": "Reactor_Space_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Reactor_Space_A",
+      "to": "Holds_Fwd_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Holds_Fwd_A",
+      "to": "Bosun_Stores_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Bosun_Stores_A",
+      "to": "Forecastle_A",
+      "type": "passageway"
+    },
+    {
+      "from": "Dining_Saloon",
+      "to": "Galley_B",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_B",
+      "to": "Crew_Mess_B",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Mess_B",
+      "to": "Machinery_Casing_B",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_B",
+      "to": "Holds_Fwd_B",
+      "type": "passageway"
+    },
+    {
+      "from": "Holds_Fwd_B",
+      "to": "Windlass_Room_B",
+      "type": "passageway"
+    },
+    {
+      "from": "Carpenter_Elec_Shops",
+      "to": "Holds_Aft_C",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Mess_C",
+      "to": "Bakery_Scullery",
+      "type": "passageway"
+    },
+    {
+      "from": "Bakery_Scullery",
+      "to": "Machinery_Space_C",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Space_C",
+      "to": "Reactor_Space_C",
+      "type": "passageway"
+    },
+    {
+      "from": "Reactor_Space_C",
+      "to": "Crew_Stores_C",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Stores_C",
+      "to": "Holds_Fwd_C",
+      "type": "passageway"
+    },
+    {
+      "from": "Holds_Fwd_C",
+      "to": "Bosun_Stores_C",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Peak_D",
+      "to": "Holds_Aft_D",
+      "type": "passageway"
+    },
+    {
+      "from": "Holds_Aft_D",
+      "to": "Aux_Machinery_D",
+      "type": "passageway"
+    },
+    {
+      "from": "Aux_Machinery_D",
+      "to": "Engine_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Reactor_Containment",
+      "type": "passageway"
+    },
+    {
+      "from": "Reactor_Containment",
+      "to": "Radiation_Sampling",
+      "type": "passageway"
+    },
+    {
+      "from": "Radiation_Sampling",
+      "to": "Holds_Fwd_D",
+      "type": "passageway"
+    },
+    {
+      "from": "Holds_Fwd_D",
+      "to": "Deep_Tank_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Hold_Bottom_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Machinery_Bottom",
+      "type": "passageway"
+    },
+    {
+      "from": "Hold_Bottom_Aft",
+      "to": "Machinery_Bottom",
+      "type": "passageway"
+    }
+  ]
+}

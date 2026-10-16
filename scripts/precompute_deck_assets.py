@@ -83,6 +83,10 @@ PLATFORMS = [
     "missouri_bb63",
     "wisconsin_bb64",
     "new_jersey_bb62",
+    "liberty_cargo_ec2",
+    "savannah_ns",
+    "aeolus_arc3",
+    "alexander_henry_cgs119",
     "jupiter_ac3",
     "montana_acr13",
     "olympia_c6",
@@ -409,3 +413,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
