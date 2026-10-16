@@ -319,6 +319,7 @@ def _mutated_platform(
     roots: tuple[str, ...],
     name: str,
     mutate,
+    **synth_kwargs,
 ) -> tuple[dict, dict, Path]:
     """Seed the toy workdir, mutate its digest, synthesize, load output."""
     from tools.ship_blueprint_import.digest import draft_svgs_from_digest
@@ -351,6 +352,7 @@ def _mutated_platform(
         allowed_roots=roots,
         require_approved=True,
         copy_graphics=False,
+        **synth_kwargs,
     )
     spatial = json.loads((out / "spatial_layout.json").read_text(encoding="utf-8"))
     airflow = json.loads((out / "air_flow_paths.json").read_text(encoding="utf-8"))
@@ -743,6 +745,34 @@ class TestAuthorContam:
             if out.exists():
                 shutil.rmtree(out)
 
+    def test_author_contam_source_credit_in_handoff(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        from tools.ship_blueprint_import.author_contam import author_contam
+
+        out, workdir = self._synth_platform(
+            tmp_path, roots, "_pytest_contam_credit"
+        )
+        try:
+            credit = (
+                "U.S. Navy Booklet of General Plans — courtesy of the "
+                "San Francisco Maritime National Park Association, "
+                "https://maritime.org/doc/plans/bb63.pdf"
+            )
+            result = author_contam(
+                platform_dir=str(out),
+                workdir=str(workdir),
+                allowed_roots=(str(REPO_ROOT), str(tmp_path)),
+                hobbyist=True,
+                run_offline_gate=False,
+                source_credit=credit,
+            )
+            handoff = Path(result["handoff"]).read_text(encoding="utf-8")
+            assert "## Source" in handoff and credit in handoff
+        finally:
+            if out.exists():
+                shutil.rmtree(out)
+
     def test_skip_duct_spines_config_sensitivity(self) -> None:
         """Changing skip_duct_spines changes hobbyist override payload."""
         from tools.ship_blueprint_import.author_contam import (
@@ -853,6 +883,37 @@ class TestSystemsInference:
         # Zone modes separate sheet reads from era rules.
         assert notes["zone_modes"]["Mess_Hall"]["evidence"] == "sheet_read"
         assert notes["zone_modes"]["MedBay"]["evidence"] == "era_rule"
+
+    def test_source_credit_lands_in_notes_and_provenance(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        credit = (
+            "U.S. Navy Booklet of General Plans — courtesy of the "
+            "San Francisco Maritime National Park Association, "
+            "https://maritime.org/doc/plans/dd502.pdf"
+        )
+        _, _, out = _mutated_platform(
+            tmp_path,
+            roots,
+            "credit",
+            _add_systems,
+            source_credit=credit,
+        )
+        md = (out / "systems_notes.md").read_text(encoding="utf-8")
+        assert "## Source" in md and credit in md
+        notes = json.loads((out / "systems_notes.json").read_text(encoding="utf-8"))
+        assert notes["source_credit"] == credit
+        prov = json.loads((out / "import_provenance.json").read_text(encoding="utf-8"))
+        assert prov["source_credit"] == credit
+
+    def test_no_source_credit_omits_source_section(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        _, _, out = _mutated_platform(tmp_path, roots, "nocredit", _add_systems)
+        md = (out / "systems_notes.md").read_text(encoding="utf-8")
+        assert "## Source" not in md
+        notes = json.loads((out / "systems_notes.json").read_text(encoding="utf-8"))
+        assert "source_credit" not in notes
 
     def test_declared_hint_oa_wins_over_era(
         self, tmp_path: Path, roots: tuple[str, ...]

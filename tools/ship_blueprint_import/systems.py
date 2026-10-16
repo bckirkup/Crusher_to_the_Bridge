@@ -461,10 +461,16 @@ def infer_systems(
 
 
 def write_systems_notes(
-    output_dir: str, notes: dict[str, Any], *, allowed_roots: tuple[str, ...]
+    output_dir: str,
+    notes: dict[str, Any],
+    *,
+    allowed_roots: tuple[str, ...],
+    source_credit: str | None = None,
 ) -> None:
     """systems_notes.json (structured) + systems_notes.md (human ledger)."""
     prepare_output_directory(output_dir, allowed_roots=allowed_roots)
+    if source_credit:
+        notes["source_credit"] = source_credit
     jpath = os.path.join(output_dir, "systems_notes.json")
     with validated_open(jpath, "w", allowed_roots=allowed_roots, encoding="utf-8") as fh:
         json.dump(notes, fh, indent=2, ensure_ascii=False)
@@ -503,6 +509,8 @@ def write_systems_notes(
     lines += ["", "Evidence grades: `sheet_read` = marker drawn/labeled on the "
               "sheet; `era_rule` = era/zone-type prior; zones with neither are "
               "engineer handwork."]
+    if source_credit:
+        lines += ["", "## Source", "", source_credit]
     mpath = os.path.join(output_dir, "systems_notes.md")
     with validated_open(mpath, "w", allowed_roots=allowed_roots, encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")

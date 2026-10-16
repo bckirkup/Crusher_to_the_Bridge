@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:36:22.323501+00:00",
+  "platform": "chicago_cg11",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1302
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 86,
+      "berth_zone": "Flag_01_Fwd",
+      "duty_zone": "Command_01",
+      "notes": "captain + flag staff + wardroom officers"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 67,
+      "berth_zone": "CPO_Country_Main",
+      "duty_zone": "CPO_Mess_2nd",
+      "notes": "chief petty officers"
+    },
+    {
+      "class_id": "crew",
+      "role_group": "crew",
+      "count": 1107,
+      "berth_zone": "Crew_Berthing_Aft_3rd",
+      "duty_zone": "Crew_Messroom_2nd",
+      "notes": "enlisted crew; berth splits across 2nd/3rd/1P berthing"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 42,
+      "berth_zone": "Marine_Country_3rd",
+      "duty_zone": "Terrier_Deck_02",
+      "notes": "marine detachment"
+    }
+  ],
+  "source": "Sheet 2 accommodations table: officer beds+staterooms+wardroom berths ~86 (incl. flag staff sea cabins), CPO 67, crew 1107, marines 42; sick-bay ward 16 + isolation 4 excluded.",
+  "consistency": {
+    "declared_total": 1302,
+    "manifest_total": 1302,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
