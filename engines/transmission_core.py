@@ -2961,43 +2961,8 @@ class TransmissionCore:
         self._init_hazard_frailty()
         self._init_common_source(tx)
 
-    def _init_caregiver(self, tx: dict[str, Any]) -> None:
-        """CAREGIVER-V1 role grammar over the NORO-CAREGIVER-01 channel.
-
-        ``transmission.caregiver`` owns the three role blocks
-        (``cleanup``/``tending``/``service``); NORO-CAREGIVER-01's flat
-        keys remain as the cleanup role's shorthand (spec §7 — the
-        shipped tree predates the role layout and converges on it
-        here). Each role's ``enabled`` is a bool or a per-pathogen map
-        (``{pathogen_id: bool}``, ``"*"`` as the default key) because
-        the transmission block is shared across pathogens.
-        """
-        cg = tx.get("caregiver") or {}
-        mode = str(cg.get("mode", "on")).strip().lower()
-        self.caregiver_mode = mode if mode in {"on", "off"} else "on"
-        budget = str(cg.get("budget_mode", "reallocate")).strip().lower()
-        self.caregiver_budget_mode = (
-            budget if budget in {"reallocate", "additive"} else "reallocate"
-        )
-        self._cg_age_mult = {
-            str(k): float(v)
-            for k, v in (
-                cg.get("care_response_by_host_age_band")
-                or CAREGIVER_AGE_BAND_MULTIPLIERS
-            ).items()
-        }
-        self._cg_draw_wt = {
-            str(k): float(v)
-            for k, v in (
-                cg.get("responder_draw_weight_by_band")
-                or CAREGIVER_RESPONDER_AGE_WEIGHTS
-            ).items()
-        }
-        pf = cg.get("responder_protection_factor") or {}
-        self._cg_protect_family = float(pf.get("family", 1.0))
-        self._cg_protect_steward = tuple(
-            pf.get("steward", CAREGIVER_STEWARD_PROTECTION_FACTOR)
-        )
+    def _init_caregiver_role_blocks(self, cg: dict[str, Any]) -> None:
+        """Parse cleanup/tending/service role tables from ``transmission.caregiver``."""
         self._cg_cleanup = self._parse_caregiver_role(
             cg,
             "cleanup",
@@ -3051,11 +3016,9 @@ class TransmissionCore:
             {"*": True},
         )
         self._normalize_service_arms()
-        # The door-drop contact discount on each delivery's dose. A scalar
-        # is a fixed factor (``1.0`` is the labelled un-discounted
-        # baseline: it draws nothing and multiplies nothing, so that arm
-        # is bit-identical to the pre-factor engine); a [lo, hi] pair
-        # draws uniformly per delivery on a dedicated spawned stream.
+
+    def _init_caregiver_service_contact_rngs(self, entropy: Any) -> None:
+        """Door-drop contact factors and dedicated delivery draw streams."""
         raw_factor = self._cg_service.get(
             "contact_factor", CAREGIVER_SERVICE_CONTACT_FACTOR
         )
@@ -3067,10 +3030,6 @@ class TransmissionCore:
             if isinstance(raw_factor, (tuple, list))
             else raw_factor
         )
-        seed_seq = getattr(
-            getattr(self.rng, "bit_generator", None), "seed_seq", None,
-        )
-        entropy = getattr(seed_seq, "entropy", None)
         self._service_contact_rng = (
             np.random.default_rng(
                 np.random.SeedSequence(
@@ -3081,14 +3040,6 @@ class TransmissionCore:
             and self._cg_service_contact[0] == "uniform"
             else None
         )
-        # MEAL-SVC-02: ``contact_factor_to_host`` gives the steward->host
-        # direction its own declared door-drop factor. Absent -> the host
-        # side takes the delivery's shared realized draw (status quo); a
-        # scalar or [lo, hi] pair resolves the host direction's own
-        # corner/interval, drawn per delivery on its own spawn of the
-        # dedicated stream family so the shared realization — and the
-        # steward-side dose — is untouched. The resolved block echoes the
-        # effective spec either way, so every cell's factor is auditable.
         raw_host_factor = self._cg_service.get("contact_factor_to_host")
         self._cg_service_to_host_contact = (
             None
@@ -3120,19 +3071,13 @@ class TransmissionCore:
             if isinstance(effective_host_factor, (tuple, list))
             else effective_host_factor
         )
-        # Realized host-factor witness (the lottery check): aggregate
-        # stats plus a bounded reservoir for the median/quantile echo.
         self._service_host_factor_stats = {"n": 0, "sum": 0.0}
         self._service_host_factor_sample: list[float] = []
-        # R2 designation state: (host_id, pathogen_id) -> designation
-        # record; ``refused`` marks the failed one-time onset draw.
+
+    def _init_caregiver_runtime_state(self) -> None:
+        """Per-voyage designation, telemetry, and section-steward state."""
         self._cg_designations: dict[tuple[int, str], dict[str, Any]] = {}
-        # cg_id -> (host_id, mult): the pairs tending THIS epoch.
         self._cg_tending_epoch: dict[int, tuple[int, float]] = {}
-        # Caregivers absorbed into the cabin this epoch (reallocate arm):
-        # removed from standard occupancy so their venue draw is what the
-        # reallocated hours cost, and their dose arrives via the caregiver
-        # channel instead of double-counting through the unit pools.
         self._cg_absorbed_ids: set[int] = set()
         self.caregiver_telemetry: dict[str, float] = {
             # NORO-CAREGIVER-01 legacy keys (cleanup aliases, kept for
@@ -3178,6 +3123,51 @@ class TransmissionCore:
             else None
         )
         self._agents_by_id: dict[int, KorkinAgent] = {}
+
+    def _init_caregiver(self, tx: dict[str, Any]) -> None:
+        """CAREGIVER-V1 role grammar over the NORO-CAREGIVER-01 channel.
+
+        ``transmission.caregiver`` owns the three role blocks
+        (``cleanup``/``tending``/``service``); NORO-CAREGIVER-01's flat
+        keys remain as the cleanup role's shorthand (spec §7 — the
+        shipped tree predates the role layout and converges on it
+        here). Each role's ``enabled`` is a bool or a per-pathogen map
+        (``{pathogen_id: bool}``, ``"*"`` as the default key) because
+        the transmission block is shared across pathogens.
+        """
+        cg = tx.get("caregiver") or {}
+        mode = str(cg.get("mode", "on")).strip().lower()
+        self.caregiver_mode = mode if mode in {"on", "off"} else "on"
+        budget = str(cg.get("budget_mode", "reallocate")).strip().lower()
+        self.caregiver_budget_mode = (
+            budget if budget in {"reallocate", "additive"} else "reallocate"
+        )
+        self._cg_age_mult = {
+            str(k): float(v)
+            for k, v in (
+                cg.get("care_response_by_host_age_band")
+                or CAREGIVER_AGE_BAND_MULTIPLIERS
+            ).items()
+        }
+        self._cg_draw_wt = {
+            str(k): float(v)
+            for k, v in (
+                cg.get("responder_draw_weight_by_band")
+                or CAREGIVER_RESPONDER_AGE_WEIGHTS
+            ).items()
+        }
+        pf = cg.get("responder_protection_factor") or {}
+        self._cg_protect_family = float(pf.get("family", 1.0))
+        self._cg_protect_steward = tuple(
+            pf.get("steward", CAREGIVER_STEWARD_PROTECTION_FACTOR)
+        )
+        self._init_caregiver_role_blocks(cg)
+        seed_seq = getattr(
+            getattr(self.rng, "bit_generator", None), "seed_seq", None,
+        )
+        entropy = getattr(seed_seq, "entropy", None)
+        self._init_caregiver_service_contact_rngs(entropy)
+        self._init_caregiver_runtime_state()
 
     def _normalize_service_arms(self) -> None:
         """Validate the MEAL-SVC-01 service-role arm grammar in place."""
@@ -3379,6 +3369,152 @@ class TransmissionCore:
 
     # ── FOOD-COMMON-SOURCE-01: config and dedicated stream ───────────
 
+    def _apply_common_source_mode_fields(self, cs: dict[str, Any]) -> None:
+        """Resolve lot/handler/diner arm modes and titre/extent knobs."""
+        self._cs_lot_mode = (
+            "independent"
+            if str(cs.get("lot_mode", "object")).strip().lower()
+            == "independent"
+            else "object"
+        )
+        self._cs_lot_mint_model = (
+            "fiat"
+            if str(
+                cs.get("lot_mint_model", COMMON_SOURCE_LOT_MINT_MODEL_ABSENT),
+            ).strip().lower() == "fiat"
+            else "provisioned_source"
+        )
+        self._cs_handler_mode = (
+            "independent"
+            if str(cs.get("handler_mode", "object")).strip().lower()
+            == "independent"
+            else "object"
+        )
+        self._cs_diner_mode = (
+            "independent"
+            if str(cs.get("diner_mode", "object")).strip().lower()
+            == "independent"
+            else "object"
+        )
+        self._cs_titre_mode = (
+            "background"
+            if str(cs.get("titre_draw_mode", "two_mode")).strip().lower()
+            == "background"
+            else "two_mode"
+        )
+        self._cs_lot_extent_mode = (
+            "declared"
+            if str(cs.get("lot_extent_mode", "emergent")).strip().lower()
+            == "declared"
+            else "emergent"
+        )
+        self._cs_lot_state_redraw = (
+            "per_window"
+            if str(cs.get("lot_state_redraw", "per_object"))
+            .strip().lower() == "per_window"
+            else "per_object"
+        )
+        self._cs_posture = max(0.0, float(
+            cs.get("food_safety_posture", 1.0),
+        ))
+        self._cs_lot_posture_coupling = bool(
+            cs.get("lot_posture_coupling", False),
+        )
+
+    def _resolve_provisioned_source_block(
+        self,
+        ps: dict[str, Any],
+    ) -> Any:
+        """PROVISIONED-SOURCE-01 registry resolution; returns resolved ``q_source``."""
+        self._cs_ps_source_id = None
+        self._cs_ps_genotype_distribution = {}
+        ps_q = None
+        if self._cs_lot_mint_model != "provisioned_source":
+            return ps_q
+        registry = _provisioning_source_registry()
+        self._cs_ps_source_id = str(
+            ps.get("source_id")
+            or registry.get("default_source")
+            or _PROVISIONED_SOURCE_FALLBACK_ID
+        )
+        entry = (
+            (registry.get("sources") or {}).get(self._cs_ps_source_id)
+            or {}
+        )
+        ps_q = ps.get("q_source")
+        if ps_q is None:
+            ps_q = entry.get("q_source")
+        ps_mix = ps.get("genotype_distribution")
+        if ps_mix is None:
+            ps_mix = entry.get("genotype_distribution")
+        if isinstance(ps_mix, dict):
+            self._cs_ps_genotype_distribution = ps_mix
+        return ps_q
+
+    def _init_common_source_state_buckets(self) -> None:
+        """Mutable per-voyage common-source witnesses and object state."""
+        self.common_source_telemetry = {
+            "events_provisioned_lot": 0,
+            "events_ill_handler": 0,
+            "events_ill_diner": 0,
+            "takers_served": 0,
+            "dose_credited": 0.0,
+            "objects_provisioned_lot": 0,
+            "objects_ill_handler": 0,
+            "objects_ill_diner": 0,
+            "pans_emitted": 0,
+            "object_windows": 0,
+            "multi_pan_windows": 0,
+            "objects_exhausted": 0,
+            "objects_perished": 0,
+        }
+        self._cs_dining_zones = [
+            z for z, t in (self.zone_types or {}).items() if t == "Dining"
+        ]
+        self._cs_rates = {}
+        self._cs_lot_plan = {}
+        self._cs_lot_plan_done = False
+        self._cs_provisioned_source = {}
+        self._cs_contaminated_stations = {}
+        self._cs_windows = {}
+        self._cs_members_epoch = -1
+        self._cs_members = {}
+        self._cs_event_counter = 0
+        self._cs_objects = {}
+        self._cs_object_log = []
+        self._cs_object_counter = 0
+        self._cs_voyage_closed = False
+        self._cs_spans = {}
+        self._cs_venue_selfserve = {}
+        self._cs_event_log = []
+
+    def _maybe_arm_common_source_rng(self) -> None:
+        armed = self.common_source_mode == "on" and any(
+            (p or {}).get("common_source_events", {}).get("enabled", False)
+            for p in (self.pathogen_profiles or {}).values()
+        )
+        self._cs_rng = None
+        self._cs_seed_seq = None
+        if not armed:
+            return
+        seed_seq = getattr(
+            getattr(self.rng, "bit_generator", None), "seed_seq", None,
+        )
+        entropy = getattr(seed_seq, "entropy", None)
+        self._cs_seed_seq = (
+            np.random.SeedSequence(
+                entropy, spawn_key=(_COMMON_SOURCE_STREAM_KEY,),
+            )
+            if entropy is not None
+            else None
+        )
+        self._cs_rng = (
+            np.random.default_rng(self._cs_seed_seq)
+            if self._cs_seed_seq is not None
+            else self.rng
+        )
+        self._cs_draw_voyage_rates()
+
     def _init_common_source(
         self,
         tx: dict[str, Any],
@@ -3404,230 +3540,16 @@ class TransmissionCore:
         self.common_source_mode = str(
             cs.get("mode", "on"),
         ).strip().lower()
-        # FOOD-COMMON-SOURCE-02 per-arm modes: each arm's ``"object"``
-        # is the shipped default (the better physics ships on) and
-        # ``"independent"`` the labelled v1 baseline — the v1 arm path
-        # preserved, consuming the identical draws it consumed before.
-        # Leg 1 shipped the lot arm; leg 2 ships the handler/diner
-        # object arms, so all three default ``"object"`` now.
-        self._cs_lot_mode = (
-            "independent"
-            if str(cs.get("lot_mode", "object")).strip().lower()
-            == "independent"
-            else "object"
-        )
-        # PROVISIONED-SOURCE-01 (contract §1.1): the lot mint model.
-        # Absent resolves ``"provisioned_source"`` — the mechanism
-        # ships ON for every config that does not opt out. ``"fiat"``
-        # is the labelled baseline: spelling it reproduces the v1
-        # Bernoulli-gate + geometric-tail grammar verbatim. Under
-        # ``"provisioned_source"`` every (zone, item-line) station in
-        # the derived census mints its lot iff a per-station Bernoulli
-        # lands under the drawn upstream prevalence q_source. Only
-        # meaningful under object-mode lot mints;
-        # ``lot_mode: "independent"`` ignores it.
-        self._cs_lot_mint_model = (
-            "fiat"
-            if str(
-                cs.get("lot_mint_model", COMMON_SOURCE_LOT_MINT_MODEL_ABSENT),
-            ).strip().lower() == "fiat"
-            else "provisioned_source"
-        )
-        # The provisioning-source covariate (contract §1.3):
-        # ``provisioned_source`` is a platform-level block naming the
-        # upstream source the voyage provisions from; the id falls back
-        # to the registry's ``default_source``, then the declared
-        # fallback entry. ``q_source`` may be a scalar rung (consumes
-        # no uniform at draw time) or a [lo, hi] interval drawn once
-        # per voyage at the first lot-rate slot; absent it resolves
-        # from the named registry entry's declared interval.
+        self._apply_common_source_mode_fields(cs)
         ps = cs.get("provisioned_source")
         if not isinstance(ps, dict):
             ps = {}
-        self._cs_ps_source_id: str | None = None
-        self._cs_ps_genotype_distribution: dict[str, Any] = {}
-        ps_q = None
-        if self._cs_lot_mint_model == "provisioned_source":
-            registry = _provisioning_source_registry()
-            self._cs_ps_source_id = str(
-                ps.get("source_id")
-                or registry.get("default_source")
-                or _PROVISIONED_SOURCE_FALLBACK_ID
-            )
-            entry = (
-                (registry.get("sources") or {}).get(self._cs_ps_source_id)
-                or {}
-            )
-            ps_q = ps.get("q_source")
-            if ps_q is None:
-                ps_q = entry.get("q_source")
-            # Per-source genotype mix (issue #1011): a declared
-            # ``genotype_distribution`` — the ``provisioned_source``
-            # block's outranks the registry entry's — replaces the
-            # boarding ``prior_genotype_distribution`` as the lot's
-            # strain draw, so the supply chain carries its own mix
-            # independent of who boards. A source (or pathogen) with no
-            # declared mix keeps the prior — the reason-to-be-the-same.
-            ps_mix = ps.get("genotype_distribution")
-            if ps_mix is None:
-                ps_mix = entry.get("genotype_distribution")
-            if isinstance(ps_mix, dict):
-                self._cs_ps_genotype_distribution = ps_mix
+        ps_q = self._resolve_provisioned_source_block(ps)
         self._cs_cfg = dict(cs)
         if ps_q is not None:
-            # Inject through the normal cfg layer so the resolved spec
-            # rides the unchanged profile-block > tx-cfg > module
-            # precedence in _cs_spec_range; the explicit
-            # ``provisioned_source.q_source`` (or the registry entry's)
-            # outranks a bare ``common_source.q_source``.
             self._cs_cfg["q_source"] = ps_q
-        self._cs_handler_mode = (
-            "independent"
-            if str(cs.get("handler_mode", "object")).strip().lower()
-            == "independent"
-            else "object"
-        )
-        self._cs_diner_mode = (
-            "independent"
-            if str(cs.get("diner_mode", "object")).strip().lower()
-            == "independent"
-            else "object"
-        )
-        # NORO-TWO-MODE-TITRE (NORO-IMPLICATED-TITRE-01 §8, applied): the
-        # mint-time lot-titre draw is conditioned on the object's
-        # denominator. ``"two_mode"`` — the shipped default, the better
-        # physics ships on — resolves each titre draw site by the mint
-        # event itself: a fired ``provisioned_lot`` object only mints
-        # conditional on the voyage carrying a contaminated lot, so it
-        # IS the implicated denominator and draws the implicated band;
-        # a background-stock site (none modelled) would draw the
-        # background band. ``"background"`` is the labelled pre-change
-        # baseline: every site resolves to the single-mode
-        # ``lot_titre_gec_per_g`` spec — the draw the review identified
-        # as the background distribution — restoring the prior
-        # behaviour verbatim at the same stream position.
-        self._cs_titre_mode = (
-            "background"
-            if str(cs.get("titre_draw_mode", "two_mode")).strip().lower()
-            == "background"
-            else "two_mode"
-        )
-        # NORO-CS-EXTENT (NORO-ENTRAIN-01 design §4.3): the lot extent
-        # and state-cadence arm knobs — config, not defaults. The
-        # shipped pair ``"emergent"`` / ``"per_object"`` is the labelled
-        # baseline; the contract waives the default-ON rule (these arms
-        # isolate dose-vs-extent and state-vs-cadence, not better
-        # physics).
-        self._cs_lot_extent_mode = (
-            "declared"
-            if str(cs.get("lot_extent_mode", "emergent")).strip().lower()
-            == "declared"
-            else "emergent"
-        )
-        self._cs_lot_state_redraw = (
-            "per_window"
-            if str(cs.get("lot_state_redraw", "per_object"))
-            .strip().lower() == "per_window"
-            else "per_object"
-        )
-        # Per-platform VSP-conditioned rate scalar. Ship wiring merges the
-        # platform layout's posture into this block when the config does
-        # not already carry one (cfg > platform > 1.0). The score→multiplier
-        # map is the declared linear identity in v1 (the score IS the
-        # multiplier), swept in the canary.
-        self._cs_posture = max(0.0, float(
-            cs.get("food_safety_posture", 1.0),
-        ))
-        self._cs_lot_posture_coupling = bool(
-            cs.get("lot_posture_coupling", False),
-        )
-        self.common_source_telemetry: dict[str, float] = {
-            "events_provisioned_lot": 0,
-            "events_ill_handler": 0,
-            "events_ill_diner": 0,
-            "takers_served": 0,
-            "dose_credited": 0.0,
-            # FOOD-COMMON-SOURCE-02 counters: events_* keep counting pan
-            # rows; the object fields are the new diagnostics of record.
-            "objects_provisioned_lot": 0,
-            "objects_ill_handler": 0,
-            "objects_ill_diner": 0,
-            "pans_emitted": 0,
-            "object_windows": 0,
-            "multi_pan_windows": 0,
-            "objects_exhausted": 0,
-            "objects_perished": 0,
-        }
-        self._cs_dining_zones = [
-            z for z, t in (self.zone_types or {}).items() if t == "Dining"
-        ]
-        self._cs_rates: dict[str, dict[str, float]] = {}
-        self._cs_lot_plan: dict[str, tuple[str, str, int]] = {}
-        self._cs_lot_plan_done = False
-        # PROVISIONED-SOURCE-01 voyage witness (contract §3): per armed
-        # pathogen the drawn q_source, the census size and the
-        # contaminated-station count; the contaminated (zone, item)
-        # set itself is retained for the station-witness readout.
-        self._cs_provisioned_source: dict[str, dict[str, Any]] = {}
-        self._cs_contaminated_stations: dict[
-            str, set[tuple[str, str]],
-        ] = {}
-        self._cs_windows: dict[tuple[str, str, str, int], dict[str, Any]] = {}
-        self._cs_members_epoch = -1
-        self._cs_members: dict[str, list[KorkinAgent]] = {}
-        self._cs_event_counter = 0
-        # FOOD-COMMON-SOURCE-02 object state: per-pathogen creation-ordered
-        # live list plus the permanent object witness (window states
-        # expire with their meal window, so the voyage record accumulates
-        # on ``_cs_object_log`` the way events accumulate on
-        # ``_cs_event_log``).
-        self._cs_objects: dict[str, list[dict[str, Any]]] = {}
-        self._cs_object_log: list[dict[str, Any]] = []
-        self._cs_object_counter = 0
-        self._cs_voyage_closed = False
-        # Leg-2 agent spans: (pathogen_id, agent_id, kind) → the open
-        # span record ``{"station": str, "object": dict|None}`` — a
-        # span is the maximal contiguous run the arm's eligibility holds
-        # (§Leg 2); ``_cs_venue_selfserve`` caches the diner venue gate
-        # per venue name.
-        self._cs_spans: dict[tuple[str, int, str], dict[str, Any]] = {}
-        self._cs_venue_selfserve: dict[str, bool] = {}
-        # Permanent event witness — window states expire with their meal
-        # window, so the voyage record accumulates here instead.
-        self._cs_event_log: list[dict[str, Any]] = []
-        armed = self.common_source_mode == "on" and any(
-            (p or {}).get("common_source_events", {}).get("enabled", False)
-            for p in (self.pathogen_profiles or {}).values()
-        )
-        self._cs_rng = None
-        # Kept alongside the generator: ``lot_state_redraw:
-        # "per_window"`` spawns each lot object its own stream partition
-        # off it, so per-window re-mints never touch the shared stream
-        # and the shipped ``"per_object"`` baseline stays bit-identical.
-        self._cs_seed_seq = None
-        if not armed:
-            return
-        seed_seq = getattr(
-            getattr(self.rng, "bit_generator", None), "seed_seq", None,
-        )
-        entropy = getattr(seed_seq, "entropy", None)
-        self._cs_seed_seq = (
-            np.random.SeedSequence(
-                entropy, spawn_key=(_COMMON_SOURCE_STREAM_KEY,),
-            )
-            if entropy is not None
-            else None
-        )
-        self._cs_rng = (
-            np.random.default_rng(self._cs_seed_seq)
-            if self._cs_seed_seq is not None
-            else self.rng
-        )
-        # Per-voyage rate draws: each armed pathogen gets one realisation
-        # of its declared intervals for the whole voyage — the rates are
-        # the sweep axis, so between-voyage dispersion is where the tail
-        # lives. Drawn in profile order, before any window logic runs.
-        self._cs_draw_voyage_rates()
+        self._init_common_source_state_buckets()
+        self._maybe_arm_common_source_rng()
 
     def _cs_draw_voyage_rates(self) -> None:
         # Each arm's mode picks that arm's rate names; the composition
@@ -6924,6 +6846,100 @@ class TransmissionCore:
         )
         return effective_dose * supply_raw / raw_total
 
+    def _run_p2p_pathways_before_hvac(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        p_agent_doses: dict[int, float],
+        p_agent_pw: dict[int, dict[str, float]],
+        p_agent_coop: dict[int, dict[str, float]],
+        matrix: ContactTracingMatrix,
+        events: list[TransmissionEvent],
+        pathogen_id: str,
+        profile: dict[str, Any],
+        ledger: StrainDoseLedger | None,
+        coop_arm: bool,
+    ) -> None:
+        self._pathway_direct_contact(
+            epoch, zone_occupants, p_agent_doses, matrix, events,
+            p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            ledger=ledger,
+        )
+        self._pathway_droplet(
+            epoch, zone_occupants, p_agent_doses, matrix, events,
+            p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            ledger=ledger,
+            agent_coop_doses=p_agent_coop if coop_arm else None,
+        )
+
+    def _run_p2p_pathways_after_hvac(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        p_agent_doses: dict[int, float],
+        p_agent_pw: dict[int, dict[str, float]],
+        matrix: ContactTracingMatrix,
+        events: list[TransmissionEvent],
+        pathogen_id: str,
+        profile: dict[str, Any],
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        self._pathway_fomite(
+            epoch, zone_occupants, p_agent_doses, matrix, events,
+            p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            ledger=ledger,
+        )
+        self._pathway_emesis_aerosol(
+            epoch, zone_occupants, p_agent_doses, matrix,
+            p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+            ledger=ledger,
+        )
+        self._pathway_flush_aerosol(
+            epoch, zone_occupants, p_agent_doses, matrix,
+            p_agent_pw, pathogen_id=pathogen_id,
+            ledger=ledger,
+        )
+
+    def _run_supplemental_pathogen_pathways(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        p_agent_doses: dict[int, float],
+        p_agent_pw: dict[int, dict[str, float]],
+        matrix: ContactTracingMatrix,
+        pathogen_id: str,
+        profile: dict[str, Any],
+        ec: dict[str, Any],
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        fc = profile.get("food_contamination", {})
+        if fc.get("enabled", False):
+            self._pathway_food_contamination(
+                epoch, zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
+            )
+        if profile.get("common_source_events", {}).get("enabled", False):
+            self._pathway_common_source(
+                epoch, zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
+            )
+        if ec.get("enabled", False):
+            self._pathway_environmental(
+                zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
+            )
+        if self.caregiver_mode == "on":
+            self._caregiver_pathogen_epoch(
+                epoch,
+                pathogen_id,
+                profile,
+                p_agent_doses,
+                p_agent_pw,
+            )
+
     def _execute_pathogen_pathways(
         self,
         epoch: int,
@@ -6953,16 +6969,10 @@ class TransmissionCore:
         person_to_person = ec.get("person_to_person", True)
 
         if person_to_person:
-            self._pathway_direct_contact(
-                epoch, zone_occupants, p_agent_doses, matrix, events,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                ledger=ledger,
-            )
-            self._pathway_droplet(
-                epoch, zone_occupants, p_agent_doses, matrix, events,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                ledger=ledger,
-                agent_coop_doses=p_agent_coop if coop_arm else None,
+            self._run_p2p_pathways_before_hvac(
+                epoch, zone_occupants, p_agent_doses, p_agent_pw,
+                p_agent_coop, matrix, events, pathogen_id, profile,
+                ledger, coop_arm,
             )
 
         self._pathway_hvac_airborne(
@@ -6973,63 +6983,15 @@ class TransmissionCore:
         )
 
         if person_to_person:
-            self._pathway_fomite(
-                epoch, zone_occupants, p_agent_doses, matrix, events,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                ledger=ledger,
-            )
-            # After fomite because _emit_emesis runs inside it: the emitted
-            # accumulator holds exactly this epoch's events when it is read.
-            self._pathway_emesis_aerosol(
-                epoch, zone_occupants, p_agent_doses, matrix,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                ledger=ledger,
-            )
-            # Same argument shape as the emesis pathway: the flush route's
-            # emitted accumulator was filled by _replenish_hand inside
-            # _pathway_fomite and is popped here, once.
-            self._pathway_flush_aerosol(
-                epoch, zone_occupants, p_agent_doses, matrix,
-                p_agent_pw, pathogen_id=pathogen_id,
-                ledger=ledger,
+            self._run_p2p_pathways_after_hvac(
+                epoch, zone_occupants, p_agent_doses, p_agent_pw,
+                matrix, events, pathogen_id, profile, ledger,
             )
 
-        fc = profile.get("food_contamination", {})
-        if fc.get("enabled", False):
-            self._pathway_food_contamination(
-                epoch, zone_occupants, p_agent_doses, matrix,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                ledger=ledger,
-            )
-
-        # FOOD-COMMON-SOURCE-01: the synchronized pan event rides the same
-        # route-efficiency/NPI/susceptibility merge as every other pathway.
-        if profile.get("common_source_events", {}).get("enabled", False):
-            self._pathway_common_source(
-                epoch, zone_occupants, p_agent_doses, matrix,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                ledger=ledger,
-            )
-
-        if ec.get("enabled", False):
-            self._pathway_environmental(
-                zone_occupants, p_agent_doses, matrix,
-                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
-                ledger=ledger,
-            )
-
-        # CAREGIVER-V1: course-bound tending (R2) and cabin service (R3)
-        # credit their dose inside this pathogen's accumulators so route
-        # efficiencies, NPI multipliers and the susceptibility merge treat
-        # it like every other pathway — labelled `caregiver`.
-        if self.caregiver_mode == "on":
-            self._caregiver_pathogen_epoch(
-                epoch,
-                pathogen_id,
-                profile,
-                p_agent_doses,
-                p_agent_pw,
-            )
+        self._run_supplemental_pathogen_pathways(
+            epoch, zone_occupants, p_agent_doses, p_agent_pw,
+            matrix, pathogen_id, profile, ec, ledger,
+        )
 
         self._apply_route_efficiencies(profile, p_agent_doses, p_agent_pw)
         npi = self._npi_route_multipliers(agents)
@@ -10524,6 +10486,80 @@ class TransmissionCore:
                 return agent
         return pool[-1]
 
+    def _caregiver_pair_emission_addback(
+        self,
+        emitted: list[tuple[KorkinAgent, float]],
+        target: KorkinAgent,
+        *,
+        emission_fraction: float,
+        pool_share: float,
+        volume: float,
+        inhaled: float,
+        vent: float,
+        residence: float,
+        target_factor: float,
+        presence: float,
+    ) -> float:
+        addback = 0.0
+        for shedder, shedding in emitted:
+            unattenuated = (
+                shedding
+                * emission_fraction
+                * pool_share
+                / max(volume, 1.0)
+                * inhaled
+                * self.droplet_scalar
+                * vent
+                * residence
+                * presence
+            )
+            addback += unattenuated * (
+                1.0
+                - self.confinement_emission_factor(shedder)
+                * target_factor
+            )
+        return addback
+
+    def _caregiver_pair_near_field_dose(
+        self,
+        emitted: list[tuple[KorkinAgent, float]],
+        *,
+        emission_fraction: float,
+        volume: float,
+        inhaled: float,
+        plume_weight: float,
+        partition: bool,
+    ) -> float:
+        near = 0.0
+        near_field = self.near_field_air
+        if not (near_field.active and plume_weight > 0.0):
+            return near
+        if partition:
+            gain = self.droplet_field_split.near_field_share / max(
+                self.near_field_flushed_volume_m3_per_epoch, 1.0
+            )
+        else:
+            gain = (
+                1.0
+                / max(self.near_field_flushed_volume_m3_per_epoch, 1.0)
+                - 1.0 / max(volume, 1.0)
+            )
+        if gain <= 0.0:
+            return near
+        for shedder, shedding in emitted:
+            shedder_factor = self.confinement_emission_factor(shedder)
+            if shedder_factor > 0.0:
+                shedding /= shedder_factor
+            near += (
+                plume_weight
+                * shedding
+                * emission_fraction
+                * gain
+                * inhaled
+                * self.droplet_scalar
+            )
+        return near
+
     def _caregiver_pair_dose(
         self,
         host: KorkinAgent,
@@ -10591,52 +10627,26 @@ class TransmissionCore:
             * target_factor
             * presence
         )
-        addback = 0.0
-        for shedder, shedding in emitted:
-            unattenuated = (
-                shedding
-                * emission_fraction
-                * pool_share
-                / max(volume, 1.0)
-                * inhaled
-                * self.droplet_scalar
-                * vent
-                * residence
-                * presence
-            )
-            addback += unattenuated * (
-                1.0
-                - self.confinement_emission_factor(shedder)
-                * target_factor
-            )
-        near = 0.0
-        near_field = self.near_field_air
-        if near_field.active and plume_weight > 0.0:
-            if partition:
-                gain = self.droplet_field_split.near_field_share / max(
-                    self.near_field_flushed_volume_m3_per_epoch, 1.0
-                )
-            else:
-                gain = (
-                    1.0
-                    / max(self.near_field_flushed_volume_m3_per_epoch, 1.0)
-                    - 1.0 / max(volume, 1.0)
-                )
-            if gain > 0.0:
-                for shedder, shedding in emitted:
-                    shedder_factor = self.confinement_emission_factor(
-                        shedder
-                    )
-                    if shedder_factor > 0.0:
-                        shedding /= shedder_factor
-                    near += (
-                        plume_weight
-                        * shedding
-                        * emission_fraction
-                        * gain
-                        * inhaled
-                        * self.droplet_scalar
-                    )
+        addback = self._caregiver_pair_emission_addback(
+            emitted,
+            target,
+            emission_fraction=emission_fraction,
+            pool_share=pool_share,
+            volume=volume,
+            inhaled=inhaled,
+            vent=vent,
+            residence=residence,
+            target_factor=target_factor,
+            presence=presence,
+        )
+        near = self._caregiver_pair_near_field_dose(
+            emitted,
+            emission_fraction=emission_fraction,
+            volume=volume,
+            inhaled=inhaled,
+            plume_weight=plume_weight,
+            partition=partition,
+        )
         return pool_term + addback + near
 
     def _caregiver_service_share(self) -> float:
@@ -10994,6 +11004,55 @@ class TransmissionCore:
                 agent_pathway_doses,
             )
 
+    def _caregiver_tending_pathogen_epoch(
+        self,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+    ) -> None:
+        """R2 tending dose for one pathogen this epoch."""
+        for (host_id, pid), des in self._cg_designations.items():
+            if (
+                pid != pathogen_id
+                or des["refused"]
+                or not des["tending_epoch"]
+            ):
+                continue
+            host = self._agents_by_id.get(host_id)
+            cg = self._agents_by_id.get(des["caregiver_id"])
+            if host is None or cg is None:
+                continue
+            copresence = self._cabin_pair_copresence(host, cg, epoch)
+            plume_base = (
+                self.cabin_cooccupancy.awake_plume_share
+                if self.cabin_cooccupancy.active
+                else 1.0
+            )
+            dose = self._caregiver_pair_dose(
+                host,
+                cg,
+                epoch,
+                pathogen_id,
+                profile,
+                presence=min(1.0, copresence * des["mult"]),
+                plume_weight=min(1.0, plume_base * des["mult"]),
+            )
+            self.caregiver_telemetry["tending_dose_delivered"] += dose
+            if dose > 0.0 and cg in self._get_susceptible(
+                [cg], pathogen_id
+            ):
+                self.caregiver_telemetry["tending_dose_credited"] += (
+                    self._accumulate(
+                        cg.agent_id,
+                        "caregiver",
+                        dose,
+                        agent_doses,
+                        agent_pathway_doses,
+                    )
+                )
+
     def _caregiver_pathogen_epoch(
         self,
         epoch: int,
@@ -11004,49 +11063,9 @@ class TransmissionCore:
     ) -> None:
         """Caregiver dose for one pathogen this epoch (R2 + R3)."""
         if self._cg_role_enabled(self._cg_tending, pathogen_id):
-            for (host_id, pid), des in self._cg_designations.items():
-                if (
-                    pid != pathogen_id
-                    or des["refused"]
-                    or not des["tending_epoch"]
-                ):
-                    continue
-                host = self._agents_by_id.get(host_id)
-                cg = self._agents_by_id.get(des["caregiver_id"])
-                if host is None or cg is None:
-                    continue
-                # R2 (§5/§11): the pair's copresence share upgraded by the
-                # declared tending multiplier toward the full-presence
-                # ceiling; the plume weight saturates the cabin-mate
-                # awake-plume share the same way.
-                copresence = self._cabin_pair_copresence(host, cg, epoch)
-                plume_base = (
-                    self.cabin_cooccupancy.awake_plume_share
-                    if self.cabin_cooccupancy.active
-                    else 1.0
-                )
-                dose = self._caregiver_pair_dose(
-                    host,
-                    cg,
-                    epoch,
-                    pathogen_id,
-                    profile,
-                    presence=min(1.0, copresence * des["mult"]),
-                    plume_weight=min(1.0, plume_base * des["mult"]),
-                )
-                self.caregiver_telemetry["tending_dose_delivered"] += dose
-                if dose > 0.0 and cg in self._get_susceptible(
-                    [cg], pathogen_id
-                ):
-                    self.caregiver_telemetry["tending_dose_credited"] += (
-                        self._accumulate(
-                            cg.agent_id,
-                            "caregiver",
-                            dose,
-                            agent_doses,
-                            agent_pathway_doses,
-                        )
-                    )
+            self._caregiver_tending_pathogen_epoch(
+                epoch, pathogen_id, profile, agent_doses, agent_pathway_doses,
+            )
         if self._cg_role_enabled(self._cg_service, pathogen_id):
             self._caregiver_service_epoch(
                 epoch,

@@ -1015,6 +1015,38 @@ def update_ever_infected_ids(
             ever_infected_ids.add(int(agent["agent_id"]))
 
 
+def _route_attribution_agent_ledger(
+    agent_id: Any,
+    agent_ledgers: dict[int, dict[str, float]] | None,
+) -> dict[str, float] | None:
+    if agent_ledgers is not None and agent_id is not None:
+        return agent_ledgers.setdefault(int(agent_id), {})
+    return None
+
+
+def _accumulate_route_attribution_event(
+    event: Any,
+    dominant_counts: dict[str, int],
+    dose_shares: dict[str, float],
+    agent_ledger: dict[str, float] | None,
+) -> None:
+    ledger = event.acquired_particles_by_route or {}
+    total = sum(ledger.values())
+    if total > 0.0:
+        dominant = max(ledger, key=ledger.get)
+        dominant_counts[dominant] = dominant_counts.get(dominant, 0) + 1
+        for route, dose in ledger.items():
+            dose_shares[route] = dose_shares.get(route, 0.0) + dose / total
+            if agent_ledger is not None:
+                agent_ledger[route] = agent_ledger.get(route, 0.0) + dose
+        return
+    fallback = event.pathway or "unknown"
+    dominant_counts[fallback] = dominant_counts.get(fallback, 0) + 1
+    dose_shares[fallback] = dose_shares.get(fallback, 0.0) + 1.0
+    if agent_ledger is not None:
+        agent_ledger[fallback] = agent_ledger.get(fallback, 0.0) + 1.0
+
+
 def update_route_attribution(
     events: list[Any],
     dominant_counts: dict[str, int],
@@ -1032,30 +1064,15 @@ def update_route_attribution(
     ``reported_cases_by_channel``'s supply_chain bucket reads it.
     """
     for event in events:
-        ledger = event.acquired_particles_by_route or {}
-        total = sum(ledger.values())
         agent_id = getattr(event, "target_agent_id", None)
         if agent_supply_doses is not None and agent_id is not None:
             agent_supply_doses[int(agent_id)] = float(
                 getattr(event, "acquired_supply_chain_dose", 0.0),
             )
-        if agent_ledgers is not None and agent_id is not None:
-            agent_ledger = agent_ledgers.setdefault(int(agent_id), {})
-        else:
-            agent_ledger = None
-        if total > 0.0:
-            dominant = max(ledger, key=ledger.get)
-            dominant_counts[dominant] = dominant_counts.get(dominant, 0) + 1
-            for route, dose in ledger.items():
-                dose_shares[route] = dose_shares.get(route, 0.0) + dose / total
-                if agent_ledger is not None:
-                    agent_ledger[route] = agent_ledger.get(route, 0.0) + dose
-            continue
-        fallback = event.pathway or "unknown"
-        dominant_counts[fallback] = dominant_counts.get(fallback, 0) + 1
-        dose_shares[fallback] = dose_shares.get(fallback, 0.0) + 1.0
-        if agent_ledger is not None:
-            agent_ledger[fallback] = agent_ledger.get(fallback, 0.0) + 1.0
+        agent_ledger = _route_attribution_agent_ledger(agent_id, agent_ledgers)
+        _accumulate_route_attribution_event(
+            event, dominant_counts, dose_shares, agent_ledger,
+        )
 
 
 def update_ever_reported_ids(
@@ -1603,6 +1620,45 @@ def _validate_severity_observation_pair(
     _validate_observation_scenario_set(pathogen_id, observation)
 
 
+def _validate_age_band_multiplier_map(label: str, values: Any) -> None:
+    if values is None:
+        return
+    if not isinstance(values, dict) or not values:
+        raise ValueError(f"{label} must be a non-empty object")
+    for band, value in values.items():
+        number = float(value)
+        if not np.isfinite(number) or number < 0.0:
+            raise ValueError(
+                f"{label}.{band} must be a finite, non-negative multiplier",
+            )
+
+
+def _validate_age_band_probability_map(label: str, values: Any) -> None:
+    if values is None:
+        return
+    if not isinstance(values, dict) or not values:
+        raise ValueError(f"{label} must be a non-empty object")
+    for band, value in values.items():
+        number = float(value)
+        if not np.isfinite(number) or not 0.0 <= number <= 1.0:
+            raise ValueError(
+                f"{label}.{band} must be a finite probability",
+            )
+
+
+def _validate_profile_age_mode(
+    pathogen_id: str,
+    profile: dict[str, Any],
+    field: str,
+) -> None:
+    mode = profile.get(field)
+    if mode is not None and str(mode) not in ("by_age_band", "flat"):
+        raise ValueError(
+            f"{pathogen_id}.{field} must be 'by_age_band' "
+            f"or 'flat', not {mode!r}",
+        )
+
+
 def _validate_age_graded_terms(pathogen_id: str, profile: dict[str, Any]) -> None:
     """Check a profile's age-banded susceptibility and presentation terms.
 
@@ -1612,58 +1668,27 @@ def _validate_age_graded_terms(pathogen_id: str, profile: dict[str, Any]) -> Non
     susceptibility = (
         profile.get("dose_response", {}) or {}
     ).get("susceptibility_by_age_band")
-    if susceptibility is not None:
-        label = f"{pathogen_id}.dose_response.susceptibility_by_age_band"
-        if not isinstance(susceptibility, dict) or not susceptibility:
-            raise ValueError(f"{label} must be a non-empty object")
-        for band, value in susceptibility.items():
-            number = float(value)
-            if not np.isfinite(number) or number < 0.0:
-                raise ValueError(
-                    f"{label}.{band} must be a finite, non-negative multiplier",
-                )
-    fractions = profile.get("symptomatic_fraction_by_age_band")
-    if fractions is not None:
-        label = f"{pathogen_id}.symptomatic_fraction_by_age_band"
-        if not isinstance(fractions, dict) or not fractions:
-            raise ValueError(f"{label} must be a non-empty object")
-        for band, value in fractions.items():
-            number = float(value)
-            if not np.isfinite(number) or not 0.0 <= number <= 1.0:
-                raise ValueError(
-                    f"{label}.{band} must be a finite probability",
-                )
+    _validate_age_band_multiplier_map(
+        f"{pathogen_id}.dose_response.susceptibility_by_age_band",
+        susceptibility,
+    )
+    _validate_age_band_probability_map(
+        f"{pathogen_id}.symptomatic_fraction_by_age_band",
+        profile.get("symptomatic_fraction_by_age_band"),
+    )
     factors = (
         profile.get("illness_probability", {}) or {}
     ).get("age_factor_by_age_band")
-    if factors is not None:
-        label = f"{pathogen_id}.illness_probability.age_factor_by_age_band"
-        if not isinstance(factors, dict) or not factors:
-            raise ValueError(f"{label} must be a non-empty object")
-        for band, value in factors.items():
-            number = float(value)
-            if not np.isfinite(number) or number < 0.0:
-                raise ValueError(
-                    f"{label}.{band} must be a finite, non-negative multiplier",
-                )
-    mode = profile.get("presentation_age_mode")
-    if mode is not None and str(mode) not in ("by_age_band", "flat"):
-        raise ValueError(
-            f"{pathogen_id}.presentation_age_mode must be 'by_age_band' "
-            f"or 'flat', not {mode!r}",
-        )
-    mode = profile.get("severity_age_mode")
-    if mode is not None and str(mode) not in ("by_age_band", "flat"):
-        raise ValueError(
-            f"{pathogen_id}.severity_age_mode must be 'by_age_band' "
-            f"or 'flat', not {mode!r}",
-        )
-    mode = profile.get("susceptibility_age_mode")
-    if mode is not None and str(mode) not in ("by_age_band", "flat"):
-        raise ValueError(
-            f"{pathogen_id}.susceptibility_age_mode must be 'by_age_band' "
-            f"or 'flat', not {mode!r}",
-        )
+    _validate_age_band_multiplier_map(
+        f"{pathogen_id}.illness_probability.age_factor_by_age_band",
+        factors,
+    )
+    for field in (
+        "presentation_age_mode",
+        "severity_age_mode",
+        "susceptibility_age_mode",
+    ):
+        _validate_profile_age_mode(pathogen_id, profile, field)
 
 
 def _validate_symptom_severity_profiles(
