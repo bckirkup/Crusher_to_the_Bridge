@@ -116,6 +116,7 @@ PLATFORMS = [
     "lsm_354",
     "lyon_ap71",
     "apl_24",
+    "antietam_cvs36",
 ]
 
 ENTERPRISE_IDS = frozenset({

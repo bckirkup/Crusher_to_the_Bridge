@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Seventy-four ship platforms are included, each with spatial layout and HVAC
+Seventy-five ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -868,6 +868,7 @@ from `orchestrator_types.py`:
 | `lsm_354` | LSM-354 landing ship medium, LSM-1 class (maritime.org GA import, incomplete booklet, 40 zones, 66 crew + ~48 troops) |
 | `lyon_ap71` | USS Lyon AP-71 troop transport, C3-type (maritime.org GA import, sheets 3-4 missing, 59 zones, 407 crew + 2208 troops) |
 | `apl_24` | APL-24 barracks ship, APL-17 class, non-self-propelled (maritime.org GA import, incomplete booklet, 34 zones, 71 crew + 589 berthed) |
+| `antietam_cvs36` | USS Antietam CVS-36 Essex-class ASW carrier, 1955 angled-deck conversion (maritime.org GA import, 66 zones, 2998 crew incl. air group + marines) |
 
 ## License
 
