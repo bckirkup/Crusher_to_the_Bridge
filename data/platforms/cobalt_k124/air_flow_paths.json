@@ -1,0 +1,232 @@
+{
+  "platform": "cobalt_k124",
+  "description": "HVAC network synthesized for cobalt_k124",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Galley",
+        "Seamen_Mess",
+        "CO_Cabin",
+        "Canteen",
+        "Provision_Issue",
+        "Wardroom",
+        "Officer_Cabins",
+        "CPO_PO_Mess",
+        "Stokers_Mess",
+        "Compass_Bridge",
+        "Bridge_House"
+      ],
+      "ach": 5.0,
+      "description": "minimal mechanical ventilation, mostly natural",
+      "vent_mode": "nat_supply",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Room",
+        "Boiler_Room",
+        "Steering_Gear",
+        "Minesweeping_Store",
+        "Provision_Room",
+        "Paint_Lamp_Room",
+        "After_Peak",
+        "Engineers_Store",
+        "Fwd_Magazines",
+        "Asdic_Compartment",
+        "Chain_Locker_Store",
+        "Fore_Peak"
+      ],
+      "ach": 10.0,
+      "description": "engine/boiler room + stores ventilation",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_HD_HD_Officers",
+      "rooms": [
+        "HD_Officers"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Officers, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Crew",
+      "rooms": [
+        "HD_Crew"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_PO",
+      "rooms": [
+        "HD_PO"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_PO, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Officers",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Officers; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Crew",
+      "flow_rate_m3h": 713.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_PO",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_PO; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Compass_Bridge",
+      "to": "Bridge_House",
+      "type": "ladder"
+    },
+    {
+      "from": "Bridge_House",
+      "to": "Quarterdeck",
+      "type": "ladder"
+    },
+    {
+      "from": "Foc_Deck_Open",
+      "to": "Quarterdeck",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Quarterdeck",
+      "to": "Stern_Open",
+      "type": "ladder"
+    },
+    {
+      "from": "Stern_Open",
+      "to": "Galley",
+      "type": "door"
+    },
+    {
+      "from": "Officer_Cabins",
+      "to": "Engine_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Engine_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Seamen_Mess",
+      "to": "CPO_PO_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Officer_Cabins",
+      "type": "ladder"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Fwd_Magazines",
+      "type": "ladder"
+    },
+    {
+      "from": "Galley",
+      "to": "CO_Cabin",
+      "type": "passageway"
+    },
+    {
+      "from": "Canteen",
+      "to": "Provision_Issue",
+      "type": "passageway"
+    },
+    {
+      "from": "Canteen",
+      "to": "Seamen_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Provision_Issue",
+      "to": "Seamen_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Minesweeping_Store",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Provision_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Officer_Cabins",
+      "type": "passageway"
+    },
+    {
+      "from": "Minesweeping_Store",
+      "to": "Officer_Cabins",
+      "type": "passageway"
+    },
+    {
+      "from": "Provision_Room",
+      "to": "Officer_Cabins",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_PO_Mess",
+      "to": "Stokers_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Fore_Peak",
+      "type": "passageway"
+    },
+    {
+      "from": "After_Peak",
+      "to": "Engineers_Store",
+      "type": "passageway"
+    }
+  ]
+}

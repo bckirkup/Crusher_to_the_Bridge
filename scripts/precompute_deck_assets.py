@@ -96,6 +96,10 @@ PLATFORMS = [
     "esteem_mso438",
     "erie_pg50",
     "pt_564",
+    "cobalt_k124",
+    "river_class_frigate",
+    "fort_william_j311",
+    "winnipeg_j337",
 ]
 
 ENTERPRISE_IDS = frozenset({

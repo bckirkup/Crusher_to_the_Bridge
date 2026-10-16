@@ -1,0 +1,91 @@
+{
+  "platform_id": "river_class_frigate",
+  "ship_class_label": "River Class Frigate",
+  "footprint_tier": "representative",
+  "representative_of": "River-class frigate GA (NCH 7077/7078, 1941): twin screw, 301ft oa convoy escort — Hedgehog, DC racks/throwers, twin oerlikons. Zones read from maritime.org river.pdf (2 sheets).",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 37",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Signal_Deck",
+    "Bridge_House",
+    "Quarterdeck",
+    "Cabin_Block",
+    "Foc_Deck_Open",
+    "DC_Flat",
+    "Mess_Mid_P",
+    "Mess_Mid_S",
+    "Engine_Room",
+    "Boiler_Room",
+    "HD_Crew",
+    "Drying_Room",
+    "Stewards_Mess",
+    "Sick_Bay",
+    "HD_Fwd",
+    "Wardroom_Flat",
+    "HD_Officers",
+    "CPO_ERA_Mess",
+    "PO_Mess",
+    "Seamen_Mess",
+    "Lamp_Paint_Decon",
+    "Fore_Peak",
+    "Steering_Gear",
+    "Stores_Aft",
+    "Ammo_Lobby",
+    "Provision_Issue",
+    "Gyro_Diesel_Room",
+    "Canteen_Flat",
+    "Stokers_Mess",
+    "AS_Instrument",
+    "Bosun_Fwd",
+    "After_Peak_Ballast",
+    "Magazine_Aft",
+    "Fwd_Magazine",
+    "Cold_Stores",
+    "Asdic_Dome",
+    "Chain_Locker"
+  ],
+  "decks": [
+    "bridge_deck",
+    "forecastle_deck",
+    "hold",
+    "lower_deck",
+    "signal_deck",
+    "upper_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 93.8,
+    "ymin": -2.0,
+    "ymax": 13.13
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "hold": "deck_hold.png",
+      "lower_deck": "deck_lower_deck.png",
+      "upper_deck": "deck_upper_deck.png",
+      "forecastle_deck": "deck_forecastle_deck.png",
+      "bridge_deck": "deck_bridge_deck.png",
+      "signal_deck": "deck_signal_deck.png"
+    }
+  }
+}

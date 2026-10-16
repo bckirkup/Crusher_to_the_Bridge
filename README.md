@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Fifty-four ship platforms are included, each with spatial layout and HVAC
+Fifty-eight ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -848,6 +848,10 @@ from `orchestrator_types.py`:
 | `esteem_mso438` | USS Esteem MSO-438 Aggressive-class ocean minesweeper (maritime.org GA import, 39 zones, 74 crew) |
 | `erie_pg50` | USS Erie PG-50 Erie-class patrol gunboat (maritime.org GA import, 54 zones, 248 crew incl. flag staff + marine guard) |
 | `pt_564` | PT-564 Higgins 70'8" motor torpedo boat (maritime.org GA import, 13 zones, 14 crew — marginal smallest hull) |
+| `cobalt_k124` | HMCS Cobalt K124 Flower-class corvette (maritime.org GA import, 29 zones, 90 crew) |
+| `river_class_frigate` | RN River-class frigate (maritime.org GA import, 37 zones, 140 crew) |
+| `fort_william_j311` | HMCS Fort William J311 Bangor-class minesweeper (maritime.org GA import, 25 zones, 70 crew) |
+| `winnipeg_j337` | HMCS Winnipeg J337 Algerine-class minesweeper (maritime.org GA import, 31 zones, 122 crew) |
 
 ## License
 
