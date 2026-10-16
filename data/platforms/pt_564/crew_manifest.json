@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:17:49.932296+00:00",
+  "platform": "pt_564",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 14
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 2,
+      "berth_zone": "Ward_Room",
+      "duty_zone": "Pilothouse",
+      "notes": "boat captain + executive officer"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 4,
+      "berth_zone": "Crews_Quarters",
+      "duty_zone": "Engine_Room",
+      "notes": "motor machinist's mates"
+    },
+    {
+      "class_id": "deck_force",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Crews_Quarters",
+      "duty_zone": "Torpedo_Deck",
+      "notes": "gunners, torpedomen, quartermaster, cook, radioman"
+    }
+  ],
+  "source": "era-typical PT crew (2 officers + 12 enlisted); booklet has no accommodations table — flagged",
+  "consistency": {
+    "declared_total": 14,
+    "manifest_total": 14,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

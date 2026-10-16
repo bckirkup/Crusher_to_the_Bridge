@@ -1,0 +1,371 @@
+{
+  "platform": "esteem_mso438",
+  "era": "usn_coldwar",
+  "era_label": "USN cold-war / early mechanical AC",
+  "era_note": "Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery forced draft.",
+  "vent_markers": [
+    {
+      "id": "STACK",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "o1_level",
+      "serves_zone": "Uptake_Trunk",
+      "display": [
+        21.86,
+        3.14
+      ],
+      "evidence": "sheet_read",
+      "notes": "stack over boiler & uptake trunk"
+    },
+    {
+      "id": "FANRM_01",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "o1_level",
+      "serves_zone": "Radio_Room",
+      "display": [
+        35.86,
+        1.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "FAN RM 01-37-?-Q label on 01 level"
+    },
+    {
+      "id": "FANRM_MAIN",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Deck_House_Main",
+      "display": [
+        18.34,
+        1.13
+      ],
+      "evidence": "sheet_read",
+      "notes": "FAN in deck house on main deck"
+    },
+    {
+      "id": "VENT_MESS",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Wardroom_Mess",
+      "display": [
+        30.94,
+        1.97
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT label beside wardroom mess"
+    },
+    {
+      "id": "MUSH_FWD",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "o1_level",
+      "serves_zone": "Stores_Fwd",
+      "display": [
+        43.58,
+        2.85
+      ],
+      "evidence": "era_plausible",
+      "notes": "mushroom vents over fwd storerooms"
+    },
+    {
+      "id": "MUSH_ENG",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "platform_deck",
+      "serves_zone": "Fwd_Machinery_Room",
+      "display": [
+        23.27,
+        3.82
+      ],
+      "evidence": "era_plausible",
+      "notes": "machinery space supply cowls (era-typical)"
+    }
+  ],
+  "zone_modes": {
+    "Crews_Shelter": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Chart_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Pilot_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Reel_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Captains_Cabin": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Stores_01": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_01": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sweep_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Deck_House_Main": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Reel_Well": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Uptake_Trunk": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Pharmacy": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Officers_Country": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Officers": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Wardroom_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Laundry": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crews_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Crew": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Stores_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Windlass_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Focsle_Store": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Quarters": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_CPO": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Steering_Flat": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Workshop": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "After_Machinery_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Machinery_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Crew_Berthing_2": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Stores_Fwd_Platform": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hold_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chem_Canvas_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sonar_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "FW_Chain_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "DIESEL OIL TANK 3-68-0-F",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Tanks_Aft",
+      "display": [
+        11.36,
+        4.94
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "D.O. TANK COMPT 3-67",
+      "kind": "unknown",
+      "nearest_zone": "Chem_Canvas_Stores",
+      "display": [
+        13.69,
+        7.41
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "DIESEL OIL TANK 3-27-2-F",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Tanks_Fwd",
+      "display": [
+        38.16,
+        4.12
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "DIESEL OIL TANK 3-27-1-F",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Tanks_Fwd",
+      "display": [
+        38.74,
+        6.58
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "D.O. TANK COMPT 3-26-0-F",
+      "kind": "unknown",
+      "nearest_zone": "Fuel_Tanks_Fwd",
+      "display": [
+        39.9,
+        8.72
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "F.W. TANK 3-13-2-W",
+      "kind": "freshwater",
+      "nearest_zone": "Sonar_Room",
+      "display": [
+        42.23,
+        3.29
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "F.W. TANK 3-18-1-W",
+      "kind": "freshwater",
+      "nearest_zone": "FW_Chain_Fwd",
+      "display": [
+        45.15,
+        6.58
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "L.O. STORAGE TANK",
+      "kind": "unknown",
+      "nearest_zone": "After_Machinery_Room",
+      "display": [
+        21.5,
+        -0.46
+      ],
+      "deck": "platform_deck",
+      "notes": ""
+    },
+    {
+      "label": "D.O. SERVICE TANK",
+      "kind": "unknown",
+      "nearest_zone": "Fwd_Machinery_Room",
+      "display": [
+        29.16,
+        10.24
+      ],
+      "deck": "platform_deck",
+      "notes": ""
+    },
+    {
+      "label": "F.O. SERVICE TANK",
+      "kind": "fuel",
+      "nearest_zone": "Steering_Flat",
+      "display": [
+        5.6,
+        9.94
+      ],
+      "deck": "platform_deck",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Pharmacy (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Pharmacy",
+    "HD_Officers (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Officers",
+    "Wardroom_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom_Mess",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "Crews_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crews_Mess",
+    "HD_Crew (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew",
+    "HD_CPO (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_CPO"
+  ]
+}
