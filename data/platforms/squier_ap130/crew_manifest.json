@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:55:05.944172+00:00",
+  "platform": "squier_ap130",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 3262,
+    "crew": 482
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "Officers_Country_Sup",
+      "duty_zone": "Fan_Hatch_Block_Sup",
+      "notes": "CO/XO/deck/engineer officers; bridge house + superstructure staterooms"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 24,
+      "berth_zone": "Crew_Berthing_Up",
+      "duty_zone": "NCO_Mess_Up",
+      "notes": "CPO berthing on upper deck"
+    },
+    {
+      "class_id": "engineers",
+      "role_group": "crew",
+      "count": 150,
+      "berth_zone": "Crew_Berthing_Up",
+      "duty_zone": "Engines_Boiler_Casing_2D",
+      "notes": "machinists, BTs, electricians, aux watch"
+    },
+    {
+      "class_id": "deck_crew",
+      "role_group": "crew",
+      "count": 160,
+      "berth_zone": "Crew_Berthing_2D",
+      "duty_zone": "Stern_Deck_Up",
+      "notes": "seamen, gun crews, boat crews, cargo handlers; second-deck berthing"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 68,
+      "berth_zone": "Crew_Berthing_Fwd_Up",
+      "duty_zone": "Galley_Bakery_3D",
+      "notes": "cooks, messmen, stewards"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "Med_Attend_Berthing",
+      "duty_zone": "Medical_Complex_2D",
+      "notes": "medical officers + attendants (48-berth attendants block on upper deck)"
+    },
+    {
+      "class_id": "troop_soldiers",
+      "role_group": "passenger",
+      "count": 2922,
+      "berth_zone": "Troop_Berthing_1P_B",
+      "duty_zone": "Troop_Mess_2D",
+      "notes": "embarked troops; berths 119 upper + 518 second + 1139 third + 1146 first platform = 2922"
+    },
+    {
+      "class_id": "troop_nco",
+      "role_group": "passenger",
+      "count": 117,
+      "berth_zone": "NCO_Berthing_Up",
+      "duty_zone": "NCO_Mess_Up",
+      "notes": "troop NCOs on upper + second decks"
+    },
+    {
+      "class_id": "troop_officers",
+      "role_group": "passenger",
+      "count": 223,
+      "berth_zone": "Troop_Off_Qtrs_Top",
+      "duty_zone": "Ship_Troop_Off_Mess",
+      "notes": "troop officers in upper-deck stateroom rows"
+    }
+  ],
+  "source": "AP-130 sheet 1 SHIP'S BERTHING ACCOMMODATIONS table (sheet-read): ship's complement 40 officers + 24 CPO + 418 crew = 482; army personnel 223 officers + 117 NCO + 2,922 troops = 3,262; TOTAL PERSONS ABOARD SHIP 3,744 (4,017 berths less 273 medical/emergency-cabin berths).",
+  "consistency": {
+    "declared_total": 3744,
+    "manifest_total": 3744,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
