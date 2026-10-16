@@ -1,0 +1,363 @@
+{
+  "platform": "jupiter_ac3",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Funnel_Port",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "first_platform",
+      "serves_zone": "Fire_Room_Port",
+      "display": [
+        74.75,
+        5.28
+      ],
+      "evidence": "sheet_read",
+      "notes": "funnel uptake over port fire room"
+    },
+    {
+      "id": "Funnel_Stbd",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "first_platform",
+      "serves_zone": "Fire_Room_Stbd",
+      "display": [
+        74.75,
+        14.52
+      ],
+      "evidence": "sheet_read",
+      "notes": "funnel uptake over stbd fire room"
+    },
+    {
+      "id": "Vent_Trunk_Hold",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "hold",
+      "serves_zone": "Coal_Bunkers_Hold",
+      "display": [
+        93.18,
+        4.95
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT label + manhole trunks along hold bunker band"
+    },
+    {
+      "id": "Vent_Deckhouse",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "deckhouse_deck",
+      "serves_zone": "Officers_Galley",
+      "display": [
+        154.72,
+        6.61
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT labels beside stack in deckhouse plan"
+    },
+    {
+      "id": "Cowl_Poop",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "poop_deck",
+      "serves_zone": "Crews_Berthing_Main",
+      "display": [
+        76.92,
+        3.96
+      ],
+      "evidence": "sheet_read",
+      "notes": "cowl/mushroom vents dotted along poop deck plan"
+    },
+    {
+      "id": "Coaling_Hatch_Marker",
+      "kind": "air_port",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "poop_deck",
+      "serves_zone": "Cargo_Holds",
+      "display": [
+        123.54,
+        9.24
+      ],
+      "evidence": "sheet_read",
+      "notes": "coaling hatches open to holds"
+    }
+  ],
+  "zone_modes": {
+    "Officers_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Captain_Suite": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wardroom": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Warrant_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machinist_Cabins": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Crews_Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Wireless_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Eng_Casing_DH": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Wardroom": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "HD_Warrant_Crews": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Passage_Deckhouse": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Poop_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Lamp_Paint_Oil": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "CPO_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Hospital": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crews_Berthing_Main": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Work_Shop": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Eng_Casing_Main": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Seamens": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "HD_Firemens": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Boiler_Casing": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Cargo_Hatch_Apron": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Spare_Berthing_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crews_Berthing_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Spare_Berthing_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Blower_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Plat_Stores_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Spare_Berthing_Plat": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crews_Berthing_Plat": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fire_Room_Port": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Fire_Room_Stbd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Coal_Bunkers_Plat": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Topside_Tanks": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Reefer_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "FW_Tanks_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Oil_Trunks_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Motor_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Generator_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Donkey_Boiler_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Coal_Bunkers_Hold": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Cargo_Holds": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Oil_Cargo_Tanks": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Forepeak_Tank": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.W.",
+      "kind": "freshwater",
+      "nearest_zone": "FW_Tanks_Aft",
+      "display": [
+        9.93,
+        15.09
+      ],
+      "deck": "second_platform_aft",
+      "notes": "fresh water tanks x2 on 2nd platform aft"
+    },
+    {
+      "label": "AFT TRIMMING TANK",
+      "kind": "unknown",
+      "nearest_zone": "Shaft_Alley",
+      "display": [
+        10.45,
+        6.81
+      ],
+      "deck": "hold",
+      "notes": "aft trimming tanks #1/#2"
+    },
+    {
+      "label": "FORD TRIMMING TANK",
+      "kind": "unknown",
+      "nearest_zone": "Forepeak_Tank",
+      "display": [
+        146.31,
+        6.81
+      ],
+      "deck": "hold",
+      "notes": "forepeak trimming tank"
+    },
+    {
+      "label": "OIL CARGO",
+      "kind": "fuel",
+      "nearest_zone": "Oil_Cargo_Tanks",
+      "display": [
+        120.18,
+        8.66
+      ],
+      "deck": "hold",
+      "notes": "oil cargo tanks #1-8"
+    },
+    {
+      "label": "COAL",
+      "kind": "unknown",
+      "nearest_zone": "Coal_Bunkers_Plat",
+      "display": [
+        86.45,
+        9.9
+      ],
+      "deck": "first_platform",
+      "notes": "coal bunkers around machinery"
+    }
+  ],
+  "plumbing_drains": [
+    "Wardroom (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom",
+    "Warrant_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Warrant_Mess",
+    "Officers_Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Officers_Galley",
+    "Crews_Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crews_Galley",
+    "HD_Wardroom (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Wardroom",
+    "HD_Warrant_Crews (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Warrant_Crews",
+    "CPO_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: CPO_Mess",
+    "Hospital (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Hospital",
+    "HD_Seamens (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Seamens",
+    "HD_Firemens (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Firemens"
+  ]
+}

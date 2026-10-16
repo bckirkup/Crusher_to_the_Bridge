@@ -207,6 +207,9 @@ data/
 │   ├── missouri_bb63/              (maritime.org GA import)
 │   ├── wisconsin_bb64/             (maritime.org GA import)
 │   ├── new_jersey_bb62/            (maritime.org GA import)
+│   ├── olympia_c6/                 (maritime.org GA import)
+│   ├── montana_acr13/              (maritime.org GA import)
+│   ├── jupiter_ac3/                (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -566,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Thirty-two ship platforms are included, each with spatial layout and HVAC
+Thirty-five ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -614,6 +617,9 @@ airflow definitions:
 | `missouri_bb63` | USS Missouri BB-63 Iowa-class battleship, 1950 booklet (maritime.org GA import, 103 zones, 1561 crew) |
 | `wisconsin_bb64` | USS Wisconsin BB-64 Iowa-class battleship, 1956 booklet (maritime.org GA import, 103 zones, ~2560 crew) |
 | `new_jersey_bb62` | USS New Jersey BB-62 Iowa-class battleship, 1984 reactivation booklet (maritime.org GA import, 103 zones, ~1781 crew) |
+| `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
+| `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
+| `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`

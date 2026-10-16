@@ -1,0 +1,930 @@
+{
+  "platform": "olympia_c6",
+  "description": "HVAC network synthesized for olympia_c6",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "VENT_Officers",
+      "rooms": [
+        "MD_Admirals_Cabin",
+        "MD_Admirals_State_Room",
+        "MD_Captains_Cabin",
+        "MD_Officers_Cabins_Port",
+        "MD_Officers_Cabins_Stb",
+        "MD_Signal_Yeoman",
+        "BD_State_Rooms_Port",
+        "BD_State_Rooms_Stb",
+        "BD_Ward_Room",
+        "BD_Dining_Passage",
+        "BD_Cabins_Stb",
+        "BD_JnrOfficers_Mess",
+        "BD_JnrOfficers_Rooms"
+      ],
+      "ach": 6.0,
+      "description": "natural supply to officers' country cabins + wardroom, era plausible",
+      "vent_mode": "nat_supply",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Berthing",
+      "rooms": [
+        "BD_Crews_Berthing_Port",
+        "BD_Crews_Berthing_Stb",
+        "BD_Sick_Bay",
+        "MD_Galley",
+        "MD_Issuing_Room"
+      ],
+      "ach": 6.0,
+      "description": "natural supply to crews berthing + mess spaces, era plausible",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "PF_Engine_Port",
+        "PF_Engine_Stb",
+        "PF_Boiler_Port",
+        "PF_Boiler_Stb",
+        "PF_Dynamo_Room",
+        "HD_Engine_Port",
+        "HD_Engine_Stb",
+        "HD_Boiler_Port",
+        "HD_Boiler_Stb"
+      ],
+      "ach": 6.0,
+      "description": "forced/natural supply to engine + boiler spaces via cowls and skylights, era plausible",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "VENT_Uptakes",
+      "rooms": [
+        "PF_Boiler_Port",
+        "PF_Boiler_Stb",
+        "HD_Boiler_Port",
+        "HD_Boiler_Stb"
+      ],
+      "ach": 6.0,
+      "description": "funnel exhaust from boiler rooms, sheet-read funnels",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "VENT_Magazines",
+      "rooms": [
+        "HD_8in_Shell_Aft",
+        "HD_8in_Magazine_Aft",
+        "HD_5in_Ammo_Aft",
+        "HD_6pdr_Ammo_Aft",
+        "HD_5in_Ammo_Fwd",
+        "HD_8in_Magazine_Fwd",
+        "HD_6pdr_Ammo_Fwd",
+        "HD_5in_Ammo_Mid"
+      ],
+      "ach": 6.0,
+      "description": "exhaust vent trunks from magazine + shell rooms, era plausible",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Stores",
+      "rooms": [
+        "PD_Officers_Lockers",
+        "PD_JOWO_Lockers",
+        "PD_Dry_Provisions",
+        "PD_Aft_Stores",
+        "PD_Paymasters_Stores",
+        "PD_Chain_Lockers",
+        "PD_Ships_Stores",
+        "PD_Bread_Room",
+        "PF_Aft_Stores_Port",
+        "PF_Aft_Stores_Stb",
+        "PF_Fwd_Stores",
+        "PF_General_Stores",
+        "HD_Marine_Stores",
+        "HD_Aft_Stores",
+        "HD_Electric_Stores"
+      ],
+      "ach": 6.0,
+      "description": "natural ventilation to stores/provisions, era plausible",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Torpedo",
+      "rooms": [
+        "PD_Torpedo_Room_Aft",
+        "PD_Torpedo_Room_Fwd",
+        "PD_Broadside_Torpedo_Aft",
+        "PD_Broadside_Torpedo_Fwd"
+      ],
+      "ach": 6.0,
+      "description": "exhaust trunks from torpedo rooms, era plausible",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "era_plausible",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_HD_MD_Wash_Room",
+      "rooms": [
+        "MD_Wash_Room"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (MD_Wash_Room, 10 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_BD_Officers_WC",
+      "rooms": [
+        "BD_Officers_WC"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (BD_Officers_WC, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_BD_Crews_WC",
+      "rooms": [
+        "BD_Crews_WC"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (BD_Crews_WC, 10 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_BD_Crews_Lavatory",
+      "rooms": [
+        "BD_Crews_Lavatory"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (BD_Crews_Lavatory, 12 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "VENT_Officers",
+      "to": "VENT_Berthing",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Berthing",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Machinery",
+      "to": "VENT_Uptakes",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Uptakes",
+      "to": "VENT_Magazines",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_4",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Magazines",
+      "to": "VENT_Stores",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_5",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Stores",
+      "to": "VENT_Torpedo",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_6",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Officers",
+      "to": "AHU_HD_MD_Wash_Room",
+      "flow_rate_m3h": 1189.0,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into MD_Wash_Room; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "VENT_Officers",
+      "to": "AHU_HD_BD_Officers_WC",
+      "flow_rate_m3h": 713.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into BD_Officers_WC; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "VENT_Officers",
+      "to": "AHU_HD_BD_Crews_WC",
+      "flow_rate_m3h": 1189.0,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into BD_Crews_WC; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "VENT_Officers",
+      "to": "AHU_HD_BD_Crews_Lavatory",
+      "flow_rate_m3h": 1426.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into BD_Crews_Lavatory; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "SD_Forecastle_Open",
+      "to": "MD_Forecastle_Open",
+      "type": "ladder"
+    },
+    {
+      "from": "SD_Stern_Open",
+      "to": "MD_Stern_Fantail",
+      "type": "ladder"
+    },
+    {
+      "from": "MD_Officers_Cabins_Port",
+      "to": "BD_State_Rooms_Port",
+      "type": "ladder"
+    },
+    {
+      "from": "MD_Officers_Cabins_Stb",
+      "to": "BD_Cabins_Stb",
+      "type": "ladder"
+    },
+    {
+      "from": "MD_Forecastle_Open",
+      "to": "BD_Crews_Berthing_Port",
+      "type": "ladder"
+    },
+    {
+      "from": "MD_Issuing_Room",
+      "to": "BD_Crews_Berthing_Stb",
+      "type": "ladder"
+    },
+    {
+      "from": "BD_Dining_Passage",
+      "to": "PD_Passing_Room_Aft",
+      "type": "ladder"
+    },
+    {
+      "from": "BD_Crews_Berthing_Port",
+      "to": "PD_Broadside_Torpedo_Fwd",
+      "type": "ladder"
+    },
+    {
+      "from": "PD_Passing_Room_Aft",
+      "to": "PF_Passing_Room_Aft",
+      "type": "ladder"
+    },
+    {
+      "from": "PD_Engine_Hatch_Port",
+      "to": "PF_Engine_Port",
+      "type": "ladder"
+    },
+    {
+      "from": "PD_Engine_Hatch_Stb",
+      "to": "PF_Engine_Stb",
+      "type": "ladder"
+    },
+    {
+      "from": "PD_Broadside_Torpedo_Aft",
+      "to": "PD_Torpedo_Room_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Broadside_Torpedo_Fwd",
+      "to": "PD_Torpedo_Room_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Engine_Port",
+      "to": "HD_Engine_Port",
+      "type": "ladder"
+    },
+    {
+      "from": "PF_Engine_Stb",
+      "to": "HD_Engine_Stb",
+      "type": "ladder"
+    },
+    {
+      "from": "PF_Boiler_Port",
+      "to": "HD_Boiler_Port",
+      "type": "hatch"
+    },
+    {
+      "from": "PF_Boiler_Stb",
+      "to": "HD_Boiler_Stb",
+      "type": "hatch"
+    },
+    {
+      "from": "PF_General_Stores",
+      "to": "HD_Hold_Fwd",
+      "type": "hatch"
+    },
+    {
+      "from": "MD_Engine_Hatch",
+      "to": "BD_Engine_Hatch",
+      "type": "hatch"
+    },
+    {
+      "from": "BD_Engine_Hatch",
+      "to": "PD_Engine_Hatch_Port",
+      "type": "hatch"
+    },
+    {
+      "from": "SD_Stern_Open",
+      "to": "SD_Aft_Barbette",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Boats_Mid_Port",
+      "to": "SD_Engine_Hatch",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Boats_Mid_Port",
+      "to": "SD_Pilot_House",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Boats_Mid_Stb",
+      "to": "SD_Engine_Hatch",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Boats_Mid_Stb",
+      "to": "SD_Skylight",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Engine_Hatch",
+      "to": "SD_Skylight",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Engine_Hatch",
+      "to": "SD_Pilot_House",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Engine_Hatch",
+      "to": "SD_Boats_Fwd_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Engine_Hatch",
+      "to": "SD_Boats_Fwd_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Skylight",
+      "to": "SD_Boats_Fwd_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Boats_Fwd_Port",
+      "to": "SD_Fwd_Barbette",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Boats_Fwd_Stb",
+      "to": "SD_Fwd_Barbette",
+      "type": "passageway"
+    },
+    {
+      "from": "SD_Fwd_Barbette",
+      "to": "SD_Forecastle_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Admirals_Cabin",
+      "to": "MD_Admirals_State_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Admirals_Cabin",
+      "to": "MD_Officers_Cabins_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Admirals_Cabin",
+      "to": "MD_Signal_Yeoman",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Admirals_Cabin",
+      "to": "MD_Casemate_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Admirals_State_Room",
+      "to": "MD_Captains_Cabin",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Captains_Cabin",
+      "to": "MD_Officers_Cabins_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Captains_Cabin",
+      "to": "MD_Signal_Yeoman",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Officers_Cabins_Port",
+      "to": "MD_Engine_Hatch",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Officers_Cabins_Port",
+      "to": "MD_Casemate_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Officers_Cabins_Stb",
+      "to": "MD_Engine_Hatch",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Officers_Cabins_Stb",
+      "to": "MD_Casemate_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Signal_Yeoman",
+      "to": "MD_Engine_Hatch",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Engine_Hatch",
+      "to": "MD_Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Galley",
+      "to": "MD_Issuing_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Issuing_Room",
+      "to": "MD_Fwd_Barbette",
+      "type": "passageway"
+    },
+    {
+      "from": "MD_Fwd_Barbette",
+      "to": "MD_Forecastle_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_State_Rooms_Port",
+      "to": "BD_Ward_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_State_Rooms_Port",
+      "to": "BD_Dining_Passage",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_State_Rooms_Stb",
+      "to": "BD_Ward_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_Ward_Room",
+      "to": "BD_Dining_Passage",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_Dining_Passage",
+      "to": "BD_JnrOfficers_Rooms",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_Cabins_Stb",
+      "to": "BD_JnrOfficers_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_JnrOfficers_Mess",
+      "to": "BD_JnrOfficers_Rooms",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_JnrOfficers_Mess",
+      "to": "BD_Engine_Hatch",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_Engine_Hatch",
+      "to": "BD_Crews_Berthing_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_Engine_Hatch",
+      "to": "BD_Crews_Berthing_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_Crews_Berthing_Port",
+      "to": "BD_Crews_Berthing_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_Crews_Berthing_Port",
+      "to": "BD_Torpedo_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "BD_Crews_Berthing_Stb",
+      "to": "BD_Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Torpedo_Room_Aft",
+      "to": "PD_Officers_Lockers",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Torpedo_Room_Aft",
+      "to": "PD_JOWO_Lockers",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Officers_Lockers",
+      "to": "PD_Dry_Provisions",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_JOWO_Lockers",
+      "to": "PD_Aft_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Dry_Provisions",
+      "to": "PD_Paymasters_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Paymasters_Stores",
+      "to": "PD_Broadside_Torpedo_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Broadside_Torpedo_Aft",
+      "to": "PD_Engine_Hatch_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Broadside_Torpedo_Aft",
+      "to": "PD_Engine_Hatch_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Coal_Port_Aft",
+      "to": "PD_Engine_Hatch_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Coal_Port_Aft",
+      "to": "PD_Passing_Room_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Coal_Port_Aft",
+      "to": "PD_Distiller_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Coal_Port_Aft",
+      "to": "PD_Coal_Port_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Coal_Stb_Aft",
+      "to": "PD_Engine_Hatch_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Coal_Stb_Aft",
+      "to": "PD_Distiller_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Coal_Stb_Aft",
+      "to": "PD_Coal_Stb_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Engine_Hatch_Port",
+      "to": "PD_Passing_Room_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Passing_Room_Aft",
+      "to": "PD_Distiller_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Distiller_Port",
+      "to": "PD_Coal_Port_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Distiller_Stb",
+      "to": "PD_Coal_Stb_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Coal_Port_Fwd",
+      "to": "PD_Ships_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Broadside_Torpedo_Fwd",
+      "to": "PD_Chain_Lockers",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Broadside_Torpedo_Fwd",
+      "to": "PD_Ships_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Chain_Lockers",
+      "to": "PD_Ships_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Chain_Lockers",
+      "to": "PD_Bread_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Ships_Stores",
+      "to": "PD_Bread_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "PD_Bread_Room",
+      "to": "PD_Torpedo_Room_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Steering_Gear",
+      "to": "PF_Aft_Stores_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Steering_Gear",
+      "to": "PF_Aft_Stores_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Aft_Stores_Port",
+      "to": "PF_Passing_Room_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Aft_Stores_Stb",
+      "to": "PF_Passing_Room_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Engine_Port",
+      "to": "PF_Coal_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Engine_Port",
+      "to": "PF_Passing_Room_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Engine_Stb",
+      "to": "PF_Coal_Mid_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Engine_Stb",
+      "to": "PF_Passing_Room_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Coal_Mid",
+      "to": "PF_Boiler_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Coal_Mid_Stb",
+      "to": "PF_Boiler_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Passing_Room_Mid",
+      "to": "PF_Boiler_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Passing_Room_Mid",
+      "to": "PF_Boiler_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Boiler_Port",
+      "to": "PF_Dynamo_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Boiler_Port",
+      "to": "PF_Fwd_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Boiler_Stb",
+      "to": "PF_Fwd_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Dynamo_Room",
+      "to": "PF_Hold_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Fwd_Stores",
+      "to": "PF_Hold_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Hold_Fwd",
+      "to": "PF_General_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_General_Stores",
+      "to": "PF_Paint_Oil",
+      "type": "passageway"
+    },
+    {
+      "from": "PF_Paint_Oil",
+      "to": "PF_Trimming_Tank_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Trimming_Tank_Aft",
+      "to": "HD_Marine_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Marine_Stores",
+      "to": "HD_Aft_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Aft_Stores",
+      "to": "HD_8in_Shell_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Aft_Stores",
+      "to": "HD_8in_Magazine_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_8in_Shell_Aft",
+      "to": "HD_5in_Ammo_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_8in_Magazine_Aft",
+      "to": "HD_6pdr_Ammo_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_5in_Ammo_Aft",
+      "to": "HD_Engine_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_6pdr_Ammo_Aft",
+      "to": "HD_Engine_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_6pdr_Ammo_Aft",
+      "to": "HD_Engine_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Engine_Port",
+      "to": "HD_Engineers_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Engine_Port",
+      "to": "HD_5in_Ammo_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Engine_Stb",
+      "to": "HD_5in_Ammo_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Engineers_Stores",
+      "to": "HD_Coal_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_5in_Ammo_Mid",
+      "to": "HD_Boiler_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_5in_Ammo_Mid",
+      "to": "HD_Boiler_Stb",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Boiler_Port",
+      "to": "HD_Electric_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Boiler_Port",
+      "to": "HD_5in_Ammo_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Boiler_Stb",
+      "to": "HD_5in_Ammo_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Boiler_Stb",
+      "to": "HD_6pdr_Ammo_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Coal_Port",
+      "to": "HD_Electric_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Electric_Stores",
+      "to": "HD_5in_Ammo_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Electric_Stores",
+      "to": "HD_8in_Magazine_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Electric_Stores",
+      "to": "HD_Hold_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_5in_Ammo_Fwd",
+      "to": "HD_8in_Magazine_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_8in_Magazine_Fwd",
+      "to": "HD_Hold_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Hold_Fwd",
+      "to": "HD_Trimming_Tank_Fwd",
+      "type": "passageway"
+    }
+  ]
+}
