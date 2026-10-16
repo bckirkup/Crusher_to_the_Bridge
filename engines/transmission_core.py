@@ -3240,9 +3240,10 @@ class TransmissionCore:
     def _parse_service_contact_factor(
         raw: Any, field: str = "contact_factor",
     ) -> tuple:
-        """Resolve ``service.contact_factor`` to (mode, ...):
-        ``("fixed", value)`` for a scalar or ``("uniform", lo, hi)`` for a
-        2-sequence. Fails at spec-lands on a malformed value."""
+        """Resolve ``service.contact_factor`` to a 3-tuple:
+        ``("fixed", value, value)`` for a scalar or ``("uniform", lo, hi)``
+        for a 2-sequence. Same arity keeps callers index-stable. Fails at
+        spec-lands on a malformed value."""
         if isinstance(raw, (int, float)) and not isinstance(raw, bool):
             value = float(raw)
             if not 0.0 <= value <= 1.0:
@@ -3250,6 +3251,8 @@ class TransmissionCore:
                     f"caregiver.service.{field} scalar out of "
                     f"[0,1]: {raw!r}"
                 )
+            # Same length as the uniform arm (Sonar S8495); consumers use
+            # spec[1] for fixed draws.
             return ("fixed", value, value)
         if isinstance(raw, (tuple, list)) and len(raw) == 2:
             lo, hi = float(raw[0]), float(raw[1])
