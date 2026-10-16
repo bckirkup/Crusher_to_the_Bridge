@@ -123,8 +123,9 @@ def test_main_smoke_pce874_manifest_arm(tmp_path):
     occ = json.loads(out.read_text())["rows"][0]["occupancy"]
     pins = occ["pin_resolution"]
     duty_pins = {p["pin"] for p in pins["unresolvable_duty_pins"]}
-    # Engine_Rm is Engineering-typed: outside the Free+Dining duty domain
-    assert "Engine_Rm" in duty_pins
+    # Engine_Rm is Engineering-typed: inside the duty domain since the
+    # _resolve_duty_zone widening — pins now land on machinery spaces
+    assert "Engine_Rm" not in duty_pins
     assert occ["manifest"]["home_on_manifest_berth_frac"] == pytest.approx(1.0)
     assert occ["manifest"]["visited_zones"] > 0
     assert "Drainage fingerprint" in md.read_text()

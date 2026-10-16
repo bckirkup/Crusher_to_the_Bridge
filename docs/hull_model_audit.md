@@ -143,9 +143,17 @@ Headline findings (measured, this run):
    `Work_Centers` hold **no agent in any epoch** on every imported hull.
    Consequence for dose modeling: machinery-space airborne/fomite dose is
    computed for rooms nobody is in, and crew work-hour co-location is
-   realized as corridor leisure traffic instead of watch-standing. Two
-   fix directions (engineering call): widen the duty search domain past
-   Free+Dining types, or have the importer type duty stations as Free.
+   realized as corridor leisure traffic instead of watch-standing.
+   **Resolved** — `_resolve_duty_zone` now matches a duty pin against
+   every zone (duty stations live wherever the hull puts them) and keeps
+   the Free+Dining fallback for unmatched pins, so the RNG stream shape
+   is unchanged. Verified on davison_dd618 (12 epochs, seed 42, manifest
+   arm): `Engine_Rm_Fwd`, `Mid_Services`, `CIC_Block`, `Nav_Bridge_Sonar`
+   now hold crew — CIC_Block peaks 38 agents vs cap 12, a real
+   watch-standing density the gap used to hide. Where a pin substring now
+   matches additional zones on authored hulls (e.g. cruise `Engine`),
+   the realized work draw shifts — expected new-mechanism delta, not
+   drift.
 2. **Berth pins resolve but collapse to few blocks — measured
    overcrowding.** `manifest_berth_hit` is 1.0 under the manifest arm
    (berth pin → Room-type zone works), but `home_distinct` collapses to

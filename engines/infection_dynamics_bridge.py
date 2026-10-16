@@ -2401,6 +2401,21 @@ class KorkinShipEngine:
             return str(self.rng.choice(fallback_zones))
         return "unknown"
 
+    def _resolve_duty_zone(self, preference: str) -> str:
+        """Resolve a duty pin against every zone, not just leisure types.
+
+        Duty stations live wherever the hull puts them — Engineering,
+        Medical, and ops spaces as well as Free and Dining — so the pin
+        matches against the full zone list. An unmatched pin falls back to
+        the leisure draw, keeping the stream shape identical to the old
+        Free+Dining-only resolution.
+        """
+        lower = preference.lower()
+        matches = [z for z in self._all_zone_names if lower in z.lower()]
+        if matches:
+            return str(self.rng.choice(matches))
+        return self._resolve_zone(preference, self._free_zones + self._dining_zones)
+
     def _resolve_crew_home(self, preference: str, work_zone: str) -> str:
         """Berth crew by department: one home corridor per work zone.
 
@@ -2605,7 +2620,7 @@ class KorkinShipEngine:
         home_pref = cls_cfg.get("home_zone_preference", "Berthing")
         free_pref = cls_cfg.get("free_zone_preference", "")
         if duty_zone:
-            work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
+            work = self._resolve_duty_zone(duty_zone)
         elif role_group == "crew":
             work = str(self.rng.choice(self._free_zones + self._dining_zones))
         else:
