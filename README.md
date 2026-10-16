@@ -190,9 +190,12 @@ data/
 │   ├── pce_874/                    (maritime.org GA import)
 │   ├── independence_cvl26/         (maritime.org GA import)
 │   ├── midway_cv41/                (maritime.org GA import)
+│   ├── sigsbee_dd502/              (maritime.org GA import)
+│   ├── nields_dd616/               (maritime.org GA import)
 │   ├── battler_acv6/               (maritime.org GA import)
 │   ├── puncher_cve53/              (maritime.org GA import)
 │   ├── thetis_bay_cve90/           (maritime.org GA import)
+│   ├── davison_dd618/              (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -552,7 +555,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twenty-one ship platforms are included, each with spatial layout and HVAC
+Twenty-four ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -579,6 +582,9 @@ airflow definitions:
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 | `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
+| `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
+| `nields_dd616` | USS Nields DD-616 Benson-class destroyer (maritime.org GA import, 39 zones, 262 crew) |
+| `davison_dd618` | USS Davison DD-618 Gleaves-class FRAM destroyer (maritime.org GA import, 39 zones, 283 crew) |
 | `battler_acv6` | HMS Battler D-18 Attacker/Bogue-class escort carrier (maritime.org GA import, 55 zones, 800 crew) |
 | `puncher_cve53` | HMS Puncher D-79 Bogue-class escort carrier CVE-53 (maritime.org GA import, 88 zones, 869 crew) |
 | `thetis_bay_cve90` | USS Thetis Bay CVE-90 Casablanca-class escort carrier (maritime.org GA import, 74 zones, 596 crew) |
