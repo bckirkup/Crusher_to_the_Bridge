@@ -1,0 +1,343 @@
+{
+  "platform": "south_dakota_bb49",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "VM_funnel_1",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "superstructure_deck",
+      "serves_zone": "Funnel_Casing_1",
+      "display": [
+        124.07,
+        14.84
+      ],
+      "evidence": "sheet_read",
+      "notes": "fwd funnel"
+    },
+    {
+      "id": "VM_funnel_2",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "superstructure_deck",
+      "serves_zone": "Funnel_Casing_2",
+      "display": [
+        138.02,
+        14.84
+      ],
+      "evidence": "sheet_read",
+      "notes": "aft funnel"
+    },
+    {
+      "id": "VM_mush_supstr",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "superstructure_deck",
+      "serves_zone": "Supstr_Wheelhouse",
+      "display": [
+        153.14,
+        13.09
+      ],
+      "evidence": "sheet_read",
+      "notes": "mushroom vents drawn on superstructure deck"
+    },
+    {
+      "id": "VM_searchlight",
+      "kind": "skylight",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "superstructure_deck",
+      "serves_zone": "Searchlight_Block",
+      "display": [
+        106.63,
+        14.84
+      ],
+      "evidence": "era_plausible",
+      "notes": "searchlight platforms"
+    },
+    {
+      "id": "VM_cowl_upper",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Forecastle",
+      "display": [
+        180.7,
+        6.01
+      ],
+      "evidence": "era_plausible",
+      "notes": "forecastle cowls era-typical"
+    },
+    {
+      "id": "VM_uptake",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Uptakes_Main",
+      "display": [
+        98.39,
+        14.68
+      ],
+      "evidence": "sheet_read",
+      "notes": "boiler uptakes on main deck plan"
+    }
+  ],
+  "zone_modes": {
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Pilot_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Flag_Plot": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Emergency_Cabin_Platform": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Landing_Platform": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Searchlight_Block": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Funnel_Casing_1": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Funnel_Casing_2": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Supstr_Wheelhouse": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Turret_I_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Turret_II_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Casemates_Port": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Casemates_Stbd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Compass_Platforms": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Deckhouse_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Turret_III_Aft": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Turret_IV_Aft": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Forecastle": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Fantail": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Crews_WC_Upper": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Wardroom_Country": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "JO_Country": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wardroom_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crews_Galley": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mess_Hall_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Uptakes_Main": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Barbette_I_Main": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Barbette_IV_Main": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_WC_Main": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Space_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Quarters_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Torpedo_Rooms": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machinery_Flat_2nd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_WC_2nd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Space_3rd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mess_3rd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Barbette_II_3rd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Barbette_III_3rd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Magazine_Fwd_3rd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Magazine_Aft_3rd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Uptakes_3rd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Stores_3rd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Inclined_Protective_Platform": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rm_Port": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rm_Stbd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Air_Locks_1p": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Magazine_Fwd_1p": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Magazine_Aft_1p": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Pump_Rm_1p": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fuel_Oil_1p": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.O.",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Oil_1p",
+      "display": [
+        141.4,
+        17.94
+      ],
+      "deck": "first_platform",
+      "notes": "fuel oil along platform (p8 section labels)"
+    },
+    {
+      "label": "DOUBLE BOTTOM",
+      "kind": "unknown",
+      "nearest_zone": "Engine_Room",
+      "display": [
+        107.84,
+        29.91
+      ],
+      "deck": "first_platform",
+      "notes": "double bottom cells on cross sections only — not zoned"
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Crews_WC_Upper (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crews_WC_Upper",
+    "HD_Crew_WC_Main (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_WC_Main",
+    "HD_Crew_WC_2nd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_WC_2nd"
+  ]
+}
