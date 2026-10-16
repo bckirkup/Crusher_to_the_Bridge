@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:35:45.481656+00:00",
+  "platform_id": "south_dakota_bb49",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/south_dakota_bb49",
+  "digest_sha256": "ba20d336e81f6d2c2de652e0dfdd3085a5f34d313f4e7aaa2f448b35fd13a186",
+  "svg_sha256": {
+    "page_05_approved.svg": "d560663c586b6d28779c0c5004b40488383037ecbe352040f1a09cacd314d580",
+    "page_06_approved.svg": "5f71173ccad64147e11f7a6984ed15a9c199bf4282e0b7f3faac70c33ceda168",
+    "page_07_approved.svg": "3e77fa502d29388a0d3e37b02cd14b9b226e1a9c052697b4cd95146675d53e33"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 55,
+  "berthing_zones": [
+    "Nav_Bridge",
+    "Pilot_House",
+    "Flag_Plot",
+    "Emergency_Cabin_Platform",
+    "Searchlight_Block",
+    "Supstr_Wheelhouse",
+    "Casemates_Port",
+    "Casemates_Stbd",
+    "Compass_Platforms",
+    "Deckhouse_Mid",
+    "Wardroom_Country",
+    "JO_Country",
+    "Wardroom_Mess",
+    "Crews_Galley",
+    "Crew_Berthing_Fwd",
+    "Crew_Berthing_Aft",
+    "Mess_Hall_Main",
+    "Crew_Space_2nd",
+    "CPO_Quarters_2nd",
+    "Stores_2nd",
+    "Crew_Space_3rd",
+    "Mess_3rd",
+    "Stores_3rd"
+  ],
+  "systems_era": "usn_ww2"
+}
