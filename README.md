@@ -203,6 +203,7 @@ data/
 │   ├── missouri_bb63/              (maritime.org GA import)
 │   ├── wisconsin_bb64/             (maritime.org GA import)
 │   ├── new_jersey_bb62/            (maritime.org GA import)
+│   ├── antietam_cvs36/             (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -602,6 +603,7 @@ airflow definitions:
 | `missouri_bb63` | USS Missouri BB-63 Iowa-class battleship, 1950 booklet (maritime.org GA import, 103 zones, 1561 crew) |
 | `wisconsin_bb64` | USS Wisconsin BB-64 Iowa-class battleship, 1956 booklet (maritime.org GA import, 103 zones, ~2560 crew) |
 | `new_jersey_bb62` | USS New Jersey BB-62 Iowa-class battleship, 1984 reactivation booklet (maritime.org GA import, 103 zones, ~1781 crew) |
+| `antietam_cvs36` | USS Antietam CVS-36 Essex-class ASW carrier, 1955 angled-deck conversion (maritime.org GA import, 66 zones, 2998 crew incl. air group + marines) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
