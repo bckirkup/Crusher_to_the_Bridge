@@ -1,0 +1,413 @@
+{
+  "platform": "assistance_ar17",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "superstructure_deck",
+      "serves_zone": "Boiler_Casing_Main",
+      "display": [
+        84.84,
+        6.99
+      ],
+      "evidence": "sheet_read",
+      "notes": "stack amidships on superstructure deck"
+    },
+    {
+      "id": "Vents_Stern",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "unknown",
+      "deck": "main_deck",
+      "serves_zone": "Stern_Working_Deck",
+      "display": [
+        7.08,
+        2.26
+      ],
+      "evidence": "sheet_read",
+      "notes": "'ARRGT OF VENTS FOR AR-18-20-21' at stern"
+    },
+    {
+      "id": "Fan_Rm_8_Vent",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Fan_Rm_8",
+      "display": [
+        34.0,
+        4.52
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "Fan_Rm_5_Vent",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Fwd_Working_Deck",
+      "display": [
+        101.99,
+        3.77
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "Cowl_Focsle",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Forecastle_Main",
+      "display": [
+        124.65,
+        3.77
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "Gooseneck_ER",
+      "kind": "gooseneck",
+      "facing": "down",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Engine_Room_Hold",
+      "display": [
+        56.66,
+        4.52
+      ],
+      "evidence": "era_plausible",
+      "notes": "era-typical ER supply at casing"
+    },
+    {
+      "id": "Shop_Vents_2nd",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "second_deck",
+      "serves_zone": "Foundry_Blacksmith",
+      "display": [
+        48.16,
+        3.59
+      ],
+      "evidence": "era_plausible",
+      "notes": "foundry/welding shop exhaust"
+    }
+  ],
+  "zone_modes": {
+    "Pilot_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Navigators_Office": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Code_Communications": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Receiving": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "House_Top_Passage": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gun_Crew_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stack_Space": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Sky_Lookout": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gun_Tubs_Sup": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Emerg_Radio_Rm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Gun_Deck_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Country_U": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Galley_U": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Upper": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Fwd_House_Upper": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stern_Working_Deck": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Gun_Repair_40mm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fan_Rm_8": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Machine_Shop_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boiler_Casing_Main": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Officers_Mess_Lounge": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Galley_Main": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "WRSR_Main": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hatch_5_4_Working": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Paravane_Hatch3": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Working_Deck": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Clipping_Empty_Shell": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Forecastle_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Flat_Aft_Berthing": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Carpenter_Shop": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Foundry_Blacksmith": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Crew_Berthing_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess_2nd": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Scullery_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_2nd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Electrical_Shop_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Refrig_Provisions_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_Fwd_2nd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Shops_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machine_Shop_Upper": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shipfitter_Upper": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Spare_Parts_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Tanks_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machine_Shop_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shipfitter_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Repair_Stores_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Peak_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Ballast_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Room_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Fuel_Water_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Repair_Parts_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Peak_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.O. TANKS (hold midship)",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Water_Hold",
+      "display": [
+        81.6,
+        5.78
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "SETTLING TANK",
+      "kind": "unknown",
+      "nearest_zone": "Fuel_Water_Hold",
+      "display": [
+        90.19,
+        8.86
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "F.W. TANKS",
+      "kind": "freshwater",
+      "nearest_zone": "Fuel_Water_Hold",
+      "display": [
+        74.44,
+        10.4
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "AFT BALLAST TANK",
+      "kind": "unknown",
+      "nearest_zone": "Aft_Ballast_Hold",
+      "display": [
+        12.88,
+        5.78
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "OXYGEN/ACETYLENE DECK RACKS",
+      "kind": "unknown",
+      "nearest_zone": "Clipping_Empty_Shell",
+      "display": [
+        103.41,
+        2.26
+      ],
+      "deck": "main_deck",
+      "notes": ""
+    },
+    {
+      "label": "D.B. TANKS (inner bottom)",
+      "kind": "unknown",
+      "nearest_zone": "Machinery_2P",
+      "display": [
+        88.76,
+        13.01
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "CPO_Galley_U (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: CPO_Galley_U",
+    "HD_Upper (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Upper",
+    "Officers_Mess_Lounge (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Officers_Mess_Lounge",
+    "Galley_Main (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_Main",
+    "WRSR_Main (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: WRSR_Main",
+    "Crew_Mess_2nd (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_2nd",
+    "HD_Crew_2nd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_2nd"
+  ]
+}

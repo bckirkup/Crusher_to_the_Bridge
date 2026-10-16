@@ -1,0 +1,206 @@
+{
+  "platform": "fort_william_j311",
+  "era": "rn_ww2",
+  "era_label": "Royal Navy WW2 practice",
+  "era_note": "Mushroom/cowl natural supply; mech exhaust galley/heads/engines; magazines sprinkled + vented.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "forecastle_deck",
+      "serves_zone": "Boiler_Rooms",
+      "display": [
+        27.64,
+        0.26
+      ],
+      "evidence": "sheet_read",
+      "notes": "funnel on profile over boiler rooms"
+    },
+    {
+      "id": "Engine_Vent",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Engine_Room",
+      "display": [
+        21.17,
+        2.32
+      ],
+      "evidence": "sheet_read",
+      "notes": "ENGINE ROOM VENT label on profile"
+    },
+    {
+      "id": "Cowl_Foc",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Seamen_Mess",
+      "display": [
+        38.81,
+        2.83
+      ],
+      "evidence": "sheet_read",
+      "notes": "cowls drawn on forecastle plan"
+    },
+    {
+      "id": "Vent_Mag",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Magazines_Fwd",
+      "display": [
+        40.52,
+        3.78
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine ventilator per RN WW2 practice"
+    }
+  ],
+  "zone_modes": {
+    "Signal_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bridge_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Quarterdeck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Foc_Superstructure": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Foc_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sweep_Deck": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Wardroom_Flat": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley_Flat": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machinery_Casing": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Ups": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Seamen_Mess": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Magazine_Lobby_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Stores_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Boiler_Rooms": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Stokers_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Low": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Cabins_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mess_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Store": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "After_Peak": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Compressed_Air_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Magazines_Fwd": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Provision_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "OIL FUEL",
+      "kind": "fuel",
+      "nearest_zone": "Compressed_Air_Room",
+      "display": [
+        28.31,
+        6.93
+      ],
+      "deck": "hold",
+      "notes": "No1/No2 oil fuel tanks flanking boiler rooms"
+    },
+    {
+      "label": "FRESH WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Chain_Locker",
+      "display": [
+        47.73,
+        3.78
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "RESERVE FEED WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Compressed_Air_Room",
+      "display": [
+        21.09,
+        4.41
+      ],
+      "deck": "hold",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Galley_Flat (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_Flat",
+    "HD_Ups (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Ups",
+    "HD_Low (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Low"
+  ]
+}

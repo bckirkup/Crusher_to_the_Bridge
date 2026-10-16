@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:20:34.822867+00:00",
+  "platform": "erie_pg50",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 248
+  },
+  "manifest": [
+    {
+      "class_id": "flag_staff",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Admirals_Quarters",
+      "duty_zone": "Flag_Plot_Bridge",
+      "notes": "admiral + 4 flag staff (squadron flagship)"
+    },
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Pilot_House",
+      "notes": "captain + 11 ward-room officers incl marine officer"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "Crews_Marine_Berthing",
+      "duty_zone": "Crews_Mess",
+      "notes": "chief petty officers including flag crew"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 44,
+      "berth_zone": "Marine_Quarters",
+      "duty_zone": "Gun_Deck_Aft",
+      "notes": "marine guard (44)"
+    },
+    {
+      "class_id": "flag_detail",
+      "role_group": "crew",
+      "count": 33,
+      "berth_zone": "Crews_Marine_Berthing",
+      "duty_zone": "Flag_Plot_Bridge",
+      "notes": "flag detail: radiomen, yeomen, signalmen"
+    },
+    {
+      "class_id": "aviation",
+      "role_group": "crew",
+      "count": 4,
+      "berth_zone": "Crews_Marine_Berthing",
+      "duty_zone": "Boat_Stowage_Port",
+      "notes": "aviation detachment for the scout plane + crane"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 50,
+      "berth_zone": "Crews_Marine_Berthing",
+      "duty_zone": "Engine_Room",
+      "notes": "engineers, boilermakers, electricians"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 63,
+      "berth_zone": "Crew_Berthing_Main",
+      "duty_zone": "Focsle_Main",
+      "notes": "deck force + gun crews for 4x6in + AA battery"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 15,
+      "berth_zone": "Mess_Attendants",
+      "duty_zone": "Galley",
+      "notes": "cooks, mess attendants, laundry, ship's store"
+    },
+    {
+      "class_id": "corpsman",
+      "role_group": "crew",
+      "count": 4,
+      "berth_zone": "Crews_Marine_Berthing",
+      "duty_zone": "Sick_Bay",
+      "notes": "hospital corpsmen"
+    }
+  ],
+  "source": "plate 2 complement table: total officers 17 (admiral 1 + staff 4 + captain 1 + W.R. officers 11) + total crew 231 (CPO incl flag ~18 + marines 44 + flag detail 33 + aviation 4 + ship's crew 132); all-crew naval hull — nominal_complement omitted",
+  "consistency": {
+    "declared_total": 248,
+    "manifest_total": 248,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

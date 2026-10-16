@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:22:52.473581+00:00",
+  "platform": "assistance_ar17",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 700
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 45,
+      "berth_zone": "Officers_Country_U",
+      "duty_zone": "Pilot_House",
+      "notes": "CO, dept heads, repair officers (upper deck)"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 55,
+      "berth_zone": "Officers_Country_U",
+      "duty_zone": "Officers_Mess_Lounge",
+      "notes": "CPOs incl repair ratings"
+    },
+    {
+      "class_id": "deck_force",
+      "role_group": "crew",
+      "count": 150,
+      "berth_zone": "Flat_Aft_Berthing",
+      "duty_zone": "Forecastle_Main",
+      "notes": "seamen, boatswains, gun crews (flat + 2nd dk)"
+    },
+    {
+      "class_id": "repair_machinists",
+      "role_group": "crew",
+      "count": 200,
+      "berth_zone": "Crew_Berthing_2nd",
+      "duty_zone": "Machine_Shop_2P",
+      "notes": "machinists, shipfitters, welders (2nd dk berthing)"
+    },
+    {
+      "class_id": "repair_electrical",
+      "role_group": "crew",
+      "count": 80,
+      "berth_zone": "Crew_Berthing_2nd",
+      "duty_zone": "Electrical_Shop_2nd",
+      "notes": "electricians, optical/instrument men"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 110,
+      "berth_zone": "Crew_Berthing_2nd",
+      "duty_zone": "Engine_Room_Hold",
+      "notes": "engineers, firemen, water tenders"
+    },
+    {
+      "class_id": "commissary_supply",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "Crew_Berthing_Main",
+      "duty_zone": "Galley_Main",
+      "notes": "cooks, storekeepers, stewards"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Crew_Berthing_Main",
+      "duty_zone": "WRSR_Main",
+      "notes": "medical dept; sick bay zoned within berthing band"
+    },
+    {
+      "class_id": "gunnery",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "Gun_Crew_Quarters",
+      "duty_zone": "Gun_Tubs_Sup",
+      "notes": "gunner's mates + 20mm crews"
+    }
+  ],
+  "source": "era/class-typical: EC2-S-C1 repair-ship conversion, repair-ship complement ~600-800 incl. repair division ratings; no sheet accommodations table found on ar17.pdf",
+  "consistency": {
+    "declared_total": 700,
+    "manifest_total": 700,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

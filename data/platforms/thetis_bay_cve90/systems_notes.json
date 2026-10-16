@@ -1,0 +1,503 @@
+{
+  "platform": "thetis_bay_cve90",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "funnel_island",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "island",
+      "serves_zone": "Funnel_Island",
+      "display": [
+        115.7,
+        18.53
+      ],
+      "evidence": "sheet_read",
+      "notes": "Island funnel trunk on inboard profile"
+    },
+    {
+      "id": "uptake_gal",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "gallery_deck",
+      "serves_zone": "Island_Offices_Gal",
+      "display": [
+        94.33,
+        20.87
+      ],
+      "evidence": "sheet_read",
+      "notes": "Uptake casings at island base on gallery deck"
+    },
+    {
+      "id": "hangar_side_port",
+      "kind": "hangar_door",
+      "facing": "port",
+      "direction": "supply",
+      "deck": "hangar_deck",
+      "serves_zone": "Hangar_Aft",
+      "display": [
+        53.67,
+        15.85
+      ],
+      "evidence": "sheet_read",
+      "notes": "Hangar side openings along port deck edge"
+    },
+    {
+      "id": "hangar_side_stbd",
+      "kind": "hangar_door",
+      "facing": "starboard",
+      "direction": "supply",
+      "deck": "hangar_deck",
+      "serves_zone": "Hangar_Fwd",
+      "display": [
+        97.58,
+        6.7
+      ],
+      "evidence": "sheet_read",
+      "notes": "Hangar side openings along stbd deck edge"
+    },
+    {
+      "id": "cowls_bow",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Bow_Block_Upper",
+      "display": [
+        139.87,
+        5.66
+      ],
+      "evidence": "era_plausible",
+      "notes": "Bow flats cowl venting per usn_ww2 practice"
+    },
+    {
+      "id": "mag_vents_fwd",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "first_platform",
+      "serves_zone": "Ammo_Fwd_1P",
+      "display": [
+        133.36,
+        7.07
+      ],
+      "evidence": "era_plausible",
+      "notes": "Magazine ventilators fwd"
+    }
+  ],
+  "zone_modes": {
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Island_Upper": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Funnel_Island": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Flight_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Walkway_Gal_Port": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Walkway_Gal_Stbd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Battery_AC_Gal": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Gal_Aft": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Officers_Quarters_Gal": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Quarters_Gal": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ward_Room_Gal": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Island_Offices_Gal": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Hospital_Gal": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Gal_Fwd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Radio_Radar_Gal": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ordnance_Gal": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Upper_Flats_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Upper_Mezz": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Upper_Flats_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bow_Block_Upper": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Hangar_Aft": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Hangar_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Hangar_Shops_Port": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hangar_Shops_Stbd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bow_Rooms_Hangar": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gun_5in_Sponson": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "WT_Rm_Hangar": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Laundry_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Carpenter_Shop_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess_2D": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Galley_2D": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Aft_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_2D_Aft": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Elec_Spare_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Mid_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Maintenance_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Mess_2D": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "CPO_Berthing_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aviation_Berthing_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_2D_Fwd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Sick_Bay_2D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Warrant_Qtrs_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ordnance_Bow_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Provision_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Aft_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Veg_Reefer_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Flat_Aft": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Generator_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machinery_Flat_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Fwd_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Berthing_15th_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ammo_Fwd_1P": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Issue_Rm_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Void_TT_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bomb_Storage_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ordnance_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Paint_Alcohol_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Engine_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Engine_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Generator_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Stores_TT_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ammo_Fwd_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "SD_Stores_TT": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Void_Tank_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "FO_Tanks_Aft_IB": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "FW_Tanks_IB": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "FO_Tanks_Mid_IB": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "FW_Tanks_Mid_IB": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Avgas_IB": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "FO_Tanks_Fwd_IB": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Peak_Tank_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "VOID TANK",
+      "kind": "unknown",
+      "nearest_zone": "Void_Tank_Aft",
+      "display": [
+        4.88,
+        7.92
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "F.O. TANK",
+      "kind": "fuel",
+      "nearest_zone": "FO_Tanks_Aft_IB",
+      "display": [
+        29.27,
+        15.32
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "F.W. TANKS #1-4",
+      "kind": "freshwater",
+      "nearest_zone": "FW_Tanks_IB",
+      "display": [
+        55.3,
+        5.28
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "F.O. TANKS",
+      "kind": "fuel",
+      "nearest_zone": "FO_Tanks_Mid_IB",
+      "display": [
+        78.06,
+        7.92
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "DIESEL OIL B-905-F",
+      "kind": "fuel",
+      "nearest_zone": "FW_Tanks_Mid_IB",
+      "display": [
+        97.58,
+        5.28
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "F.W. TANKS #5-8",
+      "kind": "freshwater",
+      "nearest_zone": "FW_Tanks_Mid_IB",
+      "display": [
+        104.09,
+        15.32
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "AVIATION GAS",
+      "kind": "unknown",
+      "nearest_zone": "Avgas_IB",
+      "display": [
+        118.72,
+        5.28
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "F.O. OR F.W. BALLAST",
+      "kind": "freshwater",
+      "nearest_zone": "Void_TT_Aft",
+      "display": [
+        9.76,
+        7.92
+      ],
+      "deck": "tank_top",
+      "notes": ""
+    },
+    {
+      "label": "L.O. STORAGE",
+      "kind": "unknown",
+      "nearest_zone": "Generator_Rm",
+      "display": [
+        104.09,
+        2.64
+      ],
+      "deck": "tank_top",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Gal_Aft (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Gal_Aft",
+    "Ward_Room_Gal (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Ward_Room_Gal",
+    "Hospital_Gal (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Hospital_Gal",
+    "HD_Gal_Fwd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Gal_Fwd",
+    "Crew_Mess_2D (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_2D",
+    "Galley_2D (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_2D",
+    "HD_2D_Aft (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_2D_Aft",
+    "CPO_Mess_2D (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: CPO_Mess_2D",
+    "HD_2D_Fwd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_2D_Fwd",
+    "Sick_Bay_2D (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay_2D"
+  ]
+}

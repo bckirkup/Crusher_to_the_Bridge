@@ -1,0 +1,831 @@
+{
+  "platform": "fort_mandan_lsd21",
+  "description": "USS Fort Mandan LSD-21 dock landing ship, 1951 — maritime.org Booklet of General Plans (12 plates). Amphibious dock: full-length well deck with stern gate, ballast-down wing tanks, superstructure-deck accommodations for ship's company + embarked troops.",
+  "isolation_unit_capacity": 0,
+  "deck_dimensions": {
+    "length_m": 139.5,
+    "beam_m": 21.99
+  },
+  "graywater_zones": [
+    "Engine_Room"
+  ],
+  "zones": [
+    {
+      "id": "Top_House_Open",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1094.47,
+      "floor_area_m2": 420.95,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 8.56,
+      "deck": "top_house",
+      "display": {
+        "x": 27.44,
+        "y": 9.42
+      },
+      "description": "house top: searchlight platforms, life rafts, 5\"/38 gun director platform"
+    },
+    {
+      "id": "Radar_House",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 350.23,
+      "floor_area_m2": 134.7,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 8.56,
+      "deck": "top_house",
+      "display": {
+        "x": 23.42,
+        "y": 16.46
+      },
+      "max_occupancy": 3,
+      "description": "radar house + radio comm antenna base"
+    },
+    {
+      "id": "Nav_Bridge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 850.1,
+      "floor_area_m2": 326.96,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 6.4,
+      "deck": "navigating_bridge",
+      "display": {
+        "x": 24.36,
+        "y": 7.6
+      },
+      "description": "pilot house + chart house + command station + flag bag"
+    },
+    {
+      "id": "Comm_Room",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 545.88,
+      "floor_area_m2": 209.96,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 6.4,
+      "deck": "navigating_bridge",
+      "display": {
+        "x": 22.97,
+        "y": 14.58
+      },
+      "max_occupancy": 4,
+      "description": "communications room + navigation light boxes"
+    },
+    {
+      "id": "Officers_Qtrs_Bridge",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 880.28,
+      "floor_area_m2": 338.57,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.57,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 27.33,
+        "y": 4.64
+      },
+      "max_occupancy": 17,
+      "description": "N.B. officers' staterooms + captain's cabin/office (CO + 16 W.R. officers)"
+    },
+    {
+      "id": "Ships_Office",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 565.89,
+      "floor_area_m2": 217.65,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.57,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 27.33,
+        "y": 12.58
+      },
+      "max_occupancy": 6,
+      "description": "ship's office + paymaster's office + GSK issue + debark net stowage"
+    },
+    {
+      "id": "Passage_Bridge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 638.44,
+      "floor_area_m2": 245.56,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.57,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 58.39,
+        "y": 7.21
+      },
+      "description": "bridge deck passage + clipping rooms + fan room"
+    },
+    {
+      "id": "Crew_Berthing_SSD",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 607.74,
+      "floor_area_m2": 233.75,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.66,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 17.25,
+        "y": 4.64
+      },
+      "max_occupancy": 120,
+      "description": "crew's berthing A-010xL rows (24+18+? man rooms)"
+    },
+    {
+      "id": "Crew_Mess_SSD",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 493.79,
+      "floor_area_m2": 189.92,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.66,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 43.22,
+        "y": 4.4
+      },
+      "max_occupancy": 60,
+      "description": "crew's mess seats 120+"
+    },
+    {
+      "id": "Galley_SSD",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 352.71,
+      "floor_area_m2": 135.66,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.66,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 64.4,
+        "y": 4.4
+      },
+      "max_occupancy": 10,
+      "description": "galley + bakery + cooks' room"
+    },
+    {
+      "id": "Sick_Bay",
+      "type": "Medical",
+      "traffic": "medium",
+      "volume_m3": 352.71,
+      "floor_area_m2": 135.66,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.66,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 81.48,
+        "y": 4.4
+      },
+      "max_occupancy": 8,
+      "description": "sick bay + sick bay berthing"
+    },
+    {
+      "id": "Army_Ranks_Qtrs_SSD",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 1139.51,
+      "floor_area_m2": 438.27,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.66,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 26.82,
+        "y": 13.8
+      },
+      "max_occupancy": 198,
+      "description": "army ranks quarters A-0101-L P/S rows + army C.O. quarters (non-com 38 + ranks 160 + surge)"
+    },
+    {
+      "id": "Officers_WR_Pantry",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 531.77,
+      "floor_area_m2": 204.53,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 1.66,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 84.22,
+        "y": 13.8
+      },
+      "max_occupancy": 12,
+      "description": "officers' W.R. + pantry + provisions issue + cargo office"
+    },
+    {
+      "id": "HD_Crew_SSD",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 115.21,
+      "floor_area_m2": 50.09,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 1.66,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 44.58,
+        "y": 14.17
+      },
+      "max_occupancy": 19,
+      "serves": [
+        "Crew_Berthing_SSD",
+        "Crew_Mess_SSD",
+        "Army_Ranks_Qtrs_SSD"
+      ],
+      "description": "crew/army wash+toilet block on superstructure deck",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Well_Cover_Open",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 2162.21,
+      "floor_area_m2": 831.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 31.2,
+        "y": 9.6
+      },
+      "description": "open main deck over well: gun tubs P/S, landing boats, life rafts, engine repair stand, hand crane"
+    },
+    {
+      "id": "Machine_Shop",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 296.27,
+      "floor_area_m2": 113.95,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 67.6,
+        "y": 5.73
+      },
+      "max_occupancy": 8,
+      "description": "machine shop A-102AEL + tool issue room + injection nozzle room (port strip)"
+    },
+    {
+      "id": "Shipfitters_Flat",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 296.27,
+      "floor_area_m2": 113.95,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 67.6,
+        "y": 16.06
+      },
+      "max_occupancy": 6,
+      "description": "shipfitters flat + tool room + welding slabs + oxygen/acetylene (starboard strip)"
+    },
+    {
+      "id": "Officers_Qtrs_MD",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 327.45,
+      "floor_area_m2": 125.94,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 87.4,
+        "y": 5.73
+      },
+      "max_occupancy": 17,
+      "description": "officers' staterooms SR#106/108/110 + T.L.C. officers (port strip)"
+    },
+    {
+      "id": "Army_Officers_MD",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 327.45,
+      "floor_area_m2": 125.94,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 87.4,
+        "y": 16.06
+      },
+      "max_occupancy": 16,
+      "description": "army officers' staterooms SR#102/104 + berths (starboard strip)"
+    },
+    {
+      "id": "HD_Officers_MD",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 49.04,
+      "floor_area_m2": 21.32,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 101.6,
+        "y": 10.8
+      },
+      "max_occupancy": 8,
+      "serves": [
+        "Officers_Qtrs_MD",
+        "Army_Officers_MD",
+        "Officers_Qtrs_Bridge"
+      ],
+      "description": "officers' W.R. & W.C. + T.L.C. officers' wash",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Passage_MD",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 247.76,
+      "floor_area_m2": 95.29,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 108.4,
+        "y": 10.8
+      },
+      "description": "lobby + passage A-102-AEL + clipping rooms"
+    },
+    {
+      "id": "HD_Army_MD_Port",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 84.29,
+      "floor_area_m2": 36.65,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 108.4,
+        "y": 5.33
+      },
+      "max_occupancy": 14,
+      "serves": [
+        "Army_Ranks_Qtrs_SSD",
+        "Crew_Berthing_SSD"
+      ],
+      "description": "army ranks toilets W.R. & W.C. A-102-ABL (port)",
+      "base_ach": 19.1
+    },
+    {
+      "id": "HD_Army_MD_Stbd",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 84.29,
+      "floor_area_m2": 36.65,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 108.4,
+        "y": 17.33
+      },
+      "max_occupancy": 14,
+      "serves": [
+        "Army_Ranks_Qtrs_SSD"
+      ],
+      "description": "army ranks toilets W.R. & W.C. A-102-ABL (starboard)",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Forecastle_MD",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 976.28,
+      "floor_area_m2": 375.49,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 124.8,
+        "y": 10.13
+      },
+      "description": "bow weather deck: windlass gear, hawse reels, chain pipes, debarkation nets, ammo hoists"
+    },
+    {
+      "id": "Steering_Gear_2D",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 591.19,
+      "floor_area_m2": 227.38,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 5.57,
+        "y": 9.05
+      },
+      "description": "steering gear compt + capstan machinery + rope stowage + 20/40mm ammo stowage aft"
+    },
+    {
+      "id": "Gallery_Port",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1184.01,
+      "floor_area_m2": 455.39,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 46.13,
+        "y": 4.15
+      },
+      "description": "port side gallery 'walkway over' the wing tanks along the well"
+    },
+    {
+      "id": "Gallery_Stbd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1184.01,
+      "floor_area_m2": 455.39,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 46.13,
+        "y": 16.71
+      },
+      "description": "starboard side gallery 'walkway over' along the well"
+    },
+    {
+      "id": "Laundry_2D",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 146.17,
+      "floor_area_m2": 56.22,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 60.65,
+        "y": 9.68
+      },
+      "max_occupancy": 4,
+      "description": "laundry + provisions issue + refrigerated spaces"
+    },
+    {
+      "id": "Ice_Machinery_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 116.94,
+      "floor_area_m2": 44.98,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 74.37,
+        "y": 9.68
+      },
+      "description": "ice machinery compartment + uptakes & fan room + switchboard"
+    },
+    {
+      "id": "Officers_Berthing_2D",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 579.01,
+      "floor_area_m2": 222.7,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 103.6,
+        "y": 7.04
+      },
+      "max_occupancy": 40,
+      "description": "officers' berthing stateroom block (supply officers, medical officers) forward"
+    },
+    {
+      "id": "Armory_DC_Station",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 317.52,
+      "floor_area_m2": 122.12,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 103.6,
+        "y": 15.02
+      },
+      "max_occupancy": 8,
+      "description": "armory + damage control repair station + post office + mail orderly + main issue room + cotton waste rm"
+    },
+    {
+      "id": "Passage_2D",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 432.03,
+      "floor_area_m2": 166.16,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 122.89,
+        "y": 9.8
+      },
+      "description": "lobby + passage + rope stowage forward"
+    },
+    {
+      "id": "HD_Army_2D",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 70.4,
+      "floor_area_m2": 30.61,
+      "ceiling_height_m": 2.3,
+      "elevation_m": -2.7,
+      "deck": "second_deck",
+      "display": {
+        "x": 87.3,
+        "y": 14.95
+      },
+      "max_occupancy": 11,
+      "serves": [
+        "Officers_Berthing_2D",
+        "Army_Ranks_Qtrs_SSD"
+      ],
+      "description": "army non-coms W.C. & H.C. + toilets on second deck",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Well_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 13000.0,
+      "floor_area_m2": 5000.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 42.63,
+        "y": 10.03
+      },
+      "description": "WELL DECK — dock bay for landing craft/vehicles, stern-gate access; tall space zoned once at floor level"
+    },
+    {
+      "id": "Ballast_Tanks_Port",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 2200.0,
+      "floor_area_m2": 846.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 45.05,
+        "y": 2.75
+      },
+      "description": "port wing ballast tanks (floodable for docking-down)"
+    },
+    {
+      "id": "Ballast_Tanks_Stbd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 2200.0,
+      "floor_area_m2": 846.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 45.05,
+        "y": 19.24
+      },
+      "description": "starboard wing ballast tanks"
+    },
+    {
+      "id": "Steering_Flat_3D",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 409.73,
+      "floor_area_m2": 157.59,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 3.21,
+        "y": 10.03
+      },
+      "description": "steering gear compartment C-416ET + stern gate machinery + diesel oil/cofferdam"
+    },
+    {
+      "id": "Engine_Room_Flat",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 1500.0,
+      "floor_area_m2": 576.92,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 49.67,
+        "y": 7.56
+      },
+      "description": "engine room flat + blower + eng rm (upper level of machinery space)"
+    },
+    {
+      "id": "Pump_Room_3D",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 215.65,
+      "floor_area_m2": 82.94,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 63.55,
+        "y": 7.56
+      },
+      "description": "pump room + fresh water pump room + chemical warfare storeroom"
+    },
+    {
+      "id": "General_Stores_3D",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 371.99,
+      "floor_area_m2": 143.07,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 80.05,
+        "y": 14.16
+      },
+      "description": "quartermasters + general stores + provision/issue rooms"
+    },
+    {
+      "id": "Ammunition_3D",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 323.47,
+      "floor_area_m2": 124.41,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 101.98,
+        "y": 14.16
+      },
+      "description": "3\" projectile stowage + small arms + 20mm/40mm ammunition"
+    },
+    {
+      "id": "Boatswains_Stores",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 454.66,
+      "floor_area_m2": 174.87,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 103.18,
+        "y": 7.15
+      },
+      "description": "boatswain's stores + supply dept stores + boatswain's passage"
+    },
+    {
+      "id": "Chain_Locker",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 656.83,
+      "floor_area_m2": 252.63,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -5.5,
+      "deck": "third_deck",
+      "display": {
+        "x": 125.71,
+        "y": 10.17
+      },
+      "description": "chain locker A-302E + gypsy/windlass gear room + fore peak access"
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 381.19,
+      "floor_area_m2": 146.61,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -8.0,
+      "deck": "hold",
+      "display": {
+        "x": 4.07,
+        "y": 11.83
+      },
+      "description": "steering gear flat (inset plan) + stern gate machinery + ballast tanks aft"
+    },
+    {
+      "id": "Shaft_Alley_Port",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 435.37,
+      "floor_area_m2": 167.45,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -8.0,
+      "deck": "hold",
+      "display": {
+        "x": 26.87,
+        "y": 7.43
+      },
+      "description": "port shaft alley + escape trunks"
+    },
+    {
+      "id": "Shaft_Alley_Stbd",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 435.37,
+      "floor_area_m2": 167.45,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -8.0,
+      "deck": "hold",
+      "display": {
+        "x": 26.87,
+        "y": 18.05
+      },
+      "description": "starboard shaft alley + escape trunks"
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 1600.0,
+      "floor_area_m2": 615.38,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -8.0,
+      "deck": "hold",
+      "display": {
+        "x": 52.71,
+        "y": 9.86
+      },
+      "description": "engine room (Skinner unaflow steam plant) at hold level"
+    },
+    {
+      "id": "Boiler_Aux_Room",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 326.02,
+      "floor_area_m2": 125.39,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -8.0,
+      "deck": "hold",
+      "display": {
+        "x": 68.39,
+        "y": 9.86
+      },
+      "description": "boiler room + aux machinery & pump room + main feed tank + gyro room"
+    },
+    {
+      "id": "Fuel_Tanks",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 626.97,
+      "floor_area_m2": 241.14,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -8.0,
+      "deck": "hold",
+      "display": {
+        "x": 86.5,
+        "y": 9.86
+      },
+      "description": "fuel oil tanks + diesel oil storage + F.O. settling"
+    },
+    {
+      "id": "Ballast_FW_Tanks",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 898.83,
+      "floor_area_m2": 345.7,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -8.0,
+      "deck": "hold",
+      "display": {
+        "x": 113.16,
+        "y": 10.92
+      },
+      "description": "fresh water + ballast + F.O./D.O. tank block forward of machinery"
+    },
+    {
+      "id": "Fore_Peak_Hold",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 323.02,
+      "floor_area_m2": 124.24,
+      "ceiling_height_m": 2.6,
+      "elevation_m": -8.0,
+      "deck": "hold",
+      "display": {
+        "x": 134.94,
+        "y": 12.59
+      },
+      "description": "peak tank + stem region"
+    }
+  ],
+  "nominal_complement": {
+    "passengers": 214,
+    "crew": 301
+  }
+}

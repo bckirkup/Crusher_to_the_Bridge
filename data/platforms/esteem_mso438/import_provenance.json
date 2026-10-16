@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:14:07.971047+00:00",
+  "platform_id": "esteem_mso438",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/esteem_mso438",
+  "digest_sha256": "9e71d8c28e01569b8db34d26059973e87e815946edf4da57beee68f87e0680bb",
+  "svg_sha256": {
+    "page_05_approved.svg": "54c63987e2c0387cc031e4ff1ab5c54a64983125496774293000b2feebb7c289",
+    "page_06_approved.svg": "3db11da7e8d5124c2d3f39708a340c0576349b3b6b0930531c8ccf219a62f746",
+    "page_07_approved.svg": "28f9dc9ffcd059f5df0f79571a6c13d2d76d39d7ba92901bafba0cc1e382837f",
+    "page_08_approved.svg": "86314e955a0f79a34bd6820bc5c36e049e2a6b0a7279aff2215a10b8cd27b4f8",
+    "page_09_approved.svg": "3a9e242fd0c5d9f896ba062d6a21bea2974870a49152a96ce3deb0bd840e6cc6"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 39,
+  "berthing_zones": [
+    "Crews_Shelter",
+    "Captains_Cabin",
+    "Officers_Country",
+    "Crew_Berthing",
+    "CPO_Quarters",
+    "Crew_Berthing_2"
+  ],
+  "systems_era": "usn_coldwar"
+}

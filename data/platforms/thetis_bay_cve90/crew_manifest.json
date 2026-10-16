@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:24:52.334612+00:00",
+  "platform": "thetis_bay_cve90",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 596
+  },
+  "manifest": [
+    {
+      "class_id": "commanding_officer",
+      "role_group": "crew",
+      "count": 1,
+      "berth_zone": "Officers_Quarters_Gal",
+      "duty_zone": "Nav_Bridge",
+      "notes": "commanding officer"
+    },
+    {
+      "class_id": "wardroom_officers",
+      "role_group": "crew",
+      "count": 36,
+      "berth_zone": "Officers_Quarters_Gal",
+      "duty_zone": "Ward_Room_Gal",
+      "notes": "ship wardroom officers"
+    },
+    {
+      "class_id": "warrant_officers",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Warrant_Qtrs_2D",
+      "duty_zone": "Officers_Quarters_Gal",
+      "notes": "warrant officers"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 24,
+      "berth_zone": "CPO_Quarters_Gal",
+      "duty_zone": "CPO_Mess_2D",
+      "notes": "chief petty officers"
+    },
+    {
+      "class_id": "crew",
+      "role_group": "crew",
+      "count": 527,
+      "berth_zone": "Crew_Berthing_Aft_2D",
+      "duty_zone": "Hangar_Aft",
+      "notes": "enlisted crew incl. air dept ship-side ratings"
+    }
+  ],
+  "source": "Plate-read accommodation table, page 2 DATA sheet (BUSHIPS CVE-90): ship co. 596, aviation column zero",
+  "consistency": {
+    "declared_total": 596,
+    "manifest_total": 596,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
