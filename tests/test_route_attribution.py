@@ -140,7 +140,13 @@ class TestRouteAttribution:
         # (sterile out to 96 epochs). Seed 18 keeps all three fiat imports
         # aboard at epoch 0 and again produces a transmission event — one
         # fomite event at 72 epochs on the shipped config.
-        spec.random_seed = 18
+        # DUTY-DOMAIN-01: `_resolve_duty_zone` now matches a duty pin
+        # against every zone type, so the shipped config's crew pins land
+        # on different work zones than at seed 18's tuning — the realized
+        # co-location shifts and seed 18's fixture goes sterile again.
+        # Seed 10 keeps all three fiat imports aboard at epoch 0 and
+        # reproduces the one fomite transmission event at 72 epochs.
+        spec.random_seed = 10
         # NORO-HAND-RESERVOIR-01: the shipped wash_reuptake arm widens the
         # fomite requester set to every occupant, which reorders the shared
         # RNG stream again and leaves this seed's fixture sterile. The
