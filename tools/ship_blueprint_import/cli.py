@@ -76,6 +76,7 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
         allowed_roots=_roots(),
         copy_graphics=not args.no_graphics,
         require_approved=bool(args.require_approved),
+        source_credit=args.source_credit,
     )
     print(
         f"Synthesized {result['zone_count']} zones → {result['output_dir']}\n"
@@ -91,6 +92,7 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
             allowed_roots=_roots(),
             hobbyist=True,
             run_offline_gate=True,
+            source_credit=args.source_credit,
         )
         print(
             f"Contam starter: {cre['prj_path']} "
@@ -111,6 +113,7 @@ def cmd_author_contam(args: argparse.Namespace) -> int:
         allowed_roots=_roots(),
         hobbyist=not args.no_hobbyist,
         run_offline_gate=not args.skip_gate,
+        source_credit=args.source_credit,
     )
     print(
         f"ContamW starter for {result['platform_id']}\n"
@@ -222,6 +225,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Also emit ContamW starter PRJ (Target B) after synthesize",
     )
+    p_sy.add_argument(
+        "--source-credit",
+        default=None,
+        help="Source/credit line for the drawings (e.g. museum collection + URL); "
+        "written into systems_notes.{json,md}, CONTAM_HANDOFF.md and import_provenance.json",
+    )
     p_sy.set_defaults(func=cmd_synthesize)
 
     p_ac = sub.add_parser(
@@ -244,6 +253,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--skip-gate",
         action="store_true",
         help="Skip offline PRJ parse/simplify gate",
+    )
+    p_ac.add_argument(
+        "--source-credit",
+        default=None,
+        help="Source/credit line for the drawings (e.g. museum collection + URL); "
+        "written into CONTAM_HANDOFF.md",
     )
     p_ac.set_defaults(func=cmd_author_contam)
 

@@ -1,0 +1,4313 @@
+{
+  "rows": [
+    {
+      "platform": "bolster_ars38",
+      "drainage": {
+        "zones": 24,
+        "retained_frac_final": 0.37089540371131186,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.43087272715822106
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.39793709911368585
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.37089540371131186
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Main",
+            "retained_mass": 6.7276
+          },
+          {
+            "zone": "Focsle_Deck_Open",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Focsle_Open_Aft",
+            "retained_mass": 0.6376
+          },
+          {
+            "zone": "Salvage_Deck",
+            "retained_mass": 0.413
+          },
+          {
+            "zone": "Gun_Tub_Fwd",
+            "retained_mass": 0.065
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 90,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm"
+            },
+            {
+              "class": "corpsman",
+              "pin": "Sick_Bay"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 17,
+          "never_occupied_interior": [
+            "Engine_Rm",
+            "HD_Main",
+            "Motor_Rm",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Radio_Rm",
+              "peak": 19,
+              "cap": 2.0
+            },
+            {
+              "zone": "Wardroom",
+              "peak": 50,
+              "cap": 8.0
+            },
+            {
+              "zone": "Bridge_Lower",
+              "peak": 20,
+              "cap": 4.0
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "peak": 18,
+              "cap": 8.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 17,
+              "cap": 10.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 7,
+              "cap": 5.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Bridge_Lower",
+              "share": 0.19
+            },
+            {
+              "zone": "Radio_Rm",
+              "share": 0.16
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "share": 0.156
+            }
+          ],
+          "home_zone_distinct": 5,
+          "home_on_manifest_berth_frac": 0.567,
+          "top_home_zones": [
+            {
+              "zone": "Bridge_Lower",
+              "n": 20
+            },
+            {
+              "zone": "Radio_Rm",
+              "n": 19
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "n": 18
+            },
+            {
+              "zone": "CPO_Quarters",
+              "n": 17
+            },
+            {
+              "zone": "Crew_Quarters",
+              "n": 16
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 15,
+          "never_occupied_interior": [
+            "Bridge_Lower",
+            "Engine_Rm",
+            "HD_Main",
+            "Motor_Rm",
+            "Radio_Rm",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Mess_Deck",
+              "peak": 47,
+              "cap": 30.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 14,
+              "cap": 10.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 7,
+              "cap": 5.0
+            },
+            {
+              "zone": "Crew_Quarters",
+              "peak": 68,
+              "cap": 55.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Crew_Quarters",
+              "share": 0.518
+            },
+            {
+              "zone": "Salvage_Deck",
+              "share": 0.161
+            },
+            {
+              "zone": "CPO_Quarters",
+              "share": 0.107
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Crew_Quarters",
+              "n": 68
+            },
+            {
+              "zone": "CPO_Quarters",
+              "n": 14
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "n": 8
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "cannon_de701",
+      "drainage": {
+        "zones": 32,
+        "retained_frac_final": 0.13202715725953063,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.1693628528622537
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.1487181686937553
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.13202715725953063
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Crew",
+            "retained_mass": 3.0378
+          },
+          {
+            "zone": "Gun_Deck_Open",
+            "retained_mass": 0.9673
+          },
+          {
+            "zone": "Focsle_Deck",
+            "retained_mass": 0.149
+          },
+          {
+            "zone": "Island_Open_Aft",
+            "retained_mass": 0.0519
+          },
+          {
+            "zone": "Fantail",
+            "retained_mass": 0.0122
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 216,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm"
+            },
+            {
+              "class": "medical",
+              "pin": "Sick_Bay"
+            },
+            {
+              "class": "radio_signal",
+              "pin": "Radio_Rm"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 24,
+          "never_occupied_interior": [
+            "Engine_Rm",
+            "Fire_Rm_Aft",
+            "Fire_Rm_Fwd",
+            "HD_Crew",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear",
+            "Upper_Machinery"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Radio_Rm",
+              "peak": 32,
+              "cap": 2.0
+            },
+            {
+              "zone": "Wardroom",
+              "peak": 126,
+              "cap": 14.0
+            },
+            {
+              "zone": "Armory_Offices",
+              "peak": 28,
+              "cap": 4.0
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "peak": 37,
+              "cap": 10.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 42,
+              "cap": 16.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 13,
+              "cap": 8.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "CPO_Quarters",
+              "share": 0.156
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "share": 0.133
+            },
+            {
+              "zone": "Radio_Rm",
+              "share": 0.119
+            }
+          ],
+          "home_zone_distinct": 7,
+          "home_on_manifest_berth_frac": 0.713,
+          "top_home_zones": [
+            {
+              "zone": "CPO_Quarters",
+              "n": 43
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "n": 37
+            },
+            {
+              "zone": "Radio_Rm",
+              "n": 33
+            },
+            {
+              "zone": "Crew_Berthing_1P",
+              "n": 30
+            },
+            {
+              "zone": "Armory_Offices",
+              "n": 29
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 19,
+          "never_occupied_interior": [
+            "Armory_Offices",
+            "Crew_Berthing_1P",
+            "Crew_Berthing_Mid",
+            "Engine_Rm",
+            "Fire_Rm_Aft",
+            "Fire_Rm_Fwd",
+            "HD_Crew",
+            "Radio_Rm",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear",
+            "Upper_Machinery"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Aft_Berthing_1P",
+              "peak": 170,
+              "cap": 40.0
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "peak": 19,
+              "cap": 10.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 15,
+              "cap": 8.0
+            },
+            {
+              "zone": "Mess_Hall",
+              "peak": 112,
+              "cap": 60.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 27,
+              "cap": 16.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Aft_Berthing_1P",
+              "share": 0.542
+            },
+            {
+              "zone": "Focsle_Deck",
+              "share": 0.164
+            },
+            {
+              "zone": "CPO_Quarters",
+              "share": 0.087
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Aft_Berthing_1P",
+              "n": 170
+            },
+            {
+              "zone": "CPO_Quarters",
+              "n": 27
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "n": 19
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "castle_class_corvette",
+      "drainage": {
+        "zones": 19,
+        "retained_frac_final": 0.3489462922186468,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.38057772311707416
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.36416661655989263
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.3489462922186468
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Upper",
+            "retained_mass": 3.3189
+          },
+          {
+            "zone": "HD_Foc",
+            "retained_mass": 3.0612
+          },
+          {
+            "zone": "Quarterdeck",
+            "retained_mass": 0.1621
+          },
+          {
+            "zone": "Foc_Deck_Open",
+            "retained_mass": 0.0837
+          },
+          {
+            "zone": "Upper_Deck_Aft",
+            "retained_mass": 0.0011
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 99,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "stokers",
+              "pin": "Engine_Rm"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 12,
+          "never_occupied_interior": [
+            "Boiler_Rm",
+            "Engine_Rm",
+            "HD_Foc",
+            "HD_Upper",
+            "Shaft_Stores",
+            "Sick_Bay",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Galley",
+              "peak": 57,
+              "cap": 4.0
+            },
+            {
+              "zone": "Officer_Cabins",
+              "peak": 15,
+              "cap": 6.0
+            },
+            {
+              "zone": "Foc_Cabins",
+              "peak": 24,
+              "cap": 14.0
+            },
+            {
+              "zone": "Mess_Mid",
+              "peak": 24,
+              "cap": 20.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Foc_Cabins",
+              "share": 0.211
+            },
+            {
+              "zone": "Mess_Mid",
+              "share": 0.191
+            },
+            {
+              "zone": "Seamen_Mess",
+              "share": 0.179
+            }
+          ],
+          "home_zone_distinct": 5,
+          "home_on_manifest_berth_frac": 0.747,
+          "top_home_zones": [
+            {
+              "zone": "Mess_Mid",
+              "n": 25
+            },
+            {
+              "zone": "Foc_Cabins",
+              "n": 24
+            },
+            {
+              "zone": "Seamen_Mess",
+              "n": 22
+            },
+            {
+              "zone": "Officer_Cabins",
+              "n": 15
+            },
+            {
+              "zone": "Stokers_Mess",
+              "n": 13
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 10,
+          "never_occupied_interior": [
+            "Boiler_Rm",
+            "Engine_Rm",
+            "HD_Foc",
+            "HD_Upper",
+            "Mess_Mid",
+            "Seamen_Mess",
+            "Shaft_Stores",
+            "Sick_Bay",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Galley",
+              "peak": 56,
+              "cap": 4.0
+            },
+            {
+              "zone": "Stokers_Mess",
+              "peak": 71,
+              "cap": 18.0
+            },
+            {
+              "zone": "Officer_Cabins",
+              "peak": 10,
+              "cap": 6.0
+            },
+            {
+              "zone": "Foc_Cabins",
+              "peak": 18,
+              "cap": 14.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Stokers_Mess",
+              "share": 0.489
+            },
+            {
+              "zone": "Foc_Deck_Open",
+              "share": 0.188
+            },
+            {
+              "zone": "Foc_Cabins",
+              "share": 0.128
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Stokers_Mess",
+              "n": 71
+            },
+            {
+              "zone": "Foc_Cabins",
+              "n": 18
+            },
+            {
+              "zone": "Officer_Cabins",
+              "n": 10
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "classic_cruise_1900",
+      "drainage": {
+        "zones": 79,
+        "retained_frac_final": 0.26475922648066336,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.26870409879297597
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.2671201660815369
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.26475922648066336
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_4M_M",
+            "retained_mass": 1.3207
+          },
+          {
+            "zone": "HD_5L_F",
+            "retained_mass": 1.3207
+          },
+          {
+            "zone": "HD_9L_F",
+            "retained_mass": 1.3131
+          },
+          {
+            "zone": "HD_1C_F",
+            "retained_mass": 1.2616
+          },
+          {
+            "zone": "HD_1C_M",
+            "retained_mass": 1.2616
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 1910,
+        "crew_source": "nominal_complement",
+        "pin_resolution": null,
+        "default": {
+          "visited_zones": 60,
+          "never_occupied_interior": [
+            "HD_0E_M",
+            "HD_10B_M",
+            "HD_1C_F",
+            "HD_1C_M",
+            "HD_2C_F",
+            "HD_2C_M",
+            "HD_4M_F_1",
+            "HD_4M_F_2",
+            "HD_4M_M",
+            "HD_5L_F",
+            "HD_5L_M",
+            "HD_7C_F",
+            "HD_7C_M",
+            "HD_8C_F",
+            "HD_8C_M",
+            "HD_9L_F",
+            "HD_9L_M",
+            "IsolRoom",
+            "MedCenter"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Engine_Room",
+              "peak": 199,
+              "cap": 20.0
+            },
+            {
+              "zone": "CC_D1_F",
+              "peak": 225,
+              "cap": 95.0
+            },
+            {
+              "zone": "MainGalley",
+              "peak": 103,
+              "cap": 60.0
+            },
+            {
+              "zone": "Bridge",
+              "peak": 16,
+              "cap": 10.0
+            },
+            {
+              "zone": "Library",
+              "peak": 42,
+              "cap": 30.0
+            },
+            {
+              "zone": "CC_D3_F",
+              "peak": 130,
+              "cap": 95.0
+            },
+            {
+              "zone": "PC_D4_S_M",
+              "peak": 50,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D7_P_M",
+              "peak": 48,
+              "cap": 37.0
+            },
+            {
+              "zone": "PhotoShops",
+              "peak": 99,
+              "cap": 80.0
+            },
+            {
+              "zone": "PC_D8_S_F",
+              "peak": 44,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D5_S_M",
+              "peak": 44,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D8_P_A",
+              "peak": 43,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D7_S_A",
+              "peak": 43,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D4_P_F",
+              "peak": 43,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D5_S_F",
+              "peak": 42,
+              "cap": 37.0
+            },
+            {
+              "zone": "Laundry",
+              "peak": 17,
+              "cap": 15.0
+            },
+            {
+              "zone": "PC_D5_P_M",
+              "peak": 40,
+              "cap": 37.0
+            },
+            {
+              "zone": "Promenade",
+              "peak": 323,
+              "cap": 300.0
+            },
+            {
+              "zone": "PC_D6_S_M",
+              "peak": 39,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D4_S_F",
+              "peak": 39,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D7_S_M",
+              "peak": 39,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D6_P_F",
+              "peak": 39,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D6_S_F",
+              "peak": 38,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D4_S_A",
+              "peak": 38,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D9_S_A",
+              "peak": 38,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D7_S_F",
+              "peak": 38,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D7_P_F",
+              "peak": 38,
+              "cap": 37.0
+            },
+            {
+              "zone": "PC_D5_S_A",
+              "peak": 38,
+              "cap": 37.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "MainTheater",
+              "share": 0.073
+            },
+            {
+              "zone": "Engine_Room",
+              "share": 0.072
+            },
+            {
+              "zone": "CC_D3_F",
+              "share": 0.05
+            }
+          ],
+          "home_zone_distinct": 42,
+          "home_on_manifest_berth_frac": null,
+          "top_home_zones": [
+            {
+              "zone": "CC_D1_F",
+              "n": 239
+            },
+            {
+              "zone": "CC_D3_F",
+              "n": 148
+            },
+            {
+              "zone": "PC_D4_S_M",
+              "n": 50
+            },
+            {
+              "zone": "CC_D3_A",
+              "n": 50
+            },
+            {
+              "zone": "PC_D7_P_M",
+              "n": 48
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "davison_dd618",
+      "drainage": {
+        "zones": 39,
+        "retained_frac_final": 0.25862579303411826,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.2676441319739449
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.26224875144736914
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.25862579303411826
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Crew_Aft",
+            "retained_mass": 3.1999
+          },
+          {
+            "zone": "HD_Fwd",
+            "retained_mass": 2.8332
+          },
+          {
+            "zone": "After_Deckhouse_Top",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Focsle_Open",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Midship_Deckhouse",
+            "retained_mass": 1.0
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 283,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "officers",
+              "pin": "Nav_Bridge_Sonar"
+            },
+            {
+              "class": "cpo",
+              "pin": "Mid_Services"
+            },
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm_Fwd"
+            },
+            {
+              "class": "ops_radio",
+              "pin": "CIC_Block"
+            },
+            {
+              "class": "medical",
+              "pin": "Mid_Services"
+            },
+            {
+              "class": "supply",
+              "pin": "Provisions_2P"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 23,
+          "never_occupied_interior": [
+            "Engine_Rm_Aft",
+            "Engine_Rm_Fwd",
+            "Fire_Rm_Aft",
+            "Fire_Rm_Fwd",
+            "Fuel_Tanks_2P",
+            "Fuel_Tanks_Hold",
+            "HD_Crew_Aft",
+            "HD_Fwd",
+            "Magazine_Aft_2P",
+            "Magazine_Fwd_2P",
+            "Magazines_Hold",
+            "Peak_Hold",
+            "Shaft_Alley",
+            "Steering_Gear",
+            "Uptake_Aft",
+            "Uptake_Fwd"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Aft_Shops",
+              "peak": 21,
+              "cap": 6.0
+            },
+            {
+              "zone": "Galley_Mess",
+              "peak": 166,
+              "cap": 50.0
+            },
+            {
+              "zone": "Mid_Services",
+              "peak": 14,
+              "cap": 6.0
+            },
+            {
+              "zone": "Radio_Central",
+              "peak": 17,
+              "cap": 8.0
+            },
+            {
+              "zone": "Workshops_Mid",
+              "peak": 15,
+              "cap": 8.0
+            },
+            {
+              "zone": "Officers_Country_Focsle",
+              "peak": 18,
+              "cap": 10.0
+            },
+            {
+              "zone": "Nav_Bridge_Sonar",
+              "peak": 22,
+              "cap": 14.0
+            },
+            {
+              "zone": "WR_Block",
+              "peak": 25,
+              "cap": 20.0
+            },
+            {
+              "zone": "CIC_Block",
+              "peak": 13,
+              "cap": 12.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "WR_Block",
+              "share": 0.068
+            },
+            {
+              "zone": "Nav_Bridge_Sonar",
+              "share": 0.064
+            },
+            {
+              "zone": "Fwd_Stores_1P",
+              "share": 0.063
+            }
+          ],
+          "home_zone_distinct": 16,
+          "home_on_manifest_berth_frac": 0.261,
+          "top_home_zones": [
+            {
+              "zone": "WR_Block",
+              "n": 25
+            },
+            {
+              "zone": "Nav_Bridge_Sonar",
+              "n": 24
+            },
+            {
+              "zone": "Fwd_Stores_1P",
+              "n": 23
+            },
+            {
+              "zone": "Aft_Shops",
+              "n": 21
+            },
+            {
+              "zone": "Crew_Qtrs_1P",
+              "n": 20
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 8,
+          "never_occupied_interior": [
+            "Aft_Shops",
+            "Aft_Stores_2P",
+            "CIC_Block",
+            "CPO_Quarters",
+            "Crew_Berthing_1P",
+            "Crew_Qtrs_1P",
+            "Engine_Rm_Aft",
+            "Engine_Rm_Fwd",
+            "Fire_Rm_Aft",
+            "Fire_Rm_Fwd",
+            "Fuel_Tanks_2P",
+            "Fuel_Tanks_Hold",
+            "Fwd_Stores_1P",
+            "HD_Crew_Aft",
+            "HD_Fwd",
+            "Magazine_Aft_2P",
+            "Magazine_Fwd_2P",
+            "Magazines_Hold",
+            "Mid_Services",
+            "Nav_Bridge_Sonar",
+            "Officers_Country_Focsle",
+            "Peak_Hold",
+            "Provisions_2P",
+            "Radio_Central",
+            "Shaft_Alley",
+            "Steering_Gear",
+            "Uptake_Aft",
+            "Uptake_Fwd",
+            "Workshops_Mid"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "WR_Block",
+              "peak": 283,
+              "cap": 20.0
+            },
+            {
+              "zone": "Galley_Mess",
+              "peak": 162,
+              "cap": 50.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "WR_Block",
+              "share": 0.684
+            },
+            {
+              "zone": "Focsle_Open",
+              "share": 0.17
+            },
+            {
+              "zone": "Galley_Mess",
+              "share": 0.045
+            }
+          ],
+          "home_zone_distinct": 1,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "WR_Block",
+              "n": 283
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "destroyer_baseline",
+      "drainage": {
+        "zones": 9,
+        "retained_frac_final": 0.5477679391750487,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.5477679391750487
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.5477679391750487
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.5477679391750487
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_MAIN_M",
+            "retained_mass": 1.946
+          },
+          {
+            "zone": "HD_MAIN_F",
+            "retained_mass": 1.6307
+          },
+          {
+            "zone": "HD_UPPER_M",
+            "retained_mass": 1.3532
+          }
+        ]
+      },
+      "occupancy": {
+        "skipped": "no crew source (no manifest, no nominal_complement)"
+      }
+    },
+    {
+      "platform": "enterprise_constitution_tos",
+      "drainage": {
+        "zones": 63,
+        "retained_frac_final": 0.4131834483718923,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.41318344837490967
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.4131834483718923
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.4131834483718923
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_4S_F",
+            "retained_mass": 1.7237
+          },
+          {
+            "zone": "HD_4S_M",
+            "retained_mass": 1.7237
+          },
+          {
+            "zone": "HD_6S_M",
+            "retained_mass": 1.6142
+          },
+          {
+            "zone": "HD_5S_F",
+            "retained_mass": 1.4826
+          },
+          {
+            "zone": "HD_5S_M",
+            "retained_mass": 1.4826
+          }
+        ]
+      },
+      "occupancy": {
+        "skipped": "no crew source (no manifest, no nominal_complement)"
+      }
+    },
+    {
+      "platform": "enterprise_galaxy_tng",
+      "drainage": {
+        "zones": 127,
+        "retained_frac_final": 0.35608367620791326,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.35608367621289094
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.35608367620791326
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.35608367620791326
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_13S_F",
+            "retained_mass": 1.4368
+          },
+          {
+            "zone": "HD_6S_M",
+            "retained_mass": 1.4368
+          },
+          {
+            "zone": "HD_13S_M",
+            "retained_mass": 1.4368
+          },
+          {
+            "zone": "HD_6S_F",
+            "retained_mass": 1.4368
+          },
+          {
+            "zone": "HD_1S_M",
+            "retained_mass": 1.3102
+          }
+        ]
+      },
+      "occupancy": {
+        "skipped": "no crew source (no manifest, no nominal_complement)"
+      }
+    },
+    {
+      "platform": "expedition_cruise_300",
+      "drainage": {
+        "zones": 36,
+        "retained_frac_final": 0.3637482839580606,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.3740845023723219
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.3698306292414152
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.3637482839580606
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_5P_F",
+            "retained_mass": 1.2877
+          },
+          {
+            "zone": "HD_5P_M",
+            "retained_mass": 1.2398
+          },
+          {
+            "zone": "HD_6E_F",
+            "retained_mass": 1.197
+          },
+          {
+            "zone": "HD_6E_M",
+            "retained_mass": 1.197
+          },
+          {
+            "zone": "HD_7S_F",
+            "retained_mass": 1.1478
+          }
+        ]
+      },
+      "occupancy": {
+        "skipped": "no crew source (no manifest, no nominal_complement)"
+      }
+    },
+    {
+      "platform": "expedition_cruise_450",
+      "drainage": {
+        "zones": 47,
+        "retained_frac_final": 0.3727886948231059,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.3793669290732309
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.3766609297456389
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.3727886948231059
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_5P_F",
+            "retained_mass": 1.7813
+          },
+          {
+            "zone": "HD_5P_M",
+            "retained_mass": 1.6511
+          },
+          {
+            "zone": "HD_7S_F",
+            "retained_mass": 1.3946
+          },
+          {
+            "zone": "HD_2C_M",
+            "retained_mass": 1.3093
+          },
+          {
+            "zone": "HD_4V_F",
+            "retained_mass": 1.2997
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 450,
+        "crew_source": "nominal_complement",
+        "pin_resolution": null,
+        "default": {
+          "visited_zones": 33,
+          "never_occupied_interior": [
+            "HD_2C_F",
+            "HD_2C_M",
+            "HD_3C_F",
+            "HD_3C_M",
+            "HD_4V_F",
+            "HD_4V_M",
+            "HD_5P_F",
+            "HD_5P_M",
+            "HD_6E_F",
+            "HD_6E_M",
+            "HD_7S_F",
+            "HD_7S_M",
+            "HD_8B_M",
+            "MedBay"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Engine_Room",
+              "peak": 47,
+              "cap": 15.0
+            },
+            {
+              "zone": "CC_D2_A",
+              "peak": 60,
+              "cap": 40.0
+            },
+            {
+              "zone": "PC_D5_P_A",
+              "peak": 33,
+              "cap": 25.0
+            },
+            {
+              "zone": "PC_D4_P_A",
+              "peak": 32,
+              "cap": 25.0
+            },
+            {
+              "zone": "PC_D6_P_A",
+              "peak": 32,
+              "cap": 25.0
+            },
+            {
+              "zone": "PC_D6_S_A",
+              "peak": 29,
+              "cap": 25.0
+            },
+            {
+              "zone": "PC_D4_S_A",
+              "peak": 29,
+              "cap": 25.0
+            },
+            {
+              "zone": "PC_D5_S_F",
+              "peak": 26,
+              "cap": 25.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "CC_D2_A",
+              "share": 0.087
+            },
+            {
+              "zone": "TheaterLng",
+              "share": 0.077
+            },
+            {
+              "zone": "Engine_Room",
+              "share": 0.071
+            }
+          ],
+          "home_zone_distinct": 16,
+          "home_on_manifest_berth_frac": null,
+          "top_home_zones": [
+            {
+              "zone": "CC_D2_A",
+              "n": 83
+            },
+            {
+              "zone": "PC_D5_P_A",
+              "n": 33
+            },
+            {
+              "zone": "PC_D4_P_A",
+              "n": 32
+            },
+            {
+              "zone": "PC_D6_P_A",
+              "n": 32
+            },
+            {
+              "zone": "PC_D4_S_A",
+              "n": 29
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "fletcher_class_destroyer",
+      "drainage": {
+        "zones": 33,
+        "retained_frac_final": 0.5607811371248473,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.5607811371248473
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.5607811371248473
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.5607811371248473
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_MAINDEC_M",
+            "retained_mass": 1.8735
+          },
+          {
+            "zone": "HD_02L_M",
+            "retained_mass": 1.7256
+          },
+          {
+            "zone": "HD_MAINDEC_F",
+            "retained_mass": 1.6987
+          },
+          {
+            "zone": "HD_HOLD_M",
+            "retained_mass": 1.4746
+          },
+          {
+            "zone": "HD_HOLD_F",
+            "retained_mass": 1.4746
+          }
+        ]
+      },
+      "occupancy": {
+        "skipped": "no crew source (no manifest, no nominal_complement)"
+      }
+    },
+    {
+      "platform": "gordon_gunter_r338",
+      "drainage": {
+        "zones": 35,
+        "retained_frac_final": 0.4248122397454893,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.45509621966316816
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.4430868866552755
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.4248122397454893
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Focsle",
+            "retained_mass": 3.2773
+          },
+          {
+            "zone": "HD_Upper",
+            "retained_mass": 3.2773
+          },
+          {
+            "zone": "HD_Bridge",
+            "retained_mass": 3.1916
+          },
+          {
+            "zone": "HD_Main",
+            "retained_mass": 2.952
+          },
+          {
+            "zone": "Mission_Deck",
+            "retained_mass": 0.7474
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 35,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "engineers",
+              "pin": "Main_Gen_Rm"
+            },
+            {
+              "class": "medical_officer",
+              "pin": "Med_Trtmt"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 18,
+          "never_occupied_interior": [
+            "AC_Mchry",
+            "Bosn_Workshop",
+            "Crew_Lounge",
+            "Emer_Gen_Rm",
+            "Exercise_Rm",
+            "Genl_Workshop",
+            "HD_Bridge",
+            "HD_Focsle",
+            "HD_Main",
+            "HD_Upper",
+            "Laundry",
+            "Main_Gen_Rm",
+            "Med_Trtmt",
+            "Prpln_Motor",
+            "Sewage_Mchry",
+            "Shaft_Alley",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Crew_SR_Foc",
+              "peak": 8,
+              "cap": 6.0
+            },
+            {
+              "zone": "Officer_SR",
+              "peak": 12,
+              "cap": 10.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Officer_SR",
+              "share": 0.275
+            },
+            {
+              "zone": "Scientist_SR",
+              "share": 0.186
+            },
+            {
+              "zone": "Crew_SR_Foc",
+              "share": 0.171
+            }
+          ],
+          "home_zone_distinct": 4,
+          "home_on_manifest_berth_frac": 0.771,
+          "top_home_zones": [
+            {
+              "zone": "Officer_SR",
+              "n": 12
+            },
+            {
+              "zone": "Scientist_SR",
+              "n": 8
+            },
+            {
+              "zone": "Crew_SR_Foc",
+              "n": 8
+            },
+            {
+              "zone": "Crew_SR_Main",
+              "n": 7
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 15,
+          "never_occupied_interior": [
+            "AC_Mchry",
+            "Bosn_Workshop",
+            "Crew_Lounge",
+            "Crew_SR_Foc",
+            "Emer_Gen_Rm",
+            "Exercise_Rm",
+            "Genl_Workshop",
+            "HD_Bridge",
+            "HD_Focsle",
+            "HD_Main",
+            "HD_Upper",
+            "Laundry",
+            "Main_Gen_Rm",
+            "Med_Trtmt",
+            "Prov_Reefers",
+            "Prpln_Motor",
+            "Recreation",
+            "Sewage_Mchry",
+            "Shaft_Alley",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [],
+          "night_top3": [
+            {
+              "zone": "Scientist_SR",
+              "share": 0.325
+            },
+            {
+              "zone": "Crew_SR_Main",
+              "share": 0.2
+            },
+            {
+              "zone": "Officer_SR",
+              "share": 0.193
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Scientist_SR",
+              "n": 15
+            },
+            {
+              "zone": "Officer_SR",
+              "n": 10
+            },
+            {
+              "zone": "Crew_SR_Main",
+              "n": 10
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "independence_cvl26",
+      "drainage": {
+        "zones": 46,
+        "retained_frac_final": 0.18249004050465847,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.18261582736099757
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.18249028309573173
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.18249004050465847
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Main",
+            "retained_mass": 3.386
+          },
+          {
+            "zone": "HD_3rd",
+            "retained_mass": 2.5249
+          },
+          {
+            "zone": "HD_2nd",
+            "retained_mass": 2.4836
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 1566,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "officers",
+              "pin": "Nav_Bridge"
+            },
+            {
+              "class": "warrant_officers",
+              "pin": "Shops_Aft"
+            },
+            {
+              "class": "engine_room_gang",
+              "pin": "Aft_Engine_Rm"
+            },
+            {
+              "class": "medical_admin",
+              "pin": "Sick_Bay"
+            },
+            {
+              "class": "seamen_general",
+              "pin": "Shops_Aft"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 34,
+          "never_occupied_interior": [
+            "Aft_Engine_Rm",
+            "Aft_Fire_Rm",
+            "Funnel_Uptake",
+            "Fwd_Engine_Rm",
+            "Fwd_Fire_Rm",
+            "HD_2nd",
+            "HD_3rd",
+            "HD_Main",
+            "Hangar_Trunk_Space",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Uptakes_Main"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Wardroom",
+              "peak": 856,
+              "cap": 114.0
+            },
+            {
+              "zone": "Nav_Bridge",
+              "peak": 105,
+              "cap": 15.0
+            },
+            {
+              "zone": "Air_Ops_Rooms",
+              "peak": 91,
+              "cap": 30.0
+            },
+            {
+              "zone": "Island_Upper",
+              "peak": 40,
+              "cap": 15.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 98,
+              "cap": 40.0
+            },
+            {
+              "zone": "Shops_Aft",
+              "peak": 95,
+              "cap": 40.0
+            },
+            {
+              "zone": "Flight_Deck",
+              "peak": 204,
+              "cap": 150.0
+            },
+            {
+              "zone": "Officers_Country",
+              "peak": 110,
+              "cap": 85.0
+            },
+            {
+              "zone": "CPO_Berthing",
+              "peak": 84,
+              "cap": 68.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Crew_Berthing_3D",
+              "share": 0.06
+            },
+            {
+              "zone": "Officers_Country",
+              "share": 0.054
+            },
+            {
+              "zone": "Nav_Bridge",
+              "share": 0.053
+            }
+          ],
+          "home_zone_distinct": 16,
+          "home_on_manifest_berth_frac": 0.322,
+          "top_home_zones": [
+            {
+              "zone": "Crew_Berthing_3D",
+              "n": 116
+            },
+            {
+              "zone": "Officers_Country",
+              "n": 112
+            },
+            {
+              "zone": "Nav_Bridge",
+              "n": 108
+            },
+            {
+              "zone": "Provisions_1P",
+              "n": 104
+            },
+            {
+              "zone": "Provisions_3D",
+              "n": 101
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 19,
+          "never_occupied_interior": [
+            "Aft_Engine_Rm",
+            "Aft_Fire_Rm",
+            "Air_Ops_Rooms",
+            "CPO_Berthing",
+            "Central_Station",
+            "Crew_Berthing_1P",
+            "Crew_Berthing_2D",
+            "Crew_Berthing_3D",
+            "Crew_Berthing_Main",
+            "Funnel_Uptake",
+            "Fwd_Engine_Rm",
+            "Fwd_Fire_Rm",
+            "Fwd_Rooms_2D",
+            "HD_2nd",
+            "HD_3rd",
+            "HD_Main",
+            "Hangar_Trunk_Space",
+            "Nav_Bridge",
+            "Provisions_1P",
+            "Provisions_3D",
+            "Shaft_Alley",
+            "Shops_Aft",
+            "Sick_Bay",
+            "Uptakes_Main",
+            "Workshops_3D"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Officers_Country",
+              "peak": 1566,
+              "cap": 85.0
+            },
+            {
+              "zone": "Island_Upper",
+              "peak": 84,
+              "cap": 15.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 141,
+              "cap": 40.0
+            },
+            {
+              "zone": "CPO_Mess",
+              "peak": 177,
+              "cap": 60.0
+            },
+            {
+              "zone": "Crew_Mess",
+              "peak": 674,
+              "cap": 300.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Officers_Country",
+              "share": 0.688
+            },
+            {
+              "zone": "Gallery_Deck",
+              "share": 0.088
+            },
+            {
+              "zone": "Hangar_Fwd",
+              "share": 0.079
+            }
+          ],
+          "home_zone_distinct": 1,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Officers_Country",
+              "n": 1566
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "legend_class_nsc",
+      "drainage": {
+        "zones": 27,
+        "retained_frac_final": 0.41772712941290313,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.41772712941290313
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.41772712941290313
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.41772712941290313
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_MAINDEC_M",
+            "retained_mass": 1.7498
+          },
+          {
+            "zone": "HD_MAINDEC_F",
+            "retained_mass": 1.6427
+          },
+          {
+            "zone": "HD_01L_F",
+            "retained_mass": 1.1695
+          },
+          {
+            "zone": "HD_01L_M",
+            "retained_mass": 1.1695
+          },
+          {
+            "zone": "HD_WEATHER_M",
+            "retained_mass": 1.1364
+          }
+        ]
+      },
+      "occupancy": {
+        "skipped": "no crew source (no manifest, no nominal_complement)"
+      }
+    },
+    {
+      "platform": "mega_cruise_5000",
+      "drainage": {
+        "zones": 192,
+        "retained_frac_final": 0.3798342379833419,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.3810347005178705
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.3806326318142821
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.3798342379833419
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_6A_M",
+            "retained_mass": 1.3429
+          },
+          {
+            "zone": "HD_6A_F_2",
+            "retained_mass": 1.3429
+          },
+          {
+            "zone": "HD_6A_F_1",
+            "retained_mass": 1.3429
+          },
+          {
+            "zone": "HD_5P_F_1",
+            "retained_mass": 1.1961
+          },
+          {
+            "zone": "HD_5P_F_2",
+            "retained_mass": 1.1961
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 7000,
+        "crew_source": "nominal_complement",
+        "pin_resolution": null,
+        "default": {
+          "visited_zones": 127,
+          "never_occupied_interior": [
+            "HD_0E_M",
+            "HD_0T_F",
+            "HD_0T_M",
+            "HD_14S_F",
+            "HD_14S_M",
+            "HD_14Y_F",
+            "HD_14Y_M",
+            "HD_15P_F_1",
+            "HD_15P_F_2",
+            "HD_15P_F_3",
+            "HD_15P_F_4",
+            "HD_15P_M_1",
+            "HD_15P_M_2",
+            "HD_15S_F",
+            "HD_15S_M",
+            "HD_16BU_F_1",
+            "HD_16BU_F_2",
+            "HD_16BU_M_1",
+            "HD_16BU_M_2",
+            "HD_16B_M",
+            "HD_16S_F",
+            "HD_16S_M",
+            "HD_1E_M",
+            "HD_1ST_F",
+            "HD_1ST_M",
+            "HD_1S_F",
+            "HD_1S_M",
+            "HD_2C_F",
+            "HD_2C_M",
+            "HD_2M_F",
+            "HD_2M_M",
+            "HD_3C_F",
+            "HD_3C_M",
+            "HD_3D_F",
+            "HD_3D_M",
+            "HD_3E_F_1",
+            "HD_3E_F_2",
+            "HD_3E_M",
+            "HD_3S_F",
+            "HD_3S_M",
+            "HD_4D_F",
+            "HD_4D_M",
+            "HD_4E_F",
+            "HD_4E_M",
+            "HD_4T_F_1",
+            "HD_4T_F_2",
+            "HD_4T_M",
+            "HD_5P_F_1",
+            "HD_5P_F_2",
+            "HD_5P_F_3",
+            "HD_5P_M_1",
+            "HD_5P_M_2",
+            "HD_6A_F_1",
+            "HD_6A_F_2",
+            "HD_6A_M",
+            "HD_6P_F",
+            "HD_6P_M",
+            "HD_6S_F",
+            "HD_6S_M",
+            "HD_8C_F_1",
+            "HD_8C_F_2",
+            "HD_8C_M_1",
+            "HD_8C_M_2",
+            "Isolation_Ward",
+            "Medical_Center"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Engine_Room_Aft",
+              "peak": 727,
+              "cap": 60.0
+            },
+            {
+              "zone": "CC_D3_F",
+              "peak": 716,
+              "cap": 170.0
+            },
+            {
+              "zone": "SpecGalley",
+              "peak": 209,
+              "cap": 100.0
+            },
+            {
+              "zone": "EngControl",
+              "peak": 32,
+              "cap": 16.0
+            },
+            {
+              "zone": "Bridge",
+              "peak": 27,
+              "cap": 16.0
+            },
+            {
+              "zone": "WasteTreat",
+              "peak": 39,
+              "cap": 25.0
+            },
+            {
+              "zone": "CC_D2_F",
+              "peak": 223,
+              "cap": 170.0
+            },
+            {
+              "zone": "CC_D4_F",
+              "peak": 215,
+              "cap": 170.0
+            },
+            {
+              "zone": "Main_Galley_Aft",
+              "peak": 181,
+              "cap": 160.0
+            },
+            {
+              "zone": "PC_D7_P_M",
+              "peak": 75,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D14_C_M",
+              "peak": 75,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D12_C_A",
+              "peak": 75,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D11_S_A",
+              "peak": 73,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D8_S_F",
+              "peak": 73,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D9_C_F",
+              "peak": 72,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D7_P_A",
+              "peak": 71,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D11_C_A",
+              "peak": 71,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D12_S_M",
+              "peak": 70,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D9_C_M",
+              "peak": 69,
+              "cap": 67.0
+            },
+            {
+              "zone": "PC_D12_P_M",
+              "peak": 69,
+              "cap": 67.0
+            },
+            {
+              "zone": "Casino",
+              "peak": 801,
+              "cap": 800.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Engine_Room_Aft",
+              "share": 0.07
+            },
+            {
+              "zone": "Royal_Promenade",
+              "share": 0.044
+            },
+            {
+              "zone": "CC_D3_F",
+              "share": 0.036
+            }
+          ],
+          "home_zone_distinct": 93,
+          "home_on_manifest_berth_frac": null,
+          "top_home_zones": [
+            {
+              "zone": "CC_D3_F",
+              "n": 778
+            },
+            {
+              "zone": "CC_D4_F",
+              "n": 246
+            },
+            {
+              "zone": "CC_D2_F",
+              "n": 245
+            },
+            {
+              "zone": "CC_D1_F",
+              "n": 106
+            },
+            {
+              "zone": "CC_D1_A",
+              "n": 103
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "messy_cruise_500",
+      "drainage": {
+        "zones": 130,
+        "retained_frac_final": 0.5386091116905651,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.5404412923576917
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.5398277858724736
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.5386091116905651
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_5P_F_1",
+            "retained_mass": 1.0917
+          },
+          {
+            "zone": "HD_5P_F_3",
+            "retained_mass": 1.0917
+          },
+          {
+            "zone": "HD_5P_F_2",
+            "retained_mass": 1.0917
+          },
+          {
+            "zone": "HD_4E_F",
+            "retained_mass": 1.0825
+          },
+          {
+            "zone": "HD_4T_M",
+            "retained_mass": 1.0813
+          }
+        ]
+      },
+      "occupancy": {
+        "skipped": "no crew source (no manifest, no nominal_complement)"
+      }
+    },
+    {
+      "platform": "midway_cv41",
+      "drainage": {
+        "zones": 65,
+        "retained_frac_final": 0.1122432763657503,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.11229298205479267
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.11224337642100249
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.1122432763657503
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_02",
+            "retained_mass": 2.9909
+          },
+          {
+            "zone": "HD_2nd",
+            "retained_mass": 2.4704
+          },
+          {
+            "zone": "HD_3rd",
+            "retained_mass": 1.8345
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 4712,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "officers",
+              "pin": "Nav_Bridge"
+            },
+            {
+              "class": "air_wing_officers",
+              "pin": "Air_Ops_Rooms"
+            },
+            {
+              "class": "cpo",
+              "pin": "CPO_3D"
+            },
+            {
+              "class": "engine_room_gang",
+              "pin": "Aft_Machinery_2P"
+            },
+            {
+              "class": "medical_admin",
+              "pin": "Sick_Bay"
+            },
+            {
+              "class": "radio_ops",
+              "pin": "PriFly_FlagPlot"
+            },
+            {
+              "class": "seamen_general",
+              "pin": "Work_Centers_Main"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 43,
+          "never_occupied_interior": [
+            "AC_Machinery_02",
+            "Aft_Diesel_3D",
+            "Aft_Machinery_2P",
+            "Aux_Machinery_1P",
+            "Catapult_Accum_01",
+            "Catapult_Machinery_02",
+            "Elev_Mach_3D",
+            "Evaporator_1P",
+            "Funnel_Uptake",
+            "Fwd_Diesel_2D",
+            "Fwd_Machinery_2P",
+            "Fwd_Machinery_4D",
+            "HD_02",
+            "HD_2nd",
+            "HD_3rd",
+            "Jet_Test_01",
+            "Shaft_Alley_Hold",
+            "Shaft_Alleys_2P",
+            "Sick_Bay",
+            "Steering_Gear_4D",
+            "Turbo_Gen_1P",
+            "Uptakes_Main"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Wardroom_02",
+              "peak": 1190,
+              "cap": 60.0
+            },
+            {
+              "zone": "Wardroom_2D",
+              "peak": 1570,
+              "cap": 80.0
+            },
+            {
+              "zone": "Galley_2D",
+              "peak": 330,
+              "cap": 40.0
+            },
+            {
+              "zone": "Island_Upper",
+              "peak": 111,
+              "cap": 15.0
+            },
+            {
+              "zone": "Nav_Bridge",
+              "peak": 137,
+              "cap": 20.0
+            },
+            {
+              "zone": "PriFly_FlagPlot",
+              "peak": 136,
+              "cap": 30.0
+            },
+            {
+              "zone": "Shops_2D",
+              "peak": 151,
+              "cap": 40.0
+            },
+            {
+              "zone": "Work_Centers_Main",
+              "peak": 138,
+              "cap": 40.0
+            },
+            {
+              "zone": "Shops_4D",
+              "peak": 134,
+              "cap": 40.0
+            },
+            {
+              "zone": "Aviation_Shops_Main",
+              "peak": 162,
+              "cap": 50.0
+            },
+            {
+              "zone": "Hangar_Aft",
+              "peak": 535,
+              "cap": 200.0
+            },
+            {
+              "zone": "Flight_Deck",
+              "peak": 800,
+              "cap": 300.0
+            },
+            {
+              "zone": "CPO_2D",
+              "peak": 154,
+              "cap": 60.0
+            },
+            {
+              "zone": "Hangar_Fwd",
+              "peak": 999,
+              "cap": 400.0
+            },
+            {
+              "zone": "Air_Ops_Rooms",
+              "peak": 148,
+              "cap": 60.0
+            },
+            {
+              "zone": "Hangar_Mid",
+              "peak": 973,
+              "cap": 400.0
+            },
+            {
+              "zone": "AIMD_01",
+              "peak": 140,
+              "cap": 60.0
+            },
+            {
+              "zone": "Officers_Country_02",
+              "peak": 146,
+              "cap": 80.0
+            },
+            {
+              "zone": "CPO_3D",
+              "peak": 141,
+              "cap": 100.0
+            },
+            {
+              "zone": "Crew_Living_02",
+              "peak": 146,
+              "cap": 120.0
+            },
+            {
+              "zone": "Fwd_Messing_2D",
+              "peak": 303,
+              "cap": 300.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Hangar_Fwd",
+              "share": 0.037
+            },
+            {
+              "zone": "Hangar_Mid",
+              "share": 0.035
+            },
+            {
+              "zone": "Flight_Deck",
+              "share": 0.03
+            }
+          ],
+          "home_zone_distinct": 31,
+          "home_on_manifest_berth_frac": 0.194,
+          "top_home_zones": [
+            {
+              "zone": "Magazine_1P_Fwd",
+              "n": 174
+            },
+            {
+              "zone": "Crew_Berthing_3D_Fwd",
+              "n": 172
+            },
+            {
+              "zone": "Magazines_4D",
+              "n": 169
+            },
+            {
+              "zone": "Crew_Berthing_3D_Aft",
+              "n": 168
+            },
+            {
+              "zone": "Aviation_Shops_Main",
+              "n": 164
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 13,
+          "never_occupied_interior": [
+            "AC_Machinery_02",
+            "ADP_3D",
+            "AIMD_01",
+            "Aft_Diesel_3D",
+            "Aft_Machinery_2P",
+            "Air_Ops_Rooms",
+            "Aux_Machinery_1P",
+            "Av_Stores_1P",
+            "Aviation_Shops_Main",
+            "Aviation_Stores_01",
+            "CPO_2D",
+            "CPO_3D",
+            "Catapult_Accum_01",
+            "Catapult_Machinery_02",
+            "Crew_Berthing_2D",
+            "Crew_Berthing_3D_Aft",
+            "Crew_Berthing_3D_Fwd",
+            "Crew_Berthing_3D_Mid",
+            "Crew_Living_02",
+            "Elev_Mach_3D",
+            "Evaporator_1P",
+            "Focsle_Stores_2D",
+            "Funnel_Uptake",
+            "Fwd_Diesel_2D",
+            "Fwd_Machinery_2P",
+            "Fwd_Machinery_4D",
+            "Fwd_Stores_1P",
+            "Fwd_Stores_4D",
+            "HD_02",
+            "HD_2nd",
+            "HD_3rd",
+            "Jet_Test_01",
+            "Laundry_3D",
+            "Nav_Bridge",
+            "PriFly_FlagPlot",
+            "Provisions_4D",
+            "Shaft_Alley_Hold",
+            "Shaft_Alleys_2P",
+            "Shops_2D",
+            "Shops_4D",
+            "Sick_Bay",
+            "Steering_Gear_4D",
+            "Supply_Offices_01",
+            "Turbo_Gen_1P",
+            "Uptakes_Main",
+            "Work_Centers_Main"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Officers_Country_02",
+              "peak": 4712,
+              "cap": 80.0
+            },
+            {
+              "zone": "Galley_2D",
+              "peak": 451,
+              "cap": 40.0
+            },
+            {
+              "zone": "Island_Upper",
+              "peak": 149,
+              "cap": 15.0
+            },
+            {
+              "zone": "Hangar_Mid",
+              "peak": 1585,
+              "cap": 400.0
+            },
+            {
+              "zone": "Fwd_Messing_2D",
+              "peak": 1055,
+              "cap": 300.0
+            },
+            {
+              "zone": "Crew_Mess_2D",
+              "peak": 1535,
+              "cap": 450.0
+            },
+            {
+              "zone": "Flight_Deck",
+              "peak": 986,
+              "cap": 300.0
+            },
+            {
+              "zone": "Wardroom_02",
+              "peak": 172,
+              "cap": 60.0
+            },
+            {
+              "zone": "Wardroom_2D",
+              "peak": 166,
+              "cap": 80.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Officers_Country_02",
+              "share": 0.688
+            },
+            {
+              "zone": "Hangar_Mid",
+              "share": 0.105
+            },
+            {
+              "zone": "Flight_Deck",
+              "share": 0.065
+            }
+          ],
+          "home_zone_distinct": 1,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Officers_Country_02",
+              "n": 4712
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "nields_dd616",
+      "drainage": {
+        "zones": 39,
+        "retained_frac_final": 0.2434547278833574,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.26169269832863723
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.25106321177812174
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.2434547278833574
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Crew_Aft",
+            "retained_mass": 3.3285
+          },
+          {
+            "zone": "HD_Fwd",
+            "retained_mass": 2.9959
+          },
+          {
+            "zone": "After_Deckhouse_Top",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Focsle_Open",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Midship_Deckhouse",
+            "retained_mass": 1.0
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 262,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "officers",
+              "pin": "Nav_Bridge"
+            },
+            {
+              "class": "cpo",
+              "pin": "Mid_Services"
+            },
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm_Fwd"
+            },
+            {
+              "class": "ops_radio",
+              "pin": "Radar_Plot"
+            },
+            {
+              "class": "medical",
+              "pin": "Mid_Services"
+            },
+            {
+              "class": "supply",
+              "pin": "Provisions_2P"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 23,
+          "never_occupied_interior": [
+            "Engine_Rm_Aft",
+            "Engine_Rm_Fwd",
+            "Fire_Rm_Aft",
+            "Fire_Rm_Fwd",
+            "Fuel_Tanks_2P",
+            "Fuel_Tanks_Hold",
+            "HD_Crew_Aft",
+            "HD_Fwd",
+            "Magazine_Aft_2P",
+            "Magazine_Fwd_2P",
+            "Magazines_Hold",
+            "Peak_Hold",
+            "Shaft_Alley",
+            "Steering_Gear",
+            "Uptake_Aft",
+            "Uptake_Fwd"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Aft_Shops",
+              "peak": 20,
+              "cap": 6.0
+            },
+            {
+              "zone": "Galley_Area",
+              "peak": 159,
+              "cap": 50.0
+            },
+            {
+              "zone": "Radio_Central",
+              "peak": 19,
+              "cap": 8.0
+            },
+            {
+              "zone": "Mid_Services",
+              "peak": 14,
+              "cap": 6.0
+            },
+            {
+              "zone": "Radar_Plot",
+              "peak": 15,
+              "cap": 8.0
+            },
+            {
+              "zone": "Nav_Bridge",
+              "peak": 21,
+              "cap": 12.0
+            },
+            {
+              "zone": "Officers_Country_Focsle",
+              "peak": 16,
+              "cap": 10.0
+            },
+            {
+              "zone": "Workshops_Mid",
+              "peak": 12,
+              "cap": 8.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Fwd_Stores_1P",
+              "share": 0.072
+            },
+            {
+              "zone": "Aft_Shops",
+              "share": 0.06
+            },
+            {
+              "zone": "Nav_Bridge",
+              "share": 0.06
+            }
+          ],
+          "home_zone_distinct": 16,
+          "home_on_manifest_berth_frac": 0.256,
+          "top_home_zones": [
+            {
+              "zone": "Fwd_Stores_1P",
+              "n": 24
+            },
+            {
+              "zone": "WR_Block",
+              "n": 21
+            },
+            {
+              "zone": "Nav_Bridge",
+              "n": 21
+            },
+            {
+              "zone": "Aft_Shops",
+              "n": 20
+            },
+            {
+              "zone": "Radio_Central",
+              "n": 19
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 9,
+          "never_occupied_interior": [
+            "Aft_Shops",
+            "Aft_Stores_2P",
+            "Crew_Berthing_1P",
+            "Crew_Qtrs_1P",
+            "Engine_Rm_Aft",
+            "Engine_Rm_Fwd",
+            "Fire_Rm_Aft",
+            "Fire_Rm_Fwd",
+            "Fuel_Tanks_2P",
+            "Fuel_Tanks_Hold",
+            "Fwd_Stores_1P",
+            "HD_Crew_Aft",
+            "HD_Fwd",
+            "Magazine_Aft_2P",
+            "Magazine_Fwd_2P",
+            "Magazines_Hold",
+            "Mid_Services",
+            "Nav_Bridge",
+            "Officers_Country_Focsle",
+            "Peak_Hold",
+            "Provisions_2P",
+            "Radar_Plot",
+            "Radio_Central",
+            "Shaft_Alley",
+            "Steering_Gear",
+            "Uptake_Aft",
+            "Uptake_Fwd",
+            "Workshops_Mid"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "WR_Block",
+              "peak": 249,
+              "cap": 20.0
+            },
+            {
+              "zone": "Galley_Area",
+              "peak": 156,
+              "cap": 50.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "WR_Block",
+              "share": 0.65
+            },
+            {
+              "zone": "Focsle_Open",
+              "share": 0.164
+            },
+            {
+              "zone": "Galley_Area",
+              "share": 0.044
+            }
+          ],
+          "home_zone_distinct": 2,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "WR_Block",
+              "n": 249
+            },
+            {
+              "zone": "CPO_Quarters",
+              "n": 13
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "passumpsic_ao106",
+      "drainage": {
+        "zones": 27,
+        "retained_frac_final": 0.1724814419961192,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.20194075183627336
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.18858965943371772
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.1724814419961192
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Crew",
+            "retained_mass": 2.5462
+          },
+          {
+            "zone": "Working_Deck",
+            "retained_mass": 0.8587
+          },
+          {
+            "zone": "Island_Deck",
+            "retained_mass": 0.7004
+          },
+          {
+            "zone": "Focsle_Deck",
+            "retained_mass": 0.5442
+          },
+          {
+            "zone": "Radio_Rm",
+            "retained_mass": 0.0018
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 280,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "senior_rates",
+              "pin": "Cargo_Control"
+            },
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm"
+            },
+            {
+              "class": "medical",
+              "pin": "Sick_Bay"
+            },
+            {
+              "class": "radio_signal",
+              "pin": "Radio_Rm"
+            },
+            {
+              "class": "cargo_pump",
+              "pin": "Cargo_Pump_Rm"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 20,
+          "never_occupied_interior": [
+            "Boiler_Rm",
+            "Cargo_Pump_Rm",
+            "Engine_Rm",
+            "HD_Crew",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Radio_Rm",
+              "peak": 51,
+              "cap": 3.0
+            },
+            {
+              "zone": "Cargo_Control",
+              "peak": 45,
+              "cap": 4.0
+            },
+            {
+              "zone": "Wardroom",
+              "peak": 159,
+              "cap": 16.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 45,
+              "cap": 14.0
+            },
+            {
+              "zone": "Officers_Country",
+              "peak": 41,
+              "cap": 20.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 19,
+              "cap": 10.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Radio_Rm",
+              "share": 0.152
+            },
+            {
+              "zone": "Crew_Qtrs_Fwd",
+              "share": 0.142
+            },
+            {
+              "zone": "Cargo_Control",
+              "share": 0.133
+            }
+          ],
+          "home_zone_distinct": 6,
+          "home_on_manifest_berth_frac": 0.643,
+          "top_home_zones": [
+            {
+              "zone": "Radio_Rm",
+              "n": 54
+            },
+            {
+              "zone": "Crew_Qtrs_Fwd",
+              "n": 51
+            },
+            {
+              "zone": "CPO_Quarters",
+              "n": 48
+            },
+            {
+              "zone": "Cargo_Control",
+              "n": 46
+            },
+            {
+              "zone": "Officers_Country",
+              "n": 41
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 17,
+          "never_occupied_interior": [
+            "Boiler_Rm",
+            "Cargo_Control",
+            "Cargo_Pump_Rm",
+            "Crew_Qtrs_Fwd",
+            "Engine_Rm",
+            "HD_Crew",
+            "Radio_Rm",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "CPO_Quarters",
+              "peak": 218,
+              "cap": 14.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 23,
+              "cap": 10.0
+            },
+            {
+              "zone": "Mess_Hall",
+              "peak": 146,
+              "cap": 80.0
+            },
+            {
+              "zone": "Officers_Country",
+              "peak": 29,
+              "cap": 20.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "CPO_Quarters",
+              "share": 0.535
+            },
+            {
+              "zone": "Working_Deck",
+              "share": 0.171
+            },
+            {
+              "zone": "Crew_Qtrs_Aft",
+              "share": 0.081
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "CPO_Quarters",
+              "n": 218
+            },
+            {
+              "zone": "Crew_Qtrs_Aft",
+              "n": 33
+            },
+            {
+              "zone": "Officers_Country",
+              "n": 29
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "pce_874",
+      "drainage": {
+        "zones": 20,
+        "retained_frac_final": 0.21080600753493348,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.22882166403476817
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.21530658628079596
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.21080600753493348
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Crew",
+            "retained_mass": 4.2075
+          },
+          {
+            "zone": "Fantail",
+            "retained_mass": 0.0084
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 99,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm"
+            },
+            {
+              "class": "corpsman",
+              "pin": "Sick_Bay"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 13,
+          "never_occupied_interior": [
+            "Eng_Casing",
+            "Engine_Rm",
+            "Gen_Rm",
+            "HD_Crew",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Wardroom",
+              "peak": 57,
+              "cap": 8.0
+            },
+            {
+              "zone": "Officers_Country",
+              "peak": 34,
+              "cap": 8.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 35,
+              "cap": 10.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 5,
+              "cap": 4.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "CPO_Quarters",
+              "share": 0.294
+            },
+            {
+              "zone": "Officers_Country",
+              "share": 0.273
+            },
+            {
+              "zone": "Crew_Quarters",
+              "share": 0.225
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "CPO_Quarters",
+              "n": 35
+            },
+            {
+              "zone": "Officers_Country",
+              "n": 35
+            },
+            {
+              "zone": "Crew_Quarters",
+              "n": 29
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 12,
+          "never_occupied_interior": [
+            "Eng_Casing",
+            "Engine_Rm",
+            "Gen_Rm",
+            "HD_Crew",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Signal_Bridge",
+            "Steering_Gear"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Mess_Hall",
+              "peak": 51,
+              "cap": 30.0
+            },
+            {
+              "zone": "Officers_Country",
+              "peak": 13,
+              "cap": 8.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 6,
+              "cap": 4.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 14,
+              "cap": 10.0
+            },
+            {
+              "zone": "Crew_Quarters",
+              "peak": 72,
+              "cap": 55.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Crew_Quarters",
+              "share": 0.496
+            },
+            {
+              "zone": "Fantail",
+              "share": 0.186
+            },
+            {
+              "zone": "CPO_Quarters",
+              "share": 0.096
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Crew_Quarters",
+              "n": 72
+            },
+            {
+              "zone": "CPO_Quarters",
+              "n": 14
+            },
+            {
+              "zone": "Officers_Country",
+              "n": 13
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "raven_am55",
+      "drainage": {
+        "zones": 21,
+        "retained_frac_final": 0.3390385753825792,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.3753582572291096
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.35952070268020353
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.3390385753825792
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Main",
+            "retained_mass": 3.4832
+          },
+          {
+            "zone": "Bosn_Gear",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Foc_Deck_Fwd",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Fwd_Stores",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Foc_Deck_Open",
+            "retained_mass": 0.4788
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 105,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "senior_rates",
+              "pin": "Clipping_Rm"
+            },
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm"
+            },
+            {
+              "class": "corpsman",
+              "pin": "Sick_Bay"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 14,
+          "never_occupied_interior": [
+            "Clipping_Rm",
+            "Engine_Rm",
+            "Gen_Rm",
+            "HD_Main",
+            "Sick_Bay",
+            "Steering_Gear",
+            "Steering_Gen"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Wardroom",
+              "peak": 60,
+              "cap": 8.0
+            },
+            {
+              "zone": "Officers_Country",
+              "peak": 31,
+              "cap": 8.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 32,
+              "cap": 12.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 8,
+              "cap": 4.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Crew_Quarters",
+              "share": 0.301
+            },
+            {
+              "zone": "CPO_Quarters",
+              "share": 0.24
+            },
+            {
+              "zone": "Officers_Country",
+              "share": 0.238
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Crew_Quarters",
+              "n": 39
+            },
+            {
+              "zone": "Officers_Country",
+              "n": 33
+            },
+            {
+              "zone": "CPO_Quarters",
+              "n": 33
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 13,
+          "never_occupied_interior": [
+            "Clipping_Rm",
+            "Engine_Rm",
+            "Gen_Rm",
+            "HD_Main",
+            "Sick_Bay",
+            "Steering_Gear",
+            "Steering_Gen"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Mess_Tables",
+              "peak": 58,
+              "cap": 30.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 23,
+              "cap": 12.0
+            },
+            {
+              "zone": "Officers_Country",
+              "peak": 13,
+              "cap": 8.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 6,
+              "cap": 4.0
+            },
+            {
+              "zone": "Crew_Quarters",
+              "peak": 69,
+              "cap": 60.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Crew_Quarters",
+              "share": 0.458
+            },
+            {
+              "zone": "Sweep_Deck",
+              "share": 0.196
+            },
+            {
+              "zone": "CPO_Quarters",
+              "share": 0.146
+            }
+          ],
+          "home_zone_distinct": 3,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Crew_Quarters",
+              "n": 69
+            },
+            {
+              "zone": "CPO_Quarters",
+              "n": 23
+            },
+            {
+              "zone": "Officers_Country",
+              "n": 13
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "ruchamkin_apd89",
+      "drainage": {
+        "zones": 32,
+        "retained_frac_final": 0.14034123061206943,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.1766539460652693
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.15636738877594247
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.14034123061206943
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Crew",
+            "retained_mass": 3.3336
+          },
+          {
+            "zone": "Boat_Deck_Open",
+            "retained_mass": 0.9707
+          },
+          {
+            "zone": "Focsle_Deck",
+            "retained_mass": 0.1156
+          },
+          {
+            "zone": "Island_Open_Aft",
+            "retained_mass": 0.0522
+          },
+          {
+            "zone": "Fantail",
+            "retained_mass": 0.0123
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 357,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm"
+            },
+            {
+              "class": "medical",
+              "pin": "Sick_Bay"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 24,
+          "never_occupied_interior": [
+            "Boiler_Rm_Aft",
+            "Boiler_Rm_Fwd",
+            "Engine_Rm",
+            "HD_Crew",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear",
+            "Upper_Machinery"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Radio_Rm",
+              "peak": 51,
+              "cap": 2.0
+            },
+            {
+              "zone": "Wardroom",
+              "peak": 202,
+              "cap": 12.0
+            },
+            {
+              "zone": "Armory_Offices",
+              "peak": 39,
+              "cap": 4.0
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "peak": 44,
+              "cap": 10.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 18,
+              "cap": 8.0
+            },
+            {
+              "zone": "Crew_Berthing_Aft",
+              "peak": 52,
+              "cap": 30.0
+            },
+            {
+              "zone": "Crew_Berthing_Mid",
+              "peak": 43,
+              "cap": 40.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Crew_Berthing_Aft",
+              "share": 0.116
+            },
+            {
+              "zone": "Radio_Rm",
+              "share": 0.113
+            },
+            {
+              "zone": "Troop_Berthing_Mid",
+              "share": 0.108
+            }
+          ],
+          "home_zone_distinct": 8,
+          "home_on_manifest_berth_frac": 0.597,
+          "top_home_zones": [
+            {
+              "zone": "Crew_Berthing_Aft",
+              "n": 53
+            },
+            {
+              "zone": "Troop_Berthing_Mid",
+              "n": 52
+            },
+            {
+              "zone": "Radio_Rm",
+              "n": 52
+            },
+            {
+              "zone": "Crew_Berthing_Mid",
+              "n": 44
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "n": 44
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 20,
+          "never_occupied_interior": [
+            "Armory_Offices",
+            "Boiler_Rm_Aft",
+            "Boiler_Rm_Fwd",
+            "Crew_Berthing_Aft",
+            "Engine_Rm",
+            "HD_Crew",
+            "Radio_Rm",
+            "Shaft_Alley",
+            "Sick_Bay",
+            "Steering_Gear",
+            "Troop_Berthing_Mid",
+            "Upper_Machinery"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Wardroom",
+              "peak": 130,
+              "cap": 12.0
+            },
+            {
+              "zone": "Crew_Berthing_1P",
+              "peak": 152,
+              "cap": 40.0
+            },
+            {
+              "zone": "Troop_Berthing_Fwd",
+              "peak": 162,
+              "cap": 70.0
+            },
+            {
+              "zone": "Galley",
+              "peak": 17,
+              "cap": 8.0
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "peak": 18,
+              "cap": 10.0
+            },
+            {
+              "zone": "Mess_Hall",
+              "peak": 69,
+              "cap": 60.0
+            },
+            {
+              "zone": "Troop_Mess_Below",
+              "peak": 41,
+              "cap": 40.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Troop_Berthing_Fwd",
+              "share": 0.37
+            },
+            {
+              "zone": "Crew_Berthing_1P",
+              "share": 0.295
+            },
+            {
+              "zone": "Fantail",
+              "share": 0.095
+            }
+          ],
+          "home_zone_distinct": 4,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Troop_Berthing_Fwd",
+              "n": 162
+            },
+            {
+              "zone": "Crew_Berthing_1P",
+              "n": 152
+            },
+            {
+              "zone": "Crew_Berthing_Mid",
+              "n": 25
+            },
+            {
+              "zone": "Officers_Qtrs",
+              "n": 18
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "san_antonio_class_lpd",
+      "drainage": {
+        "zones": 29,
+        "retained_frac_final": 0.2766495907811835,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.2766495907811835
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.2766495907811835
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.2766495907811835
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_2N_M",
+            "retained_mass": 1.3617
+          },
+          {
+            "zone": "HD_2N_F",
+            "retained_mass": 1.3165
+          },
+          {
+            "zone": "HD_07L_M",
+            "retained_mass": 1.0822
+          },
+          {
+            "zone": "HD_03L_M",
+            "retained_mass": 1.0822
+          },
+          {
+            "zone": "HD_01L_F",
+            "retained_mass": 1.0783
+          }
+        ]
+      },
+      "occupancy": {
+        "skipped": "no crew source (no manifest, no nominal_complement)"
+      }
+    },
+    {
+      "platform": "sigsbee_dd502",
+      "drainage": {
+        "zones": 41,
+        "retained_frac_final": 0.21069670299078055,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.2330669613664419
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.21927752656065522
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.21069670299078055
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_Crew_Aft",
+            "retained_mass": 4.3718
+          },
+          {
+            "zone": "HD_Fwd",
+            "retained_mass": 3.1457
+          },
+          {
+            "zone": "Midship_Deckhouse",
+            "retained_mass": 1.0
+          },
+          {
+            "zone": "Mt2_Deck",
+            "retained_mass": 0.0668
+          },
+          {
+            "zone": "Focsle_Deck",
+            "retained_mass": 0.039
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 322,
+        "crew_source": "manifest",
+        "pin_resolution": {
+          "unresolvable_berth_pins": [],
+          "unresolvable_duty_pins": [
+            {
+              "class": "officers",
+              "pin": "Nav_Bridge"
+            },
+            {
+              "class": "cpo",
+              "pin": "Mid_Shops"
+            },
+            {
+              "class": "engine_room",
+              "pin": "Engine_Rm_Fwd"
+            },
+            {
+              "class": "ops_radio",
+              "pin": "CIC"
+            },
+            {
+              "class": "medical",
+              "pin": "Mid_Shops"
+            },
+            {
+              "class": "supply",
+              "pin": "Provisions_2P"
+            }
+          ]
+        },
+        "default": {
+          "visited_zones": 24,
+          "never_occupied_interior": [
+            "Engine_Rm_Aft",
+            "Engine_Rm_Fwd",
+            "Fire_Rm_Aft",
+            "Fire_Rm_Fwd",
+            "Fuel_Tanks_2P",
+            "HD_Crew_Aft",
+            "HD_Fwd",
+            "Magazine_Aft_2P",
+            "Magazine_Fwd_2P",
+            "Magazine_Fwd_3P",
+            "Magazines_Hold",
+            "Peak_Hold",
+            "Shaft_Alley",
+            "Steering_Gear",
+            "Tanks_Hold",
+            "Uptake_Aft",
+            "Uptake_Fwd"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Provisions_2P",
+              "peak": 22,
+              "cap": 4.0
+            },
+            {
+              "zone": "Sound_Rm",
+              "peak": 13,
+              "cap": 3.0
+            },
+            {
+              "zone": "After_Deckhouse",
+              "peak": 15,
+              "cap": 4.0
+            },
+            {
+              "zone": "Galley_Mess",
+              "peak": 196,
+              "cap": 60.0
+            },
+            {
+              "zone": "Aft_Util",
+              "peak": 13,
+              "cap": 4.0
+            },
+            {
+              "zone": "Aft_Shops",
+              "peak": 23,
+              "cap": 8.0
+            },
+            {
+              "zone": "Torpedo_Workshop",
+              "peak": 15,
+              "cap": 6.0
+            },
+            {
+              "zone": "Superstructure_Radio",
+              "peak": 19,
+              "cap": 10.0
+            },
+            {
+              "zone": "Mid_Shops",
+              "peak": 15,
+              "cap": 10.0
+            },
+            {
+              "zone": "CIC",
+              "peak": 19,
+              "cap": 14.0
+            },
+            {
+              "zone": "Nav_Bridge",
+              "peak": 15,
+              "cap": 12.0
+            },
+            {
+              "zone": "CPO_Quarters",
+              "peak": 17,
+              "cap": 16.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Aft_Shops",
+              "share": 0.058
+            },
+            {
+              "zone": "Mt2_Deck",
+              "share": 0.057
+            },
+            {
+              "zone": "Crew_Berthing_Fwd",
+              "share": 0.057
+            }
+          ],
+          "home_zone_distinct": 19,
+          "home_on_manifest_berth_frac": 0.22,
+          "top_home_zones": [
+            {
+              "zone": "Aft_Shops",
+              "n": 24
+            },
+            {
+              "zone": "Crew_Berthing_Fwd",
+              "n": 23
+            },
+            {
+              "zone": "Provisions_2P",
+              "n": 22
+            },
+            {
+              "zone": "Fwd_Stores_Hold",
+              "n": 21
+            },
+            {
+              "zone": "Superstructure_Radio",
+              "n": 20
+            }
+          ]
+        },
+        "manifest": {
+          "visited_zones": 6,
+          "never_occupied_interior": [
+            "Aft_Shops",
+            "Aft_Stores_2P",
+            "Aft_Util",
+            "After_Deckhouse",
+            "Boatswain_Chain_3P",
+            "CIC",
+            "CPO_Quarters",
+            "Crew_Berthing_Aft",
+            "Crew_Berthing_Fwd",
+            "Engine_Rm_Aft",
+            "Engine_Rm_Fwd",
+            "Fire_Rm_Aft",
+            "Fire_Rm_Fwd",
+            "Fuel_Tanks_2P",
+            "Fwd_Stores_1P",
+            "HD_Crew_Aft",
+            "HD_Fwd",
+            "Magazine_Aft_2P",
+            "Magazine_Fwd_2P",
+            "Magazine_Fwd_3P",
+            "Magazines_Hold",
+            "Mid_Shops",
+            "Nav_Bridge",
+            "Peak_Hold",
+            "Provisions_2P",
+            "Provisions_3P",
+            "Shaft_Alley",
+            "Sound_Rm",
+            "Steering_Gear",
+            "Superstructure_Radio",
+            "Tanks_Hold",
+            "Torpedo_Workshop",
+            "Uptake_Aft",
+            "Uptake_Fwd"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Officers_Country",
+              "peak": 322,
+              "cap": 16.0
+            },
+            {
+              "zone": "Galley_Mess",
+              "peak": 195,
+              "cap": 60.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Officers_Country",
+              "share": 0.682
+            },
+            {
+              "zone": "Focsle_Deck",
+              "share": 0.191
+            },
+            {
+              "zone": "Galley_Mess",
+              "share": 0.059
+            }
+          ],
+          "home_zone_distinct": 1,
+          "home_on_manifest_berth_frac": 1.0,
+          "top_home_zones": [
+            {
+              "zone": "Officers_Country",
+              "n": 322
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "spirit_cruise_3000",
+      "drainage": {
+        "zones": 115,
+        "retained_frac_final": 0.31348123673492495,
+        "curve": [
+          {
+            "epoch": 12,
+            "retained_frac": 0.3184984184963967
+          },
+          {
+            "epoch": 24,
+            "retained_frac": 0.31666950512004133
+          },
+          {
+            "epoch": 48,
+            "retained_frac": 0.31348123673492495
+          }
+        ],
+        "top_accumulating": [
+          {
+            "zone": "HD_6C_F",
+            "retained_mass": 1.4451
+          },
+          {
+            "zone": "HD_10L_M",
+            "retained_mass": 1.4071
+          },
+          {
+            "zone": "HD_5L_M",
+            "retained_mass": 1.378
+          },
+          {
+            "zone": "HD_4M_F_1",
+            "retained_mass": 1.378
+          },
+          {
+            "zone": "HD_4M_F_2",
+            "retained_mass": 1.378
+          }
+        ]
+      },
+      "occupancy": {
+        "num_agents": 3000,
+        "crew_source": "nominal_complement",
+        "pin_resolution": null,
+        "default": {
+          "visited_zones": 85,
+          "never_occupied_interior": [
+            "HD_0E_M",
+            "HD_10L_F_1",
+            "HD_10L_F_2",
+            "HD_10L_M",
+            "HD_11S_F",
+            "HD_11S_M",
+            "HD_12S_F",
+            "HD_12S_M",
+            "HD_13B_M",
+            "HD_1C_F",
+            "HD_1C_M",
+            "HD_2C_F",
+            "HD_2C_M",
+            "HD_3C_F",
+            "HD_3C_M",
+            "HD_4M_F_1",
+            "HD_4M_F_2",
+            "HD_4M_M_1",
+            "HD_4M_M_2",
+            "HD_5L_F_1",
+            "HD_5L_F_2",
+            "HD_5L_M",
+            "HD_6C_F",
+            "HD_6C_M",
+            "HD_7C_F",
+            "HD_7C_M",
+            "HD_9C_F",
+            "HD_9C_M",
+            "IsolWard",
+            "MedCenter"
+          ],
+          "overflow_zones": [
+            {
+              "zone": "Engine_Room",
+              "peak": 304,
+              "cap": 25.0
+            },
+            {
+              "zone": "CC_D3_F",
+              "peak": 308,
+              "cap": 100.0
+            },
+            {
+              "zone": "CC_D1_A",
+              "peak": 199,
+              "cap": 100.0
+            },
+            {
+              "zone": "MainGalley",
+              "peak": 149,
+              "cap": 80.0
+            },
+            {
+              "zone": "SmallLounge",
+              "peak": 156,
+              "cap": 100.0
+            },
+            {
+              "zone": "Nightclub",
+              "peak": 209,
+              "cap": 150.0
+            },
+            {
+              "zone": "Library",
+              "peak": 41,
+              "cap": 30.0
+            },
+            {
+              "zone": "Promenade",
+              "peak": 531,
+              "cap": 400.0
+            },
+            {
+              "zone": "PC_D8_P_A",
+              "peak": 55,
+              "cap": 44.0
+            },
+            {
+              "zone": "Bridge",
+              "peak": 15,
+              "cap": 12.0
+            },
+            {
+              "zone": "PC_D5_P_F",
+              "peak": 53,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D9_P_M",
+              "peak": 53,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D9_S_M",
+              "peak": 52,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D6_P_M",
+              "peak": 52,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D11_S_A",
+              "peak": 52,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D9_S_A",
+              "peak": 51,
+              "cap": 44.0
+            },
+            {
+              "zone": "Casino",
+              "peak": 279,
+              "cap": 250.0
+            },
+            {
+              "zone": "PC_D4_S_A",
+              "peak": 49,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D7_P_A",
+              "peak": 49,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D8_P_F",
+              "peak": 49,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D6_P_F",
+              "peak": 48,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D10_P_F",
+              "peak": 47,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D10_P_M",
+              "peak": 47,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D8_S_A",
+              "peak": 47,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D6_S_M",
+              "peak": 46,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D6_S_F",
+              "peak": 46,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D5_S_F",
+              "peak": 45,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D9_P_F",
+              "peak": 45,
+              "cap": 44.0
+            },
+            {
+              "zone": "PC_D5_S_M",
+              "peak": 45,
+              "cap": 44.0
+            }
+          ],
+          "night_top3": [
+            {
+              "zone": "Engine_Room",
+              "share": 0.07
+            },
+            {
+              "zone": "MainTheater",
+              "share": 0.065
+            },
+            {
+              "zone": "CC_D1_A",
+              "share": 0.048
+            }
+          ],
+          "home_zone_distinct": 57,
+          "home_on_manifest_berth_frac": null,
+          "top_home_zones": [
+            {
+              "zone": "CC_D3_F",
+              "n": 343
+            },
+            {
+              "zone": "CC_D1_A",
+              "n": 222
+            },
+            {
+              "zone": "CC_D3_M",
+              "n": 60
+            },
+            {
+              "zone": "CC_D1_M",
+              "n": 56
+            },
+            {
+              "zone": "PC_D8_P_A",
+              "n": 55
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

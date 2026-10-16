@@ -149,6 +149,8 @@ def _fetch(client, bucket: str, key: str) -> dict:
         "ever_ill_crew": body.get("cumulative_ever_ill_crew"),
         "n_acquired": base["n_acquired"],
         "n_imports": base["n_imports"],
+        "rep_cases_by_channel": body.get("reported_cases_by_channel"),
+        "rep_cases_by_route": body.get("reported_cases_by_dominant_route"),
         "cs_food_inf": int(routes.get("common_source_food", 0) or 0),
         "cs_events_summary": int(mech.get("common_source_events", 0) or 0),
         "cs_takers_summary": int(mech.get("common_source_takers", 0) or 0),
