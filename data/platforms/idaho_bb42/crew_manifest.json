@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:21:20.960330+00:00",
+  "platform": "idaho_bb42",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1084
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 64,
+      "berth_zone": "Wardroom_Staterooms",
+      "duty_zone": "Wardroom_Mess",
+      "notes": "CO + wardroom/J.O./flag officers"
+    },
+    {
+      "class_id": "warrant_officers",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "Officers_Passage_Aft",
+      "duty_zone": "Exec_Office",
+      "notes": "warrant officers + chief warrant"
+    },
+    {
+      "class_id": "chief_petty_officers",
+      "role_group": "crew",
+      "count": 168,
+      "berth_zone": "CPO_Quarters_2nd",
+      "duty_zone": "CPO_Mess",
+      "notes": "CPOs"
+    },
+    {
+      "class_id": "engine_room_force",
+      "role_group": "crew",
+      "count": 220,
+      "berth_zone": "Crew_D501",
+      "duty_zone": "Engine_Rooms",
+      "notes": "firemen + motor macs, machinery watch"
+    },
+    {
+      "class_id": "seamen_gunnery",
+      "role_group": "crew",
+      "count": 540,
+      "berth_zone": "Crew_Berth_Mid",
+      "duty_zone": "Fantail",
+      "notes": "seamen, gun crews, turret crews"
+    },
+    {
+      "class_id": "commissary_stewards",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "Crew_Berth_Aft",
+      "duty_zone": "Galley",
+      "notes": "cooks, stewards, messmen"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "Crew_Berth_Fwd",
+      "duty_zone": "Crew_Mess_Upper",
+      "notes": "marine detachment"
+    }
+  ],
+  "source": "class-typical: New Mexico class c.1930s ~1,084 officers & enlisted (NOT plate-read — 9-sheet set lacks accommodation table)",
+  "consistency": {
+    "declared_total": 1084,
+    "manifest_total": 1084,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
