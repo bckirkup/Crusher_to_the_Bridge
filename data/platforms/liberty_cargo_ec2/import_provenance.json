@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:54:12.152885+00:00",
+  "platform_id": "liberty_cargo_ec2",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/liberty_cargo_ec2",
+  "digest_sha256": "2e1fb96a9f54a9f054f8c6a1378bd56d91e8f2701a2ccb1b0c08f31a65072bc7",
+  "svg_sha256": {
+    "page_03_approved.svg": "ce050f8564540013786fc54baee4b32eb97de44650ab36f3032aab536628bc28",
+    "page_04_approved.svg": "58238a95bf15ba2853285c7d0212259130a1ce259e835624ed5cc85d175c5979"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 54,
+  "berthing_zones": [
+    "Chart_Radio_Rm",
+    "Captain_Suite",
+    "Bridge_Cabins_Port",
+    "Officer_Cabins_Port",
+    "Officer_Cabins_Stbd",
+    "Boat_Deck_Lobby",
+    "Gunners_Berth_Aft",
+    "Berthing_Port",
+    "Berthing_Stbd",
+    "Berthing_Port_Lower",
+    "Ships_Stores_UD",
+    "Focsle_Stores",
+    "Dry_Provisions",
+    "CO2_Rm",
+    "Chain_Locker",
+    "Aft_Peak",
+    "Deep_Tanks_Mid",
+    "Deep_Tanks_Fwd",
+    "Forepeak"
+  ],
+  "systems_era": "merchant_ww2",
+  "digest_meta": {
+    "created_utc": "2026-10-16T11:54:07.211792+00:00",
+    "provider": "agent",
+    "model": null,
+    "hint": "agent-authored digest (no LLM)",
+    "digest_sha256": "128a501d22e9687805697f0a3a026f2cb824cd04c476425068b49b868d592b0e",
+    "draft_overlays": [
+      "page_03_approved.svg",
+      "page_04_approved.svg"
+    ]
+  }
+}

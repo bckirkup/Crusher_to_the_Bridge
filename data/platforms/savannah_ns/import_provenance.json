@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:57:33.647849+00:00",
+  "platform_id": "savannah_ns",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/savannah_ns",
+  "digest_sha256": "c5d4f5dab6c7515ed37a5bea9d83b1c8d96a37963a409b2464dc2503dcd590d2",
+  "svg_sha256": {
+    "page_04_approved.svg": "c21d638b5ed80946d8d680373d03ed850ebdd769e979c8647803f43daae6e6ac",
+    "page_05_approved.svg": "2e48429f3e02fd1150123509ebd7d6d96d71d0207dfb751bc4d8469f1c5da64b",
+    "page_07_approved.svg": "1e089a821655f205a4864f7f73efc67f15e9159d16534bf3d913de216f1fe539",
+    "page_08_approved.svg": "b5995586803993f17eedf248073b31de739232d26dfe9ac1d384993ac9f0e3d2",
+    "page_09_approved.svg": "172a5d6201b0a86c4767c19e794e995796966d9887747f409ca31f8a19d98187",
+    "page_10_approved.svg": "c8d8a89344b3cd46cacceacb4000728f38c488482c766a437eb1bb0b11cbc222",
+    "page_11_approved.svg": "0823a65275517e745d98f4ee7c6917eb9adcbe590eb587e3220c6a85ff341ffd",
+    "page_12_approved.svg": "51160bf18c557edc262ead72698fcc047f7d755923478ab4a6fd85ca820314c6"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 73,
+  "berthing_zones": [
+    "Promenade_House",
+    "Lounge_Fwd",
+    "Chart_Radio_NB",
+    "Boat_Cabins",
+    "Pax_Cabins_A_Port",
+    "Pax_Cabins_A_Stbd",
+    "A_Deck_Lobby",
+    "Bosun_Stores_A",
+    "Pax_Cabins_B_Port",
+    "Pax_Cabins_B_Stbd",
+    "Windlass_Room_B",
+    "Carpenter_Elec_Shops",
+    "Crew_Cabins_C_Port",
+    "Crew_Cabins_C_Stbd",
+    "Bakery_Scullery",
+    "Crew_Stores_C",
+    "Bosun_Stores_C",
+    "Aft_Peak_D",
+    "Radiation_Sampling",
+    "Deep_Tank_Fwd",
+    "Fore_Peak_Tank"
+  ],
+  "systems_era": "usn_coldwar",
+  "digest_meta": {
+    "created_utc": "2026-10-16T11:57:25.839242+00:00",
+    "provider": "agent",
+    "model": null,
+    "hint": "agent-authored digest (no LLM)",
+    "digest_sha256": "e1fe1dd4a54c2660404f4a3067bb7f44dc7af2288d05ec207c0d5799cdee53cf",
+    "draft_overlays": [
+      "page_04_approved.svg",
+      "page_05_approved.svg",
+      "page_07_approved.svg",
+      "page_08_approved.svg",
+      "page_09_approved.svg",
+      "page_10_approved.svg",
+      "page_11_approved.svg",
+      "page_12_approved.svg"
+    ]
+  }
+}

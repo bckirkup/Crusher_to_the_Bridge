@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:54:12.158675+00:00",
+  "platform": "liberty_cargo_ec2",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 66
+  },
+  "manifest": [
+    {
+      "class_id": "merchant_deck_officers",
+      "role_group": "crew",
+      "count": 7,
+      "berth_zone": "Officer_Cabins_Port",
+      "duty_zone": "Wheelhouse",
+      "notes": ""
+    },
+    {
+      "class_id": "merchant_engineers",
+      "role_group": "crew",
+      "count": 9,
+      "berth_zone": "Officer_Cabins_Stbd",
+      "duty_zone": "Engine_Room",
+      "notes": ""
+    },
+    {
+      "class_id": "merchant_deck_crew",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "Berthing_Stbd",
+      "duty_zone": "Tween_Hatch_3",
+      "notes": ""
+    },
+    {
+      "class_id": "merchant_stewards",
+      "role_group": "crew",
+      "count": 10,
+      "berth_zone": "Berthing_Port",
+      "duty_zone": "Galley",
+      "notes": ""
+    },
+    {
+      "class_id": "armed_guard",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "Gunners_Berth_Aft",
+      "duty_zone": "Gun_Platform",
+      "notes": ""
+    }
+  ],
+  "source": "plate legend room counts + accommodations schedule",
+  "consistency": {
+    "declared_total": 66,
+    "manifest_total": 66,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

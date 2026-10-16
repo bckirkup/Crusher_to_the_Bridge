@@ -1,0 +1,352 @@
+{
+  "platform": "aeolus_arc3",
+  "description": "HVAC network synthesized for aeolus_arc3",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "AHU_Superstructure",
+      "rooms": [
+        "Superstructure_Cabins",
+        "Wheelhouse",
+        "Bridge_Chart_Rms",
+        "Deck_House_Upper",
+        "Cable_Testing_Rm"
+      ],
+      "ach": 8.0,
+      "description": "Superstructure + 01-level quarters",
+      "vent_mode": "mech_ac",
+      "evidence": "era_plausible",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Main",
+      "rooms": [
+        "Crew_Messing",
+        "Galley",
+        "Crew_Berth_M",
+        "Crew_Recreation",
+        "Radio_Electronic_Shops",
+        "After_Repair_Locker"
+      ],
+      "ach": 8.0,
+      "description": "Main deck accommodation",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_First",
+      "rooms": [
+        "Workshops_1P",
+        "Berth_1P",
+        "Cable_Workshop",
+        "Washroom_Locker_1P",
+        "Fwd_Stores_1P"
+      ],
+      "ach": 6.0,
+      "description": "First platform",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Second",
+      "rooms": [
+        "Armory",
+        "Provisions_Stores_2P",
+        "Butcher_Meats",
+        "Fwd_Stores_2P",
+        "Flam_Liquid_Stores",
+        "Storeroom_Hold",
+        "Rope_Stowage"
+      ],
+      "ach": 4.0,
+      "description": "Second platform + hold stores",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Machinery",
+      "rooms": [
+        "Elec_Switchboard",
+        "Boiler_Casing_M",
+        "Ice_Machinery_Rm",
+        "Aux_Machinery_2P",
+        "Escape_Trunk_2P",
+        "Engine_Room",
+        "Boiler_Room",
+        "Steering_Gear"
+      ],
+      "ach": 15.0,
+      "description": "Machinery spaces",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "era_plausible",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_Cable",
+      "rooms": [
+        "Cable_Tanks"
+      ],
+      "ach": 3.0,
+      "description": "Cable tanks natural vent",
+      "oa_fraction": 1.0,
+      "vent_mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "AHU_Weather",
+      "rooms": [
+        "Top_Of_House",
+        "Cable_Working_Deck",
+        "Bow_Sheave_Area"
+      ],
+      "ach": 0.0,
+      "description": "Open-air decks",
+      "oa_fraction": 1.0,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_HD_Bridge",
+      "rooms": [
+        "HD_Bridge"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Bridge, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Upper_Deck",
+      "rooms": [
+        "HD_Upper_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Upper_Deck, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Main_Deck",
+      "rooms": [
+        "HD_Main_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Main_Deck, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_First_Platform",
+      "rooms": [
+        "HD_First_Platform"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_First_Platform, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "AHU_Superstructure",
+      "to": "AHU_Main",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Main",
+      "to": "AHU_First",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_First",
+      "to": "AHU_Second",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Second",
+      "to": "AHU_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_4",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Machinery",
+      "to": "AHU_Cable",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_5",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Cable",
+      "to": "AHU_Weather",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_6",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Superstructure",
+      "to": "AHU_HD_HD_Bridge",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Bridge; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Superstructure",
+      "to": "AHU_HD_HD_Upper_Deck",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Upper_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Main",
+      "to": "AHU_HD_HD_Main_Deck",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Main_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_First",
+      "to": "AHU_HD_HD_First_Platform",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_First_Platform; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Wheelhouse",
+      "to": "Bridge_Chart_Rms",
+      "type": "passageway"
+    },
+    {
+      "from": "Cable_Working_Deck",
+      "to": "Bow_Sheave_Area",
+      "type": "passageway"
+    },
+    {
+      "from": "Deck_House_Upper",
+      "to": "Cable_Testing_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Messing",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Messing",
+      "to": "Elec_Switchboard",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Crew_Recreation",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berth_M",
+      "to": "Crew_Recreation",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berth_M",
+      "to": "Radio_Electronic_Shops",
+      "type": "passageway"
+    },
+    {
+      "from": "Radio_Electronic_Shops",
+      "to": "After_Repair_Locker",
+      "type": "passageway"
+    },
+    {
+      "from": "Elec_Switchboard",
+      "to": "Boiler_Casing_M",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Workshops_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Workshops_1P",
+      "to": "Berth_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Berth_1P",
+      "to": "Cable_Workshop",
+      "type": "passageway"
+    },
+    {
+      "from": "Cable_Workshop",
+      "to": "Ice_Machinery_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Ice_Machinery_Rm",
+      "to": "Washroom_Locker_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Armory",
+      "to": "Provisions_Stores_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Provisions_Stores_2P",
+      "to": "Butcher_Meats",
+      "type": "passageway"
+    },
+    {
+      "from": "Butcher_Meats",
+      "to": "Aux_Machinery_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Escape_Trunk_2P",
+      "to": "Fwd_Stores_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Flam_Liquid_Stores",
+      "to": "Storeroom_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Storeroom_Hold",
+      "to": "Rope_Stowage",
+      "type": "passageway"
+    },
+    {
+      "from": "Rope_Stowage",
+      "to": "Engine_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Room",
+      "type": "passageway"
+    }
+  ]
+}
