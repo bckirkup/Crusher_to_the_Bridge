@@ -2359,12 +2359,9 @@ def _check_source_genotype_distribution(
         )
 
 
-def _check_common_source_provisioned_arm(
-    ps: dict[str, Any],
+def _provisioned_source_registry(
     report: Report,
-    layout: "SpatialLayout | None",
-) -> None:
-    """Provisioned-source mint model: registry, q_source, genotype mixes."""
+) -> tuple[dict[str, Any], dict[str, Any]] | None:
     registry = _load_json(
         os.path.join(
             _REPO_ROOT, "data", "config", _PROVISIONING_SOURCES_JSON))
@@ -2378,7 +2375,20 @@ def _check_common_source_provisioned_arm(
             "provisioned_source mint model has nothing to resolve "
             "source_id against",
         )
+        return None
+    return registry, sources
+
+
+def _check_common_source_provisioned_arm(
+    ps: dict[str, Any],
+    report: Report,
+    layout: "SpatialLayout | None",
+) -> None:
+    """Provisioned-source mint model: registry, q_source, genotype mixes."""
+    loaded = _provisioned_source_registry(report)
+    if loaded is None:
         return
+    registry, sources = loaded
     default_source = (
         registry.get("default_source")
         if isinstance(registry, dict) else None
@@ -2474,44 +2484,56 @@ def _check_common_source(
     _check_common_source_provisioned_arm(ps, report, layout)
 
 
+def _check_ppe_fatigue_conditions(
+    type_id: str, conds: list, report: Report,
+) -> None:
+    for cond in conds:
+        if not isinstance(cond, dict):
+            report.error(_CONFIG_YAML, "CONFIG",
+                         f"ppe_types.{type_id} condition must be a mapping")
+            continue
+        if not str(cond.get("condition_id") or "").strip():
+            report.error(_CONFIG_YAML, "CONFIG",
+                         f"ppe_types.{type_id} condition missing "
+                         "condition_id")
+        rate = cond.get("rate_per_wear_hour")
+        if (not isinstance(rate, (int, float)) or not math.isfinite(rate)
+                or rate < 0):
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"ppe_types.{type_id} condition rate_per_wear_hour "
+                         f"= {rate!r} must be finite and non-negative")
+
+
+def _check_ppe_type_entry(
+    type_id: str, entry: Any, report: Report,
+) -> None:
+    if not isinstance(entry, dict):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     f"ppe_types.{type_id} must be a mapping")
+        return
+    for key in ("fatigue_rate_per_epoch", "heat_load",
+                "dexterity_impairment"):
+        v = entry.get(key)
+        if not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"ppe_types.{type_id}.{key} = {v!r} "
+                         "must be finite and non-negative")
+    conds = entry.get("fatigue_conditions", [])
+    if conds is None:
+        conds = []
+    if not isinstance(conds, list):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     f"ppe_types.{type_id}.fatigue_conditions must be a list")
+        return
+    _check_ppe_fatigue_conditions(type_id, conds, report)
+
+
 def _check_ppe_types_registry(
     registry: dict[str, Any],
     report: Report,
 ) -> None:
     for type_id, entry in registry.items():
-        if not isinstance(entry, dict):
-            report.error(_CONFIG_YAML, "CONFIG",
-                         f"ppe_types.{type_id} must be a mapping")
-            continue
-        for key in ("fatigue_rate_per_epoch", "heat_load",
-                    "dexterity_impairment"):
-            v = entry.get(key)
-            if not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
-                report.error(_CONFIG_YAML, "MATH_BOUND",
-                             f"ppe_types.{type_id}.{key} = {v!r} "
-                             "must be finite and non-negative")
-        conds = entry.get("fatigue_conditions", [])
-        if conds is None:
-            conds = []
-        if not isinstance(conds, list):
-            report.error(_CONFIG_YAML, "CONFIG",
-                         f"ppe_types.{type_id}.fatigue_conditions must be a list")
-            continue
-        for cond in conds:
-            if not isinstance(cond, dict):
-                report.error(_CONFIG_YAML, "CONFIG",
-                             f"ppe_types.{type_id} condition must be a mapping")
-                continue
-            if not str(cond.get("condition_id") or "").strip():
-                report.error(_CONFIG_YAML, "CONFIG",
-                             f"ppe_types.{type_id} condition missing "
-                             "condition_id")
-            rate = cond.get("rate_per_wear_hour")
-            if (not isinstance(rate, (int, float)) or not math.isfinite(rate)
-                    or rate < 0):
-                report.error(_CONFIG_YAML, "MATH_BOUND",
-                             f"ppe_types.{type_id} condition rate_per_wear_hour "
-                             f"= {rate!r} must be finite and non-negative")
+        _check_ppe_type_entry(type_id, entry, report)
 
 
 def _check_ppe_fatigue_policy(

@@ -133,90 +133,99 @@ def _leaf_diffs(
     return diffs, one_sided
 
 
+def _bit_identity_seed(
+    client, bucket: str, seed: int, args,
+) -> bool:
+    """Return True when this seed's fingerprint is clean (or missing)."""
+    rid = _RID.format(seed=seed)
+    a0 = _fetch_summary(client, bucket, f"{args.base_prefix}/{rid}")
+    new = _fetch_summary(
+        client, bucket, f"{args.canary_prefix}/{_A0ID_TIER}/{rid}"
+    )
+    if a0 is None or new is None:
+        print(f"  s{seed}: MISSING (a0={a0 is not None} new={new is not None})")
+        return False
+    n_diffs = 0
+    schema_adds: list[str] = []
+    for block in _FINGERPRINT_BLOCKS:
+        diffs, one_sided = _leaf_diffs(
+            a0.get(block), new.get(block), (block,)
+        )
+        for path, va, vb in diffs:
+            if path in _EXCLUDED_PATHS:
+                continue
+            n_diffs += 1
+            if n_diffs <= 5:
+                print(
+                    f"  s{seed} DIFF {'.'.join(path)}: "
+                    f"a0={va!r} new={vb!r}"
+                )
+        schema_adds.extend(".".join(p) for p in one_sided)
+    if n_diffs:
+        print(f"  s{seed}: {n_diffs} voyage-fingerprint diffs")
+        return False
+    adds = f" (+{len(schema_adds)} schema keys)" if schema_adds else ""
+    print(f"  s{seed}: identical{adds}")
+    if schema_adds:
+        top = sorted({p.split(".")[0] + "." + p.split(".")[1] for p in schema_adds})
+        print(f"      one-sided keys: {', '.join(top[:8])}")
+    return True
+
+
 def bit_identity_gate(client, bucket: str, args) -> bool:
     """Compare a0id vs A0 summary.json fingerprints per seed."""
     print("== Gate 1: bit-identity (a0id vs noro_mega_01) ==")
-    all_clean = True
-    for seed in args.a0_seeds:
-        rid = _RID.format(seed=seed)
-        a0 = _fetch_summary(client, bucket, f"{args.base_prefix}/{rid}")
-        new = _fetch_summary(
-            client, bucket, f"{args.canary_prefix}/{_A0ID_TIER}/{rid}"
-        )
-        if a0 is None or new is None:
-            print(f"  s{seed}: MISSING (a0={a0 is not None} new={new is not None})")
-            all_clean = False
-            continue
-        n_diffs = 0
-        schema_adds: list[str] = []
-        for block in _FINGERPRINT_BLOCKS:
-            diffs, one_sided = _leaf_diffs(
-                a0.get(block), new.get(block), (block,)
-            )
-            for path, va, vb in diffs:
-                if path in _EXCLUDED_PATHS:
-                    continue
-                n_diffs += 1
-                if n_diffs <= 5:
-                    print(
-                        f"  s{seed} DIFF {'.'.join(path)}: "
-                        f"a0={va!r} new={vb!r}"
-                    )
-            schema_adds.extend(".".join(p) for p in one_sided)
-        if n_diffs:
-            print(f"  s{seed}: {n_diffs} voyage-fingerprint diffs")
-            all_clean = False
-        else:
-            adds = f" (+{len(schema_adds)} schema keys)" if schema_adds else ""
-            print(f"  s{seed}: identical{adds}")
-        if schema_adds:
-            top = sorted({p.split(".")[0] + "." + p.split(".")[1] for p in schema_adds})
-            print(f"      one-sided keys: {', '.join(top[:8])}")
+    all_clean = all(
+        _bit_identity_seed(client, bucket, seed, args)
+        for seed in args.a0_seeds
+    )
     print(f"  -> {'PASS' if all_clean else 'FAIL'}")
     return all_clean
+
+
+def _a1_seed_fired(client, bucket: str, seed: int, args) -> bool | None:
+    """True if fired, False if seen but not fired, None if pending."""
+    rid = _RID.format(seed=seed)
+    s = _fetch_summary(
+        client, bucket, f"{args.canary_prefix}/{_A1_TIER}/{rid}"
+    )
+    if s is None:
+        return None
+    mech = s.get("mechanisms") or {}
+    ev = int(mech.get("common_source_events") or 0)
+    takers = int(mech.get("common_source_takers") or 0)
+    cg = int(mech.get("caregiver_responses") or 0)
+    cen = _fetch_member_gz(
+        client, bucket, f"{args.canary_prefix}/{_A1_TIER}/{rid}",
+        "growth_census.json.gz",
+    )
+    tel = ((cen or {}).get("common_source") or {}).get("telemetry") or {}
+    tel_events = int(sum(
+        v for k, v in tel.items() if k.startswith("events_")
+    ))
+    if tel_events > 0:
+        print(
+            f"  s{seed}: telemetry_events={tel_events} "
+            f"(by_kind={ {k: int(v) for k, v in tel.items() if k.startswith('events_')} }) "
+            f"takers={takers} caregiver_responses={cg}"
+        )
+        return True
+    if ev > 0:
+        print(
+            f"  s{seed}: summary_events={ev} takers={takers} "
+            f"caregiver_responses={cg}"
+        )
+        return True
+    print(f"  s{seed}: 0 events (takers={takers})")
+    return False
 
 
 def exercise_gate(client, bucket: str, args) -> bool:
     """A1 must record common_source_events > 0 on at least one voyage."""
     print("== Gate 2: exercise (a1 common_source fired) ==")
-    fired = 0
-    seen = 0
-    for seed in args.a1_seeds:
-        rid = _RID.format(seed=seed)
-        s = _fetch_summary(
-            client, bucket, f"{args.canary_prefix}/{_A1_TIER}/{rid}"
-        )
-        if s is None:
-            continue  # pending cell
-        seen += 1
-        mech = s.get("mechanisms") or {}
-        ev = int(mech.get("common_source_events") or 0)
-        takers = int(mech.get("common_source_takers") or 0)
-        cg = int(mech.get("caregiver_responses") or 0)
-        # Ground truth on pre-witness-fix zips: census telemetry.
-        cen = _fetch_member_gz(
-            client, bucket, f"{args.canary_prefix}/{_A1_TIER}/{rid}",
-            "growth_census.json.gz",
-        )
-        tel = ((cen or {}).get("common_source") or {}).get("telemetry") or {}
-        tel_events = int(sum(
-            v for k, v in tel.items() if k.startswith("events_")
-        ))
-        if tel_events > 0:
-            fired += 1
-            print(
-                f"  s{seed}: telemetry_events={tel_events} "
-                f"(by_kind={ {k: int(v) for k, v in tel.items() if k.startswith('events_')} }) "
-                f"takers={takers} caregiver_responses={cg}"
-            )
-        elif ev > 0:
-            fired += 1
-            print(
-                f"  s{seed}: summary_events={ev} takers={takers} "
-                f"caregiver_responses={cg}"
-            )
-        else:
-            print(f"  s{seed}: 0 events (takers={takers})")
+    outcomes = [_a1_seed_fired(client, bucket, seed, args) for seed in args.a1_seeds]
+    seen = sum(o is not None for o in outcomes)
+    fired = sum(1 for o in outcomes if o)
     pending = len(args.a1_seeds) - seen
     ok = fired > 0
     suffix = f" (+{pending} pending)" if pending else ""
@@ -224,18 +233,14 @@ def exercise_gate(client, bucket: str, args) -> bool:
     return ok
 
 
-def memory_report(client, bucket: str, args) -> None:
-    """RSS curve medians from rss_samples.json + summary rss_mb."""
-    print("== Gate 3: peak-memory report ==")
+def _collect_rss_samples(
+    client, bucket: str, canary_prefix: str, tiers: tuple,
+) -> tuple[list[float], list[float], list[float]]:
     peaks, voyages, folds = [], [], []
-    tiers = (
-        (_A0ID_TIER, args.a0_seeds),
-        (_A1_TIER, args.a1_seeds),
-    )
     for tier, seeds in tiers:
         for seed in seeds:
             rid = _RID.format(seed=seed)
-            key = f"{args.canary_prefix}/{tier}/{rid}"
+            key = f"{canary_prefix}/{tier}/{rid}"
             rss = _fetch_member_json(client, bucket, key, "rss_samples.json")
             s = _fetch_summary(client, bucket, key)
             if rss is not None:
@@ -246,6 +251,16 @@ def memory_report(client, bucket: str, args) -> None:
                     voyages.append(rmb["voyage"])
                 if rmb.get("fold"):
                     folds.append(rmb["fold"])
+    return peaks, voyages, folds
+
+
+def memory_report(client, bucket: str, args) -> None:
+    """RSS curve medians from rss_samples.json + summary rss_mb."""
+    print("== Gate 3: peak-memory report ==")
+    tiers = ((_A0ID_TIER, args.a0_seeds), (_A1_TIER, args.a1_seeds))
+    peaks, voyages, folds = _collect_rss_samples(
+        client, bucket, args.canary_prefix, tiers,
+    )
     if not peaks:
         print("  no rss_samples.json members yet")
         return

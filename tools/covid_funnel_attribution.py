@@ -72,6 +72,40 @@ def _match_cell(design: object, theta: float, arm_id: str, seed: int) -> object:
     return matches[0]
 
 
+def _funnel_role_tally(
+    confirmed: dict[int, int],
+    role_of: dict[int, str],
+    pred,
+) -> dict[str, int]:
+    out = {"crew": 0, "passenger": 0, "other": 0}
+    for aid in confirmed:
+        if pred(aid):
+            out[role_of.get(aid) or "other"] += 1
+    return out
+
+
+def _funnel_infected_counts(
+    infection_epoch: dict[int, int],
+    role_of: dict[int, str],
+    day_of,
+    start: int,
+    end: int | None,
+) -> dict[str, dict[str, int]]:
+    infected = {
+        "total": {"crew": 0, "passenger": 0},
+        "during_window": {"crew": 0, "passenger": 0},
+    }
+    for aid, ep in infection_epoch.items():
+        role = role_of.get(aid, "other")
+        if role not in ("crew", "passenger"):
+            continue
+        infected["total"][role] += 1
+        d = day_of(ep)
+        if start <= d <= (end if end is not None else start):
+            infected["during_window"][role] += 1
+    return infected
+
+
 def funnel_seed(
     design: object, theta: float, arm_id: str, seed: int,
 ) -> dict[str, object]:
@@ -87,7 +121,6 @@ def funnel_seed(
     }
     syndromic = sim.modalities["syndromic"]
 
-    # infection day per agent (all acquisitions; repeats collapse to first)
     infection_epoch = {
         a.agent_id: int(a.infections[PATHOGEN_ID]["infection_epoch"])
         for a in sim.engine.agents
@@ -105,35 +138,17 @@ def funnel_seed(
         for aid, ep in syndromic._presentation_onset_epoch.items()
     }
 
-    def tally(pred) -> dict[str, int]:
-        out = {"crew": 0, "passenger": 0, "other": 0}
-        for aid in confirmed:
-            if pred(aid):
-                out[role_of.get(aid) or "other"] += 1
-        return out
-
-    infected = {
-        "total": {"crew": 0, "passenger": 0},
-        "during_window": {"crew": 0, "passenger": 0},
-    }
-    for aid, ep in infection_epoch.items():
-        role = role_of.get(aid, "other")
-        if role not in ("crew", "passenger"):
-            continue
-        infected["total"][role] += 1
-        d = day_of(ep)
-        if start <= d <= (end if end is not None else start):
-            infected["during_window"][role] += 1
-
-    presented = tally(lambda aid: aid in onset_epoch)
-    gate_pass = tally(
-        lambda aid: aid in onset_epoch
-        and onset_epoch[aid] <= confirmed[aid]
+    infected = _funnel_infected_counts(
+        infection_epoch, role_of, day_of, start, end,
     )
-
-    confirmed_by_role = {"crew": 0, "passenger": 0, "other": 0}
-    for aid in confirmed:
-        confirmed_by_role[role_of.get(aid) or "other"] += 1
+    presented = _funnel_role_tally(
+        confirmed, role_of, lambda aid: aid in onset_epoch,
+    )
+    gate_pass = _funnel_role_tally(
+        confirmed, role_of,
+        lambda aid: aid in onset_epoch and onset_epoch[aid] <= confirmed[aid],
+    )
+    confirmed_by_role = _funnel_role_tally(confirmed, role_of, lambda _aid: True)
 
     recorded = {"crew": 0, "passenger": 0, "other": 0}
     for (pid, aid), rec in syndromic._onset_observations.items():

@@ -122,6 +122,19 @@ def _diff_key(a: dict, b: dict, k, path: str, diffs: list[str],
         _diff_keys(a[k], b[k], f"{path}.{k}", diffs, tol, cap)
 
 
+def _diff_key_lists(
+    a: list, b: list, path: str, diffs: list[str], tol: float, cap: int,
+) -> None:
+    if len(a) != len(b):
+        diffs.append(f"{path} (len {len(a)} vs {len(b)})")
+        return
+    for i, (x, y) in enumerate(zip(a, b)):
+        if len(diffs) >= cap:
+            break
+        if x != y:
+            _diff_keys(x, y, f"{path}[{i}]", diffs, tol, cap)
+
+
 def _diff_keys(a, b, path: str = "", diffs: list[str] | None = None,
                tol: float = 0.0, cap: int = 40) -> list[str]:
     """Paths where the two parsed structures differ (capped first-
@@ -139,14 +152,7 @@ def _diff_keys(a, b, path: str = "", diffs: list[str] | None = None,
                 break
             _diff_key(a, b, k, path, diffs, tol, cap)
     elif isinstance(a, list):
-        if len(a) != len(b):
-            diffs.append(f"{path} (len {len(a)} vs {len(b)})")
-        else:
-            for i, (x, y) in enumerate(zip(a, b)):
-                if len(diffs) >= cap:
-                    break
-                if x != y:
-                    _diff_keys(x, y, f"{path}[{i}]", diffs, tol, cap)
+        _diff_key_lists(a, b, path, diffs, tol, cap)
     else:
         _leaf_diff(a, b, path, diffs, tol)
     return diffs
@@ -190,6 +196,66 @@ def _check_seed(
     return row
 
 
+def _census_seed_set(seeds: list[str], census_sample: int) -> set[str]:
+    if not census_sample:
+        return set()
+    step = max(1, len(seeds) // census_sample)
+    return set(seeds[::step])
+
+
+def _run_bridge_arm(
+    client,
+    bucket: str,
+    arm: str,
+    p_w1: str,
+    p_old: str,
+    census_seeds: set[str],
+    workers: int,
+) -> tuple[list[dict], list[str], list[str]]:
+    idx_w1 = _index_prefix(client, bucket, p_w1 + "/")
+    idx_old = _index_prefix(client, bucket, p_old + "/")
+    seeds = sorted(set(idx_w1) & set(idx_old))
+    missing_w1 = sorted(set(idx_old) - set(idx_w1))
+    missing_old = sorted(set(idx_w1) - set(idx_old))
+    arm_rows: list[dict] = []
+    with ThreadPoolExecutor(workers) as pool:
+        futs = {
+            pool.submit(
+                _check_seed, client, bucket,
+                idx_w1[s], idx_old[s], s in census_seeds,
+            ): s
+            for s in seeds
+        }
+        for fut in as_completed(futs):
+            s = futs[fut]
+            row = fut.result()
+            row["arm"] = arm
+            row["seed"] = s
+            arm_rows.append(row)
+    if missing_w1 or missing_old:
+        arm_rows.append({
+            "arm": arm, "verdict": "key_missing",
+            "missing_w1": missing_w1, "missing_old": missing_old,
+        })
+    return arm_rows, missing_w1, missing_old
+
+
+def _print_bridge_summary(bridges: tuple, rows: list[dict]) -> None:
+    print("\n| arm | paired | identical | diverged | census n |"
+          " census identical |")
+    print("|---|---|---|---|---|---|")
+    for arm, _, _ in bridges:
+        ar = [r for r in rows if r["arm"] == arm and r.get("seed")]
+        cen = [r for r in ar if r.get("census")]
+        print(
+            f"| {arm} | {len(ar)} |"
+            f" {sum(1 for r in ar if r['verdict'] == 'identical')} |"
+            f" {sum(1 for r in ar if r['verdict'] == 'diverged')} |"
+            f" {len(cen)} |"
+            f" {sum(1 for r in cen if r['census'] == 'identical')} |"
+        )
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--bucket", default=_BUCKET_DEFAULT)
@@ -222,56 +288,23 @@ def main() -> None:
             idx_w1 = _index_prefix(client, args.bucket, p_w1 + "/")
             idx_old = _index_prefix(client, args.bucket, p_old + "/")
             seeds = sorted(set(idx_w1) & set(idx_old))
-            missing_w1 = sorted(set(idx_old) - set(idx_w1))
-            missing_old = sorted(set(idx_w1) - set(idx_old))
-            census_seeds = set()
-            if args.census_sample:
-                step = max(1, len(seeds) // args.census_sample)
-                census_seeds = set(seeds[::step])
-            arm_rows: list[dict] = []
-            with ThreadPoolExecutor(args.workers) as pool:
-                futs = {
-                    pool.submit(
-                        _check_seed, client, args.bucket,
-                        idx_w1[s], idx_old[s], s in census_seeds,
-                    ): s
-                    for s in seeds
-                }
-                for fut in as_completed(futs):
-                    s = futs[fut]
-                    row = fut.result()
-                    row["arm"] = arm
-                    row["seed"] = s
-                    arm_rows.append(row)
-            n_div = sum(1 for r in arm_rows if r["verdict"] == "diverged")
+            census_seeds = _census_seed_set(seeds, args.census_sample)
+            arm_rows, missing_w1, missing_old = _run_bridge_arm(
+                client, args.bucket, arm, p_w1, p_old,
+                census_seeds, args.workers,
+            )
+            n_div = sum(1 for r in arm_rows if r.get("verdict") == "diverged")
             print(
                 f"{arm}: {len(seeds)} paired seeds, {n_div} diverged "
                 f"(missing w1:{len(missing_w1)} old:{len(missing_old)})",
                 file=sys.stderr,
             )
-            if missing_w1 or missing_old:
-                arm_rows.append({
-                    "arm": arm, "verdict": "key_missing",
-                    "missing_w1": missing_w1, "missing_old": missing_old,
-                })
             # Flush per arm so a killed run keeps its completed pairs.
             for r in sorted(arm_rows, key=lambda r: r.get("seed", 0)):
                 fh.write(json.dumps(r) + "\n")
             fh.flush()
             rows.extend(arm_rows)
-    print("\n| arm | paired | identical | diverged | census n |"
-          " census identical |")
-    print("|---|---|---|---|---|---|")
-    for arm, _, _ in bridges:
-        ar = [r for r in rows if r["arm"] == arm and r.get("seed")]
-        cen = [r for r in ar if r.get("census")]
-        print(
-            f"| {arm} | {len(ar)} |"
-            f" {sum(1 for r in ar if r['verdict'] == 'identical')} |"
-            f" {sum(1 for r in ar if r['verdict'] == 'diverged')} |"
-            f" {len(cen)} |"
-            f" {sum(1 for r in cen if r['census'] == 'identical')} |"
-        )
+    _print_bridge_summary(bridges, rows)
 
 
 if __name__ == "__main__":

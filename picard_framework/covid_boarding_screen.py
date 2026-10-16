@@ -884,28 +884,13 @@ def _apply_hazard_frailty(raw: dict[str, Any], spec: Any) -> None:
     }
 
 
-def apply_arm_overrides(
+def _dispatch_arm_overrides(
     raw: dict[str, Any],
     overrides: Mapping[str, Any],
-    *,
     profile: dict[str, Any],
-    theta: float | None = None,
-) -> dict[str, Any]:
-    """Apply one arm's override block to a built run spec, in place.
-
-    ``pathogen_pool_transport`` is not handled here: it is a build-time
-    argument to ``build_fit_run_spec``. Every other declared key lands in the
-    spec where the engine reads it; an undeclared key raises rather than
-    being silently ignored.
-    """
-    for key in overrides:
-        if key not in ARM_OVERRIDE_KEYS:
-            raise ValueError(
-                f"unknown arm override key {key!r}; allowed: "
-                f"{sorted(ARM_OVERRIDE_KEYS)}",
-            )
-    # The window retime names the DECLARED protocol id; it must run before a
-    # rename in the same arm.
+    theta: float | None,
+) -> None:
+    """Apply declared override keys in the frozen arm order."""
     if "scheduled_protocol_window" in overrides:
         _apply_scheduled_window(raw, overrides["scheduled_protocol_window"])
     if "scheduled_protocol_id" in overrides:
@@ -931,8 +916,6 @@ def apply_arm_overrides(
             raw, overrides["dose_response_frailty"], theta, profile,
         )
     if "hazard_frailty" in overrides:
-        # Runs after the block-rewriting arms above so the frailty
-        # sub-key lands on whatever dose_response block they resolved.
         _apply_hazard_frailty(raw, overrides["hazard_frailty"])
     if "seed_patch" in overrides:
         _apply_seed_patch(raw, overrides["seed_patch"])
@@ -944,6 +927,29 @@ def apply_arm_overrides(
         )
     if "observation_overrides" in overrides:
         _apply_observation_overrides(raw, overrides["observation_overrides"])
+
+
+def apply_arm_overrides(
+    raw: dict[str, Any],
+    overrides: Mapping[str, Any],
+    *,
+    profile: dict[str, Any],
+    theta: float | None = None,
+) -> dict[str, Any]:
+    """Apply one arm's override block to a built run spec, in place.
+
+    ``pathogen_pool_transport`` is not handled here: it is a build-time
+    argument to ``build_fit_run_spec``. Every other declared key lands in the
+    spec where the engine reads it; an undeclared key raises rather than
+    being silently ignored.
+    """
+    for key in overrides:
+        if key not in ARM_OVERRIDE_KEYS:
+            raise ValueError(
+                f"unknown arm override key {key!r}; allowed: "
+                f"{sorted(ARM_OVERRIDE_KEYS)}",
+            )
+    _dispatch_arm_overrides(raw, overrides, profile, theta)
     return raw
 
 

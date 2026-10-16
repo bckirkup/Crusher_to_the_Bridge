@@ -615,6 +615,81 @@ def _copy_plan_graphics(
     )
 
 
+def _zone_geometry_bundle(
+    digest: ShipDigest,
+    polys: list,
+    zone_meta: dict,
+    pages: dict,
+) -> tuple[list, list[str], list[dict], list[str], list[str], set[str], list[str]]:
+    ordered = _dedupe_polys(polys)
+    berthing = _berthing_zones(ordered, zone_meta)
+    zones_out = _zones_from_polys(ordered, zone_meta, digest, pages)
+    zone_ids = [z["id"] for z in zones_out]
+    head_ids = [z["id"] for z in zones_out if z["type"] == "Sanitary"]
+    head_set = set(head_ids)
+    graywater = [
+        g for g in _graywater_zones(digest, zones_out, zone_ids)
+        if g not in head_set
+    ]
+    return ordered, berthing, zones_out, zone_ids, head_ids, head_set, graywater
+
+
+def _spatial_layout_doc(
+    pid: str, digest: ShipDigest, zones_out: list[dict], graywater: list[str],
+) -> dict[str, Any]:
+    spatial: dict[str, Any] = {
+        "platform": pid,
+        "description": digest.description
+        or digest.class_name
+        or f"Naval platform imported from general arrangements ({pid})",
+        "isolation_unit_capacity": int(digest.isolation_unit_capacity),
+        "deck_dimensions": {
+            "length_m": float(digest.length_m),
+            "beam_m": float(digest.beam_m),
+        },
+        "graywater_zones": graywater,
+        "zones": zones_out,
+    }
+    if (
+        digest.complement
+        and digest.complement.passengers > 0
+        and digest.complement.crew > 0
+    ):
+        spatial["nominal_complement"] = {
+            "passengers": int(digest.complement.passengers),
+            "crew": int(digest.complement.crew),
+        }
+    return spatial
+
+
+def _airflow_layout_doc(
+    pid: str,
+    digest: ShipDigest,
+    ordered: list,
+    zones_out: list[dict],
+    zone_ids: list[str],
+    head_ids: list[str],
+    head_set: set[str],
+    zone_meta: dict,
+) -> dict[str, Any]:
+    hvac_zones = _auto_hvac(digest, zone_ids, zone_meta, head_set)
+    hvac_zones += _head_branch_groups(head_ids, zones_out)
+    return {
+        "platform": pid,
+        "description": f"HVAC network synthesized for {pid}",
+        "oa_fraction": 0.2,
+        "hvac_duty": 0.5,
+        "hvac_zones": hvac_zones,
+        "cross_zone_links": _cross_zone_links(digest, hvac_zones)
+        + _head_makeup_links(head_ids, zones_out, hvac_zones),
+        "adjacency": [
+            e
+            for e in _adjacency_from_polygons(ordered, digest)
+            if e["from"] not in head_set and e["to"] not in head_set
+        ],
+    }
+
+
 def synthesize(
     *,
     workdir: str,
@@ -640,62 +715,13 @@ def synthesize(
     if not polys:
         raise RuntimeError("approved/draft SVGs contained no named zone polygons")
 
-    ordered = _dedupe_polys(polys)
-    berthing = _berthing_zones(ordered, zone_meta)
-    zones_out = _zones_from_polys(ordered, zone_meta, digest, pages)
-
-    zone_ids = [z["id"] for z in zones_out]
-    head_ids = [z["id"] for z in zones_out if z["type"] == "Sanitary"]
-    head_set = set(head_ids)
-    graywater = [
-        g for g in _graywater_zones(digest, zones_out, zone_ids)
-        if g not in head_set
-    ]
-
-    spatial: dict[str, Any] = {
-        "platform": pid,
-        "description": digest.description
-        or digest.class_name
-        or f"Naval platform imported from general arrangements ({pid})",
-        "isolation_unit_capacity": int(digest.isolation_unit_capacity),
-        "deck_dimensions": {
-            "length_m": float(digest.length_m),
-            "beam_m": float(digest.beam_m),
-        },
-        "graywater_zones": graywater,
-        "zones": zones_out,
-    }
-    if (
-        digest.complement
-        and digest.complement.passengers > 0
-        and digest.complement.crew > 0
-    ):
-        # nominal_complement is the run-scored declaration: it is only written
-        # when both groups are nonzero — an all-crew hull keeps its complement
-        # in crew_manifest.json and sources it, like the other naval platforms.
-        spatial["nominal_complement"] = {
-            "passengers": int(digest.complement.passengers),
-            "crew": int(digest.complement.crew),
-        }
-
-    hvac_zones = _auto_hvac(digest, zone_ids, zone_meta, head_set)
-    hvac_zones += _head_branch_groups(head_ids, zones_out)
-    airflow: dict[str, Any] = {
-        "platform": pid,
-        "description": f"HVAC network synthesized for {pid}",
-        "oa_fraction": 0.2,
-        "hvac_duty": 0.5,
-        "hvac_zones": hvac_zones,
-        "cross_zone_links": _cross_zone_links(digest, hvac_zones)
-        + _head_makeup_links(head_ids, zones_out, hvac_zones),
-        # Heads never leak back into the served space: no adjacency edge may
-        # touch a Sanitary zone (the invariants test enforces it).
-        "adjacency": [
-            e
-            for e in _adjacency_from_polygons(ordered, digest)
-            if e["from"] not in head_set and e["to"] not in head_set
-        ],
-    }
+    ordered, berthing, zones_out, zone_ids, head_ids, head_set, graywater = (
+        _zone_geometry_bundle(digest, polys, zone_meta, pages)
+    )
+    spatial = _spatial_layout_doc(pid, digest, zones_out, graywater)
+    airflow = _airflow_layout_doc(
+        pid, digest, ordered, zones_out, zone_ids, head_ids, head_set, zone_meta,
+    )
 
     systems_notes_path: str | None = None
     if digest.systems is not None:

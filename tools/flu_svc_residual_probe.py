@@ -333,6 +333,137 @@ def run_cell(seed: int, arm: str) -> dict[str, Any]:
     }
 
 
+def _surplus_admit_epoch(
+    iv_a: dict[int, list[tuple[int, int | None]]], aid: int,
+) -> int | None:
+    ivs = iv_a.get(aid)
+    return ivs[0][0] if ivs else None
+
+
+def _surplus_source_rows(
+    aid: int,
+    epoch: int,
+    clique: int,
+    events_by_target: dict[int, list[dict[str, Any]]],
+    rows_a: dict[int, dict[str, Any]],
+    iv_a: dict[int, list[tuple[int, int | None]]],
+) -> list[dict[str, Any]]:
+    """The establishing event(s) for *aid*'s first onboard episode."""
+    out = []
+    for ev in events_by_target.get(aid, ()):
+        if ev["epoch"] != epoch:
+            continue
+        contribs = []
+        total = 0.0
+        for src_s, dose in (ev.get("contributors") or {}).items():
+            src = None if src_s in ("None", "") else int(src_s)
+            src_rec = rows_a.get(src) if src is not None else None
+            confined = bool(
+                src is not None and _confined_at(iv_a, src, epoch)
+            )
+            contribs.append({
+                "agent_id": src,
+                "dose": dose,
+                "role": (src_rec or {}).get("role"),
+                "same_clique": bool(
+                    src_rec and src_rec["clique"] == clique
+                ),
+                "confined_at_epoch": confined,
+                "first_infection_epoch": (
+                    src_rec or {}
+                ).get("first_infection_epoch"),
+            })
+            total += dose
+        contribs.sort(key=lambda c: -c["dose"])
+        confined_share = sum(
+            c["dose"] for c in contribs if c["confined_at_epoch"]
+        ) / total if total else 0.0
+        out.append({
+            "top_contributor": contribs[0] if contribs else None,
+            "n_contributors": len(contribs),
+            "confined_dose_share": confined_share,
+            "contributors": contribs[:8],
+            "zone": ev.get("zone"),
+            "pathway": ev.get("pathway"),
+            "dose": ev.get("dose"),
+            "routes": ev.get("routes"),
+        })
+    return out
+
+
+def _surplus_channel(
+    rec: dict[str, Any],
+    target_confined: bool,
+    earlier: list[int],
+    mate_confined: list[int],
+) -> str:
+    if rec["role"] == "crew":
+        return "crew"
+    if target_confined and mate_confined:
+        return "co_confined_pooling"
+    if target_confined and earlier:
+        return "confined_target_free_mate"
+    if not target_confined and mate_confined:
+        return "cross_boundary_mate"
+    if not target_confined and earlier:
+        return "free_pair"
+    if target_confined:
+        return "confined_no_mate"
+    return "free_no_mate"
+
+
+def _surplus_row(
+    aid: int,
+    rows_a: dict[int, dict[str, Any]],
+    iv_a: dict[int, list[tuple[int, int | None]]],
+    first_inf: dict[int, int | None],
+    events_by_target: dict[int, list[dict[str, Any]]],
+) -> dict[str, Any]:
+    rec = rows_a[aid]
+    epoch = rec["first_onboard_epoch"]
+    target_confined = _confined_at(iv_a, aid, epoch)
+    clique_mates = sorted(
+        m for m, mrec in rows_a.items()
+        if mrec["clique"] == rec["clique"] and m != aid
+    )
+    earlier = [
+        m for m in clique_mates
+        if first_inf.get(m) is not None and first_inf[m] < epoch
+    ]
+    mate_confined = [
+        m for m in earlier if _confined_at(iv_a, m, epoch)
+    ]
+    channel = _surplus_channel(rec, target_confined, earlier, mate_confined)
+    return {
+        "id": aid,
+        "role": rec["role"],
+        "band": rec["band"],
+        "clique": rec["clique"],
+        "clique_size": rec["clique_size"],
+        "epoch": epoch,
+        "admit_epoch": _surplus_admit_epoch(iv_a, aid),
+        "episodes": rec.get("episode"),
+        "dominant_route": rec.get("dominant_route"),
+        "routes": rec.get("routes"),
+        "confined_at_infection": target_confined,
+        "earlier_mates": [
+            {
+                "id": m,
+                "first_infection_epoch": first_inf[m],
+                "imported": first_inf[m] == 0,
+                "confined_at_epoch": m in mate_confined,
+                "admit_epoch": _surplus_admit_epoch(iv_a, m),
+            }
+            for m in earlier
+        ],
+        "mates_confined_at_epoch": mate_confined,
+        "channel": channel,
+        "sources": _surplus_source_rows(
+            aid, epoch, rec["clique"], events_by_target, rows_a, iv_a,
+        ),
+    }
+
+
 def _classify_surplus(
     arm_a: dict[str, Any],
     arm_b: dict[str, Any],
@@ -358,113 +489,15 @@ def _classify_surplus(
     for ev in arm_a.get("tx_events") or []:
         events_by_target.setdefault(ev["target_agent_id"], []).append(ev)
 
-    def _admit_epoch(aid: int) -> int | None:
-        ivs = iv_a.get(aid)
-        return ivs[0][0] if ivs else None
-
-    def _source_rows(aid: int, epoch: int, clique: int) -> list[dict[str, Any]]:
-        """The establishing event(s) for *aid*'s first onboard episode."""
-        out = []
-        for ev in events_by_target.get(aid, ()):
-            if ev["epoch"] != epoch:
-                continue
-            contribs = []
-            total = 0.0
-            for src_s, dose in (ev.get("contributors") or {}).items():
-                src = None if src_s in ("None", "") else int(src_s)
-                src_rec = rows_a.get(src) if src is not None else None
-                confined = bool(
-                    src is not None and _confined_at(iv_a, src, epoch)
-                )
-                contribs.append({
-                    "agent_id": src,
-                    "dose": dose,
-                    "role": (src_rec or {}).get("role"),
-                    "same_clique": bool(
-                        src_rec and src_rec["clique"] == clique
-                    ),
-                    "confined_at_epoch": confined,
-                    "first_infection_epoch": (
-                        src_rec or {}
-                    ).get("first_infection_epoch"),
-                })
-                total += dose
-            contribs.sort(key=lambda c: -c["dose"])
-            confined_share = sum(
-                c["dose"] for c in contribs if c["confined_at_epoch"]
-            ) / total if total else 0.0
-            out.append({
-                "top_contributor": contribs[0] if contribs else None,
-                "n_contributors": len(contribs),
-                "confined_dose_share": confined_share,
-                "contributors": contribs[:8],
-                "zone": ev.get("zone"),
-                "pathway": ev.get("pathway"),
-                "dose": ev.get("dose"),
-                "routes": ev.get("routes"),
-            })
-        return out
-
-    def _row(aid: int) -> dict[str, Any]:
-        rec = rows_a[aid]
-        epoch = rec["first_onboard_epoch"]
-        target_confined = _confined_at(iv_a, aid, epoch)
-        clique_mates = sorted(
-            m for m, mrec in rows_a.items()
-            if mrec["clique"] == rec["clique"] and m != aid
-        )
-        earlier = [
-            m for m in clique_mates
-            if first_inf.get(m) is not None and first_inf[m] < epoch
-        ]
-        mate_confined = [
-            m for m in earlier if _confined_at(iv_a, m, epoch)
-        ]
-        if rec["role"] == "crew":
-            channel = "crew"
-        elif target_confined and mate_confined:
-            channel = "co_confined_pooling"
-        elif target_confined and earlier:
-            channel = "confined_target_free_mate"
-        elif not target_confined and mate_confined:
-            channel = "cross_boundary_mate"
-        elif not target_confined and earlier:
-            channel = "free_pair"
-        elif target_confined:
-            channel = "confined_no_mate"
-        else:
-            channel = "free_no_mate"
-        return {
-            "id": aid,
-            "role": rec["role"],
-            "band": rec["band"],
-            "clique": rec["clique"],
-            "clique_size": rec["clique_size"],
-            "epoch": epoch,
-            "admit_epoch": _admit_epoch(aid),
-            "episodes": rec.get("episode"),
-            "dominant_route": rec.get("dominant_route"),
-            "routes": rec.get("routes"),
-            "confined_at_infection": target_confined,
-            "earlier_mates": [
-                {
-                    "id": m,
-                    "first_infection_epoch": first_inf[m],
-                    "imported": first_inf[m] == 0,
-                    "confined_at_epoch": m in mate_confined,
-                    "admit_epoch": _admit_epoch(m),
-                }
-                for m in earlier
-            ],
-            "mates_confined_at_epoch": mate_confined,
-            "channel": channel,
-            "sources": _source_rows(aid, epoch, rec["clique"]),
-        }
-
     return {
         "onboard_a": sorted(onboard_a),
         "onboard_b": sorted(onboard_b),
-        "a_only": [_row(aid) for aid in sorted(onboard_a - onboard_b)],
+        "a_only": [
+            _surplus_row(
+                aid, rows_a, iv_a, first_inf, events_by_target,
+            )
+            for aid in sorted(onboard_a - onboard_b)
+        ],
         "b_only_ids": sorted(onboard_b - onboard_a),
         "n_a": len(onboard_a),
         "n_b": len(onboard_b),
