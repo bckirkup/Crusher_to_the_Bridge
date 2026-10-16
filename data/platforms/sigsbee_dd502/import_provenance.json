@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:47:29.090726+00:00",
+  "platform_id": "sigsbee_dd502",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/dd502_import",
+  "digest_sha256": "201433388990c05e7ee37c21eb7397298af746b12a03777982bd6a7b31d710ad",
+  "svg_sha256": {
+    "page_05_approved.svg": "c3f56a61ef90cf1b042ebc9505b28e2efb7cabd3071714278c8b0f3825909367",
+    "page_06_approved.svg": "359ac8194d719ef6f153a2ac245b39de15bb8d0b0b114195f4d6d0845cd6c8f1",
+    "page_07_approved.svg": "d138bbfc00f7b2602b3703cb21cdaf6b070dce0125f0e40358a38f73d992a74b",
+    "page_08_approved.svg": "2d57eebfa2c6bbd77854b467ab8cc1949f2c80c9859678a19cdbee353fe0b13d",
+    "page_09_approved.svg": "d7cf92205a26f0059711c15be5a27ba412ec27cd2b4373e8af2b947f30fdca69",
+    "page_10_approved.svg": "0e611d5bb74e15d3a0aecbbdb7b51141b65cbf6135def52c412dc344b513af77",
+    "page_11_approved.svg": "acd19dcd9544ad7e6b12a09ffa571566892627ff6c55e3b7089743581c17d566"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 41,
+  "berthing_zones": [
+    "Nav_Bridge",
+    "After_Deckhouse",
+    "Superstructure_Radio",
+    "Aft_Util",
+    "Mid_Shops",
+    "CIC",
+    "Officers_Country",
+    "Torpedo_Workshop",
+    "Aft_Shops",
+    "Crew_Berthing_Aft",
+    "Crew_Berthing_Fwd",
+    "CPO_Quarters",
+    "Fwd_Stores_1P",
+    "Aft_Stores_2P",
+    "Provisions_2P",
+    "Provisions_3P",
+    "Sound_Rm",
+    "Boatswain_Chain_3P",
+    "Fwd_Stores_Hold"
+  ],
+  "systems_era": "usn_ww2"
+}
