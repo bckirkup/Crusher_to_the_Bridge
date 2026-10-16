@@ -68,6 +68,9 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `river_class_frigate` | River-class frigate (NCH 7077/7078, 2 sheets; twin boiler rooms, messes flanking machinery) | 37 | 140 crew, 5 classes | `.prj` 458 paths, 5 HVAC groups |
 | `fort_william_j311` | J311 Fort William Bangor-class minesweeper '1939 Programme' (3 sheets; reciprocating machinery) | 25 | 70 crew, 5 classes | `.prj` 264 paths, 4 HVAC groups |
 | `winnipeg_j337` | J337 Winnipeg Algerine-class minesweeper 'As fitted' (2 sheets; plate-read per-mess accommodation tables) | 31 | 122 crew, 5 classes | `.prj` 381 paths, 4 HVAC groups |
+| `sigsbee_dd502` | DD-502 Sigsbee Fletcher-class destroyer (12-plate 1944 booklet; 3rd platform fwd-only sheet, tall ER/FR machinery zoned once on 1st platform) | 41 | 322 crew, 8 classes | `.prj` 303 paths, 4 HVAC groups |
+| `nields_dd616` | DD-616 Nields Benson-class destroyer (10-plate 1942 booklet; raised forecastle deck carrying officers' country, deckhouse-top level, tall machinery) | 39 | 262 crew, 8 classes | `.prj` 258 paths, 3 HVAC groups |
+| `davison_dd618` | DD-618 Davison ex-DMS-37 Gleaves-class FRAM destroyer (10-plate 1958 booklet; sonar control at bridge, CIC on superstructure deck, mine-sweep stern gear) | 39 | 283 crew, 8 classes | `.prj` 257 paths, 3 HVAC groups |
 
 All ten carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
 
