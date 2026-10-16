@@ -93,6 +93,9 @@ PLATFORMS = [
     "ranger_cv4",
     "yorktown_cv5",
     "wasp_cv7",
+    "esteem_mso438",
+    "erie_pg50",
+    "pt_564",
 ]
 
 ENTERPRISE_IDS = frozenset({

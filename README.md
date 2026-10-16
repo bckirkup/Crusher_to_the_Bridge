@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Fifty-one ship platforms are included, each with spatial layout and HVAC
+Fifty-four ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -845,6 +845,9 @@ from `orchestrator_types.py`:
 | `ranger_cv4` | USS Ranger CV-4 first purpose-built USN carrier (maritime.org GA import, 74 zones, 2641 crew incl. air group) |
 | `yorktown_cv5` | USS Yorktown CV-5 Yorktown-class fleet carrier (maritime.org GA import, 71 zones, 2279 crew incl. air group + flag staff) |
 | `wasp_cv7` | USS Wasp CV-7 treaty carrier (maritime.org GA import, 62 zones, 2128 crew incl. air group + marines) |
+| `esteem_mso438` | USS Esteem MSO-438 Aggressive-class ocean minesweeper (maritime.org GA import, 39 zones, 74 crew) |
+| `erie_pg50` | USS Erie PG-50 Erie-class patrol gunboat (maritime.org GA import, 54 zones, 248 crew incl. flag staff + marine guard) |
+| `pt_564` | PT-564 Higgins 70'8" motor torpedo boat (maritime.org GA import, 13 zones, 14 crew — marginal smallest hull) |
 
 ## License
 
