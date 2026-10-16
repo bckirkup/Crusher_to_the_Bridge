@@ -52,7 +52,7 @@ _ABS_EPS_M3H = 0.5  # near-zero legs: absolute slack below relative math
 _DEFAULT_WORKDIR = os.path.join(
     REPO_ROOT, "telemetry_buffer", "contam_commissioned",
 )
-_PLATFORM_ID_RE = re.compile(r"[A-Za-z0-9_]+")
+_PLATFORM_ID_RE = re.compile(r"\w+")
 
 
 def _validated_platform(platform: str) -> str:
@@ -66,14 +66,6 @@ def _validated_platform(platform: str) -> str:
             or not os.path.isdir(platform_dir):
         raise ValueError(f"platform {platform!r} not under data/platforms/")
     return platform_dir
-
-
-def _validated_workdir(workdir: str) -> str:
-    """Confine the artifact workdir to the repo tree (validated_open)."""
-    resolved = os.path.realpath(workdir)
-    if os.path.commonpath((resolved, REPO_ROOT)) != REPO_ROOT:
-        raise ValueError(f"workdir {workdir!r} must be inside the repo")
-    return resolved
 
 
 def _load_platform(platform: str) -> tuple[str, dict, dict]:
@@ -257,11 +249,6 @@ def main(argv: list[str] | None = None) -> int:
         "--emit-only", action="store_true",
         help="Check emission only; skip the ContamX solve.",
     )
-    parser.add_argument(
-        "--workdir", default=_DEFAULT_WORKDIR,
-        help="Directory for emitted .prj/.sim artifacts "
-             f"(default {_DEFAULT_WORKDIR}).",
-    )
     args = parser.parse_args(argv)
     platforms = args.platforms or list(DEFAULT_PLATFORMS)
 
@@ -271,18 +258,17 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     try:
-        workdir = _validated_workdir(args.workdir)
         for platform in platforms:
             _validated_platform(platform)
     except ValueError as exc:
         print(f"ERROR: {exc}")
         return 2
-    os.makedirs(workdir, exist_ok=True)
+    os.makedirs(_DEFAULT_WORKDIR, exist_ok=True)
     errors: list[str] = []
     for platform in platforms:
         errors.extend(
             check_platform(
-                platform, workdir,
+                platform, _DEFAULT_WORKDIR,
                 tolerance=args.tolerance, solve=solve,
             )
         )
