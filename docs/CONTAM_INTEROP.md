@@ -5,6 +5,16 @@
 Crusher treats a ContamW **3.4 `.prj` as the high-fidelity airflow source of
 truth**. The native Python engine is the *fast, lower-fidelity* twin.
 
+> **Caveat (measured 2026-10-16, ledger CONTAM-DIVERGENCE-01):** the `.prj`
+> is design-intent truth — its AHS terminal legs are element-free paths
+> whose `Fahs` is a declared design flow, not an enforced one. The ContamX
+> *solve* therefore redistributes terminals through an unbalanced network
+> (destroyer `ahs2`: 878 m³/h through one room, siblings ≈ 0). The solved
+> field is *as-built-if-uncommissioned*, not as-built; the sourced ACHs are
+> the commissioned-design point. See
+> [contam_engine_divergence.md](contam_engine_divergence.md) for the
+> measurement and the flow-controlled-terminal hybrid it motivates.
+
 1. **Path A (ContamX):** run the `.prj` through ContamX → airflow field →
    Crusher pathogen mass balance (`ContamXTransportEngine` + AHS bridge).
 2. **Path B (simplify):** dumb the `.prj` down to
