@@ -1,4 +1,4 @@
-Status: in use (2026-10-16). Nine maritime.org general arrangements imported end-to-end (latest: CVL-26 Independence-class light carrier — first carrier-scale import). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
+Status: in use (2026-10-16). Thirteen maritime.org general arrangements imported end-to-end (latest: CV-4 Ranger / CV-5 Yorktown / CV-7 Wasp prewar fleet carriers). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
 
 # GA → .prj: approach and plan
 
@@ -64,8 +64,11 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `pce_874` | PCE-874 patrol escort (6-plate; below-main at lower confidence) | 20 | 99 crew, 6 classes | `.prj` 172 paths, 2 HVAC groups |
 | `independence_cvl26` | CVL-26 Monterey Independence-class light carrier (17-plate booklet; first carrier-scale import — island levels, hangar/fire-curtain segments, double-height machinery, air wing as `air_wing_*` crew classes) | 46 | 1566 crew incl. air wing, 11 classes | `.prj` 472 paths, 10 HVAC groups |
 | `midway_cv41` | CV-41 Midway-class armored battle carrier (18-plate 1947 booklet; three hangar bays w/ fire curtains, armored-flight-deck vocabulary, single island funnel trunk, weapons/ordnance elevator chains, distributed modular magazines) | 65 | 4712 crew incl. air group + marines, 11 classes | `.prj` 802 paths, 10 HVAC groups |
+| `ranger_cv4` | CV-4 USS Ranger first purpose-built USN carrier (14-plate 1944 booklet; no island — bridge under fwd flight-deck overhang, 3-segment hangar, gallery walkway, poop+forecastle partial decks) | 74 | 2641 crew incl. air group (1343 ship + 1298 aviation, plate-read), 6 classes | `.prj` 904 paths, 12 HVAC groups |
+| `yorktown_cv5` | CV-5 USS Yorktown lead of Yorktown class (17-plate 1940 Puget Sound booklet; 3 elevators, hangar on main deck piercing forecastle+gallery levels, island thin deck) | 71 | 2279 crew incl. air wing + flag staff (plate-read), 13 classes | `.prj` 984 paths, 9 HVAC groups |
+| `wasp_cv7` | CV-7 USS Wasp one-off treaty carrier (18-plate 1942 booklet; asymmetric hull arrangement, 14 decks incl. inner_bottom, distributed magazines) | 62 | 2128 crew incl. air group + marines (plate-read), 10 classes | `.prj` 778 paths, 10 HVAC groups |
 
-All ten carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
+All thirteen carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
 
 ## Era-rule provenance
 
