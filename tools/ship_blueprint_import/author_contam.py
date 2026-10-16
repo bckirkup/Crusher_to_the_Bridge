@@ -382,6 +382,7 @@ def write_handoff_markdown(
     openings_count: int,
     hvac_count: int,
     skip_ducts: bool,
+    source_credit: str | None = None,
 ) -> str:
     ducts = (
         "Fiction Darcy duct spines were **omitted** (naval GA default). "
@@ -389,6 +390,7 @@ def write_handoff_markdown(
         if skip_ducts
         else "Placeholder Darcy duct spines were emitted for listed AHUs — replace with design ducts."
     )
+    source_block = f"\n## Source\n\n{source_credit}\n\n" if source_credit else "\n"
     return f"""# ContamW handoff — `{platform_id}`
 
 This ContamW **3.4** project is a **Target B starter** from naval general
@@ -407,8 +409,7 @@ GA drawings**.
 - **{hvac_count}** starter **AHS** branches from HVAC hints (ACH → Fahs)
 - Cross-zone ladder/fan links from the synthesized airflow graph
 - `path_map.json` for ContamX ↔ Crusher alignment
-
-## Engineer handwork (Target C — not on GAs)
+{source_block}## Engineer handwork (Target C — not on GAs)
 
 1. Confirm / edit opening areas and schedules (`openings_draft.json` checklist)
 2. {ducts}
@@ -480,6 +481,7 @@ def author_contam(
     allowed_roots: tuple[str, ...],
     hobbyist: bool = True,
     run_offline_gate: bool = True,
+    source_credit: str | None = None,
 ) -> dict[str, Any]:
     """Write contam/platform.prj + path_map + openings checklist + handoff doc."""
     platform_dir = os.path.realpath(platform_dir)
@@ -546,6 +548,7 @@ def author_contam(
         openings_count=len(openings),
         hvac_count=len(airflow.get("hvac_zones") or []),
         skip_ducts=bool(overrides.get("skip_duct_spines", True)),
+        source_credit=source_credit,
     )
     _write_text(
         resolve_child_path(contam_dir, HANDOFF_MD),
