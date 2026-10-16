@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:55:05.940554+00:00",
+  "platform_id": "squier_ap130",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/squier_ap130",
+  "digest_sha256": "e632f1f13bc5e4175e2516ec5c5bbf931610819409582a689122a707ba08bc3b",
+  "svg_sha256": {
+    "page_01_approved.svg": "93afbbd7d2cec15d669e359a92182d48a4a55befcef25ba3e506f7397cf5d283",
+    "page_02_approved.svg": "90b8201255e45d41a040621155cdc643e61012c1299e2db876cc17264ef9df85"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 52,
+  "berthing_zones": [
+    "Officers_Country_Sup",
+    "Med_Attend_Berthing",
+    "Crew_Berthing_Up",
+    "Troop_Off_Qtrs_Top",
+    "NCO_Berthing_Up",
+    "Crew_Berthing_Fwd_Up",
+    "Troop_Berthing_Up",
+    "Crew_Berthing_2D",
+    "NCO_Berthing_2D",
+    "Troop_Berthing_2D",
+    "Troop_Berthing_3D_A",
+    "Troop_Berthing_3D_B",
+    "Troop_Berthing_3D_C",
+    "Troop_Berthing_1P_A",
+    "Troop_Berthing_1P_B",
+    "Troop_Berthing_1P_C"
+  ],
+  "systems_era": "usn_ww2"
+}
