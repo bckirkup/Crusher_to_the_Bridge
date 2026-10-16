@@ -77,6 +77,10 @@ PLATFORMS = [
     "missouri_bb63",
     "wisconsin_bb64",
     "new_jersey_bb62",
+    "liberty_cargo_ec2",
+    "savannah_ns",
+    "aeolus_arc3",
+    "alexander_henry_cgs119",
 ]
 
 ENTERPRISE_IDS = frozenset({

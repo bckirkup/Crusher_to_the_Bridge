@@ -1,0 +1,258 @@
+{
+  "platform": "alexander_henry_cgs119",
+  "era": "usn_coldwar",
+  "era_label": "USN cold-war / early mechanical AC",
+  "era_note": "Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery forced draft.",
+  "vent_markers": [
+    {
+      "id": "VM_funnel_cgs",
+      "kind": "funnel",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "boat_deck",
+      "serves_zone": "Funnel_Uptake",
+      "display": [
+        53.0,
+        -17.5
+      ],
+      "evidence": "sheet_read",
+      "notes": "Funnel on profile/boat deck"
+    },
+    {
+      "id": "VM_focsle_cowl",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Forecastle_Working",
+      "display": [
+        51.14,
+        3.9
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "VM_er_intake",
+      "kind": "air_shaft",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Engine_Casing_U",
+      "display": [
+        17.07,
+        2.88
+      ],
+      "evidence": "era_plausible",
+      "notes": "Engine room air supply by casing"
+    },
+    {
+      "id": "VM_hold_vent",
+      "kind": "gooseneck",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "Cargo_Hold_2",
+      "display": [
+        43.52,
+        3.46
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "VM_crew_exhaust",
+      "kind": "gooseneck",
+      "facing": "aft",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "Aft_Cabins",
+      "display": [
+        7.68,
+        3.46
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    }
+  ],
+  "zone_modes": {
+    "Wheelhouse_Top": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wheelhouse": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chart_Radio_NB": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Bridge_Wings": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officer_Cabins_Boat": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Boat_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Boat_Stowage_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Funnel_Uptake": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Officers_Bridge_Deck": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Bridge_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Forecastle_Working": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Aft_Cabins": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Laundry": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Engine_Casing_U": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess_Rec": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "PO_Mess_Rec": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Officer_Eng_Cabins_U": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Upper_Crew": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "HD_Upper_Officers": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Cargo_Hold_2": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Cargo_Hold_1": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bosun_Paint_Stores": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Stores_Lower": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_Berth_Lower": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Tanks_Voids": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "FORE PEAK TANK",
+      "kind": "unknown",
+      "nearest_zone": "Fwd_Tanks_Voids",
+      "display": [
+        65.8,
+        -11.53
+      ],
+      "deck": "lower_deck",
+      "notes": ""
+    },
+    {
+      "label": "AFT PEAK TANK",
+      "kind": "unknown",
+      "nearest_zone": "Stores_Lower",
+      "display": [
+        2.7,
+        -11.53
+      ],
+      "deck": "lower_deck",
+      "notes": ""
+    },
+    {
+      "label": "F.W. TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Tanks_Voids",
+      "display": [
+        49.58,
+        5.77
+      ],
+      "deck": "lower_deck",
+      "notes": ""
+    },
+    {
+      "label": "F.O. TANK",
+      "kind": "fuel",
+      "nearest_zone": "Fwd_Tanks_Voids",
+      "display": [
+        54.08,
+        5.77
+      ],
+      "deck": "lower_deck",
+      "notes": ""
+    },
+    {
+      "label": "BALLAST TANK",
+      "kind": "unknown",
+      "nearest_zone": "Fwd_Tanks_Voids",
+      "display": [
+        58.59,
+        5.77
+      ],
+      "deck": "lower_deck",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Boat_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Boat_Deck",
+    "HD_Bridge_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Bridge_Deck",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "Crew_Mess_Rec (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_Rec",
+    "PO_Mess_Rec (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: PO_Mess_Rec",
+    "HD_Upper_Crew (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Upper_Crew",
+    "HD_Upper_Officers (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Upper_Officers"
+  ]
+}

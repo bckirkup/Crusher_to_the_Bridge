@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:57:34.509866+00:00",
+  "platform": "alexander_henry_cgs119",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 20,
+    "crew": 31
+  },
+  "manifest": [
+    {
+      "class_id": "passengers_officials",
+      "role_group": "passenger",
+      "count": 20,
+      "berth_zone": "Officer_Cabins_Boat",
+      "duty_zone": "Crew_Mess_Rec",
+      "notes": "16 passengers + 4 officials"
+    },
+    {
+      "class_id": "master_deck_officers",
+      "role_group": "crew",
+      "count": 4,
+      "berth_zone": "Officers_Bridge_Deck",
+      "duty_zone": "Wheelhouse",
+      "notes": "master + 3 deck officers"
+    },
+    {
+      "class_id": "engineers",
+      "role_group": "crew",
+      "count": 4,
+      "berth_zone": "Officer_Eng_Cabins_U",
+      "duty_zone": "Engine_Room",
+      "notes": "chief engineer + 2 engineers + winchman 5th engr"
+    },
+    {
+      "class_id": "catering",
+      "role_group": "crew",
+      "count": 6,
+      "berth_zone": "Aft_Cabins",
+      "duty_zone": "Galley",
+      "notes": "chief cook, waitress, 2 asst cooks, 2 waiters"
+    },
+    {
+      "class_id": "deck_crew",
+      "role_group": "crew",
+      "count": 17,
+      "berth_zone": "Aft_Cabins",
+      "duty_zone": "Forecastle_Working",
+      "notes": "bosun, 3 quartermasters, 7 seamen, 5 daymen, 1 trainee"
+    }
+  ],
+  "source": "plate COMPLEMENT table sheet 2: 31 crew + 16 passengers + 4 officials = 51 berths",
+  "consistency": {
+    "declared_total": 51,
+    "manifest_total": 51,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

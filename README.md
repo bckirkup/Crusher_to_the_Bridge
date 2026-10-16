@@ -562,7 +562,7 @@ grumb_seeding:
 
 ## Platforms
 
-Thirty-two ship platforms are included, each with spatial layout and HVAC
+Thirty-nine ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -602,6 +602,10 @@ airflow definitions:
 | `missouri_bb63` | USS Missouri BB-63 Iowa-class battleship, 1950 booklet (maritime.org GA import, 103 zones, 1561 crew) |
 | `wisconsin_bb64` | USS Wisconsin BB-64 Iowa-class battleship, 1956 booklet (maritime.org GA import, 103 zones, ~2560 crew) |
 | `new_jersey_bb62` | USS New Jersey BB-62 Iowa-class battleship, 1984 reactivation booklet (maritime.org GA import, 103 zones, ~1781 crew) |
+| `liberty_cargo_ec2` | EC2-S-C1 Liberty cargo ship, WWII merchant marine (maritime.org GA import, 54 zones, 66 crew — first merchant hull) |
+| `savannah_ns` | NS Savannah nuclear merchant/passenger demonstration ship (maritime.org GA import, 73 zones, 60 passengers + 110 crew — first passenger hull) |
+| `aeolus_arc3` | USS Aeolus ARC-3 cable repair ship, ex-LST conversion (maritime.org GA import, 40 zones, ~200 crew) |
+| `alexander_henry_cgs119` | CGS Alexander Henry light icebreaker/buoy tender (maritime.org GA import, 28 zones, 31 crew + 20 passengers/officials) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
