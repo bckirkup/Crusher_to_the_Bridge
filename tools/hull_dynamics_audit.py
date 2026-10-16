@@ -84,7 +84,7 @@ def drainage_fingerprint(b: PlatformBundle, *, epochs: int = 48) -> dict[str, An
         raise ValueError(
             f"{b.platform_id}: no transport zones resolved — unknown platform?"
         )
-    mass = {z: 1.0 for z in zones}
+    mass = dict.fromkeys(zones, 1.0)
     injected = float(len(zones))
     curve: list[dict[str, float]] = []
     marks = {12, 24, epochs}
@@ -189,6 +189,88 @@ def _pin_resolution(b: PlatformBundle) -> dict[str, Any] | None:
             "unresolvable_duty_pins": bad_duty}
 
 
+def _arm_census(spec: dict[str, Any]) -> tuple[list[Counter], Counter]:
+    """Run one no-pathogen voyage; return per-epoch zone counts + home tally."""
+    epoch_counts: list[Counter] = []
+    home_counter: Counter = Counter()
+    with materialized_picard_spec(spec, REPO_ROOT) as picard_spec:
+        sim = ShipSimulation(picard_spec, display=False)
+
+        def observer(sim_: Any, _work: Any,
+                     counts: list[Counter] = epoch_counts) -> None:
+            eng = sim_.engine
+            per_zone: Counter = Counter()
+            for a in eng.agents:
+                loc = getattr(a, "current_location", None) or "unknown"
+                per_zone[loc] += 1
+            counts.append(per_zone)
+
+        sim.epoch_observer = observer
+        sim.run()
+        for a in sim.engine.agents:
+            home_counter[getattr(a, "home_zone", None) or "unknown"] += 1
+    return epoch_counts, home_counter
+
+
+def _night_and_peaks(epoch_counts: list[Counter]) -> tuple[Counter, Counter]:
+    night_counts: Counter = Counter()
+    zone_peak: Counter = Counter()
+    for epoch_i, per_zone in enumerate(epoch_counts):
+        if epoch_i % 24 in NIGHT_HOURS:
+            night_counts.update(per_zone)
+        for z, n in per_zone.items():
+            if n > zone_peak[z]:
+                zone_peak[z] = n
+    return night_counts, zone_peak
+
+
+def _overflow_zones(zone_peak: Counter,
+                    zone_meta: dict[str, Any]) -> list[dict[str, Any]]:
+    overflow = []
+    for z, peak in zone_peak.items():
+        meta = zone_meta.get(z)
+        if not meta:
+            continue
+        cap = float(meta.get("max_occupancy") or 0) * max(
+            int(meta.get("hot_bunk_ratio") or 1), 1)
+        if cap > 0 and peak > cap:
+            overflow.append({"zone": z, "peak": peak, "cap": cap})
+    return sorted(overflow, key=lambda r: -r["peak"] / r["cap"])
+
+
+def _arm_summary(epoch_counts: list[Counter], home_counter: Counter,
+                 zone_meta: dict[str, Any], manifest_berths: set[str],
+                 num_agents: int) -> dict[str, Any]:
+    counts = defaultdict(set)
+    for per_zone in epoch_counts:
+        for z in per_zone:
+            counts[z].add(1)
+    visited = {z for z in counts if z not in ("Ashore", "Departed", "Isolated_In_Quarters")}
+    interior = {z for z, m in zone_meta.items() if not _is_exterior(m)}
+    never_occupied = sorted(
+        z for z in interior if z not in visited
+        and _zone_signature(zone_meta[z]) not in ("tank_hold", "magazine")
+    )
+    night_counts, zone_peak = _night_and_peaks(epoch_counts)
+    night_total = sum(night_counts.values()) or 1
+    top_night = night_counts.most_common(3)
+    berth_hits = sum(n for z, n in home_counter.items() if z in manifest_berths)
+    return {
+        "visited_zones": len(visited),
+        "never_occupied_interior": never_occupied,
+        "overflow_zones": _overflow_zones(zone_peak, zone_meta),
+        "night_top3": [
+            {"zone": z, "share": round(n / night_total, 3)} for z, n in top_night
+        ],
+        "home_zone_distinct": len(home_counter),
+        "home_on_manifest_berth_frac": round(berth_hits / num_agents, 3)
+        if manifest_berths else None,
+        "top_home_zones": [
+            {"zone": z, "n": n} for z, n in home_counter.most_common(5)
+        ],
+    }
+
+
 def _occupancy_smoke(b: PlatformBundle, *, epochs: int, seed: int,
                      arms: list[str]) -> dict[str, Any]:
     num_agents, source = _crew_source(b)
@@ -215,79 +297,21 @@ def _occupancy_smoke(b: PlatformBundle, *, epochs: int, seed: int,
             spec["config_overrides"].setdefault("ship_graph", {})[
                 "agent_classes"
             ] = manifest_classes
-        epoch_counts: list[Counter] = []
-        home_counter: Counter = Counter()
-        with materialized_picard_spec(spec, REPO_ROOT) as picard_spec:
-            sim = ShipSimulation(picard_spec, display=False)
-
-            def observer(sim_: Any, _work: Any) -> None:
-                eng = sim_.engine
-                per_zone: Counter = Counter()
-                for a in eng.agents:
-                    loc = getattr(a, "current_location", None) or "unknown"
-                    per_zone[loc] += 1
-                epoch_counts.append(per_zone)
-
-            sim.epoch_observer = observer
-            sim.run()
-            for a in sim.engine.agents:
-                home_counter[getattr(a, "home_zone", None) or "unknown"] += 1
-
-        counts = defaultdict(set)
-        for per_zone in epoch_counts:
-            for z in per_zone:
-                counts[z].add(1)
-        visited = {z for z in counts if z not in ("Ashore", "Departed", "Isolated_In_Quarters")}
-        interior = {z for z, m in zone_meta.items() if not _is_exterior(m)}
-        never_occupied = sorted(
-            z for z in interior if z not in visited
-            and _zone_signature(zone_meta[z]) not in ("tank_hold", "magazine")
-        )
-        night_counts: Counter = Counter()
-        zone_peak: Counter = Counter()
-        for epoch_i, per_zone in enumerate(epoch_counts):
-            if epoch_i % 24 in NIGHT_HOURS:
-                night_counts.update(per_zone)
-            for z, n in per_zone.items():
-                if n > zone_peak[z]:
-                    zone_peak[z] = n
-        overflow = []
-        for z, peak in zone_peak.items():
-            meta = zone_meta.get(z)
-            if not meta:
-                continue
-            cap = float(meta.get("max_occupancy") or 0) * max(
-                int(meta.get("hot_bunk_ratio") or 1), 1)
-            if cap > 0 and peak > cap:
-                overflow.append({"zone": z, "peak": peak, "cap": cap})
-        night_total = sum(night_counts.values()) or 1
-        top_night = night_counts.most_common(3)
-        berth_hits = sum(n for z, n in home_counter.items() if z in manifest_berths)
-        results[arm] = {
-            "visited_zones": len(visited),
-            "never_occupied_interior": never_occupied,
-            "overflow_zones": sorted(overflow, key=lambda r: -r["peak"] / r["cap"]),
-            "night_top3": [
-                {"zone": z, "share": round(n / night_total, 3)} for z, n in top_night
-            ],
-            "home_zone_distinct": len(home_counter),
-            "home_on_manifest_berth_frac": round(berth_hits / num_agents, 3)
-            if manifest_berths else None,
-            "top_home_zones": [
-                {"zone": z, "n": n} for z, n in home_counter.most_common(5)
-            ],
-        }
+        epoch_counts, home_counter = _arm_census(spec)
+        results[arm] = _arm_summary(
+            epoch_counts, home_counter, zone_meta, manifest_berths, num_agents)
     return results
 
 
 # ---------------------------------------------------------------- rendering
 
-def render_markdown(rows: list[dict[str, Any]]) -> str:
-    lines = ["# Hull dynamics audit — fleet report", ""]
-    lines.append("## Drainage fingerprint (check 7)")
-    lines.append("")
-    lines.append("| platform | zones | retained 12h | retained 24h | retained final | top accumulating |")
-    lines.append("|---|---|---|---|---|---|")
+def _render_drainage(rows: list[dict[str, Any]]) -> list[str]:
+    lines = [
+        "## Drainage fingerprint (check 7)",
+        "",
+        "| platform | zones | retained 12h | retained 24h | retained final | top accumulating |",
+        "|---|---|---|---|---|---|",
+    ]
     for r in rows:
         d = r.get("drainage") or {}
         if not d:
@@ -301,8 +325,30 @@ def render_markdown(rows: list[dict[str, Any]]) -> str:
             f"{curve.get(24, 0):.3f} | {d['retained_frac_final']:.3f} | {top} |"
         )
     lines.append("")
-    lines.append("## Occupancy smoke (check 6)")
-    lines.append("")
+    return lines
+
+
+def _render_arm(arm: str, res: dict[str, Any]) -> list[str]:
+    lines = [
+        f"- `{arm}`: visited={res['visited_zones']} "
+        f"never_occupied={len(res['never_occupied_interior'])} "
+        f"overflow={len(res['overflow_zones'])} "
+        f"home_distinct={res['home_zone_distinct']} "
+        f"manifest_berth_hit={res['home_on_manifest_berth_frac']}"
+    ]
+    if res["never_occupied_interior"]:
+        lines.append(f"  - never entered: {', '.join(res['never_occupied_interior'][:8])}")
+    if res["overflow_zones"]:
+        lines.append("  - over cap: " + ", ".join(
+            f"{o['zone']} {o['peak']:.0f}/{o['cap']:.0f}"
+            for o in res["overflow_zones"][:5]))
+    lines.append("  - night top: " + ", ".join(
+        f"{t['zone']} {t['share']:.0%}" for t in res["night_top3"]))
+    return lines
+
+
+def _render_occupancy(rows: list[dict[str, Any]]) -> list[str]:
+    lines = ["## Occupancy smoke (check 6)", ""]
     for r in rows:
         occ = r.get("occupancy") or {}
         if not occ or occ.get("skipped"):
@@ -320,21 +366,14 @@ def render_markdown(rows: list[dict[str, Any]]) -> str:
         for arm, res in occ.items():
             if arm in ("num_agents", "crew_source", "pin_resolution"):
                 continue
-            lines.append(
-                f"- `{arm}`: visited={res['visited_zones']} "
-                f"never_occupied={len(res['never_occupied_interior'])} "
-                f"overflow={len(res['overflow_zones'])} "
-                f"home_distinct={res['home_zone_distinct']} "
-                f"manifest_berth_hit={res['home_on_manifest_berth_frac']}"
-            )
-            if res["never_occupied_interior"]:
-                lines.append(f"  - never entered: {', '.join(res['never_occupied_interior'][:8])}")
-            if res["overflow_zones"]:
-                lines.append("  - over cap: " + ", ".join(
-                    f"{o['zone']} {o['peak']:.0f}/{o['cap']:.0f}"
-                    for o in res["overflow_zones"][:5]))
-            lines.append("  - night top: " + ", ".join(
-                f"{t['zone']} {t['share']:.0%}" for t in res["night_top3"]))
+            lines.extend(_render_arm(arm, res))
+    return lines
+
+
+def render_markdown(rows: list[dict[str, Any]]) -> str:
+    lines = ["# Hull dynamics audit — fleet report", ""]
+    lines.extend(_render_drainage(rows))
+    lines.extend(_render_occupancy(rows))
     return "\n".join(lines) + "\n"
 
 
