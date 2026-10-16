@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:33:15.993019+00:00",
+  "platform": "new_york_bb34",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1617
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 84,
+      "berth_zone": "Wardroom_Country_2DF",
+      "duty_zone": "Nav_Bridge",
+      "notes": "CO + wardroom 44 + junior 27 + warrant 10"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 955,
+      "berth_zone": "Casemate_Crew_2DA",
+      "duty_zone": "Weather_Deck_Aft",
+      "notes": ""
+    },
+    {
+      "class_id": "artificers",
+      "role_group": "crew",
+      "count": 104,
+      "berth_zone": "Crew_3DF_Mid",
+      "duty_zone": "Machine_Shop_C105",
+      "notes": ""
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 246,
+      "berth_zone": "Crew_3DA",
+      "duty_zone": "Engine_Rm_1PA",
+      "notes": ""
+    },
+    {
+      "class_id": "special",
+      "role_group": "crew",
+      "count": 81,
+      "berth_zone": "Crew_3DA_B",
+      "duty_zone": "Radio_Central_3DF",
+      "notes": ""
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 25,
+      "berth_zone": "Crew_3DA_C",
+      "duty_zone": "Officers_Galley",
+      "notes": ""
+    },
+    {
+      "class_id": "messmen",
+      "role_group": "crew",
+      "count": 38,
+      "berth_zone": "Marines_2DA",
+      "duty_zone": "Galley_Mess_2DA",
+      "notes": ""
+    },
+    {
+      "class_id": "aviation",
+      "role_group": "crew",
+      "count": 21,
+      "berth_zone": "Crew_Space_2DF_a",
+      "duty_zone": "Catapult_Mid",
+      "notes": ""
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 63,
+      "berth_zone": "Marines_2DA",
+      "duty_zone": "Fantail_Weather",
+      "notes": ""
+    }
+  ],
+  "source": "BB-34 booklet plate 2 COMPLEMENT table (sheet_read): CO 1, wardroom 44, junior 27, warrant 10 = TOTAL OFFICERS 84; seamen branch 955, artificer 104, engine room 246, special 81, commissary 25, messmen 38, aviation 21, marines 63 = TOTAL CREW & MARINES 1533; TOTAL ON BOARD 1617 (internally consistent)",
+  "consistency": {
+    "declared_total": 1617,
+    "manifest_total": 1617,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
