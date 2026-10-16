@@ -166,7 +166,8 @@ def test_match_cell_unique(cell_mod: types.ModuleType) -> None:
 
     design = load_design(str(DESIGN_PATH))
     cell = cell_mod._match_cell(design, 7900000.0, "boxed_period", 20200211)
-    assert cell.seed == 20200211 and cell.arm_id == "boxed_period"
+    assert cell.seed == 20200211
+    assert cell.arm_id == "boxed_period"
     with pytest.raises(SystemExit):
         cell_mod._match_cell(design, 7900000.0, "boxed_period", 19990101)
 
