@@ -79,6 +79,19 @@ The `ERA_RULES` mode/oa tables in `tools/ship_blueprint_import/systems.py` are *
 
 Standing liabilities (the Grade C rows): an Admiralty/BUSHIPS DDS reference for the RN and NOAA rows, and any sourced basis for the OA-fraction numbers. Until those surface, era-rule modes may shape a starter `.prj` but should not inform a fitted parameter.
 
+## Carrier-scale conventions
+
+Fleet/auxiliary carriers fit the same digest model with these conventions (first applied to CVL-26 / CV-41 booklets):
+
+- **Flight deck** is a `Free` zone (often the whole weather surface, one or two polygons). Era mode gives `nat_supply` (oa_fraction 1.0), which is already the honest open-air approximation; do not invent conditioning plant for it.
+- **Hangar deck** is `Free` — one large zone (Essex hangar ≈ 200×20×5.4 m ≈ 21,000 m³ is within the volume bound) or 2–3 fore/mid/aft segments where fire curtains are drawn. Ventilation: `usn_ww2`/`usn_coldwar` era gives `nat_supply`; refine with sheet-read markers — hangar-side roller doors are `kind: "hangar_door"` → `nat_supply`, and where the sheet labels forced hangar exhaust fans declare an explicit `VENT_Hangar` hvac_hint (`mech_exhaust`) instead. Fuel-vapor purge fans are the era-plausible fallback.
+- **Island** is a thin deck level *above* the flight deck (elevation ≈ flight_deck + 3 m) carrying Nav_Bridge, flag plot, primary fly, funnel uptake zones.
+- **Aircraft/bomb elevators** are adjacency `type: "elevator"` links (free string) between flight deck ↔ hangar ↔ hold/magazines.
+- **Air wing** embarked squadrons are `role_group: "crew"` manifest classes (`air_wing_*`) — they are embarked personnel, not passengers.
+- **Distributed magazines** (bomb/ammo rooms fore and aft below the waterline) each get a sheet-read marker entry; `Mag_Vent` era-plausible fallback per NAVARMEDGUARD §3109.
+- **Below-main decks** on CV booklets run 2nd/3rd/4th deck + gallery deck conventions (USN deck numbering differs from merchant — flight deck is "main" in practice; keep repo `*_deck` ids ordered by elevation and record the booklet's own names in `DeckInfo.role`).
+- **Complement** runs 1,500 (CVL) – 4,100+ (CV-41). `crew_estimate` and manifest counts are unbounded; declare `nominal_complement` only when passengers > 0, else manifest-only like other naval hulls.
+
 ## Roadmap
 
 1. **Now (this PR):** schema + model + synthesize changes above; two imported platforms; this doc.
@@ -89,3 +102,4 @@ Standing liabilities (the Grade C rows): an Admiralty/BUSHIPS DDS reference for 
 6. **Manifest → run config:** a `scripts/` helper that expands `crew_manifest.json` classes into `config.yaml agent_classes` entries (fractions from counts, `home_zone_preference` from `berth_zone`, `duty_zone` direct) so manifests become runnable without hand YAML.
 7. **Multi-frame fidelity:** when a sheet's plan view shows partial hull coverage, hull spans already handle it — but bow/stern overhang beyond frame 0/105 needs the same care on each new ship.
 8. **Marker direction from geometry:** cowl facing is currently authored per marker; the SVG symbol's orientation could be read automatically (cowl mouth direction) when overlays carry marker glyphs.
+9. **Carrier import:** CVL-26 Independence-class light carrier and CV-41 Midway booklets are on the maritime.org index (`cv12.pdf` is a single mega-plate — deprioritize); apply §Carrier-scale conventions. Submarines remain out of scope (pressure-hull geometry semantics).
