@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:21:22.761784+00:00",
+  "platform_id": "winnipeg_j337",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/winnipeg_j337",
+  "digest_sha256": "ca7992b7ea073fac43d5acd00eed9978be1ebf4d50ef7d012a005ae1e3e94aaa",
+  "svg_sha256": {
+    "page_01_approved.svg": "8a904bb269c7da825ae0b4a4ccef5d436f28eb275eb788097b455636d13453a2",
+    "page_02_approved.svg": "de442ec14e4289c1242f93961bc992ae015be0a51892b58a9163f76f7cb80ba8"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 31,
+  "berthing_zones": [
+    "Quarterdeck",
+    "Foc_Superstructure",
+    "Quarterdeck_Flat",
+    "ERA_Flat",
+    "MS_Mess",
+    "Wardroom_Flat",
+    "Signal_Stwd_Mess",
+    "Seamens_Mess",
+    "Stokers_Mess",
+    "CPO_Mess",
+    "PO_Mess",
+    "Provision_Aft",
+    "Cold_Stores"
+  ],
+  "systems_era": "rn_ww2"
+}

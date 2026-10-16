@@ -1,0 +1,96 @@
+{
+  "platform_id": "esteem_mso438",
+  "ship_class_label": "Esteem Mso438",
+  "footprint_tier": "representative",
+  "representative_of": "MSO-438 USS Esteem, Aggressive-class non-magnetic wooden-hull ocean minesweeper, 1958 Long Beach NYD booklet (10 plates). 172'11\" LOA, ~74 crew. Zones read from maritime.org GA plates.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 39",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Crews_Shelter",
+    "Chart_Room",
+    "Pilot_House",
+    "Reel_Deck",
+    "Boat_Deck_Aft",
+    "Radio_Room",
+    "Captains_Cabin",
+    "Stores_01",
+    "Focsle_01",
+    "Sweep_Deck",
+    "Deck_House_Main",
+    "Reel_Well",
+    "Uptake_Trunk",
+    "Pharmacy",
+    "Officers_Country",
+    "HD_Officers",
+    "Wardroom_Mess",
+    "Laundry",
+    "Galley",
+    "Crews_Mess",
+    "HD_Crew",
+    "Crew_Berthing",
+    "Stores_Fwd",
+    "Windlass_Room",
+    "Focsle_Store",
+    "CPO_Quarters",
+    "HD_CPO",
+    "Steering_Flat",
+    "Workshop",
+    "After_Machinery_Room",
+    "Fwd_Machinery_Room",
+    "Crew_Berthing_2",
+    "Stores_Fwd_Platform",
+    "Hold_Stores",
+    "Chem_Canvas_Stores",
+    "Fuel_Tanks_Aft",
+    "Fuel_Tanks_Fwd",
+    "Sonar_Room",
+    "FW_Chain_Fwd"
+  ],
+  "decks": [
+    "hold",
+    "main_deck",
+    "o1_level",
+    "o2_bridge",
+    "o2_reel",
+    "o3_level",
+    "platform_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 54.72,
+    "ymin": -2.0,
+    "ymax": 12.7
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "o4_level": "deck_o4_level.png",
+      "o3_level": "deck_o3_level.png",
+      "o2_bridge": "deck_o2_bridge.png",
+      "o2_reel": "deck_o2_reel.png",
+      "o1_level": "deck_o1_level.png",
+      "main_deck": "deck_main_deck.png",
+      "platform_deck": "deck_platform_deck.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}

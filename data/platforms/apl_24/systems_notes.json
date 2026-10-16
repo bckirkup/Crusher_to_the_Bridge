@@ -1,0 +1,326 @@
+{
+  "platform": "apl_24",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Diesel_Stack",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Galley_Bakery",
+      "display": [
+        9.73,
+        0.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "SMOKE STACK & DIESEL EXHAUST on outboard profile; serves the undrawn generator room below main deck"
+    },
+    {
+      "id": "Engine_Exhaust_2",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Crew_Cafeteria_Mess",
+      "display": [
+        17.69,
+        1.71
+      ],
+      "evidence": "sheet_read",
+      "notes": "TYPICAL ENGINE EXHAUST trunk on profile"
+    },
+    {
+      "id": "Galley_Smoke_Pipe",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "Galley_Bakery",
+      "display": [
+        5.69,
+        11.6
+      ],
+      "evidence": "sheet_read",
+      "notes": "GALLEY SMOKE PIPE at the stern edge above the galley block below"
+    },
+    {
+      "id": "Boiler_Casing_Vent",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "CPO_Pantry",
+      "display": [
+        15.43,
+        5.2
+      ],
+      "evidence": "sheet_read",
+      "notes": "BOILER + CASING trunk in the CPO pantry column"
+    },
+    {
+      "id": "Radio_Trunk",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "gun_platform_deck",
+      "serves_zone": "Gun_Platforms",
+      "display": [
+        26.82,
+        6.67
+      ],
+      "evidence": "sheet_read",
+      "notes": "RADIO TRUNK label"
+    },
+    {
+      "id": "MH_Main_1",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Galley_Bakery",
+      "display": [
+        9.73,
+        0.21
+      ],
+      "evidence": "sheet_read",
+      "notes": "M.H. mushroom head on deck edge, one of a row"
+    },
+    {
+      "id": "MH_Main_2",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "HD_Crew_1",
+      "display": [
+        34.49,
+        0.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "M.H. mushroom head"
+    },
+    {
+      "id": "MH_Main_3",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Library",
+      "display": [
+        53.07,
+        0.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "M.H. mushroom head"
+    },
+    {
+      "id": "MH_Upper_1",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "HD_CPO_1",
+      "display": [
+        25.99,
+        0.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "M.H. mushroom head"
+    },
+    {
+      "id": "Vent_Crews_Lock",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Crews_Locker_Office",
+      "display": [
+        61.91,
+        3.86
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT label at the crew's locker block"
+    }
+  ],
+  "zone_modes": {
+    "Fantail_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley_Bakery": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Crew_Cafeteria_Mess": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Ships_Store": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_1": {
+      "mode": "exhaust_only",
+      "evidence": "sheet_read"
+    },
+    "Scullery": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_2": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Barber_Shop": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ships_Service": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shower_Room": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Post_Office": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Library": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Recreation_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crews_Locker_Office": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Brig": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fantail_Upper": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Laundry": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Receiving_Rm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Pantry": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "CPO_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_CPO_1": {
+      "mode": "exhaust_only",
+      "evidence": "sheet_read"
+    },
+    "HD_CPO_2": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "CPO_Berthing": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Mess_Pantry": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Officers_Staterooms": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sick_Bay": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Isolation_Ward": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Ships_Office": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Dental_Office": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Dispensary_Lab": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Washroom": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Forecastle": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gun_Platforms": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    }
+  },
+  "tanks": [
+    {
+      "label": "SEWAGE MACH",
+      "kind": "sewage",
+      "nearest_zone": "HD_Crew_1",
+      "display": [
+        38.03,
+        3.21
+      ],
+      "deck": "main_deck",
+      "notes": "sewage machinery space beside the wash-room blocks"
+    },
+    {
+      "label": "GASOLINE STOWAGE",
+      "kind": "unknown",
+      "nearest_zone": "Laundry",
+      "display": [
+        7.31,
+        2.2
+      ],
+      "deck": "upper_deck",
+      "notes": "gasoline lockers on the outboard edge (two, port and starboard)"
+    }
+  ],
+  "plumbing_drains": [
+    "Galley_Bakery (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "Crew_Cafeteria_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "HD_Crew_1 (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "HD_Crew_2 (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "Shower_Room (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "CPO_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "HD_CPO_1 (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "HD_CPO_2 (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "Officers_Mess_Pantry (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "Sick_Bay (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "Isolation_Ward (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "Dental_Office (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "Dispensary_Lab (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1",
+    "Crew_Washroom (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_1"
+  ]
+}

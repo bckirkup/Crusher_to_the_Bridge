@@ -1,0 +1,586 @@
+{
+  "platform": "apl_24",
+  "description": "APL-24 barracks ship (Pollock-Stockton, 1944): 261'2\" x 49'2\", non-self-propelled berthing barge, permanent crew ~71 (5 officers + 66 enlisted) plus accommodation for 6 officers + 583 enlisted. Zones read from maritime.org APL-23 booklet sheets 2-4 (outboard profile + main/upper decks + gun platforms). Booklet is incomplete: no inboard profile and no second-deck/hold sheets.",
+  "isolation_unit_capacity": 4,
+  "deck_dimensions": {
+    "length_m": 79.6,
+    "beam_m": 15.0
+  },
+  "graywater_zones": [
+    "Gun_Platforms"
+  ],
+  "zones": [
+    {
+      "id": "Fantail_Main",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 128.12,
+      "floor_area_m2": 49.28,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 1.86,
+        "y": 6.21
+      },
+      "description": "open stern deck: hatch, davit, stern anchor, closed chocks"
+    },
+    {
+      "id": "Galley_Bakery",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 345.68,
+      "floor_area_m2": 132.95,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 8.05,
+        "y": 5.87
+      },
+      "max_occupancy": 40,
+      "description": "galley + bakery + bread rm + issue rm + steam kettles block"
+    },
+    {
+      "id": "Crew_Cafeteria_Mess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 755.9,
+      "floor_area_m2": 290.73,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 23.35,
+        "y": 5.91
+      },
+      "max_occupancy": 240,
+      "description": "CREW'S CAFETERIA & MESS - ~20+ mess tables feeding 600+"
+    },
+    {
+      "id": "Ships_Store",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 36.96,
+      "floor_area_m2": 14.21,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 31.84,
+        "y": 5.14
+      },
+      "max_occupancy": 6,
+      "description": "SHIP'S STORE issue counter"
+    },
+    {
+      "id": "HD_Crew_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 144.28,
+      "floor_area_m2": 62.73,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 34.87,
+        "y": 3.49
+      },
+      "max_occupancy": 23,
+      "serves": [
+        "Crew_Cafeteria_Mess",
+        "Galley_Bakery"
+      ],
+      "description": "upper TOILET + CREW'S WASH ROOM block (UR/LAV/WC rows)",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Scullery",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 53.22,
+      "floor_area_m2": 20.47,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 33.26,
+        "y": 10.03
+      },
+      "max_occupancy": 6,
+      "description": "SCULLERY + GARBAGE GRIND RM + washing machines"
+    },
+    {
+      "id": "HD_Crew_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 94.16,
+      "floor_area_m2": 40.94,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 38.21,
+        "y": 10.03
+      },
+      "max_occupancy": 15,
+      "serves": [
+        "Crew_Cafeteria_Mess",
+        "Crew_Quarters"
+      ],
+      "description": "lower CREW'S WASH ROOM + TOILET block",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Barber_Shop",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 64.06,
+      "floor_area_m2": 24.64,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 44.22,
+        "y": 3.94
+      },
+      "max_occupancy": 4,
+      "description": "BARBER SHOP, two chairs"
+    },
+    {
+      "id": "Ships_Service",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 64.06,
+      "floor_area_m2": 24.64,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 48.64,
+        "y": 3.94
+      },
+      "max_occupancy": 8,
+      "description": "SHIP'S SERVICE: soda fountain, ice cream freezer"
+    },
+    {
+      "id": "Shower_Room",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 52.3,
+      "floor_area_m2": 22.74,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 44.22,
+        "y": 9.77
+      },
+      "max_occupancy": 8,
+      "serves": [
+        "Crew_Quarters"
+      ],
+      "description": "SHOWER ROOM serving the berthed population",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Post_Office",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 54.2,
+      "floor_area_m2": 20.85,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 48.64,
+        "y": 9.6
+      },
+      "max_occupancy": 3,
+      "description": "POST OFFICE"
+    },
+    {
+      "id": "Library",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 177.39,
+      "floor_area_m2": 68.23,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 55.54,
+        "y": 3.86
+      },
+      "max_occupancy": 20,
+      "description": "LIBRARY + book stacks"
+    },
+    {
+      "id": "Recreation_Room",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 165.57,
+      "floor_area_m2": 63.68,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 55.54,
+        "y": 10.54
+      },
+      "max_occupancy": 40,
+      "description": "RECREATION ROOM: benches, piano, radio, athletic gear"
+    },
+    {
+      "id": "Crews_Locker_Office",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 162.12,
+      "floor_area_m2": 62.35,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 64.39,
+        "y": 6.81
+      },
+      "max_occupancy": 10,
+      "description": "CREW'S LOCK. + OFFICE + passage, motion-picture locker"
+    },
+    {
+      "id": "Brig",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 281.86,
+      "floor_area_m2": 108.41,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 71.99,
+        "y": 6.17
+      },
+      "max_occupancy": 4,
+      "description": "BRIG office + CELL NO.1/2/3 at the stem"
+    },
+    {
+      "id": "Fantail_Upper",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 195.13,
+      "floor_area_m2": 75.05,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 2.27,
+        "y": 6.08
+      },
+      "description": "open stern deck above the fantail"
+    },
+    {
+      "id": "Laundry",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 164.72,
+      "floor_area_m2": 63.35,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 7.8,
+        "y": 6.8
+      },
+      "max_occupancy": 6,
+      "description": "LAUNDRY C-0101E: presses, sleeve former, truck tub, washing machines, extractors; gasoline stowage lockers on the outboard edges"
+    },
+    {
+      "id": "Receiving_Rm",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 26.61,
+      "floor_area_m2": 10.23,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 12.43,
+        "y": 2.72
+      },
+      "max_occupancy": 4,
+      "description": "REC'G. RM shelves (laundry receiving)"
+    },
+    {
+      "id": "CPO_Pantry",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 38.01,
+      "floor_area_m2": 14.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 13.0,
+        "y": 5.36
+      },
+      "max_occupancy": 4,
+      "description": "C.P.O. PANTRY B-0104L: range, ref, steam table + boiler casing trunk"
+    },
+    {
+      "id": "CPO_Mess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 88.7,
+      "floor_area_m2": 34.11,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 16.49,
+        "y": 9.2
+      },
+      "max_occupancy": 60,
+      "description": "C.P.O. MESS A-0108L, two long tables"
+    },
+    {
+      "id": "HD_CPO_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 89.68,
+      "floor_area_m2": 38.99,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 22.34,
+        "y": 4.16
+      },
+      "max_occupancy": 14,
+      "serves": [
+        "CPO_Berthing",
+        "CPO_Mess"
+      ],
+      "description": "C.P.O. W.R. & W.C. B-0101L (SH/UR/LAV) + locker strip",
+      "base_ach": 19.1
+    },
+    {
+      "id": "HD_CPO_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 78.45,
+      "floor_area_m2": 34.11,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 22.34,
+        "y": 10.24
+      },
+      "max_occupancy": 13,
+      "serves": [
+        "CPO_Berthing",
+        "CPO_Mess"
+      ],
+      "description": "C.P.O. W.R. & W.C. B-0102L (WC/LAV) + locker strip",
+      "base_ach": 19.1
+    },
+    {
+      "id": "CPO_Berthing",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 152.05,
+      "floor_area_m2": 58.48,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 27.94,
+        "y": 6.4
+      },
+      "max_occupancy": 48,
+      "description": "C.P.O. BERTHING A-0103L, 3-4-man bunk bays"
+    },
+    {
+      "id": "Officers_Mess_Pantry",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 57.44,
+      "floor_area_m2": 22.09,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 32.16,
+        "y": 3.92
+      },
+      "max_occupancy": 12,
+      "description": "W.R. PANTRY A-0104L + wardroom mess strip"
+    },
+    {
+      "id": "Officers_Staterooms",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 59.13,
+      "floor_area_m2": 22.74,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 32.49,
+        "y": 10.24
+      },
+      "max_occupancy": 12,
+      "description": "single + double berth officer staterooms, W.Q. A-0109, W.R.&S.R. washrooms"
+    },
+    {
+      "id": "Sick_Bay",
+      "type": "Medical",
+      "traffic": "medium",
+      "volume_m3": 155.43,
+      "floor_area_m2": 59.78,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 37.53,
+        "y": 4.88
+      },
+      "max_occupancy": 10,
+      "description": "SICK BAY A-0102L ward + S.D. BATH + surgical dressing rm + operating table A-0111A + sterilizers"
+    },
+    {
+      "id": "Isolation_Ward",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 50.68,
+      "floor_area_m2": 19.49,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 37.53,
+        "y": 11.6
+      },
+      "max_occupancy": 6,
+      "description": "ISOLATION WARD A-0107L, 2+ beds"
+    },
+    {
+      "id": "Ships_Office",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 34.21,
+      "floor_area_m2": 13.16,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 42.89,
+        "y": 3.04
+      },
+      "max_occupancy": 4,
+      "description": "SHIP'S OFFICE"
+    },
+    {
+      "id": "Dental_Office",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 49.42,
+      "floor_area_m2": 19.01,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 42.89,
+        "y": 7.28
+      },
+      "max_occupancy": 2,
+      "description": "DENTAL OFF. + doctor clerical"
+    },
+    {
+      "id": "Dispensary_Lab",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 40.55,
+      "floor_area_m2": 15.6,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 44.02,
+        "y": 11.56
+      },
+      "max_occupancy": 3,
+      "description": "DISPENSARY & LABORATORY + drug cabinet"
+    },
+    {
+      "id": "Crew_Washroom",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 25.41,
+      "floor_area_m2": 11.05,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 46.38,
+        "y": 8.56
+      },
+      "max_occupancy": 4,
+      "serves": [
+        "Crew_Quarters"
+      ],
+      "description": "CREW'S W.R.-W.L. + 3 SEAT W.C.",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Crew_Quarters",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 527.96,
+      "floor_area_m2": 203.06,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 56.86,
+        "y": 7.0
+      },
+      "max_occupancy": 300,
+      "description": "CREW'S QUARTERS A-0101L: 4-man bunk bays; drawn berths ~200 vs 583 accommodation (second deck undrawn)"
+    },
+    {
+      "id": "Forecastle",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 369.57,
+      "floor_area_m2": 142.14,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.6,
+      "deck": "upper_deck",
+      "display": {
+        "x": 73.1,
+        "y": 5.6
+      },
+      "description": "open bow: windlass, anchors, fairleads, hose racks, jack staff"
+    },
+    {
+      "id": "Gun_Platforms",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 2931.93,
+      "floor_area_m2": 1127.67,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.4,
+      "deck": "gun_platform_deck",
+      "display": {
+        "x": 31.84,
+        "y": 6.08
+      },
+      "description": "weather deck: 20mm gun tubs, radio trunk, canvas awning stowage, signal area"
+    }
+  ],
+  "nominal_complement": {
+    "passengers": 589,
+    "crew": 71
+  }
+}

@@ -1,0 +1,258 @@
+{
+  "platform": "fletcher_dde_dd445",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Funnel_Fwd",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Fwd_Machinery_1P",
+      "display": [
+        66.26,
+        0.86
+      ],
+      "evidence": "sheet_read",
+      "notes": "forward stack over fwd fire/engine rooms (profile)"
+    },
+    {
+      "id": "Funnel_Aft",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Aft_Machinery_1P",
+      "display": [
+        53.33,
+        0.86
+      ],
+      "evidence": "sheet_read",
+      "notes": "aft stack over aft fire/engine rooms (profile)"
+    },
+    {
+      "id": "Vent_Focsle",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Fwd_Stores_1P",
+      "display": [
+        105.05,
+        2.58
+      ],
+      "evidence": "era_plausible",
+      "notes": "cowls on forecastle serving fwd spaces (era-typical)"
+    },
+    {
+      "id": "Mag_Vent_2P",
+      "kind": "mushroom",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "second_platform",
+      "serves_zone": "Aft_Stores_2P",
+      "display": [
+        84.04,
+        5.41
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine ventilator era practice"
+    }
+  ],
+  "zone_modes": {
+    "Fantail": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Deckhouse": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Uptakes_Mid": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Galley_Mess_Main": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Officers_Country_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Room_01": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Pilot_House_CIC": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Stores_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ammo_Handling_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gen_Wkshop": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fuel_Oil_Svc_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Aft_Machinery_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Fwd_Machinery_1P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "IC_Plotting": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ships_Office": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Country_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_WR_1P": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "CPO_Berthing_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ammo_Handling_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Messing": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_Fwd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Aft_Stores_2P": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Machinery_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Tanks_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Emerg_Diesel_Batt": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Sonar_Block_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ships_Service_Store": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Machinery_Bottom_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "FUEL OIL SERVICE TANK",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Oil_Svc_1P",
+      "display": [
+        64.65,
+        5.34
+      ],
+      "deck": "first_platform",
+      "notes": ""
+    },
+    {
+      "label": "RESERVE FEED WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Tanks_2P",
+      "display": [
+        101.82,
+        3.01
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    },
+    {
+      "label": "FRESH WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Tanks_2P",
+      "display": [
+        103.44,
+        4.21
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    },
+    {
+      "label": "FUEL OIL OR BALLAST",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Tanks_Hold",
+      "display": [
+        27.48,
+        4.43
+      ],
+      "deck": "hold",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Galley_Mess_Main (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_Mess_Main",
+    "HD_WR_1P (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_WR_1P",
+    "CPO_Messing (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: CPO_Messing",
+    "HD_Crew_Fwd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Fwd"
+  ]
+}

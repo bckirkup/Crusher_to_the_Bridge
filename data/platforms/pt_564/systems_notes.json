@@ -1,0 +1,189 @@
+{
+  "platform": "pt_564",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "VENT_BOX_ENG",
+      "kind": "air_port",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Engine_Room",
+      "display": [
+        6.28,
+        4.82
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT BOX P&S over the engine room"
+    },
+    {
+      "id": "FUEL_VENT_AFT",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Fuel_Comp_Aft",
+      "display": [
+        3.14,
+        -3.69
+      ],
+      "evidence": "sheet_read",
+      "notes": "FUEL TANK VENT aft"
+    },
+    {
+      "id": "FUEL_VENT_MID",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Fuel_Comp_Mid",
+      "display": [
+        9.65,
+        -3.69
+      ],
+      "evidence": "sheet_read",
+      "notes": "FUEL TANK VENT / EXPANSION TANK VENT mid"
+    },
+    {
+      "id": "SKYLIGHT_WR",
+      "kind": "skylight",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Ward_Room",
+      "display": [
+        11.89,
+        3.53
+      ],
+      "evidence": "era_plausible",
+      "notes": "deck light/skylight over the ward room (era-typical)"
+    }
+  ],
+  "zone_modes": {
+    "Gun_Tub_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Torpedo_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Cockpit": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Pilothouse": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Foredeck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Lazaret": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fuel_Comp_Aft": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Engine_Room": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Fuel_Comp_Mid": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Ward_Room": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Crews_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Crew": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Fore_Peak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "FUEL TANK 100 GAL P",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Comp_Aft",
+      "display": [
+        2.56,
+        1.85
+      ],
+      "deck": "cabin_deck",
+      "notes": ""
+    },
+    {
+      "label": "FUEL TANK 100 GAL S",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Comp_Aft",
+      "display": [
+        2.56,
+        4.62
+      ],
+      "deck": "cabin_deck",
+      "notes": ""
+    },
+    {
+      "label": "FUEL TANK 400 GAL P",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Comp_Mid",
+      "display": [
+        10.26,
+        1.85
+      ],
+      "deck": "cabin_deck",
+      "notes": ""
+    },
+    {
+      "label": "FUEL TANK 400 GAL S",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Comp_Mid",
+      "display": [
+        10.26,
+        4.25
+      ],
+      "deck": "cabin_deck",
+      "notes": ""
+    },
+    {
+      "label": "OIL SUMP TANK",
+      "kind": "fuel",
+      "nearest_zone": "Engine_Room",
+      "display": [
+        6.92,
+        3.14
+      ],
+      "deck": "cabin_deck",
+      "notes": ""
+    },
+    {
+      "label": "F.W. EXPANSION TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Fuel_Comp_Mid",
+      "display": [
+        9.49,
+        0.55
+      ],
+      "deck": "cabin_deck",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Crew (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew"
+  ]
+}

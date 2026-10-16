@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:26:15.332721+00:00",
+  "platform": "luzon_arg2",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 600
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "Officer_State_Rms",
+      "duty_zone": "Pilot_House",
+      "notes": "CO, dept heads, repair officers"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 45,
+      "berth_zone": "CPO_Berthing_Fwd",
+      "duty_zone": "CPO_Pantry_Mess",
+      "notes": "CPOs incl repair chiefs (main dk)"
+    },
+    {
+      "class_id": "repair_machinists",
+      "role_group": "crew",
+      "count": 180,
+      "berth_zone": "Crews_Berthing_2nd_F",
+      "duty_zone": "Machine_Shop_1P",
+      "notes": "machinists, ICE repairmen, shipfitters, welders"
+    },
+    {
+      "class_id": "repair_support",
+      "role_group": "crew",
+      "count": 80,
+      "berth_zone": "Crews_Berthing_2nd_A",
+      "duty_zone": "Weld_Shop_2nd",
+      "notes": "carpenters, electricians, patternmakers"
+    },
+    {
+      "class_id": "deck_force",
+      "role_group": "crew",
+      "count": 120,
+      "berth_zone": "Crews_Berthing_Aft",
+      "duty_zone": "Stern_Weather",
+      "notes": "seamen, boatswains, gun crews"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 90,
+      "berth_zone": "Crews_Berthing_2nd_A",
+      "duty_zone": "Engine_Room",
+      "notes": "diesel engineers, firemen, electricians"
+    },
+    {
+      "class_id": "commissary_supply",
+      "role_group": "crew",
+      "count": 35,
+      "berth_zone": "CPO_Berthing_Main",
+      "duty_zone": "Crews_Galley",
+      "notes": "cooks, storekeepers, stewards"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 10,
+      "berth_zone": "CPO_Berthing_Main",
+      "duty_zone": "Surgical_Dressing",
+      "notes": "medical dept + surgical dressing battle station"
+    }
+  ],
+  "source": "era/class-typical: ARG internal-combustion repair ship complement ~550-650 incl. large repair division; no sheet accommodations table found on arg2.pdf",
+  "consistency": {
+    "declared_total": 600,
+    "manifest_total": 600,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

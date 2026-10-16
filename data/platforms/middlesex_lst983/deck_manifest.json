@@ -1,0 +1,92 @@
+{
+  "platform_id": "middlesex_lst983",
+  "ship_class_label": "Middlesex Lst983",
+  "footprint_tier": "representative",
+  "representative_of": "LST-983 USS Middlesex County, LST-542 class tank landing ship; Norfolk NSY booklet corrected 1-18-56. Deckhouse + machinery aft, open tank deck fwd with bow doors and ramp. 328' x 50'.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 40",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Gun_Platform_Aft_Bridge",
+    "Boat_Deck",
+    "Radio_Control",
+    "Gunnery_Office",
+    "Vegetable_Locker",
+    "Nav_Bridge",
+    "Gun_Platforms_Fwd_Bridge",
+    "Fantail_Main",
+    "Service_Rooms_Aft",
+    "Supply_Disburse_Office",
+    "Officers_Staterooms_Aft",
+    "HD_Officers",
+    "Gun_Platform_Aft_Main",
+    "Barber_Shop",
+    "Galley_Main",
+    "Officers_Staterooms_Mid",
+    "Wardroom",
+    "Weather_Deck_Amids",
+    "Forecastle_Bow",
+    "Wash_WC_Stern",
+    "Crew_Berthing_Aft",
+    "CPO_Berthing",
+    "Crew_Mess_Galley",
+    "Sick_Bay",
+    "Troop_Berthing_Port",
+    "Troop_Berthing_Starboard",
+    "Tank_Deck",
+    "Troop_Messing_Fwd",
+    "Ammo_Stowage_Fwd",
+    "Bow_Door_Machinery",
+    "HD_Troop_Fwd",
+    "Tank_Deck_Port",
+    "HD_Crew_Aft",
+    "Steering_Flat",
+    "Engine_Room",
+    "Aux_Machinery",
+    "Dry_Stores_Third",
+    "Tanks_Fwd_Third",
+    "Hold_Access",
+    "Hold_Double_Bottom"
+  ],
+  "decks": [
+    "bridge_deck",
+    "hold",
+    "main_deck",
+    "second_deck",
+    "third_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 102.0,
+    "ymin": -2.0,
+    "ymax": 17.2
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "hold": "deck_hold.png",
+      "third_deck": "deck_third_deck.png",
+      "second_deck": "deck_second_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "bridge_deck": "deck_bridge_deck.png"
+    }
+  }
+}

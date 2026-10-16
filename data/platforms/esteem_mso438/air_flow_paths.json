@@ -1,0 +1,355 @@
+{
+  "platform": "esteem_mso438",
+  "description": "HVAC network synthesized for esteem_mso438",
+  "oa_fraction": 0.4,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "VENT_Weather",
+      "rooms": [
+        "Sweep_Deck",
+        "Reel_Deck",
+        "Boat_Deck_Aft",
+        "Focsle_01"
+      ],
+      "ach": 12.0,
+      "description": "open weather decks — untreated outside air",
+      "oa_fraction": 1.0,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Radio_Room",
+        "Captains_Cabin",
+        "Crews_Shelter",
+        "Pilot_House",
+        "Chart_Room",
+        "Officers_Country",
+        "Wardroom_Mess",
+        "Pharmacy",
+        "CPO_Quarters",
+        "Crew_Berthing",
+        "Crew_Berthing_2",
+        "Crews_Mess",
+        "Galley",
+        "Laundry",
+        "Deck_House_Main",
+        "Stores_01",
+        "Stores_Fwd",
+        "Stores_Fwd_Platform",
+        "Hold_Stores",
+        "Chem_Canvas_Stores"
+      ],
+      "ach": 6.0,
+      "description": "accommodation, messing, stores branches",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Uptake_Trunk",
+        "Workshop",
+        "After_Machinery_Room",
+        "Fwd_Machinery_Room",
+        "Steering_Flat",
+        "Sonar_Room",
+        "Reel_Well",
+        "Windlass_Room"
+      ],
+      "ach": 10.0,
+      "description": "machinery spaces — forced draft per stack/uptake",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "VENT_Tanks",
+      "rooms": [
+        "Fuel_Tanks_Aft",
+        "Fuel_Tanks_Fwd",
+        "FW_Chain_Fwd"
+      ],
+      "ach": 4.0,
+      "description": "tank/void venting",
+      "oa_fraction": 0.9,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "AHU_HD_HD_Officers",
+      "rooms": [
+        "HD_Officers"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Officers, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Crew",
+      "rooms": [
+        "HD_Crew"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_CPO",
+      "rooms": [
+        "HD_CPO"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_CPO, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "VENT_Weather",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Machinery",
+      "to": "VENT_Tanks",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Officers",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Officers; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Crew",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_CPO",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_CPO; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Pilot_House",
+      "to": "Chart_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Pilot_House",
+      "to": "Radio_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Radio_Room",
+      "to": "Officers_Country",
+      "type": "ladder"
+    },
+    {
+      "from": "Captains_Cabin",
+      "to": "Officers_Country",
+      "type": "ladder"
+    },
+    {
+      "from": "Focsle_01",
+      "to": "Crew_Berthing",
+      "type": "ladder"
+    },
+    {
+      "from": "Boat_Deck_Aft",
+      "to": "Sweep_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Reel_Deck",
+      "to": "Reel_Well",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Berthing",
+      "to": "Crew_Berthing_2",
+      "type": "ladder"
+    },
+    {
+      "from": "Workshop",
+      "to": "Hold_Stores",
+      "type": "ladder"
+    },
+    {
+      "from": "After_Machinery_Room",
+      "to": "Fuel_Tanks_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Fwd_Machinery_Room",
+      "to": "Fuel_Tanks_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Sonar_Room",
+      "to": "Windlass_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Boat_Deck_Aft",
+      "to": "Radio_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Radio_Room",
+      "to": "Captains_Cabin",
+      "type": "passageway"
+    },
+    {
+      "from": "Radio_Room",
+      "to": "Stores_01",
+      "type": "passageway"
+    },
+    {
+      "from": "Captains_Cabin",
+      "to": "Stores_01",
+      "type": "passageway"
+    },
+    {
+      "from": "Captains_Cabin",
+      "to": "Focsle_01",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_01",
+      "to": "Focsle_01",
+      "type": "passageway"
+    },
+    {
+      "from": "Sweep_Deck",
+      "to": "CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Deck_House_Main",
+      "to": "Pharmacy",
+      "type": "passageway"
+    },
+    {
+      "from": "Reel_Well",
+      "to": "Uptake_Trunk",
+      "type": "passageway"
+    },
+    {
+      "from": "Uptake_Trunk",
+      "to": "Wardroom_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Pharmacy",
+      "to": "Officers_Country",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom_Mess",
+      "to": "Laundry",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Crews_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Mess",
+      "to": "Crew_Berthing",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing",
+      "to": "Stores_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing",
+      "to": "Windlass_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing",
+      "to": "Focsle_Store",
+      "type": "passageway"
+    },
+    {
+      "from": "Windlass_Room",
+      "to": "Focsle_Store",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Flat",
+      "to": "Workshop",
+      "type": "passageway"
+    },
+    {
+      "from": "After_Machinery_Room",
+      "to": "Fwd_Machinery_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Fwd_Machinery_Room",
+      "to": "Crew_Berthing_2",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_2",
+      "to": "Stores_Fwd_Platform",
+      "type": "passageway"
+    },
+    {
+      "from": "Hold_Stores",
+      "to": "Chem_Canvas_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Hold_Stores",
+      "to": "Fuel_Tanks_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Tanks_Fwd",
+      "to": "Sonar_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Sonar_Room",
+      "to": "FW_Chain_Fwd",
+      "type": "passageway"
+    }
+  ]
+}

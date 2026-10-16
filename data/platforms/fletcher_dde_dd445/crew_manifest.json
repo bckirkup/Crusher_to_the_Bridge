@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:22:21.104797+00:00",
+  "platform": "fletcher_dde_dd445",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 300
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 16,
+      "berth_zone": "Officers_Country_Main",
+      "duty_zone": "Pilot_House_CIC",
+      "notes": "CO/XO + wardroom officers (officers' country split main/1P)"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 24,
+      "berth_zone": "CPO_Berthing_1P",
+      "duty_zone": "CPO_Messing",
+      "notes": "chief petty officers"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 50,
+      "berth_zone": "Crew_Berthing_1P",
+      "duty_zone": "Fwd_Machinery_1P",
+      "notes": "machinists, boilermen, electricians"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 120,
+      "berth_zone": "Crew_Berthing_1P",
+      "duty_zone": "Focsle_Main",
+      "notes": "seamen, gun crews, ASW/hedgehog deck force"
+    },
+    {
+      "class_id": "ops_electronics",
+      "role_group": "crew",
+      "count": 45,
+      "berth_zone": "Crew_Berthing_2P",
+      "duty_zone": "Sonar_Block_2P",
+      "notes": "CIC/radar/radio/sonar ratings incl. DDE sonar block"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 30,
+      "berth_zone": "Crew_Berthing_2P",
+      "duty_zone": "Galley_Mess_Main",
+      "notes": "cooks, stewards, storekeepers"
+    },
+    {
+      "class_id": "medical_admin",
+      "role_group": "crew",
+      "count": 15,
+      "berth_zone": "Crew_Berthing_2P",
+      "duty_zone": "Ships_Office",
+      "notes": "corpsmen + yeomen/office admin"
+    }
+  ],
+  "source": "No accommodations table on study sheet — era/class-typical ~300 for Fletcher DDE (flagged fallback)",
+  "consistency": {
+    "declared_total": 300,
+    "manifest_total": 300,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

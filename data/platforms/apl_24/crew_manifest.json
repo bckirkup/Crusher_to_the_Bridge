@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:15:19.102729+00:00",
+  "platform": "apl_24",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 589,
+    "crew": 71
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Officers_Staterooms",
+      "duty_zone": "Ships_Office",
+      "notes": "CO + officers"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 10,
+      "berth_zone": "CPO_Berthing",
+      "duty_zone": "Crews_Locker_Office",
+      "notes": "CPOs incl. master-at-arms"
+    },
+    {
+      "class_id": "generator_watch",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "CPO_Berthing",
+      "duty_zone": "CPO_Mess",
+      "notes": "diesel-generator watch (plant below main deck undrawn)"
+    },
+    {
+      "class_id": "deck_service",
+      "role_group": "crew",
+      "count": 30,
+      "berth_zone": "Crew_Quarters",
+      "duty_zone": "Forecastle",
+      "notes": "seamen, boat crews, brig/detail personnel"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "Crew_Quarters",
+      "duty_zone": "Galley_Bakery",
+      "notes": "cooks, stewards, laundrymen for a 650+ man facility"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 2,
+      "berth_zone": "Officers_Staterooms",
+      "duty_zone": "Sick_Bay",
+      "notes": "doctor/dentist + hospital corpsmen"
+    },
+    {
+      "class_id": "berthed_officers",
+      "role_group": "passenger",
+      "count": 6,
+      "berth_zone": "Officers_Staterooms",
+      "duty_zone": "Ships_Office",
+      "notes": "housed officers (e.g. reserve-fleet caretaker staffs)"
+    },
+    {
+      "class_id": "berthed_enlisted",
+      "role_group": "passenger",
+      "count": 583,
+      "berth_zone": "Crew_Quarters",
+      "duty_zone": "Recreation_Room",
+      "notes": "housed enlisted population; most berthing on the undrawn second deck"
+    }
+  ],
+  "source": "Class data (NavSource/DANFS): complement 5 officers + 66 enlisted = 71 permanent crew; accommodation 6 officers + 583 enlisted = 589 berthed personnel. Not plate-read (booklet has no capacity table).",
+  "consistency": {
+    "declared_total": 660,
+    "manifest_total": 660,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

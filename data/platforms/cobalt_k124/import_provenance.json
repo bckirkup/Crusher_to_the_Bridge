@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:13:56.304898+00:00",
+  "platform_id": "cobalt_k124",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/cobalt_k124",
+  "digest_sha256": "89106af6e1bb89b2e63d57955c0b37c7a4d12d9f9526f479395c2dd5f5a11531",
+  "svg_sha256": {
+    "page_01_approved.svg": "572c50991e28d0fbddab8f98eaa07c96a99aac84909081352c80d9949c105a12",
+    "page_02_approved.svg": "42a2c53fd845d1cc889a477b83f778fb32fae6c2933600adea4c20e4e35d669f"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 29,
+  "berthing_zones": [
+    "Quarterdeck",
+    "CO_Cabin",
+    "Canteen",
+    "Provision_Issue",
+    "Seamen_Mess",
+    "Provision_Room",
+    "Officer_Cabins",
+    "Wardroom",
+    "CPO_PO_Mess",
+    "Stokers_Mess"
+  ],
+  "systems_era": "rn_ww2"
+}
