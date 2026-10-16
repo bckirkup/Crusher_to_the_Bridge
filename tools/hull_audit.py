@@ -162,26 +162,21 @@ def _zone_signature(zone: dict[str, Any]) -> str:
     pivot: type first, then id hints refine Room/Free."""
     zid = zone["id"].lower()
     ztype = zone.get("type", "Room")
-    if ztype == "Sanitary" or any(h in zid for h in _SAN_HINTS):
-        return "sanitary"
-    if any(h in zid for h in _BERTH_HINTS):
-        return "berthing"
-    if ztype == "Dining" or any(h in zid for h in _MESS_HINTS):
-        return "mess"
-    if any(h in zid for h in _MED_HINTS):
-        return "medical"
-    if ztype == "Engineering" or any(h in zid for h in _MACH_HINTS):
-        return "machinery"
-    if any(h in zid for h in _MAG_HINTS):
-        return "magazine"
-    if any(h in zid for h in _TANK_HINTS):
-        return "tank_hold"
-    if any(h in zid for h in _EXTERIOR_HINTS):
-        return "weather_open"
-    if ztype == "Free":
-        return "open_other"
-    if any(h in zid for h in _OFFICE_HINTS):
-        return "ops_office"
+    rules: tuple[tuple[bool, str], ...] = (
+        (ztype == "Sanitary" or any(h in zid for h in _SAN_HINTS), "sanitary"),
+        (any(h in zid for h in _BERTH_HINTS), "berthing"),
+        (ztype == "Dining" or any(h in zid for h in _MESS_HINTS), "mess"),
+        (any(h in zid for h in _MED_HINTS), "medical"),
+        (ztype == "Engineering" or any(h in zid for h in _MACH_HINTS), "machinery"),
+        (any(h in zid for h in _MAG_HINTS), "magazine"),
+        (any(h in zid for h in _TANK_HINTS), "tank_hold"),
+        (any(h in zid for h in _EXTERIOR_HINTS), "weather_open"),
+        (ztype == "Free", "open_other"),
+        (any(h in zid for h in _OFFICE_HINTS), "ops_office"),
+    )
+    for ok, label in rules:
+        if ok:
+            return label
     return "room_other"
 
 
@@ -247,33 +242,135 @@ def _add(b: PlatformBundle, check: str, severity: str, scope: str, msg: str) -> 
     b.findings.append(Finding(check=check, severity=severity, scope=scope, message=msg))
 
 
-def _check_references(b: PlatformBundle) -> None:
-    zids = b.zone_ids
-    gids = {g["id"] for g in b.groups}
+def _check_hvac_group_rooms(b: PlatformBundle, zids: set[str]) -> None:
     for group in b.groups:
         for room in group.get("rooms", []):
             if room not in zids:
                 _add(b, "topology", "flag", room, f"hvac group {group['id']} lists unknown room")
-    for link in b.airflow.get("cross_zone_links", []):
+
+
+def _check_link_endpoints(
+    b: PlatformBundle, zids: set[str], gids: set[str], links: list[dict[str, Any]]
+) -> None:
+    for link in links:
         for end in (link.get("from"), link.get("to")):
             if end not in zids and end not in gids:
-                _add(b, "topology", "flag", str(end), "cross_zone_links endpoint resolves to no zone or group")
+                _add(
+                    b, "topology", "flag", str(end),
+                    "cross_zone_links endpoint resolves to no zone or group",
+                )
+
+
+def _check_adjacency_endpoints(b: PlatformBundle, zids: set[str]) -> None:
     for edge in b.airflow.get("adjacency", []):
         for end in (edge.get("from"), edge.get("to")):
             if end not in zids:
                 _add(b, "topology", "flag", str(end), "adjacency endpoint resolves to no zone")
+
+
+def _check_zone_serves(b: PlatformBundle, zids: set[str]) -> None:
     for zone in b.zones:
         for served in zone.get("serves", []):
             if served not in zids:
                 _add(b, "topology", "flag", zone["id"], f"serves -> {served} resolves to no zone")
+
+
+def _check_graywater_zones(b: PlatformBundle, zids: set[str]) -> None:
     for gz in b.spatial.get("graywater_zones", []):
         if gz not in zids:
             _add(b, "topology", "flag", str(gz), "graywater_zones entry resolves to no zone")
+
+
+def _check_manifest_zone_pins(b: PlatformBundle, zids: set[str]) -> None:
     manifest = b.manifest or {}
     for cls in manifest.get("manifest", []):
         for key in ("berth_zone", "duty_zone"):
             if cls.get(key) not in zids:
-                _add(b, "topology", "flag", cls.get("class_id", "?"), f"{key}={cls.get(key)} resolves to no zone")
+                _add(
+                    b, "topology", "flag", cls.get("class_id", "?"),
+                    f"{key}={cls.get(key)} resolves to no zone",
+                )
+
+
+def _check_references(b: PlatformBundle) -> None:
+    zids = b.zone_ids
+    gids = {g["id"] for g in b.groups}
+    _check_hvac_group_rooms(b, zids)
+    _check_link_endpoints(b, zids, gids, b.airflow.get("cross_zone_links", []))
+    _check_adjacency_endpoints(b, zids)
+    _check_zone_serves(b, zids)
+    _check_graywater_zones(b, zids)
+    _check_manifest_zone_pins(b, zids)
+
+
+def _classify_ungrouped(
+    ungrouped: list[dict[str, Any]],
+) -> tuple[list[str], list[str], list[str]]:
+    exterior, interior, void = [], [], []
+    for zone in ungrouped:
+        if _is_exterior(zone) or _zone_signature(zone) in {"weather_open", "open_other"}:
+            exterior.append(zone["id"])
+        elif _is_occupied(zone):
+            interior.append(zone["id"])
+        else:
+            void.append(zone["id"])
+    return exterior, interior, void
+
+
+def _passive_path_label(zid: str, adj: dict[str, set[str]], linked: set[str | None]) -> str:
+    if zid in adj:
+        return "adjacency"
+    if zid in linked:
+        return "links"
+    return "none"
+
+
+def _flag_ungrouped_zones(
+    b: PlatformBundle,
+    by_id: dict[str, dict[str, Any]],
+    interior: list[str],
+    void: list[str],
+    adj: dict[str, set[str]],
+    linked: set[str | None],
+) -> None:
+    for zid in interior:
+        z = by_id[zid]
+        paths = _passive_path_label(zid, adj, linked)
+        _add(
+            b, "topology", "flag", zid,
+            f"occupied {_zone_signature(z)} zone on no hvac group (passive path: {paths})",
+        )
+    for zid in void:
+        _add(b, "topology", "note", zid, "unvented zone (tank/hold/void class) — sealed by design?")
+
+
+def _flag_adjacency_orphans(
+    b: PlatformBundle, by_id: dict[str, dict[str, Any]], orphans: list[str]
+) -> None:
+    authored_head = [
+        i for i in orphans if i.startswith("HD_") or by_id[i].get("type") == "Sanitary"
+    ]
+    for zid in orphans:
+        if zid in authored_head:
+            continue
+        z = by_id[zid]
+        sev = "flag" if _is_occupied(z) else "note"
+        _add(
+            b, "topology", sev, zid,
+            f"{_zone_signature(z)} zone declares no passage (walk-island gap or closed compartment)",
+        )
+
+
+def _flag_adjacency_fragments(b: PlatformBundle, comps: list[list[str]]) -> None:
+    if len(comps) <= 1:
+        return
+    for frag in comps[1:]:
+        if len(frag) <= 1:
+            continue
+        _add(
+            b, "topology", "note", "+".join(frag[:4]),
+            f"adjacency fragment of {len(frag)} zones disconnected from main graph",
+        )
 
 
 def _check_topology(b: PlatformBundle) -> dict[str, Any]:
@@ -284,44 +381,85 @@ def _check_topology(b: PlatformBundle) -> dict[str, Any]:
     adj = _adjacency_graph(b)
     by_id = {z["id"]: z for z in b.zones}
     ungrouped = [by_id[i] for i in sorted(b.zone_ids - grouped) if i in by_id]
-    exterior, interior, void = [], [], []
-    for zone in ungrouped:
-        if _is_exterior(zone) or _zone_signature(zone) in {"weather_open", "open_other"}:
-            exterior.append(zone["id"])
-        elif _is_occupied(zone):
-            interior.append(zone["id"])
-        else:
-            void.append(zone["id"])
-    for zid in interior:
-        z = by_id[zid]
-        if zid in adj:
-            paths = "adjacency"
-        elif zid in linked:
-            paths = "links"
-        else:
-            paths = "none"
-        _add(b, "topology", "flag", zid,
-             f"occupied {_zone_signature(z)} zone on no hvac group (passive path: {paths})")
-    for zid in void:
-        _add(b, "topology", "note", zid, "unvented zone (tank/hold/void class) — sealed by design?")
+    exterior, interior, void = _classify_ungrouped(ungrouped)
+    _flag_ungrouped_zones(b, by_id, interior, void, adj, linked)
     census = {"ungrouped_exterior": exterior, "ungrouped_void": void, "ungrouped_occupied": interior}
     comps = _components(adj, b.zone_ids)
     orphans = [i for i in sorted(b.zone_ids) if i not in adj]
-    authored_head = [i for i in orphans if i.startswith("HD_") or by_id[i].get("type") == "Sanitary"]
-    real_orphans = [i for i in orphans if i not in authored_head]
-    for zid in real_orphans:
-        z = by_id[zid]
-        sev = "flag" if _is_occupied(z) else "note"
-        _add(b, "topology", sev, zid,
-             f"{_zone_signature(z)} zone declares no passage (walk-island gap or closed compartment)")
-    if len(comps) > 1:
-        frags = [c for c in comps[1:] if len(c) > 1]
-        for frag in frags:
-            _add(b, "topology", "note", "+".join(frag[:4]),
-                 f"adjacency fragment of {len(frag)} zones disconnected from main graph")
+    _flag_adjacency_orphans(b, by_id, orphans)
+    _flag_adjacency_fragments(b, comps)
     census["adjacency_components"] = [len(c) for c in comps]
     census["orphan_zones"] = orphans
     return census
+
+
+def _link_flow_totals(b: PlatformBundle) -> tuple[dict[str, float], dict[str, float]]:
+    links_in: dict[str, float] = defaultdict(float)
+    links_out: dict[str, float] = defaultdict(float)
+    for link in b.airflow.get("cross_zone_links", []):
+        links_out[link["from"]] += float(link.get("flow_rate_m3h", 0.0))
+        links_in[link["to"]] += float(link.get("flow_rate_m3h", 0.0))
+    return links_in, links_out
+
+
+def _dedicated_exhaust_flag(
+    b: PlatformBundle,
+    gid: str,
+    group: dict[str, Any],
+    links_in: dict[str, float],
+    by_id: dict[str, dict[str, Any]],
+) -> bool:
+    duty = float(group.get("hvac_duty", b.airflow.get("hvac_duty", 1.0)))
+    oa = float(group.get("oa_fraction", b.airflow.get("oa_fraction", 0.2)))
+    dedicated_exhaust = duty <= 0.0 and oa >= 1.0
+    if dedicated_exhaust and links_in.get(gid, 0.0) <= 0.0:
+        rooms = group.get("rooms", [])
+        sev = "flag" if any(by_id.get(r, {}).get("type") == "Sanitary" for r in rooms) else "note"
+        _add(
+            b, "flow_closure", sev, gid,
+            "dedicated-exhaust group declares no makeup link in — draws only via passive paths",
+        )
+    return dedicated_exhaust
+
+
+def _audit_group_rooms(
+    b: PlatformBundle,
+    group: dict[str, Any],
+    dedicated_exhaust: bool,
+    removal: dict[str, float],
+    by_id: dict[str, dict[str, Any]],
+    adj: dict[str, set[str]],
+    links_in: dict[str, float],
+    zone_to_group: dict[str, str],
+    single_path: list[str],
+) -> None:
+    for room in group.get("rooms", []):
+        if not dedicated_exhaust and removal.get(room, 0.0) <= 0.0:
+            if room in by_id and _is_occupied(by_id[room]):
+                _add(b, "flow_closure", "flag", room, "grouped but effective removal ~0 ACH")
+    for room in group.get("rooms", []):
+        if removal.get(room, 0.0) <= 0.0:
+            continue
+        passive = room in adj or links_in.get(zone_to_group.get(room, ""), 0.0) > 0.0
+        if not passive:
+            single_path.append(room)
+
+
+def _flag_sealed_ungrouped(
+    b: PlatformBundle,
+    census: dict[str, Any],
+    adj: dict[str, set[str]],
+    by_id: dict[str, dict[str, Any]],
+) -> None:
+    for zid in census.get("ungrouped_occupied", []) + census.get("ungrouped_void", []):
+        if zid in adj:
+            continue
+        z = by_id.get(zid, {})
+        sev = "flag" if _is_occupied(z) else "note"
+        _add(
+            b, "flow_closure", sev, zid,
+            "sealed volume: no hvac entry, no links, no passage — mass injected never leaves",
+        )
 
 
 def _check_flow(b: PlatformBundle, census: dict[str, Any]) -> dict[str, float]:
@@ -329,43 +467,20 @@ def _check_flow(b: PlatformBundle, census: dict[str, Any]) -> dict[str, float]:
     adj = _adjacency_graph(b)
     gids = {g["id"]: g for g in b.groups}
     zone_to_group = {r: g["id"] for g in b.groups for r in g.get("rooms", [])}
-    links_in: dict[str, float] = defaultdict(float)
-    links_out: dict[str, float] = defaultdict(float)
-    for link in b.airflow.get("cross_zone_links", []):
-        links_out[link["from"]] += float(link.get("flow_rate_m3h", 0.0))
-        links_in[link["to"]] += float(link.get("flow_rate_m3h", 0.0))
+    links_in, _links_out = _link_flow_totals(b)
     by_id = {z["id"]: z for z in b.zones}
-    sealed, single_path = [], []
+    single_path: list[str] = []
     for gid, group in gids.items():
-        duty = float(group.get("hvac_duty", b.airflow.get("hvac_duty", 1.0)))
-        oa = float(group.get("oa_fraction", b.airflow.get("oa_fraction", 0.2)))
-        dedicated_exhaust = duty <= 0.0 and oa >= 1.0
-        if dedicated_exhaust and links_in.get(gid, 0.0) <= 0.0:
-            rooms = group.get("rooms", [])
-            sev = "flag" if any(by_id.get(r, {}).get("type") == "Sanitary" for r in rooms) else "note"
-            _add(b, "flow_closure", sev, gid,
-                 "dedicated-exhaust group declares no makeup link in — draws only via passive paths")
-        for room in group.get("rooms", []):
-            if dedicated_exhaust or removal.get(room, 0.0) > 0.0:
-                continue
-            if room in by_id and _is_occupied(by_id[room]):
-                _add(b, "flow_closure", "flag", room, "grouped but effective removal ~0 ACH")
-        for room in group.get("rooms", []):
-            if removal.get(room, 0.0) <= 0.0:
-                continue
-            passive = room in adj or links_in.get(zone_to_group.get(room, ""), 0.0) > 0.0
-            if not passive:
-                single_path.append(room)
-    for zid in census.get("ungrouped_occupied", []) + census.get("ungrouped_void", []):
-        if zid not in adj:
-            z = by_id.get(zid, {})
-            sev = "flag" if _is_occupied(z) else "note"
-            sealed.append(zid)
-            _add(b, "flow_closure", sev, zid,
-                 "sealed volume: no hvac entry, no links, no passage — mass injected never leaves")
+        dedicated = _dedicated_exhaust_flag(b, gid, group, links_in, by_id)
+        _audit_group_rooms(
+            b, group, dedicated, removal, by_id, adj, links_in, zone_to_group, single_path,
+        )
+    _flag_sealed_ungrouped(b, census, adj, by_id)
     if single_path:
-        _add(b, "flow_closure", "note", ",".join(single_path[:6]),
-             f"{len(single_path)} zones ventilated only by their group — HVAC casualty leaves them sealed")
+        _add(
+            b, "flow_closure", "note", ",".join(single_path[:6]),
+            f"{len(single_path)} zones ventilated only by their group — HVAC casualty leaves them sealed",
+        )
     return removal
 
 
@@ -389,15 +504,13 @@ def _group_direction(group: dict[str, Any], default_duty: float, default_oa: flo
     return "supply"
 
 
-def _check_modes(b: PlatformBundle) -> None:
-    notes = b.systems_notes or {}
-    zone_modes = notes.get("zone_modes") or {}
-    if not zone_modes:
-        return
+def _collect_mode_mismatches(
+    b: PlatformBundle, zone_modes: dict[str, Any]
+) -> list[tuple[str, Any, str, str]]:
     default_duty = float(b.airflow.get("hvac_duty", 1.0))
     default_oa = float(b.airflow.get("oa_fraction", 0.2))
     zone_to_group = {r: g for g in b.groups for r in g.get("rooms", [])}
-    mismatched = []
+    mismatched: list[tuple[str, Any, str, str]] = []
     for zid, rec in zone_modes.items():
         group = zone_to_group.get(zid)
         if group is None:
@@ -406,15 +519,32 @@ def _check_modes(b: PlatformBundle) -> None:
         got = _group_direction(group, default_duty, default_oa)
         if want != "unknown" and got != "open" and want != got:
             mismatched.append((zid, rec.get("mode"), got, group["id"]))
-    for zid, mode, got, gid in mismatched:
-        _add(b, "modes", "note", zid,
-             f"declared {mode} sits in {gid} realized as {got} — intent vs field mismatch")
+    return mismatched
+
+
+def _flag_ww2_mech_ac(b: PlatformBundle, zone_modes: dict[str, Any]) -> None:
     era = b.era
-    if era in {"usn_ww2", "rn_ww2", "merchant_ww2"}:
-        ac = [zid for zid, r in zone_modes.items() if r.get("mode") == "mech_ac"]
-        if ac:
-            _add(b, "modes", "flag", ",".join(ac[:5]),
-                 f"{len(ac)} zones carry mech_ac on a {era} hull — anachronistic mode")
+    if era not in {"usn_ww2", "rn_ww2", "merchant_ww2"}:
+        return
+    ac = [zid for zid, r in zone_modes.items() if r.get("mode") == "mech_ac"]
+    if ac:
+        _add(
+            b, "modes", "flag", ",".join(ac[:5]),
+            f"{len(ac)} zones carry mech_ac on a {era} hull — anachronistic mode",
+        )
+
+
+def _check_modes(b: PlatformBundle) -> None:
+    notes = b.systems_notes or {}
+    zone_modes = notes.get("zone_modes") or {}
+    if not zone_modes:
+        return
+    for zid, mode, got, gid in _collect_mode_mismatches(b, zone_modes):
+        _add(
+            b, "modes", "note", zid,
+            f"declared {mode} sits in {gid} realized as {got} — intent vs field mismatch",
+        )
+    _flag_ww2_mech_ac(b, zone_modes)
 
 
 def _dining_seats(b: PlatformBundle) -> tuple[int, float]:
@@ -446,65 +576,133 @@ def _berth_audit(b: PlatformBundle) -> tuple[int, int, list[tuple[str, int, int]
     return sum(assigned.values()), cap, over
 
 
-def _check_metrics(b: PlatformBundle, removal: dict[str, float]) -> dict[str, Any]:
-    m: dict[str, Any] = {}
-    manifest = b.manifest or {}
-    nc = (manifest.get("nominal_complement") or b.spatial.get("nominal_complement") or {})
-    crew = int(nc.get("passengers", 0) or 0) + int(nc.get("crew", 0) or 0)
+def _manifest_role_totals(manifest: dict[str, Any]) -> dict[str, int]:
     manifest_by_role: dict[str, int] = defaultdict(int)
     for c in manifest.get("manifest", []):
         manifest_by_role[str(c.get("role_group", "crew"))] += int(c.get("count", 0))
+    return manifest_by_role
+
+
+def _check_complement_vs_manifest(
+    b: PlatformBundle, nc: dict[str, Any], manifest_by_role: dict[str, int]
+) -> None:
     for role in ("crew", "passenger"):
         want = int(nc.get("crew" if role == "crew" else "passengers", 0) or 0)
         got = manifest_by_role.get(role, 0)
         if manifest_by_role and want > 0 and got != want:
-            _add(b, "metrics", "flag", b.platform_id,
-                 f"nominal_complement.{role}s {want} != manifest {role} sum {got}")
-    zones = b.zones
-    vol = sum(float(z.get("volume_m3", 0.0)) for z in zones)
-    weather_vol = sum(float(z.get("volume_m3", 0.0)) for z in zones
-                      if _zone_signature(z) in {"weather_open", "open_other"})
-    seats, seatings = _dining_seats(b)
-    sanitary = [z for z in zones if _zone_signature(z) == "sanitary"]
-    san_cap = sum(int(z.get("max_occupancy", 0)) for z in sanitary)
-    berth_need, berth_cap, over = _berth_audit(b)
-    ach_by_class: dict[str, list[float]] = defaultdict(list)
-    for z in zones:
-        ach_by_class[_zone_signature(z)].append(removal.get(z["id"], 0.0))
-    ach_means = {k: round(sum(v) / len(v), 2) for k, v in ach_by_class.items()}
-    dims = b.spatial.get("deck_dimensions") or {}
-    envelope = float(dims.get("length_m", 0.0) or 0.0) * float(dims.get("beam_m", 0.0) or 0.0)
+            _add(
+                b, "metrics", "flag", b.platform_id,
+                f"nominal_complement.{role}s {want} != manifest {role} sum {got}",
+            )
+
+
+def _deck_area_by_deck(zones: list[dict[str, Any]]) -> dict[str, float]:
     deck_area: dict[str, float] = defaultdict(float)
     for z in zones:
         deck_area[z.get("deck", "?")] += float(z.get("floor_area_m2", 0.0))
-    over_decks = [d for d, a in deck_area.items() if envelope > 0.0 and a > envelope * 1.25]
-    for d in over_decks:
-        _add(b, "metrics", "flag", d,
-             f"deck zones sum {deck_area[d]:.0f} m2 > 1.25x hull envelope {envelope:.0f} m2")
+    return deck_area
+
+
+def _flag_deck_envelope_overruns(
+    b: PlatformBundle, deck_area: dict[str, float], dims: dict[str, Any]
+) -> None:
+    envelope = float(dims.get("length_m", 0.0) or 0.0) * float(dims.get("beam_m", 0.0) or 0.0)
+    for d, a in deck_area.items():
+        if envelope > 0.0 and a > envelope * 1.25:
+            _add(
+                b, "metrics", "flag", d,
+                f"deck zones sum {a:.0f} m2 > 1.25x hull envelope {envelope:.0f} m2",
+            )
+
+
+def _flag_capacity_metrics(
+    b: PlatformBundle,
+    crew: int,
+    seats: int,
+    berth_need: int,
+    berth_cap: int,
+    over: list[tuple[str, int, int]],
+) -> None:
     if crew > 0 and seats > 0 and crew / seats > 8.0:
-        _add(b, "metrics", "flag", b.platform_id,
-             f"dining seats {seats} for crew {crew} ({crew / seats:.1f} crew/seat)")
+        _add(
+            b, "metrics", "flag", b.platform_id,
+            f"dining seats {seats} for crew {crew} ({crew / seats:.1f} crew/seat)",
+        )
     if crew > 0 and berth_cap > 0 and berth_need > berth_cap * 1.5:
-        _add(b, "metrics", "flag", b.platform_id,
-             f"manifest assigns {berth_need} to berth zones capped at {berth_cap} (>{1.5}x)")
+        _add(
+            b, "metrics", "flag", b.platform_id,
+            f"manifest assigns {berth_need} to berth zones capped at {berth_cap} (>{1.5}x)",
+        )
     for zid, need, cap in over:
         if cap > 0 and need > cap * 1.5:
-            _add(b, "metrics", "flag", zid,
-                 f"{need} assigned to berth capacity {cap} — exceeds any hot-bunk interpretation")
+            _add(
+                b, "metrics", "flag", zid,
+                f"{need} assigned to berth capacity {cap} — exceeds any hot-bunk interpretation",
+            )
+
+
+def _ach_means_by_class(
+    zones: list[dict[str, Any]], removal: dict[str, float]
+) -> dict[str, float]:
+    ach_by_class: dict[str, list[float]] = defaultdict(list)
+    for z in zones:
+        ach_by_class[_zone_signature(z)].append(removal.get(z["id"], 0.0))
+    return {k: round(sum(v) / len(v), 2) for k, v in ach_by_class.items()}
+
+
+def _nominal_crew(nc: dict[str, Any]) -> int:
+    return int(nc.get("passengers", 0) or 0) + int(nc.get("crew", 0) or 0)
+
+
+def _volume_totals(zones: list[dict[str, Any]]) -> tuple[float, float]:
+    vol = sum(float(z.get("volume_m3", 0.0)) for z in zones)
+    weather_vol = sum(
+        float(z.get("volume_m3", 0.0)) for z in zones
+        if _zone_signature(z) in {"weather_open", "open_other"}
+    )
+    return vol, weather_vol
+
+
+def _sanitary_panel(zones: list[dict[str, Any]]) -> tuple[int, int]:
+    sanitary = [z for z in zones if _zone_signature(z) == "sanitary"]
+    san_cap = sum(int(z.get("max_occupancy", 0)) for z in sanitary)
+    return len(sanitary), san_cap
+
+
+def _note_scaled_hvac_duty(b: PlatformBundle) -> None:
     duty = float(b.airflow.get("hvac_duty", 1.0))
     if duty < 1.0:
-        _add(b, "metrics", "note", b.platform_id,
-             f"top-level hvac_duty={duty} halves/scales every group ACH vs declared")
-    notes = b.systems_notes or {}
-    zmodes = notes.get("zone_modes") or {}
-    evidence = Counter(str(r.get("evidence", "none")) for r in zmodes.values())
-    m.update({
+        _add(
+            b, "metrics", "note", b.platform_id,
+            f"top-level hvac_duty={duty} halves/scales every group ACH vs declared",
+        )
+
+
+def _metrics_record(
+    b: PlatformBundle,
+    *,
+    crew: int,
+    zones: list[dict[str, Any]],
+    vol: float,
+    weather_vol: float,
+    seats: int,
+    seatings: float,
+    sanitary_n: int,
+    san_cap: int,
+    berth_need: int,
+    berth_cap: int,
+    over: list[tuple[str, int, int]],
+    ach_means: dict[str, float],
+    dims: dict[str, Any],
+    evidence: Counter[str],
+) -> dict[str, Any]:
+    return {
         "crew": crew, "zones": len(zones), "volume_m3": round(vol),
         "m3_per_crew": round(vol / crew, 1) if crew else None,
         "weather_share": round(weather_vol / vol, 3) if vol > 0 else None,
         "dining_seats": seats, "meal_seatings": seatings,
         "crew_per_seat": round(crew / seats, 2) if seats else None,
-        "sanitary_zones": len(sanitary),
+        "sanitary_zones": sanitary_n,
         "sanitary_per_100": round(san_cap / crew * 100, 1) if crew else None,
         "berth_need": berth_need, "berth_cap": berth_cap,
         "berth_ratio": round(berth_need / berth_cap, 2) if berth_cap else None,
@@ -514,8 +712,43 @@ def _check_metrics(b: PlatformBundle, removal: dict[str, float]) -> dict[str, An
         "evidence": dict(evidence),
         "deck_dims": dims,
         "ungrouped": None,
-    })
-    return m
+    }
+
+
+def _check_metrics(b: PlatformBundle, removal: dict[str, float]) -> dict[str, Any]:
+    manifest = b.manifest or {}
+    nc = (manifest.get("nominal_complement") or b.spatial.get("nominal_complement") or {})
+    crew = _nominal_crew(nc)
+    _check_complement_vs_manifest(b, nc, _manifest_role_totals(manifest))
+    zones = b.zones
+    vol, weather_vol = _volume_totals(zones)
+    seats, seatings = _dining_seats(b)
+    sanitary_n, san_cap = _sanitary_panel(zones)
+    berth_need, berth_cap, over = _berth_audit(b)
+    ach_means = _ach_means_by_class(zones, removal)
+    dims = b.spatial.get("deck_dimensions") or {}
+    _flag_deck_envelope_overruns(b, _deck_area_by_deck(zones), dims)
+    _flag_capacity_metrics(b, crew, seats, berth_need, berth_cap, over)
+    _note_scaled_hvac_duty(b)
+    zmodes = (b.systems_notes or {}).get("zone_modes") or {}
+    evidence = Counter(str(r.get("evidence", "none")) for r in zmodes.values())
+    return _metrics_record(
+        b,
+        crew=crew,
+        zones=zones,
+        vol=vol,
+        weather_vol=weather_vol,
+        seats=seats,
+        seatings=seatings,
+        sanitary_n=sanitary_n,
+        san_cap=san_cap,
+        berth_need=berth_need,
+        berth_cap=berth_cap,
+        over=over,
+        ach_means=ach_means,
+        dims=dims,
+        evidence=evidence,
+    )
 
 
 def audit_platform(root: Path) -> PlatformBundle:
@@ -529,9 +762,9 @@ def audit_platform(root: Path) -> PlatformBundle:
     return b
 
 
-def _era_contradictions(bundles: list[PlatformBundle]) -> list[Finding]:
-    """Same-era platforms should infer the same mode for the same zone class
-    wherever the sheet itself did not speak."""
+def _index_era_inferred_modes(
+    bundles: list[PlatformBundle],
+) -> dict[tuple[str, str], dict[str, set[str]]]:
     by_era_class: dict[tuple[str, str], dict[str, set[str]]] = defaultdict(
         lambda: defaultdict(set))
     for b in bundles:
@@ -545,21 +778,61 @@ def _era_contradictions(bundles: list[PlatformBundle]) -> list[Finding]:
             if klass is None:
                 continue
             by_era_class[(b.era, klass)][str(rec.get("mode", "?"))].add(b.platform_id)
+    return by_era_class
+
+
+def _era_disagreement_kind(mode_map: dict[str, set[str]]) -> str:
+    shared = set.intersection(*mode_map.values())
+    all_plats = set.union(*mode_map.values())
+    if shared == all_plats:
+        return "within-platform only (a hull self-disagrees by zone)"
+    if shared:
+        return f"cross-platform; {sorted(shared)} also self-disagree"
+    return "cross-platform"
+
+
+def _era_contradictions(bundles: list[PlatformBundle]) -> list[Finding]:
+    """Same-era platforms should infer the same mode for the same zone class
+    wherever the sheet itself did not speak."""
+    by_era_class = _index_era_inferred_modes(bundles)
     findings = []
     for (era, klass), mode_map in sorted(by_era_class.items()):
         if len(mode_map) <= 1:
             continue
         detail = "; ".join(f"{m}: {sorted(p)}" for m, p in sorted(mode_map.items()))
-        shared = set.intersection(*mode_map.values())
-        all_plats = set.union(*mode_map.values())
-        if shared == all_plats:
-            kind = "within-platform only (a hull self-disagrees by zone)"
-        elif shared:
-            kind = f"cross-platform; {sorted(shared)} also self-disagree"
-        else:
-            kind = "cross-platform"
+        kind = _era_disagreement_kind(mode_map)
         findings.append(Finding("era_consistency", "flag", f"{era}/{klass}",
                                 f"era-inferred modes disagree ({kind}): {detail}"))
+    return findings
+
+
+def _metric_rows_by_era(
+    bundles: list[PlatformBundle], metric: str
+) -> dict[str, list[tuple[str, float]]]:
+    by_era: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    for b in bundles:
+        v = b.metrics.get(metric)
+        if isinstance(v, (int, float)):
+            by_era[b.era].append((b.platform_id, float(v)))
+    return by_era
+
+
+def _iqr_outlier_findings(
+    metric: str, era: str, rows: list[tuple[str, float]]
+) -> list[Finding]:
+    vals = sorted(v for _, v in rows)
+    if len(vals) < 4:
+        return []
+    q1, q3 = vals[len(vals) // 4], vals[(3 * len(vals)) // 4]
+    iqr = q3 - q1
+    lo, hi = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+    findings: list[Finding] = []
+    for pid, v in rows:
+        if v < lo or v > hi:
+            findings.append(Finding(
+                "fleet_outlier", "flag", pid,
+                f"{metric}={v} outside {era} band [{lo:.2f},{hi:.2f}]",
+            ))
     return findings
 
 
@@ -568,23 +841,8 @@ def _fleet_outliers(bundles: list[PlatformBundle]) -> list[Finding]:
     metrics = ["m3_per_crew", "crew_per_seat", "sanitary_per_100", "berth_ratio"]
     findings: list[Finding] = []
     for metric in metrics:
-        by_era: dict[str, list[tuple[str, float]]] = defaultdict(list)
-        for b in bundles:
-            v = b.metrics.get(metric)
-            era = b.era
-            if isinstance(v, (int, float)):
-                by_era[era].append((b.platform_id, float(v)))
-        for era, rows in sorted(by_era.items()):
-            vals = sorted(v for _, v in rows)
-            if len(vals) < 4:
-                continue
-            q1, q3 = vals[len(vals) // 4], vals[(3 * len(vals)) // 4]
-            iqr = q3 - q1
-            lo, hi = q1 - 1.5 * iqr, q3 + 1.5 * iqr
-            for pid, v in rows:
-                if v < lo or v > hi:
-                    findings.append(Finding("fleet_outlier", "flag", pid,
-                                            f"{metric}={v} outside {era} band [{lo:.2f},{hi:.2f}]"))
+        for era, rows in sorted(_metric_rows_by_era(bundles, metric).items()):
+            findings.extend(_iqr_outlier_findings(metric, era, rows))
     return findings
 
 
@@ -648,26 +906,42 @@ def _fleet_panel(bundles: list[PlatformBundle]) -> str:
     return "\n".join(lines)
 
 
-def _render_platform(b: PlatformBundle, min_sev: str) -> str:
-    lines = [f"## {b.platform_id}\n"]
+def _platform_summary_lines(b: PlatformBundle) -> list[str]:
     m = b.metrics
     ach = " ".join(f"{k}={v}" for k, v in sorted((m.get("ach_by_class") or {}).items()))
-    lines.append(f"- era={b.era} crew={_fmt(m.get('crew'))} zones={_fmt(m.get('zones'))} "
-                 f"vol={_fmt(m.get('volume_m3'))} isolation={_fmt(m.get('isolation_beds'))}")
-    lines.append(f"- removal ACH by class: {ach}")
+    lines = [
+        f"- era={b.era} crew={_fmt(m.get('crew'))} zones={_fmt(m.get('zones'))} "
+        f"vol={_fmt(m.get('volume_m3'))} isolation={_fmt(m.get('isolation_beds'))}",
+        f"- removal ACH by class: {ach}",
+    ]
     ev = m.get("evidence") or {}
     if ev:
         lines.append("- zone-mode evidence: " + ", ".join(f"{k}={v}" for k, v in sorted(ev.items())))
     census = m.get("ungrouped") or {}
     if census.get("ungrouped_occupied") or census.get("ungrouped_void"):
-        lines.append(f"- ungrouped: occupied={census.get('ungrouped_occupied')} void={census.get('ungrouped_void')}")
+        lines.append(
+            f"- ungrouped: occupied={census.get('ungrouped_occupied')} void={census.get('ungrouped_void')}"
+        )
     comps = census.get("adjacency_components") or []
     if len(comps) > 1:
         lines.append(f"- adjacency components: {comps}")
     if m.get("berth_over"):
         lines.append(f"- berth over-assignment: {', '.join(m['berth_over'])}")
-    findings = [f for f in b.findings if SEVERITY_ORDER.get(f.severity, 9) <= SEVERITY_ORDER[min_sev]]
+    return lines
+
+
+def _filtered_findings(b: PlatformBundle, min_sev: str) -> list[Finding]:
+    findings = [
+        f for f in b.findings if SEVERITY_ORDER.get(f.severity, 9) <= SEVERITY_ORDER[min_sev]
+    ]
     findings.sort(key=lambda f: (SEVERITY_ORDER.get(f.severity, 9), f.check, f.scope))
+    return findings
+
+
+def _render_platform(b: PlatformBundle, min_sev: str) -> str:
+    lines = [f"## {b.platform_id}\n"]
+    lines.extend(_platform_summary_lines(b))
+    findings = _filtered_findings(b, min_sev)
     if not findings:
         lines.append("- no findings at this severity")
     for f in findings:

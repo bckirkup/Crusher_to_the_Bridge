@@ -186,26 +186,34 @@ def _pin_resolution(b: PlatformBundle) -> dict[str, Any] | None:
             "unresolvable_duty_pins": bad_duty}
 
 
+def _per_epoch_zone_counts(sim_: Any) -> Counter:
+    per_zone: Counter = Counter()
+    for a in sim_.engine.agents:
+        loc = getattr(a, "current_location", None) or "unknown"
+        per_zone[loc] += 1
+    return per_zone
+
+
+def _home_zone_tally(agents: list[Any]) -> Counter:
+    home_counter: Counter = Counter()
+    for a in agents:
+        home_counter[getattr(a, "home_zone", None) or "unknown"] += 1
+    return home_counter
+
+
 def _arm_census(spec: dict[str, Any]) -> tuple[list[Counter], Counter]:
     """Run one no-pathogen voyage; return per-epoch zone counts + home tally."""
     epoch_counts: list[Counter] = []
-    home_counter: Counter = Counter()
     with materialized_picard_spec(spec, REPO_ROOT) as picard_spec:
         sim = ShipSimulation(picard_spec, display=False)
 
         def observer(sim_: Any, _work: Any,
                      counts: list[Counter] = epoch_counts) -> None:
-            eng = sim_.engine
-            per_zone: Counter = Counter()
-            for a in eng.agents:
-                loc = getattr(a, "current_location", None) or "unknown"
-                per_zone[loc] += 1
-            counts.append(per_zone)
+            counts.append(_per_epoch_zone_counts(sim_))
 
         sim.epoch_observer = observer
         sim.run()
-        for a in sim.engine.agents:
-            home_counter[getattr(a, "home_zone", None) or "unknown"] += 1
+        home_counter = _home_zone_tally(sim.engine.agents)
     return epoch_counts, home_counter
 
 
@@ -235,30 +243,45 @@ def _overflow_zones(zone_peak: Counter,
     return sorted(overflow, key=lambda r: -r["peak"] / r["cap"])
 
 
-def _arm_summary(epoch_counts: list[Counter], home_counter: Counter,
-                 zone_meta: dict[str, Any], manifest_berths: set[str],
-                 num_agents: int) -> dict[str, Any]:
+def _visited_zones(epoch_counts: list[Counter]) -> set[str]:
     counts = defaultdict(set)
     for per_zone in epoch_counts:
         for z in per_zone:
             counts[z].add(1)
-    visited = {z for z in counts if z not in ("Ashore", "Departed", "Isolated_In_Quarters")}
+    return {z for z in counts if z not in ("Ashore", "Departed", "Isolated_In_Quarters")}
+
+
+def _never_occupied_interior(
+    visited: set[str], zone_meta: dict[str, Any]
+) -> list[str]:
     interior = {z for z, m in zone_meta.items() if not _is_exterior(m)}
-    never_occupied = sorted(
+    return sorted(
         z for z in interior if z not in visited
         and _zone_signature(zone_meta[z]) not in ("tank_hold", "magazine")
     )
-    night_counts, zone_peak = _night_and_peaks(epoch_counts)
+
+
+def _night_top3(epoch_counts: list[Counter]) -> list[dict[str, Any]]:
+    night_counts, _zone_peak = _night_and_peaks(epoch_counts)
     night_total = sum(night_counts.values()) or 1
-    top_night = night_counts.most_common(3)
+    return [
+        {"zone": z, "share": round(n / night_total, 3)}
+        for z, n in night_counts.most_common(3)
+    ]
+
+
+def _arm_summary(epoch_counts: list[Counter], home_counter: Counter,
+                 zone_meta: dict[str, Any], manifest_berths: set[str],
+                 num_agents: int) -> dict[str, Any]:
+    visited = _visited_zones(epoch_counts)
+    never_occupied = _never_occupied_interior(visited, zone_meta)
+    _, zone_peak = _night_and_peaks(epoch_counts)
     berth_hits = sum(n for z, n in home_counter.items() if z in manifest_berths)
     return {
         "visited_zones": len(visited),
         "never_occupied_interior": never_occupied,
         "overflow_zones": _overflow_zones(zone_peak, zone_meta),
-        "night_top3": [
-            {"zone": z, "share": round(n / night_total, 3)} for z, n in top_night
-        ],
+        "night_top3": _night_top3(epoch_counts),
         "home_zone_distinct": len(home_counter),
         "home_on_manifest_berth_frac": round(berth_hits / num_agents, 3)
         if manifest_berths else None,
@@ -268,17 +291,44 @@ def _arm_summary(epoch_counts: list[Counter], home_counter: Counter,
     }
 
 
+def _manifest_berth_zones(b: PlatformBundle) -> set[str]:
+    return {
+        str(r.get("berth_zone"))
+        for r in (b.manifest or {}).get("manifest") or []
+        if r.get("berth_zone")
+    }
+
+
+def _apply_manifest_arm(spec: dict[str, Any], manifest_classes: list[dict[str, Any]]) -> None:
+    spec["config_overrides"].setdefault("ship_graph", {})["agent_classes"] = manifest_classes
+
+
+def _run_occupancy_arm(
+    b: PlatformBundle,
+    arm: str,
+    epochs: int,
+    seed: int,
+    num_agents: int,
+    manifest_classes: list[dict[str, Any]] | None,
+    zone_meta: dict[str, Any],
+    manifest_berths: set[str],
+) -> dict[str, Any] | None:
+    if arm == "manifest" and not manifest_classes:
+        return None
+    spec = _null_infection_spec(b.platform_id, epochs, num_agents, seed)
+    if arm == "manifest":
+        _apply_manifest_arm(spec, manifest_classes or [])
+    epoch_counts, home_counter = _arm_census(spec)
+    return _arm_summary(epoch_counts, home_counter, zone_meta, manifest_berths, num_agents)
+
+
 def _occupancy_smoke(b: PlatformBundle, *, epochs: int, seed: int,
                      arms: list[str]) -> dict[str, Any]:
     num_agents, source = _crew_source(b)
     if num_agents <= 0:
         return {"skipped": "no crew source (no manifest, no nominal_complement)"}
     manifest_classes = _manifest_agent_classes(b)
-    manifest_berths = {
-        str(r.get("berth_zone"))
-        for r in (b.manifest or {}).get("manifest") or []
-        if r.get("berth_zone")
-    }
+    manifest_berths = _manifest_berth_zones(b)
     zone_meta = {str(z.get("id") or z.get("name")): z for z in b.zones}
     results: dict[str, Any] = {
         "num_agents": num_agents,
@@ -287,16 +337,11 @@ def _occupancy_smoke(b: PlatformBundle, *, epochs: int, seed: int,
     }
 
     for arm in arms:
-        if arm == "manifest" and not manifest_classes:
-            continue
-        spec = _null_infection_spec(b.platform_id, epochs, num_agents, seed)
-        if arm == "manifest":
-            spec["config_overrides"].setdefault("ship_graph", {})[
-                "agent_classes"
-            ] = manifest_classes
-        epoch_counts, home_counter = _arm_census(spec)
-        results[arm] = _arm_summary(
-            epoch_counts, home_counter, zone_meta, manifest_berths, num_agents)
+        arm_res = _run_occupancy_arm(
+            b, arm, epochs, seed, num_agents, manifest_classes, zone_meta, manifest_berths,
+        )
+        if arm_res is not None:
+            results[arm] = arm_res
     return results
 
 
