@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:33:45.583023+00:00",
+  "platform": "olympia_c6",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 440
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 33,
+      "berth_zone": "BD_State_Rooms_Port",
+      "duty_zone": "BD_Ward_Room",
+      "notes": "line officers + admiral staff; state rooms P+S, wardroom + junior officers mess"
+    },
+    {
+      "class_id": "warrant_cpo",
+      "role_group": "crew",
+      "count": 17,
+      "berth_zone": "BD_Cabins_Stb",
+      "duty_zone": "MD_Signal_Yeoman",
+      "notes": "warrant officers + chief petty officers in cc cabins"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 240,
+      "berth_zone": "BD_Crews_Berthing_Port",
+      "duty_zone": "MD_Galley",
+      "notes": "deck divisions, hammock berthing fwd on berth deck"
+    },
+    {
+      "class_id": "engineering",
+      "role_group": "crew",
+      "count": 60,
+      "berth_zone": "BD_Crews_Berthing_Stb",
+      "duty_zone": "PF_Engine_Port",
+      "notes": "firemen + engineers division, watch-standing in engine/boiler/dynamo rooms"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 50,
+      "berth_zone": "BD_Crews_Berthing_Stb",
+      "duty_zone": "MD_Casemate_Port",
+      "notes": "marine guard, secondary battery duty"
+    },
+    {
+      "class_id": "stewards",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "BD_Wardroom_Pantry",
+      "duty_zone": "MD_Galley",
+      "notes": "officers stewards, cooks, servants"
+    }
+  ],
+  "source": "era-typical flagship fit (33 officers + ~395 enlisted + small admiral staff); no accommodation table on sheets",
+  "consistency": {
+    "declared_total": 440,
+    "manifest_total": 440,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
