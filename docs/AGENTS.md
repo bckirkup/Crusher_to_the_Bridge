@@ -127,7 +127,7 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 | `testing-agent-classes` | Agent class, gender, duty zone, exempt_classes changes |
 | `schema-validation` | Before committing JSON in `data/` or `telemetry_buffer/` |
 | `adding-new-platform` | New vessel spatial layout + HVAC |
-| `importing-naval-blueprint` | GA PDF/image → ShipDigest + SVG overlay → platform JSON |
+| `importing-naval-blueprint` | GA PDF/image → agent-authored ShipDigest + approved SVGs → platform JSON + .prj |
 | `adding-new-pathogen` | New pathogen profile entries |
 | `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
 | `mega-cruise-campaign-local` | Local `--smoke` / `--dry-run` / shard hygiene; synthetic recovery + VSP degradation (`docs/synthetic_recovery_and_vsp_degradation.md`) |
@@ -155,7 +155,7 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 - **Law 1:** No hardcoded epoch SOP schedules; Stackelberg `authorize_sop_subset` filters stoplight-eligible SOPs; `activate_sop` can force protocols via `forced_protocol_ids`.
 - **OIS:** Fourth ledger dimension in `cost_accounting`; configured via `operational_impact_weights` in `resource_costs.json`.
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
-- Thirty-eight ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `expedition_cruise_300`/`messy_cruise_500`); see `README.md` Platforms table.
+- Forty-two ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `expedition_cruise_300`/`messy_cruise_500`); see `README.md` Platforms table.
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
 - **Complexity backlog:** new functions stay at cognitive complexity ≤15. Campaign `t1`–`t16` / calibration iterators live in `tier_iterators.py`; `ShipSimulation.step` is `_begin_epoch` plus `_step_*` phases. See skill `sonar-quality`.
 - **Outbreak response architecture:** SOP policy (attack-rate escalation + `min_escalation_status`), organizational decision latency (`escalation.decision_latency` / SOP `activation_delay_hours`), and bimodal compliance (compliant/reluctant/defiant) are separate systems — see `docs/tiered_escalation_spec.md` and skill `outbreak-response-architecture`. Default `lockdown_attack_rate: never` for n=20 smokes; mega-cruise campaign injects `0.05`.

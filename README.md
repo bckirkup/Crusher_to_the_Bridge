@@ -193,6 +193,10 @@ data/
 │   ├── esteem_mso438/              (maritime.org GA import)
 │   ├── erie_pg50/                  (maritime.org GA import)
 │   ├── pt_564/                     (maritime.org GA import)
+│   ├── astoria_ca34/               (maritime.org GA import)
+│   ├── miami_cl89/                 (maritime.org GA import)
+│   ├── chicago_cg11/               (maritime.org GA import)
+│   ├── wright_cc2/                 (maritime.org GA import)
 │   ├── pope_ap110/                 (maritime.org GA import)
 │   ├── squier_ap130/               (maritime.org GA import)
 │   ├── lexington_cv2/              (maritime.org GA import)
@@ -595,6 +599,10 @@ airflow definitions:
 | `esteem_mso438` | USS Esteem MSO-438 Aggressive-class ocean minesweeper (maritime.org GA import, 39 zones, 74 crew) |
 | `erie_pg50` | USS Erie PG-50 Erie-class patrol gunboat (maritime.org GA import, 54 zones, 248 crew incl. flag staff + marine guard) |
 | `pt_564` | PT-564 Higgins 70'8" motor torpedo boat (maritime.org GA import, 13 zones, 14 crew — marginal smallest hull) |
+| `astoria_ca34` | USS Astoria CA-34 New Orleans-class heavy cruiser (maritime.org GA import, 65 zones, 982 crew) |
+| `miami_cl89` | USS Miami CL-89 Cleveland-class light cruiser (maritime.org GA import, 81 zones, 1252 crew) |
+| `chicago_cg11` | USS Chicago CG-11 guided missile cruiser on Baltimore-class hull (maritime.org GA import, 87 zones, 1302 crew incl. flag staff + marines) |
+| `wright_cc2` | USS Wright CC-2 command ship on Saipan-class CVL hull (maritime.org GA import, 68 zones, 1768 crew) |
 | `pope_ap110` | USS General John Pope AP-110 troop transport (maritime.org GA import, 88 zones, 479 crew + 5313 troops) |
 | `squier_ap130` | USS General G.O. Squier AP-130 C4-S-A1 troop transport (maritime.org GA import, 52 zones, 482 crew + 3262 troops) |
 | `lexington_cv2` | USS Lexington CV-2 Lexington-class carrier, 1941 fit (maritime.org GA import, 97 zones, 2370 crew incl. air group) |
