@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T01:12:33.348967+00:00",
+  "platform": "independence_cvl26",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1566
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 71,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Nav_Bridge",
+      "notes": "captain + wardroom officers incl. air-group officers"
+    },
+    {
+      "class_id": "warrant_officers",
+      "role_group": "crew",
+      "count": 14,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Shops_Aft",
+      "notes": ""
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 52,
+      "berth_zone": "CPO_Berthing",
+      "duty_zone": "CPO_Mess",
+      "notes": ""
+    },
+    {
+      "class_id": "air_wing_enlisted",
+      "role_group": "crew",
+      "count": 360,
+      "berth_zone": "Crew_Berthing_3D",
+      "duty_zone": "Hangar_Fwd",
+      "notes": "plane handlers, aviation mechanics, ordnancemen of the embarked air group (~45 aircraft)"
+    },
+    {
+      "class_id": "engine_room_gang",
+      "role_group": "crew",
+      "count": 210,
+      "berth_zone": "Crew_Berthing_2D",
+      "duty_zone": "Aft_Engine_Rm",
+      "notes": "machinist's mates / firemen for 2 engine rooms + 2 fire rooms"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 400,
+      "berth_zone": "Crew_Berthing_3D",
+      "duty_zone": "Gallery_Deck",
+      "notes": "gun crews (40mm mounts + directors) and deck division"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 110,
+      "berth_zone": "Crew_Berthing_2D",
+      "duty_zone": "Galley",
+      "notes": "cooks, bakers, stewards, mess attendants"
+    },
+    {
+      "class_id": "medical_admin",
+      "role_group": "crew",
+      "count": 25,
+      "berth_zone": "Crew_Berthing_3D",
+      "duty_zone": "Sick_Bay",
+      "notes": ""
+    },
+    {
+      "class_id": "radio_ops",
+      "role_group": "crew",
+      "count": 50,
+      "berth_zone": "Crew_Berthing_2D",
+      "duty_zone": "Island_Upper",
+      "notes": "radio, signal, and air-defense watchstanders"
+    },
+    {
+      "class_id": "seamen_general",
+      "role_group": "crew",
+      "count": 274,
+      "berth_zone": "Crew_Berthing_Main",
+      "duty_zone": "Shops_Aft",
+      "notes": "general seamen, shipfitters, storekeepers"
+    }
+  ],
+  "source": "CVL-26 booklet Plan No.2 general data plate: 'ACCOMMODATIONS' — captain 1, wardroom officers 70, warrant officers 14, C.P.O. 52, crew 1429, total 1566. Functional split of the 1429 crew pool is era-plausible (Independence-class ship's company ~1,200 + air group ~350); air wing carried as air_wing_* crew classes.",
+  "consistency": {
+    "declared_total": 1566,
+    "manifest_total": 1566,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

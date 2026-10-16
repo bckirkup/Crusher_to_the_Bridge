@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T01:12:33.346725+00:00",
+  "platform_id": "independence_cvl26",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/cvl26_import",
+  "digest_sha256": "3c73daf9809c01690ea4636d6dc54f2461445756a2373711caa1332e710c1fc9",
+  "svg_sha256": {
+    "page_07_approved.svg": "4b71ca0dc61934e26915aa069f221095780aee3425835807cb8c99ed1201f5a5",
+    "page_08_approved.svg": "f371214e4fba600510322db0c71891e559765bf300893edca6c71776e5472194",
+    "page_09_approved.svg": "cb82793b886adc13d8221b65670268557d8870b219962da61efce21b191858d5",
+    "page_10_approved.svg": "941a9f1dbca0688a86fdab552325112a4acce39cf0d22751822736480eee064a",
+    "page_11_approved.svg": "f0789816648c25ea21c4ec8ba116d873cb6d625491390e2258d42ab5adfdc9fb",
+    "page_12_approved.svg": "f98b8376772b8d9caaa98c649c99f3ee125e6bf1b7a82d9d89d4d239fcfc2329",
+    "page_13_approved.svg": "b54a441826f093fd48bf731f1bcf200814cc478833292894eb9a33eeed62e415",
+    "page_14_approved.svg": "e8ba9bb91605011c3dc729b9f5ed555363b1678ed53dcbf8bc3cc07a6bc75389",
+    "page_15_approved.svg": "db41735ad626f663d5ba52d188dcb2b513db66847ed97e2502985e67abfabfe5",
+    "page_16_approved.svg": "29fdbd0586918a9f3b58bdb5a5edbca237d3073cee64166d08722b89f78ae490",
+    "page_17_approved.svg": "8edaf747ef7dbb2e5f2e6f794fdcf3c661596141eff1aa93752358fbaa42758e"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 46,
+  "berthing_zones": [
+    "Nav_Bridge",
+    "Air_Ops_Rooms",
+    "Shops_Aft",
+    "Crew_Berthing_Main",
+    "Officers_Country",
+    "CPO_Berthing",
+    "Crew_Berthing_2D",
+    "Fwd_Rooms_2D",
+    "Crew_Berthing_3D",
+    "Provisions_3D",
+    "Workshops_3D",
+    "Provisions_1P",
+    "Crew_Berthing_1P",
+    "Central_Station",
+    "Ordnance_Stores",
+    "Bomb_Assembly"
+  ],
+  "systems_era": "usn_ww2"
+}

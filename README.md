@@ -188,6 +188,7 @@ data/
 │   ├── cannon_de701/               (maritime.org GA import)
 │   ├── passumpsic_ao106/           (maritime.org GA import)
 │   ├── pce_874/                    (maritime.org GA import)
+│   ├── independence_cvl26/         (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -547,7 +548,7 @@ grumb_seeding:
 
 ## Platforms
 
-Fifteen ship platforms are included, each with spatial layout and HVAC
+Twenty-one ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -572,6 +573,7 @@ airflow definitions:
 | `cannon_de701` | USS Cannon-class DE-701 destroyer escort (maritime.org GA import, 32 zones, 216 crew) |
 | `passumpsic_ao106` | USS Passumpsic AO-106 fleet oiler (maritime.org GA import, 27 zones, 280 crew) |
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
+| `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
