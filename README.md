@@ -210,6 +210,8 @@ data/
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
+│   ├── gosper_apa170/              (maritime.org GA import)
+│   ├── fort_mandan_lsd21/          (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -622,6 +624,8 @@ airflow definitions:
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
+| `gosper_apa170` | USS Gosper APA-170 Haskell-class attack transport (maritime.org GA import, 71 zones, 534 crew + 1561 troops) |
+| `fort_mandan_lsd21` | USS Fort Mandan LSD-21 Casa Grande-class dock landing ship (maritime.org GA import, 51 zones, 301 crew + 214 troops) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
@@ -842,8 +846,6 @@ from `orchestrator_types.py`:
 | `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
 | `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
 | `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
-| `gosper_apa170` | USS Gosper APA-170 Haskell-class attack transport (maritime.org GA import, 71 zones, 534 crew + 1561 troops) |
-| `fort_mandan_lsd21` | USS Fort Mandan LSD-21 Casa Grande-class dock landing ship (maritime.org GA import, 51 zones, 301 crew + 214 troops) |
 
 ## License
 

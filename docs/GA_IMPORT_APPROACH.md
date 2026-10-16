@@ -1,4 +1,4 @@
-Status: in use (2026-10-16). Nine maritime.org general arrangements imported end-to-end (latest: CVL-26 Independence-class light carrier — first carrier-scale import). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
+Status: in use (2026-10-16). Thirty-eight maritime.org general arrangements imported end-to-end (latest: amphibious bundle — APA-170 Haskell attack transport + LSD-21 Casa Grande dock landing ship, first embarked-troop `nominal_complement` platforms since APD-89). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
 
 # GA → .prj: approach and plan
 
@@ -92,8 +92,85 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `jupiter_ac3` | AC-3 Jupiter collier later CV-1 Langley (4-sheet 1913 booklet; cargo holds dominate, first USN turbo-electric, split 2nd-platform flats) | 50 | 295 crew, 6 classes | `.prj` 538 paths, 8 HVAC groups |
 | `gosper_apa170` | APA-170 Gosper Haskell-class attack transport (13-plate VC2-S-AP5 booklet; troop berthing decks with standee-bunk densities, landing-craft boat deck, sick bay + isolation ward) | 71 | 534 crew + 1561 troops, 7 classes | `.prj` 1351 paths, 9 HVAC groups |
 | `fort_mandan_lsd21` | LSD-21 Fort Mandan Casa Grande-class dock landing ship (12-plate 1951 booklet; well deck zoned once at floor level with explicit 13,000 m³ volume, floodable wing ballast tanks, stern gate) | 51 | 301 crew + 214 troops, 7 classes | `.prj` 502 paths, 9 HVAC groups |
-| `rn_ww2` row, `noaa_research` row, era cutoff years, `MODE_OA_FRACTION` values | none — declared engineering priors | C | — |
+
+All thirty-eight carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
+
+## Era-rule provenance
+
+The `ERA_RULES` mode/oa tables in `tools/ship_blueprint_import/systems.py` are *practice* priors, not physical constants — graded and cited at the point of definition (repo convention):
+
+| Claim | Source actually read | Grade | Origin |
+|---|---|---|---|
+| WW2 USN practice: cowled/mushroom natural supply + mechanical exhaust to galley/heads/machinery; magazine ventilators of the mushroom or cowl type | NAVARMEDGUARD "General Instructions" §3109 (~1942), via HyperWar transcription | B | Tr |
+| Same practice, period authority (identified, **not read** — do not cite as read) | BuShips Technical Publication No. 6, *Pointers on Shipboard Ventilation* (1944) | — | ?nr |
+| Modern/cold-war USN taxonomy: mechanical supply & exhaust, recirculating AC with outside-air makeup | NAVSEA S9086-RQ-STM-010 (NSTM ch. 510), ToC/§510-2 | B | Tr |
+| Corroborating secondary of the above | "Ventilation Systems, US Navy Ships" (bluewaternavy.org, NSTM-derived) | C | Sec |
 | `rn_ww2` row, `noaa_research` row, era cutoff years, `MODE_OA_FRACTION` values | none — declared engineering priors | C | — |
 
-All thirty carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
+Standing liabilities (the Grade C rows): an Admiralty/BUSHIPS DDS reference for the RN and NOAA rows, and any sourced basis for the OA-fraction numbers. Until those surface, era-rule modes may shape a starter `.prj` but should not inform a fitted parameter.
 
+## Carrier-scale conventions
+
+Fleet/auxiliary carriers fit the same digest model with these conventions (first applied to CVL-26 / CV-41 booklets):
+
+- **Flight deck** is a `Free` zone (often the whole weather surface, one or two polygons). Era mode gives `nat_supply` (oa_fraction 1.0), which is already the honest open-air approximation; do not invent conditioning plant for it.
+- **Hangar deck** is `Free` — one large zone (Essex hangar ≈ 200×20×5.4 m ≈ 21,000 m³ is within the volume bound) or 2–3 fore/mid/aft segments where fire curtains are drawn. Ventilation: `usn_ww2`/`usn_coldwar` era gives `nat_supply`; refine with sheet-read markers — hangar-side roller doors are `kind: "hangar_door"` → `nat_supply`, and where the sheet labels forced hangar exhaust fans declare an explicit `VENT_Hangar` hvac_hint (`mech_exhaust`) instead. Fuel-vapor purge fans are the era-plausible fallback.
+- **Island** is a thin deck level *above* the flight deck (elevation ≈ flight_deck + 3 m) carrying Nav_Bridge, flag plot, primary fly, funnel uptake zones.
+- **Aircraft/bomb elevators** are adjacency `type: "elevator"` links (free string) between flight deck ↔ hangar ↔ hold/magazines.
+- **Air wing** embarked squadrons are `role_group: "crew"` manifest classes (`air_wing_*`) — they are embarked personnel, not passengers.
+- **Distributed magazines** (bomb/ammo rooms fore and aft below the waterline) each get a sheet-read marker entry; `Mag_Vent` era-plausible fallback per NAVARMEDGUARD §3109.
+- **Below-main decks** on CV booklets run 2nd/3rd/4th deck + gallery deck conventions (USN deck numbering differs from merchant — flight deck is "main" in practice; keep repo `*_deck` ids ordered by elevation and record the booklet's own names in `DeckInfo.role`).
+- **Complement** runs 1,500 (CVL) – 4,100+ (CV-41). `crew_estimate` and manifest counts are unbounded; declare `nominal_complement` only when passengers > 0, else manifest-only like other naval hulls.
+
+## Roadmap
+
+1. **Now (this PR):** schema + model + synthesize changes above; two imported platforms; this doc.
+2. **Next ship batch:** AM-55 Raven, APD-89 Ruchamkin, ARS-38 Bolster are already rasterized in `work/blueprints/` — same recipe, ~30–60 min of sheet reading each. *(Done — PR #1023.)*
+3. **Vision-LLM digest parity:** the `--provider gemini|openai_compat|anthropic` digest path should emit `plan_bbox_norm` + `complement` + `systems`; update `DIGEST_SYSTEM_PROMPT` and the providers' JSON schema so a real LLM can produce the same fields the agent authored by hand.
+4. ~~**Era-table provenance**~~ **(done — §Era-rule provenance above; RN/NOAA/OA-fraction rows remain Grade C declarations).**
+5. **Auto-bbox detection:** detect the plan-view frame lines on each sheet to propose `plan_bbox_norm` automatically; agent/LLM only confirms.
+6. **Manifest → run config:** a `scripts/` helper that expands `crew_manifest.json` classes into `config.yaml agent_classes` entries (fractions from counts, `home_zone_preference` from `berth_zone`, `duty_zone` direct) so manifests become runnable without hand YAML.
+7. **Multi-frame fidelity:** when a sheet's plan view shows partial hull coverage, hull spans already handle it — but bow/stern overhang beyond frame 0/105 needs the same care on each new ship.
+8. **Marker direction from geometry:** cowl facing is currently authored per marker; the SVG symbol's orientation could be read automatically (cowl mouth direction) when overlays carry marker glyphs.
+9. **Carrier import:** CVL-26 Independence-class light carrier and CV-41 Midway booklets are on the maritime.org index (`cv12.pdf` is a single mega-plate — deprioritize); apply §Carrier-scale conventions. Submarines remain out of scope (pressure-hull geometry semantics).
+||||||| 87b2f4fb
+All twenty-seven carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
+
+## Era-rule provenance
+
+The `ERA_RULES` mode/oa tables in `tools/ship_blueprint_import/systems.py` are *practice* priors, not physical constants — graded and cited at the point of definition (repo convention):
+
+| Claim | Source actually read | Grade | Origin |
+|---|---|---|---|
+| WW2 USN practice: cowled/mushroom natural supply + mechanical exhaust to galley/heads/machinery; magazine ventilators of the mushroom or cowl type | NAVARMEDGUARD "General Instructions" §3109 (~1942), via HyperWar transcription | B | Tr |
+| Same practice, period authority (identified, **not read** — do not cite as read) | BuShips Technical Publication No. 6, *Pointers on Shipboard Ventilation* (1944) | — | ?nr |
+| Modern/cold-war USN taxonomy: mechanical supply & exhaust, recirculating AC with outside-air makeup | NAVSEA S9086-RQ-STM-010 (NSTM ch. 510), ToC/§510-2 | B | Tr |
+| Corroborating secondary of the above | "Ventilation Systems, US Navy Ships" (bluewaternavy.org, NSTM-derived) | C | Sec |
+| `rn_ww2` row, `noaa_research` row, era cutoff years, `MODE_OA_FRACTION` values | none — declared engineering priors | C | — |
+
+Standing liabilities (the Grade C rows): an Admiralty/BUSHIPS DDS reference for the RN and NOAA rows, and any sourced basis for the OA-fraction numbers. Until those surface, era-rule modes may shape a starter `.prj` but should not inform a fitted parameter.
+
+## Carrier-scale conventions
+
+Fleet/auxiliary carriers fit the same digest model with these conventions (first applied to CVL-26 / CV-41 booklets):
+
+- **Flight deck** is a `Free` zone (often the whole weather surface, one or two polygons). Era mode gives `nat_supply` (oa_fraction 1.0), which is already the honest open-air approximation; do not invent conditioning plant for it.
+- **Hangar deck** is `Free` — one large zone (Essex hangar ≈ 200×20×5.4 m ≈ 21,000 m³ is within the volume bound) or 2–3 fore/mid/aft segments where fire curtains are drawn. Ventilation: `usn_ww2`/`usn_coldwar` era gives `nat_supply`; refine with sheet-read markers — hangar-side roller doors are `kind: "hangar_door"` → `nat_supply`, and where the sheet labels forced hangar exhaust fans declare an explicit `VENT_Hangar` hvac_hint (`mech_exhaust`) instead. Fuel-vapor purge fans are the era-plausible fallback.
+- **Island** is a thin deck level *above* the flight deck (elevation ≈ flight_deck + 3 m) carrying Nav_Bridge, flag plot, primary fly, funnel uptake zones.
+- **Aircraft/bomb elevators** are adjacency `type: "elevator"` links (free string) between flight deck ↔ hangar ↔ hold/magazines.
+- **Air wing** embarked squadrons are `role_group: "crew"` manifest classes (`air_wing_*`) — they are embarked personnel, not passengers.
+- **Distributed magazines** (bomb/ammo rooms fore and aft below the waterline) each get a sheet-read marker entry; `Mag_Vent` era-plausible fallback per NAVARMEDGUARD §3109.
+- **Below-main decks** on CV booklets run 2nd/3rd/4th deck + gallery deck conventions (USN deck numbering differs from merchant — flight deck is "main" in practice; keep repo `*_deck` ids ordered by elevation and record the booklet's own names in `DeckInfo.role`).
+- **Complement** runs 1,500 (CVL) – 4,100+ (CV-41). `crew_estimate` and manifest counts are unbounded; declare `nominal_complement` only when passengers > 0, else manifest-only like other naval hulls.
+
+## Roadmap
+
+1. **Now (this PR):** schema + model + synthesize changes above; two imported platforms; this doc.
+2. **Next ship batch:** AM-55 Raven, APD-89 Ruchamkin, ARS-38 Bolster are already rasterized in `work/blueprints/` — same recipe, ~30–60 min of sheet reading each. *(Done — PR #1023.)*
+3. **Vision-LLM digest parity:** the `--provider gemini|openai_compat|anthropic` digest path should emit `plan_bbox_norm` + `complement` + `systems`; update `DIGEST_SYSTEM_PROMPT` and the providers' JSON schema so a real LLM can produce the same fields the agent authored by hand.
+4. ~~**Era-table provenance**~~ **(done — §Era-rule provenance above; RN/NOAA/OA-fraction rows remain Grade C declarations).**
+5. **Auto-bbox detection:** detect the plan-view frame lines on each sheet to propose `plan_bbox_norm` automatically; agent/LLM only confirms.
+6. **Manifest → run config:** a `scripts/` helper that expands `crew_manifest.json` classes into `config.yaml agent_classes` entries (fractions from counts, `home_zone_preference` from `berth_zone`, `duty_zone` direct) so manifests become runnable without hand YAML.
+7. **Multi-frame fidelity:** when a sheet's plan view shows partial hull coverage, hull spans already handle it — but bow/stern overhang beyond frame 0/105 needs the same care on each new ship.
+8. **Marker direction from geometry:** cowl facing is currently authored per marker; the SVG symbol's orientation could be read automatically (cowl mouth direction) when overlays carry marker glyphs.
+9. **Carrier import:** CVL-26 Independence-class light carrier and CV-41 Midway booklets are on the maritime.org index (`cv12.pdf` is a single mega-plate — deprioritize); apply §Carrier-scale conventions. Submarines remain out of scope (pressure-hull geometry semantics).
