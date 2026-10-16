@@ -82,6 +82,9 @@ PLATFORMS = [
     "wisconsin_bb64",
     "new_jersey_bb62",
     "antietam_cvs36",
+    "jupiter_ac3",
+    "montana_acr13",
+    "olympia_c6",
 ]
 
 ENTERPRISE_IDS = frozenset({
