@@ -82,6 +82,19 @@ objects-bind-stations consistency; mega cells RSS within 8192 MB.
   mint-mechanism change. Gate read: PASS-with-note (parity axis)
   pending user call.
 
-### canary readout — mega cells (12 × canary_meg_q30)
+### canary readout — mega cells (12/12 SUCCEEDED, measured 2026-10-16)
 
-pending — children RUNNING at measure time.
+- Witness: `n_stations: 70` on every cell; `n_contaminated` 10×0 +
+  2×1 (seeds 8115, 8116 — the latter produced 4 provisioned_lot
+  events, `supply_chain: 7` passenger cases in
+  `reported_cases_by_channel`). E = 70·0.003 = 0.21 ⇒ ~2.5
+  contaminated voyages expected in 12; 2 measured —
+  Binomial-consistent.
+- RSS: peak 6431–6588 MB (limit 8192).
+- objects-bind-stations: exact on the 2 minted cells.
+
+### canary verdict
+
+All canary gates pass; the single note is the 45/48 minted-set
+parity (attributed to the 81-commit SHA gap — upstream stream
+perturbation, not the mechanism). Wave 1 decision is the user's.
