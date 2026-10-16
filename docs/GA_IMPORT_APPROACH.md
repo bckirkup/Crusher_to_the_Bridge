@@ -1,4 +1,4 @@
-Status: proposal + first proof (2026-10-15). Two maritime.org general arrangements imported end-to-end (R-338 NOAA Gordon Gunter, Castle-class corvette). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
+Status: in use (2026-10-16). Nine maritime.org general arrangements imported end-to-end (latest: CVL-26 Independence-class light carrier — first carrier-scale import). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
 
 # GA → .prj: approach and plan
 
@@ -62,8 +62,9 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `cannon_de701` | DE-701 Cannon-class destroyer escort (same 10-plate BuShips booklet family, unconverted) | 32 | 216 crew, 7 classes | `.prj` 255 paths, 3 HVAC groups |
 | `passumpsic_ao106` | AO-106 Passumpsic fleet oiler (11-plate; cargo-tank block aggregated) | 27 | 280 crew incl. cargo deck force, 8 classes | `.prj` 202 paths, 4 HVAC groups |
 | `pce_874` | PCE-874 patrol escort (6-plate; below-main at lower confidence) | 20 | 99 crew, 6 classes | `.prj` 172 paths, 2 HVAC groups |
+| `independence_cvl26` | CVL-26 Monterey Independence-class light carrier (17-plate booklet; first carrier-scale import — island levels, hangar/fire-curtain segments, double-height machinery, air wing as `air_wing_*` crew classes) | 46 | 1566 crew incl. air wing, 11 classes | `.prj` 472 paths, 10 HVAC groups |
 
-All eight carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
+All nine carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
 
 ## Era-rule provenance
 
