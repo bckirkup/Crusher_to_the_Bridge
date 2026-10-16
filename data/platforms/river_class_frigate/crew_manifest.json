@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:18:05.221267+00:00",
+  "platform": "river_class_frigate",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 140
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Cabin_Block",
+      "duty_zone": "Bridge_House",
+      "notes": "CO + officers; wardroom flat"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 28,
+      "berth_zone": "CPO_ERA_Mess",
+      "duty_zone": "Signal_Deck",
+      "notes": "CPO/PO/ERA incl. asdic + W/T rates"
+    },
+    {
+      "class_id": "stokers",
+      "role_group": "crew",
+      "count": 30,
+      "berth_zone": "Stokers_Mess",
+      "duty_zone": "Engine_Room",
+      "notes": "engine-room branch"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 66,
+      "berth_zone": "Seamen_Mess",
+      "duty_zone": "Foc_Deck_Open",
+      "notes": "deck division incl. DC/hedgehog crews"
+    },
+    {
+      "class_id": "cooks_stewards",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Stewards_Mess",
+      "duty_zone": "Wardroom_Flat",
+      "notes": "cooks/stewards + canteen staff"
+    }
+  ],
+  "source": "River-class frigate typical complement ~140 (class-typical; sheet carries no accommodation table)",
+  "consistency": {
+    "declared_total": 140,
+    "manifest_total": 140,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

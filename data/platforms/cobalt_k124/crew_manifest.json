@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:13:56.307066+00:00",
+  "platform": "cobalt_k124",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 90
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 6,
+      "berth_zone": "Officer_Cabins",
+      "duty_zone": "Compass_Bridge",
+      "notes": "CO + sub-lieutenants + engineer officer"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 14,
+      "berth_zone": "CPO_PO_Mess",
+      "duty_zone": "Bridge_House",
+      "notes": "CPO/PO incl. asdic, W/T, gunnery rates"
+    },
+    {
+      "class_id": "stokers",
+      "role_group": "crew",
+      "count": 16,
+      "berth_zone": "Stokers_Mess",
+      "duty_zone": "Engine_Room",
+      "notes": "engine-room branch"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 48,
+      "berth_zone": "Seamen_Mess",
+      "duty_zone": "Foc_Deck_Open",
+      "notes": "deck division, ASW ops + minesweeping party"
+    },
+    {
+      "class_id": "cooks_stewards",
+      "role_group": "crew",
+      "count": 6,
+      "berth_zone": "Seamen_Mess",
+      "duty_zone": "Galley",
+      "notes": "pay/cook/steward branch"
+    }
+  ],
+  "source": "Flower-class corvette typical complement ~90 (class-typical; sheet carries no accommodation table)",
+  "consistency": {
+    "declared_total": 90,
+    "manifest_total": 90,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

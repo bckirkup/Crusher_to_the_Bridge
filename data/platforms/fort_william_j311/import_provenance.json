@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:19:30.718858+00:00",
+  "platform_id": "fort_william_j311",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/fort_william_j311",
+  "digest_sha256": "f6bbb55fae3f415b05c3b4af1b32ff10cb6e6a85d93ef534b0d00eea47d37963",
+  "svg_sha256": {
+    "page_01_approved.svg": "9b3c28aaa4b82da0fde386329108fe612184a680ccc414d7aba2f0ab43012529",
+    "page_02_approved.svg": "e07d24a90f8e658530fd2e4a87a62074275b8cdf7c2d0557ad06e692cf226cf8",
+    "page_03_approved.svg": "3631c5238d3d3db9f7c63033aeaa128b2be39e0621439866875892d5a21dc949"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 25,
+  "berthing_zones": [
+    "Quarterdeck",
+    "Foc_Superstructure",
+    "Wardroom_Flat",
+    "Seamen_Mess",
+    "Stores_Aft",
+    "Stokers_Mess",
+    "Cabins_Fwd",
+    "Mess_Fwd",
+    "Provision_Fwd"
+  ],
+  "systems_era": "rn_ww2"
+}

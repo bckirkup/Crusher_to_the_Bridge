@@ -1,0 +1,532 @@
+{
+  "platform": "fort_mandan_lsd21",
+  "description": "HVAC network synthesized for fort_mandan_lsd21",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "VENT_Accommodation",
+      "rooms": [
+        "Nav_Bridge",
+        "Comm_Room",
+        "Radar_House",
+        "Officers_Qtrs_Bridge",
+        "Ships_Office",
+        "Passage_Bridge",
+        "Officers_Qtrs_MD",
+        "Army_Officers_MD",
+        "Officers_Berthing_2D",
+        "Sick_Bay",
+        "Officers_WR_Pantry"
+      ],
+      "ach": 6.0,
+      "description": "officer country + medical + offices (usn_coldwar mech supply)",
+      "oa_fraction": 0.35,
+      "vent_mode": "mech_ac",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "VENT_Berthing_Messing",
+      "rooms": [
+        "Crew_Berthing_SSD",
+        "Army_Ranks_Qtrs_SSD",
+        "Crew_Mess_SSD",
+        "Galley_SSD",
+        "Laundry_2D",
+        "Armory_DC_Station",
+        "Passage_MD",
+        "Passage_2D"
+      ],
+      "ach": 6.0,
+      "description": "berthing + messing + services",
+      "oa_fraction": 0.4,
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "VENT_Well_Deck",
+      "rooms": [
+        "Well_Deck",
+        "Well_Cover_Open",
+        "Gallery_Port",
+        "Gallery_Stbd"
+      ],
+      "ach": 4.0,
+      "description": "well deck dock bay + open main deck cover — open-air natural ventilation",
+      "oa_fraction": 1.0,
+      "vent_mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "VENT_Machinery_Holds",
+      "rooms": [
+        "Top_House_Open",
+        "Forecastle_MD",
+        "Machine_Shop",
+        "Shipfitters_Flat",
+        "Steering_Gear_2D",
+        "Ice_Machinery_Rm",
+        "Steering_Flat_3D",
+        "Engine_Room_Flat",
+        "Pump_Room_3D",
+        "General_Stores_3D",
+        "Ammunition_3D",
+        "Boatswains_Stores",
+        "Chain_Locker",
+        "Steering_Gear",
+        "Shaft_Alley_Port",
+        "Shaft_Alley_Stbd",
+        "Engine_Room",
+        "Boiler_Aux_Room",
+        "Fuel_Tanks",
+        "Ballast_FW_Tanks",
+        "Fore_Peak_Hold",
+        "Ballast_Tanks_Port",
+        "Ballast_Tanks_Stbd"
+      ],
+      "ach": 10.0,
+      "description": "machinery, shaft tunnels, stores, ammunition and tanks",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_HD_Crew_SSD",
+      "rooms": [
+        "HD_Crew_SSD"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew_SSD, 19 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Officers_MD",
+      "rooms": [
+        "HD_Officers_MD"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Officers_MD, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Army_MD_Port",
+      "rooms": [
+        "HD_Army_MD_Port"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Army_MD_Port, 14 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Army_MD_Stbd",
+      "rooms": [
+        "HD_Army_MD_Stbd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Army_MD_Stbd, 14 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Army_2D",
+      "rooms": [
+        "HD_Army_2D"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Army_2D, 11 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "VENT_Accommodation",
+      "to": "VENT_Berthing_Messing",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Berthing_Messing",
+      "to": "VENT_Well_Deck",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Well_Deck",
+      "to": "VENT_Machinery_Holds",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Berthing_Messing",
+      "to": "AHU_HD_HD_Crew_SSD",
+      "flow_rate_m3h": 2259.1,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew_SSD; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "VENT_Accommodation",
+      "to": "AHU_HD_HD_Officers_MD",
+      "flow_rate_m3h": 951.2,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Officers_MD; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "VENT_Berthing_Messing",
+      "to": "AHU_HD_HD_Army_MD_Port",
+      "flow_rate_m3h": 1664.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Army_MD_Port; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "VENT_Berthing_Messing",
+      "to": "AHU_HD_HD_Army_MD_Stbd",
+      "flow_rate_m3h": 1664.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Army_MD_Stbd; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "VENT_Accommodation",
+      "to": "AHU_HD_HD_Army_2D",
+      "flow_rate_m3h": 1307.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Army_2D; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Nav_Bridge",
+      "to": "Comm_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Nav_Bridge",
+      "to": "Top_House_Open",
+      "type": "ladder"
+    },
+    {
+      "from": "Nav_Bridge",
+      "to": "Passage_Bridge",
+      "type": "ladder"
+    },
+    {
+      "from": "Passage_Bridge",
+      "to": "Officers_Qtrs_Bridge",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Bridge",
+      "to": "Ships_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Bridge",
+      "to": "Officers_WR_Pantry",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Berthing_SSD",
+      "to": "Crew_Mess_SSD",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Mess_SSD",
+      "to": "Galley_SSD",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Mess_SSD",
+      "to": "Passage_MD",
+      "type": "ladder"
+    },
+    {
+      "from": "Well_Cover_Open",
+      "to": "Well_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Well_Cover_Open",
+      "to": "Machine_Shop",
+      "type": "door"
+    },
+    {
+      "from": "Well_Cover_Open",
+      "to": "Shipfitters_Flat",
+      "type": "door"
+    },
+    {
+      "from": "Well_Cover_Open",
+      "to": "Officers_Qtrs_MD",
+      "type": "door"
+    },
+    {
+      "from": "Well_Cover_Open",
+      "to": "Army_Officers_MD",
+      "type": "door"
+    },
+    {
+      "from": "Passage_MD",
+      "to": "Passage_2D",
+      "type": "ladder"
+    },
+    {
+      "from": "Forecastle_MD",
+      "to": "Chain_Locker",
+      "type": "ladder"
+    },
+    {
+      "from": "Gallery_Port",
+      "to": "Well_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Gallery_Stbd",
+      "to": "Well_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Gallery_Port",
+      "to": "Gallery_Stbd",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Officers_Berthing_2D",
+      "to": "Officers_Qtrs_MD",
+      "type": "ladder"
+    },
+    {
+      "from": "Officers_Berthing_2D",
+      "to": "Boatswains_Stores",
+      "type": "ladder"
+    },
+    {
+      "from": "Passage_2D",
+      "to": "General_Stores_3D",
+      "type": "ladder"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Engine_Room_Flat",
+      "type": "door"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Pump_Room_3D",
+      "type": "door"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "General_Stores_3D",
+      "type": "door"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Ammunition_3D",
+      "type": "door"
+    },
+    {
+      "from": "Engine_Room_Flat",
+      "to": "Engine_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Aux_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Shaft_Alley_Port",
+      "type": "door"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Shaft_Alley_Stbd",
+      "type": "door"
+    },
+    {
+      "from": "Shaft_Alley_Port",
+      "to": "Steering_Gear",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley_Stbd",
+      "to": "Steering_Gear",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear_2D",
+      "to": "Steering_Gear",
+      "type": "ladder"
+    },
+    {
+      "from": "Boatswains_Stores",
+      "to": "Chain_Locker",
+      "type": "passageway"
+    },
+    {
+      "from": "General_Stores_3D",
+      "to": "Ballast_FW_Tanks",
+      "type": "ladder"
+    },
+    {
+      "from": "Galley_SSD",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Machine_Shop",
+      "to": "Officers_Qtrs_MD",
+      "type": "passageway"
+    },
+    {
+      "from": "Shipfitters_Flat",
+      "to": "Army_Officers_MD",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_MD",
+      "to": "Forecastle_MD",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear_2D",
+      "to": "Gallery_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear_2D",
+      "to": "Gallery_Stbd",
+      "type": "passageway"
+    },
+    {
+      "from": "Gallery_Port",
+      "to": "Officers_Berthing_2D",
+      "type": "passageway"
+    },
+    {
+      "from": "Gallery_Stbd",
+      "to": "Armory_DC_Station",
+      "type": "passageway"
+    },
+    {
+      "from": "Laundry_2D",
+      "to": "Ice_Machinery_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Berthing_2D",
+      "to": "Armory_DC_Station",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Berthing_2D",
+      "to": "Passage_2D",
+      "type": "passageway"
+    },
+    {
+      "from": "Armory_DC_Station",
+      "to": "Passage_2D",
+      "type": "passageway"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Ballast_Tanks_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Ballast_Tanks_Stbd",
+      "type": "passageway"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Steering_Flat_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Boatswains_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Ballast_Tanks_Port",
+      "to": "Engine_Room_Flat",
+      "type": "passageway"
+    },
+    {
+      "from": "Ballast_Tanks_Port",
+      "to": "Pump_Room_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Ballast_Tanks_Port",
+      "to": "Boatswains_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Ballast_Tanks_Stbd",
+      "to": "General_Stores_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Ballast_Tanks_Stbd",
+      "to": "Ammunition_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room_Flat",
+      "to": "Pump_Room_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Pump_Room_3D",
+      "to": "General_Stores_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "General_Stores_3D",
+      "to": "Ammunition_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "General_Stores_3D",
+      "to": "Boatswains_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Ammunition_3D",
+      "to": "Boatswains_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Aux_Room",
+      "to": "Fuel_Tanks",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Tanks",
+      "to": "Ballast_FW_Tanks",
+      "type": "passageway"
+    },
+    {
+      "from": "Ballast_FW_Tanks",
+      "to": "Fore_Peak_Hold",
+      "type": "passageway"
+    }
+  ]
+}

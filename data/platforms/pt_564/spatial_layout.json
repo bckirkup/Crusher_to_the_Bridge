@@ -1,0 +1,217 @@
+{
+  "platform": "pt_564",
+  "description": "PT-564 motor torpedo boat, Higgins Industries 1943 booklet (maritime.org ptboat.pdf). 70'8\" LOA, ~14 crew. Booklet mixes PT-564 sheets with PT-5/PT-6 76' MTB sheets — only pages 1-2 (PT-564 outboard/inboard + arrangement) are imported. MARGINAL: smallest feasible hull in the fleet.",
+  "isolation_unit_capacity": 0,
+  "deck_dimensions": {
+    "length_m": 21.54,
+    "beam_m": 6.1
+  },
+  "graywater_zones": [
+    "Engine_Room"
+  ],
+  "zones": [
+    {
+      "id": "Gun_Tub_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 11.53,
+      "floor_area_m2": 5.76,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 2.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 2.06,
+        "y": 2.89
+      },
+      "description": "low-trunnion 20mm gun + smoke screen generator on fantail"
+    },
+    {
+      "id": "Torpedo_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 58.49,
+      "floor_area_m2": 29.25,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 2.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 5.74,
+        "y": 2.76
+      },
+      "description": "open deck with 4x22.5in torpedo tubes P&S, engine room hatch, deck lights"
+    },
+    {
+      "id": "Cockpit",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 29.39,
+      "floor_area_m2": 14.7,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 2.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 11.85,
+        "y": 3.15
+      },
+      "description": "open cockpit / day room abaft the chart house"
+    },
+    {
+      "id": "Pilothouse",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 22.19,
+      "floor_area_m2": 11.09,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 2.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 15.62,
+        "y": 3.02
+      },
+      "description": "chart house/pilothouse: throttle, engine-room telegraphs, compass, .50cal guns + searchlight on top"
+    },
+    {
+      "id": "Foredeck",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 15.56,
+      "floor_area_m2": 7.78,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 2.4,
+      "deck": "main_deck",
+      "display": {
+        "x": 18.58,
+        "y": 3.08
+      },
+      "description": "foredeck: anchor, jack staff, bow light, mooring cleats"
+    },
+    {
+      "id": "Lazaret",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 16.02,
+      "floor_area_m2": 8.01,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 0.8,
+      "deck": "cabin_deck",
+      "display": {
+        "x": 0.79,
+        "y": 2.85
+      },
+      "description": "lazaret with steering gear + lazaret hatch"
+    },
+    {
+      "id": "Fuel_Comp_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 29.58,
+      "floor_area_m2": 14.79,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 0.8,
+      "deck": "cabin_deck",
+      "display": {
+        "x": 3.03,
+        "y": 2.85
+      },
+      "description": "aft fuel compartment: 2x100 gal fuel tanks P&S, CO2 extinguisher, aux generator"
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 42.47,
+      "floor_area_m2": 21.24,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 0.8,
+      "deck": "cabin_deck",
+      "display": {
+        "x": 7.03,
+        "y": 2.62
+      },
+      "description": "engine room: 3 Packard engines, oil sump tank, expansion tank, lift raft stowage"
+    },
+    {
+      "id": "Fuel_Comp_Mid",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 18.96,
+      "floor_area_m2": 9.48,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 0.8,
+      "deck": "cabin_deck",
+      "display": {
+        "x": 10.51,
+        "y": 2.77
+      },
+      "description": "mid fuel compartment: 400 gal tanks P&S, tank compt hatch"
+    },
+    {
+      "id": "Ward_Room",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 10.62,
+      "floor_area_m2": 5.31,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 0.8,
+      "deck": "cabin_deck",
+      "display": {
+        "x": 12.77,
+        "y": 2.85
+      },
+      "max_occupancy": 2,
+      "description": "ward room: officers berthing + mess table (single space on the sheet)"
+    },
+    {
+      "id": "Crews_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 22.94,
+      "floor_area_m2": 11.47,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 0.8,
+      "deck": "cabin_deck",
+      "display": {
+        "x": 14.98,
+        "y": 2.55
+      },
+      "max_occupancy": 10,
+      "description": "crew's quarters: upper berth forms settee, coffee percolator, sink"
+    },
+    {
+      "id": "HD_Crew",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.53,
+      "floor_area_m2": 2.84,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.8,
+      "deck": "cabin_deck",
+      "display": {
+        "x": 17.18,
+        "y": 2.92
+      },
+      "serves": [
+        "Crews_Quarters",
+        "Ward_Room"
+      ],
+      "description": "crew's lavatory: sink + W.C. — the only sanitary space aboard",
+      "base_ach": 19.1,
+      "max_occupancy": 1
+    },
+    {
+      "id": "Fore_Peak",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 18.2,
+      "floor_area_m2": 9.1,
+      "ceiling_height_m": 2.0,
+      "elevation_m": 0.8,
+      "deck": "cabin_deck",
+      "display": {
+        "x": 19.18,
+        "y": 2.85
+      },
+      "description": "fore peak: anchor gear and stores"
+    }
+  ]
+}
