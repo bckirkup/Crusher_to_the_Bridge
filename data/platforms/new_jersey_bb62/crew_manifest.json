@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:52:48.589538+00:00",
+  "platform": "new_jersey_bb62",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1781
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 109,
+      "berth_zone": "Officers_Qtrs_2D",
+      "duty_zone": "Offices_2D",
+      "notes": "~105 officers + 4 flag/staff beds (1984 berth table)"
+    },
+    {
+      "class_id": "chief_petty_officers",
+      "role_group": "crew",
+      "count": 79,
+      "berth_zone": "CPO_Quarters_2D",
+      "duty_zone": "Workshops_2D",
+      "notes": "79 CPO berths (1984 berth table)"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 23,
+      "berth_zone": "Marines_Quarters_2D",
+      "duty_zone": "Fantail_Open",
+      "notes": "23 marine detachment berths (1984 berth table)"
+    },
+    {
+      "class_id": "ship_enlisted",
+      "role_group": "crew",
+      "count": 1570,
+      "berth_zone": "Berthing_2D_Mid",
+      "duty_zone": "Fantail_Open",
+      "notes": "~1,542 ship's company + ~27 other billets (1984 berth table)"
+    }
+  ],
+  "source": "plate accommodation/berthing table (1984): ~105 officers + 4 flag/staff beds, 79 CPO, 23 marines, ~1,542 crew enlisted, ~27 other billets",
+  "consistency": {
+    "declared_total": 1781,
+    "manifest_total": 1781,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
