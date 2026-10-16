@@ -54,10 +54,6 @@ PLATFORMS = [
     "messy_cruise_500",
     "gordon_gunter_r338",
     "castle_class_corvette",
-    "cobalt_k124",
-    "river_class_frigate",
-    "fort_william_j311",
-    "winnipeg_j337",
     "raven_am55",
     "bolster_ars38",
     "ruchamkin_apd89",
@@ -87,9 +83,17 @@ PLATFORMS = [
     "missouri_bb63",
     "wisconsin_bb64",
     "new_jersey_bb62",
+    "liberty_cargo_ec2",
+    "savannah_ns",
+    "aeolus_arc3",
+    "alexander_henry_cgs119",
     "jupiter_ac3",
     "montana_acr13",
     "olympia_c6",
+    "cobalt_k124",
+    "river_class_frigate",
+    "fort_william_j311",
+    "winnipeg_j337",
 ]
 
 ENTERPRISE_IDS = frozenset({
@@ -413,3 +417,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

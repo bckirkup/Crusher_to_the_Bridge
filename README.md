@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Thirty-five ship platforms are included, each with spatial layout and HVAC
+Fifty-two ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -588,10 +588,6 @@ airflow definitions:
 | `san_antonio_class_lpd` | USN San Antonio-class LPD |
 | `gordon_gunter_r338` | NOAA Gordon Gunter T-AGOS research vessel (maritime.org R-338 import, 35 zones, 20 crew + 15 scientists) |
 | `castle_class_corvette` | HMS Castle-class WWII corvette (maritime.org GA import, 19 zones, 99 crew) |
-| `cobalt_k124` | HMCS Cobalt K124 Flower-class corvette (maritime.org GA import, 29 zones, 90 crew) |
-| `river_class_frigate` | RN River-class frigate (maritime.org GA import, 37 zones, 140 crew) |
-| `fort_william_j311` | HMCS Fort William J311 Bangor-class minesweeper (maritime.org GA import, 25 zones, 70 crew) |
-| `winnipeg_j337` | HMCS Winnipeg J337 Algerine-class minesweeper (maritime.org GA import, 31 zones, 122 crew) |
 | `raven_am55` | USS Raven-class AM-55 fleet minesweeper (maritime.org GA import, 21 zones, 105 crew) |
 | `bolster_ars38` | USS Bolster ARS-38 rescue/salvage tug (maritime.org GA import, 24 zones, 90 crew) |
 | `ruchamkin_apd89` | USS Ruchamkin APD-89 fast transport (maritime.org GA import, 32 zones, 213 crew + 162 troops) |
@@ -619,6 +615,10 @@ airflow definitions:
 | `missouri_bb63` | USS Missouri BB-63 Iowa-class battleship, 1950 booklet (maritime.org GA import, 103 zones, 1561 crew) |
 | `wisconsin_bb64` | USS Wisconsin BB-64 Iowa-class battleship, 1956 booklet (maritime.org GA import, 103 zones, ~2560 crew) |
 | `new_jersey_bb62` | USS New Jersey BB-62 Iowa-class battleship, 1984 reactivation booklet (maritime.org GA import, 103 zones, ~1781 crew) |
+| `liberty_cargo_ec2` | EC2-S-C1 Liberty cargo ship, WWII merchant marine (maritime.org GA import, 54 zones, 66 crew — first merchant hull) |
+| `savannah_ns` | NS Savannah nuclear merchant/passenger demonstration ship (maritime.org GA import, 73 zones, 60 passengers + 110 crew — first passenger hull) |
+| `aeolus_arc3` | USS Aeolus ARC-3 cable repair ship, ex-LST conversion (maritime.org GA import, 40 zones, ~200 crew) |
+| `alexander_henry_cgs119` | CGS Alexander Henry light icebreaker/buoy tender (maritime.org GA import, 28 zones, 31 crew + 20 passengers/officials) |
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
@@ -842,7 +842,12 @@ from `orchestrator_types.py`:
 | `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
 | `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
 | `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
+| `cobalt_k124` | HMCS Cobalt K124 Flower-class corvette (maritime.org GA import, 29 zones, 90 crew) |
+| `river_class_frigate` | RN River-class frigate (maritime.org GA import, 37 zones, 140 crew) |
+| `fort_william_j311` | HMCS Fort William J311 Bangor-class minesweeper (maritime.org GA import, 25 zones, 70 crew) |
+| `winnipeg_j337` | HMCS Winnipeg J337 Algerine-class minesweeper (maritime.org GA import, 31 zones, 122 crew) |
 
 ## License
 
 MIT
+
