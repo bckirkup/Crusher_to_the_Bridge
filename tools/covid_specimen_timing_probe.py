@@ -146,7 +146,7 @@ def decompose_cell(
     # pre-onset confirmation requires.
     sampled = pools["sampled"]
     windowed: dict[str, dict[str, int]] = {
-        k: {r: 0 for r in ROLES}
+        k: dict.fromkeys(ROLES, 0)
         for k in (
             "swabbed_in_window",
             "swabbed_only_outside_window",
@@ -179,8 +179,8 @@ def decompose_cell(
             return 0.0
         return float(sensitivity[min(dpi, len(sensitivity) - 1)])
 
-    cf_catches: dict[str, float] = {r: 0.0 for r in ROLES}
-    cf_hosts: dict[str, int] = {r: 0 for r in ROLES}
+    cf_catches: dict[str, float] = dict.fromkeys(ROLES, 0.0)
+    cf_hosts: dict[str, int] = dict.fromkeys(ROLES, 0)
     for aid, contact_day in first_contact_day.items():
         if aid in confirmed or aid not in infection:
             continue
@@ -197,7 +197,7 @@ def decompose_cell(
     def _classes() -> dict[str, dict[str, int]]:
         out: dict[str, dict[str, int]] = {}
         for case in cases:
-            out.setdefault(case["class"], {r: 0 for r in ROLES})
+            out.setdefault(case["class"], dict.fromkeys(ROLES, 0))
             out[case["class"]][case["role"]] += 1
         return out
 
@@ -247,13 +247,13 @@ def _pool_cells(cells: list[dict[str, Any]]) -> dict[str, Any]:
     for cell in cells:
         total += cell["lab_confirmed_total"]
         for key, roles in cell["catch_classes"].items():
-            classes.setdefault(key, {r: 0 for r in ROLES})
+            classes.setdefault(key, dict.fromkeys(ROLES, 0))
             for role, n in roles.items():
                 classes[key][role] += n
                 if key.endswith("_pre_onset"):
                     pre += n
         for key, roles in cell["window_coverage"].items():
-            windowed.setdefault(key, {r: 0 for r in ROLES})
+            windowed.setdefault(key, dict.fromkeys(ROLES, 0))
             for role, n in roles.items():
                 windowed[key][role] += n
     return {

@@ -117,14 +117,22 @@ def contamx_flows(platform):
             if p["m"] in idx:
                 pre[idx[p["m"]]] += q
         else:
-            C = (e["nums"][1] if len(e["nums"]) > 1 else (e["nums"][0] if e["nums"] else 0.0))
+            nums = e["nums"]
+            if len(nums) > 1:
+                C = nums[1]
+            elif nums:
+                C = nums[0]
+            else:
+                C = 0.0
             C *= SIM_SCHED_MULT.get(p["sched"], 1.0)
             orifices.append((p["n"], p["m"], C * p["mult"]))
 
-    def resid(P):
+    def resid(pressures):
         f = pre.copy()
         for fr, to, C in orifices:
-            dp = (P[idx[fr]] if fr in idx else 0.0) - (P[idx[to]] if to in idx else 0.0)
+            dp = (pressures[idx[fr]] if fr in idx else 0.0) - (
+                pressures[idx[to]] if to in idx else 0.0
+            )
             q = C * np.sign(dp) * np.sqrt(abs(dp))
             if fr in idx:
                 f[idx[fr]] -= q * RHO
@@ -142,7 +150,14 @@ def contamx_flows(platform):
         elif e["type"] == "fan_cvf":
             out[pnr] = (e["nums"][0] if e["nums"] else 0.0) / RHO * 3600.0
         else:
-            C = (e["nums"][1] if len(e["nums"]) > 1 else (e["nums"][0] if e["nums"] else 0.0)) * p["mult"]
+            nums = e["nums"]
+            if len(nums) > 1:
+                coeff = nums[1]
+            elif nums:
+                coeff = nums[0]
+            else:
+                coeff = 0.0
+            C = coeff * p["mult"]
             C *= SIM_SCHED_MULT.get(p["sched"], 1.0)
             dp = (P[idx[p["n"]]] if p["n"] in idx else 0.0) - (P[idx[p["m"]]] if p["m"] in idx else 0.0)
             out[pnr] = C * np.sign(dp) * np.sqrt(abs(dp)) * 3600.0
@@ -154,7 +169,7 @@ def build_engines(platform):
     spatial = json.loads((plat / "spatial_layout.json").read_text())
     airflow = json.loads((plat / "air_flow_paths.json").read_text())
     entries = json.loads((plat / "contam" / "path_map.json").read_text())
-    flows, P, idx, res, prj_zones = contamx_flows(platform)
+    flows, P, idx, res, _ = contamx_flows(platform)
     nat = ContamTransportEngine(spatial, airflow, filter_efficiency=0.50,
                                 natural_decay_rate=0.0)
     cx = ContamXTransportEngine(spatial, [], flows, filter_efficiency=0.50,
@@ -166,7 +181,7 @@ def dose_trace(eng, inject_zone, epochs=24):
     """Time-integrated per-zone concentration (dose proxy) + mass accounting."""
     mass = {z: (1.0 if z == inject_zone else 0.0) for z in eng._real_zone_ids}
     vols = {z: eng.zone_nodes[z].volume_m3 for z in eng._real_zone_ids}
-    cum = {z: 0.0 for z in eng._real_zone_ids}
+    cum = dict.fromkeys(eng._real_zone_ids, 0.0)
     removed = 0.0
     for _ in range(epochs):
         before = sum(mass.values())
@@ -179,7 +194,7 @@ def dose_trace(eng, inject_zone, epochs=24):
 
 
 def compare(platform, inject_zones):
-    nat, cx, P, idx, res = build_engines(platform)
+    nat, cx, P, _, res = build_engines(platform)
     print(f"=== {platform} ===")
     print(f"pressure solve: residual max {np.abs(res).max():.2e} kg/s, "
           f"dP range [{P.min():.3g}, {P.max():.3g}] Pa")

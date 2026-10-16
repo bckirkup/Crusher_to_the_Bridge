@@ -294,7 +294,12 @@ def _check_topology(b: PlatformBundle) -> dict[str, Any]:
             void.append(zone["id"])
     for zid in interior:
         z = by_id[zid]
-        paths = "adjacency" if zid in adj else ("links" if zid in linked else "none")
+        if zid in adj:
+            paths = "adjacency"
+        elif zid in linked:
+            paths = "links"
+        else:
+            paths = "none"
         _add(b, "topology", "flag", zid,
              f"occupied {_zone_signature(z)} zone on no hvac group (passive path: {paths})")
     for zid in void:
@@ -673,21 +678,27 @@ def _render_platform(b: PlatformBundle, min_sev: str) -> str:
 def render_markdown(bundles: list[PlatformBundle], fleet_findings: list[Finding],
                     adjacency: dict[str, Any], min_severity: str = "note") -> str:
     out = ["# Hull model audit — fleet report", ""]
-    out.append("Scope: declared design baseline (normal steaming). Operational "
-               "deviations (lockdown, CPS, HVAC casualty) are intentionally "
-               "out of scope for the defect flags; the operability fields "
-               "record whether a hull can express them.")
-    out.append("")
-    out.append("## Fleet panel")
-    out.append("")
+    out.extend([
+        "Scope: declared design baseline (normal steaming). Operational "
+        "deviations (lockdown, CPS, HVAC casualty) are intentionally "
+        "out of scope for the defect flags; the operability fields "
+        "record whether a hull can express them.",
+        "",
+        "## Fleet panel",
+        "",
+    ])
     out.append(_fleet_panel(bundles))
-    out.append("")
-    out.append("## Fleet findings")
+    out.extend([
+        "",
+        "## Fleet findings",
+    ])
     for f in sorted(fleet_findings, key=lambda x: (SEVERITY_ORDER.get(x.severity, 9), x.check)):
         out.append(f"- **{f.severity}** [{f.check}] `{f.scope}` — {f.message}")
-    out.append("")
-    out.append("## Adjacency type → passive rate coverage")
-    out.append("")
+    out.extend([
+        "",
+        "## Adjacency type → passive rate coverage",
+        "",
+    ])
     out.append("| type | rate m3/h | platforms |")
     out.append("|---|---|---|")
     for r in adjacency["rows"]:

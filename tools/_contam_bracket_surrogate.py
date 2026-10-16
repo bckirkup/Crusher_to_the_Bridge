@@ -63,11 +63,10 @@ def shunt_field(
         if len(rooms) < 2:
             continue
         vols = {z: eng.zone_nodes[z].volume_m3 for z in rooms}
-        t = (
-            min(rooms, key=lambda z: vols[z])
-            if pick == "small"
-            else max(rooms, key=lambda z: vols[z])
-        )
+        if pick == "small":
+            t = min(rooms, key=lambda z, vols=vols: vols[z])
+        else:
+            t = max(rooms, key=lambda z, vols=vols: vols[z])
         for kind in ("ret", "sup"):
             tot = sum(
                 p.flow_rate_m3h
