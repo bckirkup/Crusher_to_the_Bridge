@@ -1,4 +1,4 @@
-Status: in use (2026-10-16). Nine maritime.org general arrangements imported end-to-end (latest: CVL-26 Independence-class light carrier — first carrier-scale import). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
+Status: in use (2026-10-16). Twelve maritime.org general arrangements imported end-to-end (latest: amphibious bundle — APA-170 Haskell attack transport + LSD-21 Casa Grande dock landing ship, first embarked-troop `nominal_complement` platforms since APD-89). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
 
 # GA → .prj: approach and plan
 
@@ -64,8 +64,10 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `pce_874` | PCE-874 patrol escort (6-plate; below-main at lower confidence) | 20 | 99 crew, 6 classes | `.prj` 172 paths, 2 HVAC groups |
 | `independence_cvl26` | CVL-26 Monterey Independence-class light carrier (17-plate booklet; first carrier-scale import — island levels, hangar/fire-curtain segments, double-height machinery, air wing as `air_wing_*` crew classes) | 46 | 1566 crew incl. air wing, 11 classes | `.prj` 472 paths, 10 HVAC groups |
 | `midway_cv41` | CV-41 Midway-class armored battle carrier (18-plate 1947 booklet; three hangar bays w/ fire curtains, armored-flight-deck vocabulary, single island funnel trunk, weapons/ordnance elevator chains, distributed modular magazines) | 65 | 4712 crew incl. air group + marines, 11 classes | `.prj` 802 paths, 10 HVAC groups |
+| `gosper_apa170` | APA-170 Gosper Haskell-class attack transport (13-plate VC2-S-AP5 booklet; troop berthing decks with standee-bunk densities, landing-craft boat deck, sick bay + isolation ward) | 71 | 534 crew + 1561 troops, 7 classes | `.prj` 1351 paths, 9 HVAC groups |
+| `fort_mandan_lsd21` | LSD-21 Fort Mandan Casa Grande-class dock landing ship (12-plate 1951 booklet; well deck zoned once at floor level with explicit 13,000 m³ volume, floodable wing ballast tanks, stern gate) | 51 | 301 crew + 214 troops, 7 classes | `.prj` 502 paths, 9 HVAC groups |
 
-All ten carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
+All twelve carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
 
 ## Era-rule provenance
 

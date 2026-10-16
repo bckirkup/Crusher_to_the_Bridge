@@ -64,6 +64,8 @@ PLATFORMS = [
     "enterprise_constitution_tos",
     "enterprise_galaxy_tng",
     "midway_cv41",
+    "gosper_apa170",
+    "fort_mandan_lsd21",
 ]
 
 ENTERPRISE_IDS = frozenset({

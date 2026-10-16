@@ -4,6 +4,7 @@ data/platforms/*/reference_photo.jpg
 # Naval blueprint import working directories (rasters / drafts / source scans)
 work/blueprints/
 work/pdfs/
+work/downloads/
 
 # Runtime artifacts
 telemetry_buffer/ground_truth.json
