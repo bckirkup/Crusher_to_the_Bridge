@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T01:47:16.768599+00:00",
+  "platform_id": "midway_cv41",
+  "target": "B_contam_starter",
+  "hobbyist": true,
+  "openings_count": 81,
+  "skip_duct_spines": true,
+  "offline_gate": {
+    "ok": true,
+    "zone_count": 65,
+    "path_map_entries": 802,
+    "hvac_zones": 10,
+    "simplify_warnings": [
+      "Dropped Contam section on simplify: day-schedules",
+      "Dropped Contam section on simplify: week-schedules",
+      "Dropped Contam section on simplify: wind pressure profiles",
+      "Dropped Contam section on simplify: filter elements",
+      "Dropped Contam section on simplify: filters",
+      "Dropped Contam section on simplify: control nodes",
+      "Dropped Contam section on simplify: annotations"
+    ]
+  },
+  "contamx": null,
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/cv41_import"
+}
