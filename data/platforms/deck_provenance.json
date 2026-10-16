@@ -6184,6 +6184,452 @@
           "hold": "deck_hold.png"
         }
       }
+    },
+    "cushing_dd376": {
+      "platform_id": "cushing_dd376",
+      "ship_class_label": "Cushing Dd376",
+      "footprint_tier": "representative",
+      "representative_of": "USS Cushing DD-376, Mahan class, ~1942 wartime fit: 4x5in/38, quad torpedo tubes P&S, 4 boilers 2 ER. maritime.org booklet of general plans (sheets 2-9).",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 41",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Pilot_House",
+        "Signal_Bridge",
+        "Chart_House",
+        "AA_Shelter_Mag",
+        "Officers_Country",
+        "Blower_Room",
+        "Focsle_Open",
+        "Fantail",
+        "Gun_Crew_Shelter_Aft",
+        "MG_DC_Room",
+        "HD_Crew_Washroom",
+        "General_Workshop",
+        "Radio_Central",
+        "Galley",
+        "Wardroom_Mess",
+        "WR_Staterooms",
+        "HD_CPO",
+        "CPO_Quarters",
+        "Windlass_Room",
+        "Crew_Berthing_Aft",
+        "Crew_Berthing_Mid",
+        "Sick_Bay",
+        "Ships_Service",
+        "Crew_Mess_Fwd",
+        "Provisions_1P",
+        "CPO_Mess",
+        "Fwd_Stores_1P",
+        "Aft_Magazines",
+        "Commissary_Stores",
+        "Aft_Ammo_2",
+        "IC_Room",
+        "Cold_Stores",
+        "Provisions_2P",
+        "Second_Plat_Stores_Fwd",
+        "Fwd_Magazine",
+        "Steering_Gear",
+        "Shaft_Alley",
+        "Engine_Room",
+        "Aft_Boiler_Room",
+        "Fwd_Boiler_Room",
+        "Sound_Room"
+      ],
+      "decks": [
+        "bridge_deck",
+        "first_platform",
+        "forecastle_deck",
+        "hold",
+        "main_deck",
+        "second_platform",
+        "superstructure_deck"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 106.0,
+        "ymin": -2.0,
+        "ymax": 12.8
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "bridge_deck": "deck_bridge_deck.png",
+          "superstructure_deck": "deck_superstructure_deck.png",
+          "forecastle_deck": "deck_forecastle_deck.png",
+          "main_deck": "deck_main_deck.png",
+          "first_platform": "deck_first_platform.png",
+          "second_platform": "deck_second_platform.png",
+          "hold": "deck_hold.png"
+        }
+      }
+    },
+    "palmer_dms5": {
+      "platform_id": "palmer_dms5",
+      "ship_class_label": "Palmer Dms5",
+      "footprint_tier": "representative",
+      "representative_of": "USS Palmer DMS-5 (ex-DD-161), Wickes-class flush-deck destroyer converted to high-speed minesweeper, Norfolk Navy Yard booklet corrected 1943. Small source scans (~21x6in sheets): labels read at compa",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 39",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Sound_Room_Bridge",
+        "Chart_House",
+        "Pilot_House",
+        "Paravane_Handling",
+        "Ammo_Stowage_Aft",
+        "Crew_Wash_Room",
+        "Crew_Head",
+        "Store_Aft",
+        "Paravane_Smoke_Stow",
+        "Winch_Room",
+        "Boat_Deck_Uptakes",
+        "Battery_Locker",
+        "Vegetable_Lockers",
+        "Galley",
+        "Ship_Fitters_Shop",
+        "Berthing_Mid",
+        "Engineering_Office",
+        "CPO_Berthing_Main",
+        "Radio_Room",
+        "Sound_Compt",
+        "Officers_Cabins",
+        "Wardroom",
+        "Focsle_Chain",
+        "Crew_Berthing_Aft",
+        "Crew_Berthing_Aft_2",
+        "Store_1P_Aft",
+        "Machinery_2P",
+        "Store_2P",
+        "Crew_Berthing_Fwd_1",
+        "Crew_Berthing_Fwd_2",
+        "Crew_Mess",
+        "Fore_Peak",
+        "Magazine_Aft",
+        "Crew_Stores_Hold",
+        "Boiler_Room_1",
+        "Boiler_Room_2",
+        "Engine_Room",
+        "Stores_Hold_Fwd",
+        "Magazine_Fwd"
+      ],
+      "decks": [
+        "bridge_deck",
+        "first_platform_aft",
+        "first_platform_fwd",
+        "hold",
+        "main_deck",
+        "second_platform"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 97.8,
+        "ymin": -2.0,
+        "ymax": 11.4
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "bridge_deck": "deck_bridge_deck.png",
+          "main_deck": "deck_main_deck.png",
+          "first_platform_aft": "deck_first_platform_aft.png",
+          "second_platform": "deck_second_platform.png",
+          "first_platform_fwd": "deck_first_platform_fwd.png",
+          "hold": "deck_hold.png"
+        }
+      }
+    },
+    "bainbridge_dd1": {
+      "platform_id": "bainbridge_dd1",
+      "ship_class_label": "Bainbridge Dd1",
+      "footprint_tier": "representative",
+      "representative_of": "USS Bainbridge DD-1, 1901 torpedo-boat destroyer, booklet corrected Aug 1917: 4 coal-fired Thornycroft boilers, 2 triple-expansion engines, turtleback bow. 3-sheet booklet: profile + berth deck/platfo",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 27",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Galley_Mess_Deckhouse",
+        "Pilot_Chart_House",
+        "Officers_Mess_Dh",
+        "Officers_Country",
+        "Wardroom",
+        "Boiler_Room_Aft",
+        "Engine_Rooms",
+        "Boiler_Room_Fwd",
+        "Coal_Bunker_B3",
+        "Coal_Bunker_B5",
+        "Crew_WC",
+        "Crew_Quarters",
+        "Berthing_Fwd",
+        "Medical_Electrical_Stores",
+        "Shell_Room",
+        "Chain_Hawse",
+        "Engineer_Stores",
+        "Ordnance_Stores",
+        "Paint_Oil_Stores",
+        "Chain_Locker_Plat",
+        "Fore_Peak_A1",
+        "Steering_Gear",
+        "Coal_Bunker_Hold_Aft",
+        "Machinery_Lwr",
+        "Coal_Bunker_Hold_Fwd",
+        "Stores_Hold_Fwd",
+        "Hold_Fwd_Peak"
+      ],
+      "decks": [
+        "berth_deck",
+        "hold",
+        "platform",
+        "spar_deck"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 78.2,
+        "ymin": -2.0,
+        "ymax": 9.2
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "spar_deck": "deck_spar_deck.png",
+          "berth_deck": "deck_berth_deck.png",
+          "platform": "deck_platform.png",
+          "hold": "deck_hold.png"
+        }
+      }
+    },
+    "rolla_pc483": {
+      "platform_id": "rolla_pc483",
+      "ship_class_label": "Rolla Pc483",
+      "footprint_tier": "representative",
+      "representative_of": "USS Rolla PC-483, Bluffton-class 173ft steel sub chaser, 1942: twin diesel, 3in/50 fwd, 20mm + depth charges aft. maritime.org booklet plates 3-8.",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 30",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Pilot_House",
+        "Fantail",
+        "Eng_Casing",
+        "Engineers_Stores",
+        "Wardroom",
+        "Chart_House",
+        "Officers_WC",
+        "Stowage_Mid",
+        "Radio_Room",
+        "Crew_Head",
+        "Focsle_Deck",
+        "Steering_Gear",
+        "Galley",
+        "Galley_Stores",
+        "Crew_Mess",
+        "Mag_3in",
+        "Engine_Rm",
+        "Berthing_Mid",
+        "Crew_Quarters",
+        "Officers_Berthing",
+        "Berthing_Fwd",
+        "Fore_Peak",
+        "Berthing_2P",
+        "Stores_2P",
+        "Ammo_Stow_2P",
+        "Peak_2P",
+        "Fuel_Oil_Fwd",
+        "Fuel_Oil_Aft",
+        "Cont_Oil",
+        "Void_Shaft"
+      ],
+      "decks": [
+        "bridge_deck",
+        "first_platform",
+        "hold",
+        "main_deck",
+        "second_platform"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 54.7,
+        "ymin": -2.0,
+        "ymax": 9.1
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "bridge_deck": "deck_bridge_deck.png",
+          "main_deck": "deck_main_deck.png",
+          "first_platform": "deck_first_platform.png",
+          "second_platform": "deck_second_platform.png",
+          "hold": "deck_hold.png"
+        }
+      }
+    },
+    "eagle_pe60": {
+      "platform_id": "eagle_pe60",
+      "ship_class_label": "Eagle Pe60",
+      "footprint_tier": "representative",
+      "representative_of": "USS Eagle No.60 (PE-60), Ford-built Eagle-class 200ft patrol boat, 1918: geared steam turbine, 2 express boilers, 2x4in RF guns + Y-gun/depth charges. maritime.org booklet, 10 pages incl. data sheet +",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 41",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Chart_House",
+        "Open_Bridge",
+        "Gun_Platform_Fwd",
+        "After_Gun_Platform",
+        "Nav_Bridge",
+        "AA_Gun_Platforms",
+        "Radio_Room",
+        "CPO_Quarters",
+        "Galley",
+        "Officers_Head",
+        "Mess_Room",
+        "Wardroom_Mess",
+        "WR_Staterooms",
+        "Officers_Staterooms",
+        "Fantail",
+        "Berthing_Main_1",
+        "Berthing_Main_2",
+        "Aux_Radio_Room",
+        "Engine_Rm",
+        "Boiler_Rm",
+        "Gun_Deck_Fwd",
+        "Chain_Locker",
+        "Steering_Gear",
+        "Shaft_Alley",
+        "FO_Aft_Port",
+        "FO_Aft_Stbd",
+        "Eng_Rm_Lwr",
+        "Boiler_Rm_Lwr",
+        "Magazine",
+        "FO_Fwd",
+        "Stores_Hold",
+        "Fore_Peak",
+        "Crew_WC",
+        "Stores_Aft",
+        "Berthing_Lwr",
+        "Crew_Mess_Lwr",
+        "Sub_Signal_Rm",
+        "Stores_2P_1",
+        "Stores_2P_2",
+        "FO_Tanks_Platform",
+        "Fore_Peak_Plat"
+      ],
+      "decks": [
+        "bridge_deck",
+        "deckhouse",
+        "gun_platform_aft",
+        "hold",
+        "main_deck",
+        "nav_bridge",
+        "platform"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 63.0,
+        "ymin": -2.0,
+        "ymax": 10.0
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "nav_bridge": "deck_nav_bridge.png",
+          "bridge_deck": "deck_bridge_deck.png",
+          "gun_platform_aft": "deck_gun_platform_aft.png",
+          "deckhouse": "deck_deckhouse.png",
+          "main_deck": "deck_main_deck.png",
+          "platform": "deck_platform.png",
+          "hold": "deck_hold.png"
+        }
+      }
     }
   }
 }
