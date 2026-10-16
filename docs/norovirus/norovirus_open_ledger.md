@@ -4622,25 +4622,25 @@ on every hull; every exp-calibrated absolute band compresses
 (D2 ≥0.04 met only on exp; `ind` excursion conversion 77.7→50.0→
 26.3%). Verdict: exp admissible, cls/spr admissible-with-caveat.
 
-**`NORO-MINT-RATE-01` (declared — design frozen at `9039e234`, no
-cells submitted):** the bracket on the mint-rate axis SHAPES-01
-identified as the operative margin — the provisioned_lot voyage gate
-`lot_object_probability` between the shipped U(0.001, 0.02)
-(in-band but vacuous: ~6 minted voyages/1,000) and the powered
-U(0.02, 0.15) (over-posting at `ind` level, full signature). Arm set
-(9): `off`/`ind` baselines; `ship`/`mint` bracket anchors and
-SHAPES-01 bridges; scalar rungs `p005`/`p008`/`p012`/`p017`/`p024`
-— the margin is linear in E[presence] (posture-free gate,
-`extra_lot` only a ×1.163 object multiplicity), so rungs are declared
-points, not intervals, and minted sets nest by gate value per seed.
-3 hulls × 1,000 seeds = 27,000 voyages on the SCORE-01 seed lists;
-mega excluded. Expected per-hull in-band windows (design §3.3): exp
-≈[0.004, 0.010], cls ≈[0.007, 0.015], spr ≈[0.011, 0.025] — no single
-gate lands in-band on all three hulls; `p012` is the closest. Frozen
-admissibility (D1–D4 read mint-vs-`ind` per hull), integrity gates
-(nested-mint-sets stream check), vacuity rule (<20 minted voyages
-→ thin-flagged), canary-then-STOP in
-`docs/norovirus/noro_mint_rate_01_sweep_design.md`; package
+**`NORO-MINT-RATE-01` (measured — 27,000/27,000 cells SUCCEEDED,
+readout `docs/norovirus/noro_mint_rate_01_readout.md`):** the
+bracket on the mint-rate axis SHAPES-01 identified as the operative
+margin — the provisioned_lot voyage gate `lot_object_probability`
+between the shipped U(0.001, 0.02) and the powered U(0.02, 0.15).
+Arm set (9): `off`/`ind` baselines; `ship`/`mint` anchors; scalar
+rungs `p005`/`p008`/`p012`/`p017`/`p024`. 3 hulls × 1,000 seeds on
+the SCORE-01 seed lists; mega excluded. Measured per-hull in-band
+windows: **exp [0.005, 0.0105], cls [0.005, ~0.020],
+spr [0.008, 0.024]** — the operative gate rises as the hull's
+P(post|minted) falls. Signature splits by hull: D2 postAR fails exp
+(0.030<0.038) but survives cls (0.052≥0.036) and spr (0.032≥0.031,
+thin); D3 excursion→posting conversion survives exp but fails cls
+(0.46×) and spr (0.52×); D4 burst48 survives everywhere. **No hull
+satisfies D2+D3+D4 jointly at in-band rate.** P(post|minted)
+re-anchored at 0.93/0.58/0.37 (exp/cls/spr) — the linear marginal
+minted × P1 holds on every hull; cls/spr minted sets are
+bit-identical per arm (F0 discrete-gate confirmed cross-hull).
+Design `docs/norovirus/noro_mint_rate_01_sweep_design.md`; package
 `campaigns/noro/mint_rate_01/`; entry
 `docs/ledger/NORO-MINT-RATE-01.md`.
 

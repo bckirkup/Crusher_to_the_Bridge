@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:47:29.377247+00:00",
+  "platform_id": "nields_dd616",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/dd616_import",
+  "digest_sha256": "3162c7c11bb57ccc38b9a103dc98867cdbcd345a87ef608da98715ebe244f79f",
+  "svg_sha256": {
+    "page_05_approved.svg": "bfb544c2b157361b847f33bb3d5f8826f3b13ce4a223b8bc09bf948462bf9b94",
+    "page_06_approved.svg": "588078a117b3527f08db8f23f69071fca78eb5dba82c6b9864e50c0dcb7f7498",
+    "page_07_approved.svg": "6ae3d999c4baa0c74d708ef7301786eaa8ac5027ab7dbd187103685d2cdf4e1a",
+    "page_08_approved.svg": "49fa8bc52346c7577ee5525a80b2cf2ca6f4aec58f87ea3625e885b656e94867",
+    "page_09_approved.svg": "a4bdaa6088ad5d7f70f3ec05dc20f88f8167cad0b4319a579521a7e6c2881156",
+    "page_10_approved.svg": "20fdbb83498dd0b011e842eb57bee7ab2a299ca27e1099e7047e8c812a6535e0"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 39,
+  "berthing_zones": [
+    "Nav_Bridge",
+    "Radar_Plot",
+    "Radio_Central",
+    "Officers_Country_Focsle",
+    "Aft_Ammo",
+    "Mid_Services",
+    "Workshops_Mid",
+    "WR_Block",
+    "CPO_Quarters",
+    "Aft_Shops",
+    "Crew_Berthing_1P",
+    "Crew_Qtrs_1P",
+    "Fwd_Stores_1P",
+    "Aft_Stores_2P",
+    "Provisions_2P",
+    "Fwd_Stores_Hold"
+  ],
+  "systems_era": "usn_ww2"
+}
