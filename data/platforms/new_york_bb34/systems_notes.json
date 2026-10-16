@@ -1,0 +1,487 @@
+{
+  "platform": "new_york_bb34",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "funnel_main",
+      "kind": "funnel",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "superstructure_deck",
+      "serves_zone": "Conning_Region_Super",
+      "display": [
+        4.91,
+        2.43
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "uptake_casing",
+      "kind": "uptake",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Uptake_Mid",
+      "display": [
+        74.24,
+        7.54
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "cowls_focsle",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Stores_Fwd_3DF",
+      "display": [
+        164.99,
+        -3.23
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "mushroom_aft",
+      "kind": "mushroom",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Crew_Space_2DA",
+      "display": [
+        4.12,
+        6.47
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "air_port_wr",
+      "kind": "air_port",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "second_deck_fwd",
+      "serves_zone": "WR_Staterooms_2DF",
+      "display": [
+        69.71,
+        5.66
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "vent_trunk_3d",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "third_deck_fwd",
+      "serves_zone": "Radio_Central_3DF",
+      "display": [
+        14.08,
+        18.72
+      ],
+      "evidence": "sheet_read",
+      "notes": ""
+    },
+    {
+      "id": "air_shaft_blower",
+      "kind": "air_shaft",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "second_platform_aft",
+      "serves_zone": "Engine_Rm_2PA",
+      "display": [
+        39.11,
+        11.35
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    }
+  ],
+  "zone_modes": {
+    "Fantail_Weather": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Weather_Deck_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Catapult_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shipfitter_Foundry": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Uptake_Mid": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Bakery": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Galley": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Admiral_Capt_Block": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Officers_Main": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Gunnery_Conning": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Focsle_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Super_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Captains_Cabin_Super": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_Super": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Conning_Region_Super": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Flag_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "AA_Control_Top": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Space_2DF_a": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Space_2DF_b": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Jr_Off_2DF": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wardroom_Country_2DF": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "WR_Staterooms_2DF": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "HD_2DF": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Stern_Crew_2DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_2DA": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Space_2DA": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Sick_Bay_2DA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Laundry_2DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Offices_2DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley_Mess_2DA": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Casemate_Crew_2DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Casemate_Crew_2DA_N": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Marines_2DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Exec_Offices_2DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "WO_Mess_Half": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "JO_Mess_Half": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "WO_Country_Half": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "JO_Country_Half": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Half": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Bow_Stor_Half": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Mess_Berth": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "CPO_Country_Berth": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_CPO_Berth": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_3DF_N": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_3DF_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Central_3DF": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Signal_Stores_3DF": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Photo_Ordn_3DF": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_Fwd_3DF": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Machine_Shop_3DA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Refrig_3DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ice_Machine_3DA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_3DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machine_Shop_C105": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_3DA_B": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Rm_3DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Hatch_3DA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Carpenter_3DA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Brig_3DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_3DA_C": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stores_FwdEdge_3DA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rms_1PF": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "IC_Rm_1PF": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Powder_1PF": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Windlass_1PF": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Rm_1PA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Powder_1PA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Magazines_1PA_R": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Steam_Passage_1PA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rm_2PF": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Plotting_2PF": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Magazines_2PF": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Stores_2PF": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Rm_2PA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Gyro_Dynamo_2PA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rm_2PA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Stores_2PA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hold_Stores_HF": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hold_Fwd_Tip": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hold_Stores_HA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Lower_HA": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Provisions_HA": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "fuel oil + void double bottoms",
+      "kind": "fuel",
+      "nearest_zone": "Engine_Lower_HA",
+      "display": [
+        37.5,
+        -3.71
+      ],
+      "deck": "hold_aft",
+      "notes": ""
+    },
+    {
+      "label": "reserve feed water",
+      "kind": "freshwater",
+      "nearest_zone": "Hold_Stores_HF",
+      "display": [
+        16.15,
+        10.46
+      ],
+      "deck": "hold_fwd",
+      "notes": ""
+    },
+    {
+      "label": "emergency feed water",
+      "kind": "unknown",
+      "nearest_zone": "Hold_Stores_HA",
+      "display": [
+        31.25,
+        11.14
+      ],
+      "deck": "hold_aft",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Officers_Main (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Officers_Main",
+    "HD_2DF (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_2DF",
+    "HD_Crew_2DA (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_2DA",
+    "Sick_Bay_2DA (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay_2DA",
+    "Galley_Mess_2DA (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_Mess_2DA",
+    "WO_Mess_Half (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: WO_Mess_Half",
+    "JO_Mess_Half (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: JO_Mess_Half",
+    "HD_Half (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Half",
+    "CPO_Mess_Berth (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: CPO_Mess_Berth",
+    "HD_CPO_Berth (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_CPO_Berth"
+  ]
+}
