@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Fifty-two ship platforms are included, each with spatial layout and HVAC
+Fifty-five ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -842,6 +842,9 @@ from `orchestrator_types.py`:
 | `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
 | `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
 | `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
+| `ranger_cv4` | USS Ranger CV-4 first purpose-built USN carrier (maritime.org GA import, 74 zones, 2641 crew incl. air group) |
+| `yorktown_cv5` | USS Yorktown CV-5 Yorktown-class fleet carrier (maritime.org GA import, 71 zones, 2279 crew incl. air group + flag staff) |
+| `wasp_cv7` | USS Wasp CV-7 treaty carrier (maritime.org GA import, 62 zones, 2128 crew incl. air group + marines) |
 | `cobalt_k124` | HMCS Cobalt K124 Flower-class corvette (maritime.org GA import, 29 zones, 90 crew) |
 | `river_class_frigate` | RN River-class frigate (maritime.org GA import, 37 zones, 140 crew) |
 | `fort_william_j311` | HMCS Fort William J311 Bangor-class minesweeper (maritime.org GA import, 25 zones, 70 crew) |
