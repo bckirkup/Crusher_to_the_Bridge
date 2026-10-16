@@ -1,0 +1,286 @@
+{
+  "platform": "river_class_frigate",
+  "description": "HVAC network synthesized for river_class_frigate",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Cabin_Block",
+        "Mess_Mid_P",
+        "Mess_Mid_S",
+        "Stewards_Mess",
+        "Sick_Bay",
+        "Wardroom_Flat",
+        "CPO_ERA_Mess",
+        "PO_Mess",
+        "Seamen_Mess",
+        "Stokers_Mess",
+        "Canteen_Flat",
+        "Provision_Issue",
+        "Cold_Stores",
+        "Stores_Aft",
+        "Signal_Deck",
+        "Bridge_House"
+      ],
+      "ach": 5.0,
+      "description": "minimal mechanical ventilation, mostly natural",
+      "vent_mode": "nat_supply",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Room",
+        "Boiler_Room",
+        "DC_Flat",
+        "Drying_Room",
+        "Lamp_Paint_Decon",
+        "Steering_Gear",
+        "Gyro_Diesel_Room",
+        "AS_Instrument",
+        "Bosun_Fwd",
+        "After_Peak_Ballast",
+        "Magazine_Aft",
+        "Fwd_Magazine",
+        "Asdic_Dome",
+        "Chain_Locker",
+        "Ammo_Lobby",
+        "Fore_Peak"
+      ],
+      "ach": 10.0,
+      "description": "machinery + magazine/store ventilation",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_HD_HD_Crew",
+      "rooms": [
+        "HD_Crew"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew, 16 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Fwd",
+      "rooms": [
+        "HD_Fwd"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Fwd, 5 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Officers",
+      "rooms": [
+        "HD_Officers"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Officers, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Crew",
+      "flow_rate_m3h": 1902.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Fwd",
+      "flow_rate_m3h": 594.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Fwd; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Officers",
+      "flow_rate_m3h": 356.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Officers; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Signal_Deck",
+      "to": "Bridge_House",
+      "type": "ladder"
+    },
+    {
+      "from": "Bridge_House",
+      "to": "Cabin_Block",
+      "type": "ladder"
+    },
+    {
+      "from": "Foc_Deck_Open",
+      "to": "Quarterdeck",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Quarterdeck",
+      "to": "DC_Flat",
+      "type": "door"
+    },
+    {
+      "from": "Cabin_Block",
+      "to": "Wardroom_Flat",
+      "type": "ladder"
+    },
+    {
+      "from": "Seamen_Mess",
+      "to": "Stokers_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Boiler_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Stores_Aft",
+      "to": "Steering_Gear",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_Aft",
+      "to": "Engine_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Ammo_Lobby",
+      "to": "Magazine_Aft",
+      "type": "ladder"
+    },
+    {
+      "from": "PO_Mess",
+      "to": "Fwd_Magazine",
+      "type": "ladder"
+    },
+    {
+      "from": "Cabin_Block",
+      "to": "Foc_Deck_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "DC_Flat",
+      "to": "Engine_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Mid_P",
+      "to": "Engine_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Mid_S",
+      "to": "Engine_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Room",
+      "to": "Drying_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Room",
+      "to": "Stewards_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Stewards_Mess",
+      "to": "Wardroom_Flat",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "CPO_ERA_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom_Flat",
+      "to": "PO_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_ERA_Mess",
+      "to": "PO_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "PO_Mess",
+      "to": "Seamen_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Seamen_Mess",
+      "to": "Lamp_Paint_Decon",
+      "type": "passageway"
+    },
+    {
+      "from": "Seamen_Mess",
+      "to": "Fore_Peak",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_Aft",
+      "to": "Ammo_Lobby",
+      "type": "passageway"
+    },
+    {
+      "from": "Provision_Issue",
+      "to": "Gyro_Diesel_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Gyro_Diesel_Room",
+      "to": "Canteen_Flat",
+      "type": "passageway"
+    },
+    {
+      "from": "Canteen_Flat",
+      "to": "Stokers_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "AS_Instrument",
+      "type": "passageway"
+    },
+    {
+      "from": "AS_Instrument",
+      "to": "Bosun_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "After_Peak_Ballast",
+      "to": "Magazine_Aft",
+      "type": "passageway"
+    }
+  ]
+}

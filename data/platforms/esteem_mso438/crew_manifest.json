@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:14:07.972192+00:00",
+  "platform": "esteem_mso438",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 74
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Pilot_House",
+      "notes": "captain (01-level cabin) + 4 wardroom officers"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "CPO_Quarters",
+      "duty_zone": "Crews_Mess",
+      "notes": "chief petty officers"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 14,
+      "berth_zone": "Crew_Berthing_2",
+      "duty_zone": "Fwd_Machinery_Room",
+      "notes": "engineers, electricians, sonar techs"
+    },
+    {
+      "class_id": "deck_force",
+      "role_group": "crew",
+      "count": 38,
+      "berth_zone": "Crew_Berthing",
+      "duty_zone": "Sweep_Deck",
+      "notes": "deck force + minesweep gear gang"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Crew_Berthing",
+      "duty_zone": "Galley",
+      "notes": "cooks, stewards, laundry"
+    },
+    {
+      "class_id": "corpsman",
+      "role_group": "crew",
+      "count": 1,
+      "berth_zone": "CPO_Quarters",
+      "duty_zone": "Pharmacy",
+      "notes": "hospital corpsman (pharmacy only medical space)"
+    }
+  ],
+  "source": "plate 2 accommodations table: captain 1 + officers 4 + CPO 8 + crew 61 (berthing total 74, lockers 72); all-crew naval hull — nominal_complement omitted, manifest carries it",
+  "consistency": {
+    "declared_total": 74,
+    "manifest_total": 74,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

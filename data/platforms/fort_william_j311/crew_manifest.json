@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:19:30.720717+00:00",
+  "platform": "fort_william_j311",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 70
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Wardroom_Flat",
+      "duty_zone": "Bridge_House",
+      "notes": "CO + officers"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 10,
+      "berth_zone": "Cabins_Fwd",
+      "duty_zone": "Signal_Deck",
+      "notes": "CPO/PO incl. sweep + signals rates"
+    },
+    {
+      "class_id": "stokers",
+      "role_group": "crew",
+      "count": 16,
+      "berth_zone": "Stokers_Mess",
+      "duty_zone": "Engine_Room",
+      "notes": "engine-room branch"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 34,
+      "berth_zone": "Seamen_Mess",
+      "duty_zone": "Quarterdeck",
+      "notes": "deck division incl. sweep/DC crews"
+    },
+    {
+      "class_id": "cooks_stewards",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Mess_Fwd",
+      "duty_zone": "Galley_Flat",
+      "notes": "cooks/stewards"
+    }
+  ],
+  "source": "Bangor-class minesweeper complement ~60-80 (class-typical ~70; no accommodation table on sheet)",
+  "consistency": {
+    "declared_total": 70,
+    "manifest_total": 70,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

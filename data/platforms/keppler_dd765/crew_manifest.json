@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:20:40.868367+00:00",
+  "platform": "keppler_dd765",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 308
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 23,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Pilot_House",
+      "notes": "div cdr + CO + XO + ~20 wardroom officers (WR_Staterooms_Fwd overflow on 1P)"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "CPO_Quarters_1P",
+      "duty_zone": "CPO_Mess",
+      "notes": "chief petty officers (berth fwd on 1P/2P)"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 55,
+      "berth_zone": "Crew_Berthing_Aft",
+      "duty_zone": "Fwd_Engine_Room",
+      "notes": "machinists, boilermen, electricians"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 120,
+      "berth_zone": "Crew_Berthing_Mid_2P",
+      "duty_zone": "Focsle_Fwd",
+      "notes": "seamen, 5\" gun crews, torpedomen, ASW deck force"
+    },
+    {
+      "class_id": "ops_electronics",
+      "role_group": "crew",
+      "count": 48,
+      "berth_zone": "Crew_Berthing_Mid_2P",
+      "duty_zone": "CIC",
+      "notes": "CIC/radar/radio/sonar/crypto ratings incl. DASH drone control"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 32,
+      "berth_zone": "Crew_Berthing_Aft",
+      "duty_zone": "Galley",
+      "notes": "cooks, stewards, storekeepers, ship's service"
+    },
+    {
+      "class_id": "medical_admin",
+      "role_group": "crew",
+      "count": 12,
+      "berth_zone": "Crew_Berthing_Aft",
+      "duty_zone": "Mid_Shops",
+      "notes": "corpsmen (pharmacy) + yeomen/office admin"
+    }
+  ],
+  "source": "Plate 2 accommodations: 308 berths = div cdr 1 + capt 1 + XO 1 + W.R. officers ~20 + CPO 18 + crew 267 (plate-read; '339' on plate is small-boat capacity)",
+  "consistency": {
+    "declared_total": 308,
+    "manifest_total": 308,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
