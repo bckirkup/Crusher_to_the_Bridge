@@ -1,0 +1,89 @@
+{
+  "platform_id": "gordon_gunter_r338",
+  "ship_class_label": "Gordon Gunter R338",
+  "footprint_tier": "representative",
+  "representative_of": "T-AGOS oceanographic research vessel, 224 ft LOA, SWATH-derived small-waterplane hull; 20 officers/crew + 15 scientists. Zones read from booklet R-338 sheets 6-10 (maritime.org Booklet of General Plan",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 35",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Pilot_House",
+    "HD_Bridge",
+    "Officer_SR",
+    "HD_Upper",
+    "Ships_Office",
+    "Boat_Deck",
+    "Science_Labs",
+    "Wet_Lab",
+    "Scientist_SR",
+    "Crew_SR_Foc",
+    "HD_Focsle",
+    "Shelter_Deck",
+    "Emer_Gen_Rm",
+    "Crew_SR_Main",
+    "Passage_Main",
+    "Genl_Mess",
+    "Galley",
+    "Crew_Lounge",
+    "Med_Trtmt",
+    "Recreation",
+    "Ships_Store",
+    "Prov_Reefers",
+    "Genl_Workshop",
+    "Bosn_Workshop",
+    "HD_Main",
+    "Aft_Working_Deck",
+    "Mission_Deck",
+    "Steering_Gear",
+    "Shaft_Alley",
+    "Prpln_Motor",
+    "Main_Gen_Rm",
+    "AC_Mchry",
+    "Laundry",
+    "Sewage_Mchry",
+    "Exercise_Rm"
+  ],
+  "decks": [
+    "bridge_deck",
+    "forecastle_deck",
+    "lower_platform",
+    "main_deck",
+    "mission_platform",
+    "upper_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 70.3,
+    "ymin": -2.0,
+    "ymax": 15.1
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "bridge_deck": "deck_bridge_deck.png",
+      "upper_deck": "deck_upper_deck.png",
+      "forecastle_deck": "deck_forecastle_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "mission_platform": "deck_mission_platform.png",
+      "lower_platform": "deck_lower_platform.png"
+    }
+  }
+}

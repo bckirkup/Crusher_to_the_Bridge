@@ -1,0 +1,76 @@
+{
+  "platform_id": "bolster_ars38",
+  "ship_class_label": "Bolster Ars38",
+  "footprint_tier": "representative",
+  "representative_of": "Bolster-class rescue & salvage ship, 213.5 ft, diesel-electric, ~90 crew incl. divers. Zones read from maritime.org ARS-38 single-sheet multi-view plan.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 24",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Nav_Bridge",
+    "Signal_Shelter",
+    "Focsle_Deck_Open",
+    "Gun_Tub_Fwd",
+    "Bridge_Lower",
+    "Radio_Rm",
+    "Focsle_Open_Aft",
+    "Officers_Qtrs",
+    "Wardroom",
+    "CPO_Quarters",
+    "Galley",
+    "Mess_Deck",
+    "Sick_Bay",
+    "HD_Main",
+    "Salvage_Deck",
+    "Crew_Quarters",
+    "Diving_Locker",
+    "Engine_Rm",
+    "Motor_Rm",
+    "Bosn_Stores",
+    "Steering_Gear",
+    "Shaft_Alley",
+    "Fuel_Tanks",
+    "Fwd_Peak"
+  ],
+  "decks": [
+    "forecastle_deck",
+    "hold",
+    "main_deck",
+    "platform_deck",
+    "superstructure_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 67.1,
+    "ymin": -2.0,
+    "ymax": 13.9
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "superstructure_deck": "deck_superstructure_deck.png",
+      "forecastle_deck": "deck_forecastle_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "platform_deck": "deck_platform_deck.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}

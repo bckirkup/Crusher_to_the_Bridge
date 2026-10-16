@@ -1,0 +1,79 @@
+{
+  "platform_id": "passumpsic_ao106",
+  "ship_class_label": "Passumpsic Ao106",
+  "footprint_tier": "representative",
+  "representative_of": "Passumpsic-class fleet oiler, 553 ft, geared turbines, ~280 crew. Zones read from maritime.org AO-106 booklet plates 4-9.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 27",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Nav_Bridge",
+    "Signal_Deck",
+    "Island_Deck",
+    "Radio_Rm",
+    "Focsle_Deck",
+    "Officers_Country",
+    "Wardroom",
+    "CPO_Quarters",
+    "Mess_Hall",
+    "Galley",
+    "Sick_Bay",
+    "HD_Crew",
+    "Cargo_Pump_Rm",
+    "Cargo_Control",
+    "Working_Deck",
+    "Aft_Open_Deck",
+    "Crew_Qtrs_Fwd",
+    "Crew_Qtrs_Aft",
+    "Boiler_Rm",
+    "Engine_Rm",
+    "Stores_2D",
+    "Magazines",
+    "Main_Cargo_Tanks",
+    "Fwd_Peak_Tanks",
+    "Fuel_Tanks",
+    "Shaft_Alley",
+    "Steering_Gear"
+  ],
+  "decks": [
+    "bridge_deck",
+    "forecastle_deck",
+    "hold",
+    "second_deck",
+    "upper_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 170.6,
+    "ymin": -2.0,
+    "ymax": 24.9
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "bridge_deck": "deck_bridge_deck.png",
+      "forecastle_deck": "deck_forecastle_deck.png",
+      "upper_deck": "deck_upper_deck.png",
+      "second_deck": "deck_second_deck.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}
