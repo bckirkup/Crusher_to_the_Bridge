@@ -26,7 +26,7 @@ cells) then STOP — user gates wave 1.
 |---|---|---|---|
 | canary | 6 exp + 1 meg | 128 | done 2026-10-16 — all gates pass |
 | 1 | exp ×12 arms | 12,000 | done 2026-10-16 — all cells landed, readout below |
-| 2 | cls + spr ×12 arms | 24,000 | not submitted |
+| 2 | cls + spr ×12 arms | 24,000 | submitted 2026-10-16 — 24 arrays in flight |
 | 3 | mega ×10 arms | 10,000 | not submitted |
 
 ## Readout log
@@ -212,3 +212,37 @@ clean (0 unresolved oids, 0 open objects).
 the common band exists with operative q ∈ ~[0.0004, 0.0006]
 (rung q05) and the ps_ship interval in band. Wave 2 (cls+spr —
 the hull-free test) is the user's decision.
+
+### wave 2 — submitted 2026-10-16, awaiting cells
+
+User approved after the wave-1 readout ("yes, wave 2"). 24 arrays
+(cls + spr × 12 arms) × 1,000 seeds = 24,000 cells, same
+digest-pinned image (a9f4a517). Jobdef
+`picard-noro-provisioned-source-01` revs registered per submit.
+
+| block | job id |
+|---|---|
+| fl_cls_12d_scr_off | 408c7547-ee00-4506-b715-12df882f0be4 |
+| fl_cls_12d_scr_ind | 161c6743-59ef-469b-9bc5-62dcf14af6e5 |
+| fl_cls_12d_scr_ship | d8efd14f-4109-4a43-a366-d32c72a8fc43 |
+| fl_cls_12d_scr_mint | e850915b-c90f-452a-a62c-a8302db1662a |
+| fl_cls_12d_scr_ps_ship | d1ec4f52-ab67-43fc-a2b8-1bb91da3a5fe |
+| fl_cls_12d_scr_q01 | aebf255c-2569-49f3-89dc-fc412e047886 |
+| fl_cls_12d_scr_q02 | 46187993-5dfd-4dd6-884c-83dc4186abcc |
+| fl_cls_12d_scr_q03 | 65843391-1164-4ad1-b4cc-7f71d66dba53 |
+| fl_cls_12d_scr_q05 | f35ec95f-5825-4671-a705-76680252670e |
+| fl_cls_12d_scr_q08 | 375b3fdf-5344-4dde-b5df-7d34f1d64700 |
+| fl_cls_12d_scr_q15 | d9a450e7-a585-4e15-b449-a9dab692cb1d |
+| fl_cls_12d_scr_q30 | 1ba16547-22b9-4ed0-bd0c-cce5fa86f349 |
+| fl_spr_12d_scr_off | 0feb2758-9b27-40c3-b3bd-5c579ddd4edb |
+| fl_spr_12d_scr_ind | a0130fd9-e82f-4990-9783-284d0c7df13a |
+| fl_spr_12d_scr_ship | 25d25311-9cd2-4b54-a37e-22068ad1ecb3 |
+| fl_spr_12d_scr_mint | 015ec470-68a3-45a1-b04f-9f0e85a4412d |
+| fl_spr_12d_scr_ps_ship | de70a2b4-10c7-4fa9-bec1-3af0e64bcc36 |
+| fl_spr_12d_scr_q01 | 95b48b3f-ec97-4ec7-8bda-0dea2a052d6c |
+| fl_spr_12d_scr_q02 | 46187993-5dfd-4dd6-884c-83dc4186abcc |
+| fl_spr_12d_scr_q03 | b41aa71c-8fa7-41ca-b9ef-08d1fdfdfe5a |
+| fl_spr_12d_scr_q05 | f748b6b9-ec27-4ead-a36a-7fbcaefb17a8 |
+| fl_spr_12d_scr_q08 | edb8d96e-329b-4b37-9c76-4a85992aef66 |
+| fl_spr_12d_scr_q15 | e7f47ca4-500f-4e79-adb7-ccc29e848641 |
+| fl_spr_12d_scr_q30 | df3828c6-1e26-4726-b8b6-8bc6dbcf1825 |
