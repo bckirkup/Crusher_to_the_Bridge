@@ -1,4 +1,4 @@
-Status: in use (2026-10-16). Thirty maritime.org general arrangements imported end-to-end (latest: CV-4 Ranger / CV-5 Yorktown / CV-7 Wasp prewar fleet carriers; CA-34/CL-89/CG-11/CC-2 cruisers). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
+Status: in use (2026-10-16). Thirty-three maritime.org general arrangements imported end-to-end (latest: CV-4 Ranger / CV-5 Yorktown / CV-7 Wasp prewar fleet carriers; C-6/ACR-13/AC-3 early cruisers). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
 
 # GA → .prj: approach and plan
 
@@ -81,11 +81,14 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `missouri_bb63` | BB-63 Missouri Iowa-class battleship (17-plate 1950 booklet; 13 deck levels incl. splinter citadel + third platform, turret barbette/trunk chain, era-tagged usn_coldwar) | 103 | 1561 crew, 5 classes | `.prj` 2248 paths, 11 HVAC groups |
 | `wisconsin_bb64` | BB-64 Wisconsin Iowa-class battleship (15-plate 1956 booklet; zone layout affine-transferred from the BB-63 sheet-read digest into BB-64 page frames, era usn_coldwar) | 103 | ~2560 crew, 4 classes | `.prj` 2248 paths, 11 HVAC groups |
 | `new_jersey_bb62` | BB-62 New Jersey Iowa-class battleship (18-plate 1984 NAVSEA reactivation booklet; affine-transferred layout, era usn_modern / mech_ac shipwide) | 103 | ~1781 crew, 4 classes | `.prj` 2248 paths, 11 HVAC groups |
+| `olympia_c6` | C-6 Olympia protected cruiser (10-sheet 1895 booklet, coarse scan; six zoneable decks, coal-ring protective deck, era fallback flagged) | 104 | 440 crew era-typical flagship fit, 6 classes | `.prj` 805 paths, 11 HVAC groups |
+| `montana_acr13` | ACR-13 Montana Tennessee-class armored cruiser (9-plate 1917 booklet; split lower-platform flats, coal bunkers, ~900-1100 class-typical complement) | 146 | 1000 crew class-typical, 7 classes | `.prj` 2474 paths, 17 HVAC groups |
+| `jupiter_ac3` | AC-3 Jupiter collier later CV-1 Langley (4-sheet 1913 booklet; cargo holds dominate, first USN turbo-electric, split 2nd-platform flats) | 50 | 295 crew, 6 classes | `.prj` 538 paths, 8 HVAC groups |
 | `ranger_cv4` | CV-4 USS Ranger first purpose-built USN carrier (14-plate 1944 booklet; no island — bridge under fwd flight-deck overhang, 3-segment hangar, gallery walkway, poop+forecastle partial decks) | 74 | 2641 crew incl. air group (1343 ship + 1298 aviation, plate-read), 6 classes | `.prj` 904 paths, 12 HVAC groups |
 | `yorktown_cv5` | CV-5 USS Yorktown lead of Yorktown class (17-plate 1940 Puget Sound booklet; 3 elevators, hangar on main deck piercing forecastle+gallery levels, island thin deck) | 71 | 2279 crew incl. air wing + flag staff (plate-read), 13 classes | `.prj` 984 paths, 9 HVAC groups |
 | `wasp_cv7` | CV-7 USS Wasp one-off treaty carrier (18-plate 1942 booklet; asymmetric hull arrangement, 14 decks incl. inner_bottom, distributed magazines) | 62 | 2128 crew incl. air group + marines (plate-read), 10 classes | `.prj` 778 paths, 10 HVAC groups |
 
-All thirty carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
+All thirty-three carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
 
 ## Era-rule provenance
 
