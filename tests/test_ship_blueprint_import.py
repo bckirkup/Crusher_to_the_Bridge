@@ -889,6 +889,35 @@ class TestSystemsInference:
         assert added in spatial["graywater_zones"]
         assert notes["plumbing_drains"]
 
+    def test_hangar_door_is_natural_opening(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        """Carrier hangar-side roller doors read as natural ventilation."""
+
+        def _mut(data: dict) -> None:
+            _add_systems(
+                data,
+                vent_markers=[
+                    {
+                        "id": "Hangar_Door_P",
+                        "page": 1,
+                        "position_norm": [0.4, 0.4],
+                        "deck": "main_deck",
+                        "kind": "hangar_door",
+                        "facing": "unknown",
+                        "serves_zone": "Mess_Hall",
+                        "evidence": "sheet_read",
+                    }
+                ],
+            )
+
+        _, airflow, out = _mutated_platform(tmp_path, roots, "syshd", _mut)
+        groups = {g["id"]: g for g in airflow["hvac_zones"]}
+        assert groups["zone_main"]["vent_mode"] == "nat_supply"
+        assert groups["zone_main"]["evidence"] == "sheet_read"
+        notes = json.loads((out / "systems_notes.json").read_text())
+        assert notes["vent_markers"][0]["direction"] == "supply"
+
     def test_no_systems_no_notes(
         self, tmp_path: Path, roots: tuple[str, ...]
     ) -> None:
