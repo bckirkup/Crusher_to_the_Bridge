@@ -1,0 +1,294 @@
+{
+  "platform": "river_class_frigate",
+  "era": "rn_ww2",
+  "era_label": "Royal Navy WW2 practice",
+  "era_note": "Mushroom/cowl natural supply; mech exhaust galley/heads/engines; magazines sprinkled + vented.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "forecastle_deck",
+      "serves_zone": "Boiler_Room",
+      "display": [
+        40.92,
+        -10.54
+      ],
+      "evidence": "sheet_read",
+      "notes": "funnel + boiler-room skylight on forecastle plan"
+    },
+    {
+      "id": "Vent_Boiler",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Boiler_Room",
+      "display": [
+        40.3,
+        5.57
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT label + boiler room vent over on upper deck"
+    },
+    {
+      "id": "MechVent_ER",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Engine_Room",
+      "display": [
+        29.11,
+        5.06
+      ],
+      "evidence": "sheet_read",
+      "notes": "MECH. VENT OVER E.R. + hatch vent labels"
+    },
+    {
+      "id": "Cowl_Foc",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Seamen_Mess",
+      "display": [
+        74.1,
+        4.1
+      ],
+      "evidence": "sheet_read",
+      "notes": "cowl vents fwd of hedgehog deck"
+    },
+    {
+      "id": "Vent_Mag_Aft",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Magazine_Aft",
+      "display": [
+        19.75,
+        5.19
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine ventilator per RN WW2 practice"
+    },
+    {
+      "id": "Vent_Mag_Fwd",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Fwd_Magazine",
+      "display": [
+        59.26,
+        5.94
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine ventilator per RN WW2 practice"
+    }
+  ],
+  "zone_modes": {
+    "Signal_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bridge_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Quarterdeck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Cabin_Block": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Foc_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "DC_Flat": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Mess_Mid_P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mess_Mid_S": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Boiler_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "HD_Crew": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Drying_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Stewards_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sick_Bay": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Fwd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Wardroom_Flat": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Officers": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "CPO_ERA_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "PO_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Seamen_Mess": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Lamp_Paint_Decon": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fore_Peak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Stores_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ammo_Lobby": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Provision_Issue": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gyro_Diesel_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Canteen_Flat": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Stokers_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "AS_Instrument": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Bosun_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "After_Peak_Ballast": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Magazine_Aft": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Fwd_Magazine": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Cold_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Asdic_Dome": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "OIL FUEL",
+      "kind": "fuel",
+      "nearest_zone": "Fwd_Magazine",
+      "display": [
+        49.97,
+        3.71
+      ],
+      "deck": "hold",
+      "notes": "rows of oil fuel tanks flanking machinery"
+    },
+    {
+      "label": "RESERVE FEED WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Magazine",
+      "display": [
+        45.32,
+        5.19
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "FRESH WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Magazine",
+      "display": [
+        53.45,
+        5.94
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "BALLAST TANK",
+      "kind": "unknown",
+      "nearest_zone": "After_Peak_Ballast",
+      "display": [
+        6.97,
+        5.94
+      ],
+      "deck": "hold",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Crew (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew",
+    "Sick_Bay (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay",
+    "HD_Fwd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Fwd",
+    "HD_Officers (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Officers"
+  ]
+}

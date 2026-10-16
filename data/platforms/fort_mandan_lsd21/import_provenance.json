@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:25:35.935131+00:00",
+  "platform_id": "fort_mandan_lsd21",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/fort_mandan_lsd21",
+  "digest_sha256": "6e42dd6f2c95c89f49fbb62d972236f48f9966b9de2a2fccac682a89ad18fcb5",
+  "svg_sha256": {
+    "page_05_approved.svg": "297017afe1b5ab8bdb6c6c171df646c1d1258b874c3bca335ccc066648352133",
+    "page_06_approved.svg": "1c3908e2fe39203f3668763516f51261796893c5ecca978658615aa52161cb61",
+    "page_07_approved.svg": "e2d76645ceba84e60406d9a2d85dcc98eefa4cfa9975fcd3ef396f5e231d6e50",
+    "page_08_approved.svg": "61e458b46954eccba915f276a95c6130ed632c9437f915088e01fbd289db916f",
+    "page_09_approved.svg": "0210373d11845e6d0a323ec0d051c283bbf53538e4691ec71b33e2378c09bb1b"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 51,
+  "berthing_zones": [
+    "Radar_House",
+    "Comm_Room",
+    "Officers_Qtrs_Bridge",
+    "Ships_Office",
+    "Crew_Berthing_SSD",
+    "Army_Ranks_Qtrs_SSD",
+    "Officers_WR_Pantry",
+    "Machine_Shop",
+    "Shipfitters_Flat",
+    "Officers_Qtrs_MD",
+    "Army_Officers_MD",
+    "Laundry_2D",
+    "Officers_Berthing_2D",
+    "Armory_DC_Station"
+  ],
+  "systems_era": "usn_coldwar"
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:22:04.931030+00:00",
+  "platform_id": "gosper_apa170",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/gosper_apa170",
+  "digest_sha256": "123e3b0423a24a6a48303884cbcb6948ad2b69752e50e44cb78990e795a7a59f",
+  "svg_sha256": {
+    "page_05_approved.svg": "4dcae686b9151f3192cf26c36aa5431b7d833bb4309fcd27f460ff2991d9b058",
+    "page_06_approved.svg": "4f48bd37e7d78e73d5e5d7a15198ba46d17951c9115276afc56f9a530a8060dd",
+    "page_07_approved.svg": "b7b2514f2fd0b1e6534987dc2269c94b952391cdb415fc6839a3f84096cc3c50",
+    "page_08_approved.svg": "60a7a280d682262df4f80f9f4030c053200cfe080c80e54c8f631b72e74160f0",
+    "page_09_approved.svg": "2d62d2921d0181cc800759185757edaa62ec1ff83534134dfa856f975a8a750b",
+    "page_10_approved.svg": "47fb4625f7a3adae8735c2eb78cb2e0c169ba6f772fea24457ece8451ff71a70",
+    "page_11_approved.svg": "45bccfd922db090575127bdeacc1dce1eef03181c639260af426dc13ab1cd80c"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 71,
+  "berthing_zones": [
+    "CIC",
+    "Officers_Qtrs_Cabin",
+    "Radio_Central",
+    "Officers_Qtrs_Boat",
+    "Aft_Deckhouse",
+    "Officers_Offices_Main",
+    "Troop_Officers_Berthing",
+    "Troop_Berthing_Fwd",
+    "Troop_Berthing_2D_Aft",
+    "Crew_Berthing_2D",
+    "Services_2D",
+    "CPO_Berthing",
+    "Troop_Berthing_2D_Fwd",
+    "Troop_Berthing_3D_Aft",
+    "Crew_Berthing_3D",
+    "Troop_Berthing_3D_Mid",
+    "Troop_Berthing_3D_Bow"
+  ],
+  "systems_era": "usn_ww2"
+}

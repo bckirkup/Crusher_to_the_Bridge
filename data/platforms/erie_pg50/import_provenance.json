@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:20:34.820651+00:00",
+  "platform_id": "erie_pg50",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/erie_pg50",
+  "digest_sha256": "e9b99c61acdbad5425793752e352591a90964452c27b2b461b1ba6f125f4c702",
+  "svg_sha256": {
+    "page_05_approved.svg": "e737eceb50c1c54cc6b36ccf6a83e87b25b901f732048166bd116cc369b04143",
+    "page_06_approved.svg": "0099af21f21e94a27b753e1bc3e95625c45bf188de772015a5e170041bf50dee",
+    "page_07_approved.svg": "819f7e30a66e0524b35b876dda95ae68e20efaa7721b7fa69c935d2aad4a6d82",
+    "page_08_approved.svg": "c99ae46c259e23317e35187c58d4a57e42946e2e0acf1f77e82833f66b07c3f8",
+    "page_09_approved.svg": "92cf71fd9cdca13dcc7ffd3c40a6f2f14e4dcb8bcbfaee19862cc60852ae1c10",
+    "page_10_approved.svg": "eee67277f906df19053e2cef7fffd67e5750c161f28f75b9b1adc82d59f71153"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 54,
+  "berthing_zones": [
+    "Emergency_Cabin",
+    "Admirals_Quarters",
+    "Officers_Country",
+    "Crew_Berthing_Main",
+    "Marine_Quarters",
+    "Crews_Marine_Berthing",
+    "Mess_Attendants"
+  ],
+  "systems_era": "usn_ww2"
+}

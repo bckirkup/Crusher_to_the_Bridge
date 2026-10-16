@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:17:30.010002+00:00",
+  "platform": "mercury_aks20",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 309
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 22,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Nav_Bridge",
+      "notes": "CO + officers (boat dk fr 98-122)"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "CPO_Quarters",
+      "duty_zone": "CPO_Pantry_Issue",
+      "notes": "CPOs (shelter dk fr 99-113 P)"
+    },
+    {
+      "class_id": "deck_stores",
+      "role_group": "crew",
+      "count": 140,
+      "berth_zone": "Crew_Berthing_3rd",
+      "duty_zone": "Foredeck",
+      "notes": "seamen, boatswain, deck force (3rd dk fr 117-126)"
+    },
+    {
+      "class_id": "stores_issue",
+      "role_group": "crew",
+      "count": 60,
+      "berth_zone": "Crew_Berthing_2nd",
+      "duty_zone": "Ships_Store_Cargo",
+      "notes": "storekeepers + issue-room personnel (2nd dk fr 117-141)"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "Crew_Berthing_2nd",
+      "duty_zone": "Engine_Room",
+      "notes": "engineers, electricians, refrigeration mates"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "Crew_Berthing_Shelter",
+      "duty_zone": "Galley",
+      "notes": "cooks, bakers, stewards (shelter dk fr 100-115 S)"
+    },
+    {
+      "class_id": "corpsman",
+      "role_group": "crew",
+      "count": 4,
+      "berth_zone": "CPO_Quarters",
+      "duty_zone": "Sick_Bay",
+      "notes": "pharmacist's mates"
+    },
+    {
+      "class_id": "ship_services",
+      "role_group": "crew",
+      "count": 3,
+      "berth_zone": "Crew_Berthing_Shelter",
+      "duty_zone": "Post_Office_Disb",
+      "notes": "postal clerk + disbursing"
+    }
+  ],
+  "source": "AKS-20 sheet 2 accommodations: 22 officers + 20 CPO + 267 crew = 309 ship's company; sheet TOTAL 316 includes 2 hospital + 4 sick-bay patient berths",
+  "consistency": {
+    "declared_total": 309,
+    "manifest_total": 309,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

@@ -1,0 +1,59 @@
+{
+  "platform_id": "pt_564",
+  "ship_class_label": "Pt 564",
+  "footprint_tier": "representative",
+  "representative_of": "PT-564 motor torpedo boat, Higgins Industries 1943 booklet (maritime.org ptboat.pdf). 70'8\" LOA, ~14 crew. Booklet mixes PT-564 sheets with PT-5/PT-6 76' MTB sheets — only pages 1-2 (PT-564 outboard/i",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 13",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Gun_Tub_Aft",
+    "Torpedo_Deck",
+    "Cockpit",
+    "Pilothouse",
+    "Foredeck",
+    "Lazaret",
+    "Fuel_Comp_Aft",
+    "Engine_Room",
+    "Fuel_Comp_Mid",
+    "Ward_Room",
+    "Crews_Quarters",
+    "HD_Crew",
+    "Fore_Peak"
+  ],
+  "decks": [
+    "cabin_deck",
+    "main_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 23.54,
+    "ymin": -2.0,
+    "ymax": 8.1
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "main_deck": "deck_main_deck.png",
+      "cabin_deck": "deck_cabin_deck.png"
+    }
+  }
+}

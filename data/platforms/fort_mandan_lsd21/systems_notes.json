@@ -1,0 +1,376 @@
+{
+  "platform": "fort_mandan_lsd21",
+  "era": "usn_coldwar",
+  "era_label": "USN cold-war / early mechanical AC",
+  "era_note": "Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery forced draft.",
+  "vent_markers": [
+    {
+      "id": "v_turbine_1",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Well_Cover_Open",
+      "display": [
+        45.16,
+        10.33
+      ],
+      "evidence": "sheet_read",
+      "notes": "TURBINE VENT labels on well cover deck"
+    },
+    {
+      "id": "v_cowl_fwd",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Forecastle_MD",
+      "display": [
+        130.63,
+        15.33
+      ],
+      "evidence": "sheet_read",
+      "notes": "8\" COWL NAT. VENT P/S on forecastle"
+    },
+    {
+      "id": "v_well_sponson",
+      "kind": "gooseneck",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "third_deck",
+      "serves_zone": "Well_Deck",
+      "display": [
+        51.91,
+        3.09
+      ],
+      "evidence": "sheet_read",
+      "notes": "vent trunks along well-deck sponsons"
+    },
+    {
+      "id": "v_uptakes",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "second_deck",
+      "serves_zone": "Engine_Room",
+      "display": [
+        64.14,
+        2.51
+      ],
+      "evidence": "sheet_read",
+      "notes": "uptakes & fan room on second deck over machinery"
+    },
+    {
+      "id": "v_signal_mast",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "navigating_bridge",
+      "serves_zone": "Comm_Room",
+      "display": [
+        -35.51,
+        6.28
+      ],
+      "evidence": "era_plausible",
+      "notes": "machinery exhaust trunk via signal mast/funnel stack"
+    },
+    {
+      "id": "v_magazines",
+      "kind": "mushroom",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "third_deck",
+      "serves_zone": "Ammunition_3D",
+      "display": [
+        124.9,
+        13.4
+      ],
+      "evidence": "era_plausible",
+      "notes": "magazine vents era-typical"
+    }
+  ],
+  "zone_modes": {
+    "Top_House_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radar_House": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Comm_Room": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Officers_Qtrs_Bridge": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Ships_Office": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Passage_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_SSD": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_Mess_SSD": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Galley_SSD": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Sick_Bay": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Army_Ranks_Qtrs_SSD": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Officers_WR_Pantry": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Crew_SSD": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Well_Cover_Open": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Machine_Shop": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Shipfitters_Flat": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Officers_Qtrs_MD": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Army_Officers_MD": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Officers_MD": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Passage_MD": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Army_MD_Port": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "HD_Army_MD_Stbd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Forecastle_MD": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Steering_Gear_2D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Gallery_Port": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gallery_Stbd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Laundry_2D": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Ice_Machinery_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Officers_Berthing_2D": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Armory_DC_Station": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Passage_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Army_2D": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Well_Deck": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Ballast_Tanks_Port": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ballast_Tanks_Stbd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Flat_3D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Room_Flat": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Pump_Room_3D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "General_Stores_3D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ammunition_3D": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Boatswains_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley_Port": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley_Stbd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Boiler_Aux_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ballast_FW_Tanks": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fore_Peak_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "BALLAST TANKS (wing, floodable)",
+      "kind": "unknown",
+      "nearest_zone": "Well_Deck",
+      "display": [
+        37.75,
+        7.96
+      ],
+      "deck": null,
+      "notes": ""
+    },
+    {
+      "label": "DIESEL OIL STORAGE",
+      "kind": "fuel",
+      "nearest_zone": "Officers_Qtrs_Bridge",
+      "display": [
+        26.26,
+        4.17
+      ],
+      "deck": null,
+      "notes": ""
+    },
+    {
+      "label": "F.O. TANK",
+      "kind": "fuel",
+      "nearest_zone": "HD_Officers_MD",
+      "display": [
+        98.47,
+        9.86
+      ],
+      "deck": null,
+      "notes": ""
+    },
+    {
+      "label": "MAIN FEED TANK",
+      "kind": "unknown",
+      "nearest_zone": "General_Stores_3D",
+      "display": [
+        78.78,
+        11.75
+      ],
+      "deck": null,
+      "notes": ""
+    },
+    {
+      "label": "FRESH WATER",
+      "kind": "freshwater",
+      "nearest_zone": "Sick_Bay",
+      "display": [
+        79.48,
+        1.37
+      ],
+      "deck": null,
+      "notes": ""
+    },
+    {
+      "label": "PEAK TANK",
+      "kind": "unknown",
+      "nearest_zone": "Chain_Locker",
+      "display": [
+        128.01,
+        11.75
+      ],
+      "deck": null,
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "Crew_Mess_SSD (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_SSD",
+    "Galley_SSD (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_SSD",
+    "Sick_Bay (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay",
+    "HD_Crew_SSD (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_SSD",
+    "HD_Officers_MD (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Officers_MD",
+    "HD_Army_MD_Port (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Army_MD_Port",
+    "HD_Army_MD_Stbd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Army_MD_Stbd",
+    "HD_Army_2D (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Army_2D"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:17:49.930581+00:00",
+  "platform_id": "pt_564",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/pt_564",
+  "digest_sha256": "70d2986de32972b99ba83fac2f7c2adecdf51cb05651d8ba2f21c73d6cc47990",
+  "svg_sha256": {
+    "page_01_approved.svg": "9b3a0d7f0b39e27a1152d5375e1a8f7c65a36af009610f796088f7da29eef317",
+    "page_02_approved.svg": "2df1391d8e15e0d035a109ff5fdb017538d70f078d86a1a23abaabed40064a48"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 13,
+  "berthing_zones": [
+    "Ward_Room",
+    "Crews_Quarters"
+  ],
+  "systems_era": "usn_ww2"
+}
