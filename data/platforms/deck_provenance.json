@@ -45,7 +45,7 @@
         "wikimedia_title": "File:USS Gleaves (DD-423) underway on 18 June 1941 (513043).jpg",
         "source_page": null,
         "license": "Public domain (US Navy)",
-        "credit": "US Navy — USS Gleaves (DD-423), lead ship Gleaves-class, 18 June 1941",
+        "credit": "US Navy \u2014 USS Gleaves (DD-423), lead ship Gleaves-class, 18 June 1941",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -121,7 +121,7 @@
         "wikimedia_title": "File:Fletcher-class destroyer technical drawing 1954.jpg",
         "source_page": null,
         "license": "Public domain (US Navy)",
-        "credit": "US Navy All Hands magazine, 1954 — Fletcher-class technical drawing",
+        "credit": "US Navy All Hands magazine, 1954 \u2014 Fletcher-class technical drawing",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -191,7 +191,7 @@
         "wikimedia_title": "File:USCGC Hamilton (WHEC-715).jpg",
         "source_page": null,
         "license": "Public domain (US Coast Guard)",
-        "credit": "US Coast Guard — USCGC Hamilton (WHEC-715), Hamilton-class WHEC, decommissioned 2011",
+        "credit": "US Coast Guard \u2014 USCGC Hamilton (WHEC-715), Hamilton-class WHEC, decommissioned 2011",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -264,13 +264,13 @@
         "wikimedia_title": "File:USS Austin (LPD-4) underway on 29 April 1965 (USN 1111157).jpg",
         "source_page": null,
         "license": "Public domain (US Navy)",
-        "credit": "US Navy — USS Austin (LPD-4), Austin-class LPD, 29 April 1965; decommissioned 2006",
+        "credit": "US Navy \u2014 USS Austin (LPD-4), Austin-class LPD, 29 April 1965; decommissioned 2006",
         "local_file": "reference_photo.jpg"
       }
     },
     "expedition_cruise_300": {
       "platform_id": "expedition_cruise_300",
-      "ship_class_label": "Expedition cruise — legacy well-mixed berthing",
+      "ship_class_label": "Expedition cruise \u2014 legacy well-mixed berthing",
       "footprint_tier": "representative",
       "representative_of": "LEGACY platform (archived Aug 2026). Small expedition cruise with well-mixed Room berthing blocks (~50 pax per cabin block) and a single Crew_Quarters zone. Retained for regression and comparison only",
       "provenance": [
@@ -343,7 +343,7 @@
         "wikimedia_title": "File:Cruise ship side view.png",
         "source_page": null,
         "license": "CC BY-SA 3.0",
-        "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic); LEGACY platform superseded by expedition_cruise_450",
+        "credit": "Marcusroos / Wikimedia Commons \u2014 cruise ship side elevation (schematic); LEGACY platform superseded by expedition_cruise_450",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -351,7 +351,7 @@
       "platform_id": "expedition_cruise_450",
       "ship_class_label": "Expedition cruise (cabin-corridor)",
       "footprint_tier": "representative",
-      "representative_of": "Small/medium expedition cruise (~300 passengers + ~150 crew = 450). Silver Cloud / Le Boréal / Viking Star class archetype: ~160m LOA × 21m beam, ~17,000 GT. Cabin-corridor resolution (12 pax + 4 crew",
+      "representative_of": "Small/medium expedition cruise (~300 passengers + ~150 crew = 450). Silver Cloud / Le Bor\u00e9al / Viking Star class archetype: ~160m LOA \u00d7 21m beam, ~17,000 GT. Cabin-corridor resolution (12 pax + 4 crew",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 47",
@@ -436,7 +436,7 @@
       "background_plate": "architectural_plan",
       "reference_photo": {
         "license": "Original work (AI-generated notional schematic)",
-        "credit": "Crusher-to-the-Bridge — notional expedition-cruise architectural plates (plan + elevation)",
+        "credit": "Crusher-to-the-Bridge \u2014 notional expedition-cruise architectural plates (plan + elevation)",
         "local_file": "reference_photo.jpg"
       },
       "architectural_graphics": {
@@ -445,13 +445,13 @@
         "elevation": {
           "file": "elevation.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — notional expedition-cruise elevation (original schematic)",
+          "credit": "Crusher-to-the-Bridge \u2014 notional expedition-cruise elevation (original schematic)",
           "license": "Original work"
         },
         "plan": {
           "file": "plan_overview.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — notional expedition-cruise plan (original schematic)",
+          "credit": "Crusher-to-the-Bridge \u2014 notional expedition-cruise plan (original schematic)",
           "license": "Original work"
         },
         "deck_plans": {}
@@ -461,7 +461,7 @@
       "platform_id": "classic_cruise_1900",
       "ship_class_label": "Classic cruise (cabin-corridor)",
       "footprint_tier": "representative",
-      "representative_of": "Large classic cruise (~1,350 passengers + ~560 crew = 1,910). Holland America Veendam / Celebrity Century archetype: ~238m LOA × 32m beam, ~57,000 GT. Cabin-corridor resolution (36 pax + 6 crew corrid",
+      "representative_of": "Large classic cruise (~1,350 passengers + ~560 crew = 1,910). Holland America Veendam / Celebrity Century archetype: ~238m LOA \u00d7 32m beam, ~57,000 GT. Cabin-corridor resolution (36 pax + 6 crew corrid",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 79",
@@ -582,7 +582,7 @@
       "background_plate": "architectural_plan",
       "reference_photo": {
         "license": "Original work (AI-generated notional schematic)",
-        "credit": "Crusher-to-the-Bridge — notional classic-cruise architectural plates (plan + elevation)",
+        "credit": "Crusher-to-the-Bridge \u2014 notional classic-cruise architectural plates (plan + elevation)",
         "local_file": "reference_photo.jpg"
       },
       "architectural_graphics": {
@@ -591,13 +591,13 @@
         "elevation": {
           "file": "elevation.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — notional classic-cruise elevation (original schematic)",
+          "credit": "Crusher-to-the-Bridge \u2014 notional classic-cruise elevation (original schematic)",
           "license": "Original work"
         },
         "plan": {
           "file": "plan_overview.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — notional classic-cruise plan (original schematic)",
+          "credit": "Crusher-to-the-Bridge \u2014 notional classic-cruise plan (original schematic)",
           "license": "Original work"
         },
         "deck_plans": {}
@@ -607,7 +607,7 @@
       "platform_id": "spirit_cruise_3000",
       "ship_class_label": "Spirit cruise (cabin-corridor)",
       "footprint_tier": "representative",
-      "representative_of": "Extra-large Spirit-class cruise (~2,100 passengers + ~900 crew = 3,000). Carnival Spirit / HAL Vista / Princess Grand archetype: ~290m LOA × 36m beam, ~86,000 GT. Cabin-corridor resolution (48 pax + 9",
+      "representative_of": "Extra-large Spirit-class cruise (~2,100 passengers + ~900 crew = 3,000). Carnival Spirit / HAL Vista / Princess Grand archetype: ~290m LOA \u00d7 36m beam, ~86,000 GT. Cabin-corridor resolution (48 pax + 9",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 115",
@@ -768,7 +768,7 @@
       "background_plate": "architectural_plan",
       "reference_photo": {
         "license": "Original work (AI-generated notional schematic)",
-        "credit": "Crusher-to-the-Bridge — notional spirit-cruise architectural plates (plan + elevation)",
+        "credit": "Crusher-to-the-Bridge \u2014 notional spirit-cruise architectural plates (plan + elevation)",
         "local_file": "reference_photo.jpg"
       },
       "architectural_graphics": {
@@ -777,13 +777,13 @@
         "elevation": {
           "file": "elevation.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — notional spirit-cruise elevation",
+          "credit": "Crusher-to-the-Bridge \u2014 notional spirit-cruise elevation",
           "license": "Original work"
         },
         "plan": {
           "file": "plan_overview.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — notional spirit-cruise plan",
+          "credit": "Crusher-to-the-Bridge \u2014 notional spirit-cruise plan",
           "license": "Original work"
         },
         "deck_plans": {}
@@ -1050,7 +1050,7 @@
       "background_plate": "architectural_plan",
       "reference_photo": {
         "license": "Original work (AI-generated notional schematic)",
-        "credit": "Crusher-to-the-Bridge — notional mega-cruise architectural plates (plan + elevation)",
+        "credit": "Crusher-to-the-Bridge \u2014 notional mega-cruise architectural plates (plan + elevation)",
         "local_file": "reference_photo.jpg"
       },
       "architectural_graphics": {
@@ -1059,13 +1059,13 @@
         "elevation": {
           "file": "elevation.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — notional mega-cruise elevation (AI-generated schematic, original composition)",
+          "credit": "Crusher-to-the-Bridge \u2014 notional mega-cruise elevation (AI-generated schematic, original composition)",
           "license": "Original work"
         },
         "plan": {
           "file": "plan_overview.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — notional mega-cruise plan (AI-generated schematic, original composition)",
+          "credit": "Crusher-to-the-Bridge \u2014 notional mega-cruise plan (AI-generated schematic, original composition)",
           "license": "Original work"
         },
         "deck_plans": {}
@@ -1073,7 +1073,7 @@
     },
     "messy_cruise_500": {
       "platform_id": "messy_cruise_500",
-      "ship_class_label": "Mega cruise — legacy well-mixed berthing",
+      "ship_class_label": "Mega cruise \u2014 legacy well-mixed berthing",
       "footprint_tier": "representative",
       "representative_of": "LEGACY platform (archived from mega_cruise_5000, Feb 2026). Berthing is represented as 27 large well-mixed passenger cabin blocks (~200 occupants each) and 4 crew-quarter blocks. Each block models dir",
       "provenance": [
@@ -1271,7 +1271,7 @@
         "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",
         "source_page": null,
         "license": "CC BY-SA 2.0",
-        "credit": "Kahunapule Michael Johnson / Wikimedia Commons — Icon of the Seas (Royal Caribbean); legacy platform archived from mega_cruise_5000",
+        "credit": "Kahunapule Michael Johnson / Wikimedia Commons \u2014 Icon of the Seas (Royal Caribbean); legacy platform archived from mega_cruise_5000",
         "local_file": "reference_photo.jpg"
       }
     },
@@ -2120,23 +2120,23 @@
       "background_plate": "architectural_plan",
       "reference_photo": {
         "license": "Original work (AI-generated notional schematic)",
-        "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired architectural plates (simplified silhouette, not show artwork)",
+        "credit": "Crusher-to-the-Bridge \u2014 fiction-adapted Constitution-inspired architectural plates (simplified silhouette, not show artwork)",
         "local_file": "reference_photo.jpg"
       },
       "architectural_graphics": {
         "schema_version": "1.0",
-        "description": "User-supplied architectural underlays. Fiction-adapted Constitution-class silhouette — simplified geometry, not a reproduction of any televised Star Trek artwork.",
+        "description": "User-supplied architectural underlays. Fiction-adapted Constitution-class silhouette \u2014 simplified geometry, not a reproduction of any televised Star Trek artwork.",
         "elevation": {
           "file": "elevation.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired elevation (AI-generated schematic, original composition)",
+          "credit": "Crusher-to-the-Bridge \u2014 fiction-adapted Constitution-inspired elevation (AI-generated schematic, original composition)",
           "license": "Original work",
           "fiction_adapted": true
         },
         "plan": {
           "file": "plan_overview.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — fiction-adapted Constitution-inspired plan (AI-generated schematic, original composition)",
+          "credit": "Crusher-to-the-Bridge \u2014 fiction-adapted Constitution-inspired plan (AI-generated schematic, original composition)",
           "license": "Original work",
           "fiction_adapted": true
         },
@@ -2324,23 +2324,23 @@
       "background_plate": "architectural_plan",
       "reference_photo": {
         "license": "Original work (AI-generated notional schematic)",
-        "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired architectural plates (simplified silhouette, not show artwork)",
+        "credit": "Crusher-to-the-Bridge \u2014 fiction-adapted Galaxy-inspired architectural plates (simplified silhouette, not show artwork)",
         "local_file": "reference_photo.jpg"
       },
       "architectural_graphics": {
         "schema_version": "1.0",
-        "description": "User-supplied architectural underlays. Fiction-adapted Galaxy-class silhouette — simplified geometry, not a reproduction of any televised Star Trek artwork.",
+        "description": "User-supplied architectural underlays. Fiction-adapted Galaxy-class silhouette \u2014 simplified geometry, not a reproduction of any televised Star Trek artwork.",
         "elevation": {
           "file": "elevation.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired elevation (AI-generated schematic, original composition)",
+          "credit": "Crusher-to-the-Bridge \u2014 fiction-adapted Galaxy-inspired elevation (AI-generated schematic, original composition)",
           "license": "Original work",
           "fiction_adapted": true
         },
         "plan": {
           "file": "plan_overview.jpg",
           "style": "ai_generated_notional",
-          "credit": "Crusher-to-the-Bridge — fiction-adapted Galaxy-inspired plan (AI-generated schematic, original composition)",
+          "credit": "Crusher-to-the-Bridge \u2014 fiction-adapted Galaxy-inspired plan (AI-generated schematic, original composition)",
           "license": "Original work",
           "fiction_adapted": true
         },
@@ -2351,7 +2351,7 @@
       "platform_id": "midway_cv41",
       "ship_class_label": "Midway Cv41",
       "footprint_tier": "representative",
-      "representative_of": "USS Midway (CV-41), lead ship of the Midway-class battle carriers — armored flight deck (strength deck), hangar as superstructure, single island funnel trunk. 1947 Puget Sound NSY booklet (18 plates);",
+      "representative_of": "USS Midway (CV-41), lead ship of the Midway-class battle carriers \u2014 armored flight deck (strength deck), hangar as superstructure, single island funnel trunk. 1947 Puget Sound NSY booklet (18 plates);",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 65",
@@ -3606,7 +3606,7 @@
       "platform_id": "idaho_bb42",
       "ship_class_label": "Idaho Bb42",
       "footprint_tier": "representative",
-      "representative_of": "BB-42 USS Idaho (New Mexico class), c.1930s configuration. Zones read from maritime.org bb42.pdf — 9-sheet incomplete set (no inboard profile, sections, or data sheet). Bow at right.",
+      "representative_of": "BB-42 USS Idaho (New Mexico class), c.1930s configuration. Zones read from maritime.org bb42.pdf \u2014 9-sheet incomplete set (no inboard profile, sections, or data sheet). Bow at right.",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 114",
@@ -3798,7 +3798,7 @@
       "platform_id": "west_virginia_bb48",
       "ship_class_label": "West Virginia Bb48",
       "footprint_tier": "representative",
-      "representative_of": "USS West Virginia (BB-48) — 1939 Booklet of General Plans, Puget Sound Navy Yard; bow right on all sheets",
+      "representative_of": "USS West Virginia (BB-48) \u2014 1939 Booklet of General Plans, Puget Sound Navy Yard; bow right on all sheets",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 198",
@@ -4072,7 +4072,7 @@
       "platform_id": "south_dakota_bb49",
       "ship_class_label": "South Dakota Bb49",
       "footprint_tier": "representative",
-      "representative_of": "USS South Dakota (BB-49) — 1918 contract plans; engineering plates + arrangement bands; bow right on p4 profile",
+      "representative_of": "USS South Dakota (BB-49) \u2014 1918 contract plans; engineering plates + arrangement bands; bow right on p4 profile",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 55",
@@ -4189,7 +4189,7 @@
       "platform_id": "missouri_bb63",
       "ship_class_label": "Missouri Bb63",
       "footprint_tier": "representative",
-      "representative_of": "USS Missouri (BB-63), Iowa-class battleship — 1950 New York Naval Shipyard Booklet of General Plans (17 plates, peacetime flagship configuration). Agent-read GA import.",
+      "representative_of": "USS Missouri (BB-63), Iowa-class battleship \u2014 1950 New York Naval Shipyard Booklet of General Plans (17 plates, peacetime flagship configuration). Agent-read GA import.",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 103",
@@ -4360,7 +4360,7 @@
       "platform_id": "wisconsin_bb64",
       "ship_class_label": "Wisconsin Bb64",
       "footprint_tier": "representative",
-      "representative_of": "USS Wisconsin (BB-64), Iowa-class battleship — 1956 Booklet of General Plans (15 plates, Korean-war configuration). Agent-read GA import; zone layout affine-transferred from the BB-63 sheet-read diges",
+      "representative_of": "USS Wisconsin (BB-64), Iowa-class battleship \u2014 1956 Booklet of General Plans (15 plates, Korean-war configuration). Agent-read GA import; zone layout affine-transferred from the BB-63 sheet-read diges",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 103",
@@ -4531,7 +4531,7 @@
       "platform_id": "new_jersey_bb62",
       "ship_class_label": "New Jersey Bb62",
       "footprint_tier": "representative",
-      "representative_of": "USS New Jersey (BB-62), Iowa-class battleship — 1984 NAVSEA Booklet of General Plans (18 plates, Reagan-era reactivation configuration, mechanical A/C shipwide). Agent-read GA import; zone layout affi",
+      "representative_of": "USS New Jersey (BB-62), Iowa-class battleship \u2014 1984 NAVSEA Booklet of General Plans (18 plates, Reagan-era reactivation configuration, mechanical A/C shipwide). Agent-read GA import; zone layout affi",
       "provenance": [
         "spatial_layout.json description and deck_dimensions",
         "zone count: 103",
@@ -4695,6 +4695,545 @@
           "hold": "deck_hold.png",
           "third_bottom": "deck_third_bottom.png",
           "inner_bottom": "deck_inner_bottom.png"
+        }
+      }
+    },
+    "astoria_ca34": {
+      "platform_id": "astoria_ca34",
+      "ship_class_label": "Astoria Ca34",
+      "footprint_tier": "representative",
+      "representative_of": "CA-34 USS Astoria, New Orleans-class heavy cruiser, 1941 fit. maritime.org Booklet of General Plans (C&R 202031, 12 sheets). 982 complement (44 officers + 38 CPO + 859 crew + 41 marines); flagship acc",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 65",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Fwd_Stores_3rd",
+        "Aft_Stores_3rd",
+        "Nav_Bridge",
+        "Flag_Plot",
+        "Chart_House",
+        "Bridge_Wings",
+        "After_Deckhouse",
+        "Upper_Deck_Aft",
+        "HD_Crew_Upper",
+        "Boat_Deck",
+        "Gun_Gallery_01",
+        "Superstructure_01",
+        "Flag_Quarters",
+        "Fwd_Gear_Stores",
+        "Focsle_Deck",
+        "Fantail",
+        "Catapult_Deck",
+        "Hangar",
+        "Repair_Space",
+        "Hangar_Spares_Stbd",
+        "Officers_Country",
+        "Wardroom",
+        "Galley",
+        "Provisions_Main",
+        "Crew_Space_Fwd",
+        "Forecastle_Stores",
+        "Chain_Locker",
+        "CPO_Quarters",
+        "CPO_Mess",
+        "HD_CPO",
+        "Crew_Berthing_Aft",
+        "Crew_Mess",
+        "HD_Crew_2nd",
+        "Offices_2nd",
+        "Sick_Bay",
+        "Dental_Unit",
+        "Crew_Berthing_Fwd",
+        "HD_Crew_Fwd",
+        "Forepeak_Stores",
+        "Provisions_Low",
+        "Crew_Berthing_1P",
+        "Cold_Storage",
+        "Engine_Room_Aft",
+        "Engine_Room_Fwd",
+        "Fire_Rooms",
+        "Crew_Berthing_1P_Fwd",
+        "Fwd_Stores_1P",
+        "Battery_Rooms",
+        "Forepeak_1P",
+        "Steering_Gear",
+        "Aft_Magazines",
+        "Mid_Magazines",
+        "Plot_Room",
+        "Fwd_Magazines",
+        "Gasoline_Tanks",
+        "FW_Tanks_2P",
+        "Peak_Tank",
+        "Shaft_Alley",
+        "Fuel_Oil_Tanks_Aft",
+        "Bilge_Spaces_Aft",
+        "Fuel_Oil_Tanks_Mid",
+        "Fwd_Tanks",
+        "Gasoline_Room",
+        "SA_Magazines_Hold",
+        "Forepeak_Hold"
+      ],
+      "decks": [
+        "bridge_deck",
+        "first_platform",
+        "hold",
+        "main_deck",
+        "second_deck",
+        "second_platform",
+        "third_deck",
+        "upper_deck"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 187.34,
+        "ymin": -2.0,
+        "ymax": 20.83
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "bridge_deck": "deck_bridge_deck.png",
+          "upper_deck": "deck_upper_deck.png",
+          "main_deck": "deck_main_deck.png",
+          "second_deck": "deck_second_deck.png",
+          "third_deck": "deck_third_deck.png",
+          "first_platform": "deck_first_platform.png",
+          "second_platform": "deck_second_platform.png",
+          "hold": "deck_hold.png"
+        }
+      }
+    },
+    "miami_cl89": {
+      "platform_id": "miami_cl89",
+      "ship_class_label": "Miami Cl89",
+      "footprint_tier": "representative",
+      "representative_of": "CL-89 USS Miami, Cleveland-class light cruiser, 1946 Cramp fit. maritime.org Booklet of General Plans (13 sheets). Complement as provided 1252 (71 officers+warrants incl. 12 warrant, 47 CPO incl. 2 ma",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 81",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Nav_Bridge",
+        "Chart_House",
+        "Radio_Bridge",
+        "Signal_Shelter",
+        "Bridge_Wings",
+        "Boat_Stowage_Port",
+        "Boat_Stowage_Stbd",
+        "Shops_01",
+        "Radio_01",
+        "Comm_Shelter_01",
+        "Gun_Tubs_01",
+        "Stern_Aviation",
+        "Catapult_Deck",
+        "Galley_Main",
+        "Ammo_Handling_5in_7",
+        "Ammo_Handling_5in_8",
+        "Repair_Shops_Main",
+        "HD_Crew_Main",
+        "Electrical_Repair",
+        "Navigators_Office",
+        "Radar_Room",
+        "Misc_Services_Main",
+        "Ammo_Handling_5in_2",
+        "CIC",
+        "Ammo_Handling_5in_1",
+        "Forecastle_Main",
+        "Bow_Weather",
+        "Steering_Flat",
+        "Hangar",
+        "HD_CPO_2nd",
+        "CPO_Berthing_2nd",
+        "Crew_Messing_2nd",
+        "HD_Crew_2nd",
+        "Fan_Issue_2nd",
+        "Laundry",
+        "Wardroom",
+        "Officers_Country_2nd",
+        "Stores_2nd",
+        "Windlass_Chain_2nd",
+        "Bow_Stores_2nd",
+        "RS_Clipping",
+        "Aviation_Trunk_3rd",
+        "Elevator_Pit_3rd",
+        "Crew_Berthing_3rd",
+        "Marine_LF_Stores",
+        "Provisions_3rd",
+        "Galley_Service_3rd",
+        "Evaporator_AC_3rd",
+        "HD_Crew_3rd",
+        "Medical_3rd",
+        "Armory_3rd",
+        "WO_Country",
+        "Bow_Stores_3rd",
+        "Forepeak_3rd",
+        "Provisions_1P",
+        "Ships_Stores_1P",
+        "Crew_Mess_1P",
+        "Aft_5In_Magazines",
+        "Engine_Room_Aft",
+        "Fire_Room_Aft",
+        "Engine_Room_Fwd",
+        "Fire_Room_Fwd",
+        "DC_Radio_1P",
+        "Crew_Berthing_1P",
+        "Fwd_Stores_1P",
+        "Peak_Tank_1P",
+        "Steering_Gear",
+        "Aft_6In_Magazines",
+        "FO_Wing_Port_2P",
+        "FO_Wing_Stbd_2P",
+        "Plot_Room",
+        "Fwd_6In_Magazines",
+        "Fwd_Stores_2P",
+        "Peak_Tank_2P",
+        "Shaft_Alley_Hold",
+        "Fuel_Oil_Tanks_Aft",
+        "FO_Service_Port_Hold",
+        "FO_Service_Stbd_Hold",
+        "Fuel_Oil_Tanks_Fwd",
+        "Fwd_Tanks_Hold",
+        "Forepeak_Hold"
+      ],
+      "decks": [
+        "bridge_deck",
+        "comm_platform",
+        "first_platform",
+        "hold",
+        "main_deck",
+        "second_deck",
+        "second_platform",
+        "third_deck"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 187.34,
+        "ymin": -2.0,
+        "ymax": 21.38
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "bridge_deck": "deck_bridge_deck.png",
+          "comm_platform": "deck_comm_platform.png",
+          "main_deck": "deck_main_deck.png",
+          "second_deck": "deck_second_deck.png",
+          "third_deck": "deck_third_deck.png",
+          "first_platform": "deck_first_platform.png",
+          "second_platform": "deck_second_platform.png",
+          "hold": "deck_hold.png"
+        }
+      }
+    },
+    "chicago_cg11": {
+      "platform_id": "chicago_cg11",
+      "ship_class_label": "Chicago Cg11",
+      "footprint_tier": "representative",
+      "representative_of": "CG-11 USS Chicago, Baltimore-class hull rebuilt as a guided-missile cruiser (Talos aft / Terrier fwd, helo platform over aft magazine), 1964 fit. maritime.org Booklet of General Plans (16 sheets). Ber",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 87",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Superstructure_03",
+        "Flag_Level_03",
+        "Open_03",
+        "Helo_Deck_02_Aft",
+        "Boat_Stowage_02",
+        "Offices_02",
+        "Terrier_Deck_02",
+        "Shelters_01_Aft",
+        "Command_01",
+        "Flag_01_Fwd",
+        "Launcher_Deck_01",
+        "Fantail_Weather",
+        "Helo_Deck",
+        "Boat_Stowage_Main",
+        "Offices_Main_Aft",
+        "Crew_Berthing_Main",
+        "CPO_Country_Main",
+        "Electronics_Main",
+        "Shops_Main",
+        "Missile_Mag_Deck_Fwd",
+        "Forecastle_Deck",
+        "Bow_Weather",
+        "Helo_Service_2nd",
+        "SD_Stores_Aft_2nd",
+        "Crew_Berthing_Aft_2nd",
+        "Mess_Gear_2nd",
+        "Crew_Messroom_2nd",
+        "Missile_Magazine_Aft",
+        "Galley_Support_2nd",
+        "Recreation_2nd",
+        "HD_Crew_Mid_2nd",
+        "CPO_Mess_2nd",
+        "Medical_2nd",
+        "Missile_Magazine_Fwd",
+        "HD_CPO_2nd",
+        "HD_Crew_Fwd_2nd",
+        "Crew_Berthing_Fwd_2nd",
+        "Officers_Strm_2nd",
+        "Bow_Tip_2nd",
+        "Stern_Gear_3rd",
+        "Helo_Hangar_3rd",
+        "Elevator_Trunk_3rd",
+        "Aft_Mags_3rd",
+        "Crew_Berthing_Aft_3rd",
+        "Marine_Country_3rd",
+        "HD_Marines_3rd",
+        "HD_Crew_Aft_3rd",
+        "Crew_Services_3rd",
+        "Radar_Control_3rd",
+        "Missile_Magazine_3rd",
+        "HD_CIC_3rd",
+        "Amidships_Cells_3rd",
+        "HD_Crew_Fwd_3rd",
+        "Crew_Berthing_Fwd_3rd",
+        "Fwd_Stores_3rd",
+        "Forepeak_3rd",
+        "SD_Storerooms_Aft_1P",
+        "Provisions_1P",
+        "Equipment_Mid_1P",
+        "Missile_Support_1P",
+        "Machinery_Port_1P",
+        "Machinery_Stbd_1P",
+        "Electronics_1P",
+        "Crew_Berthing_1P",
+        "Fwd_Services_1P",
+        "Landing_Force_1P",
+        "Bow_Stores_1P",
+        "Peak_Tank_1P",
+        "Steering_Gear_2P",
+        "Talos_Mag_Deep_2P",
+        "Emerg_Gen_2P",
+        "FO_Wing_Port_2P",
+        "Machinery_2P",
+        "FO_Wing_Stbd_2P",
+        "Mag_Machinery_2P",
+        "Sonar_AC_2P",
+        "Fwd_Stores_2P",
+        "Peak_Tank_2P",
+        "Shaft_Alley_Hold",
+        "Aft_Voids_Hold",
+        "Aft_Cells_Hold",
+        "FO_Wing_Port_Hold",
+        "FO_Wing_Stbd_Hold",
+        "Fwd_Tanks_Hold",
+        "Sonar_Room_Hold",
+        "Bow_Cells_Hold",
+        "Peak_Tank_Hold"
+      ],
+      "decks": [
+        "first_platform",
+        "hold",
+        "level_01",
+        "level_02",
+        "level_03",
+        "main_deck",
+        "second_deck",
+        "second_platform",
+        "third_deck"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 207.7,
+        "ymin": -2.0,
+        "ymax": 23.31
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "level_03": "deck_level_03.png",
+          "level_02": "deck_level_02.png",
+          "level_01": "deck_level_01.png",
+          "main_deck": "deck_main_deck.png",
+          "second_deck": "deck_second_deck.png",
+          "third_deck": "deck_third_deck.png",
+          "first_platform": "deck_first_platform.png",
+          "second_platform": "deck_second_platform.png",
+          "hold": "deck_hold.png"
+        }
+      }
+    },
+    "wright_cc2": {
+      "platform_id": "wright_cc2",
+      "ship_class_label": "Wright Cc2",
+      "footprint_tier": "representative",
+      "representative_of": "CC-2 USS Wright \u2014 Saipan-class light carrier hull converted to national command ship, 1965. Command/communications spaces dominate gallery + hangar decks (Combat Operations Center, radio transmitter/r",
+      "provenance": [
+        "spatial_layout.json description and deck_dimensions",
+        "zone count: 68",
+        "per-deck non-overlapping compartment packing"
+      ],
+      "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+      "zone_ids": [
+        "Bridge_Island",
+        "Island_Rooms",
+        "Flight_Deck_Aft",
+        "Elevator_Aft_FD",
+        "Flight_Deck_Mid",
+        "Island_Base_FD",
+        "Flight_Deck_Fwd",
+        "Aft_Gallery",
+        "Ready_Rooms_Gal",
+        "Elevator_Wells_Gal",
+        "Crews_Shelters_Gal",
+        "Comms_Aft_Gal",
+        "VIP_Gal",
+        "Comms_Fwd_Gal",
+        "Island_Gal",
+        "Bow_Gal",
+        "Aft_Shops_Hangar",
+        "Hangar_Bay_Aft",
+        "Hangar_Bay_Fwd",
+        "Command_Support_Hangar",
+        "COC_Hangar",
+        "Staterooms_Hangar",
+        "Bow_Cells_Hangar",
+        "Aft_Rooms_Main",
+        "Aft_Berthing_Main",
+        "Elevator_Pit_Main",
+        "Mid_Voids_Main",
+        "Steward_Mess_Main",
+        "Wardroom_Main",
+        "Officers_Main",
+        "Medical_Main",
+        "Bow_Gear_Main",
+        "Aft_Rooms_2nd",
+        "HD_Crew_Aft_2nd",
+        "Crew_Berthing_Aft_2nd",
+        "Crew_Mess_2nd",
+        "Services_Mid_2nd",
+        "HD_Crew_Mid_2nd",
+        "Issue_Amidships_2nd",
+        "Crew_Berthing_Fwd_2nd",
+        "HD_Crew_Fwd_2nd",
+        "Fwd_Services_2nd",
+        "Bow_Stores_2nd",
+        "Crew_Berthing_Aft_3rd",
+        "Services_Aft_3rd",
+        "HD_Crew_Aft_3rd",
+        "Uptakes_3rd",
+        "Crew_Berthing_Fwd_3rd",
+        "HD_Crew_Fwd_3rd",
+        "Fwd_Stores_3rd",
+        "Shaft_Alley_1P",
+        "Aux_Machinery_1P",
+        "Uptakes_1P",
+        "AC_Refrig_1P",
+        "Fwd_Stores_1P",
+        "Bow_Cells_1P",
+        "Shaft_Alley_2P",
+        "Aft_Cells_2P",
+        "Machinery_2P",
+        "Gen_Machinery_2P",
+        "Fwd_Stores_2P",
+        "Peak_Tank_2P",
+        "Stern_Cells_Hold",
+        "FO_Wing_Port_Hold",
+        "FO_Wing_Stbd_Hold",
+        "Emerg_Gen_Hold",
+        "Fwd_Cells_Hold",
+        "Peak_Tank_Hold"
+      ],
+      "decks": [
+        "first_platform",
+        "flight_deck",
+        "gallery_deck",
+        "hangar_deck",
+        "hold",
+        "island",
+        "main_deck",
+        "second_deck",
+        "second_platform",
+        "third_deck"
+      ],
+      "view_bounds": {
+        "xmin": -2.0,
+        "xmax": 210.33,
+        "ymin": -2.0,
+        "ymax": 36.75
+      },
+      "assets": {
+        "deck_graphics": "deck_graphics.geojson",
+        "deck_hull": "deck_hull.png",
+        "deck_blueprint_bg": "deck_blueprint_bg.png",
+        "architectural_graphics": "graphics/graphics.json",
+        "plan_overview": "graphics/plan_overview.png"
+      },
+      "background_plate": "architectural_plan",
+      "architectural_graphics": {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+          "file": "plan_overview.png",
+          "style": "general_arrangement_scan",
+          "credit": "Imported via tools.ship_blueprint_import",
+          "license": "Source drawing rights remain with original owner"
+        },
+        "deck_plans": {
+          "island": "deck_island.png",
+          "flight_deck": "deck_flight_deck.png",
+          "gallery_deck": "deck_gallery_deck.png",
+          "hangar_deck": "deck_hangar_deck.png",
+          "main_deck": "deck_main_deck.png",
+          "second_deck": "deck_second_deck.png",
+          "third_deck": "deck_third_deck.png",
+          "first_platform": "deck_first_platform.png",
+          "second_platform": "deck_second_platform.png",
+          "hold": "deck_hold.png"
         }
       }
     }
