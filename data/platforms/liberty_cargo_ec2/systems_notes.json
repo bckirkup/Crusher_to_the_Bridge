@@ -1,0 +1,375 @@
+{
+  "platform": "liberty_cargo_ec2",
+  "era": "merchant_ww2",
+  "era_label": "Merchant / aux WW2 practice",
+  "era_note": "Natural cowl supply to accommodation; mechanical exhaust to galley and machinery spaces.",
+  "vent_markers": [
+    {
+      "id": "VM_focsle_cowl",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Focsle_Stores",
+      "display": [
+        128.93,
+        3.86
+      ],
+      "evidence": "era_plausible",
+      "notes": "Focsle stores supply"
+    },
+    {
+      "id": "VM_house_supply",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "PO_Mess",
+      "display": [
+        68.01,
+        1.45
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "VM_house_exhaust",
+      "kind": "gooseneck",
+      "facing": "aft",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "Berthing_Port",
+      "display": [
+        53.84,
+        1.45
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "VM_funnel",
+      "kind": "funnel",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "Boiler_Casing_UD",
+      "display": [
+        65.88,
+        7.23
+      ],
+      "evidence": "sheet_read",
+      "notes": "Boiler casing/uptake above boiler room"
+    },
+    {
+      "id": "VM_engine_skylight",
+      "kind": "skylight",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "boat_deck",
+      "serves_zone": "Machinery_Casing_Bt",
+      "display": [
+        69.56,
+        9.25
+      ],
+      "evidence": "sheet_read",
+      "notes": "Rm 33 engine skylight boat deck"
+    }
+  ],
+  "zone_modes": {
+    "Gun_Platform": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Top_Of_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wheelhouse": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chart_Radio_Rm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Captain_Suite": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bridge_Cabins_Port": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boiler_Casing_Br": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Bridge_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Bridge_Wings": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officer_Cabins_Port": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officer_Cabins_Stbd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck_Lobby": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Casing_Bt": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "HD_Officers": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Hospital": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Gunners_Berth_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Tween_Hatch_5": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Tween_Hatch_4": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Berthing_Port": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Casing_UD": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Casing_UD": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Crew_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "PO_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Berthing_Stbd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Berthing_Port_Lower": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ships_Stores_UD": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "HD_PO": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "HD_Eng": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Tween_Hatch_3": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Machinery_Flats_UD": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Tween_Hatch_2": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Tween_Hatch_1": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Forecastle_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Tween_Cargo_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Casing_2D": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Dry_Provisions": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CO2_Rm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Tween_Cargo_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Peak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Holds_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Deep_Tanks_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Holds_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Deep_Tanks_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Forepeak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "FO SETTLING TK",
+      "kind": "unknown",
+      "nearest_zone": "Boiler_Room",
+      "display": [
+        61.63,
+        12.25
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "RESERVE FEED WATER TK",
+      "kind": "freshwater",
+      "nearest_zone": "Engine_Room",
+      "display": [
+        59.51,
+        5.1
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "FO/BALLAST DEEP TK N2",
+      "kind": "unknown",
+      "nearest_zone": "Deep_Tanks_Fwd",
+      "display": [
+        121.85,
+        10.21
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "FO/BALLAST DEEP TK N3",
+      "kind": "unknown",
+      "nearest_zone": "Deep_Tanks_Mid",
+      "display": [
+        72.26,
+        6.12
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "FORE PEAK",
+      "kind": "unknown",
+      "nearest_zone": "Forepeak",
+      "display": [
+        131.06,
+        9.19
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    },
+    {
+      "label": "AFT PEAK",
+      "kind": "unknown",
+      "nearest_zone": "Aft_Peak",
+      "display": [
+        11.33,
+        9.19
+      ],
+      "deck": "inner_bottom",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Bridge_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Bridge_Deck",
+    "HD_Officers (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Officers",
+    "Hospital (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Hospital",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "Crew_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess",
+    "PO_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: PO_Mess",
+    "HD_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Deck",
+    "HD_PO (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_PO",
+    "HD_Eng (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Eng"
+  ]
+}

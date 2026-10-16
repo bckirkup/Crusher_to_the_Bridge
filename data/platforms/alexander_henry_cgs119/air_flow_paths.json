@@ -1,0 +1,273 @@
+{
+  "platform": "alexander_henry_cgs119",
+  "description": "HVAC network synthesized for alexander_henry_cgs119",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "AHU_Bridge",
+      "rooms": [
+        "Wheelhouse",
+        "Chart_Radio_NB",
+        "Officer_Cabins_Boat",
+        "Officers_Bridge_Deck"
+      ],
+      "ach": 6.0,
+      "description": "Officers accommodation",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Upper",
+      "rooms": [
+        "Aft_Cabins",
+        "Galley",
+        "Crew_Mess_Rec",
+        "PO_Mess_Rec",
+        "Officer_Eng_Cabins_U",
+        "Laundry"
+      ],
+      "ach": 6.0,
+      "description": "Upper deck crew accommodation",
+      "vent_mode": "mech_exhaust",
+      "evidence": "era_plausible",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_Lower",
+      "rooms": [
+        "Stores_Lower",
+        "Crew_Berth_Lower",
+        "Fwd_Tanks_Voids",
+        "Bosun_Paint_Stores"
+      ],
+      "ach": 4.0,
+      "description": "Lower deck stores/berthing",
+      "vent_mode": "mech_ac",
+      "evidence": "era_rule",
+      "oa_fraction": 0.2
+    },
+    {
+      "id": "AHU_Machinery",
+      "rooms": [
+        "Engine_Room",
+        "Engine_Casing_U",
+        "Funnel_Uptake",
+        "Steering_Gear"
+      ],
+      "ach": 15.0,
+      "description": "Machinery",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_Holds",
+      "rooms": [
+        "Cargo_Hold_1",
+        "Cargo_Hold_2"
+      ],
+      "ach": 2.0,
+      "description": "Cargo holds",
+      "oa_fraction": 1.0,
+      "vent_mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "AHU_Weather",
+      "rooms": [
+        "Wheelhouse_Top",
+        "Bridge_Wings",
+        "Boat_Stowage_Open",
+        "Forecastle_Working"
+      ],
+      "ach": 0.0,
+      "description": "Open-air decks",
+      "oa_fraction": 1.0,
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "AHU_HD_HD_Boat_Deck",
+      "rooms": [
+        "HD_Boat_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Boat_Deck, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Bridge_Deck",
+      "rooms": [
+        "HD_Bridge_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Bridge_Deck, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Upper_Crew",
+      "rooms": [
+        "HD_Upper_Crew"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Upper_Crew, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Upper_Officers",
+      "rooms": [
+        "HD_Upper_Officers"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Upper_Officers, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "AHU_Bridge",
+      "to": "AHU_Upper",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Upper",
+      "to": "AHU_Lower",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Lower",
+      "to": "AHU_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Machinery",
+      "to": "AHU_Holds",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_4",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Holds",
+      "to": "AHU_Weather",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_5",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Bridge",
+      "to": "AHU_HD_HD_Boat_Deck",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Boat_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Bridge",
+      "to": "AHU_HD_HD_Bridge_Deck",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Bridge_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Upper",
+      "to": "AHU_HD_HD_Upper_Crew",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Upper_Crew; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Upper",
+      "to": "AHU_HD_HD_Upper_Officers",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Upper_Officers; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Wheelhouse",
+      "to": "Chart_Radio_NB",
+      "type": "passageway"
+    },
+    {
+      "from": "Wheelhouse",
+      "to": "Bridge_Wings",
+      "type": "passageway"
+    },
+    {
+      "from": "Officer_Cabins_Boat",
+      "to": "Boat_Stowage_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "Officer_Cabins_Boat",
+      "to": "Funnel_Uptake",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Aft_Cabins",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Cabins",
+      "to": "Laundry",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Cabins",
+      "to": "Engine_Casing_U",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Casing_U",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Casing_U",
+      "to": "Officer_Eng_Cabins_U",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Crew_Mess_Rec",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "PO_Mess_Rec",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Officer_Eng_Cabins_U",
+      "type": "passageway"
+    },
+    {
+      "from": "PO_Mess_Rec",
+      "to": "Officer_Eng_Cabins_U",
+      "type": "passageway"
+    }
+  ]
+}
