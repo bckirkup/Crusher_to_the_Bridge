@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Seventy ship platforms are included, each with spatial layout and HVAC
+Seventy-four ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -864,6 +864,10 @@ from `orchestrator_types.py`:
 | `assistance_ar17` | USS Assistance AR-17 EC2-S-C1 Liberty-hull repair ship (maritime.org GA import, 56 zones, ~700 crew est.) |
 | `luzon_arg2` | USS Luzon ARG-2 internal-combustion-engine repair ship (maritime.org GA import, 67 zones, ~600 crew est.) |
 | `saratoga_cv60` | USS Saratoga CV-60 Forrestal-class supercarrier, SLEP 1993 (maritime.org GA import, 82 zones, 4955 crew incl. air wing + marines) |
+| `middlesex_lst983` | USS Middlesex County LST-983 tank landing ship, LST-542 class (maritime.org GA import, 40 zones, 123 crew + 129 troops) |
+| `lsm_354` | LSM-354 landing ship medium, LSM-1 class (maritime.org GA import, incomplete booklet, 40 zones, 66 crew + ~48 troops) |
+| `lyon_ap71` | USS Lyon AP-71 troop transport, C3-type (maritime.org GA import, sheets 3-4 missing, 59 zones, 407 crew + 2208 troops) |
+| `apl_24` | APL-24 barracks ship, APL-17 class, non-self-propelled (maritime.org GA import, incomplete booklet, 34 zones, 71 crew + 589 berthed) |
 
 ## License
 

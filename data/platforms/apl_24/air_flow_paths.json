@@ -1,0 +1,393 @@
+{
+  "platform": "apl_24",
+  "description": "HVAC network synthesized for apl_24",
+  "oa_fraction": 0.3,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Berthing",
+      "rooms": [
+        "Crew_Quarters",
+        "CPO_Berthing",
+        "Officers_Staterooms",
+        "Officers_Mess_Pantry",
+        "Brig"
+      ],
+      "ach": 6.0,
+      "description": "berthing + brig accommodation branch",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "HVAC_Messing",
+      "rooms": [
+        "Galley_Bakery",
+        "Crew_Cafeteria_Mess",
+        "Scullery",
+        "CPO_Mess",
+        "CPO_Pantry"
+      ],
+      "ach": 8.0,
+      "description": "galley/cafeteria + CPO messing branch",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "HVAC_Services",
+      "rooms": [
+        "Ships_Store",
+        "Barber_Shop",
+        "Ships_Service",
+        "Post_Office",
+        "Library",
+        "Recreation_Room",
+        "Crews_Locker_Office",
+        "Laundry",
+        "Receiving_Rm",
+        "Ships_Office"
+      ],
+      "ach": 6.0,
+      "description": "crew services / welfare branch",
+      "vent_mode": "mech_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "HVAC_Medical",
+      "rooms": [
+        "Sick_Bay",
+        "Isolation_Ward",
+        "Dental_Office",
+        "Dispensary_Lab"
+      ],
+      "ach": 6.0,
+      "description": "medical suite branch",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "era_rule",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_HD_HD_Crew_1",
+      "rooms": [
+        "HD_Crew_1"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew_1, 23 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Crew_2",
+      "rooms": [
+        "HD_Crew_2"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew_2, 15 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_Shower_Room",
+      "rooms": [
+        "Shower_Room"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Shower_Room, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_CPO_1",
+      "rooms": [
+        "HD_CPO_1"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_CPO_1, 14 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_CPO_2",
+      "rooms": [
+        "HD_CPO_2"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_CPO_2, 13 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_Crew_Washroom",
+      "rooms": [
+        "Crew_Washroom"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Crew_Washroom, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Berthing",
+      "to": "HVAC_Messing",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Messing",
+      "to": "HVAC_Services",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Services",
+      "to": "HVAC_Medical",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Messing",
+      "to": "AHU_HD_HD_Crew_1",
+      "flow_rate_m3h": 2734.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "AHU_HD_HD_Crew_2",
+      "flow_rate_m3h": 1783.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "AHU_HD_Shower_Room",
+      "flow_rate_m3h": 951.2,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Shower_Room; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "AHU_HD_HD_CPO_1",
+      "flow_rate_m3h": 1664.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_CPO_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "AHU_HD_HD_CPO_2",
+      "flow_rate_m3h": 1545.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_CPO_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "AHU_HD_Crew_Washroom",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Crew_Washroom; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Fantail_Main",
+      "to": "Galley_Bakery",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Bakery",
+      "to": "Crew_Cafeteria_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Cafeteria_Mess",
+      "to": "Ships_Store",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Cafeteria_Mess",
+      "to": "Scullery",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Barber_Shop",
+      "to": "Ships_Service",
+      "type": "passageway"
+    },
+    {
+      "from": "Ships_Service",
+      "to": "Library",
+      "type": "passageway"
+    },
+    {
+      "from": "Post_Office",
+      "to": "Recreation_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Library",
+      "to": "Recreation_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Library",
+      "to": "Crews_Locker_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Recreation_Room",
+      "to": "Crews_Locker_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Crews_Locker_Office",
+      "to": "Brig",
+      "type": "passageway"
+    },
+    {
+      "from": "Fantail_Upper",
+      "to": "Laundry",
+      "type": "passageway"
+    },
+    {
+      "from": "Laundry",
+      "to": "Receiving_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Receiving_Rm",
+      "to": "CPO_Pantry",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Pantry",
+      "to": "CPO_Mess",
+      "type": "service_hatch"
+    },
+    {
+      "from": "CPO_Mess",
+      "to": "CPO_Berthing",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Berthing",
+      "to": "Officers_Mess_Pantry",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Berthing",
+      "to": "Officers_Staterooms",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Mess_Pantry",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Staterooms",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "Isolation_Ward",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "Ships_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "Dental_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Isolation_Ward",
+      "to": "Dispensary_Lab",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Forecastle",
+      "type": "passageway"
+    },
+    {
+      "from": "Forecastle",
+      "to": "Gun_Platforms",
+      "type": "ladder"
+    },
+    {
+      "from": "Fantail_Upper",
+      "to": "Gun_Platforms",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Cafeteria_Mess",
+      "to": "CPO_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Galley_Bakery",
+      "to": "Laundry",
+      "type": "ladder"
+    },
+    {
+      "from": "Library",
+      "to": "Crew_Quarters",
+      "type": "ladder"
+    },
+    {
+      "from": "Brig",
+      "to": "Forecastle",
+      "type": "ladder"
+    },
+    {
+      "from": "Post_Office",
+      "to": "Library",
+      "type": "passageway"
+    },
+    {
+      "from": "Laundry",
+      "to": "CPO_Pantry",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Mess_Pantry",
+      "to": "Officers_Staterooms",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Staterooms",
+      "to": "Isolation_Ward",
+      "type": "passageway"
+    },
+    {
+      "from": "Isolation_Ward",
+      "to": "Dental_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Ships_Office",
+      "to": "Dental_Office",
+      "type": "passageway"
+    }
+  ]
+}

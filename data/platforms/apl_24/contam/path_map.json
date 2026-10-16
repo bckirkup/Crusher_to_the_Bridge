@@ -1,0 +1,2756 @@
+[
+  {
+    "path_nr": 1,
+    "from_zone": "Fantail_Main",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 3,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 4,
+    "from_zone": "Ships_Store",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 5,
+    "from_zone": "HD_Crew_1",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 6,
+    "from_zone": "Scullery",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 7,
+    "from_zone": "HD_Crew_2",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 8,
+    "from_zone": "Barber_Shop",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 9,
+    "from_zone": "Ships_Service",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 10,
+    "from_zone": "Shower_Room",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 11,
+    "from_zone": "Post_Office",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 12,
+    "from_zone": "Library",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 13,
+    "from_zone": "Recreation_Room",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 14,
+    "from_zone": "Crews_Locker_Office",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 15,
+    "from_zone": "Brig",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 16,
+    "from_zone": "Fantail_Upper",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 17,
+    "from_zone": "Laundry",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 18,
+    "from_zone": "Receiving_Rm",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 19,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 20,
+    "from_zone": "CPO_Mess",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 21,
+    "from_zone": "HD_CPO_1",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 22,
+    "from_zone": "HD_CPO_2",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 23,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 24,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 25,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 26,
+    "from_zone": "Sick_Bay",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 27,
+    "from_zone": "Isolation_Ward",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 28,
+    "from_zone": "Ships_Office",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 29,
+    "from_zone": "Dental_Office",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 30,
+    "from_zone": "Dispensary_Lab",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 31,
+    "from_zone": "Crew_Washroom",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 32,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 33,
+    "from_zone": "Forecastle",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 34,
+    "from_zone": "Gun_Platforms",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "envelope_leak",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 35,
+    "from_zone": "Fantail_Main",
+    "to_zone": "Galley_Bakery",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 36,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Crew_Cafeteria_Mess",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 37,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Ships_Store",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 38,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Scullery",
+    "is_hvac_ducted": false,
+    "kind": "service_hatch",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 39,
+    "from_zone": "Barber_Shop",
+    "to_zone": "Ships_Service",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 40,
+    "from_zone": "Ships_Service",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 41,
+    "from_zone": "Post_Office",
+    "to_zone": "Recreation_Room",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 42,
+    "from_zone": "Library",
+    "to_zone": "Recreation_Room",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 43,
+    "from_zone": "Library",
+    "to_zone": "Crews_Locker_Office",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 44,
+    "from_zone": "Recreation_Room",
+    "to_zone": "Crews_Locker_Office",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 45,
+    "from_zone": "Crews_Locker_Office",
+    "to_zone": "Brig",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 46,
+    "from_zone": "Fantail_Upper",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 47,
+    "from_zone": "Laundry",
+    "to_zone": "Receiving_Rm",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 48,
+    "from_zone": "Receiving_Rm",
+    "to_zone": "CPO_Pantry",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 49,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "CPO_Mess",
+    "is_hvac_ducted": false,
+    "kind": "service_hatch",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 50,
+    "from_zone": "CPO_Mess",
+    "to_zone": "CPO_Berthing",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 51,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "Officers_Mess_Pantry",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 52,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "Officers_Staterooms",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 53,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 54,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 55,
+    "from_zone": "Sick_Bay",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 56,
+    "from_zone": "Sick_Bay",
+    "to_zone": "Ships_Office",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 57,
+    "from_zone": "Sick_Bay",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 58,
+    "from_zone": "Isolation_Ward",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 59,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "Forecastle",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 60,
+    "from_zone": "Forecastle",
+    "to_zone": "Gun_Platforms",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 61,
+    "from_zone": "Fantail_Upper",
+    "to_zone": "Gun_Platforms",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 62,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "CPO_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 63,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 64,
+    "from_zone": "Library",
+    "to_zone": "Crew_Quarters",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 65,
+    "from_zone": "Brig",
+    "to_zone": "Forecastle",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 66,
+    "from_zone": "Post_Office",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 67,
+    "from_zone": "Laundry",
+    "to_zone": "CPO_Pantry",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 68,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "Officers_Staterooms",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 69,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 70,
+    "from_zone": "Isolation_Ward",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 71,
+    "from_zone": "Ships_Office",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 72,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "Galley_Bakery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 73,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "Crew_Cafeteria_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 74,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "Scullery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 75,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "CPO_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 76,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "CPO_Pantry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 77,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "Galley_Bakery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 78,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "Crew_Cafeteria_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 79,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "Scullery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 80,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "CPO_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 81,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "CPO_Pantry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 82,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "Galley_Bakery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 83,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "Crew_Cafeteria_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 84,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "Scullery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 85,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "CPO_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 86,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "CPO_Pantry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 87,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "Galley_Bakery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 88,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "Crew_Cafeteria_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 89,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "Scullery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 90,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "CPO_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 91,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "CPO_Pantry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 92,
+    "from_zone": "Brig",
+    "to_zone": "Galley_Bakery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 93,
+    "from_zone": "Brig",
+    "to_zone": "Crew_Cafeteria_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 94,
+    "from_zone": "Brig",
+    "to_zone": "Scullery",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 95,
+    "from_zone": "Brig",
+    "to_zone": "CPO_Mess",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 96,
+    "from_zone": "Brig",
+    "to_zone": "CPO_Pantry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 97,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Ships_Store",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 98,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Barber_Shop",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 99,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Ships_Service",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 100,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Post_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 101,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 102,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Recreation_Room",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 103,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Crews_Locker_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 104,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 105,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Receiving_Rm",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 106,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "Ships_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 107,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Ships_Store",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 108,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Barber_Shop",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 109,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Ships_Service",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 110,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Post_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 111,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 112,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Recreation_Room",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 113,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Crews_Locker_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 114,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 115,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Receiving_Rm",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 116,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "Ships_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 117,
+    "from_zone": "Scullery",
+    "to_zone": "Ships_Store",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 118,
+    "from_zone": "Scullery",
+    "to_zone": "Barber_Shop",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 119,
+    "from_zone": "Scullery",
+    "to_zone": "Ships_Service",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 120,
+    "from_zone": "Scullery",
+    "to_zone": "Post_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 121,
+    "from_zone": "Scullery",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 122,
+    "from_zone": "Scullery",
+    "to_zone": "Recreation_Room",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 123,
+    "from_zone": "Scullery",
+    "to_zone": "Crews_Locker_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 124,
+    "from_zone": "Scullery",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 125,
+    "from_zone": "Scullery",
+    "to_zone": "Receiving_Rm",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 126,
+    "from_zone": "Scullery",
+    "to_zone": "Ships_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 127,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Ships_Store",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 128,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Barber_Shop",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 129,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Ships_Service",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 130,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Post_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 131,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 132,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Recreation_Room",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 133,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Crews_Locker_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 134,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 135,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Receiving_Rm",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 136,
+    "from_zone": "CPO_Mess",
+    "to_zone": "Ships_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 137,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Ships_Store",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 138,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Barber_Shop",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 139,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Ships_Service",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 140,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Post_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 141,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Library",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 142,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Recreation_Room",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 143,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Crews_Locker_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 144,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 145,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Receiving_Rm",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 146,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "Ships_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_2",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 147,
+    "from_zone": "Ships_Store",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 148,
+    "from_zone": "Ships_Store",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 149,
+    "from_zone": "Ships_Store",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 150,
+    "from_zone": "Ships_Store",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 151,
+    "from_zone": "Barber_Shop",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 152,
+    "from_zone": "Barber_Shop",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 153,
+    "from_zone": "Barber_Shop",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 154,
+    "from_zone": "Barber_Shop",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 155,
+    "from_zone": "Ships_Service",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 156,
+    "from_zone": "Ships_Service",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 157,
+    "from_zone": "Ships_Service",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 158,
+    "from_zone": "Ships_Service",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 159,
+    "from_zone": "Post_Office",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 160,
+    "from_zone": "Post_Office",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 161,
+    "from_zone": "Post_Office",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 162,
+    "from_zone": "Post_Office",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 163,
+    "from_zone": "Library",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 164,
+    "from_zone": "Library",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 165,
+    "from_zone": "Library",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 166,
+    "from_zone": "Library",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 167,
+    "from_zone": "Recreation_Room",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 168,
+    "from_zone": "Recreation_Room",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 169,
+    "from_zone": "Recreation_Room",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 170,
+    "from_zone": "Recreation_Room",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 171,
+    "from_zone": "Crews_Locker_Office",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 172,
+    "from_zone": "Crews_Locker_Office",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 173,
+    "from_zone": "Crews_Locker_Office",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 174,
+    "from_zone": "Crews_Locker_Office",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 175,
+    "from_zone": "Laundry",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 176,
+    "from_zone": "Laundry",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 177,
+    "from_zone": "Laundry",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 178,
+    "from_zone": "Laundry",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 179,
+    "from_zone": "Receiving_Rm",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 180,
+    "from_zone": "Receiving_Rm",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 181,
+    "from_zone": "Receiving_Rm",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 182,
+    "from_zone": "Receiving_Rm",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 183,
+    "from_zone": "Ships_Office",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 184,
+    "from_zone": "Ships_Office",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 185,
+    "from_zone": "Ships_Office",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 186,
+    "from_zone": "Ships_Office",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 187,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "HD_Crew_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 188,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "HD_Crew_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 189,
+    "from_zone": "Scullery",
+    "to_zone": "HD_Crew_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 190,
+    "from_zone": "CPO_Mess",
+    "to_zone": "HD_Crew_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 191,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "HD_Crew_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 192,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "HD_Crew_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 193,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "HD_Crew_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 194,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "HD_Crew_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 195,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "HD_Crew_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 196,
+    "from_zone": "Brig",
+    "to_zone": "HD_Crew_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 197,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "Shower_Room",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 198,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "Shower_Room",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 199,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "Shower_Room",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 200,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "Shower_Room",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 201,
+    "from_zone": "Brig",
+    "to_zone": "Shower_Room",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 202,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "HD_CPO_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 203,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "HD_CPO_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 204,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "HD_CPO_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 205,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "HD_CPO_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 206,
+    "from_zone": "Brig",
+    "to_zone": "HD_CPO_1",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 207,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "HD_CPO_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 208,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "HD_CPO_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 209,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "HD_CPO_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 210,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "HD_CPO_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 211,
+    "from_zone": "Brig",
+    "to_zone": "HD_CPO_2",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 212,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "Crew_Washroom",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 213,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "Crew_Washroom",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 214,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "Crew_Washroom",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 215,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "Crew_Washroom",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 216,
+    "from_zone": "Brig",
+    "to_zone": "Crew_Washroom",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 217,
+    "from_zone": "ambient",
+    "to_zone": "ahs1(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 218,
+    "from_zone": "ahs1(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 219,
+    "from_zone": "ahs1(Ret)",
+    "to_zone": "ahs1(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 220,
+    "from_zone": "ahs1(Sup)",
+    "to_zone": "Crew_Quarters",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 221,
+    "from_zone": "Crew_Quarters",
+    "to_zone": "ahs1(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 222,
+    "from_zone": "ahs1(Sup)",
+    "to_zone": "CPO_Berthing",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 223,
+    "from_zone": "CPO_Berthing",
+    "to_zone": "ahs1(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 224,
+    "from_zone": "ahs1(Sup)",
+    "to_zone": "Officers_Staterooms",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 225,
+    "from_zone": "Officers_Staterooms",
+    "to_zone": "ahs1(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 226,
+    "from_zone": "ahs1(Sup)",
+    "to_zone": "Officers_Mess_Pantry",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 227,
+    "from_zone": "Officers_Mess_Pantry",
+    "to_zone": "ahs1(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 228,
+    "from_zone": "ahs1(Sup)",
+    "to_zone": "Brig",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 229,
+    "from_zone": "Brig",
+    "to_zone": "ahs1(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 1
+  },
+  {
+    "path_nr": 230,
+    "from_zone": "ambient",
+    "to_zone": "ahs2(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 231,
+    "from_zone": "ahs2(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 232,
+    "from_zone": "ahs2(Ret)",
+    "to_zone": "ahs2(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 233,
+    "from_zone": "ahs2(Sup)",
+    "to_zone": "Galley_Bakery",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 234,
+    "from_zone": "Galley_Bakery",
+    "to_zone": "ahs2(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 235,
+    "from_zone": "ahs2(Sup)",
+    "to_zone": "Crew_Cafeteria_Mess",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 236,
+    "from_zone": "Crew_Cafeteria_Mess",
+    "to_zone": "ahs2(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 237,
+    "from_zone": "ahs2(Sup)",
+    "to_zone": "Scullery",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 238,
+    "from_zone": "Scullery",
+    "to_zone": "ahs2(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 239,
+    "from_zone": "ahs2(Sup)",
+    "to_zone": "CPO_Mess",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 240,
+    "from_zone": "CPO_Mess",
+    "to_zone": "ahs2(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 241,
+    "from_zone": "ahs2(Sup)",
+    "to_zone": "CPO_Pantry",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 242,
+    "from_zone": "CPO_Pantry",
+    "to_zone": "ahs2(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 2
+  },
+  {
+    "path_nr": 243,
+    "from_zone": "ambient",
+    "to_zone": "ahs3(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 244,
+    "from_zone": "ahs3(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 245,
+    "from_zone": "ahs3(Ret)",
+    "to_zone": "ahs3(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 246,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Ships_Store",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 247,
+    "from_zone": "Ships_Store",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 248,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Barber_Shop",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 249,
+    "from_zone": "Barber_Shop",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 250,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Ships_Service",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 251,
+    "from_zone": "Ships_Service",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 252,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Post_Office",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 253,
+    "from_zone": "Post_Office",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 254,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Library",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 255,
+    "from_zone": "Library",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 256,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Recreation_Room",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 257,
+    "from_zone": "Recreation_Room",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 258,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Crews_Locker_Office",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 259,
+    "from_zone": "Crews_Locker_Office",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 260,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 261,
+    "from_zone": "Laundry",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 262,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Receiving_Rm",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 263,
+    "from_zone": "Receiving_Rm",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 264,
+    "from_zone": "ahs3(Sup)",
+    "to_zone": "Ships_Office",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 265,
+    "from_zone": "Ships_Office",
+    "to_zone": "ahs3(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 3
+  },
+  {
+    "path_nr": 266,
+    "from_zone": "ambient",
+    "to_zone": "ahs4(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 267,
+    "from_zone": "ahs4(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 268,
+    "from_zone": "ahs4(Ret)",
+    "to_zone": "ahs4(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 269,
+    "from_zone": "ahs4(Sup)",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 270,
+    "from_zone": "Sick_Bay",
+    "to_zone": "ahs4(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 271,
+    "from_zone": "ahs4(Sup)",
+    "to_zone": "Isolation_Ward",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 272,
+    "from_zone": "Isolation_Ward",
+    "to_zone": "ahs4(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 273,
+    "from_zone": "ahs4(Sup)",
+    "to_zone": "Dental_Office",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 274,
+    "from_zone": "Dental_Office",
+    "to_zone": "ahs4(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 275,
+    "from_zone": "ahs4(Sup)",
+    "to_zone": "Dispensary_Lab",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 276,
+    "from_zone": "Dispensary_Lab",
+    "to_zone": "ahs4(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 4
+  },
+  {
+    "path_nr": 277,
+    "from_zone": "ambient",
+    "to_zone": "ahs5(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 5
+  },
+  {
+    "path_nr": 278,
+    "from_zone": "ahs5(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 5
+  },
+  {
+    "path_nr": 279,
+    "from_zone": "ahs5(Ret)",
+    "to_zone": "ahs5(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 5
+  },
+  {
+    "path_nr": 280,
+    "from_zone": "ahs5(Sup)",
+    "to_zone": "HD_Crew_1",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 5
+  },
+  {
+    "path_nr": 281,
+    "from_zone": "HD_Crew_1",
+    "to_zone": "ahs5(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 5
+  },
+  {
+    "path_nr": 282,
+    "from_zone": "ambient",
+    "to_zone": "ahs6(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 6
+  },
+  {
+    "path_nr": 283,
+    "from_zone": "ahs6(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 6
+  },
+  {
+    "path_nr": 284,
+    "from_zone": "ahs6(Ret)",
+    "to_zone": "ahs6(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 6
+  },
+  {
+    "path_nr": 285,
+    "from_zone": "ahs6(Sup)",
+    "to_zone": "HD_Crew_2",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 6
+  },
+  {
+    "path_nr": 286,
+    "from_zone": "HD_Crew_2",
+    "to_zone": "ahs6(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 6
+  },
+  {
+    "path_nr": 287,
+    "from_zone": "ambient",
+    "to_zone": "ahs7(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 7
+  },
+  {
+    "path_nr": 288,
+    "from_zone": "ahs7(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 7
+  },
+  {
+    "path_nr": 289,
+    "from_zone": "ahs7(Ret)",
+    "to_zone": "ahs7(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 7
+  },
+  {
+    "path_nr": 290,
+    "from_zone": "ahs7(Sup)",
+    "to_zone": "Shower_Room",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 7
+  },
+  {
+    "path_nr": 291,
+    "from_zone": "Shower_Room",
+    "to_zone": "ahs7(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 7
+  },
+  {
+    "path_nr": 292,
+    "from_zone": "ambient",
+    "to_zone": "ahs8(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 8
+  },
+  {
+    "path_nr": 293,
+    "from_zone": "ahs8(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 8
+  },
+  {
+    "path_nr": 294,
+    "from_zone": "ahs8(Ret)",
+    "to_zone": "ahs8(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 8
+  },
+  {
+    "path_nr": 295,
+    "from_zone": "ahs8(Sup)",
+    "to_zone": "HD_CPO_1",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 8
+  },
+  {
+    "path_nr": 296,
+    "from_zone": "HD_CPO_1",
+    "to_zone": "ahs8(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 8
+  },
+  {
+    "path_nr": 297,
+    "from_zone": "ambient",
+    "to_zone": "ahs9(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 9
+  },
+  {
+    "path_nr": 298,
+    "from_zone": "ahs9(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 9
+  },
+  {
+    "path_nr": 299,
+    "from_zone": "ahs9(Ret)",
+    "to_zone": "ahs9(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 9
+  },
+  {
+    "path_nr": 300,
+    "from_zone": "ahs9(Sup)",
+    "to_zone": "HD_CPO_2",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 9
+  },
+  {
+    "path_nr": 301,
+    "from_zone": "HD_CPO_2",
+    "to_zone": "ahs9(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 9
+  },
+  {
+    "path_nr": 302,
+    "from_zone": "ambient",
+    "to_zone": "ahs10(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_oa",
+    "crusher_transfer": false,
+    "ahs_nr": 10
+  },
+  {
+    "path_nr": 303,
+    "from_zone": "ahs10(Ret)",
+    "to_zone": "ambient",
+    "is_hvac_ducted": true,
+    "kind": "ahs_exhaust",
+    "crusher_transfer": false,
+    "ahs_nr": 10
+  },
+  {
+    "path_nr": 304,
+    "from_zone": "ahs10(Ret)",
+    "to_zone": "ahs10(Sup)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_recirc",
+    "crusher_transfer": false,
+    "ahs_nr": 10
+  },
+  {
+    "path_nr": 305,
+    "from_zone": "ahs10(Sup)",
+    "to_zone": "Crew_Washroom",
+    "is_hvac_ducted": true,
+    "kind": "ahs_supply",
+    "crusher_transfer": false,
+    "ahs_nr": 10
+  },
+  {
+    "path_nr": 306,
+    "from_zone": "Crew_Washroom",
+    "to_zone": "ahs10(Ret)",
+    "is_hvac_ducted": true,
+    "kind": "ahs_return",
+    "crusher_transfer": false,
+    "ahs_nr": 10
+  }
+]

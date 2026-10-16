@@ -112,6 +112,10 @@ PLATFORMS = [
     "assistance_ar17",
     "luzon_arg2",
     "saratoga_cv60",
+    "middlesex_lst983",
+    "lsm_354",
+    "lyon_ap71",
+    "apl_24",
 ]
 
 ENTERPRISE_IDS = frozenset({

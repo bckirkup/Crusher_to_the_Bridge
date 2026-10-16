@@ -1,0 +1,96 @@
+{
+  "platform_id": "lsm_354",
+  "ship_class_label": "Lsm 354",
+  "footprint_tier": "representative",
+  "representative_of": "LSM-354, LSM-1 class landing ship medium (1944): 203'6\" x 34'. Open tank well amidships under weather deck, side-gallery rooms, fwd superstructure + conning station; stern machinery + berthing in hold",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 40",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Forecastle_Weather",
+    "Signal_Bridge",
+    "Bridge_Wings",
+    "Wheel_House",
+    "Conning_Station",
+    "Weather_Aft_Super",
+    "Radar_Radio_Chart",
+    "WT_Room_Services",
+    "Weather_Fwd_Super",
+    "Stern_Rooms_Main",
+    "Engineers_Stores",
+    "General_Work_Shop",
+    "Gunners_Ordnance",
+    "Canteen_Stores",
+    "Aux_Machinery_Main",
+    "Washroom_Main",
+    "Tank_Well",
+    "Galley_Stores_Main",
+    "Ships_Office",
+    "Windlass_Mach_Rm",
+    "Bosuns_Stores",
+    "Ramp_Gate_Mach",
+    "Passage_Stbd_Fwd",
+    "Bow_Door_Mach",
+    "WC_Space_Fwd",
+    "Bow_Ramp_Area",
+    "Steering_Gear_Flat",
+    "Aux_Machinery_Hold",
+    "Engine_Room",
+    "Magazine_Hold",
+    "Crew_Berthing_Hold",
+    "Crew_Mess_Hold",
+    "HD_Crew_Hold",
+    "Troop_Berthing_Hold",
+    "Troop_Mess_Hold",
+    "HD_Troop_Hold",
+    "Galley_Hold",
+    "Ballast_Tanks_Hold",
+    "Bosun_Chain_Fwd",
+    "Void_Forepeak"
+  ],
+  "decks": [
+    "bridge_deck",
+    "conning_deck",
+    "forecastle_deck",
+    "hold",
+    "main_deck",
+    "superstructure_deck",
+    "wheelhouse_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 64.0,
+    "ymin": -2.0,
+    "ymax": 12.4
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "hold": "deck_hold.png",
+      "main_deck": "deck_main_deck.png",
+      "superstructure_deck": "deck_superstructure_deck.png",
+      "forecastle_deck": "deck_forecastle_deck.png",
+      "bridge_deck": "deck_bridge_deck.png",
+      "wheelhouse_deck": "deck_wheelhouse_deck.png",
+      "conning_deck": "deck_conning_deck.png"
+    }
+  }
+}

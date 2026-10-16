@@ -1,0 +1,15 @@
+{
+ "schema_version": "1.0",
+ "description": "Blueprint plates copied from naval GA import workdir",
+ "plan": {
+  "file": "plan_overview.png",
+  "style": "general_arrangement_scan",
+  "credit": "Imported via tools.ship_blueprint_import",
+  "license": "Source drawing rights remain with original owner"
+ },
+ "deck_plans": {
+  "gun_platform_deck": "deck_gun_platform_deck.png",
+  "upper_deck": "deck_upper_deck.png",
+  "main_deck": "deck_main_deck.png"
+ }
+}

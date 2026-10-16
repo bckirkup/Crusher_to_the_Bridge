@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:23:02.112761+00:00",
+  "platform": "lsm_354",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 48,
+    "crew": 66
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Crew_Berthing_Hold",
+      "duty_zone": "Wheel_House",
+      "notes": "era-typical: 5 officers"
+    },
+    {
+      "class_id": "enlisted",
+      "role_group": "crew",
+      "count": 61,
+      "berth_zone": "Crew_Berthing_Hold",
+      "duty_zone": "Tank_Well",
+      "notes": "era-typical: ~61 enlisted"
+    },
+    {
+      "class_id": "embarked_troops",
+      "role_group": "passenger",
+      "count": 48,
+      "berth_zone": "Troop_Berthing_Hold",
+      "duty_zone": "Tank_Well",
+      "notes": "era-typical landing-force berthing ~48"
+    }
+  ],
+  "source": "era-typical LSM-1 figures (no data plate: plates 1-2 missing); ~5 off + ~61 enl crew, ~48 embarked troops",
+  "consistency": {
+    "declared_total": 114,
+    "manifest_total": 114,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
