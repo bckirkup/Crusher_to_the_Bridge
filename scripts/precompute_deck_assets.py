@@ -103,6 +103,9 @@ PLATFORMS = [
     "battler_acv6",
     "puncher_cve53",
     "thetis_bay_cve90",
+    "keppler_dd765",
+    "fletcher_dde_dd445",
+    "hunter_killer_dd692",
 ]
 
 ENTERPRISE_IDS = frozenset({

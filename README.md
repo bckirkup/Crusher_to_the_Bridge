@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Sixty-one ship platforms are included, each with spatial layout and HVAC
+Sixty-four ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -855,6 +855,9 @@ from `orchestrator_types.py`:
 | `battler_acv6` | HMS Battler D-18 Attacker/Bogue-class escort carrier (maritime.org GA import, 55 zones, 800 crew) |
 | `puncher_cve53` | HMS Puncher D-79 Bogue-class escort carrier CVE-53 (maritime.org GA import, 88 zones, 869 crew) |
 | `thetis_bay_cve90` | USS Thetis Bay CVE-90 Casablanca-class escort carrier (maritime.org GA import, 74 zones, 596 crew) |
+| `keppler_dd765` | USS Keppler DD-765 Gearing-class FRAM II destroyer (maritime.org GA import, 79 zones, 308 crew) |
+| `fletcher_dde_dd445` | DD-445 Fletcher-class DDE conversion study drawing (maritime.org GA import, 35 zones, ~300 crew est.) |
+| `hunter_killer_dd692` | DD-692-class long-hull hunter-killer contract plan (maritime.org GA import, 60 zones, 309 crew) |
 
 ## License
 

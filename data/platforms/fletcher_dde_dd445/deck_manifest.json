@@ -1,0 +1,89 @@
+{
+  "platform_id": "fletcher_dde_dd445",
+  "ship_class_label": "Fletcher Dde Dd445",
+  "footprint_tier": "representative",
+  "representative_of": "DD-445 Fletcher-class DDE conversion study drawing (Bureau of Ships, PRELIMINARY 27 Jan 1950, single sheet). 376 ft LOA. Thin import: below-main-deck platforms read from banded plans; everything above",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 35",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Fantail",
+    "Aft_Deckhouse",
+    "Uptakes_Mid",
+    "Galley_Mess_Main",
+    "Officers_Country_Main",
+    "Focsle_Main",
+    "Radio_Room_01",
+    "Pilot_House_CIC",
+    "Aft_Stores_1P",
+    "Crew_Berthing_1P",
+    "Ammo_Handling_Aft",
+    "Gen_Wkshop",
+    "Fuel_Oil_Svc_1P",
+    "Aft_Machinery_1P",
+    "Fwd_Machinery_1P",
+    "IC_Plotting",
+    "Ships_Office",
+    "Officers_Country_1P",
+    "HD_WR_1P",
+    "CPO_Berthing_1P",
+    "Ammo_Handling_Fwd",
+    "CPO_Messing",
+    "HD_Crew_Fwd",
+    "Fwd_Stores_1P",
+    "Aft_Stores_2P",
+    "Machinery_2P",
+    "Fwd_Tanks_2P",
+    "Emerg_Diesel_Batt",
+    "Sonar_Block_2P",
+    "Ships_Service_Store",
+    "Crew_Berthing_2P",
+    "Fwd_Stores_2P",
+    "Fuel_Tanks_Hold",
+    "Machinery_Bottom_Hold",
+    "Fwd_Hold"
+  ],
+  "decks": [
+    "bridge_deck",
+    "first_platform",
+    "hold",
+    "main_deck",
+    "second_platform",
+    "superstructure_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 116.75,
+    "ymin": -2.0,
+    "ymax": 14.02
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates cropped from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "bridge_deck": "deck_bridge_deck.png",
+      "superstructure_deck": "deck_superstructure_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "first_platform": "deck_first_platform.png",
+      "second_platform": "deck_second_platform.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}
