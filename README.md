@@ -210,9 +210,6 @@ data/
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
-│   ├── mercury_aks20/              (maritime.org GA import)
-│   ├── assistance_ar17/            (maritime.org GA import)
-│   ├── luzon_arg2/                 (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -572,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Thirty-five ship platforms are included, each with spatial layout and HVAC
+Fifty-one ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -618,12 +615,13 @@ airflow definitions:
 | `missouri_bb63` | USS Missouri BB-63 Iowa-class battleship, 1950 booklet (maritime.org GA import, 103 zones, 1561 crew) |
 | `wisconsin_bb64` | USS Wisconsin BB-64 Iowa-class battleship, 1956 booklet (maritime.org GA import, 103 zones, ~2560 crew) |
 | `new_jersey_bb62` | USS New Jersey BB-62 Iowa-class battleship, 1984 reactivation booklet (maritime.org GA import, 103 zones, ~1781 crew) |
+| `liberty_cargo_ec2` | EC2-S-C1 Liberty cargo ship, WWII merchant marine (maritime.org GA import, 54 zones, 66 crew — first merchant hull) |
+| `savannah_ns` | NS Savannah nuclear merchant/passenger demonstration ship (maritime.org GA import, 73 zones, 60 passengers + 110 crew — first passenger hull) |
+| `aeolus_arc3` | USS Aeolus ARC-3 cable repair ship, ex-LST conversion (maritime.org GA import, 40 zones, ~200 crew) |
+| `alexander_henry_cgs119` | CGS Alexander Henry light icebreaker/buoy tender (maritime.org GA import, 28 zones, 31 crew + 20 passengers/officials) |
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
-| `mercury_aks20` | USS Mercury AKS-20 Acubens-class stores issue ship (maritime.org GA import, 61 zones, 309 crew) |
-| `assistance_ar17` | USS Assistance AR-17 EC2-S-C1 Liberty-hull repair ship (maritime.org GA import, 56 zones, ~700 crew est.) |
-| `luzon_arg2` | USS Luzon ARG-2 internal-combustion-engine repair ship (maritime.org GA import, 67 zones, ~600 crew est.) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
@@ -844,7 +842,11 @@ from `orchestrator_types.py`:
 | `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
 | `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
 | `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
+| `mercury_aks20` | USS Mercury AKS-20 Acubens-class stores issue ship (maritime.org GA import, 61 zones, 309 crew) |
+| `assistance_ar17` | USS Assistance AR-17 EC2-S-C1 Liberty-hull repair ship (maritime.org GA import, 56 zones, ~700 crew est.) |
+| `luzon_arg2` | USS Luzon ARG-2 internal-combustion-engine repair ship (maritime.org GA import, 67 zones, ~600 crew est.) |
 
 ## License
 
 MIT
+
