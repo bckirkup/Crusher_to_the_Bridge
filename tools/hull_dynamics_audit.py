@@ -347,6 +347,19 @@ def _render_arm(arm: str, res: dict[str, Any]) -> list[str]:
     return lines
 
 
+def _render_pin_warnings(pins: dict[str, Any]) -> list[str]:
+    lines = []
+    for key, label in (
+        ("unresolvable_berth_pins", "unresolvable berth pins"),
+        ("unresolvable_duty_pins", "unresolvable duty pins"),
+    ):
+        bad = pins.get(key) or []
+        if bad:
+            lines.append(f"- **{label}: " + ", ".join(
+                f"{x['class']}→{x['pin']}" for x in bad[:8]) + "**")
+    return lines
+
+
 def _render_occupancy(rows: list[dict[str, Any]]) -> list[str]:
     lines = ["## Occupancy smoke (check 6)", ""]
     for r in rows:
@@ -354,15 +367,7 @@ def _render_occupancy(rows: list[dict[str, Any]]) -> list[str]:
         if not occ or occ.get("skipped"):
             continue
         lines.append(f"### {r['platform']} ({occ.get('crew_source')}={occ.get('num_agents')})")
-        pins = occ.get("pin_resolution") or {}
-        for key, label in (
-            ("unresolvable_berth_pins", "unresolvable berth pins"),
-            ("unresolvable_duty_pins", "unresolvable duty pins"),
-        ):
-            bad = pins.get(key) or []
-            if bad:
-                lines.append(f"- **{label}: " + ", ".join(
-                    f"{x['class']}→{x['pin']}" for x in bad[:8]) + "**")
+        lines.extend(_render_pin_warnings(occ.get("pin_resolution") or {}))
         for arm, res in occ.items():
             if arm in ("num_agents", "crew_source", "pin_resolution"):
                 continue
