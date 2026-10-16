@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "description": "Blueprint plates copied from naval GA import workdir",
+  "plan": {
+    "file": "plan_overview.png",
+    "style": "general_arrangement_scan",
+    "credit": "Imported via tools.ship_blueprint_import",
+    "license": "Source drawing rights remain with original owner"
+  },
+  "deck_plans": {
+    "compass_platform_deck": "deck_compass_platform_deck.png",
+    "rangefinder_platform_deck": "deck_rangefinder_platform_deck.png",
+    "nav_bridge_deck": "deck_nav_bridge_deck.png",
+    "searchlight_platform_deck": "deck_searchlight_platform_deck.png",
+    "signal_bridge_deck": "deck_signal_bridge_deck.png",
+    "observation_platform_deck": "deck_observation_platform_deck.png",
+    "emergency_platform_deck": "deck_emergency_platform_deck.png",
+    "landing_platform_deck": "deck_landing_platform_deck.png",
+    "superstructure_deck": "deck_superstructure_deck.png",
+    "upper_deck": "deck_upper_deck.png",
+    "main_deck": "deck_main_deck.png",
+    "second_deck": "deck_second_deck.png",
+    "third_deck": "deck_third_deck.png",
+    "first_platform": "deck_first_platform.png",
+    "second_platform": "deck_second_platform.png",
+    "hold": "deck_hold.png",
+    "inner_bottom": "deck_inner_bottom.png"
+  }
+}
