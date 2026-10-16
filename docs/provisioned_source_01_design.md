@@ -51,7 +51,8 @@ one census; this contract changes only the provisioned_lot mint.
     "lot_mint_model": "provisioned_source" | "fiat",
     "provisioned_source": {
       "source_id": "<provisioning-source registry key>",
-      "q_source": <scalar | [lo, hi]>
+      "q_source": <scalar | [lo, hi]>,
+      "genotype_distribution": {"<pathogen_id>": {"<genotype>": <weight>}}
     }
   }
 }
@@ -82,6 +83,13 @@ one census; this contract changes only the provisioned_lot mint.
   (§1.3). Resolved to a declared `q_source` interval through the
   registry; an explicit `q_source` in the block wins over the registry
   value (that is how rung arms express).
+- `genotype_distribution` (issue #1011 extension) — optional
+  per-pathogen genotype mix the supply chain carries. A declared
+  pathogen's lot strains draw this mix instead of the boarding
+  `prior_genotype_distribution`, so the supply chain's strains are
+  independent of who boards; block > registry; a source or pathogen
+  with no declared mix keeps the prior (the reason-to-be-the-same
+  fallback).
 
 Under `"fiat"`, `lot_object_probability` / `extra_lot_probability`
 keep their shipped semantics and the `provisioned_source` block is
@@ -152,6 +160,7 @@ New data file the implementation leg adds:
     "<source_id>": {
       "q_source": [lo, hi],
       "platform_types": ["cruise", ...],
+      "genotype_distribution": {"<pathogen_id>": {"<genotype>": <weight>}},
       "evidence": "declared Grade C — pending sourcing leg",
       "notes": "<what this source id stands for>"
     }

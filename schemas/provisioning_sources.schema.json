@@ -41,6 +41,15 @@
           "items": {"type": "string"},
           "description": "Platform types this source provisions (e.g. \"cruise\"). Informational; the run config's source_id binding decides resolution."
         },
+        "genotype_distribution": {
+          "type": "object",
+          "description": "Per-pathogen genotype mix the supply chain carries: {pathogen_id: {genotype: weight}} with each pathogen's weights summing to 1. A provisioned lot's strain draws from the source's declared mix for that pathogen instead of the boarding prior_genotype_distribution (issue #1011); a source or pathogen without a declared mix falls back to the prior.",
+          "additionalProperties": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {"type": "number", "minimum": 0}
+          }
+        },
         "evidence": {
           "type": "string",
           "description": "Evidence grade and provenance of the declared interval."

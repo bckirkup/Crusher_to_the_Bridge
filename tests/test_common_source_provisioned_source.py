@@ -382,3 +382,136 @@ def test_sanity_checker_flags_bad_source_and_bad_grammar() -> None:
         report3,
     )
     assert not report3.errors
+
+
+# ── Per-source genotype mix (issue #1011) ───────────────────────────
+
+def _lot_genotypes(core: TransmissionCore) -> list[str]:
+    _, _, objects, _ = _step_objects(
+        core, [_diner(i) for i in range(1, 40)],
+    )
+    lots = [o for o in objects if o["source_kind"] == "provisioned_lot"]
+    assert lots, "q_source 1.0 should contaminate every served station"
+    return [
+        core.strain_registry.get(row["strain_id"]).genotype
+        for row in lots
+    ]
+
+
+def _mix_core(ps_block: dict) -> TransmissionCore:
+    """provisioned_source object-mode core with variant_surveillance
+    armed and the boarding prior pinned to GII.4."""
+    return _strain_core(
+        cs_overrides={
+            "lot_mint_model": "provisioned_source",
+            "provisioned_source": ps_block,
+        },
+        strain_evolution={
+            "genotypes": ["GII.4", "GII.2"],
+            "prior_genotype_distribution": {"GII.4": 0.7, "GII.2": 0.3},
+        },
+    )
+
+
+def test_source_genotype_distribution_overrides_the_boarding_prior(
+) -> None:
+    """A source that declares its own mix supplies the lot's strain —
+    independent of who boards (issue #1011). The boarding prior says
+    GII.4/GII.2; the source says GII.6; every minted lot is GII.6."""
+    core = _mix_core({
+        "source_id": SOURCE_ID,
+        "q_source": 1.0,
+        "genotype_distribution": {PATHOGEN: {"GII.6": 1.0}},
+    })
+    assert set(_lot_genotypes(core)) == {"GII.6"}
+
+
+def test_registry_declared_mix_supplies_the_draw(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The registry entry's own mix is the default — the
+    ``provisioned_source`` block only outranks it when it declares one."""
+    from engines import transmission_core as tc
+
+    monkeypatch.setattr(
+        tc,
+        "_provisioning_source_registry",
+        lambda: {
+            "default_source": SOURCE_ID,
+            "sources": {
+                SOURCE_ID: {
+                    "q_source": 1.0,
+                    "genotype_distribution": {PATHOGEN: {"GII.9": 1.0}},
+                },
+            },
+        },
+    )
+    core = _mix_core({"source_id": SOURCE_ID, "q_source": 1.0})
+    assert set(_lot_genotypes(core)) == {"GII.9"}
+
+
+def test_mix_unscoped_to_the_pathogen_falls_back_to_the_prior() -> None:
+    """A mix that doesn't name the pathogen is the reason-to-be-the-same
+    fallback — the lot draws the boarding prior as before."""
+    core = _mix_core({
+        "source_id": SOURCE_ID,
+        "q_source": 1.0,
+        "genotype_distribution": {"influenza_a": {"H1N1": 1.0}},
+    })
+    assert set(_lot_genotypes(core)) == {"GII.4", "GII.2"}
+
+
+def test_fiat_ignores_the_source_mix() -> None:
+    """The fiat grammar never resolves a source, so a declared mix is
+    inert — lot strains draw the prior exactly as on main."""
+    core = _strain_core(
+        cs_overrides={
+            "lot_mint_model": "fiat",
+            "provisioned_source": {
+                "source_id": SOURCE_ID,
+                "genotype_distribution": {PATHOGEN: {"GII.6": 1.0}},
+            },
+        },
+        strain_evolution={
+            "genotypes": ["GII.4"],
+            "prior_genotype_distribution": {"GII.4": 1.0},
+        },
+    )
+    assert set(_lot_genotypes(core)) == {"GII.4"}
+
+
+def test_sanity_checker_flags_a_bad_genotype_distribution() -> None:
+    """The hook: a config-block or registry mix that isn't a
+    {pathogen: {genotype: weight}} probability map errors."""
+    from tools.sanity_checker import (
+        Report,
+        _check_common_source,
+        _check_source_genotype_distribution,
+    )
+
+    report = Report()
+    _check_common_source(
+        {"transmission": {"common_source": {
+            "lot_mint_model": "provisioned_source",
+            "provisioned_source": {
+                "source_id": SOURCE_ID,
+                "genotype_distribution": {PATHOGEN: {"GII.4": 0.5}},
+            },
+        }}},
+        report,
+    )
+    assert any("sum" in f.message for f in report.errors)
+
+    report2 = Report()
+    _check_source_genotype_distribution(
+        {"flat": "not-a-map"}, "genotype_distribution",
+        "provisioning_sources.json", report2,
+    )
+    assert report2.errors
+
+    report3 = Report()
+    _check_source_genotype_distribution(
+        {PATHOGEN: {"GII.4": 0.6, "GII.2": 0.4}},
+        "genotype_distribution", "provisioning_sources.json", report3,
+    )
+    assert not report3.errors
