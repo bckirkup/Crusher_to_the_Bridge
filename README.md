@@ -193,6 +193,9 @@ data/
 │   ├── ranger_cv4/                 (maritime.org GA import)
 │   ├── yorktown_cv5/               (maritime.org GA import)
 │   ├── wasp_cv7/                   (maritime.org GA import)
+│   ├── sigsbee_dd502/              (maritime.org GA import)
+│   ├── nields_dd616/               (maritime.org GA import)
+│   ├── davison_dd618/              (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -552,7 +555,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twenty-one ship platforms are included, each with spatial layout and HVAC
+Twenty-four ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -582,6 +585,9 @@ airflow definitions:
 | `ranger_cv4` | USS Ranger CV-4 first purpose-built USN carrier (maritime.org GA import, 74 zones, 2641 crew incl. air group) |
 | `yorktown_cv5` | USS Yorktown CV-5 Yorktown-class fleet carrier (maritime.org GA import, 71 zones, 2279 crew incl. air group + flag staff) |
 | `wasp_cv7` | USS Wasp CV-7 treaty carrier (maritime.org GA import, 62 zones, 2128 crew incl. air group + marines) |
+| `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
+| `nields_dd616` | USS Nields DD-616 Benson-class destroyer (maritime.org GA import, 39 zones, 262 crew) |
+| `davison_dd618` | USS Davison DD-618 Gleaves-class FRAM destroyer (maritime.org GA import, 39 zones, 283 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
