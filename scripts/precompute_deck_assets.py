@@ -90,6 +90,9 @@ PLATFORMS = [
     "jupiter_ac3",
     "montana_acr13",
     "olympia_c6",
+    "ranger_cv4",
+    "yorktown_cv5",
+    "wasp_cv7",
 ]
 
 ENTERPRISE_IDS = frozenset({
