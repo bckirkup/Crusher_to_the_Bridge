@@ -106,6 +106,8 @@ PLATFORMS = [
     "keppler_dd765",
     "fletcher_dde_dd445",
     "hunter_killer_dd692",
+    "gosper_apa170",
+    "fort_mandan_lsd21",
 ]
 
 ENTERPRISE_IDS = frozenset({

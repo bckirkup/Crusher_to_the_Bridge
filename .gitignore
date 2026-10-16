@@ -136,3 +136,4 @@ out/
 canary_growth/
 growth_runs/
 growth_*.log
+work/downloads/

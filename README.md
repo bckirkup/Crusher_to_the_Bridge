@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Sixty-four ship platforms are included, each with spatial layout and HVAC
+Sixty-six ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -858,6 +858,8 @@ from `orchestrator_types.py`:
 | `keppler_dd765` | USS Keppler DD-765 Gearing-class FRAM II destroyer (maritime.org GA import, 79 zones, 308 crew) |
 | `fletcher_dde_dd445` | DD-445 Fletcher-class DDE conversion study drawing (maritime.org GA import, 35 zones, ~300 crew est.) |
 | `hunter_killer_dd692` | DD-692-class long-hull hunter-killer contract plan (maritime.org GA import, 60 zones, 309 crew) |
+| `gosper_apa170` | USS Gosper APA-170 Haskell-class attack transport (maritime.org GA import, 71 zones, 534 crew + 1561 troops) |
+| `fort_mandan_lsd21` | USS Fort Mandan LSD-21 Casa Grande-class dock landing ship (maritime.org GA import, 51 zones, 301 crew + 214 troops) |
 
 ## License
 
