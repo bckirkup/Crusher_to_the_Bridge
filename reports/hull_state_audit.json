@@ -1,0 +1,4440 @@
+{
+  "rows": [
+    {
+      "platform": "aeolus_arc3",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2394,
+            "state_retained_frac": 0.3039
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "8/8 rooms have no hvac_supply; residual cross-zone inflow into ['Aux_Machinery_2P', 'Boiler_Casing_M', 'Boiler_Room', 'Elec_Switchboard', 'Engine_Room', 'Escape_Trunk_2P', 'Ice_Machinery_Rm', 'Steering_Gear']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 8 room(s): baseline 0.000 \u2192 state 2.366"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2815,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 5.65,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "alexander_henry_cgs119",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3219,
+            "state_retained_frac": 0.3668
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "4/4 rooms have no hvac_supply; residual cross-zone inflow into ['Engine_Casing_U', 'Engine_Room', 'Funnel_Uptake', 'Steering_Gear']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 4 room(s): baseline 0.000 \u2192 state 0.801"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3103,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 7.65,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "antietam_cvs36",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Tanks"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.0808,
+            "state_retained_frac": 0.2008
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "8/8 rooms have no hvac_supply; residual cross-zone inflow into ['Fuel_Tanks_1P', 'Fuel_Tanks_Hold', 'Gasoline_Tanks', 'Stern_Hold', 'Tanks_1P', 'Tanks_2P', 'Tanks_3B', 'Void_2P']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 8 room(s): baseline 0.000 \u2192 state 7.915"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2824,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 5.74,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "apl_24",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Messing"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.4448,
+            "state_retained_frac": 0.5279
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "5/5 rooms have no hvac_supply; residual cross-zone inflow into ['CPO_Mess', 'CPO_Pantry', 'Crew_Cafeteria_Mess', 'Galley_Bakery', 'Scullery']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "net retained mass in 5 room(s): 0.002 \u2192 0.005; fell in ['CPO_Mess', 'Scullery'] (net-recipient redistribution)"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3505,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 9.74,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "assistance_ar17",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Shops_Stores"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1403,
+            "state_retained_frac": 0.3307
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "18/18 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Shops_1P', 'Carpenter_Shop', 'Clipping_Empty_Shell', 'Electrical_Shop_2nd', 'Fwd_Peak_2P', 'Fwd_Peak_Hold', 'Fwd_Stores_1P', 'Gun_Repair_40mm', 'Machine_Shop_2P', 'Machine_Shop_Main', 'Machine_Shop_Upper', 'Refrig_Provisions_2nd', 'Repair_Parts_Hold', 'Repair_Stores_2P', 'Shipfitter_2P', 'Shipfitter_Upper', 'Spare_Parts_1P', 'Stores_Fwd_2nd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 18 room(s): baseline 0.000 \u2192 state 10.372"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2832,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 8.09,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "astoria_ca34",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1329,
+            "state_retained_frac": 0.2023
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "6/6 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 6 room(s): baseline 0.000 \u2192 state 4.453"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.283,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 4.09,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "bainbridge_dd1",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Accom"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1563,
+            "state_retained_frac": 0.6872
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "22/22 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 22 room(s): baseline 0.000 \u2192 state 0.008"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2823,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 5.22,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "battler_acv6",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Hangar"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1024,
+            "state_retained_frac": 0.1472
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "3/3 rooms have no hvac_supply; residual cross-zone inflow into ['Hangar_Aft', 'Hangar_Fwd', 'Hangar_Shops']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 3 room(s): baseline 0.000 \u2192 state 2.368"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2835,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 8.35,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "bolster_ars38",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3979,
+            "state_retained_frac": 0.6733
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "6/6 rooms have no hvac_supply; residual cross-zone inflow into ['Bosn_Stores', 'Diving_Locker', 'Engine_Rm', 'Motor_Rm', 'Shaft_Alley', 'Steering_Gear']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 6 room(s): baseline 0.006 \u2192 state 4.864"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2812,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 5.26,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "cannon_de701",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1487,
+            "state_retained_frac": 0.4997
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "13/13 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Stores', 'Chain_Locker', 'Engine_Rm', 'Fire_Rm_Aft', 'Fire_Rm_Fwd', 'Fuel_Tanks', 'Fwd_Hold', 'Magazines_Aft', 'Magazines_Fwd', 'Shaft_Alley', 'Steering_Gear', 'Stores_2P', 'Upper_Machinery']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 13 room(s): baseline 0.002 \u2192 state 9.849"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2824,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 6.65,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "castle_class_corvette",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Accom"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3642,
+            "state_retained_frac": 0.718
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "10/10 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "net retained mass in 10 room(s): 0.012 \u2192 0.036; fell in ['Compass_Bridge', 'Sick_Bay', 'Stokers_Mess'] (net-recipient redistribution)"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2815,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 4.74,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "chicago_cg11",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Stores"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1842,
+            "state_retained_frac": 0.3708
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "23/23 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 23 room(s): baseline 0.000 \u2192 state 14.597"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2829,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 4.09,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "classic_cruise_1900",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Service"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2671,
+            "state_retained_frac": 0.299
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "3/3 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 3 room(s): baseline 0.000 \u2192 state 1.116"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.25,
+            "mixing_zones": 42.0,
+            "baseline_mixing_zones": 51.91,
+            "agent_classes": "default"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "cobalt_k124",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3226,
+            "state_retained_frac": 0.5856
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "12/12 rooms have no hvac_supply; residual cross-zone inflow into ['After_Peak', 'Asdic_Compartment', 'Boiler_Room', 'Chain_Locker_Store', 'Engine_Room', 'Engineers_Store', 'Fore_Peak', 'Fwd_Magazines', 'Minesweeping_Store', 'Paint_Lamp_Room', 'Provision_Room', 'Steering_Gear']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 12 room(s): baseline 0.000 \u2192 state 6.256"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2812,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 4.74,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "cushing_dd376",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Accom"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1643,
+            "state_retained_frac": 0.8108
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "32/32 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 32 room(s): baseline 0.004 \u2192 state 0.183"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2826,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 6.65,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "davison_dd618",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2622,
+            "state_retained_frac": 0.4576
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "14/14 rooms have no hvac_supply; residual cross-zone inflow into ['Engine_Rm_Aft', 'Engine_Rm_Fwd', 'Fire_Rm_Aft', 'Fire_Rm_Fwd', 'Fuel_Tanks_2P', 'Fuel_Tanks_Hold', 'Magazine_Aft_2P', 'Magazine_Fwd_2P', 'Magazines_Hold', 'Peak_Hold', 'Shaft_Alley', 'Steering_Gear', 'Uptake_Aft', 'Uptake_Fwd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 14 room(s): baseline 0.000 \u2192 state 5.943"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2822,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 6.04,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "destroyer_baseline",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): zone_lower"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.5478,
+            "state_retained_frac": 0.7007
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "2/2 rooms have no hvac_supply; residual cross-zone inflow into ['Berthing', 'Engine_Room']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 2 room(s): baseline 0.000 \u2192 state 0.438"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "no crew source \u2014 nothing to confine"
+          ],
+          "notes": []
+        }
+      }
+    },
+    {
+      "platform": "eagle_pe60",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Accom"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.219,
+            "state_retained_frac": 0.7105
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "23/23 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 23 room(s): baseline 0.025 \u2192 state 0.208"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2834,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 7.22,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "enterprise_constitution_tos",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_EC_D4"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.4132,
+            "state_retained_frac": 0.4166
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "4/4 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 4 room(s): baseline 0.000 \u2192 state 0.000"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "no crew source \u2014 nothing to confine"
+          ],
+          "notes": []
+        }
+      }
+    },
+    {
+      "platform": "enterprise_galaxy_tng",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_EC_D7"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3561,
+            "state_retained_frac": 0.358
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "6/6 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 6 room(s): baseline 0.000 \u2192 state 0.000"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "no crew source \u2014 nothing to confine"
+          ],
+          "notes": []
+        }
+      }
+    },
+    {
+      "platform": "erie_pg50",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Accom"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1378,
+            "state_retained_frac": 0.517
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "29/29 rooms have no hvac_supply; residual cross-zone inflow into ['Admirals_Quarters', 'Clipping_Room_Aft', 'Crew_Berthing_Main', 'Crews_Locker_Stores', 'Crews_Marine_Berthing', 'Crews_Mess', 'Emergency_Cabin', 'Emergency_Radio', 'Focsle_Stores', 'Galley', 'Hold_Stores_Aft', 'Laundry', 'Marine_Quarters', 'Mess_Attendants', 'Motion_Picture_Room', 'Navigators_Stores', 'Office_Block', 'Officers_Country', 'Pilot_House', 'Powder_Magazine', 'Provisions_Magazine', 'Provisions_Platform', 'Pyrotechnic_Magazine', 'Reefer_Stores', 'Service_Stores', 'Sick_Bay', 'Stores_Aft_2', 'WR_Stores_Block', 'Wardroom_Mess']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 29 room(s): baseline 0.000 \u2192 state 0.016"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2823,
+            "mixing_zones": 6.0,
+            "baseline_mixing_zones": 8.39,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "esteem_mso438",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1669,
+            "state_retained_frac": 0.2048
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "8/8 rooms have no hvac_supply; residual cross-zone inflow into ['After_Machinery_Room', 'Fwd_Machinery_Room', 'Reel_Well', 'Sonar_Room', 'Steering_Flat', 'Uptake_Trunk', 'Windlass_Room', 'Workshop']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 8 room(s): baseline 0.000 \u2192 state 1.040"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2803,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 5.61,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "expedition_cruise_300",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_2_Main"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3698,
+            "state_retained_frac": 0.4826
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "9/9 rooms have no hvac_supply; residual cross-zone inflow into ['Cabin_Deck4_Port', 'Cabin_Deck4_Stbd', 'Cabin_Deck5_Port', 'Cabin_Deck5_Stbd', 'Casino', 'Library', 'Main_Dining_Room', 'Reception_Lobby', 'Theater_Lounge']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 9 room(s): baseline 0.000 \u2192 state 0.006"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "no crew source \u2014 nothing to confine"
+          ],
+          "notes": []
+        }
+      }
+    },
+    {
+      "platform": "expedition_cruise_450",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Service"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3767,
+            "state_retained_frac": 0.4512
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "4/4 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 4 room(s): baseline 0.000 \u2192 state 0.275"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2418,
+            "mixing_zones": 16.0,
+            "baseline_mixing_zones": 27.3,
+            "agent_classes": "default"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "fletcher_class_destroyer",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "no_signature",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Boiler_Rooms"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.5608,
+            "state_retained_frac": 0.6193
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "2/2 rooms have no hvac_supply; residual cross-zone inflow into ['Boiler_Room_1', 'Boiler_Room_2']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": false,
+              "detail": "net retained mass in 2 room(s): 0.000 \u2192 0.000"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "no crew source \u2014 nothing to confine"
+          ],
+          "notes": []
+        }
+      }
+    },
+    {
+      "platform": "fletcher_dde_dd445",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1385,
+            "state_retained_frac": 0.2757
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "9/9 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Machinery_1P', 'Emerg_Diesel_Batt', 'Fuel_Oil_Svc_1P', 'Fuel_Tanks_Hold', 'Fwd_Machinery_1P', 'Fwd_Tanks_2P', 'Machinery_2P', 'Machinery_Bottom_Hold', 'Uptakes_Mid']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 9 room(s): baseline 0.000 \u2192 state 4.362"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2832,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 6.13,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "fort_mandan_lsd21",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Well_Deck"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2049,
+            "state_retained_frac": 0.2548
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "4/4 rooms have no hvac_supply; residual cross-zone inflow into ['Gallery_Port', 'Gallery_Stbd', 'Well_Cover_Open', 'Well_Deck']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 4 room(s): baseline 0.000 \u2192 state 2.378"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3135,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 13.22,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "fort_william_j311",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2205,
+            "state_retained_frac": 0.476
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "12/12 rooms have no hvac_supply; residual cross-zone inflow into ['After_Peak', 'Boiler_Rooms', 'Chain_Locker', 'Compressed_Air_Room', 'Engine_Room', 'Foc_Deck_Open', 'Fwd_Store', 'Machinery_Casing', 'Magazine_Lobby_Fwd', 'Magazines_Fwd', 'Quarterdeck', 'Sweep_Deck']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 12 room(s): baseline 0.000 \u2192 state 3.046"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2807,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 5.04,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "gordon_gunter_r338",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Hotel"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.4431,
+            "state_retained_frac": 0.5982
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "12/12 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "net retained mass in 12 room(s): 0.005 \u2192 0.035; fell in ['Crew_Lounge', 'Crew_SR_Foc', 'Crew_SR_Main', 'Exercise_Rm', 'Laundry', 'Med_Trtmt', 'Recreation', 'Ships_Store'] (net-recipient redistribution)"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3155,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 7.96,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "gosper_apa170",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery_Holds"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2597,
+            "state_retained_frac": 0.6615
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "34/34 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Peak_Tanks', 'Ammunition_Fwd', 'Aux_Machinery_Flat', 'Boat_Deck_Open', 'Boat_Deck_Open_Fwd', 'Boat_Stowage_Deck', 'Cargo_3D', 'Cargo_Hold_4_Lower', 'Cargo_Hold_5_Lower', 'Cargo_Hold_5_Top', 'Diesel_FO_Tanks_Aft', 'Dry_Stores_1P', 'Emergency_Generator_Rm', 'Engine_Boiler_Room', 'Evaporator_Room', 'FO_Tanks_Fwd', 'Fan_Room_Boat', 'Fantail', 'Focsle_Deck_Open', 'Fore_Peak', 'Fore_Peak_1P', 'Fore_Peak_Tank', 'Fwd_Hold_1P', 'Fwd_Stores_1P', 'Machinery_Casing', 'Machinery_Casing_2D', 'Magazines_Aft', 'Main_Deck_Open_Fwd', 'Provisions_3D', 'Shaft_Alley', 'Steering_Gear', 'Stores_Flat_Aft', 'Troop_Cargo_Hold', 'Windlass_Room']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 34 room(s): baseline 0.000 \u2192 state 24.597"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3396,
+            "mixing_zones": 6.0,
+            "baseline_mixing_zones": 19.17,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "hunter_killer_dd692",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2848,
+            "state_retained_frac": 0.3929
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "9/9 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Machinery_1P', 'Emerg_Diesel_2P', 'Fuel_Tanks_Hold', 'Fwd_Machinery_1P', 'Fwd_Tanks_Hold', 'Machinery_2P', 'Machinery_Bottom_Hold', 'Stack_Uptake_01', 'Uptake_Mid']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 9 room(s): baseline 0.004 \u2192 state 4.900"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2832,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 6.91,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "idaho_bb42",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1151,
+            "state_retained_frac": 0.3164
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "28/28 rooms have no hvac_supply; residual cross-zone inflow into ['Barbette_III_2nd', 'Barbette_III_3rd', 'Barbette_II_3rd', 'Barbette_II_Main', 'Barbette_II_Upper', 'Barbette_IV_2nd', 'Barbette_IV_3rd', 'Barbette_I_3rd', 'Barbette_I_Main', 'Barbette_I_Upper', 'Blower_Rms', 'Dynamo_Rm', 'Eng_Casing', 'Engine_Rooms', 'Fire_Rms_2p', 'Fire_Rooms', 'Machinery_Handling', 'Machinery_Space_Hold', 'Pump_Rooms', 'Refrigerating_Rm', 'Shaft_Alley_Hold', 'Smoke_Pipe_Main', 'Smoke_Pipe_Upper', 'Steering_Gear_1p', 'Turret_III', 'Turret_IV', 'Uptakes_3rd', 'Windlass_Mach_3rd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 28 room(s): baseline 0.002 \u2192 state 2.780"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2829,
+            "mixing_zones": 7.0,
+            "baseline_mixing_zones": 7.13,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "independence_cvl26",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1825,
+            "state_retained_frac": 0.3042
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "7/7 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Engine_Rm', 'Aft_Fire_Rm', 'Funnel_Uptake', 'Fwd_Engine_Rm', 'Fwd_Fire_Rm', 'Shaft_Alley', 'Uptakes_Main']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 7 room(s): baseline 0.000 \u2192 state 5.103"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2827,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 7.78,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "jupiter_ac3",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Cargo"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1186,
+            "state_retained_frac": 0.3815
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "15/15 rooms have no hvac_supply; residual cross-zone inflow into ['Cargo_Hatch_Apron', 'Cargo_Holds', 'Chain_Locker', 'FW_Tanks_Aft', 'Focsle_Deck_Open', 'Forepeak_Tank', 'Lamp_Paint_Oil', 'Oil_Cargo_Tanks', 'Oil_Trunks_Fwd', 'Plat_Stores_Aft', 'Poop_Deck_Open', 'Reefer_Stores', 'Stores_2nd', 'Topside_Tanks', 'Work_Shop']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 15 room(s): baseline 0.000 \u2192 state 12.976"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2836,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 5.09,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "keppler_dd765",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.213,
+            "state_retained_frac": 0.3421
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "17/17 rooms have no hvac_supply; residual cross-zone inflow into ['AC_Mach_Rm', 'Aft_Engine_Room', 'Aft_Fire_Room', 'Chain_Locker_3P', 'Emerg_Diesel_Gen', 'Fuel_Tanks_2P', 'Fwd_Engine_Room', 'Fwd_Fire_Room', 'Machinery_Bottom_Hold', 'Peak_Hold', 'Peak_Tank_2P', 'Peak_Tank_3P', 'Shaft_Alley', 'Tanks_Machinery_2P', 'Uptake_Mid', 'Uptake_Stacks', 'Water_Fuel_Hold_Fwd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 17 room(s): baseline 0.007 \u2192 state 8.085"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2833,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 6.65,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "legend_class_nsc",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Aviation"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.4177,
+            "state_retained_frac": 0.5217
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "3/3 rooms have no hvac_supply; residual cross-zone inflow into ['Boat_Deck', 'Flight_Deck', 'Helicopter_Hangar']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 3 room(s): baseline 0.000 \u2192 state 0.006"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 3 group(s): HVAC_Aviation, HVAC_Engine_Room, HVAC_Galley",
+            "dropped 9 boundary-crossing cross_zone_links link(s)",
+            "dropped 5 boundary-crossing adjacency link(s)"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.999,
+            "baseline_retained_frac": 0.4177,
+            "state_retained_frac": 0.5185
+          },
+          "checks": [
+            {
+              "name": "supplied_rooms",
+              "pass": true,
+              "detail": "13/13 rooms supplied"
+            },
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "5/5 rooms have no hvac_supply"
+            },
+            {
+              "name": "no_boundary_paths",
+              "pass": true,
+              "detail": "0 boundary-crossing path(s): "
+            }
+          ]
+        },
+        "lockdown_general": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "no crew source \u2014 nothing to confine"
+          ],
+          "notes": []
+        }
+      }
+    },
+    {
+      "platform": "lexington_cv2",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Hangar"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.9526,
+            "state_retained_frac": 1.0
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "3/3 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 3 room(s): baseline 0.008 \u2192 state 0.041"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2828,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 9.48,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "liberty_cargo_ec2",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Cargo"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2472,
+            "state_retained_frac": 0.389
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "9/9 rooms have no hvac_supply; residual cross-zone inflow into ['Holds_Aft', 'Holds_Fwd', 'Tween_Cargo_Aft', 'Tween_Cargo_Fwd', 'Tween_Hatch_1', 'Tween_Hatch_2', 'Tween_Hatch_3', 'Tween_Hatch_4', 'Tween_Hatch_5']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 9 room(s): baseline 0.000 \u2192 state 6.717"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2813,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 5.52,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "lsm_354",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_TankWell"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2557,
+            "state_retained_frac": 0.2965
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "1/1 rooms have no hvac_supply; residual cross-zone inflow into ['Tank_Well']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 1 room(s): baseline 0.015 \u2192 state 1.243"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.315,
+            "mixing_zones": 2.0,
+            "baseline_mixing_zones": 6.48,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "luzon_arg2",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1599,
+            "state_retained_frac": 0.3208
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "20/20 rooms have no hvac_supply; residual cross-zone inflow into ['AC_Room', 'Aft_DO_Tanks_2P', 'Aft_Peak_Hold', 'Aft_Tanks_1P', 'Cargo_DO_Hold_A', 'Cargo_DO_Hold_F', 'Cargo_DO_Tanks_2P', 'Deep_Tank_2P', 'Deep_Tank_Hold', 'Eng_Boiler_Casing_2nd', 'Eng_Casing_Main', 'Engine_Room', 'Forepeak_Tank_2nd', 'Gen_Evap_Rm', 'Machinery_Bilge_Hold', 'Machinery_Lower_2P', 'Pump_Filter_Rms', 'Settling_Lub_Tanks', 'Steering_Gear', 'Weld_Shop_2nd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 20 room(s): baseline 0.000 \u2192 state 10.378"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2828,
+            "mixing_zones": 6.0,
+            "baseline_mixing_zones": 7.96,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "lyon_ap71",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3371,
+            "state_retained_frac": 0.3965
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "8/8 rooms have no hvac_supply; residual cross-zone inflow into ['Aux_Machinery_3rd', 'Aux_Machinery_Hold', 'Chain_Locker_Fwd_2nd', 'Engine_Room_Hold', 'Machinery_Casing_2nd', 'Machinery_Casing_Shelter', 'Shaft_Alley_3rd', 'Shaft_Alley_Hold']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 8 room(s): baseline 0.001 \u2192 state 2.130"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3469,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 13.57,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "mega_cruise_5000",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Network_Midship_Atrium"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3806,
+            "state_retained_frac": 0.3993
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "5/5 rooms have no hvac_supply; residual cross-zone inflow into ['Casino', 'ComedyClub', 'LibraryCard', 'Royal_Promenade', 'ShopRetail']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 5 room(s): baseline 0.000 \u2192 state 0.334"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2433,
+            "mixing_zones": 93.0,
+            "baseline_mixing_zones": 115.39,
+            "agent_classes": "default"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "mercury_aks20",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Stores"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1137,
+            "state_retained_frac": 0.3965
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "22/22 rooms have no hvac_supply; residual cross-zone inflow into ['Ammo_Fwd', 'Bosns_Stores_3rd', 'Bosuns_Stores_2nd', 'Cargo_Aft_1P', 'Cargo_Aft_2nd', 'Cargo_Aft_3rd', 'Cargo_Clothing', 'Cargo_Fwd_1P', 'Cargo_Fwd_3rd', 'Cargo_Hold_Aft', 'Cargo_Hold_Fwd', 'Chain_Locker_Peak', 'Deep_Tanks', 'Dry_Provisions', 'Electronic_Stores', 'Forepeak_2nd', 'Magazines_Fwd', 'Refrigerated_2nd', 'Refrigerated_3rd', 'Ships_Store_Cargo', 'Storeroom_Flat', 'Stores_Fwd_3rd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 22 room(s): baseline 0.000 \u2192 state 16.915"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2832,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 7.35,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "messy_cruise_500",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Network_Cabins_Stbd_Central"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.5398,
+            "state_retained_frac": 0.5679
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "18/18 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 18 room(s): baseline 0.001 \u2192 state 0.541"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "no crew source \u2014 nothing to confine"
+          ],
+          "notes": []
+        }
+      }
+    },
+    {
+      "platform": "miami_cl89",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Stores"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1395,
+            "state_retained_frac": 0.3566
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "24/24 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 24 room(s): baseline 0.000 \u2192 state 15.422"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2831,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 3.3,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "middlesex_lst983",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_TankDeck"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3108,
+            "state_retained_frac": 0.3591
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "2/2 rooms have no hvac_supply; residual cross-zone inflow into ['Tank_Deck', 'Tank_Deck_Port']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 2 room(s): baseline 0.008 \u2192 state 1.564"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3218,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 10.17,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "midway_cv41",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Accom"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1122,
+            "state_retained_frac": 0.29
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "14/14 rooms have no hvac_supply; residual cross-zone inflow into ['ADP_3D', 'AIMD_01', 'Air_Ops_Rooms', 'Aviation_Shops_Main', 'Aviation_Stores_01', 'Crew_Living_02', 'Nav_Bridge', 'Officers_Country_02', 'PriFly_FlagPlot', 'Shops_2D', 'Shops_4D', 'Supply_Offices_01', 'Wardroom_02', 'Work_Centers_Main']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 14 room(s): baseline 0.000 \u2192 state 0.567"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3113,
+            "mixing_zones": 6.0,
+            "baseline_mixing_zones": 10.87,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "missouri_bb63",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Engineering"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1614,
+            "state_retained_frac": 0.3598
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "29/29 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Crane_Mach', 'Boiler_Rms_Aft_3D', 'Boiler_Rms_Fwd_3D', 'Boiler_Rms_Mid_3D', 'Eng_Rm_1_1P', 'Eng_Rm_4_1P', 'Eng_Rm_Aft_3D', 'Eng_Rm_Fwd_3D', 'Eng_Rms_Mid_1P', 'Evap_Feed_2P', 'Evap_ResFeed_Hold', 'Machinery_3P', 'Machinery_Hold', 'Machinery_Lower_2P', 'Shaft_Alleys_2P', 'Shaft_Alleys_Hold', 'Steering_Gear_1P', 'Turret1_Barbette_1P', 'Turret1_Barbette_2D', 'Turret1_Barbette_3D', 'Turret2_Barbette_1P', 'Turret2_Barbette_2D', 'Turret2_Barbette_3D', 'Turret2_Trunk_MD', 'Turret3_Barbette_1P', 'Turret3_Barbette_2D', 'Uptakes_2D', 'Uptakes_MD', 'Windlass_Room_2D']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 29 room(s): baseline 0.000 \u2192 state 18.416"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2827,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 5.09,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "montana_acr13",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3256,
+            "state_retained_frac": 0.4084
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "19/19 rooms have no hvac_supply; residual cross-zone inflow into ['BD_Engine_Hatches', 'BD_Engine_Hatches_S', 'BD_Uptakes', 'BD_Uptakes_S', 'GD_Air_Compressor', 'GD_Dynamo_Trunks', 'GD_Engine_Hatches', 'GD_Uptakes', 'LPA_Air_Compressor', 'MD_Dynamo_Trunk', 'MD_Machinery_Hatches', 'UP_Boiler_Port', 'UP_Boiler_Stb', 'UP_Dynamo_Port', 'UP_Dynamo_Stb', 'UP_Engine_Port', 'UP_Engine_Stb', 'UP_Fire_Control', 'UP_Flushing_Pumps']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 19 room(s): baseline 0.000 \u2192 state 9.445"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.283,
+            "mixing_zones": 20.0,
+            "baseline_mixing_zones": 11.26,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "new_jersey_bb62",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Engineering"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1614,
+            "state_retained_frac": 0.3598
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "29/29 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Crane_Mach', 'Boiler_Rms_Aft_3D', 'Boiler_Rms_Fwd_3D', 'Boiler_Rms_Mid_3D', 'Eng_Rm_1_1P', 'Eng_Rm_4_1P', 'Eng_Rm_Aft_3D', 'Eng_Rm_Fwd_3D', 'Eng_Rms_Mid_1P', 'Evap_Feed_2P', 'Evap_ResFeed_Hold', 'Machinery_3P', 'Machinery_Hold', 'Machinery_Lower_2P', 'Shaft_Alleys_2P', 'Shaft_Alleys_Hold', 'Steering_Gear_1P', 'Turret1_Barbette_1P', 'Turret1_Barbette_2D', 'Turret1_Barbette_3D', 'Turret2_Barbette_1P', 'Turret2_Barbette_2D', 'Turret2_Barbette_3D', 'Turret2_Trunk_MD', 'Turret3_Barbette_1P', 'Turret3_Barbette_2D', 'Uptakes_2D', 'Uptakes_MD', 'Windlass_Room_2D']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 29 room(s): baseline 0.000 \u2192 state 18.415"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2825,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 3.52,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "new_york_bb34",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1745,
+            "state_retained_frac": 0.3328
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "18/18 rooms have no hvac_supply; residual cross-zone inflow into ['Boiler_Rm_2PA', 'Boiler_Rm_2PF', 'Boiler_Rms_1PF', 'Conning_Region_Super', 'Engine_Lower_HA', 'Engine_Rm_1PA', 'Engine_Rm_2PA', 'Gunnery_Conning', 'Gyro_Dynamo_2PA', 'Ice_Machine_3DA', 'Machinery_Hatch_3DA', 'Magazines_1PA_R', 'Magazines_2PF', 'Powder_1PA', 'Powder_1PF', 'Steam_Passage_1PA', 'Uptake_Mid', 'Windlass_1PF']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 18 room(s): baseline 0.002 \u2192 state 11.700"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2825,
+            "mixing_zones": 8.0,
+            "baseline_mixing_zones": 9.48,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "nields_dd616",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2511,
+            "state_retained_frac": 0.4416
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "14/14 rooms have no hvac_supply; residual cross-zone inflow into ['Engine_Rm_Aft', 'Engine_Rm_Fwd', 'Fire_Rm_Aft', 'Fire_Rm_Fwd', 'Fuel_Tanks_2P', 'Fuel_Tanks_Hold', 'Magazine_Aft_2P', 'Magazine_Fwd_2P', 'Magazines_Hold', 'Peak_Hold', 'Shaft_Alley', 'Steering_Gear', 'Uptake_Aft', 'Uptake_Fwd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 14 room(s): baseline 0.000 \u2192 state 5.918"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2831,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 6.0,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "olympia_c6",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "no_signature",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3275,
+            "state_retained_frac": 0.355
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": false,
+              "detail": "5/9 rooms have no hvac_supply; residual cross-zone inflow into ['HD_Boiler_Port', 'HD_Boiler_Stb', 'HD_Engine_Port', 'HD_Engine_Stb', 'PF_Boiler_Port', 'PF_Boiler_Stb', 'PF_Dynamo_Room', 'PF_Engine_Port', 'PF_Engine_Stb']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "net retained mass in 9 room(s): 0.025 \u2192 1.620"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2832,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 4.96,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "palmer_dms5",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Accom"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1835,
+            "state_retained_frac": 0.8415
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "32/32 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 32 room(s): baseline 0.002 \u2192 state 0.040"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2823,
+            "mixing_zones": 6.0,
+            "baseline_mixing_zones": 7.3,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "passumpsic_ao106",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1886,
+            "state_retained_frac": 0.3943
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "9/9 rooms have no hvac_supply; residual cross-zone inflow into ['Boiler_Rm', 'Cargo_Pump_Rm', 'Engine_Rm', 'Fuel_Tanks', 'Fwd_Peak_Tanks', 'Magazines', 'Shaft_Alley', 'Steering_Gear', 'Stores_2D']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 9 room(s): baseline 0.001 \u2192 state 5.076"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2829,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 7.04,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "pce_874",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2153,
+            "state_retained_frac": 0.5365
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "7/7 rooms have no hvac_supply; residual cross-zone inflow into ['Eng_Casing', 'Engine_Rm', 'Fuel_Tanks', 'Gen_Rm', 'Shaft_Alley', 'Steering_Gear', 'Stores_Platform']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 7 room(s): baseline 0.002 \u2192 state 4.650"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2815,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 5.22,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "pope_ap110",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Stores_Holds"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2157,
+            "state_retained_frac": 0.4804
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "28/28 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Loading_House', 'Boat_Deck_Open', 'Dry_Stores_Flat', 'Focsle_Deck', 'Forepeak_3D', 'Forepeak_Tank', 'Fwd_Hold_Cargo', 'Fwd_House_Mech', 'Fwd_Peak_Tank', 'Hold5_Dry_Cargo', 'Laundry', 'Machinery_Tankage', 'Nav_Bridge', 'Provision_Stores_1P', 'Provisions_3D', 'Refrig_Stores', 'Resistor_House_Aft', 'Signal_Control_Block', 'Stern_Gun_Deck', 'Stores_Aft_2D', 'Stores_Aft_3D', 'Stores_Fwd', 'Sup_Deck_Mech', 'Sup_Gun_Tubs_Aft', 'Tailor_Shop_3D', 'Tanks_Aft', 'Tanks_Fwd', 'Top_House']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 28 room(s): baseline 0.000 \u2192 state 21.553"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3525,
+            "mixing_zones": 8.0,
+            "baseline_mixing_zones": 18.87,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "pt_564",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Weather"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2022,
+            "state_retained_frac": 0.3278
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "5/5 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 5 room(s): baseline 0.000 \u2192 state 0.000"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2733,
+            "mixing_zones": 2.0,
+            "baseline_mixing_zones": 2.83,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "puncher_cve53",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Weather"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1624,
+            "state_retained_frac": 0.2126
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "7/7 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 7 room(s): baseline 0.000 \u2192 state 4.293"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2879,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 5.26,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "ranger_cv4",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Weather"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1369,
+            "state_retained_frac": 0.198
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "5/5 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 5 room(s): baseline 0.000 \u2192 state 4.507"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2963,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 5.96,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "raven_am55",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3595,
+            "state_retained_frac": 0.6078
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "6/6 rooms have no hvac_supply; residual cross-zone inflow into ['Clipping_Rm', 'Engine_Rm', 'Fwd_Magazines', 'Gen_Rm', 'Steering_Gear', 'Steering_Gen']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 6 room(s): baseline 0.005 \u2192 state 3.879"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2807,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 5.26,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "river_class_frigate",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2996,
+            "state_retained_frac": 0.5886
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "16/16 rooms have no hvac_supply; residual cross-zone inflow into ['AS_Instrument', 'After_Peak_Ballast', 'Ammo_Lobby', 'Asdic_Dome', 'Boiler_Room', 'Bosun_Fwd', 'Chain_Locker', 'DC_Flat', 'Drying_Room', 'Engine_Room', 'Fore_Peak', 'Fwd_Magazine', 'Gyro_Diesel_Room', 'Lamp_Paint_Decon', 'Magazine_Aft', 'Steering_Gear']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 16 room(s): baseline 0.002 \u2192 state 6.260"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2814,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 5.26,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "rolla_pc483",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Accom"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.245,
+            "state_retained_frac": 0.8151
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "21/21 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 21 room(s): baseline 0.009 \u2192 state 0.113"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2819,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 6.83,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "ruchamkin_apd89",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1564,
+            "state_retained_frac": 0.4473
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "11/11 rooms have no hvac_supply; residual cross-zone inflow into ['Boiler_Rm_Aft', 'Boiler_Rm_Fwd', 'Chain_Locker', 'Engine_Rm', 'Fuel_Tanks', 'Fwd_Hold', 'Magazines', 'Shaft_Alley', 'Steering_Gear', 'Stores_2P', 'Upper_Machinery']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 11 room(s): baseline 0.001 \u2192 state 8.285"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3166,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 10.87,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "san_antonio_class_lpd",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Well_Deck"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2766,
+            "state_retained_frac": 0.3089
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "1/1 rooms have no hvac_supply; residual cross-zone inflow into ['Well_Deck']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 1 room(s): baseline 0.000 \u2192 state 0.924"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [
+            "no declared nbc_filter_efficiency on citadel groups \u2014 filter kept at baseline 0.50"
+          ],
+          "edits": [
+            "hvac_duty=0.0 on 9 group(s): HVAC_Aviation, HVAC_Crew_Habitable, HVAC_Galley, HVAC_Machinery, HVAC_Medical, HVAC_Officer_Berthing, HVAC_Troop_Berthing, HVAC_Vehicle_Deck, HVAC_Well_Deck",
+            "dropped 3 boundary-crossing cross_zone_links link(s)",
+            "dropped 2 boundary-crossing adjacency link(s)"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2766,
+            "state_retained_frac": 0.696
+          },
+          "checks": [
+            {
+              "name": "supplied_rooms",
+              "pass": true,
+              "detail": "3/3 rooms supplied"
+            },
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "19/19 rooms have no hvac_supply; residual cross-zone inflow into ['Crew_Mess', 'Engine_Room_Aft', 'Engine_Room_Fwd', 'Passageway_Main', 'Ship_Enlisted_Berthing', 'Troop_Berthing_Aft', 'Troop_Berthing_Fwd', 'Troop_Berthing_Mid', 'Troop_Mess', 'Troop_Recreation', 'Vehicle_Deck', 'Well_Deck']"
+            },
+            {
+              "name": "no_boundary_paths",
+              "pass": true,
+              "detail": "0 boundary-crossing path(s): "
+            }
+          ]
+        },
+        "lockdown_general": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "no crew source \u2014 nothing to confine"
+          ],
+          "notes": []
+        }
+      }
+    },
+    {
+      "platform": "saratoga_cv3",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Hangar"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.9724,
+            "state_retained_frac": 1.0
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "3/3 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 3 room(s): baseline 0.005 \u2192 state 0.025"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2828,
+            "mixing_zones": 2.0,
+            "baseline_mixing_zones": 7.74,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "saratoga_cv60",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Weather"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.0998,
+            "state_retained_frac": 0.1149
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "2/2 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 2 room(s): baseline 0.000 \u2192 state 1.228"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2826,
+            "mixing_zones": 9.0,
+            "baseline_mixing_zones": 9.52,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "savannah_ns",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Holds"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2254,
+            "state_retained_frac": 0.3441
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "10/10 rooms have no hvac_supply; residual cross-zone inflow into ['Hold_Bottom_Aft', 'Hold_Bottom_Fwd', 'Holds_Aft_A', 'Holds_Aft_B', 'Holds_Aft_C', 'Holds_Aft_D', 'Holds_Fwd_A', 'Holds_Fwd_B', 'Holds_Fwd_C', 'Holds_Fwd_D']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 10 room(s): baseline 0.016 \u2192 state 4.649"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3092,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 17.83,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "sigsbee_dd502",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2193,
+            "state_retained_frac": 0.4029
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "15/15 rooms have no hvac_supply; residual cross-zone inflow into ['Engine_Rm_Aft', 'Engine_Rm_Fwd', 'Fire_Rm_Aft', 'Fire_Rm_Fwd', 'Fuel_Tanks_2P', 'Magazine_Aft_2P', 'Magazine_Fwd_2P', 'Magazine_Fwd_3P', 'Magazines_Hold', 'Peak_Hold', 'Shaft_Alley', 'Steering_Gear', 'Tanks_Hold', 'Uptake_Aft', 'Uptake_Fwd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 15 room(s): baseline 0.000 \u2192 state 5.957"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2831,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 6.04,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "south_dakota_bb49",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Living"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2996,
+            "state_retained_frac": 0.4647
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "11/11 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 11 room(s): baseline 0.000 \u2192 state 0.497"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.283,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 5.96,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "spirit_cruise_3000",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): AHU_Public_Fwd"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.3167,
+            "state_retained_frac": 0.3474
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "4/4 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 4 room(s): baseline 0.000 \u2192 state 0.612"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2508,
+            "mixing_zones": 57.0,
+            "baseline_mixing_zones": 74.04,
+            "agent_classes": "default"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "squier_ap130",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Troop_Berthing"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1029,
+            "state_retained_frac": 0.3893
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "18/18 rooms have no hvac_supply; residual cross-zone inflow into ['Crew_Berthing_2D', 'Crew_Berthing_Fwd_Up', 'Crew_Berthing_Up', 'Crew_Troop_Mess_2D', 'Galley_Bakery_3D', 'Galley_Complex_Up', 'NCO_Berthing_2D', 'NCO_Mess_Up', 'Ship_Troop_Off_Mess', 'Troop_Berthing_1P_A', 'Troop_Berthing_1P_B', 'Troop_Berthing_1P_C', 'Troop_Berthing_2D', 'Troop_Berthing_3D_A', 'Troop_Berthing_3D_B', 'Troop_Berthing_3D_C', 'Troop_Berthing_Up', 'Troop_Mess_2D']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 18 room(s): baseline 0.000 \u2192 state 0.016"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3493,
+            "mixing_zones": 8.0,
+            "baseline_mixing_zones": 17.22,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "texas_bb35",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Stores"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1908,
+            "state_retained_frac": 0.4537
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "36/36 rooms have no hvac_supply; residual cross-zone inflow into ['Admin_Mid_2D', 'Bow_Stor_Half', 'Brig_3D', 'Butcher_Garbage', 'CPO_Pantry_Berth', 'Carpenter_Shop_3D', 'Conning_Tower_Super', 'Crew_3D_AftN', 'DC_Locker_Carpenter', 'Elec_Dist_1P', 'Gunnery_Conning', 'Hold_Provisions_Mid', 'Hold_Stores_Aft', 'Hold_Stores_Fwd', 'IC_Rm_1P', 'Laundry_2D', 'Lumber_Issue_3D', 'Machine_Shop_3D', 'Magazines_Fwd_2P', 'Medical_Offices_2D', 'Metal_Issue_3D', 'Officers_Trunk_3D', 'Plating_Hatches_3D', 'Powder_Aft_1P', 'Powder_Fwd_1P', 'Refrig_Meat_3D', 'Shipfitter_DC_3D', 'Shipfitter_Foundry', 'Ships_Services_2D', 'Stern_Crew_2D', 'Stores_Fwd_2P', 'Stores_Fwd_3D', 'Stores_MidS_3D', 'Stores_Row_Super', 'Trunk_3D_S', 'Windlass_1P']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 36 room(s): baseline 0.015 \u2192 state 21.055"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2826,
+            "mixing_zones": 8.0,
+            "baseline_mixing_zones": 8.78,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "thetis_bay_cve90",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Weather"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1393,
+            "state_retained_frac": 0.2116
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "9/9 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 9 room(s): baseline 0.000 \u2192 state 5.252"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.283,
+            "mixing_zones": 4.0,
+            "baseline_mixing_zones": 4.87,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "wasp_cv7",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Hangar"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1864,
+            "state_retained_frac": 0.2161
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "2/2 rooms have no hvac_supply; residual cross-zone inflow into ['Hangar_Aft', 'Hangar_Fwd']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 2 room(s): baseline 0.000 \u2192 state 1.669"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2826,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 6.43,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "west_virginia_bb48",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Tanks"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2033,
+            "state_retained_frac": 0.2968
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "28/28 rooms have no hvac_supply; residual cross-zone inflow into ['Aftpeak_IB', 'FO_Bands_IB_Port', 'FO_Bands_IB_Stbd', 'FO_Cells_IB', 'FO_FWD_Aft', 'FO_Tanks_1p_Port', 'FO_Tanks_1p_Port_F', 'FO_Tanks_1p_Stbd', 'FO_Tanks_1p_Stbd_F', 'FO_Tanks_2p_Port', 'FO_Tanks_2p_Stbd', 'FO_Tanks_Hold_Port', 'FO_Tanks_Hold_Stbd', 'FW_Hold', 'Forepeak_IB', 'Forepeak_Main', 'Gas_Stowage_2p', 'Gasoline_Stowage_Hold', 'Hydraulic_Oil_Tanks', 'Peak_Tank_1p', 'Peak_Tank_2nd', 'Peak_Tank_2p', 'Peak_Tank_2p_F', 'Peak_Tank_3rd', 'Peak_Tank_Hold', 'Reserve_FW_IB', 'Reserve_FW_IB_F', 'WT_Voids_IB']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 28 room(s): baseline 0.002 \u2192 state 18.125"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.283,
+            "mixing_zones": 7.0,
+            "baseline_mixing_zones": 9.43,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "winnipeg_j337",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Machinery"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.2015,
+            "state_retained_frac": 0.4333
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "14/14 rooms have no hvac_supply; residual cross-zone inflow into ['After_Peak', 'Asdic_Fwd', 'Boiler_Rooms', 'Chain_Locker', 'Engine_Room', 'Foc_Deck_Open', 'Fwd_Stores', 'Generator_Store', 'Machinery_Casing', 'Magazine_Lobby_Up', 'Magazines_Fwd', 'Quarterdeck', 'Quarterdeck_Flat', 'Steering_Gear']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 14 room(s): baseline 0.000 \u2192 state 3.448"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2819,
+            "mixing_zones": 5.0,
+            "baseline_mixing_zones": 5.04,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "wisconsin_bb64",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Engineering"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1614,
+            "state_retained_frac": 0.3598
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "29/29 rooms have no hvac_supply; residual cross-zone inflow into ['Aft_Crane_Mach', 'Boiler_Rms_Aft_3D', 'Boiler_Rms_Fwd_3D', 'Boiler_Rms_Mid_3D', 'Eng_Rm_1_1P', 'Eng_Rm_4_1P', 'Eng_Rm_Aft_3D', 'Eng_Rm_Fwd_3D', 'Eng_Rms_Mid_1P', 'Evap_Feed_2P', 'Evap_ResFeed_Hold', 'Machinery_3P', 'Machinery_Hold', 'Machinery_Lower_2P', 'Shaft_Alleys_2P', 'Shaft_Alleys_Hold', 'Steering_Gear_1P', 'Turret1_Barbette_1P', 'Turret1_Barbette_2D', 'Turret1_Barbette_3D', 'Turret2_Barbette_1P', 'Turret2_Barbette_2D', 'Turret2_Barbette_3D', 'Turret2_Trunk_MD', 'Turret3_Barbette_1P', 'Turret3_Barbette_2D', 'Uptakes_2D', 'Uptakes_MD', 'Windlass_Room_2D']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 29 room(s): baseline 0.000 \u2192 state 18.415"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2824,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 3.52,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "wright_cc2",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): VENT_Weather"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.1495,
+            "state_retained_frac": 0.2237
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "6/6 rooms have no hvac_supply"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 6 room(s): baseline 0.000 \u2192 state 4.953"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.2825,
+            "mixing_zones": 3.0,
+            "baseline_mixing_zones": 4.0,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "yorktown_cv5",
+      "states": {
+        "hvac_casualty_main_ahu": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "edits": [
+            "hvac_duty=0.0 on 1 group(s): HVAC_Berthing"
+          ],
+          "drainage": {
+            "filter_efficiency": 0.5,
+            "baseline_retained_frac": 0.0827,
+            "state_retained_frac": 0.3047
+          },
+          "checks": [
+            {
+              "name": "starved_rooms",
+              "pass": true,
+              "detail": "20/20 rooms have no hvac_supply; residual cross-zone inflow into ['CPO_3D', 'Crew_Berthing_2D_Aft', 'Crew_Berthing_2D_Mid', 'Crew_Mess_3D', 'Crew_Mess_3D_Fwd', 'Crew_Space_4D', 'Focsle_Bow_01', 'Focsle_Bow_Main', 'Focsle_Stores_2D', 'Fwd_Stores_1P', 'Fwd_Stores_4D', 'Galley_3D', 'Laundry_3D', 'Provisions_1P', 'Stern_Rooms_Main', 'Stern_Stores_4D', 'Stores_3D', 'Stores_Fwd_3D', 'Wardroom_2D', 'Wardroom_Annex_02']"
+            },
+            {
+              "name": "elevated_retention_in",
+              "pass": true,
+              "detail": "retained mass in 20 room(s): baseline 0.000 \u2192 state 0.025"
+            }
+          ]
+        },
+        "collective_protection": {
+          "verdict": "cannot_express",
+          "blockers": [
+            "citadel selector resolved no HVAC group \u2014 hull cannot state a citadel boundary"
+          ],
+          "notes": []
+        },
+        "lockdown_general": {
+          "verdict": "verified",
+          "blockers": [],
+          "notes": [],
+          "occupancy": {
+            "confined_share": 1.0,
+            "baseline_confined_share": 0.3469,
+            "mixing_zones": 6.0,
+            "baseline_mixing_zones": 10.0,
+            "agent_classes": "manifest"
+          },
+          "checks": [
+            {
+              "name": "min_confined_share",
+              "pass": true,
+              "detail": "confined share 1.000 vs declared minimum 0.95"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

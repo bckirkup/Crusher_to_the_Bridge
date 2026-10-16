@@ -116,6 +116,14 @@ python3 tools/hull_dynamics_audit.py --epochs 48 \
     --json-out reports/hull_dynamics.json --md-out reports/hull_dynamics.md
 python3 tools/hull_dynamics_audit.py --platforms pce_874 --arms default
 python3 tools/hull_dynamics_audit.py --skip-occupancy   # drainage only
+
+# declared-state audit (drainage + occupancy under an operational state)
+python3 tools/hull_state_audit.py --epochs 24 \
+    --json-out reports/hull_state_audit.json \
+    --md-out reports/hull_state_audit.md
+python3 tools/hull_state_audit.py --platforms legend_class_nsc \
+    --states collective_protection
+python3 tools/hull_state_audit.py --states hvac_casualty_main_ahu
 ```
 
 CI-friendly: exit 0 always (it reports findings, it does not gate them).
@@ -159,6 +167,73 @@ Design emission (`"design"` — uniform `ach·ΣV/n` split under the hobbyist
 duty schedule) remains the default pending a fleet-wide regeneration
 decision; the committed `contam/platform.prj` artifacts are unchanged.
 
+## Declared-state audit — 2026-10-16 (80 hulls, seed 42, 24 epochs)
+
+`tools/hull_state_audit.py`, driven by `tools/hull_declared_states.json`.
+Lockdown, collective protection, and HVAC casualty are **declared**
+deviations from normal airflow/occupancy, not baseline defects: the audit
+resolves each state's generic selectors against the hull, applies the
+edits to a copy of its config, reruns the drainage fingerprint and/or
+occupancy smoke under the declared state, and verifies the intended
+signature is present. Verdicts: `verified` (signature measured),
+`cannot_express` (the hull lacks the lever the state needs — a finding on
+the hull, not the state), `no_signature` (edits applied but the declared
+deviation is absent or its declared consequence invisible).
+
+Machinery used by the three shipped states:
+
+- **HVAC casualty** — `hvac_duty: 0` on the largest-volume supply group
+  (the shipped HD-sink star pattern: no supply, no return). Signature:
+  casualty rooms lose all `hvac_supply` inflow and pool injected mass.
+- **Collective protection** — the citadel boundary resolves from
+  `nbc_filter_efficiency` fields or `citadel protected` group
+  descriptions; out-of-citadel supply groups go to duty 0,
+  boundary-crossing `cross_zone_links`/`adjacency` edges are dropped,
+  and the run's ducted-path filtration is raised to the citadel's
+  declared NBC grade. Signature: citadel rooms keep supply while outside
+  rooms starve and no path crosses the boundary.
+- **Lockdown** — an audit-only protocol (`SOP-900-AUDIT`,
+  `confine_all_to_quarters` + `confinement_enforced`, mess-class zones
+  closed) is materialized into a merged protocols file and forced from
+  day 0 via `config_overrides.scenario_schedule`; the manifest arm runs
+  where `crew_manifest.json` exists. Signature: agents collapse onto
+  home zones (confined share ≥ 0.95).
+
+Headline findings (measured, this run):
+
+1. **Only 2 of 80 hulls can declare a citadel at all.** legend_class_nsc
+   carries `nbc_filter_efficiency`/`nbc_filter_type` on 6 HVAC groups and
+   verifies cleanly (3 outside supply groups starved, 14 boundary
+   ducts/hatches shut, filter 0.999). san_antonio_class_lpd resolves a
+   one-group citadel from its description text and verifies (9 outside
+   groups starved, 5 boundary paths shut) — but declares no NBC grade, so
+   the run keeps baseline filtration. Every other hull reports
+   `cannot_express`: the citadel boundary is declared nowhere else in the
+   fleet. Two further engine gaps sit under the metadata: `nbc_filter_*`
+   fields are consumed by no code (they are recorded metadata only), and
+   `filter_efficiency` is a single engine-global scalar — per-zone NBC
+   filtration is inexpressible in config today.
+2. **HVAC casualty is expressible fleet-wide** (78/80 verified) — every
+   hull with a supply group starves it on command. Two hulls produce no
+   pooling signature worth flagging: fletcher_class_destroyer's boiler
+   rooms keep cross-ducted inflow and drain fully through passive uptake
+   paths (retained 0 → 0 — the casualty is near-consequence-free for
+   mass pooling there), and olympia_c6's `VENT_Uptakes` shares four rooms
+   with `VENT_Machinery`, so the casualty leaks ducted supply through the
+   sibling group (5/9 rooms starved — a shared-room group cannot be
+   isolated by a single duty-0 declaration).
+3. **Lockdown is expressible on every hull with a crew source** (72/80
+   verified; confined share 1.00 everywhere it ran). The 8
+   `cannot_express` hulls (legend_class_nsc, san_antonio_class_lpd,
+   fletcher_class_destroyer, destroyer_baseline, expedition_cruise_300,
+   messy_cruise_500, enterprise_constitution_tos,
+   enterprise_galaxy_tng) carry no manifest and no `nominal_complement`
+   — the same crew-source gap the occupancy smoke measures.
+
+Report artifacts: `reports/hull_state_audit.md`,
+`reports/hull_state_audit.json`.
+
+||||||| 0a2e025a
 ## Second fleet run — 2026-10-16, dynamic checks (25 platforms, seed 42, 48 epochs)
 
 `tools/hull_dynamics_audit.py` over every bundle under `data/platforms/`.

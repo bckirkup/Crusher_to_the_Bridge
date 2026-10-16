@@ -1,0 +1,61 @@
+{
+  "description": "Declared operational states for tools/hull_state_audit.py. Each state is a config-level deviation (airflow edits and/or an occupancy-side protocol) plus the signature the audit must measure under it. Selectors are generic; per-hull overrides live under 'platforms'.",
+  "states": {
+    "hvac_casualty_main_ahu": {
+      "description": "Main habitability AHU casualty: the largest-volume supply HVAC group is cut to hvac_duty 0 (the shipped HD-sink star pattern — no supply, no return); its rooms keep only passive adjacency/cross paths.",
+      "airflow": {
+        "set_hvac_duty": [
+          {"select": {"largest_supply_group": true}, "duty": 0.0}
+        ]
+      },
+      "expect": {
+        "starved_rooms": {"select": {"largest_supply_group": true}},
+        "elevated_retention_in": {"select": {"largest_supply_group": true}}
+      }
+    },
+    "collective_protection": {
+      "description": "Citadel sealed (collective protection): out-of-citadel supply groups go to hvac_duty 0, boundary-crossing ducts and hatches shut, and the run's ducted-path filtration is raised to the citadel's declared NBC grade.",
+      "citadel": {"any": [
+        {"with_field": "nbc_filter_efficiency"},
+        {"description_contains": ["citadel protected"]}
+      ]},
+      "airflow": {
+        "set_hvac_duty": [
+          {"select": {"outside_citadel": true, "supply_only": true}, "duty": 0.0}
+        ],
+        "drop_cross_zone_links": [{"crosses_citadel_boundary": true}],
+        "drop_adjacency": [{"crosses_citadel_boundary": true}],
+        "filter_efficiency": "nbc"
+      },
+      "expect": {
+        "supplied_rooms": {"select": {"inside_citadel": true}},
+        "starved_rooms": {"select": {"outside_citadel": true, "supply_only": true}},
+        "no_boundary_paths": true
+      }
+    },
+    "lockdown_general": {
+      "description": "All-hands lockdown: every agent confined to quarters under enforcement from day 0 (no voluntary-compliance draw, no exemptions); mess-class zones closed.",
+      "occupancy": {
+        "audit_protocols": [
+          {
+            "protocol_id": "SOP-900-AUDIT",
+            "name": "AUDIT: declared all-hands lockdown",
+            "description": "Audit-declared confinement order. scenario_calendar trigger never fires reactively; it activates only through the scenario_schedule named below.",
+            "category": "intervention",
+            "trigger": {"instrument_class": "scenario_calendar", "stoplight_level": "RED"},
+            "modifiers": {
+              "confine_all_to_quarters": true,
+              "confinement_enforced": true,
+              "close_zone_class": ["mess"]
+            }
+          }
+        ],
+        "scenario_schedule": {"protocols": [
+          {"protocol_id": "SOP-900-AUDIT", "start_day": 0}
+        ]}
+      },
+      "expect": {"min_confined_share": 0.95}
+    }
+  },
+  "platforms": {}
+}
