@@ -64,6 +64,8 @@ PLATFORMS = [
     "enterprise_constitution_tos",
     "enterprise_galaxy_tng",
     "midway_cv41",
+    "pope_ap110",
+    "squier_ap130",
     "lexington_cv2",
     "saratoga_cv3",
     "sigsbee_dd502",
