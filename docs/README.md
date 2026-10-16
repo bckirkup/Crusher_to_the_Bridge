@@ -146,6 +146,7 @@ python3 presidio_runner.py \
 | [contam_engine_divergence.md](contam_engine_divergence.md) | Measured — native vs ContamX divergence, AHS shunt mechanism, designed-vs-uncommissioned framing, bracket test (ledger CONTAM-DIVERGENCE-01) |
 | [SHIP_BLUEPRINT_IMPORT.md](SHIP_BLUEPRINT_IMPORT.md) | Implemented (`tools/ship_blueprint_import/`) |
 | [GA_IMPORT_APPROACH.md](GA_IMPORT_APPROACH.md) | Proposal + first proof — agent-driven GA digest; R-338 Gordon Gunter, Castle corvette + AM-55 Raven imported with crew manifests |
+| [hull_model_audit.md](hull_model_audit.md) | Living audit — `tools/hull_audit.py` static realism battery (referential integrity, topology, flow closure, mode consistency, derived metrics + fleet outliers) over all 22 platform bundles; first-run deviation report included |
 
 ## Campaign analysis & calibration tooling
 
