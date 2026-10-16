@@ -60,6 +60,43 @@ _MARGIN_PAIRS = (
 )
 _POST_BAND = (0.004, 0.009)
 
+# --- NORO-MINT-RATE-01 arm set (design §10: arm table + echo map only) ---
+_MR_ARM_ORDER = (
+    "off", "ind", "ship",
+    "p005", "p008", "p012", "p017", "p024", "mint",
+)
+_MR_OBJECT_ARMS = (
+    "ship", "p005", "p008", "p012", "p017", "p024", "mint",
+)
+_MR_MINT_ARMS = ("mint",)
+_MR_MARGIN_PAIRS = (
+    ("ship", "p005"), ("p005", "p008"), ("p008", "p012"),
+    ("p012", "p017"), ("p017", "p024"), ("p024", "mint"),
+    ("off", "ship"), ("off", "mint"), ("ind", "ship"), ("ind", "mint"),
+)
+# Scalar-rung E[minted voyage fraction] + E[objects/1000] from the
+# frozen design §3.2/§4 (presence = gate p; objects = p x 1.163).
+_MR_E_PRESENCE = {
+    "ship": 0.0105, "mint": 0.085,
+    "p005": 0.005, "p008": 0.008, "p012": 0.012,
+    "p017": 0.017, "p024": 0.024,
+}
+_MR_SCALAR_LADDER = ("p005", "p008", "p012", "p017", "p024")
+
+
+def _apply_arm_set(name: str) -> None:
+    """Rebind the arm-set constants for a sibling campaign's rows."""
+    global _ARM_ORDER, _OBJECT_ARMS, _MINT_ARMS, _MARGIN_PAIRS, _ECHO_EXPECT
+    if name == "shapes":
+        return
+    if name != "mint_rate":
+        raise ValueError(f"unknown arm set {name!r}")
+    _ARM_ORDER = _MR_ARM_ORDER
+    _OBJECT_ARMS = _MR_OBJECT_ARMS
+    _MINT_ARMS = _MR_MINT_ARMS
+    _MARGIN_PAIRS = _MR_MARGIN_PAIRS
+    _ECHO_EXPECT = _ECHO_EXPECT_MINT_RATE
+
 
 def _arm_of(tier: str) -> str:
     return tier.split("scr_", 1)[-1] if "scr_" in tier else tier
@@ -591,48 +628,149 @@ def _integrity_table(cells: dict) -> list[str]:
     return lines
 
 
-def _echo_table(cells: dict) -> list[str]:
-    """Run-parameter override echo vs the arm's frozen override dict."""
-    expect = {
-        "off": {"mode": "off"},
-        "ind": {"lot_mode": "independent", "handler_mode": "independent",
-                "diner_mode": "independent"},
-        "ind_bg": {"lot_mode": "independent", "handler_mode": "independent",
-                   "diner_mode": "independent",
-                   "titre_draw_mode": "background"},
-        "ship": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
-                 "diner_mode": "object",
-                 "lot_object_probability": [0.001, 0.02]},
-        "bg": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
+def _mr_presence_ladder(cells: dict) -> list[str]:
+    """MINT-RATE-01 §5.4-4: realized minted-voyage presence + objects
+    vs the declared gate expectation per rung (E[p]=p, E[obj]=p·1.163)."""
+    lines = [
+        "| arm | cells | minted | frac | E[frac] | objects | E[obj]"
+        " | posted|minted |",
+        _SEP8,
+    ]
+    for arm in _ARM_ORDER:
+        if arm in ("off", "ind"):
+            continue
+        cen = _ok(cells.get(arm, []))
+        if not cen:
+            continue
+        minted = [r for r in cen if _cen(r).get("lot_obj_voyage")]
+        objs = [o for r in minted for o in _cen(r).get("lot_objects", [])]
+        e_p = _MR_E_PRESENCE.get(arm, 0.0)
+        posted = sum(1 for r in minted if r["posted"])
+        lines.append(
+            f"| {arm} | {len(cen)} | {len(minted)}"
+            f" | {len(minted) / len(cen):.4f} | {e_p:.4f}"
+            f" | {len(objs)} | {1000 * e_p * 1.163:.1f}"
+            f" | {posted} ({100.0 * posted / len(minted) if minted else 0:.1f}%) |"
+        )
+    return lines
+
+
+def _mr_post_per_minted(cells: dict) -> list[str]:
+    """MINT-RATE-01 §4 linearity check: P(post | >=1 lot object) per
+    rung — the rate-independence read — plus the unminted-voyage
+    background posting share."""
+    lines = [
+        "| arm | minted | posted | P(post|minted) [W95]"
+        " | unminted | posted | bg share |",
+        _SEP8,
+    ]
+    for arm in _ARM_ORDER:
+        if arm in ("off", "ind"):
+            continue
+        cen = _ok(cells.get(arm, []))
+        minted = [r for r in cen if _cen(r).get("lot_obj_voyage")]
+        unm = [r for r in cen if not _cen(r).get("lot_obj_voyage")]
+        k = sum(1 for r in minted if r["posted"])
+        lo, hi = _wilson(k, len(minted)) if minted else (0.0, 0.0)
+        kb = sum(1 for r in unm if r["posted"])
+        lines.append(
+            f"| {arm} | {len(minted)} | {k}"
+            f" | {100.0 * k / len(minted) if minted else 0:.2f}%"
+            f" [{100 * lo:.1f},{100 * hi:.1f}]"
+            f" | {len(unm)} | {kb}"
+            f" | {100.0 * kb / len(unm) if unm else 0:.2f}% |"
+        )
+    return lines
+
+
+def _mr_nested_sets(cells: dict) -> list[str]:
+    """MINT-RATE-01 §5.4-3: scalar-rung minted sets must nest in gate
+    order per seed (p005 ⊆ p008 ⊆ p012 ⊆ p017 ⊆ p024)."""
+    flag = {
+        arm: {r["seed"]: bool(_cen(r).get("lot_obj_voyage"))
+              for r in _ok(cells.get(arm, []))}
+        for arm in _MR_SCALAR_LADDER
+    }
+    lines = [
+        "| pair | shared seeds | violated nesting |",
+        _SEP3,
+    ]
+    total_v = 0
+    for lo_arm, hi_arm in zip(_MR_SCALAR_LADDER, _MR_SCALAR_LADDER[1:]):
+        shared = set(flag[lo_arm]) & set(flag[hi_arm])
+        v = sum(
+            1 for s in shared
+            if flag[lo_arm][s] and not flag[hi_arm][s]
+        )
+        total_v += v
+        lines.append(f"| {lo_arm} ⊆ {hi_arm} | {len(shared)} | {v} |")
+    lines.append(f"| **all pairs** | — | **{total_v}** |")
+    return lines
+
+
+_ECHO_EXPECT = {
+    "off": {"mode": "off"},
+    "ind": {"lot_mode": "independent", "handler_mode": "independent",
+            "diner_mode": "independent"},
+    "ind_bg": {"lot_mode": "independent", "handler_mode": "independent",
+               "diner_mode": "independent",
+               "titre_draw_mode": "background"},
+    "ship": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
+             "diner_mode": "object",
+             "lot_object_probability": [0.001, 0.02]},
+    "bg": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
+           "diner_mode": "object",
+           "lot_object_probability": [0.001, 0.02],
+           "titre_draw_mode": "background"},
+    "mint": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
+             "diner_mode": "object",
+             "lot_object_probability": [0.02, 0.15]},
+    "bg_mint": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
+                "diner_mode": "object",
+                "lot_object_probability": [0.02, 0.15],
+                "titre_draw_mode": "background"},
+    "redraw": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
                "diner_mode": "object",
                "lot_object_probability": [0.001, 0.02],
-               "titre_draw_mode": "background"},
-        "mint": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
-                 "diner_mode": "object",
-                 "lot_object_probability": [0.02, 0.15]},
-        "bg_mint": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
+               "lot_state_redraw": "per_window"},
+    "redraw_mint": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
                     "diner_mode": "object",
                     "lot_object_probability": [0.02, 0.15],
-                    "titre_draw_mode": "background"},
-        "redraw": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
-                   "diner_mode": "object",
-                   "lot_object_probability": [0.001, 0.02],
-                   "lot_state_redraw": "per_window"},
-        "redraw_mint": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
-                        "diner_mode": "object",
-                        "lot_object_probability": [0.02, 0.15],
-                        "lot_state_redraw": "per_window"},
-        "fx_wide": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
-                    "diner_mode": "object",
-                    "lot_object_probability": [0.001, 0.02],
-                    "lot_extent_mode": "declared",
-                    "lot_extent_windows": [12, 24]},
-        "fx_narrow": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
-                      "diner_mode": "object",
-                      "lot_object_probability": [0.001, 0.02],
-                      "lot_extent_mode": "declared",
-                      "lot_extent_windows": [2, 4]},
-    }
+                    "lot_state_redraw": "per_window"},
+    "fx_wide": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
+                "diner_mode": "object",
+                "lot_object_probability": [0.001, 0.02],
+                "lot_extent_mode": "declared",
+                "lot_extent_windows": [12, 24]},
+    "fx_narrow": {"lot_mode": "object", "lot_mint_model": "fiat", "handler_mode": "object",
+                  "diner_mode": "object",
+                  "lot_object_probability": [0.001, 0.02],
+                  "lot_extent_mode": "declared",
+                  "lot_extent_windows": [2, 4]},
+}
+
+# MINT-RATE-01: cells ran the pre-#1022 manifests — `lot_mint_model`
+# resolves absent (fiat semantics) and is NOT echoed. Scalar rungs echo
+# the point value exactly (design §5.4-1).
+_MR_OBJ = {"lot_mode": "object", "handler_mode": "object",
+           "diner_mode": "object"}
+_ECHO_EXPECT_MINT_RATE = {
+    "off": {"mode": "off"},
+    "ind": {"lot_mode": "independent", "handler_mode": "independent",
+            "diner_mode": "independent"},
+    "ship": dict(_MR_OBJ, lot_object_probability=[0.001, 0.02]),
+    "mint": dict(_MR_OBJ, lot_object_probability=[0.02, 0.15]),
+    "p005": dict(_MR_OBJ, lot_object_probability=0.005),
+    "p008": dict(_MR_OBJ, lot_object_probability=0.008),
+    "p012": dict(_MR_OBJ, lot_object_probability=0.012),
+    "p017": dict(_MR_OBJ, lot_object_probability=0.017),
+    "p024": dict(_MR_OBJ, lot_object_probability=0.024),
+}
+
+
+def _echo_table(cells: dict) -> list[str]:
+    """Run-parameter override echo vs the arm's frozen override dict."""
+    expect = _ECHO_EXPECT
     lines = ["| arm | echo matches | mismatched |", _SEP3]
     for arm in _ARM_ORDER:
         rows = cells.get(arm, [])
@@ -694,7 +832,12 @@ def main() -> None:
     ap.add_argument("--dose-rows", action="append", default=None,
                     help="entrain_01_dose_audit.py JSONL rows (dose "
                          "position table)")
+    ap.add_argument("--arm-set", default="shapes",
+                    choices=("shapes", "mint_rate"),
+                    help="arm table + echo expectations; 'mint_rate' is "
+                         "the NORO-MINT-RATE-01 arm set (design §10)")
     args = ap.parse_args()
+    _apply_arm_set(args.arm_set)
     cells = load_rows(args.rows)
 
     print("## coverage\n")
@@ -725,6 +868,13 @@ def main() -> None:
     print("\n".join(_margins_table(cells)))
     print("\n## dose position (delivered-dose Hill)\n")
     print("\n".join(_dose_position_table(args.dose_rows)))
+    if args.arm_set == "mint_rate":
+        print("\n## mint presence vs declared gate\n")
+        print("\n".join(_mr_presence_ladder(cells)))
+        print("\n## P(post|minted) — rate independence\n")
+        print("\n".join(_mr_post_per_minted(cells)))
+        print("\n## nested minted sets (scalar rungs)\n")
+        print("\n".join(_mr_nested_sets(cells)))
 
 
 if __name__ == "__main__":

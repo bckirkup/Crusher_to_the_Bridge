@@ -190,6 +190,9 @@ data/
 │   ├── pce_874/                    (maritime.org GA import)
 │   ├── independence_cvl26/         (maritime.org GA import)
 │   ├── midway_cv41/                (maritime.org GA import)
+│   ├── sigsbee_dd502/              (maritime.org GA import)
+│   ├── nields_dd616/               (maritime.org GA import)
+│   ├── davison_dd618/              (maritime.org GA import)
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
@@ -552,7 +555,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twenty-five ship platforms are included, each with spatial layout and HVAC
+Twenty-seven ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -579,6 +582,9 @@ airflow definitions:
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 | `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
+| `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
+| `nields_dd616` | USS Nields DD-616 Benson-class destroyer (maritime.org GA import, 39 zones, 262 crew) |
+| `davison_dd618` | USS Davison DD-618 Gleaves-class FRAM destroyer (maritime.org GA import, 39 zones, 283 crew) |
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:47:29.642074+00:00",
+  "platform_id": "davison_dd618",
+  "target": "B_contam_starter",
+  "hobbyist": true,
+  "openings_count": 25,
+  "skip_duct_spines": true,
+  "offline_gate": {
+    "ok": true,
+    "zone_count": 39,
+    "path_map_entries": 257,
+    "hvac_zones": 5,
+    "simplify_warnings": [
+      "Dropped Contam section on simplify: day-schedules",
+      "Dropped Contam section on simplify: week-schedules",
+      "Dropped Contam section on simplify: wind pressure profiles",
+      "Dropped Contam section on simplify: filter elements",
+      "Dropped Contam section on simplify: filters",
+      "Dropped Contam section on simplify: control nodes",
+      "Dropped Contam section on simplify: annotations"
+    ]
+  },
+  "contamx": null,
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/dd618_import"
+}
