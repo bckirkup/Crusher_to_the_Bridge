@@ -568,6 +568,10 @@ airflow definitions:
 | `san_antonio_class_lpd` | USN San Antonio-class LPD |
 | `gordon_gunter_r338` | NOAA Gordon Gunter T-AGOS research vessel (maritime.org R-338 import, 35 zones, 20 crew + 15 scientists) |
 | `castle_class_corvette` | HMS Castle-class WWII corvette (maritime.org GA import, 19 zones, 99 crew) |
+| `cobalt_k124` | HMCS Cobalt K124 Flower-class corvette (maritime.org GA import, 29 zones, 90 crew) |
+| `river_class_frigate` | RN River-class frigate (maritime.org GA import, 37 zones, 140 crew) |
+| `fort_william_j311` | HMCS Fort William J311 Bangor-class minesweeper (maritime.org GA import, 25 zones, 70 crew) |
+| `winnipeg_j337` | HMCS Winnipeg J337 Algerine-class minesweeper (maritime.org GA import, 31 zones, 122 crew) |
 | `raven_am55` | USS Raven-class AM-55 fleet minesweeper (maritime.org GA import, 21 zones, 105 crew) |
 | `bolster_ars38` | USS Bolster ARS-38 rescue/salvage tug (maritime.org GA import, 24 zones, 90 crew) |
 | `ruchamkin_apd89` | USS Ruchamkin APD-89 fast transport (maritime.org GA import, 32 zones, 213 crew + 162 troops) |

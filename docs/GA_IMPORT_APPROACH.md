@@ -64,6 +64,10 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `pce_874` | PCE-874 patrol escort (6-plate; below-main at lower confidence) | 20 | 99 crew, 6 classes | `.prj` 172 paths, 2 HVAC groups |
 | `independence_cvl26` | CVL-26 Monterey Independence-class light carrier (17-plate booklet; first carrier-scale import — island levels, hangar/fire-curtain segments, double-height machinery, air wing as `air_wing_*` crew classes) | 46 | 1566 crew incl. air wing, 11 classes | `.prj` 472 paths, 10 HVAC groups |
 | `midway_cv41` | CV-41 Midway-class armored battle carrier (18-plate 1947 booklet; three hangar bays w/ fire curtains, armored-flight-deck vocabulary, single island funnel trunk, weapons/ordnance elevator chains, distributed modular magazines) | 65 | 4712 crew incl. air group + marines, 11 classes | `.prj` 802 paths, 10 HVAC groups |
+| `cobalt_k124` | K124 Cobalt Flower-class corvette (2 dense sheets; machinery double-height) | 29 | 90 crew, 5 classes | `.prj` 284 paths, 5 HVAC groups |
+| `river_class_frigate` | River-class frigate (NCH 7077/7078, 2 sheets; twin boiler rooms, messes flanking machinery) | 37 | 140 crew, 5 classes | `.prj` 458 paths, 5 HVAC groups |
+| `fort_william_j311` | J311 Fort William Bangor-class minesweeper '1939 Programme' (3 sheets; reciprocating machinery) | 25 | 70 crew, 5 classes | `.prj` 264 paths, 4 HVAC groups |
+| `winnipeg_j337` | J337 Winnipeg Algerine-class minesweeper 'As fitted' (2 sheets; plate-read per-mess accommodation tables) | 31 | 122 crew, 5 classes | `.prj` 381 paths, 4 HVAC groups |
 
 All ten carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
 

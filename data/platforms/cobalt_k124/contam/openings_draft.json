@@ -1,0 +1,268 @@
+{
+  "schema_version": "1.0",
+  "platform_id": "cobalt_k124",
+  "created_utc": "2026-10-16T12:13:56.340331+00:00",
+  "description": "Draft Contam orifice checklist from naval GA import. Engineers confirm areas/schedules in ContamW; as-built ducts are out of scope here.",
+  "openings": [
+    {
+      "from": "Compass_Bridge",
+      "to": "Bridge_House",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Bridge_House",
+      "to": "Quarterdeck",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Foc_Deck_Open",
+      "to": "Quarterdeck",
+      "type": "deck_walkway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Quarterdeck",
+      "to": "Stern_Open",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Stern_Open",
+      "to": "Galley",
+      "type": "door",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Officer_Cabins",
+      "to": "Engine_Room",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Engine_Room",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Seamen_Mess",
+      "to": "CPO_PO_Mess",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Officer_Cabins",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Fwd_Magazines",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Galley",
+      "to": "CO_Cabin",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Canteen",
+      "to": "Provision_Issue",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Canteen",
+      "to": "Seamen_Mess",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Provision_Issue",
+      "to": "Seamen_Mess",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Minesweeping_Store",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Provision_Room",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Officer_Cabins",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Minesweeping_Store",
+      "to": "Officer_Cabins",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Provision_Room",
+      "to": "Officer_Cabins",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Room",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "CPO_PO_Mess",
+      "to": "Stokers_Mess",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Fore_Peak",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "After_Peak",
+      "to": "Engineers_Store",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    }
+  ],
+  "handwork_remaining": [
+    "duct_networks",
+    "fan_curves",
+    "measured_leakage",
+    "nbc_filtration_elements",
+    "weather_wind_as_required"
+  ]
+}

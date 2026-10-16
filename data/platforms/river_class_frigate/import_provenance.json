@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:18:05.217973+00:00",
+  "platform_id": "river_class_frigate",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/river_class_frigate",
+  "digest_sha256": "3e3c1c0a44b47834213a888c2c751a2787662705bec1dc6bc00537c7bede306b",
+  "svg_sha256": {
+    "page_01_approved.svg": "f731b36352219845e6533d0acd9d15057e06d5a409c8dfc395ab4d3c37985f53",
+    "page_02_approved.svg": "f2f79590dc797fe2749b7ea05a8d43bea3e2dba15ca18c47d5411b32c09cf25d"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 37,
+  "berthing_zones": [
+    "Quarterdeck",
+    "Cabin_Block",
+    "Mess_Mid_P",
+    "Mess_Mid_S",
+    "Stewards_Mess",
+    "Wardroom_Flat",
+    "CPO_ERA_Mess",
+    "PO_Mess",
+    "Seamen_Mess",
+    "Stores_Aft",
+    "Provision_Issue",
+    "Canteen_Flat",
+    "Stokers_Mess",
+    "Cold_Stores"
+  ],
+  "systems_era": "rn_ww2"
+}
