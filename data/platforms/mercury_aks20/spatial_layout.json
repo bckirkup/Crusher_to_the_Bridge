@@ -1,0 +1,968 @@
+{
+  "platform": "mercury_aks20",
+  "description": "AKS-20 USS Mercury, Acubens-class general stores issue ship, maritime.org booklet aks20.pdf (BuShips plan AKS20-S0103-167288, 1949). 469ft OA x 65ft, single-screw EC2-derived hull; cargo holds fwd and aft of midship machinery, midship house with accommodation.",
+  "isolation_unit_capacity": 4,
+  "deck_dimensions": {
+    "length_m": 143.04,
+    "beam_m": 19.81
+  },
+  "graywater_zones": [
+    "Engine_Room"
+  ],
+  "zones": [
+    {
+      "id": "Nav_Bridge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 511.06,
+      "floor_area_m2": 196.56,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 17.4,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 55.04,
+        "y": 8.29
+      },
+      "max_occupancy": 6,
+      "description": "wheel house + chart room + gyro (C-0212-E blk)"
+    },
+    {
+      "id": "Signal_Shelter",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 108.84,
+      "floor_area_m2": 41.86,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 17.4,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 42.17,
+        "y": 8.66
+      },
+      "max_occupancy": 4,
+      "description": "signal shelter B-0116-L"
+    },
+    {
+      "id": "Officers_Country",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 614.85,
+      "floor_area_m2": 236.48,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 14.8,
+      "deck": "boat_deck",
+      "display": {
+        "x": 51.56,
+        "y": 8.64
+      },
+      "max_occupancy": 21,
+      "description": "officer staterooms + wardroom, fr 98-122 (sheet accom 21-22 off)"
+    },
+    {
+      "id": "Boat_Stowage",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 301.4,
+      "floor_area_m2": 115.92,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 14.8,
+      "deck": "boat_deck",
+      "display": {
+        "x": 34.19,
+        "y": 8.48
+      },
+      "description": "motor whale boats / 40' motor launches on davits"
+    },
+    {
+      "id": "Fantail",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1411.67,
+      "floor_area_m2": 542.95,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 15.91,
+        "y": 7.98
+      },
+      "description": "aft weather incl NO.4 hatch cover, capstan, amm hoist, 5in gun tub over"
+    },
+    {
+      "id": "Eng_Office",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 112.77,
+      "floor_area_m2": 43.37,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 44.23,
+        "y": 7.87
+      },
+      "max_occupancy": 3,
+      "description": "C-102-L engineer's office"
+    },
+    {
+      "id": "Emerg_Gen_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 93.97,
+      "floor_area_m2": 36.14,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 44.52,
+        "y": 13.81
+      },
+      "description": "emergency diesel generator room"
+    },
+    {
+      "id": "Sick_Bay",
+      "type": "Medical",
+      "traffic": "medium",
+      "volume_m3": 75.18,
+      "floor_area_m2": 28.91,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 44.96,
+        "y": 2.59
+      },
+      "max_occupancy": 6,
+      "description": "C-104-L sick bay fr 116-122 P (2 hosp + 4 sick-bay berths)"
+    },
+    {
+      "id": "Eng_Casing",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 505.88,
+      "floor_area_m2": 194.57,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 53.71,
+        "y": 6.77
+      },
+      "description": "machinery casing B-1 trunk over engine room"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 129.47,
+      "floor_area_m2": 49.8,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 63.64,
+        "y": 5.01
+      },
+      "max_occupancy": 6,
+      "description": "B-108-AL galley, elect ranges/ovens/kettles"
+    },
+    {
+      "id": "CPO_Pantry_Issue",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 95.02,
+      "floor_area_m2": 36.54,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 67.73,
+        "y": 4.24
+      },
+      "max_occupancy": 4,
+      "description": "A-106-L CPO pantry + issue room with counter/shelves"
+    },
+    {
+      "id": "Bakery",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 58.47,
+      "floor_area_m2": 22.49,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 64.08,
+        "y": 11.94
+      },
+      "max_occupancy": 3,
+      "description": "A-109-LA bakery (oven, mixer)"
+    },
+    {
+      "id": "Emerg_Radio",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 46.99,
+      "floor_area_m2": 18.07,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 68.6,
+        "y": 9.96
+      },
+      "max_occupancy": 2,
+      "description": "emergency radio room A-107C"
+    },
+    {
+      "id": "CPO_Quarters",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 68.91,
+      "floor_area_m2": 26.5,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 56.05,
+        "y": 1.76
+      },
+      "max_occupancy": 20,
+      "description": "CPO berthing 9+3+2 blocks, shelter dk fr 99-113 P"
+    },
+    {
+      "id": "HD_CPO",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 25.39,
+      "floor_area_m2": 11.04,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 50.36,
+        "y": 1.76
+      },
+      "max_occupancy": 4,
+      "serves": [
+        "CPO_Quarters",
+        "Officers_Country"
+      ],
+      "description": "CPO/officer W.C. + urinals, port house",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Post_Office_Disb",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 140.96,
+      "floor_area_m2": 54.21,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 52.55,
+        "y": 15.9
+      },
+      "max_occupancy": 4,
+      "description": "post office + crew disbursing office B-105-L + ships office"
+    },
+    {
+      "id": "Crew_Berthing_Shelter",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 62.13,
+      "floor_area_m2": 23.9,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 61.16,
+        "y": 16.45
+      },
+      "max_occupancy": 48,
+      "description": "9+6+33 crew berthing B-101-L, shelter dk fr 100-115 S"
+    },
+    {
+      "id": "Pay_Supply_Office",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 84.57,
+      "floor_area_m2": 32.53,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 66.85,
+        "y": 15.46
+      },
+      "max_occupancy": 4,
+      "description": "A-111-L pay & supply office"
+    },
+    {
+      "id": "HD_Crew_Shelter",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 35.56,
+      "floor_area_m2": 15.46,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 43.64,
+        "y": 16.89
+      },
+      "max_occupancy": 6,
+      "serves": [
+        "Crew_Berthing_Shelter",
+        "Post_Office_Disb"
+      ],
+      "description": "crew W.C./wash, stbd-aft house",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Hatch_3",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 459.42,
+      "floor_area_m2": 176.7,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 76.63,
+        "y": 7.32
+      },
+      "description": "NO.3 hatch 27x20 weather cover + elevator hatch A-105-A"
+    },
+    {
+      "id": "Hatch_2",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 396.77,
+      "floor_area_m2": 152.6,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 93.12,
+        "y": 7.98
+      },
+      "description": "NO.2 hatch 16x20 between resistor houses"
+    },
+    {
+      "id": "Hatch_1",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 112.77,
+      "floor_area_m2": 43.37,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 106.84,
+        "y": 7.54
+      },
+      "description": "NO.1 hatch 15x20 cover"
+    },
+    {
+      "id": "Foredeck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 801.9,
+      "floor_area_m2": 308.42,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 12.2,
+      "deck": "shelter_deck",
+      "display": {
+        "x": 124.59,
+        "y": 8.92
+      },
+      "description": "forecastle: clipping rm, fan rm, amm trunk A-505-MT, anchor winch, windlass, 3in gun platform over"
+    },
+    {
+      "id": "Storeroom_Flat",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 921.84,
+      "floor_area_m2": 354.55,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 11.59,
+        "y": 8.07
+      },
+      "max_occupancy": 6,
+      "description": "C-201-A storeroom flat: bosun/damage-control lockers, brig, carp shop, 6 crew stern berths"
+    },
+    {
+      "id": "Cargo_Aft_2nd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 351.91,
+      "floor_area_m2": 135.35,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 31.32,
+        "y": 7.48
+      },
+      "description": "spare parts + bulk stores C-503-x, hatch 5 trunk"
+    },
+    {
+      "id": "Crew_Mess",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 111.21,
+      "floor_area_m2": 42.77,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 39.6,
+        "y": 4.34
+      },
+      "max_occupancy": 40,
+      "description": "C-501-8AL crew mess + steam table"
+    },
+    {
+      "id": "Scullery",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 51.21,
+      "floor_area_m2": 19.7,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 42.46,
+        "y": 3.59
+      },
+      "max_occupancy": 3,
+      "description": "C-501-6AE scullery (sinks, dishwasher)"
+    },
+    {
+      "id": "Crew_Berthing_2nd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 233.39,
+      "floor_area_m2": 89.77,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 41.26,
+        "y": 12.93
+      },
+      "max_occupancy": 120,
+      "description": "120 crew berthing C-501-5AL/7AL fr 117-141 P&S; I.C. room C-501-4AC inside block"
+    },
+    {
+      "id": "Eng_Casing_2nd",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 323.37,
+      "floor_area_m2": 124.37,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 50.14,
+        "y": 9.27
+      },
+      "description": "machinery casing B-1 + B-202 machinery flats"
+    },
+    {
+      "id": "Refrigeration_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 117.06,
+      "floor_area_m2": 45.02,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 51.8,
+        "y": 2.24
+      },
+      "description": "B-202-6A/2A refrigeration machinery, port of casing"
+    },
+    {
+      "id": "Nav_Store_Armory",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 112.67,
+      "floor_area_m2": 43.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 58.12,
+        "y": 4.78
+      },
+      "max_occupancy": 2,
+      "description": "nav store room + small-arms armory + linen"
+    },
+    {
+      "id": "Eng_Stores_Laundry",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 134.62,
+      "floor_area_m2": 51.78,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 58.42,
+        "y": 13.9
+      },
+      "max_occupancy": 3,
+      "description": "B-202-5A engineers storeroom + laundry + issue rm + CO2 bottles"
+    },
+    {
+      "id": "Refrig_Machinery",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 116.33,
+      "floor_area_m2": 44.74,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 63.09,
+        "y": 5.01
+      },
+      "description": "A-509-12E refrigerated machinery rm + refrigerant cylinders"
+    },
+    {
+      "id": "Refrigerated_2nd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 900.0,
+      "floor_area_m2": 346.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 70.92,
+        "y": 7.33
+      },
+      "description": "A-509-9A/11A/10A/8A refrigerated cargo P&S + fan rooms + barber"
+    },
+    {
+      "id": "Cargo_Clothing",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "floor_area_m2": 307.69,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 85.22,
+        "y": 7.77
+      },
+      "description": "cargo clothing blocks + hatch no.3 trunk A-509-3A"
+    },
+    {
+      "id": "Ships_Store_Cargo",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "floor_area_m2": 230.77,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 100.88,
+        "y": 7.92
+      },
+      "description": "ships store cargo + hatch no.2 trunk A-507-3A"
+    },
+    {
+      "id": "Electronic_Stores",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 210.7,
+      "floor_area_m2": 81.04,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 112.17,
+        "y": 8.15
+      },
+      "description": "electronic stowage + hatch no.1 trunk A-506-3A + amm trunk A-505-MT"
+    },
+    {
+      "id": "Bosuns_Stores_2nd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 215.1,
+      "floor_area_m2": 82.73,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 119.85,
+        "y": 8.22
+      },
+      "description": "A-506-4A boatswain storeroom, chain pipe, stowage racks, CO2 bottles"
+    },
+    {
+      "id": "Forepeak_2nd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 241.43,
+      "floor_area_m2": 92.86,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 131.9,
+        "y": 8.82
+      },
+      "description": "storm oil tank, windlass resisters A-201-A, bosun lkr"
+    },
+    {
+      "id": "HD_Crew_2nd",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 36.25,
+      "floor_area_m2": 15.76,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 9.6,
+      "deck": "second_deck",
+      "display": {
+        "x": 36.89,
+        "y": 15.55
+      },
+      "max_occupancy": 6,
+      "serves": [
+        "Crew_Berthing_2nd",
+        "Crew_Mess"
+      ],
+      "description": "crew shower + urinal by 2nd-deck berthing",
+      "base_ach": 19.1
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 249.21,
+      "floor_area_m2": 95.85,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.0,
+      "deck": "third_deck",
+      "display": {
+        "x": 5.53,
+        "y": 10.51
+      },
+      "description": "C-301-E steering gear flat, hand hyd pump"
+    },
+    {
+      "id": "Cargo_Aft_3rd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1600.0,
+      "floor_area_m2": 615.38,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.0,
+      "deck": "third_deck",
+      "display": {
+        "x": 23.08,
+        "y": 9.54
+      },
+      "description": "C-403-MT + C-501-1A cargo, ammo hoist mchy C-506-E, hatch5 C-503-2A"
+    },
+    {
+      "id": "Crew_Berthing_3rd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 265.84,
+      "floor_area_m2": 102.24,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.0,
+      "deck": "third_deck",
+      "display": {
+        "x": 41.25,
+        "y": 9.7
+      },
+      "max_occupancy": 108,
+      "description": "108 crew berthing C-501-2AL fr 117-126 P&S"
+    },
+    {
+      "id": "Eng_Casing_3rd",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 621.35,
+      "floor_area_m2": 238.98,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.0,
+      "deck": "third_deck",
+      "display": {
+        "x": 52.0,
+        "y": 9.54
+      },
+      "description": "machinery casing B-1 over engine room (ER volume zoned on 1st platform)"
+    },
+    {
+      "id": "Refrigerated_3rd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1560.0,
+      "floor_area_m2": 600.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.0,
+      "deck": "third_deck",
+      "display": {
+        "x": 71.6,
+        "y": 8.89
+      },
+      "description": "A-509-6A/4A/7A/5A refrigerated spaces + hatch3 A-509-2A"
+    },
+    {
+      "id": "Cargo_Fwd_3rd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1290.0,
+      "floor_area_m2": 496.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.0,
+      "deck": "third_deck",
+      "display": {
+        "x": 95.47,
+        "y": 9.22
+      },
+      "description": "A-507-2A + A-507-A cargo"
+    },
+    {
+      "id": "Stores_Fwd_3rd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 328.95,
+      "floor_area_m2": 126.52,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.0,
+      "deck": "third_deck",
+      "display": {
+        "x": 116.33,
+        "y": 9.86
+      },
+      "description": "hatch1 A-506-2A trunk, amm trunk A-505-MT, esc trunk, chain locker A-401-E"
+    },
+    {
+      "id": "Bosns_Stores_3rd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 200.61,
+      "floor_area_m2": 77.16,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.0,
+      "deck": "third_deck",
+      "display": {
+        "x": 131.5,
+        "y": 11.4
+      },
+      "description": "A-301-A bos'n stores bow, storm oil"
+    },
+    {
+      "id": "Cargo_Aft_1P",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1450.0,
+      "floor_area_m2": 557.69,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.3,
+      "deck": "first_platform",
+      "display": {
+        "x": 15.51,
+        "y": 8.6
+      },
+      "description": "cargo stowage C-501-A + aft deep tanks"
+    },
+    {
+      "id": "Deep_Tanks",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 609.62,
+      "floor_area_m2": 234.47,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.3,
+      "deck": "first_platform",
+      "display": {
+        "x": 42.57,
+        "y": 8.3
+      },
+      "description": "deep tanks P&S fwd of machinery"
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 1450.0,
+      "floor_area_m2": 557.69,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.3,
+      "deck": "first_platform",
+      "display": {
+        "x": 65.66,
+        "y": 8.6
+      },
+      "max_occupancy": 12,
+      "description": "aux mchy + boiler flat; ER spans hold->3rd dk heights (~6.5m), zoned once here"
+    },
+    {
+      "id": "Cargo_Fwd_1P",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1380.0,
+      "floor_area_m2": 530.77,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.3,
+      "deck": "first_platform",
+      "display": {
+        "x": 93.23,
+        "y": 8.3
+      },
+      "description": "forward cargo stowage"
+    },
+    {
+      "id": "Ammo_Fwd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 318.21,
+      "floor_area_m2": 122.39,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.3,
+      "deck": "first_platform",
+      "display": {
+        "x": 119.77,
+        "y": 8.75
+      },
+      "description": "A-308-A ammunition + handling rooms"
+    },
+    {
+      "id": "Chain_Locker_Peak",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 100.49,
+      "floor_area_m2": 38.65,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.3,
+      "deck": "first_platform",
+      "display": {
+        "x": 134.25,
+        "y": 10.39
+      },
+      "description": "chain locker / fore peak"
+    },
+    {
+      "id": "Ballast_Tanks_Aft",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 902.13,
+      "floor_area_m2": 346.97,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 15.36,
+        "y": 8.09
+      },
+      "description": "liquid ballast C-509-x + shaft alley"
+    },
+    {
+      "id": "Pump_Room",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 77.96,
+      "floor_area_m2": 29.99,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 36.55,
+        "y": 8.73
+      },
+      "description": "C-502-E pump room"
+    },
+    {
+      "id": "Cargo_Hold_Aft",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1210.0,
+      "floor_area_m2": 465.38,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 48.92,
+        "y": 7.12
+      },
+      "description": "C-509-A/C-501-A/C-501-E cargo hold, ~4.2m deep"
+    },
+    {
+      "id": "Eng_Bilge",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 519.75,
+      "floor_area_m2": 199.9,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 69.75,
+        "y": 7.44
+      },
+      "description": "machinery space B-1 lower level + settling tank B-851-F (in ER volume)"
+    },
+    {
+      "id": "Cargo_Hold_Fwd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1980.0,
+      "floor_area_m2": 761.54,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 94.48,
+        "y": 6.95
+      },
+      "description": "cargo A-509-A + hatch trunks, ~4.2m deep"
+    },
+    {
+      "id": "Dry_Provisions",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 297.0,
+      "floor_area_m2": 114.23,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 121.32,
+        "y": 6.47
+      },
+      "description": "A-506-A dry provisions + inflatables + paint stow"
+    },
+    {
+      "id": "Magazines_Fwd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 207.9,
+      "floor_area_m2": 79.96,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.8,
+      "deck": "hold",
+      "display": {
+        "x": 134.74,
+        "y": 7.76
+      },
+      "description": "40mm mag handling + magazines A-505-M/506-M, bow"
+    }
+  ]
+}
