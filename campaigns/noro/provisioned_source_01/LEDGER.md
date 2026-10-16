@@ -24,8 +24,8 @@ cells) then STOP — user gates wave 1.
 
 | wave | blocks | cells | status |
 |---|---|---|---|
-| canary | 6 exp + 1 meg | 128 | submitted 2026-10-16 |
-| 1 | exp ×12 arms | 12,000 | not submitted |
+| canary | 6 exp + 1 meg | 128 | done 2026-10-16 — all gates pass |
+| 1 | exp ×12 arms | 12,000 | submitted 2026-10-16 |
 | 2 | cls + spr ×12 arms | 24,000 | not submitted |
 | 3 | mega ×10 arms | 10,000 | not submitted |
 
@@ -98,3 +98,23 @@ objects-bind-stations consistency; mega cells RSS within 8192 MB.
 All canary gates pass; the single note is the 45/48 minted-set
 parity (attributed to the 81-commit SHA gap — upstream stream
 perturbation, not the mechanism). Wave 1 decision is the user's.
+
+### wave 1 — submitted 2026-10-16, awaiting cells
+
+User approved after the canary readout ("merge 1058, launch wave
+1"). 12 exp arrays × 1,000 seeds, digest-pinned jobdef revs.
+
+| block | jobdef rev | job id |
+|---|---|---|
+| fl_exp_12d_scr_off | picard-noro-provisioned-source-01:7 | cc4af336-485a-4d5e-99b3-d109ad77c5c1 |
+| fl_exp_12d_scr_ind | :8 | 1756adfc-2681-4196-962f-73ae67f6cea0 |
+| fl_exp_12d_scr_ship | :9 | 42d478cf-9805-4fcc-9a61-f9f3562bd6c4 |
+| fl_exp_12d_scr_mint | :10 | 74793cb0-e711-4fec-8228-352081a14967 |
+| fl_exp_12d_scr_ps_ship | :11 | 29e2e349-304b-4913-9498-06177a024645 |
+| fl_exp_12d_scr_q01 | :12 | 4ccc47b7-ad07-420d-8017-b22f83b93e44 |
+| fl_exp_12d_scr_q02 | :13 | a8af78b8-fbfc-495d-9973-2a46e663c6d4 |
+| fl_exp_12d_scr_q03 | :14 | f688db70-16c0-4859-91ec-7719a348d468 |
+| fl_exp_12d_scr_q05 | :15 | d0329bf5-fbda-4fac-998f-964f43ce534f |
+| fl_exp_12d_scr_q08 | :16 | 6eec0fa0-b7b4-4539-a53a-19ef87c5b6f4 |
+| fl_exp_12d_scr_q15 | :17 | dbfbaedb-b2ba-4991-af19-da27ac0b852b |
+| fl_exp_12d_scr_q30 | :18 | 1de736ce-fa69-47b6-9d21-0c9805ac917d |
