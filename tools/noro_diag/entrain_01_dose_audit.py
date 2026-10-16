@@ -110,8 +110,8 @@ def _iter_decompressed(blob: bytes):
         yield tail
 
 
-_STRUCT = re.compile(rb'"|\\|[\[\]{}]')
-_STR_END = re.compile(rb'"|\\')
+_STRUCT = re.compile(rb'["\\[\]{}]')
+_STR_END = re.compile(rb'["\\]')
 _HZ_ROW = re.compile(
     rb'"epoch": (\d+), "agent_id": (\d+),'
     rb' "effective_dose": ([\-\d.eE+]+)'
@@ -134,7 +134,7 @@ def _skip_string(buf: bytes, i: int, st: dict) -> int | None:
         i = m.start() + 2  # backslash: skip it and the escaped char
 
 
-def _value_end(buf: bytes, start: int, st: dict) -> int | None:
+def _value_end(buf: bytes, _start: int, st: dict) -> int | None:
     """Incremental bracket/string scan; end index after the top-level
     value or None when the span is incomplete. State resumes where the
     last chunk left off, so each byte is scanned exactly once."""

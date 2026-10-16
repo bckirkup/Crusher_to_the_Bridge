@@ -147,9 +147,6 @@ def _null_infection_spec(platform: str, epochs: int, num_agents: int, seed: int)
         seed=seed, platform=platform, bundle=BUNDLE, epochs=epochs,
         num_agents=num_agents, pathogen_id=PATHOGEN_ID,
         alpha=None, beta=0.0,
-        high_touch_area_scale=None, high_touch_area_scale_by_zone_class=None,
-        fomite_representation=None, fomite_touch_share=None,
-        fomite_touch_share_table=None, cabin_confined_fomite=None,
     )
     spec["pathogen_overrides"] = isolate_arm_overrides(
         BUNDLE, PATHOGEN_ID, {PATHOGEN_ID: {"initial_infected": None}},

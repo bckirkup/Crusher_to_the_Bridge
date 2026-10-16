@@ -33,6 +33,7 @@ from enum import Enum
 from typing import Any, Literal
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_PROVISIONING_SOURCES_JSON = "provisioning_sources.json"
 sys.path.insert(0, _REPO_ROOT)
 
 from pydantic import (  # noqa: E402  (imported after the sys.path insert above)
@@ -2402,14 +2403,14 @@ def _check_common_source(
         return
     registry = _load_json(
         os.path.join(
-            _REPO_ROOT, "data", "config", "provisioning_sources.json"))
+            _REPO_ROOT, "data", "config", _PROVISIONING_SOURCES_JSON))
     sources = (
         registry.get("sources") if isinstance(registry, dict) else None
     )
     if not isinstance(sources, dict) or not sources:
         report.error(
-            "provisioning_sources.json", "SCHEMA",
-            "provisioning_sources.json declares no sources — the "
+            _PROVISIONING_SOURCES_JSON, "SCHEMA",
+            f"{_PROVISIONING_SOURCES_JSON} declares no sources — the "
             "provisioned_source mint model has nothing to resolve "
             "source_id against",
         )
@@ -2423,11 +2424,11 @@ def _check_common_source(
         report.error(
             _CONFIG_YAML, "CONFIG",
             f"provisioned_source.source_id {source_id!r} names no "
-            "provisioning_sources.json entry",
+            f"{_PROVISIONING_SOURCES_JSON} entry",
         )
     if default_source is not None and default_source not in sources:
         report.error(
-            "provisioning_sources.json", "CONFIG",
+            _PROVISIONING_SOURCES_JSON, "CONFIG",
             f"default_source {default_source!r} names no sources entry",
         )
     spec = ps.get("q_source")
@@ -2446,7 +2447,7 @@ def _check_common_source(
             _check_source_genotype_distribution(
                 source_entry.get("genotype_distribution"),
                 f"sources.{sid}.genotype_distribution",
-                "provisioning_sources.json", report,
+                _PROVISIONING_SOURCES_JSON, report,
             )
     if layout is not None and not any(
         z.type == "Dining" for z in layout.zones

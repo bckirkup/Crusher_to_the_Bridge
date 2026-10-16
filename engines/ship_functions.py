@@ -465,10 +465,11 @@ class FunctionCapacityRunner:
                 name for name, ztype in zone_type_by_id.items()
                 if ztype == requirement
             ]
-            if members and any(name not in closed_zones for name in members):
-                open_count += 1
-            elif not members and requirement not in closed_zones:
-                open_count += 1  # validated id not in the type map: open
+            if (
+                (members and any(name not in closed_zones for name in members))
+                or (not members and requirement not in closed_zones)
+            ):
+                open_count += 1  # no members: validated id not in type map
         return open_count / len(spec.required_zones)
 
     def _instance_capacity(
@@ -651,7 +652,7 @@ class FunctionCapacityRunner:
     def _dining_candidate(
         self,
         spec: ShipFunctionSpec,
-        capacity: float,
+        _capacity: float,
         hours_per_epoch: float,
     ) -> dict[str, Any] | None:
         """Degraded meal weights when a declared dining writer is sustained-below."""

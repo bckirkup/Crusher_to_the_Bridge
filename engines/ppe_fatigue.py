@@ -222,7 +222,7 @@ class PpeFatigueTracker:
                     worn.append(type_id)
         return tuple(worn)
 
-    def _try_refusal(self, agent: Any) -> bool:
+    def _try_refusal(self, _agent: Any) -> bool:
         """The §7.3 fatigue draw: sticky refusal once drawn."""
         if self.rng is None:
             return False

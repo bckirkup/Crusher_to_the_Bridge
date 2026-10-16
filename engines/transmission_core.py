@@ -3260,7 +3260,7 @@ class TransmissionCore:
                     f"caregiver.service.{field} scalar out of "
                     f"[0,1]: {raw!r}"
                 )
-            return ("fixed", value)
+            return ("fixed", value, value)
         if isinstance(raw, (tuple, list)) and len(raw) == 2:
             lo, hi = float(raw[0]), float(raw[1])
             if not 0.0 <= lo <= hi <= 1.0:

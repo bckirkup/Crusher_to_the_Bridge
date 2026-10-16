@@ -327,7 +327,9 @@ def _head_makeup_links(
         serves = set(head.get("serves", []))
         scored = sorted(
             branches,
-            key=lambda g: (-len(serves & set(g.get("rooms", []))), str(g["id"])),
+            key=lambda g, serves=serves: (
+                -len(serves & set(g.get("rooms", []))), str(g["id"]),
+            ),
         )
         if serves & set(scored[0].get("rooms", [])):
             source = str(scored[0]["id"])
@@ -340,7 +342,7 @@ def _head_makeup_links(
             }
             scored = sorted(
                 branches,
-                key=lambda g: (
+                key=lambda g, same_deck=same_deck: (
                     -len(same_deck & set(g.get("rooms", []))),
                     str(g["id"]),
                 ),

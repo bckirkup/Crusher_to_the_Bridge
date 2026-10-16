@@ -54,6 +54,15 @@ _ARM_LABEL = {"ext": "a_ext", "thin": "a_thin"}
 # Declared anchors (design §6).
 _POSTING_BAND = (0.004, 0.009)
 _AR_BAND = (0.04, 0.10)
+_MD_SEP_5 = "|---|---|---|---|---|"
+
+
+def _band_verdict(rate: float, band: tuple[float, float]) -> str:
+    if band[0] <= rate <= band[1]:
+        return "in"
+    if rate < band[0]:
+        return "below"
+    return "above"
 
 
 def _pct(num: int | float, den: int | float) -> str:
@@ -101,7 +110,7 @@ def _obj_rows(row: dict) -> list[dict]:
 def _posting_table(cells: dict[tuple[str, str], list[dict]]) -> list[str]:
     lines = [
         "| cell | n | posted n | posting rate [95% CI] | vs 0.4-0.9% |",
-        "|---|---|---|---|---|",
+        _MD_SEP_5,
     ]
     for hull in _HULLS:
         for arm in _ARMS:
@@ -112,10 +121,7 @@ def _posting_table(cells: dict[tuple[str, str], list[dict]]) -> list[str]:
             k = sum(1 for r in rows if r["posted"])
             lo, hi = wilson_interval(k, n)
             rate = k / n
-            band = (
-                "in" if _POSTING_BAND[0] <= rate <= _POSTING_BAND[1]
-                else ("below" if rate < _POSTING_BAND[0] else "above")
-            )
+            band = _band_verdict(rate, _POSTING_BAND)
             lines.append(
                 f"| {hull} {_ARM_LABEL.get(arm, arm)} | {n} | {k} |"
                 f" {100 * rate:.2f}% [{100 * lo:.2f},{100 * hi:.2f}]"
@@ -130,7 +136,7 @@ def _posted_ar_table(
     lines = [
         "| cell | posted n | med rep pax AR [p10,p90] | med reach"
         " | vs 0.04-0.10 |",
-        "|---|---|---|---|---|",
+        _MD_SEP_5,
     ]
     for hull in _HULLS:
         for arm in _ARMS:
@@ -145,10 +151,7 @@ def _posted_ar_table(
             p10 = _q(ars, 0.10)
             p90 = _q(ars, 0.90)
             reach = stats.median(r["reach"] for r in posted)
-            verdict = (
-                "in" if _AR_BAND[0] <= med <= _AR_BAND[1]
-                else ("below" if med < _AR_BAND[0] else "above")
-            )
+            verdict = _band_verdict(med, _AR_BAND)
             lines.append(
                 f"| {hull} {_ARM_LABEL.get(arm, arm)} | {len(posted)} |"
                 f" {med:.4f} [{p10:.4f},{p90:.4f}] | {reach:.2f}"
@@ -435,14 +438,11 @@ def _integrity_table(
                 continue
             agg: Counter[str] = Counter()
             pw_over = 0
-            multi_pan = 0
             for r in cen:
                 c = _cen(r)
                 integ = c.get("integrity") or {}
                 for k, v in integ.items():
                     agg[k] += int(v or 0)
-                tel = c.get("telemetry") or {}
-                multi_pan += int(tel.get("multi_pan_windows") or 0)
                 for o in _obj_rows(r):
                     if int(o.get("pw_max") or 0) > 80:
                         pw_over += 1

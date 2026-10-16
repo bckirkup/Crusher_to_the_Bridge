@@ -1050,11 +1050,10 @@ def _epoch_counts_block(
     return {
         channel: {
             key_name: sum(
-                1 for (_e, c) in counts if c == channel
+                1 for (_e, c) in counts.items() if c == channel
             ),
             "targets_by_epoch_quantiles": _quantiles(
-                [float(v) for (e, c), v in counts.items()
-                 if c == channel],
+                [float(v) for (_e, c), v in counts.items() if c == channel],
             ),
         }
         for channel in CHANNELS

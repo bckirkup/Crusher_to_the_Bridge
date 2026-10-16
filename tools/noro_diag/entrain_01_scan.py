@@ -129,8 +129,7 @@ def _object_rows(
             src = "import"
         else:
             src = "acq"
-        tallies["obj_src_" + ("import" if src == "import"
-                              else "acq" if src == "acq" else "none")] += 1
+        tallies["obj_src_" + src] += 1
         epoch = o.get("seeded_epoch")
         row = {
             "k": o.get("source_kind"),
@@ -170,15 +169,18 @@ def _event_rows(
         if epoch is None or int(epoch) > _EARLY_EPOCH:
             continue
         src_id = e.get("source_agent_id")
+        if src_id is None:
+            ev_src = "none"
+        elif int(src_id) in import_ids:
+            ev_src = "import"
+        else:
+            ev_src = "acq"
         rows.append({
             "f": "ev",
             "k": e.get("source_kind"),
             "e": epoch,
             "t": int(e.get("servings_taken", 0) or 0),
-            "src": (
-                "import" if src_id is not None and int(src_id) in import_ids
-                else "acq" if src_id is not None else "none"
-            ),
+            "src": ev_src,
             "zone": e.get("zone"),
         })
     return rows
@@ -350,12 +352,14 @@ def _fetch(client, bucket: str, key: str, mode: str) -> dict:
         blob = _try(
             lambda: _s3_member_blob(client, bucket, key, _CENSUS_MEMBER)
         )
-        row["census"] = (
-            blob if isinstance(blob, dict)
-            else _try(lambda: _census_side(blob, row["num_epochs"]))
-            if blob is not None
-            else {"error": "no census member"}
-        )
+        if isinstance(blob, dict):
+            row["census"] = blob
+        elif blob is not None:
+            row["census"] = _try(
+                lambda: _census_side(blob, row["num_epochs"]),
+            )
+        else:
+            row["census"] = {"error": "no census member"}
     return row
 
 
@@ -412,9 +416,9 @@ def _run_prefix(
             return "full"
         if args.head_set is not None and k in args.head_set:
             return "head"
-        return "none" if (args.full_set or args.head_set) else (
-            "none" if args.no_census else "full"
-        )
+        if args.full_set or args.head_set:
+            return "none"
+        return "none" if args.no_census else "full"
 
     n_rows, n_err, done_i = 0, 0, 0
     with ThreadPoolExecutor(args.workers) as pool:
