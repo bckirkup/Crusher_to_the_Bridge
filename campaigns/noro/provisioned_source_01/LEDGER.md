@@ -25,7 +25,7 @@ cells) then STOP — user gates wave 1.
 | wave | blocks | cells | status |
 |---|---|---|---|
 | canary | 6 exp + 1 meg | 128 | done 2026-10-16 — all gates pass |
-| 1 | exp ×12 arms | 12,000 | submitted 2026-10-16 |
+| 1 | exp ×12 arms | 12,000 | done 2026-10-16 — all cells landed, readout below |
 | 2 | cls + spr ×12 arms | 24,000 | not submitted |
 | 3 | mega ×10 arms | 10,000 | not submitted |
 
@@ -118,3 +118,97 @@ User approved after the canary readout ("merge 1058, launch wave
 | fl_exp_12d_scr_q08 | :16 | 6eec0fa0-b7b4-4539-a53a-19ef87c5b6f4 |
 | fl_exp_12d_scr_q15 | :17 | dbfbaedb-b2ba-4991-af19-da27ac0b852b |
 | fl_exp_12d_scr_q30 | :18 | 1de736ce-fa69-47b6-9d21-0c9805ac917d |
+
+### wave-1 readout — exp, 12,000 cells, 0 failures (measured 2026-10-16)
+
+Cells landed 15:58 UTC (~2h). Scan: `food_shapes_01_scan.py` per arm
+→ `campaign/noro_provisioned_source_01/_scan_rows/` (12-child EC2
+array `ps01-w1-scan-exp-ec2` on picard-campaign-queue; the Fargate
+queue's ECR route was unreachable mid-day — two 12/12-failed
+submits, `dial tcp …i/o timeout` on ECR auth — so the scan ran on
+the Spot CE that ran the cells). Report:
+`food_shapes_01_report.py --arm-set ps01`. Supplement: per-voyage
+`reported_cases_by_channel`/`by_dominant_route` pulled locally for
+all 212 minted voyage zips (scan image predates those row fields).
+
+**Draw statistics — Binomial(21,q) confirmed on exp (measured).**
+Minted-voyage fractions: q01 0 (E 2.1), q02 2 (E 4.2), q03 4
+(E 6.3), q05 8 (E 10.4), q08 13 (E 16.7), q15 29 (E 31.0), q30 63
+(E 61.1) per 1,000 — all within Binomial sampling error. Objects ≈
+1 per minted voyage (q15 30 obj/29 voyages, q30 65/63 — rare pairs,
+Binomial tail). `provisioned_source` witness `n_contaminated` ==
+`provisioned_lot` object count on every minted cell. **Nested
+station draws: 0 violations across all 6 adjacent rung pairs
+(6,000 seed-pairs)** — shared station uniforms hold at full scale.
+
+**Posting window (D1, off floor 7/1,000 = 0.70%, band +0.4–0.9pp).**
+
+| arm | posted | marginal pp | band |
+|---|---:|---:|---|
+| off | 7 | — | floor |
+| q01 | 7 | +0.00 | under |
+| q02 | 9 | +0.20 | under |
+| q03 | 10 | +0.30 | under |
+| **q05** | **14** | **+0.70** | **in band** |
+| q08 | 20 | +1.30 | over |
+| q15 | 35 | +2.80 | over |
+| q30 | 63 | +5.60 | over |
+| **ps_ship** | **12** | **+0.50** | **in band** |
+| ship (fiat) | 12 | +0.50 | in band |
+| mint (fiat) | 87 | +8.00 | over |
+| ind | 80 | +7.30 | over |
+
+**In-band rung set on exp: {q05} (+ ps_ship; fiat ship also
+in-band).** Design predicted {q03}±edges; the measured band-centre
+lands one rung higher — operative per-station q for the observed
+marginal ≈ 0.0004–0.0006. `ps_ship` (U[2e-4,5e-4] per ship) posts
++0.50 — inside the predicted +0.45–0.85 interval; the shipped
+interval is calibrated about right on exp.
+
+**P(post|minted) — rate-independent on exp (measured):** mint 97.6%
+[91.5,99.3], ps_ship 5/5, q05 87.5%, q08 100%, q15 100%, q30 90.5%
+[80.7,95.6] — consistent with the 0.93 anchor; conversion is
+per-minted-voyage, not per-q.
+
+**Signature at powered q:** posted pax-AR median reaches the ≥0.04
+edge at q08+ (q08 0.0411, q15 0.0506, q30 0.0443; ind 0.038) —
+same shape as MINT-RATE-01 exp: at in-band rate (q05 0.0316 <0.038)
+D2's posted-AR signature needs powered rate. Excursion→posting
+conversion recovers ind-level at q15/q30 (96.7%/89.1% vs ind 78.5%,
+mint 96.4%) — conversion scales with minted count, not mechanism.
+D4 burst48 separation holds on every minted arm (excursion medians
+~0.68–0.77 vs 0.41 rest).
+
+**Baseline bridge — exact.** off/ind/ship/mint posted counts
+reproduce MINT-RATE-01's exp wave-1 verbatim (7/80/12/87 on both
+campaigns) — shared baseline arms are voyage-identical across the
+81-commit SHA gap.
+
+**Minted-set parity (gate 5.3.2 as amended):** `mint` arm minted-
+voyage flags + `provisioned_lot` object counts identical to the
+landed MINT-RATE-01 exp cells on **1,000/1,000 shared seeds**;
+canary-vs-wave-1 mint arm also bit-identical on flag+count. The
+canary's 3/48 residual was station-*identity* divergence (which
+stations minted, same count) at seeds 8026/8032/8046 — attributed
+to the SHA-gap stream perturbation downstream of the mint draw;
+the voyage-level mint gate is bit-stable. Read: parity gate PASS
+on flag+count; station-identity caveat carried from canary.
+
+**Channel decomposition (212 minted voyage zips, measured):**
+`reported_cases_by_channel.supply_chain` = 80–97% of reported
+passenger cases on minted voyages — ship 83%, mint 83%, ps_ship
+91%, q03 88%, q05 86%, q08 85%, q15 82%, q30 80% — mechanism-
+agnostic lot attribution (fiat and provisioned_source produce the
+same channel shape). `reported_cases_by_dominant_route
+.common_source_food` ≈ supply_chain one-for-one (the two blocks
+agree; kept distinct per the separable-dimensions convention).
+
+**Must-not-move:** paired median Δinf-AR vs `off` = +0.0000 on all
+12 arms (p90 |Δ| ≤0.013); `off` zero-witness PASS; `ind` v1-only
+witness PASS; override echo exact 12,000/12,000; integrity tallies
+clean (0 unresolved oids, 0 open objects).
+
+**Wave-1 verdict:** mechanism is Binomial-clean end-to-end on exp;
+the common band exists with operative q ∈ ~[0.0004, 0.0006]
+(rung q05) and the ps_ship interval in band. Wave 2 (cls+spr —
+the hull-free test) is the user's decision.
