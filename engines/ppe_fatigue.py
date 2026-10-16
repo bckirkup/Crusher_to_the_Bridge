@@ -222,7 +222,7 @@ class PpeFatigueTracker:
                     worn.append(type_id)
         return tuple(worn)
 
-    def _try_refusal(self, agent: Any) -> bool:
+    def _try_refusal(self, _agent: Any) -> bool:
         """The §7.3 fatigue draw: sticky refusal once drawn."""
         if self.rng is None:
             return False
@@ -233,6 +233,30 @@ class PpeFatigueTracker:
             return False
         return True
 
+    def _draw_fatigue_onsets_for_type(
+        self,
+        agent: Any,
+        type_id: str,
+        wear_hours: float,
+        held: set[str],
+        onsets: list[str],
+    ) -> None:
+        """One worn PPE type's endogenous onset draws for this epoch."""
+        for condition in self.ppe_types[type_id].fatigue_conditions:
+            if condition.condition_id in held:
+                continue
+            if condition.rate_per_wear_hour <= 0.0:
+                continue
+            hazard = 1.0 - float(
+                np.exp(-condition.rate_per_wear_hour * wear_hours)
+            )
+            if float(self.rng.random()) >= hazard:
+                continue
+            held.add(condition.condition_id)
+            onsets.append(condition.condition_id)
+            if condition.symptomatic:
+                agent.ppe_symptomatic_active = True
+
     def _condition_draws(
         self, agent: Any, worn: tuple[str, ...], wear_hours: float,
     ) -> list[str]:
@@ -242,20 +266,9 @@ class PpeFatigueTracker:
         onsets: list[str] = []
         held = getattr(agent, "ppe_condition_ids", set())
         for type_id in worn:
-            for condition in self.ppe_types[type_id].fatigue_conditions:
-                if condition.condition_id in held:
-                    continue
-                if condition.rate_per_wear_hour <= 0.0:
-                    continue
-                hazard = 1.0 - float(
-                    np.exp(-condition.rate_per_wear_hour * wear_hours)
-                )
-                if float(self.rng.random()) >= hazard:
-                    continue
-                held.add(condition.condition_id)
-                onsets.append(condition.condition_id)
-                if condition.symptomatic:
-                    agent.ppe_symptomatic_active = True
+            self._draw_fatigue_onsets_for_type(
+                agent, type_id, wear_hours, held, onsets,
+            )
         return onsets
 
     def step_epoch(

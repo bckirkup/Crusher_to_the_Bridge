@@ -665,7 +665,9 @@ class TestCaregiverV1:
         ``contact_factor: 1.0`` spawns no dedicated stream."""
         fixed = _core(caregiver={"service": {"contact_factor": 1.0}})
         assert fixed._service_contact_rng is None
-        assert fixed._cg_service_contact == ("fixed", 1.0)
+        # Fixed arm mirrors uniform arity (lo=hi=value) for a stable
+        # 3-tuple shape from `_parse_service_contact_factor` (S8495).
+        assert fixed._cg_service_contact == ("fixed", 1.0, 1.0)
         uniform = _core(caregiver={"service": {"contact_factor": (0.1, 0.2)}})
         assert uniform._cg_service_contact == ("uniform", 0.1, 0.2)
         assert uniform._service_contact_rng is not None

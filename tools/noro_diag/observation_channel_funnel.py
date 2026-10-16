@@ -160,10 +160,7 @@ class ChannelCapture:
         self.caregiver_first_report_epoch: dict[int, int] = {}
         self.caregiver_stamped_ids: set[int] = set()
 
-    def observe(self, _sim: Any, work: Any) -> None:
-        epoch = int(work.epoch)
-        self.status_by_epoch[epoch] = str(work.state.trigger_status)
-        syn = work.syn_result or {}
+    def _observe_syn_epoch(self, epoch: int, syn: dict[str, Any]) -> None:
         self.sick_call_count += len(syn.get("sick_call_agents") or [])
         self.noise_report_count += len(syn.get("noise_ids") or [])
         for aid in syn.get("true_positive_ids") or []:
@@ -174,11 +171,10 @@ class ChannelCapture:
             aid = int(aid)
             self.caregiver_report_ids.add(aid)
             self.caregiver_first_report_epoch.setdefault(aid, epoch)
-        beliefs = _beliefs_from_information(work.information_state or {})
-        if beliefs:
-            self.beliefs_nonempty_epochs += 1
+
+    def _infected_count(self, agents: list[dict[str, Any]]) -> int:
         infected_now = 0
-        for agent in work.agents or []:
+        for agent in agents:
             infection = (agent.get("pathogen_infections") or {}).get(
                 self.pathogen_id,
             )
@@ -186,10 +182,21 @@ class ChannelCapture:
                 infection.get("status"),
             ) == "INFECTED":
                 infected_now += 1
+        return infected_now
+
+    def observe(self, _sim: Any, work: Any) -> None:
+        epoch = int(work.epoch)
+        self.status_by_epoch[epoch] = str(work.state.trigger_status)
+        self._observe_syn_epoch(epoch, work.syn_result or {})
+        beliefs = _beliefs_from_information(work.information_state or {})
+        if beliefs:
+            self.beliefs_nonempty_epochs += 1
+        agents = work.agents or []
+        for agent in agents:
             if agent.get("caregiver_report_due_epoch") is not None:
                 self.caregiver_stamped_ids.add(int(agent["agent_id"]))
             self._exposure(agent, epoch, beliefs)
-        self.peak_infected = max(self.peak_infected, infected_now)
+        self.peak_infected = max(self.peak_infected, self._infected_count(agents))
 
     def _exposure(
         self,

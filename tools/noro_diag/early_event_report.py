@@ -232,30 +232,26 @@ def _route_table(rows: list[dict], label: str) -> list[str]:
     ]
     total_post = sum(mix_post.values())
     total_all = sum(mix_all.values())
-    lines.append(
+    lines.extend([
         "| early events, posted voyages |"
         + "".join(
             f" {mix_post.get(k, 0)} ({_pct(mix_post.get(k, 0), total_post)}) |"
             for k in ("lot", "handler", "diner")
         )
-        + " - |"
-    )
-    lines.append(
+        + " - |",
         "| early events, all voyages |"
         + "".join(
             f" {mix_all.get(k, 0)} ({_pct(mix_all.get(k, 0), total_all)}) |"
             for k in ("lot", "handler", "diner")
         )
-        + " - |"
-    )
-    lines.append(
+        + " - |",
         "| voyage-max early event arm, posted voyages |"
         + "".join(
             f" {driver.get(k, 0)} |"
             for k in ("lot", "handler", "diner")
         )
-        + f" {driver.get('(none)', 0)} |"
-    )
+        + f" {driver.get('(none)', 0)} |",
+    ])
     return lines
 
 

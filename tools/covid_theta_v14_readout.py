@@ -497,9 +497,14 @@ def main(argv: list[str] | None = None) -> int:
     expected_cells = {
         c.key for c in enumerate_cells(design) if c.arm_id == screen_arm
     }
-    delivery_echoes = dict(
-        e.split("=", 1) for e in args.audit_echo or ()
-    ) or None
+    delivery_echoes = (
+        {
+            key: val
+            for echo in (args.audit_echo or ())
+            for key, val in [echo.split("=", 1)]
+        }
+        or None
+    )
 
     client = _s3_client()
     bucket, prefix = _s3_uri(args.s3_prefix)

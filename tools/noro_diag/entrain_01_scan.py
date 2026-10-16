@@ -97,6 +97,49 @@ def _boarding(summary: dict) -> dict:
     }
 
 
+def _agent_src(src_id, import_ids: set[int]) -> str:
+    if src_id is None:
+        return "none"
+    if int(src_id) in import_ids:
+        return "import"
+    return "acq"
+
+
+def _object_one_row(
+    o: dict,
+    linked: list[dict],
+    import_ids: set[int],
+    tallies: dict,
+) -> tuple[dict, dict | None]:
+    pw_list = [
+        int(e.get("servings_taken", 0) or 0) for e in linked
+    ]
+    src = _agent_src(o.get("source_agent_id"), import_ids)
+    tallies["obj_src_" + src] += 1
+    epoch = o.get("seeded_epoch")
+    row = {
+        "k": o.get("source_kind"),
+        "e": epoch,
+        "w": o.get("windows_covered"),
+        "t": int(o.get("servings_served") or 0) or sum(pw_list),
+        "pans": o.get("pans_emitted"),
+        "end": o.get("end_reason"),
+        "lot_srv": o.get("lot_servings"),
+        "pw_max": max(pw_list, default=0),
+        "pw": pw_list,
+        "src": src,
+        "zone": o.get("zone"),
+    }
+    early = None
+    if epoch is not None and int(epoch) <= _EARLY_EPOCH:
+        early = {"f": "obj", **row}
+        if src == "import":
+            tallies["early_obj_src_import"] += 1
+    else:
+        tallies["n_late_obj"] += 1
+    return row, early
+
+
 def _object_rows(
     objects: list[dict], events: list[dict], import_ids: set[int],
 ) -> tuple[list[dict], list[dict], dict]:
@@ -119,40 +162,28 @@ def _object_rows(
     for o in objects:
         oid = o.get("object_id")
         linked = by_object.get(oid, [])
-        pw_list = [
-            int(e.get("servings_taken", 0) or 0) for e in linked
-        ]
-        src_id = o.get("source_agent_id")
-        if src_id is None:
-            src = "none"
-        elif int(src_id) in import_ids:
-            src = "import"
-        else:
-            src = "acq"
-        tallies["obj_src_" + ("import" if src == "import"
-                              else "acq" if src == "acq" else "none")] += 1
-        epoch = o.get("seeded_epoch")
-        row = {
-            "k": o.get("source_kind"),
-            "e": epoch,
-            "w": o.get("windows_covered"),
-            "t": int(o.get("servings_served") or 0) or sum(pw_list),
-            "pans": o.get("pans_emitted"),
-            "end": o.get("end_reason"),
-            "lot_srv": o.get("lot_servings"),
-            "pw_max": max(pw_list, default=0),
-            "pw": pw_list,
-            "src": src,
-            "zone": o.get("zone"),
-        }
+        row, early = _object_one_row(o, linked, import_ids, tallies)
         obj_rows.append(row)
-        if epoch is not None and int(epoch) <= _EARLY_EPOCH:
-            early_rows.append({"f": "obj", **row})
-            if src == "import":
-                tallies["early_obj_src_import"] += 1
-        else:
-            tallies["n_late_obj"] += 1
+        if early is not None:
+            early_rows.append(early)
     return obj_rows, early_rows, tallies
+
+
+def _early_pan_event_row(e: dict, import_ids: set[int]) -> dict | None:
+    epoch = e.get("start_epoch")
+    if epoch is None:
+        epoch = e.get("epoch")
+    if epoch is None or int(epoch) > _EARLY_EPOCH:
+        return None
+    ev_src = _agent_src(e.get("source_agent_id"), import_ids)
+    return {
+        "f": "ev",
+        "k": e.get("source_kind"),
+        "e": epoch,
+        "t": int(e.get("servings_taken", 0) or 0),
+        "src": ev_src,
+        "zone": e.get("zone"),
+    }
 
 
 def _event_rows(
@@ -164,23 +195,9 @@ def _event_rows(
         oid = e.get("object_id")
         if oid is not None and oid in object_ids:
             continue  # accounted under its object row
-        epoch = e.get("start_epoch")
-        if epoch is None:
-            epoch = e.get("epoch")
-        if epoch is None or int(epoch) > _EARLY_EPOCH:
-            continue
-        src_id = e.get("source_agent_id")
-        rows.append({
-            "f": "ev",
-            "k": e.get("source_kind"),
-            "e": epoch,
-            "t": int(e.get("servings_taken", 0) or 0),
-            "src": (
-                "import" if src_id is not None and int(src_id) in import_ids
-                else "acq" if src_id is not None else "none"
-            ),
-            "zone": e.get("zone"),
-        })
+        row = _early_pan_event_row(e, import_ids)
+        if row is not None:
+            rows.append(row)
     return rows
 
 
@@ -350,12 +367,14 @@ def _fetch(client, bucket: str, key: str, mode: str) -> dict:
         blob = _try(
             lambda: _s3_member_blob(client, bucket, key, _CENSUS_MEMBER)
         )
-        row["census"] = (
-            blob if isinstance(blob, dict)
-            else _try(lambda: _census_side(blob, row["num_epochs"]))
-            if blob is not None
-            else {"error": "no census member"}
-        )
+        if isinstance(blob, dict):
+            row["census"] = blob
+        elif blob is not None:
+            row["census"] = _try(
+                lambda: _census_side(blob, row["num_epochs"]),
+            )
+        else:
+            row["census"] = {"error": "no census member"}
     return row
 
 
@@ -397,6 +416,36 @@ def _parse_row(line: str) -> dict | None:
         return None
 
 
+def _census_mode(k: str, args) -> str:
+    if args.full_set is not None and k in args.full_set:
+        return "full"
+    if args.head_set is not None and k in args.head_set:
+        return "head"
+    if args.full_set or args.head_set:
+        return "none"
+    return "none" if args.no_census else "full"
+
+
+def _drain_fetches(
+    futs, fh, prefix: str, n_keys: int,
+) -> tuple[int, int]:
+    n_rows, n_err, done_i = 0, 0, 0
+    for fut in as_completed(futs):
+        done_i += 1
+        row = fut.result()
+        if row is None:
+            continue
+        fh.write(json.dumps(row) + "\n")
+        n_rows += 1
+        n_err += bool(row.get("error"))
+        if done_i % 200 == 0:
+            fh.flush()
+            print(f"  {prefix}: {done_i}/{n_keys} ({n_err} errors)",
+                  file=sys.stderr)
+    fh.flush()
+    return n_rows, n_err
+
+
 def _run_prefix(
     client, bucket: str, prefix: str, args, done: set[str], fh,
 ) -> tuple[int, int]:
@@ -407,34 +456,12 @@ def _run_prefix(
     if not keys:
         return 0, 0
 
-    def mode(k: str) -> str:
-        if args.full_set is not None and k in args.full_set:
-            return "full"
-        if args.head_set is not None and k in args.head_set:
-            return "head"
-        return "none" if (args.full_set or args.head_set) else (
-            "none" if args.no_census else "full"
-        )
-
-    n_rows, n_err, done_i = 0, 0, 0
     with ThreadPoolExecutor(args.workers) as pool:
         futs = [
-            pool.submit(_fetch, client, bucket, k, mode(k)) for k in keys
+            pool.submit(_fetch, client, bucket, k, _census_mode(k, args))
+            for k in keys
         ]
-        for fut in as_completed(futs):
-            done_i += 1
-            row = fut.result()
-            if row is None:
-                continue
-            fh.write(json.dumps(row) + "\n")
-            n_rows += 1
-            n_err += bool(row.get("error"))
-            if done_i % 200 == 0:
-                fh.flush()
-                print(f"  {prefix}: {done_i}/{len(keys)} ({n_err} errors)",
-                      file=sys.stderr)
-    fh.flush()
-    return n_rows, n_err
+        return _drain_fetches(futs, fh, prefix, len(keys))
 
 
 def main() -> None:

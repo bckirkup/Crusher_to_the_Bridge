@@ -155,25 +155,31 @@ def test_available_for_duty_states() -> None:
 
 
 def test_parse_rejects_exclusive_staffing_modes() -> None:
+    block = _block([_fn(
+        staffing_by_duty_zone={"Galley": {"required_on_watch": 2}},
+    )])
     with pytest.raises(ValueError, match="exclusive"):
-        parse_ship_functions(_block([_fn(
-            staffing_by_duty_zone={"Galley": {"required_on_watch": 2}},
-        )]))
+        parse_ship_functions(block)
 
 
 def test_parse_rejects_bad_enums_and_duplicate_instances() -> None:
+    bad_serves = _block([_fn(serves="aliens")])
     with pytest.raises(ValueError, match="serves"):
-        parse_ship_functions(_block([_fn(serves="aliens")]))
+        parse_ship_functions(bad_serves)
+    bad_capacity = _block([_fn(capacity_model="vibes")])
     with pytest.raises(ValueError, match="capacity_model"):
-        parse_ship_functions(_block([_fn(capacity_model="vibes")]))
+        parse_ship_functions(bad_capacity)
+    bad_feedback_kind = _block([_fn(feedback={"kind": "wishing"})])
     with pytest.raises(ValueError, match="feedback.kind"):
-        parse_ship_functions(_block([_fn(feedback={"kind": "wishing"})]))
+        parse_ship_functions(bad_feedback_kind)
+    bad_scalar = _block([_fn(feedback={
+        "kind": "route_scalar_scale", "scalar_name": "vibes_scalar",
+    })])
     with pytest.raises(ValueError, match="scalar_name"):
-        parse_ship_functions(_block([_fn(feedback={
-            "kind": "route_scalar_scale", "scalar_name": "vibes_scalar",
-        })]))
+        parse_ship_functions(bad_scalar)
+    duplicate = _block([_fn(), _fn()])
     with pytest.raises(ValueError, match="duplicate"):
-        parse_ship_functions(_block([_fn(), _fn()]))
+        parse_ship_functions(duplicate)
 
 
 def test_parse_absent_and_disabled_are_identity() -> None:

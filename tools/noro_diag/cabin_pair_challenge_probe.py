@@ -37,7 +37,10 @@ from tools.covid_route_attribution import (  # noqa: E402
 )
 from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
 from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
-from tools.noro_diag.per_host_dose_challenge import build_spec  # noqa: E402
+from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
+    TransmissionSweepKnobs,
+    build_spec,
+)
 
 
 def instrumented_voyage(spec_dict: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
@@ -76,10 +79,9 @@ def run_seed(
         seed=seed, platform=platform, bundle=bundle,
         epochs=epochs, num_agents=declared_total(platform),
         pathogen_id=pathogen_id, alpha=None, beta=beta,
-        high_touch_area_scale=None, high_touch_area_scale_by_zone_class=None,
-        fomite_representation=None, fomite_touch_share=None,
-        fomite_touch_share_table=None,
-        cabin_confined_fomite=cabin_confined_fomite,
+        sweep=TransmissionSweepKnobs(
+            cabin_confined_fomite=cabin_confined_fomite,
+        ),
     )
     _, table = instrumented_voyage(spec_dict)
     return {

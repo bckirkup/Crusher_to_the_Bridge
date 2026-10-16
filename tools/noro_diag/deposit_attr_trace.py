@@ -591,11 +591,14 @@ def run_seed(
     rec = Recorder(pathogen_id=PATHOGEN_ID)
     # arm_patches first: the recording wrappers then capture the patched
     # functions as their originals, so the patched arms are still traced.
-    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
-        with arm_patches(arm), instrumented(rec):
-            sim = ShipSimulation(picard_spec, display=False)
-            sim.epoch_observer = _epoch_observer(rec, PATHOGEN_ID)
-            sim.run()
+    with (
+        materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec,
+        arm_patches(arm),
+        instrumented(rec),
+    ):
+        sim = ShipSimulation(picard_spec, display=False)
+        sim.epoch_observer = _epoch_observer(rec, PATHOGEN_ID)
+        sim.run()
     return _summarise(rec, arm, seed)
 
 

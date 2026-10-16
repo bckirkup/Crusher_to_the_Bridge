@@ -85,28 +85,25 @@ def _catch_class(
     return f"{channel}_{pre}"
 
 
-def decompose_cell(
-    design: object, theta: float, arm_id: str, seed: int,
-) -> dict[str, Any]:
-    """Re-run one cell and decompose its confirmed-case specimen timing."""
-    cell = _match_cell(design, theta, arm_id, seed)
-    raw = prepare_cell_run_spec(design, cell, repo_root=str(_REPO_ROOT))
-    sim = run_fit_spec(raw, repo_root=str(_REPO_ROOT))
-    pools = _host_pools(sim)
-    day_of = pools["day_of"]
-    confirmed = pools["confirmed"]
-    onset = pools["onset"]
-    infection = pools["infection_epoch"]
-    role_of = pools["role_of"]
-
+def _campaign_day_maps(
+    campaign_log: list[dict[str, Any]],
+) -> dict[int, set[int]]:
     campaign_days_of: dict[int, set[int]] = defaultdict(set)
-    campaign_specimens_of: dict[int, list[int]] = defaultdict(list)
-    for entry in pools["campaign_log"]:
+    for entry in campaign_log:
         aid = int(entry["agent_id"])
         campaign_days_of[aid].add(int(entry["day"]))
-        campaign_specimens_of[aid].append(int(entry["day"]))
-    first_contact_day = _contact_of_confirmed(sim, pools)
+    return campaign_days_of
 
+
+def _confirmed_timing_cases(
+    confirmed: dict[int, int],
+    infection: dict[int, int],
+    onset: dict[int, int],
+    day_of,
+    role_of: dict[int, str],
+    campaign_days_of: dict[int, set[int]],
+    first_contact_day: dict[int, int],
+) -> list[dict[str, Any]]:
     cases: list[dict[str, Any]] = []
     for aid, spec_ep in confirmed.items():
         spec_day = day_of(spec_ep)
@@ -140,13 +137,18 @@ def decompose_cell(
                 if aid in first_contact_day else None
             ),
         })
+    return cases
 
-    # Catchable-pool coverage: infected hosts and whether any specimen
-    # (campaign or passive) fell inside [infection, onset) — the window a
-    # pre-onset confirmation requires.
-    sampled = pools["sampled"]
+
+def _window_coverage_block(
+    infection: dict[int, int],
+    onset: dict[int, int],
+    sampled: dict[int, int],
+    day_of,
+    role_of: dict[int, str],
+) -> tuple[dict[str, dict[str, int]], list[int]]:
     windowed: dict[str, dict[str, int]] = {
-        k: {r: 0 for r in ROLES}
+        k: dict.fromkeys(ROLES, 0)
         for k in (
             "swabbed_in_window",
             "swabbed_only_outside_window",
@@ -167,20 +169,26 @@ def decompose_cell(
             windowed["swabbed_in_window"][role] += 1
         else:
             windowed["swabbed_only_outside_window"][role] += 1
+    return windowed, window_days_hist
 
-    # Counterfactual: contacts of confirmeds swabbed the day after the
-    # index confirmation. How many infected contacts were still pre-onset
-    # that day, i.e. would have been pre-onset catches (weighted by
-    # sensitivity at their dpi that day)?
-    sensitivity = pools["sensitivity"]
+
+def _counterfactual_contact_swab(
+    first_contact_day: dict[int, int],
+    confirmed: dict[int, int],
+    infection: dict[int, int],
+    onset: dict[int, int],
+    day_of,
+    role_of: dict[int, str],
+    sensitivity: list[float],
+) -> tuple[dict[str, int], dict[str, float]]:
 
     def sens_at(dpi: int) -> float:
         if dpi < 0:
             return 0.0
         return float(sensitivity[min(dpi, len(sensitivity) - 1)])
 
-    cf_catches: dict[str, float] = {r: 0.0 for r in ROLES}
-    cf_hosts: dict[str, int] = {r: 0 for r in ROLES}
+    cf_catches: dict[str, float] = dict.fromkeys(ROLES, 0.0)
+    cf_hosts: dict[str, int] = dict.fromkeys(ROLES, 0)
     for aid, contact_day in first_contact_day.items():
         if aid in confirmed or aid not in infection:
             continue
@@ -193,40 +201,72 @@ def decompose_cell(
             role = role_of.get(aid, "passenger")
             cf_hosts[role] += 1
             cf_catches[role] += sens_at(spec_day - inf_day)
+    return cf_hosts, cf_catches
 
-    def _classes() -> dict[str, dict[str, int]]:
-        out: dict[str, dict[str, int]] = {}
-        for case in cases:
-            out.setdefault(case["class"], {r: 0 for r in ROLES})
-            out[case["class"]][case["role"]] += 1
-        return out
 
-    def _stat(values: list[int]) -> dict[str, float | None]:
-        if not values:
-            return {"median": None, "mean": None}
-        vs = sorted(values)
-        return {
-            "median": vs[len(vs) // 2],
-            "mean": round(sum(vs) / len(vs), 2),
-        }
+def _catch_class_counts(cases: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    out: dict[str, dict[str, int]] = {}
+    for case in cases:
+        out.setdefault(case["class"], dict.fromkeys(ROLES, 0))
+        out[case["class"]][case["role"]] += 1
+    return out
+
+
+def _int_list_stats(values: list[int]) -> dict[str, float | None]:
+    if not values:
+        return {"median": None, "mean": None}
+    vs = sorted(values)
+    return {
+        "median": vs[len(vs) // 2],
+        "mean": round(sum(vs) / len(vs), 2),
+    }
+
+
+def decompose_cell(
+    design: object, theta: float, arm_id: str, seed: int,
+) -> dict[str, Any]:
+    """Re-run one cell and decompose its confirmed-case specimen timing."""
+    cell = _match_cell(design, theta, arm_id, seed)
+    raw = prepare_cell_run_spec(design, cell, repo_root=str(_REPO_ROOT))
+    sim = run_fit_spec(raw, repo_root=str(_REPO_ROOT))
+    pools = _host_pools(sim)
+    day_of = pools["day_of"]
+    confirmed = pools["confirmed"]
+    onset = pools["onset"]
+    infection = pools["infection_epoch"]
+    role_of = pools["role_of"]
+
+    campaign_days_of = _campaign_day_maps(pools["campaign_log"])
+    first_contact_day = _contact_of_confirmed(sim, pools)
+    cases = _confirmed_timing_cases(
+        confirmed, infection, onset, day_of, role_of,
+        campaign_days_of, first_contact_day,
+    )
+    windowed, window_days_hist = _window_coverage_block(
+        infection, onset, pools["sampled"], day_of, role_of,
+    )
+    cf_hosts, cf_catches = _counterfactual_contact_swab(
+        first_contact_day, confirmed, infection, onset,
+        day_of, role_of, pools["sensitivity"],
+    )
 
     return {
         "seed": seed,
         "arm_id": arm_id,
         "infections_total": len(infection),
         "lab_confirmed_total": len(cases),
-        "catch_classes": _classes(),
+        "catch_classes": _catch_class_counts(cases),
         "pre_onset_share_of_confirmed": (
             sum(
                 1 for c in cases if c["class"].endswith("_pre_onset")
             ) / len(cases)
             if cases else None
         ),
-        "dpi_at_specimen": _stat(
+        "dpi_at_specimen": _int_list_stats(
             [c["dpi_at_specimen"] for c in cases
              if c["dpi_at_specimen"] is not None]
         ),
-        "preonset_window_days": _stat(window_days_hist),
+        "preonset_window_days": _int_list_stats(window_days_hist),
         "contact_of_confirmed_confirmed": sum(
             1 for c in cases if c["contact_of_confirmed_at_specimen"]
         ),
@@ -247,13 +287,13 @@ def _pool_cells(cells: list[dict[str, Any]]) -> dict[str, Any]:
     for cell in cells:
         total += cell["lab_confirmed_total"]
         for key, roles in cell["catch_classes"].items():
-            classes.setdefault(key, {r: 0 for r in ROLES})
+            classes.setdefault(key, dict.fromkeys(ROLES, 0))
             for role, n in roles.items():
                 classes[key][role] += n
                 if key.endswith("_pre_onset"):
                     pre += n
         for key, roles in cell["window_coverage"].items():
-            windowed.setdefault(key, {r: 0 for r in ROLES})
+            windowed.setdefault(key, dict.fromkeys(ROLES, 0))
             for role, n in roles.items():
                 windowed[key][role] += n
     return {

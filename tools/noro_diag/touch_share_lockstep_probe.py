@@ -104,7 +104,10 @@ from simulation_utils.paths import validated_open  # noqa: E402
 from simulation_utils.platform_complement import declared_total  # noqa: E402
 from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
 from tools.diag.manifest_args import identifier  # noqa: E402
-from tools.noro_diag.per_host_dose_challenge import build_spec  # noqa: E402
+from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
+    TransmissionSweepKnobs,
+    build_spec,
+)
 
 PATHOGEN_ID = "norwalk_gi"
 RESIDUE_FLOOR_GEC = 1e-12
@@ -1362,12 +1365,21 @@ def _arm_specs(
         "seed": seed, "platform": platform, "bundle": bundle,
         "epochs": epochs, "num_agents": num_agents,
         "pathogen_id": PATHOGEN_ID, "alpha": None, "beta": 1.0,
-        "fomite_representation": "per_surface",
     }
-    spec_a = build_spec(**common, fomite_touch_share="areal")
+    spec_a = build_spec(
+        **common,
+        sweep=TransmissionSweepKnobs(
+            fomite_representation="per_surface",
+            fomite_touch_share="areal",
+        ),
+    )
     spec_d = build_spec(
-        **common, fomite_touch_share="declared",
-        fomite_touch_share_table=share_table,
+        **common,
+        sweep=TransmissionSweepKnobs(
+            fomite_representation="per_surface",
+            fomite_touch_share="declared",
+            fomite_touch_share_table=share_table,
+        ),
     )
     return spec_a, spec_d
 

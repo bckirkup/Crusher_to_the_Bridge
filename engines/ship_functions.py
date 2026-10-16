@@ -219,6 +219,103 @@ def _parse_capacity_schedule(raw: Any, index: int) -> dict[int, float]:
     return out
 
 
+def _parse_ship_function_feedback(entry: dict[str, Any], index: int) -> dict[str, Any]:
+    """Validate one function's feedback block and return the normalized mapping."""
+    feedback = dict(entry.get("feedback") or {})
+    kind = str(feedback.get("kind") or "readout_only")
+    if kind not in FEEDBACK_KINDS:
+        raise ValueError(
+            f"ship_functions.functions[{index}].feedback.kind must be one "
+            f"of {sorted(FEEDBACK_KINDS)}: {kind!r}",
+        )
+    if kind == "route_scalar_scale":
+        scalar_name = str(feedback.get("scalar_name") or "")
+        if scalar_name not in ROUTE_SCALAR_KEYS:
+            raise ValueError(
+                f"ship_functions.functions[{index}].feedback.scalar_name "
+                f"must be one of {sorted(ROUTE_SCALAR_KEYS)}: "
+                f"{scalar_name!r}",
+            )
+    return feedback
+
+
+def _ship_function_spec_from_entry(
+    entry: dict[str, Any],
+    index: int,
+) -> ShipFunctionSpec:
+    """Validate one ``functions[]`` row into a ``ShipFunctionSpec``."""
+    function_id = str(entry.get("function_id") or "")
+    serves = str(entry.get("serves") or "")
+    if not function_id or serves not in SERVES_VALUES:
+        raise ValueError(
+            f"ship_functions.functions[{index}]: function_id required and "
+            f"serves must be one of {sorted(SERVES_VALUES)}: {entry!r}",
+        )
+    model = str(entry.get("capacity_model") or "staffing_fraction")
+    if model not in CAPACITY_MODELS:
+        raise ValueError(
+            f"ship_functions.functions[{index}].capacity_model must be one "
+            f"of {sorted(CAPACITY_MODELS)}: {model!r}",
+        )
+    feedback = _parse_ship_function_feedback(entry, index)
+    return ShipFunctionSpec(
+        function_id=function_id,
+        serves=serves,
+        staffing=_parse_staffing(entry, index),
+        required_zones=frozenset(
+            str(z) for z in (
+                list(entry.get("required_zone_ids") or [])
+                + list(entry.get("required_zone_types") or [])
+            )
+        ),
+        required_systems=tuple(
+            str(s) for s in (entry.get("required_systems") or [])
+        ),
+        capacity_model=model,
+        capacity_schedule=_parse_capacity_schedule(
+            entry.get("capacity_schedule"), index,
+        ),
+        feedback=feedback,
+        crew_sustenance=bool(feedback.get("crew_sustenance", False)),
+    )
+
+
+def _validate_one_ship_function_ref(
+    spec: ShipFunctionSpec,
+    *,
+    pools: set[str],
+    zone_names: set[str],
+    zone_types: set[str],
+    system_ids: set[str],
+) -> None:
+    """Referential integrity for a single function instance."""
+    for staff in spec.staffing:
+        name = staff.pool_key
+        if name.startswith("zone:"):
+            zone = name.split(":", 1)[1]
+            if zone not in zone_names and zone not in zone_types:
+                raise ValueError(
+                    f"ship_functions {spec.key!r}: unknown duty zone "
+                    f"{zone!r}",
+                )
+        elif name not in pools:
+            raise ValueError(
+                f"ship_functions {spec.key!r}: staffing class {name!r} "
+                "not in the platform's agent_classes",
+            )
+    for zone in spec.required_zones:
+        if zone not in zone_names and zone not in zone_types:
+            raise ValueError(
+                f"ship_functions {spec.key!r}: unknown zone {zone!r}",
+            )
+    for system_id in spec.required_systems:
+        if system_id not in system_ids:
+            raise ValueError(
+                f"ship_functions {spec.key!r}: system {system_id!r} "
+                "not in ship_systems",
+            )
+
+
 def parse_ship_functions(block: Any) -> tuple[bool, list[ShipFunctionSpec]]:
     """Validate a ``ship_functions`` config block into function specs.
 
@@ -235,54 +332,7 @@ def parse_ship_functions(block: Any) -> tuple[bool, list[ShipFunctionSpec]]:
     for index, entry in enumerate(block.get("functions") or []):
         if not isinstance(entry, dict):
             raise ValueError(f"ship_functions.functions[{index}] must be a mapping")
-        function_id = str(entry.get("function_id") or "")
-        serves = str(entry.get("serves") or "")
-        if not function_id or serves not in SERVES_VALUES:
-            raise ValueError(
-                f"ship_functions.functions[{index}]: function_id required and "
-                f"serves must be one of {sorted(SERVES_VALUES)}: {entry!r}",
-            )
-        model = str(entry.get("capacity_model") or "staffing_fraction")
-        if model not in CAPACITY_MODELS:
-            raise ValueError(
-                f"ship_functions.functions[{index}].capacity_model must be one "
-                f"of {sorted(CAPACITY_MODELS)}: {model!r}",
-            )
-        feedback = dict(entry.get("feedback") or {})
-        kind = str(feedback.get("kind") or "readout_only")
-        if kind not in FEEDBACK_KINDS:
-            raise ValueError(
-                f"ship_functions.functions[{index}].feedback.kind must be one "
-                f"of {sorted(FEEDBACK_KINDS)}: {kind!r}",
-            )
-        if kind == "route_scalar_scale":
-            scalar_name = str(feedback.get("scalar_name") or "")
-            if scalar_name not in ROUTE_SCALAR_KEYS:
-                raise ValueError(
-                    f"ship_functions.functions[{index}].feedback.scalar_name "
-                    f"must be one of {sorted(ROUTE_SCALAR_KEYS)}: "
-                    f"{scalar_name!r}",
-                )
-        spec = ShipFunctionSpec(
-            function_id=function_id,
-            serves=serves,
-            staffing=_parse_staffing(entry, index),
-            required_zones=frozenset(
-                str(z) for z in (
-                    list(entry.get("required_zone_ids") or [])
-                    + list(entry.get("required_zone_types") or [])
-                )
-            ),
-            required_systems=tuple(
-                str(s) for s in (entry.get("required_systems") or [])
-            ),
-            capacity_model=model,
-            capacity_schedule=_parse_capacity_schedule(
-                entry.get("capacity_schedule"), index,
-            ),
-            feedback=feedback,
-            crew_sustenance=bool(feedback.get("crew_sustenance", False)),
-        )
+        spec = _ship_function_spec_from_entry(entry, index)
         if spec.key in seen_keys:
             raise ValueError(f"ship_functions: duplicate instance {spec.key!r}")
         seen_keys.add(spec.key)
@@ -307,31 +357,13 @@ def validate_ship_function_refs(
     """
     pools = class_ids | set(staffing_pool_names or set())
     for spec in specs:
-        for staff in spec.staffing:
-            name = staff.pool_key
-            if name.startswith("zone:"):
-                zone = name.split(":", 1)[1]
-                if zone not in zone_names and zone not in zone_types:
-                    raise ValueError(
-                        f"ship_functions {spec.key!r}: unknown duty zone "
-                        f"{zone!r}",
-                    )
-            elif name not in pools:
-                raise ValueError(
-                    f"ship_functions {spec.key!r}: staffing class {name!r} "
-                    "not in the platform's agent_classes",
-                )
-        for zone in spec.required_zones:
-            if zone not in zone_names and zone not in zone_types:
-                raise ValueError(
-                    f"ship_functions {spec.key!r}: unknown zone {zone!r}",
-                )
-        for system_id in spec.required_systems:
-            if system_id not in system_ids:
-                raise ValueError(
-                    f"ship_functions {spec.key!r}: system {system_id!r} "
-                    "not in ship_systems",
-                )
+        _validate_one_ship_function_ref(
+            spec,
+            pools=pools,
+            zone_names=zone_names,
+            zone_types=zone_types,
+            system_ids=system_ids,
+        )
 
 
 class FunctionCapacityRunner:
@@ -465,10 +497,11 @@ class FunctionCapacityRunner:
                 name for name, ztype in zone_type_by_id.items()
                 if ztype == requirement
             ]
-            if members and any(name not in closed_zones for name in members):
-                open_count += 1
-            elif not members and requirement not in closed_zones:
-                open_count += 1  # validated id not in the type map: open
+            if (
+                (members and any(name not in closed_zones for name in members))
+                or (not members and requirement not in closed_zones)
+            ):
+                open_count += 1  # no members: validated id not in type map
         return open_count / len(spec.required_zones)
 
     def _instance_capacity(
@@ -651,7 +684,7 @@ class FunctionCapacityRunner:
     def _dining_candidate(
         self,
         spec: ShipFunctionSpec,
-        capacity: float,
+        _capacity: float,
         hours_per_epoch: float,
     ) -> dict[str, Any] | None:
         """Degraded meal weights when a declared dining writer is sustained-below."""
@@ -692,6 +725,27 @@ class FunctionCapacityRunner:
             new_weights[meal] = row
         behavior["dining_meal_weights"] = new_weights
 
+    @staticmethod
+    def _recover_crew_sustenance(agents: list[Any], recovery: float) -> None:
+        if recovery <= 0.0:
+            return
+        for agent in agents:
+            if str(getattr(agent, "role", "")) != "crew":
+                continue
+            deficit = getattr(agent, "sustenance_deficit", 0.0)
+            if deficit:
+                agent.sustenance_deficit = deficit * (1.0 - recovery)
+
+    @staticmethod
+    def _accrue_crew_sustenance(agents: list[Any], increment: float) -> None:
+        if increment <= 0.0:
+            return
+        for agent in agents:
+            if str(getattr(agent, "role", "")) == "crew":
+                agent.sustenance_deficit = (
+                    getattr(agent, "sustenance_deficit", 0.0) + increment
+                )
+
     def _write_sustenance(
         self,
         spec: ShipFunctionSpec,
@@ -709,23 +763,10 @@ class FunctionCapacityRunner:
             "sustenance_recovery", DEFAULT_SUSTENANCE_RECOVERY,
         ))
         if capacity >= threshold:
-            if recovery <= 0.0:
-                return
-            for agent in agents:
-                if str(getattr(agent, "role", "")) != "crew":
-                    continue
-                deficit = getattr(agent, "sustenance_deficit", 0.0)
-                if deficit:
-                    agent.sustenance_deficit = deficit * (1.0 - recovery)
+            self._recover_crew_sustenance(agents, recovery)
             return
         increment = (threshold - capacity) * rate
-        if increment <= 0.0:
-            return
-        for agent in agents:
-            if str(getattr(agent, "role", "")) == "crew":
-                agent.sustenance_deficit = (
-                    getattr(agent, "sustenance_deficit", 0.0) + increment
-                )
+        self._accrue_crew_sustenance(agents, increment)
 
     def _step_systems(
         self,

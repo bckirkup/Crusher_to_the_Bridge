@@ -768,7 +768,8 @@ class TestAuthorContam:
                 source_credit=credit,
             )
             handoff = Path(result["handoff"]).read_text(encoding="utf-8")
-            assert "## Source" in handoff and credit in handoff
+            assert "## Source" in handoff
+            assert credit in handoff
         finally:
             if out.exists():
                 shutil.rmtree(out)
@@ -900,7 +901,8 @@ class TestSystemsInference:
             source_credit=credit,
         )
         md = (out / "systems_notes.md").read_text(encoding="utf-8")
-        assert "## Source" in md and credit in md
+        assert "## Source" in md
+        assert credit in md
         notes = json.loads((out / "systems_notes.json").read_text(encoding="utf-8"))
         assert notes["source_credit"] == credit
         prov = json.loads((out / "import_provenance.json").read_text(encoding="utf-8"))
