@@ -621,6 +621,7 @@ def synthesize(
     allowed_roots: tuple[str, ...],
     copy_graphics: bool = True,
     require_approved: bool = False,
+    source_credit: str | None = None,
 ) -> dict[str, Any]:
     """Build spatial_layout.json + air_flow_paths.json from approved overlays."""
     digest = load_digest(workdir, allowed_roots=allowed_roots)
@@ -709,7 +710,12 @@ def synthesize(
         if sewage_ids:
             graywater += [s for s in sewage_ids if s not in graywater]
             spatial["graywater_zones"] = graywater
-        write_systems_notes(output_dir, systems_notes, allowed_roots=allowed_roots)
+        write_systems_notes(
+            output_dir,
+            systems_notes,
+            allowed_roots=allowed_roots,
+            source_credit=source_credit,
+        )
         systems_notes_path = resolve_child_path(output_dir, "systems_notes.json")
 
     prepare_output_directory(output_dir, allowed_roots=allowed_roots)
@@ -723,6 +729,7 @@ def synthesize(
         "schema_version": "1.0",
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "platform_id": pid,
+        **({"source_credit": source_credit} if source_credit else {}),
         "workdir": workdir,
         "digest_sha256": _sha256_file(digest_path, allowed_roots=allowed_roots),
         "svg_sha256": svg_hashes,
