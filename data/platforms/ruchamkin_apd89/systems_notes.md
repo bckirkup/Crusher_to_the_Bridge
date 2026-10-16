@@ -68,3 +68,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - Troop_Mess_Below (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Troop_Mess_Below
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy APD-89 USS Ruchamkin, Booklet of General Plans, 1961 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [apd89.pdf](https://maritime.org/doc/plans/apd89.pdf).

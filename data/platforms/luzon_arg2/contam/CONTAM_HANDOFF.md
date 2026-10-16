@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/luzon_arg2 --contam-gate
 ```
+
+## Source
+
+U.S. Navy ARG-2 USS Luzon, Booklet of General Plans, 1943 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [arg2.pdf](https://maritime.org/doc/plans/arg2.pdf).

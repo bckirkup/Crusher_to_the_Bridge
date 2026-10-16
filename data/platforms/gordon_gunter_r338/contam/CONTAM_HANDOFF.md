@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/gordon_gunter_r338 --contam-gate
 ```
+
+## Source
+
+U.S. Navy R-338 NOAA Gordon Gunter, Booklet of General Plans, 2008 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [r338.pdf](https://maritime.org/doc/plans/r338.pdf).

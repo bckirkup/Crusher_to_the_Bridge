@@ -126,3 +126,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - HD_CPO_Berth (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_CPO_Berth
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy BB-34 USS New York, Booklet of General Plans, 1942 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [bb34.pdf](https://maritime.org/doc/plans/bb34.pdf).

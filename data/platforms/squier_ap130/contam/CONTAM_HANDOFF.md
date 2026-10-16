@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/squier_ap130 --contam-gate
 ```
+
+## Source
+
+U.S. Navy AP-130 USS General G.O. Squier, Booklet of General Plans, 1942 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [ap130.pdf](https://maritime.org/doc/plans/ap130.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/hunter_killer_dd692 --contam-gate
 ```
+
+## Source
+
+U.S. Navy DD-692 class long-hull, Contract Plan, Hunter Killer completion, 1947 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [dd692.pdf](https://maritime.org/doc/plans/dd692.pdf).

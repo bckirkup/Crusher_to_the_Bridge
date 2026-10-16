@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/pce_874 --contam-gate
 ```
+
+## Source
+
+U.S. Navy PCE-874 USS Pascagoula, Booklet of General Plans, 1944 (incomplete, 6 of 8 pages) — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [pce874.pdf](https://maritime.org/doc/plans/pce874.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/west_virginia_bb48 --contam-gate
 ```
+
+## Source
+
+U.S. Navy BB-48 USS West Virginia (Colorado class), Booklet of General Plans, 1939 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [bb48.pdf](https://maritime.org/doc/plans/bb48.pdf).

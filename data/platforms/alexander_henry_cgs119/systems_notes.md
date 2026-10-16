@@ -68,3 +68,7 @@ Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery 
 - HD_Upper_Officers (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Upper_Officers
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy CGS-119 CGS Alexander Henry, General Plans, 1959 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cgs119.pdf](https://maritime.org/doc/plans/cgs119.pdf).

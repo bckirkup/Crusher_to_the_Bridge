@@ -78,3 +78,7 @@ Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery 
 - HD_First_Platform (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_First_Platform
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy ARC-3 USS Aeolus, Booklet of General Plans, 1955 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [arc3.pdf](https://maritime.org/doc/plans/arc3.pdf).

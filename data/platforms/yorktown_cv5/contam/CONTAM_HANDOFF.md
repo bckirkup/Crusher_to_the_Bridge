@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/yorktown_cv5 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CV-5 USS Yorktown, Booklet of General Plans, 1940 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cv5.pdf](https://maritime.org/doc/plans/cv5.pdf).

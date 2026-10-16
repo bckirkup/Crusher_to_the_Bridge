@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/passumpsic_ao106 --contam-gate
 ```
+
+## Source
+
+U.S. Navy AO-106 USS Navasota (Cimarron class), Booklet of General Plans, 1960 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [ao106.pdf](https://maritime.org/doc/plans/ao106.pdf).

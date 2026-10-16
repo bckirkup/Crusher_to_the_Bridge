@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/thetis_bay_cve90 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CVE-90 USS Thetis Bay (Casablanca class), Booklet of General Plans, 1945 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cve90.pdf](https://maritime.org/doc/plans/cve90.pdf).

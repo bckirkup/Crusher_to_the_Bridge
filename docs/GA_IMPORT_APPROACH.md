@@ -1,6 +1,18 @@
-Status: in use (2026-10-16). Nine maritime.org general arrangements imported end-to-end (latest: CVL-26 Independence-class light carrier — first carrier-scale import). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
+Status: in use (2026-10-16). Sixty-eight maritime.org general arrangements imported end-to-end (latest: full-index sweep, 1895 Olympia through CV-60 Saratoga). Tool changes in `tools/ship_blueprint_import/`; this document is the plan for turning GA booklets into engineer-ready ContamW starters at scale.
 
 # GA → .prj: approach and plan
+
+> **Source & credit.** The general-arrangement booklets this pipeline
+> converts are museum material: U.S. Navy (and allied) *Booklets of
+> General Plans* hosted by the [San Francisco Maritime National Park
+> Association](https://maritime.org/about/), the non-profit partner to
+> San Francisco Maritime National Historical Park, via its [Booklets of
+> General Plans Online](https://maritime.org/doc/plans/index.htm)
+> collection. Every platform produced by an import carries a `## Source`
+> block in `data/platforms/<pid>/systems_notes.md` and
+> `contam/CONTAM_HANDOFF.md` naming the specific booklet and linking back
+> to its PDF on maritime.org; emit it at generation time with
+> `synthesize --source-credit`.
 
 ## What we have today
 

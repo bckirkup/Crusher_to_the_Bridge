@@ -202,3 +202,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - BD_Sick_Bay_Bath (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: BD_Sick_Bay_Bath
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy ACR-13 USS Montana / USS Missoula CA-13 (Tennessee class), Plans, 1917 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [acr13.pdf](https://maritime.org/doc/plans/acr13.pdf).

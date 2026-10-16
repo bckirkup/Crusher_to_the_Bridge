@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/cushing_dd376 --contam-gate
 ```
+
+## Source
+
+U.S. Navy DD-376 USS Cushing (Mahan class), Booklet of General Plans, c.1942 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [dd376.pdf](https://maritime.org/doc/plans/dd376.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/wright_cc2 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CC-2 USS Wright, Booklet of General Plans, 1965 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cc2.pdf](https://maritime.org/doc/plans/cc2.pdf).

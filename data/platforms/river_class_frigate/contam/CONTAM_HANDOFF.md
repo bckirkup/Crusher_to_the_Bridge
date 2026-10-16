@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/river_class_frigate --contam-gate
 ```
+
+## Source
+
+U.S. Navy River Class Frigate, Booklet of General Plans, 1941 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [river.pdf](https://maritime.org/doc/plans/river.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/ranger_cv4 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CV-4 USS Ranger, Booklet of General Plans, 1944 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cv4.pdf](https://maritime.org/doc/plans/cv4.pdf).

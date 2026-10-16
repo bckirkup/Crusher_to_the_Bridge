@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/south_dakota_bb49 --contam-gate
 ```
+
+## Source
+
+U.S. Navy BB-49 USS South Dakota, Contract Plans, 1918 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [bb49.pdf](https://maritime.org/doc/plans/bb49.pdf).

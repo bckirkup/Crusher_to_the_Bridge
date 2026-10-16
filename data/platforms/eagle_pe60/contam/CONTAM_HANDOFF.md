@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/eagle_pe60 --contam-gate
 ```
+
+## Source
+
+U.S. Navy PE-60 USS Eagle No. 60, Booklet of General Plans, 1918 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [pe60.pdf](https://maritime.org/doc/plans/pe60.pdf).

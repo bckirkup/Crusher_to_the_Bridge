@@ -144,3 +144,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - BD_Crews_Lavatory (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: BD_Crews_Lavatory
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy C-6 USS Olympia, Booklet of General Plans, 1895 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [c6.pdf](https://maritime.org/doc/plans/c6.pdf).

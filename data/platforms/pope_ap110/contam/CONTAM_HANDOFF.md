@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/pope_ap110 --contam-gate
 ```
+
+## Source
+
+U.S. Navy AP-110 USS General John Pope, Booklet of General Plans, 1943 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [ap110.pdf](https://maritime.org/doc/plans/ap110.pdf).

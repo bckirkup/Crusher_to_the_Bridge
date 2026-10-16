@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/missouri_bb63 --contam-gate
 ```
+
+## Source
+
+U.S. Navy BB-63 USS Missouri (Iowa class), Booklet of General Plans, 1950 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [bb63.pdf](https://maritime.org/doc/plans/bb63.pdf).

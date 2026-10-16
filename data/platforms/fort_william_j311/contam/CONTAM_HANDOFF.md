@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/fort_william_j311 --contam-gate
 ```
+
+## Source
+
+U.S. Navy J311 HMCS Fort William (Bangor class minesweeper), 1942 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [j311.pdf](https://maritime.org/doc/plans/j311.pdf).

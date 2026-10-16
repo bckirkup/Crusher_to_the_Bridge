@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/savannah_ns --contam-gate
 ```
+
+## Source
+
+U.S. Navy NS Savannah, Booklet of General Plans, 1967 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [savannah.pdf](https://maritime.org/doc/plans/savannah.pdf).

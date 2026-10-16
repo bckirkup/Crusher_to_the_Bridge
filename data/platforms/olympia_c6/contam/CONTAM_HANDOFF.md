@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/olympia_c6 --contam-gate
 ```
+
+## Source
+
+U.S. Navy C-6 USS Olympia, Booklet of General Plans, 1895 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [c6.pdf](https://maritime.org/doc/plans/c6.pdf).

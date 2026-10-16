@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/castle_class_corvette --contam-gate
 ```
+
+## Source
+
+U.S. Navy Castle Class corvette, 1944 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [castle.pdf](https://maritime.org/doc/plans/castle.pdf).

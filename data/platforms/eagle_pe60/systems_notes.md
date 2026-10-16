@@ -81,3 +81,7 @@ Cowled natural supply to accommodation; mechanical exhaust for galley, heads, ma
 - Crew_Mess_Lwr (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Mess_Lwr
 
 Evidence grades: `sheet_read` = marker drawn/labeled on the sheet; `era_rule` = era/zone-type prior; zones with neither are engineer handwork.
+
+## Source
+
+U.S. Navy PE-60 USS Eagle No. 60, Booklet of General Plans, 1918 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [pe60.pdf](https://maritime.org/doc/plans/pe60.pdf).

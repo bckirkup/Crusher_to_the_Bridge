@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/midway_cv41 --contam-gate
 ```
+
+## Source
+
+U.S. Navy CV-41 USS Midway, Booklet of General Plans, 1987 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cv41.pdf](https://maritime.org/doc/plans/cv41.pdf).

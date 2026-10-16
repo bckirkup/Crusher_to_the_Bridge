@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/texas_bb35 --contam-gate
 ```
+
+## Source
+
+U.S. Navy BB-35 USS Texas (New York class), Booklet of General Plans, 1944 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [bb35.pdf](https://maritime.org/doc/plans/bb35.pdf).

@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/nields_dd616 --contam-gate
 ```
+
+## Source
+
+U.S. Navy DD-616 USS Nields (Benson class), Booklet of General Plans, 1942 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [dd616.pdf](https://maritime.org/doc/plans/dd616.pdf).

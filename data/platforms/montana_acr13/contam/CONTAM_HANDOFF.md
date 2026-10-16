@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/montana_acr13 --contam-gate
 ```
+
+## Source
+
+U.S. Navy ACR-13 USS Montana / USS Missoula CA-13 (Tennessee class), Plans, 1917 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [acr13.pdf](https://maritime.org/doc/plans/acr13.pdf).

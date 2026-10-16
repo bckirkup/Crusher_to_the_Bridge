@@ -45,3 +45,7 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/bainbridge_dd1 --contam-gate
 ```
+
+## Source
+
+U.S. Navy DD-1 USS Bainbridge, Booklet of General Plans, 1901 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [dd1.pdf](https://maritime.org/doc/plans/dd1.pdf).
