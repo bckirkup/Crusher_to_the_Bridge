@@ -72,6 +72,9 @@ PLATFORMS = [
     "idaho_bb42",
     "west_virginia_bb48",
     "south_dakota_bb49",
+    "missouri_bb63",
+    "wisconsin_bb64",
+    "new_jersey_bb62",
 ]
 
 ENTERPRISE_IDS = frozenset({
