@@ -105,6 +105,40 @@ Both files must exist in the target dir.
 - `load_history_from` does NOT schema-validate — hand-edited fixture JSON loads
   as long as keys/values are well-formed.
 
+### Per-platform checks: fingerprint your own telemetry (new platform bundles)
+
+The app picks its platform by zone-set fingerprint of the loaded history —
+an exact zone match locks the platform with no env override or restart. To
+exercise a NEW platform's deck plans, generate tiny telemetry that carries
+its own zone set instead of fighting `CTTB_PLATFORM_OVERRIDE`:
+
+```bash
+.venv/bin/python -c "
+import json, os
+from picard_framework import PicardRunSpec, ShipSimulation
+spec = json.load(open('picard_framework/runs/smoke_2epoch.json'))
+spec['catalog']['platform_id'] = '<new_platform_id>'
+outdir = 'telemetry_buffer/t_<name>'
+os.makedirs(outdir, exist_ok=True)
+spec.setdefault('run', {})['simulation_history'] = f'{outdir}/simulation_history.json'
+spec['run']['lab_notebook'] = f'{outdir}/artificial_lab_notebook.json'
+spec['run']['ground_truth'] = f'{outdir}/ground_truth.json'
+spec['run'].setdefault('history_retention', 'full')
+s = PicardRunSpec.from_picard_dict(os.getcwd(), spec)
+sim = ShipSimulation(s, display=False)
+sim.run(); sim.finalize(display=False)
+"
+```
+
+Runs in ~1 s. Point the sidebar "Telemetry directory" input at
+`telemetry_buffer/t_<name>` — the fingerprint resolves the new platform
+exactly (verify beforehand with
+`dashboard.loaders.fingerprint_platform`, which returns
+`('<platform_id>', 'exact')`), and the Tactical Sensor Grid renders that
+platform's registered deck crops. Delete the fixture dir when done —
+`telemetry_buffer/t_*` test dirs are untracked artifacts, never commit
+them.
+
 ## Where mechanism data actually lives (gotchas)
 
 - SOP events are under **`reactive_protocols.sop_events`**, not a top-level
