@@ -183,6 +183,8 @@ data/
 │   ├── gordon_gunter_r338/         (maritime.org GA import)
 │   ├── castle_class_corvette/      (maritime.org GA import)
 │   ├── raven_am55/                 (maritime.org GA import)
+│   ├── bolster_ars38/              (maritime.org GA import)
+│   ├── ruchamkin_apd89/            (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -562,6 +564,8 @@ airflow definitions:
 | `gordon_gunter_r338` | NOAA Gordon Gunter T-AGOS research vessel (maritime.org R-338 import, 35 zones, 20 crew + 15 scientists) |
 | `castle_class_corvette` | HMS Castle-class WWII corvette (maritime.org GA import, 19 zones, 99 crew) |
 | `raven_am55` | USS Raven-class AM-55 fleet minesweeper (maritime.org GA import, 21 zones, 105 crew) |
+| `bolster_ars38` | USS Bolster ARS-38 rescue/salvage tug (maritime.org GA import, 24 zones, 90 crew) |
+| `ruchamkin_apd89` | USS Ruchamkin APD-89 fast transport (maritime.org GA import, 32 zones, 213 crew + 162 troops) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`

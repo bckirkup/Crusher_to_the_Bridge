@@ -1,0 +1,390 @@
+{
+  "platform": "bolster_ars38",
+  "description": "Bolster-class rescue & salvage ship, 213.5 ft, diesel-electric, ~90 crew incl. divers. Zones read from maritime.org ARS-38 single-sheet multi-view plan.",
+  "isolation_unit_capacity": 1,
+  "deck_dimensions": {
+    "length_m": 65.1,
+    "beam_m": 11.9
+  },
+  "graywater_zones": [
+    "Engine_Rm"
+  ],
+  "zones": [
+    {
+      "id": "Nav_Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 51.2,
+      "floor_area_m2": 21.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 9.0,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 37.33,
+        "y": 2.49
+      },
+      "description": "pilot house + chart space, top of island"
+    },
+    {
+      "id": "Signal_Shelter",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 34.81,
+      "floor_area_m2": 14.51,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 9.0,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 43.73,
+        "y": 5.39
+      },
+      "description": "signal shelter abaft bridge"
+    },
+    {
+      "id": "Focsle_Deck_Open",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 145.21,
+      "floor_area_m2": 60.5,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 9.0,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 39.09,
+        "y": 9.2
+      },
+      "description": "open deck edges of the island deck"
+    },
+    {
+      "id": "Gun_Tub_Fwd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 122.18,
+      "floor_area_m2": 50.91,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 6.0,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 41.11,
+        "y": 1.75
+      },
+      "description": "3in/50 gun tub on the bow"
+    },
+    {
+      "id": "Bridge_Lower",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 177.07,
+      "floor_area_m2": 73.78,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 6.0,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 25.11,
+        "y": 4.23
+      },
+      "max_occupancy": 4,
+      "description": "lower bridge/coding rooms under pilot house"
+    },
+    {
+      "id": "Radio_Rm",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 61.38,
+      "floor_area_m2": 25.58,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 6.0,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 6.7,
+        "y": 4.55
+      },
+      "max_occupancy": 2,
+      "description": "radio room on forecastle level"
+    },
+    {
+      "id": "Focsle_Open_Aft",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 531.22,
+      "floor_area_m2": 221.34,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 6.0,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 24.18,
+        "y": 8.73
+      },
+      "description": "open forecastle deck aft w/ davit heads"
+    },
+    {
+      "id": "Officers_Qtrs",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 105.31,
+      "floor_area_m2": 43.88,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 49.28,
+        "y": 2.06
+      },
+      "max_occupancy": 8,
+      "description": "officers' country fwd"
+    },
+    {
+      "id": "Wardroom",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 93.61,
+      "floor_area_m2": 39.01,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 32.45,
+        "y": 2.06
+      },
+      "max_occupancy": 8,
+      "description": "wardroom + officers' mess fwd"
+    },
+    {
+      "id": "CPO_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 130.02,
+      "floor_area_m2": 54.17,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 30.05,
+        "y": 4.38
+      },
+      "max_occupancy": 10,
+      "description": "CPO berthing forward of amidships"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 72.81,
+      "floor_area_m2": 30.34,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 22.43,
+        "y": 6.44
+      },
+      "max_occupancy": 5,
+      "description": "galley + scullery amidships"
+    },
+    {
+      "id": "Mess_Deck",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 124.82,
+      "floor_area_m2": 52.01,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 41.66,
+        "y": 6.55
+      },
+      "max_occupancy": 30,
+      "description": "crew messing amidships"
+    },
+    {
+      "id": "Sick_Bay",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 54.61,
+      "floor_area_m2": 22.75,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 47.67,
+        "y": 4.17
+      },
+      "max_occupancy": 1,
+      "description": "sick bay by officers' country"
+    },
+    {
+      "id": "HD_Main",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 87.22,
+      "floor_area_m2": 37.92,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 3.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 7.61,
+        "y": 5.41
+      },
+      "serves": [
+        "CPO_Quarters",
+        "Mess_Deck",
+        "Officers_Qtrs"
+      ],
+      "description": "crew's head + washroom midships",
+      "base_ach": 19.1,
+      "max_occupancy": 14
+    },
+    {
+      "id": "Salvage_Deck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 527.87,
+      "floor_area_m2": 219.95,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.0,
+      "deck": "main_deck",
+      "display": {
+        "x": 25.24,
+        "y": 9.36
+      },
+      "description": "open working deck aft: towing machine, gallows frame, towing pins"
+    },
+    {
+      "id": "Crew_Quarters",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 168.63,
+      "floor_area_m2": 70.26,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.5,
+      "deck": "platform_deck",
+      "display": {
+        "x": 38.73,
+        "y": 1.99
+      },
+      "max_occupancy": 55,
+      "description": "main crew berthing forward on 1st platform"
+    },
+    {
+      "id": "Diving_Locker",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 136.2,
+      "floor_area_m2": 56.75,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.5,
+      "deck": "platform_deck",
+      "display": {
+        "x": 17.25,
+        "y": 5.15
+      },
+      "description": "diver's locker + air compressor rm (salvage mission)"
+    },
+    {
+      "id": "Engine_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "floor_area_m2": 250.0,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.5,
+      "deck": "platform_deck",
+      "display": {
+        "x": 22.79,
+        "y": 8.19
+      },
+      "description": "main machinery: diesel-electric gens amidships"
+    },
+    {
+      "id": "Motor_Rm",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 260.0,
+      "floor_area_m2": 108.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.5,
+      "deck": "platform_deck",
+      "display": {
+        "x": 17.25,
+        "y": 9.63
+      },
+      "description": "propulsion motor room aft of engine room"
+    },
+    {
+      "id": "Bosn_Stores",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 91.34,
+      "floor_area_m2": 38.06,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.5,
+      "deck": "platform_deck",
+      "display": {
+        "x": 54.68,
+        "y": 5.59
+      },
+      "description": "boatswain/salvage stores forward lower tier"
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 120.85,
+      "floor_area_m2": 50.35,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -2.5,
+      "deck": "hold",
+      "display": {
+        "x": 9.37,
+        "y": 10.12
+      },
+      "description": "steering gear flat aft"
+    },
+    {
+      "id": "Shaft_Alley",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 120.85,
+      "floor_area_m2": 50.35,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -2.5,
+      "deck": "hold",
+      "display": {
+        "x": 24.74,
+        "y": 8.98
+      },
+      "description": "shaft alley aft"
+    },
+    {
+      "id": "Fuel_Tanks",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 195.22,
+      "floor_area_m2": 81.34,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -2.5,
+      "deck": "hold",
+      "display": {
+        "x": 17.71,
+        "y": 4.76
+      },
+      "description": "F.O. tankage flanking machinery"
+    },
+    {
+      "id": "Fwd_Peak",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 74.37,
+      "floor_area_m2": 30.99,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -2.5,
+      "deck": "hold",
+      "display": {
+        "x": 32.81,
+        "y": 1.19
+      },
+      "description": "fwd peak + chain locker"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T00:03:34.455467+00:00",
+  "platform_id": "ruchamkin_apd89",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/apd89_ruchamkin",
+  "digest_sha256": "68e5035cb69462a5758ca35d12f36fd8cb11e4fea64c847905795171f2040291",
+  "svg_sha256": {
+    "page_05_approved.svg": "ee483631e91638d10a37ea65d2f4053aa303b11759b5fbdd79c26c13c236bbd3",
+    "page_06_approved.svg": "18b20e981da76e481ca79ae610b7207a2795b90ccb117072e305bbb4fe156c29",
+    "page_07_approved.svg": "b563c5893c0382b8c9166a6cb6562758c4e37e2d399232860dfa27f89eb1eae4",
+    "page_08_approved.svg": "30d8d07182bcc33972a3274f676d3b75871944c3f46276a4bb89d0a28482d210",
+    "page_09_approved.svg": "10902e2250a519ad30976e9568f4fc3fad861bc7537d08e797fcda288fee180c",
+    "page_10_approved.svg": "9dd262c95bba71b99dd0aaff8425f7b9a758806d6a116d0ceee9dcb6b06733ed"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 32,
+  "berthing_zones": [
+    "Officers_Qtrs",
+    "Radio_Rm",
+    "Crew_Berthing_Aft",
+    "Crew_Berthing_Mid",
+    "Armory_Offices",
+    "Troop_Berthing_Fwd",
+    "Troop_Berthing_Mid",
+    "Crew_Berthing_1P"
+  ],
+  "systems_era": "usn_ww2"
+}

@@ -1,0 +1,182 @@
+{
+  "platform": "bolster_ars38",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "platform_deck",
+      "serves_zone": "Engine_Rm",
+      "display": [
+        -378.39,
+        1.66
+      ],
+      "evidence": "sheet_read",
+      "notes": "Stack on outboard profile over midships machinery"
+    },
+    {
+      "id": "Cowl_Focsle",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Gun_Tub_Fwd",
+      "display": [
+        35.34,
+        0.53
+      ],
+      "evidence": "sheet_read",
+      "notes": "Cowl symbols drawn on forecastle plan bow"
+    },
+    {
+      "id": "Gooseneck_Eng",
+      "kind": "gooseneck",
+      "facing": "down",
+      "direction": "supply",
+      "deck": "platform_deck",
+      "serves_zone": "Engine_Rm",
+      "display": [
+        -73.24,
+        6.92
+      ],
+      "evidence": "era_plausible",
+      "notes": "Era-typical forced-draft supply to machinery"
+    },
+    {
+      "id": "Mushroom_Mess",
+      "kind": "mushroom",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Mess_Deck",
+      "display": [
+        40.06,
+        5.68
+      ],
+      "evidence": "era_plausible",
+      "notes": "Mushroom supply typical over mess deck"
+    }
+  ],
+  "zone_modes": {
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Signal_Shelter": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Gun_Tub_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Bridge_Lower": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Rm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_Open_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Qtrs": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wardroom": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "CPO_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Mess_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Sick_Bay": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Main": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Salvage_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Diving_Locker": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Motor_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Bosn_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Peak": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.O. TANKS",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Tanks",
+      "display": [
+        19.53,
+        5.06
+      ],
+      "deck": "hold",
+      "notes": "Fuel-oil tankage flanking machinery, hold plan"
+    }
+  ],
+  "plumbing_drains": [
+    "Wardroom (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "Mess_Deck (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Mess_Deck",
+    "Sick_Bay (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay",
+    "HD_Main (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Main"
+  ]
+}

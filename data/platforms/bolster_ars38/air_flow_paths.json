@@ -1,0 +1,220 @@
+{
+  "platform": "bolster_ars38",
+  "description": "HVAC network synthesized for bolster_ars38",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Nav_Bridge",
+        "Signal_Shelter",
+        "Bridge_Lower",
+        "Radio_Rm",
+        "Officers_Qtrs",
+        "Wardroom",
+        "CPO_Quarters",
+        "Galley",
+        "Mess_Deck",
+        "Sick_Bay",
+        "Crew_Quarters"
+      ],
+      "ach": 6.0,
+      "description": "accommodation ventilation",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Rm",
+        "Motor_Rm",
+        "Steering_Gear",
+        "Shaft_Alley",
+        "Diving_Locker",
+        "Bosn_Stores"
+      ],
+      "ach": 10.0,
+      "description": "machinery + salvage spaces ventilation",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_HD_Main",
+      "rooms": [
+        "HD_Main"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Main, 14 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Main",
+      "flow_rate_m3h": 1664.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Main; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Nav_Bridge",
+      "to": "Bridge_Lower",
+      "type": "ladder"
+    },
+    {
+      "from": "Signal_Shelter",
+      "to": "Radio_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Bridge_Lower",
+      "to": "Officers_Qtrs",
+      "type": "ladder"
+    },
+    {
+      "from": "Radio_Rm",
+      "to": "Officers_Qtrs",
+      "type": "passageway"
+    },
+    {
+      "from": "Gun_Tub_Fwd",
+      "to": "Focsle_Open_Aft",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Focsle_Open_Aft",
+      "to": "Salvage_Deck",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Officers_Qtrs",
+      "to": "CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Officers_Qtrs",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Deck",
+      "to": "Crew_Quarters",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Diving_Locker",
+      "type": "passageway"
+    },
+    {
+      "from": "Diving_Locker",
+      "to": "Engine_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Motor_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Fuel_Tanks",
+      "type": "ladder"
+    },
+    {
+      "from": "Motor_Rm",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Steering_Gear",
+      "type": "passageway"
+    },
+    {
+      "from": "Nav_Bridge",
+      "to": "Signal_Shelter",
+      "type": "passageway"
+    },
+    {
+      "from": "Gun_Tub_Fwd",
+      "to": "Bridge_Lower",
+      "type": "passageway"
+    },
+    {
+      "from": "Bridge_Lower",
+      "to": "Radio_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Qtrs",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Mess_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Deck",
+      "to": "Salvage_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Bosn_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Fuel_Tanks",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Tanks",
+      "to": "Fwd_Peak",
+      "type": "passageway"
+    }
+  ]
+}

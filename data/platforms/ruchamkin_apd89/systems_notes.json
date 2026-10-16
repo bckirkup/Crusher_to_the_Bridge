@@ -1,0 +1,240 @@
+{
+  "platform": "ruchamkin_apd89",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "second_platform",
+      "serves_zone": "Engine_Rm",
+      "display": [
+        50.16,
+        1.26
+      ],
+      "evidence": "sheet_read",
+      "notes": "Stack over machinery on inboard profile"
+    },
+    {
+      "id": "Cowl_Focsle",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Focsle_Deck",
+      "display": [
+        82.5,
+        -0.68
+      ],
+      "evidence": "sheet_read",
+      "notes": "Cowl on fore deck edge"
+    },
+    {
+      "id": "Vent_Fantail",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "unknown",
+      "deck": "main_deck",
+      "serves_zone": "Crew_Berthing_Aft",
+      "display": [
+        7.86,
+        7.91
+      ],
+      "evidence": "sheet_read",
+      "notes": "VENT label near fantail over aft berthing"
+    },
+    {
+      "id": "Gooseneck_Eng",
+      "kind": "gooseneck",
+      "facing": "down",
+      "direction": "supply",
+      "deck": "second_platform",
+      "serves_zone": "Boiler_Rm_Fwd",
+      "display": [
+        42.14,
+        4.27
+      ],
+      "evidence": "era_plausible",
+      "notes": "Forced-draft supply for fire rooms"
+    },
+    {
+      "id": "Mushroom_Mess",
+      "kind": "mushroom",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Mess_Hall",
+      "display": [
+        45.18,
+        0.0
+      ],
+      "evidence": "era_plausible",
+      "notes": "Mushroom supply over messing"
+    }
+  ],
+  "zone_modes": {
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Signal_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Qtrs": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Rm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Island_Open_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fantail": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_Aft": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Crew_Berthing_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mess_Hall": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Sick_Bay": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Wardroom": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Crew": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Passage_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Armory_Offices": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_Deck": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Troop_Berthing_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Troop_Berthing_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Upper_Machinery": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rm_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Engine_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Boiler_Rm_Aft": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Stores_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Magazines": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Troop_Mess_Below": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Chain_Locker": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.O. TANK",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Tanks",
+      "display": [
+        47.14,
+        8.41
+      ],
+      "deck": "hold",
+      "notes": "Fuel-oil tankage flanking machinery on hold plan"
+    },
+    {
+      "label": "F.W. TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Hold",
+      "display": [
+        74.64,
+        4.81
+      ],
+      "deck": "hold",
+      "notes": "Fresh-water tank fwd hold"
+    }
+  ],
+  "plumbing_drains": [
+    "Mess_Hall (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Mess_Hall",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "Sick_Bay (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay",
+    "Wardroom (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom",
+    "HD_Crew (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew",
+    "Troop_Mess_Below (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Troop_Mess_Below"
+  ]
+}

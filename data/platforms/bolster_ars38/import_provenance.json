@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T00:03:34.166031+00:00",
+  "platform_id": "bolster_ars38",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/ars38_bolster",
+  "digest_sha256": "d61f91671e9d87ba6da3ce1e8b8fa1452e775ec77bda0e01f82516ff9e4b1c54",
+  "svg_sha256": {
+    "page_01_approved.svg": "695895cb2c19341647def78ba49840a920bbbc091a92a2a557b87258f5653dbc"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 24,
+  "berthing_zones": [
+    "Bridge_Lower",
+    "Radio_Rm",
+    "Officers_Qtrs",
+    "CPO_Quarters",
+    "Crew_Quarters"
+  ],
+  "systems_era": "usn_ww2"
+}
