@@ -210,6 +210,9 @@ data/
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
+│   ├── keppler_dd765/              (maritime.org GA import)
+│   ├── fletcher_dde_dd445/         (maritime.org GA import)
+│   ├── hunter_killer_dd692/        (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
