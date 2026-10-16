@@ -1,0 +1,318 @@
+{
+  "platform": "nields_dd616",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "UPT_AftStack",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "first_platform",
+      "serves_zone": "Fire_Rm_Aft",
+      "display": [
+        44.05,
+        2.13
+      ],
+      "evidence": "sheet_read",
+      "notes": "uptake casing + air intake openings, aft stack"
+    },
+    {
+      "id": "UPT_FwdStack",
+      "kind": "uptake",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "first_platform",
+      "serves_zone": "Fire_Rm_Fwd",
+      "display": [
+        65.5,
+        2.13
+      ],
+      "evidence": "sheet_read",
+      "notes": "uptake casing + air intakes, fwd stack"
+    },
+    {
+      "id": "AI_Main_Aft",
+      "kind": "air_port",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Uptake_Aft",
+      "display": [
+        44.7,
+        1.47
+      ],
+      "evidence": "sheet_read",
+      "notes": "air intake openings at deck edge"
+    },
+    {
+      "id": "AI_Main_Fwd",
+      "kind": "air_port",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Uptake_Fwd",
+      "display": [
+        67.05,
+        1.47
+      ],
+      "evidence": "sheet_read",
+      "notes": "air intake openings at deck edge"
+    },
+    {
+      "id": "VFS_Aft",
+      "kind": "fan_room",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Aft_Ammo",
+      "display": [
+        19.0,
+        3.27
+      ],
+      "evidence": "sheet_read",
+      "notes": "supply vent fan space"
+    },
+    {
+      "id": "VENT_Laundry",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "main_deck",
+      "serves_zone": "Galley_Area",
+      "display": [
+        71.52,
+        1.64
+      ],
+      "evidence": "sheet_read",
+      "notes": "laundry area vent"
+    },
+    {
+      "id": "FAN_Deckhouse",
+      "kind": "fan_room",
+      "facing": "up",
+      "direction": "supply",
+      "deck": "deckhouse_deck",
+      "serves_zone": "Midship_Deckhouse",
+      "display": [
+        43.04,
+        3.66
+      ],
+      "evidence": "sheet_read",
+      "notes": "vent fans on deckhouse tops"
+    },
+    {
+      "id": "CWL_Focsle",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "focsle_deck",
+      "serves_zone": "Focsle_Open",
+      "display": [
+        95.08,
+        1.89
+      ],
+      "evidence": "era_plausible",
+      "notes": "era-typical focsle cowl"
+    }
+  ],
+  "zone_modes": {
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radar_Plot": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Super_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "After_Deckhouse_Top": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Midship_Deckhouse": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Radio_Central": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Country_Focsle": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Fantail": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Ammo": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "HD_Crew_Aft": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Mid_Services": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Uptake_Aft": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Workshops_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Uptake_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Galley_Area": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "WR_Block": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Fwd": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "CPO_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bow_Focsle": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Aft_Shops": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Berthing_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Engine_Rm_Aft": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fire_Rm_Aft": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Engine_Rm_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fire_Rm_Fwd": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Crew_Qtrs_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_1P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Stores_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Magazine_Aft_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Provisions_2P": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Magazine_Fwd_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_Hold": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Magazines_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Peak_Hold": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.O./BALLAST + LUB OIL TANKS",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Tanks_2P",
+      "display": [
+        46.3,
+        4.91
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    },
+    {
+      "label": "RESERVE FEED + F.W. TANKS",
+      "kind": "freshwater",
+      "nearest_zone": "Fuel_Tanks_2P",
+      "display": [
+        63.24,
+        7.37
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    },
+    {
+      "label": "PEAK TANK A-1W",
+      "kind": "unknown",
+      "nearest_zone": "Magazine_Fwd_2P",
+      "display": [
+        102.77,
+        4.91
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Crew_Aft (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew_Aft",
+    "Galley_Area (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley_Area",
+    "HD_Fwd (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Fwd"
+  ]
+}
