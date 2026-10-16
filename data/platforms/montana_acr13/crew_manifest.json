@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:30:04.653430+00:00",
+  "platform": "montana_acr13",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 1000
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 60,
+      "berth_zone": "GD_Officers_Staterooms_Port",
+      "duty_zone": "GD_Wardroom_Dining",
+      "notes": "captain + wardroom/junior officers in staterooms (GD_Captains_Quarters, GD_/BD_ stateroom blocks)"
+    },
+    {
+      "class_id": "warrant",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "BD_Warrant_Mess",
+      "duty_zone": "GD_Armory",
+      "notes": "warrant officers mess + staterooms"
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 60,
+      "berth_zone": "BD_CPO_Quarters_Port",
+      "duty_zone": "GD_Post_Office",
+      "notes": "chief petty officers quarters port+stb"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 560,
+      "berth_zone": "BD_Crew_Berthing_Port",
+      "duty_zone": "MD_General_Mess",
+      "notes": "deck divisions + battalion, hammock berthing port/stb + central passages + crews space"
+    },
+    {
+      "class_id": "engineering",
+      "role_group": "crew",
+      "count": 180,
+      "berth_zone": "BD_Crew_Berthing_Stb",
+      "duty_zone": "UP_Boiler_Port",
+      "notes": "firemen + engineers division, watch-standing in boiler/engine/dynamo rooms"
+    },
+    {
+      "class_id": "marines",
+      "role_group": "crew",
+      "count": 80,
+      "berth_zone": "MD_Battalion_Berthing",
+      "duty_zone": "GD_Prison",
+      "notes": "marine detachment + guard"
+    },
+    {
+      "class_id": "stewards",
+      "role_group": "crew",
+      "count": 40,
+      "berth_zone": "GD_Wardroom_Pantry",
+      "duty_zone": "MD_Officers_Galley",
+      "notes": "officers stewards, cooks, servants"
+    }
+  ],
+  "source": "class-typical wartime (900-1100); no accommodation table on sheets",
+  "consistency": {
+    "declared_total": 1000,
+    "manifest_total": 1000,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:18:34.834901+00:00",
+  "platform": "jupiter_ac3",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 295
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 15,
+      "berth_zone": "Officers_Quarters",
+      "duty_zone": "Passage_Deckhouse",
+      "notes": "CO + wardroom officers"
+    },
+    {
+      "class_id": "warrant_petty",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "Machinist_Cabins",
+      "duty_zone": "Passage_Deckhouse",
+      "notes": "warrant officers, CPOs, machinist/carpenter/painter"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 70,
+      "berth_zone": "Crews_Berthing_Plat",
+      "duty_zone": "Engine_Room",
+      "notes": "black gang: firemen, water tenders, electricians, turbo-electric watch"
+    },
+    {
+      "class_id": "deck_force",
+      "role_group": "crew",
+      "count": 170,
+      "berth_zone": "Crews_Berthing_Main",
+      "duty_zone": "Poop_Deck_Open",
+      "notes": "seamen, coal heavers, cargo winch crews"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "Crews_Berthing_2nd",
+      "duty_zone": "Crews_Galley",
+      "notes": "cooks, stewards, ships servicemen"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 4,
+      "berth_zone": "Crews_Berthing_2nd",
+      "duty_zone": "Hospital",
+      "notes": "surgeon + pharmacist's mates"
+    }
+  ],
+  "source": "era/class-typical (AC-3 ~15 officers + ~280 enlisted per NavSource class data; no accommodation table on the 4-sheet booklet)",
+  "consistency": {
+    "declared_total": 295,
+    "manifest_total": 295,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
