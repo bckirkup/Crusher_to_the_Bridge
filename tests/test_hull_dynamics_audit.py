@@ -111,6 +111,37 @@ def test_null_infection_spec_nulls_seed_and_removes_nothing():
     assert pov.get("remove", []) == []
 
 
+def test_main_smoke_pce874_manifest_arm(tmp_path):
+    """End-to-end: 2-epoch manifest-arm voyage + drainage on pce_874."""
+    out = tmp_path / "sm.json"
+    md = tmp_path / "sm.md"
+    rc = dyn.main([
+        "--platforms", "pce_874", "--epochs", "2", "--arms", "manifest",
+        "--json-out", str(out), "--md-out", str(md),
+    ])
+    assert rc == 0
+    occ = json.loads(out.read_text())["rows"][0]["occupancy"]
+    pins = occ["pin_resolution"]
+    duty_pins = {p["pin"] for p in pins["unresolvable_duty_pins"]}
+    # Engine_Rm is Engineering-typed: outside the Free+Dining duty domain
+    assert "Engine_Rm" in duty_pins
+    assert occ["manifest"]["home_on_manifest_berth_frac"] == pytest.approx(1.0)
+    assert occ["manifest"]["visited_zones"] > 0
+    assert "Drainage fingerprint" in md.read_text()
+
+
+def test_main_skip_occupancy_runs_drainage_only(tmp_path):
+    out = tmp_path / "sm.json"
+    rc = dyn.main([
+        "--platforms", "pce_874", "--epochs", "2", "--skip-occupancy",
+        "--json-out", str(out),
+    ])
+    assert rc == 0
+    row = json.loads(out.read_text())["rows"][0]
+    assert "occupancy" not in row
+    assert row["drainage"]["retained_frac_final"] < 1.0
+
+
 def test_render_includes_both_sections():
     rows = [{
         "platform": "toy",
