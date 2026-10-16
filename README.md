@@ -210,9 +210,6 @@ data/
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
-│   ├── keppler_dd765/              (maritime.org GA import)
-│   ├── fletcher_dde_dd445/         (maritime.org GA import)
-│   ├── hunter_killer_dd692/        (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -572,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Forty-six ship platforms are included, each with spatial layout and HVAC
+Fifty-four ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -625,9 +622,6 @@ airflow definitions:
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
-| `keppler_dd765` | USS Keppler DD-765 Gearing-class FRAM II destroyer (maritime.org GA import, 79 zones, 308 crew) |
-| `fletcher_dde_dd445` | DD-445 Fletcher-class DDE conversion study drawing (maritime.org GA import, 35 zones, ~300 crew est.) |
-| `hunter_killer_dd692` | DD-692-class long-hull hunter-killer contract plan (maritime.org GA import, 60 zones, 309 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
@@ -848,6 +842,12 @@ from `orchestrator_types.py`:
 | `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
 | `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
 | `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
+| `ranger_cv4` | USS Ranger CV-4 first purpose-built USN carrier (maritime.org GA import, 74 zones, 2641 crew incl. air group) |
+| `yorktown_cv5` | USS Yorktown CV-5 Yorktown-class fleet carrier (maritime.org GA import, 71 zones, 2279 crew incl. air group + flag staff) |
+| `wasp_cv7` | USS Wasp CV-7 treaty carrier (maritime.org GA import, 62 zones, 2128 crew incl. air group + marines) |
+| `keppler_dd765` | USS Keppler DD-765 Gearing-class FRAM II destroyer (maritime.org GA import, 79 zones, 308 crew) |
+| `fletcher_dde_dd445` | DD-445 Fletcher-class DDE conversion study drawing (maritime.org GA import, 35 zones, ~300 crew est.) |
+| `hunter_killer_dd692` | DD-692-class long-hull hunter-killer contract plan (maritime.org GA import, 60 zones, 309 crew) |
 
 ## License
 
