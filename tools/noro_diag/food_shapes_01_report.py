@@ -83,19 +83,77 @@ _MR_E_PRESENCE = {
 }
 _MR_SCALAR_LADDER = ("p005", "p008", "p012", "p017", "p024")
 
+# --- PROVISIONED-SOURCE-01 arm set (sweep design §10) ---
+_PS_ARM_ORDER = (
+    "off", "ind", "ship", "mint", "ps_ship",
+    "q01", "q02", "q03", "q05", "q08", "q15", "q30",
+)
+_PS_OBJECT_ARMS = (
+    "ship", "mint", "ps_ship",
+    "q01", "q02", "q03", "q05", "q08", "q15", "q30",
+)
+_PS_MINT_ARMS = ("mint",)
+_PS_MARGIN_PAIRS = (
+    ("off", "ship"), ("off", "mint"), ("ind", "ship"), ("ind", "mint"),
+    ("off", "ps_ship"), ("off", "q01"), ("off", "q02"), ("off", "q03"),
+    ("off", "q05"), ("off", "q08"), ("off", "q15"), ("off", "q30"),
+    ("q01", "q02"), ("q02", "q03"), ("q03", "q05"), ("q05", "q08"),
+    ("q08", "q15"), ("q15", "q30"),
+)
+# Per-rung station-contamination q (exp N_stations = 21); ps_ship draws
+# per-ship q ~ U[0.0002, 0.0005].
+_PS_N_STATIONS = 21
+_PS_Q = {
+    "q01": 0.0001, "q02": 0.0002, "q03": 0.0003, "q05": 0.0005,
+    "q08": 0.0008, "q15": 0.0015, "q30": 0.003,
+}
+_PS_SCALAR_LADDER = tuple(_PS_Q)
+# Fiat-gate minted-voyage presence on exp (MINT-RATE-01 measured).
+_PS_E_PRESENCE_FIAT = {"ship": 0.0105, "mint": 0.085}
+# E[1-(1-q)^21] for q ~ U[0.0002, 0.0005] (300-point quadrature).
+_PS_E_PRESENCE_PS_SHIP = sum(
+    1.0 - (1.0 - (0.0002 + 0.0003 * i / 299)) ** 21
+    for i in range(300)
+) / 300
+
+
+def _ps_e_presence(arm: str) -> float:
+    """E[minted-voyage fraction] per arm: 1-(1-q)^N for scalars."""
+    if arm in _PS_Q:
+        return 1.0 - (1.0 - _PS_Q[arm]) ** _PS_N_STATIONS
+    if arm == "ps_ship":
+        return _PS_E_PRESENCE_PS_SHIP
+    return _PS_E_PRESENCE_FIAT.get(arm, 0.0)
+
+
+def _ps_e_objects(arm: str) -> float:
+    """E[objects per 1000 cells]: N*q*1000 for provisioned scalars."""
+    if arm in _PS_Q:
+        return _PS_N_STATIONS * _PS_Q[arm] * 1000.0
+    if arm == "ps_ship":
+        return _PS_N_STATIONS * 0.00035 * 1000.0
+    return 0.0
+
 
 def _apply_arm_set(name: str) -> None:
     """Rebind the arm-set constants for a sibling campaign's rows."""
     global _ARM_ORDER, _OBJECT_ARMS, _MINT_ARMS, _MARGIN_PAIRS, _ECHO_EXPECT
     if name == "shapes":
         return
-    if name != "mint_rate":
+    if name == "mint_rate":
+        _ARM_ORDER = _MR_ARM_ORDER
+        _OBJECT_ARMS = _MR_OBJECT_ARMS
+        _MINT_ARMS = _MR_MINT_ARMS
+        _MARGIN_PAIRS = _MR_MARGIN_PAIRS
+        _ECHO_EXPECT = _ECHO_EXPECT_MINT_RATE
+        return
+    if name != "ps01":
         raise ValueError(f"unknown arm set {name!r}")
-    _ARM_ORDER = _MR_ARM_ORDER
-    _OBJECT_ARMS = _MR_OBJECT_ARMS
-    _MINT_ARMS = _MR_MINT_ARMS
-    _MARGIN_PAIRS = _MR_MARGIN_PAIRS
-    _ECHO_EXPECT = _ECHO_EXPECT_MINT_RATE
+    _ARM_ORDER = _PS_ARM_ORDER
+    _OBJECT_ARMS = _PS_OBJECT_ARMS
+    _MINT_ARMS = _PS_MINT_ARMS
+    _MARGIN_PAIRS = _PS_MARGIN_PAIRS
+    _ECHO_EXPECT = _ECHO_EXPECT_PS
 
 
 def _arm_of(tier: str) -> str:
@@ -683,20 +741,53 @@ def _mr_post_per_minted(cells: dict) -> list[str]:
     return lines
 
 
-def _mr_nested_sets(cells: dict) -> list[str]:
-    """MINT-RATE-01 §5.4-3: scalar-rung minted sets must nest in gate
-    order per seed (p005 ⊆ p008 ⊆ p012 ⊆ p017 ⊆ p024)."""
+def _ps_presence_ladder(cells: dict) -> list[str]:
+    """PROVISIONED-SOURCE-01: realized minted-voyage presence + object
+    counts vs Binomial(N=21, q) draws — 1-(1-q)^21 per scalar rung,
+    quadrature over U[2e-4,5e-4] for ps_ship, fiat-gate measured
+    presence for ship/mint."""
+    lines = [
+        "| arm | cells | minted | frac | E[frac] | objects | E[obj]"
+        " | posted|minted |",
+        _SEP8,
+    ]
+    for arm in _ARM_ORDER:
+        if arm in ("off", "ind"):
+            continue
+        cen = _ok(cells.get(arm, []))
+        if not cen:
+            continue
+        minted = [r for r in cen if _cen(r).get("lot_obj_voyage")]
+        n_obj = sum(
+            (c.get("obj_arms") or {}).get("provisioned_lot", 0)
+            for c in map(_cen, minted)
+        )
+        e_p = _ps_e_presence(arm)
+        e_o = _ps_e_objects(arm)
+        posted = sum(1 for r in minted if r["posted"])
+        lines.append(
+            f"| {arm} | {len(cen)} | {len(minted)}"
+            f" | {len(minted) / len(cen):.4f} | {e_p:.4f}"
+            f" | {n_obj} | {e_o:.1f}"
+            f" | {posted} ({100.0 * posted / len(minted) if minted else 0:.1f}%) |"
+        )
+    return lines
+
+
+def _nested_sets(cells: dict, ladder: tuple) -> list[str]:
+    """Scalar-rung minted sets must nest in gate order per seed
+    (MINT-RATE-01 §5.4-3; PROVISIONED-SOURCE-01 §10 fail-informative)."""
     flag = {
         arm: {r["seed"]: bool(_cen(r).get("lot_obj_voyage"))
               for r in _ok(cells.get(arm, []))}
-        for arm in _MR_SCALAR_LADDER
+        for arm in ladder
     }
     lines = [
         "| pair | shared seeds | violated nesting |",
         _SEP3,
     ]
     total_v = 0
-    for lo_arm, hi_arm in zip(_MR_SCALAR_LADDER, _MR_SCALAR_LADDER[1:]):
+    for lo_arm, hi_arm in zip(ladder, ladder[1:]):
         shared = set(flag[lo_arm]) & set(flag[hi_arm])
         v = sum(
             1 for s in shared
@@ -767,6 +858,36 @@ _ECHO_EXPECT_MINT_RATE = {
     "p024": dict(_MR_OBJ, lot_object_probability=0.024),
 }
 
+# PROVISIONED-SOURCE-01: frozen override dicts per arm (manifest
+# common_source block, verbatim).
+_PS_SRC = {"source_id": "generic_cruise_port"}
+_ECHO_EXPECT_PS = {
+    "off": {"mode": "off"},
+    "ind": {"lot_mode": "independent", "handler_mode": "independent",
+            "diner_mode": "independent"},
+    "ship": dict(_MR_OBJ, lot_mint_model="fiat",
+                 lot_object_probability=[0.001, 0.02]),
+    "mint": dict(_MR_OBJ, lot_mint_model="fiat",
+                 lot_object_probability=[0.02, 0.15]),
+    "ps_ship": dict(_MR_OBJ, lot_mint_model="provisioned_source",
+                    provisioned_source=dict(
+                        _PS_SRC, q_source=[0.0002, 0.0005])),
+    "q01": dict(_MR_OBJ, lot_mint_model="provisioned_source",
+                provisioned_source=dict(_PS_SRC, q_source=0.0001)),
+    "q02": dict(_MR_OBJ, lot_mint_model="provisioned_source",
+                provisioned_source=dict(_PS_SRC, q_source=0.0002)),
+    "q03": dict(_MR_OBJ, lot_mint_model="provisioned_source",
+                provisioned_source=dict(_PS_SRC, q_source=0.0003)),
+    "q05": dict(_MR_OBJ, lot_mint_model="provisioned_source",
+                provisioned_source=dict(_PS_SRC, q_source=0.0005)),
+    "q08": dict(_MR_OBJ, lot_mint_model="provisioned_source",
+                provisioned_source=dict(_PS_SRC, q_source=0.0008)),
+    "q15": dict(_MR_OBJ, lot_mint_model="provisioned_source",
+                provisioned_source=dict(_PS_SRC, q_source=0.0015)),
+    "q30": dict(_MR_OBJ, lot_mint_model="provisioned_source",
+                provisioned_source=dict(_PS_SRC, q_source=0.003)),
+}
+
 
 def _echo_table(cells: dict) -> list[str]:
     """Run-parameter override echo vs the arm's frozen override dict."""
@@ -833,9 +954,10 @@ def main() -> None:
                     help="entrain_01_dose_audit.py JSONL rows (dose "
                          "position table)")
     ap.add_argument("--arm-set", default="shapes",
-                    choices=("shapes", "mint_rate"),
+                    choices=("shapes", "mint_rate", "ps01"),
                     help="arm table + echo expectations; 'mint_rate' is "
-                         "the NORO-MINT-RATE-01 arm set (design §10)")
+                         "the NORO-MINT-RATE-01 arm set (design §10), "
+                         "'ps01' the PROVISIONED-SOURCE-01 arm set")
     args = ap.parse_args()
     _apply_arm_set(args.arm_set)
     cells = load_rows(args.rows)
@@ -874,7 +996,14 @@ def main() -> None:
         print("\n## P(post|minted) — rate independence\n")
         print("\n".join(_mr_post_per_minted(cells)))
         print("\n## nested minted sets (scalar rungs)\n")
-        print("\n".join(_mr_nested_sets(cells)))
+        print("\n".join(_nested_sets(cells, _MR_SCALAR_LADDER)))
+    if args.arm_set == "ps01":
+        print("\n## presence + objects vs Binomial(21,q) draw\n")
+        print("\n".join(_ps_presence_ladder(cells)))
+        print("\n## P(post|minted) — rate independence\n")
+        print("\n".join(_mr_post_per_minted(cells)))
+        print("\n## nested minted sets (scalar rungs)\n")
+        print("\n".join(_nested_sets(cells, _PS_SCALAR_LADDER)))
 
 
 if __name__ == "__main__":
