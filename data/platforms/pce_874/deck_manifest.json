@@ -1,0 +1,70 @@
+{
+  "platform_id": "pce_874",
+  "ship_class_label": "Pce 874",
+  "footprint_tier": "representative",
+  "representative_of": "PCE-874-class rescue-type patrol escort, 184 ft, twin GM diesel, ~99 crew. Zones read from maritime.org PCE-874 plates (profile + main/platform/hold plans).",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 20",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Nav_Bridge",
+    "Signal_Bridge",
+    "Fantail",
+    "Eng_Casing",
+    "Mess_Hall",
+    "Galley",
+    "CPO_Quarters",
+    "Officers_Country",
+    "Wardroom",
+    "Sick_Bay",
+    "HD_Crew",
+    "Passage_Main",
+    "Focsle_Deck",
+    "Crew_Quarters",
+    "Engine_Rm",
+    "Gen_Rm",
+    "Stores_Platform",
+    "Steering_Gear",
+    "Fuel_Tanks",
+    "Shaft_Alley"
+  ],
+  "decks": [
+    "bridge_deck",
+    "hold",
+    "main_deck",
+    "platform_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 58.1,
+    "ymin": -2.0,
+    "ymax": 12.0
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "bridge_deck": "deck_bridge_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "platform_deck": "deck_platform_deck.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "platform_id": "raven_am55",
+  "ship_class_label": "Raven Am55",
+  "footprint_tier": "representative",
+  "representative_of": "Auk/Raven-class fleet minesweeper, 220 ft, twin diesel, ~105 crew. Zones read from maritime.org AM-55 sheets 3-5.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 21",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Steering_Gear",
+    "Gen_Rm",
+    "Engine_Rm",
+    "Crew_Quarters",
+    "CPO_Quarters",
+    "Fwd_Magazines",
+    "Nav_Bridge",
+    "Clipping_Rm",
+    "Bosn_Gear",
+    "Foc_Deck_Fwd",
+    "Foc_Deck_Open",
+    "Sweep_Deck",
+    "Steering_Gen",
+    "Mess_Tables",
+    "Galley",
+    "Passage_Main",
+    "Officers_Country",
+    "Wardroom",
+    "Sick_Bay",
+    "HD_Main",
+    "Fwd_Stores"
+  ],
+  "decks": [
+    "forecastle_deck",
+    "main_deck",
+    "navigation_bridge",
+    "platform_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 69.1,
+    "ymin": -2.0,
+    "ymax": 11.8
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "navigation_bridge": "deck_navigation_bridge.png",
+      "forecastle_deck": "deck_forecastle_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "platform_deck": "deck_platform_deck.png"
+    }
+  }
+}
