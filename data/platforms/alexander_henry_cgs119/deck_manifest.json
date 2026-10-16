@@ -1,0 +1,84 @@
+{
+  "platform_id": "alexander_henry_cgs119",
+  "ship_class_label": "Alexander Henry Cgs119",
+  "footprint_tier": "representative",
+  "representative_of": "Canadian Coast Guard light icebreaker/buoy tender, Collingwood Shipyards 1959. Two multi-view GA sheets; ~31 crew + 20 passengers/officials (51 berths plate-read).",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 28",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Wheelhouse_Top",
+    "Wheelhouse",
+    "Chart_Radio_NB",
+    "Bridge_Wings",
+    "Officer_Cabins_Boat",
+    "HD_Boat_Deck",
+    "Boat_Stowage_Open",
+    "Funnel_Uptake",
+    "Officers_Bridge_Deck",
+    "HD_Bridge_Deck",
+    "Forecastle_Working",
+    "Steering_Gear",
+    "Aft_Cabins",
+    "Laundry",
+    "Engine_Casing_U",
+    "Galley",
+    "Crew_Mess_Rec",
+    "PO_Mess_Rec",
+    "Officer_Eng_Cabins_U",
+    "HD_Upper_Crew",
+    "HD_Upper_Officers",
+    "Cargo_Hold_2",
+    "Cargo_Hold_1",
+    "Bosun_Paint_Stores",
+    "Stores_Lower",
+    "Crew_Berth_Lower",
+    "Engine_Room",
+    "Fwd_Tanks_Voids"
+  ],
+  "decks": [
+    "boat_deck",
+    "bridge_deck",
+    "forecastle_deck",
+    "lower_deck",
+    "nav_bridge",
+    "upper_deck",
+    "wheelhouse_top"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 66.0,
+    "ymin": -2.0,
+    "ymax": 15.26
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "wheelhouse_top": "deck_wheelhouse_top.png",
+      "nav_bridge": "deck_nav_bridge.png",
+      "boat_deck": "deck_boat_deck.png",
+      "bridge_deck": "deck_bridge_deck.png",
+      "forecastle_deck": "deck_forecastle_deck.png",
+      "upper_deck": "deck_upper_deck.png",
+      "lower_deck": "deck_lower_deck.png"
+    }
+  }
+}

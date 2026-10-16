@@ -1,0 +1,471 @@
+{
+  "platform": "liberty_cargo_ec2",
+  "description": "HVAC network synthesized for liberty_cargo_ec2",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "AHU_Bridge",
+      "rooms": [
+        "Wheelhouse",
+        "Chart_Radio_Rm",
+        "Captain_Suite",
+        "Bridge_Cabins_Port"
+      ],
+      "ach": 6.0,
+      "description": "Bridge deck accommodation",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_Boat",
+      "rooms": [
+        "Officer_Cabins_Port",
+        "Officer_Cabins_Stbd",
+        "Boat_Deck_Lobby"
+      ],
+      "ach": 6.0,
+      "description": "Boat deck officers",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_House_Port",
+      "rooms": [
+        "Berthing_Port",
+        "PO_Mess",
+        "Ships_Stores_UD",
+        "Galley"
+      ],
+      "ach": 6.0,
+      "description": "Upper-deck house port",
+      "vent_mode": "mech_exhaust",
+      "evidence": "era_plausible",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_House_Stbd",
+      "rooms": [
+        "Berthing_Stbd",
+        "Berthing_Port_Lower",
+        "Crew_Mess",
+        "Hospital"
+      ],
+      "ach": 6.0,
+      "description": "Upper-deck house stbd + hospital",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_Stores",
+      "rooms": [
+        "Dry_Provisions",
+        "Focsle_Stores",
+        "CO2_Rm",
+        "Chain_Locker",
+        "Aft_Peak",
+        "Forepeak",
+        "Deep_Tanks_Mid",
+        "Deep_Tanks_Fwd"
+      ],
+      "ach": 4.0,
+      "description": "Stores/tanks",
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "AHU_Machinery",
+      "rooms": [
+        "Engine_Room",
+        "Boiler_Room",
+        "Shaft_Alley",
+        "Engine_Casing_UD",
+        "Boiler_Casing_UD",
+        "Engine_Casing_2D",
+        "Machinery_Casing_Bt",
+        "Boiler_Casing_Br",
+        "Machinery_Flats_UD",
+        "Steering_Gear"
+      ],
+      "ach": 15.0,
+      "description": "Machinery spaces",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_Cargo",
+      "rooms": [
+        "Holds_Aft",
+        "Holds_Fwd",
+        "Tween_Cargo_Aft",
+        "Tween_Cargo_Fwd",
+        "Tween_Hatch_1",
+        "Tween_Hatch_2",
+        "Tween_Hatch_3",
+        "Tween_Hatch_4",
+        "Tween_Hatch_5"
+      ],
+      "ach": 2.0,
+      "description": "Cargo holds/tweens natural vent",
+      "oa_fraction": 1.0,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "AHU_Weather",
+      "rooms": [
+        "Gun_Platform",
+        "Top_Of_House",
+        "Bridge_Wings",
+        "Boat_Deck_Open",
+        "Aft_Deck_Open",
+        "Forecastle_Deck"
+      ],
+      "ach": 0.0,
+      "description": "Open-air decks",
+      "oa_fraction": 1.0,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "AHU_HD_HD_Bridge_Deck",
+      "rooms": [
+        "HD_Bridge_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Bridge_Deck, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Officers",
+      "rooms": [
+        "HD_Officers"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Officers, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Deck",
+      "rooms": [
+        "HD_Deck"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Deck, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_PO",
+      "rooms": [
+        "HD_PO"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_PO, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Eng",
+      "rooms": [
+        "HD_Eng"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Eng, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "AHU_Bridge",
+      "to": "AHU_Boat",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Boat",
+      "to": "AHU_House_Port",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_House_Port",
+      "to": "AHU_House_Stbd",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_House_Stbd",
+      "to": "AHU_Stores",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_4",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Stores",
+      "to": "AHU_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_5",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Machinery",
+      "to": "AHU_Cargo",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_6",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Cargo",
+      "to": "AHU_Weather",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_7",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "AHU_Bridge",
+      "to": "AHU_HD_HD_Bridge_Deck",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Bridge_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Boat",
+      "to": "AHU_HD_HD_Officers",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Officers; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_House_Stbd",
+      "to": "AHU_HD_HD_Deck",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Deck; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_House_Port",
+      "to": "AHU_HD_HD_PO",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_PO; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_House_Stbd",
+      "to": "AHU_HD_HD_Eng",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Eng; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Wheelhouse",
+      "to": "Boiler_Casing_Br",
+      "type": "passageway"
+    },
+    {
+      "from": "Wheelhouse",
+      "to": "Bridge_Wings",
+      "type": "passageway"
+    },
+    {
+      "from": "Chart_Radio_Rm",
+      "to": "Captain_Suite",
+      "type": "passageway"
+    },
+    {
+      "from": "Officer_Cabins_Port",
+      "to": "Boat_Deck_Lobby",
+      "type": "passageway"
+    },
+    {
+      "from": "Officer_Cabins_Stbd",
+      "to": "Boat_Deck_Lobby",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing_Bt",
+      "to": "PO_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Open",
+      "to": "Berthing_Port",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Open",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Open",
+      "to": "Engine_Casing_UD",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Open",
+      "to": "Boiler_Casing_UD",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Open",
+      "to": "Crew_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Open",
+      "to": "PO_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Port",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Port",
+      "to": "Engine_Casing_UD",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Port",
+      "to": "Ships_Stores_UD",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Engine_Casing_UD",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Boiler_Casing_UD",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Berthing_Stbd",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Berthing_Port_Lower",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Casing_UD",
+      "to": "Berthing_Port_Lower",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Casing_UD",
+      "to": "Ships_Stores_UD",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Casing_UD",
+      "to": "Crew_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Casing_UD",
+      "to": "Berthing_Stbd",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Casing_UD",
+      "to": "Berthing_Port_Lower",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Stbd",
+      "to": "Berthing_Port_Lower",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Port_Lower",
+      "to": "Ships_Stores_UD",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Flats_UD",
+      "to": "Tween_Hatch_2",
+      "type": "passageway"
+    },
+    {
+      "from": "Focsle_Stores",
+      "to": "Forecastle_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Casing_2D",
+      "to": "Dry_Provisions",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Casing_2D",
+      "to": "CO2_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Dry_Provisions",
+      "to": "Tween_Cargo_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Peak",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Holds_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Room",
+      "to": "Deep_Tanks_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Deep_Tanks_Mid",
+      "to": "Holds_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Holds_Fwd",
+      "to": "Deep_Tanks_Fwd",
+      "type": "passageway"
+    }
+  ]
+}

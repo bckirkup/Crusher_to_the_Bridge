@@ -61,9 +61,6 @@ PLATFORMS = [
     "passumpsic_ao106",
     "pce_874",
     "independence_cvl26",
-    "esteem_mso438",
-    "erie_pg50",
-    "pt_564",
     "enterprise_constitution_tos",
     "enterprise_galaxy_tng",
     "midway_cv41",
@@ -86,9 +83,16 @@ PLATFORMS = [
     "missouri_bb63",
     "wisconsin_bb64",
     "new_jersey_bb62",
+    "liberty_cargo_ec2",
+    "savannah_ns",
+    "aeolus_arc3",
+    "alexander_henry_cgs119",
     "jupiter_ac3",
     "montana_acr13",
     "olympia_c6",
+    "esteem_mso438",
+    "erie_pg50",
+    "pt_564",
 ]
 
 ENTERPRISE_IDS = frozenset({
@@ -412,3 +416,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
