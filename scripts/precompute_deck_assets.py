@@ -67,6 +67,9 @@ PLATFORMS = [
     "sigsbee_dd502",
     "nields_dd616",
     "davison_dd618",
+    "idaho_bb42",
+    "west_virginia_bb48",
+    "south_dakota_bb49",
 ]
 
 ENTERPRISE_IDS = frozenset({
