@@ -569,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Sixty-nine ship platforms are included, each with spatial layout and HVAC
+Seventy ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -863,6 +863,7 @@ from `orchestrator_types.py`:
 | `mercury_aks20` | USS Mercury AKS-20 Acubens-class stores issue ship (maritime.org GA import, 61 zones, 309 crew) |
 | `assistance_ar17` | USS Assistance AR-17 EC2-S-C1 Liberty-hull repair ship (maritime.org GA import, 56 zones, ~700 crew est.) |
 | `luzon_arg2` | USS Luzon ARG-2 internal-combustion-engine repair ship (maritime.org GA import, 67 zones, ~600 crew est.) |
+| `saratoga_cv60` | USS Saratoga CV-60 Forrestal-class supercarrier, SLEP 1993 (maritime.org GA import, 82 zones, 4955 crew incl. air wing + marines) |
 
 ## License
 

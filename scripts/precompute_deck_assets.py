@@ -111,6 +111,7 @@ PLATFORMS = [
     "mercury_aks20",
     "assistance_ar17",
     "luzon_arg2",
+    "saratoga_cv60",
 ]
 
 ENTERPRISE_IDS = frozenset({
