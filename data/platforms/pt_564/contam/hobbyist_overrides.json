@@ -1,0 +1,62 @@
+{
+  "description": "Naval GA Contam starter for pt_564 (Target B — openings/AHS drafted; ducts are engineer handwork)",
+  "orifice_type_map": {
+    "ladder_well": "ladder_well",
+    "ladder": "ladder",
+    "passageway": "passageway",
+    "service_hatch": "hatch",
+    "hatch": "hatch",
+    "doorway": "doorway",
+    "stairwell": "stairwell"
+  },
+  "wind_profile": "ship_hull",
+  "filter_preset": "MERV13",
+  "hvac_filter": {
+    "VENT_Machinery": "HEPA"
+  },
+  "deck_temp_offset_K": {
+    "cabin_deck": 4.0
+  },
+  "zone_annotations": {
+    "Gun_Tub_Aft": "low-trunnion 20mm gun + smoke screen generator o",
+    "Torpedo_Deck": "open deck with 4x22.5in torpedo tubes P&S, engin",
+    "Cockpit": "open cockpit / day room abaft the chart house",
+    "Pilothouse": "chart house/pilothouse: throttle, engine-room te",
+    "Foredeck": "foredeck: anchor, jack staff, bow light, mooring",
+    "Lazaret": "lazaret with steering gear + lazaret hatch",
+    "Fuel_Comp_Aft": "aft fuel compartment: 2x100 gal fuel tanks P&S, ",
+    "Engine_Room": "engine room: 3 Packard engines, oil sump tank, e",
+    "Fuel_Comp_Mid": "mid fuel compartment: 400 gal tanks P&S, tank co",
+    "Ward_Room": "ward room: officers berthing + mess table (singl",
+    "Crews_Quarters": "crew's quarters: upper berth forms settee, coffe",
+    "HD_Crew": "crew's lavatory: sink + W.C. — the only sanitary",
+    "Fore_Peak": "fore peak: anchor gear and stores"
+  },
+  "wall_azimuth_deg": {
+    "Gun_Tub_Aft": 180.0,
+    "Torpedo_Deck": 180.0,
+    "Cockpit": 90.0,
+    "Pilothouse": 0.0,
+    "Foredeck": 0.0,
+    "Lazaret": 180.0,
+    "Fuel_Comp_Aft": 180.0,
+    "Engine_Room": 270.0,
+    "Fuel_Comp_Mid": 270.0,
+    "Ward_Room": 270.0,
+    "Crews_Quarters": 270.0,
+    "HD_Crew": 0.0,
+    "Fore_Peak": 0.0
+  },
+  "night_setback": true,
+  "duct_hvac_ids": [],
+  "skip_duct_spines": true,
+  "naval_ga_import": true,
+  "handoff_notes": [
+    "Open cockpit and deck zones carry no HVAC duty.",
+    "Cabin deck sits below the weather deck; engineers may merge fuel compartments into their compartments.",
+    "Confirm orifice clear areas against watertight door / hatch schedules",
+    "Author real duct networks in ContamW (fiction Darcy spines omitted by default)",
+    "Replace starter MERV/HEPA filters with ship NBC / HVAC design data",
+    "Calibrate AHS Fahs / OAFrac against design ACH and TAB where available"
+  ]
+}

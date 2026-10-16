@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:23:02.110003+00:00",
+  "platform_id": "lsm_354",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/lsm_354",
+  "digest_sha256": "9c5d8c9ade1906d434dac0af5a07ac950645d2a5b155da3b07f7c989931cbff7",
+  "svg_sha256": {
+    "page_03_approved.svg": "f08b8dd2a2886058cedf3b149bbad7351032af649a1cd501a4ccf3e4b66c228e",
+    "page_04_approved.svg": "735b8e2b4fb1dded974abd3da0d28abd3a192d2d07650e68415c6100efebf246",
+    "page_05_approved.svg": "d2fabeaf616ba36c0212c7eaaebb24ca9f4ac377c6a4d0442f104f5801f296f9",
+    "page_06_approved.svg": "7cd9121a1906869848d9aba3f57e147ab116b51a9669b90aff3afa5f71b5eb81"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 40,
+  "berthing_zones": [
+    "Signal_Bridge",
+    "Wheel_House",
+    "Conning_Station",
+    "Radar_Radio_Chart",
+    "WT_Room_Services",
+    "Stern_Rooms_Main",
+    "Engineers_Stores",
+    "General_Work_Shop",
+    "Gunners_Ordnance",
+    "Canteen_Stores",
+    "Galley_Stores_Main",
+    "Ships_Office",
+    "Bosuns_Stores",
+    "Passage_Stbd_Fwd",
+    "Magazine_Hold",
+    "Crew_Berthing_Hold",
+    "Troop_Berthing_Hold"
+  ],
+  "systems_era": "usn_ww2"
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:15:19.100654+00:00",
+  "platform_id": "apl_24",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/apl_24",
+  "digest_sha256": "9e2fa742047ce9dd731fc6e2e3b6ff1bf06b5053c781487cea117f051b5e0da2",
+  "svg_sha256": {
+    "page_02_approved.svg": "e220916b8c7317c545851cd7b7ea99dc060e3d42b23ef14ae8331a318fac53c6",
+    "page_03_approved.svg": "57f3daea34cc9b4c18935d1f43d9a993483231c3739bc0c728c125deba130589",
+    "page_04_approved.svg": "d91cc4c58a69c217abccfc17eecce8b9f42d9fcd57508a5f80d7bf5009c6ccbd"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 34,
+  "berthing_zones": [
+    "Ships_Store",
+    "Scullery",
+    "Barber_Shop",
+    "Ships_Service",
+    "Post_Office",
+    "Crews_Locker_Office",
+    "Brig",
+    "Laundry",
+    "Receiving_Rm",
+    "CPO_Pantry",
+    "CPO_Berthing",
+    "Officers_Staterooms",
+    "Ships_Office",
+    "Crew_Quarters"
+  ],
+  "systems_era": "usn_ww2"
+}

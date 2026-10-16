@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:20:49.810516+00:00",
+  "platform_id": "middlesex_lst983",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/middlesex_lst983",
+  "digest_sha256": "f64d84a1418b18116be1966ff6713556d1907a3548adb9890916481a369fbc9b",
+  "svg_sha256": {
+    "page_05_approved.svg": "417768d6698b68d393116c767d875bcf355f1a69e7745c2746c0ef980bbe3bd0",
+    "page_06_approved.svg": "222bbe06ca55c8e4d9ca1494386b9d0222664f1e6f4c1440663dfe42712ee9ab",
+    "page_07_approved.svg": "641629c5166da0a9672370f3ca3b984c18cb7118902a9d546b4de6a6fca8cc3a",
+    "page_08_approved.svg": "52ba4a7ef116ded65bb82f4e863c03c721c9b285a4a6b9c93a07a304f24f4463",
+    "page_09_approved.svg": "d3f8ffc471576ddf9485c0b6bf2c58667bc84a2de2787cf4c675bb76b1aaaca9"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 40,
+  "berthing_zones": [
+    "Radio_Control",
+    "Gunnery_Office",
+    "Vegetable_Locker",
+    "Nav_Bridge",
+    "Service_Rooms_Aft",
+    "Supply_Disburse_Office",
+    "Officers_Staterooms_Aft",
+    "Barber_Shop",
+    "Officers_Staterooms_Mid",
+    "Crew_Berthing_Aft",
+    "CPO_Berthing",
+    "Troop_Berthing_Port",
+    "Troop_Berthing_Starboard",
+    "Ammo_Stowage_Fwd",
+    "Dry_Stores_Third"
+  ],
+  "systems_era": "usn_coldwar"
+}

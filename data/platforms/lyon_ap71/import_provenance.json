@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:27:26.901029+00:00",
+  "platform_id": "lyon_ap71",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/lyon_ap71",
+  "digest_sha256": "5451ed8fc6e26a399d5a7ae51632dbe598b3cac55fb630b47b632eb72af0d764",
+  "svg_sha256": {
+    "page_03_approved.svg": "4d89071b30143092f8ef2f5cdc079029ca6860362a530991110d796fb95b75f4",
+    "page_04_approved.svg": "9df4a3b5c0721d67dfbc398b331efdb5d6147460cbfe3c8375f6fc9f5a8a734b",
+    "page_05_approved.svg": "16d4fcc6705e7d1d183e76568823c35292d0e5dfdf2de90f4c54dc7970bef41b",
+    "page_06_approved.svg": "c6d4c112b93dece90d691ac8d841b92c6b646ebb98429a7cd9f866be7f05c23c",
+    "page_07_approved.svg": "e3618e49b21fe91f5c88ae7f50b55aff86c64765cadc3d45acfd75a58396fb06"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 59,
+  "berthing_zones": [
+    "Officers_Cabins_Port",
+    "Officers_Cabins_Stbd",
+    "Radio_Central",
+    "Gyro_Battery_Room",
+    "Wheel_House",
+    "Signal_Bridge",
+    "Troop_Officer_Cabins",
+    "Reefer_Ice_Stores",
+    "Offices_Laundry",
+    "Services_Barber",
+    "CPO_Berthing_Shelter",
+    "Quarter_Weather",
+    "Crew_Berthing_Aft_2nd",
+    "Reefer_Stores_2nd",
+    "Services_Mid_2nd",
+    "Troop_Berthing_Mid_2nd",
+    "Troop_Berthing_Fwd_2nd",
+    "Crew_Berthing_3rd",
+    "Troop_Berthing_Aft_3rd",
+    "Troop_Berthing_Fwd_3rd",
+    "Stores_Fwd_3rd",
+    "Provision_Issue_Hold"
+  ],
+  "systems_era": "usn_ww2"
+}

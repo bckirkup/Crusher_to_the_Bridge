@@ -210,11 +210,6 @@ data/
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
-│   ├── cushing_dd376/              (maritime.org GA import)
-│   ├── palmer_dms5/                (maritime.org GA import)
-│   ├── bainbridge_dd1/             (maritime.org GA import)
-│   ├── rolla_pc483/                (maritime.org GA import)
-│   ├── eagle_pe60/                 (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -574,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Fifty-three ship platforms are included
+Eighty ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -627,11 +622,6 @@ airflow definitions:
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
-| `cushing_dd376` | USS Cushing DD-376 Mahan-class destroyer, ~1942 (maritime.org GA import, 41 zones, 250 crew) |
-| `palmer_dms5` | USS Palmer DMS-5 flush-deck high-speed minesweeper, 1943 (maritime.org GA import, 39 zones, 144 crew) |
-| `bainbridge_dd1` | USS Bainbridge DD-1, first USN destroyer, 1901 (maritime.org GA import, 27 zones, 73 crew) |
-| `rolla_pc483` | USS Rolla PC-483 Bluffton-class submarine chaser, 1942 (maritime.org GA import, 30 zones, 99 crew) |
-| `eagle_pe60` | USS Eagle No.60 PE-60 Eagle-class patrol vessel, 1918 (maritime.org GA import, 41 zones, 58 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
@@ -852,6 +842,38 @@ from `orchestrator_types.py`:
 | `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
 | `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
 | `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
+| `ranger_cv4` | USS Ranger CV-4 first purpose-built USN carrier (maritime.org GA import, 74 zones, 2641 crew incl. air group) |
+| `yorktown_cv5` | USS Yorktown CV-5 Yorktown-class fleet carrier (maritime.org GA import, 71 zones, 2279 crew incl. air group + flag staff) |
+| `wasp_cv7` | USS Wasp CV-7 treaty carrier (maritime.org GA import, 62 zones, 2128 crew incl. air group + marines) |
+| `esteem_mso438` | USS Esteem MSO-438 Aggressive-class ocean minesweeper (maritime.org GA import, 39 zones, 74 crew) |
+| `erie_pg50` | USS Erie PG-50 Erie-class patrol gunboat (maritime.org GA import, 54 zones, 248 crew incl. flag staff + marine guard) |
+| `pt_564` | PT-564 Higgins 70'8" motor torpedo boat (maritime.org GA import, 13 zones, 14 crew — marginal smallest hull) |
+| `cobalt_k124` | HMCS Cobalt K124 Flower-class corvette (maritime.org GA import, 29 zones, 90 crew) |
+| `river_class_frigate` | RN River-class frigate (maritime.org GA import, 37 zones, 140 crew) |
+| `fort_william_j311` | HMCS Fort William J311 Bangor-class minesweeper (maritime.org GA import, 25 zones, 70 crew) |
+| `winnipeg_j337` | HMCS Winnipeg J337 Algerine-class minesweeper (maritime.org GA import, 31 zones, 122 crew) |
+| `battler_acv6` | HMS Battler D-18 Attacker/Bogue-class escort carrier (maritime.org GA import, 55 zones, 800 crew) |
+| `puncher_cve53` | HMS Puncher D-79 Bogue-class escort carrier CVE-53 (maritime.org GA import, 88 zones, 869 crew) |
+| `thetis_bay_cve90` | USS Thetis Bay CVE-90 Casablanca-class escort carrier (maritime.org GA import, 74 zones, 596 crew) |
+| `keppler_dd765` | USS Keppler DD-765 Gearing-class FRAM II destroyer (maritime.org GA import, 79 zones, 308 crew) |
+| `fletcher_dde_dd445` | DD-445 Fletcher-class DDE conversion study drawing (maritime.org GA import, 35 zones, ~300 crew est.) |
+| `hunter_killer_dd692` | DD-692-class long-hull hunter-killer contract plan (maritime.org GA import, 60 zones, 309 crew) |
+| `gosper_apa170` | USS Gosper APA-170 Haskell-class attack transport (maritime.org GA import, 71 zones, 534 crew + 1561 troops) |
+| `fort_mandan_lsd21` | USS Fort Mandan LSD-21 Casa Grande-class dock landing ship (maritime.org GA import, 51 zones, 301 crew + 214 troops) |
+| `mercury_aks20` | USS Mercury AKS-20 Acubens-class stores issue ship (maritime.org GA import, 61 zones, 309 crew) |
+| `assistance_ar17` | USS Assistance AR-17 EC2-S-C1 Liberty-hull repair ship (maritime.org GA import, 56 zones, ~700 crew est.) |
+| `luzon_arg2` | USS Luzon ARG-2 internal-combustion-engine repair ship (maritime.org GA import, 67 zones, ~600 crew est.) |
+| `saratoga_cv60` | USS Saratoga CV-60 Forrestal-class supercarrier, SLEP 1993 (maritime.org GA import, 82 zones, 4955 crew incl. air wing + marines) |
+| `middlesex_lst983` | USS Middlesex County LST-983 tank landing ship, LST-542 class (maritime.org GA import, 40 zones, 123 crew + 129 troops) |
+| `lsm_354` | LSM-354 landing ship medium, LSM-1 class (maritime.org GA import, incomplete booklet, 40 zones, 66 crew + ~48 troops) |
+| `lyon_ap71` | USS Lyon AP-71 troop transport, C3-type (maritime.org GA import, sheets 3-4 missing, 59 zones, 407 crew + 2208 troops) |
+| `apl_24` | APL-24 barracks ship, APL-17 class, non-self-propelled (maritime.org GA import, incomplete booklet, 34 zones, 71 crew + 589 berthed) |
+| `antietam_cvs36` | USS Antietam CVS-36 Essex-class ASW carrier, 1955 angled-deck conversion (maritime.org GA import, 66 zones, 2998 crew incl. air group + marines) |
+| `cushing_dd376` | USS Cushing DD-376 Mahan-class destroyer, ~1942 (maritime.org GA import, 41 zones, 250 crew) |
+| `palmer_dms5` | USS Palmer DMS-5 flush-deck high-speed minesweeper, 1943 (maritime.org GA import, 39 zones, 144 crew) |
+| `bainbridge_dd1` | USS Bainbridge DD-1, first USN destroyer, 1901 (maritime.org GA import, 27 zones, 73 crew) |
+| `rolla_pc483` | USS Rolla PC-483 Bluffton-class submarine chaser, 1942 (maritime.org GA import, 30 zones, 99 crew) |
+| `eagle_pe60` | USS Eagle No.60 PE-60 Eagle-class patrol vessel, 1918 (maritime.org GA import, 41 zones, 58 crew) |
 
 ## License
 

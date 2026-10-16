@@ -1,0 +1,138 @@
+{
+  "platform": "pt_564",
+  "description": "HVAC network synthesized for pt_564",
+  "oa_fraction": 0.6,
+  "hvac_duty": 0.3,
+  "hvac_zones": [
+    {
+      "id": "VENT_Weather",
+      "rooms": [
+        "Gun_Tub_Aft",
+        "Torpedo_Deck",
+        "Cockpit",
+        "Pilothouse",
+        "Foredeck"
+      ],
+      "ach": 12.0,
+      "description": "open weather deck / open cockpit — untreated outside air",
+      "oa_fraction": 1.0,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Ward_Room",
+        "Crews_Quarters",
+        "Fore_Peak"
+      ],
+      "ach": 6.0,
+      "description": "accommodation spaces — natural vent via skylights/ports",
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Room",
+        "Fuel_Comp_Aft",
+        "Fuel_Comp_Mid",
+        "Lazaret"
+      ],
+      "ach": 10.0,
+      "description": "engine room and fuel compartments — forced/natural draft via vent boxes",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_HD_Crew",
+      "rooms": [
+        "HD_Crew"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "VENT_Weather",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Crew",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Pilothouse",
+      "to": "Crews_Quarters",
+      "type": "ladder"
+    },
+    {
+      "from": "Cockpit",
+      "to": "Ward_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Torpedo_Deck",
+      "to": "Engine_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Gun_Tub_Aft",
+      "to": "Lazaret",
+      "type": "ladder"
+    },
+    {
+      "from": "Gun_Tub_Aft",
+      "to": "Torpedo_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Pilothouse",
+      "to": "Foredeck",
+      "type": "passageway"
+    },
+    {
+      "from": "Lazaret",
+      "to": "Fuel_Comp_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Fuel_Comp_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Comp_Mid",
+      "to": "Ward_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Ward_Room",
+      "to": "Crews_Quarters",
+      "type": "passageway"
+    }
+  ]
+}

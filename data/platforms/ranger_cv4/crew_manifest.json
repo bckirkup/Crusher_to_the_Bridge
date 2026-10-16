@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T11:56:37.622284+00:00",
+  "platform": "ranger_cv4",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 2641
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 57,
+      "berth_zone": "Officers_Country_1D",
+      "duty_zone": "Nav_Bridge",
+      "notes": "ship's officers"
+    },
+    {
+      "class_id": "ship_cpo",
+      "role_group": "crew",
+      "count": 62,
+      "berth_zone": "CPO_Quarters_4D",
+      "duty_zone": "CPO_Quarters_4D",
+      "notes": "ship's chief petty officers"
+    },
+    {
+      "class_id": "ship_men",
+      "role_group": "crew",
+      "count": 1224,
+      "berth_zone": "Crew_Berthing_2D",
+      "duty_zone": "Flight_Deck",
+      "notes": "ship's company enlisted — deck divisions, gun crews, commissary, medical, engineering"
+    },
+    {
+      "class_id": "air_wing_officers",
+      "role_group": "crew",
+      "count": 47,
+      "berth_zone": "Officers_Country_3D",
+      "duty_zone": "Ready_Room_1D",
+      "notes": "embarked air group squadron officers"
+    },
+    {
+      "class_id": "air_wing_cpo",
+      "role_group": "crew",
+      "count": 101,
+      "berth_zone": "CPO_Quarters_4D",
+      "duty_zone": "Hangar_Mid",
+      "notes": "air group chief petty officers"
+    },
+    {
+      "class_id": "air_wing_enlisted",
+      "role_group": "crew",
+      "count": 1150,
+      "berth_zone": "Aviation_Qtrs_3D",
+      "duty_zone": "Hangar_Fwd",
+      "notes": "air group enlisted — plane handlers, aviation mechanics, ordnancemen (sub-figure partially illegible; printed total used)"
+    }
+  ],
+  "source": "CV-4 booklet plate 2 COMPLEMENT table: SHIP 57 officers + 62 C.P. officers + 1224 men = 1343; AVIATION 47 officers + 101 C.P. officers + ~1150 men = 1298 (printed total). Separate 'COMPLEMENT 1434' figure ≈ ship 1343 + ~91 Marines — flagged in uncertainties.",
+  "consistency": {
+    "declared_total": 2641,
+    "manifest_total": 2641,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
