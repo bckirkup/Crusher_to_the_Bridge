@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T00:26:58.447397+00:00",
+  "platform_id": "cannon_de701",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/de701_import",
+  "digest_sha256": "30541892987265d9134532330159fe0677b65e07b7d16036d55c9d769ea074ba",
+  "svg_sha256": {
+    "page_05_approved.svg": "7dd8cbc785467e72f20bfcfd64a48927df924e3b21eaec3772f4bbe1554599b4",
+    "page_06_approved.svg": "ab9860b9baf52ed7324cfa9d0effb88299be3d5e09aafdd787fc3688a0b59c07",
+    "page_07_approved.svg": "6aec3ecd6b7085ce6464e87c9ed41bd9c44dd23629c779edaa38f60cbb952216",
+    "page_08_approved.svg": "fe528b8fc83705d1917fb0e095a796ad012b01b6b768cff1ca477b0fd38f2aec",
+    "page_09_approved.svg": "b8e50758ce92d1bb70f800b034aca0d1ff8a6fe4a6404ecc39fd90f2cf18cd61",
+    "page_10_approved.svg": "6ff1ea5359320831de0ee4b209b1544e5c4b359b26377f8760924d78e927d3d2"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 32,
+  "berthing_zones": [
+    "Officers_Qtrs",
+    "Radio_Rm",
+    "Crew_Berthing_Mid",
+    "Armory_Offices",
+    "Crew_Berthing_1P",
+    "CPO_Quarters",
+    "Aft_Berthing_1P"
+  ],
+  "systems_era": "usn_ww2"
+}

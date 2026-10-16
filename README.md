@@ -185,6 +185,9 @@ data/
 │   ├── raven_am55/                 (maritime.org GA import)
 │   ├── bolster_ars38/              (maritime.org GA import)
 │   ├── ruchamkin_apd89/            (maritime.org GA import)
+│   ├── cannon_de701/               (maritime.org GA import)
+│   ├── passumpsic_ao106/           (maritime.org GA import)
+│   ├── pce_874/                    (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -566,6 +569,9 @@ airflow definitions:
 | `raven_am55` | USS Raven-class AM-55 fleet minesweeper (maritime.org GA import, 21 zones, 105 crew) |
 | `bolster_ars38` | USS Bolster ARS-38 rescue/salvage tug (maritime.org GA import, 24 zones, 90 crew) |
 | `ruchamkin_apd89` | USS Ruchamkin APD-89 fast transport (maritime.org GA import, 32 zones, 213 crew + 162 troops) |
+| `cannon_de701` | USS Cannon-class DE-701 destroyer escort (maritime.org GA import, 32 zones, 216 crew) |
+| `passumpsic_ao106` | USS Passumpsic AO-106 fleet oiler (maritime.org GA import, 27 zones, 280 crew) |
+| `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`

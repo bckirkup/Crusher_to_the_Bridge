@@ -1,0 +1,77 @@
+{
+  "description": "Naval GA Contam starter for pce_874 (Target B — openings/AHS drafted; ducts are engineer handwork)",
+  "orifice_type_map": {
+    "ladder_well": "ladder_well",
+    "ladder": "ladder",
+    "passageway": "passageway",
+    "service_hatch": "hatch",
+    "hatch": "hatch",
+    "doorway": "doorway",
+    "stairwell": "stairwell"
+  },
+  "wind_profile": "ship_hull",
+  "filter_preset": "MERV13",
+  "hvac_filter": {
+    "HVAC_Accom": "HEPA",
+    "VENT_Machinery": "HEPA"
+  },
+  "deck_temp_offset_K": {
+    "main_deck": 4.0,
+    "platform_deck": 4.0,
+    "hold": 4.0
+  },
+  "zone_annotations": {
+    "Nav_Bridge": "pilot house under SU radar mast (profile read)",
+    "Signal_Bridge": "open signal bridge wings",
+    "Fantail": "stern: depth-charge racks + projectors, 40mm twi",
+    "Eng_Casing": "engine room casing + funnel uptake amidships",
+    "Mess_Hall": "crew's mess amidships",
+    "Galley": "galley + scullery fwd of mess",
+    "CPO_Quarters": "CPO berthing fwd-mid",
+    "Officers_Country": "wardroom + staterooms fwd",
+    "Wardroom": "officers' wardroom",
+    "Sick_Bay": "sick bay fwd",
+    "HD_Crew": "crew head + washroom",
+    "Passage_Main": "fore-aft passage",
+    "Focsle_Deck": "fore deck: 3in/50 mount, anchor gear",
+    "Crew_Quarters": "main crew berthing on platform deck fwd",
+    "Engine_Rm": "twin GM diesel engine room amidships",
+    "Gen_Rm": "generator/machinery rm aft of engine rm",
+    "Stores_Platform": "stores + magazine fwd of berthing",
+    "Steering_Gear": "steering gear flat aft",
+    "Fuel_Tanks": "F.O. tankage",
+    "Shaft_Alley": "shaft alleys aft"
+  },
+  "wall_azimuth_deg": {
+    "Nav_Bridge": 0.0,
+    "Signal_Bridge": 0.0,
+    "Fantail": 180.0,
+    "Eng_Casing": 270.0,
+    "Mess_Hall": 270.0,
+    "Galley": 90.0,
+    "CPO_Quarters": 270.0,
+    "Officers_Country": 0.0,
+    "Wardroom": 0.0,
+    "Sick_Bay": 0.0,
+    "HD_Crew": 90.0,
+    "Passage_Main": 90.0,
+    "Focsle_Deck": 0.0,
+    "Crew_Quarters": 270.0,
+    "Engine_Rm": 270.0,
+    "Gen_Rm": 180.0,
+    "Stores_Platform": 0.0,
+    "Steering_Gear": 180.0,
+    "Fuel_Tanks": 90.0,
+    "Shaft_Alley": 180.0
+  },
+  "night_setback": true,
+  "duct_hvac_ids": [],
+  "skip_duct_spines": true,
+  "naval_ga_import": true,
+  "handoff_notes": [
+    "Confirm orifice clear areas against watertight door / hatch schedules",
+    "Author real duct networks in ContamW (fiction Darcy spines omitted by default)",
+    "Replace starter MERV/HEPA filters with ship NBC / HVAC design data",
+    "Calibrate AHS Fahs / OAFrac against design ACH and TAB where available"
+  ]
+}

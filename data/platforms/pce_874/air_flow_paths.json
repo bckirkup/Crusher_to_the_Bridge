@@ -1,0 +1,210 @@
+{
+  "platform": "pce_874",
+  "description": "HVAC network synthesized for pce_874",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Nav_Bridge",
+        "Signal_Bridge",
+        "Officers_Country",
+        "Wardroom",
+        "Sick_Bay",
+        "CPO_Quarters",
+        "Mess_Hall",
+        "Galley",
+        "Crew_Quarters",
+        "Passage_Main"
+      ],
+      "ach": 6.0,
+      "description": "accommodation ventilation",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Rm",
+        "Gen_Rm",
+        "Eng_Casing",
+        "Steering_Gear",
+        "Shaft_Alley",
+        "Stores_Platform",
+        "Fuel_Tanks"
+      ],
+      "ach": 10.0,
+      "description": "machinery ventilation",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_HD_Crew",
+      "rooms": [
+        "HD_Crew"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Crew",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Nav_Bridge",
+      "to": "Officers_Country",
+      "type": "ladder"
+    },
+    {
+      "from": "Signal_Bridge",
+      "to": "Officers_Country",
+      "type": "ladder"
+    },
+    {
+      "from": "Focsle_Deck",
+      "to": "Officers_Country",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Officers_Country",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "Officers_Country",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Country",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Hall",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Hall",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Crew_Quarters",
+      "type": "ladder"
+    },
+    {
+      "from": "Fantail",
+      "to": "Gen_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Fantail",
+      "to": "Steering_Gear",
+      "type": "ladder"
+    },
+    {
+      "from": "Eng_Casing",
+      "to": "Engine_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Gen_Rm",
+      "to": "Engine_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Fuel_Tanks",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Stores_Platform",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Steering_Gear",
+      "type": "passageway"
+    },
+    {
+      "from": "Nav_Bridge",
+      "to": "Signal_Bridge",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Casing",
+      "to": "Mess_Hall",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Casing",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Hall",
+      "to": "CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Officers_Country",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "Focsle_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Tanks",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    }
+  ]
+}
