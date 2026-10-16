@@ -190,6 +190,9 @@ data/
 │   ├── pce_874/                    (maritime.org GA import)
 │   ├── independence_cvl26/         (maritime.org GA import)
 │   ├── midway_cv41/                (maritime.org GA import)
+│   ├── sigsbee_dd502/              (maritime.org GA import)
+│   ├── nields_dd616/               (maritime.org GA import)
+│   ├── davison_dd618/              (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -549,7 +552,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twenty-one ship platforms are included, each with spatial layout and HVAC
+Twenty-four ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -578,6 +581,9 @@ airflow definitions:
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
 | `texas_bb35` | USS Texas BB-35 New York-class battleship, 1944 wartime fit (maritime.org GA import, 92 zones, 1810 crew incl. marines) |
 | `new_york_bb34` | USS New York BB-34 New York-class battleship, 1942 wartime fit (maritime.org GA import, 83 zones, 1617 crew incl. marines; main-deck plan absent from scan — sister-derived) |
+| `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
+| `nields_dd616` | USS Nields DD-616 Benson-class destroyer (maritime.org GA import, 39 zones, 262 crew) |
+| `davison_dd618` | USS Davison DD-618 Gleaves-class FRAM destroyer (maritime.org GA import, 39 zones, 283 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
