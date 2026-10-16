@@ -201,8 +201,6 @@ data/
 │   ├── sigsbee_dd502/              (maritime.org GA import)
 │   ├── nields_dd616/               (maritime.org GA import)
 │   ├── davison_dd618/              (maritime.org GA import)
-│   ├── gosper_apa170/              (maritime.org GA import)
-│   ├── fort_mandan_lsd21/          (maritime.org GA import)
 │   ├── idaho_bb42/                 (maritime.org GA import)
 │   ├── west_virginia_bb48/         (maritime.org GA import)
 │   ├── south_dakota_bb49/          (maritime.org GA import)
@@ -571,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Thirty-five ship platforms are included, each with spatial layout and HVAC
+Fifty ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -598,6 +596,8 @@ airflow definitions:
 | `pce_874` | USS PCE-874 patrol craft escort (maritime.org GA import, 20 zones, 99 crew) |
 | `independence_cvl26` | USS Independence-class CVL-26 Monterey light carrier (maritime.org GA import, 46 zones, 1566 crew incl. air group) |
 | `midway_cv41` | USS Midway-class CV-41 armored battle carrier (maritime.org GA import, 65 zones, 4712 crew incl. air group + marines) |
+| `texas_bb35` | USS Texas BB-35 New York-class battleship, 1944 wartime fit (maritime.org GA import, 92 zones, 1810 crew incl. marines) |
+| `new_york_bb34` | USS New York BB-34 New York-class battleship, 1942 wartime fit (maritime.org GA import, 83 zones, 1617 crew incl. marines; main-deck plan absent from scan — sister-derived) |
 | `astoria_ca34` | USS Astoria CA-34 New Orleans-class heavy cruiser (maritime.org GA import, 65 zones, 982 crew) |
 | `miami_cl89` | USS Miami CL-89 Cleveland-class light cruiser (maritime.org GA import, 81 zones, 1252 crew) |
 | `chicago_cg11` | USS Chicago CG-11 guided missile cruiser on Baltimore-class hull (maritime.org GA import, 87 zones, 1302 crew incl. flag staff + marines) |
@@ -609,14 +609,16 @@ airflow definitions:
 | `sigsbee_dd502` | USS Sigsbee DD-502 Fletcher-class destroyer (maritime.org GA import, 41 zones, 322 crew) |
 | `nields_dd616` | USS Nields DD-616 Benson-class destroyer (maritime.org GA import, 39 zones, 262 crew) |
 | `davison_dd618` | USS Davison DD-618 Gleaves-class FRAM destroyer (maritime.org GA import, 39 zones, 283 crew) |
-| `gosper_apa170` | USS Gosper APA-170 Haskell-class attack transport (maritime.org GA import, 71 zones, 534 crew + 1561 troops) |
-| `fort_mandan_lsd21` | USS Fort Mandan LSD-21 Casa Grande-class dock landing ship (maritime.org GA import, 51 zones, 301 crew + 214 troops) |
 | `idaho_bb42` | USS Idaho BB-42 New Mexico-class battleship (maritime.org GA import, 114 zones, ~1084 crew class-typical) |
 | `west_virginia_bb48` | USS West Virginia BB-48 Colorado-class battleship (maritime.org GA import, 198 zones, 1340 crew plate-read) |
 | `south_dakota_bb49` | USS South Dakota BB-49 1918 contract-design battleship, never completed (maritime.org GA import, 55 zones, ~1191 crew class-typical) |
 | `missouri_bb63` | USS Missouri BB-63 Iowa-class battleship, 1950 booklet (maritime.org GA import, 103 zones, 1561 crew) |
 | `wisconsin_bb64` | USS Wisconsin BB-64 Iowa-class battleship, 1956 booklet (maritime.org GA import, 103 zones, ~2560 crew) |
 | `new_jersey_bb62` | USS New Jersey BB-62 Iowa-class battleship, 1984 reactivation booklet (maritime.org GA import, 103 zones, ~1781 crew) |
+| `liberty_cargo_ec2` | EC2-S-C1 Liberty cargo ship, WWII merchant marine (maritime.org GA import, 54 zones, 66 crew — first merchant hull) |
+| `savannah_ns` | NS Savannah nuclear merchant/passenger demonstration ship (maritime.org GA import, 73 zones, 60 passengers + 110 crew — first passenger hull) |
+| `aeolus_arc3` | USS Aeolus ARC-3 cable repair ship, ex-LST conversion (maritime.org GA import, 40 zones, ~200 crew) |
+| `alexander_henry_cgs119` | CGS Alexander Henry light icebreaker/buoy tender (maritime.org GA import, 28 zones, 31 crew + 20 passengers/officials) |
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
@@ -840,7 +842,10 @@ from `orchestrator_types.py`:
 | `PRESENTATION_*` | `agent_axes` | Clinical presentation (mild counts as symptomatic for counters) |
 | `COMPLIANCE_*` | `agent_axes` | FRED confinement (quarantine vs. isolation ward) |
 | `LOCATION_*` | `orchestrator_types` | Synthetic quarters locations for confined agents |
+| `gosper_apa170` | USS Gosper APA-170 Haskell-class attack transport (maritime.org GA import, 71 zones, 534 crew + 1561 troops) |
+| `fort_mandan_lsd21` | USS Fort Mandan LSD-21 Casa Grande-class dock landing ship (maritime.org GA import, 51 zones, 301 crew + 214 troops) |
 
 ## License
 
 MIT
+

@@ -1,0 +1,98 @@
+{
+  "platform_id": "aeolus_arc3",
+  "ship_class_label": "Aeolus Arc3",
+  "footprint_tier": "representative",
+  "representative_of": "Cable repair/laying ship converted from an LST hull (1955). Long cable working deck forward with cable drum, dynamometer and bow sheaves; superstructure + accommodation aft.",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 40",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Top_Of_House",
+    "Superstructure_Cabins",
+    "Wheelhouse",
+    "Bridge_Chart_Rms",
+    "HD_Bridge",
+    "Cable_Working_Deck",
+    "Deck_House_Upper",
+    "Cable_Testing_Rm",
+    "Bow_Sheave_Area",
+    "HD_Upper_Deck",
+    "Crew_Messing",
+    "Galley",
+    "Crew_Berth_M",
+    "Crew_Recreation",
+    "Radio_Electronic_Shops",
+    "After_Repair_Locker",
+    "Elec_Switchboard",
+    "Boiler_Casing_M",
+    "Fwd_Stores_M",
+    "HD_Main_Deck",
+    "Steering_Gear",
+    "Workshops_1P",
+    "Berth_1P",
+    "Cable_Workshop",
+    "Ice_Machinery_Rm",
+    "Washroom_Locker_1P",
+    "HD_First_Platform",
+    "Fwd_Stores_1P",
+    "Armory",
+    "Provisions_Stores_2P",
+    "Butcher_Meats",
+    "Aux_Machinery_2P",
+    "Escape_Trunk_2P",
+    "Fwd_Stores_2P",
+    "Cable_Tanks",
+    "Flam_Liquid_Stores",
+    "Storeroom_Hold",
+    "Rope_Stowage",
+    "Engine_Room",
+    "Boiler_Room"
+  ],
+  "decks": [
+    "first_platform",
+    "hold",
+    "main_deck",
+    "nav_bridge",
+    "second_platform",
+    "superstructure_deck",
+    "top_of_house",
+    "upper_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 102.0,
+    "ymin": -2.0,
+    "ymax": 17.2
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "top_of_house": "deck_top_of_house.png",
+      "superstructure_deck": "deck_superstructure_deck.png",
+      "nav_bridge": "deck_nav_bridge.png",
+      "upper_deck": "deck_upper_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "first_platform": "deck_first_platform.png",
+      "second_platform": "deck_second_platform.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}

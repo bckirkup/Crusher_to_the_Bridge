@@ -64,6 +64,8 @@ PLATFORMS = [
     "enterprise_constitution_tos",
     "enterprise_galaxy_tng",
     "midway_cv41",
+    "texas_bb35",
+    "new_york_bb34",
     "astoria_ca34",
     "miami_cl89",
     "chicago_cg11",
@@ -75,17 +77,21 @@ PLATFORMS = [
     "sigsbee_dd502",
     "nields_dd616",
     "davison_dd618",
-    "gosper_apa170",
-    "fort_mandan_lsd21",
     "idaho_bb42",
     "west_virginia_bb48",
     "south_dakota_bb49",
     "missouri_bb63",
     "wisconsin_bb64",
     "new_jersey_bb62",
+    "liberty_cargo_ec2",
+    "savannah_ns",
+    "aeolus_arc3",
+    "alexander_henry_cgs119",
     "jupiter_ac3",
     "montana_acr13",
     "olympia_c6",
+    "gosper_apa170",
+    "fort_mandan_lsd21",
 ]
 
 ENTERPRISE_IDS = frozenset({
@@ -409,3 +415,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
