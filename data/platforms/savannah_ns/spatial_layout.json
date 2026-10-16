@@ -1,0 +1,1194 @@
+{
+  "platform": "savannah_ns",
+  "description": "Nuclear-powered merchant demonstration/passenger ship: PWR, geared turbine; ~60 passengers + ~110 crew. Booklet GA sheets 1-13: promenade/A/B/C/D deck plans, hold, reactor flats.",
+  "isolation_unit_capacity": 2,
+  "deck_dimensions": {
+    "length_m": 181.5,
+    "beam_m": 23.77
+  },
+  "graywater_zones": [
+    "Galley_A",
+    "Galley_B",
+    "Dining_Saloon",
+    "Verandah_Lounge",
+    "Crew_Mess_B",
+    "Crew_Mess_C",
+    "Bakery_Scullery"
+  ],
+  "zones": [
+    {
+      "id": "Docking_Bridge_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 302.05,
+      "floor_area_m2": 116.17,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 11.46,
+        "y": 11.83
+      },
+      "max_occupancy": 8,
+      "description": "After docking bridge, open"
+    },
+    {
+      "id": "Promenade_Aft_Open",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 642.54,
+      "floor_area_m2": 247.13,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 32.86,
+        "y": 11.17
+      },
+      "description": "Open promenade aft + stringer"
+    },
+    {
+      "id": "Swimming_Pool",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 219.67,
+      "floor_area_m2": 84.49,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 55.79,
+        "y": 11.06
+      },
+      "max_occupancy": 20,
+      "description": "Swimming pool, aft end of promenade house"
+    },
+    {
+      "id": "Verandah_Lounge",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 370.7,
+      "floor_area_m2": 142.58,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 72.6,
+        "y": 11.0
+      },
+      "max_occupancy": 50,
+      "description": "Verandah + dance floor"
+    },
+    {
+      "id": "Promenade_House",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 425.62,
+      "floor_area_m2": 163.7,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 91.71,
+        "y": 10.89
+      },
+      "max_occupancy": 60,
+      "description": "Purser square, writing rooms, entrances"
+    },
+    {
+      "id": "Machinery_Casing_P",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 151.03,
+      "floor_area_m2": 58.09,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 106.99,
+        "y": 11.28
+      },
+      "max_occupancy": 2,
+      "description": "Machinery casing through promenade"
+    },
+    {
+      "id": "Lounge_Fwd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 285.58,
+      "floor_area_m2": 109.84,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 118.83,
+        "y": 11.17
+      },
+      "max_occupancy": 60,
+      "description": "First-class lounge fwd end of house"
+    },
+    {
+      "id": "HD_Promenade",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 18.22,
+      "floor_area_m2": 7.92,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 92.09,
+        "y": 6.36
+      },
+      "serves": [
+        "Promenade_House",
+        "Verandah_Lounge"
+      ],
+      "description": "Public toilets promenade level",
+      "base_ach": 19.1,
+      "max_occupancy": 3
+    },
+    {
+      "id": "Promenade_Walkway_Port",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 845.74,
+      "floor_area_m2": 325.29,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 81.39,
+        "y": 17.58
+      },
+      "description": "Port side promenade walkway"
+    },
+    {
+      "id": "Promenade_Walkway_Stbd",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 845.74,
+      "floor_area_m2": 325.29,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 81.39,
+        "y": 4.86
+      },
+      "description": "Stbd side promenade walkway"
+    },
+    {
+      "id": "Fwd_Deck_Promenade",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1383.94,
+      "floor_area_m2": 532.29,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 7.800000000000001,
+      "deck": "promenade_deck",
+      "display": {
+        "x": 150.17,
+        "y": 10.72
+      },
+      "description": "Open deck fwd, winch control platforms, masthouse"
+    },
+    {
+      "id": "Top_Of_House",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 494.48,
+      "floor_area_m2": 190.18,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "top_of_house",
+      "display": {
+        "x": 109.61,
+        "y": 11.16
+      },
+      "max_occupancy": 4,
+      "description": "Compass platform, open air"
+    },
+    {
+      "id": "Wheelhouse",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 480.71,
+      "floor_area_m2": 184.89,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.6,
+      "deck": "nav_bridge",
+      "display": {
+        "x": 119.89,
+        "y": 9.96
+      },
+      "max_occupancy": 10,
+      "description": "Navigation bridge enclosure fwd"
+    },
+    {
+      "id": "Chart_Radio_NB",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 318.93,
+      "floor_area_m2": 122.67,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.6,
+      "deck": "nav_bridge",
+      "display": {
+        "x": 104.78,
+        "y": 9.48
+      },
+      "max_occupancy": 6,
+      "description": "Chart room/radio aft of wheelhouse"
+    },
+    {
+      "id": "Funnel_Casing",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 123.26,
+      "floor_area_m2": 47.41,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.6,
+      "deck": "nav_bridge",
+      "display": {
+        "x": 102.7,
+        "y": 17.4
+      },
+      "max_occupancy": 2,
+      "description": "Funnel/uptake casing abaft bridge"
+    },
+    {
+      "id": "Bridge_Wings",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 172.56,
+      "floor_area_m2": 66.37,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 2.6,
+      "deck": "nav_bridge",
+      "display": {
+        "x": 118.11,
+        "y": 18.28
+      },
+      "description": "Open bridge wings"
+    },
+    {
+      "id": "Boat_Cabins",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 887.51,
+      "floor_area_m2": 341.35,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.2,
+      "deck": "boat_deck",
+      "display": {
+        "x": 103.77,
+        "y": 6.77
+      },
+      "max_occupancy": 20,
+      "description": "Officer staterooms on boat deck"
+    },
+    {
+      "id": "Emergency_Gen_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 83.85,
+      "floor_area_m2": 32.25,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.2,
+      "deck": "boat_deck",
+      "display": {
+        "x": 87.1,
+        "y": 4.25
+      },
+      "max_occupancy": 2,
+      "description": "Emergency generator room"
+    },
+    {
+      "id": "HD_Boat_Deck",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 17.11,
+      "floor_area_m2": 7.44,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "boat_deck",
+      "display": {
+        "x": 106.61,
+        "y": 15.49
+      },
+      "serves": [
+        "Boat_Cabins"
+      ],
+      "description": "Officer W.C./shower boat deck",
+      "base_ach": 19.1,
+      "max_occupancy": 3
+    },
+    {
+      "id": "Boat_Deck_Fwd",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 332.82,
+      "floor_area_m2": 128.01,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.2,
+      "deck": "boat_deck",
+      "display": {
+        "x": 125.06,
+        "y": 6.77
+      },
+      "description": "Open boat deck fwd + davits"
+    },
+    {
+      "id": "Boat_Deck_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 870.74,
+      "floor_area_m2": 334.9,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 5.2,
+      "deck": "boat_deck",
+      "display": {
+        "x": 101.29,
+        "y": 17.84
+      },
+      "description": "Open boat deck aft + boat stowage"
+    },
+    {
+      "id": "Fantail_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 440.67,
+      "floor_area_m2": 169.49,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 6.05,
+        "y": 12.29
+      },
+      "description": "Ensign staff/aft weather deck"
+    },
+    {
+      "id": "Holds_Aft_A",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1612.45,
+      "floor_area_m2": 620.17,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 32.52,
+        "y": 11.14
+      },
+      "description": "N5-N7 hatch trunks aft, tween level"
+    },
+    {
+      "id": "Pax_Cabins_A_Port",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 373.9,
+      "floor_area_m2": 143.81,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 72.6,
+        "y": 6.66
+      },
+      "max_occupancy": 30,
+      "description": "A-deck stateroom rows port (A-##)"
+    },
+    {
+      "id": "Pax_Cabins_A_Stbd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 320.49,
+      "floor_area_m2": 123.26,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 72.6,
+        "y": 18.61
+      },
+      "max_occupancy": 30,
+      "description": "A-deck stateroom rows stbd"
+    },
+    {
+      "id": "A_Deck_Lobby",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 257.06,
+      "floor_area_m2": 98.87,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 96.04,
+        "y": 12.5
+      },
+      "max_occupancy": 16,
+      "description": "Lobby/purser/corridor amidships"
+    },
+    {
+      "id": "Galley_A",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 240.37,
+      "floor_area_m2": 92.45,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 81.67,
+        "y": 12.63
+      },
+      "max_occupancy": 14,
+      "description": "Galley/pantry block amidships"
+    },
+    {
+      "id": "Machinery_Casing_A",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 183.61,
+      "floor_area_m2": 70.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 107.77,
+        "y": 12.5
+      },
+      "max_occupancy": 2,
+      "description": "Machinery casing"
+    },
+    {
+      "id": "Reactor_Space_A",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 220.34,
+      "floor_area_m2": 84.74,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 117.98,
+        "y": 12.5
+      },
+      "max_occupancy": 4,
+      "description": "Reactor space trunk through A deck (labelled)"
+    },
+    {
+      "id": "Weather_Deck_Port_A",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 467.38,
+      "floor_area_m2": 179.76,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 85.08,
+        "y": 22.14
+      },
+      "description": "Port weather deck walkway"
+    },
+    {
+      "id": "Weather_Deck_Stbd_A",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 701.07,
+      "floor_area_m2": 269.64,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 85.08,
+        "y": 2.31
+      },
+      "description": "Stbd weather deck walkway"
+    },
+    {
+      "id": "Holds_Fwd_A",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1468.9,
+      "floor_area_m2": 564.96,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 141.42,
+        "y": 10.87
+      },
+      "description": "N1-N4 hatch trunks fwd, tween level"
+    },
+    {
+      "id": "Stevedores_Toilet",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 22.15,
+      "floor_area_m2": 9.63,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 149.74,
+        "y": 6.79
+      },
+      "serves": [
+        "Holds_Fwd_A"
+      ],
+      "description": "Stevedore's toilet fwd of house",
+      "base_ach": 19.1,
+      "max_occupancy": 4
+    },
+    {
+      "id": "Bosun_Stores_A",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 202.8,
+      "floor_area_m2": 78.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 169.78,
+        "y": 11.48
+      },
+      "max_occupancy": 4,
+      "description": "Bosun's stores fwd"
+    },
+    {
+      "id": "Forecastle_A",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 157.74,
+      "floor_area_m2": 60.67,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 10.4,
+      "deck": "a_deck",
+      "display": {
+        "x": 177.53,
+        "y": 11.48
+      },
+      "description": "Focsle head, windlass gear fwd"
+    },
+    {
+      "id": "Steering_Gear_B",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 183.61,
+      "floor_area_m2": 70.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 5.67,
+        "y": 11.82
+      },
+      "max_occupancy": 4,
+      "description": "Steering gear room aft"
+    },
+    {
+      "id": "Holds_Aft_B",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1612.45,
+      "floor_area_m2": 620.17,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 32.52,
+        "y": 11.14
+      },
+      "description": "Aft tween cargo"
+    },
+    {
+      "id": "Pax_Cabins_B_Port",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 373.9,
+      "floor_area_m2": 143.81,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 72.6,
+        "y": 6.66
+      },
+      "max_occupancy": 30,
+      "description": "B-deck staterooms port"
+    },
+    {
+      "id": "Pax_Cabins_B_Stbd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 320.49,
+      "floor_area_m2": 123.26,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 72.6,
+        "y": 18.61
+      },
+      "max_occupancy": 30,
+      "description": "B-deck staterooms stbd"
+    },
+    {
+      "id": "Dining_Saloon",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 390.59,
+      "floor_area_m2": 150.23,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 85.46,
+        "y": 12.63
+      },
+      "max_occupancy": 70,
+      "description": "Main dining saloon (gallery above)"
+    },
+    {
+      "id": "Galley_B",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 150.23,
+      "floor_area_m2": 57.78,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 103.98,
+        "y": 12.63
+      },
+      "max_occupancy": 12,
+      "description": "Galley adjacent to saloon"
+    },
+    {
+      "id": "Crew_Mess_B",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 180.27,
+      "floor_area_m2": 69.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 114.19,
+        "y": 12.63
+      },
+      "max_occupancy": 40,
+      "description": "Crew mess fwd of machinery casing"
+    },
+    {
+      "id": "Machinery_Casing_B",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 146.89,
+      "floor_area_m2": 56.5,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 124.03,
+        "y": 12.5
+      },
+      "max_occupancy": 2,
+      "description": "Machinery casing B deck"
+    },
+    {
+      "id": "HD_B_Deck",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 22.15,
+      "floor_area_m2": 9.63,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 85.46,
+        "y": 22.41
+      },
+      "serves": [
+        "Pax_Cabins_B_Port",
+        "Pax_Cabins_B_Stbd"
+      ],
+      "description": "Passenger W.C./bath block B deck",
+      "base_ach": 19.1,
+      "max_occupancy": 4
+    },
+    {
+      "id": "Holds_Fwd_B",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1335.36,
+      "floor_area_m2": 513.6,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 143.69,
+        "y": 10.87
+      },
+      "description": "Fwd tween cargo"
+    },
+    {
+      "id": "Windlass_Room_B",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 225.34,
+      "floor_area_m2": 86.67,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 13.0,
+      "deck": "b_deck",
+      "display": {
+        "x": 170.16,
+        "y": 11.48
+      },
+      "max_occupancy": 4,
+      "description": "Windlass power unit room fwd"
+    },
+    {
+      "id": "Carpenter_Elec_Shops",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 315.48,
+      "floor_area_m2": 121.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 7.18,
+        "y": 11.48
+      },
+      "max_occupancy": 8,
+      "description": "Carpenter shop, electrical workshop, void aft"
+    },
+    {
+      "id": "Holds_Aft_C",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1542.35,
+      "floor_area_m2": 593.21,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 31.76,
+        "y": 11.14
+      },
+      "description": "Aft tween cargo C level"
+    },
+    {
+      "id": "Crew_Cabins_C_Port",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 397.27,
+      "floor_area_m2": 152.8,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 71.47,
+        "y": 6.66
+      },
+      "max_occupancy": 40,
+      "description": "Crew cabins port C deck (C-##)"
+    },
+    {
+      "id": "Crew_Cabins_C_Stbd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 340.52,
+      "floor_area_m2": 130.97,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 71.47,
+        "y": 18.61
+      },
+      "max_occupancy": 40,
+      "description": "Crew cabins stbd C deck"
+    },
+    {
+      "id": "Crew_Mess_C",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 300.46,
+      "floor_area_m2": 115.56,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 79.41,
+        "y": 12.63
+      },
+      "max_occupancy": 50,
+      "description": "Crew mess amidships C deck"
+    },
+    {
+      "id": "Bakery_Scullery",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 150.23,
+      "floor_area_m2": 57.78,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 94.53,
+        "y": 12.63
+      },
+      "max_occupancy": 6,
+      "description": "Bakery/scullery/stores"
+    },
+    {
+      "id": "Machinery_Space_C",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 467.38,
+      "floor_area_m2": 179.76,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 105.5,
+        "y": 11.55
+      },
+      "max_occupancy": 6,
+      "description": "Engine room upper level"
+    },
+    {
+      "id": "Reactor_Space_C",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 200.3,
+      "floor_area_m2": 77.04,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 117.97,
+        "y": 12.9
+      },
+      "max_occupancy": 4,
+      "description": "Reactor space trunk C deck"
+    },
+    {
+      "id": "Crew_Stores_C",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 120.18,
+      "floor_area_m2": 46.22,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 127.81,
+        "y": 12.63
+      },
+      "max_occupancy": 4,
+      "description": "Crew stores/gear lockers"
+    },
+    {
+      "id": "HD_C_Deck",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 22.15,
+      "floor_area_m2": 9.63,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 83.57,
+        "y": 22.41
+      },
+      "serves": [
+        "Crew_Cabins_C_Port",
+        "Crew_Cabins_C_Stbd"
+      ],
+      "description": "Crew W.C./wash block C deck",
+      "base_ach": 19.1,
+      "max_occupancy": 4
+    },
+    {
+      "id": "Holds_Fwd_C",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1201.83,
+      "floor_area_m2": 462.24,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 145.96,
+        "y": 10.87
+      },
+      "description": "Fwd tween cargo C level"
+    },
+    {
+      "id": "Bosun_Stores_C",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 180.27,
+      "floor_area_m2": 69.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 15.600000000000001,
+      "deck": "c_deck",
+      "display": {
+        "x": 169.4,
+        "y": 11.48
+      },
+      "max_occupancy": 3,
+      "description": "Bosun's stores fwd C level"
+    },
+    {
+      "id": "Aft_Peak_D",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 211.28,
+      "floor_area_m2": 81.26,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "d_deck",
+      "display": {
+        "x": 6.43,
+        "y": 11.33
+      },
+      "max_occupancy": 2,
+      "description": "Aft peak/escape trunk region"
+    },
+    {
+      "id": "Holds_Aft_D",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1478.96,
+      "floor_area_m2": 568.83,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "d_deck",
+      "display": {
+        "x": 29.12,
+        "y": 10.94
+      },
+      "description": "Aft cargo D level"
+    },
+    {
+      "id": "Aux_Machinery_D",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 332.93,
+      "floor_area_m2": 128.05,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "d_deck",
+      "display": {
+        "x": 58.99,
+        "y": 11.2
+      },
+      "max_occupancy": 6,
+      "description": "Aux machinery flat 16'-6\""
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 4500.0,
+      "floor_area_m2": 1730.77,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "d_deck",
+      "display": {
+        "x": 78.65,
+        "y": 10.55
+      },
+      "max_occupancy": 16,
+      "description": "Main machinery space, turbine+reduction gear"
+    },
+    {
+      "id": "Reactor_Containment",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 3800.0,
+      "floor_area_m2": 1461.54,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "d_deck",
+      "display": {
+        "x": 102.09,
+        "y": 11.07
+      },
+      "max_occupancy": 4,
+      "description": "Concrete reactor containment vessel; single zone covers hold->D-deck extent"
+    },
+    {
+      "id": "Radiation_Sampling",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 86.43,
+      "floor_area_m2": 33.24,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "d_deck",
+      "display": {
+        "x": 115.71,
+        "y": 11.46
+      },
+      "max_occupancy": 4,
+      "description": "Radiation sampling room / health physics"
+    },
+    {
+      "id": "Holds_Fwd_D",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 1680.64,
+      "floor_area_m2": 646.4,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "d_deck",
+      "display": {
+        "x": 138.02,
+        "y": 10.68
+      },
+      "description": "Fwd cargo D level"
+    },
+    {
+      "id": "Deep_Tank_Fwd",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 216.08,
+      "floor_area_m2": 83.11,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 18.2,
+      "deck": "d_deck",
+      "display": {
+        "x": 170.16,
+        "y": 11.01
+      },
+      "max_occupancy": 2,
+      "description": "Deep tank top / fore peak region fwd"
+    },
+    {
+      "id": "Reactor_Control_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 65.0,
+      "floor_area_m2": 25.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 20.8,
+      "deck": "reactor_flat",
+      "display": {
+        "x": 93.0,
+        "y": 14.5
+      },
+      "max_occupancy": 4,
+      "description": "Control room on 14'-0\" flat"
+    },
+    {
+      "id": "Aux_Machinery_Flat",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 130.0,
+      "floor_area_m2": 50.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 20.8,
+      "deck": "reactor_flat",
+      "display": {
+        "x": 91.5,
+        "y": 7.17
+      },
+      "max_occupancy": 4,
+      "description": "24'-6\" flat aux machinery"
+    },
+    {
+      "id": "Shaft_Alley",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 507.67,
+      "floor_area_m2": 195.26,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 23.400000000000002,
+      "deck": "hold",
+      "display": {
+        "x": 31.76,
+        "y": 11.64
+      },
+      "max_occupancy": 4,
+      "description": "Shaft alley aft along centreline"
+    },
+    {
+      "id": "Hold_Bottom_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 9000.0,
+      "floor_area_m2": 3461.54,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 23.400000000000002,
+      "deck": "hold",
+      "display": {
+        "x": 34.03,
+        "y": 15.85
+      },
+      "description": "Aft hold bottoms (N5-N7)"
+    },
+    {
+      "id": "Machinery_Bottom",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 2200.0,
+      "floor_area_m2": 846.15,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 23.400000000000002,
+      "deck": "hold",
+      "display": {
+        "x": 73.73,
+        "y": 11.48
+      },
+      "max_occupancy": 6,
+      "description": "Engine room inner bottom + bilge"
+    },
+    {
+      "id": "Hold_Bottom_Fwd",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 12000.0,
+      "floor_area_m2": 4615.38,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 23.400000000000002,
+      "deck": "hold",
+      "display": {
+        "x": 138.02,
+        "y": 11.42
+      },
+      "description": "Fwd hold bottoms (N1-N4)"
+    },
+    {
+      "id": "Fore_Peak_Tank",
+      "type": "Room",
+      "traffic": "medium",
+      "volume_m3": 96.7,
+      "floor_area_m2": 37.19,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 23.400000000000002,
+      "deck": "hold",
+      "display": {
+        "x": 173.18,
+        "y": 11.53
+      },
+      "max_occupancy": 2,
+      "description": "Fore peak tank"
+    }
+  ],
+  "nominal_complement": {
+    "passengers": 60,
+    "crew": 110
+  }
+}

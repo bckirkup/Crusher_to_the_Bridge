@@ -1,0 +1,268 @@
+{
+  "schema_version": "1.0",
+  "platform_id": "aeolus_arc3",
+  "created_utc": "2026-10-16T11:57:34.025678+00:00",
+  "description": "Draft Contam orifice checklist from naval GA import. Engineers confirm areas/schedules in ContamW; as-built ducts are out of scope here.",
+  "openings": [
+    {
+      "from": "Wheelhouse",
+      "to": "Bridge_Chart_Rms",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Cable_Working_Deck",
+      "to": "Bow_Sheave_Area",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Deck_House_Upper",
+      "to": "Cable_Testing_Rm",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Crew_Messing",
+      "to": "Galley",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Crew_Messing",
+      "to": "Elec_Switchboard",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Galley",
+      "to": "Crew_Recreation",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Crew_Berth_M",
+      "to": "Crew_Recreation",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Crew_Berth_M",
+      "to": "Radio_Electronic_Shops",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Radio_Electronic_Shops",
+      "to": "After_Repair_Locker",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Elec_Switchboard",
+      "to": "Boiler_Casing_M",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Workshops_1P",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Workshops_1P",
+      "to": "Berth_1P",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Berth_1P",
+      "to": "Cable_Workshop",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Cable_Workshop",
+      "to": "Ice_Machinery_Rm",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Ice_Machinery_Rm",
+      "to": "Washroom_Locker_1P",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Armory",
+      "to": "Provisions_Stores_2P",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Provisions_Stores_2P",
+      "to": "Butcher_Meats",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Butcher_Meats",
+      "to": "Aux_Machinery_2P",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Escape_Trunk_2P",
+      "to": "Fwd_Stores_2P",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Flam_Liquid_Stores",
+      "to": "Storeroom_Hold",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Storeroom_Hold",
+      "to": "Rope_Stowage",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Rope_Stowage",
+      "to": "Engine_Room",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Room",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    }
+  ],
+  "handwork_remaining": [
+    "duct_networks",
+    "fan_curves",
+    "measured_leakage",
+    "nbc_filtration_elements",
+    "weather_wind_as_required"
+  ]
+}
