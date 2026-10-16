@@ -1,0 +1,281 @@
+{
+  "platform": "passumpsic_ao106",
+  "description": "HVAC network synthesized for passumpsic_ao106",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Nav_Bridge",
+        "Signal_Deck",
+        "Radio_Rm",
+        "Officers_Country",
+        "Wardroom",
+        "Sick_Bay",
+        "Cargo_Control",
+        "CPO_Quarters"
+      ],
+      "ach": 6.0,
+      "description": "officers/accommodation ventilation",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "HVAC_Berthing",
+      "rooms": [
+        "Mess_Hall",
+        "Galley",
+        "Crew_Qtrs_Fwd",
+        "Crew_Qtrs_Aft"
+      ],
+      "ach": 6.0,
+      "description": "berthing + messing ventilation",
+      "oa_fraction": 0.4,
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Rm",
+        "Boiler_Rm",
+        "Cargo_Pump_Rm",
+        "Shaft_Alley",
+        "Steering_Gear",
+        "Stores_2D",
+        "Magazines",
+        "Fuel_Tanks",
+        "Fwd_Peak_Tanks"
+      ],
+      "ach": 10.0,
+      "description": "machinery + cargo vent",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "VENT_Cargo_Tanks",
+      "rooms": [
+        "Main_Cargo_Tanks"
+      ],
+      "ach": 4.0,
+      "description": "cargo tank venting (ullage/IG outlets to weather)",
+      "oa_fraction": 1.0,
+      "vent_mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_HD_Crew",
+      "rooms": [
+        "HD_Crew"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew, 28 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "HVAC_Berthing",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Machinery",
+      "to": "VENT_Cargo_Tanks",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "AHU_HD_HD_Crew",
+      "flow_rate_m3h": 3329.2,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Nav_Bridge",
+      "to": "Signal_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Signal_Deck",
+      "to": "Radio_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Radio_Rm",
+      "to": "Cargo_Control",
+      "type": "ladder"
+    },
+    {
+      "from": "Island_Deck",
+      "to": "Working_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Focsle_Deck",
+      "to": "Working_Deck",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Focsle_Deck",
+      "to": "Crew_Qtrs_Fwd",
+      "type": "ladder"
+    },
+    {
+      "from": "Aft_Open_Deck",
+      "to": "Officers_Country",
+      "type": "door"
+    },
+    {
+      "from": "Officers_Country",
+      "to": "Wardroom",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Mess_Hall",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Hall",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "Officers_Country",
+      "type": "passageway"
+    },
+    {
+      "from": "Cargo_Control",
+      "to": "Cargo_Pump_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Working_Deck",
+      "to": "Cargo_Pump_Rm",
+      "type": "door"
+    },
+    {
+      "from": "Cargo_Pump_Rm",
+      "to": "Engine_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Qtrs_Aft",
+      "to": "Engine_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Qtrs_Aft",
+      "to": "Boiler_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Qtrs_Fwd",
+      "to": "Magazines",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Fuel_Tanks",
+      "type": "ladder"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Steering_Gear",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Rm",
+      "to": "Engine_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_2D",
+      "to": "Engine_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Main_Cargo_Tanks",
+      "to": "Cargo_Pump_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Island_Deck",
+      "to": "Radio_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Country",
+      "to": "CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Country",
+      "to": "Mess_Hall",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Mess_Hall",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Aft_Open_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Cargo_Control",
+      "to": "Working_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Main_Cargo_Tanks",
+      "to": "Fuel_Tanks",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Tanks",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    }
+  ]
+}

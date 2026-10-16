@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T00:27:07.944422+00:00",
+  "platform_id": "passumpsic_ao106",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/ao106_import",
+  "digest_sha256": "2328c964691ca583e538487ac97476e6bffb4221865d85d737ab9186ad9e33c7",
+  "svg_sha256": {
+    "page_05_approved.svg": "468d293ce730648a7e46510ca3b8279bd84c334b78160ae68c15b40066683801",
+    "page_06_approved.svg": "b379fc7ec4f33ca5a09c7873b5daacca654f83205bedacff99c544fb31d48ee0",
+    "page_07_approved.svg": "76ab5d4d9dddc9fedbb1cfa5c7e1cf8e64f927f16fe860e6922402554e6cd704",
+    "page_08_approved.svg": "ecfde9554d4b622613291ad6feec2980ff3208ab7f031032043d02b2fdc3e4ae",
+    "page_09_approved.svg": "5c528022c9fc511c24e2cbf73bb93e3596e86b3b88071b4ebf75dadebdcbd957"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 27,
+  "berthing_zones": [
+    "Radio_Rm",
+    "Officers_Country",
+    "CPO_Quarters",
+    "Cargo_Control",
+    "Crew_Qtrs_Fwd",
+    "Crew_Qtrs_Aft"
+  ],
+  "systems_era": "usn_ww2"
+}

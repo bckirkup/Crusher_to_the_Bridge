@@ -1,0 +1,303 @@
+{
+  "platform": "cannon_de701",
+  "description": "HVAC network synthesized for cannon_de701",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Nav_Bridge",
+        "Signal_Deck",
+        "Officers_Qtrs",
+        "Radio_Rm",
+        "Wardroom",
+        "Sick_Bay",
+        "Armory_Offices",
+        "Passage_Main",
+        "CPO_Quarters"
+      ],
+      "ach": 6.0,
+      "description": "officers/accommodation ventilation",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    {
+      "id": "HVAC_Berthing",
+      "rooms": [
+        "Crew_Berthing_Mid",
+        "Crew_Berthing_1P",
+        "Aft_Berthing_1P",
+        "Mess_Hall",
+        "Galley"
+      ],
+      "ach": 6.0,
+      "description": "berthing + messing ventilation",
+      "oa_fraction": 0.4,
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Upper_Machinery",
+        "Fire_Rm_Fwd",
+        "Engine_Rm",
+        "Fire_Rm_Aft",
+        "Shaft_Alley",
+        "Steering_Gear",
+        "Magazines_Aft",
+        "Magazines_Fwd",
+        "Stores_2P",
+        "Fwd_Hold",
+        "Chain_Locker",
+        "Fuel_Tanks",
+        "Aft_Stores"
+      ],
+      "ach": 10.0,
+      "description": "machinery + magazine ventilation",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_HD_Crew",
+      "rooms": [
+        "HD_Crew"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Crew, 10 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "HVAC_Berthing",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Berthing",
+      "to": "AHU_HD_HD_Crew",
+      "flow_rate_m3h": 1189.0,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Crew; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Nav_Bridge",
+      "to": "Signal_Deck",
+      "type": "passageway"
+    },
+    {
+      "from": "Signal_Deck",
+      "to": "Radio_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Radio_Rm",
+      "to": "Officers_Qtrs",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Qtrs",
+      "to": "Wardroom",
+      "type": "ladder"
+    },
+    {
+      "from": "Gun_Deck_Open",
+      "to": "Island_Open_Aft",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Island_Open_Aft",
+      "to": "Passage_Main",
+      "type": "ladder"
+    },
+    {
+      "from": "Focsle_Deck",
+      "to": "Armory_Offices",
+      "type": "passageway"
+    },
+    {
+      "from": "Armory_Offices",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Hall",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Hall",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Crew_Berthing_1P",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Berthing_1P",
+      "to": "CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Mid",
+      "to": "Crew_Berthing_1P",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Berthing_Mid",
+      "to": "Upper_Machinery",
+      "type": "ladder"
+    },
+    {
+      "from": "Fantail",
+      "to": "Aft_Stores",
+      "type": "door"
+    },
+    {
+      "from": "Fantail",
+      "to": "Steering_Gear",
+      "type": "ladder"
+    },
+    {
+      "from": "Aft_Stores",
+      "to": "Aft_Berthing_1P",
+      "type": "ladder"
+    },
+    {
+      "from": "Aft_Berthing_1P",
+      "to": "Magazines_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Upper_Machinery",
+      "to": "Fire_Rm_Fwd",
+      "type": "ladder"
+    },
+    {
+      "from": "Upper_Machinery",
+      "to": "Engine_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Fuel_Tanks",
+      "type": "ladder"
+    },
+    {
+      "from": "Fire_Rm_Fwd",
+      "to": "Fire_Rm_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_2P",
+      "to": "Magazines_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Magazines_Fwd",
+      "type": "ladder"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Steering_Gear",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Tanks",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Qtrs",
+      "to": "Island_Open_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Stores",
+      "to": "Crew_Berthing_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Mid",
+      "to": "Mess_Hall",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Hall",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Sick_Bay",
+      "to": "Wardroom",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Armory_Offices",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Berthing_1P",
+      "to": "Upper_Machinery",
+      "type": "passageway"
+    },
+    {
+      "from": "Fire_Rm_Fwd",
+      "to": "Engine_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Fire_Rm_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Fire_Rm_Aft",
+      "to": "Stores_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Chain_Locker",
+      "to": "Fwd_Hold",
+      "type": "passageway"
+    }
+  ]
+}

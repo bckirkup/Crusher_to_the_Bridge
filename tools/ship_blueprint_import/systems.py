@@ -30,6 +30,27 @@ from tools.ship_blueprint_import.models import (
 #   nat_supply          — natural supply via weather cowls, exhaust trunks
 #   exhaust_only        — sanitary fixture contract (already wired)
 #   open_air            — weather deck, no conditioning
+#
+# Provenance (repo convention: grade + origin at the point of definition,
+# see .agents/skills/model-parameter-provenance and docs/GA_IMPORT_APPROACH.md
+# §Era-rule provenance).  These are *practice* tables, not physical constants:
+#
+# - WW2 USN practice (cowled/mushroom natural supply + mechanical exhaust to
+#   galley/heads/machinery; magazine ventilators of mushroom or cowl type):
+#   NAVARMEDGUARD "General Instructions" §3109 (~1942), read via HyperWar
+#   transcription.  Grade B.  Origin: Tr.
+#   BuShips Technical Publication No. 6, "Pointers on Shipboard Ventilation"
+#   (1944) is the identified period authority for the same practice; text not
+#   retrieved this pass.  Origin: ?nr — do not treat it as a read source.
+# - Modern/cold-war USN system taxonomy (mechanical supply & exhaust,
+#   recirculating AC with outside-air makeup): NAVSEA S9086-RQ-STM-010
+#   (NSTM ch. 510 "Heating, Ventilating, and Air Conditioning Systems for
+#   Surface Ships"), ToC/§510-2 read.  Grade B.  Origin: Tr.
+#   Corroborating secondary: "Ventilation Systems, US Navy Ships"
+#   (bluewaternavy.org, NSTM-derived).  Grade C.  Origin: Sec.
+# - RN WW2, NOAA/research, era cutoff years, and the MODE_OA_FRACTION numbers:
+#   no source retrieved — declared engineering priors.  Grade C (standing
+#   liability; revisit when a BUSHIPS DDS 810-x or Admiralty doc surfaces).
 _M_MODES = {
     "Engineering": "mech_supply_exhaust",
     "Dining": "mech_exhaust",

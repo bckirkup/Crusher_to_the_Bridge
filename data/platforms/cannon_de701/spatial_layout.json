@@ -1,0 +1,512 @@
+{
+  "platform": "cannon_de701",
+  "description": "Cannon-class destroyer escort, 306 ft, diesel-electric, ~216 crew. Zones read from maritime.org DE-701 booklet plates 5-10.",
+  "isolation_unit_capacity": 2,
+  "deck_dimensions": {
+    "length_m": 93.3,
+    "beam_m": 11.3
+  },
+  "graywater_zones": [
+    "Engine_Rm"
+  ],
+  "zones": [
+    {
+      "id": "Nav_Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 106.32,
+      "floor_area_m2": 44.3,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 9.4,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 60.62,
+        "y": 4.52
+      },
+      "description": "pilot house + chart house"
+    },
+    {
+      "id": "Signal_Deck",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 85.06,
+      "floor_area_m2": 35.44,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 9.4,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 67.24,
+        "y": 4.52
+      },
+      "description": "signal shelter"
+    },
+    {
+      "id": "Gun_Deck_Open",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 1051.33,
+      "floor_area_m2": 438.05,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 7.4,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 26.47,
+        "y": 4.93
+      },
+      "description": "open deck: 40mm/20mm mounts + boat stowage"
+    },
+    {
+      "id": "Officers_Qtrs",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 81.82,
+      "floor_area_m2": 34.09,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 7.4,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 58.83,
+        "y": 3.16
+      },
+      "max_occupancy": 10,
+      "description": "officers' staterooms fwd island"
+    },
+    {
+      "id": "Radio_Rm",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 42.15,
+      "floor_area_m2": 17.56,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 7.4,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 65.97,
+        "y": 2.79
+      },
+      "max_occupancy": 2,
+      "description": "radio room in island"
+    },
+    {
+      "id": "Island_Open_Aft",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 182.66,
+      "floor_area_m2": 76.11,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 7.4,
+      "deck": "superstructure_deck",
+      "display": {
+        "x": 61.76,
+        "y": 7.61
+      },
+      "description": "open deck aft of island, 20mm tubs"
+    },
+    {
+      "id": "Fantail",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 213.08,
+      "floor_area_m2": 88.78,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 4.91,
+        "y": 4.75
+      },
+      "description": "stern: aft 5in mount, DC racks + projectors"
+    },
+    {
+      "id": "Aft_Stores",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 205.09,
+      "floor_area_m2": 85.45,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 15.12,
+        "y": 4.97
+      },
+      "description": "aft stores + machine shop under fantail"
+    },
+    {
+      "id": "Crew_Berthing_Mid",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 298.31,
+      "floor_area_m2": 124.3,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 27.89,
+        "y": 4.97
+      },
+      "max_occupancy": 40,
+      "description": "midships berthing band"
+    },
+    {
+      "id": "Mess_Hall",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 140.63,
+      "floor_area_m2": 58.6,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 42.03,
+        "y": 4.93
+      },
+      "max_occupancy": 60,
+      "description": "crew's mess amidships"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 42.62,
+      "floor_area_m2": 17.76,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 43.21,
+        "y": 1.85
+      },
+      "max_occupancy": 8,
+      "description": "galley + scullery + bakery"
+    },
+    {
+      "id": "Sick_Bay",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 31.96,
+      "floor_area_m2": 13.32,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 51.07,
+        "y": 4.02
+      },
+      "max_occupancy": 2,
+      "description": "sick bay"
+    },
+    {
+      "id": "Wardroom",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 52.74,
+      "floor_area_m2": 21.97,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 57.55,
+        "y": 3.03
+      },
+      "max_occupancy": 14,
+      "description": "officers' wardroom"
+    },
+    {
+      "id": "HD_Crew",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 61.25,
+      "floor_area_m2": 26.63,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 42.03,
+        "y": 8.81
+      },
+      "serves": [
+        "Crew_Berthing_Mid",
+        "Mess_Hall",
+        "Crew_Berthing_1P"
+      ],
+      "description": "crew heads amidships",
+      "base_ach": 19.1,
+      "max_occupancy": 10
+    },
+    {
+      "id": "Passage_Main",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 101.21,
+      "floor_area_m2": 42.17,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 61.48,
+        "y": 5.42
+      },
+      "description": "central fore-aft passage"
+    },
+    {
+      "id": "Armory_Offices",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 90.56,
+      "floor_area_m2": 37.73,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 66.78,
+        "y": 6.06
+      },
+      "max_occupancy": 4,
+      "description": "ship's office, armory, CPO quarters fwd block"
+    },
+    {
+      "id": "Focsle_Deck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 344.12,
+      "floor_area_m2": 143.38,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.2,
+      "deck": "main_deck",
+      "display": {
+        "x": 81.32,
+        "y": 4.57
+      },
+      "description": "fore deck: fwd 5in mount, windlass"
+    },
+    {
+      "id": "Crew_Berthing_1P",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 534.69,
+      "floor_area_m2": 222.79,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.4,
+      "deck": "first_platform",
+      "display": {
+        "x": 61.74,
+        "y": 4.42
+      },
+      "max_occupancy": 80,
+      "description": "crew berthing forward on 1st platform"
+    },
+    {
+      "id": "CPO_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 220.24,
+      "floor_area_m2": 91.77,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.4,
+      "deck": "first_platform",
+      "display": {
+        "x": 80.2,
+        "y": 4.88
+      },
+      "max_occupancy": 16,
+      "description": "CPO berthing fwd of berthing band"
+    },
+    {
+      "id": "Aft_Berthing_1P",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 371.96,
+      "floor_area_m2": 154.98,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.4,
+      "deck": "first_platform",
+      "display": {
+        "x": 14.29,
+        "y": 4.42
+      },
+      "max_occupancy": 40,
+      "description": "crew berthing aft on 1st platform"
+    },
+    {
+      "id": "Upper_Machinery",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 256.94,
+      "floor_area_m2": 107.06,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 3.4,
+      "deck": "first_platform",
+      "display": {
+        "x": 29.38,
+        "y": 4.88
+      },
+      "description": "machinery casing/uptake level amidships"
+    },
+    {
+      "id": "Fire_Rm_Fwd",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 380.0,
+      "floor_area_m2": 158.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 1.8,
+      "deck": "second_platform",
+      "display": {
+        "x": 32.1,
+        "y": 5.22
+      },
+      "description": "fwd fireroom"
+    },
+    {
+      "id": "Engine_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 500.0,
+      "floor_area_m2": 208.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 1.8,
+      "deck": "second_platform",
+      "display": {
+        "x": 42.94,
+        "y": 4.92
+      },
+      "description": "main engine room (geared diesels)"
+    },
+    {
+      "id": "Fire_Rm_Aft",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 380.0,
+      "floor_area_m2": 158.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 1.8,
+      "deck": "second_platform",
+      "display": {
+        "x": 54.17,
+        "y": 5.22
+      },
+      "description": "aft fireroom"
+    },
+    {
+      "id": "Magazines_Aft",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 386.95,
+      "floor_area_m2": 161.23,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 1.8,
+      "deck": "second_platform",
+      "display": {
+        "x": 14.05,
+        "y": 5.22
+      },
+      "description": "aft magazines + handling rooms under fantail"
+    },
+    {
+      "id": "Magazines_Fwd",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 253.94,
+      "floor_area_m2": 105.81,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 1.8,
+      "deck": "second_platform",
+      "display": {
+        "x": 81.86,
+        "y": 5.52
+      },
+      "description": "fwd magazines + 5in handling"
+    },
+    {
+      "id": "Stores_2P",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 261.19,
+      "floor_area_m2": 108.83,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 1.8,
+      "deck": "second_platform",
+      "display": {
+        "x": 66.61,
+        "y": 5.22
+      },
+      "description": "general stores + workshops"
+    },
+    {
+      "id": "Chain_Locker",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 90.67,
+      "floor_area_m2": 37.78,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -0.5,
+      "deck": "hold",
+      "display": {
+        "x": 87.6,
+        "y": 5.05
+      },
+      "description": "chain locker + fwd peak"
+    },
+    {
+      "id": "Fwd_Hold",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 275.41,
+      "floor_area_m2": 114.76,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -0.5,
+      "deck": "hold",
+      "display": {
+        "x": 73.85,
+        "y": 5.0
+      },
+      "description": "fwd hold: provisions, F.W. tanks"
+    },
+    {
+      "id": "Fuel_Tanks",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 211.94,
+      "floor_area_m2": 88.31,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -0.5,
+      "deck": "hold",
+      "display": {
+        "x": 45.96,
+        "y": 8.85
+      },
+      "description": "F.O. tankage flanking machinery"
+    },
+    {
+      "id": "Shaft_Alley",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 285.61,
+      "floor_area_m2": 119.01,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -0.5,
+      "deck": "hold",
+      "display": {
+        "x": 20.82,
+        "y": 7.74
+      },
+      "description": "twin shaft alleys aft"
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 99.74,
+      "floor_area_m2": 41.56,
+      "ceiling_height_m": 2.4,
+      "elevation_m": -0.5,
+      "deck": "hold",
+      "display": {
+        "x": 5.11,
+        "y": 5.72
+      },
+      "description": "steering gear aft"
+    }
+  ]
+}

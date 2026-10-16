@@ -1,0 +1,230 @@
+{
+  "platform": "passumpsic_ao106",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "second_deck",
+      "serves_zone": "Engine_Rm",
+      "display": [
+        25.94,
+        -4.87
+      ],
+      "evidence": "sheet_read",
+      "notes": "STACK label aft on inboard profile over machinery"
+    },
+    {
+      "id": "Cowl_Focsle",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Focsle_Deck",
+      "display": [
+        154.22,
+        0.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "Cowl on forecastle edge"
+    },
+    {
+      "id": "Gooseneck_Eng",
+      "kind": "gooseneck",
+      "facing": "down",
+      "direction": "supply",
+      "deck": "second_deck",
+      "serves_zone": "Boiler_Rm",
+      "display": [
+        50.02,
+        7.31
+      ],
+      "evidence": "era_plausible",
+      "notes": "Forced-draft supply for fire room"
+    },
+    {
+      "id": "Mushroom_Mess",
+      "kind": "mushroom",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Mess_Hall",
+      "display": [
+        34.45,
+        0.0
+      ],
+      "evidence": "era_plausible",
+      "notes": "Mushroom supply over messing"
+    },
+    {
+      "id": "Cargo_Vents",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "Main_Cargo_Tanks",
+      "display": [
+        112.4,
+        -1.73
+      ],
+      "evidence": "sheet_read",
+      "notes": "Tank vent outlets along working deck edge"
+    }
+  ],
+  "zone_modes": {
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Signal_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Island_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Radio_Rm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Focsle_Deck": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Officers_Country": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wardroom": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "CPO_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mess_Hall": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Sick_Bay": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Crew": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Cargo_Pump_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Cargo_Control": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Working_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Aft_Open_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Qtrs_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Crew_Qtrs_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Engine_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Stores_2D": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Magazines": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Main_Cargo_Tanks": {
+      "mode": "mech_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Fwd_Peak_Tanks": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fuel_Tanks": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "MAIN CARGO TANK NO.1-6",
+      "kind": "unknown",
+      "nearest_zone": "Main_Cargo_Tanks",
+      "display": [
+        95.3,
+        17.7
+      ],
+      "deck": "hold",
+      "notes": "Cargo tank cells on inboard profile"
+    },
+    {
+      "label": "F.O. TANK",
+      "kind": "fuel",
+      "nearest_zone": "Fuel_Tanks",
+      "display": [
+        38.48,
+        17.7
+      ],
+      "deck": "hold",
+      "notes": "Bunker fuel aft"
+    },
+    {
+      "label": "F.W. TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Peak_Tanks",
+      "display": [
+        152.11,
+        11.45
+      ],
+      "deck": "hold",
+      "notes": "Fresh-water fwd"
+    }
+  ],
+  "plumbing_drains": [
+    "Wardroom (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom",
+    "Mess_Hall (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Mess_Hall",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "Sick_Bay (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay",
+    "HD_Crew (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Crew"
+  ]
+}

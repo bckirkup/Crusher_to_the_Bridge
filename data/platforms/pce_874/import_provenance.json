@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T00:27:00.494739+00:00",
+  "platform_id": "pce_874",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/pce874_import",
+  "digest_sha256": "c2127a44ca9355ea0eef975fe0f9af52486434b2097e8d1d6b70286bc617a524",
+  "svg_sha256": {
+    "page_02_approved.svg": "dc1546ee3826a108e9dbe40a4dc34a2b8a9e9c5c0dd1d0bd9cb134f7844a81cd",
+    "page_04_approved.svg": "186f65ba47a78381e3f9c6e4710b8dcc61dd2f676bb871709fba21fcf27fb1f5",
+    "page_05_approved.svg": "e4b1e5b23f041ecea31e49fa8a249e3f0dce1dd00a59d1a4665109ec887c4087",
+    "page_06_approved.svg": "96a2269d066aded3bcea4491e853e46d4673b7ab7115c0adada8a030aec2d313"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 20,
+  "berthing_zones": [
+    "CPO_Quarters",
+    "Officers_Country",
+    "Crew_Quarters"
+  ],
+  "systems_era": "usn_ww2"
+}
