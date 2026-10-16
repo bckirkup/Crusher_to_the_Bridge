@@ -17,14 +17,25 @@ implementation leg lands the mechanism and its witness fields
 the arm table and the arithmetic; nothing in it depends on unshipped
 behaviour being correct, only on the contract being the shipped one.
 
+**Amendment A1 (pre-submit):** (a) §1 window citation and the §2
+derived chain updated to the MINT-RATE-01 measured brackets (was
+the pre-readout predictions) — measured brackets re-centre the
+common-q window on the declared q03 point; (b) §5.3-2 gate
+rewritten — bit-identity vs landed cells is unmeasurable under F0
+(MINT-RATE-01 LEDGER: host-level nondeterminism; same image
+diverges by host) — replaced by the convention MINT-RATE-01
+adopted: minted-set identity + statistical parity. No arm, q value,
+seed list, or admissibility criterion changed.
+
 ## 1. What is being measured and why
 
 FOOD-SHAPES-01 measured that the mint gate is the only surviving margin
 that reproduces the posting signature (`ind`-parity per hull), and
 MINT-RATE-01 measured the required per-hull gate windows
-exp [0.004, 0.010] / cls [0.007, 0.015] / spr [0.011, 0.025] — the fiat
-gate's p*(hull) ladder, hull-parametrized because the fiat mechanism is
-a dial. NORO-HULL-SCALE-01 measured that the carrier is a hull-FLAT
+**exp [0.005, 0.0105] / cls [0.005, ~0.020] / spr [0.008, 0.024]**
+(27,000 cells, readout `docs/norovirus/noro_mint_rate_01_readout.md`)
+— the fiat gate's p*(hull) ladder, hull-parametrized because the fiat
+mechanism is a dial. NORO-HULL-SCALE-01 measured that the carrier is a hull-FLAT
 per-lot yield (~104 takers / ~30–37 cs cases per object); mega arms and
 fires but needs p* ≈ 0.09–0.25, outside the shipped U(0.02, 0.15).
 
@@ -44,15 +55,17 @@ multi-lot voyages pull it below).
 - `P(post | ≥1 lot object)` ≈ 0.93 / 0.58 / 0.36 exp→cls→spr
   (SHAPES-01 readout §7); hull-flat ~104 takers / ~30–37 cs cases per
   object (HULL-SCALE-01 §1–§2).
-- Required E[objects] (gate window × geometric-tail factor 1.163):
-  exp [0.0047, 0.0116]; cls [0.0081, 0.0174]; spr [0.0128, 0.029].
+- Required E[objects] (measured gate window × geometric-tail factor
+  1.163): exp [0.0058, 0.0122]; cls [0.0058, 0.0233];
+  spr [0.0093, 0.0279].
 - Station censuses (contract §1.2): **N_lots = 21 / 35 / 63 / 70**
   exp / cls / spr / mega.
-- Implied per-hull in-band q under the mechanism (E = N·q, thin-rate
-  marginal ≈ 100·N·q·P1):
-  exp ≈ [2.0e-4, 4.6e-4]; cls ≈ [2.0e-4, 4.4e-4]; spr ≈ [1.8e-4, 4.0e-4];
-  common window ≈ [2.0e-4, 4.0e-4] centred at **q ≈ 3e-4** (frozen
-  prediction: +0.59 / +0.61 / +0.68 pp at `q03`).
+- Implied per-hull in-band q under the mechanism (presence ≈ N·q,
+  measured windows): exp ≈ [2.4e-4, 5.0e-4];
+  cls ≈ [1.4e-4, 5.7e-4]; spr ≈ [1.3e-4, 3.8e-4];
+  common window ≈ [2.4e-4, 3.8e-4] centred at **q ≈ 3e-4** — the
+  declared `q03` rung lands inside all three measured brackets
+  (frozen prediction: +0.59 / +0.61 / +0.68 pp at `q03`).
 - mega: E[objects] ∈ [0.105, 0.29] ⇒ q ∈ [1.5e-3, 4.1e-3]; at common q
   mega carries ~0.02 objects/voyage — near-absent under the census.
 - Fiat bridges: `ship` U(0.001, 0.02) presence ≈ 0.0105 (vacuous,
@@ -78,8 +91,8 @@ fiat bridge arms.
 |---|---|---|
 | `off` | `{mode:"off"}` | floor |
 | `ind` | `{"handler_mode":"independent","diner_mode":"independent","lot_mode":"independent"}` | signature denominator |
-| `ship` | `{"lot_mint_model":"fiat","lot_object_probability":[0.001,0.02],"extra_lot_probability":[0.02,0.25]}` (object modes) | fiat bridge (vacuous anchor) + bit-identity vs pre-mechanism cells |
-| `mint` | `{"lot_mint_model":"fiat","lot_object_probability":[0.02,0.15],"extra_lot_probability":[0.02,0.25]}` (object modes) | fiat bridge (powered anchor) + bit-identity |
+| `ship` | `{"lot_mint_model":"fiat","lot_object_probability":[0.001,0.02],"extra_lot_probability":[0.02,0.25]}` (object modes) | fiat bridge (vacuous anchor) + minted-set & statistical parity vs landed cells |
+| `mint` | `{"lot_mint_model":"fiat","lot_object_probability":[0.02,0.15],"extra_lot_probability":[0.02,0.25]}` (object modes) | fiat bridge (powered anchor) + minted-set & statistical parity |
 | `ps_ship` | `{"lot_mint_model":"provisioned_source","provisioned_source":{"source_id":"generic_cruise_port","q_source":[2e-4,5e-4]}}` (object modes) | the shipped default configuration under the new mechanism |
 | `q01` | same as `ps_ship`, `"q_source":0.0001` | scalar rung — below all bands |
 | `q02` | `"q_source":0.0002` | scalar rung — band floor |
@@ -195,10 +208,23 @@ applies).
    (zone×item of provisioned_lot objects) at q_a ⊆ that at q_b for
    q_a < q_b, rung pairs (q01,q02,q03,q05,q08,q15,q30) per hull.
    Violation ⇒ stream-layout defect, full stop.
-2. **Baseline bit-identity** — `ship`/`mint` cells bit-identical to
-   the corresponding landed MINT-RATE-01/SHAPES-01 cells at shared
-   seeds (`tools/noro_diag/food_shapes_01_bridge.py` compare-mode).
-   Drift ⇒ the fiat path isn't preserved; array STOPs.
+2. **Baseline parity (amended A1 — was bit-identity)** — `ship`/`mint`
+   cells at shared seeds are checked against the landed
+   MINT-RATE-01/SHAPES-01 cells on two axes, matching the convention
+   MINT-RATE-01 adopted under F0 (bit-identity across hosts is
+   unmeasurable; the seed-paired minted SET draws are bit-stable,
+   trajectories are not):
+   a. **Minted-set identity** — per shared seed, the set of voyages
+      minting ≥1 provisioned_lot (and the per-voyage object census)
+      is identical to the landed cell's set.
+   b. **Statistical parity** — cell marginals (posted counts,
+      excursion counts, AR distributions) statistically consistent
+      with the landed cells at 1,000-seed power, via paired-seed
+      comparison (`tools/noro_diag/food_shapes_01_bridge.py`
+      compare-mode in its statistical form).
+   A minted-set mismatch ⇒ the fiat draw sequence changed ⇒ stream
+   defect, array STOPs. Statistical drift beyond tolerance ⇒ the
+   fiat path isn't preserved ⇒ array STOPs.
 3. **Declared expectation** — object counts track N·q within
    binomial tolerance per (rung, hull); `n_stations` echoes
    21/35/63/70.
@@ -220,7 +246,7 @@ applies).
 
 | block | cells | purpose |
 |---|---|---|
-| `canary_exp_mint` | 48 | fiat bridge — interval echo, objects fire, bit-identity spot-check vs landed cell |
+| `canary_exp_mint` | 48 | fiat bridge — interval echo, objects fire, minted-set + statistical parity spot-check vs landed cell |
 | `canary_exp_q30` | 24 | mechanism machinery — scalar q echo, n_stations=21, objects bind stations, E≈1.5 objects expected |
 | `canary_exp_q03` | 24 | echo + nested-set spot-check vs q30 at shared seeds (q03 sets ⊆ q30) |
 | `canary_exp_ps_ship` | 8 | shipped-default block — interval echo [2e-4,5e-4], registry resolution of `generic_cruise_port` |
@@ -231,8 +257,9 @@ applies).
 Gates per block before wave 1: echo present and equal, census block
 present, objects bind census stations, worker-channel objects present,
 no `simulation_error`/`hang_watchdog`. Then STOP and report: emitted
-marginals, object census by source_kind, bit-identity result vs landed
-cells, mega RSS read. User decides wave 1.
+marginals, object census by source_kind, minted-set + statistical
+parity result vs landed cells (gate 5.3-2 as amended), mega RSS read.
+User decides wave 1.
 
 ## 7. Wave order
 
@@ -257,8 +284,8 @@ integrity reads.
 - `tools/noro_diag/hull_scale_01_scan.py` — the objects → takers →
   cases → reported → posted chain re-read under the mechanism per hull
   (where N·q enters the chain and where it compresses)
-- `tools/noro_diag/food_shapes_01_bridge.py` — bit-identity vs landed
-  cells (gate 5.3.2)
+- `tools/noro_diag/food_shapes_01_bridge.py` — minted-set identity +
+  statistical parity vs landed cells (gate 5.3.2 as amended A1)
 - `tools/noro_diag/entrain_01_dose_audit.py` — dose positions only
   (dose ledger withdrawn; no absolute figures anywhere in the readout)
 - `reported_cases_by_dominant_route` — the posted-vs-acquired
