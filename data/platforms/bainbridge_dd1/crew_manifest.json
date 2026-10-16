@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:24:35.345130+00:00",
+  "platform": "bainbridge_dd1",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 73
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 3,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Pilot_Chart_House",
+      "notes": "CO + 2 officers"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Berthing_Fwd",
+      "duty_zone": "Crew_Quarters",
+      "notes": "chief/rated petty officers"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 25,
+      "berth_zone": "Crew_Quarters",
+      "duty_zone": "Engine_Rooms",
+      "notes": "firemen, coal passers, water tenders, oilers"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 28,
+      "berth_zone": "Crew_Quarters",
+      "duty_zone": "Berthing_Fwd",
+      "notes": "seamen, gun crews, torpedomen"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 6,
+      "berth_zone": "Crew_Quarters",
+      "duty_zone": "Galley_Mess_Deckhouse",
+      "notes": "cook, stewards, ship's writer"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 1,
+      "berth_zone": "Berthing_Fwd",
+      "duty_zone": "Medical_Electrical_Stores",
+      "notes": "hospital apprentice"
+    },
+    {
+      "class_id": "radio_signal",
+      "role_group": "crew",
+      "count": 2,
+      "berth_zone": "Berthing_Fwd",
+      "duty_zone": "Pilot_Chart_House",
+      "notes": "signalmen/quartermasters"
+    }
+  ],
+  "source": "Class-typical DD-1 complement ~73 (3 officers + ~70 enlisted); booklet carries no complement table",
+  "consistency": {
+    "declared_total": 73,
+    "manifest_total": 73,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

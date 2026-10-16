@@ -1,0 +1,282 @@
+{
+  "platform": "palmer_dms5",
+  "description": "HVAC network synthesized for palmer_dms5",
+  "oa_fraction": 0.3,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Pilot_House",
+        "Chart_House",
+        "Sound_Room_Bridge",
+        "Paravane_Handling",
+        "Ammo_Stowage_Aft",
+        "Store_Aft",
+        "Paravane_Smoke_Stow",
+        "Winch_Room",
+        "Battery_Locker",
+        "Vegetable_Lockers",
+        "Galley",
+        "Ship_Fitters_Shop",
+        "Berthing_Mid",
+        "Engineering_Office",
+        "CPO_Berthing_Main",
+        "Radio_Room",
+        "Sound_Compt",
+        "Officers_Cabins",
+        "Wardroom",
+        "Focsle_Chain",
+        "Crew_Berthing_Aft",
+        "Crew_Berthing_Aft_2",
+        "Store_1P_Aft",
+        "Store_2P",
+        "Crew_Berthing_Fwd_1",
+        "Crew_Berthing_Fwd_2",
+        "Crew_Mess",
+        "Fore_Peak",
+        "Magazine_Aft",
+        "Crew_Stores_Hold",
+        "Stores_Hold_Fwd",
+        "Magazine_Fwd"
+      ],
+      "ach": 6.0,
+      "description": "accommodation + stores ventilation",
+      "vent_mode": "mech_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Boiler_Room_1",
+        "Boiler_Room_2",
+        "Engine_Room",
+        "Machinery_2P"
+      ],
+      "ach": 12.0,
+      "description": "machinery ventilation: forced draft + funnel exhaust",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    {
+      "id": "AHU_HD_Crew_Wash_Room",
+      "rooms": [
+        "Crew_Wash_Room"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Crew_Wash_Room, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_Crew_Head",
+      "rooms": [
+        "Crew_Head"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Crew_Head, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_Crew_Wash_Room",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Crew_Wash_Room; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_Crew_Head",
+      "flow_rate_m3h": 356.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Crew_Head; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Pilot_House",
+      "to": "Chart_House",
+      "type": "door"
+    },
+    {
+      "from": "Chart_House",
+      "to": "Sound_Room_Bridge",
+      "type": "door"
+    },
+    {
+      "from": "Officers_Cabins",
+      "to": "Wardroom",
+      "type": "door"
+    },
+    {
+      "from": "Officers_Cabins",
+      "to": "CPO_Berthing_Main",
+      "type": "door"
+    },
+    {
+      "from": "Radio_Room",
+      "to": "Sound_Compt",
+      "type": "door"
+    },
+    {
+      "from": "Radio_Room",
+      "to": "Officers_Cabins",
+      "type": "door"
+    },
+    {
+      "from": "Galley",
+      "to": "Berthing_Mid",
+      "type": "door"
+    },
+    {
+      "from": "Galley",
+      "to": "Vegetable_Lockers",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Crew_Berthing_Fwd_1",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Crew_Berthing_Fwd_2",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Galley",
+      "type": "stairs"
+    },
+    {
+      "from": "Crew_Berthing_Fwd_1",
+      "to": "Officers_Cabins",
+      "type": "stairs"
+    },
+    {
+      "from": "Crew_Berthing_Aft",
+      "to": "Berthing_Mid",
+      "type": "ladder"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Room_2",
+      "type": "door"
+    },
+    {
+      "from": "Boiler_Room_2",
+      "to": "Boiler_Room_1",
+      "type": "door"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Machinery_2P",
+      "type": "ladder"
+    },
+    {
+      "from": "Magazine_Aft",
+      "to": "Crew_Stores_Hold",
+      "type": "door"
+    },
+    {
+      "from": "Winch_Room",
+      "to": "Paravane_Smoke_Stow",
+      "type": "door"
+    },
+    {
+      "from": "Paravane_Handling",
+      "to": "Ammo_Stowage_Aft",
+      "type": "door"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Crew_Mess",
+      "type": "stairs"
+    },
+    {
+      "from": "Focsle_Chain",
+      "to": "Fore_Peak",
+      "type": "ladder"
+    },
+    {
+      "from": "Store_Aft",
+      "to": "Paravane_Smoke_Stow",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Uptakes",
+      "to": "Battery_Locker",
+      "type": "passageway"
+    },
+    {
+      "from": "Boat_Deck_Uptakes",
+      "to": "Vegetable_Lockers",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Ship_Fitters_Shop",
+      "type": "passageway"
+    },
+    {
+      "from": "Ship_Fitters_Shop",
+      "to": "Engineering_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Mid",
+      "to": "CPO_Berthing_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Sound_Compt",
+      "to": "Officers_Cabins",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Focsle_Chain",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft",
+      "to": "Crew_Berthing_Aft_2",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft_2",
+      "to": "Store_1P_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_2P",
+      "to": "Store_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Fwd_1",
+      "to": "Crew_Berthing_Fwd_2",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_Hold_Fwd",
+      "to": "Magazine_Fwd",
+      "type": "passageway"
+    }
+  ]
+}

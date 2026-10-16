@@ -1,0 +1,249 @@
+{
+  "platform": "rolla_pc483",
+  "description": "HVAC network synthesized for rolla_pc483",
+  "oa_fraction": 0.3,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Pilot_House",
+        "Engineers_Stores",
+        "Wardroom",
+        "Chart_House",
+        "Stowage_Mid",
+        "Radio_Room",
+        "Galley",
+        "Galley_Stores",
+        "Crew_Mess",
+        "Mag_3in",
+        "Berthing_Mid",
+        "Crew_Quarters",
+        "Officers_Berthing",
+        "Berthing_Fwd",
+        "Fore_Peak",
+        "Berthing_2P",
+        "Stores_2P",
+        "Ammo_Stow_2P",
+        "Peak_2P",
+        "Steering_Gear",
+        "Cont_Oil"
+      ],
+      "ach": 6.0,
+      "description": "accommodation + stores ventilation",
+      "vent_mode": "mech_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Eng_Casing",
+        "Engine_Rm"
+      ],
+      "ach": 10.0,
+      "description": "machinery ventilation: forced draft + funnel exhaust",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_Officers_WC",
+      "rooms": [
+        "Officers_WC"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Officers_WC, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_Crew_Head",
+      "rooms": [
+        "Crew_Head"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Crew_Head, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_Officers_WC",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Officers_WC; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_Crew_Head",
+      "flow_rate_m3h": 237.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Crew_Head; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Pilot_House",
+      "to": "Chart_House",
+      "type": "ladder"
+    },
+    {
+      "from": "Chart_House",
+      "to": "Wardroom",
+      "type": "door"
+    },
+    {
+      "from": "Chart_House",
+      "to": "Radio_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Officers_Berthing",
+      "type": "ladder"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Engineers_Stores",
+      "type": "door"
+    },
+    {
+      "from": "Stowage_Mid",
+      "to": "Radio_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Casing",
+      "to": "Engine_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Fantail",
+      "to": "Steering_Gear",
+      "type": "ladder"
+    },
+    {
+      "from": "Galley",
+      "to": "Crew_Mess",
+      "type": "door"
+    },
+    {
+      "from": "Galley",
+      "to": "Galley_Stores",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Mag_3in",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Engine_Rm",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Mess",
+      "to": "Focsle_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Engine_Rm",
+      "to": "Berthing_Mid",
+      "type": "door"
+    },
+    {
+      "from": "Berthing_Mid",
+      "to": "Crew_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Officers_Berthing",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Berthing",
+      "to": "Berthing_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Fwd",
+      "to": "Fore_Peak",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_2P",
+      "to": "Stores_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_2P",
+      "to": "Ammo_Stow_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Ammo_Stow_2P",
+      "to": "Peak_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Berthing_2P",
+      "type": "ladder"
+    },
+    {
+      "from": "Fuel_Oil_Fwd",
+      "to": "Cont_Oil",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Oil_Aft",
+      "to": "Cont_Oil",
+      "type": "passageway"
+    },
+    {
+      "from": "Void_Shaft",
+      "to": "Fuel_Oil_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Void_Shaft",
+      "type": "ladder"
+    },
+    {
+      "from": "Eng_Casing",
+      "to": "Engineers_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Eng_Casing",
+      "to": "Wardroom",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Stores",
+      "to": "Crew_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Fuel_Oil_Fwd",
+      "to": "Void_Shaft",
+      "type": "passageway"
+    }
+  ]
+}

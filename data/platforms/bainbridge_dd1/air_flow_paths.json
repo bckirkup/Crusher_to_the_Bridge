@@ -1,0 +1,244 @@
+{
+  "platform": "bainbridge_dd1",
+  "description": "HVAC network synthesized for bainbridge_dd1",
+  "oa_fraction": 0.3,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Pilot_Chart_House",
+        "Galley_Mess_Deckhouse",
+        "Officers_Mess_Dh",
+        "Officers_Country",
+        "Wardroom",
+        "Coal_Bunker_B3",
+        "Coal_Bunker_B5",
+        "Crew_Quarters",
+        "Berthing_Fwd",
+        "Medical_Electrical_Stores",
+        "Shell_Room",
+        "Chain_Hawse",
+        "Engineer_Stores",
+        "Ordnance_Stores",
+        "Paint_Oil_Stores",
+        "Chain_Locker_Plat",
+        "Fore_Peak_A1",
+        "Steering_Gear",
+        "Coal_Bunker_Hold_Aft",
+        "Coal_Bunker_Hold_Fwd",
+        "Stores_Hold_Fwd",
+        "Hold_Fwd_Peak"
+      ],
+      "ach": 6.0,
+      "description": "accommodation + stores ventilation",
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Boiler_Room_Aft",
+        "Engine_Rooms",
+        "Boiler_Room_Fwd",
+        "Machinery_Lwr"
+      ],
+      "ach": 12.0,
+      "description": "machinery ventilation: forced draft + funnel exhaust",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    {
+      "id": "AHU_HD_Crew_WC",
+      "rooms": [
+        "Crew_WC"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (Crew_WC, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_Crew_WC",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into Crew_WC; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Pilot_Chart_House",
+      "to": "Galley_Mess_Deckhouse",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Mess_Deckhouse",
+      "to": "Officers_Mess_Dh",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Mess_Deckhouse",
+      "to": "Wardroom",
+      "type": "ladder"
+    },
+    {
+      "from": "Officers_Mess_Dh",
+      "to": "Officers_Country",
+      "type": "ladder"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Officers_Country",
+      "type": "door"
+    },
+    {
+      "from": "Officers_Country",
+      "to": "Boiler_Room_Aft",
+      "type": "door"
+    },
+    {
+      "from": "Boiler_Room_Aft",
+      "to": "Engine_Rooms",
+      "type": "door"
+    },
+    {
+      "from": "Engine_Rooms",
+      "to": "Boiler_Room_Fwd",
+      "type": "door"
+    },
+    {
+      "from": "Boiler_Room_Fwd",
+      "to": "Crew_Quarters",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Berthing_Fwd",
+      "type": "door"
+    },
+    {
+      "from": "Berthing_Fwd",
+      "to": "Medical_Electrical_Stores",
+      "type": "door"
+    },
+    {
+      "from": "Medical_Electrical_Stores",
+      "to": "Shell_Room",
+      "type": "door"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Engineer_Stores",
+      "type": "ladder"
+    },
+    {
+      "from": "Engineer_Stores",
+      "to": "Ordnance_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Ordnance_Stores",
+      "to": "Paint_Oil_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Paint_Oil_Stores",
+      "to": "Chain_Locker_Plat",
+      "type": "passageway"
+    },
+    {
+      "from": "Chain_Locker_Plat",
+      "to": "Fore_Peak_A1",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Fwd",
+      "to": "Chain_Locker_Plat",
+      "type": "ladder"
+    },
+    {
+      "from": "Chain_Hawse",
+      "to": "Chain_Locker_Plat",
+      "type": "ladder"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Machinery_Lwr",
+      "type": "passageway"
+    },
+    {
+      "from": "Coal_Bunker_Hold_Aft",
+      "to": "Machinery_Lwr",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Lwr",
+      "to": "Coal_Bunker_Hold_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Coal_Bunker_Hold_Fwd",
+      "to": "Stores_Hold_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Stores_Hold_Fwd",
+      "to": "Hold_Fwd_Peak",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Rooms",
+      "to": "Machinery_Lwr",
+      "type": "ladder"
+    },
+    {
+      "from": "Coal_Bunker_B3",
+      "to": "Coal_Bunker_Hold_Fwd",
+      "type": "ladder"
+    },
+    {
+      "from": "Pilot_Chart_House",
+      "to": "Officers_Mess_Dh",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Boiler_Room_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Room_Fwd",
+      "to": "Coal_Bunker_B3",
+      "type": "passageway"
+    },
+    {
+      "from": "Coal_Bunker_B3",
+      "to": "Coal_Bunker_B5",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Fwd",
+      "to": "Shell_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Shell_Room",
+      "to": "Chain_Hawse",
+      "type": "passageway"
+    }
+  ]
+}

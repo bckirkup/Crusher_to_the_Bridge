@@ -1,0 +1,97 @@
+{
+  "platform_id": "cushing_dd376",
+  "ship_class_label": "Cushing Dd376",
+  "footprint_tier": "representative",
+  "representative_of": "USS Cushing DD-376, Mahan class, ~1942 wartime fit: 4x5in/38, quad torpedo tubes P&S, 4 boilers 2 ER. maritime.org booklet of general plans (sheets 2-9).",
+  "provenance": [
+    "spatial_layout.json description and deck_dimensions",
+    "zone count: 41",
+    "per-deck non-overlapping compartment packing"
+  ],
+  "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
+  "zone_ids": [
+    "Pilot_House",
+    "Signal_Bridge",
+    "Chart_House",
+    "AA_Shelter_Mag",
+    "Officers_Country",
+    "Blower_Room",
+    "Focsle_Open",
+    "Fantail",
+    "Gun_Crew_Shelter_Aft",
+    "MG_DC_Room",
+    "HD_Crew_Washroom",
+    "General_Workshop",
+    "Radio_Central",
+    "Galley",
+    "Wardroom_Mess",
+    "WR_Staterooms",
+    "HD_CPO",
+    "CPO_Quarters",
+    "Windlass_Room",
+    "Crew_Berthing_Aft",
+    "Crew_Berthing_Mid",
+    "Sick_Bay",
+    "Ships_Service",
+    "Crew_Mess_Fwd",
+    "Provisions_1P",
+    "CPO_Mess",
+    "Fwd_Stores_1P",
+    "Aft_Magazines",
+    "Commissary_Stores",
+    "Aft_Ammo_2",
+    "IC_Room",
+    "Cold_Stores",
+    "Provisions_2P",
+    "Second_Plat_Stores_Fwd",
+    "Fwd_Magazine",
+    "Steering_Gear",
+    "Shaft_Alley",
+    "Engine_Room",
+    "Aft_Boiler_Room",
+    "Fwd_Boiler_Room",
+    "Sound_Room"
+  ],
+  "decks": [
+    "bridge_deck",
+    "first_platform",
+    "forecastle_deck",
+    "hold",
+    "main_deck",
+    "second_platform",
+    "superstructure_deck"
+  ],
+  "view_bounds": {
+    "xmin": -2.0,
+    "xmax": 106.0,
+    "ymin": -2.0,
+    "ymax": 12.8
+  },
+  "assets": {
+    "deck_graphics": "deck_graphics.geojson",
+    "deck_hull": "deck_hull.png",
+    "deck_blueprint_bg": "deck_blueprint_bg.png",
+    "architectural_graphics": "graphics/graphics.json",
+    "plan_overview": "graphics/plan_overview.png"
+  },
+  "background_plate": "architectural_plan",
+  "architectural_graphics": {
+    "schema_version": "1.0",
+    "description": "Blueprint plates copied from naval GA import workdir",
+    "plan": {
+      "file": "plan_overview.png",
+      "style": "general_arrangement_scan",
+      "credit": "Imported via tools.ship_blueprint_import",
+      "license": "Source drawing rights remain with original owner"
+    },
+    "deck_plans": {
+      "bridge_deck": "deck_bridge_deck.png",
+      "superstructure_deck": "deck_superstructure_deck.png",
+      "forecastle_deck": "deck_forecastle_deck.png",
+      "main_deck": "deck_main_deck.png",
+      "first_platform": "deck_first_platform.png",
+      "second_platform": "deck_second_platform.png",
+      "hold": "deck_hold.png"
+    }
+  }
+}

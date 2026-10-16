@@ -210,6 +210,11 @@ data/
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
+│   ├── cushing_dd376/              (maritime.org GA import)
+│   ├── palmer_dms5/                (maritime.org GA import)
+│   ├── bainbridge_dd1/             (maritime.org GA import)
+│   ├── rolla_pc483/                (maritime.org GA import)
+│   ├── eagle_pe60/                 (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -569,7 +574,7 @@ grumb_seeding:
 
 ## Platforms
 
-Forty-six ship platforms are included, each with spatial layout and HVAC
+Fifty-three ship platforms are included
 airflow definitions:
 
 | Platform | Description |
@@ -622,6 +627,11 @@ airflow definitions:
 | `olympia_c6` | USS Olympia C-6 protected cruiser, Dewey's flagship (maritime.org GA import, 104 zones, 440 crew) |
 | `montana_acr13` | USS Montana ACR-13 Tennessee-class armored cruiser (maritime.org GA import, 146 zones, 1000 crew) |
 | `jupiter_ac3` | USS Jupiter AC-3 collier, later CV-1 Langley (maritime.org GA import, 50 zones, 295 crew) |
+| `cushing_dd376` | USS Cushing DD-376 Mahan-class destroyer, ~1942 (maritime.org GA import, 41 zones, 250 crew) |
+| `palmer_dms5` | USS Palmer DMS-5 flush-deck high-speed minesweeper, 1943 (maritime.org GA import, 39 zones, 144 crew) |
+| `bainbridge_dd1` | USS Bainbridge DD-1, first USN destroyer, 1901 (maritime.org GA import, 27 zones, 73 crew) |
+| `rolla_pc483` | USS Rolla PC-483 Bluffton-class submarine chaser, 1942 (maritime.org GA import, 30 zones, 99 crew) |
+| `eagle_pe60` | USS Eagle No.60 PE-60 Eagle-class patrol vessel, 1918 (maritime.org GA import, 41 zones, 58 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`

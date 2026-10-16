@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:17:51.767470+00:00",
+  "platform": "cushing_dd376",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 250
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 14,
+      "berth_zone": "Officers_Country",
+      "duty_zone": "Pilot_House",
+      "notes": "CO, XO, engineer, gunnery + junior officers"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 30,
+      "berth_zone": "CPO_Quarters",
+      "duty_zone": "CPO_Mess",
+      "notes": "CPOs"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 55,
+      "berth_zone": "Crew_Berthing_Aft",
+      "duty_zone": "Engine_Room",
+      "notes": "motor macs, electricians, water tenders"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 120,
+      "berth_zone": "Crew_Berthing_Mid",
+      "duty_zone": "Focsle_Open",
+      "notes": "seamen, 5in/20mm crews, torpedo + depth-charge detail"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 20,
+      "berth_zone": "Crew_Berthing_Mid",
+      "duty_zone": "Galley",
+      "notes": "cooks, stewards, ships service"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 3,
+      "berth_zone": "Crew_Berthing_Mid",
+      "duty_zone": "Sick_Bay",
+      "notes": "pharmacist's mates"
+    },
+    {
+      "class_id": "radio_signal",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Crew_Berthing_Aft",
+      "duty_zone": "Radio_Central",
+      "notes": "radiomen + signalmen"
+    }
+  ],
+  "source": "Mahan-class wartime complement ~250 (14 officers + ~236 enlisted); plate reads per-space bunks, no total line",
+  "consistency": {
+    "declared_total": 250,
+    "manifest_total": 250,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

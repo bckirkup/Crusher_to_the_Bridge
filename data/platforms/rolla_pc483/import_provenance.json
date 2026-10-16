@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:26:47.915912+00:00",
+  "platform_id": "rolla_pc483",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/rolla_pc483",
+  "digest_sha256": "f893b4fc7b87dce15e60a95d852a78973606a1ce2ba872c2b3f3ca5dec343f39",
+  "svg_sha256": {
+    "page_05_approved.svg": "315a5eb0ec406e68f96ce102c31890313537c036900729c8c87715f2f8992fc6",
+    "page_06_approved.svg": "d59c7d51bcc9ccb70441ef1acf064373f0283029773ece0d203c556c8c8ed2a0",
+    "page_07_approved.svg": "1c9fa2df1b8004c9c6edb3a9b3a09f72a8dbab9ac24e53a0d6c22b86dfd07bb0",
+    "page_08_approved.svg": "f86f09016aadf906f9babc7d15abed65e8ca7e02f0288f380ed5d40d7778b6f5"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 30,
+  "berthing_zones": [
+    "Pilot_House",
+    "Engineers_Stores",
+    "Chart_House",
+    "Stowage_Mid",
+    "Radio_Room",
+    "Steering_Gear",
+    "Galley_Stores",
+    "Mag_3in",
+    "Berthing_Mid",
+    "Crew_Quarters",
+    "Officers_Berthing",
+    "Berthing_Fwd",
+    "Fore_Peak",
+    "Berthing_2P",
+    "Stores_2P",
+    "Ammo_Stow_2P",
+    "Peak_2P",
+    "Cont_Oil"
+  ],
+  "systems_era": "usn_ww2"
+}

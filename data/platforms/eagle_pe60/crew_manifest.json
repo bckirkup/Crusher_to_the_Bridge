@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:29:28.804319+00:00",
+  "platform": "eagle_pe60",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 58
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 4,
+      "berth_zone": "WR_Staterooms",
+      "duty_zone": "Chart_House",
+      "notes": "C.O. + 3 wardroom officers (plate-read)"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 3,
+      "berth_zone": "CPO_Quarters",
+      "duty_zone": "Crew_Mess_Lwr",
+      "notes": "chief petty officers (plate-read)"
+    },
+    {
+      "class_id": "engine_room",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "Berthing_Lwr",
+      "duty_zone": "Engine_Rm",
+      "notes": "engine-room branch incl. artificers (plate-read ~18)"
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 25,
+      "berth_zone": "Berthing_Main_1",
+      "duty_zone": "Gun_Deck_Fwd",
+      "notes": "seaman branch + gun/depth-charge detail"
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Berthing_Lwr",
+      "duty_zone": "Galley",
+      "notes": "commissary 2 + messmen 3"
+    },
+    {
+      "class_id": "radio_signal",
+      "role_group": "crew",
+      "count": 2,
+      "berth_zone": "Berthing_Main_2",
+      "duty_zone": "Radio_Room",
+      "notes": "special branch: radiomen + signalmen"
+    },
+    {
+      "class_id": "medical",
+      "role_group": "crew",
+      "count": 1,
+      "berth_zone": "Berthing_Main_2",
+      "duty_zone": "Wardroom_Mess",
+      "notes": "hospital apprentice; no dedicated sick bay drawn"
+    }
+  ],
+  "source": "Plate-read complement table: TOTAL ON BOARD 58 (C.O. 1, wardroom officers 3, CPO 3, seaman branch ~24, artificer ~5, engine room ~18, special ~2, commissary ~2, messmen ~3 — row values partially legible)",
+  "consistency": {
+    "declared_total": 58,
+    "manifest_total": 58,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}
