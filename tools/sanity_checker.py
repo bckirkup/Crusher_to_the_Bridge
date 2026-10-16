@@ -2296,6 +2296,53 @@ def _check_q_source_spec(spec: Any, field: str, report: Report) -> None:
         )
 
 
+def _check_source_genotype_distribution(
+    spec: Any, field: str, source_file: str, report: Report,
+) -> None:
+    """Issue #1011 — a declared ``genotype_distribution`` is a
+    per-pathogen map ``{pathogen_id: {genotype: weight}}`` whose
+    per-pathogen weights are numbers >= 0 summing to 1."""
+    if spec is None:
+        return
+    if not isinstance(spec, dict) or not spec:
+        report.error(
+            source_file, "CONFIG",
+            f"{field} must be a non-empty mapping "
+            "{pathogen_id: {genotype: weight}}",
+        )
+        return
+    for pid, weights in spec.items():
+        if not isinstance(weights, dict) or not weights:
+            report.error(
+                source_file, "CONFIG",
+                f"{field}[{pid!r}] must be a non-empty "
+                "{genotype: weight} mapping",
+            )
+            continue
+        total = 0.0
+        for g, w in weights.items():
+            bad = (
+                not isinstance(w, (int, float))
+                or isinstance(w, bool)
+                or w < 0
+            )
+            if not bad and not math.isfinite(float(w)):
+                bad = True
+            if bad:
+                report.error(
+                    source_file, "CONFIG",
+                    f"{field}[{pid!r}][{g!r}] = {w!r} must be a "
+                    "non-negative number",
+                )
+                continue
+            total += float(w)
+        if abs(total - 1.0) > 1e-6:
+            report.error(
+                source_file, "CONFIG",
+                f"{field}[{pid!r}] weights sum to {total}, not 1",
+            )
+
+
 def _check_common_source(
     cfg: dict[str, Any],
     report: Report,
@@ -2379,6 +2426,18 @@ def _check_common_source(
     if spec is not None:
         _check_q_source_spec(
             spec, "provisioned_source.q_source", report)
+    _check_source_genotype_distribution(
+        ps.get("genotype_distribution"),
+        "provisioned_source.genotype_distribution",
+        _CONFIG_YAML, report,
+    )
+    for sid, source_entry in sources.items():
+        if isinstance(source_entry, dict):
+            _check_source_genotype_distribution(
+                source_entry.get("genotype_distribution"),
+                f"sources.{sid}.genotype_distribution",
+                "provisioning_sources.json", report,
+            )
     if layout is not None and not any(
         z.type == "Dining" for z in layout.zones
     ):

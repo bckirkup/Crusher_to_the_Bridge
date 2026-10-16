@@ -80,6 +80,15 @@ Not in this leg (deliberate): sentinel import-channel vocabulary
 (#1011 — the registry carries `q_source` only), the
 NORO-PROVISIONED-SOURCE-01 eval array itself.
 
+Since then: #1008 closed via `reported_cases_by_channel` (#1018);
+#1010 closed via `founders_by_origin` (#1024); #1011 closed via the
+`genotype_distribution` extension — an optional per-pathogen genotype
+mix on each registry source (block > registry > boarding
+`prior_genotype_distribution`; a source or pathogen with no declared
+mix keeps the prior). The shipped `generic_cruise_port` entry
+declares no mix pending the sourcing leg — fallback is the
+reason-to-be-the-same, not a hole.
+
 The contract/prompt wording note: §1.1 calls `"provisioned_source"`
 "the shipped default once the mechanism lands" while the leg brief
 asked the fiat sequence to stay bit-identical for unmarked configs.

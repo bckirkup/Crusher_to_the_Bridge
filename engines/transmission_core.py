@@ -3445,6 +3445,7 @@ class TransmissionCore:
         if not isinstance(ps, dict):
             ps = {}
         self._cs_ps_source_id: str | None = None
+        self._cs_ps_genotype_distribution: dict[str, Any] = {}
         ps_q = None
         if self._cs_lot_mint_model == "provisioned_source":
             registry = _provisioning_source_registry()
@@ -3453,12 +3454,25 @@ class TransmissionCore:
                 or registry.get("default_source")
                 or _PROVISIONED_SOURCE_FALLBACK_ID
             )
+            entry = (
+                (registry.get("sources") or {}).get(self._cs_ps_source_id)
+                or {}
+            )
             ps_q = ps.get("q_source")
             if ps_q is None:
-                ps_q = (
-                    (registry.get("sources") or {}).get(self._cs_ps_source_id)
-                    or {}
-                ).get("q_source")
+                ps_q = entry.get("q_source")
+            # Per-source genotype mix (issue #1011): a declared
+            # ``genotype_distribution`` — the ``provisioned_source``
+            # block's outranks the registry entry's — replaces the
+            # boarding ``prior_genotype_distribution`` as the lot's
+            # strain draw, so the supply chain carries its own mix
+            # independent of who boards. A source (or pathogen) with no
+            # declared mix keeps the prior — the reason-to-be-the-same.
+            ps_mix = ps.get("genotype_distribution")
+            if ps_mix is None:
+                ps_mix = entry.get("genotype_distribution")
+            if isinstance(ps_mix, dict):
+                self._cs_ps_genotype_distribution = ps_mix
         self._cs_cfg = dict(cs)
         if ps_q is not None:
             # Inject through the normal cfg layer so the resolved spec
@@ -13763,7 +13777,12 @@ class TransmissionCore:
             return None
         config = self.strain_configs.get(pathogen_id)
         genotype = ""
-        if config is not None and config.prior_genotype_distribution:
+        source_mix = self._cs_ps_genotype_distribution.get(pathogen_id)
+        if source_mix:
+            genotypes = tuple(source_mix)
+            probs = [float(source_mix[g]) for g in genotypes]
+            genotype = str(self._cs_rng.choice(genotypes, p=probs))
+        elif config is not None and config.prior_genotype_distribution:
             genotypes = tuple(config.prior_genotype_distribution)
             probs = [
                 config.prior_genotype_distribution[g] for g in genotypes
