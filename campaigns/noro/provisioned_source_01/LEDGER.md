@@ -51,3 +51,37 @@ Canary gates (design §5.3-2 as amended A1): q-source echo present in
 run provenance; provisioned_source witness blocks (stations/objects)
 written; minted-set parity vs landed mint cells per shared seed;
 objects-bind-stations consistency; mega cells RSS within 8192 MB.
+
+### canary readout — exp cells (116/116 SUCCEEDED, measured 2026-10-16)
+
+- Echo: `lot_mint_model` echoed per arm (`provisioned_source` on
+  q03/q30/ps_ship, `fiat` on mint, absent on ind/off);
+  `provisioned_source: {source_id, q_source}` in run provenance.
+- Witness: `common_source.provisioned_source` written per voyage —
+  `n_stations: 21` (exp census), `n_contaminated`, `q_source_drawn`
+  on every provisioned cell; objects carry
+  `provisioned_source_id: generic_cruise_port`.
+- Draw statistics (measured): q30 2/24 voyages minted exactly 1
+  object (E = 21·0.003 ≈ 0.063 ⇒ ~1.5 expected); q03 0/24
+  (E ≈ 0.006); ps_ship per-ship q resolved [2e-4, 5e-4], 0/8;
+  ind/off 0 objects, 0 events. Consistent with Binomial(21, q).
+- objects-bind-stations: `n_contaminated` == `provisioned_lot`
+  objects on every provisioned cell, no exceptions.
+- Attribution blocks live: `reported_cases_by_dominant_route` +
+  `reported_cases_by_channel` (`supply_chain` populated on minted
+  voyages).
+- RSS: peak 516 MB across all exp cells (limit 4096).
+- Minted-set parity vs MINT-RATE-01 `fl_exp_12d_scr_mint` (seeds
+  8000–8047 paired): **45/48 bit-identical** object sets + event
+  counts. Seeds 8026/8032/8046 diverge — attribution: landed cells
+  ran image SHA `49e1993b` (81 commits older than canary `a9f4a517`),
+  including the ndarray rate-vector truthiness fix (#1013) and
+  phylodynamics founder draws (#1025) which perturb the shared RNG
+  stream; seed 8026 shows the signature (identical minted set,
+  divergent downstream acquired) — upstream stream shift, not a
+  mint-mechanism change. Gate read: PASS-with-note (parity axis)
+  pending user call.
+
+### canary readout — mega cells (12 × canary_meg_q30)
+
+pending — children RUNNING at measure time.
