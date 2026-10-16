@@ -1,0 +1,214 @@
+{
+  "platform": "fort_william_j311",
+  "description": "HVAC network synthesized for fort_william_j311",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Signal_Deck",
+        "Bridge_House",
+        "Foc_Superstructure",
+        "Wardroom_Flat",
+        "Galley_Flat",
+        "Seamen_Mess",
+        "Stokers_Mess",
+        "Cabins_Fwd",
+        "Mess_Fwd",
+        "Stores_Aft",
+        "Provision_Fwd"
+      ],
+      "ach": 5.0,
+      "description": "minimal mechanical ventilation, mostly natural",
+      "vent_mode": "nat_supply",
+      "evidence": "sheet_read",
+      "oa_fraction": 1.0
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Quarterdeck",
+        "Foc_Deck_Open",
+        "Sweep_Deck",
+        "Machinery_Casing",
+        "Magazine_Lobby_Fwd",
+        "Engine_Room",
+        "Boiler_Rooms",
+        "Fwd_Store",
+        "After_Peak",
+        "Compressed_Air_Room",
+        "Magazines_Fwd",
+        "Chain_Locker"
+      ],
+      "ach": 10.0,
+      "description": "machinery + magazine/store ventilation",
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "AHU_HD_HD_Ups",
+      "rooms": [
+        "HD_Ups"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Ups, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Low",
+      "rooms": [
+        "HD_Low"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Low, 5 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Ups",
+      "flow_rate_m3h": 713.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Ups; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Low",
+      "flow_rate_m3h": 594.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Low; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Signal_Deck",
+      "to": "Bridge_House",
+      "type": "ladder"
+    },
+    {
+      "from": "Bridge_House",
+      "to": "Foc_Superstructure",
+      "type": "ladder"
+    },
+    {
+      "from": "Foc_Deck_Open",
+      "to": "Quarterdeck",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Quarterdeck",
+      "to": "Sweep_Deck",
+      "type": "door"
+    },
+    {
+      "from": "Foc_Superstructure",
+      "to": "Galley_Flat",
+      "type": "ladder"
+    },
+    {
+      "from": "Seamen_Mess",
+      "to": "Stokers_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Boiler_Rooms",
+      "type": "ladder"
+    },
+    {
+      "from": "Stores_Aft",
+      "to": "Engine_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Magazine_Lobby_Fwd",
+      "to": "Magazines_Fwd",
+      "type": "ladder"
+    },
+    {
+      "from": "Quarterdeck",
+      "to": "Foc_Superstructure",
+      "type": "passageway"
+    },
+    {
+      "from": "Foc_Superstructure",
+      "to": "Foc_Deck_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "Sweep_Deck",
+      "to": "Wardroom_Flat",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom_Flat",
+      "to": "Galley_Flat",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Flat",
+      "to": "Machinery_Casing",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Casing",
+      "to": "Seamen_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Seamen_Mess",
+      "to": "Magazine_Lobby_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Engine_Room",
+      "to": "Boiler_Rooms",
+      "type": "passageway"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Cabins_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Cabins_Fwd",
+      "to": "Mess_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Fwd",
+      "to": "Fwd_Store",
+      "type": "passageway"
+    },
+    {
+      "from": "Compressed_Air_Room",
+      "to": "Magazines_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Magazines_Fwd",
+      "to": "Provision_Fwd",
+      "type": "passageway"
+    },
+    {
+      "from": "Provision_Fwd",
+      "to": "Chain_Locker",
+      "type": "passageway"
+    }
+  ]
+}

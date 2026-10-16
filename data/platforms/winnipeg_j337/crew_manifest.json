@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:21:22.766530+00:00",
+  "platform": "winnipeg_j337",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 122
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 7,
+      "berth_zone": "Wardroom_Flat",
+      "duty_zone": "Bridge_House",
+      "notes": "CO + officers"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 27,
+      "berth_zone": "PO_Mess",
+      "duty_zone": "Signal_Deck",
+      "notes": "C.P.O.'s 5 + P.O.'s 17 + E.R.A.'s 5, plate-read"
+    },
+    {
+      "class_id": "stokers",
+      "role_group": "crew",
+      "count": 19,
+      "berth_zone": "Stokers_Mess",
+      "duty_zone": "Engine_Room",
+      "notes": "plate-read stokers' mess 19"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 51,
+      "berth_zone": "Seamens_Mess",
+      "duty_zone": "Foc_Deck_Open",
+      "notes": "seamens 35 + M/S sweep crew 16, plate-read"
+    },
+    {
+      "class_id": "cooks_stewards",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "Signal_Stwd_Mess",
+      "duty_zone": "Galley_Flat",
+      "notes": "signalmen/cooks/stewards mess 18, plate-read"
+    }
+  ],
+  "source": "plate-read accommodation tables on sheet 2: seamens 35, P.O.'s 17, C.P.O.'s 5, C.P.O.'s & P.O.'s M/S 16-22, E.R.A.'s 5, stokers 19, signalmen/cooks/stewards 18 (~115 ratings) + ~7 officers (wardroom)",
+  "consistency": {
+    "declared_total": 122,
+    "manifest_total": 122,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

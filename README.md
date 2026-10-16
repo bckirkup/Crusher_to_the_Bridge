@@ -210,9 +210,6 @@ data/
 │   ├── olympia_c6/                 (maritime.org GA import)
 │   ├── montana_acr13/              (maritime.org GA import)
 │   ├── jupiter_ac3/                (maritime.org GA import)
-│   ├── battler_acv6/               (maritime.org GA import)
-│   ├── puncher_cve53/              (maritime.org GA import)
-│   ├── thetis_bay_cve90/           (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -572,7 +569,7 @@ grumb_seeding:
 
 ## Platforms
 
-Fifty-four ship platforms are included, each with spatial layout and HVAC
+Sixty-one ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -848,6 +845,13 @@ from `orchestrator_types.py`:
 | `ranger_cv4` | USS Ranger CV-4 first purpose-built USN carrier (maritime.org GA import, 74 zones, 2641 crew incl. air group) |
 | `yorktown_cv5` | USS Yorktown CV-5 Yorktown-class fleet carrier (maritime.org GA import, 71 zones, 2279 crew incl. air group + flag staff) |
 | `wasp_cv7` | USS Wasp CV-7 treaty carrier (maritime.org GA import, 62 zones, 2128 crew incl. air group + marines) |
+| `esteem_mso438` | USS Esteem MSO-438 Aggressive-class ocean minesweeper (maritime.org GA import, 39 zones, 74 crew) |
+| `erie_pg50` | USS Erie PG-50 Erie-class patrol gunboat (maritime.org GA import, 54 zones, 248 crew incl. flag staff + marine guard) |
+| `pt_564` | PT-564 Higgins 70'8" motor torpedo boat (maritime.org GA import, 13 zones, 14 crew — marginal smallest hull) |
+| `cobalt_k124` | HMCS Cobalt K124 Flower-class corvette (maritime.org GA import, 29 zones, 90 crew) |
+| `river_class_frigate` | RN River-class frigate (maritime.org GA import, 37 zones, 140 crew) |
+| `fort_william_j311` | HMCS Fort William J311 Bangor-class minesweeper (maritime.org GA import, 25 zones, 70 crew) |
+| `winnipeg_j337` | HMCS Winnipeg J337 Algerine-class minesweeper (maritime.org GA import, 31 zones, 122 crew) |
 | `battler_acv6` | HMS Battler D-18 Attacker/Bogue-class escort carrier (maritime.org GA import, 55 zones, 800 crew) |
 | `puncher_cve53` | HMS Puncher D-79 Bogue-class escort carrier CVE-53 (maritime.org GA import, 88 zones, 869 crew) |
 | `thetis_bay_cve90` | USS Thetis Bay CVE-90 Casablanca-class escort carrier (maritime.org GA import, 74 zones, 596 crew) |
