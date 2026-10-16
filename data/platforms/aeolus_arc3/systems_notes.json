@@ -1,0 +1,291 @@
+{
+  "platform": "aeolus_arc3",
+  "era": "usn_coldwar",
+  "era_label": "USN cold-war / early mechanical AC",
+  "era_note": "Berthing/officers mechanically conditioned; ops/electronics rooms AC; machinery forced draft.",
+  "vent_markers": [
+    {
+      "id": "VM_buoy_deck_cowl",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Cable_Working_Deck",
+      "display": [
+        30.61,
+        2.34
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "VM_house_supply",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "upper_deck",
+      "serves_zone": "Deck_House_Upper",
+      "display": [
+        6.12,
+        2.92
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "VM_funnel_arc",
+      "kind": "funnel",
+      "facing": "unknown",
+      "direction": "exhaust",
+      "deck": "top_of_house",
+      "serves_zone": "Top_Of_House",
+      "display": [
+        29.45,
+        6.84
+      ],
+      "evidence": "sheet_read",
+      "notes": "Stack on top of house"
+    },
+    {
+      "id": "VM_er_intake",
+      "kind": "air_shaft",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Boiler_Casing_M",
+      "display": [
+        86.32,
+        3.8
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    },
+    {
+      "id": "VM_hold_vent",
+      "kind": "gooseneck",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "hold",
+      "serves_zone": "Cable_Tanks",
+      "display": [
+        18.95,
+        5.24
+      ],
+      "evidence": "era_plausible",
+      "notes": ""
+    }
+  ],
+  "zone_modes": {
+    "Top_Of_House": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Superstructure_Cabins": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Wheelhouse": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bridge_Chart_Rms": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Bridge": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Cable_Working_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Deck_House_Upper": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Cable_Testing_Rm": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Bow_Sheave_Area": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Upper_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Crew_Messing": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Berth_M": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_Recreation": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Radio_Electronic_Shops": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "After_Repair_Locker": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Elec_Switchboard": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Casing_M": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Fwd_Stores_M": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Main_Deck": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Workshops_1P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Berth_1P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Cable_Workshop": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Ice_Machinery_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Washroom_Locker_1P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_First_Platform": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_1P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Armory": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Provisions_Stores_2P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Butcher_Meats": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Aux_Machinery_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Escape_Trunk_2P": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores_2P": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Cable_Tanks": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Flam_Liquid_Stores": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Storeroom_Hold": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Rope_Stowage": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Engine_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Room": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.O. TANK C-3F",
+      "kind": "fuel",
+      "nearest_zone": "Armory",
+      "display": [
+        10.53,
+        6.47
+      ],
+      "deck": "second_platform",
+      "notes": ""
+    },
+    {
+      "label": "CABLE TANK NO.1",
+      "kind": "unknown",
+      "nearest_zone": "Cable_Tanks",
+      "display": [
+        10.53,
+        6.55
+      ],
+      "deck": "hold",
+      "notes": ""
+    },
+    {
+      "label": "FORE PEAK",
+      "kind": "unknown",
+      "nearest_zone": null,
+      "display": null,
+      "deck": null,
+      "notes": "fwd peak on inboard profile"
+    },
+    {
+      "label": "F.W. TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Flam_Liquid_Stores",
+      "display": [
+        40.0,
+        5.24
+      ],
+      "deck": "hold",
+      "notes": ""
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Bridge (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Bridge",
+    "HD_Upper_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Upper_Deck",
+    "Crew_Messing (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Crew_Messing",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "HD_Main_Deck (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Main_Deck",
+    "HD_First_Platform (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_First_Platform"
+  ]
+}
