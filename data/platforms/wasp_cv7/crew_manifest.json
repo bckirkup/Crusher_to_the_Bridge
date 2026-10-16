@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-16T12:05:14.099977+00:00",
+  "platform": "wasp_cv7",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 0
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 105,
+      "berth_zone": "Officers_Country_2D",
+      "duty_zone": "Nav_Bridge",
+      "notes": ""
+    },
+    {
+      "class_id": "air_wing_officers",
+      "role_group": "crew",
+      "count": 81,
+      "berth_zone": "Officers_Country_2D",
+      "duty_zone": "Squadron_Ready_Rm",
+      "notes": ""
+    },
+    {
+      "class_id": "cpo",
+      "role_group": "crew",
+      "count": 68,
+      "berth_zone": "CPO_3D",
+      "duty_zone": "Crew_Mess_3D",
+      "notes": ""
+    },
+    {
+      "class_id": "air_wing_cpo",
+      "role_group": "crew",
+      "count": 30,
+      "berth_zone": "CPO_3D",
+      "duty_zone": "Hangar_Fwd",
+      "notes": ""
+    },
+    {
+      "class_id": "air_wing_enlisted",
+      "role_group": "crew",
+      "count": 416,
+      "berth_zone": "Crew_Berthing_3D_Fwd",
+      "duty_zone": "Hangar_Fwd",
+      "notes": ""
+    },
+    {
+      "class_id": "marines_detachment",
+      "role_group": "crew",
+      "count": 78,
+      "berth_zone": "Crew_Berthing_2D",
+      "duty_zone": "Flight_Deck",
+      "notes": ""
+    },
+    {
+      "class_id": "engine_room_gang",
+      "role_group": "crew",
+      "count": 300,
+      "berth_zone": "Crew_Berthing_3D_Aft",
+      "duty_zone": "Machinery_2P",
+      "notes": ""
+    },
+    {
+      "class_id": "deck_gunnery",
+      "role_group": "crew",
+      "count": 600,
+      "berth_zone": "Crew_Berthing_2D",
+      "duty_zone": "Flight_Deck",
+      "notes": ""
+    },
+    {
+      "class_id": "commissary",
+      "role_group": "crew",
+      "count": 250,
+      "berth_zone": "Crew_Berthing_4D",
+      "duty_zone": "Crew_Mess_3D",
+      "notes": ""
+    },
+    {
+      "class_id": "seamen_operations",
+      "role_group": "crew",
+      "count": 200,
+      "berth_zone": "Crew_Berthing_3D_Mid",
+      "duty_zone": "Hangar_Aft",
+      "notes": ""
+    }
+  ],
+  "source": "",
+  "consistency": {
+    "declared_total": 0,
+    "manifest_total": 2128,
+    "matches": false
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

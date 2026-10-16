@@ -66,6 +66,7 @@ PLATFORMS = [
     "midway_cv41",
     "ranger_cv4",
     "yorktown_cv5",
+    "wasp_cv7",
 ]
 
 ENTERPRISE_IDS = frozenset({
