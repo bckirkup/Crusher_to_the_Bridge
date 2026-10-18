@@ -4644,9 +4644,11 @@ Design `docs/norovirus/noro_mint_rate_01_sweep_design.md`; package
 `campaigns/noro/mint_rate_01/`; entry
 `docs/ledger/NORO-MINT-RATE-01.md`.
 
-**`PROVISIONED-SOURCE-01` (wave 1 done 2026-10-16 — exp ×12
-measured: in-band rung set {q05}+ps_ship, Binomial(21,q) draws +
-nesting clean, minted-set parity 1000/1000 on flag+count):** the supply-side replacement for the
+**`PROVISIONED-SOURCE-01` (waves 1–2 done 2026-10-17 — 36,000 cells
+measured: `ps_ship` U[0.0002,0.0005] is the only arm in-band on all
+three hulls, Binomial(N,q) presence clean at N=21/35/63, per-hull
+P(post|minted) conversion constant mechanism-independent, no scalar
+rung covers the drifting band):** the supply-side replacement for the
 fiat mint gate MINT-RATE-01 brackets — provisioned_lot mints become a
 derived draw, objects-per-voyage = Binomial(N_lots, q_source) with
 N_lots the served-venue × item-line station census (21/35/63/70 on

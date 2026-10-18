@@ -110,11 +110,25 @@ _PS_Q = {
 _PS_SCALAR_LADDER = tuple(_PS_Q)
 # Fiat-gate minted-voyage presence on exp (MINT-RATE-01 measured).
 _PS_E_PRESENCE_FIAT = {"ship": 0.0105, "mint": 0.085}
-# E[1-(1-q)^21] for q ~ U[0.0002, 0.0005] (300-point quadrature).
-_PS_E_PRESENCE_PS_SHIP = sum(
-    1.0 - (1.0 - (0.0002 + 0.0003 * i / 299)) ** 21
-    for i in range(300)
-) / 300
+
+
+def _ps_ship_presence(n_stations: int) -> float:
+    """E[1-(1-q)^N] for q ~ U[0.0002, 0.0005] (300-point quadrature)."""
+    return sum(
+        1.0 - (1.0 - (0.0002 + 0.0003 * i / 299)) ** n_stations
+        for i in range(300)
+    ) / 300
+
+
+_PS_E_PRESENCE_PS_SHIP = _ps_ship_presence(_PS_N_STATIONS)
+
+
+def _set_ps_stations(n_stations: int) -> None:
+    """Rebase the provisioned-source Binomial expectations on a hull's
+    station count (exp 21 / cls 35 / spr 63 / mega 70)."""
+    global _PS_N_STATIONS, _PS_E_PRESENCE_PS_SHIP
+    _PS_N_STATIONS = n_stations
+    _PS_E_PRESENCE_PS_SHIP = _ps_ship_presence(n_stations)
 
 
 def _ps_e_presence(arm: str) -> float:
@@ -969,8 +983,13 @@ def main() -> None:
                     help="arm table + echo expectations; 'mint_rate' is "
                          "the NORO-MINT-RATE-01 arm set (design §10), "
                          "'ps01' the PROVISIONED-SOURCE-01 arm set")
+    ap.add_argument("--n-stations", type=int, default=21,
+                    help="contamination stations on the scanned hull "
+                         "(ps01 only: exp 21, cls 35, spr 63, mega 70)")
     args = ap.parse_args()
     _apply_arm_set(args.arm_set)
+    if args.arm_set == "ps01":
+        _set_ps_stations(args.n_stations)
     cells = load_rows(args.rows)
 
     print("## coverage\n")
@@ -1009,7 +1028,7 @@ def main() -> None:
         print("\n## nested minted sets (scalar rungs)\n")
         print("\n".join(_nested_sets(cells, _MR_SCALAR_LADDER)))
     if args.arm_set == "ps01":
-        print("\n## presence + objects vs Binomial(21,q) draw\n")
+        print(f"\n## presence + objects vs Binomial({args.n_stations},q) draw\n")
         print("\n".join(_ps_presence_ladder(cells)))
         print("\n## P(post|minted) — rate independence\n")
         print("\n".join(_mr_post_per_minted(cells)))
