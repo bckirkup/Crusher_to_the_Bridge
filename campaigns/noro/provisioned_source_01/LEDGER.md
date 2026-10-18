@@ -351,3 +351,36 @@ fixed per-hull constant on every mint mechanism. Wave 3 = mega
 ×10 arms (10,000 cells): the near-absence test (~0.02
 objects/voyage at common q) plus the multi-lot lift and the
 mega-window extrapolation q ≈ [1.5e-3, 4.1e-3] — user's call.
+
+### wave 3 — submitted 2026-10-18, awaiting cells
+
+User approved after the wave-2 readout ("sure launch wave 3").
+10 mega arrays (`campaigns/noro/provisioned_source_01_mega/` spec —
+fl_meg_12d_scr_{off,ind,ps_ship,q01,q02,q03,q05,q08,q15,q30}) ×
+1,000 seeds (8105–9104) = 10,000 cells, same digest-pinned image
+(a9f4a517). Jobdef `picard-noro-provisioned-source-01-mega` revs
+:2–:11 (memory 8192 — canary RSS read 6.4–6.6GB). Fiat bridges
+omitted per design (mega's fiat cells are vacuous). Every jobId
+verified against `describe-jobs` pre-commit.
+
+| block | job id |
+|---|---|
+| fl_meg_12d_scr_off | f0e5957b-c31f-4011-927d-d39e3266094b |
+| fl_meg_12d_scr_ind | 19bb450c-af57-43ce-bc23-98349a1997bf |
+| fl_meg_12d_scr_ps_ship | d99b8454-d7c8-4d0e-b568-7a0cdc8f929e |
+| fl_meg_12d_scr_q01 | 977e2fdf-6371-484a-aa8f-d6b96c239819 |
+| fl_meg_12d_scr_q02 | 9f659325-b2cb-4561-81bb-123caf614b43 |
+| fl_meg_12d_scr_q03 | 299ba541-0dcc-4d5e-b8db-a7d90fb4c4a3 |
+| fl_meg_12d_scr_q05 | 51f9acea-971d-48ae-b40c-a8715bad7829 |
+| fl_meg_12d_scr_q08 | cb284ba8-d3d4-4bef-a81d-74ccf1b6eb66 |
+| fl_meg_12d_scr_q15 | 77a6dbcc-461a-45d1-9cd8-45e78f51f91a |
+| fl_meg_12d_scr_q30 | 31602b0e-c5d6-4a91-8df6-2ac73dfa0665 |
+
+Wave-3 readout gates (design §3.3 / frozen eval): the near-absence
+test — ~0.02 objects/voyage at common q on mega's N=70 census —
+vs the mega in-band window extrapolation q ∈ [1.5e-3, 4.1e-3];
+the multi-lot lift where minted voyages carry >1 object (P(≥2|
+minted) rises with q); whether ps_ship stays in-band on the fourth
+hull; D4 posted-burst discriminator declared TBD (mega bursts
+unmeasured). Mega cells ~8GB, ~50min/voyage — full drain is the
+slowest wave.
