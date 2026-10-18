@@ -393,3 +393,12 @@ priced and declined: 512-vCPU Spot (~2 days, same ~$120–160 bill)
 and On-Demand at 512 (~2 days, ~$700+). Spot grind chosen; readout
 proceeds incrementally as arms complete (ps_ship ~day 2–3 in FIFO
 order).
+
+Wave-3 watcher (2026-10-18): automation auto-565ded61 ("PS01
+wave-3 mega landing check") pings this session every 6h
+(01/07/13/19:37 UTC, through 2026-10-26) to count landed zips;
+on full landing it submits the scan array and runs the readout.
+NOTE: scan jobdef `picard-noro-scan-readout-ec2:5` was registered
+against the PARENT prefix (empty for mega) — superseded by rev
+`:6`, which scans `campaign/noro_provisioned_source_01_mega/`
+correctly. Submit ONLY `:6`.
