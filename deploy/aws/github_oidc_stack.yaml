@@ -27,6 +27,18 @@ Parameters:
     Type: String
     Default: campaign
     Description: Top-level key prefix the roles may touch (no leading slash).
+  CreateOidcProvider:
+    Type: String
+    Default: "yes"
+    AllowedValues: ["yes", "no"]
+    Description: >-
+      "no" when token.actions.githubusercontent.com is already an OIDC
+      provider in this account (one per URL); pass its ARN via
+      ExistingOidcProviderArn.
+  ExistingOidcProviderArn:
+    Type: String
+    Default: arn:aws:iam::994254241749:oidc-provider/token.actions.githubusercontent.com
+    Description: ARN of the existing GitHub OIDC provider (used only when CreateOidcProvider=no).
   NotificationEmail:
     Type: String
     Default: ""
@@ -36,10 +48,13 @@ Parameters:
 
 Conditions:
   CreateBudget: !Not [!Equals [!Ref NotificationEmail, ""]]
+  CreateOidc: !Equals [!Ref CreateOidcProvider, "yes"]
+  UseExistingOidc: !Equals [!Ref CreateOidcProvider, "no"]
 
 Resources:
   GitHubOidcProvider:
     Type: AWS::IAM::OIDCProvider
+    Condition: CreateOidc
     Properties:
       Url: https://token.actions.githubusercontent.com
       ClientIdList:
@@ -64,7 +79,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Federated: !GetAtt GitHubOidcProvider.Arn
+              Federated: !If [CreateOidc, !GetAtt GitHubOidcProvider.Arn, !Ref ExistingOidcProviderArn]
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
@@ -134,7 +149,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Federated: !GetAtt GitHubOidcProvider.Arn
+              Federated: !If [CreateOidc, !GetAtt GitHubOidcProvider.Arn, !Ref ExistingOidcProviderArn]
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
               StringEquals:
