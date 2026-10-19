@@ -3,20 +3,31 @@ name: campaign-collect
 # Short, bounded collection pass over s3://.../campaign/* via the read-only
 # collector role. Publishes a compact index as a GitHub issue (API-readable
 # by anything that can read the repo, including Edison's GitHub connector).
-# Deliberately does NOT stream raw campaign objects: listing is bounded per
-# prefix and truncated prefixes are flagged rather than chased.
+# Deliberately does NOT stream raw campaign objects: prefix enumeration is
+# paged up to the cap, per-prefix listing is capped and truncation flagged.
+# An optional exact_key input fetches ONE reviewed object under a byte
+# ceiling, verifies nothing beyond its own integrity, and exposes it only
+# as a workflow artifact — never inline in an issue body.
 
 on:
   workflow_dispatch:
     inputs:
       max_prefixes:
         description: "cap on campaign prefixes enumerated this pass"
-        required: true
+        required: false
         default: "50"
       keys_per_prefix:
         description: "cap on keys listed per prefix (bounded read)"
-        required: true
+        required: false
         default: "5000"
+      exact_key:
+        description: "optional single object key under campaign/ to fetch"
+        required: false
+        default: ""
+      max_fetch_bytes:
+        description: "byte ceiling for exact_key fetch"
+        required: false
+        default: "52428800"
   schedule:
     - cron: "0 6 * * 1" # Mondays 06:00 UTC; remove if unwanted
 
@@ -53,12 +64,15 @@ jobs:
       - name: Denial probe — write must be refused
         run: |
           echo probe > /tmp/probe.txt
-          if aws s3api put-object --bucket "$BUCKET" \
-              --key "campaign/.write-probe" --body /tmp/probe.txt 2>/dev/null; then
+          OUT=$(aws s3api put-object --bucket "$BUCKET" \
+              --key "campaign/.write-probe" --body /tmp/probe.txt 2>&1) && {
             echo "::error::put-object was NOT denied — collector role is over-scoped"
             exit 1
+          }
+          if echo "$OUT" | grep -q "AccessDenied"; then
+            echo "put-object correctly denied (AccessDenied)"
           else
-            echo "put-object correctly denied"
+            echo "::error::put-object failed but NOT with AccessDenied — unexpected failure:"; echo "$OUT"; exit 1
           fi
 
       - name: Build bounded campaign index
@@ -67,25 +81,37 @@ jobs:
           KEYS_PER_PREFIX: ${{ inputs.keys_per_prefix }}
         run: |
           python3 - <<'PY'
-          import json, os, subprocess, sys
+          import json, os, subprocess
           from datetime import datetime, timezone
 
           bucket = os.environ["BUCKET"]
-          max_prefixes = int(os.environ["MAX_PREFIXES"])
-          max_keys = int(os.environ["KEYS_PER_PREFIX"])
+          max_prefixes = int(os.environ.get("MAX_PREFIXES") or 50)
+          max_keys = int(os.environ.get("KEYS_PER_PREFIX") or 5000)
 
           def aws(*args):
               return subprocess.run(
                   ["aws", "s3api", *args], capture_output=True, text=True, check=True
               ).stdout
 
-          out = json.loads(aws(
-              "list-objects-v2", "--bucket", bucket,
-              "--prefix", "campaign/", "--delimiter", "/",
-              "--query", "CommonPrefixes[].Prefix", "--output", "json",
-          )) or []
-          prefixes = sorted(p for p in out if p != "campaign/")
-          truncated_prefixes = prefixes[max_prefixes:]
+          # Page the delimiter enumeration itself — stop as soon as the cap
+          # of common prefixes is gathered rather than fetching all of them.
+          prefixes, token = [], None
+          while len(prefixes) < max_prefixes:
+              args = [
+                  "list-objects-v2", "--bucket", bucket,
+                  "--prefix", "campaign/", "--delimiter", "/",
+                  "--max-items", str(max_prefixes - len(prefixes) + 1),
+                  "--output", "json",
+              ]
+              if token:
+                  args += ["--starting-token", token]
+              page = json.loads(aws(*args))
+              prefixes += [cp["Prefix"] for cp in page.get("CommonPrefixes") or []]
+              token = page.get("NextToken")
+              if not token:
+                  break
+          prefixes = sorted(p for p in prefixes if p != "campaign/")
+          prefixes_beyond_cap = bool(token) and len(prefixes) >= max_prefixes
           prefixes = prefixes[:max_prefixes]
 
           rows = []
@@ -99,7 +125,7 @@ jobs:
                   "prefix": p,
                   "objects_listed": len(contents),
                   "bytes_listed": sum(o["Size"] for o in contents),
-                  "truncated": bool(page.get("IsTruncated")),
+                  "truncated": bool(page.get("IsTruncated")) or bool(page.get("NextToken")),
               })
 
           index = {
@@ -107,7 +133,7 @@ jobs:
               "bucket": bucket,
               "bounds": {"max_prefixes": max_prefixes, "keys_per_prefix": max_keys},
               "prefixes": rows,
-              "prefixes_beyond_cap": truncated_prefixes,
+              "prefix_enumeration_hit_cap": prefixes_beyond_cap,
           }
           with open("campaign_index.json", "w") as f:
               json.dump(index, f, indent=2)
@@ -122,7 +148,43 @@ jobs:
                   f"| {r['bytes_listed']/1e9:.2f} GB | {r['truncated']} |"
               )
           open("campaign_index.md", "w").write("\n".join(lines) + "\n")
-          print(f"indexed {len(rows)} prefixes")
+          print(f"indexed {len(rows)} prefixes; cap hit: {prefixes_beyond_cap}")
+          PY
+
+      - name: Bounded exact-object fetch (when exact_key supplied)
+        if: ${{ inputs.exact_key != '' }}
+        env:
+          EXACT_KEY: ${{ inputs.exact_key }}
+          MAX_FETCH_BYTES: ${{ inputs.max_fetch_bytes }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          bucket = os.environ["BUCKET"]
+          key = os.environ["EXACT_KEY"].strip()
+          ceiling = int(os.environ.get("MAX_FETCH_BYTES") or 52428800)
+          if not key.startswith("campaign/") or ".." in key or key.endswith("/"):
+              raise SystemExit(f"refusing key outside campaign/ or malformed: {key!r}")
+          head = json.loads(subprocess.run(
+              ["aws", "s3api", "head-object", "--bucket", bucket, "--key", key,
+               "--output", "json"], capture_output=True, text=True, check=True).stdout)
+          size = head["ContentLength"]
+          sc = (head.get("StorageClass") or "STANDARD").upper()
+          if "ARCHIVE" in sc or sc == "GLACIER":
+              raise SystemExit(f"refusing archived object (class {sc}); restore first")
+          if size > ceiling:
+              raise SystemExit(f"refusing {size} B object; ceiling {ceiling} B")
+          dest = "/tmp/fetched_object"
+          subprocess.run(
+              ["aws", "s3api", "get-object", "--bucket", bucket, "--key", key,
+               dest], check=True)
+          sha = subprocess.run(["sha256sum", dest], capture_output=True,
+                               text=True, check=True).stdout.split()[0]
+          os.makedirs("fetched", exist_ok=True)
+          out_path = os.path.join("fetched", key.rsplit("/", 1)[-1])
+          os.rename(dest, out_path)
+          with open("fetched/SHA256SUMS", "w") as f:
+              f.write(f"{sha}  {key}\n")
+          print(f"fetched {key} ({size} B), sha256 {sha}")
           PY
 
       - name: Publish index to tracking issue
@@ -147,4 +209,6 @@ jobs:
           path: |
             campaign_index.json
             campaign_index.md
+            fetched/
           retention-days: 30
+          if-no-files-found: ignore
