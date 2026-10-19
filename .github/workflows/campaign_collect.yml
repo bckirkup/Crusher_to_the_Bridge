@@ -133,9 +133,9 @@ jobs:
           ISSUE=$(gh issue list --state open --search "in:title \"$TITLE\"" \
                   --json number --jq '.[0].number')
           if [ -z "$ISSUE" ] || [ "$ISSUE" = "null" ]; then
-            ISSUE=$(gh issue create --title "$TITLE" \
-              --body "Auto-updated by the campaign-collect workflow. Latest bounded index below." \
-              --json number --jq '.number')
+            URL=$(gh issue create --title "$TITLE" \
+              --body "Auto-updated by the campaign-collect workflow. Latest bounded index below.")
+            ISSUE=${URL##*/}
           fi
           BODY=$(cat campaign_index.md)
           gh issue comment "$ISSUE" --body "$(printf '```\n%s\n```' "$BODY")"
