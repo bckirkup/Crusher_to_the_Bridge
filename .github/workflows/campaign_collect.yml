@@ -1,0 +1,150 @@
+name: campaign-collect
+
+# Short, bounded collection pass over s3://.../campaign/* via the read-only
+# collector role. Publishes a compact index as a GitHub issue (API-readable
+# by anything that can read the repo, including Edison's GitHub connector).
+# Deliberately does NOT stream raw campaign objects: listing is bounded per
+# prefix and truncated prefixes are flagged rather than chased.
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_prefixes:
+        description: "cap on campaign prefixes enumerated this pass"
+        required: true
+        default: "50"
+      keys_per_prefix:
+        description: "cap on keys listed per prefix (bounded read)"
+        required: true
+        default: "5000"
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC; remove if unwanted
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+
+concurrency:
+  group: campaign-collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 20
+    env:
+      AWS_REGION: us-east-1
+      BUCKET: crusherbucket-994254241749-us-east-1-an
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_COLLECTOR_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify assumed identity (must be github-crusher-collector)
+        run: aws sts get-caller-identity
+
+      - name: Denial probe — write must be refused
+        run: |
+          echo probe > /tmp/probe.txt
+          if aws s3api put-object --bucket "$BUCKET" \
+              --key "campaign/.write-probe" --body /tmp/probe.txt 2>/dev/null; then
+            echo "::error::put-object was NOT denied — collector role is over-scoped"
+            exit 1
+          else
+            echo "put-object correctly denied"
+          fi
+
+      - name: Build bounded campaign index
+        env:
+          MAX_PREFIXES: ${{ inputs.max_prefixes }}
+          KEYS_PER_PREFIX: ${{ inputs.keys_per_prefix }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          from datetime import datetime, timezone
+
+          bucket = os.environ["BUCKET"]
+          max_prefixes = int(os.environ["MAX_PREFIXES"])
+          max_keys = int(os.environ["KEYS_PER_PREFIX"])
+
+          def aws(*args):
+              return subprocess.run(
+                  ["aws", "s3api", *args], capture_output=True, text=True, check=True
+              ).stdout
+
+          out = json.loads(aws(
+              "list-objects-v2", "--bucket", bucket,
+              "--prefix", "campaign/", "--delimiter", "/",
+              "--query", "CommonPrefixes[].Prefix", "--output", "json",
+          )) or []
+          prefixes = sorted(p for p in out if p != "campaign/")
+          truncated_prefixes = prefixes[max_prefixes:]
+          prefixes = prefixes[:max_prefixes]
+
+          rows = []
+          for p in prefixes:
+              page = json.loads(aws(
+                  "list-objects-v2", "--bucket", bucket, "--prefix", p,
+                  "--max-items", str(max_keys), "--output", "json",
+              ))
+              contents = page.get("Contents") or []
+              rows.append({
+                  "prefix": p,
+                  "objects_listed": len(contents),
+                  "bytes_listed": sum(o["Size"] for o in contents),
+                  "truncated": bool(page.get("IsTruncated")),
+              })
+
+          index = {
+              "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+              "bucket": bucket,
+              "bounds": {"max_prefixes": max_prefixes, "keys_per_prefix": max_keys},
+              "prefixes": rows,
+              "prefixes_beyond_cap": truncated_prefixes,
+          }
+          with open("campaign_index.json", "w") as f:
+              json.dump(index, f, indent=2)
+
+          lines = [
+              "| prefix | objects (<= cap) | bytes | truncated |",
+              "|---|---|---|---|",
+          ]
+          for r in rows:
+              lines.append(
+                  f"| `{r['prefix']}` | {r['objects_listed']} "
+                  f"| {r['bytes_listed']/1e9:.2f} GB | {r['truncated']} |"
+              )
+          open("campaign_index.md", "w").write("\n".join(lines) + "\n")
+          print(f"indexed {len(rows)} prefixes")
+          PY
+
+      - name: Publish index to tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="Campaign storage index (collector)"
+          ISSUE=$(gh issue list --state open --search "in:title \"$TITLE\"" \
+                  --json number --jq '.[0].number')
+          if [ -z "$ISSUE" ] || [ "$ISSUE" = "null" ]; then
+            ISSUE=$(gh issue create --title "$TITLE" \
+              --body "Auto-updated by the campaign-collect workflow. Latest bounded index below." \
+              --json number --jq '.number')
+          fi
+          BODY=$(cat campaign_index.md)
+          gh issue comment "$ISSUE" --body "$(printf '```\n%s\n```' "$BODY")"
+          echo "published to issue #$ISSUE"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: campaign-index
+          path: |
+            campaign_index.json
+            campaign_index.md
+          retention-days: 30
