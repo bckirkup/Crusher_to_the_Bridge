@@ -93,25 +93,26 @@ jobs:
                   ["aws", "s3api", *args], capture_output=True, text=True, check=True
               ).stdout
 
-          # Page the delimiter enumeration itself — stop as soon as the cap
-          # of common prefixes is gathered rather than fetching all of them.
+          # Manual pagination: --max-items bounds the CLI paginator's Contents
+          # count, NOT CommonPrefixes. Drive raw pages ourselves (no-paginate,
+          # service-level max-keys) and stop once we hold more than the cap.
           prefixes, token = [], None
-          while len(prefixes) < max_prefixes:
+          while len(prefixes) < max_prefixes + 1:
               args = [
                   "list-objects-v2", "--bucket", bucket,
                   "--prefix", "campaign/", "--delimiter", "/",
-                  "--max-items", str(max_prefixes - len(prefixes) + 1),
-                  "--output", "json",
+                  "--max-keys", str(max_prefixes + 1 - len(prefixes)),
+                  "--no-paginate", "--output", "json",
               ]
               if token:
-                  args += ["--starting-token", token]
+                  args += ["--continuation-token", token]
               page = json.loads(aws(*args))
               prefixes += [cp["Prefix"] for cp in page.get("CommonPrefixes") or []]
-              token = page.get("NextToken")
+              token = page.get("NextContinuationToken")
               if not token:
                   break
           prefixes = sorted(p for p in prefixes if p != "campaign/")
-          prefixes_beyond_cap = bool(token) and len(prefixes) >= max_prefixes
+          prefixes_beyond_cap = len(prefixes) > max_prefixes or bool(token)
           prefixes = prefixes[:max_prefixes]
 
           rows = []
@@ -173,10 +174,20 @@ jobs:
               raise SystemExit(f"refusing archived object (class {sc}); restore first")
           if size > ceiling:
               raise SystemExit(f"refusing {size} B object; ceiling {ceiling} B")
+          # Pin the GET to what HEAD saw: VersionId when versioned, else ETag.
           dest = "/tmp/fetched_object"
-          subprocess.run(
-              ["aws", "s3api", "get-object", "--bucket", bucket, "--key", key,
-               dest], check=True)
+          gargs = ["aws", "s3api", "get-object", "--bucket", bucket,
+                   "--key", key]
+          if head.get("VersionId"):
+              gargs += ["--version-id", head["VersionId"]]
+          elif head.get("ETag"):
+              gargs += ["--if-match", head["ETag"]]
+          gargs += [dest]
+          subprocess.run(gargs, check=True)
+          actual = os.path.getsize(dest)
+          if actual > ceiling:
+              raise SystemExit(
+                  f"downloaded {actual} B exceeds ceiling {ceiling} B — refusing")
           sha = subprocess.run(["sha256sum", dest], capture_output=True,
                                text=True, check=True).stdout.split()[0]
           os.makedirs("fetched", exist_ok=True)
