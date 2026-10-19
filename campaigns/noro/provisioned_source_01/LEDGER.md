@@ -384,3 +384,21 @@ minted) rises with q); whether ps_ship stays in-band on the fourth
 hull; D4 posted-burst discriminator declared TBD (mega bursts
 unmeasured). Mega cells ~8GB, ~50min/voyage — full drain is the
 slowest wave.
+
+Wave-3 pace note (2026-10-18, user decision): mega cells are the
+heaviest in the campaign (~8GB, ~50min/voyage, ~210MB zips —
+memory-bound at ~50 concurrent on the 256-vCPU Spot CE). Measured
+drain ~1.7 cells/min ⇒ ~3.5–4 days for the full 10,000. Options
+priced and declined: 512-vCPU Spot (~2 days, same ~$120–160 bill)
+and On-Demand at 512 (~2 days, ~$700+). Spot grind chosen; readout
+proceeds incrementally as arms complete (ps_ship ~day 2–3 in FIFO
+order).
+
+Wave-3 watcher (2026-10-18): automation auto-565ded61 ("PS01
+wave-3 mega landing check") pings this session every 6h
+(01/07/13/19:37 UTC, through 2026-10-26) to count landed zips;
+on full landing it submits the scan array and runs the readout.
+NOTE: scan jobdef `picard-noro-scan-readout-ec2:5` was registered
+against the PARENT prefix (empty for mega) — superseded by rev
+`:6`, which scans `campaign/noro_provisioned_source_01_mega/`
+correctly. Submit ONLY `:6`.
