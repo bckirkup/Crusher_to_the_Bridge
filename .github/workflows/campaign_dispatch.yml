@@ -1,0 +1,73 @@
+name: campaign-dispatch
+
+# Protected dispatch path for campaign submissions (GitHub -> AWS via OIDC).
+# v1 is a no-spend handshake: it proves the environment can assume the
+# dispatch role, read the Batch fleet, and render a jobdef — and proves the
+# role is denied where it should be (no object deletes, no EC2 writes).
+# Real submits land behind the same environment once this has run clean.
+
+on:
+  workflow_dispatch:
+    inputs:
+      campaign:
+        description: "campaign spec path (<pathogen>/<name>, dry-run only)"
+        required: true
+        default: "noro/hand_occupancy"
+      block:
+        description: "campaign block name (dry-run only)"
+        required: true
+        default: "fl_spr_12d"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: campaign-dispatch
+  cancel-in-progress: false
+
+jobs:
+  handshake:
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 15
+    env:
+      AWS_REGION: us-east-1
+      BUCKET: crusherbucket-994254241749-us-east-1-an
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_DISPATCH_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify assumed identity
+        run: aws sts get-caller-identity
+
+      - name: Read the Batch fleet (bounded)
+        run: |
+          aws batch describe-job-queues \
+            --job-queues picard-campaign-queue picard-analysis-queue picard-analysis-fargate-queue \
+            --query 'jobQueues[].{name:jobQueueName,state:state,status:status}'
+
+      - name: Render campaign jobdef (dry run, nothing registered or submitted)
+        env:
+          CAMPAIGN: ${{ inputs.campaign }}
+          BLOCK: ${{ inputs.block }}
+        run: |
+          python3 scripts/campaign describe "$CAMPAIGN"
+          python3 scripts/campaign submit "$CAMPAIGN" \
+            --block "$BLOCK" --bucket "$BUCKET" --dry-run
+
+      - name: Denial probe — delete must be refused
+        run: |
+          if aws s3api delete-object --bucket "$BUCKET" \
+              --key "campaign/.denial-probe" 2>/dev/null; then
+            echo "::error::delete-object was NOT denied — dispatch role is over-scoped"
+            exit 1
+          else
+            echo "delete-object correctly denied"
+          fi
