@@ -34,6 +34,7 @@ jobs:
     env:
       AWS_REGION: us-east-1
       BUCKET: crusherbucket-994254241749-us-east-1-an
+      ACCOUNT_ID: "994254241749"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -60,7 +61,8 @@ jobs:
         run: |
           python3 scripts/campaign describe "$CAMPAIGN"
           python3 scripts/campaign submit "$CAMPAIGN" \
-            --block "$BLOCK" --bucket "$BUCKET" --dry-run
+            --block "$BLOCK" --bucket "$BUCKET" \
+            --account "$ACCOUNT_ID" --profile '' --dry-run
 
       - name: Denial probe — delete must be refused
         run: |

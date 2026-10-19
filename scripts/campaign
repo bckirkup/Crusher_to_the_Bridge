@@ -177,7 +177,8 @@ def cmd_submit(args: argparse.Namespace) -> int:
     jobdef = _jobdef_name(spec)
 
     aws_env = dict(os.environ)
-    aws_env["AWS_PROFILE"] = args.profile
+    if args.profile:
+        aws_env["AWS_PROFILE"] = args.profile
 
     account = args.account
     if not account:
@@ -301,7 +302,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="AWS account id; registers the jobdef when given")
     submit.add_argument("--region", default=_DEFAULT_REGION)
     submit.add_argument("--queue", default=None)
-    submit.add_argument("--profile", default=_DEFAULT_PROFILE)
+    submit.add_argument("--profile", default=_DEFAULT_PROFILE,
+                        help="AWS CLI profile; pass '' to use ambient "
+                             "credentials (e.g. OIDC in CI)")
     submit.add_argument("--canary", action="store_true",
                         help="single job with --index instead of the array")
     submit.add_argument("--index", type=int, default=0)
