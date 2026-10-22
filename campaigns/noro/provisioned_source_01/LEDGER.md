@@ -402,3 +402,118 @@ NOTE: scan jobdef `picard-noro-scan-readout-ec2:5` was registered
 against the PARENT prefix (empty for mega) — superseded by rev
 `:6`, which scans `campaign/noro_provisioned_source_01_mega/`
 correctly. Submit ONLY `:6`.
+
+### wave 3 readout — 2026-10-22, all measured at image a9f4a517, 1,000 seeds/arm
+
+All 10 arms landed 10,000/10,000 (~09:31 UTC — 4.0-day Spot
+drain, 0 failed cells). Census scan ran as a 10-child array on
+`picard-noro-scan-readout-ec2:6` (job
+`dcd663eb-b121-4955-905f-51efac5626b9`, 10/10 SUCCEEDED ~90min),
+rows in `campaign/noro_provisioned_source_01/_scan_rows/`.
+Report: `food_shapes_01_report.py --arm-set ps01 --n-stations 70`.
+
+**Posting window (band +0.4–0.9pp):**
+
+| arm | mega posted | mega marginal | in-band |
+|---|---|---|---|
+| off | 0 (0.00%) | +0.00 | – |
+| ind | 11 (1.10%) | +1.10 | no (over) |
+| ps_ship | 2 (0.20%) | +0.20 | **no (under)** |
+| q01 | 2 (0.20%) | +0.20 | no |
+| q02 | 2 (0.20%) | +0.20 | no |
+| q03 | 2 (0.20%) | +0.20 | no |
+| q05 | 2 (0.20%) | +0.20 | no |
+| **q08** | **6 (0.60%)** | **+0.60** | **yes** |
+| **q15** | **9 (0.90%)** | **+0.90** | **edge** |
+| q30 | 19 (1.90%) | +1.90 | no (over) |
+
+q15's +0.90 is the inclusive upper edge — the tool's float-ulp
+boundary flags `no` again (same artifact as cls q05); reported as
+edge-in-band. **In-band set on mega: {q08, q15(edge)} ≈ q ∈
+[8e-4, 1.5e-3].**
+
+**ps_ship fourth-hull check — FAILS.** The U[0.0002,0.0005]
+per-ship draw minted 21/1000 voyages (near-absent as designed) and
+posted 2 → +0.20pp, below the band floor. **The flat-rate claim is
+dead at N=70**: one hull-invariant per-lot prevalence does not
+cover the band on mega. The operative window rises to
+~[8e-4,1.5e-3] — ~3–4× the small-hull common window
+[~2.4e-4,3.8e-4]. The rate-rises reading is the measured one: the
+per-lot prevalence needed for the marginal anchor scales up with
+hull, because dilution outruns presence scaling.
+
+**Near-absence test — CONFIRMED.** At common q (~3e-4) mega
+carries ~0.02 objects/voyage — ps_ship/q03 minted 21/1000 each,
+vs design's ~0.021 prediction. Posting is impossible at that
+presence under measured conversion.
+
+**Presence ladder vs Binomial(70,q) — clean:**
+
+| arm | mega minted (E[frac]) | objects (E[obj]) | posted |
+|---|---|---|---|
+| ps_ship | 21 (0.0242) | 21 (24.5) | 2 |
+| q01 | 5 (0.0070) | 5 (7.0) | 2 |
+| q02 | 13 (0.0139) | 13 (14.0) | 2 |
+| q03 | 21 (0.0208) | 21 (21.0) | 2 |
+| q05 | 29 (0.0344) | 29 (35.0) | 2 |
+| q08 | 53 (0.0545) | 56 (56.0) | 6 |
+| q15 | 86 (0.0997) | 93 (105.0) | 9 |
+| q30 | 188 (0.1897) | 207 (210.0) | 19 |
+
+Nested-set violations: **0** across all rung pairs. All posting is
+mint-attributable — unminted-voyage postings 0 on every arm.
+
+**P(post|minted) — the dilution ladder extends:** pooled ≈ 0.10 on
+mega (q30 19/188 = 10.1% [6.6,15.2], q15 9/86 = 10.5%, q08 6/53 =
+11.3%, ps_ship 2/21 = 9.5% [2.7,28.9]) vs exp 0.93 / cls 0.58 /
+spr 0.36. The marginal = minted × conversion identity still holds,
+but conversion falls ~4× exp→spr and lands ~0.10 at N=70 — faster
+than N·q presence can compensate at the shipped prevalence.
+
+**Mega window vs single-lot extrapolation — multi-lot lift
+CONFIRMED.** Design's naive extrapolation was q ∈ [1.5e-3, 4.1e-3]
+(E[objects] 0.105–0.29). Measured window is {q08, q15-edge} — the
+centre sits ~1 rung below the extrapolation floor. Per-voyage
+yield is higher than the single-lot scaling assumed: minted
+voyages carry 1.06–1.10 objects (56/53, 93/86, 207/188) —
+multi-lot share P(≥2|minted) measured ≈ 5.7% / 8.1% / 10.1% at
+q08/q15/q30 — and the added objects lift conversion per minted
+voyage, pulling the in-band window below the naive point.
+
+**D3 excursion→posting conversion:** tops 0.73× ind on mega (q30
+7.39% vs ind 10.19%); excursion→post conversion on minted voyages
+0.20–0.73× ind across rungs. Posted pax-AR ≥0.04 edge still unmet
+everywhere (top 0.0272 ps_ship, obj pooled p90 0.0371) — the
+signature gap persists on the fourth hull: presence/marginal
+reproduced, ind-level excursion AR structural.
+
+**Minted-voyage channel decomposition** (8 sampled zips/arm,
+`reported_cases_by_channel` pax totals): `supply_chain` is the
+entry channel on every minted arm (ps_ship 175/508/28, q08
+153/563/25, q15 92/542/25, q30 196/579/25 — sc/aboard/board) —
+14–25% of reported pax. `aboard` amplification now dominates the
+reported mass ~2–4× on mega (continuing exp→cls→spr→mega growth),
+consistent with wave-2's mechanism-agnostic reading: supply chain
+seeds, aboard spreads, and the amplification share grows with
+hull.
+
+**Must-not-move + integrity:** `off` zero-witness PASS; `ind`
+v1-only PASS; median paired Δinf-AR vs off +0.0000 all 10 arms
+(p90|Δ| ≤0.0073); override echo 10,000/10,000; integrity tallies
+clean (0 unresolved oids, 0 open objects); worst non-cs route
+drift pooled −95.91pp is the vacuous `ship` arm placeholder (0
+cells) — real drift unmeasured on mega (fiat arms omitted by
+design).
+
+**Wave-3 verdict:** the hull-free-q claim in its `ps_ship`
+distribution form FAILS on the fourth hull — near-absence at
+common q on N=70 is exactly as designed (~0.02 objects/voyage) but
+conversion ~0.10 cannot lift +0.20pp into band. Measured mega
+in-band window q ∈ ~[8e-4, 1.5e-3] ≈ 3–4× the small-hull common
+window — the per-lot prevalence needed for the anchor scales up
+with hull size (rate-rises), sitting below the naive single-lot
+extrapolation via the multi-lot lift. Campaign total 46,000 cells
+measured, 0 failures. Open modeling question: whether the supply-
+chain prevalence scales with provisioning volume as a physical
+covariate (bigger ships = bigger supply pools), or whether a
+second entry channel is missing on mega.
