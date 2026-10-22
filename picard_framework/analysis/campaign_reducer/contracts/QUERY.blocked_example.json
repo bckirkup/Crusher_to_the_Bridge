@@ -1,0 +1,96 @@
+{
+  "contract_id": "crusher-campaign-distributions/1.0-proposed",
+  "catalog_snapshot_id": "<FROZEN_CATALOG_REQUIRED>",
+  "operation": "query",
+  "analysis_version": "<ANALYSIS_SHA_AND_RECIPE_REQUIRED>",
+  "source_table": "metrics",
+  "metric_ids": [
+    "reported_true_person_risk.v1"
+  ],
+  "filters": {
+    "and": [
+      {
+        "in": [
+          "runs.campaign_id",
+          [
+            "noro_provisioned_source_01",
+            "noro_provisioned_source_01_mega"
+          ]
+        ]
+      },
+      {
+        "in": [
+          "runs.vessel_id",
+          [
+            "expedition",
+            "classic",
+            "spirit",
+            "mega"
+          ]
+        ]
+      },
+      {
+        "eq": [
+          "runs.selection_state",
+          "selected"
+        ]
+      },
+      {
+        "eq": [
+          "runs.execution_state",
+          "completed"
+        ]
+      }
+    ]
+  },
+  "group_by": [
+    "runs.vessel_id",
+    "runs.arm_id",
+    "metrics.population_id",
+    "metrics.condition_id"
+  ],
+  "statistic": "exact_rows",
+  "weight_set_id": "<FROZEN_EQUAL_RUN_WEIGHT_SET_REQUIRED>",
+  "missing_policy": "report_separately",
+  "projection": [
+    "metrics.run_uid",
+    "runs.vessel_id",
+    "runs.arm_id",
+    "runs.seed",
+    "metrics.metric_id",
+    "metrics.population_id",
+    "metrics.condition_id",
+    "metrics.window_id",
+    "metrics.numerator",
+    "metrics.denominator",
+    "metrics.value",
+    "metrics.value_status"
+  ],
+  "max_export_rows": 200,
+  "max_export_bytes": 1048576,
+  "page_rows": 100,
+  "allow_raw_agent_export": false,
+  "continuation_token": null,
+  "order_by": [
+    "metrics.run_uid",
+    "metrics.metric_id",
+    "metrics.population_id",
+    "metrics.condition_id",
+    "metrics.window_id"
+  ],
+  "grain": "metrics primary key (run \u00d7 estimand \u00d7 population \u00d7 condition/window)",
+  "joins": [
+    {
+      "table": "runs",
+      "on": [
+        "run_uid"
+      ],
+      "cardinality": "many_to_one"
+    }
+  ],
+  "scan_budget": {
+    "max_scan_bytes": 1048576,
+    "max_wall_seconds": 60,
+    "max_cost_usd": 0.01
+  }
+}

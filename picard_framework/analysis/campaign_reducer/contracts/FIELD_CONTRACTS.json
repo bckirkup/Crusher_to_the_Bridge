@@ -1,0 +1,4891 @@
+{
+  "contract_id": "crusher-campaign-distributions/1.0-proposed",
+  "status": "NOT_YET_IMPLEMENTED",
+  "date": "2026-10-22",
+  "survey_source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+  "scope": "ALL Crusher campaign attempts, stages and saved specialized observations, including historical/withdrawn/canary/failed/planned; inclusion in catalog does not qualify scientific use.",
+  "notation": {
+    "type": "Arrow-compatible type names; timestamp represented as ISO8601 UTC string plus timezone evidence",
+    "nullable": "Null requires a data_gaps record unless structurally optional as explicitly stated. Null is never zero.",
+    "json": "Canonical JSON string for original nested payload not yet normalized; preserve original asset separately.",
+    "enum": "Enumerations are closed unless explicitly extension-governed."
+  },
+  "tables": {
+    "campaign_catalog": {
+      "grain": "one declared campaign/stage registration",
+      "primary_key": [
+        "campaign_id",
+        "stage_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "campaign_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Canonical namespaced stable campaign ID; aliases in campaign_aliases_json"
+        },
+        {
+          "name": "stage_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Distinct staged design/reanalysis/canary block; do not infer from directory"
+        },
+        {
+          "name": "campaign_aliases_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Historical directory/ledger/manifest names, with alias evidence"
+        },
+        {
+          "name": "family",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Pathogen/mechanistic/diagnostic/wearable/wastewater/boundary/economics/sentinel/variant/multi-pathogen family"
+        },
+        {
+          "name": "pathogen_ids",
+          "type": "list<utf8>",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Explicit pathogens; synthetic flagged, not assumed norovirus"
+        },
+        {
+          "name": "catalog_state",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Documentation/execution state",
+          "enum": [
+            "declared",
+            "outcomes_reported",
+            "assets_verified",
+            "partially_recovered",
+            "reduced",
+            "withdrawn",
+            "blocked",
+            "unknown"
+          ]
+        },
+        {
+          "name": "design_uri",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Frozen input or source-local URI"
+        },
+        {
+          "name": "ledger_uri",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Controlling chronological entry not stale front matter"
+        },
+        {
+          "name": "documentation_sha",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Documentation revision distinct from simulation/reducer"
+        },
+        {
+          "name": "declared_slots",
+          "type": "int64",
+          "nullable": true,
+          "unit": "run",
+          "definition": "Declared design slots, not verified completed executions"
+        },
+        {
+          "name": "reported_completed",
+          "type": "int64",
+          "nullable": true,
+          "unit": "run",
+          "definition": "Ledger asserted completed cells, not independently verified"
+        },
+        {
+          "name": "verified_unique_completed",
+          "type": "int64",
+          "nullable": true,
+          "unit": "run",
+          "definition": "Exact asset-linked selected completed executions"
+        },
+        {
+          "name": "validity_axes_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Independent hull, fleet weighting, total population, crew/passenger statuses and evidence"
+        },
+        {
+          "name": "claim_use",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Candidate use only; historical or quarantined rows remain queryable"
+        },
+        {
+          "name": "coverage_note",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Known omissions, scope and status basis"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "ALL is a catalog inclusion promise, not a promise every simulation saved every observable.",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "attempts": {
+      "grain": "one immutable scientific attempt",
+      "primary_key": [
+        "campaign_id",
+        "stage_id",
+        "attempt_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "campaign_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Campaign FK"
+        },
+        {
+          "name": "stage_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stage FK"
+        },
+        {
+          "name": "attempt_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exploratory/confirmatory/revision/review-response/canary identity"
+        },
+        {
+          "name": "attempt_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Scientific lifecycle",
+          "enum": [
+            "exploratory",
+            "confirmatory",
+            "revision",
+            "review_response",
+            "canary",
+            "smoke",
+            "reanalysis",
+            "unknown"
+          ]
+        },
+        {
+          "name": "parent_attempt_ids",
+          "type": "list<utf8>",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Explicit parentage; empty means root, not missing history"
+        },
+        {
+          "name": "design_hash",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Frozen design contents identity"
+        },
+        {
+          "name": "analysis_plan_hash",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Frozen estimands and rules, if existing"
+        },
+        {
+          "name": "selected_run_policy",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Predetermined retry/result selection, never most favorable result"
+        },
+        {
+          "name": "scientific_approval_state",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Existing approval evidence, not a new per-download human gate"
+        },
+        {
+          "name": "supersedes_scope_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Target/run/claim-specific supersession; none does not erase history"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "runs": {
+      "grain": "one actual or declared run execution",
+      "primary_key": [
+        "run_uid"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Globally unique scientific execution key"
+        },
+        {
+          "name": "campaign_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Campaign ID"
+        },
+        {
+          "name": "stage_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stage ID"
+        },
+        {
+          "name": "attempt_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Attempt ID"
+        },
+        {
+          "name": "case_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Design-cell + replicate identity independent of retry packaging"
+        },
+        {
+          "name": "execution_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Actual execution/retry identity; unresolved gets explicit provisional ID"
+        },
+        {
+          "name": "original_run_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Emitted identifier unmodified"
+        },
+        {
+          "name": "seed",
+          "type": "uint64",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact RNG seed; never float"
+        },
+        {
+          "name": "rng_streams_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Saved RNG algorithm/substream identities and pairing scope; unknown explicitly"
+        },
+        {
+          "name": "replicate_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Within-design scientific replicate"
+        },
+        {
+          "name": "arm_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Nominal arm identifier"
+        },
+        {
+          "name": "vessel_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Stable template/vessel identifier, not inferred from population"
+        },
+        {
+          "name": "pathogen_ids",
+          "type": "list<utf8>",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Pathogens represented in this execution"
+        },
+        {
+          "name": "engine_sha",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Actually executed source SHA; documentation SHA is not a substitute"
+        },
+        {
+          "name": "image_digest",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Actually executed container digest; tag may be stored in metadata only"
+        },
+        {
+          "name": "input_hash",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Resolved input content hash"
+        },
+        {
+          "name": "execution_state",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Execution state",
+          "enum": [
+            "declared",
+            "completed",
+            "partial",
+            "failed",
+            "cancelled",
+            "unknown"
+          ]
+        },
+        {
+          "name": "selection_state",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Eligible replicate state",
+          "enum": [
+            "selected",
+            "duplicate_alias",
+            "retry_not_selected",
+            "identity_conflict",
+            "quarantined",
+            "pending"
+          ]
+        },
+        {
+          "name": "selection_reason",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Explicit dedup/retry/claim use basis"
+        },
+        {
+          "name": "clock_mode",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Actual natural-history/physical clock mode"
+        },
+        {
+          "name": "configured_epoch_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Saved configured step length, not necessarily effective"
+        },
+        {
+          "name": "effective_epoch_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Effective conversion proved from actual run version/config"
+        },
+        {
+          "name": "epoch_origin_kind",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Origin convention: pre-step/post-step/time-zero/etc."
+        },
+        {
+          "name": "epoch_origin_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Elapsed hours at epoch zero relative to voyage departure"
+        },
+        {
+          "name": "voyage_start_utc",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Calendar origin only when actually saved; otherwise elapsed-only"
+        },
+        {
+          "name": "requested_duration_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Intended horizon"
+        },
+        {
+          "name": "actual_followup_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Observed/simulated completed follow-up"
+        },
+        {
+          "name": "last_complete_epoch",
+          "type": "int64",
+          "nullable": true,
+          "unit": "epoch",
+          "definition": "Last complete epoch; incomplete tail excluded"
+        },
+        {
+          "name": "retention_profile",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Full/compact/lean/mixed/unknown; capability finer than this label"
+        },
+        {
+          "name": "metadata_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Original run tags, image tag, launch IDs and optional environment metadata"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "assets": {
+      "grain": "one object/member/sidecar instance",
+      "primary_key": [
+        "asset_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "asset_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable asset ID"
+        },
+        {
+          "name": "campaign_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Campaign ID; unmapped assets receive inventory namespace"
+        },
+        {
+          "name": "attempt_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Attempt or unresolved inventory attempt"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Mapped execution; null for fused container or not-yet-mapped"
+        },
+        {
+          "name": "s3_uri",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Existing authorized source URI; local evidence URI also allowed"
+        },
+        {
+          "name": "object_version",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "S3 version if present; not mandatory for unversioned historical objects"
+        },
+        {
+          "name": "object_etag",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "ETag only cache identity, NOT promised content SHA"
+        },
+        {
+          "name": "asset_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Container or member",
+          "enum": [
+            "container",
+            "member",
+            "sidecar",
+            "parquet",
+            "manifest",
+            "log",
+            "local_source"
+          ]
+        },
+        {
+          "name": "parent_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Container FK for a member"
+        },
+        {
+          "name": "member_path",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact path inside per-run/fused archive"
+        },
+        {
+          "name": "compression",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "ZIP/gzip/none etc."
+        },
+        {
+          "name": "bytes_stored",
+          "type": "int64",
+          "nullable": true,
+          "unit": "byte",
+          "definition": "Stored bytes"
+        },
+        {
+          "name": "bytes_uncompressed",
+          "type": "int64",
+          "nullable": true,
+          "unit": "byte",
+          "definition": "Member uncompressed bytes"
+        },
+        {
+          "name": "content_sha256",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Hash of exact object OR uncompressed member as stated in hash_scope"
+        },
+        {
+          "name": "hash_scope",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Container hashes never compared as member hashes",
+          "enum": [
+            "container_bytes",
+            "uncompressed_member",
+            "file_bytes",
+            "not_computed"
+          ]
+        },
+        {
+          "name": "read_state",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Listing vs actual parse evidence",
+          "enum": [
+            "listed",
+            "indexed",
+            "read",
+            "parsed",
+            "malformed",
+            "unreachable",
+            "missing",
+            "not_requested"
+          ]
+        },
+        {
+          "name": "adapter_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Versioned source adapter used or proposed"
+        },
+        {
+          "name": "source_sha",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Writer/engine identity only when known"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "capabilities": {
+      "grain": "one run or stage capability",
+      "primary_key": [
+        "scope_id",
+        "capability_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "scope_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "run_uid or campaign/stage ID; scope_kind disambiguates"
+        },
+        {
+          "name": "scope_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Scope type",
+          "enum": [
+            "run",
+            "stage",
+            "campaign"
+          ]
+        },
+        {
+          "name": "capability_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Metric/table/join capability ID"
+        },
+        {
+          "name": "availability",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Typed scientific recoverability",
+          "enum": [
+            "available_exact",
+            "available_rounded",
+            "recoverable_unread",
+            "derivable_exact",
+            "partial",
+            "not_saved",
+            "dropped_by_profile",
+            "not_applicable",
+            "unknown",
+            "blocked_identity",
+            "malformed",
+            "unreachable"
+          ]
+        },
+        {
+          "name": "evidence_detail",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Saved member/schema/version proof; no global flag inferred from one sample"
+        },
+        {
+          "name": "row_coverage",
+          "type": "int64",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Rows or executions inspected, stated in coverage_unit"
+        },
+        {
+          "name": "coverage_unit",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "run/member/row"
+        },
+        {
+          "name": "required_members",
+          "type": "list<utf8>",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Targeted member paths"
+        },
+        {
+          "name": "recoverability_action",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Read/reduce/reconcile/retain unavailable/pilot proposal"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "data_gaps": {
+      "grain": "one unavailable value or range",
+      "primary_key": [
+        "row_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "table_name",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Affected normalized table"
+        },
+        {
+          "name": "target_row_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Affected row, or range selector JSON in selector_json"
+        },
+        {
+          "name": "field_name",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Column or metric"
+        },
+        {
+          "name": "selector_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Explicit affected slice; empty object for single row"
+        },
+        {
+          "name": "reason",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Never silently map to zero",
+          "enum": [
+            "not_saved",
+            "dropped_by_profile",
+            "member_missing",
+            "not_applicable",
+            "unknown_schema",
+            "malformed",
+            "unreachable",
+            "not_requested",
+            "identity_unresolved",
+            "incompatible_definition",
+            "denominator_zero",
+            "no_events",
+            "not_observed",
+            "not_identifiable",
+            "rounded_only",
+            "time_origin_unknown",
+            "partial_followup",
+            "unsupported_join"
+          ]
+        },
+        {
+          "name": "detail",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Evidence and recovery instructions"
+        },
+        {
+          "name": "recoverability",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Recoverability state",
+          "enum": [
+            "read_existing",
+            "derive_existing",
+            "reconcile_identity",
+            "irrecoverable_existing",
+            "pending_inventory",
+            "not_applicable"
+          ]
+        },
+        {
+          "name": "blocks_claim_ids",
+          "type": "list<utf8>",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Only affected claims blocked, not the entire catalog"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "design_values": {
+      "grain": "one run parameter at specified design layer",
+      "primary_key": [
+        "run_uid",
+        "parameter_path",
+        "value_layer"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "parameter_path",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Canonical and original configuration path via metadata"
+        },
+        {
+          "name": "value_layer",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Do not substitute nominal for realized",
+          "enum": [
+            "nominal_design",
+            "resolved_config",
+            "realized_draw",
+            "realized_exposure",
+            "measured_outcome"
+          ]
+        },
+        {
+          "name": "value_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact original scalar/structured value, no float seed conversion"
+        },
+        {
+          "name": "value_numeric",
+          "type": "float64",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Numeric projection when lossless enough for analysis"
+        },
+        {
+          "name": "value_unit",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Physical/probability/log scale units"
+        },
+        {
+          "name": "distribution_family",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Nominal distribution family if draw"
+        },
+        {
+          "name": "correlation_group_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Shared draw/correlation design identifier"
+        },
+        {
+          "name": "parameter_provenance_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Source grade/assumed/fitted/transcribed plus transform/version"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "pair_links": {
+      "grain": "one explicitly justified pair/contrast",
+      "primary_key": [
+        "pair_id",
+        "contrast_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "pair_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Pairing identity within contrast, not seed alone"
+        },
+        {
+          "name": "contrast_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Frozen contrast recipe ID"
+        },
+        {
+          "name": "left_run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reference selected run FK"
+        },
+        {
+          "name": "right_run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Treatment/other selected run FK"
+        },
+        {
+          "name": "shared_seed",
+          "type": "uint64",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Seed equality is necessary only for declared CRN scheme, not sufficient"
+        },
+        {
+          "name": "pairing_basis",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Matched cell, random stream and source bridge evidence"
+        },
+        {
+          "name": "pair_state",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Eligibility",
+          "enum": [
+            "exact_design_pair",
+            "version_bridge_pair",
+            "partial_pair",
+            "unmatched",
+            "incompatible"
+          ]
+        },
+        {
+          "name": "bridge_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Source/image/parameter equivalence table reference for version comparison"
+        },
+        {
+          "name": "differing_parameter_paths",
+          "type": "list<utf8>",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Explicit actual differences incl hull bundle"
+        },
+        {
+          "name": "unmatched_reason",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Structurally optional for exact pairs"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "No pairing across attempts or hulls by coincident seed number alone.",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "role_dictionary": {
+      "grain": "one versioned role concept",
+      "primary_key": [
+        "role_definition_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "role_definition_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable explicit ontology ID with version"
+        },
+        {
+          "name": "role_label",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Human label"
+        },
+        {
+          "name": "role_axis",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Orthogonal role axes",
+          "enum": [
+            "primary_population",
+            "occupation",
+            "response_function",
+            "duty_state",
+            "source_eligibility",
+            "clinical_state",
+            "observation_state",
+            "spatial_context"
+          ]
+        },
+        {
+          "name": "membership_rule",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact predicate including writer version and input fields"
+        },
+        {
+          "name": "exclusive_within_axis",
+          "type": "bool",
+          "nullable": false,
+          "unit": "1",
+          "definition": "True only for proved exhaustive disjoint primary role partition"
+        },
+        {
+          "name": "time_varying",
+          "type": "bool",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Requires interval/event-time membership"
+        },
+        {
+          "name": "source_mapping_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Original role/class values and explicit fallback/unresolved handling"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "agents": {
+      "grain": "one saved agent identity per run",
+      "primary_key": [
+        "run_uid",
+        "agent_id"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "agent_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable within-run ID, not cross-seed person"
+        },
+        {
+          "name": "roster_scope",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Full roster vs infected subset",
+          "enum": [
+            "full_at_risk",
+            "infected_only",
+            "observed_only",
+            "event_participant_only",
+            "partial"
+          ]
+        },
+        {
+          "name": "boarding_state",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Saved infection/import and presence state"
+        },
+        {
+          "name": "primary_role_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Explicit role dictionary FK; unresolved not inferred crew/passenger"
+        },
+        {
+          "name": "attributes_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Only saved stable subgroup attributes, no generated demographics"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "memberships": {
+      "grain": "one agent-role/context membership interval",
+      "primary_key": [
+        "run_uid",
+        "membership_id"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "membership_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Distinct membership interval ID"
+        },
+        {
+          "name": "agent_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Within-run agent FK"
+        },
+        {
+          "name": "role_definition_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Dictionary FK"
+        },
+        {
+          "name": "start_hours",
+          "type": "float64",
+          "nullable": false,
+          "unit": "h",
+          "definition": "Inclusive start, elapsed voyage hours"
+        },
+        {
+          "name": "end_hours",
+          "type": "float64",
+          "nullable": false,
+          "unit": "h",
+          "definition": "Exclusive end; clipped to complete followup"
+        },
+        {
+          "name": "context_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Zone/work/team/host recipient context"
+        },
+        {
+          "name": "membership_basis",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Saved role, explicit predicate or verified derived interval; never nominal crew JSON alone"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "Overlapping function/occupation roles allowed. Primary-population axis must not overlap unless documented transition; aggregate with distinct IDs or interval union.",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "population_intervals": {
+      "grain": "one run × population/window denominator",
+      "primary_key": [
+        "run_uid",
+        "population_id",
+        "window_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "population_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned set rule, with role/eligibility/clinical exclusion"
+        },
+        {
+          "name": "window_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned followup window"
+        },
+        {
+          "name": "role_definition_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Optional role-specific set"
+        },
+        {
+          "name": "window_start_hours",
+          "type": "float64",
+          "nullable": false,
+          "unit": "h",
+          "definition": "Inclusive beginning"
+        },
+        {
+          "name": "window_end_hours",
+          "type": "float64",
+          "nullable": false,
+          "unit": "h",
+          "definition": "Exclusive end"
+        },
+        {
+          "name": "population_basis",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Denominator semantics",
+          "enum": [
+            "boarding_complement",
+            "unique_ever_aboard",
+            "susceptible_at_start",
+            "eligible_course_cohort",
+            "eligible_onboard",
+            "dynamic_at_risk",
+            "test_eligible",
+            "source_eligible",
+            "response_eligible",
+            "observed_roster"
+          ]
+        },
+        {
+          "name": "n_unique",
+          "type": "int64",
+          "nullable": true,
+          "unit": "person",
+          "definition": "Distinct eligible persons; not episodes"
+        },
+        {
+          "name": "n_at_start",
+          "type": "int64",
+          "nullable": true,
+          "unit": "person",
+          "definition": "Eligible present at start"
+        },
+        {
+          "name": "n_at_end",
+          "type": "int64",
+          "nullable": true,
+          "unit": "person",
+          "definition": "Eligible present at end"
+        },
+        {
+          "name": "person_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "person*h",
+          "definition": "Integral of union of eligible presence intervals"
+        },
+        {
+          "name": "susceptible_person_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "person*h",
+          "definition": "Integral of infection-risk eligibility; reinfection rule explicit"
+        },
+        {
+          "name": "risk_set_rule",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Arrivals/departures, immunity, infection, competing exit, attribution membership time"
+        },
+        {
+          "name": "count_evidence",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Emitted complete roster, emitted counts, reconstruction, or nominal-only warning"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "run_scalars": {
+      "grain": "one exact native scalar path per run and source member",
+      "primary_key": [
+        "run_uid",
+        "source_asset_id",
+        "native_path"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "native_path",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "JSON Pointer / row+column to original scalar"
+        },
+        {
+          "name": "native_type",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Original primitive",
+          "enum": [
+            "null",
+            "boolean",
+            "integer",
+            "number",
+            "string"
+          ]
+        },
+        {
+          "name": "native_value_json",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact lexical JSON token where possible; original member retained otherwise"
+        },
+        {
+          "name": "canonical_metric_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Validated mapping only; unmapped scalar still accessible"
+        },
+        {
+          "name": "mapping_state",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Mapping status",
+          "enum": [
+            "verified",
+            "native_only",
+            "ambiguous",
+            "rounded_source"
+          ]
+        },
+        {
+          "name": "unit",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "As emitted or unknown; never infer route dose unit from field name"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "Retain every original scalar, including zero, negatives, strings, flags and rounded legacy values; no quantile-only replacement.",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "metrics": {
+      "grain": "one exact run × estimand × population × condition/window",
+      "primary_key": [
+        "run_uid",
+        "metric_id",
+        "population_id",
+        "condition_id",
+        "window_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "metric_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned estimand dictionary ID"
+        },
+        {
+          "name": "population_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Denominator population ID"
+        },
+        {
+          "name": "condition_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Unconditional or explicit predicate on post/outbreak/channel/etc."
+        },
+        {
+          "name": "window_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned observation/clinical/acquisition window"
+        },
+        {
+          "name": "numerator",
+          "type": "float64",
+          "nullable": true,
+          "unit": "metric-dependent",
+          "definition": "Exact count/integral numerator projection; native token retained"
+        },
+        {
+          "name": "denominator",
+          "type": "float64",
+          "nullable": true,
+          "unit": "metric-dependent",
+          "definition": "Matching population/person-time/exposure opportunity denominator"
+        },
+        {
+          "name": "value",
+          "type": "float64",
+          "nullable": true,
+          "unit": "metric-dependent",
+          "definition": "Unrounded recomputation only where numerator/denominator defined"
+        },
+        {
+          "name": "value_status",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Value evidence",
+          "enum": [
+            "exact_emitted",
+            "exact_derived",
+            "rounded_emitted",
+            "partial",
+            "undefined",
+            "unavailable"
+          ]
+        },
+        {
+          "name": "unit",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Count/proportion/person^-hour/dose/event etc."
+        },
+        {
+          "name": "endpoint_domain",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Truth, clinical, observation, policy, economic distinct",
+          "enum": [
+            "latent_truth",
+            "symptomatic_course",
+            "onboard_symptoms",
+            "reported",
+            "tested",
+            "lab_confirmed",
+            "response",
+            "mechanism",
+            "economic",
+            "external_observed"
+          ]
+        },
+        {
+          "name": "definition_version",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Source/analysis definition identity"
+        },
+        {
+          "name": "membership_time_rule",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "At boarding/acquisition/onset/report/event/time-integrated"
+        },
+        {
+          "name": "numerator_exact_json",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact count/integral JSON token when numeric projection is lossy; structurally optional when numerator absent"
+        },
+        {
+          "name": "denominator_exact_json",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact denominator token; structurally optional when denominator absent"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "epoch_metrics": {
+      "grain": "one run × metric × population × time bin",
+      "primary_key": [
+        "run_uid",
+        "metric_id",
+        "population_id",
+        "bin_start_hours",
+        "bin_end_hours"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "metric_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned curve metric"
+        },
+        {
+          "name": "population_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Explicit role/risk set"
+        },
+        {
+          "name": "source_epoch",
+          "type": "int64",
+          "nullable": true,
+          "unit": "epoch",
+          "definition": "Original epoch; keep exact axis"
+        },
+        {
+          "name": "bin_start_hours",
+          "type": "float64",
+          "nullable": false,
+          "unit": "h",
+          "definition": "Inclusive elapsed time"
+        },
+        {
+          "name": "bin_end_hours",
+          "type": "float64",
+          "nullable": false,
+          "unit": "h",
+          "definition": "Exclusive elapsed time"
+        },
+        {
+          "name": "value",
+          "type": "float64",
+          "nullable": true,
+          "unit": "metric-dependent",
+          "definition": "Count/state/increment/integral; metric defines type"
+        },
+        {
+          "name": "denominator",
+          "type": "float64",
+          "nullable": true,
+          "unit": "metric-dependent",
+          "definition": "Actual bin population or person-time"
+        },
+        {
+          "name": "series_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Series semantics",
+          "enum": [
+            "state",
+            "incidence",
+            "cumulative",
+            "rate",
+            "integral",
+            "flag"
+          ]
+        },
+        {
+          "name": "value_status",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact/rounded/estimated/missing"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "No interpolated agent-event times from cumulative counts. Preserve full resolution; downsample only an explicitly labeled query view.",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "times_to_event": {
+      "grain": "one subject/run × endpoint × followup window",
+      "primary_key": [
+        "run_uid",
+        "subject_kind",
+        "subject_id",
+        "endpoint_id",
+        "window_id"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "subject_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Unit at risk",
+          "enum": [
+            "run",
+            "agent",
+            "episode",
+            "object",
+            "test",
+            "port_call"
+          ]
+        },
+        {
+          "name": "subject_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable ID at this grain"
+        },
+        {
+          "name": "endpoint_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Acquisition/onset/report/test/result/trigger/recovery/etc."
+        },
+        {
+          "name": "window_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Followup window definition"
+        },
+        {
+          "name": "time_origin_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Voyage start/acquisition/onset/specimen/etc."
+        },
+        {
+          "name": "origin_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Origin on elapsed voyage axis"
+        },
+        {
+          "name": "entry_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Risk entry relative to time origin (delayed entry supported)"
+        },
+        {
+          "name": "lower_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Lower event bound; null means negative infinity only for explicitly left censored"
+        },
+        {
+          "name": "upper_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Upper event bound; null means positive infinity only for explicitly right censored"
+        },
+        {
+          "name": "censor_type",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Event-time observation",
+          "enum": [
+            "exact",
+            "right",
+            "left",
+            "interval",
+            "structural_nonoccurrence",
+            "not_at_risk",
+            "unknown"
+          ]
+        },
+        {
+          "name": "exit_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Actual end of observation relative origin"
+        },
+        {
+          "name": "competing_endpoint_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Disembarkation/death/recovery/etc.; must distinguish administrative censor"
+        },
+        {
+          "name": "event_domain",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Observed/latent/estimated",
+          "enum": [
+            "latent",
+            "observed",
+            "scheduled",
+            "inferred_interval"
+          ]
+        },
+        {
+          "name": "event_observed",
+          "type": "bool",
+          "nullable": true,
+          "unit": "1",
+          "definition": "True iff endpoint was directly observed within relevant domain"
+        },
+        {
+          "name": "original_time_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Raw epoch, unit, bounds and writer convention"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "events": {
+      "grain": "one saved event or establishment episode",
+      "primary_key": [
+        "run_uid",
+        "event_id"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "event_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Native ID, or deterministic source-member+array-index ID"
+        },
+        {
+          "name": "event_type",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exposure/contact/acquisition/onset/report/care/delivery/etc."
+        },
+        {
+          "name": "episode_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Infection episode FK if saved"
+        },
+        {
+          "name": "start_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Inclusive event time/beginning"
+        },
+        {
+          "name": "end_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Exclusive end for duration; instant events start=end"
+        },
+        {
+          "name": "zone_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Saved spatial context"
+        },
+        {
+          "name": "object_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Saved mechanism object FK"
+        },
+        {
+          "name": "entry_channel",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Boarding/imported supply/shore/aboard/unknown per version"
+        },
+        {
+          "name": "dose_route",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Dose accounting route, distinct from entry"
+        },
+        {
+          "name": "dominant_route",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Establishment argmax/tie/fallback definition, never source identity"
+        },
+        {
+          "name": "dose_delivered",
+          "type": "float64",
+          "nullable": true,
+          "unit": "declared_dose_unit",
+          "definition": "Delivered dose, not automatically acquired dose"
+        },
+        {
+          "name": "dose_acquired",
+          "type": "float64",
+          "nullable": true,
+          "unit": "declared_dose_unit",
+          "definition": "Credited/acquired dose with source units"
+        },
+        {
+          "name": "event_weight",
+          "type": "float64",
+          "nullable": false,
+          "unit": "event",
+          "definition": "1 for each event unless saved aggregated event explicitly labeled"
+        },
+        {
+          "name": "payload_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "All unmapped original event fields preserved server-side"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "event_participants": {
+      "grain": "one event × agent × participation kind",
+      "primary_key": [
+        "run_uid",
+        "event_id",
+        "agent_id",
+        "participation_kind"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "event_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Saved event FK"
+        },
+        {
+          "name": "agent_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable within-run ID"
+        },
+        {
+          "name": "participation_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Directed and multi-person participation",
+          "enum": [
+            "actor",
+            "source",
+            "recipient",
+            "exposed",
+            "responder",
+            "caregiver",
+            "service_provider",
+            "reporter",
+            "specimen_donor",
+            "tested",
+            "observer"
+          ]
+        },
+        {
+          "name": "role_definition_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Event-time role if recoverable, otherwise null gap"
+        },
+        {
+          "name": "membership_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Event-time interval membership evidence"
+        },
+        {
+          "name": "dose_share",
+          "type": "float64",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Only when saved and meaningful; not imputed equal shares"
+        },
+        {
+          "name": "participation_status",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Saved/derived/partial; count unique IDs separately from event rows"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "Several role labels can attach to same agent through memberships; this table does not create an all-actors × all-recipients cross product.",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "mechanism_objects": {
+      "grain": "one saved physical/source object",
+      "primary_key": [
+        "run_uid",
+        "object_id"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "object_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable within-run object ID"
+        },
+        {
+          "name": "object_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Provisioned lot/pan/event source/air compartment/etc."
+        },
+        {
+          "name": "source_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Saved source identity; scenario label not necessarily routed itinerary"
+        },
+        {
+          "name": "source_kind",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Boarding/agent/provisioned/shore/environmental etc."
+        },
+        {
+          "name": "zone_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Saved location"
+        },
+        {
+          "name": "station_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Stable source station if saved or deterministic zone+item mapping"
+        },
+        {
+          "name": "start_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Seeded/available time"
+        },
+        {
+          "name": "end_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Removal/end/censor time"
+        },
+        {
+          "name": "end_reason",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exhaustion/extent_met/horizon/etc."
+        },
+        {
+          "name": "attributes_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "All saved titre/servings/pans/window/source witnesses with units"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "observations": {
+      "grain": "one saved observation/specimen/result/report",
+      "primary_key": [
+        "run_uid",
+        "observation_id"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "run_uid",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact scientific execution identity, never filename alone",
+          "references": "runs.run_uid"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "observation_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Unique observation ID; repeated tests remain distinct"
+        },
+        {
+          "name": "subject_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Agent/site/zone/port subject"
+        },
+        {
+          "name": "subject_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "agent/sample/zone/ship/port"
+        },
+        {
+          "name": "modality",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Syndromic/clinical/lab/wearable/wastewater/sequencing/etc."
+        },
+        {
+          "name": "specimen_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Specimen identity"
+        },
+        {
+          "name": "parent_observation_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Reflex/cascade lineage"
+        },
+        {
+          "name": "collection_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Actual sample/observation time"
+        },
+        {
+          "name": "result_hours",
+          "type": "float64",
+          "nullable": true,
+          "unit": "h",
+          "definition": "Availability time not collection time"
+        },
+        {
+          "name": "result_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Categorical/numeric result and original unit/LOD/LOQ/censor flags"
+        },
+        {
+          "name": "latent_truth_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Saved simulation truth linkage, labeled and never used as observed fit input"
+        },
+        {
+          "name": "eligibility_population_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Who could be tested/reported"
+        },
+        {
+          "name": "feedback_action_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Policy/clinical action caused by observation if saved"
+        }
+      ],
+      "partition_by": [
+        "campaign_id",
+        "attempt_id",
+        "run_bucket"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "weights": {
+      "grain": "one analysis target × unit weight",
+      "primary_key": [
+        "weight_set_id",
+        "unit_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "weight_set_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Named immutable target/date weight definition"
+        },
+        {
+          "name": "unit_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Weight unit",
+          "enum": [
+            "run",
+            "seed_block",
+            "design_cell",
+            "vessel",
+            "voyage",
+            "person",
+            "posterior_draw",
+            "external_record"
+          ]
+        },
+        {
+          "name": "unit_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Matching ID at declared unit"
+        },
+        {
+          "name": "target_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Finite fleet, bounded class, design distribution, population etc."
+        },
+        {
+          "name": "weight",
+          "type": "float64",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Nonnegative finite analysis weight; zero weight reported not deleted"
+        },
+        {
+          "name": "weight_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Simulation design/fleet/population/inverse probability/posterior separately",
+          "enum": [
+            "equal_run",
+            "design",
+            "fleet",
+            "person",
+            "selection",
+            "posterior"
+          ]
+        },
+        {
+          "name": "normalization_scope",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Within vessel/cell/target normalization"
+        },
+        {
+          "name": "provenance_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Named/date fleet source, selection rule, uncertainty, bounds and approval"
+        },
+        {
+          "name": "validity_status",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Qualified/unqualified/blocked; no weights borrowed silently across targets"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "distributions": {
+      "grain": "one exact mass/support point or censored-time contribution per group",
+      "primary_key": [
+        "query_id",
+        "distribution_id",
+        "support_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "query_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reproducible query/analysis ID"
+        },
+        {
+          "name": "distribution_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Metric/conditioning/weight domain ID"
+        },
+        {
+          "name": "support_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable sorted support/bound record ID"
+        },
+        {
+          "name": "group_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact user-selected dimensions and target"
+        },
+        {
+          "name": "metric_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned metric"
+        },
+        {
+          "name": "support_value",
+          "type": "float64",
+          "nullable": true,
+          "unit": "metric-dependent",
+          "definition": "Exact observed scalar support; null for censor/time category only"
+        },
+        {
+          "name": "mass_count",
+          "type": "int64",
+          "nullable": false,
+          "unit": "run",
+          "definition": "Number of distinct selected independent run contributions"
+        },
+        {
+          "name": "weight_sum",
+          "type": "float64",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Sum declared valid weights at support"
+        },
+        {
+          "name": "cdf",
+          "type": "float64",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Right-continuous scalar ECDF when meaningful; not for arbitrary censor records"
+        },
+        {
+          "name": "n_eligible",
+          "type": "int64",
+          "nullable": false,
+          "unit": "run",
+          "definition": "Runs eligible before value missingness"
+        },
+        {
+          "name": "n_observed",
+          "type": "int64",
+          "nullable": false,
+          "unit": "run",
+          "definition": "Nonmissing value runs"
+        },
+        {
+          "name": "n_missing",
+          "type": "int64",
+          "nullable": false,
+          "unit": "run",
+          "definition": "Unavailable/undefined separate via missing_reason_counts_json"
+        },
+        {
+          "name": "n_effective",
+          "type": "float64",
+          "nullable": true,
+          "unit": "run",
+          "definition": "Kish weight diagnostic, not independent replicate count"
+        },
+        {
+          "name": "missing_reason_counts_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Typed reason counts incl structural zero/event absence"
+        },
+        {
+          "name": "distribution_payload_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Censor/risk-set/CIF table, atom metadata, histogram bounds or approximation disclosure"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "aggregate_estimates": {
+      "grain": "one analysis estimand × target/group",
+      "primary_key": [
+        "query_id",
+        "estimate_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "query_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Recipe/query identity"
+        },
+        {
+          "name": "estimate_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Output ID"
+        },
+        {
+          "name": "estimand_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Mean run rate/pooled person rate/mixture contrast etc."
+        },
+        {
+          "name": "group_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "All conditioning, populations, hulls and parameter dimensions"
+        },
+        {
+          "name": "target_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Named target distribution or bounded vessel claim"
+        },
+        {
+          "name": "weight_set_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Explicit weights or equal-run definition"
+        },
+        {
+          "name": "estimate",
+          "type": "float64",
+          "nullable": true,
+          "unit": "estimand-dependent",
+          "definition": "Unrounded estimate"
+        },
+        {
+          "name": "lower",
+          "type": "float64",
+          "nullable": true,
+          "unit": "estimand-dependent",
+          "definition": "Interval lower bound"
+        },
+        {
+          "name": "upper",
+          "type": "float64",
+          "nullable": true,
+          "unit": "estimand-dependent",
+          "definition": "Interval upper bound"
+        },
+        {
+          "name": "interval_method",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Seed-block bootstrap/binomial/exact/survival/posterior etc."
+        },
+        {
+          "name": "interval_level",
+          "type": "float64",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Coverage or posterior probability"
+        },
+        {
+          "name": "n_independent_blocks",
+          "type": "int64",
+          "nullable": false,
+          "unit": "block",
+          "definition": "Actual independent seed/design blocks"
+        },
+        {
+          "name": "n_runs",
+          "type": "int64",
+          "nullable": false,
+          "unit": "run",
+          "definition": "Selected complete runs contributing"
+        },
+        {
+          "name": "numerator",
+          "type": "float64",
+          "nullable": true,
+          "unit": "estimand-dependent",
+          "definition": "Pooled numerator if appropriate"
+        },
+        {
+          "name": "denominator",
+          "type": "float64",
+          "nullable": true,
+          "unit": "estimand-dependent",
+          "definition": "Pooled denominator if appropriate"
+        },
+        {
+          "name": "analysis_version",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Deterministic recipe, code and environment version"
+        },
+        {
+          "name": "limitations_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Vacuity, missingness, multiplicity, identity and validity restrictions"
+        },
+        {
+          "name": "numerator_exact_json",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact count/integral JSON token when numeric projection is lossy; structurally optional when numerator absent"
+        },
+        {
+          "name": "denominator_exact_json",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact denominator token; structurally optional when denominator absent"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "external_targets": {
+      "grain": "one external observed endpoint/stratum",
+      "primary_key": [
+        "external_target_id"
+      ],
+      "tier": "external_separate",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "external_target_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable target/version"
+        },
+        {
+          "name": "dataset_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Dataset and extraction date"
+        },
+        {
+          "name": "endpoint_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "AGE/norovirus-specific/reported/lab etc."
+        },
+        {
+          "name": "population_definition",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Passengers/crew/fleet/tonnage/duration/eligibility"
+        },
+        {
+          "name": "time_window_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Calendar era, voyage duration and observation boundaries"
+        },
+        {
+          "name": "observed_numerator",
+          "type": "float64",
+          "nullable": true,
+          "unit": "declared",
+          "definition": "Actual observed count or estimate"
+        },
+        {
+          "name": "observed_denominator",
+          "type": "float64",
+          "nullable": true,
+          "unit": "declared",
+          "definition": "Matching observed exposure denominator"
+        },
+        {
+          "name": "estimate_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Uncertainty, ascertainment, norovirus fraction model and external-only transformation"
+        },
+        {
+          "name": "provenance_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Local source/citation/extraction grade and limitations"
+        },
+        {
+          "name": "comparison_qualification",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Matched/partially matched/withheld, endpoint-specific"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "analysis_artifacts": {
+      "grain": "one generated query/reduction export",
+      "primary_key": [
+        "artifact_id"
+      ],
+      "tier": "core",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "artifact_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable catalog ID"
+        },
+        {
+          "name": "query_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Query ID"
+        },
+        {
+          "name": "uri",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "AWS full table or compact Edison artifact pointer"
+        },
+        {
+          "name": "format",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Parquet/JSON/CSV/PNG/PDF/Markdown etc."
+        },
+        {
+          "name": "row_count",
+          "type": "int64",
+          "nullable": false,
+          "unit": "row",
+          "definition": "Exact rows exported"
+        },
+        {
+          "name": "bytes",
+          "type": "int64",
+          "nullable": false,
+          "unit": "byte",
+          "definition": "Artifact size"
+        },
+        {
+          "name": "content_sha256",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Ordinary scientific reproducibility checksum"
+        },
+        {
+          "name": "source_partition_ids",
+          "type": "list<utf8>",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact catalog snapshot inputs"
+        },
+        {
+          "name": "query_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Filters/groupings/metric/window/weight/paging/revision"
+        },
+        {
+          "name": "reducer_version",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Actual reducer code version or proposed marker"
+        },
+        {
+          "name": "analysis_version",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Actual analysis code version or proposed marker"
+        },
+        {
+          "name": "truncated",
+          "type": "bool",
+          "nullable": false,
+          "unit": "1",
+          "definition": "True only for explicitly labeled preview"
+        },
+        {
+          "name": "continuation_token",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Page token tied to immutable query+sort+catalog snapshot"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "posterior_draws": {
+      "grain": "one saved fit × chain × draw × scalar parameter",
+      "primary_key": [
+        "fit_id",
+        "chain_id",
+        "draw_id",
+        "parameter_path"
+      ],
+      "tier": "conditional_saved",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable deterministic row identity within table"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Versioned reduction invocation/catalog identity"
+        },
+        {
+          "name": "source_asset_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows",
+          "references": "assets.asset_id"
+        },
+        {
+          "name": "fit_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Fit identity tied to exact reduced inputs/model/source"
+        },
+        {
+          "name": "chain_id",
+          "type": "int64",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Saved MCMC chain"
+        },
+        {
+          "name": "draw_id",
+          "type": "int64",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Post-warmup draw index"
+        },
+        {
+          "name": "parameter_path",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Parameter including array index"
+        },
+        {
+          "name": "value",
+          "type": "float64",
+          "nullable": false,
+          "unit": "parameter-dependent",
+          "definition": "Actual saved draw; no reconstructed draws from quantiles"
+        },
+        {
+          "name": "diagnostics_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Divergences/Rhat/ESS/treedepth/model validity and warmup handling"
+        },
+        {
+          "name": "input_lineage_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Simulation/observation fitting inputs and model version"
+        }
+      ],
+      "partition_by": [
+        "catalog_version"
+      ],
+      "notes": "",
+      "storage": "partitioned Parquet in existing authorized AWS data plane; small metadata mirrored as JSON",
+      "partition_derivation": "Virtual partition columns resolved from immutable runs/attempts/catalog; run_bucket is fixed hash-prefix for sizing, not an analytical grouping. Do not partition every parameter or seed."
+    },
+    "source_objects": {
+      "grain": "one observed physical object version/pin in one listing snapshot",
+      "primary_key": [
+        "snapshot_id",
+        "object_id"
+      ],
+      "tier": "operational_catalog",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable row identity"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer invocation identity, not scientific attempt"
+        },
+        {
+          "name": "snapshot_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Frozen non-atomic listing snapshot"
+        },
+        {
+          "name": "object_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Hash of bucket/key and version or ETag identity"
+        },
+        {
+          "name": "bucket",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Actual source bucket"
+        },
+        {
+          "name": "key",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Full object key, not basename"
+        },
+        {
+          "name": "prefix_family",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Discovered family; explicit unregistered/unknown allowed"
+        },
+        {
+          "name": "version_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Non-null immutable version if verified by HEAD; literal null is not immutable"
+        },
+        {
+          "name": "etag",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Opaque conditional-read identity; not assumed MD5"
+        },
+        {
+          "name": "pin_kind",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "version_id, if_match_etag, or unpinned_blocked"
+        },
+        {
+          "name": "bytes_stored",
+          "type": "int64",
+          "nullable": true,
+          "unit": "byte",
+          "definition": "HEAD/list stored bytes"
+        },
+        {
+          "name": "last_modified_utc",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "UTC",
+          "definition": "Observed object modification timestamp"
+        },
+        {
+          "name": "storage_class",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Observed storage class"
+        },
+        {
+          "name": "listing_start_utc",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "UTC",
+          "definition": "Snapshot observation window start"
+        },
+        {
+          "name": "listing_end_utc",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "UTC",
+          "definition": "Snapshot observation window end"
+        },
+        {
+          "name": "discovery_root",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Authorized root listing used to discover this object"
+        },
+        {
+          "name": "identity_evidence_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "HEAD/list metadata and provenance; no credentials"
+        },
+        {
+          "name": "read_state",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Typed read/blocked status",
+          "enum": [
+            "available",
+            "missing_member",
+            "missing_object",
+            "access_denied",
+            "archived_unrestored",
+            "corrupt_archive",
+            "crc_failure",
+            "decode_failure",
+            "source_changed",
+            "unsupported_schema",
+            "unsupported_compression",
+            "resource_limit",
+            "not_yet_read"
+          ]
+        },
+        {
+          "name": "scope_delta",
+          "type": "bool",
+          "nullable": false,
+          "unit": "1",
+          "definition": "New versus dated scope"
+        }
+      ]
+    },
+    "source_links": {
+      "grain": "one justified directed provenance/dedup edge",
+      "primary_key": [
+        "link_id"
+      ],
+      "tier": "operational_catalog",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable row identity"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer invocation identity, not scientific attempt"
+        },
+        {
+          "name": "link_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable edge ID"
+        },
+        {
+          "name": "from_table",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Canonical table"
+        },
+        {
+          "name": "from_row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Input row"
+        },
+        {
+          "name": "to_table",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Canonical table"
+        },
+        {
+          "name": "to_row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Output row"
+        },
+        {
+          "name": "relation",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "derived_from, contains, same_execution, conflicts_with, supersedes_target, or source_equivalent"
+        },
+        {
+          "name": "evidence_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact object/member/adapter/key mapping evidence"
+        },
+        {
+          "name": "confidence",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "direct, documentary, inferred, unresolved"
+        },
+        {
+          "name": "selection_effect",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "No discard unless an explicit selection rule authorizes it"
+        }
+      ]
+    },
+    "coverage_cells": {
+      "grain": "one declared/discovered design cell and execution selection scope",
+      "primary_key": [
+        "scope_id"
+      ],
+      "tier": "operational_catalog",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable row identity"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer invocation identity, not scientific attempt"
+        },
+        {
+          "name": "scope_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Campaign/stage/scientific-attempt/cell selection"
+        },
+        {
+          "name": "campaign_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Canonical campaign"
+        },
+        {
+          "name": "stage_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stage"
+        },
+        {
+          "name": "attempt_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Scientific attempt"
+        },
+        {
+          "name": "cell_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Logical design coordinate, not an object"
+        },
+        {
+          "name": "declared_runs",
+          "type": "int64",
+          "nullable": true,
+          "unit": "run",
+          "definition": "Ledger/design expected runs; null if unknown"
+        },
+        {
+          "name": "landed_physical_objects",
+          "type": "int64",
+          "nullable": true,
+          "unit": "object",
+          "definition": "Distinct physical source objects, not members"
+        },
+        {
+          "name": "indexed_run_members",
+          "type": "int64",
+          "nullable": true,
+          "unit": "run_member",
+          "definition": "Logical run groups indexed inside objects"
+        },
+        {
+          "name": "parsed_execution_rows",
+          "type": "int64",
+          "nullable": true,
+          "unit": "execution",
+          "definition": "Successfully parsed executions"
+        },
+        {
+          "name": "duplicate_copies",
+          "type": "int64",
+          "nullable": true,
+          "unit": "copy",
+          "definition": "Proved duplicate copies, not reruns"
+        },
+        {
+          "name": "conflicting_rows",
+          "type": "int64",
+          "nullable": true,
+          "unit": "row",
+          "definition": "Ambiguous duplicates/versions"
+        },
+        {
+          "name": "selected_unique_runs",
+          "type": "int64",
+          "nullable": true,
+          "unit": "run",
+          "definition": "Selected logical runs under frozen policy"
+        },
+        {
+          "name": "eligible_runs",
+          "type": "int64",
+          "nullable": true,
+          "unit": "run",
+          "definition": "Metric-specific eligible runs, or null pending metric"
+        },
+        {
+          "name": "missing_or_unread_runs",
+          "type": "int64",
+          "nullable": true,
+          "unit": "run",
+          "definition": "Expected minus accounted when comparable; otherwise unknown"
+        },
+        {
+          "name": "coverage_status",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "complete, partial, absent, unsupported, blocked, or unassessable",
+          "enum": [
+            "complete",
+            "partial",
+            "absent",
+            "unsupported",
+            "blocked",
+            "unassessable"
+          ]
+        },
+        {
+          "name": "metric_scope_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Per-family availability, reason and numerator/denominator accounting"
+        },
+        {
+          "name": "evidence_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Expected/observed scopes and reconciliation equation"
+        }
+      ]
+    },
+    "catalog_partitions": {
+      "grain": "one immutable derived Parquet/export partition",
+      "primary_key": [
+        "partition_id"
+      ],
+      "tier": "operational_catalog",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable row identity"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer invocation identity, not scientific attempt"
+        },
+        {
+          "name": "partition_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Partition identity"
+        },
+        {
+          "name": "catalog_snapshot_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Published immutable catalog"
+        },
+        {
+          "name": "table_name",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Canonical table"
+        },
+        {
+          "name": "uri",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "S3 derived object URI"
+        },
+        {
+          "name": "sha256",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Actual derived-file hash"
+        },
+        {
+          "name": "rows",
+          "type": "int64",
+          "nullable": false,
+          "unit": "row",
+          "definition": "Logical table rows"
+        },
+        {
+          "name": "bytes_stored",
+          "type": "int64",
+          "nullable": false,
+          "unit": "byte",
+          "definition": "Stored partition size"
+        },
+        {
+          "name": "schema_version",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact schema"
+        },
+        {
+          "name": "adapter_version",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact adapter registry version"
+        },
+        {
+          "name": "min_key_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable sort lower bound"
+        },
+        {
+          "name": "max_key_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable sort upper bound"
+        },
+        {
+          "name": "statistics_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Column bounds/nulls/coverage at valid table grain"
+        },
+        {
+          "name": "committed",
+          "type": "bool",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Visible only through finalized COMMIT"
+        }
+      ]
+    },
+    "reduction_attempts": {
+      "grain": "one immutable reduction or query execution request",
+      "primary_key": [
+        "reduction_id"
+      ],
+      "tier": "operational_catalog",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable row identity"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer invocation identity, not scientific attempt"
+        },
+        {
+          "name": "fingerprint",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Request+inventory+code+image+adapter+scope identity"
+        },
+        {
+          "name": "parent_reduction_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Resume/supersession parent"
+        },
+        {
+          "name": "request_sha256",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Frozen request"
+        },
+        {
+          "name": "inventory_sha256",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Frozen input scope"
+        },
+        {
+          "name": "implementation_sha",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer source; distinct from engine SHA"
+        },
+        {
+          "name": "image_digest",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer image digest"
+        },
+        {
+          "name": "adapter_registry_sha256",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Adapter versions"
+        },
+        {
+          "name": "phase",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Admitted phase"
+        },
+        {
+          "name": "admission_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Scope/budget authorization reference"
+        },
+        {
+          "name": "status",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Lifecycle status",
+          "enum": [
+            "planned",
+            "blocked",
+            "admitted",
+            "queued",
+            "running",
+            "checkpointed",
+            "budget_stopped",
+            "source_changed",
+            "quarantined",
+            "partial",
+            "completed",
+            "failed",
+            "cancelled",
+            "return_blocked",
+            "unknown"
+          ]
+        },
+        {
+          "name": "budget_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reserved/spent/remaining including retries"
+        },
+        {
+          "name": "checkpoint_uri",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Immutable checkpoint"
+        },
+        {
+          "name": "coverage_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Declared/landed/parsed/selected/failed/unsupported"
+        },
+        {
+          "name": "start_utc",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "UTC",
+          "definition": "Phase start"
+        },
+        {
+          "name": "end_utc",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "UTC",
+          "definition": "Phase end"
+        }
+      ]
+    },
+    "receipts": {
+      "grain": "one durable attempt/status receipt revision",
+      "primary_key": [
+        "receipt_id"
+      ],
+      "tier": "operational_catalog",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable row identity"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer invocation identity, not scientific attempt"
+        },
+        {
+          "name": "receipt_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable immutable receipt"
+        },
+        {
+          "name": "request_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Request correlation"
+        },
+        {
+          "name": "github_run_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Workflow ID"
+        },
+        {
+          "name": "github_attempt",
+          "type": "int64",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Workflow attempt"
+        },
+        {
+          "name": "batch_job_ids_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Bounded inline IDs or pinned child-page index"
+        },
+        {
+          "name": "status",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Qualified attempt status, not blanket success",
+          "enum": [
+            "planned",
+            "blocked",
+            "admitted",
+            "queued",
+            "running",
+            "checkpointed",
+            "budget_stopped",
+            "source_changed",
+            "quarantined",
+            "partial",
+            "completed",
+            "failed",
+            "cancelled",
+            "return_blocked",
+            "unknown"
+          ]
+        },
+        {
+          "name": "receipt_uri",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Durable S3 receipt"
+        },
+        {
+          "name": "receipt_sha256",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Receipt hash"
+        },
+        {
+          "name": "catalog_uri",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Frozen catalog if present"
+        },
+        {
+          "name": "catalog_sha256",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Catalog hash"
+        },
+        {
+          "name": "continuation_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Phase/query/page continuation or explicit null"
+        },
+        {
+          "name": "error_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Typed failures and owner/fallback"
+        },
+        {
+          "name": "budget_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Spent and remaining"
+        },
+        {
+          "name": "created_utc",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "UTC",
+          "definition": "Receipt timestamp"
+        }
+      ]
+    },
+    "query_pages": {
+      "grain": "one bounded deterministic query page",
+      "primary_key": [
+        "query_id",
+        "page_id"
+      ],
+      "tier": "operational_catalog",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable row identity"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer invocation identity, not scientific attempt"
+        },
+        {
+          "name": "query_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Frozen query hash/ID"
+        },
+        {
+          "name": "page_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable page ID"
+        },
+        {
+          "name": "catalog_snapshot_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Frozen catalog"
+        },
+        {
+          "name": "query_sha256",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Query AST and estimand hash"
+        },
+        {
+          "name": "uri",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Derived JSONL/Parquet export"
+        },
+        {
+          "name": "sha256",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Export bytes hash"
+        },
+        {
+          "name": "returned_rows",
+          "type": "int64",
+          "nullable": false,
+          "unit": "row",
+          "definition": "Returned rows"
+        },
+        {
+          "name": "scanned_rows",
+          "type": "int64",
+          "nullable": true,
+          "unit": "row",
+          "definition": "Actual query scan accounting"
+        },
+        {
+          "name": "scanned_bytes",
+          "type": "int64",
+          "nullable": false,
+          "unit": "byte",
+          "definition": "Actual scanned bytes"
+        },
+        {
+          "name": "complete",
+          "type": "bool",
+          "nullable": false,
+          "unit": "1",
+          "definition": "End of frozen query selection"
+        },
+        {
+          "name": "next_cursor_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Bound query/catalog/order/key token or null"
+        },
+        {
+          "name": "selection_counts_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Eligible/observed/missing/censored/selected units and weights"
+        },
+        {
+          "name": "oversized_rows_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Explicit ROW_TOO_LARGE; never omitted silently"
+        }
+      ]
+    },
+    "acknowledgments": {
+      "grain": "one qualified automated Edison ingestion acknowledgment",
+      "primary_key": [
+        "ack_id"
+      ],
+      "tier": "operational_catalog",
+      "fields": [
+        {
+          "name": "row_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Stable row identity"
+        },
+        {
+          "name": "reduction_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Reducer invocation identity, not scientific attempt"
+        },
+        {
+          "name": "ack_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Idempotent acknowledgement identity"
+        },
+        {
+          "name": "receipt_id",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Receipt acknowledged"
+        },
+        {
+          "name": "query_id",
+          "type": "utf8",
+          "nullable": true,
+          "unit": "1",
+          "definition": "Query if applicable"
+        },
+        {
+          "name": "page_ids_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact accepted page IDs"
+        },
+        {
+          "name": "project_asset_ids_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Durable Edison assets; not ephemeral URLs"
+        },
+        {
+          "name": "accepted_hashes_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Verified artifact and member hashes"
+        },
+        {
+          "name": "qualification_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Exact status, coverage/missingness/scientific limits accepted"
+        },
+        {
+          "name": "next_cursor_json",
+          "type": "json",
+          "nullable": false,
+          "unit": "1",
+          "definition": "Saved resumable client cursor"
+        },
+        {
+          "name": "acknowledged_utc",
+          "type": "utf8",
+          "nullable": false,
+          "unit": "UTC",
+          "definition": "Durable ingestion time"
+        }
+      ]
+    }
+  },
+  "metric_definitions": {
+    "infection_ever_person_risk.v1": {
+      "numerator": "distinct eligible agents ever infected within defined followup, including imported infection if named",
+      "denominator": "distinct eligible agents in specified ever-aboard or boarding cohort",
+      "unit": "proportion",
+      "domain": "latent_truth",
+      "condition": "unconditional",
+      "notes": "First infection/person risk, not sum episodes; imported and aboard-acquired can overlap. Cannot substitute final I+R in an open/reinfection/multipathogen run.",
+      "requires": [
+        "exact_unique_infection_counts",
+        "matching_population"
+      ],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "infection_aboard_person_risk.v1": {
+      "numerator": "distinct agents with >=1 aboard-acquired episode during window",
+      "denominator": "agents eligible for aboard acquisition under explicit susceptibility/reinfection rule",
+      "unit": "proportion",
+      "domain": "latent_truth",
+      "condition": "unconditional",
+      "notes": "If denominator includes already-infected imports, label total-cohort risk; susceptible-at-start risk is a distinct estimand. Epoch-zero fiat seeds follow writer convention and must not silently become imports.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "infection_import_person_fraction.v1": {
+      "numerator": "distinct agents carrying an infection at entry, with entry definition",
+      "denominator": "distinct entrants in entry cohort",
+      "unit": "proportion",
+      "domain": "latent_truth",
+      "condition": "unconditional",
+      "notes": "Boarding imports, later shore imports and supply-origin exposure are different channels. One person may import and reacquire; no subtraction to obtain acquired count without overlap.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "infection_episode_incidence_rate.v1": {
+      "numerator": "number of new infection episodes during window, excluding specified imported episodes",
+      "denominator": "susceptible person-hours using episode eligibility",
+      "unit": "episode/person*h",
+      "domain": "latent_truth",
+      "condition": "unconditional",
+      "notes": "Episodes != unique persons; recurrent-risk eligibility/version mandatory.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "symptomatic_course_risk.v1": {
+      "numerator": "distinct infected course-cohort persons whose complete relevant clinical course becomes symptomatic",
+      "denominator": "distinct infected eligible course-cohort persons",
+      "unit": "proportion",
+      "domain": "symptomatic_course",
+      "condition": "unconditional",
+      "notes": "Needs saved future course/completed followup; incomplete courses censored or unavailable. Never infer from symptomatic epochs at voyage end.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "symptomatic_onboard_person_risk.v1": {
+      "numerator": "distinct eligible persons with >=1 symptomatic period while aboard during window",
+      "denominator": "matching at-risk aboard cohort",
+      "unit": "proportion",
+      "domain": "onboard_symptoms",
+      "condition": "unconditional",
+      "notes": "Separate any-cause syndrome from pathogen-specific attributed symptoms. Boarding-symptomatic prevalence is separately labeled.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "symptomatic_onboard_burden.v1": {
+      "numerator": "symptomatic eligible person-hours aboard",
+      "denominator": "eligible person-hours aboard",
+      "unit": "proportion",
+      "domain": "onboard_symptoms",
+      "condition": "unconditional",
+      "notes": "",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "reported_true_person_risk.v1": {
+      "numerator": "distinct eligible symptomatic true-case persons ever reported during window",
+      "denominator": "explicit aboard or infected or symptomatic eligible cohort",
+      "unit": "proportion",
+      "domain": "reported",
+      "condition": "unconditional",
+      "notes": "Source symptomatic true-positive ID set is not all syndromic signals; observation feedback may change disease and test availability. Keep noise reports separate.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "report_capture_given_symptoms.v1": {
+      "numerator": "distinct symptomatic eligible persons reported",
+      "denominator": "distinct symptomatic report-eligible persons",
+      "unit": "proportion",
+      "domain": "reported",
+      "condition": "symptomatic_and_report_eligible",
+      "notes": "Condition set must be evaluated in the same window. Eventual symptomatic course does not equal report-eligible while aboard.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "reported_noise_count.v1": {
+      "numerator": "distinct noise-case IDs or noise report events, explicitly named",
+      "denominator": "1",
+      "unit": "person or event",
+      "domain": "reported",
+      "condition": "unconditional",
+      "notes": "Do not add unique noise persons to true-case persons unless disjoint IDs proved; raw observation count kept separately.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "tested_person_fraction.v1": {
+      "numerator": "distinct eligible persons tested during window",
+      "denominator": "distinct test-eligible persons during window",
+      "unit": "proportion",
+      "domain": "tested",
+      "condition": "unconditional",
+      "notes": "Tests, specimens, assays, positives and tested persons all separate; repeat tests do not add people.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "lab_confirmed_person_fraction.v1": {
+      "numerator": "distinct persons with qualifying lab-positive rule",
+      "denominator": "explicit test-eligible OR tested OR cohort population",
+      "unit": "proportion",
+      "domain": "lab_confirmed",
+      "condition": "unconditional",
+      "notes": "Denominator choice creates separate metric IDs/condition IDs; turnaround, LOD, equivocal and repeat testing rules explicit.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "test_positive_assay_fraction.v1": {
+      "numerator": "positive qualifying assays",
+      "denominator": "valid assays with known result by cutoff",
+      "unit": "proportion",
+      "domain": "tested",
+      "condition": "unconditional",
+      "notes": "Not agent AR; pending/censored/invalid tests listed separately.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "posting_probability.v1": {
+      "numerator": "selected completed voyages meeting exact either-role reported-case threshold policy",
+      "denominator": "all eligible selected completed voyages",
+      "unit": "proportion",
+      "domain": "reported",
+      "condition": "unconditional",
+      "notes": "Threshold/source version explicit; evaluate unrounded count >= ceil(threshold*N) for >= rule only when exact predicate agrees. Unknown passenger/crew complement blocks derived post, not zero.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "outbreak_probability.v1": {
+      "numerator": "selected eligible voyages meeting versioned takeoff/outbreak predicate",
+      "denominator": "all eligible selected completed voyages",
+      "unit": "proportion",
+      "domain": "latent_truth",
+      "condition": "unconditional",
+      "notes": "Not interchangeable with posted, any infection, seed establishment, or VSP response trigger.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "conditional_metric.v1": {
+      "numerator": "metric evaluated among units satisfying named post/outbreak/entry channel/minted/excursion conjunction",
+      "denominator": "matching eligible conditioned units",
+      "unit": "metric-dependent",
+      "domain": "mechanism",
+      "condition": "explicit Boolean AST with conditioning grain",
+      "notes": "Always publish unconditional alongside conditioned, P(condition), count eligible/observed/missing and policy feedback context; empty condition undefined not zero.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "case_entry_channel_fraction.v1": {
+      "numerator": "distinct qualifying cases in saved entry-channel category",
+      "denominator": "distinct qualifying cases across explicit exhaustive channel set",
+      "unit": "proportion",
+      "domain": "mechanism",
+      "condition": "unconditional",
+      "notes": "Boarding_import/supply_chain/aboard is reported-case mass-dominance classifier in current source, NOT a causal counterfactual fraction. Supply vs aboard ties follow writer; mixed fractions retained if saved.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "case_dominant_route_fraction.v1": {
+      "numerator": "distinct established/reported cases assigned selected dominant route by saved rule",
+      "denominator": "matching assigned plus explicit unknown/unattributed cases as declared",
+      "unit": "proportion",
+      "domain": "mechanism",
+      "condition": "unconditional",
+      "notes": "Argmax acquired dose at establishment; route/channel and progression distinct. Retain tie/fallback/missing classification, and case counts not only percentages.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "route_dose_share.v1": {
+      "numerator": "sum credited/acquired dose in route under one unit/pathogen definition",
+      "denominator": "sum credited/acquired dose over declared routes",
+      "unit": "proportion",
+      "domain": "mechanism",
+      "condition": "unconditional",
+      "notes": "Delivered vs credited separate; noncausal share. GEC/copies/PFU/aerosol mass incomparable absent validated conversion. Withdrawn absolute dose remains historical/qualified.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "mechanism_event_rate.v1": {
+      "numerator": "saved qualifying events",
+      "denominator": "eligible person-hours or source opportunity count",
+      "unit": "event/declared exposure",
+      "domain": "mechanism",
+      "condition": "unconditional",
+      "notes": "Event count versus unique actors/recipients/source objects distinct. Multiple recipients per event not multiple independent voyages.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "role_participation_fraction.v1": {
+      "numerator": "distinct role-members participating as actor/recipient/caregiver/etc. during window",
+      "denominator": "distinct role-members eligible for that activity during window",
+      "unit": "proportion",
+      "domain": "mechanism",
+      "condition": "unconditional",
+      "notes": "Role at event-time plus occupation and primary role; time-varying overlap unioned. Role complements alone cannot establish source/responder eligibility.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "role_participation_rate.v1": {
+      "numerator": "role-specific qualifying event participations",
+      "denominator": "eligible role-member person-hours",
+      "unit": "participation/person*h",
+      "domain": "mechanism",
+      "condition": "unconditional",
+      "notes": "One person can occupy several functions; no summing functional-role denominators as total crew.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "source_realization_probability.v1": {
+      "numerator": "voyages or stations with >=1 realized source/object, separate units",
+      "denominator": "eligible voyages or source stations",
+      "unit": "proportion",
+      "domain": "mechanism",
+      "condition": "unconditional",
+      "notes": "Save nominal q, actual drawn q, station uniforms/witness if saved, realized counts and source IDs. No causal reclassification from infection endpoint.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "conversion_post_given_excursion.v1": {
+      "numerator": "voyages posted AND exact excursion predicate holds",
+      "denominator": "voyages with exact excursion predicate",
+      "unit": "proportion",
+      "domain": "reported",
+      "condition": "excursion",
+      "notes": "Legacy operational excursion is >=1 infection dominant-routed common_source_food. Minted object, nonzero delivered dose and early shared-dose exposure are DIFFERENT predicates.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "ps01_D2_frozen_relative.v1": {
+      "numerator": "median posted passenger AR per in-band rung/hull",
+      "denominator": "in-campaign ind median at same hull/endpoint",
+      "unit": "ratio",
+      "domain": "reported",
+      "condition": "posted AND in_band_rung",
+      "notes": "Frozen interval [0.5,2]. Compute per-rung and any separately predeclared pooling. Source E25; operational absolute 0.04 table remains separate.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "ps01_D2_operational_absolute.v1": {
+      "numerator": "median posted passenger AR per arm/hull",
+      "denominator": "1",
+      "unit": "proportion",
+      "domain": "reported",
+      "condition": "posted",
+      "notes": "Legacy reporter >=0.04 edge. Does NOT resolve frozen D2; endpoint mapping of pax-AR must be confirmed in source version.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "ps01_D3_frozen_converted_AR.v1": {
+      "numerator": "median converted-pax-AR among posted voyages pooled in-band per hull",
+      "denominator": "ind counterpart median",
+      "unit": "ratio",
+      "domain": "reported",
+      "condition": "posted AND in_band",
+      "notes": "BLOCKED_DEFINITION: design does not fully specify converted-pax-AR numerator/population. Do NOT substitute excursion->posting probability or guess aboard/food-route AR. Preserve candidate raw counts and obtain explicit definition adjudication; report unresolved gate.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "ps01_D3_operational_conversion.v1": {
+      "numerator": "P(post|legacy excursion,object arm,hull)",
+      "denominator": "P(post|legacy excursion,ind,hull)",
+      "unit": "ratio",
+      "domain": "reported",
+      "condition": "legacy excursion",
+      "notes": "Empty excursion or zero ind conversion -> undefined reason; no 0/0 default. Separate probability components and paired changes.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "burst_acquisition_closed_W.v1": {
+      "numerator": "maximum number acquisitions within [t,t+W] over saved acquisition times",
+      "denominator": "number acquisitions included in same exact filter",
+      "unit": "proportion",
+      "domain": "latent_truth",
+      "condition": "unconditional",
+      "notes": "Legacy closed span <=W includes both endpoints; W=48 epochs is not necessarily 48h. Unit/clock and e>0 filter explicit. Ties choose earliest maximizing left boundary. If no acquisitions: undefined/no_events, retain legacy zero in native scalar only. Count episodes vs persons follows saved acquisition schema.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "burst_observed_onset_halfopen_W.v1": {
+      "numerator": "maximum number qualifying observed onsets in [t,t+W)",
+      "denominator": "all qualifying observed onsets",
+      "unit": "proportion",
+      "domain": "onboard_symptoms",
+      "condition": "unconditional",
+      "notes": "New proposed physical-hour endpoint, NOT a rename of acquisition burst. Inferred interval onsets yield bounds/interval method not invented exact times. Window type, alignment and minimum count frozen.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "response_delay.v1": {
+      "numerator": "endpoint time minus named origin",
+      "denominator": "1",
+      "unit": "h",
+      "domain": "response",
+      "condition": "unconditional",
+      "notes": "Endpoint exact/left/right/interval censor and competing events retained. peak_epoch-detection_epoch is lead-time-to-peak, NOT onset-to-detection delay; negative values can be meaningful.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "economic_cost_per_case_averted.v1": {
+      "numerator": "paired incremental cost",
+      "denominator": "paired difference in versioned cases",
+      "unit": "currency/case",
+      "domain": "economic",
+      "condition": "unconditional",
+      "notes": "Use exact cost currency year, opportunity units and paired seeds. Zero/negative denominator reported, not infinity hidden or favorable-only ratios; effect requires valid intervention contrast.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    },
+    "surveillance_detection_probability.v1": {
+      "numerator": "eligible voyages/lineages detected by deadline under observed channel",
+      "denominator": "all eligible latent-introduction or risk-set units at stated grain",
+      "unit": "proportion",
+      "domain": "reported",
+      "condition": "unconditional",
+      "notes": "Observed vs truth channels, specimen sampling and information feedback explicit; lineage census and observed sequence line list not merged as observations.",
+      "requires": [],
+      "aggregation": "Keep exact per-run numerator/denominator/value; define mean-run versus pooled versus hierarchy explicitly."
+    }
+  },
+  "controlled_vocabularies": {
+    "primary_population_roles": [
+      "passenger",
+      "crew",
+      "other_explicit",
+      "unresolved"
+    ],
+    "example_role_definitions": [
+      {
+        "id": "primary.passenger.v1",
+        "axis": "primary_population",
+        "rule": "explicit emitted passenger role; class fallback only recorded as source-derived uncertain mapping"
+      },
+      {
+        "id": "primary.crew.v1",
+        "axis": "primary_population",
+        "rule": "explicit emitted crew role; compare roster to emitted role complement"
+      },
+      {
+        "id": "occupation.food_employee.source_version",
+        "axis": "occupation",
+        "rule": "crew AND work_zone in declared service_zones; E23"
+      },
+      {
+        "id": "duty.food_handler_active.source_version",
+        "axis": "duty_state",
+        "rule": "food_employee AND currently in work zone AND schedule Work where writer implements this; never all crew"
+      },
+      {
+        "id": "response.cleanup.source_version",
+        "axis": "response_function",
+        "rule": "saved cleanup responder identity, distinct from source and recipient"
+      },
+      {
+        "id": "response.tending.source_version",
+        "axis": "response_function",
+        "rule": "saved tending designation interval"
+      },
+      {
+        "id": "response.service.source_version",
+        "axis": "response_function",
+        "rule": "saved delivery/service provider event membership"
+      },
+      {
+        "id": "source.eligible.source_version",
+        "axis": "source_eligibility",
+        "rule": "exact source-process eligibility, not infected or crew proxy"
+      }
+    ],
+    "condition_ast_operators": [
+      "and",
+      "or",
+      "not",
+      "eq",
+      "ne",
+      "lt",
+      "le",
+      "gt",
+      "ge",
+      "in",
+      "is_null"
+    ],
+    "weight_target_classes": [
+      "equal_simulation_run",
+      "frozen_design_mixture",
+      "named_dated_weighted_fleet",
+      "externally_bounded_vessel_class",
+      "person_weighted_cohort"
+    ],
+    "capability_rule": "Availability must be scoped by run/member/version. Mixed full/lean populations never get an all-available silent pass.",
+    "typed_read_states": [
+      "available",
+      "missing_member",
+      "missing_object",
+      "access_denied",
+      "archived_unrestored",
+      "corrupt_archive",
+      "crc_failure",
+      "decode_failure",
+      "source_changed",
+      "unsupported_schema",
+      "unsupported_compression",
+      "resource_limit",
+      "not_yet_read"
+    ],
+    "value_statuses_integrated": [
+      "observed",
+      "derived_supported",
+      "documented_unverified",
+      "not_saved",
+      "counted_not_retained",
+      "not_observed",
+      "not_applicable",
+      "zero_denominator",
+      "unknown_definition",
+      "censored",
+      "unsupported",
+      "corrupt",
+      "source_changed",
+      "access_blocked",
+      "resource_blocked",
+      "unknown"
+    ],
+    "value_statuses_integrated_namespace": "Narrative evidence/read aliases only; NOT metrics.value_status or a shared status enum. See STATUS_NAMESPACES.json for evidence-qualified conversion.",
+    "typed_read_states_namespace": "source_objects.read_state only; translate to assets.read_state plus data_gaps.reason/detail, never assign these read reasons directly to scientific enums."
+  },
+  "invariants": [
+    "All table rows satisfy declared grain; primary key uniqueness checked before aggregation.",
+    "The same uncompressed run member found in per-run and fused archives is an asset alias, not a second replicate. A retry with different bytes remains a distinct execution.",
+    "All unique selected completed run counts reconcile catalog, selection ledger and reduction outputs; failures/partial/unreachable separate.",
+    "All null substantive fields have typed gap records or explicit structural optionality; no NaN/Inf emitted as scientific values.",
+    "Role complement sums checked only when primary roles exhaustive/disjoint and same population/time. Overlapping occupation/function memberships never summed as exhaustive totals.",
+    "0 <= unique-case numerator <= matching at-risk cohort for a person-risk estimand. Event/episode counts may exceed people only with distinct metric units.",
+    "Imported and aboard-acquired counts overlap if reacquisition occurs; total ever = import union aboard, not import + aboard unless disjointness proved.",
+    "Reporting channel/route counts sum to corresponding true reported cases only under proved exhaustive partition with explicit unknown bucket.",
+    "Cumulative counters monotone only within fixed cohort/definition with no resets; departures and changing denominators require intervals, not positive-I+R incidence.",
+    "Person-hours are sums of disjoint interval unions clipped to eligibility and actual followup; negative durations or double-counted role intervals reject.",
+    "Censor records obey bounds and entry <= exit; administrative right censor, competing exit, never-at-risk and structural nonoccurrence distinct.",
+    "Weights finite nonnegative, named/date target-qualified; total valid weight >0; missing weight target blocks fleet aggregate only.",
+    "Seed pairing requires design/attempt/random-stream evidence, explicit unmatched rows and actual source bridge; accidental numeric seed equality is not pairing.",
+    "Query joins must preserve declared unit or explicitly change estimand; multiplying scalar rows by event/agent rows cannot create independent replicates.",
+    "Every output retains actual input/source/definition/reducer/analysis identity and missingness; doc SHA is not assumed execution SHA.",
+    "No scalar ECDF or mean imputes missing/censored/nonoccurred timing as zero or terminal horizon.",
+    "No external AGE fraction is multiplied into simulated norovirus outcomes; external transformations remain external and uncertainty-propagated.",
+    "If exact integer numerator/denominator exceeds float64 exact integer range, keep int64/decimal/native exact token and leave lossy numeric projection null with status; no silent precision loss.",
+    "Physical object counts use source_objects distinct object_id; members, design cells, executions, selected voyages and posterior draws are separate units.",
+    "source_links provides many-to-many provenance; no dedup across scientific attempts on seed, prefix, basename or byte equality alone."
+  ],
+  "null_policy": {
+    "required_columns": "Every declared column is present in Parquet schema; every JSON row key is present.",
+    "substantive_null": "Requires data_gaps entry on table/row/field or selector range.",
+    "structural_null_exceptions": [
+      "source_asset_id for pure derivation/declaration with analysis lineage",
+      "optional linkage fields with no applicable relationship: parent asset, episode, object, membership, source/bridge/parent observation, feedback action",
+      "timing infinity bounds only as explicitly implied by censor_type",
+      "projection numeric when original scalar is nonnumeric; exact token absent if numerator/denominator itself structurally absent",
+      "continuation token after final page",
+      "unmatched reason for valid pairs",
+      "role-specific field for explicitly all-population row"
+    ],
+    "unknown_not_exception": "Unknown values still require a typed gap; structurally absent does not mean unknown."
+  },
+  "authority": "Canonical integrated scientific field dictionary; supersedes proposed lane table names, not source evidence.",
+  "upstream_contract": "../contracts/dictionary.json (26 tables, 382 original fields, 33 metric definitions retained)"
+}

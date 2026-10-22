@@ -1,0 +1,177 @@
+{
+  "status": "SOURCE_SURVEY_AND_REUSE_DECISIONS_NOT_DEPLOYMENT_CERTIFICATION",
+  "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+  "coverage": {
+    "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+    "source_text_files": 3235,
+    "source_text_bytes": 74257179,
+    "tool_directory_text_files": 163,
+    "tool_python_files": 159,
+    "nonpython_tool_files": [
+      "tools/README.md",
+      "tools/hull_declared_states.json",
+      "tools/ship_blueprint_import/templates/EDITOR_NOTES.md",
+      "tools/ship_blueprint_import/templates/toy_destroyer_digest.json"
+    ],
+    "registered_modules_and_interfaces": 378,
+    "registered_tools_python": 159,
+    "registered_support_interfaces": 219,
+    "S2_specific_line_reviewed_registered_rows": 28,
+    "S1_AST_lexical_only_registered_rows": 350,
+    "source_evidence_records": 54,
+    "distinct_source_evidence_files": 33,
+    "contract_profiles": 16,
+    "gap_tasks": 14,
+    "gap_decisions": {
+      "extend": 10,
+      "reuse": 2,
+      "new": 2
+    },
+    "field_lineage_records": 12,
+    "offline_fixture_checks": 16,
+    "offline_fixture_assertion_failures": 0,
+    "model_runs": 0,
+    "cloud_jobs": 0,
+    "AWS_requests": 0,
+    "repository_edits": 0,
+    "historical_raw_archives_opened": 0,
+    "campaign_json_files_in_snapshot": 21,
+    "mega_directory_manifest_json_files": 95,
+    "coverage_limitations": [
+      "S1 entries are explicit screening-only records, not complete semantic contracts.",
+      "Source text snapshot excludes binary and >3MB files; no claim that absent literal surface cannot exist in excluded material.",
+      "All-campaign AWS contents, IAM/integration readiness, original PS01 scan rows and production images were not inspected.",
+      "No full existing test suite, simulator, MCMC or cloud command was run."
+    ],
+    "review_profile_counts": {
+      "cloud_analysis_bridge": 4,
+      "readout_specialized": 284,
+      "model_probe": 28,
+      "flatten_collector": 1,
+      "curve_collector": 1,
+      "current_writer": 5,
+      "generic_bundle": 4,
+      "history_line_list": 1,
+      "special_postprocess": 3,
+      "out_of_scope": 35,
+      "local_zip_stats": 1,
+      "noro_scanner": 7,
+      "noro_reporter": 1,
+      "instrumented_writer": 1,
+      "role_objects": 1,
+      "range_zip": 1
+    },
+    "evidence_grade_counts": {
+      "S2": 50,
+      "H1": 4
+    }
+  },
+  "original_full_tool_register": "../tools_review/TOOL_REGISTER.json",
+  "original_lineage": "../tools_review/FIELD_LINEAGE_REGISTER.json",
+  "original_gap_register": "../tools_review/GAP_REGISTER.json",
+  "original_16_probes": "../tools_review/OFFLINE_FIXTURE_RESULTS.json",
+  "canonical_implementation": "picard_framework/analysis/campaign_reducer/ via existing scripts/campaign analysis (NOT_YET_IMPLEMENTED)",
+  "surfaces": [
+    {
+      "existing": "tools/noro_diag/outbreak_anchor_readout.py::_s3_member_blob",
+      "decision": "EXTEND_SHARED_READER",
+      "tickets": [
+        "D1"
+      ],
+      "requirements": [
+        "conditional identity each read",
+        "ZIP64/long comments/fused/nested/CRC/decoded-size limits",
+        "stream without original full downloads"
+      ]
+    },
+    {
+      "existing": "tools/noro_diag/onset_curve_readout.py::_census_prefix",
+      "decision": "EXTEND_BOUNDED_DISCOVERY",
+      "tickets": [
+        "D1",
+        "D5"
+      ],
+      "requirements": [
+        "all roots and197+ scope",
+        "finite pagination and identity manifest"
+      ]
+    },
+    {
+      "existing": "tools/diag/readout_common.py",
+      "decision": "REUSE_WRAPPED_TYPED_ERRORS",
+      "tickets": [
+        "D1",
+        "D2"
+      ],
+      "requirements": [
+        "distinguish missing/corrupt/decode",
+        "empty denominator NA, not Wilson zero tuple"
+      ]
+    },
+    {
+      "existing": "deploy/aws/aggregate_results.py::_zip_groups/iter_summary_rows",
+      "decision": "REUSE_GROUPING_NOT_GLOBAL_RUN_ID_DEDUP",
+      "tickets": [
+        "D1",
+        "D2"
+      ],
+      "requirements": [
+        "all fused/nested runs",
+        "attempt-aware exact identity and source_links"
+      ]
+    },
+    {
+      "existing": "tools/noro_diag/food_shapes_01_scan.py; food_score_01_scan.py; early_event_scan.py; food_shapes_01_report.py",
+      "decision": "REUSE_SAVED_SCAN_ROWS_AFTER_EQUIVALENCE",
+      "tickets": [
+        "D1",
+        "D6"
+      ],
+      "requirements": [
+        "all scalar native fields and rounding status",
+        "overlap/field-order parser regression",
+        "PS01 D1-D4 named estimands no vacuous PASS"
+      ]
+    },
+    {
+      "existing": "picard_framework/analysis/campaign_bundle.py; deploy/aws/analyze_campaign_curves.py",
+      "decision": "REUSE_EXTRACTION_ONLY",
+      "tickets": [
+        "D1",
+        "D2"
+      ],
+      "requirements": [
+        "embedded/external time series",
+        "no first summary only",
+        "fit/posterior grain separate"
+      ]
+    },
+    {
+      "existing": "scripts/campaign; deploy/aws/Dockerfile.analysis",
+      "decision": "MODIFY_EXISTING_SHARED_SURFACES",
+      "tickets": [
+        "D0",
+        "D3"
+      ],
+      "requirements": [
+        "AGENTS81-86 no new frozen-layout entrypoint/Dockerfile/jobdef/submit file",
+        "literal argv under python3 ENTRYPOINT",
+        "actual image smoke test; tools omitted today; preserve legacy defaults/activeargv"
+      ]
+    },
+    {
+      "existing": ".github/workflows/campaign_dispatch.yml; .github/workflows/campaign_collect.yml",
+      "decision": "EXTEND_COLLECTOR_ADD_REVIEWED_ANALYSIS_WORKFLOW",
+      "tickets": [
+        "D3",
+        "D4",
+        "D8"
+      ],
+      "requirements": [
+        "existing dispatch dryrun only",
+        "bounded exact-key and new receipt/page mode",
+        "durable automatic Edison ingest/qualifiedack, no human relay"
+      ]
+    }
+  ]
+}

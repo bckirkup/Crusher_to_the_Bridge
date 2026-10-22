@@ -1,0 +1,587 @@
+{
+  "contract_id": "crusher-campaign-distributions/1.0-proposed",
+  "status": "NOT_YET_IMPLEMENTED",
+  "survey_source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+  "implementation_source_sha": null,
+  "authority": {
+    "main": "SURVEY_AND_DEVIN_SPEC.md",
+    "cli": "CANONICAL_INTERFACE.json",
+    "fields": "FIELD_CONTRACTS.json",
+    "row_schema": "TABLE_ROWS.schema.json",
+    "query_schema": "QUERY.schema.json",
+    "request_schema": "REQUEST.schema.json",
+    "scope": "CAMPAIGN_COVERAGE.json",
+    "tickets": "PHASED_TICKETS.json",
+    "acceptance": "ACCEPTANCE_MATRIX.json",
+    "appendices": "Original lanes are evidence and design antecedents, not competing command/schema specifications.",
+    "bootstrap_schema": "BOOTSTRAP_REQUEST.schema.json",
+    "status_namespaces": "STATUS_NAMESPACES.json"
+  },
+  "public_cli": {
+    "existing_launcher_to_modify": "scripts/campaign",
+    "proposed_prefix": "python3 scripts/campaign analysis",
+    "status": "NOT_YET_IMPLEMENTED",
+    "shared_package_to_create": "picard_framework/analysis/campaign_reducer/",
+    "operations": {
+      "plan": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "offline",
+        "additional_required_inputs": [],
+        "outputs": [
+          "scope",
+          "blocking_inputs",
+          "request_template"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": []
+      },
+      "validate": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "offline",
+        "additional_required_inputs": [],
+        "outputs": [
+          "schema_and_semantic_validation"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": [
+          "--request-kind",
+          "bootstrap|execution|query"
+        ]
+      },
+      "preflight": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "metadata_bootstrap",
+        "additional_required_inputs": [
+          "bootstrap_admission"
+        ],
+        "outputs": [
+          "access_resources_image_return_capability"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": []
+      },
+      "inventory": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "bounded_metadata",
+        "additional_required_inputs": [
+          "inventory_admission"
+        ],
+        "outputs": [
+          "frozen_inventory",
+          "scope_delta",
+          "coverage"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": []
+      },
+      "quote": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "offline_from_measured_evidence",
+        "additional_required_inputs": [
+          "pilot_receipt_or_bootstrap_estimate"
+        ],
+        "outputs": [
+          "phase_quote",
+          "uncertainty",
+          "blocking_inputs"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": [
+          "--evidence",
+          "PILOT_OR_BOOTSTRAP_EVIDENCE.json"
+        ]
+      },
+      "submit": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "paid_explicit",
+        "additional_required_inputs": [
+          "phase_admission",
+          "quote_id",
+          "phase"
+        ],
+        "outputs": [
+          "durable_attempt_receipt"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": [
+          "--phase",
+          "return_canary|pilot|materialize|finalize"
+        ]
+      },
+      "status": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "bounded_metadata",
+        "additional_required_inputs": [
+          "attempt_id"
+        ],
+        "outputs": [
+          "qualified_receipt",
+          "continuation"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": [
+          "--attempt-id",
+          "ID"
+        ]
+      },
+      "resume": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "paid_explicit",
+        "additional_required_inputs": [
+          "checkpoint_id",
+          "remaining_budget_admission"
+        ],
+        "outputs": [
+          "new_child_receipt"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": [
+          "--checkpoint",
+          "URI"
+        ]
+      },
+      "query": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "paid_explicit",
+        "additional_required_inputs": [
+          "query_file",
+          "query_admission",
+          "committed_catalog"
+        ],
+        "outputs": [
+          "bounded_query_pages",
+          "receipt"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": [
+          "--query",
+          "QUERY.json"
+        ]
+      },
+      "collect": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "bounded_return",
+        "additional_required_inputs": [
+          "receipt_or_export_manifest"
+        ],
+        "outputs": [
+          "verified_artifacts",
+          "durable_ingestion_request"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": [
+          "--receipt",
+          "URI"
+        ]
+      },
+      "acknowledge": {
+        "status": "NOT_YET_IMPLEMENTED",
+        "mode": "bounded_control",
+        "additional_required_inputs": [
+          "receipt_id",
+          "project_asset_ids",
+          "accepted_page_ids"
+        ],
+        "outputs": [
+          "qualified_durable_ack"
+        ],
+        "common_argv": [
+          "--request",
+          "FILE",
+          "--out",
+          "DIR"
+        ],
+        "extra_argv": [
+          "--ack",
+          "ACK.json"
+        ]
+      }
+    },
+    "existing_semantics": "Retain scripts/campaign run and submit existing campaign/simulation semantics and readout analysis/reuse semantics. New analysis namespace must not invoke the simulation launcher; existing readout functions are reusable."
+  },
+  "worker_transport": {
+    "status": "NOT_YET_IMPLEMENTED",
+    "module": "picard_framework.analysis.campaign_reducer.worker",
+    "argv": [
+      "-m",
+      "picard_framework.analysis.campaign_reducer.worker",
+      "--phase",
+      "<phase>",
+      "--request-uri",
+      "<immutable_s3_uri>",
+      "--request-sha256",
+      "<sha256>",
+      "--shard-index",
+      "<index>"
+    ],
+    "rule": "Existing Dockerfile.analysis ENTRYPOINT python3 supplies interpreter; literal argv, not shell or Ref:: expansion. Worker is an internal transport for this same contract, not another public campaign entrypoint."
+  },
+  "scope": {
+    "cold_prefix_register": "CAMPAIGN_COVERAGE.json",
+    "prefix_families": 197,
+    "inventory_as_of": "2026-10-19",
+    "all_campaigns_required": true,
+    "derived_prefixes_excluded_from_input": true,
+    "simulation_launch_allowed": false,
+    "routine_raw_transfer_to_edison_allowed": false,
+    "root_discovery": "Stage 0 bounded authorized bucket-root delimiter/known-root discovery; campaign/ is not assumed the only results root; restricted/inaccessible roots explicitly blocked. Add discovered unregistered/new prefixes; exclude derived root.",
+    "union_prefix_names_at_survey": 198,
+    "registered_campaigns": 21,
+    "cold_prefix_query": {
+      "filter": {
+        "field": "record_kind",
+        "operator": "eq",
+        "value": "historical_prefix"
+      },
+      "expected_rows": 197
+    }
+  },
+  "proposed_storage": {
+    "root": "campaign/_derived/reducer/v1/",
+    "attempt_path": "campaign/_derived/reducer/v1/attempts/{reduction_id}/",
+    "query_path": "campaign/_derived/reducer/v1/queries/{query_id}/",
+    "source_immutable": true,
+    "commit": "COMMIT.json",
+    "publication_rule": "only expose catalog snapshot after immutable partition hashes, counts, errors, and checkpoints validated; COMMIT create-if-absent last",
+    "mutable_latest_pointer_required": false
+  },
+  "request_required_fields": [
+    "schema_version",
+    "reduction_id",
+    "parent_reduction_id",
+    "purpose",
+    "implementation_sha",
+    "reducer_image_digest",
+    "adapter_registry_sha256",
+    "scope_register_sha256",
+    "source_bucket",
+    "source_prefix_allowlist",
+    "source_exclude_prefixes",
+    "derived_root",
+    "inventory_snapshot",
+    "job_binding",
+    "budgets",
+    "readback",
+    "approval",
+    "survey_source_sha",
+    "quote"
+  ],
+  "budgets_required": [
+    "max_list_pages",
+    "max_api_calls_total",
+    "max_head_requests",
+    "max_get_requests",
+    "max_source_objects",
+    "max_source_object_bytes_referenced",
+    "max_compressed_bytes_read",
+    "max_uncompressed_bytes",
+    "max_member_bytes",
+    "max_central_directory_bytes",
+    "max_output_bytes",
+    "max_spool_bytes",
+    "max_wall_seconds",
+    "max_queue_wait_seconds",
+    "max_vcpu_seconds",
+    "max_memory_mib_seconds",
+    "max_jobs",
+    "max_inflight_jobs",
+    "max_retries",
+    "max_cost_usd",
+    "safety_factor",
+    "checkpoint_reserve_bytes",
+    "checkpoint_reserve_seconds"
+  ],
+  "budget_rules": {
+    "admission": "Machine admission/reservation against an already approved scientific scope and budget envelope; a current matching quote and finite ceilings are required, not a fresh PI approval per operation.",
+    "shared_limits": "disjoint shard reservations summing within parent; retries/resumes/query jobs charge same ledger; reserve before request; no reset on resume",
+    "stop": "before operation exceeding any remaining ceiling; checkpoint and BUDGET_STOPPED nonzero; no successful completeness claim",
+    "pricing": "timestamped source, region, compute basis, S3 requests/storage, ECR/logs, artifact/egress, KMS if used; unknown price blocks quote; Spot scenarios not guarantee",
+    "pilot": "stratify every schema/archive family, hull including mega, largest central-directory/member classes, scan_rows, source/derived joins, corrupted/archived cases; bootstrap cap approved before measurement",
+    "quote": "observed operations and p50/p95/max bytes/decode/time; cold count extrapolation labeled dated, then frozen inventory quote; worst-case concurrency/retries/storage bounds; archive restoration excluded and blocked",
+    "automatic_reservation": {
+      "rule": "Automatically reserve remaining budget for each in-envelope query, page, resume, phase or campaign; bind admission_id, scope_hash, quote_id and expiry to the parent envelope and retain ledger/receipt. Phase-specific reservations are machine records, not new manual tokens.",
+      "human_escalation_only": [
+        "new scientific scope",
+        "budget-envelope exception",
+        "credential or permission exception"
+      ],
+      "fail_closed": "Expired/absent envelope, unmatched scope/quote, insufficient remaining budget or inaccessible credentials => blocked nonzero; no implicit authority.",
+      "survey_authorizes_paid_execution": false
+    }
+  },
+  "source_read_rules": {
+    "version_pin": "nonempty VersionId other than literal null; else IfMatch ETag on every HEAD-reconciled GET/range",
+    "changed": "412 or identity mismatch => SOURCE_CHANGED; stop/quarantine affected shard, no mixing; revised source snapshot new attempt",
+    "range": "validate status/ContentRange/returned bytes and account retries; reject whole-body response to range beyond budget",
+    "hash": "ETag treated as opaque identity, not content hash; SHA256 compressed bytes actually read and logical decompressed summary/member, derived partition files; do not download full originals just to hash",
+    "zip": "EOCD validated including comment, ZIP64 locator/records and nested member paths; stored/deflate supported explicitly; CRC and size/decode bounds; duplicate/ambiguous members quarantined; unsupported encryption/compression declared; no unsafe extraction",
+    "archives": "per-run and fused multi-run ZIPs separate identities (object,member path), scan JSONL, standalone JSON/gzip/parquet adapters; no extension-only interpretation"
+  },
+  "permissions": {
+    "source_reader": {
+      "scope": "admitted original prefixes only; exclude derived",
+      "allow": [
+        "s3:ListBucket (prefix condition)",
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:GetObjectAttributes"
+      ],
+      "deny": [
+        "s3:PutObject to source",
+        "s3:DeleteObject",
+        "s3:RestoreObject",
+        "batch:SubmitJob",
+        "iam:*",
+        "ec2 writes"
+      ],
+      "kms": "kms:Decrypt only if actual source encryption requires it, exact key and service/context restriction"
+    },
+    "derived_writer": {
+      "scope": "attempt/query subtree only",
+      "allow": [
+        "s3:GetObject for checkpoint/reuse validation",
+        "s3:PutObject create-if-absent",
+        "s3:ListBucket for own derived subtree"
+      ],
+      "deny": [
+        "source writes",
+        "object deletes",
+        "overwrite existing key"
+      ],
+      "implementation": "worker application role combines source_reader and derived_writer scoped policies; no separate credentials handled by reducer"
+    },
+    "analysis_dispatcher": {
+      "allow": [
+        "bounded Batch describe/list",
+        "SubmitJob exact reducer jobdef revision and approved queue",
+        "status/cancel/terminate own tagged attempt jobs",
+        "PutObject create-only admitted request/receipt paths",
+        "GetObject for request/receipt/admission"
+      ],
+      "no_source_write": true,
+      "pass_role": "exact reducer application/execution roles, service-bound as required; registration/build by deployment identity only"
+    },
+    "collector": {
+      "allow": [
+        "read derived receipts, catalog index pages, query page files",
+        "bounded original manifest/key export read if explicitly requested"
+      ],
+      "write_s3": false,
+      "submit_jobs": false
+    },
+    "execution_role": {
+      "scope": "ECR digest-pinned image pull and log stream only; reuse existing role only after exact policy/resource verification"
+    },
+    "deployer": {
+      "purpose": "one-time approved IAM/template/image registration by authorized Devin deployment identity; not Edison credential relay",
+      "live_arns": "resolve, do not fabricate"
+    }
+  },
+  "readback": {
+    "proposed_hard_caps": {
+      "receipt_bytes": 262144,
+      "summary_bytes": 1048576,
+      "index_page_bytes": 1048576,
+      "export_object_bytes": 5242880,
+      "request_manifest_bytes": 1048576,
+      "files_per_collect": 20,
+      "total_bytes_per_collect": 52428800,
+      "max_query_rows_per_page": 10000,
+      "issue_envelope_bytes": 32768
+    },
+    "request_fields": [
+      "contract_id",
+      "catalog_snapshot_id",
+      "operation",
+      "analysis_version",
+      "source_table",
+      "metric_ids",
+      "filters",
+      "group_by",
+      "statistic",
+      "weight_set_id",
+      "missing_policy",
+      "projection",
+      "max_export_rows",
+      "max_export_bytes",
+      "page_rows",
+      "allow_raw_agent_export",
+      "continuation_token",
+      "window_definition_id",
+      "condition_definition_id",
+      "target_id",
+      "order_by",
+      "scan_budget",
+      "grain",
+      "joins"
+    ],
+    "query": "structured filter AST/column allowlist, not arbitrary shell or unconstrained SQL; Parquet projection and partition/row-group pruning on AWS; JSONL/Parquet bounded export files",
+    "pagination": "never silent truncate; returned/scanned/remaining-known counts, complete bool, reason, next continuation bound to frozen catalog/query hash and next stable row key, explicit final null; one oversized row gets ROW_TOO_LARGE with selectable columns not omission",
+    "joint_example_columns": [
+      "runs.run_uid",
+      "runs.vessel_id",
+      "runs.arm_id",
+      "runs.seed",
+      "metrics.metric_id",
+      "metrics.population_id",
+      "metrics.condition_id",
+      "metrics.numerator",
+      "metrics.denominator",
+      "metrics.value",
+      "metrics.value_status"
+    ],
+    "no_histogram_only": true,
+    "query_scan_ceiling": "applies to source partitions scanned as well as tiny return size; no pretending selected columns reduce JSONL source scan cost",
+    "joint_example_rule": "Join metrics to runs many-to-one; multiple metric roles/IDs must pivot via explicit uniqueness-checked key and select named metrics, never duplicate-run cross-product. Population complements from population_intervals or exact native run_scalars, not an invented runs.hull_id/run_key schema."
+  },
+  "return_path": {
+    "proposed_dispatch_workflow": ".github/workflows/campaign_reduction.yml",
+    "proposed_collector_mode": "receipt_uri or export_manifest_key with strict allowlist, pins, per-file/total limits; paged list-prefix mode without object bodies",
+    "automatic_trigger": "workflow completion notification if integration supports durable callback; otherwise persistent Edison-side bounded GitHub Actions polling with cursor/backoff. Capability must be verified; not assumed",
+    "attempt_receipt_fields": [
+      "reduction_id",
+      "fingerprint",
+      "request_sha256",
+      "admission_id",
+      "github_run_id",
+      "github_attempt",
+      "phase",
+      "status",
+      "batch_job_ids",
+      "jobdef_revision_arn",
+      "image_digest",
+      "source_inventory_uri",
+      "source_inventory_hash",
+      "catalog_uri",
+      "catalog_hash",
+      "summary_key",
+      "files_manifest_key",
+      "output_counts",
+      "errors",
+      "budget_spent",
+      "budget_remaining",
+      "checkpoint_uri",
+      "continuation",
+      "start_utc",
+      "end_utc"
+    ],
+    "github": "Issue envelope <=32 KiB containing attempt/status/hash/pointers plus bounded summary; full S3 receipt <=256 KiB, paginated child-job receipts if necessary. Artifacts carry requested JSONL/Parquet pages and hash manifest, never raw archives. Publish failure receipt when possible; missing receipt becomes detectable RETURN_PATH_BLOCKED.",
+    "edison": "connector discovers receipt, dispatches collect if needed, downloads bounded artifact via authenticated redirect without logging signed URL, verifies artifact and member SHA256, ingests durable project asset/index, acknowledges attempt/query/page IDs. Deduplicate on IDs/hashes; expiry re-collect from immutable S3, no human relay",
+    "end_to_end_status": "BLOCKED_UNTIL_ACCEPTANCE_TEST",
+    "client_access": [
+      "GitHub contents read",
+      "Actions read and dispatch write via secure integration",
+      "issues read",
+      "authorized persistent Edison automation/session and artifact download/ingestion capability"
+    ],
+    "human_role": "approve scientific scope/budget and exceptional permissions once as required; not transfer files",
+    "receipt_pagination": "Large job-ID/error/partition lists move to pinned pages; receipt retains count, index hash and continuation. A 256 KiB receipt is never pasted wholesale into a GitHub issue/comment.",
+    "qualified_ack": "acknowledgments identifies reduction_id via reduction_id field, receipt_id, exact query/pages/hashes, durable project asset IDs, accepted coverage/limits and saved next cursor. No acknowledgment implies scientifically usable completeness."
+  },
+  "exit_codes": {
+    "0": "phase complete with declared coverage",
+    "2": "invalid contract",
+    "3": "ACCESS_OR_RESOURCE_BLOCKED",
+    "4": "ADMISSION_REQUIRED_OR_EXCEEDED",
+    "5": "BUDGET_STOPPED_CHECKPOINTED",
+    "6": "SOURCE_CHANGED",
+    "7": "SCHEMA_OR_CORRUPTION_QUARANTINE",
+    "8": "PARTIAL_COVERAGE",
+    "9": "RETURN_PATH_BLOCKED"
+  },
+  "semantic_rules": [
+    "Unknown or null budgets, prices, resources, credentials or approval block paid work. max_retries may be zero; other quantitative ceilings must be positive. Budget null is never unlimited.",
+    "Bootstrap preflight/inventory and canary require separate bounded admissions before the full-data quote exists.",
+    "No source writes/deletes/restores, simulations, fitting, or infrastructure auto-creation.",
+    "All operations accept --request FILE --out DIR. plan and validate are strictly offline. status/collect/acknowledge charge API/return budgets.",
+    "A query is a bounded AST with explicit table grain, joins, target, metric versions, weights, missingness and frozen catalog; no arbitrary SQL/shell.",
+    "No query complete flag without all requested pages or explicit qualified incomplete status.",
+    "preflight/inventory/status/collect/acknowledge may use BOOTSTRAP_REQUEST.schema.json for metadata/return only; this admission cannot authorize Batch submission, source payload GET, restore, or materialization. quote and plan remain offline.",
+    "Paid REQUEST.schema.json price/quote/resource/admission cross-checks are semantic, including quote expiry, scope equality, shared budget ceilings, exact source/image identity and allowed worker module. Passing structural schema alone never authorizes execution.",
+    "reduction_id and parent_reduction_id identify data-reduction executions; attempts.attempt_id is a historical scientific attempt. Engine SHA is never filled from survey or reducer SHA.",
+    "All quote inputs, unit prices, scopes, expiry, role/image bindings and measured/estimated uncertainty must be retained in a pinned quote object. The request quote, approval quote_id and scope/price/resource fingerprint must match. Pilot may have a separately admitted conservative bootstrap quote; bulk needs measured pilot results.",
+    "Quotes for query/control phases use the same finite admission principles. REQUEST.schema.json is the Batch/paid-operation envelope; BOOTSTRAP_REQUEST.schema.json never authorizes source payload reading.",
+    "query query_file is validated by QUERY.schema.json and bound to execution request hash/admission. status/collect/acknowledge use the bounded bootstrap envelope; operation-specific required fields are validated by the shared parser and semantic gate, not inferred from omitted context.",
+    "In-envelope admissions are automatic reservations under the preapproved parent scope/budget envelope, never routine per-query/page/resume/phase/campaign PI approvals. Escalate only new scientific scope, budget-envelope exceptions or credential/permission exceptions. This survey authorizes no AWS execution.",
+    "STATUS_NAMESPACES.json separates operational lifecycle, source read, capability, metric value, coverage, clinical censoring and historical scientific approval. Exit-code reason labels are not table status literals. Historical stopped attempts are not evidence of missing/lost data; unknown remains unknown absent completion evidence."
+  ],
+  "implementation_paths": {
+    "MODIFY": [
+      "scripts/campaign",
+      ".github/workflows/campaign_collect.yml",
+      "deploy/aws/Dockerfile.analysis",
+      "pyproject.toml (only if dependencies change; regenerate uv.lock correctly)"
+    ],
+    "CREATE_ALLOWED": [
+      "picard_framework/analysis/campaign_reducer/",
+      ".github/workflows/campaign_reduction.yml",
+      "tests/analysis/campaign_reducer/",
+      "docs/campaign_reduction/"
+    ],
+    "CONDITIONAL_MODIFY": [
+      "deploy/aws/github_oidc_stack.yaml",
+      "deploy/aws/batch_execution_role_permissions.json",
+      "existing shared analysis job-definition rendering/configuration under scripts/campaign"
+    ],
+    "DO_NOT_CREATE": [
+      "deploy/aws/*_entrypoint.py",
+      "deploy/aws/submit_*.sh",
+      "deploy/aws/batch_job_definition_*.json",
+      "deploy/aws/Dockerfile.*",
+      "scripts/campaign-reduce"
+    ],
+    "DO_NOT_MOVE": [
+      "Legacy files named by active jobdef argv until work is complete"
+    ]
+  }
+}

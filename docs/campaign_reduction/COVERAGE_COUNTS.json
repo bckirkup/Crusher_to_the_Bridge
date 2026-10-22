@@ -1,0 +1,52 @@
+{
+  "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+  "registered_campaign_records": 21,
+  "historical_prefix_records": 197,
+  "combined_records": 218,
+  "distinct_prefix_names_in_union": 198,
+  "historical_exact_current_registry_prefixes": 20,
+  "historical_paired_rerun_prefixes": 2,
+  "current_registry_not_in_historical_inventory": [
+    "noro_age_food_01_mega"
+  ],
+  "program_groups": 19,
+  "attempt_token_families": 118,
+  "schema_families": 11,
+  "historical_exact_source_token_linked_prefixes": 169,
+  "historical_no_exact_source_token_reference": 28,
+  "historical_objects_listed": 447190,
+  "historical_bytes_listed": 12179256285889,
+  "historical_truncated_prefix_rows": 0,
+  "historical_schema_candidate_counts": {
+    "bounded_region_jsonl": 3,
+    "observation_jsonl": 31,
+    "unknown_legacy": 30,
+    "campaign_summary_zip": 57,
+    "covid_screen_json": 56,
+    "flu_cell_json": 3,
+    "perturbation_json": 2,
+    "growth_census_zip": 12,
+    "fomite_diagnostic_gzip": 1,
+    "stan_nuts_json": 1,
+    "wastewater_campaign_zip": 1
+  },
+  "historical_endpoint_status_counts": {
+    "AR": {
+      "documented_unverified": 141,
+      "unknown": 56
+    },
+    "timing": {
+      "unknown": 68,
+      "documented_unverified": 129
+    },
+    "mechanism": {
+      "documented_unverified": 141,
+      "unknown": 55,
+      "known_saved": 1
+    },
+    "role": {
+      "unknown": 70,
+      "documented_unverified": 127
+    }
+  }
+}

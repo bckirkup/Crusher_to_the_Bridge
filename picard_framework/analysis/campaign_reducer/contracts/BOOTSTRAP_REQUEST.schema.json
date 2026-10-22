@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:crusher:integrated-distributions:v1:bootstrap",
+  "title": "NOT_YET_IMPLEMENTED bounded metadata/return admission; no Batch submit or payload reduction",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "crusher-campaign-distributions/1.0-proposed"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation": {
+      "enum": [
+        "preflight",
+        "inventory",
+        "status",
+        "collect",
+        "acknowledge"
+      ]
+    },
+    "source_bucket": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_roots_allowlist": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "derived_exclude_prefixes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "scope_register_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "max_api_calls_total": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_list_pages": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_head_requests": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_source_objects": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_return_bytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_wall_seconds": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_cost_usd": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "max_api_calls_total",
+        "max_list_pages",
+        "max_head_requests",
+        "max_source_objects",
+        "max_return_bytes",
+        "max_wall_seconds",
+        "max_cost_usd"
+      ],
+      "additionalProperties": false
+    },
+    "admission": {
+      "type": "object",
+      "properties": {
+        "admission_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approved_scope_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approved_cost_usd": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "expires_utc": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "admission_id",
+        "approved_scope_hash",
+        "approved_cost_usd",
+        "expires_utc"
+      ],
+      "additionalProperties": false
+    },
+    "price_snapshot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "as_of_utc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit_prices_json": {
+          "type": "object",
+          "minProperties": 1
+        }
+      },
+      "required": [
+        "id",
+        "as_of_utc",
+        "unit_prices_json"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "operation",
+    "source_bucket",
+    "source_roots_allowlist",
+    "derived_exclude_prefixes",
+    "scope_register_sha256",
+    "budgets",
+    "admission",
+    "price_snapshot"
+  ],
+  "additionalProperties": false
+}

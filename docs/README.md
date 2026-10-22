@@ -17,6 +17,7 @@ links to, and several heavily-linked files describe work that is finished.
 | [`flu/`](flu/) | The influenza-A thread: open ledger, readouts | Touching any `influenza_a` constant or the flu anchors |
 | [`sentinel/`](sentinel/) | Sentinel surveillance, port health, wastewater ops, shore-side, economics | Working on `picard_framework/analysis/sentinel/`, `shore/`, `economics/` |
 | [`paper3/`](paper3/) | Variant surveillance and phylodynamics | Working on strain state, mutation, lineage observables |
+| [`campaign_reduction/`](campaign_reduction/) | Campaign-wide AWS reduction program: authoritative spec, phased tickets D0–D8, coverage registers (specification only — artifact does not exist yet) | Working on `picard_framework/analysis/campaign_reducer/` or the `scripts/campaign analysis` namespace |
 | [`proposals/`](proposals/) | Documents whose primary artifact **does not exist yet** | Deciding what to build; never as a description of current behaviour |
 | [`history/`](history/) | Resolved audits, superseded versions, one-off task briefs, completed plans | Auditing why something is the way it is |
 | [`literature/`](literature/) | Raw literature-search output (PDFs, review notes) | Sourcing or checking a constant's provenance |

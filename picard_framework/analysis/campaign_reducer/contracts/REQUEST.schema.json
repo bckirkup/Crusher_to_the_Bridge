@@ -1,0 +1,454 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:crusher:integrated-distributions:v1:request",
+  "title": "NOT_YET_IMPLEMENTED admitted execution request; semantic validator also required",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "crusher-campaign-distributions/1.0-proposed"
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reducer_image_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_registry_sha256": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_register_sha256": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_bucket": {
+      "type": "string",
+      "minLength": 1
+    },
+    "derived_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_prefix_allowlist": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source_exclude_prefixes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "inventory_snapshot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    "job_binding": {
+      "type": "object",
+      "properties": {
+        "queue_arn": {
+          "type": "string",
+          "minLength": 1
+        },
+        "job_definition_revision_arn": {
+          "type": "string",
+          "minLength": 1
+        },
+        "job_role_arn": {
+          "type": "string",
+          "minLength": 1
+        },
+        "execution_role_arn": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image_digest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vcpu": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "memory_mib": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "queue_arn",
+        "job_definition_revision_arn",
+        "job_role_arn",
+        "execution_role_arn",
+        "image_digest",
+        "platform",
+        "vcpu",
+        "memory_mib",
+        "timeout_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "max_list_pages": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_api_calls_total": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_head_requests": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_get_requests": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_source_objects": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_source_object_bytes_referenced": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_compressed_bytes_read": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_uncompressed_bytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_member_bytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_central_directory_bytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_output_bytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_spool_bytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_wall_seconds": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_queue_wait_seconds": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_vcpu_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_memory_mib_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max_jobs": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_inflight_jobs": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_cost_usd": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "safety_factor": {
+          "type": "number",
+          "minimum": 1
+        },
+        "checkpoint_reserve_bytes": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "checkpoint_reserve_seconds": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "max_list_pages",
+        "max_api_calls_total",
+        "max_head_requests",
+        "max_get_requests",
+        "max_source_objects",
+        "max_source_object_bytes_referenced",
+        "max_compressed_bytes_read",
+        "max_uncompressed_bytes",
+        "max_member_bytes",
+        "max_central_directory_bytes",
+        "max_output_bytes",
+        "max_spool_bytes",
+        "max_wall_seconds",
+        "max_queue_wait_seconds",
+        "max_vcpu_seconds",
+        "max_memory_mib_seconds",
+        "max_jobs",
+        "max_inflight_jobs",
+        "max_retries",
+        "max_cost_usd",
+        "safety_factor",
+        "checkpoint_reserve_bytes",
+        "checkpoint_reserve_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "readback": {
+      "type": "object",
+      "properties": {
+        "receipt_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 262144
+        },
+        "summary_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "index_page_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "export_object_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5242880
+        },
+        "request_manifest_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1048576
+        },
+        "files_per_collect": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "total_bytes_per_collect": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 52428800
+        },
+        "max_query_rows_per_page": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "issue_envelope_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32768
+        }
+      },
+      "required": [
+        "receipt_bytes",
+        "summary_bytes",
+        "index_page_bytes",
+        "export_object_bytes",
+        "request_manifest_bytes",
+        "files_per_collect",
+        "total_bytes_per_collect",
+        "max_query_rows_per_page",
+        "issue_envelope_bytes"
+      ],
+      "additionalProperties": false
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "admission_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quote_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approved_cost_usd": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "expires_utc": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "admission_id",
+        "scope_hash",
+        "quote_id",
+        "approved_cost_usd",
+        "expires_utc"
+      ],
+      "additionalProperties": false
+    },
+    "phase": {
+      "enum": [
+        "bootstrap",
+        "return_canary",
+        "inventory",
+        "pilot",
+        "materialize",
+        "finalize",
+        "query"
+      ]
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reduction_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parent_reduction_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "implementation_sha": {
+      "type": "string",
+      "minLength": 1
+    },
+    "survey_source_sha": {
+      "const": "496a919ca3af4563da34b958db37e737b58bab4b"
+    },
+    "quote": {
+      "type": "object",
+      "properties": {
+        "quote_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "minLength": 1
+        },
+        "price_snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "price_as_of_utc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_inventory_sha256": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "valid_until_utc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "estimates_json": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "resource_bindings_json": {
+          "type": "object",
+          "minProperties": 1
+        }
+      },
+      "required": [
+        "quote_id",
+        "uri",
+        "sha256",
+        "price_snapshot_id",
+        "price_as_of_utc",
+        "input_inventory_sha256",
+        "scope_hash",
+        "valid_until_utc",
+        "estimates_json",
+        "resource_bindings_json"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "reduction_id",
+    "parent_reduction_id",
+    "purpose",
+    "implementation_sha",
+    "reducer_image_digest",
+    "adapter_registry_sha256",
+    "scope_register_sha256",
+    "source_bucket",
+    "derived_root",
+    "source_prefix_allowlist",
+    "source_exclude_prefixes",
+    "inventory_snapshot",
+    "job_binding",
+    "budgets",
+    "readback",
+    "approval",
+    "phase",
+    "request_id",
+    "survey_source_sha",
+    "quote"
+  ],
+  "additionalProperties": false
+}

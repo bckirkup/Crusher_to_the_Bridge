@@ -1,0 +1,12 @@
+{
+  "schema_version": "crusher-campaign-distributions/1.0-proposed",
+  "request_id": null,
+  "operation": null,
+  "source_bucket": null,
+  "source_roots_allowlist": null,
+  "derived_exclude_prefixes": null,
+  "scope_register_sha256": null,
+  "budgets": null,
+  "admission": null,
+  "price_snapshot": null
+}

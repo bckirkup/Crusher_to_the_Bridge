@@ -1,0 +1,290 @@
+{
+  "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+  "contract_id": "crusher-campaign-distributions/1.0-proposed",
+  "survey_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+  "phases": [
+    {
+      "id": "D0",
+      "phase": "contract_and_checkout",
+      "owner": "Devin; Kosmos acceptance",
+      "dependencies": [],
+      "actions": [
+        "Inspect canonical accepted checkout including extensionless launcher/Dockerfiles; retain survey SHA separately from implementation SHA.",
+        "Generate null-valued blocking request template, resource/access/dependency checklist, and deterministic offline plan.",
+        "Adopt canonical FIELD_CONTRACTS.json, CANONICAL_INTERFACE.json, REQUEST.schema.json/BOOTSTRAP_REQUEST.schema.json; extend existing scripts/campaign with analysis subcommand, no parallel launcher or new deploy/aws worker entrypoint."
+      ],
+      "acceptance": [
+        "plan/validate invoke zero network calls, jobs or simulation functions under subprocess/network spies",
+        "all 197 dated prefixes retained with date, no fabricated current keys/run counts",
+        "request with any unset resource/price/admission/paid limit rejected; SHA and image digest roles distinct",
+        "minimal reducer dependency lock with Python>=3.11,boto3,pyarrow and parser choices, no required CmdStan"
+      ],
+      "execution": "offline_only",
+      "original_aws_ticket": "R0",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "F01",
+        "F06",
+        "F17",
+        "F26",
+        "F34",
+        "P06"
+      ]
+    },
+    {
+      "id": "D1",
+      "phase": "identity_and_readers",
+      "owner": "Devin",
+      "dependencies": [
+        "D0"
+      ],
+      "actions": [
+        "Create pinned bounded S3 readers and explicit adapter registry.",
+        "Add scan-row lossless preservation, per-run and fused ZIP/ZIP64, JSON/gzip/JSONL/Parquet adapters."
+      ],
+      "acceptance": [
+        "non-null version and ETag/null-version paths tested; change between HEAD/ranges produces SOURCE_CHANGED",
+        "stored/deflate ZIP, ZIP64, long comments, nested/fused run folders, duplicate names, corrupt CRC, truncated members, archived and unsupported compression fixtures accounted",
+        "malicious decoded/member/CD size and whole-body range fallback cannot exceed admitted caps",
+        "same seed in different hull/cell/engine attempts never collides; object and member hashes distinct",
+        "unknown fields retained, zero/false/null distinct, missing denominators remain null"
+      ],
+      "execution": "offline_only",
+      "original_aws_ticket": "R1",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "P01",
+        "P02",
+        "P03",
+        "P05",
+        "P07",
+        "P08",
+        "P09",
+        "P10",
+        "P11",
+        "P23"
+      ]
+    },
+    {
+      "id": "D2",
+      "phase": "budget_materialize_catalog_query",
+      "owner": "Devin; Kosmos reviews semantics",
+      "dependencies": [
+        "D1"
+      ],
+      "actions": [
+        "Implement reservation ledger, streaming bounded shards/checkpoints, idempotent create-only outputs, catalog finalization and AWS-side projection/filter exports.",
+        "Add base full run distributions plus optional requested long tables; emit coverage/errors/lineage."
+      ],
+      "acceptance": [
+        "every ceiling tested at limit-1, limit, limit+1 with retry/resume/concurrency charging included",
+        "kill after partition and before COMMIT; resume yields same logical row set and no conflicting overwrite",
+        "fused ZIP emits all run members; canary/production/rerun conflicts visible, no first-row-only helper",
+        "full joint pages equal exhaustive fixture selection with stable ordering, no missing/duplicate rows, null-aware filters and all caps",
+        "oversized row/error, schema evolution, unsupported family and incomplete inventory prevent unqualified complete status"
+      ],
+      "execution": "offline_only",
+      "original_aws_ticket": "R2",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "P04",
+        "P12",
+        "P13",
+        "P20",
+        "P22",
+        "P25",
+        "P26"
+      ]
+    },
+    {
+      "id": "D3",
+      "phase": "deployment_and_access_acceptance",
+      "owner": "Devin authorized deployer; Benjamin approves exceptional access/budget",
+      "dependencies": [
+        "D0",
+        "D1",
+        "D2"
+      ],
+      "actions": [
+        "MODIFY existing deploy/aws/Dockerfile.analysis (it currently excludes tools/ and its ENTRYPOINT is python3), ensure shared reducer package and qualified scanner functions are included; execute exact image import/argv smoke test.",
+        "Configure analysis worker module through shared scripts/campaign analysis and verified job-binding renderer; do not create a new deploy/aws entrypoint, Dockerfile, bespoke jobdef or submit script; preserve active legacy argv.",
+        "Review/create dedicated constrained roles if authorized, verify queue/runtime prices and environment; extend existing bounded collector; add one analysis-dispatch workflow only when approved."
+      ],
+      "acceptance": [
+        "exact live role/queue/jobdef/image ARNs and platform/resources recorded, unsupported binding blocks",
+        "source-write/delete/restore and simulation/infra permissions excluded; create-only derived collision tested",
+        "image import/entrypoint smoke test, ECR/logs/KMS/network checks passed within metadata/bootstrap budget",
+        "workflow input injection rejected; current legacy exact-key and index behavior regression tests retained",
+        "quote approved for synthetic return canary; no new infrastructure fallback"
+      ],
+      "execution": "only_after_offline_implementation_acceptance_and_deployment_authorization",
+      "original_aws_ticket": "R3",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "P19"
+      ]
+    },
+    {
+      "id": "D4",
+      "phase": "automatic_edison_return_canary",
+      "owner": "Devin AWS/GitHub; Kosmos Edison acceptance",
+      "dependencies": [
+        "D3"
+      ],
+      "actions": [
+        "Implement persistent platform driver/poller or verified durable completion callback, artifact readback, durable ingestion and acknowledgments.",
+        "Run synthetic analysis success/failure/query pages, without simulation."
+      ],
+      "acceptance": [
+        "actual GitHub attempt receipt to bounded collector artifact to durable Edison summary/index and selected JSONL/Parquet rows completes without human file transfer",
+        "selected joint query has >=2 pages and retained continuation; repeated notifications deduplicate",
+        "403, expired artifact, missing trigger, interrupted poller, missing artifact/member and hash mismatch tested; fail closed or automatic re-collect from S3",
+        "pending collector requests serialized/correlated by request/workflow IDs; failure receipt does not look successful",
+        "client and server byte budgets observed; credentials/signed URLs not in logs"
+      ],
+      "execution": "authorized_synthetic_cloud_canary",
+      "original_aws_ticket": "R4",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "P19",
+        "P20"
+      ]
+    },
+    {
+      "id": "D5",
+      "phase": "all_197_cold_inventory",
+      "owner": "Devin executes AWS; Kosmos scope review",
+      "dependencies": [
+        "D4"
+      ],
+      "actions": [
+        "Run future bounded metadata inventory, reusing dated register as scope only.",
+        "Export paginated exact-key manifests, schema candidates and parent/mega _scan_rows mapping keys; preserve discovery window and scope delta.",
+        "Inventory authorized results roots outside campaign/; derive additive dated discovery deltas and account for the registered mega prefix absent Oct19; verify root-list permissions, otherwise block completeness."
+      ],
+      "acceptance": [
+        "197 historical families each present/absent/error with fresh observation; additions explicit, derived excluded",
+        "all caps produce explicit continuation/incomplete state; resume does not restart completed pages unnecessarily",
+        "every raw/scan candidate has object identity/size/storage-class fields with VersionId provenance separate from listing",
+        "Oct19 counts retained as dated, not overwritten or represented as fresh"
+      ],
+      "execution": "admitted_metadata_only",
+      "original_aws_ticket": "R5",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "P06",
+        "P21"
+      ]
+    },
+    {
+      "id": "D6",
+      "phase": "schema_pilot_and_quote",
+      "owner": "Devin executes; Kosmos scientific coverage; budget owner admission",
+      "dependencies": [
+        "D5"
+      ],
+      "actions": [
+        "Run stratified capped pilot across actual schema/archive families, size extremes, relevant four hulls and parent/mega scan overlap.",
+        "Measure/quote remaining materialization and optional witness expansion; declare unsupported/unavailable scope.",
+        "Pick minimal existing-data pilot adaptively to cover all parser/identity/telemetry-risk classes, not an arbitrary number of archives; prioritize PS01 all four hulls and include ordinary summary, lean/full census, fused/nested legacy, clinical non-AGE and an unsupported/missing witness. Record actual member/count and measured costs; expand classes only where insufficient."
+      ],
+      "acceptance": [
+        "exact mega raw sibling keys join parent _scan_rows rows by embedded source key; no rev5 false absence",
+        "reuse audit distinguishes complete summary, partial precision, census missingness and unknown image/source provenance",
+        "timings/bytes/requests/peak-memory/spool/retries measured and committed with specimen pins",
+        "quote uses timestamped verified regional prices and bound reserves; absent price/resource stops materialization",
+        "no inferred all-family compatibility from norovirus pilot"
+      ],
+      "execution": "admitted_analysis_only_pilot",
+      "original_aws_ticket": "R6",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "P14",
+        "P15",
+        "P16",
+        "P17",
+        "P18",
+        "P21",
+        "P23",
+        "P24"
+      ]
+    },
+    {
+      "id": "D7",
+      "phase": "all_campaign_materialize_finalize",
+      "owner": "Devin AWS execution; Kosmos reviews distributions",
+      "dependencies": [
+        "D6"
+      ],
+      "actions": [
+        "Execute admitted bounded shards and checkpoint/resume; no simulation jobs.",
+        "Finalize immutable catalog/COMMIT only after coverage and hashes reconcile, publish receipt automatically.",
+        "Execute admitted iterative reduction across the entire discovered catalog, not only PS01; reconcile source\u2192member\u2192adapter\u2192metric\u2192query at per-family/per-attempt grain. A preserved unavailable metric is acceptable coverage, not fabricated completeness."
+      ],
+      "acceptance": [
+        "source originals unchanged; write paths only derived; output hashes/member lineage retained",
+        "all 197 families accounted; full-distribution flag justified per family/table; unsupported/inaccessible/changed sources not silently omitted",
+        "provisioned 36k+10k production claim checked against actual run identities separately from canaries, object counts and inherited ledger",
+        "four-hull coverage retained; no three-hull first-paper substitution",
+        "all full per-run values accessible, not just histograms/quantiles; failed/partial attempts keep resumable receipts"
+      ],
+      "execution": "admitted_production_analysis_not_simulation",
+      "original_aws_ticket": "R7",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "P04",
+        "P06",
+        "P12",
+        "P22",
+        "P26"
+      ]
+    },
+    {
+      "id": "D8",
+      "phase": "production_joint_readback_and_handoff",
+      "owner": "Kosmos analysis; Devin repairs/executes missing tools",
+      "dependencies": [
+        "D7"
+      ],
+      "actions": [
+        "Run capped selected joint-distribution queries from real committed catalog, page through required cells/hulls, ingest compact evidence automatically.",
+        "Deliver execution readout, budget accounting, unresolved schema limits and continued-query instructions.",
+        "Kosmos verifies exact scalar and joint row distributions and uncertainty via durable automatic receipt/ack across campaigns; Devin repairs incomplete adapters/return workflows before claiming completion; four-hull PS01 is first priority, not a three-hull substitute."
+      ],
+      "acceptance": [
+        "two or more paginated column/filter-selected exports compared with independent bounded source/scan rows; precision differences recorded",
+        "every query has catalog hash, columns/filter, complete/continuation, row/file hashes and scan/return budgets",
+        "summary/catalog/selected distributions reach durable Edison assets with acknowledgment and no manual bulk relay",
+        "scientific validity axes and claim quarantine unchanged by parsing success; publication analysis decisions owned by Kosmos"
+      ],
+      "execution": "admitted_production_query_and_automatic_return",
+      "original_aws_ticket": "R8",
+      "status": "NOT_YET_IMPLEMENTED_NOT_EXECUTED",
+      "scientific_fixture_ids": [
+        "P12",
+        "P13",
+        "P19",
+        "P20",
+        "P21",
+        "P26"
+      ]
+    }
+  ],
+  "required_sequence": "D0\u2013D4 pass before D5 inventory, D6 measured pilot/quote before D7 bulk, D8 durable readback before distribution-access certification. At each phase stop on scope/access/price/budget/telemetry failures and return qualified receipt.",
+  "future_optional_tickets": [
+    {
+      "id": "FUTURE-T1",
+      "status": "DESIGN_ONLY_NOT_A_PREREQUISITE_TO_HISTORICAL_REDUCTION",
+      "owner": "Devin producer instrumentation; Kosmos scientific contract; PI prospective scope approval",
+      "actions": [
+        "For future independently authorized campaigns only, emit complete primary-role denominator/composition by window; event source/recipient/context and role-at-event; exact infection/symptom/specimen/result/report/response clocks and censor metadata; requested retention/full-vs-lean lost counts; source engine/image/input/seed identity.",
+        "Expose explicit capability/version tags to adapters; emit planned dropped-versus-retained counters; preserve raw native fields and unit/version definitions.",
+        "No retroactive reconstruction or automatic rerun of existing campaigns. Any future simulation needs a separate scoped scientific design, budget and approval; old-data reducer continues with explicit unavailable fields."
+      ],
+      "acceptance": [
+        "Producer fixture maps to FIELD_CONTRACTS.json without guessing roles/times/rosters.",
+        "Missing historical telemetry does not block reducing all recoverable old scalar rows or trigger new campaigns."
+      ]
+    }
+  ]
+}

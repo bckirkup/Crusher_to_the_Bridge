@@ -1,0 +1,121 @@
+{
+  "status": "DESIGN_ALIAS_MAP_ONLY_NOT_IMPLEMENTED",
+  "authority": "crusher-campaign-distributions/1.0-proposed",
+  "command_aliases": [
+    {
+      "from": "aws_review: python3 scripts/campaign-reduce <operation>",
+      "to": "python3 scripts/campaign analysis <operation>",
+      "disposition": "replace proposal; do not create separate launcher"
+    },
+    {
+      "from": "aws_review: deploy/aws/campaign_reduce_entrypoint.py",
+      "to": "picard_framework.analysis.campaign_reducer.worker",
+      "disposition": "replace proposal; no new legacy entrypoint"
+    },
+    {
+      "from": "aws_review: new Dockerfile/jobdef/submit file",
+      "to": "modify existing Dockerfile.analysis + shared launcher job binding",
+      "disposition": "superseded by AGENTS.md 81-86"
+    },
+    {
+      "from": "aws_review: .github/workflows/campaign_reduce.yml",
+      "to": ".github/workflows/campaign_reduction.yml",
+      "disposition": "one proposed dispatcher name"
+    },
+    {
+      "from": "contracts: catalog, capabilities",
+      "to": "analysis query over campaign_catalog/capabilities",
+      "disposition": "query profiles, not additional endpoints"
+    },
+    {
+      "from": "contracts: reduce",
+      "to": "analysis submit --phase pilot|materialize|finalize",
+      "disposition": "explicit gated phase"
+    },
+    {
+      "from": "contracts: export",
+      "to": "analysis query then collect then acknowledge",
+      "disposition": "one durable bounded return lifecycle"
+    },
+    {
+      "from": "tools_review: shared reader/scanner/reducer/catalog suggestions",
+      "to": "picard_framework/analysis/campaign_reducer/ modules via scripts/campaign analysis",
+      "disposition": "functions reuse; no competing public CLI"
+    }
+  ],
+  "table_aliases": [
+    {
+      "from": "aws_review.run_key",
+      "to": "runs.run_uid with source_objects/assets/source_links provenance",
+      "rule": "not seed or basename; source asset identity distinct from selected logical run"
+    },
+    {
+      "from": "aws_review.summary_fields; tools_review scalar/summary rows",
+      "to": "run_scalars plus metrics and design_values",
+      "rule": "preserve exact native paths/types; no rounded reconstruction"
+    },
+    {
+      "from": "aws_review.timeseries",
+      "to": "epoch_metrics",
+      "rule": "clock, population, units and bins explicit"
+    },
+    {
+      "from": "aws_review.entities_events",
+      "to": "agents, memberships, events, event_participants, mechanism_objects, observations",
+      "rule": "split by actual grain; preserve joins only when saved"
+    },
+    {
+      "from": "aws_review.legacy_scan",
+      "to": "assets original scan bytes/JSON + run_scalars + adapted metrics",
+      "rule": "scan reuse must prove coverage and equivalence"
+    },
+    {
+      "from": "aws_review.errors",
+      "to": "data_gaps + assets.read_state + receipts.error_json",
+      "rule": "typed failure; never silent skip"
+    },
+    {
+      "from": "aws_review.lineage",
+      "to": "source_links, assets, pair_links, attempts",
+      "rule": "many-to-many and attempt-aware"
+    },
+    {
+      "from": "tools_review run index/catalog/distribution rows",
+      "to": "runs, source_objects, coverage_cells, catalog_partitions, distributions",
+      "rule": "physical object/member/cell/run counts never interchangeable"
+    },
+    {
+      "from": "aws_review request attempt_id/parent_attempt_id/source_code_sha",
+      "to": "reduction_id/parent_reduction_id/implementation_sha",
+      "rule": "Separate historical scientific attempt_id and engine_sha from reducer invocation identity."
+    }
+  ],
+  "status_namespaces": "STATUS_NAMESPACES.json",
+  "status_rule": "Per table.field authority; narrative source/read/exit labels require evidence-qualified mappings, not direct enum assignment.",
+  "literal_path_aliases": {
+    "science/source/": {
+      "kind": "inherited_source_prefix",
+      "resolve_prefix": "../source/",
+      "rule": "Historical prior-snapshot label retained verbatim; resolve matching relative suffix against the pinned survey source for local inspection, not proof of identical historical execution SHA."
+    },
+    "s3/campaign_index_complete.json": {
+      "kind": "dated_external_evidence",
+      "resolve": "../../2026-10-19_publication_stocktake/s3/campaign_index_complete.json",
+      "rule": "Dated October19 listing, not a current local/cloud inventory."
+    },
+    "source_supplement_inventory.json": {
+      "kind": "inherited_filename_case_alias",
+      "resolve": "../SOURCE_SUPPLEMENT_INVENTORY.json",
+      "rule": "Original E14 evidence wording retained; superseded inspection limitation is explained in the main report."
+    }
+  },
+  "nonresident_path_literals": {
+    ".github/workflows/campaign_reduction.yml": "Proposed workflow, explicitly NOT_YET_IMPLEMENTED.",
+    "PILOT_OR_BOOTSTRAP_EVIDENCE.json": "CLI argument filename placeholder, not supplied evidence.",
+    "QUERY.json": "CLI argument filename placeholder; QUERY.blocked_example.json is supplied.",
+    "ACK.json": "CLI argument filename placeholder; future durable acknowledgment.",
+    "COMMIT.json": "Proposed future catalog publication artifact.",
+    "zip/summary.json": "Archive format/member pattern, not a package file.",
+    "timeseries.json": "Possible archive member/telemetry filename, not proof of a saved member."
+  }
+}
