@@ -377,7 +377,9 @@ def build_contamx_engine(
                 ) as fh:
                     entries = path_map_from_prj(fh.read())
 
-        sim_path = run_contamx(prj_path, binary, config=cfg)
+        sim_path = run_contamx(
+            prj_path, binary, config=cfg, allowed_roots=allowed_roots,
+        )
         sim = SimResults(sim_path, allowed_roots=allowed_roots)
         flows = sim.path_volumetric_flow_m3h()
     finally:

@@ -151,6 +151,92 @@ def test_run_contamx_raises_without_binary(tmp_path):
         run_contamx(prj_path, binary=None, config={})
 
 
+def test_run_contamx_rejects_path_outside_allowed_roots(tmp_path, monkeypatch):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    prj = outside / "p.prj"
+    prj.write_text("ContamW 3.1\n")
+    fake = tmp_path / "contamx"
+    fake.write_text("#!/bin/sh\n")
+    os.chmod(fake, 0o700)
+    # allowed_roots is a different empty tree — prj must not escape it.
+    allowed = tmp_path / "allowed"
+    allowed.mkdir()
+    with pytest.raises(ContamXUnavailable, match="outside allowed roots"):
+        run_contamx(
+            str(prj), binary=str(fake), config={},
+            allowed_roots=(str(allowed),),
+        )
+
+
+def test_run_contamx_rejects_non_prj_basename(tmp_path):
+    bad = tmp_path / "model.txt"
+    bad.write_text("not a prj\n")
+    fake = tmp_path / "contamx"
+    fake.write_text("#!/bin/sh\n")
+    os.chmod(fake, 0o700)
+    with pytest.raises(ContamXUnavailable, match="\\.prj extension"):
+        run_contamx(
+            str(bad), binary=str(fake), config={},
+            allowed_roots=(str(tmp_path),),
+        )
+
+
+def test_run_contamx_rejects_non_contamx_binary_name(tmp_path):
+    prj = tmp_path / "model.prj"
+    prj.write_text("ContamW 3.1\n")
+    evil = tmp_path / "python"
+    evil.write_text("#!/bin/sh\n")
+    os.chmod(evil, 0o700)
+    with pytest.raises(ContamXUnavailable, match="not a ContamX binary"):
+        run_contamx(
+            str(prj), binary=str(evil), config={},
+            allowed_roots=(str(tmp_path),),
+        )
+
+
+def test_run_contamx_rejects_nonpositive_timeout(tmp_path):
+    prj = tmp_path / "model.prj"
+    prj.write_text("ContamW 3.1\n")
+    fake = tmp_path / "contamx"
+    fake.write_text("#!/bin/sh\n")
+    os.chmod(fake, 0o700)
+    with pytest.raises(ContamXUnavailable, match="timeout_s"):
+        run_contamx(
+            str(prj), binary=str(fake), config={}, timeout_s=0.0,
+            allowed_roots=(str(tmp_path),),
+        )
+
+
+def test_run_contamx_invokes_allowlisted_argv(tmp_path, monkeypatch):
+    prj = tmp_path / "model.prj"
+    prj.write_text("ContamW 3.1\n")
+    fake = tmp_path / "contamx"
+    fake.write_text("#!/bin/sh\n")
+    os.chmod(fake, 0o700)
+    sim = tmp_path / "model.sim"
+    captured: dict[str, object] = {}
+
+    def _fake_run(argv, **kwargs):
+        captured["argv"] = list(argv)
+        captured["cwd"] = kwargs.get("cwd")
+        captured["shell"] = kwargs.get("shell")
+        sim.write_bytes(b"")
+        return type("Completed", (), {"returncode": 0, "stderr": "", "stdout": ""})()
+
+    monkeypatch.setattr(
+        "engines.contamx_runner.subprocess.run", _fake_run,
+    )
+    out = run_contamx(
+        str(prj), binary=str(fake), config={},
+        allowed_roots=(str(tmp_path),),
+    )
+    assert out == str(sim.resolve())
+    assert captured["argv"] == [str(fake.resolve()), "model.prj"]
+    assert captured["cwd"] == str(tmp_path.resolve())
+    assert captured["shell"] is False
+
+
 def test_build_transport_engine_contamx_falls_back_to_native():
     cfg = {
         "ship_graph": {

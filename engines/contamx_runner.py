@@ -41,7 +41,13 @@ from typing import Any
 
 import numpy as np
 
-from simulation_utils.paths import is_path_under_base, validated_open
+from simulation_utils.numeric import is_zero
+from simulation_utils.paths import (
+    confine_to_base,
+    is_path_under_base,
+    validate_path_component,
+    validated_open,
+)
 
 # Candidate executable names for the ContamX solver, most-specific first.
 _CONTAMX_BINARY_NAMES = (
@@ -52,6 +58,7 @@ _CONTAMX_BINARY_NAMES = (
     "ContamX.exe",
     "ContamX3",
 )
+_CONTAMX_BINARY_NAMES_LOWER = frozenset(name.lower() for name in _CONTAMX_BINARY_NAMES)
 
 # Default in-repo drop directory for NIST binaries (gitignored contents).
 _THIRD_PARTY_CONTAMX_REL = os.path.join("third_party", "contamx")
@@ -89,16 +96,18 @@ def _search_dir_for_contamx(directory: str) -> str | None:
         candidate = os.path.join(directory, name)
         if _is_runnable_binary(candidate):
             return os.path.abspath(candidate)
-    # Fall back: any ContamX*.exe in the folder (Windows install dumps)
+    # Fall back: any ContamX*.exe in the folder (Windows install dumps).
+    # listdir can race with isdir (directory removed/unreadable); treat as miss.
     try:
-        for entry in sorted(os.listdir(directory)):
-            lower = entry.lower()
-            if lower.startswith("contamx") and lower.endswith(".exe"):
-                candidate = os.path.join(directory, entry)
-                if _is_runnable_binary(candidate):
-                    return os.path.abspath(candidate)
+        entries = sorted(os.listdir(directory))
     except OSError:
         return None
+    for entry in entries:
+        lower = entry.lower()
+        if lower.startswith("contamx") and lower.endswith(".exe"):
+            candidate = os.path.join(directory, entry)
+            if _is_runnable_binary(candidate):
+                return os.path.abspath(candidate)
     return None
 
 
@@ -155,38 +164,120 @@ def find_contamx(config: dict[str, Any] | None = None) -> str | None:
     return None
 
 
+def _default_contamx_roots() -> tuple[str, ...]:
+    """Repository root plus system temp (pytest / TemporaryDirectory)."""
+    return (_repo_root(), os.path.realpath(tempfile.gettempdir()))
+
+
+def _confine_under_roots(path: str, roots: tuple[str, ...]) -> str:
+    """Return the real path of *path* when it lies under any allowed root."""
+    for root in roots:
+        try:
+            return confine_to_base(root, path)
+        except ValueError:
+            continue
+    raise ContamXUnavailable(
+        f"Path outside allowed roots: {path}"
+    )
+
+
+def _safe_contamx_binary(
+    binary: str | None,
+    config: dict[str, Any] | None,
+) -> str:
+    """Resolve ContamX and allowlist its basename (Sonar pythonsecurity:S8705)."""
+    candidate = binary or find_contamx(config)
+    if candidate is None:
+        raise ContamXUnavailable(
+            "No ContamX binary configured or on PATH "
+            "(set hvac.contamx.binary_path or CONTAMX_BINARY)."
+        )
+    expanded = os.path.abspath(os.path.expanduser(candidate))
+    if not _is_runnable_binary(expanded):
+        raise ContamXUnavailable(f"ContamX binary not runnable: {candidate}")
+    try:
+        base = validate_path_component(
+            os.path.basename(expanded), label="ContamX binary",
+        )
+    except ValueError as exc:
+        raise ContamXUnavailable(str(exc)) from exc
+    lower = base.lower()
+    if lower not in _CONTAMX_BINARY_NAMES_LOWER and not (
+        lower.startswith("contamx") and lower.endswith((".exe", ".bat", ".cmd"))
+    ):
+        raise ContamXUnavailable(
+            f"Refusing executable that is not a ContamX binary: {base!r}"
+        )
+    # Re-join the validated basename under the resolved parent so the argv[0]
+    # Sonar sees is built from a sanitizer return value, not the raw input.
+    parent = os.path.dirname(expanded)
+    return os.path.join(parent, base)
+
+
+def _safe_contamx_prj(
+    prj_path: str,
+    *,
+    allowed_roots: tuple[str, ...] | None = None,
+) -> tuple[str, str, str]:
+    """Confine *prj_path* and return ``(abs_path, directory, basename)``.
+
+    Basename is path-component validated so LLM-/CLI-supplied values cannot
+    inject additional ContamX argv flags (Sonar pythonsecurity:S8705).
+    """
+    roots = allowed_roots if allowed_roots is not None else _default_contamx_roots()
+    confined = _confine_under_roots(prj_path, roots)
+    if not os.path.isfile(confined):
+        raise ContamXUnavailable(f"Project file not found: {prj_path}")
+    try:
+        prj_name = validate_path_component(
+            os.path.basename(confined), label="ContamX project file",
+        )
+    except ValueError as exc:
+        raise ContamXUnavailable(str(exc)) from exc
+    if not prj_name.lower().endswith(".prj"):
+        raise ContamXUnavailable(
+            f"ContamX project must use a .prj extension: {prj_name!r}"
+        )
+    prj_dir = os.path.dirname(confined)
+    return os.path.join(prj_dir, prj_name), prj_dir, prj_name
+
+
 def run_contamx(
     prj_path: str,
     binary: str | None = None,
     *,
     config: dict[str, Any] | None = None,
     timeout_s: float = 300.0,
+    allowed_roots: tuple[str, ...] | None = None,
 ) -> str:
     """Run ContamX on *prj_path* and return the path to the ``.sim`` output.
 
     ContamX writes ``<project>.sim`` alongside the project file. Raises
     ``ContamXUnavailable`` when no binary is found or the solver exits
     non-zero / times out / produces no results file.
-    """
-    resolved = binary or find_contamx(config)
-    if resolved is None:
-        raise ContamXUnavailable(
-            "No ContamX binary configured or on PATH "
-            "(set hvac.contamx.binary_path or CONTAMX_BINARY)."
-        )
-    if not os.path.isfile(prj_path):
-        raise ContamXUnavailable(f"Project file not found: {prj_path}")
 
-    prj_dir = os.path.dirname(os.path.abspath(prj_path))
-    prj_name = os.path.basename(prj_path)
+    *prj_path* and *binary* are treated as untrusted CLI/agent inputs: the
+    project must resolve under *allowed_roots* (default: repo root + system
+    temp), its basename must be a single ``.prj`` path component, and the
+    executable basename must match the ContamX allowlist. ContamX is invoked
+    with ``shell=False`` and a fixed two-element argv.
+    """
+    if timeout_s <= 0.0:
+        raise ContamXUnavailable(f"timeout_s must be positive, got {timeout_s}")
+
+    safe_binary = _safe_contamx_binary(binary, config)
+    prj_abs, prj_dir, prj_name = _safe_contamx_prj(
+        prj_path, allowed_roots=allowed_roots,
+    )
     try:
-        completed = subprocess.run(  # noqa: S603 - opt-in local solver
-            [resolved, prj_name],
+        completed = subprocess.run(  # noqa: S603 - allowlisted local solver
+            [safe_binary, prj_name],
             cwd=prj_dir,
             capture_output=True,
             text=True,
             timeout=timeout_s,
             check=False,
+            shell=False,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:
         raise ContamXUnavailable(f"ContamX invocation failed: {exc}") from exc
@@ -197,7 +288,7 @@ def run_contamx(
             f"{completed.stderr.strip()[:500]}"
         )
 
-    sim_path = os.path.splitext(prj_path)[0] + ".sim"
+    sim_path = os.path.splitext(prj_abs)[0] + ".sim"
     if not os.path.isfile(sim_path):
         raise ContamXUnavailable(
             f"ContamX produced no results file at {sim_path}"
@@ -396,6 +487,8 @@ class SimResults:
             positive = frame.node_density[frame.node_density > 0]
             if positive.size:
                 density = float(positive.mean())
+        if is_zero(density, abs_tol=1e-12):
+            density = _DEFAULT_AIR_DENSITY
 
         flows: dict[int, float] = {}
         for path_nr, mass_flow in zip(
