@@ -1,0 +1,1885 @@
+{
+  "status": "SOURCE_AND_SAVED_EVIDENCE_NOT_LIVE_CLOUD_VERIFICATION",
+  "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+  "records": [
+    {
+      "integrated_id": "tools_review:E001",
+      "lane": "tools_review",
+      "original": {
+        "id": "E001",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/outbreak_anchor_readout.py",
+        "line_start": 103,
+        "line_end": 150,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/outbreak_anchor_readout.py#L103-L150",
+        "claim": "Existing EOCD/CD/local-header S3 range reader; stored/deflate exact member; whole compressed member buffer; no CRC/version pin/ZIP64 support shown.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E002",
+      "lane": "tools_review",
+      "original": {
+        "id": "E002",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/diag/readout_common.py",
+        "line_start": 40,
+        "line_end": 106,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/diag/readout_common.py#L40-L106",
+        "claim": "Sorted local tier ZIP walker, exact-member JSON/gzip loading and ZIP writer.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E003",
+      "lane": "tools_review",
+      "original": {
+        "id": "E003",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/diag/readout_common.py",
+        "line_start": 136,
+        "line_end": 188,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/diag/readout_common.py#L136-L188",
+        "claim": "Wilson rates return zeros for empty cells; linear quantiles n=0 distinguished.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E004",
+      "lane": "tools_review",
+      "original": {
+        "id": "E004",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_shapes_01_scan.py",
+        "line_start": 288,
+        "line_end": 429,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/food_shapes_01_scan.py#L288-L429",
+        "claim": "Existing repeated-prefix, explicit-key, concurrent JSONL scanner; summary/census error rows; key-only resume inherited.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E005",
+      "lane": "tools_review",
+      "original": {
+        "id": "E005",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_score_01_scan.py",
+        "line_start": 48,
+        "line_end": 92,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/food_score_01_scan.py#L48-L92",
+        "claim": "Acquisition regex assumes epoch before pathway; sorted paginated S3 keys.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E006",
+      "lane": "tools_review",
+      "original": {
+        "id": "E006",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_score_01_scan.py",
+        "line_start": 143,
+        "line_end": 173,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/food_score_01_scan.py#L143-L173",
+        "claim": "Incremental inner gunzip rolling tail; preceding overlap rescanned; no max_length on decompress.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E007",
+      "lane": "tools_review",
+      "original": {
+        "id": "E007",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_shapes_01_scan.py",
+        "line_start": 217,
+        "line_end": 285,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/food_shapes_01_scan.py#L217-L285",
+        "claim": "Census scanner uses acquisition scan, whole-decode fallback, common-source objects and burst48/24/12/6.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E008",
+      "lane": "tools_review",
+      "original": {
+        "id": "E008",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/early_event_scan.py",
+        "line_start": 289,
+        "line_end": 337,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/early_event_scan.py#L289-L337",
+        "claim": "Resume marks any parsed key done including errors; all futures queued; output completion order.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E009",
+      "lane": "tools_review",
+      "original": {
+        "id": "E009",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_shapes_01_report.py",
+        "line_start": 214,
+        "line_end": 232,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/food_shapes_01_report.py#L214-L232",
+        "claim": "Reporter last-row key dedup, errors omitted, arm-only grouping; no bucket/version identity.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E010",
+      "lane": "tools_review",
+      "original": {
+        "id": "E010",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_shapes_01_report.py",
+        "line_start": 252,
+        "line_end": 349,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/food_shapes_01_report.py#L252-L349",
+        "claim": "D1 float boundary, unequal-denominator marginal and seed-only pairing; D2 absolute .04; D3 excursion-to-post.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E011",
+      "lane": "tools_review",
+      "original": {
+        "id": "E011",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_shapes_01_report.py",
+        "line_start": 538,
+        "line_end": 565,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/food_shapes_01_report.py#L538-L565",
+        "claim": "Zero available witness rows can receive PASS.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E012",
+      "lane": "tools_review",
+      "original": {
+        "id": "E012",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "docs/norovirus/noro_provisioned_source_01_sweep_design.md",
+        "line_start": 163,
+        "line_end": 182,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/norovirus/noro_provisioned_source_01_sweep_design.md#L163-L182",
+        "claim": "Frozen PS01 D1-D4; D2 relative to ind; D3 converted-pax-AR wording requires resolution.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E013",
+      "lane": "tools_review",
+      "original": {
+        "id": "E013",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "line_start": 1045,
+        "line_end": 1081,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L1045-L1081",
+        "claim": "Generic writer emits separate timeseries and summary with last summary, cost, derived and conditional strain attribution; not norovirus census/mechanism blocks.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E014",
+      "lane": "tools_review",
+      "original": {
+        "id": "E014",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/growth_chain_census.py",
+        "line_start": 1804,
+        "line_end": 1848,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/growth_chain_census.py#L1804-L1848",
+        "claim": "Instrumented writer embeds timeseries in summary and writes census/mechanisms; distinct archive schema.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E015",
+      "lane": "tools_review",
+      "original": {
+        "id": "E015",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/growth_chain_census.py",
+        "line_start": 1515,
+        "line_end": 1558,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/growth_chain_census.py#L1515-L1558",
+        "claim": "Event streams plus common_source, census_epochs and meta payload profile/row counts; lean/full distinctions.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E016",
+      "lane": "tools_review",
+      "original": {
+        "id": "E016",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/growth_chain_census.py",
+        "line_start": 1180,
+        "line_end": 1226,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/growth_chain_census.py#L1180-L1226",
+        "claim": "Acquisition host rows carry epoch_acquired and dominant_pathway; rows not universal role/event history.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E017",
+      "lane": "tools_review",
+      "original": {
+        "id": "E017",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/hull_scale_01_scan.py",
+        "line_start": 71,
+        "line_end": 116,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/hull_scale_01_scan.py#L71-L116",
+        "claim": "Distinct taker union per object; missing taker IDs default empty, not known zero.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E018",
+      "lane": "tools_review",
+      "original": {
+        "id": "E018",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/onset_curve_readout.py",
+        "line_start": 199,
+        "line_end": 241,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/onset_curve_readout.py#L199-L241",
+        "claim": "Existing partial compressed-census prefix reader; ZIP-deflate and gzip assumption; fixed head byte budget.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E019",
+      "lane": "tools_review",
+      "original": {
+        "id": "E019",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/_io.py",
+        "line_start": 151,
+        "line_end": 197,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/_io.py#L151-L197",
+        "claim": "Common loader chooses first suffix summary and only separate timeseries; fused/embedded limitations.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E020",
+      "lane": "tools_review",
+      "original": {
+        "id": "E020",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/campaign_bundle.py",
+        "line_start": 37,
+        "line_end": 88,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/campaign_bundle.py#L37-L88",
+        "claim": "Existing scalar CSV, epoch table, factor dictionary, aggregate, pairwise, phylo and figure bundle; accumulated in memory.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E021",
+      "lane": "tools_review",
+      "original": {
+        "id": "E021",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/aggregate_results.py",
+        "line_start": 38,
+        "line_end": 111,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/aggregate_results.py#L38-L111",
+        "claim": "Existing flattened summary collector, grouped nested archive members; omits other top-level blocks.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E022",
+      "lane": "tools_review",
+      "original": {
+        "id": "E022",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/aggregate_results.py",
+        "line_start": 160,
+        "line_end": 178,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/aggregate_results.py#L160-L178",
+        "claim": "Collector run_id-only dedup across ZIPs and manifests, first wins.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E023",
+      "lane": "tools_review",
+      "original": {
+        "id": "E023",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/analyze_campaign_curves.py",
+        "line_start": 57,
+        "line_end": 119,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/analyze_campaign_curves.py#L57-L119",
+        "claim": "Nested member grouping and curve/frontier export; requires separate timeseries.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E024",
+      "lane": "tools_review",
+      "original": {
+        "id": "E024",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/metrics.py",
+        "line_start": 15,
+        "line_end": 62,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/metrics.py#L15-L62",
+        "claim": "Fixed scalar export columns omit passenger reported/ill AR and mechanism scalars.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E025",
+      "lane": "tools_review",
+      "original": {
+        "id": "E025",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/metrics.py",
+        "line_start": 125,
+        "line_end": 147,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/metrics.py#L125-L147",
+        "claim": "Metrics adapter requires both complements strictly positive, rejects otherwise valid all-crew fixture.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E026",
+      "lane": "tools_review",
+      "original": {
+        "id": "E026",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/metrics.py",
+        "line_start": 175,
+        "line_end": 237,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/metrics.py#L175-L237",
+        "claim": "Final infected+recovered attack rate, array-index peak time, person-epochs and derived quantities.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E027",
+      "lane": "tools_review",
+      "original": {
+        "id": "E027",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/metrics.py",
+        "line_start": 326,
+        "line_end": 358,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/metrics.py#L326-L358",
+        "claim": "Bundle recomputes derived from timeseries when agents known; can relabel historical outbreak definitions.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E028",
+      "lane": "tools_review",
+      "original": {
+        "id": "E028",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/pairwise.py",
+        "line_start": 35,
+        "line_end": 55,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/pairwise.py#L35-L55",
+        "claim": "Existing native/ContamX and surveillance pairing match-key scope.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E029",
+      "lane": "tools_review",
+      "original": {
+        "id": "E029",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "orchestrator_init.py",
+        "line_start": 982,
+        "line_end": 992,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/orchestrator_init.py#L982-L992",
+        "claim": "Explicit crew/passenger and crew-prefixed classes classify correctly; fallback passenger.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E030",
+      "lane": "tools_review",
+      "original": {
+        "id": "E030",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "telemetry_buffer/observation_model/score_anchors.py",
+        "line_start": 121,
+        "line_end": 220,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/score_anchors.py#L121-L220",
+        "claim": "Prefer emitted role complements; conservative rounded-rate legacy recovery; clock resolution; both roles positive.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E031",
+      "lane": "tools_review",
+      "original": {
+        "id": "E031",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "telemetry_buffer/observation_model/score_anchors.py",
+        "line_start": 346,
+        "line_end": 446,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/score_anchors.py#L346-L446",
+        "claim": "Scorer infection/ill/report role quantities and clock-exposure use; required emitted/legacy complement contract.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E032",
+      "lane": "tools_review",
+      "original": {
+        "id": "E032",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "orchestrator_record.py",
+        "line_start": 474,
+        "line_end": 545,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/orchestrator_record.py#L474-L545",
+        "claim": "Compact vs full epoch telemetry including agents; current history is not evidence of saved historical detail.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E033",
+      "lane": "tools_review",
+      "original": {
+        "id": "E033",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "telemetry_buffer/fields.py",
+        "line_start": 5,
+        "line_end": 12,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/fields.py#L5-L12",
+        "claim": "Typed telemetry/schema agreement has tests; no universal campaign archive contract.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E034",
+      "lane": "tools_review",
+      "original": {
+        "id": "E034",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/sentinel/export_line_list.py",
+        "line_start": 1,
+        "line_end": 11,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/sentinel/export_line_list.py#L1-L11",
+        "claim": "Retrospective history line list requires full retention; sick-call identities unavailable; compact needs run-time ledger.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E035",
+      "lane": "tools_review",
+      "original": {
+        "id": "E035",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/vsp_degradation_postprocess.py",
+        "line_start": 112,
+        "line_end": 152,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/vsp_degradation_postprocess.py#L112-L152",
+        "claim": "Existing local TAR-contained ZIP iteration; per-ZIP read into memory; not S3 random gzip access.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E036",
+      "lane": "tools_review",
+      "original": {
+        "id": "E036",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/sentinel_recovery_postprocess.py",
+        "line_start": 201,
+        "line_end": 224,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/sentinel_recovery_postprocess.py#L201-L224",
+        "claim": "Sentinel reducer requires summary/run_spec/sentinel_line_list plus voyage and run identity.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E037",
+      "lane": "tools_review",
+      "original": {
+        "id": "E037",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/synthetic_recovery_postprocess.py",
+        "line_start": 61,
+        "line_end": 122,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/synthetic_recovery_postprocess.py#L61-L122",
+        "claim": "Synthetic recovery first-summary adapter and analysis-specific defaults; not general distributions API.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E038",
+      "lane": "tools_review",
+      "original": {
+        "id": "E038",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": ".github/workflows/campaign_collect.yml",
+        "line_start": 1,
+        "line_end": 47,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/.github/workflows/campaign_collect.yml#L1-L47",
+        "claim": "Bounded read-only existing collector bridge, not general distributions reducer; no dispatch in audit.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E039",
+      "lane": "tools_review",
+      "original": {
+        "id": "E039",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": ".github/workflows/campaign_collect.yml",
+        "line_start": 155,
+        "line_end": 199,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/.github/workflows/campaign_collect.yml#L155-L199",
+        "claim": "Exact-object fetch ceiling, VersionId/ETag pin and SHA256 are already implemented.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E040",
+      "lane": "tools_review",
+      "original": {
+        "id": "E040",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": ".github/workflows/campaign_collect.yml",
+        "line_start": 201,
+        "line_end": 225,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/.github/workflows/campaign_collect.yml#L201-L225",
+        "claim": "Collector publishes compact index issue plus 30-day workflow artifact.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E041",
+      "lane": "tools_review",
+      "original": {
+        "id": "E041",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/boundary_analysis_entrypoint.py",
+        "line_start": 114,
+        "line_end": 173,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/boundary_analysis_entrypoint.py#L114-L173",
+        "claim": "Existing analysis download-prefix/upload-tree lifecycle; downloads whole objects, reusable bridge not range-query service.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E042",
+      "lane": "tools_review",
+      "original": {
+        "id": "E042",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/campaign_entrypoint.py",
+        "line_start": 234,
+        "line_end": 270,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/campaign_entrypoint.py#L234-L270",
+        "claim": "Existing job-role S3, array child, artifact selection/upload lifecycle; executes worker, do not invoke for read-only inspection.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E043",
+      "lane": "tools_review",
+      "original": {
+        "id": "E043",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/README.md",
+        "line_start": 343,
+        "line_end": 355,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/README.md#L343-L355",
+        "claim": "Existing EC2 compute pathways, including analysis; do not mandate new orchestration services.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E044",
+      "lane": "tools_review",
+      "original": {
+        "id": "E044",
+        "grade": "H1",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "campaigns/noro/provisioned_source_01/LEDGER.md",
+        "line_start": 122,
+        "line_end": 132,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/provisioned_source_01/LEDGER.md#L122-L132",
+        "claim": "Wave1 measurement notes scan image predates extra reported channel/route row fields; Fargate failed ECR access, EC2 successful per ledger.",
+        "evidence_kind": "historical_committed_ledger_assertion"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E045",
+      "lane": "tools_review",
+      "original": {
+        "id": "E045",
+        "grade": "H1",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "campaigns/noro/provisioned_source_01/LEDGER.md",
+        "line_start": 216,
+        "line_end": 226,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/provisioned_source_01/LEDGER.md#L216-L226",
+        "claim": "Wave2 ledger reports 8192MiB/16 workers, prior OOM and 24-child success; not current benchmark.",
+        "evidence_kind": "historical_committed_ledger_assertion"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E046",
+      "lane": "tools_review",
+      "original": {
+        "id": "E046",
+        "grade": "H1",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "campaigns/noro/provisioned_source_01/LEDGER.md",
+        "line_start": 397,
+        "line_end": 413,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/provisioned_source_01/LEDGER.md#L397-L413",
+        "claim": "Wave3 revision5 wrong prefix superseded by revision6; scan rows at parent prefix; execution source digest unproven.",
+        "evidence_kind": "historical_committed_ledger_assertion"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E047",
+      "lane": "tools_review",
+      "original": {
+        "id": "E047",
+        "grade": "H1",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "campaigns/noro/provisioned_source_01/LEDGER.md",
+        "line_start": 426,
+        "line_end": 432,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/provisioned_source_01/LEDGER.md#L426-L432",
+        "claim": "Ledger itself identifies .90pp float boundary defect; current fixture reproduces it.",
+        "evidence_kind": "historical_committed_ledger_assertion"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E048",
+      "lane": "tools_review",
+      "original": {
+        "id": "E048",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tests/test_analysis_io.py",
+        "line_start": 27,
+        "line_end": 120,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tests/test_analysis_io.py#L27-L120",
+        "claim": "Existing local I/O/gzip/path tests; no evidence here for all-campaign ranged scanner golden set.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E049",
+      "lane": "tools_review",
+      "original": {
+        "id": "E049",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tests/test_census_lean_payload.py",
+        "line_start": 26,
+        "line_end": 45,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tests/test_census_lean_payload.py#L26-L45",
+        "claim": "Existing lean/full retention unit tests; inspected only.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E050",
+      "lane": "tools_review",
+      "original": {
+        "id": "E050",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "line_start": 454,
+        "line_end": 507,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L454-L507",
+        "claim": "Compact epoch exporter stores row index as epoch; new_infections is nonnegative first difference of I+R, not universal infection-event incidence.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E051",
+      "lane": "tools_review",
+      "original": {
+        "id": "E051",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/entrain_01_funnel_scan.py",
+        "line_start": 2,
+        "line_end": 21,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/entrain_01_funnel_scan.py#L2-L21",
+        "claim": "Existing summary-only observation funnel scanner; no census needed.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E052",
+      "lane": "tools_review",
+      "original": {
+        "id": "E052",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/entrain_01_funnel_scan.py",
+        "line_start": 46,
+        "line_end": 70,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/entrain_01_funnel_scan.py#L46-L70",
+        "claim": "Exact per-role summary funnel fields requested by existing consumer.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E053",
+      "lane": "tools_review",
+      "original": {
+        "id": "E053",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "orchestrator_record.py",
+        "line_start": 236,
+        "line_end": 262,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/orchestrator_record.py#L236-L262",
+        "claim": "Current summary role complements, infection/ill/report counts and rates; historical writer version not inferred.",
+        "evidence_kind": "pinned_source_contract_or_specification"
+      }
+    },
+    {
+      "integrated_id": "tools_review:E054",
+      "lane": "tools_review",
+      "original": {
+        "id": "E054",
+        "grade": "S2",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "orchestrator_record.py",
+        "line_start": 227,
+        "line_end": 244,
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/orchestrator_record.py#L227-L244",
+        "claim": "Current summary explicitly writes reported_cases_by_dominant_route and reported_cases_by_channel as well as infection route/share fields."
+      }
+    },
+    {
+      "integrated_id": "contracts:E01",
+      "lane": "contracts",
+      "original": {
+        "id": "E01",
+        "claim": "Nested shard vs flat archives and manifest fallback",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/aggregate_results.py",
+        "lines": [
+          14,
+          18
+        ],
+        "sha256": "3515d8feb57f511ea1b8f0713a48d4ae75757c1abdd9597f53f878029cad331d",
+        "anchor": "deploy/aws/aggregate_results.py#L14-L18",
+        "excerpt": "14: Each shard zip contains nested ``<run_id>/summary.json`` and\n15: ``<run_id>/timeseries.json`` files. Legacy flat single-run zips remain\n16: supported, and shard manifests provide parameter/derived rows for runs whose\n17: artifacts are not in a downloaded zip. Nested keys in ``summary`` and\n18: ``cost_accounting`` are flattened with dotted names so they land in one row.",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E02",
+      "lane": "contracts",
+      "original": {
+        "id": "E02",
+        "claim": "Current de-duplication is by run_id only, unsuitable as universal attempt identity",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/aggregate_results.py",
+        "lines": [
+          163,
+          178
+        ],
+        "sha256": "3515d8feb57f511ea1b8f0713a48d4ae75757c1abdd9597f53f878029cad331d",
+        "anchor": "deploy/aws/aggregate_results.py#L163-L178",
+        "excerpt": "163:     rows: list[dict[str, Any]] = []\n164:     seen_run_ids: set[str] = set()\n165:     for zp in zips:\n166:         for row in iter_summary_rows(zp):\n167:             run_id = str(row[\"run_id\"])\n168:             if run_id in seen_run_ids:\n169:                 continue\n170:             seen_run_ids.add(run_id)\n171:             rows.append(row)\n172:     for manifest_path in sorted(results_dir.rglob(\"*.manifest.json\")):\n173:         for row in _manifest_rows(manifest_path):\n174:             run_id = str(row[\"run_id\"])\n175:             if run_id in seen_run_ids:\n176:                 continue\n177:             seen_run_ids.add(run_id)\n178:             rows.append(row)",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E03",
+      "lane": "contracts",
+      "original": {
+        "id": "E03",
+        "claim": "Curves exporter fixed subset omits saved role counters and report channels",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "deploy/aws/analyze_campaign_curves.py",
+        "lines": [
+          89,
+          121
+        ],
+        "sha256": "fd255afaeef2f0bbf4a0f0e5c560e4f347f36176db6c9d6b7b55eacdc2430c70",
+        "anchor": "deploy/aws/analyze_campaign_curves.py#L89-L121",
+        "excerpt": "89: def _row_from_point(\n90:     point: dict[str, Any],\n91:     *,\n92:     run_id: str,\n93:     tags: dict[str, str | None],\n94:     derived: dict[str, Any],\n95: ) -> dict[str, Any]:\n96:     \"\"\"Build one long-form epoch row from a timeseries point.\"\"\"\n97:     row: dict[str, Any] = {\n98:         \"run_id\": run_id,\n99:         \"epoch\": point.get(\"epoch\"),\n100:         \"susceptible\": point.get(\"susceptible\"),\n101:         \"infected\": point.get(\"infected\"),\n102:         \"symptomatic\": point.get(\"symptomatic\"),\n103:         \"recovered\": point.get(\"recovered\"),\n104:         \"immune\": point.get(\"immune\"),\n105:         \"quarantined\": point.get(\"quarantined\"),\n106:         \"isolated\": point.get(\"isolated\"),\n107:         \"new_infections\": point.get(\"new_infections\"),\n108:         \"total_pathogen_mass\": point.get(\"total_pathogen_mass\"),\n109:         \"n_zones_contaminated\": point.get(\"n_zones_contaminated\"),\n110:         \"max_concentration\": point.get(\"max_concentration\"),\n111:         \"cumulative_cost_usd\": point.get(\"cumulative_cost_usd\"),\n112:         \"cumulative_ois\": point.get(\"cumulative_ois\"),\n113:         \"trigger_status\": point.get(\"trigger_status\"),\n114:         \"attack_rate\": derived.get(\"attack_rate\"),\n115:         \"peak_prevalence\": derived.get(\"peak_prevalence\"),\n116:         \"peak_epoch\": derived.get(\"peak_epoch\"),\n117:         \"detection_epoch\": derived.get(\"detection_epoch\"),\n118:         \"r_effective_at_peak\": derived.get(\"r_effective_at_peak\"),\n119:     }\n120:     row.update(tags)\n121:     return row",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E04",
+      "lane": "contracts",
+      "original": {
+        "id": "E04",
+        "claim": "Current local bundle: summaries, curves, pairwise deltas, figures, phylogenetic tables",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/campaign_bundle.py",
+        "lines": [
+          37,
+          94
+        ],
+        "sha256": "ab049d25e6c69a2b98911b2d3e8cd734a2625696b15afa540f641e7c512baf90",
+        "anchor": "picard_framework/analysis/campaign_bundle.py#L37-L94",
+        "excerpt": "37: def build_bundle(results_dir: str, out_dir: str) -> dict[str, Any]:\n38:     \"\"\"Parse all campaign zips under ``results_dir`` into an analysis bundle.\n39: \n40:     Returns a small manifest describing written artifacts.\n41:     \"\"\"\n42:     out = ensure_out_dir(out_dir)\n43:     run_rows: list[dict[str, Any]] = []\n44:     epoch_rows: list[dict[str, Any]] = []\n45:     skipped = 0\n46: \n47:     for zip_path in iter_result_zips(results_dir):\n48:         payload = load_run_zip(zip_path)\n49:         if payload is None:\n50:             skipped += 1\n51:             print(f\"  WARN: skip unreadable zip {os.path.basename(zip_path)}\", file=sys.stderr)\n52:             continue\n53:         summary_row = build_run_summary_row(payload)\n54:         run_rows.append(summary_row)\n55:         epoch_rows.extend(build_epoch_rows(payload, summary_row))\n56: \n57:     if not run_rows:\n58:         raise SystemExit(\"No campaign summaries found; nothing written.\")\n59: \n60:     write_csv(os.path.join(out, \"run_summary.csv\"), run_rows, RUN_SUMMARY_COLUMNS)\n61:     ts_name = write_timeseries_table(out, epoch_rows, epoch_table_columns())\n62: \n63:     factor_dict = build_factor_dictionary(run_rows)\n64:     aggregate = build_aggregate_metrics(run_rows)\n65:     write_json(os.path.join(out, \"factor_dictionary.json\"), factor_dict)\n66:     write_json(os.path.join(out, \"aggregate_metrics.json\"), aggregate)\n67: \n68:     pairwise_rows = build_pairwise_deltas(run_rows, epoch_rows)\n69:     pairwise_name = None\n70:     if pairwise_rows:\n71:         pairwise_name = write_pairwise_csv(out, pairwise_rows)\n72: \n73:     fig_names = write_standard_figures(out, run_rows, epoch_rows)\n74:     phylo = write_campaign_tables(out, results_dir)\n75: \n76:     manifest = {\n77:         \"n_runs\": len(run_rows),\n78:         \"n_epoch_rows\": len(epoch_rows),\n79:         \"skipped_zips\": skipped,\n80:         \"artifacts\": {\n81:             \"run_summary\": \"run_summary.csv\",\n82:             \"epoch_timeseries\": ts_name,\n83:             \"factor_dictionary\": \"factor_dictionary.json\",\n84:             \"aggregate_metrics\": \"aggregate_metrics.json\",\n85:             \"pairwise_deltas\": pairwise_name,\n86:             \"figures\": fig_names,\n87:             **phylo[\"artifacts\"],\n88:         },\n89:         \"phylodynamics\": {\n90:             key: value for key, value in phylo.items() if key != \"artifacts\"\n91:         },\n92:     }\n93:     write_json(os.path.join(out, \"bundle_manifest.json\"), manifest)\n94:     return manifest",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E05",
+      "lane": "contracts",
+      "original": {
+        "id": "E05",
+        "claim": "Legacy AR I+R final, peak and detection-lag definitions",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/metrics.py",
+        "lines": [
+          175,
+          237
+        ],
+        "sha256": "5861b87718a0dc80092a21ab98ead2f7ebd2f0a2b094839e9e165e0362679539",
+        "anchor": "picard_framework/analysis/metrics.py#L175-L237",
+        "excerpt": "175: def compute_derived_metrics(\n176:     timeseries: list[dict[str, Any]], num_agents: int\n177: ) -> dict[str, Any]:\n178:     \"\"\"Compute publication-ready scalar metrics from an epoch time series.\n179: \n180:     Mirrors ``campaign_runner.compute_derived_metrics`` so bundle regeneration\n181:     matches runner-embedded ``derived`` blocks when those are absent.\n182:     \"\"\"\n183:     if not timeseries:\n184:         return {}\n185: \n186:     infected_by_epoch = [int(e.get(\"infected\", 0) or 0) for e in timeseries]\n187:     peak_infected = max(infected_by_epoch)\n188:     peak_epoch = infected_by_epoch.index(peak_infected)\n189: \n190:     final = timeseries[-1]\n191:     (\n192:         passenger_complement,\n193:         crew_complement,\n194:         complements_present,\n195:     ) = _complement_fields(final, num_agents)\n196:     recovered = int(final.get(\"recovered\", 0) or 0)\n197:     infected_final = int(final.get(\"infected\", 0) or 0)\n198:     ever_infected = infected_final + recovered\n199:     attack_rate = ever_infected / num_agents if num_agents > 0 else 0.0\n200:     # Takeoff vs fizzle: VSP onset while incidence still accelerating.\n201:     outbreak_occurred = epidemic_took_off(timeseries)\n202:     seeded = seed_established(ever_infected)\n203: \n204:     detection_epoch, confirmation_epoch = _detection_epochs(timeseries)\n205: \n206:     total_quarantine_epochs = sum(int(e.get(\"quarantined\", 0) or 0) for e in timeseries)\n207: \n208:     r_eff_at_peak = _r_effective_at_peak(timeseries, infected_by_epoch, peak_epoch)\n209: \n210:     detection_lag = (\n211:         peak_epoch - detection_epoch if detection_epoch is not None else None\n212:     )\n213:     r_eff_rounded = (\n214:         round(r_eff_at_peak, 3) if r_eff_at_peak is not None else None\n215:     )\n216:     final_susceptible_fraction = round(\n217:         int(final.get(\"susceptible\", 0) or 0) / max(num_agents, 1),\n218:         4,\n219:     )\n220:     derived = {\n221:         \"attack_rate\": round(attack_rate, 4),\n222:         **_role_rate_fields(final),\n223:         \"peak_prevalence\": peak_infected,\n224:         \"peak_epoch\": peak_epoch,\n225:         \"outbreak_occurred\": outbreak_occurred,\n226:         \"seed_established\": seeded,\n227:         \"detection_epoch\": detection_epoch,\n228:         \"confirmation_epoch\": confirmation_epoch,\n229:         \"detection_lag\": detection_lag,\n230:         \"total_quarantine_person_epochs\": total_quarantine_epochs,\n231:         \"r_effective_at_peak\": r_eff_rounded,\n232:         \"final_susceptible_fraction\": final_susceptible_fraction,\n233:     }\n234:     if complements_present:\n235:         derived[\"passenger_complement\"] = passenger_complement\n236:         derived[\"crew_complement\"] = crew_complement\n237:     return derived",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E06",
+      "lane": "contracts",
+      "original": {
+        "id": "E06",
+        "claim": "Compact incidence estimator uses positive I+R differences",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "lines": [
+          454,
+          483
+        ],
+        "sha256": "219b2af60de822bba1b662f4b3465029539865c70f24e5f940512996615deed5",
+        "anchor": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L454-L483",
+        "excerpt": "454: def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:\n455:     \"\"\"Extract a compact per-epoch epidemic/contamination series from history.\n456: \n457:     Keeps only the scalar fields needed for epidemic curves, detection lag,\n458:     contamination spread and cost-effectiveness analysis \u2014 not the full\n459:     per-agent / per-zone records \u2014 so it stays ~50 KB per run.\n460: \n461:     ``new_infections`` is the per-epoch incidence estimator\n462:     ``max(0, (I+R)_t \u2212 (I+R)_{t\u22121})``.\n463:     \"\"\"\n464:     series: list[dict[str, Any]] = []\n465:     prev_ever_infected = 0\n466:     for epoch_idx, rec in enumerate(history):\n467:         s = record_block(rec, RECORD_SUMMARY)\n468:         cost = record_block(rec, RECORD_COST_ACCOUNTING)\n469:         spaces = record_spaces(rec)\n470:         reported_case_counter = record_block(\n471:             record_block(rec, RECORD_INFECTION_COUNTERS),\n472:             COUNTER_PASSENGER_REPORTED_CASE_RATE,\n473:         )\n474:         crew_reported_counter = record_block(\n475:             record_block(rec, RECORD_INFECTION_COUNTERS),\n476:             COUNTER_CREW_REPORTED_CASE_RATE,\n477:         )\n478: \n479:         infected = int(s.get(SUMMARY_INFECTED, 0) or 0)\n480:         recovered = int(s.get(SUMMARY_RECOVERED, 0) or 0)\n481:         ever_infected = infected + recovered\n482:         new_infections = max(0, ever_infected - prev_ever_infected)\n483:         prev_ever_infected = ever_infected",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E07",
+      "lane": "contracts",
+      "original": {
+        "id": "E07",
+        "claim": "Saved cumulative infection/illness/reports, role complements and trigger flags",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "lines": [
+          514,
+          564
+        ],
+        "sha256": "219b2af60de822bba1b662f4b3465029539865c70f24e5f940512996615deed5",
+        "anchor": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L514-L564",
+        "excerpt": "514:             \"cumulative_reported_cases\": s.get(SUMMARY_CUMULATIVE_REPORTED_CASES, 0),\n515:             \"cumulative_reported_cases_passenger\": s.get(\n516:                 SUMMARY_CUMULATIVE_REPORTED_CASES_PASSENGER, 0,\n517:             ),\n518:             \"cumulative_reported_cases_crew\": s.get(\n519:                 SUMMARY_CUMULATIVE_REPORTED_CASES_CREW, 0,\n520:             ),\n521:             \"cumulative_reported_noise_cases\": s.get(\n522:                 SUMMARY_CUMULATIVE_REPORTED_NOISE_CASES, 0,\n523:             ),\n524:             \"cumulative_ever_ill\": s.get(SUMMARY_CUMULATIVE_EVER_ILL, 0),\n525:             \"cumulative_ever_ill_passenger\": s.get(\n526:                 SUMMARY_CUMULATIVE_EVER_ILL_PASSENGER, 0,\n527:             ),\n528:             \"cumulative_ever_ill_crew\": s.get(SUMMARY_CUMULATIVE_EVER_ILL_CREW, 0),\n529:             \"cumulative_ever_infected\": s.get(SUMMARY_CUMULATIVE_EVER_INFECTED, 0),\n530:             \"cumulative_ever_infected_passenger\": s.get(\n531:                 SUMMARY_CUMULATIVE_EVER_INFECTED_PASSENGER, 0,\n532:             ),\n533:             \"cumulative_ever_infected_crew\": s.get(\n534:                 SUMMARY_CUMULATIVE_EVER_INFECTED_CREW, 0,\n535:             ),\n536:             \"passenger_complement\": s.get(SUMMARY_PASSENGER_COMPLEMENT),\n537:             \"crew_complement\": s.get(SUMMARY_CREW_COMPLEMENT),\n538:             \"infection_attack_rate_passenger\": s.get(\n539:                 SUMMARY_INFECTION_ATTACK_RATE_PASSENGER, 0.0,\n540:             ),\n541:             \"infection_attack_rate_crew\": s.get(\n542:                 SUMMARY_INFECTION_ATTACK_RATE_CREW, 0.0,\n543:             ),\n544:             \"reported_case_rate_passenger\": reported_case_counter.get(\n545:                 COUNTER_VALUE, s.get(SUMMARY_REPORTED_CASE_RATE_PASSENGER, 0.0),\n546:             ),\n547:             \"reported_case_rate_crew\": s.get(SUMMARY_REPORTED_CASE_RATE_CREW, 0.0),\n548:             \"passenger_reported_case_rate_newly_confined\": reported_case_counter.get(\n549:                 COUNTER_NEWLY_CONFINED, 0,\n550:             ),\n551:             \"passenger_reported_case_rate_exceeded\": bool(\n552:                 reported_case_counter.get(COUNTER_EXCEEDED, False),\n553:             ),\n554:             \"crew_reported_case_rate_newly_confined\": crew_reported_counter.get(\n555:                 COUNTER_NEWLY_CONFINED, 0,\n556:             ),\n557:             \"crew_reported_case_rate_exceeded\": bool(\n558:                 crew_reported_counter.get(COUNTER_EXCEEDED, False),\n559:             ),\n560:             \"ever_ill_rate_passenger\": s.get(SUMMARY_EVER_ILL_RATE_PASSENGER, 0.0),\n561:             \"ever_ill_rate_crew\": s.get(SUMMARY_EVER_ILL_RATE_CREW, 0.0),\n562:             \"sanitary_activity\": dict(s.get(SUMMARY_SANITARY_ACTIVITY) or {}),\n563:             \"trigger_status\": record_trigger_status(rec, \"none\"),\n564:         })",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E08",
+      "lane": "contracts",
+      "original": {
+        "id": "E08",
+        "claim": "Detection and role-complement validation",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "lines": [
+          568,
+          628
+        ],
+        "sha256": "219b2af60de822bba1b662f4b3465029539865c70f24e5f940512996615deed5",
+        "anchor": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L568-L628",
+        "excerpt": "568: def _detection_epochs(\n569:     ts: list[dict[str, Any]],\n570: ) -> tuple[int | None, int | None]:\n571:     detection_epoch = None\n572:     confirmation_epoch = None\n573:     for e in ts:\n574:         status = e.get(\"trigger_status\", \"none\")\n575:         if status in (\"SUSPECTED\", \"CONFIRMED\") and detection_epoch is None:\n576:             detection_epoch = e[\"epoch\"]\n577:         if status == \"CONFIRMED\" and confirmation_epoch is None:\n578:             confirmation_epoch = e[\"epoch\"]\n579:     return detection_epoch, confirmation_epoch\n580: \n581: \n582: def _reported_case_counter_exceeded(epoch: dict[str, Any]) -> bool:\n583:     \"\"\"Return the emitted either-channel reported-case threshold state.\n584: \n585:     The published VSP rule posts at 3% of passengers *or* 3% of crew, so the\n586:     trigger stamps the first epoch either channel's counter is exceeded\n587:     (VSP-EITHER-CHANNEL-01).\n588:     \"\"\"\n589:     if epoch.get(\"passenger_reported_case_rate_exceeded\", False):\n590:         return True\n591:     if epoch.get(\"crew_reported_case_rate_exceeded\", False):\n592:         return True\n593:     counters = epoch.get(\"infection_counters\") or {}\n594:     return any(\n595:         bool((counters.get(cid) or {}).get(COUNTER_EXCEEDED, False))\n596:         for cid in (\n597:             COUNTER_PASSENGER_REPORTED_CASE_RATE,\n598:             COUNTER_CREW_REPORTED_CASE_RATE,\n599:         )\n600:     )\n601: \n602: \n603: def _validate_role_complements(\n604:     final: dict[str, Any],\n605:     num_agents: int,\n606: ) -> tuple[int | None, int | None]:\n607:     \"\"\"Validate and return emitted role complements, if present.\"\"\"\n608:     passenger_complement = final.get(\"passenger_complement\")\n609:     crew_complement = final.get(\"crew_complement\")\n610:     complements_present = (\n611:         passenger_complement is not None or crew_complement is not None\n612:     )\n613:     if complements_present and (\n614:         isinstance(passenger_complement, bool)\n615:         or not isinstance(passenger_complement, int)\n616:         or passenger_complement <= 0\n617:         or isinstance(crew_complement, bool)\n618:         or not isinstance(crew_complement, int)\n619:         or crew_complement <= 0\n620:         or passenger_complement + crew_complement != num_agents\n621:     ):\n622:         raise ValueError(\n623:             \"timeseries role complements must be positive integers summing \"\n624:             f\"to num_agents ({num_agents})\",\n625:         )\n626:     if not complements_present:\n627:         return None, None\n628:     return passenger_complement, crew_complement",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E09",
+      "lane": "contracts",
+      "original": {
+        "id": "E09",
+        "claim": "Full versus compact history retention",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "lines": [
+          798,
+          819
+        ],
+        "sha256": "219b2af60de822bba1b662f4b3465029539865c70f24e5f940512996615deed5",
+        "anchor": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L798-L819",
+        "excerpt": "798: def _telemetry_run_spec(\n799:     spec: dict[str, Any], run_dir: str, full_telemetry: bool\n800: ) -> dict[str, Any]:\n801:     spec = dict(spec)\n802:     spec[\"run\"] = dict(spec.get(\"run\") or {})\n803:     if full_telemetry:\n804:         spec[\"run\"][\"write_ground_truth\"] = True\n805:         spec[\"run\"][\"history_retention\"] = \"full\"\n806:         spec[\"run\"][\"simulation_history\"] = os.path.join(run_dir, \"simulation_history.json\")\n807:         spec[\"run\"][\"lab_notebook\"] = os.path.join(run_dir, \"artificial_lab_notebook.json\")\n808:         spec[\"run\"][\"ground_truth\"] = os.path.join(run_dir, \"ground_truth.json\")\n809:         if isinstance(spec.get(\"campaign_parameters\"), dict):\n810:             spec[\"campaign_parameters\"] = dict(spec[\"campaign_parameters\"])\n811:             spec[\"campaign_parameters\"][\"history_retention\"] = \"full\"\n812:             spec[\"campaign_parameters\"].setdefault(\n813:                 \"engine_git_sha\", _cr.engine_git_sha(),\n814:             )\n815:     else:\n816:         # Campaign default: compact in-RAM history (summary / spaces / cost only).\n817:         spec[\"run\"].setdefault(\"history_retention\", \"compact\")\n818:         spec[\"run\"].setdefault(\"write_ground_truth\", False)\n819:     return spec",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E10",
+      "lane": "contracts",
+      "original": {
+        "id": "E10",
+        "claim": "Summary/timeseries writing and per-run versus fused shard packaging",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "lines": [
+          1045,
+          1116
+        ],
+        "sha256": "219b2af60de822bba1b662f4b3465029539865c70f24e5f940512996615deed5",
+        "anchor": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L1045-L1116",
+        "excerpt": "1045: def _write_timeseries_and_summary(\n1046:     run_dir: str,\n1047:     roots: tuple[str, ...],\n1048:     safe_id: str,\n1049:     spec: dict[str, Any],\n1050:     sim: Any,\n1051:     result: Any,\n1052: ) -> None:\n1053:     last = result.history[-1] if result.history else {}\n1054:     ts = extract_timeseries(result.history)\n1055:     ts_path = resolve_child_path(run_dir, \"timeseries.json\")\n1056:     with validated_open(ts_path, \"w\", allowed_roots=roots, encoding=\"utf-8\") as fh:\n1057:         json.dump(ts, fh)\n1058: \n1059:     from picard_framework.runs.mega_cruise_campaign.sourced_window_flags import (\n1060:         provenance_flags,\n1061:     )\n1062: \n1063:     summary = {\n1064:         \"run_id\": safe_id,\n1065:         \"parameters\": _cr.parameters_from_spec(spec),\n1066:         \"num_epochs\": result.num_epochs,\n1067:         \"trigger_status\": result.final_trigger_status,\n1068:         \"pathogen_ids\": sorted(sim.pathogen_profiles),\n1069:         \"summary\": last.get(\"summary\", {}),\n1070:         \"cost_accounting\": last.get(\"cost_accounting\", {}),\n1071:         \"derived\": compute_derived_metrics(ts, _spec_num_agents(spec)),\n1072:         \"provenance_flags\": provenance_flags(\n1073:             spec, sim.cfg, sim.pathogen_profiles,\n1074:         ),\n1075:     }\n1076:     attribution = _strain_attribution(sim)\n1077:     if attribution:\n1078:         summary[\"strain_attribution\"] = attribution\n1079:     summary_path = resolve_child_path(run_dir, \"summary.json\")\n1080:     with validated_open(summary_path, \"w\", allowed_roots=roots, encoding=\"utf-8\") as fh:\n1081:         json.dump(summary, fh, indent=2)\n1082: \n1083: \n1084: def _zip_and_accumulate(\n1085:     run_dir: str,\n1086:     root_str: str,\n1087:     roots: tuple[str, ...],\n1088:     safe_id: str,\n1089:     accumulation_suffix: str,\n1090:     keep_workdir: bool,\n1091: ) -> None:\n1092:     zip_name = validate_path_component(f\"{safe_id}.zip\", label=\"zip artifact\")\n1093:     zip_path = resolve_child_path(root_str, zip_name)\n1094:     with zipfile.ZipFile(zip_path, \"w\", zipfile.ZIP_DEFLATED) as zf:\n1095:         for dirpath, _dirnames, filenames in os.walk(run_dir):\n1096:             for fname in filenames:\n1097:                 fpath = os.path.join(dirpath, fname)\n1098:                 zf.write(fpath, os.path.relpath(fpath, run_dir))\n1099:     accumulation_base = confine_to_base(\n1100:         root_str, os.path.join(root_str, \"_shard_runs\"),\n1101:     )\n1102:     prepare_output_directory(accumulation_base, allowed_roots=roots)\n1103:     accumulation_root = resolve_child_path(\n1104:         accumulation_base,\n1105:         validate_path_component(\n1106:             accumulation_suffix, label=\"shard suffix\",\n1107:         ),\n1108:     )\n1109:     prepare_output_directory(accumulation_root, allowed_roots=roots)\n1110:     accumulation_dir = resolve_child_path(accumulation_root, safe_id)\n1111:     if os.path.isdir(accumulation_dir):\n1112:         shutil.rmtree(accumulation_dir)\n1113:     if keep_workdir:\n1114:         shutil.copytree(run_dir, accumulation_dir)\n1115:     else:\n1116:         shutil.move(run_dir, accumulation_dir)",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E11",
+      "lane": "contracts",
+      "original": {
+        "id": "E11",
+        "claim": "Lean drops twelve event streams but keeps acquisition and host data",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/growth_chain_census.py",
+        "lines": [
+          279,
+          362
+        ],
+        "sha256": "9c9f19b430a2bee1fb15754a0486a378b5210535ada9a4600e8b0c3f77f183db",
+        "anchor": "tools/noro_diag/growth_chain_census.py#L279-L362",
+        "excerpt": "279:     # ``full`` keeps every per-event row stream; ``lean`` replaces the\n280:     # streams below with per-stream counts (NORO-MEGA-01 showed the event\n281:     # rows, not the voyage, are what push mega cells past 4 GB at\n282:     # census-finalize \u2014 the emits log alone is ~1.5 GB of text on mega).\n283:     payload_profile: str = \"full\"\n284:     # Agent ids behind every emit row, kept in both profiles so\n285:     # ignited/emitting_hosts/emitting_imports derive identically.\n286:     emit_host_ids: set[int] = field(default_factory=set)\n287:     # Per-stream count of rows the lean profile dropped instead of held.\n288:     dropped_counts: dict[str, int] = field(\n289:         default_factory=lambda: defaultdict(int),\n290:     )\n291:     # host -> generation (0 = import); filled lazily as hosts appear.\n292:     host_gen: dict[int, int] = field(default_factory=dict)\n293:     # strain_id -> first host carrying it; resolves source-less pedigrees.\n294:     strain_home: dict[str, int] = field(default_factory=dict)\n295:     seed_ids: set[int] = field(default_factory=set)\n296:     import_ids: set[int] = field(default_factory=set)\n297:     acquired_ids: set[int] = field(default_factory=set)\n298:     epoch0_snapshotted: bool = False\n299:     # Per-host census (infected hosts only).\n300:     hosts: dict[int, dict[str, Any]] = field(default_factory=dict)\n301:     # Live per-unit source-generation composition (observer-side mirrors of\n302:     # ``surface_pools_by_pathogen`` / ``food_pools``).\n303:     unit_mix: dict[str, dict[str, float]] = field(\n304:         default_factory=lambda: defaultdict(lambda: defaultdict(float)),\n305:     )\n306:     food_mix: dict[str, dict[str, float]] = field(\n307:         default_factory=lambda: defaultdict(lambda: defaultdict(float)),\n308:     )\n309:     # Delivery context stacks for the pickup-channel tag.\n310:     channel_stack: list[tuple[str, str]] = field(default_factory=list)\n311:     sanitary_ctx: dict[int, tuple[float, str]] = field(default_factory=dict)\n312:     patch_ctx: dict[str, Any] | None = None\n313:     # Row tables.\n314:     deposit_rows: list[dict[str, Any]] = field(default_factory=list)\n315:     emit_rows: list[dict[str, Any]] = field(default_factory=list)\n316:     stool_rows: list[dict[str, Any]] = field(default_factory=list)\n317:     gate_rows: list[dict[str, Any]] = field(default_factory=list)\n318:     gate_open_by_caller: dict[str, int] = field(\n319:         default_factory=lambda: defaultdict(int),\n320:     )\n321:     unit_epoch_rows: list[dict[str, Any]] = field(default_factory=list)\n322:     pickup_rows: list[dict[str, Any]] = field(default_factory=list)\n323:     dose_rows: list[dict[str, Any]] = field(default_factory=list)\n324:     hazard_rows: list[dict[str, Any]] = field(default_factory=list)\n325:     acquisition_rows: list[dict[str, Any]] = field(default_factory=list)\n326:     contact_rows: list[dict[str, Any]] = field(default_factory=list)\n327:     food_rows: list[dict[str, Any]] = field(default_factory=list)\n328:     patch_rows: list[dict[str, Any]] = field(default_factory=list)\n329:     patch_sweep_rows: list[dict[str, Any]] = field(default_factory=list)\n330:     removal_totals: dict[str, dict[str, float]] = field(\n331:         default_factory=lambda: defaultdict(lambda: defaultdict(float)),\n332:     )\n333:     census_rows: list[dict[str, Any]] = field(default_factory=list)\n334:     hazard_witness: tuple[int, str, float, float, float] | None = None\n335:     # NORO-HAND-STATIONARY-01: per host-epoch hand-load occupancy rows.\n336:     occupancy: hand_occupancy.OccupancyRecorder | None = None\n337:     # VmHWM sampled right after sim.run() \u2014 the live-voyage share of the\n338:     # child footprint, before census fold/serialize adds the spike.\n339:     voyage_rss_mb: float = 0.0\n340: \n341:     # Row streams the lean profile counts instead of retaining.\n342:     LEAN_DROPPED_STREAMS = frozenset({\n343:         \"emit\", \"deposit\", \"stool\", \"gate\", \"unit_epoch\", \"pickup\",\n344:         \"dose\", \"hazard\", \"contact\", \"food\", \"patch\", \"patch_sweep\",\n345:     })\n346: \n347:     def record_row(self, stream: str, record: dict[str, Any]) -> None:\n348:         \"\"\"Append one census row, or count-and-drop under ``lean``.\n349: \n350:         Aggregates downstream of the row tables (ignited, emitting_hosts,\n351:         acquisitions_by_gen) must not notice a lean voyage, so the emit\n352:         host-id set is maintained in either profile.\n353:         \"\"\"\n354:         if stream == \"emit\":\n355:             self.emit_host_ids.add(int(record[\"agent_id\"]))\n356:         if (\n357:             self.payload_profile == \"lean\"\n358:             and stream in self.LEAN_DROPPED_STREAMS\n359:         ):\n360:             self.dropped_counts[stream] += 1\n361:             return\n362:         getattr(self, stream + \"_rows\").append(record)",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E12",
+      "lane": "contracts",
+      "original": {
+        "id": "E12",
+        "claim": "Retained census blocks and explicit dropped-stream counts",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/growth_chain_census.py",
+        "lines": [
+          1510,
+          1560
+        ],
+        "sha256": "9c9f19b430a2bee1fb15754a0486a378b5210535ada9a4600e8b0c3f77f183db",
+        "anchor": "tools/noro_diag/growth_chain_census.py#L1510-L1560",
+        "excerpt": "1510:         \"n_acquired\": len(rec.acquired_ids),\n1511:         \"acquisitions_by_gen\": _count_by(rec.acquisition_rows, \"gen\"),\n1512:         \"hosts\": host_rows,\n1513:         \"emits\": rec.emit_rows,\n1514:         \"deposits\": rec.deposit_rows,\n1515:         \"stool_events\": rec.stool_rows,\n1516:         \"gate_closed\": rec.gate_rows,\n1517:         \"gate_open_by_caller\": dict(rec.gate_open_by_caller),\n1518:         \"unit_epochs\": rec.unit_epoch_rows,\n1519:         \"pickups\": rec.pickup_rows,\n1520:         \"doses\": rec.dose_rows,\n1521:         \"hazards\": rec.hazard_rows,\n1522:         \"acquisitions\": rec.acquisition_rows,\n1523:         \"hand_contacts\": rec.contact_rows,\n1524:         \"food_venues\": rec.food_rows,\n1525:         \"patch_pickups\": rec.patch_rows,\n1526:         \"patch_sweeps\": rec.patch_sweep_rows,\n1527:         \"hand_occupancy\": (\n1528:             hand_occupancy.summarise(rec.occupancy)\n1529:             if rec.occupancy is not None else None\n1530:         ),\n1531:         \"hand_occupancy_rows\": (\n1532:             rec.occupancy.rows if rec.occupancy is not None else []\n1533:         ),\n1534:         \"removal_totals\": {\n1535:             cause: dict(by_gen)\n1536:             for cause, by_gen in rec.removal_totals.items()\n1537:         },\n1538:         # Mechanism counters + the FOOD-COMMON-SOURCE-01 witness rows \u2014\n1539:         # tiny next to any dropped stream, kept in both profiles so the\n1540:         # MEGA-IMPACT arms score without a second observer.\n1541:         \"caregiver_telemetry\": dict(\n1542:             getattr(core, \"caregiver_telemetry\", {}) or {},\n1543:         ),\n1544:         \"common_source\": _common_source_block(core),\n1545:         \"census_epochs\": rec.census_rows,\n1546:         \"meta\": {\n1547:             \"zone_classes\": classes,\n1548:             \"seed\": int(spec_dict[\"run\"][\"random_seed\"]),\n1549:             \"num_agents\": int(\n1550:                 spec_dict[\"campaign_parameters\"][\"num_agents\"],\n1551:             ),\n1552:             \"epochs\": int(spec_dict[\"run\"][\"num_epochs\"]),\n1553:             \"platform\": spec_dict[\"catalog\"][\"platform_id\"],\n1554:             \"pathogen_id\": rec.pathogen_id,\n1555:             \"wall_clock_s\": round(wall_clock_s, 1),\n1556:             \"payload_profile\": rec.payload_profile,\n1557:             \"row_stream_counts\": _row_stream_counts(rec),\n1558:             \"voyage_rss_mb\": rec.voyage_rss_mb,\n1559:             \"fold_rss_mb\": _proc_rss_mb()[1],\n1560:         },",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E13",
+      "lane": "contracts",
+      "original": {
+        "id": "E13",
+        "claim": "Host table contains infected-host summaries; not the full at-risk roster",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/growth_chain_census.py",
+        "lines": [
+          381,
+          405
+        ],
+        "sha256": "9c9f19b430a2bee1fb15754a0486a378b5210535ada9a4600e8b0c3f77f183db",
+        "anchor": "tools/noro_diag/growth_chain_census.py#L381-L405",
+        "excerpt": "381:     def host_row(self, agent: Any) -> dict[str, Any]:\n382:         aid = int(agent.agent_id)\n383:         row = self.hosts.get(aid)\n384:         if row is None:\n385:             row = {\n386:                 \"agent_id\": aid,\n387:                 \"gen\": self.gen_of(aid),\n388:                 \"infected_epochs\": 0,\n389:                 \"symptomatic_epochs\": 0,\n390:                 \"confined_epochs\": 0,\n391:                 \"shedding_gec\": 0.0,\n392:                 \"shedding_epochs\": 0,\n393:                 \"hand_peak_gec\": 0.0,\n394:                 \"emesis_scheduled\": 0,\n395:                 \"emesis_emitted\": 0,\n396:                 \"emesis_surface_gec\": 0.0,\n397:                 \"emesis_patch_gec\": 0.0,\n398:                 \"emesis_aerosol_gec\": 0.0,\n399:                 \"emesis_censored\": False,\n400:                 \"vomiting_axis\": False,\n401:                 \"stool_events\": 0,\n402:                 \"deposit_gec\": 0.0,\n403:             }\n404:             self.hosts[aid] = row\n405:         return row",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E14",
+      "lane": "contracts",
+      "original": {
+        "id": "E14",
+        "claim": "Existing per-run scanner fields; summary-first extraction",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_shapes_01_scan.py",
+        "lines": [
+          288,
+          334
+        ],
+        "sha256": "c3de5dfb5c60eea9117ee34198d4c15dddc11db5d1c8bde12610937df08d7040",
+        "anchor": "tools/noro_diag/food_shapes_01_scan.py#L288-L334",
+        "excerpt": "288: def _fetch(client, bucket: str, key: str, census: bool) -> dict | None:\n289:     try:\n290:         blob = _s3_member_blob(client, bucket, key, _SUMMARY_MEMBER)\n291:         if blob is None:\n292:             return {\"key\": key, \"error\": \"no summary member\"}\n293:         summary = json.loads(blob)\n294:         base = _row_from_summary(summary, key.rsplit(\"/\", 1)[-1])\n295:     except Exception as exc:  # noqa: BLE001 \u2014 per-voyage isolation\n296:         return {\"key\": key, \"error\": f\"summary: {exc}\"}\n297:     params = summary.get(\"parameters\", {})\n298:     body = summary.get(\"summary\", {})\n299:     mech = summary.get(\"mechanisms\", {})\n300:     cs_echo = (\n301:         params.get(\"common_source\")\n302:         or (params.get(\"transmission\") or {}).get(\"common_source\")\n303:         or {}\n304:     )\n305:     anchor = base[\"anchor_row\"]\n306:     row = {\n307:         \"key\": key,\n308:         \"seed\": base[\"seed\"],\n309:         \"cell\": _cell_label(tuple(base[\"cell_key\"])),\n310:         \"hull\": anchor[\"hull\"],\n311:         \"posted\": _posted(anchor),\n312:         \"pax_comp\": anchor[\"passenger_complement\"],\n313:         \"crew_comp\": anchor[\"crew_complement\"],\n314:         \"rep_pax_ar\": anchor[\"reported_case_attack_rate_passenger\"],\n315:         \"rep_crew_ar\": anchor[\"reported_case_attack_rate_crew\"],\n316:         \"inf_ar_pax\": anchor[\"infection_attack_rate_passenger\"],\n317:         \"inf_ar_crew\": anchor[\"infection_attack_rate_crew\"],\n318:         \"ever_ill_pax\": anchor[\"A1_ever_ill_passenger\"],\n319:         \"rep_pax_n\": body.get(\"cumulative_reported_cases_passenger\"),\n320:         \"rep_crew_n\": body.get(\"cumulative_reported_cases_crew\"),\n321:         \"n_acquired\": base[\"n_acquired\"],\n322:         \"n_imports\": base[\"n_imports\"],\n323:         \"ignited\": base[\"ignited\"],\n324:         \"vsp_trigger\": base[\"vsp_trigger_epoch\"] is not None,\n325:         \"peak_prevalence\": base[\"peak_prevalence\"],\n326:         \"routes\": body.get(\"infections_by_dominant_route\") or {},\n327:         \"dose_share\": body.get(\"infection_dose_share_by_route\") or {},\n328:         \"cs_events_summary\": int(mech.get(\"common_source_events\", 0) or 0),\n329:         \"cs_takers_summary\": int(mech.get(\"common_source_takers\", 0) or 0),\n330:         \"cs_echo\": cs_echo,\n331:         \"cs_sha_echo\": params.get(\"engine_git_sha\"),\n332:         \"num_epochs\": int(params.get(\"num_epochs\", 0) or 0),\n333:     }\n334:     if not census:",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E15",
+      "lane": "contracts",
+      "original": {
+        "id": "E15",
+        "claim": "Event/object counts and acquisition burst fields",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_shapes_01_scan.py",
+        "lines": [
+          235,
+          285
+        ],
+        "sha256": "c3de5dfb5c60eea9117ee34198d4c15dddc11db5d1c8bde12610937df08d7040",
+        "anchor": "tools/noro_diag/food_shapes_01_scan.py#L235-L285",
+        "excerpt": "235:     )\n236:     out = {\n237:         \"n_events\": len(events),\n238:         **_event_tally(events),\n239:         \"integrity\": _integrity(events, objects),\n240:         \"n_acq\": len(acq_all),\n241:         \"cs_acq_n\": len(cs_acq),\n242:         \"cs_acq_in_span\": in_span,\n243:         \"saw_cs\": saw_marker,\n244:         \"n_exposures\": len(exposures),\n245:         \"telemetry\": telemetry,\n246:         \"n_objects\": len(objects),\n247:         \"lot_obj_voyage\": any(\n248:             o.get(\"source_kind\") == \"provisioned_lot\" for o in objects\n249:         ),\n250:         \"lot_event_voyage\": any(\n251:             e.get(\"lot_titre_gec_per_g\") is not None\n252:             and e.get(\"object_id\") is None\n253:             for e in events\n254:         ),\n255:         \"obj_arms\": dict(\n256:             Counter(o.get(\"source_kind\") or \"?\" for o in objects)\n257:         ),\n258:         \"end_reasons\": dict(\n259:             Counter(o.get(\"end_reason\") or \"?\" for o in objects)\n260:         ),\n261:         \"obj_pans_sum\": sum(\n262:             int(o.get(\"pans_emitted\", 0) or 0) for o in objects\n263:         ),\n264:         \"obj_windows_sum\": sum(\n265:             int(o.get(\"windows_covered\", 0) or 0) for o in objects\n266:         ),\n267:         \"early\": early_obj + early_ev,\n268:         \"n_early_obj\": len(early_obj),\n269:         \"n_early_ev\": len(early_ev),\n270:         \"n_late_obj\": n_late_obj,\n271:         \"n_late_ev\": n_late_ev,\n272:         \"max_early_takers\": max(\n273:             (r[\"t\"] for r in early_obj + early_ev), default=0\n274:         ),\n275:         \"max_late_ev_takers\": _late_max_takers(\n276:             events, _EARLY_EPOCH_DEFAULT\n277:         ),\n278:     }\n279:     out.update(_lot_census(events, objects))\n280:     for w in (48, 24, 12, 6):\n281:         share, centre = _burst(acq_all, w)\n282:         out[f\"burst{w}\"] = round(share, 4)\n283:         if w == 48:\n284:             out[\"burst48_centre\"] = centre\n285:     return out",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E16",
+      "lane": "contracts",
+      "original": {
+        "id": "E16",
+        "claim": "Burst uses closed acquisition-time window, empty returns zero; not observed onset",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/onset_curve_readout.py",
+        "lines": [
+          282,
+          313
+        ],
+        "sha256": "2a8b12599425192e22e10bd8ca1f0167f7753dc446b51131988c7e33afc7f9db",
+        "anchor": "tools/noro_diag/onset_curve_readout.py#L282-L313",
+        "excerpt": "282: def _burst(epochs: list[int], window: int) -> tuple[float, float | None]:\n283:     \"\"\"Max share of epochs inside any rolling `window`-epoch window.\n284: \n285:     Returns (share, centre epoch of the densest window). Two-pointer over\n286:     sorted epochs, O(n log n).\n287:     \"\"\"\n288:     if not epochs:\n289:         return 0.0, None\n290:     ep = sorted(epochs)\n291:     best, best_lo = 0, 0\n292:     j = 0\n293:     for i, e in enumerate(ep):\n294:         while j < len(ep) and ep[j] <= e + window:\n295:             j += 1\n296:         if j - i > best:\n297:             best, best_lo = j - i, i\n298:     centre = (ep[best_lo] + ep[min(best_lo + best - 1, len(ep) - 1)]) / 2.0\n299:     return best / len(ep), centre\n300: \n301: \n302: def _voyage_metrics(epochs: dict, num_epochs: int) -> dict:\n303:     onboard = [e for e in epochs[\"acquired\"] if e > 0]\n304:     onboard_symp = [e for e in epochs[\"acquired_symp\"] if e > 0]\n305:     out = {\n306:         \"ignited\": epochs[\"ignited\"],\n307:         \"n_imports\": epochs[\"n_imports\"],\n308:         \"n_acquired\": len(onboard),\n309:         \"n_symp\": len(onboard_symp),\n310:     }\n311:     for tag, eps in ((\"all\", onboard), (\"symp\", onboard_symp)):\n312:         if len(eps) < _MIN_ACQUIRED:\n313:             continue",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E17",
+      "lane": "contracts",
+      "original": {
+        "id": "E17",
+        "claim": "Existing S3 ZIP member range-read implementation",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/outbreak_anchor_readout.py",
+        "lines": [
+          103,
+          142
+        ],
+        "sha256": "b15c0bada037196ed5b4b2ee3916108b844466b7b18aeaa19caa6bcc442904f1",
+        "anchor": "tools/noro_diag/outbreak_anchor_readout.py#L103-L142",
+        "excerpt": "103: def _s3_range_get(client, bucket: str, key: str, start: int, end: int) -> bytes:\n104:     resp = client.get_object(Bucket=bucket, Key=key, Range=f\"bytes={start}-{end}\")\n105:     return resp[\"Body\"].read()\n106: \n107: \n108: def _s3_member_blob(client, bucket: str, key: str, member: str) -> bytes | None:\n109:     \"\"\"Fetch one zip member via S3 range reads (EOCD -> CD -> local blob).\n110: \n111:     Run zips grow to ~45 MB on the big hulls while summary.json stays\n112:     ~20 KB compressed; ranged reads keep a 12k-run readout off disk.\n113:     \"\"\"\n114:     size = client.head_object(Bucket=bucket, Key=key)[\"ContentLength\"]\n115:     tail_len = min(1 << 16, size)\n116:     tail = _s3_range_get(client, bucket, key, size - tail_len, size - 1)\n117:     eocd_off = tail.rfind(b\"PK\\x05\\x06\")\n118:     if eocd_off < 0:\n119:         return None\n120:     cd_size = struct.unpack_from(\"<I\", tail, eocd_off + 12)[0]\n121:     cd_off = struct.unpack_from(\"<I\", tail, eocd_off + 16)[0]\n122:     cd = _s3_range_get(client, bucket, key, cd_off, cd_off + cd_size - 1)\n123:     pos = 0\n124:     while pos + 46 <= len(cd):\n125:         if cd[pos : pos + 4] != b\"PK\\x01\\x02\":\n126:             break\n127:         method = struct.unpack_from(\"<H\", cd, pos + 10)[0]\n128:         comp_size = struct.unpack_from(\"<I\", cd, pos + 20)[0]\n129:         name_len = struct.unpack_from(\"<H\", cd, pos + 28)[0]\n130:         extra_len = struct.unpack_from(\"<H\", cd, pos + 30)[0]\n131:         comment_len = struct.unpack_from(\"<H\", cd, pos + 32)[0]\n132:         lh_off = struct.unpack_from(\"<I\", cd, pos + 42)[0]\n133:         name = cd[pos + 46 : pos + 46 + name_len].decode(\"utf-8\", \"replace\")\n134:         if name == member:\n135:             lh = _s3_range_get(client, bucket, key, lh_off, lh_off + 30)\n136:             if lh[:4] != b\"PK\\x03\\x04\":\n137:                 return None\n138:             l_name_len = struct.unpack_from(\"<H\", lh, 26)[0]\n139:             l_extra_len = struct.unpack_from(\"<H\", lh, 28)[0]\n140:             data_start = lh_off + 30 + l_name_len + l_extra_len\n141:             blob = _s3_range_get(\n142:                 client, bucket, key, data_start, data_start + comp_size - 1",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E18",
+      "lane": "contracts",
+      "original": {
+        "id": "E18",
+        "claim": "Streaming gzip scan has whole-decode fallback, needs bounded replacement",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_score_01_scan.py",
+        "lines": [
+          143,
+          207
+        ],
+        "sha256": "0132df701970be01c32e4ad1d20fe97b5a082a75f2b2415e11c8427cbc4be1ac",
+        "anchor": "tools/noro_diag/food_score_01_scan.py#L143-L207",
+        "excerpt": "143: def _acquisition_scan(\n144:     blob: bytes,\n145: ) -> tuple[list[int], list[int], bytes, bool]:\n146:     \"\"\"Stream-decompress the census member once.\n147: \n148:     Returns (all onboard acquisition epochs, cs-route acquisition epochs,\n149:     rolling tail window, saw-cs-marker) \u2014 the acquisition regex runs per\n150:     chunk on a small overlap, and the tail window keeps the trailing\n151:     `common_source` block for the tail-decode. Baseline arms emit no\n152:     `common_source` block at all, so the marker flag is what tells a\n153:     legitimately empty witness from a window that ran short.\n154:     \"\"\"\n155:     dec = zlib.decompressobj(16 + zlib.MAX_WBITS)\n156:     acq_all: list[int] = []\n157:     cs_acq: list[int] = []\n158:     prev = b\"\"\n159:     tail = b\"\"\n160:     saw_marker = False\n161:     # exact key with colon \u2014 `common_source_food` pathway strings inside\n162:     # host rows must not trip this (ind arms have cs acquisitions but the\n163:     # witness block itself may be absent)\n164:     marker = b'\"common_source\":'\n165:     for i in range(0, len(blob), _CHUNK):\n166:         part = dec.decompress(blob[i : i + _CHUNK])\n167:         buf = prev + part\n168:         saw_marker = saw_marker or marker in buf\n169:         _acq_epochs(buf, acq_all, cs_acq)\n170:         prev = buf[-_ACQ_OVERLAP:]\n171:         tail = (tail + part)[-_TAIL_WINDOW:]\n172:     tail = (tail + dec.flush())[-_TAIL_WINDOW:]\n173:     return acq_all, cs_acq, tail, saw_marker\n174: \n175: \n176: def _head_side(client, bucket: str, key: str) -> dict:\n177:     \"\"\"Head-only census: acquisition epochs + bursts from the `hosts[]`\n178:     prefix of the census member (~6 MB ranged read vs an 84 MB member).\n179:     No witness block \u2014 objects/events live in the member tail.\n180:     \"\"\"\n181:     text = _census_prefix(client, bucket, key)\n182:     if not text:\n183:         return {\"head_only\": True, \"error\": \"no census head\"}\n184:     text = text.encode(\"utf-8\")\n185:     acq_all: list[int] = []\n186:     cs_acq: list[int] = []\n187:     _acq_epochs(text, acq_all, cs_acq)\n188:     out = {\n189:         \"head_only\": True,\n190:         \"n_acq\": len(acq_all),\n191:         \"cs_acq_n\": len(cs_acq),\n192:     }\n193:     for w in (48, 24, 12, 6):\n194:         share, centre = _burst(acq_all, w)\n195:         out[f\"burst{w}\"] = round(share, 4)\n196:         if w == 48:\n197:             out[\"burst48_centre\"] = centre\n198:     return out\n199: \n200: \n201: def _census_side(blob: bytes, num_epochs: int) -> dict:\n202:     acq_all, cs_acq, tail, saw_marker = _acquisition_scan(blob)\n203:     cs_fields = _tail_fields(tail)\n204:     if saw_marker and not any(cs_fields.values()):\n205:         # Marker seen but the block's start fell outside the tail window\n206:         # (huge exposure lists) \u2014 full-decode fallback for this zip.\n207:         cs_fields = _tail_fields(gzip.decompress(blob))",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E19",
+      "lane": "contracts",
+      "original": {
+        "id": "E19",
+        "claim": "Reported entry-channel partition is mass-based dominance, not cause",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "orchestrator_record.py",
+        "lines": [
+          138,
+          155
+        ],
+        "sha256": "28a7ae7ac85851056a74caad2c86b67bf44c27a3a622d146ee0ef770d324f8ca",
+        "anchor": "orchestrator_record.py#L138-L155",
+        "excerpt": "138: def _reported_route_and_channel(\n139:     agent_ledger: dict[str, float] | None,\n140:     supply: float,\n141: ) -> tuple[str, str]:\n142:     \"\"\"Dominant route + import channel for one reported agent.\n143: \n144:     ``agent_ledger`` is the agent's acquired route ledger at\n145:     establishment (absent = no establishing event: a boarding import).\n146:     ``supply`` is the supply-chain-sourced share of that ledger's mass;\n147:     the agent's channel is ``supply_chain`` only when it strictly\n148:     exceeds the aboard dose.\n149:     \"\"\"\n150:     if not agent_ledger:\n151:         return \"imported\", \"boarding_import\"\n152:     dominant = max(agent_ledger, key=agent_ledger.get)\n153:     aboard_dose = sum(agent_ledger.values()) - supply\n154:     channel = \"supply_chain\" if supply > aboard_dose else \"aboard\"\n155:     return dominant, channel",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E20",
+      "lane": "contracts",
+      "original": {
+        "id": "E20",
+        "claim": "Role-specific unique-case/report route and channel counts",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "orchestrator_record.py",
+        "lines": [
+          163,
+          227
+        ],
+        "sha256": "28a7ae7ac85851056a74caad2c86b67bf44c27a3a622d146ee0ef770d324f8ca",
+        "anchor": "orchestrator_record.py#L163-L227",
+        "excerpt": "163: ) -> dict[str, Any]:\n164:     reported_counts = {\"passenger\": 0, \"crew\": 0}\n165:     # reported_cases_by_dominant_route (PROVISIONED-SOURCE-01 \u00a73): each\n166:     # reported agent buckets by the dominant route of their established\n167:     # infection (argmax over the per-agent acquired ledger \u2014 the same\n168:     # rule infections_by_dominant_route applies \u2014 over all of their\n169:     # establishing events); an agent with no establishing event is a\n170:     # boarding import and buckets under \"imported\".\n171:     reported_by_route = {\"passenger\": {}, \"crew\": {}}\n172:     # reported_cases_by_channel (issue #1008 decision): the import\n173:     # channel the case arrived by \u2014 \"boarding_import\" when the agent has\n174:     # no establishing event (the \"imported\" bucket of the route split),\n175:     # \"supply_chain\" when supply-chain-sourced pan dose strictly exceeds\n176:     # the aboard dose in their acquired ledger, else \"aboard\". All three\n177:     # keys emit unconditionally so the block's shape is stable; each\n178:     # role's counts sum to cumulative_reported_cases_{role}.\n179:     reported_by_channel = {\n180:         group: {\"boarding_import\": 0, \"supply_chain\": 0, \"aboard\": 0}\n181:         for group in (\"passenger\", \"crew\")\n182:     }\n183:     ill_counts = {\"passenger\": 0, \"crew\": 0}\n184:     infected_counts = {\"passenger\": 0, \"crew\": 0}\n185:     group_totals = {\"passenger\": 0, \"crew\": 0}\n186:     for agent in agents:\n187:         aid = int(agent[\"agent_id\"])\n188:         group = role_group_for_agent(agent)\n189:         group_totals[group] += 1\n190:         if aid in state.ever_reported_ids:\n191:             reported_counts[group] += 1\n192:             dominant, channel = _reported_route_and_channel(\n193:                 state.infection_route_ledger_by_agent.get(aid),\n194:                 state.infection_supply_dose_by_agent.get(aid, 0.0),\n195:             )\n196:             cell = reported_by_route[group]\n197:             cell[dominant] = cell.get(dominant, 0) + 1\n198:             reported_by_channel[group][channel] += 1\n199:         if aid in state.ever_ill_ids:\n200:             ill_counts[group] += 1\n201:         if aid in state.ever_infected_ids:\n202:             infected_counts[group] += 1\n203:     reported_rates = compute_group_rates_for_ids(\n204:         agents, state.ever_reported_ids,\n205:     )\n206:     infected_rates = compute_group_rates_for_ids(\n207:         agents, state.ever_infected_ids,\n208:     )\n209:     ever_ill_rates = compute_group_attack_rates(agents, state.ever_ill_ids)\n210:     disrupted_count = sum(\n211:         1 for a in engine.agents if a.microflora_disruption_status > 0\n212:     )\n213:     summary: dict[str, Any] = {\n214:         \"susceptible\": 0,\n215:         \"infected\": 0,\n216:         \"symptomatic\": 0,\n217:         \"recovered\": 0,\n218:         \"immune\": 0,\n219:         \"isolated\": len(state.isolated_ids),\n220:         \"quarantined\": len(state.quarantined_ids),\n221:         \"quarantine_refusers\": len(state.quarantine_refusers),\n222:         \"sick_call_count\": syn_result[\"sick_call_count\"],\n223:         \"campaign_specimens\": _campaign_count(syn_result, \"campaign_specimens_by_pathogen\"),\n224:         \"campaign_confirmed\": _campaign_count(syn_result, \"campaign_confirmed_by_pathogen\"),\n225:         \"onset_observation_count\": int(syn_result.get(\"onset_observation_count\", 0)),\n226:         \"disrupted_microflora_count\": disrupted_count,\n227:         \"cumulative_reported_cases\": len(state.ever_reported_ids),",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E21",
+      "lane": "contracts",
+      "original": {
+        "id": "E21",
+        "claim": "Legacy role fallback and ever-ill/ever-infected accumulation",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "orchestrator_init.py",
+        "lines": [
+          982,
+          1015
+        ],
+        "sha256": "72f0a0d0d522fd1c0d1ba96b4418f794a53c0ee71cb2d9f58ffc14a9b7693fa6",
+        "anchor": "orchestrator_init.py#L982-L1015",
+        "excerpt": "982: def role_group_for_agent(agent: dict[str, Any]) -> str:\n983:     role = str(agent.get(\"role\") or \"\").lower()\n984:     if role in (\"crew\", \"passenger\"):\n985:         return role\n986:     a_class = str(agent.get(\"agent_class\") or \"\").lower()\n987:     if a_class.startswith(\"crew\"):\n988:         return \"crew\"\n989:     return \"passenger\"\n990: \n991: \n992: _role_group_for_agent = role_group_for_agent\n993: \n994: \n995: def update_ever_ill_ids(\n996:     agents: list[dict[str, Any]],\n997:     ever_ill_ids: set[int],\n998: ) -> None:\n999:     \"\"\"Accumulate agents who have shown symptomatic presentation.\"\"\"\n1000:     from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation\n1001: \n1002:     for agent in agents:\n1003:         if agent_has_symptomatic_presentation(agent):\n1004:             ever_ill_ids.add(int(agent[\"agent_id\"]))\n1005: \n1006: \n1007: def update_ever_infected_ids(\n1008:     agents: list[dict[str, Any]],\n1009:     ever_infected_ids: set[int],\n1010: ) -> None:\n1011:     \"\"\"Accumulate agents who are currently or were previously infected.\"\"\"\n1012:     for agent in agents:\n1013:         infection_state, _, _ = resolve_agent_axes(agent)\n1014:         if infection_state in (INFECTION_INFECTED, INFECTION_RECOVERED):\n1015:             ever_infected_ids.add(int(agent[\"agent_id\"]))",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E22",
+      "lane": "contracts",
+      "original": {
+        "id": "E22",
+        "claim": "Reported true symptomatic ID set separate from background noise",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "orchestrator_init.py",
+        "lines": [
+          1078,
+          1102
+        ],
+        "sha256": "72f0a0d0d522fd1c0d1ba96b4418f794a53c0ee71cb2d9f58ffc14a9b7693fa6",
+        "anchor": "orchestrator_init.py#L1078-L1102",
+        "excerpt": "1078: def update_ever_reported_ids(\n1079:     agents: list[dict[str, Any]],\n1080:     syn_result: dict[str, Any],\n1081:     ever_reported_ids: set[int],\n1082:     ever_reported_noise_ids: set[int],\n1083: ) -> None:\n1084:     \"\"\"Accumulate symptomatic reports and separate background-noise IDs.\n1085: \n1086:     ``syndromic.query_ground_truth`` currently mislabels non-compliant,\n1087:     asymptomatic agents in ``true_positive_ids``; intersecting with the\n1088:     current symptomatic roster prevents those IDs from becoming reported\n1089:     cases while preserving the modality's existing sick-call behavior.\n1090:     \"\"\"\n1091:     symptomatic_ids = {\n1092:         int(agent[\"agent_id\"])\n1093:         for agent in agents\n1094:         if agent_has_symptomatic_presentation(agent)\n1095:         and not agent_is_departed(agent)\n1096:     }\n1097:     ever_reported_ids.update(\n1098:         symptomatic_ids.intersection(\n1099:             int(aid) for aid in syn_result.get(\"true_positive_ids\", [])\n1100:         ),\n1101:     )\n1102:     ever_reported_noise_ids.update(int(aid) for aid in syn_result.get(\"noise_ids\", []))",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E23",
+      "lane": "contracts",
+      "original": {
+        "id": "E23",
+        "claim": "Food employee predicate distinct from all crew",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "engines/crew_duty_exclusion.py",
+        "lines": [
+          209,
+          241
+        ],
+        "sha256": "2ac9ef1a74495b83abaa55c6cc3e1fd42f0f6abd161780674d9b68a449a6b72c",
+        "anchor": "engines/crew_duty_exclusion.py#L209-L241",
+        "excerpt": "209: def is_food_employee(agent: Any, service_zones: Iterable[str]) -> bool:\n210:     \"\"\"True when this agent is crew whose work zone is a service zone.\n211: \n212:     The one definition of food-employee status in the model: the duty\n213:     exclusion's 48-hour clause and the transmission core's food-handler\n214:     exposure read it from here, so the two cannot disagree about who is a\n215:     food employee.\n216:     \"\"\"\n217:     return (\n218:         getattr(agent, \"role\", \"\") == CREW_ROLE\n219:         and getattr(agent, \"work_zone\", \"\") in set(service_zones)\n220:     )\n221: \n222: \n223: def food_employee_ids(\n224:     agents: Iterable[Any],\n225:     service_zones: Iterable[str],\n226: ) -> frozenset[int]:\n227:     \"\"\"Crew whose work zone is a service zone \u2014 the 48-hour population.\"\"\"\n228:     zones = set(service_zones)\n229:     return frozenset(\n230:         int(agent.agent_id)\n231:         for agent in agents\n232:         if is_food_employee(agent, zones)\n233:     )\n234: \n235: \n236: def crew_ids(agents: Iterable[Any]) -> frozenset[int]:\n237:     \"\"\"Every crew agent, food employee or not.\"\"\"\n238:     return frozenset(\n239:         int(agent.agent_id)\n240:         for agent in agents\n241:         if getattr(agent, \"role\", \"\") == CREW_ROLE",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E24",
+      "lane": "contracts",
+      "original": {
+        "id": "E24",
+        "claim": "Effective legacy epoch is 24h even if configured duration differs",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "engines/sim_clock.py",
+        "lines": [
+          170,
+          219
+        ],
+        "sha256": "24a298dbd5c930737b56167a0b4da95a41d585791bd30d344aa44d04d45bd686",
+        "anchor": "engines/sim_clock.py#L170-L219",
+        "excerpt": "170: @dataclass(frozen=True)\n171: class SimClock:\n172:     \"\"\"Converts epoch counts to the day-valued scale pathogen profiles use.\"\"\"\n173: \n174:     epoch_duration_hours: float = DEFAULT_EPOCH_DURATION_HOURS\n175:     mode: str = LEGACY_EPOCH_DAY\n176: \n177:     def __post_init__(self) -> None:\n178:         if self.mode not in MODES:\n179:             raise ValueError(f\"unknown natural-history clock mode: {self.mode!r}\")\n180:         if not math.isfinite(self.epoch_duration_hours):\n181:             raise ValueError(\n182:                 \"epoch_duration_hours must be finite, got \"\n183:                 f\"{self.epoch_duration_hours}\",\n184:             )\n185:         if self.epoch_duration_hours <= 0:\n186:             raise ValueError(\n187:                 f\"epoch_duration_hours must be positive, got {self.epoch_duration_hours}\",\n188:             )\n189: \n190:     # \u2500\u2500 epochs \u2192 wall clock \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n191: \n192:     @property\n193:     def hours_per_epoch(self) -> float:\n194:         \"\"\"Wall-clock hours one epoch spans.\n195: \n196:         Under the legacy clock an epoch *is* a day of natural history, so a\n197:         physical delay must be read on that same day-long grid \u2014 otherwise the\n198:         control arm gets a 72-epoch (72-day) microbiology turnaround while its\n199:         biology still advances a day per epoch, which is not the pre-clock\n200:         behaviour it exists to reproduce.\n201:         \"\"\"\n202:         if self.mode == LEGACY_EPOCH_DAY:\n203:             return HOURS_PER_DAY\n204:         return self.epoch_duration_hours\n205: \n206:     def hours_elapsed(self, epochs: float) -> float:\n207:         \"\"\"Wall-clock hours spanned by ``epochs`` epochs.\"\"\"\n208:         return float(epochs) * self.hours_per_epoch\n209: \n210:     @property\n211:     def day_fraction_per_epoch(self) -> float:\n212:         \"\"\"Fraction of a natural-history day represented by one epoch.\"\"\"\n213:         return self.hours_per_epoch / HOURS_PER_DAY\n214: \n215:     def amount_per_epoch(self, amount_per_day: float) -> float:\n216:         \"\"\"Convert a per-day amount to the amount for one epoch.\"\"\"\n217:         if self.mode == LEGACY_EPOCH_DAY:\n218:             return float(amount_per_day)\n219:         return float(amount_per_day) * self.day_fraction_per_epoch",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E25",
+      "lane": "contracts",
+      "original": {
+        "id": "E25",
+        "claim": "Frozen PS01 D1-D4 including ambiguous converted AR and vacuity",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "docs/norovirus/noro_provisioned_source_01_sweep_design.md",
+        "lines": [
+          163,
+          203
+        ],
+        "sha256": "7e1c83616a3f94042da964d114fed49ae57850218c45b5ef0489dbb936d4f227",
+        "anchor": "docs/norovirus/noro_provisioned_source_01_sweep_design.md#L163-L203",
+        "excerpt": "163: ## 5. Gates\n164: \n165: ### 5.1 Admissibility (D1\u2013D4, adapted from MINT-RATE-01 \u00a75)\n166: \n167: - **D1 (posting marginal)** \u2014 per arm \u00d7 hull, reported posting marginal\n168:   over `off` in the 0.4\u20130.9 pp band. The headline read is the SET of\n169:   rungs simultaneously in-band on exp+cls+spr (the hull-free claim;\n170:   frozen prediction `{q03}` plus edge neighbours), and mega's in-band\n171:   set (predicted `{q15, q30}`-region). `ps_ship` is read separately \u2014\n172:   it is the shipped-config check, not a rung.\n173: - **D2 (severity)** \u2014 per in-band rung per hull: pooled posted-pax-AR\n174:   median within [0.5\u00d7, 2.0\u00d7] the in-campaign `ind` median for that\n175:   hull (verdict reads vs `ind`, the proven comparator \u2014 not vs\n176:   truth, same convention as #998/#999). Mega's `ind` median comes\n177:   from its own `ind` arm.\n178: - **D3 (conversion)** \u2014 median converted-pax-AR among posted voyages\n179:   within [0.5\u00d7, 2.0\u00d7] `ind` per hull, pooled in-band read.\n180: - **D4 (shape)** \u2014 posted bursts not collapsed to rest (the HULL-SCALE\n181:   mechanism unchanged, expected-pass); the spr excursion-vs-rest\n182:   comparison stays declared unreadable (largest-ship cohort reads\n183:   compound atop multiple pool excursions); mega's D4 declared TBD \u2014\n184:   posted bursts have never been measured on mega, the campaign posts\n185:   the first number.\n186: - **Vacuity** \u2014 arms with <20 object-carrying voyages report the\n187:   presence census + marginal only (the `ship` bridge on small hulls\n188:   and `q01`\u2013`q02` on exp/mega will land here); not a gate failure.\n189: \n190: ### 5.2 Verdicts (declared)\n191: \n192: - **Common-q band** = intersection of in-band rung sets across\n193:   exp+cls+spr. Prediction: non-empty, contains `q03`. Empty \u21d2\n194:   hull-free claim dead \u21d2 venue-station N_lots wrong (revisit \u00a71.2's\n195:   recorded alternative before any tuning).\n196: - **Mechanism admissible** = non-empty common band AND `ps_ship`'s\n197:   interval-marginal lands inside it AND D2/D3 pass per hull.\n198: - **Mega** = in-band rung set exists (read vs its own `ind`) \u2014 lands\n199:   at/below the extrapolation (multi-lot lift measured) or stays\n200:   empty (yield ceiling, a finding not a defect).\n201: - **Ship-vs-fiat check** \u2014 `ps_ship` marginal vs `ship`/`mint` anchors\n202:   must sit between them ordered by realized E[objects]; an inversion\n203:   is a mechanism defect, not a tuning signal.",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E26",
+      "lane": "contracts",
+      "original": {
+        "id": "E26",
+        "claim": "Operational D2 absolute edge and D3 excursion-to-posting definition",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "tools/noro_diag/food_shapes_01_report.py",
+        "lines": [
+          1,
+          16
+        ],
+        "sha256": "e3560f1e8e0634f76b868a1d6c2e9758b27cd848fc40fc261847503fa903592c",
+        "anchor": "tools/noro_diag/food_shapes_01_report.py#L1-L16",
+        "excerpt": "1: #!/usr/bin/env python3\n2: \"\"\"NORO-FOOD-SHAPES-01 scored readout \u2014 aggregates food_shapes_01_scan rows.\n3: \n4: Consumes the JSONL rows emitted by ``food_shapes_01_scan.py`` (one per\n5: voyage) and renders the frozen criteria of\n6: ``docs/norovirus/noro_food_shapes_01_sweep_design.md``:\n7: \n8: - D1 posting frequency: posted share + Wilson 95% CI per arm, paired\n9:   gained/lost vs the in-campaign ``off`` floor, marginal pp vs the\n10:   0.4-0.9% reference band;\n11: - D2 posted-conditional pax-AR pooled medians per arm (the pooled\n12:   rule \u2014 thin cells pool within an arm, not per-voyage votes);\n13: - D3 excursion->posting conversion (excursion = >=1 infection\n14:   dominant-routed common_source_food) vs the in-campaign ``ind`` read;\n15: - D4 burst48 excursion-vs-rest medians + posted-voyage burst48;\n16: - mint census: provisioned_lot objects/cells per arm, windows covered,",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E27",
+      "lane": "contracts",
+      "original": {
+        "id": "E27",
+        "claim": "Latest four-hull production completion and appended mega readout",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "campaigns/noro/provisioned_source_01/LEDGER.md",
+        "lines": [
+          406,
+          470
+        ],
+        "sha256": "8741d421d4046e89434be0f1b12e15b413b8cef1169de7ab3ab74d5e6a90158a",
+        "anchor": "campaigns/noro/provisioned_source_01/LEDGER.md#L406-L470",
+        "excerpt": "406: ### wave 3 readout \u2014 2026-10-22, all measured at image a9f4a517, 1,000 seeds/arm\n407: \n408: All 10 arms landed 10,000/10,000 (~09:31 UTC \u2014 4.0-day Spot\n409: drain, 0 failed cells). Census scan ran as a 10-child array on\n410: `picard-noro-scan-readout-ec2:6` (job\n411: `dcd663eb-b121-4955-905f-51efac5626b9`, 10/10 SUCCEEDED ~90min),\n412: rows in `campaign/noro_provisioned_source_01/_scan_rows/`.\n413: Report: `food_shapes_01_report.py --arm-set ps01 --n-stations 70`.\n414: \n415: **Posting window (band +0.4\u20130.9pp):**\n416: \n417: | arm | mega posted | mega marginal | in-band |\n418: |---|---|---|---|\n419: | off | 0 (0.00%) | +0.00 | \u2013 |\n420: | ind | 11 (1.10%) | +1.10 | no (over) |\n421: | ps_ship | 2 (0.20%) | +0.20 | **no (under)** |\n422: | q01 | 2 (0.20%) | +0.20 | no |\n423: | q02 | 2 (0.20%) | +0.20 | no |\n424: | q03 | 2 (0.20%) | +0.20 | no |\n425: | q05 | 2 (0.20%) | +0.20 | no |\n426: | **q08** | **6 (0.60%)** | **+0.60** | **yes** |\n427: | **q15** | **9 (0.90%)** | **+0.90** | **edge** |\n428: | q30 | 19 (1.90%) | +1.90 | no (over) |\n429: \n430: q15's +0.90 is the inclusive upper edge \u2014 the tool's float-ulp\n431: boundary flags `no` again (same artifact as cls q05); reported as\n432: edge-in-band. **In-band set on mega: {q08, q15(edge)} \u2248 q \u2208\n433: [8e-4, 1.5e-3].**\n434: \n435: **ps_ship fourth-hull check \u2014 FAILS.** The U[0.0002,0.0005]\n436: per-ship draw minted 21/1000 voyages (near-absent as designed) and\n437: posted 2 \u2192 +0.20pp, below the band floor. **The flat-rate claim is\n438: dead at N=70**: one hull-invariant per-lot prevalence does not\n439: cover the band on mega. The operative window rises to\n440: ~[8e-4,1.5e-3] \u2014 ~3\u20134\u00d7 the small-hull common window\n441: [~2.4e-4,3.8e-4]. The rate-rises reading is the measured one: the\n442: per-lot prevalence needed for the marginal anchor scales up with\n443: hull, because dilution outruns presence scaling.\n444: \n445: **Near-absence test \u2014 CONFIRMED.** At common q (~3e-4) mega\n446: carries ~0.02 objects/voyage \u2014 ps_ship/q03 minted 21/1000 each,\n447: vs design's ~0.021 prediction. Posting is impossible at that\n448: presence under measured conversion.\n449: \n450: **Presence ladder vs Binomial(70,q) \u2014 clean:**\n451: \n452: | arm | mega minted (E[frac]) | objects (E[obj]) | posted |\n453: |---|---|---|---|\n454: | ps_ship | 21 (0.0242) | 21 (24.5) | 2 |\n455: | q01 | 5 (0.0070) | 5 (7.0) | 2 |\n456: | q02 | 13 (0.0139) | 13 (14.0) | 2 |\n457: | q03 | 21 (0.0208) | 21 (21.0) | 2 |\n458: | q05 | 29 (0.0344) | 29 (35.0) | 2 |\n459: | q08 | 53 (0.0545) | 56 (56.0) | 6 |\n460: | q15 | 86 (0.0997) | 93 (105.0) | 9 |\n461: | q30 | 188 (0.1897) | 207 (210.0) | 19 |\n462: \n463: Nested-set violations: **0** across all rung pairs. All posting is\n464: mint-attributable \u2014 unminted-voyage postings 0 on every arm.\n465: \n466: **P(post|minted) \u2014 the dilution ladder extends:** pooled \u2248 0.10 on\n467: mega (q30 19/188 = 10.1% [6.6,15.2], q15 9/86 = 10.5%, q08 6/53 =\n468: 11.3%, ps_ship 2/21 = 9.5% [2.7,28.9]) vs exp 0.93 / cls 0.58 /\n469: spr 0.36. The marginal = minted \u00d7 conversion identity still holds,\n470: but conversion falls ~4\u00d7 exp\u2192spr and lands ~0.10 at N=70 \u2014 faster",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E28",
+      "lane": "contracts",
+      "original": {
+        "id": "E28",
+        "claim": "Stale child ledger points to controlling parent",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "campaigns/noro/provisioned_source_01_mega/LEDGER.md",
+        "lines": [
+          1,
+          10
+        ],
+        "sha256": "fc6da4c48592ed4da1cae60e38fe51cd3d0a96a0fdc4aa4f190cc061b1956a85",
+        "anchor": "campaigns/noro/provisioned_source_01_mega/LEDGER.md#L1-L10",
+        "excerpt": "1: # NORO-PROVISIONED-SOURCE-01 (mega spec) \u2014 campaign ledger\n2: \n3: **Status: declared \u2014 design frozen, no cells submitted.** This spec is\n4: the mega half of `campaigns/noro/provisioned_source_01/` \u2014 same\n5: manifest (`noro_provisioned_source_01_manifest.json`), same arm table\n6: minus the fiat bridges, elevated `memory: 8192` (MEGA-IMPACT working\n7: point after AGE-FOOD's 6144 OOM; pending the canary `rss_samples`\n8: read \u2014 design \u00a73.3). 10 arms \u00d7 1,000 seeds (8105\u20139104) = 10,000\n9: cells + `canary_meg_q30` (12). All waves, gates and readout entries\n10: record in the parent ledger `campaigns/noro/provisioned_source_01/LEDGER.md`.",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E29",
+      "lane": "contracts",
+      "original": {
+        "id": "E29",
+        "claim": "Sentinel saved spec/summary/observations adapter",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/sentinel_recovery_postprocess.py",
+        "lines": [
+          201,
+          225
+        ],
+        "sha256": "02b3574a6d13ceaec60b5d70862e0cbe73f57ebc1441ed801dbba9aebaf05371",
+        "anchor": "picard_framework/analysis/sentinel_recovery_postprocess.py#L201-L225",
+        "excerpt": "201: def voyage_record_from_zip(zip_path: str) -> dict[str, Any] | None:\n202:     \"\"\"Pull one voyage's fit inputs from a campaign zip.\"\"\"\n203:     summary = load_zip_json(zip_path, \"summary.json\")\n204:     spec = load_zip_json(zip_path, \"run_spec.json\")\n205:     observations = load_zip_json(zip_path, \"sentinel_line_list.json\")\n206:     if not isinstance(summary, dict) or not isinstance(spec, dict):\n207:         return None\n208:     if not isinstance(observations, dict):\n209:         return None\n210:     params = summary.get(\"parameters\")\n211:     if not isinstance(params, dict):\n212:         return None\n213:     run_id = str(params.get(\"run_id\") or \"\")\n214:     voyage = (spec.get(\"config_overrides\") or {}).get(\"voyage\")\n215:     if not run_id or not isinstance(voyage, dict):\n216:         return None\n217:     return {\n218:         \"run_id\": run_id,\n219:         \"params\": params,\n220:         \"itinerary\": {\"schema_version\": \"1.0\", \"voyage\": voyage},\n221:         \"observations\": prepare_observations(\n222:             observations, run_id, port_day_ids(voyage),\n223:         ),\n224:     }\n225: ",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E30",
+      "lane": "contracts",
+      "original": {
+        "id": "E30",
+        "claim": "Variant per-run and per-arm analysis adapter",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/phylodynamics/campaign.py",
+        "lines": [
+          179,
+          238
+        ],
+        "sha256": "58044c4aef71087d11dfdb4aaa8af2e7c0fc6d287ccf6a343c1c7d3081ff87d8",
+        "anchor": "picard_framework/analysis/phylodynamics/campaign.py#L179-L238",
+        "excerpt": "179: def build_campaign_rows(results_dir: str) -> tuple[list[dict[str, Any]], int]:\n180:     \"\"\"Per-run phylodynamic rows for every armed run under ``results_dir``.\n181: \n182:     Runs with no census are counted rather than raised on: a campaign mixes\n183:     variant-surveillance arms with arms that track no lineages at all.\n184:     \"\"\"\n185:     rows: list[dict[str, Any]] = []\n186:     unarmed = 0\n187:     for zip_path in iter_result_zips(results_dir):\n188:         run_id = os.path.basename(zip_path)[: -len(\".zip\")]\n189:         try:\n190:             rows.extend(_rows_for_source(zip_path, run_id))\n191:         except MissingCensusError:\n192:             unarmed += 1\n193:     return rows, unarmed\n194: \n195: \n196: def _mean(values: list[float]) -> float | None:\n197:     return sum(values) / len(values) if values else None\n198: \n199: \n200: def arm_summaries(rows: Iterable[Mapping[str, Any]]) -> dict[str, Any]:\n201:     \"\"\"Per-arm means, keyed by arm, with the run count that produced them.\"\"\"\n202:     grouped: dict[str, list[Mapping[str, Any]]] = {}\n203:     for row in rows:\n204:         grouped.setdefault(arm_key(row), []).append(row)\n205:     out: dict[str, Any] = {}\n206:     for key, arm_rows in sorted(grouped.items()):\n207:         summary: dict[str, Any] = {\"n_rows\": len(arm_rows)}\n208:         for field in _ARM_FIELDS:\n209:             values = [\n210:                 float(row[field]) for row in arm_rows if row.get(field) is not None\n211:             ]\n212:             summary[f\"mean_{field}\"] = _mean(values)\n213:         out[key] = summary\n214:     return out\n215: \n216: \n217: def write_campaign_tables(out_dir: str, results_dir: str) -> dict[str, Any]:\n218:     \"\"\"Write the campaign phylodynamic table and per-arm summary, if any runs.\n219: \n220:     Returns a manifest fragment; ``artifacts`` is empty when no run in the\n221:     campaign was armed with a lineage census.\n222:     \"\"\"\n223:     rows, unarmed = build_campaign_rows(results_dir)\n224:     if not rows:\n225:         return {\"n_rows\": 0, \"unarmed_runs\": unarmed, \"artifacts\": {}}\n226:     write_csv(os.path.join(out_dir, \"phylodynamic_runs.csv\"), rows, RUN_COLUMNS)\n227:     summaries = arm_summaries(rows)\n228:     write_json(\n229:         os.path.join(out_dir, \"phylodynamic_arms.json\"),\n230:         {\"arms\": summaries, \"unarmed_runs\": unarmed},\n231:     )\n232:     return {\n233:         \"n_rows\": len(rows),\n234:         \"n_arms\": len(summaries),\n235:         \"unarmed_runs\": unarmed,\n236:         \"artifacts\": {\n237:             \"phylodynamic_runs\": \"phylodynamic_runs.csv\",\n238:             \"phylodynamic_arms\": \"phylodynamic_arms.json\",",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E31",
+      "lane": "contracts",
+      "original": {
+        "id": "E31",
+        "claim": "Boundary scenario summaries and policy comparisons",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/boundary/campaign.py",
+        "lines": [
+          212,
+          242
+        ],
+        "sha256": "2b225128a361771d7ba5cf6aa5b158eccd1c5679d676c636af06eb7698834e95",
+        "anchor": "picard_framework/analysis/boundary/campaign.py#L212-L242",
+        "excerpt": "212: def run_campaign(\n213:     scenarios: Iterable[dict[str, Any]],\n214:     surface: OutbreakSurface,\n215:     *,\n216:     out_dir: str,\n217:     n_mc: int,\n218:     seed: int,\n219:     resume: bool = False,\n220: ) -> list[dict[str, Any]]:\n221:     \"\"\"Run all scenarios; write per-scenario summary.json and policy_comparison.csv.\"\"\"\n222:     out = ensure_out_dir(out_dir)\n223:     runs_dir = ensure_out_dir(os.path.join(out, \"runs\"))\n224:     completed = _fresh_completed(out, resume)\n225: \n226:     scenario_list = list(scenarios)\n227:     # Precompute P0 baselines within the batch for VoI / VSP-avoided metrics.\n228:     baselines: dict[tuple[Any, ...], dict[str, Any]] = {}\n229:     summaries = _resumed_summaries(scenario_list, runs_dir, completed, resume)\n230: \n231:     _run_p0_scenarios(\n232:         scenario_list, summaries, baselines, completed, out, runs_dir, surface,\n233:         n_mc=n_mc, seed=seed,\n234:     )\n235:     _run_policy_scenarios(\n236:         scenario_list, summaries, baselines, completed, out, runs_dir, surface,\n237:         n_mc=n_mc, seed=seed,\n238:     )\n239: \n240:     # Stable CSV order: follow scenario_list order when possible\n241:     ordered = _ordered_summaries(scenario_list, summaries)\n242:     _write_campaign_csv(out, ordered)",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E32",
+      "lane": "contracts",
+      "original": {
+        "id": "E32",
+        "claim": "PR1081 external AGE/norovirus observational share; separate evidence domain",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "docs/literature/consensus_tranche_53_fleet_age_norovirus_share.md",
+        "lines": [
+          1,
+          80
+        ],
+        "sha256": "3c681e753b63ebc538a748bff66b1b76a972006d453b25075f8ac9dcd07d5eec",
+        "anchor": "docs/literature/consensus_tranche_53_fleet_age_norovirus_share.md#L1-L80",
+        "excerpt": "1: # Consensus tranche 53 \u2014 the norovirus share of fleet acute gastroenteritis\n2: \n3: > **Status:** Reference.\n4: \n5: Evidence retrieved 2026-10-22 for the maintainer's identified gap: *what\n6: credible fraction of acute gastroenteritis (AGE) in the fleet is likely\n7: norovirus*. Retrieval: one Consensus Pro research thread\n8: ([thread](https://consensus.app/search/research-question-what-fraction-of-acute-gastroent/RLuL_KqCSoKlMVGpeAj70w/))\n9: plus two targeted `search` passes with `include_full_text_chunks`, one naming\n10: outbreak-level etiology and one naming the all-cases prevalence. Origins are\n11: marked per row (`R` Results, `Tn` Table n, `Ab` Abstract only, `Me` Methods,\n12: `Sec` secondary, `Tr` transcribed).\n13: \n14: ## 1. The answer is denominator-dependent \u2014 three separable quantities\n15: \n16: | Denominator | Norovirus share | Evidence class |\n17: |---|---|---|\n18: | Etiology-determined AGE **outbreaks** | **~0.80\u20130.97** | Measured, multiple surveillance periods |\n19: | AGE **cases within outbreaks** | **~0.68\u20130.70** | Measured (VSP 2008\u20132014) |\n20: | **All** AGE cases (outbreak + sporadic) | **unmeasured aboard ship**; floor ~0.10 passenger / ~0.03 crew, plausible ~0.2\u20130.3 | Floor measured; the rest inferred |\n21: \n22: The headline \"~90%+\" figure answers the *outbreak* question. No study has\n23: systematically tested the etiology of routine, non-outbreak shipboard AGE\n24: presentations \u2014 that is a genuine measurement gap for every pathogen, not a\n25: null on norovirus.\n26: \n27: ## 2. Outbreak-level \u2014 measured\n28: \n29: - **Freeland et al. 2016**, *MMWR* 65(1), DOI 10.15585/mmwr.mm6501a1 (`R`,\n30:   abstract + figure caption via chunks). CDC Vessel Sanitation Program,\n31:   2008\u20132014, 29,107 voyages: 133 AGE outbreaks reported; 95 (71%) had clinical\n32:   specimens tested; **92 of 95 were norovirus (96.8%** of tested outbreaks \u2014\n33:   the paper prints both 97% and \"92%\"; the count is 92/95). All 87\n34:   viral-only outbreaks were norovirus, plus 4 mixed viral-bacterial and 1\n35:   mixed viral-parasitic. Non-norovirus etiologies in the period:\n36:   enterotoxigenic *E. coli* (6 outbreaks), *Shigella sonnei* (1),\n37:   *Campylobacter jejuni* (1), *Clostridium perfringens* (1, crew-only),\n38:   *Cyclospora cayetanensis* (1). As a share of all 133 reported outbreaks\n39:   (including untested), norovirus is 69.2%.\n40: - **Preston et al. 2026**, *Open Forum Infectious Diseases* 13, DOI\n41:   10.1093/ofid/ofaf695.2359 (`Ab`, conference abstract, CDC data): **since\n42:   2019, 81% of cruise-ship AGE outbreaks posted to the VSP website were\n43:   attributed to norovirus**; GII.17 has become the predominant genotype over\n44:   GII.4 in 2020\u20132025.\n45: - **Cramer et al. 2003**, *MMWR* 51(49):1112\u20135, DOI 10.1001/jama.289.2.167\n46:   (`Ab`): 2002 season \u2014 21 outbreaks reported, **9 confirmed norovirus**, 3\n47:   bacterial, 9 unknown etiology \u2192 75% of the 12 etiology-determined outbreaks,\n48:   43% of all reported. 2001: 4 of 7 outbreaks norovirus.\n49: - **Cramer et al. 2004**, *J Infect Dis* 190(1), DOI 10.1086/420888 (`Ab`,\n50:   `Me`): of 14 laboratory-confirmed cruise outbreaks in 2002, 12 (85.7%) were\n51:   calicivirus, of which 11 were norovirus \u2192 **78.6% of confirmed outbreaks**.\n52: - **Scaioli et al. 2013**, *Eur J Public Health* 23, DOI\n53:   10.1093/eurpub/ckt123.192 (`Sec`, abstract citing CDC): \"over 90% of\n54:   diarrheal disease outbreaks on cruise ships are caused by norovirus\".\n55: - **Mouchtouri et al. 2024**, *Eurosurveillance* 29(10), DOI\n56:   10.2807/1560-7917.es.2024.29.10.2300345 (`Ab`): norovirus has been the\n57:   **leading cause of AGE outbreaks on cruise ships since 2006**.\n58: \n59: **Synthesis:** across four surveillance eras the norovirus share of\n60: etiology-determined cruise outbreaks sits in **~0.75\u20130.97**; the recent-era\n61: point is ~0.81\u20130.97. The credible interval for \"an outbreak posted to VSP is\n62: norovirus\" is **~0.8\u20130.95**.\n63: \n64: ## 3. Case-level aboard ship \u2014 partly measured\n65: \n66: - **Freeland et al. 2016** (`R`): 129,678 passenger AGE cases in 2008\u20132014,\n67:   of which only **19,273 (14.9%) were part of an outbreak**; of those\n68:   outbreak-associated cases, **13,568 (70.4%) were in laboratory-confirmed\n69:   norovirus outbreaks**. Crew: 43,132 AGE cases, 1,984 (4.6%)\n70:   outbreak-associated, of which 1,343 (67.7%) in confirmed norovirus\n71:   outbreaks.\n72:   \u2192 **Measured floor:** norovirus outbreak cases are \u226510.5% of *all*\n73:   passenger AGE cases and \u22653.1% of all crew AGE cases. The etiology of the\n74:   remaining ~85\u201395% (non-outbreak presentations) was never tested.\n75: - **Wikswo et al. 2011**, *Clin Infect Dis* 52(9):1116\u201322, DOI\n76:   10.1093/cid/cir144 (`Ab`): within one high-morbidity 2009 outbreak,\n77:   **12/14 (85.7%) tested specimens were norovirus-positive**; 15.4% of\n78:   surveyed passengers met the AGE case definition and **40% of them never\n79:   reported to the infirmary** \u2014 infirmary surveillance detected only 60% of\n80:   AGE cases. Relevant to any \"fleet AGE\" denominator built on reported cases.",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E33",
+      "lane": "contracts",
+      "original": {
+        "id": "E33",
+        "claim": "Fresh independent PS01 review: four hulls completed; source/reducer versions distinct; D2/D3/D4 unresolved",
+        "path": "/workspace/projects/de6f53c3-4850-4888-974c-eda053c529f2/scratch/2026-10-22_four_hull_first_paper/fresh/SOURCEREVIEW.md",
+        "lines": [
+          13,
+          153
+        ],
+        "sha256": "526462a08a6b802c3ce9958fe25dc6f9b5b029585938e3b5e91004eeba311c41",
+        "source_sha": "c77f1d5122d0367c022012f83ca690b057d361fb",
+        "grade": "prior_independent_static_review"
+      }
+    },
+    {
+      "integrated_id": "contracts:E34",
+      "lane": "contracts",
+      "original": {
+        "id": "E34",
+        "claim": "Prior stocktake covers 21 named campaign directories but not all manifest/ledger stages; old mega status superseded only by fresh review",
+        "path": "/workspace/projects/de6f53c3-4850-4888-974c-eda053c529f2/scratch/2026-10-19_publication_stocktake/integration/merged_campaign_register.json",
+        "sha256": "913b4cc7b5018fcd2fed622109869f4d882bbbfcadcb092c7d274d5360fed1d1",
+        "source_sha": "e67a42dcc9f6566b0c4331550b2a063f0f067189",
+        "grade": "historical_register_not_cloud_execution"
+      }
+    },
+    {
+      "integrated_id": "contracts:E35",
+      "lane": "contracts",
+      "original": {
+        "id": "E35",
+        "claim": "Saved infected-agent rows have role, illness/report flags, infection epoch and onset_time_infected; complement histograms separate",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "campaigns/flu/open_voyage_01/cell.py",
+        "lines": [
+          40,
+          81
+        ],
+        "sha256": "90444a94d81a4646eb650361d63b89240cf26298161b52b325ce0a3d43e2eded",
+        "anchor": "campaigns/flu/open_voyage_01/cell.py#L40-L81",
+        "excerpt": "40: def _infection_rows(\n41:     agents: list[Any],\n42:     pathogen_id: str,\n43:     ever_ill: set[int],\n44:     ever_reported: set[int],\n45: ) -> list[dict[str, Any]]:\n46:     \"\"\"One row per agent ever infected with *pathogen_id*.\"\"\"\n47:     rows = []\n48:     for ag in agents:\n49:         inf = ag.infections.get(pathogen_id)\n50:         if inf is None:\n51:             continue\n52:         routes = dict(inf.get(\"acquired_particles_by_route\") or {})\n53:         rows.append(\n54:             {\n55:                 \"id\": ag.agent_id,\n56:                 \"role\": getattr(ag, \"role\", \"\") or \"\",\n57:                 \"band\": host_age_band(ag) or \"unbanded\",\n58:                 \"ill\": ag.agent_id in ever_ill,\n59:                 \"reported\": ag.agent_id in ever_reported,\n60:                 \"presented\": ever_presented(inf),\n61:                 \"severity_peak\": inf.get(\"symptom_severity_peak\"),\n62:                 \"infection_epoch\": inf.get(\"infection_epoch\"),\n63:                 \"onset_time_infected\": inf.get(\"onset_time_infected\"),\n64:                 \"index\": inf.get(\"infection_epoch\") == 0,\n65:                 \"routes\": routes,\n66:                 \"dominant_route\": (max(routes, key=routes.get) if routes else None),\n67:             }\n68:         )\n69:     return rows\n70: \n71: \n72: def _complement(agents: list[Any]) -> dict[str, Any]:\n73:     \"\"\"Band/role histograms over the whole complement.\"\"\"\n74:     roles: dict[str, int] = {}\n75:     bands: dict[str, int] = {}\n76:     for ag in agents:\n77:         role = getattr(ag, \"role\", \"\") or \"unknown\"\n78:         roles[role] = roles.get(role, 0) + 1\n79:         band = host_age_band(ag) or \"unbanded\"\n80:         bands[band] = bands.get(band, 0) + 1\n81:     return {\"total\": len(agents), \"roles\": roles, \"bands\": bands}",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E36",
+      "lane": "contracts",
+      "original": {
+        "id": "E36",
+        "claim": "Non-ZIP native JSON cell has counts, complements, caregiver counters and infections",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "campaigns/flu/open_voyage_01/cell.py",
+        "lines": [
+          118,
+          142
+        ],
+        "sha256": "90444a94d81a4646eb650361d63b89240cf26298161b52b325ce0a3d43e2eded",
+        "anchor": "campaigns/flu/open_voyage_01/cell.py#L118-L142",
+        "excerpt": "118:     return {\n119:         \"schema\": \"flu_open_voyage_01.v1\",\n120:         \"seed\": seed,\n121:         \"platform\": platform,\n122:         \"pathogen_id\": pathogen_id,\n123:         \"bundle\": bundle,\n124:         \"epochs\": epochs,\n125:         \"engine_git_sha\": os.environ.get(\"ENGINE_GIT_SHA\") or \"unknown\",\n126:         \"final_trigger_status\": result.final_trigger_status,\n127:         \"counts\": {\n128:             \"ever_infected\": len(rows),\n129:             \"ever_infected_state\": len(ever_infected),\n130:             \"ever_ill\": len(ever_ill),\n131:             \"ever_reported\": len(ever_reported),\n132:             \"index_cases\": sum(1 for r in rows if r[\"index\"]),\n133:             \"onboard_acquired\": sum(1 for r in rows if not r[\"index\"]),\n134:             \"quarantined_end\": len(quarantined),\n135:             \"isolated_end\": len(isolated),\n136:         },\n137:         \"complement\": _complement(sim.engine.agents),\n138:         \"caregiver_telemetry\": dict(\n139:             getattr(sim.tx_core, \"caregiver_telemetry\", {}) or {},\n140:         ),\n141:         \"infections\": rows,\n142:     }",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "contracts:E37",
+      "lane": "contracts",
+      "original": {
+        "id": "E37",
+        "claim": "Boundary auto lookup may use packaged fixture; not proof of empirical fit or ship-sim handoff",
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "path": "picard_framework/analysis/boundary/README.md",
+        "lines": [
+          40,
+          57
+        ],
+        "sha256": "781b07268b6dd55ce698ce817084e0dc4c0d2e6132d029357fe47860407c65f9",
+        "anchor": "picard_framework/analysis/boundary/README.md#L40-L57",
+        "excerpt": "40: ## Stan surface contract\n41: \n42: Place one of these under `--stan-fit`:\n43: \n44: - `outbreak_surface.json` (same schema as `fixtures/outbreak_surface.json`)\n45: - `outbreak_surface.csv` with columns\n46:   `platform_class,pathogen,baseline_response,k,P_trigger,E_AR,P_accel,E_cost_onboard[,E_peak_epoch]`\n47: - or the same filenames under `posterior/` or `boundary/`\n48: \n49: Build the CSV from campaign zips with\n50: `python -m picard_framework.analysis.boundary.export_outbreak_surface` (aggregates\n51: by introductions `k` from parameters / `initN` tags / epoch-0 infected).\n52: `--lookup auto` uses Stan when present, otherwise the packaged fixture.\n53: \n54: ## Ship-sim handoff (future)\n55: \n56: Phase 1 does **not** wire boarding denials into `init_multi_pathogen`.\n57: A later PR may map `K_board` / denied agent sets into embarkation seeding.",
+        "grade": "direct_static_source_not_runtime"
+      }
+    },
+    {
+      "integrated_id": "aws_review:E01",
+      "lane": "aws_review",
+      "original": {
+        "id": "E01",
+        "finding": "Dispatch workflow is an OIDC dry-run handshake, not a paid reducer or campaign launcher workflow.",
+        "grade": "source_inspected",
+        "refs": [
+          {
+            "path": ".github/workflows/campaign_dispatch.yml",
+            "lines": [
+              9,
+              19
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": ".github/workflows/campaign_dispatch.yml",
+            "lines": [
+              51,
+              65
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E02",
+      "lane": "aws_review",
+      "original": {
+        "id": "E02",
+        "finding": "Collector exposes prefix summary counts and single exact object; defaults 50 prefixes/5000 keys/50 MiB; no prefix selector, continuation input, object-key export or arbitrary command execution.",
+        "grade": "source_inspected",
+        "refs": [
+          {
+            "path": ".github/workflows/campaign_collect.yml",
+            "lines": [
+              15,
+              35
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": ".github/workflows/campaign_collect.yml",
+            "lines": [
+              96,
+              139
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": ".github/workflows/campaign_collect.yml",
+            "lines": [
+              155,
+              199
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E03",
+      "lane": "aws_review",
+      "original": {
+        "id": "E03",
+        "finding": "Collector publishes issue comments and 30-day artifact, uses one fixed concurrency group and 20-minute timeout.",
+        "grade": "source_inspected",
+        "refs": [
+          {
+            "path": ".github/workflows/campaign_collect.yml",
+            "lines": [
+              47,
+              56
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": ".github/workflows/campaign_collect.yml",
+            "lines": [
+              201,
+              225
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E04",
+      "lane": "aws_review",
+      "original": {
+        "id": "E04",
+        "finding": "HEAD/GET pin exists; truthy VersionId includes mutable literal null; no hard max on user ceiling; exact-key names under campaign only.",
+        "grade": "source_inspected_not_live_failure",
+        "refs": [
+          {
+            "path": ".github/workflows/campaign_collect.yml",
+            "lines": [
+              164,
+              190
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E05",
+      "lane": "aws_review",
+      "original": {
+        "id": "E05",
+        "finding": "IAM dispatch role can submit picard-* jobs and Put/Get campaign/*; current Batch application role can Put/Get all campaign objects. Collector role is read-only, includes version reads and Batch status.",
+        "grade": "declared_policy_not_live_iam",
+        "refs": [
+          {
+            "path": "deploy/aws/github_oidc_stack.yaml",
+            "lines": [
+              96,
+              136
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": "deploy/aws/github_oidc_stack.yaml",
+            "lines": [
+              161,
+              188
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": "deploy/aws/batch_job_role_permissions.json",
+            "lines": [
+              1,
+              20
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E06",
+      "lane": "aws_review",
+      "original": {
+        "id": "E06",
+        "finding": "ZIP reader uses 64 KiB tail, central directory, local header, compressed member; supports exact root member, stored/deflate; no identity pin on any range, no ZIP64 or explicit decompression limits.",
+        "grade": "source_inspected",
+        "refs": [
+          {
+            "path": "tools/noro_diag/outbreak_anchor_readout.py",
+            "lines": [
+              103,
+              150
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E07",
+      "lane": "aws_review",
+      "original": {
+        "id": "E07",
+        "finding": "food_shapes scanner emits joint per-run JSONL including role complements and nested census; lists all ZIPs and submits all pending futures; key-only resume inherited.",
+        "grade": "source_inspected",
+        "refs": [
+          {
+            "path": "tools/noro_diag/food_shapes_01_scan.py",
+            "lines": [
+              288,
+              345
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": "tools/noro_diag/food_shapes_01_scan.py",
+            "lines": [
+              348,
+              424
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": "tools/noro_diag/food_score_01_scan.py",
+            "lines": [
+              85,
+              92
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E08",
+      "lane": "aws_review",
+      "original": {
+        "id": "E08",
+        "finding": "Provisioned mega raw inputs are in sibling mega prefix while its scan rows are documented under parent _scan_rows; bad rev5 parent-input scan was superseded by rev6.",
+        "grade": "committed_ledger_not_fresh_s3_body",
+        "refs": [
+          {
+            "path": "campaigns/noro/provisioned_source_01/LEDGER.md",
+            "lines": [
+              398,
+              413
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E09",
+      "lane": "aws_review",
+      "original": {
+        "id": "E09",
+        "finding": "Aggregate_results supports multiple run folders per shard ZIP, but operates on local downloaded ZIPs; first-row wrapper is not whole-shard aggregation.",
+        "grade": "source_inspected",
+        "refs": [
+          {
+            "path": "deploy/aws/aggregate_results.py",
+            "lines": [
+              38,
+              77
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          },
+          {
+            "path": "deploy/aws/aggregate_results.py",
+            "lines": [
+              80,
+              118
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E10",
+      "lane": "aws_review",
+      "original": {
+        "id": "E10",
+        "finding": "Generic campaign entrypoint invokes simulation worker then uploads artifact under prefix/block/artifact filename; existence-only skip, not a reducer.",
+        "grade": "source_inspected",
+        "refs": [
+          {
+            "path": "deploy/aws/campaign_entrypoint.py",
+            "lines": [
+              247,
+              270
+            ],
+            "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E11",
+      "lane": "aws_review",
+      "original": {
+        "id": "E11",
+        "finding": "Dated 19 October complete current-object listing: 197 prefixes, 447190 entries, 12179256285889 bytes; non-atomic and not completed-run count.",
+        "grade": "dated_inventory_metadata",
+        "refs": [
+          {
+            "path": "/workspace/projects/de6f53c3-4850-4888-974c-eda053c529f2/scratch/2026-10-19_publication_stocktake/S3_COMPLETE.json",
+            "source_sha": "e67a42dcc9f6566b0c4331550b2a063f0f067189"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E12",
+      "lane": "aws_review",
+      "original": {
+        "id": "E12",
+        "finding": "19 October selected S3 manifest to GitHub artifact to Edison proven under 1 MiB cap; durable external re-entry and paid reducer not proven.",
+        "grade": "prior_executed_access_evidence",
+        "refs": [
+          {
+            "path": "/workspace/projects/de6f53c3-4850-4888-974c-eda053c529f2/scratch/2026-10-19_access_verification/pr1079/VERIFICATION.json",
+            "source_sha": "e67a42dcc9f6566b0c4331550b2a063f0f067189"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E13",
+      "lane": "aws_review",
+      "original": {
+        "id": "E13",
+        "finding": "Undeployed Oct19 helper has 1 MiB default/5 MiB hard per-object and 1 MiB selected-manifest ceiling; must not conflate with merged collector 50 MiB default.",
+        "grade": "local_proposal_not_deployed",
+        "refs": [
+          {
+            "path": "/workspace/projects/de6f53c3-4850-4888-974c-eda053c529f2/scratch/2026-10-19_publication_stocktake/read_only_access_branch/tools/campaign_evidence_inventory.py",
+            "lines": [
+              24,
+              28
+            ]
+          },
+          {
+            "path": "/workspace/projects/de6f53c3-4850-4888-974c-eda053c529f2/scratch/2026-10-19_publication_stocktake/ACCESS_LIMITS.json"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "aws_review:E14",
+      "lane": "aws_review",
+      "original": {
+        "id": "E14",
+        "finding": "Supplied snapshot excludes extensionless launcher/Dockerfiles; scripts/campaign and Dockerfile bodies unverified, not proven absent in canonical repo.",
+        "grade": "snapshot_limitation",
+        "refs": [
+          {
+            "path": "/workspace/projects/de6f53c3-4850-4888-974c-eda053c529f2/scratch/2026-10-22_campaign_reduction_survey/SOURCE_READY.json"
+          },
+          {
+            "path": "source_supplement_inventory.json"
+          }
+        ]
+      }
+    },
+    {
+      "integrated_id": "integration:106",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+      "path": "AGENTS.md",
+      "line_start": 81,
+      "line_end": 90,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/AGENTS.md#L81-L90",
+      "claim": "Frozen legacy layout; modify shared launcher/image instead of creating bespoke files."
+    },
+    {
+      "integrated_id": "integration:107",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+      "path": "scripts/campaign",
+      "line_start": 167,
+      "line_end": 268,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/scripts/campaign#L167-L268",
+      "claim": "Recovered shared submit implementation uses literal command arrays and dry-run renders only."
+    },
+    {
+      "integrated_id": "integration:108",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+      "path": "scripts/campaign",
+      "line_start": 281,
+      "line_end": 335,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/scripts/campaign#L281-L335",
+      "claim": "Existing CLI parser; analysis subcommand not implemented."
+    },
+    {
+      "integrated_id": "integration:109",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+      "path": "deploy/aws/Dockerfile.analysis",
+      "line_start": 33,
+      "line_end": 63,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/Dockerfile.analysis#L33-L63",
+      "claim": "Recovered existing image copies scripts/shared packages, omits tools/, ENTRYPOINT python3; built/deployed image unverified."
+    },
+    {
+      "integrated_id": "integration:110",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+      "path": "tools/noro_diag/outbreak_anchor_readout.py",
+      "line_start": 193,
+      "line_end": 232,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/outbreak_anchor_readout.py#L193-L232",
+      "claim": "Infection index called onset_epoch; not clinical symptom onset; explicit timeseries epoch not guaranteed."
+    },
+    {
+      "integrated_id": "integration:111",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+      "path": "tools/diag/readout_common.py",
+      "line_start": 72,
+      "line_end": 106,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/diag/readout_common.py#L72-L106",
+      "claim": "Missing/corrupt/read/decode failures collapse to None."
+    },
+    {
+      "integrated_id": "integration:112",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+      "path": "tools/diag/readout_common.py",
+      "line_start": 136,
+      "line_end": 147,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/diag/readout_common.py#L136-L147",
+      "claim": "Empty Wilson group returns zero tuple; not suitable as certainty zero."
+    },
+    {
+      "integrated_id": "integration:113",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+      "path": "docs/literature/consensus_tranche_53_fleet_age_norovirus_share.md",
+      "line_start": 112,
+      "line_end": 139,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/literature/consensus_tranche_53_fleet_age_norovirus_share.md#L112-L139",
+      "claim": "Repo-transcribed external etiologic fractions have differing denominators; no native norovirus scaling."
+    }
+  ],
+  "census_all_record_lineage": "CAMPAIGN_COVERAGE.json",
+  "final_source_manifest": "FINAL_SOURCE_VERIFICATION.json"
+}

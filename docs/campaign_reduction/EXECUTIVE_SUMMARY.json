@@ -1,0 +1,160 @@
+{
+  "status": "SPECIFICATION_COMPLETE_IMPLEMENTATION_AND_AWS_EXECUTION_NOT_PERFORMED",
+  "date": "2026-10-22",
+  "survey_source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+  "implementation_sha": null,
+  "canonical_source_files_verified": 3272,
+  "canonical_source_blob_mismatches": 0,
+  "scope": {
+    "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+    "registered_campaign_records": 21,
+    "historical_prefix_records": 197,
+    "combined_records": 218,
+    "distinct_prefix_names_in_union": 198,
+    "historical_exact_current_registry_prefixes": 20,
+    "historical_paired_rerun_prefixes": 2,
+    "current_registry_not_in_historical_inventory": [
+      "noro_age_food_01_mega"
+    ],
+    "program_groups": 19,
+    "attempt_token_families": 118,
+    "schema_families": 11,
+    "historical_exact_source_token_linked_prefixes": 169,
+    "historical_no_exact_source_token_reference": 28,
+    "historical_objects_listed": 447190,
+    "historical_bytes_listed": 12179256285889,
+    "historical_truncated_prefix_rows": 0,
+    "historical_schema_candidate_counts": {
+      "bounded_region_jsonl": 3,
+      "observation_jsonl": 31,
+      "unknown_legacy": 30,
+      "campaign_summary_zip": 57,
+      "covid_screen_json": 56,
+      "flu_cell_json": 3,
+      "perturbation_json": 2,
+      "growth_census_zip": 12,
+      "fomite_diagnostic_gzip": 1,
+      "stan_nuts_json": 1,
+      "wastewater_campaign_zip": 1
+    },
+    "historical_endpoint_status_counts": {
+      "AR": {
+        "documented_unverified": 141,
+        "unknown": 56
+      },
+      "timing": {
+        "unknown": 68,
+        "documented_unverified": 129
+      },
+      "mechanism": {
+        "documented_unverified": 141,
+        "unknown": 55,
+        "known_saved": 1
+      },
+      "role": {
+        "unknown": 70,
+        "documented_unverified": 127
+      }
+    }
+  },
+  "canonical_public_cli": "python3 scripts/campaign analysis <operation>",
+  "canonical_public_cli_status": "NOT_YET_IMPLEMENTED",
+  "table_model": {
+    "scientific_tables": 26,
+    "scientific_fields_retained": 382,
+    "operational_tables": 8,
+    "operational_fields": 123,
+    "tables_total": 34,
+    "fields_total": 505,
+    "metric_definitions": 33,
+    "authority": "FIELD_CONTRACTS.json"
+  },
+  "execution_plan": {
+    "required_tickets": [
+      "D0",
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7",
+      "D8"
+    ],
+    "optional_future_only_telemetry_ticket": "FUTURE-T1",
+    "automatic_routine_human_file_relay": false,
+    "new_simulations_for_reduction": false,
+    "pilot_selection": "Adaptive existing-data schema/identity/observability/error-class coverage, PS01 four hulls first, plus full-catalog architecture and subsequent staged all-family coverage",
+    "paid_execution": "BLOCKED_UNTIL_TESTS_BOOTSTRAP_RETURN_PILOT_MEASURED_QUOTE_SCOPE_BUDGET_RESOURCES_APPROVAL",
+    "routine_admission": "Automatic reservations under preapproved scope/budget envelope; escalate only new scope, budget-envelope or credential/permission exceptions."
+  },
+  "acceptance_evidence": {
+    "saved_contract_lane_synthetic_reference_tests": 41,
+    "saved_contract_lane_consistency_checks": 135,
+    "saved_old_source_synthetic_probes": 16,
+    "scientific_production_tests_defined_not_run": 26,
+    "operational_production_tests_defined_not_run": 10,
+    "new_production_tests_run": 0,
+    "live_AWS_requests_this_integration": 0,
+    "cloud_jobs_this_integration": 0,
+    "model_runs_this_integration": 0,
+    "source_edits_this_integration": 0,
+    "integrated_spec_validation_file": "VALIDATION.json"
+  },
+  "readiness": {
+    "specification": "COMPLETE_PACKAGE_VALIDATED",
+    "production_tools": "NOT_YET_IMPLEMENTED",
+    "live_inventory": "NOT_RUN_DATED_OCT19_SCOPE_ONLY",
+    "deployed_image": "NOT_CERTIFIED",
+    "paid_analysis_dispatch": "UNPROVEN",
+    "selected_manifest_access": "HISTORICALLY_DEMONSTRATED_PR1079_ONLY",
+    "durable_Edison_callback_or_polling": "BLOCKED_UNTIL_REAL_END_TO_END_ACCEPTANCE",
+    "all_campaign_distributions": "NOT_CERTIFIED",
+    "PS01_frozen_D3": "BLOCKED_DEFINITION",
+    "source_engine_historical_identity": "RETAIN_ACTUAL_ENGINE_IMAGE_NULL_WHEN_UNKNOWN",
+    "four_validity_axes": "RETAIN_INDEPENDENT_HULL_FLEET_TOTAL_POPULATION_CREW_PASSENGER"
+  },
+  "decisions": [
+    "One existing shared launcher/image extension, no new frozen-layout legacy entrypoint/jobdef/Dockerfile/submit script.",
+    "Full exact native scalar distributions mandatory, optional saved agent/event details only.",
+    "Source object/member/cell/execution/selected-run/fit/query row counts remain distinct.",
+    "Typed observability/censoring and actual source identity, proportions and weights explicitly defined.",
+    "Separate bounded bootstrap metadata/return admission from paid pilot/materialization/query admissions.",
+    "Durable automatic receipt, verified page ingestion and qualified acknowledgment, no routine human relay.",
+    "External PR1081 etiologic fractions are independent versioned target sensitivity, not native AR scaling."
+  ],
+  "limitations": [
+    "No new cloud inventory, payload census, image build/deployment or reducer run here.",
+    "Missing historical rosters/event IDs/exact onsets cannot be reconstructed from aggregate marginals.",
+    "Repo-transcribed external literature not independently validated.",
+    "Source implementation inspection and legacy ledger claims do not certify live image, scientific validity or all-campaign access."
+  ],
+  "files": {
+    "main": "SURVEY_AND_DEVIN_SPEC.md",
+    "numbered_main": "SURVEY_AND_DEVIN_SPEC.lines.md",
+    "handoff": "DEVIN_HANDOFF.md",
+    "tickets": "PHASED_TICKETS.json",
+    "cli": "CANONICAL_INTERFACE.json",
+    "authority_aliases": "ALIAS_AND_AUTHORITY_MAP.json",
+    "fields": "FIELD_CONTRACTS.json",
+    "coverage": "CAMPAIGN_COVERAGE.json",
+    "acceptance": "ACCEPTANCE_MATRIX.json",
+    "validation": "VALIDATION.json",
+    "source_final": "FINAL_SOURCE_VERIFICATION.json",
+    "hashes": "SHA256SUMS.json",
+    "source_families": "SOURCE_FAMILIES.json",
+    "program_groups": "FAMILY_GROUP_REGISTER.json",
+    "attempt_token_families": "ATTEMPT_FAMILY_MAP.json",
+    "tools_overview": "TOOLS_OVERVIEW.json",
+    "field_reading_view": "FIELD_CONTRACTS.md",
+    "row_schema": "TABLE_ROWS.schema.json",
+    "query_schema": "QUERY.schema.json",
+    "request_schema": "REQUEST.schema.json",
+    "bootstrap_schema": "BOOTSTRAP_REQUEST.schema.json",
+    "evidence_register": "EVIDENCE_REGISTER.json",
+    "input_evidence_manifest": "INPUT_EVIDENCE_MANIFEST.json",
+    "bibliography": "references.bib",
+    "status_namespaces": "STATUS_NAMESPACES.json",
+    "status_reading_view": "STATUS_NAMESPACES.md"
+  }
+}

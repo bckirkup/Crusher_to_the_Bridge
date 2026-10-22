@@ -1,0 +1,303 @@
+{
+  "status": "PASS",
+  "scope": "Integrated specification/evidence/count/schema/link/hash consistency ONLY; no implemented reducer, production/AWS runtime, paid execution or durable integration qualification.",
+  "timestamp_utc": "2026-10-22T16:04:37.251392+00:00",
+  "checks_total": 53,
+  "checks_passed": 53,
+  "checks": [
+    {
+      "check": "197 unique dated historical prefix rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "21 unique registered campaigns",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "218 records unique record_id",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "198 distinct union prefixes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "20 exact historical/current overlaps",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "CSV and JSON exact record identities",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all actual21 pinned campaign specs represented exactly",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "19 group census complete and non-overlapping",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "11 adapter families retained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "118 explicit attempt-token families retained",
+      "passed": true,
+      "detail": {
+        "rows": 118
+      }
+    },
+    {
+      "check": "coverage counts exactly match final lane",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "dated stored object and byte counts",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all original26 scientific table definitions preserved",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all33 metric definitions preserved exactly",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "34 total tables,505 fields,382 original",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all table field names unique and PK fields defined",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all fields typed,nullable,unit,definition explicit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all four canonical JSON Schemas valid",
+      "passed": true,
+      "detail": [
+        "BOOTSTRAP_REQUEST.schema.json",
+        "QUERY.schema.json",
+        "REQUEST.schema.json",
+        "TABLE_ROWS.schema.json"
+      ]
+    },
+    {
+      "check": "row schema and field dictionary exact34 table names",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "every table schema has exact field names",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "query source-table enum all canonical tables",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "readback fields exactly canonical query schema",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "blocked query example structurally valid",
+      "passed": true,
+      "detail": "Unresolved catalog/weights/analysis placeholders and no paid admission keep it semantically BLOCKED; this is not a runnable production request"
+    },
+    {
+      "check": "BLOCKED_REQUEST.template.json deliberately rejected",
+      "passed": true,
+      "detail": {
+        "schema_errors": 46
+      }
+    },
+    {
+      "check": "BLOCKED_BOOTSTRAP.template.json deliberately rejected",
+      "passed": true,
+      "detail": {
+        "schema_errors": 9
+      }
+    },
+    {
+      "check": "execution request cross-file required field agreement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all23 budgets required; null cannot authorize launch",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "budget retryzero explicit; safety factor>=1",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "one public CLI; policy forbids new legacy entrypoint",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all11 proposed operations labeled not implemented",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all alias targets covered",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "D0-D8 unique ordered dependencies",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "future producer ticket outside old reduction prerequisites",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "26 proposed scientific production fixtures explicitly not run",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "10 proposed operational fixtures and16 original source probes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "every phase fixture ID resolves",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "SURVEY_AND_DEVIN_SPEC stable line counterpart roundtrip",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "DEVIN_HANDOFF stable line counterpart roundtrip",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "FIELD_CONTRACTS stable line counterpart roundtrip",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all literal local document links exist",
+      "passed": true,
+      "detail": {
+        "links_checked": 63,
+        "errors": []
+      }
+    },
+    {
+      "check": "all main-document pinned source permalinks and line ranges valid",
+      "passed": true,
+      "detail": {
+        "source_links_checked": 15,
+        "errors": []
+      }
+    },
+    {
+      "check": "integrated evidence IDs unique",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "original detailed116 lane evidence files preserved byte-for-byte",
+      "passed": true,
+      "detail": {
+        "files_checked": 116,
+        "changed": []
+      }
+    },
+    {
+      "check": "all3272 pinned source blobs exact after integration",
+      "passed": true,
+      "detail": {
+        "files_rehashed": 3272,
+        "changed": []
+      }
+    },
+    {
+      "check": "executive counts agree with contract+scope",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "readiness not falsely certified",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "all executive-linked canonical files resolve",
+      "passed": true,
+      "detail": {
+        "files_checked": 26
+      }
+    },
+    {
+      "check": "cold-prefix register path resolves and explicit filter returns197",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "strict status enums agree across dictionary row-schema namespace",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "four operational status fields reject imaginary_success",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "narrative aliases explicitly noncanonical metric values",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "namespace reading view stable line counterpart",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "automatic in-envelope reservations no survey paid authority",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "cloud_requests": 0,
+  "model_runs": 0,
+  "production_tests_run": 0,
+  "source_edits": 0
+}

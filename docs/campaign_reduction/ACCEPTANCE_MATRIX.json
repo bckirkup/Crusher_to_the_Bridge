@@ -1,0 +1,323 @@
+{
+  "contract_id": "crusher-campaign-distributions/1.0-proposed",
+  "status": "ACCEPTANCE_CRITERIA_NOT_REDUCER_TEST_RESULTS",
+  "reference_tests": {
+    "scientific_synthetic_41": "PASSED_IN_CONTRACT_LANE_ONLY",
+    "contract_consistency_135": "PASSED_IN_CONTRACT_LANE_ONLY",
+    "original_tools_probe_16": "EXECUTED_SYNTHETIC_OFFLINE_SOURCE_FUNCTION_PROBES_NOT_FIXES"
+  },
+  "required_production_fixtures": [
+    {
+      "id": "P01",
+      "kind": "mixed_flat_nested_zip",
+      "input_description": "One flat per-run archive and fused nested shard share two exact members; one different retry",
+      "expected_behavior": "2 exact executions; alias ledger reconciles assets, no duplicate replicates",
+      "scientific_requirement": "2 exact executions; alias ledger reconciles assets, no duplicate replicates",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P02",
+      "kind": "zip64_member_paths",
+      "input_description": "ZIP64 archive; same basename in distinct run folders; duplicate member path; truncated central directory",
+      "expected_behavior": "Nested identities supported; ambiguous duplicate/corrupt entries typed malformed; no silent omission",
+      "scientific_requirement": "Nested identities supported; ambiguous duplicate/corrupt entries typed malformed; no silent omission",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P03",
+      "kind": "bounded_gzip_stream",
+      "input_description": "Large synthetic compressed census with requested acquisition block and huge unused contact block",
+      "expected_behavior": "Bounded parse/flush memory, explicit max bytes and resume; no whole-decode fallback",
+      "scientific_requirement": "Bounded parse/flush memory, explicit max bytes and resume; no whole-decode fallback",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P04",
+      "kind": "restart_determinism",
+      "input_description": "Repeat identical reducer on same catalog; interrupt after partition 2; restart",
+      "expected_behavior": "Identical normalized row sets/counts/checksums with specified deterministic writer; no duplicated rows; atomic completed partition catalog",
+      "scientific_requirement": "Identical normalized row sets/counts/checksums with specified deterministic writer; no duplicated rows; atomic completed partition catalog",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P05",
+      "kind": "cross_version_adapters",
+      "input_description": "Two saved writer schemas rename/round a rate; third unknown schema",
+      "expected_behavior": "Exact source scalar preserved; known mappings versioned; unknown schema native-only/gap not guessed",
+      "scientific_requirement": "Exact source scalar preserved; known mappings versioned; unknown schema native-only/gap not guessed",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P06",
+      "kind": "all_scope_catalog",
+      "input_description": "21 prior registered campaigns + 22 current ledgers + 189 designs/manifests + unmapped inventory prefix",
+      "expected_behavior": "All inputs represented/aliased; no assertion that each file is unique campaign or executed slot",
+      "scientific_requirement": "All inputs represented/aliased; no assertion that each file is unique campaign or executed slot",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P07",
+      "kind": "missing_noise_lab",
+      "input_description": "True symptomatic report IDs, repeated noise signals, repeated tests, one pending result",
+      "expected_behavior": "Unique persons, report events, assays, positives and missing/pending separate; no case-set arithmetic conflation",
+      "scientific_requirement": "Unique persons, report events, assays, positives and missing/pending separate; no case-set arithmetic conflation",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P08",
+      "kind": "roles_at_events",
+      "input_description": "Crew changes service duty midvoyage; passenger caregiver; same actor two functions; 3 recipients",
+      "expected_behavior": "Event-time membership and role-specific eligible time; no crew-only caregiver assumption; no Cartesian actor-recipient events",
+      "scientific_requirement": "Event-time membership and role-specific eligible time; no crew-only caregiver assumption; no Cartesian actor-recipient events",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P09",
+      "kind": "source_route_progression",
+      "input_description": "Import reacquires supply/aboard exposure; mixed route ties; reported cases subset",
+      "expected_behavior": "Entry channel/dose route/dominant route/progression mapped separately; unique sets and unknown buckets conserve",
+      "scientific_requirement": "Entry channel/dose route/dominant route/progression mapped separately; unique sets and unknown buckets conserve",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P10",
+      "kind": "timing_competing",
+      "input_description": "Exact/right/left/interval/never-at-risk endpoints, death/disembark competition, irregular sampling",
+      "expected_behavior": "Correct risk set/CIF/survival domain; no horizon or zero imputation; unsuitable KM blocked",
+      "scientific_requirement": "Correct risk set/CIF/survival domain; no horizon or zero imputation; unsuitable KM blocked",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P11",
+      "kind": "agent_subset_denominator",
+      "input_description": "Infected-only census without uninfected roster plus emitted crew/passenger counts",
+      "expected_behavior": "Role summary AR may recover; individual source eligibility/event role/time unavailable; no full roster reconstruction",
+      "scientific_requirement": "Role summary AR may recover; individual source eligibility/event role/time unavailable; no full roster reconstruction",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P12",
+      "kind": "all_joint_groupby",
+      "input_description": "Request hull \u00d7 arm \u00d7 role \u00d7 channel \u00d7 window \u00d7 actual-q bin, then saved event occupation \u00d7 context",
+      "expected_behavior": "Query arbitrary supported joint dimensions server-side with correct grain; unsupported joints typed error, not marginals multiplied",
+      "scientific_requirement": "Query arbitrary supported joint dimensions server-side with correct grain; unsupported joints typed error, not marginals multiplied",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P13",
+      "kind": "join_explosion",
+      "input_description": "Join per-run scalar to 100 events then aggregate scalar ECDF",
+      "expected_behavior": "Reject multiplication of replicate count; semijoin or reduce events to run-level first",
+      "scientific_requirement": "Reject multiplication of replicate count; semijoin or reduce events to run-level first",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P14",
+      "kind": "PS01_D2_D3",
+      "input_description": "Frozen relative D2/D3 plus legacy reporter D2 absolute/D3 posting conversion",
+      "expected_behavior": "Distinct IDs; frozen converted-AR remains blocked_definition absent scientific adjudication; never old table => frozen pass",
+      "scientific_requirement": "Distinct IDs; frozen converted-AR remains blocked_definition absent scientific adjudication; never old table => frozen pass",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P15",
+      "kind": "PS01_mega_D4",
+      "input_description": "Mega lean census retains acquisition rows but drops contact streams",
+      "expected_behavior": "Burst recovery attempted using acquisitions; missing onset not relabeled onset; unrecoverable blocks explicitly typed",
+      "scientific_requirement": "Burst recovery attempted using acquisitions; missing onset not relabeled onset; unrecoverable blocks explicitly typed",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P16",
+      "kind": "weighted_fleet",
+      "input_description": "Unbalanced design samples by hull; external dated fleet weights uncertain; condition post",
+      "expected_behavior": "Show hull distributions, conditional reweighting, uncertainty and effective n; unqualified fleet target blocked only",
+      "scientific_requirement": "Show hull distributions, conditional reweighting, uncertainty and effective n; unqualified fleet target blocked only",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P17",
+      "kind": "sensitivity_bundle",
+      "input_description": "Hull changes layout, complement and rhythm jointly; realized source correlated with exposure",
+      "expected_behavior": "Design matrix confounding and nominal/realized distinction; no causal hull-size regression coefficient",
+      "scientific_requirement": "Design matrix confounding and nominal/realized distinction; no causal hull-size regression coefficient",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P18",
+      "kind": "external_fraction",
+      "input_description": "Observed AGE cases/denominator with uncertain norovirus share; simulated noro outcomes",
+      "expected_behavior": "External comparison transformed only with uncertainty; simulated values/IDs byte-equivalent before and after",
+      "scientific_requirement": "External comparison transformed only with uncertainty; simulated values/IDs byte-equivalent before and after",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P19",
+      "kind": "integration_access",
+      "input_description": "Connector denied/no credentials/export over byte limit, then authorized retry",
+      "expected_behavior": "Structured blocked status/error owner; no secret prompt/file relay request; bounded retry/page and S3 result pointer",
+      "scientific_requirement": "Structured blocked status/error owner; no secret prompt/file relay request; bounded retry/page and S3 result pointer",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P20",
+      "kind": "paging_snapshot",
+      "input_description": "New catalog version appears between pages; filter/order includes equal values",
+      "expected_behavior": "Page token frozen catalog+query+sort+PK; no missing/duplicate rows; token mismatch error",
+      "scientific_requirement": "Page token frozen catalog+query+sort+PK; no missing/duplicate rows; token mismatch error",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P21",
+      "kind": "all_four_hulls",
+      "input_description": "Four-hull production 46k declared/readout rows with 128 canaries separate and 4x4 complement panel",
+      "expected_behavior": "Verify recovered count/lineage; no canary pooling; all four hulls shown; any discrepancies localized, not stale no-submission gate",
+      "scientific_requirement": "Verify recovered count/lineage; no canary pooling; all four hulls shown; any discrepancies localized, not stale no-submission gate",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P22",
+      "kind": "partial_weight_failure",
+      "input_description": "Failed runs concentrated at one arm/large hull; weights sum only observed outputs",
+      "expected_behavior": "Failure/attrition tables and sensitivity bounds; do not silently renormalize as full-target successful sample",
+      "scientific_requirement": "Failure/attrition tables and sensitivity bounds; do not silently renormalize as full-target successful sample",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P23",
+      "kind": "posterior_domain",
+      "input_description": "Only posterior quantiles saved in one fit, full chains in another; invalid model ridge flags",
+      "expected_behavior": "No fake draws; saved draw distribution accessible with fit diagnostics and model-specific posterior validity separate from computation",
+      "scientific_requirement": "No fake draws; saved draw distribution accessible with fit diagnostics and model-specific posterior validity separate from computation",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P24",
+      "kind": "four_axis_gate",
+      "input_description": "Hull-qualified result has no fleet weights; crew complement unknown in second",
+      "expected_behavior": "Independent hull/fleet/population/composition flags; no all-or-nothing blanket readiness or implicit fleet estimate",
+      "scientific_requirement": "Independent hull/fleet/population/composition flags; no all-or-nothing blanket readiness or implicit fleet estimate",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P25",
+      "kind": "unit_rate_currency",
+      "input_description": "GEC vs PFU dose, USD-year mismatch, person-epochs at 24h vs 1h",
+      "expected_behavior": "Unit check rejects pooling; documented validated conversion only; person-hours reflect effective clock",
+      "scientific_requirement": "Unit check rejects pooling; documented validated conversion only; person-hours reflect effective clock",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    },
+    {
+      "id": "P26",
+      "kind": "release_manifest",
+      "input_description": "Compact query artifact plus all required input hashes/source versions and gap summary",
+      "expected_behavior": "Manifest references valid tables/keys and actual source/analysis version; hash manifest excludes itself; no unimplemented operation labeled complete",
+      "scientific_requirement": "Manifest references valid tables/keys and actual source/analysis version; hash manifest excludes itself; no unimplemented operation labeled complete",
+      "production_acceptance": "REQUIRED_NOT_RUN",
+      "reference_status": "not_executed_requires_implementation"
+    }
+  ],
+  "source_probe_names": [
+    "range_stored",
+    "range_deflate",
+    "range_nested_exact_name",
+    "range_max_zip_comment",
+    "range_crc_not_checked",
+    "range_no_version_pin",
+    "D1_endpoint_4",
+    "D1_endpoint_9",
+    "empty_off_witness",
+    "empty_ind_witness",
+    "all_crew_complement_edge",
+    "role_classification_control",
+    "acquisition_overlap_duplicates",
+    "acquisition_field_order",
+    "embedded_timeseries",
+    "multi_summary_first"
+  ],
+  "end_to_end": [
+    "At least two stable filtered joint query pages, count/identities/hash check vs independently read small saved members; complete union without duplicates and stable final null cursor.",
+    "Success, denied 403, missing callback, expiry, interrupted automation and hash mismatch have durable failure/retry receipts with Edison acknowledgment; no human relay.",
+    "Every currently discoverable registered and unregistered family has scoped inventory/coverage/read state; 197 historical dated rows kept and new roots/prefixes explicit.",
+    "All missing fields classified at exact run/family metric scope and no full historical agent joint reconstructed from summary marginals.",
+    "Cost quote using observed bytes/schema mix/prices, non-null finite caps, staged admissions and safe failure; never production-pass inferred from synthetic results."
+  ],
+  "scientific_reference_fixture_file": "../contracts/fixture_matrix.json",
+  "operational_production_fixtures": [
+    {
+      "id": "O01",
+      "name": "source pin every range",
+      "expected": "HEAD pin propagated to all ranges; changed/null version 412 -> SOURCE_CHANGED"
+    },
+    {
+      "id": "O02",
+      "name": "archive boundaries",
+      "expected": "ZIP64, 65535-byte comment, duplicate names, corrupt CRC and unsupported method have typed outcome within decoded/resource limits"
+    },
+    {
+      "id": "O03",
+      "name": "all original sixteen edges",
+      "expected": "Corrected implementations exercise all 16 source probes; known failures no longer silently accepted; compare old diagnostics separately"
+    },
+    {
+      "id": "O04",
+      "name": "finite budget admission",
+      "expected": "Missing/null/expired/over-budget/quote-mismatch/unknown prices reject before submit; limit-1/limit/limit+1 plus concurrent retries/resume charge shared limits"
+    },
+    {
+      "id": "O05",
+      "name": "image and module",
+      "expected": "Actual digest-pinned image imports all required shared/scanner modules and executes reduce-only worker argv; no simulator/Stan call graph"
+    },
+    {
+      "id": "O06",
+      "name": "two page exact joint",
+      "expected": "All pages union matches independently computed exhaustive fixture; no duplicate, stable last-key cursor, explicit ROW_TOO_LARGE"
+    },
+    {
+      "id": "O07",
+      "name": "durable return",
+      "expected": "Success/failure/403/expired artifacts/interrupted poller/hash mismatch restore from S3 or block explicitly; durable Edison assets and qualified page acknowledgment without human relay"
+    },
+    {
+      "id": "O08",
+      "name": "all roots and 197 plus",
+      "expected": "197 cold historical rows plus21 registry observations, union198 prefix names, new root/prefix delta and inaccessible scopes typed; physical objects not cells"
+    },
+    {
+      "id": "O09",
+      "name": "immutable restart",
+      "expected": "kill before/after partition and COMMIT; resume exact logical rows, collision rejects; no original write/restore/delete or unadmitted retry"
+    },
+    {
+      "id": "O10",
+      "name": "unknown telemetry",
+      "expected": "Missing onsets/rosters/event IDs cannot produce joint individual/role distributions from marginals; full historical native scalars still queryable"
+    }
+  ]
+}

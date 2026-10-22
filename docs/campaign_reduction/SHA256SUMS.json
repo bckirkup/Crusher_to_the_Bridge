@@ -1,0 +1,187 @@
+{
+  "algorithm": "SHA-256",
+  "self_excluded": true,
+  "scope": "Every file recursively below this directory except this root SHA256SUMS.json; no self-reference.",
+  "files": [
+    {
+      "path": "ACCEPTANCE_MATRIX.json",
+      "bytes": 19451,
+      "sha256": "ac935235b049536f5e037479ea110981409568e26c91ba1133e88493bde00d11"
+    },
+    {
+      "path": "ALIAS_AND_AUTHORITY_MAP.json",
+      "bytes": 5350,
+      "sha256": "bbbf675d71117ba095b57a5577d2c8af31f11f837b7103eba75612bc748e5e9d"
+    },
+    {
+      "path": "ATTEMPT_FAMILY_MAP.json",
+      "bytes": 50225,
+      "sha256": "87b71a4407bb1bd653758fe2bd1d2827868ecccf2460cb3e950d5ce8484462cf"
+    },
+    {
+      "path": "BLOCKED_BOOTSTRAP.template.json",
+      "bytes": 307,
+      "sha256": "f1a5fd5f7f3ed2fb48e1b52ca6c215ce12206989f646e02790957a026adde7eb"
+    },
+    {
+      "path": "BLOCKED_REQUEST.template.json",
+      "bytes": 1953,
+      "sha256": "bef53a030d46a45f04097b32f52e3d0841fb2f7b39bfaeaca599799ce5c35c5d"
+    },
+    {
+      "path": "BOOTSTRAP_REQUEST.schema.json",
+      "bytes": 3461,
+      "sha256": "13eec5a71661ea792ec6b6cd7fff0ffab69eaa96957e36e42815144db7d17ac6"
+    },
+    {
+      "path": "CAMPAIGN_COVERAGE.csv",
+      "bytes": 1800120,
+      "sha256": "96ee5335235c20d54f364ce8c900a16882228e417faf947cbf85acfb379a3727"
+    },
+    {
+      "path": "CAMPAIGN_COVERAGE.json",
+      "bytes": 6395532,
+      "sha256": "3f73b5847c47b9bee7809c89a7105585f3134f48bba07f08e82545381fb51f88"
+    },
+    {
+      "path": "CANONICAL_INTERFACE.json",
+      "bytes": 24016,
+      "sha256": "5c9469465e606bf78e69310a54f4aa126c93bc9f2d365cb04c070ee4ad377845"
+    },
+    {
+      "path": "COVERAGE_COUNTS.json",
+      "bytes": 1445,
+      "sha256": "b60e4c79914221e11e988f962982b5ecabf0a857d021cdc3522a419146128d20"
+    },
+    {
+      "path": "DEVIN_HANDOFF.lines.md",
+      "bytes": 12586,
+      "sha256": "19083d51affe641e4bdc9437182657d94148e457d85bccc0bb737121e4b64411"
+    },
+    {
+      "path": "DEVIN_HANDOFF.md",
+      "bytes": 12042,
+      "sha256": "266c6a6f9dc560a4992454b75d0657b61555f2815a15aef466f58b78ab588e4c"
+    },
+    {
+      "path": "EVIDENCE_REGISTER.json",
+      "bytes": 149049,
+      "sha256": "b26624ae2aa706fbe7d2a794616c5e50e9cd6f01f82c6c642701b34edd016ad6"
+    },
+    {
+      "path": "EXECUTIVE_SUMMARY.json",
+      "bytes": 6722,
+      "sha256": "7e0e6ba3699ffad5e24b29cedb3d41e27e74b07038037ab553940b3f49bc4641"
+    },
+    {
+      "path": "FAMILY_GROUP_REGISTER.json",
+      "bytes": 72802,
+      "sha256": "41fe719eb0c2f3ce5c3e1721c29448a4a72a1a69b8fb90ac20c5ce7f8581a7f5"
+    },
+    {
+      "path": "FIELD_CONTRACTS.json",
+      "bytes": 160292,
+      "sha256": "34bedbb7db5bc6d7bf213e5fe213a5934d7adec11684e3d49d07c7dd538b6f0c"
+    },
+    {
+      "path": "FIELD_CONTRACTS.lines.md",
+      "bytes": 80864,
+      "sha256": "3450fa2ae222274faee598212a63c559455aad7b5f3047bc582bd3306ced10fc"
+    },
+    {
+      "path": "FIELD_CONTRACTS.md",
+      "bytes": 73240,
+      "sha256": "6bf059c05722370a0181a4716ebb5277eeeba75b56899606072e54f84beeba8d"
+    },
+    {
+      "path": "FINAL_ACCEPTANCE.json",
+      "bytes": 2014,
+      "sha256": "2d7f0f21c78a6419da16bd4c1be46df3b0ca3c9d82e64007857014ac0fcca1b8"
+    },
+    {
+      "path": "FINAL_SOURCE_VERIFICATION.json",
+      "bytes": 1084559,
+      "sha256": "d27d52eb7e15582d2070c7ce4fde8b348d32a6cc2fd14c535a281a973ef05f07"
+    },
+    {
+      "path": "INPUT_EVIDENCE_MANIFEST.json",
+      "bytes": 21873,
+      "sha256": "bc1148d054947d5fdcc972920d7f769e516adb61952886268ed3874444bb59c1"
+    },
+    {
+      "path": "PHASED_TICKETS.json",
+      "bytes": 15291,
+      "sha256": "6d00c303d6c34933443da2d70075bd2f1ae58410e0ed7dee3225f95484f274df"
+    },
+    {
+      "path": "QUERY.blocked_example.json",
+      "bytes": 2084,
+      "sha256": "a170cba470947d6a8f077ac3939a0f7ba53538494fdb17fd41452579a283e72e"
+    },
+    {
+      "path": "QUERY.schema.json",
+      "bytes": 10423,
+      "sha256": "ecc629357f866a3d1a58353e6ac2b4422b2dff1805941b1cc3041c2ad61ad90c"
+    },
+    {
+      "path": "REQUEST.schema.json",
+      "bytes": 10620,
+      "sha256": "d6fe26c65fa67ac104d6f65443cc10060fdd8d84a38c0b22626deca88d4b0b94"
+    },
+    {
+      "path": "SOURCE_FAMILIES.json",
+      "bytes": 42707,
+      "sha256": "72fb15f0411e83700f7b4a73060b3140b30e9483a80beb09a1de27795f94112c"
+    },
+    {
+      "path": "STATUS_NAMESPACES.json",
+      "bytes": 25161,
+      "sha256": "31184c04de592e1ab1493dff117526b94de75aeb968fd889f271d8dccc4d8a7d"
+    },
+    {
+      "path": "STATUS_NAMESPACES.lines.md",
+      "bytes": 11595,
+      "sha256": "bab6401aa915e2c50c7c605b276f4f9f95dbc3981207ff9809eb22add34754ae"
+    },
+    {
+      "path": "STATUS_NAMESPACES.md",
+      "bytes": 10939,
+      "sha256": "6195634e49b3b70631eecb985751ef31704592659a7fae77ff2a453aef594112"
+    },
+    {
+      "path": "SURVEY_AND_DEVIN_SPEC.lines.md",
+      "bytes": 53941,
+      "sha256": "87af267ced382e9aa5fdb4fc03634787687ae78aea14e2d5ba6343e0916c6b62"
+    },
+    {
+      "path": "SURVEY_AND_DEVIN_SPEC.md",
+      "bytes": 50509,
+      "sha256": "5a7a4b7b4448db2a6fe4a9a051516ad5c956d5c2506077678a9cf46bbda7bc88"
+    },
+    {
+      "path": "TABLE_ROWS.schema.json",
+      "bytes": 133915,
+      "sha256": "dcfd0509174c45f004937b846b2aee2ea81306ceabe54f47cdd56cffc263409f"
+    },
+    {
+      "path": "TOOLS_OVERVIEW.json",
+      "bytes": 5839,
+      "sha256": "73acddad6134c9e352da275422cb2f431d9309bdc0d64ca848af2f14770a3397"
+    },
+    {
+      "path": "VALIDATION.json",
+      "bytes": 7445,
+      "sha256": "9341c56edfa5062607d7c3d51873a92f8b02681fa45e2c467ac3fb9d0afec643"
+    },
+    {
+      "path": "references.bib",
+      "bytes": 359,
+      "sha256": "309635ba474e5fd6b6eb7b59821457a797066ada39a78d373924afbdf7ba612d"
+    },
+    {
+      "path": "validate_package.py",
+      "bytes": 12815,
+      "sha256": "b04c031509fcf8ffd299d45db25e458a6966ea66e010b8cdd207a73338540a4d"
+    }
+  ]
+}

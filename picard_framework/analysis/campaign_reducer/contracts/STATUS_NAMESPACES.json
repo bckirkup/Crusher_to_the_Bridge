@@ -1,0 +1,826 @@
+{
+  "status": "PROPOSED_CONTRACT_ONLY_NOT_IMPLEMENTED",
+  "authority": "FIELD_CONTRACTS.json + TABLE_ROWS.schema.json",
+  "namespaces": {
+    "campaign_catalog.catalog_state": {
+      "allowed_literals": [
+        "declared",
+        "outcomes_reported",
+        "assets_verified",
+        "partially_recovered",
+        "reduced",
+        "withdrawn",
+        "blocked",
+        "unknown"
+      ],
+      "mode": "strict_enum",
+      "meaning": "catalog evidence"
+    },
+    "attempts.attempt_kind": {
+      "allowed_literals": [
+        "exploratory",
+        "confirmatory",
+        "revision",
+        "review_response",
+        "canary",
+        "smoke",
+        "reanalysis",
+        "unknown"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Scientific lifecycle"
+    },
+    "attempts.scientific_approval_state": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "historical scientific approval evidence, not job lifecycle or fresh query approval"
+    },
+    "runs.execution_state": {
+      "allowed_literals": [
+        "declared",
+        "completed",
+        "partial",
+        "failed",
+        "cancelled",
+        "unknown"
+      ],
+      "mode": "strict_enum",
+      "meaning": "historical simulation execution"
+    },
+    "runs.selection_state": {
+      "allowed_literals": [
+        "selected",
+        "duplicate_alias",
+        "retry_not_selected",
+        "identity_conflict",
+        "quarantined",
+        "pending"
+      ],
+      "mode": "strict_enum",
+      "meaning": "scientific replicate selection"
+    },
+    "runs.selection_reason": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "Explicit dedup/retry/claim use basis"
+    },
+    "assets.asset_kind": {
+      "allowed_literals": [
+        "container",
+        "member",
+        "sidecar",
+        "parquet",
+        "manifest",
+        "log",
+        "local_source"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Container or member"
+    },
+    "assets.hash_scope": {
+      "allowed_literals": [
+        "container_bytes",
+        "uncompressed_member",
+        "file_bytes",
+        "not_computed"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Container hashes never compared as member hashes"
+    },
+    "assets.read_state": {
+      "allowed_literals": [
+        "listed",
+        "indexed",
+        "read",
+        "parsed",
+        "malformed",
+        "unreachable",
+        "missing",
+        "not_requested"
+      ],
+      "mode": "strict_enum",
+      "meaning": "scientific asset read/parse evidence"
+    },
+    "capabilities.scope_kind": {
+      "allowed_literals": [
+        "run",
+        "stage",
+        "campaign"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Scope type"
+    },
+    "capabilities.availability": {
+      "allowed_literals": [
+        "available_exact",
+        "available_rounded",
+        "recoverable_unread",
+        "derivable_exact",
+        "partial",
+        "not_saved",
+        "dropped_by_profile",
+        "not_applicable",
+        "unknown",
+        "blocked_identity",
+        "malformed",
+        "unreachable"
+      ],
+      "mode": "strict_enum",
+      "meaning": "scoped scientific recoverability"
+    },
+    "data_gaps.reason": {
+      "allowed_literals": [
+        "not_saved",
+        "dropped_by_profile",
+        "member_missing",
+        "not_applicable",
+        "unknown_schema",
+        "malformed",
+        "unreachable",
+        "not_requested",
+        "identity_unresolved",
+        "incompatible_definition",
+        "denominator_zero",
+        "no_events",
+        "not_observed",
+        "not_identifiable",
+        "rounded_only",
+        "time_origin_unknown",
+        "partial_followup",
+        "unsupported_join"
+      ],
+      "mode": "strict_enum",
+      "meaning": "canonical missing-value reason; precise operational reason remains in detail"
+    },
+    "data_gaps.recoverability": {
+      "allowed_literals": [
+        "read_existing",
+        "derive_existing",
+        "reconcile_identity",
+        "irrecoverable_existing",
+        "pending_inventory",
+        "not_applicable"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Recoverability state"
+    },
+    "design_values.value_layer": {
+      "allowed_literals": [
+        "nominal_design",
+        "resolved_config",
+        "realized_draw",
+        "realized_exposure",
+        "measured_outcome"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Do not substitute nominal for realized"
+    },
+    "pair_links.pair_state": {
+      "allowed_literals": [
+        "exact_design_pair",
+        "version_bridge_pair",
+        "partial_pair",
+        "unmatched",
+        "incompatible"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Eligibility"
+    },
+    "pair_links.unmatched_reason": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "Structurally optional for exact pairs"
+    },
+    "role_dictionary.role_axis": {
+      "allowed_literals": [
+        "primary_population",
+        "occupation",
+        "response_function",
+        "duty_state",
+        "source_eligibility",
+        "clinical_state",
+        "observation_state",
+        "spatial_context"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Orthogonal role axes"
+    },
+    "agents.roster_scope": {
+      "allowed_literals": [
+        "full_at_risk",
+        "infected_only",
+        "observed_only",
+        "event_participant_only",
+        "partial"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Full roster vs infected subset"
+    },
+    "agents.boarding_state": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "Saved infection/import and presence state"
+    },
+    "population_intervals.population_basis": {
+      "allowed_literals": [
+        "boarding_complement",
+        "unique_ever_aboard",
+        "susceptible_at_start",
+        "eligible_course_cohort",
+        "eligible_onboard",
+        "dynamic_at_risk",
+        "test_eligible",
+        "source_eligible",
+        "response_eligible",
+        "observed_roster"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Denominator semantics"
+    },
+    "run_scalars.native_type": {
+      "allowed_literals": [
+        "null",
+        "boolean",
+        "integer",
+        "number",
+        "string"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Original primitive"
+    },
+    "run_scalars.mapping_state": {
+      "allowed_literals": [
+        "verified",
+        "native_only",
+        "ambiguous",
+        "rounded_source"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Mapping status"
+    },
+    "metrics.value_status": {
+      "allowed_literals": [
+        "exact_emitted",
+        "exact_derived",
+        "rounded_emitted",
+        "partial",
+        "undefined",
+        "unavailable"
+      ],
+      "mode": "strict_enum",
+      "meaning": "metric value evidence; six original literals only"
+    },
+    "metrics.endpoint_domain": {
+      "allowed_literals": [
+        "latent_truth",
+        "symptomatic_course",
+        "onboard_symptoms",
+        "reported",
+        "tested",
+        "lab_confirmed",
+        "response",
+        "mechanism",
+        "economic",
+        "external_observed"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Truth, clinical, observation, policy, economic distinct"
+    },
+    "epoch_metrics.series_kind": {
+      "allowed_literals": [
+        "state",
+        "incidence",
+        "cumulative",
+        "rate",
+        "integral",
+        "flag"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Series semantics"
+    },
+    "epoch_metrics.value_status": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "legacy time-series value evidence; no new enum imposed"
+    },
+    "times_to_event.subject_kind": {
+      "allowed_literals": [
+        "run",
+        "agent",
+        "episode",
+        "object",
+        "test",
+        "port_call"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Unit at risk"
+    },
+    "times_to_event.censor_type": {
+      "allowed_literals": [
+        "exact",
+        "right",
+        "left",
+        "interval",
+        "structural_nonoccurrence",
+        "not_at_risk",
+        "unknown"
+      ],
+      "mode": "strict_enum",
+      "meaning": "clinical event-time censoring, not missingness or job failure"
+    },
+    "times_to_event.event_domain": {
+      "allowed_literals": [
+        "latent",
+        "observed",
+        "scheduled",
+        "inferred_interval"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Observed/latent/estimated"
+    },
+    "event_participants.participation_kind": {
+      "allowed_literals": [
+        "actor",
+        "source",
+        "recipient",
+        "exposed",
+        "responder",
+        "caregiver",
+        "service_provider",
+        "reporter",
+        "specimen_donor",
+        "tested",
+        "observer"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Directed and multi-person participation"
+    },
+    "event_participants.participation_status": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "Saved/derived/partial; count unique IDs separately from event rows"
+    },
+    "mechanism_objects.end_reason": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "Exhaustion/extent_met/horizon/etc."
+    },
+    "weights.unit_kind": {
+      "allowed_literals": [
+        "run",
+        "seed_block",
+        "design_cell",
+        "vessel",
+        "voyage",
+        "person",
+        "posterior_draw",
+        "external_record"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Weight unit"
+    },
+    "weights.weight_kind": {
+      "allowed_literals": [
+        "equal_run",
+        "design",
+        "fleet",
+        "person",
+        "selection",
+        "posterior"
+      ],
+      "mode": "strict_enum",
+      "meaning": "Simulation design/fleet/population/inverse probability/posterior separately"
+    },
+    "weights.validity_status": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "Qualified/unqualified/blocked; no weights borrowed silently across targets"
+    },
+    "distributions.missing_reason_counts_json": {
+      "allowed_literals": null,
+      "mode": "original_open_field_preserved",
+      "meaning": "Typed reason counts incl structural zero/event absence"
+    },
+    "source_objects.read_state": {
+      "allowed_literals": [
+        "available",
+        "missing_member",
+        "missing_object",
+        "access_denied",
+        "archived_unrestored",
+        "corrupt_archive",
+        "crc_failure",
+        "decode_failure",
+        "source_changed",
+        "unsupported_schema",
+        "unsupported_compression",
+        "resource_limit",
+        "not_yet_read"
+      ],
+      "mode": "strict_enum",
+      "meaning": "typed physical read operation result/reason"
+    },
+    "coverage_cells.coverage_status": {
+      "allowed_literals": [
+        "complete",
+        "partial",
+        "absent",
+        "unsupported",
+        "blocked",
+        "unassessable"
+      ],
+      "mode": "strict_enum",
+      "meaning": "scope accounting, independent of lifecycle and exactness"
+    },
+    "reduction_attempts.status": {
+      "allowed_literals": [
+        "planned",
+        "blocked",
+        "admitted",
+        "queued",
+        "running",
+        "checkpointed",
+        "budget_stopped",
+        "source_changed",
+        "quarantined",
+        "partial",
+        "completed",
+        "failed",
+        "cancelled",
+        "return_blocked",
+        "unknown"
+      ],
+      "mode": "strict_enum",
+      "meaning": "reducer job lifecycle only"
+    },
+    "receipts.status": {
+      "allowed_literals": [
+        "planned",
+        "blocked",
+        "admitted",
+        "queued",
+        "running",
+        "checkpointed",
+        "budget_stopped",
+        "source_changed",
+        "quarantined",
+        "partial",
+        "completed",
+        "failed",
+        "cancelled",
+        "return_blocked",
+        "unknown"
+      ],
+      "mode": "strict_enum",
+      "meaning": "durable qualified operational lifecycle only"
+    }
+  },
+  "invariants": [
+    "No universal status enum; no status alone establishes source identity, exact metric evidence, complete coverage or scientific approval.",
+    "All original 26 scientific table definitions, 382 fields and 33 metric definitions are unchanged. Only four existing operational fields gain enums.",
+    "data_gaps.reason retains its scientific enum; precise read failures belong in data_gaps.detail alongside the generic canonical reason.",
+    "Historical stopped/cancelled/failed states are lifecycle evidence, not data-loss evidence. Do not map unknown scientific source execution or approval to completed/approved.",
+    "value_statuses_integrated are narrative aliases, not additional metrics.value_status literals.",
+    "A completed reducer phase is not all-campaign scientific validity or production certification."
+  ],
+  "operational_strict_fields": [
+    "reduction_attempts.status",
+    "receipts.status",
+    "coverage_cells.coverage_status",
+    "source_objects.read_state"
+  ],
+  "read_aliases": {
+    "available": {
+      "source_objects.read_state": "available",
+      "assets.read_state": "read",
+      "data_gaps.reason": null,
+      "data_gaps.detail": null,
+      "rule": "Read operation evidence only; available means bytes read, not necessarily parsed/exact. Upgrade assets.read_state to parsed only with successful parse evidence."
+    },
+    "missing_member": {
+      "source_objects.read_state": "missing_member",
+      "assets.read_state": "missing",
+      "data_gaps.reason": "member_missing",
+      "data_gaps.detail": "precise_read_reason=missing_member; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "missing_object": {
+      "source_objects.read_state": "missing_object",
+      "assets.read_state": "missing",
+      "data_gaps.reason": "unreachable",
+      "data_gaps.detail": "precise_read_reason=missing_object; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "access_denied": {
+      "source_objects.read_state": "access_denied",
+      "assets.read_state": "unreachable",
+      "data_gaps.reason": "unreachable",
+      "data_gaps.detail": "precise_read_reason=access_denied; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "archived_unrestored": {
+      "source_objects.read_state": "archived_unrestored",
+      "assets.read_state": "unreachable",
+      "data_gaps.reason": "unreachable",
+      "data_gaps.detail": "precise_read_reason=archived_unrestored; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "corrupt_archive": {
+      "source_objects.read_state": "corrupt_archive",
+      "assets.read_state": "malformed",
+      "data_gaps.reason": "malformed",
+      "data_gaps.detail": "precise_read_reason=corrupt_archive; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "crc_failure": {
+      "source_objects.read_state": "crc_failure",
+      "assets.read_state": "malformed",
+      "data_gaps.reason": "malformed",
+      "data_gaps.detail": "precise_read_reason=crc_failure; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "decode_failure": {
+      "source_objects.read_state": "decode_failure",
+      "assets.read_state": "malformed",
+      "data_gaps.reason": "malformed",
+      "data_gaps.detail": "precise_read_reason=decode_failure; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "source_changed": {
+      "source_objects.read_state": "source_changed",
+      "assets.read_state": "unreachable",
+      "data_gaps.reason": "identity_unresolved",
+      "data_gaps.detail": "precise_read_reason=source_changed; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "unsupported_schema": {
+      "source_objects.read_state": "unsupported_schema",
+      "assets.read_state": "malformed",
+      "data_gaps.reason": "unknown_schema",
+      "data_gaps.detail": "precise_read_reason=unsupported_schema; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "unsupported_compression": {
+      "source_objects.read_state": "unsupported_compression",
+      "assets.read_state": "unreachable",
+      "data_gaps.reason": "unreachable",
+      "data_gaps.detail": "precise_read_reason=unsupported_compression; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "resource_limit": {
+      "source_objects.read_state": "resource_limit",
+      "assets.read_state": "unreachable",
+      "data_gaps.reason": "unreachable",
+      "data_gaps.detail": "precise_read_reason=resource_limit; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    },
+    "not_yet_read": {
+      "source_objects.read_state": "not_yet_read",
+      "assets.read_state": "not_requested",
+      "data_gaps.reason": "not_requested",
+      "data_gaps.detail": "precise_read_reason=not_yet_read; retain source evidence and recovery instructions",
+      "rule": "Generic compatible scientific state plus precise read reason; retain any unaffected previously verified data."
+    }
+  },
+  "capability_aliases": {
+    "available": {
+      "cases": [
+        {
+          "requires": [
+            "exact_verified"
+          ],
+          "to": "available_exact"
+        },
+        {
+          "requires": [
+            "rounded_verified"
+          ],
+          "to": "available_rounded"
+        },
+        {
+          "requires": [
+            "member_identity_verified",
+            "read_access_supported"
+          ],
+          "to": "recoverable_unread"
+        }
+      ],
+      "otherwise": "unknown"
+    },
+    "documented_unverified": {
+      "cases": [
+        {
+          "requires": [
+            "member_identity_verified",
+            "read_access_supported"
+          ],
+          "to": "recoverable_unread"
+        }
+      ],
+      "otherwise": "unknown"
+    },
+    "known_saved": {
+      "cases": [
+        {
+          "requires": [
+            "member_identity_verified",
+            "read_access_supported"
+          ],
+          "to": "recoverable_unread"
+        }
+      ],
+      "otherwise": "unknown"
+    },
+    "count_not_retained": {
+      "cases": [
+        {
+          "requires": [
+            "retention_loss_verified"
+          ],
+          "to": "not_saved"
+        }
+      ],
+      "otherwise": "unknown"
+    },
+    "counted_not_retained": {
+      "cases": [
+        {
+          "requires": [
+            "retention_loss_verified"
+          ],
+          "to": "not_saved"
+        }
+      ],
+      "otherwise": "unknown"
+    },
+    "corrupt": {
+      "cases": [
+        {
+          "requires": [
+            "parse_failure_verified"
+          ],
+          "to": "malformed"
+        }
+      ],
+      "otherwise": "unknown"
+    },
+    "not_saved": {
+      "cases": [
+        {
+          "requires": [
+            "retention_loss_verified"
+          ],
+          "to": "not_saved"
+        }
+      ],
+      "otherwise": "unknown"
+    },
+    "unknown": {
+      "cases": [],
+      "otherwise": "unknown"
+    }
+  },
+  "metric_aliases": {
+    "observed": {
+      "cases": [
+        {
+          "requires": [
+            "exact_verified"
+          ],
+          "to": "exact_emitted"
+        },
+        {
+          "requires": [
+            "rounded_verified"
+          ],
+          "to": "rounded_emitted"
+        }
+      ],
+      "otherwise": "unavailable"
+    },
+    "derived_supported": {
+      "cases": [
+        {
+          "requires": [
+            "derivation_verified"
+          ],
+          "to": "exact_derived"
+        }
+      ],
+      "otherwise": "unavailable"
+    },
+    "documented_unverified": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "zero_denominator": {
+      "cases": [],
+      "otherwise": "undefined"
+    },
+    "censored": {
+      "cases": [
+        {
+          "requires": [
+            "partial_value_verified"
+          ],
+          "to": "partial"
+        }
+      ],
+      "otherwise": "unavailable"
+    },
+    "not_saved": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "counted_not_retained": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "not_observed": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "not_applicable": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "unknown_definition": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "unsupported": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "corrupt": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "source_changed": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "access_blocked": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "resource_blocked": {
+      "cases": [],
+      "otherwise": "unavailable"
+    },
+    "unknown": {
+      "cases": [],
+      "otherwise": "unavailable"
+    }
+  },
+  "narrative_evidence_aliases": [
+    "observed",
+    "derived_supported",
+    "documented_unverified",
+    "not_saved",
+    "counted_not_retained",
+    "not_observed",
+    "not_applicable",
+    "zero_denominator",
+    "unknown_definition",
+    "censored",
+    "unsupported",
+    "corrupt",
+    "source_changed",
+    "access_blocked",
+    "resource_blocked",
+    "unknown"
+  ],
+  "lifecycle_aliases": {
+    "BUDGET_STOPPED_CHECKPOINTED": "budget_stopped",
+    "SOURCE_CHANGED": "source_changed",
+    "SCHEMA_OR_CORRUPTION_QUARANTINE": "quarantined",
+    "PARTIAL_COVERAGE": "partial",
+    "RETURN_PATH_BLOCKED": "return_blocked",
+    "ACCESS_OR_RESOURCE_BLOCKED": "blocked",
+    "ADMISSION_REQUIRED_OR_EXCEEDED": "blocked",
+    "unknown": "unknown"
+  },
+  "lifecycle_alias_rule": "Operational aliases apply only to reduction_attempts.status/receipts.status with retained reason/receipt evidence; historical scientific stopped labels are retained in provenance, never interpreted as lost data. completed requires explicit phase-completion evidence; no default unknown-to-completed mapping.",
+  "metric_alias_rule": "An unavailable/undefined value retains null plus a separate data_gaps reason/detail; censorship is encoded in times_to_event.censor_type, never a seventh metrics.value_status. No zero imputation.",
+  "capability_alias_rule": "Source narrative labels remain verbatim in evidence_detail/provenance. Conditions are evidence requirements, not source-label synonyms; historical census labels/rows are not rewritten.",
+  "narrative_gap_reasons": {
+    "documented_unverified": "not_requested",
+    "not_saved": "not_saved",
+    "count_not_retained": "not_saved",
+    "counted_not_retained": "not_saved",
+    "not_observed": "not_observed",
+    "not_applicable": "not_applicable",
+    "zero_denominator": "denominator_zero",
+    "unknown_definition": "incompatible_definition",
+    "censored": "partial_followup",
+    "unsupported": "unknown_schema",
+    "corrupt": "malformed",
+    "source_changed": "identity_unresolved",
+    "access_blocked": "unreachable",
+    "resource_blocked": "unreachable",
+    "unknown": "not_identifiable"
+  },
+  "narrative_gap_rule": "Use these generic reasons only when the named condition is evidenced; otherwise unknown/unverified detail remains explicit (not_identifiable or not_requested as applicable). Retain original label, precise reason and evidence in data_gaps.detail; no automatic fabricated missingness evidence.",
+  "historical_stop_rule": "Historical stopped labels stay in historical scientific provenance and are not automatically converted into completed, checkpointed or data-loss states. A reducer checkpointed status requires actual checkpoint evidence."
+}

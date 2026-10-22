@@ -1,0 +1,990 @@
+[
+  {
+    "schema_family": "growth_census_zip",
+    "description": "Instrumented per-voyage ZIP; summary embeds timeseries, census gzip has hosts/acquisitions/mechanisms. Full and lean profiles differ.",
+    "expected_archive_formats": [
+      "zip/summary.json",
+      "zip/growth_census.json.gz",
+      "zip/rss_samples.json (newer)"
+    ],
+    "evidence": [
+      {
+        "source_path": "tools/noro_diag/growth_chain_census.py",
+        "line_start": 78,
+        "line_end": 97,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/growth_chain_census.py#L78-L97"
+      },
+      {
+        "source_path": "tools/noro_diag/growth_chain_census.py",
+        "line_start": 1480,
+        "line_end": 1557,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/growth_chain_census.py#L1480-L1557"
+      },
+      {
+        "source_path": "tools/noro_diag/growth_chain_census.py",
+        "line_start": 1805,
+        "line_end": 1847,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/growth_chain_census.py#L1805-L1847"
+      }
+    ],
+    "AR": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "summary.cumulative_ever_infected_passenger",
+        "summary.cumulative_ever_infected_crew",
+        "summary.infection_attack_rate_passenger",
+        "summary.infection_attack_rate_crew",
+        "summary.cumulative_reported_cases_passenger",
+        "summary.cumulative_reported_cases_crew",
+        "derived.passenger_complement",
+        "derived.crew_complement"
+      ],
+      "evidence": [
+        {
+          "source_path": "telemetry_buffer/observation_model/score_anchors.py",
+          "line_start": 346,
+          "line_end": 437,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/score_anchors.py#L346-L437"
+        }
+      ],
+      "limitation": "Historical payload and emitted denominator presence require discovery; legacy recovery is not emitted count evidence."
+    },
+    "timing": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "timeseries[].new_infections",
+        "derived.peak_epoch",
+        "derived.detection_epoch",
+        "derived.vsp_trigger_epoch",
+        "hosts[].acquired_epoch",
+        "census_epochs"
+      ],
+      "evidence": [
+        {
+          "source_path": "tools/noro_diag/outbreak_anchor_readout.py",
+          "line_start": 193,
+          "line_end": 227,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/outbreak_anchor_readout.py#L193-L227"
+        }
+      ],
+      "limitation": "Existing onset_epoch means first positive new_infections index, not symptom onset. Existing food_shapes scan drops most summary timing descriptors."
+    },
+    "mechanism": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "summary.infections_by_dominant_route",
+        "summary.infection_dose_share_by_route",
+        "mechanisms.common_source_events",
+        "mechanisms.common_source_takers",
+        "common_source.objects",
+        "common_source.events",
+        "hosts[].dominant_pathway",
+        "acquisitions",
+        "removal_totals"
+      ],
+      "evidence": [
+        {
+          "source_path": "tools/noro_diag/food_shapes_01_scan.py",
+          "line_start": 297,
+          "line_end": 344,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/food_shapes_01_scan.py#L297-L344"
+        }
+      ],
+      "limitation": "Dominant infection route, fractional dose share, source channel and generation are different estimands; do not sum or substitute."
+    },
+    "role": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "derived.passenger_complement",
+        "derived.crew_complement",
+        "summary role-specific numerators"
+      ],
+      "evidence": [
+        {
+          "source_path": "telemetry_buffer/observation_model/score_anchors.py",
+          "line_start": 170,
+          "line_end": 205,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/score_anchors.py#L170-L205"
+        },
+        {
+          "source_path": "tools/noro_diag/growth_chain_census.py",
+          "line_start": 381,
+          "line_end": 405,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/growth_chain_census.py#L381-L405"
+        }
+      ],
+      "limitation": "Aggregate passenger/crew AR is supportable conditional on emitted complements. Census hosts[] initially has no role field: occupational participation and role-by-route joins require an actual emitted roster/role witness, not platform labels or inferred agent IDs."
+    },
+    "reducers": [
+      "tools/noro_diag/outbreak_anchor_readout.py",
+      "tools/noro_diag/food_shapes_01_scan.py",
+      "tools/noro_diag/food_shapes_01_report.py",
+      "tools/noro_diag/food_score_01_scan.py",
+      "tools/noro_diag/entrain_01_scan.py"
+    ]
+  },
+  {
+    "schema_family": "campaign_summary_zip",
+    "description": "Generic manifest campaign per-run ZIP or shard ZIP. summary.json and separate timeseries.json; optional raw/ground-truth members. Not interchangeable with census ZIP summary-embedded timeseries.",
+    "expected_archive_formats": [
+      "per-run zip/summary.json",
+      "per-run zip/timeseries.json",
+      "fused shard ZIP containing multiple run directories",
+      "optional ground_truth members (inspect)"
+    ],
+    "evidence": [
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "line_start": 1045,
+        "line_end": 1100,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L1045-L1100"
+      }
+    ],
+    "AR": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "summary role-specific cumulative counts/rates",
+        "derived role complements"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+          "line_start": 603,
+          "line_end": 705,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L603-L705"
+        }
+      ],
+      "limitation": null
+    },
+    "timing": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "timeseries.json",
+        "derived.peak_epoch",
+        "derived.detection_epoch"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+          "line_start": 454,
+          "line_end": 542,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L454-L542"
+        }
+      ],
+      "limitation": "Trajectory is separate archive member; do not treat absent embedded summary timeseries as no outbreak."
+    },
+    "mechanism": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "summary route counters where emitted",
+        "optional strain_attribution"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+          "line_start": 1063,
+          "line_end": 1078,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L1063-L1078"
+        }
+      ],
+      "limitation": "No default growth_census; optional fields require member discovery."
+    },
+    "role": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "derived.passenger_complement",
+        "derived.crew_complement",
+        "role-specific cumulative counts"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+          "line_start": 603,
+          "line_end": 628,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L603-L628"
+        }
+      ],
+      "limitation": "Current validator does not prove older runs emitted role counts."
+    },
+    "reducers": [
+      "telemetry_buffer/observation_model/score_anchors.py",
+      "picard_framework/analysis/metrics.py",
+      "telemetry_buffer/observation_model/flush_sweep_readout.py"
+    ]
+  },
+  {
+    "schema_family": "covid_screen_json",
+    "description": "Boarding-screen/designed replay cell JSON. design_id + cell coordinates + observables + version-dependent truth/observation/mechanism echoes.",
+    "expected_archive_formats": [
+      "cell_<seed>.json",
+      "legacy cells/cells/<cell-key>.json",
+      "design JSON / merged readout JSON"
+    ],
+    "evidence": [
+      {
+        "source_path": "campaigns/covid/crew_window_02/cell.py",
+        "line_start": 27,
+        "line_end": 32,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/crew_window_02/cell.py#L27-L32"
+      },
+      {
+        "source_path": "campaigns/covid/crew_window_02/cell.py",
+        "line_start": 65,
+        "line_end": 79,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/crew_window_02/cell.py#L65-L79"
+      },
+      {
+        "source_path": "picard_framework/covid_boarding_screen.py",
+        "line_start": 1938,
+        "line_end": 2037,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/covid_boarding_screen.py#L1938-L2037"
+      }
+    ],
+    "AR": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "observables",
+        "truth infection counts",
+        "ship_graph_immune.realized.complement_by_role",
+        "lab_confirmed_total",
+        "lab_confirmed_by_role"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/covid_boarding_screen.py",
+          "line_start": 1710,
+          "line_end": 1738,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/covid_boarding_screen.py#L1710-L1738"
+        },
+        {
+          "source_path": "picard_framework/covid_boarding_screen.py",
+          "line_start": 1977,
+          "line_end": 1984,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/covid_boarding_screen.py#L1977-L1984"
+        }
+      ],
+      "limitation": "Infection, dated onset, presenting and lab-confirmed numerators are distinct; observables positive_share may use tested denominator, not population AR."
+    },
+    "timing": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "onset_curve[day][role]",
+        "first_onset_day",
+        "acquisition_curve.total_by_day",
+        "funnel_hosts.*_day (if funnel_echo)"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/covid_boarding_screen.py",
+          "line_start": 1466,
+          "line_end": 1509,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/covid_boarding_screen.py#L1466-L1509"
+        },
+        {
+          "source_path": "picard_framework/covid_boarding_screen.py",
+          "line_start": 1955,
+          "line_end": 1969,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/covid_boarding_screen.py#L1955-L1969"
+        },
+        {
+          "source_path": "picard_framework/covid_boarding_screen.py",
+          "line_start": 2002,
+          "line_end": 2009,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/covid_boarding_screen.py#L2002-L2009"
+        }
+      ],
+      "limitation": "Day-indexed; dates differ across observation channels; later optional echoes not retroactive."
+    },
+    "mechanism": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "quarantine_attribution.during_window_by_role",
+        "during_window_by_zone_class",
+        "during_window_by_route",
+        "crew_window",
+        "crew_duty_exclusion",
+        "dose_response"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/covid_boarding_screen.py",
+          "line_start": 1684,
+          "line_end": 1706,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/covid_boarding_screen.py#L1684-L1706"
+        }
+      ],
+      "limitation": null
+    },
+    "role": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "ship_graph_immune.realized.complement_by_role",
+        "lab_confirmed_by_role",
+        "onset_curve role split",
+        "during_window_by_role",
+        "funnel_hosts[].role (if enabled)"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/covid_boarding_screen.py",
+          "line_start": 1720,
+          "line_end": 1737,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/covid_boarding_screen.py#L1720-L1737"
+        }
+      ],
+      "limitation": "Before/after quarantine population denominators and activated-window status remain separate; legacy missing role defaults in source are not evidence of emitted roles."
+    },
+    "reducers": [
+      "campaigns/covid/crew_berth_01/readout.py",
+      "campaigns/covid/crew_mess_01/readout.py",
+      "campaigns/covid/crew_reach_01/readout.py",
+      "campaigns/covid/crew_window_01/readout.py",
+      "campaigns/covid/crew_window_02/readout.py",
+      "campaigns/covid/gm_rescore_02/readout.py",
+      "campaigns/covid/meal_service_01/readout.py",
+      "campaigns/covid/meal_service_02/readout.py",
+      "campaigns/covid/onset_rec_01/readout.py",
+      "tools/covid_screen_readout_common.py"
+    ]
+  },
+  {
+    "schema_family": "flu_cell_json",
+    "description": "Explicit versioned influenza cell JSON with full-complement role/band histograms and infected-agent rows; open, visibility and reassessment versions have different echoes.",
+    "expected_archive_formats": [
+      "cell_<seed>.json (schema flu_open_voyage_01.v1 / flu_visibility_01.v1 / flu_reassess_01.v1)"
+    ],
+    "evidence": [
+      {
+        "source_path": "campaigns/flu/open_voyage_01/cell.py",
+        "line_start": 40,
+        "line_end": 81,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/open_voyage_01/cell.py#L40-L81"
+      },
+      {
+        "source_path": "campaigns/flu/open_voyage_01/cell.py",
+        "line_start": 118,
+        "line_end": 141,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/open_voyage_01/cell.py#L118-L141"
+      }
+    ],
+    "AR": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "counts.ever_infected",
+        "counts.ever_ill",
+        "counts.ever_reported",
+        "counts.index_cases",
+        "counts.onboard_acquired",
+        "complement.total",
+        "complement.roles"
+      ],
+      "evidence": [
+        {
+          "source_path": "campaigns/flu/open_voyage_01/cell.py",
+          "line_start": 127,
+          "line_end": 141,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/open_voyage_01/cell.py#L127-L141"
+        }
+      ],
+      "limitation": null
+    },
+    "timing": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "infections[].infection_epoch",
+        "infections[].onset_time_infected"
+      ],
+      "evidence": [
+        {
+          "source_path": "campaigns/flu/open_voyage_01/cell.py",
+          "line_start": 40,
+          "line_end": 67,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/open_voyage_01/cell.py#L40-L67"
+        }
+      ],
+      "limitation": "No full susceptible trajectory or first reported timestamp in this output; onset_time_infected must be interpreted with clock semantics, not relabeled unconditionally as epoch."
+    },
+    "mechanism": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "infections[].routes",
+        "infections[].dominant_route",
+        "caregiver_telemetry",
+        "mechanism_echo (reassess)"
+      ],
+      "evidence": [
+        {
+          "source_path": "campaigns/flu/reassess_01/cell.py",
+          "line_start": 237,
+          "line_end": 273,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/reassess_01/cell.py#L237-L273"
+        }
+      ],
+      "limitation": null
+    },
+    "role": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "complement.roles",
+        "complement.bands",
+        "infections[].role",
+        "infections[].band",
+        "infections[].index"
+      ],
+      "evidence": [
+        {
+          "source_path": "campaigns/flu/open_voyage_01/cell.py",
+          "line_start": 40,
+          "line_end": 81,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/open_voyage_01/cell.py#L40-L81"
+        }
+      ],
+      "limitation": "Counts support realized role denominators; full occupational contact participation is not implied by infection rows."
+    },
+    "reducers": [
+      "campaigns/flu/open_voyage_01/readout.py",
+      "campaigns/flu/reassess_01/readout.py",
+      "campaigns/flu/visibility_01/readout.py"
+    ]
+  },
+  {
+    "schema_family": "bounded_region_jsonl",
+    "description": "Sobol feasibility point/block JSONL with nested per-voyage rows; separate Morris elementary-effect JSON. These are simulation screening, not Stan fits.",
+    "expected_archive_formats": [
+      "region/shard_NNNN.jsonl (kind=rows; point_index,block_index,units,seeds,rows)",
+      "region/shard_NNNN.json merged point summaries",
+      "screen/shard_NNNN.json raw elementary effects"
+    ],
+    "evidence": [
+      {
+        "source_path": "deploy/aws/bounded_design_entrypoint.py",
+        "line_start": 2,
+        "line_end": 19,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/bounded_design_entrypoint.py#L2-L19"
+      },
+      {
+        "source_path": "deploy/aws/bounded_design_entrypoint.py",
+        "line_start": 274,
+        "line_end": 282,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/bounded_design_entrypoint.py#L274-L282"
+      },
+      {
+        "source_path": "telemetry_buffer/observation_model/admissible_region.py",
+        "line_start": 760,
+        "line_end": 783,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/admissible_region.py#L760-L783"
+      }
+    ],
+    "AR": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "rows[] anchor-scoring fields",
+        "point coordinates",
+        "seed-block rows"
+      ],
+      "evidence": [
+        {
+          "source_path": "telemetry_buffer/observation_model/admissible_region.py",
+          "line_start": 767,
+          "line_end": 783,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/admissible_region.py#L767-L783"
+        }
+      ],
+      "limitation": "Morris effects alone cannot reconstruct voyage outcome distributions; preserve native quantity and grain."
+    },
+    "timing": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Inspect nested rows and committed scorer version; no promise of full event trajectories."
+    },
+    "mechanism": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "point units/design factors",
+        "nested row outcomes"
+      ],
+      "evidence": [
+        {
+          "source_path": "deploy/aws/bounded_design_entrypoint.py",
+          "line_start": 7,
+          "line_end": 18,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/bounded_design_entrypoint.py#L7-L18"
+        }
+      ],
+      "limitation": "Factor coordinate is intervention/design metadata, not realized transmission attribution."
+    },
+    "role": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Inspect explicit emitted denominator fields; declared complement CLI is not a realized role count."
+    },
+    "reducers": [
+      "telemetry_buffer/observation_model/admissible_region.py",
+      "telemetry_buffer/observation_model/bounded_screen.py",
+      "telemetry_buffer/observation_model/staged_posting_readout.py",
+      "telemetry_buffer/observation_model/adj_stratified_readout.py"
+    ]
+  },
+  {
+    "schema_family": "perturbation_json",
+    "description": "LEVERAGE perturbation-run JSON, different noro/covid channel outputs. Not a Stan posterior family.",
+    "expected_archive_formats": [
+      "<channel>/<run_id>.json"
+    ],
+    "evidence": [
+      {
+        "source_path": "deploy/aws/leverage01_entrypoint.py",
+        "line_start": 2,
+        "line_end": 9,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/leverage01_entrypoint.py#L2-L9"
+      },
+      {
+        "source_path": "picard_framework/leverage_screen.py",
+        "line_start": 449,
+        "line_end": 478,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/leverage_screen.py#L449-L478"
+      }
+    ],
+    "AR": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "derived (noro)",
+        "observables (covid)"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/leverage_screen.py",
+          "line_start": 449,
+          "line_end": 478,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/leverage_screen.py#L449-L478"
+        }
+      ],
+      "limitation": "Noro emitted summary is empty in this writer; derived complements may be filled from declared platform; tag as declared fallback, never emitted realized."
+    },
+    "timing": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Derived endpoint-only output; no guarantee raw timeseries saved."
+    },
+    "mechanism": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "axis_id",
+        "endpoint",
+        "resolved_witness"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/leverage_screen.py",
+          "line_start": 459,
+          "line_end": 478,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/leverage_screen.py#L459-L478"
+        }
+      ],
+      "limitation": "Perturbation witness, not per-agent causal attribution."
+    },
+    "role": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Declared complement fallback explicitly exists at leverage_screen.py:452-455."
+    },
+    "reducers": [
+      "picard_framework/leverage_screen.py"
+    ]
+  },
+  {
+    "schema_family": "stan_nuts_json",
+    "description": "Sentinel NUTS ladder: one fit result JSON per rung/ratio/replicate; no attack-rate endpoint forced onto posterior diagnostic experiments.",
+    "expected_archive_formats": [
+      "cell_<rung>_ratio_<ratio>_rep_<rep>.json",
+      "fit diagnostic/posterior arrays as actually emitted (inspect)"
+    ],
+    "evidence": [
+      {
+        "source_path": "deploy/aws/sentinel_nuts_entrypoint.py",
+        "line_start": 2,
+        "line_end": 9,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/sentinel_nuts_entrypoint.py#L2-L9"
+      },
+      {
+        "source_path": "deploy/aws/sentinel_nuts_entrypoint.py",
+        "line_start": 53,
+        "line_end": 65,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/sentinel_nuts_entrypoint.py#L53-L65"
+      }
+    ],
+    "AR": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Not an epidemic-distribution endpoint for this fit-diagnostic family; keep posterior target/diagnostic native rather than assign fake AR/timing/role metrics."
+    },
+    "timing": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Not an epidemic-distribution endpoint for this fit-diagnostic family; keep posterior target/diagnostic native rather than assign fake AR/timing/role metrics."
+    },
+    "mechanism": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Not an epidemic-distribution endpoint for this fit-diagnostic family; keep posterior target/diagnostic native rather than assign fake AR/timing/role metrics."
+    },
+    "role": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Not an epidemic-distribution endpoint for this fit-diagnostic family; keep posterior target/diagnostic native rather than assign fake AR/timing/role metrics."
+    },
+    "reducers": [
+      "deploy/aws/sentinel_nuts_entrypoint.py"
+    ]
+  },
+  {
+    "schema_family": "fomite_diagnostic_gzip",
+    "description": "Specialized hand-reservoir mass-balance/occupancy JSON gzip; stationary campaign also has growth-census ZIP arm.",
+    "expected_archive_formats": [
+      "per-seed *.json.gz",
+      "growth-census ZIP companion arm",
+      "committed hand_occupancy_cells.json aggregation"
+    ],
+    "evidence": [
+      {
+        "source_path": "tools/noro_diag/fomite_mass_balance.py",
+        "line_start": 56,
+        "line_end": 61,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/fomite_mass_balance.py#L56-L61"
+      },
+      {
+        "source_path": "tools/noro_diag/fomite_mass_balance.py",
+        "line_start": 455,
+        "line_end": 483,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/fomite_mass_balance.py#L455-L483"
+      },
+      {
+        "source_path": "tools/noro_diag/hand_occupancy_readout.py",
+        "line_start": 4,
+        "line_end": 8,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/hand_occupancy_readout.py#L4-L8"
+      }
+    ],
+    "AR": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Diagnostic occupancy estimand is primary; companion ZIP may retain epidemic endpoints."
+    },
+    "timing": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "per-epoch hand occupancy rows"
+      ],
+      "evidence": [
+        {
+          "source_path": "tools/noro_diag/fomite_mass_balance.py",
+          "line_start": 56,
+          "line_end": 61,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/noro_diag/fomite_mass_balance.py#L56-L61"
+        }
+      ],
+      "limitation": null
+    },
+    "mechanism": {
+      "status": "known_saved",
+      "telemetry_fields": [
+        "per_seed[].positive_share",
+        "per_seed[].shedding_rows",
+        "occupancy",
+        "ordering",
+        "never_positive"
+      ],
+      "evidence": [
+        {
+          "source_path": "docs/norovirus/noro_hand_stationary_01/hand_occupancy_cells.json",
+          "line_start": 1,
+          "line_end": 1,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/norovirus/noro_hand_stationary_01/hand_occupancy_cells.json#L1"
+        }
+      ],
+      "limitation": "Committed diagnostic aggregation is saved locally; not proof all cloud raw cells remain readable."
+    },
+    "role": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Infected-host diagnostic sampling is not a whole-population role complement."
+    },
+    "reducers": [
+      "tools/noro_diag/hand_occupancy_readout.py"
+    ]
+  },
+  {
+    "schema_family": "unknown_legacy",
+    "description": "Legacy prefix without established writer/schema linkage; lightweight discovery needed.",
+    "expected_archive_formats": [
+      "unknown; do not fabricate based on naming"
+    ],
+    "evidence": [],
+    "AR": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Prefix name and object count do not establish fields or schema."
+    },
+    "timing": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Prefix name and object count do not establish fields or schema."
+    },
+    "mechanism": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Prefix name and object count do not establish fields or schema."
+    },
+    "role": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Prefix name and object count do not establish fields or schema."
+    },
+    "reducers": []
+  },
+  {
+    "schema_family": "wastewater_campaign_zip",
+    "description": "Sentinel/WW manifest campaign ZIP plus wastewater sample/assay telemetry; final hazard recovery/posterior assessments are a separate inference layer.",
+    "expected_archive_formats": [
+      "per-run or fused-shard ZIP with summary.json, timeseries.json and optional wastewater/ground-truth members"
+    ],
+    "evidence": [
+      {
+        "source_path": "docs/synthetic_recovery_and_vsp_degradation.md",
+        "line_start": 1,
+        "line_end": 29,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/synthetic_recovery_and_vsp_degradation.md#L1-L29"
+      },
+      {
+        "source_path": "docs/sentinel/sentinel_wastewater_ops_scan.md",
+        "line_start": 38,
+        "line_end": 72,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/sentinel/sentinel_wastewater_ops_scan.md#L38-L72"
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+        "line_start": 1045,
+        "line_end": 1100,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L1045-L1100"
+      }
+    ],
+    "AR": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "summary role-specific infection counts/rates"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+          "line_start": 1045,
+          "line_end": 1081,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L1045-L1081"
+        }
+      ],
+      "limitation": "Secondary to port-hazard detection; subject to run identity and archive-member verification."
+    },
+    "timing": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "timeseries.json",
+        "wastewater.sample_epoch",
+        "detection events"
+      ],
+      "evidence": [
+        {
+          "source_path": "picard_framework/analysis/sentinel/wastewater_ops.py",
+          "line_start": 395,
+          "line_end": 409,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/sentinel/wastewater_ops.py#L395-L409"
+        }
+      ],
+      "limitation": "Sample epoch is not infection epoch and assay positivity is not clinical case detection."
+    },
+    "mechanism": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "wastewater_enabled",
+        "assay_mode",
+        "detected",
+        "lod_copies_per_l",
+        "wastewater_cell",
+        "wastewater_block"
+      ],
+      "evidence": [
+        {
+          "source_path": "docs/sentinel/sentinel_wastewater_ops_scan.md",
+          "line_start": 62,
+          "line_end": 79,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/sentinel/sentinel_wastewater_ops_scan.md#L62-L79"
+        },
+        {
+          "source_path": "picard_framework/analysis/sentinel/wastewater_assays.py",
+          "line_start": 606,
+          "line_end": 620,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/analysis/sentinel/wastewater_assays.py#L606-L620"
+        }
+      ],
+      "limitation": "Assay channel design/observation does not establish infection route contribution."
+    },
+    "role": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Conditional on actual emitted role complements in each run; port-hazard detection alone does not report crew/passenger participation."
+    },
+    "reducers": [
+      "picard_framework/analysis/sentinel/wastewater_signal.py",
+      "picard_framework/analysis/sentinel/wastewater_ops.py",
+      "telemetry_buffer/observation_model/score_anchors.py"
+    ]
+  },
+  {
+    "schema_family": "observation_jsonl",
+    "description": "Classmix/contact architecture/boarding-posting/flush contrasts; per-voyage JSONL and/or ZIP vary by campaign, inspect small object/key before adapting.",
+    "expected_archive_formats": [
+      "JSONL rows with point/hull/seed where emitted",
+      "campaign ZIP with summary.json for flush",
+      "merged JSON readouts"
+    ],
+    "evidence": [
+      {
+        "source_path": "telemetry_buffer/observation_model/staged_posting_readout.py",
+        "line_start": 1,
+        "line_end": 21,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/staged_posting_readout.py#L1-L21"
+      },
+      {
+        "source_path": "telemetry_buffer/observation_model/flush_sweep_readout.py",
+        "line_start": 1,
+        "line_end": 52,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/flush_sweep_readout.py#L1-L52"
+      },
+      {
+        "source_path": "telemetry_buffer/observation_model/flush_sweep_readout.py",
+        "line_start": 130,
+        "line_end": 147,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/flush_sweep_readout.py#L130-L147"
+      }
+    ],
+    "AR": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "row reported/infected endpoints if emitted",
+        "ZIP summary role rates for flush"
+      ],
+      "evidence": [
+        {
+          "source_path": "telemetry_buffer/observation_model/flush_sweep_readout.py",
+          "line_start": 130,
+          "line_end": 147,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/flush_sweep_readout.py#L130-L147"
+        }
+      ],
+      "limitation": "A staged Sobol point is not an independent voyage; must preserve point/seed-block hierarchy."
+    },
+    "timing": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "No blanket trajectory promise for compact JSONL; inspect row/member."
+    },
+    "mechanism": {
+      "status": "documented_unverified",
+      "telemetry_fields": [
+        "contact setting/flush fraction",
+        "flush witness if emitted"
+      ],
+      "evidence": [
+        {
+          "source_path": "telemetry_buffer/observation_model/flush_sweep_readout.py",
+          "line_start": 113,
+          "line_end": 147,
+          "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+          "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/flush_sweep_readout.py#L113-L147"
+        }
+      ],
+      "limitation": "Intervention factor is not measured per-infection causal pathway."
+    },
+    "role": {
+      "status": "unknown",
+      "telemetry_fields": [],
+      "evidence": [],
+      "limitation": "Read row-level emitted passenger/crew counts and denominators; do not copy manifest population as measured composition."
+    },
+    "reducers": [
+      "telemetry_buffer/observation_model/staged_posting_readout.py",
+      "telemetry_buffer/observation_model/adj_stratified_readout.py",
+      "telemetry_buffer/observation_model/flush_sweep_readout.py"
+    ]
+  }
+]

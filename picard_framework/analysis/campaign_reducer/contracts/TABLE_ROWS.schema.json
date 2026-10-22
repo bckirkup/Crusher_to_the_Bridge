@@ -1,0 +1,4898 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:crusher:integrated-distributions:v1:table-rows",
+  "title": "NOT_YET_IMPLEMENTED canonical normalized row envelope",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "campaign_catalog"
+        },
+        "row": {
+          "$ref": "#/$defs/campaign_catalog"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "attempts"
+        },
+        "row": {
+          "$ref": "#/$defs/attempts"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "runs"
+        },
+        "row": {
+          "$ref": "#/$defs/runs"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "assets"
+        },
+        "row": {
+          "$ref": "#/$defs/assets"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "capabilities"
+        },
+        "row": {
+          "$ref": "#/$defs/capabilities"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "data_gaps"
+        },
+        "row": {
+          "$ref": "#/$defs/data_gaps"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "design_values"
+        },
+        "row": {
+          "$ref": "#/$defs/design_values"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "pair_links"
+        },
+        "row": {
+          "$ref": "#/$defs/pair_links"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "role_dictionary"
+        },
+        "row": {
+          "$ref": "#/$defs/role_dictionary"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "agents"
+        },
+        "row": {
+          "$ref": "#/$defs/agents"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "memberships"
+        },
+        "row": {
+          "$ref": "#/$defs/memberships"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "population_intervals"
+        },
+        "row": {
+          "$ref": "#/$defs/population_intervals"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "run_scalars"
+        },
+        "row": {
+          "$ref": "#/$defs/run_scalars"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "metrics"
+        },
+        "row": {
+          "$ref": "#/$defs/metrics"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "epoch_metrics"
+        },
+        "row": {
+          "$ref": "#/$defs/epoch_metrics"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "times_to_event"
+        },
+        "row": {
+          "$ref": "#/$defs/times_to_event"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "events"
+        },
+        "row": {
+          "$ref": "#/$defs/events"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "event_participants"
+        },
+        "row": {
+          "$ref": "#/$defs/event_participants"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "mechanism_objects"
+        },
+        "row": {
+          "$ref": "#/$defs/mechanism_objects"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "observations"
+        },
+        "row": {
+          "$ref": "#/$defs/observations"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "weights"
+        },
+        "row": {
+          "$ref": "#/$defs/weights"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "distributions"
+        },
+        "row": {
+          "$ref": "#/$defs/distributions"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "aggregate_estimates"
+        },
+        "row": {
+          "$ref": "#/$defs/aggregate_estimates"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "external_targets"
+        },
+        "row": {
+          "$ref": "#/$defs/external_targets"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "analysis_artifacts"
+        },
+        "row": {
+          "$ref": "#/$defs/analysis_artifacts"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "posterior_draws"
+        },
+        "row": {
+          "$ref": "#/$defs/posterior_draws"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "source_objects"
+        },
+        "row": {
+          "$ref": "#/$defs/source_objects"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "source_links"
+        },
+        "row": {
+          "$ref": "#/$defs/source_links"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "coverage_cells"
+        },
+        "row": {
+          "$ref": "#/$defs/coverage_cells"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "catalog_partitions"
+        },
+        "row": {
+          "$ref": "#/$defs/catalog_partitions"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "reduction_attempts"
+        },
+        "row": {
+          "$ref": "#/$defs/reduction_attempts"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "receipts"
+        },
+        "row": {
+          "$ref": "#/$defs/receipts"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "query_pages"
+        },
+        "row": {
+          "$ref": "#/$defs/query_pages"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "table": {
+          "const": "acknowledgments"
+        },
+        "row": {
+          "$ref": "#/$defs/acknowledgments"
+        }
+      },
+      "required": [
+        "table",
+        "row"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "campaign_catalog": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "campaign_id": {
+          "type": "string",
+          "description": "Canonical namespaced stable campaign ID; aliases in campaign_aliases_json [unit: 1]"
+        },
+        "stage_id": {
+          "type": "string",
+          "description": "Distinct staged design/reanalysis/canary block; do not infer from directory [unit: 1]"
+        },
+        "campaign_aliases_json": {
+          "type": "string",
+          "description": "Historical directory/ledger/manifest names, with alias evidence [unit: 1]"
+        },
+        "family": {
+          "type": "string",
+          "description": "Pathogen/mechanistic/diagnostic/wearable/wastewater/boundary/economics/sentinel/variant/multi-pathogen family [unit: 1]"
+        },
+        "pathogen_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Explicit pathogens; synthetic flagged, not assumed norovirus [unit: 1]"
+        },
+        "catalog_state": {
+          "type": "string",
+          "description": "Documentation/execution state [unit: 1]",
+          "enum": [
+            "declared",
+            "outcomes_reported",
+            "assets_verified",
+            "partially_recovered",
+            "reduced",
+            "withdrawn",
+            "blocked",
+            "unknown"
+          ]
+        },
+        "design_uri": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Frozen input or source-local URI [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ledger_uri": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Controlling chronological entry not stale front matter [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "documentation_sha": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Documentation revision distinct from simulation/reducer [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "declared_slots": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Declared design slots, not verified completed executions [unit: run]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reported_completed": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Ledger asserted completed cells, not independently verified [unit: run]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verified_unique_completed": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Exact asset-linked selected completed executions [unit: run]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "validity_axes_json": {
+          "type": "string",
+          "description": "Independent hull, fleet weighting, total population, crew/passenger statuses and evidence [unit: 1]"
+        },
+        "claim_use": {
+          "type": "string",
+          "description": "Candidate use only; historical or quarantined rows remain queryable [unit: 1]"
+        },
+        "coverage_note": {
+          "type": "string",
+          "description": "Known omissions, scope and status basis [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "source_asset_id",
+        "campaign_id",
+        "stage_id",
+        "campaign_aliases_json",
+        "family",
+        "pathogen_ids",
+        "catalog_state",
+        "design_uri",
+        "ledger_uri",
+        "documentation_sha",
+        "declared_slots",
+        "reported_completed",
+        "verified_unique_completed",
+        "validity_axes_json",
+        "claim_use",
+        "coverage_note"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "campaign_id",
+        "stage_id"
+      ],
+      "x-grain": "one declared campaign/stage registration"
+    },
+    "attempts": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "campaign_id": {
+          "type": "string",
+          "description": "Campaign FK [unit: 1]"
+        },
+        "stage_id": {
+          "type": "string",
+          "description": "Stage FK [unit: 1]"
+        },
+        "attempt_id": {
+          "type": "string",
+          "description": "Exploratory/confirmatory/revision/review-response/canary identity [unit: 1]"
+        },
+        "attempt_kind": {
+          "type": "string",
+          "description": "Scientific lifecycle [unit: 1]",
+          "enum": [
+            "exploratory",
+            "confirmatory",
+            "revision",
+            "review_response",
+            "canary",
+            "smoke",
+            "reanalysis",
+            "unknown"
+          ]
+        },
+        "parent_attempt_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Explicit parentage; empty means root, not missing history [unit: 1]"
+        },
+        "design_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Frozen design contents identity [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "analysis_plan_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Frozen estimands and rules, if existing [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selected_run_policy": {
+          "type": "string",
+          "description": "Predetermined retry/result selection, never most favorable result [unit: 1]"
+        },
+        "scientific_approval_state": {
+          "type": "string",
+          "description": "Existing approval evidence, not a new per-download human gate [unit: 1]"
+        },
+        "supersedes_scope_json": {
+          "type": "string",
+          "description": "Target/run/claim-specific supersession; none does not erase history [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "source_asset_id",
+        "campaign_id",
+        "stage_id",
+        "attempt_id",
+        "attempt_kind",
+        "parent_attempt_ids",
+        "design_hash",
+        "analysis_plan_hash",
+        "selected_run_policy",
+        "scientific_approval_state",
+        "supersedes_scope_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "campaign_id",
+        "stage_id",
+        "attempt_id"
+      ],
+      "x-grain": "one immutable scientific attempt"
+    },
+    "runs": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Globally unique scientific execution key [unit: 1]"
+        },
+        "campaign_id": {
+          "type": "string",
+          "description": "Campaign ID [unit: 1]"
+        },
+        "stage_id": {
+          "type": "string",
+          "description": "Stage ID [unit: 1]"
+        },
+        "attempt_id": {
+          "type": "string",
+          "description": "Attempt ID [unit: 1]"
+        },
+        "case_id": {
+          "type": "string",
+          "description": "Design-cell + replicate identity independent of retry packaging [unit: 1]"
+        },
+        "execution_id": {
+          "type": "string",
+          "description": "Actual execution/retry identity; unresolved gets explicit provisional ID [unit: 1]"
+        },
+        "original_run_id": {
+          "type": "string",
+          "description": "Emitted identifier unmodified [unit: 1]"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615,
+              "description": "Exact RNG seed; never float [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rng_streams_json": {
+          "type": "string",
+          "description": "Saved RNG algorithm/substream identities and pairing scope; unknown explicitly [unit: 1]"
+        },
+        "replicate_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Within-design scientific replicate [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "arm_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Nominal arm identifier [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vessel_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Stable template/vessel identifier, not inferred from population [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pathogen_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Pathogens represented in this execution [unit: 1]"
+        },
+        "engine_sha": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Actually executed source SHA; documentation SHA is not a substitute [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "image_digest": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Actually executed container digest; tag may be stored in metadata only [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Resolved input content hash [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "execution_state": {
+          "type": "string",
+          "description": "Execution state [unit: 1]",
+          "enum": [
+            "declared",
+            "completed",
+            "partial",
+            "failed",
+            "cancelled",
+            "unknown"
+          ]
+        },
+        "selection_state": {
+          "type": "string",
+          "description": "Eligible replicate state [unit: 1]",
+          "enum": [
+            "selected",
+            "duplicate_alias",
+            "retry_not_selected",
+            "identity_conflict",
+            "quarantined",
+            "pending"
+          ]
+        },
+        "selection_reason": {
+          "type": "string",
+          "description": "Explicit dedup/retry/claim use basis [unit: 1]"
+        },
+        "clock_mode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Actual natural-history/physical clock mode [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "configured_epoch_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Saved configured step length, not necessarily effective [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "effective_epoch_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Effective conversion proved from actual run version/config [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "epoch_origin_kind": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Origin convention: pre-step/post-step/time-zero/etc. [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "epoch_origin_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Elapsed hours at epoch zero relative to voyage departure [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "voyage_start_utc": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Calendar origin only when actually saved; otherwise elapsed-only [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requested_duration_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Intended horizon [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actual_followup_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Observed/simulated completed follow-up [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_complete_epoch": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Last complete epoch; incomplete tail excluded [unit: epoch]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "retention_profile": {
+          "type": "string",
+          "description": "Full/compact/lean/mixed/unknown; capability finer than this label [unit: 1]"
+        },
+        "metadata_json": {
+          "type": "string",
+          "description": "Original run tags, image tag, launch IDs and optional environment metadata [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "campaign_id",
+        "stage_id",
+        "attempt_id",
+        "case_id",
+        "execution_id",
+        "original_run_id",
+        "seed",
+        "rng_streams_json",
+        "replicate_id",
+        "arm_id",
+        "vessel_id",
+        "pathogen_ids",
+        "engine_sha",
+        "image_digest",
+        "input_hash",
+        "execution_state",
+        "selection_state",
+        "selection_reason",
+        "clock_mode",
+        "configured_epoch_hours",
+        "effective_epoch_hours",
+        "epoch_origin_kind",
+        "epoch_origin_hours",
+        "voyage_start_utc",
+        "requested_duration_hours",
+        "actual_followup_hours",
+        "last_complete_epoch",
+        "retention_profile",
+        "metadata_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid"
+      ],
+      "x-grain": "one actual or declared run execution"
+    },
+    "assets": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "asset_id": {
+          "type": "string",
+          "description": "Stable asset ID [unit: 1]"
+        },
+        "campaign_id": {
+          "type": "string",
+          "description": "Campaign ID; unmapped assets receive inventory namespace [unit: 1]"
+        },
+        "attempt_id": {
+          "type": "string",
+          "description": "Attempt or unresolved inventory attempt [unit: 1]"
+        },
+        "run_uid": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Mapped execution; null for fused container or not-yet-mapped [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "s3_uri": {
+          "type": "string",
+          "description": "Existing authorized source URI; local evidence URI also allowed [unit: 1]"
+        },
+        "object_version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "S3 version if present; not mandatory for unversioned historical objects [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "object_etag": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "ETag only cache identity, NOT promised content SHA [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "asset_kind": {
+          "type": "string",
+          "description": "Container or member [unit: 1]",
+          "enum": [
+            "container",
+            "member",
+            "sidecar",
+            "parquet",
+            "manifest",
+            "log",
+            "local_source"
+          ]
+        },
+        "parent_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Container FK for a member [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "member_path": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact path inside per-run/fused archive [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "compression": {
+          "type": "string",
+          "description": "ZIP/gzip/none etc. [unit: 1]"
+        },
+        "bytes_stored": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Stored bytes [unit: byte]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bytes_uncompressed": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Member uncompressed bytes [unit: byte]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Hash of exact object OR uncompressed member as stated in hash_scope [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hash_scope": {
+          "type": "string",
+          "description": "Container hashes never compared as member hashes [unit: 1]",
+          "enum": [
+            "container_bytes",
+            "uncompressed_member",
+            "file_bytes",
+            "not_computed"
+          ]
+        },
+        "read_state": {
+          "type": "string",
+          "description": "Listing vs actual parse evidence [unit: 1]",
+          "enum": [
+            "listed",
+            "indexed",
+            "read",
+            "parsed",
+            "malformed",
+            "unreachable",
+            "missing",
+            "not_requested"
+          ]
+        },
+        "adapter_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Versioned source adapter used or proposed [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_sha": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Writer/engine identity only when known [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "asset_id",
+        "campaign_id",
+        "attempt_id",
+        "run_uid",
+        "s3_uri",
+        "object_version",
+        "object_etag",
+        "asset_kind",
+        "parent_asset_id",
+        "member_path",
+        "compression",
+        "bytes_stored",
+        "bytes_uncompressed",
+        "content_sha256",
+        "hash_scope",
+        "read_state",
+        "adapter_id",
+        "source_sha"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "asset_id"
+      ],
+      "x-grain": "one object/member/sidecar instance"
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope_id": {
+          "type": "string",
+          "description": "run_uid or campaign/stage ID; scope_kind disambiguates [unit: 1]"
+        },
+        "scope_kind": {
+          "type": "string",
+          "description": "Scope type [unit: 1]",
+          "enum": [
+            "run",
+            "stage",
+            "campaign"
+          ]
+        },
+        "capability_id": {
+          "type": "string",
+          "description": "Metric/table/join capability ID [unit: 1]"
+        },
+        "availability": {
+          "type": "string",
+          "description": "Typed scientific recoverability [unit: 1]",
+          "enum": [
+            "available_exact",
+            "available_rounded",
+            "recoverable_unread",
+            "derivable_exact",
+            "partial",
+            "not_saved",
+            "dropped_by_profile",
+            "not_applicable",
+            "unknown",
+            "blocked_identity",
+            "malformed",
+            "unreachable"
+          ]
+        },
+        "evidence_detail": {
+          "type": "string",
+          "description": "Saved member/schema/version proof; no global flag inferred from one sample [unit: 1]"
+        },
+        "row_coverage": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Rows or executions inspected, stated in coverage_unit [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverage_unit": {
+          "type": "string",
+          "description": "run/member/row [unit: 1]"
+        },
+        "required_members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Targeted member paths [unit: 1]"
+        },
+        "recoverability_action": {
+          "type": "string",
+          "description": "Read/reduce/reconcile/retain unavailable/pilot proposal [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "source_asset_id",
+        "scope_id",
+        "scope_kind",
+        "capability_id",
+        "availability",
+        "evidence_detail",
+        "row_coverage",
+        "coverage_unit",
+        "required_members",
+        "recoverability_action"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "scope_id",
+        "capability_id"
+      ],
+      "x-grain": "one run or stage capability"
+    },
+    "data_gaps": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "table_name": {
+          "type": "string",
+          "description": "Affected normalized table [unit: 1]"
+        },
+        "target_row_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Affected row, or range selector JSON in selector_json [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "field_name": {
+          "type": "string",
+          "description": "Column or metric [unit: 1]"
+        },
+        "selector_json": {
+          "type": "string",
+          "description": "Explicit affected slice; empty object for single row [unit: 1]"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Never silently map to zero [unit: 1]",
+          "enum": [
+            "not_saved",
+            "dropped_by_profile",
+            "member_missing",
+            "not_applicable",
+            "unknown_schema",
+            "malformed",
+            "unreachable",
+            "not_requested",
+            "identity_unresolved",
+            "incompatible_definition",
+            "denominator_zero",
+            "no_events",
+            "not_observed",
+            "not_identifiable",
+            "rounded_only",
+            "time_origin_unknown",
+            "partial_followup",
+            "unsupported_join"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "description": "Evidence and recovery instructions [unit: 1]"
+        },
+        "recoverability": {
+          "type": "string",
+          "description": "Recoverability state [unit: 1]",
+          "enum": [
+            "read_existing",
+            "derive_existing",
+            "reconcile_identity",
+            "irrecoverable_existing",
+            "pending_inventory",
+            "not_applicable"
+          ]
+        },
+        "blocks_claim_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Only affected claims blocked, not the entire catalog [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "source_asset_id",
+        "table_name",
+        "target_row_id",
+        "field_name",
+        "selector_json",
+        "reason",
+        "detail",
+        "recoverability",
+        "blocks_claim_ids"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "row_id"
+      ],
+      "x-grain": "one unavailable value or range"
+    },
+    "design_values": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parameter_path": {
+          "type": "string",
+          "description": "Canonical and original configuration path via metadata [unit: 1]"
+        },
+        "value_layer": {
+          "type": "string",
+          "description": "Do not substitute nominal for realized [unit: 1]",
+          "enum": [
+            "nominal_design",
+            "resolved_config",
+            "realized_draw",
+            "realized_exposure",
+            "measured_outcome"
+          ]
+        },
+        "value_json": {
+          "type": "string",
+          "description": "Exact original scalar/structured value, no float seed conversion [unit: 1]"
+        },
+        "value_numeric": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Numeric projection when lossless enough for analysis [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_unit": {
+          "type": "string",
+          "description": "Physical/probability/log scale units [unit: 1]"
+        },
+        "distribution_family": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Nominal distribution family if draw [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "correlation_group_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Shared draw/correlation design identifier [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parameter_provenance_json": {
+          "type": "string",
+          "description": "Source grade/assumed/fitted/transcribed plus transform/version [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "parameter_path",
+        "value_layer",
+        "value_json",
+        "value_numeric",
+        "value_unit",
+        "distribution_family",
+        "correlation_group_id",
+        "parameter_provenance_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "parameter_path",
+        "value_layer"
+      ],
+      "x-grain": "one run parameter at specified design layer"
+    },
+    "pair_links": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pair_id": {
+          "type": "string",
+          "description": "Pairing identity within contrast, not seed alone [unit: 1]"
+        },
+        "contrast_id": {
+          "type": "string",
+          "description": "Frozen contrast recipe ID [unit: 1]"
+        },
+        "left_run_uid": {
+          "type": "string",
+          "description": "Reference selected run FK [unit: 1]"
+        },
+        "right_run_uid": {
+          "type": "string",
+          "description": "Treatment/other selected run FK [unit: 1]"
+        },
+        "shared_seed": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615,
+              "description": "Seed equality is necessary only for declared CRN scheme, not sufficient [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pairing_basis": {
+          "type": "string",
+          "description": "Matched cell, random stream and source bridge evidence [unit: 1]"
+        },
+        "pair_state": {
+          "type": "string",
+          "description": "Eligibility [unit: 1]",
+          "enum": [
+            "exact_design_pair",
+            "version_bridge_pair",
+            "partial_pair",
+            "unmatched",
+            "incompatible"
+          ]
+        },
+        "bridge_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Source/image/parameter equivalence table reference for version comparison [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "differing_parameter_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Explicit actual differences incl hull bundle [unit: 1]"
+        },
+        "unmatched_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Structurally optional for exact pairs [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "source_asset_id",
+        "pair_id",
+        "contrast_id",
+        "left_run_uid",
+        "right_run_uid",
+        "shared_seed",
+        "pairing_basis",
+        "pair_state",
+        "bridge_id",
+        "differing_parameter_paths",
+        "unmatched_reason"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "pair_id",
+        "contrast_id"
+      ],
+      "x-grain": "one explicitly justified pair/contrast"
+    },
+    "role_dictionary": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "role_definition_id": {
+          "type": "string",
+          "description": "Stable explicit ontology ID with version [unit: 1]"
+        },
+        "role_label": {
+          "type": "string",
+          "description": "Human label [unit: 1]"
+        },
+        "role_axis": {
+          "type": "string",
+          "description": "Orthogonal role axes [unit: 1]",
+          "enum": [
+            "primary_population",
+            "occupation",
+            "response_function",
+            "duty_state",
+            "source_eligibility",
+            "clinical_state",
+            "observation_state",
+            "spatial_context"
+          ]
+        },
+        "membership_rule": {
+          "type": "string",
+          "description": "Exact predicate including writer version and input fields [unit: 1]"
+        },
+        "exclusive_within_axis": {
+          "type": "boolean",
+          "description": "True only for proved exhaustive disjoint primary role partition [unit: 1]"
+        },
+        "time_varying": {
+          "type": "boolean",
+          "description": "Requires interval/event-time membership [unit: 1]"
+        },
+        "source_mapping_json": {
+          "type": "string",
+          "description": "Original role/class values and explicit fallback/unresolved handling [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "role_definition_id",
+        "role_label",
+        "role_axis",
+        "membership_rule",
+        "exclusive_within_axis",
+        "time_varying",
+        "source_mapping_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "role_definition_id"
+      ],
+      "x-grain": "one versioned role concept"
+    },
+    "agents": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "agent_id": {
+          "type": "string",
+          "description": "Stable within-run ID, not cross-seed person [unit: 1]"
+        },
+        "roster_scope": {
+          "type": "string",
+          "description": "Full roster vs infected subset [unit: 1]",
+          "enum": [
+            "full_at_risk",
+            "infected_only",
+            "observed_only",
+            "event_participant_only",
+            "partial"
+          ]
+        },
+        "boarding_state": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Saved infection/import and presence state [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "primary_role_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Explicit role dictionary FK; unresolved not inferred crew/passenger [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attributes_json": {
+          "type": "string",
+          "description": "Only saved stable subgroup attributes, no generated demographics [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "agent_id",
+        "roster_scope",
+        "boarding_state",
+        "primary_role_id",
+        "attributes_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "agent_id"
+      ],
+      "x-grain": "one saved agent identity per run"
+    },
+    "memberships": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "membership_id": {
+          "type": "string",
+          "description": "Distinct membership interval ID [unit: 1]"
+        },
+        "agent_id": {
+          "type": "string",
+          "description": "Within-run agent FK [unit: 1]"
+        },
+        "role_definition_id": {
+          "type": "string",
+          "description": "Dictionary FK [unit: 1]"
+        },
+        "start_hours": {
+          "type": "number",
+          "description": "Inclusive start, elapsed voyage hours [unit: h]"
+        },
+        "end_hours": {
+          "type": "number",
+          "description": "Exclusive end; clipped to complete followup [unit: h]"
+        },
+        "context_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Zone/work/team/host recipient context [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "membership_basis": {
+          "type": "string",
+          "description": "Saved role, explicit predicate or verified derived interval; never nominal crew JSON alone [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "membership_id",
+        "agent_id",
+        "role_definition_id",
+        "start_hours",
+        "end_hours",
+        "context_id",
+        "membership_basis"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "membership_id"
+      ],
+      "x-grain": "one agent-role/context membership interval"
+    },
+    "population_intervals": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "population_id": {
+          "type": "string",
+          "description": "Versioned set rule, with role/eligibility/clinical exclusion [unit: 1]"
+        },
+        "window_id": {
+          "type": "string",
+          "description": "Versioned followup window [unit: 1]"
+        },
+        "role_definition_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Optional role-specific set [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "window_start_hours": {
+          "type": "number",
+          "description": "Inclusive beginning [unit: h]"
+        },
+        "window_end_hours": {
+          "type": "number",
+          "description": "Exclusive end [unit: h]"
+        },
+        "population_basis": {
+          "type": "string",
+          "description": "Denominator semantics [unit: 1]",
+          "enum": [
+            "boarding_complement",
+            "unique_ever_aboard",
+            "susceptible_at_start",
+            "eligible_course_cohort",
+            "eligible_onboard",
+            "dynamic_at_risk",
+            "test_eligible",
+            "source_eligible",
+            "response_eligible",
+            "observed_roster"
+          ]
+        },
+        "n_unique": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Distinct eligible persons; not episodes [unit: person]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "n_at_start": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Eligible present at start [unit: person]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "n_at_end": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Eligible present at end [unit: person]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "person_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Integral of union of eligible presence intervals [unit: person*h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "susceptible_person_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Integral of infection-risk eligibility; reinfection rule explicit [unit: person*h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "risk_set_rule": {
+          "type": "string",
+          "description": "Arrivals/departures, immunity, infection, competing exit, attribution membership time [unit: 1]"
+        },
+        "count_evidence": {
+          "type": "string",
+          "description": "Emitted complete roster, emitted counts, reconstruction, or nominal-only warning [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "population_id",
+        "window_id",
+        "role_definition_id",
+        "window_start_hours",
+        "window_end_hours",
+        "population_basis",
+        "n_unique",
+        "n_at_start",
+        "n_at_end",
+        "person_hours",
+        "susceptible_person_hours",
+        "risk_set_rule",
+        "count_evidence"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "population_id",
+        "window_id"
+      ],
+      "x-grain": "one run × population/window denominator"
+    },
+    "run_scalars": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "type": "string",
+          "description": "Exact source member evidence [unit: 1]"
+        },
+        "native_path": {
+          "type": "string",
+          "description": "JSON Pointer / row+column to original scalar [unit: 1]"
+        },
+        "native_type": {
+          "type": "string",
+          "description": "Original primitive [unit: 1]",
+          "enum": [
+            "null",
+            "boolean",
+            "integer",
+            "number",
+            "string"
+          ]
+        },
+        "native_value_json": {
+          "type": "string",
+          "description": "Exact lexical JSON token where possible; original member retained otherwise [unit: 1]"
+        },
+        "canonical_metric_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Validated mapping only; unmapped scalar still accessible [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mapping_state": {
+          "type": "string",
+          "description": "Mapping status [unit: 1]",
+          "enum": [
+            "verified",
+            "native_only",
+            "ambiguous",
+            "rounded_source"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "description": "As emitted or unknown; never infer route dose unit from field name [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "native_path",
+        "native_type",
+        "native_value_json",
+        "canonical_metric_id",
+        "mapping_state",
+        "unit"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "source_asset_id",
+        "native_path"
+      ],
+      "x-grain": "one exact native scalar path per run and source member"
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metric_id": {
+          "type": "string",
+          "description": "Versioned estimand dictionary ID [unit: 1]"
+        },
+        "population_id": {
+          "type": "string",
+          "description": "Denominator population ID [unit: 1]"
+        },
+        "condition_id": {
+          "type": "string",
+          "description": "Unconditional or explicit predicate on post/outbreak/channel/etc. [unit: 1]"
+        },
+        "window_id": {
+          "type": "string",
+          "description": "Versioned observation/clinical/acquisition window [unit: 1]"
+        },
+        "numerator": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Exact count/integral numerator projection; native token retained [unit: metric-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "denominator": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Matching population/person-time/exposure opportunity denominator [unit: metric-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Unrounded recomputation only where numerator/denominator defined [unit: metric-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_status": {
+          "type": "string",
+          "description": "Value evidence [unit: 1]",
+          "enum": [
+            "exact_emitted",
+            "exact_derived",
+            "rounded_emitted",
+            "partial",
+            "undefined",
+            "unavailable"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "description": "Count/proportion/person^-hour/dose/event etc. [unit: 1]"
+        },
+        "endpoint_domain": {
+          "type": "string",
+          "description": "Truth, clinical, observation, policy, economic distinct [unit: 1]",
+          "enum": [
+            "latent_truth",
+            "symptomatic_course",
+            "onboard_symptoms",
+            "reported",
+            "tested",
+            "lab_confirmed",
+            "response",
+            "mechanism",
+            "economic",
+            "external_observed"
+          ]
+        },
+        "definition_version": {
+          "type": "string",
+          "description": "Source/analysis definition identity [unit: 1]"
+        },
+        "membership_time_rule": {
+          "type": "string",
+          "description": "At boarding/acquisition/onset/report/event/time-integrated [unit: 1]"
+        },
+        "numerator_exact_json": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact count/integral JSON token when numeric projection is lossy; structurally optional when numerator absent [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "denominator_exact_json": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact denominator token; structurally optional when denominator absent [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "metric_id",
+        "population_id",
+        "condition_id",
+        "window_id",
+        "numerator",
+        "denominator",
+        "value",
+        "value_status",
+        "unit",
+        "endpoint_domain",
+        "definition_version",
+        "membership_time_rule",
+        "numerator_exact_json",
+        "denominator_exact_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "metric_id",
+        "population_id",
+        "condition_id",
+        "window_id"
+      ],
+      "x-grain": "one exact run × estimand × population × condition/window"
+    },
+    "epoch_metrics": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metric_id": {
+          "type": "string",
+          "description": "Versioned curve metric [unit: 1]"
+        },
+        "population_id": {
+          "type": "string",
+          "description": "Explicit role/risk set [unit: 1]"
+        },
+        "source_epoch": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -9223372036854775808,
+              "maximum": 9223372036854775807,
+              "description": "Original epoch; keep exact axis [unit: epoch]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bin_start_hours": {
+          "type": "number",
+          "description": "Inclusive elapsed time [unit: h]"
+        },
+        "bin_end_hours": {
+          "type": "number",
+          "description": "Exclusive elapsed time [unit: h]"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Count/state/increment/integral; metric defines type [unit: metric-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "denominator": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Actual bin population or person-time [unit: metric-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "series_kind": {
+          "type": "string",
+          "description": "Series semantics [unit: 1]",
+          "enum": [
+            "state",
+            "incidence",
+            "cumulative",
+            "rate",
+            "integral",
+            "flag"
+          ]
+        },
+        "value_status": {
+          "type": "string",
+          "description": "Exact/rounded/estimated/missing [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "metric_id",
+        "population_id",
+        "source_epoch",
+        "bin_start_hours",
+        "bin_end_hours",
+        "value",
+        "denominator",
+        "series_kind",
+        "value_status"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "metric_id",
+        "population_id",
+        "bin_start_hours",
+        "bin_end_hours"
+      ],
+      "x-grain": "one run × metric × population × time bin"
+    },
+    "times_to_event": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "subject_kind": {
+          "type": "string",
+          "description": "Unit at risk [unit: 1]",
+          "enum": [
+            "run",
+            "agent",
+            "episode",
+            "object",
+            "test",
+            "port_call"
+          ]
+        },
+        "subject_id": {
+          "type": "string",
+          "description": "Stable ID at this grain [unit: 1]"
+        },
+        "endpoint_id": {
+          "type": "string",
+          "description": "Acquisition/onset/report/test/result/trigger/recovery/etc. [unit: 1]"
+        },
+        "window_id": {
+          "type": "string",
+          "description": "Followup window definition [unit: 1]"
+        },
+        "time_origin_id": {
+          "type": "string",
+          "description": "Voyage start/acquisition/onset/specimen/etc. [unit: 1]"
+        },
+        "origin_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Origin on elapsed voyage axis [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Risk entry relative to time origin (delayed entry supported) [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lower_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Lower event bound; null means negative infinity only for explicitly left censored [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upper_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Upper event bound; null means positive infinity only for explicitly right censored [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "censor_type": {
+          "type": "string",
+          "description": "Event-time observation [unit: 1]",
+          "enum": [
+            "exact",
+            "right",
+            "left",
+            "interval",
+            "structural_nonoccurrence",
+            "not_at_risk",
+            "unknown"
+          ]
+        },
+        "exit_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Actual end of observation relative origin [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "competing_endpoint_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Disembarkation/death/recovery/etc.; must distinguish administrative censor [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_domain": {
+          "type": "string",
+          "description": "Observed/latent/estimated [unit: 1]",
+          "enum": [
+            "latent",
+            "observed",
+            "scheduled",
+            "inferred_interval"
+          ]
+        },
+        "event_observed": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "True iff endpoint was directly observed within relevant domain [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "original_time_json": {
+          "type": "string",
+          "description": "Raw epoch, unit, bounds and writer convention [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "subject_kind",
+        "subject_id",
+        "endpoint_id",
+        "window_id",
+        "time_origin_id",
+        "origin_hours",
+        "entry_hours",
+        "lower_hours",
+        "upper_hours",
+        "censor_type",
+        "exit_hours",
+        "competing_endpoint_id",
+        "event_domain",
+        "event_observed",
+        "original_time_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "subject_kind",
+        "subject_id",
+        "endpoint_id",
+        "window_id"
+      ],
+      "x-grain": "one subject/run × endpoint × followup window"
+    },
+    "events": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_id": {
+          "type": "string",
+          "description": "Native ID, or deterministic source-member+array-index ID [unit: 1]"
+        },
+        "event_type": {
+          "type": "string",
+          "description": "Exposure/contact/acquisition/onset/report/care/delivery/etc. [unit: 1]"
+        },
+        "episode_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Infection episode FK if saved [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Inclusive event time/beginning [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Exclusive end for duration; instant events start=end [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zone_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Saved spatial context [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "object_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Saved mechanism object FK [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry_channel": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Boarding/imported supply/shore/aboard/unknown per version [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dose_route": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Dose accounting route, distinct from entry [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dominant_route": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Establishment argmax/tie/fallback definition, never source identity [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dose_delivered": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Delivered dose, not automatically acquired dose [unit: declared_dose_unit]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dose_acquired": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Credited/acquired dose with source units [unit: declared_dose_unit]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_weight": {
+          "type": "number",
+          "description": "1 for each event unless saved aggregated event explicitly labeled [unit: event]"
+        },
+        "payload_json": {
+          "type": "string",
+          "description": "All unmapped original event fields preserved server-side [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "event_id",
+        "event_type",
+        "episode_id",
+        "start_hours",
+        "end_hours",
+        "zone_id",
+        "object_id",
+        "entry_channel",
+        "dose_route",
+        "dominant_route",
+        "dose_delivered",
+        "dose_acquired",
+        "event_weight",
+        "payload_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "event_id"
+      ],
+      "x-grain": "one saved event or establishment episode"
+    },
+    "event_participants": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_id": {
+          "type": "string",
+          "description": "Saved event FK [unit: 1]"
+        },
+        "agent_id": {
+          "type": "string",
+          "description": "Stable within-run ID [unit: 1]"
+        },
+        "participation_kind": {
+          "type": "string",
+          "description": "Directed and multi-person participation [unit: 1]",
+          "enum": [
+            "actor",
+            "source",
+            "recipient",
+            "exposed",
+            "responder",
+            "caregiver",
+            "service_provider",
+            "reporter",
+            "specimen_donor",
+            "tested",
+            "observer"
+          ]
+        },
+        "role_definition_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Event-time role if recoverable, otherwise null gap [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "membership_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Event-time interval membership evidence [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dose_share": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Only when saved and meaningful; not imputed equal shares [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "participation_status": {
+          "type": "string",
+          "description": "Saved/derived/partial; count unique IDs separately from event rows [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "event_id",
+        "agent_id",
+        "participation_kind",
+        "role_definition_id",
+        "membership_id",
+        "dose_share",
+        "participation_status"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "event_id",
+        "agent_id",
+        "participation_kind"
+      ],
+      "x-grain": "one event × agent × participation kind"
+    },
+    "mechanism_objects": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "object_id": {
+          "type": "string",
+          "description": "Stable within-run object ID [unit: 1]"
+        },
+        "object_kind": {
+          "type": "string",
+          "description": "Provisioned lot/pan/event source/air compartment/etc. [unit: 1]"
+        },
+        "source_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Saved source identity; scenario label not necessarily routed itinerary [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_kind": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Boarding/agent/provisioned/shore/environmental etc. [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zone_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Saved location [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "station_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Stable source station if saved or deterministic zone+item mapping [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Seeded/available time [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Removal/end/censor time [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exhaustion/extent_met/horizon/etc. [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attributes_json": {
+          "type": "string",
+          "description": "All saved titre/servings/pans/window/source witnesses with units [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "object_id",
+        "object_kind",
+        "source_id",
+        "source_kind",
+        "zone_id",
+        "station_id",
+        "start_hours",
+        "end_hours",
+        "end_reason",
+        "attributes_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "object_id"
+      ],
+      "x-grain": "one saved physical/source object"
+    },
+    "observations": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "run_uid": {
+          "type": "string",
+          "description": "Exact scientific execution identity, never filename alone [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation_id": {
+          "type": "string",
+          "description": "Unique observation ID; repeated tests remain distinct [unit: 1]"
+        },
+        "subject_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Agent/site/zone/port subject [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "subject_kind": {
+          "type": "string",
+          "description": "agent/sample/zone/ship/port [unit: 1]"
+        },
+        "modality": {
+          "type": "string",
+          "description": "Syndromic/clinical/lab/wearable/wastewater/sequencing/etc. [unit: 1]"
+        },
+        "specimen_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Specimen identity [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parent_observation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Reflex/cascade lineage [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "collection_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Actual sample/observation time [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_hours": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Availability time not collection time [unit: h]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_json": {
+          "type": "string",
+          "description": "Categorical/numeric result and original unit/LOD/LOQ/censor flags [unit: 1]"
+        },
+        "latent_truth_json": {
+          "type": "string",
+          "description": "Saved simulation truth linkage, labeled and never used as observed fit input [unit: 1]"
+        },
+        "eligibility_population_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Who could be tested/reported [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "feedback_action_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Policy/clinical action caused by observation if saved [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "run_uid",
+        "source_asset_id",
+        "observation_id",
+        "subject_id",
+        "subject_kind",
+        "modality",
+        "specimen_id",
+        "parent_observation_id",
+        "collection_hours",
+        "result_hours",
+        "result_json",
+        "latent_truth_json",
+        "eligibility_population_id",
+        "feedback_action_id"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "run_uid",
+        "observation_id"
+      ],
+      "x-grain": "one saved observation/specimen/result/report"
+    },
+    "weights": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "weight_set_id": {
+          "type": "string",
+          "description": "Named immutable target/date weight definition [unit: 1]"
+        },
+        "unit_kind": {
+          "type": "string",
+          "description": "Weight unit [unit: 1]",
+          "enum": [
+            "run",
+            "seed_block",
+            "design_cell",
+            "vessel",
+            "voyage",
+            "person",
+            "posterior_draw",
+            "external_record"
+          ]
+        },
+        "unit_id": {
+          "type": "string",
+          "description": "Matching ID at declared unit [unit: 1]"
+        },
+        "target_id": {
+          "type": "string",
+          "description": "Finite fleet, bounded class, design distribution, population etc. [unit: 1]"
+        },
+        "weight": {
+          "type": "number",
+          "description": "Nonnegative finite analysis weight; zero weight reported not deleted [unit: 1]"
+        },
+        "weight_kind": {
+          "type": "string",
+          "description": "Simulation design/fleet/population/inverse probability/posterior separately [unit: 1]",
+          "enum": [
+            "equal_run",
+            "design",
+            "fleet",
+            "person",
+            "selection",
+            "posterior"
+          ]
+        },
+        "normalization_scope": {
+          "type": "string",
+          "description": "Within vessel/cell/target normalization [unit: 1]"
+        },
+        "provenance_json": {
+          "type": "string",
+          "description": "Named/date fleet source, selection rule, uncertainty, bounds and approval [unit: 1]"
+        },
+        "validity_status": {
+          "type": "string",
+          "description": "Qualified/unqualified/blocked; no weights borrowed silently across targets [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "weight_set_id",
+        "unit_kind",
+        "unit_id",
+        "target_id",
+        "weight",
+        "weight_kind",
+        "normalization_scope",
+        "provenance_json",
+        "validity_status"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "weight_set_id",
+        "unit_id"
+      ],
+      "x-grain": "one analysis target × unit weight"
+    },
+    "distributions": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "query_id": {
+          "type": "string",
+          "description": "Reproducible query/analysis ID [unit: 1]"
+        },
+        "distribution_id": {
+          "type": "string",
+          "description": "Metric/conditioning/weight domain ID [unit: 1]"
+        },
+        "support_id": {
+          "type": "string",
+          "description": "Stable sorted support/bound record ID [unit: 1]"
+        },
+        "group_json": {
+          "type": "string",
+          "description": "Exact user-selected dimensions and target [unit: 1]"
+        },
+        "metric_id": {
+          "type": "string",
+          "description": "Versioned metric [unit: 1]"
+        },
+        "support_value": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Exact observed scalar support; null for censor/time category only [unit: metric-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mass_count": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Number of distinct selected independent run contributions [unit: run]"
+        },
+        "weight_sum": {
+          "type": "number",
+          "description": "Sum declared valid weights at support [unit: 1]"
+        },
+        "cdf": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Right-continuous scalar ECDF when meaningful; not for arbitrary censor records [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "n_eligible": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Runs eligible before value missingness [unit: run]"
+        },
+        "n_observed": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Nonmissing value runs [unit: run]"
+        },
+        "n_missing": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Unavailable/undefined separate via missing_reason_counts_json [unit: run]"
+        },
+        "n_effective": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Kish weight diagnostic, not independent replicate count [unit: run]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "missing_reason_counts_json": {
+          "type": "string",
+          "description": "Typed reason counts incl structural zero/event absence [unit: 1]"
+        },
+        "distribution_payload_json": {
+          "type": "string",
+          "description": "Censor/risk-set/CIF table, atom metadata, histogram bounds or approximation disclosure [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "query_id",
+        "distribution_id",
+        "support_id",
+        "group_json",
+        "metric_id",
+        "support_value",
+        "mass_count",
+        "weight_sum",
+        "cdf",
+        "n_eligible",
+        "n_observed",
+        "n_missing",
+        "n_effective",
+        "missing_reason_counts_json",
+        "distribution_payload_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "query_id",
+        "distribution_id",
+        "support_id"
+      ],
+      "x-grain": "one exact mass/support point or censored-time contribution per group"
+    },
+    "aggregate_estimates": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "query_id": {
+          "type": "string",
+          "description": "Recipe/query identity [unit: 1]"
+        },
+        "estimate_id": {
+          "type": "string",
+          "description": "Output ID [unit: 1]"
+        },
+        "estimand_id": {
+          "type": "string",
+          "description": "Mean run rate/pooled person rate/mixture contrast etc. [unit: 1]"
+        },
+        "group_json": {
+          "type": "string",
+          "description": "All conditioning, populations, hulls and parameter dimensions [unit: 1]"
+        },
+        "target_id": {
+          "type": "string",
+          "description": "Named target distribution or bounded vessel claim [unit: 1]"
+        },
+        "weight_set_id": {
+          "type": "string",
+          "description": "Explicit weights or equal-run definition [unit: 1]"
+        },
+        "estimate": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Unrounded estimate [unit: estimand-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lower": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Interval lower bound [unit: estimand-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Interval upper bound [unit: estimand-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "interval_method": {
+          "type": "string",
+          "description": "Seed-block bootstrap/binomial/exact/survival/posterior etc. [unit: 1]"
+        },
+        "interval_level": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Coverage or posterior probability [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "n_independent_blocks": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Actual independent seed/design blocks [unit: block]"
+        },
+        "n_runs": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Selected complete runs contributing [unit: run]"
+        },
+        "numerator": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Pooled numerator if appropriate [unit: estimand-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "denominator": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Pooled denominator if appropriate [unit: estimand-dependent]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "analysis_version": {
+          "type": "string",
+          "description": "Deterministic recipe, code and environment version [unit: 1]"
+        },
+        "limitations_json": {
+          "type": "string",
+          "description": "Vacuity, missingness, multiplicity, identity and validity restrictions [unit: 1]"
+        },
+        "numerator_exact_json": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact count/integral JSON token when numeric projection is lossy; structurally optional when numerator absent [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "denominator_exact_json": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact denominator token; structurally optional when denominator absent [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "query_id",
+        "estimate_id",
+        "estimand_id",
+        "group_json",
+        "target_id",
+        "weight_set_id",
+        "estimate",
+        "lower",
+        "upper",
+        "interval_method",
+        "interval_level",
+        "n_independent_blocks",
+        "n_runs",
+        "numerator",
+        "denominator",
+        "analysis_version",
+        "limitations_json",
+        "numerator_exact_json",
+        "denominator_exact_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "query_id",
+        "estimate_id"
+      ],
+      "x-grain": "one analysis estimand × target/group"
+    },
+    "external_targets": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "external_target_id": {
+          "type": "string",
+          "description": "Stable target/version [unit: 1]"
+        },
+        "dataset_id": {
+          "type": "string",
+          "description": "Dataset and extraction date [unit: 1]"
+        },
+        "endpoint_id": {
+          "type": "string",
+          "description": "AGE/norovirus-specific/reported/lab etc. [unit: 1]"
+        },
+        "population_definition": {
+          "type": "string",
+          "description": "Passengers/crew/fleet/tonnage/duration/eligibility [unit: 1]"
+        },
+        "time_window_json": {
+          "type": "string",
+          "description": "Calendar era, voyage duration and observation boundaries [unit: 1]"
+        },
+        "observed_numerator": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Actual observed count or estimate [unit: declared]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_denominator": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Matching observed exposure denominator [unit: declared]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "estimate_json": {
+          "type": "string",
+          "description": "Uncertainty, ascertainment, norovirus fraction model and external-only transformation [unit: 1]"
+        },
+        "provenance_json": {
+          "type": "string",
+          "description": "Local source/citation/extraction grade and limitations [unit: 1]"
+        },
+        "comparison_qualification": {
+          "type": "string",
+          "description": "Matched/partially matched/withheld, endpoint-specific [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "external_target_id",
+        "dataset_id",
+        "endpoint_id",
+        "population_definition",
+        "time_window_json",
+        "observed_numerator",
+        "observed_denominator",
+        "estimate_json",
+        "provenance_json",
+        "comparison_qualification"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "external_target_id"
+      ],
+      "x-grain": "one external observed endpoint/stratum"
+    },
+    "analysis_artifacts": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "artifact_id": {
+          "type": "string",
+          "description": "Stable catalog ID [unit: 1]"
+        },
+        "query_id": {
+          "type": "string",
+          "description": "Query ID [unit: 1]"
+        },
+        "uri": {
+          "type": "string",
+          "description": "AWS full table or compact Edison artifact pointer [unit: 1]"
+        },
+        "format": {
+          "type": "string",
+          "description": "Parquet/JSON/CSV/PNG/PDF/Markdown etc. [unit: 1]"
+        },
+        "row_count": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Exact rows exported [unit: row]"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Artifact size [unit: byte]"
+        },
+        "content_sha256": {
+          "type": "string",
+          "description": "Ordinary scientific reproducibility checksum [unit: 1]"
+        },
+        "source_partition_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Exact catalog snapshot inputs [unit: 1]"
+        },
+        "query_json": {
+          "type": "string",
+          "description": "Filters/groupings/metric/window/weight/paging/revision [unit: 1]"
+        },
+        "reducer_version": {
+          "type": "string",
+          "description": "Actual reducer code version or proposed marker [unit: 1]"
+        },
+        "analysis_version": {
+          "type": "string",
+          "description": "Actual analysis code version or proposed marker [unit: 1]"
+        },
+        "truncated": {
+          "type": "boolean",
+          "description": "True only for explicitly labeled preview [unit: 1]"
+        },
+        "continuation_token": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Page token tied to immutable query+sort+catalog snapshot [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "artifact_id",
+        "query_id",
+        "uri",
+        "format",
+        "row_count",
+        "bytes",
+        "content_sha256",
+        "source_partition_ids",
+        "query_json",
+        "reducer_version",
+        "analysis_version",
+        "truncated",
+        "continuation_token"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "artifact_id"
+      ],
+      "x-grain": "one generated query/reduction export"
+    },
+    "posterior_draws": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable deterministic row identity within table [unit: 1]"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Versioned reduction invocation/catalog identity [unit: 1]"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Exact member/derived-input evidence anchor; null only for declared-only or purely derived rows [unit: 1]"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fit_id": {
+          "type": "string",
+          "description": "Fit identity tied to exact reduced inputs/model/source [unit: 1]"
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Saved MCMC chain [unit: 1]"
+        },
+        "draw_id": {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807,
+          "description": "Post-warmup draw index [unit: 1]"
+        },
+        "parameter_path": {
+          "type": "string",
+          "description": "Parameter including array index [unit: 1]"
+        },
+        "value": {
+          "type": "number",
+          "description": "Actual saved draw; no reconstructed draws from quantiles [unit: parameter-dependent]"
+        },
+        "diagnostics_json": {
+          "type": "string",
+          "description": "Divergences/Rhat/ESS/treedepth/model validity and warmup handling [unit: 1]"
+        },
+        "input_lineage_json": {
+          "type": "string",
+          "description": "Simulation/observation fitting inputs and model version [unit: 1]"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "source_asset_id",
+        "fit_id",
+        "chain_id",
+        "draw_id",
+        "parameter_path",
+        "value",
+        "diagnostics_json",
+        "input_lineage_json"
+      ],
+      "additionalProperties": false,
+      "x-primary-key": [
+        "fit_id",
+        "chain_id",
+        "draw_id",
+        "parameter_path"
+      ],
+      "x-grain": "one saved fit × chain × draw × scalar parameter"
+    },
+    "source_objects": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable row identity; unit=1"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Reducer invocation identity, not scientific attempt; unit=1"
+        },
+        "snapshot_id": {
+          "type": "string",
+          "description": "Frozen non-atomic listing snapshot; unit=1"
+        },
+        "object_id": {
+          "type": "string",
+          "description": "Hash of bucket/key and version or ETag identity; unit=1"
+        },
+        "bucket": {
+          "type": "string",
+          "description": "Actual source bucket; unit=1"
+        },
+        "key": {
+          "type": "string",
+          "description": "Full object key, not basename; unit=1"
+        },
+        "prefix_family": {
+          "type": "string",
+          "description": "Discovered family; explicit unregistered/unknown allowed; unit=1"
+        },
+        "version_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Non-null immutable version if verified by HEAD; literal null is not immutable; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "etag": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Opaque conditional-read identity; not assumed MD5; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pin_kind": {
+          "type": "string",
+          "description": "version_id, if_match_etag, or unpinned_blocked; unit=1"
+        },
+        "bytes_stored": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "HEAD/list stored bytes; unit=byte"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_modified_utc": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Observed object modification timestamp; unit=UTC"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "storage_class": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Observed storage class; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "listing_start_utc": {
+          "type": "string",
+          "description": "Snapshot observation window start; unit=UTC"
+        },
+        "listing_end_utc": {
+          "type": "string",
+          "description": "Snapshot observation window end; unit=UTC"
+        },
+        "discovery_root": {
+          "type": "string",
+          "description": "Authorized root listing used to discover this object; unit=1"
+        },
+        "identity_evidence_json": {
+          "description": "HEAD/list metadata and provenance; no credentials; unit=1"
+        },
+        "read_state": {
+          "type": "string",
+          "description": "Typed read/blocked status; unit=1",
+          "enum": [
+            "available",
+            "missing_member",
+            "missing_object",
+            "access_denied",
+            "archived_unrestored",
+            "corrupt_archive",
+            "crc_failure",
+            "decode_failure",
+            "source_changed",
+            "unsupported_schema",
+            "unsupported_compression",
+            "resource_limit",
+            "not_yet_read"
+          ]
+        },
+        "scope_delta": {
+          "type": "boolean",
+          "description": "New versus dated scope; unit=1"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "snapshot_id",
+        "object_id",
+        "bucket",
+        "key",
+        "prefix_family",
+        "version_id",
+        "etag",
+        "pin_kind",
+        "bytes_stored",
+        "last_modified_utc",
+        "storage_class",
+        "listing_start_utc",
+        "listing_end_utc",
+        "discovery_root",
+        "identity_evidence_json",
+        "read_state",
+        "scope_delta"
+      ],
+      "additionalProperties": false
+    },
+    "source_links": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable row identity; unit=1"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Reducer invocation identity, not scientific attempt; unit=1"
+        },
+        "link_id": {
+          "type": "string",
+          "description": "Stable edge ID; unit=1"
+        },
+        "from_table": {
+          "type": "string",
+          "description": "Canonical table; unit=1"
+        },
+        "from_row_id": {
+          "type": "string",
+          "description": "Input row; unit=1"
+        },
+        "to_table": {
+          "type": "string",
+          "description": "Canonical table; unit=1"
+        },
+        "to_row_id": {
+          "type": "string",
+          "description": "Output row; unit=1"
+        },
+        "relation": {
+          "type": "string",
+          "description": "derived_from, contains, same_execution, conflicts_with, supersedes_target, or source_equivalent; unit=1"
+        },
+        "evidence_json": {
+          "description": "Exact object/member/adapter/key mapping evidence; unit=1"
+        },
+        "confidence": {
+          "type": "string",
+          "description": "direct, documentary, inferred, unresolved; unit=1"
+        },
+        "selection_effect": {
+          "type": "string",
+          "description": "No discard unless an explicit selection rule authorizes it; unit=1"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "link_id",
+        "from_table",
+        "from_row_id",
+        "to_table",
+        "to_row_id",
+        "relation",
+        "evidence_json",
+        "confidence",
+        "selection_effect"
+      ],
+      "additionalProperties": false
+    },
+    "coverage_cells": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable row identity; unit=1"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Reducer invocation identity, not scientific attempt; unit=1"
+        },
+        "scope_id": {
+          "type": "string",
+          "description": "Campaign/stage/scientific-attempt/cell selection; unit=1"
+        },
+        "campaign_id": {
+          "type": "string",
+          "description": "Canonical campaign; unit=1"
+        },
+        "stage_id": {
+          "type": "string",
+          "description": "Stage; unit=1"
+        },
+        "attempt_id": {
+          "type": "string",
+          "description": "Scientific attempt; unit=1"
+        },
+        "cell_id": {
+          "type": "string",
+          "description": "Logical design coordinate, not an object; unit=1"
+        },
+        "declared_runs": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Ledger/design expected runs; null if unknown; unit=run"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "landed_physical_objects": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Distinct physical source objects, not members; unit=object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "indexed_run_members": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Logical run groups indexed inside objects; unit=run_member"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parsed_execution_rows": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Successfully parsed executions; unit=execution"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "duplicate_copies": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Proved duplicate copies, not reruns; unit=copy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conflicting_rows": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Ambiguous duplicates/versions; unit=row"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selected_unique_runs": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Selected logical runs under frozen policy; unit=run"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "eligible_runs": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Metric-specific eligible runs, or null pending metric; unit=run"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "missing_or_unread_runs": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Expected minus accounted when comparable; otherwise unknown; unit=run"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverage_status": {
+          "type": "string",
+          "description": "complete, partial, absent, unsupported, blocked, or unassessable; unit=1",
+          "enum": [
+            "complete",
+            "partial",
+            "absent",
+            "unsupported",
+            "blocked",
+            "unassessable"
+          ]
+        },
+        "metric_scope_json": {
+          "description": "Per-family availability, reason and numerator/denominator accounting; unit=1"
+        },
+        "evidence_json": {
+          "description": "Expected/observed scopes and reconciliation equation; unit=1"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "scope_id",
+        "campaign_id",
+        "stage_id",
+        "attempt_id",
+        "cell_id",
+        "declared_runs",
+        "landed_physical_objects",
+        "indexed_run_members",
+        "parsed_execution_rows",
+        "duplicate_copies",
+        "conflicting_rows",
+        "selected_unique_runs",
+        "eligible_runs",
+        "missing_or_unread_runs",
+        "coverage_status",
+        "metric_scope_json",
+        "evidence_json"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_partitions": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable row identity; unit=1"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Reducer invocation identity, not scientific attempt; unit=1"
+        },
+        "partition_id": {
+          "type": "string",
+          "description": "Partition identity; unit=1"
+        },
+        "catalog_snapshot_id": {
+          "type": "string",
+          "description": "Published immutable catalog; unit=1"
+        },
+        "table_name": {
+          "type": "string",
+          "description": "Canonical table; unit=1"
+        },
+        "uri": {
+          "type": "string",
+          "description": "S3 derived object URI; unit=1"
+        },
+        "sha256": {
+          "type": "string",
+          "description": "Actual derived-file hash; unit=1"
+        },
+        "rows": {
+          "type": "integer",
+          "description": "Logical table rows; unit=row"
+        },
+        "bytes_stored": {
+          "type": "integer",
+          "description": "Stored partition size; unit=byte"
+        },
+        "schema_version": {
+          "type": "string",
+          "description": "Exact schema; unit=1"
+        },
+        "adapter_version": {
+          "type": "string",
+          "description": "Exact adapter registry version; unit=1"
+        },
+        "min_key_json": {
+          "description": "Stable sort lower bound; unit=1"
+        },
+        "max_key_json": {
+          "description": "Stable sort upper bound; unit=1"
+        },
+        "statistics_json": {
+          "description": "Column bounds/nulls/coverage at valid table grain; unit=1"
+        },
+        "committed": {
+          "type": "boolean",
+          "description": "Visible only through finalized COMMIT; unit=1"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "partition_id",
+        "catalog_snapshot_id",
+        "table_name",
+        "uri",
+        "sha256",
+        "rows",
+        "bytes_stored",
+        "schema_version",
+        "adapter_version",
+        "min_key_json",
+        "max_key_json",
+        "statistics_json",
+        "committed"
+      ],
+      "additionalProperties": false
+    },
+    "reduction_attempts": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable row identity; unit=1"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Reducer invocation identity, not scientific attempt; unit=1"
+        },
+        "fingerprint": {
+          "type": "string",
+          "description": "Request+inventory+code+image+adapter+scope identity; unit=1"
+        },
+        "parent_reduction_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Resume/supersession parent; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request_sha256": {
+          "type": "string",
+          "description": "Frozen request; unit=1"
+        },
+        "inventory_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Frozen input scope; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "implementation_sha": {
+          "type": "string",
+          "description": "Reducer source; distinct from engine SHA; unit=1"
+        },
+        "image_digest": {
+          "type": "string",
+          "description": "Reducer image digest; unit=1"
+        },
+        "adapter_registry_sha256": {
+          "type": "string",
+          "description": "Adapter versions; unit=1"
+        },
+        "phase": {
+          "type": "string",
+          "description": "Admitted phase; unit=1"
+        },
+        "admission_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Scope/budget authorization reference; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "Lifecycle status; unit=1",
+          "enum": [
+            "planned",
+            "blocked",
+            "admitted",
+            "queued",
+            "running",
+            "checkpointed",
+            "budget_stopped",
+            "source_changed",
+            "quarantined",
+            "partial",
+            "completed",
+            "failed",
+            "cancelled",
+            "return_blocked",
+            "unknown"
+          ]
+        },
+        "budget_json": {
+          "description": "Reserved/spent/remaining including retries; unit=1"
+        },
+        "checkpoint_uri": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Immutable checkpoint; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverage_json": {
+          "description": "Declared/landed/parsed/selected/failed/unsupported; unit=1"
+        },
+        "start_utc": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Phase start; unit=UTC"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_utc": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Phase end; unit=UTC"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "fingerprint",
+        "parent_reduction_id",
+        "request_sha256",
+        "inventory_sha256",
+        "implementation_sha",
+        "image_digest",
+        "adapter_registry_sha256",
+        "phase",
+        "admission_id",
+        "status",
+        "budget_json",
+        "checkpoint_uri",
+        "coverage_json",
+        "start_utc",
+        "end_utc"
+      ],
+      "additionalProperties": false
+    },
+    "receipts": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable row identity; unit=1"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Reducer invocation identity, not scientific attempt; unit=1"
+        },
+        "receipt_id": {
+          "type": "string",
+          "description": "Stable immutable receipt; unit=1"
+        },
+        "request_id": {
+          "type": "string",
+          "description": "Request correlation; unit=1"
+        },
+        "github_run_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Workflow ID; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "github_attempt": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Workflow attempt; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "batch_job_ids_json": {
+          "description": "Bounded inline IDs or pinned child-page index; unit=1"
+        },
+        "status": {
+          "type": "string",
+          "description": "Qualified attempt status, not blanket success; unit=1",
+          "enum": [
+            "planned",
+            "blocked",
+            "admitted",
+            "queued",
+            "running",
+            "checkpointed",
+            "budget_stopped",
+            "source_changed",
+            "quarantined",
+            "partial",
+            "completed",
+            "failed",
+            "cancelled",
+            "return_blocked",
+            "unknown"
+          ]
+        },
+        "receipt_uri": {
+          "type": "string",
+          "description": "Durable S3 receipt; unit=1"
+        },
+        "receipt_sha256": {
+          "type": "string",
+          "description": "Receipt hash; unit=1"
+        },
+        "catalog_uri": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Frozen catalog if present; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "catalog_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Catalog hash; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "continuation_json": {
+          "description": "Phase/query/page continuation or explicit null; unit=1"
+        },
+        "error_json": {
+          "description": "Typed failures and owner/fallback; unit=1"
+        },
+        "budget_json": {
+          "description": "Spent and remaining; unit=1"
+        },
+        "created_utc": {
+          "type": "string",
+          "description": "Receipt timestamp; unit=UTC"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "receipt_id",
+        "request_id",
+        "github_run_id",
+        "github_attempt",
+        "batch_job_ids_json",
+        "status",
+        "receipt_uri",
+        "receipt_sha256",
+        "catalog_uri",
+        "catalog_sha256",
+        "continuation_json",
+        "error_json",
+        "budget_json",
+        "created_utc"
+      ],
+      "additionalProperties": false
+    },
+    "query_pages": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable row identity; unit=1"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Reducer invocation identity, not scientific attempt; unit=1"
+        },
+        "query_id": {
+          "type": "string",
+          "description": "Frozen query hash/ID; unit=1"
+        },
+        "page_id": {
+          "type": "string",
+          "description": "Stable page ID; unit=1"
+        },
+        "catalog_snapshot_id": {
+          "type": "string",
+          "description": "Frozen catalog; unit=1"
+        },
+        "query_sha256": {
+          "type": "string",
+          "description": "Query AST and estimand hash; unit=1"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Derived JSONL/Parquet export; unit=1"
+        },
+        "sha256": {
+          "type": "string",
+          "description": "Export bytes hash; unit=1"
+        },
+        "returned_rows": {
+          "type": "integer",
+          "description": "Returned rows; unit=row"
+        },
+        "scanned_rows": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "description": "Actual query scan accounting; unit=row"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scanned_bytes": {
+          "type": "integer",
+          "description": "Actual scanned bytes; unit=byte"
+        },
+        "complete": {
+          "type": "boolean",
+          "description": "End of frozen query selection; unit=1"
+        },
+        "next_cursor_json": {
+          "description": "Bound query/catalog/order/key token or null; unit=1"
+        },
+        "selection_counts_json": {
+          "description": "Eligible/observed/missing/censored/selected units and weights; unit=1"
+        },
+        "oversized_rows_json": {
+          "description": "Explicit ROW_TOO_LARGE; never omitted silently; unit=1"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "query_id",
+        "page_id",
+        "catalog_snapshot_id",
+        "query_sha256",
+        "uri",
+        "sha256",
+        "returned_rows",
+        "scanned_rows",
+        "scanned_bytes",
+        "complete",
+        "next_cursor_json",
+        "selection_counts_json",
+        "oversized_rows_json"
+      ],
+      "additionalProperties": false
+    },
+    "acknowledgments": {
+      "type": "object",
+      "properties": {
+        "row_id": {
+          "type": "string",
+          "description": "Stable row identity; unit=1"
+        },
+        "reduction_id": {
+          "type": "string",
+          "description": "Reducer invocation identity, not scientific attempt; unit=1"
+        },
+        "ack_id": {
+          "type": "string",
+          "description": "Idempotent acknowledgement identity; unit=1"
+        },
+        "receipt_id": {
+          "type": "string",
+          "description": "Receipt acknowledged; unit=1"
+        },
+        "query_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "Query if applicable; unit=1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page_ids_json": {
+          "description": "Exact accepted page IDs; unit=1"
+        },
+        "project_asset_ids_json": {
+          "description": "Durable Edison assets; not ephemeral URLs; unit=1"
+        },
+        "accepted_hashes_json": {
+          "description": "Verified artifact and member hashes; unit=1"
+        },
+        "qualification_json": {
+          "description": "Exact status, coverage/missingness/scientific limits accepted; unit=1"
+        },
+        "next_cursor_json": {
+          "description": "Saved resumable client cursor; unit=1"
+        },
+        "acknowledged_utc": {
+          "type": "string",
+          "description": "Durable ingestion time; unit=UTC"
+        }
+      },
+      "required": [
+        "row_id",
+        "reduction_id",
+        "ack_id",
+        "receipt_id",
+        "query_id",
+        "page_ids_json",
+        "project_asset_ids_json",
+        "accepted_hashes_json",
+        "qualification_json",
+        "next_cursor_json",
+        "acknowledged_utc"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
