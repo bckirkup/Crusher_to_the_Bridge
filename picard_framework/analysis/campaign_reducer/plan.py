@@ -18,9 +18,13 @@ import os
 from pathlib import Path
 from typing import Any
 
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import (
+    confine_to_base,
+    prepare_output_directory,
+    validated_open,
+)
 
-from .._io import allowed_roots, ensure_out_dir, write_json
+from .._io import allowed_roots, cwd_root, write_json
 from . import contracts
 from .scope import scope_report
 
@@ -115,7 +119,7 @@ def _load_optional_request(path: Path | None) -> dict | None:
             str(path), allowed_roots=allowed_roots(), encoding="utf-8",
         ) as fh:
             doc = json.load(fh)
-    except (OSError, ValueError, json.JSONDecodeError):
+    except (OSError, ValueError):
         return None
     return doc if isinstance(doc, dict) else None
 
@@ -129,8 +133,11 @@ def run_plan(request_path: Path | None, out_dir: Path) -> int:
     blocking = build_blocking_inputs(canonical, _load_optional_request(request_path))
 
     try:
-        out_root = ensure_out_dir(str(out_dir))
-    except SystemExit as exc:
+        out_root = prepare_output_directory(
+            confine_to_base(cwd_root(), str(out_dir)),
+            allowed_roots=(cwd_root(),),
+        )
+    except ValueError as exc:
         print(json.dumps({
             "status": "INVALID_CONTRACT",
             "operation": "plan",

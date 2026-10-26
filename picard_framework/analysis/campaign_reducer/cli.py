@@ -20,22 +20,30 @@ import json
 import os
 from pathlib import Path
 
-from .._io import ensure_out_dir, safe_path, write_json
+from simulation_utils.paths import confine_to_base, prepare_output_directory
+
+from .._io import cwd_root, write_json
 from . import contracts
 from .plan import run_plan
 from .validate import run_validate
 
 
+def _refuse_escalation(operation: str, exc: ValueError) -> int:
+    print(json.dumps({
+        "status": "INVALID_CONTRACT",
+        "operation": operation,
+        "error": str(exc),
+    }))
+    return contracts.EXIT_INVALID_CONTRACT
+
+
 def _out_root(out_dir: Path, operation: str) -> str | None:
     """Confine ``--out`` to the invocation directory; None + print on escape."""
     try:
-        return ensure_out_dir(str(out_dir))
-    except SystemExit as exc:
-        print(json.dumps({
-            "status": "INVALID_CONTRACT",
-            "operation": operation,
-            "error": str(exc),
-        }))
+        safe = confine_to_base(cwd_root(), str(out_dir))
+        return prepare_output_directory(safe, allowed_roots=(cwd_root(),))
+    except ValueError as exc:
+        _refuse_escalation(operation, exc)
         return None
 
 
@@ -84,14 +92,9 @@ def _not_implemented(args: argparse.Namespace, spec: dict) -> int:
 
 def _plan(args: argparse.Namespace) -> int:
     try:
-        request = safe_path(args.request)
-    except SystemExit as exc:
-        print(json.dumps({
-            "status": "INVALID_CONTRACT",
-            "operation": "plan",
-            "error": str(exc),
-        }))
-        return contracts.EXIT_INVALID_CONTRACT
+        request = confine_to_base(cwd_root(), str(args.request))
+    except ValueError as exc:
+        return _refuse_escalation("plan", exc)
     if not os.path.isfile(request):
         print(json.dumps({
             "status": "INVALID_CONTRACT",

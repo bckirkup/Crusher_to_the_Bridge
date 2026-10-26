@@ -29,9 +29,13 @@ from typing import Any, Iterator
 
 import jsonschema
 
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import (
+    confine_to_base,
+    prepare_output_directory,
+    validated_open,
+)
 
-from .._io import allowed_roots, ensure_out_dir, write_json
+from .._io import allowed_roots, cwd_root, write_json
 from . import contracts
 
 _PLACEHOLDER = re.compile(r"^\s*<[^<>]+>\s*$")
@@ -162,7 +166,7 @@ def _load_request(path: Path, errors: list[str]) -> dict | None:
             str(path), allowed_roots=allowed_roots(), encoding="utf-8",
         ) as fh:
             doc = json.load(fh)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
         errors.append(f"{path}: unreadable or invalid JSON — {exc}")
         return None
     if not isinstance(doc, dict):
@@ -219,8 +223,11 @@ def run_validate(request_path: Path, kind: str, out_dir: Path) -> int:
         "exit_code": exit_code,
     }
     try:
-        out_root = ensure_out_dir(str(out_dir))
-    except SystemExit as exc:
+        out_root = prepare_output_directory(
+            confine_to_base(cwd_root(), str(out_dir)),
+            allowed_roots=(cwd_root(),),
+        )
+    except ValueError as exc:
         print(json.dumps({
             "status": "INVALID_CONTRACT",
             "operation": "validate",
