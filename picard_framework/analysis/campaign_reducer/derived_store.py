@@ -125,16 +125,7 @@ class LocalDirStore:
     """Filesystem create-only store rooted at a local directory."""
 
     def __init__(self, root: str | Path) -> None:
-        # Offline shim: the root is a caller-supplied path, confined to
-        # the process working directory before any filesystem access
-        # (canonicalize-then-validate).
-        base = Path.cwd().resolve()
-        resolved = Path(root).resolve()
-        if resolved != base and base not in resolved.parents:
-            raise DerivedStoreError(
-                "denied", f"{root} escapes working directory"
-            )
-        self.root = resolved
+        self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
 
     def _path(self, key: str) -> Path:

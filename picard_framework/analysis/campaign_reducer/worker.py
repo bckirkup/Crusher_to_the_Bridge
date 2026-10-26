@@ -27,6 +27,9 @@ import json
 import sys
 from pathlib import Path
 
+from simulation_utils.paths import confine_to_base
+
+from .._io import cwd_root
 from .derived_store import DerivedStoreError, LocalDirStore, MemoryDerivedStore
 from .ledger import BudgetBlocked, BudgetLedger, parse_ceilings
 from .materialize import MaterializeSpec, run_materialization
@@ -128,9 +131,14 @@ def _fetch_request(uri: str) -> tuple[dict, Path]:
 def _open_store(out_uri: str | None):
     if not out_uri:
         return MemoryDerivedStore()
-    if out_uri.startswith("dir://"):
-        return LocalDirStore(out_uri[len("dir://"):])
-    return LocalDirStore(out_uri)
+    raw = out_uri[len("dir://"):] if out_uri.startswith("dir://") else out_uri
+    try:
+        # The derived-root CLI argument is confined to the working
+        # directory before any filesystem access (canonicalize-then-
+        # validate, the repo's S8707 pattern).
+        return LocalDirStore(confine_to_base(cwd_root(), raw))
+    except ValueError as exc:
+        raise QueryError("access_denied", str(exc)) from exc
 
 
 def _verify_sha(doc: dict, expected: str) -> None:
@@ -216,7 +224,11 @@ def main(argv: list[str] | None = None) -> int:
     except (QueryError, BudgetBlocked) as exc:
         print(json.dumps({"status": "blocked", "error": str(exc)}))
         return EXIT_INVALID_CONTRACT if isinstance(exc, QueryError) else EXIT_ADMISSION
-    store = _open_store(args.out_uri or None)
+    try:
+        store = _open_store(args.out_uri or None)
+    except QueryError as exc:
+        print(json.dumps({"status": "blocked", "error": str(exc)}))
+        return EXIT_BLOCKED
     ledger = BudgetLedger(ceilings)
     ctx = _ctx(request, args.shard_index)
 

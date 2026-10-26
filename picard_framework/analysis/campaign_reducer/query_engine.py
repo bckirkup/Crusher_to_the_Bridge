@@ -700,12 +700,13 @@ def _fill_page(
     max_export_bytes = min(float(max_export_bytes), _MAX_EXPORT_BYTES)
     page = []
     page_bytes = 0
-    while (
-        i < len(result_rows)
-        and len(page) < page_rows
-        and (max_export_rows is None or emitted < max_export_rows)
-    ):
-        row = result_rows[i]
+    n = i
+    for idx in range(i, len(result_rows)):
+        if len(page) >= page_rows:
+            break
+        if max_export_rows is not None and emitted >= max_export_rows:
+            break
+        row = result_rows[idx]
         size = len(canonical_json(row).encode())
         if size > max_export_bytes:
             oversized.append(
@@ -716,15 +717,15 @@ def _fill_page(
                     "hint": "request a narrower projection",
                 }
             )
-            i += 1
+            n = idx + 1
             continue
         if page_bytes + size > max_export_bytes and page:
             break
         page.append(row)
         page_bytes += size
         emitted += 1
-        i += 1
-    return page, i, emitted
+        n = idx + 1
+    return page, n, emitted
 
 
 def _write_page(
