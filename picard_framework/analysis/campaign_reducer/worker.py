@@ -65,12 +65,17 @@ class LocalTransport:
     """
 
     def __init__(self, root: str | Path) -> None:
-        self.root = Path(root).resolve()
+        self.root = Path(root).expanduser().resolve()
 
     def _path(self, key: str) -> Path:
-        path = (self.root / key.lstrip("/")).resolve()
-        if path != self.root and self.root not in path.parents:
+        key_path = Path(key.lstrip("/"))
+        if key_path.is_absolute() or ".." in key_path.parts:
             raise TransportError("access_denied", key)
+        path = (self.root / key_path).resolve()
+        try:
+            path.relative_to(self.root)
+        except ValueError:
+            raise TransportError("access_denied", key) from None
         if not path.is_file():
             raise TransportError("not_found", key)
         return path
