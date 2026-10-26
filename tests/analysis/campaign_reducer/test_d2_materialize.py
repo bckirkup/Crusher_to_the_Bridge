@@ -179,7 +179,9 @@ def test_put_idempotent_conflict_rejects():
         store.put_if_absent("k", b"abc")
 
 
-def test_local_dir_store_create_only(tmp_path):
+def test_local_dir_store_create_only(tmp_path, monkeypatch):
+    # LocalDirStore confines its root to the process working directory.
+    monkeypatch.chdir(tmp_path)
     store = LocalDirStore(tmp_path / "derived")
     store.put_if_absent("a/b.json", b"{}")
     assert store.get("a/b.json") == b"{}"

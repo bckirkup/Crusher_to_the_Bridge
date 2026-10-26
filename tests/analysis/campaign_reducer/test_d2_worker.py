@@ -16,6 +16,9 @@ import pytest
 from zip_builders import build_zip, member
 
 from picard_framework.analysis.campaign_reducer.ledger import BUDGET_FIELDS
+from picard_framework.analysis.campaign_reducer.pinned_reader import (
+    TransportError,
+)
 from picard_framework.analysis.campaign_reducer.worker import (
     EXIT_COMPLETE,
     EXIT_INVALID_CONTRACT,
@@ -77,7 +80,9 @@ def _fixture(tmp_path):
     return req_path, out_dir, request
 
 
-def test_worker_materialize_then_query(tmp_path, capsys):
+def test_worker_materialize_then_query(tmp_path, capsys, monkeypatch):
+    # The offline store confines out-uri to the process working directory.
+    monkeypatch.chdir(tmp_path)
     req_path, out_dir, request = _fixture(tmp_path)
     rc = main([
         "--phase", "materialize",
@@ -163,7 +168,7 @@ def test_local_transport_confined_to_root(tmp_path):
     assert info.content_length == 4
     resp = transport.get("ok.bin", start=1, end=2)
     assert resp.body == b"at"
-    with pytest.raises(Exception):
+    with pytest.raises(TransportError):
         transport.head("../outside.bin")
-    with pytest.raises(Exception):
+    with pytest.raises(TransportError):
         transport.head("missing.bin")

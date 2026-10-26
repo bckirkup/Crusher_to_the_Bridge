@@ -40,6 +40,10 @@ from .ledger import BudgetLedger
 from .rows import canonical_json
 
 _MAX_PAGE_ROWS = 10000
+# Absolute server-side ceilings on request-declared export caps — a
+# request can declare smaller caps, never larger (S6680).
+_MAX_EXPORT_ROWS = 10_000_000
+_MAX_EXPORT_BYTES = 1 << 30  # 1 GiB
 _RUN_GRAIN_TABLES = frozenset(
     {"runs", "run_scalars", "metrics", "distributions", "weights"}
 )
@@ -690,6 +694,10 @@ def _fill_page(
     page_rows, max_export_rows, max_export_bytes, oversized,
 ) -> tuple[list[dict], int, int]:
     """Assemble one page within the row/byte caps; collect oversized rows."""
+    page_rows = min(int(page_rows), _MAX_PAGE_ROWS)
+    if max_export_rows is not None:
+        max_export_rows = min(int(max_export_rows), _MAX_EXPORT_ROWS)
+    max_export_bytes = min(float(max_export_bytes), _MAX_EXPORT_BYTES)
     page = []
     page_bytes = 0
     while (
