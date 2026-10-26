@@ -40,6 +40,10 @@ into the analysis image: `picard_framework/analysis/campaign_reducer/contracts/`
 `BOOTSTRAP_REQUEST.schema.json`, `CANONICAL_INTERFACE.json`,
 `STATUS_NAMESPACES.json`, `CAMPAIGN_COVERAGE.json` (the dated 218-record cold
 scope), plus the three `BLOCKED*`/`blocked_example` invalid-request fixtures.
+`SOURCE_FAMILIES.json`, `ATTEMPT_FAMILY_MAP.json`, `FAMILY_GROUP_REGISTER.json`
+and `COVERAGE_COUNTS.json` are also mirrored there byte-for-byte (hashes in
+`SHA256SUMS.json`) so the adapter index travels with the code into the image;
+this directory's copies remain the canonical survey artifacts.
 
 ## Program rules carried forward
 

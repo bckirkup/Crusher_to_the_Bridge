@@ -1,0 +1,1370 @@
+[
+  {
+    "program_group": "classmix_staged_feasibility_and_diagnostics",
+    "registered_campaigns": [],
+    "historical_prefix_count": 9,
+    "historical_prefixes": [
+      "campaign/classmix_stage0/",
+      "campaign/classmix_stage0_berth01/",
+      "campaign/classmix_stage0_dineparty01/",
+      "campaign/classmix_stage0_dineseg01/",
+      "campaign/classmix_stage0_foodrole01/",
+      "campaign/classmix_stage0_seat01/",
+      "campaign/classmix_stage0_seat02/",
+      "campaign/classmix_stage1/",
+      "campaign/classmix_stage2/"
+    ],
+    "historical_object_count": 1848,
+    "historical_bytes": 45572009,
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "exact_source_reference_prefix_count": 1,
+    "no_exact_source_reference_prefix_count": 8,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "telemetry_buffer/observation_model/staged_posting_readout.py",
+        "line_start": 20,
+        "line_end": 20,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/staged_posting_readout.py#L20",
+        "text": "--rows s3sync/classmix_stage1/*/region/*.jsonl \\\\"
+      }
+    ]
+  },
+  {
+    "program_group": "covid_crew_confinement_service_mechanisms",
+    "registered_campaigns": [
+      "covid_crew_berth_01",
+      "covid_crew_mess_01",
+      "covid_crew_window_01",
+      "covid_crew_window_02",
+      "covid_meal_service_01",
+      "covid_meal_service_02"
+    ],
+    "historical_prefix_count": 11,
+    "historical_prefixes": [
+      "campaign/covid_caregiver_off_v1/",
+      "campaign/covid_cg_floor_v1/",
+      "campaign/covid_crew_berth_01/",
+      "campaign/covid_crew_mess_01/",
+      "campaign/covid_crew_window_01/",
+      "campaign/covid_crew_window_02/",
+      "campaign/covid_meal_service_01/",
+      "campaign/covid_meal_service_02/",
+      "campaign/covid_quar_suppression_v1/",
+      "campaign/covid_quarantine_attribution_v1/",
+      "campaign/covid_quarantine_attribution_v2/"
+    ],
+    "historical_object_count": 1438,
+    "historical_bytes": 16415137,
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "exact_source_reference_prefix_count": 11,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "tools/covid_caregiver_off_v1_readout.py",
+        "line_start": 4,
+        "line_end": 4,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/tools/covid_caregiver_off_v1_readout.py#L4",
+        "text": "``covid_caregiver_off_v1`` — one anchor point, 2 arms, 20 seeds — and"
+      },
+      {
+        "source_path": "docs/ledger/CG-FLOOR-01.md",
+        "line_start": 20,
+        "line_end": 20,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/CG-FLOOR-01.md#L20",
+        "text": "`covid_cg_floor_v1` (declared by `covid_anchor_derivation_v1.md` §5):"
+      },
+      {
+        "source_path": "campaigns/covid/crew_berth_01/LEDGER.md",
+        "line_start": 1,
+        "line_end": 1,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/crew_berth_01/LEDGER.md#L1",
+        "text": "# LEDGER — covid_crew_berth_01"
+      },
+      {
+        "source_path": "campaigns/covid/crew_berth_01/readout.py",
+        "line_start": 51,
+        "line_end": 51,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/crew_berth_01/readout.py#L51",
+        "text": "\"campaign/covid_crew_mess_01/\""
+      },
+      {
+        "source_path": "campaigns/covid/crew_window_01/LEDGER.md",
+        "line_start": 1,
+        "line_end": 1,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/crew_window_01/LEDGER.md#L1",
+        "text": "# covid_crew_window_01 — ledger"
+      },
+      {
+        "source_path": "campaigns/covid/crew_window_02/LEDGER.md",
+        "line_start": 1,
+        "line_end": 1,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/crew_window_02/LEDGER.md#L1",
+        "text": "# covid_crew_window_02 — ledger"
+      },
+      {
+        "source_path": "campaigns/covid/meal_service_01/LEDGER.md",
+        "line_start": 1,
+        "line_end": 1,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/meal_service_01/LEDGER.md#L1",
+        "text": "# covid_meal_service_01 — ledger"
+      },
+      {
+        "source_path": "campaigns/covid/crew_mess_01/readout.py",
+        "line_start": 50,
+        "line_end": 50,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/crew_mess_01/readout.py#L50",
+        "text": "\"campaign/covid_meal_service_02/\""
+      }
+    ]
+  },
+  {
+    "program_group": "covid_mechanistic_parameter_diagnostics",
+    "registered_campaigns": [],
+    "historical_prefix_count": 34,
+    "historical_prefixes": [
+      "campaign/covid_coop_v1/",
+      "campaign/covid_coop_v1_fleet/",
+      "campaign/covid_frailty_v1/",
+      "campaign/covid_hand_ab_v1/",
+      "campaign/covid_hand_carriage01/",
+      "campaign/covid_heat_v1/",
+      "campaign/covid_import_sweep_v1/",
+      "campaign/covid_import_sweep_v1r/",
+      "campaign/covid_import_sweep_v1rr/",
+      "campaign/covid_info_suppress_v1/",
+      "campaign/covid_lambda_cross_v1/",
+      "campaign/covid_mech_v2/",
+      "campaign/covid_mech_v2_fleet/",
+      "campaign/covid_partner_rate_assay_v1/",
+      "campaign/covid_plume_dose_assay_v1/",
+      "campaign/covid_propensity_cv_screen/",
+      "campaign/covid_propensity_v1/",
+      "campaign/covid_rebase_01/",
+      "campaign/covid_rebase_01_boarding/",
+      "campaign/covid_rebase_01_stage2/",
+      "campaign/covid_rhythm_ab_v1/",
+      "campaign/covid_ring_cap_v1/",
+      "campaign/covid_seed_geom_v1/",
+      "campaign/covid_sensitivity_assay_v1/",
+      "campaign/covid_suppress_v1/",
+      "campaign/covid_susc_pool_v1/",
+      "campaign/covid_suscept_v1/",
+      "campaign/covid_takeoff_attr_v1/",
+      "campaign/covid_theta_refit_bracket_v1/",
+      "campaign/covid_theta_refit_floor_v1/",
+      "campaign/covid_theta_refit_v1/",
+      "campaign/covid_theta_screen_v15/",
+      "campaign/covid_theta_screen_v15_stage2/",
+      "campaign/covid_vuln_ab_v1/"
+    ],
+    "historical_object_count": 14470,
+    "historical_bytes": 1867385347,
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "exact_source_reference_prefix_count": 34,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "picard_framework/runs/covid_ascertain_v1_design.json",
+        "line_start": 18,
+        "line_end": 18,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/covid_ascertain_v1_design.json#L18",
+        "text": "\"voyage_mode_note\": \"Declared replay, verbatim from covid_coop_v1 / covid_susc_pool_v1: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, measured null axis under a declared onset_day -- COVID-SEED-GEOM-01 -- carried for cell-key bookkeeping and seed-pairing against the coop/susc_pool lattice), seeds at base 20200205, full 32-day voyage (768 epochs).\","
+      },
+      {
+        "source_path": "picard_framework/runs/covid_coop_v1_design.json",
+        "line_start": 284,
+        "line_end": 284,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/covid_coop_v1_design.json#L284",
+        "text": "\"cells_note\": \"3 points x 16 arms x 10 seeds = 480 declared-replay cells (~30 min each). Cell order is point x arm x seed with the anchor point first: indices 0-159 = Theta 2.37e11 x all 16 arms x 10 seeds; 160-319 = Theta 1e11; 320-479 = Theta 1e12. Companion design covid_coop_v1_fleet runs the coarse generic-voyage fleet-shape response at the same three Thetas, 50 seeds per row, same arms.\","
+      },
+      {
+        "source_path": "docs/ledger/FRAILTY-V1.md",
+        "line_start": 26,
+        "line_end": 26,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/FRAILTY-V1.md#L26",
+        "text": "`sha256:56536971…`, S3 `campaign/covid_frailty_v1/c950e57/cells/`)."
+      },
+      {
+        "source_path": "docs/ledger/NORO-HAND-CARRIAGE-01.md",
+        "line_start": 125,
+        "line_end": 125,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-HAND-CARRIAGE-01.md#L125",
+        "text": "The Diamond Princess `covid_hand_ab_v1` array stays held until the"
+      },
+      {
+        "source_path": "docs/ledger/COVID-HAND-AB-01.md",
+        "line_start": 12,
+        "line_end": 12,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/COVID-HAND-AB-01.md#L12",
+        "text": "prefix `campaign/covid_hand_carriage01/`) is measured:"
+      },
+      {
+        "source_path": "docs/ledger/HEAT-V1.md",
+        "line_start": 55,
+        "line_end": 55,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/HEAT-V1.md#L55",
+        "text": "`s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_heat_v1/98d0edd2/cells/`;"
+      },
+      {
+        "source_path": "picard_framework/runs/covid_import_sweep_v1_design.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/covid_import_sweep_v1_design.json#L2",
+        "text": "\"design_id\": \"covid_import_sweep_v1\","
+      },
+      {
+        "source_path": "picard_framework/runs/covid_import_sweep_v1_design.json",
+        "line_start": 3,
+        "line_end": 3,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/covid_import_sweep_v1_design.json#L3",
+        "text": "\"description\": \"Stage 1 (coarse grid) of the adaptive-density import sweep on the corrected model (#543 declared seeding, #547 incubation). Import count x Theta on the 20 matched covid_first_look_v4 fit seeds, index case infected at embarkation. Stage 2 (covid_import_sweep_v1r) is generated from this surface by tools/fit_covid_theta.py refine and inserts geometric midpoints only where P(takeoff) or the conditional onset medians move faster than the declared tolerances or cross the observed count"
+      }
+    ]
+  },
+  {
+    "program_group": "covid_observation_funnel_hull_validation",
+    "registered_campaigns": [
+      "covid_crew_reach_01",
+      "covid_gm_rescore_02",
+      "covid_onset_rec_01"
+    ],
+    "historical_prefix_count": 11,
+    "historical_prefixes": [
+      "campaign/covid_ascertain_v1/",
+      "campaign/covid_boarding_screen_v1/",
+      "campaign/covid_boarding_screen_v2/",
+      "campaign/covid_crew_reach_01/",
+      "campaign/covid_first_look_v6/",
+      "campaign/covid_first_look_v6c/",
+      "campaign/covid_gm_rescore_02/",
+      "campaign/covid_gm_rescore_v1/",
+      "campaign/covid_gm_rescore_v1_imports3/",
+      "campaign/covid_onset_rec_01/",
+      "campaign/covid_sero_channel_v1/"
+    ],
+    "historical_object_count": 3752,
+    "historical_bytes": 116273690,
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "exact_source_reference_prefix_count": 11,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "docs/ledger/ASCERTAIN-V1.md",
+        "line_start": 34,
+        "line_end": 34,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/ASCERTAIN-V1.md#L34",
+        "text": "`s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_ascertain_v1/cb519c97/cells/`."
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_covid_boarding_screen.json",
+        "line_start": 56,
+        "line_end": 56,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_covid_boarding_screen.json#L56",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/covid_boarding_screen_v1/\","
+      },
+      {
+        "source_path": "picard_framework/runs/covid_boarding_screen_v2_design.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/covid_boarding_screen_v2_design.json#L2",
+        "text": "\"design_id\": \"covid_boarding_screen_v2\","
+      },
+      {
+        "source_path": "campaigns/covid/crew_reach_01/LEDGER.md",
+        "line_start": 22,
+        "line_end": 22,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/crew_reach_01/LEDGER.md#L22",
+        "text": "- S3: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_crew_reach_01/`."
+      },
+      {
+        "source_path": "docs/ledger/LEVERAGE-01.md",
+        "line_start": 26,
+        "line_end": 26,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/LEVERAGE-01.md#L26",
+        "text": "`covid_first_look_v6` fit (Theta = 3.16e11, cabin_compartment, airflow"
+      },
+      {
+        "source_path": "picard_framework/runs/covid_first_look_v6c_design.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/covid_first_look_v6c_design.json#L2",
+        "text": "\"design_id\": \"covid_first_look_v6c\","
+      },
+      {
+        "source_path": "campaigns/covid/gm_rescore_02/LEDGER.md",
+        "line_start": 1,
+        "line_end": 1,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/covid/gm_rescore_02/LEDGER.md#L1",
+        "text": "# LEDGER — covid_gm_rescore_02"
+      },
+      {
+        "source_path": "docs/ledger/COVID-GM-RESCORE-01.md",
+        "line_start": 21,
+        "line_end": 21,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/COVID-GM-RESCORE-01.md#L21",
+        "text": "cells under `campaign/covid_gm_rescore_v1/591d21b1…/cells/` (canary"
+      }
+    ]
+  },
+  {
+    "program_group": "cross_pathogen_leverage_perturbations",
+    "registered_campaigns": [],
+    "historical_prefix_count": 2,
+    "historical_prefixes": [
+      "campaign/leverage01/",
+      "campaign/leverage02/"
+    ],
+    "historical_object_count": 596,
+    "historical_bytes": 658663,
+    "schema_families": [
+      "perturbation_json"
+    ],
+    "exact_source_reference_prefix_count": 2,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "deploy/aws/batch_job_definition_leverage01.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_leverage01.json#L2",
+        "text": "\"jobDefinitionName\": \"picard-leverage01\","
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_leverage02.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_leverage02.json#L2",
+        "text": "\"jobDefinitionName\": \"picard-leverage02\","
+      }
+    ]
+  },
+  {
+    "program_group": "influenza_open_voyage_age_visibility_response",
+    "registered_campaigns": [
+      "flu_open_voyage_01",
+      "flu_reassess_01",
+      "flu_visibility_01"
+    ],
+    "historical_prefix_count": 7,
+    "historical_prefixes": [
+      "campaign/flu_age_01/",
+      "campaign/flu_open_voyage_01/",
+      "campaign/flu_reassess_01/",
+      "campaign/flu_rhythm_01/",
+      "campaign/flu_rhythm_02/",
+      "campaign/flu_social_01/",
+      "campaign/flu_visibility_01/"
+    ],
+    "historical_object_count": 6023,
+    "historical_bytes": 144478566,
+    "schema_families": [
+      "flu_cell_json",
+      "unknown_legacy"
+    ],
+    "exact_source_reference_prefix_count": 7,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "docs/ledger/FLU-AGE-01.md",
+        "line_start": 25,
+        "line_end": 25,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/FLU-AGE-01.md#L25",
+        "text": "`deploy/aws/Dockerfile.flu_age_01` on `campaign-7e1b54bc`), jobdef"
+      },
+      {
+        "source_path": "campaigns/flu/open_voyage_01/LEDGER.md",
+        "line_start": 35,
+        "line_end": 35,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/open_voyage_01/LEDGER.md#L35",
+        "text": "| 2026-10-05 | canary + arrays | jobdef `picard-flu-open-voyage-01` revs :1–:2 (canary registers), :3–:6 (blocks); queue `picard-analysis-queue`. Canary `4c84471a` SUCCEEDED + inspected (8 index, organic confinement, ALERT-class). Arrays `18074d2e`/`7224370a`/`bb8fdf0e`/`c86b415f`: **400/400 SUCCEEDED**, ~75 min wall. Prefix `campaign/flu_open_voyage_01/`, 100 `cell_<seed>.json` per block. |"
+      },
+      {
+        "source_path": "campaigns/flu/reassess_01/DESIGN.md",
+        "line_start": 59,
+        "line_end": 59,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/reassess_01/DESIGN.md#L59",
+        "text": "1. `schema == \"flu_reassess_01.v1\"` on every cell."
+      },
+      {
+        "source_path": "campaigns/flu/open_voyage_01/DESIGN.md",
+        "line_start": 17,
+        "line_end": 17,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/open_voyage_01/DESIGN.md#L17",
+        "text": "`flu_rhythm_01` manifest (isolated `influenza_a`, explicit 2-passenger"
+      },
+      {
+        "source_path": "docs/ledger/FLU-PRESENT-RESCORE-01.md",
+        "line_start": 60,
+        "line_end": 60,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/FLU-PRESENT-RESCORE-01.md#L60",
+        "text": "full-manifest re-census (flu_rhythm_02 manifest, 800 cells) is"
+      },
+      {
+        "source_path": "docs/ledger/FLU-AGE-01.md",
+        "line_start": 12,
+        "line_end": 12,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/FLU-AGE-01.md#L12",
+        "text": "against the `flu_social_01` census at `8c03e9d7` as baseline. Engine"
+      },
+      {
+        "source_path": "campaigns/flu/visibility_01/LEDGER.md",
+        "line_start": 29,
+        "line_end": 29,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/flu/visibility_01/LEDGER.md#L29",
+        "text": "| audits | `index_invariant_fails=0` all cells; arm echo: `arm.resolved` = declared patch on 2401/2401 (0 mismatches); schema `flu_visibility_01.v1` everywhere; strict-arm mild onsets = 0 on all 1200 strict cells (witness fired) |"
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_Morris_Sobol_screening",
+    "registered_campaigns": [],
+    "historical_prefix_count": 3,
+    "historical_prefixes": [
+      "campaign/admissible_region_v2/",
+      "campaign/bounded_design_v1/",
+      "campaign/bounded_design_v2/"
+    ],
+    "historical_object_count": 732,
+    "historical_bytes": 8366082,
+    "schema_families": [
+      "bounded_region_jsonl"
+    ],
+    "exact_source_reference_prefix_count": 3,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "docs/norovirus/admissible_region_37_v2.md",
+        "line_start": 9,
+        "line_end": 9,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/norovirus/admissible_region_37_v2.md#L9",
+        "text": "`s3://crusherbucket-994254241749-us-east-1-an/campaign/admissible_region_v2/`"
+      },
+      {
+        "source_path": "deploy/aws/submit_bounded_design.sh",
+        "line_start": 58,
+        "line_end": 58,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/submit_bounded_design.sh#L58",
+        "text": "S3_PREFIX=\"${S3_PREFIX:-s3://${BUCKET}/campaign/bounded_design_v1/}\""
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_bounded_design.json",
+        "line_start": 70,
+        "line_end": 70,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_bounded_design.json#L70",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/bounded_design_v2/\""
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_contact_architecture_counterfactuals",
+    "registered_campaigns": [],
+    "historical_prefix_count": 20,
+    "historical_prefixes": [
+      "campaign/contactarch2_expedition_control/",
+      "campaign/contactarch2_expedition_high/",
+      "campaign/contactarch2_expedition_high_tau05/",
+      "campaign/contactarch2_expedition_high_tau1/",
+      "campaign/contactarch2_expedition_high_tau2/",
+      "campaign/contactarch2_expedition_low/",
+      "campaign/contactarch2_expedition_mid/",
+      "campaign/contactarch2_expedition_mid_tau1/",
+      "campaign/contactarch2_expedition_mid_tau2/",
+      "campaign/contactarch_expedition_control/",
+      "campaign/contactarch_expedition_high/",
+      "campaign/contactarch_expedition_low/",
+      "campaign/contactarch_expedition_mid/",
+      "campaign/contactscale_expedition_phi0/",
+      "campaign/contactscale_expedition_phi05/",
+      "campaign/contactscale_expedition_phi1/",
+      "campaign/contactscale_expedition_phi2/",
+      "campaign/contactscale_expedition_phim1/",
+      "campaign/threearm_expedition_base/",
+      "campaign/threearm_expedition_surfko/"
+    ],
+    "historical_object_count": 640,
+    "historical_bytes": 78980893,
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "exact_source_reference_prefix_count": 5,
+    "no_exact_source_reference_prefix_count": 15,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "telemetry_buffer/observation_model/adj_stratified_readout.py",
+        "line_start": 76,
+        "line_end": 76,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/adj_stratified_readout.py#L76",
+        "text": "\"contactarch2_expedition_control\","
+      },
+      {
+        "source_path": "telemetry_buffer/observation_model/adj_stratified_readout.py",
+        "line_start": 72,
+        "line_end": 72,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/adj_stratified_readout.py#L72",
+        "text": "\"contactarch_expedition_control\","
+      },
+      {
+        "source_path": "telemetry_buffer/observation_model/adj_stratified_readout.py",
+        "line_start": 67,
+        "line_end": 67,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/adj_stratified_readout.py#L67",
+        "text": "\"contactscale_expedition_phi0\","
+      },
+      {
+        "source_path": "telemetry_buffer/observation_model/adj_stratified_readout.py",
+        "line_start": 63,
+        "line_end": 63,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/adj_stratified_readout.py#L63",
+        "text": "\"threearm_expedition_base\","
+      },
+      {
+        "source_path": "telemetry_buffer/observation_model/adj_stratified_readout.py",
+        "line_start": 64,
+        "line_end": 64,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/adj_stratified_readout.py#L64",
+        "text": "(\"threearm_expedition_surfko\",),"
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_dose_clock_containment",
+    "registered_campaigns": [],
+    "historical_prefix_count": 9,
+    "historical_prefixes": [
+      "campaign/c1_reported_case_refit/",
+      "campaign/c1_reported_case_refit_trackA_20260905/",
+      "campaign/c1_single_dose_hours_v1/",
+      "campaign/clock_arm_c1_v1/",
+      "campaign/common_dose_containment_v1/",
+      "campaign/common_dose_containment_v2/",
+      "campaign/common_dose_containment_v3/",
+      "campaign/common_dose_containment_v4/",
+      "campaign/noro_dose_refit_01/"
+    ],
+    "historical_object_count": 2053,
+    "historical_bytes": 177664739,
+    "schema_families": [
+      "campaign_summary_zip",
+      "unknown_legacy"
+    ],
+    "exact_source_reference_prefix_count": 7,
+    "no_exact_source_reference_prefix_count": 2,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "docs/norovirus/c1_reported_case_bracket_result.md",
+        "line_start": 7,
+        "line_end": 7,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/norovirus/c1_reported_case_bracket_result.md#L7",
+        "text": "`s3://crusherbucket-994254241749-us-east-1-an/campaign/c1_reported_case_refit_trackA_20260905/`."
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/c1_reported_case_refit_v1_manifest.json",
+        "line_start": 4,
+        "line_end": 4,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/c1_reported_case_refit_v1_manifest.json#L4",
+        "text": "\"description\": \"Norovirus dose_adjustment refit on the CORRECTED model: the VSP trigger now fires on cumulative reported passenger cases (PR #325) and recovery is measured from symptom onset rather than from exposure, so the infectious course is incubation + recovery_day. Both changes invalidate the c1_single_dose_hours_v1 answer (a common dose of 12.25-12.5): that fit was scored as infections/complement against a model whose response never engaged and whose symptomatic window was recovery_day m"
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/common_dose_containment_v1_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/common_dose_containment_v1_manifest.json#L2",
+        "text": "\"campaign\": \"common_dose_containment_v1\","
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/common_dose_containment_v2_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/common_dose_containment_v2_manifest.json#L2",
+        "text": "\"campaign\": \"common_dose_containment_v2\","
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/common_dose_containment_v3_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/common_dose_containment_v3_manifest.json#L2",
+        "text": "\"campaign\": \"common_dose_containment_v3\","
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/common_dose_containment_v4_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/common_dose_containment_v4_manifest.json#L2",
+        "text": "\"campaign\": \"common_dose_containment_v4\","
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_dose_refit.json",
+        "line_start": 53,
+        "line_end": 53,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_dose_refit.json#L53",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_dose_refit_01/\","
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_flush_stage_parameter_sweeps",
+    "registered_campaigns": [],
+    "historical_prefix_count": 28,
+    "historical_prefixes": [
+      "campaign/flush_sweep_v1_1e-5_s1/",
+      "campaign/flush_sweep_v1_1e-5_s3/",
+      "campaign/flush_sweep_v1_1e-7_s1/",
+      "campaign/flush_sweep_v1_1e-7_s2/",
+      "campaign/flush_sweep_v1_1e-7_s2e/",
+      "campaign/flush_sweep_v1_1e-7_s2r/",
+      "campaign/flush_sweep_v1_1e-7_s3/",
+      "campaign/flush_sweep_v1_1e-8_s2/",
+      "campaign/flush_sweep_v1_1e-8_s2e/",
+      "campaign/flush_sweep_v1_1e-8_s2r/",
+      "campaign/flush_sweep_v1_1e-8_s4/",
+      "campaign/flush_sweep_v1_1e-9_s1/",
+      "campaign/flush_sweep_v1_1e-9_s3/",
+      "campaign/flush_sweep_v1_3e-7_s4/",
+      "campaign/flush_sweep_v1_3e-8_s2/",
+      "campaign/flush_sweep_v1_3e-8_s2e/",
+      "campaign/flush_sweep_v1_3e-8_s2r/",
+      "campaign/flush_sweep_v1_3e-8_s4/",
+      "campaign/flush_sweep_v1_3e-9_s2/",
+      "campaign/flush_sweep_v1_3e-9_s2e/",
+      "campaign/flush_sweep_v1_3e-9_s2r/",
+      "campaign/flush_sweep_v1_3e-9_s4/",
+      "campaign/flush_sweep_v1_off_s1/",
+      "campaign/flush_sweep_v1_off_s2/",
+      "campaign/flush_sweep_v1_off_s2e/",
+      "campaign/flush_sweep_v1_off_s2r/",
+      "campaign/flush_sweep_v1_off_s3/",
+      "campaign/flush_sweep_v1_off_s4/"
+    ],
+    "historical_object_count": 25632,
+    "historical_bytes": 634944118,
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "exact_source_reference_prefix_count": 28,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "telemetry_buffer/observation_model/flush_sweep_readout.py",
+        "line_start": 48,
+        "line_end": 48,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/telemetry_buffer/observation_model/flush_sweep_readout.py#L48",
+        "text": "--arm 1e-5=telemetry_buffer/flush_sweep_v1_1e-5_s1 \\\\"
+      },
+      {
+        "source_path": "docs/ledger/FLUSH-S3.md",
+        "line_start": 135,
+        "line_end": 135,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/FLUSH-S3.md#L135",
+        "text": "| `1e-5_s3` | `415f8807-8653-46f6-9dfb-5cd8c7c96b6f` | 600 | `campaign/flush_sweep_v1_1e-5_s3/` |"
+      },
+      {
+        "source_path": "scripts/build_flush_sweep_v1_manifest.py",
+        "line_start": 306,
+        "line_end": 306,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/scripts/build_flush_sweep_v1_manifest.py#L306",
+        "text": "\"s1 -> flush_sweep_v1_1e-7_s1; keeps a 100-seed stage-1 arm \""
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/flush_sweep_v1_1e-7_s2_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/flush_sweep_v1_1e-7_s2_manifest.json#L2",
+        "text": "\"campaign\": \"flush_sweep_v1_1e-7_s2\","
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/flush_sweep_v1_1e-7_s2e_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/flush_sweep_v1_1e-7_s2e_manifest.json#L2",
+        "text": "\"campaign\": \"flush_sweep_v1_1e-7_s2e\","
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/flush_sweep_v1_1e-7_s2r_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/flush_sweep_v1_1e-7_s2r_manifest.json#L2",
+        "text": "\"campaign\": \"flush_sweep_v1_1e-7_s2r\","
+      },
+      {
+        "source_path": "docs/ledger/FLUSH-S3.md",
+        "line_start": 134,
+        "line_end": 134,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/FLUSH-S3.md#L134",
+        "text": "| `1e-7_s3` | `48bca2c4-6786-4fbe-8a77-d118d72ee87f` | 600 | `campaign/flush_sweep_v1_1e-7_s3/` |"
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/flush_sweep_v1_1e-8_s2_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/flush_sweep_v1_1e-8_s2_manifest.json#L2",
+        "text": "\"campaign\": \"flush_sweep_v1_1e-8_s2\","
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_food_object_growth_sweeps",
+    "registered_campaigns": [
+      "noro_age_food_01",
+      "noro_age_food_01_mega",
+      "noro_food_shapes_01",
+      "noro_mint_rate_01",
+      "noro_entrain_01",
+      "noro_food_score_01"
+    ],
+    "historical_prefix_count": 10,
+    "historical_prefixes": [
+      "campaign/noro_age_food_01/",
+      "campaign/noro_age_food_01_confpair/",
+      "campaign/noro_age_food_01_defpair/",
+      "campaign/noro_entrain_01/",
+      "campaign/noro_food_01/",
+      "campaign/noro_food_02/",
+      "campaign/noro_food_score_01/",
+      "campaign/noro_food_shapes_01/",
+      "campaign/noro_mega_impact_01/",
+      "campaign/noro_mint_rate_01/"
+    ],
+    "historical_object_count": 185029,
+    "historical_bytes": 8487726837225,
+    "schema_families": [
+      "campaign_summary_zip",
+      "growth_census_zip"
+    ],
+    "exact_source_reference_prefix_count": 10,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "campaigns/noro/age_food_01/LEDGER.md",
+        "line_start": 12,
+        "line_end": 12,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/age_food_01/LEDGER.md#L12",
+        "text": "| 2026-10-05 | Canary submitted at cb0f562153fc and verified. Image `picard-campaign:noro-age-food01` digest `sha256:4a66190ea85fa9a5ff11d9466209cdbcc114b60141fa677dc8754b68a31b1c3c` (root Dockerfile + `Dockerfile.campaign_stack` + `campaigns/` overlay — committed `Dockerfile.campaign` copies nothing, so a literal build yields an image with no `deploy/aws/`, `tools/`, or `campaigns/`; this is the first submit through `campaign_jobdef.json` + `campaign_entrypoint.py`, so the gap had never been ex"
+      },
+      {
+        "source_path": "campaigns/noro/age_food_01/LEDGER.md",
+        "line_start": 17,
+        "line_end": 17,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/age_food_01/LEDGER.md#L17",
+        "text": "| 2026-10-06 | CONFINEMENT-PAIR RE-RUN (6 ship blocks × 1000 seeds = 6,000 voyages) submitted at `32b11ccf2c17` — post-#936 door-drop `contact_factor` (default-ON); purpose: paired re-run of the confinement-active subset vs the wave-1 baseline (pairing key = tier + seed). NEW image `picard-campaign:noro-age-food01-post936`, digest `sha256:de3e764494a149772e67485bade31093e0f70853a91fb5d8d4dfbf4e4c4cc558`, `ENGINE_GIT_SHA` stamped `32b11ccf…` in-container (base + `Dockerfile.campaign` rebuilt at H"
+      },
+      {
+        "source_path": "campaigns/noro/age_food_01/LEDGER.md",
+        "line_start": 18,
+        "line_end": 18,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/age_food_01/LEDGER.md#L18",
+        "text": "| 2026-10-06 | DEFIANCE-PAIR RE-RUN (6 ship blocks × 1000 seeds = 6,000 voyages) submitted at `679a6c1b9189` — post-#945 DEFIANT-ESC-01 (defiant refusers escalate to enforced confinement after a declared hold-out); purpose: third paired snapshot of the confinement-active subset vs the wave-1 baseline and the confpair v1 run (pairing key = tier + seed across all three). NEW image `picard-campaign:noro-age-food01-defiant-esc`, digest `sha256:7eed839a37f09335afc1f541ab2b703044038ee140884914e4acf60d"
+      },
+      {
+        "source_path": "campaigns/noro/noro_entrain_01/LEDGER.md",
+        "line_start": 60,
+        "line_end": 60,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/noro_entrain_01/LEDGER.md#L60",
+        "text": "Zips under `campaign/noro_entrain_01/{canary_exp_bc80,canary_exp_a_ext,canary_exp_ship,canary_exp_off}/`."
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_noro_food_01.json",
+        "line_start": 10,
+        "line_end": 10,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_noro_food_01.json#L10",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_food_01/\""
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_noro_food_02.json",
+        "line_start": 10,
+        "line_end": 10,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_noro_food_02.json#L10",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_food_02/\""
+      },
+      {
+        "source_path": "campaigns/noro/noro_food_score_01/LEDGER.md",
+        "line_start": 17,
+        "line_end": 17,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/noro_food_score_01/LEDGER.md#L17",
+        "text": "| wave 1 | landed | exp + cls 12,000/12,000 SUCCEEDED, 0 FAILED — zips under `campaign/noro_food_score_01/fl_{exp,cls}_*/`; see Wave 1 submission |"
+      },
+      {
+        "source_path": "campaigns/noro/food_shapes_01/LEDGER.md",
+        "line_start": 63,
+        "line_end": 63,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/food_shapes_01/LEDGER.md#L63",
+        "text": "`s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_food_shapes_01/manifest.json`."
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_genotype_mixtures",
+    "registered_campaigns": [],
+    "historical_prefix_count": 7,
+    "historical_prefixes": [
+      "campaign/noro_geno_01_gii4/",
+      "campaign/noro_geno_01_mixture/",
+      "campaign/noro_geno_01_nongii4/",
+      "campaign/noro_geno_02_gii4/",
+      "campaign/noro_geno_02_mixture/",
+      "campaign/noro_geno_02_nongii4/",
+      "campaign/noro_geno_02_sweep/"
+    ],
+    "historical_object_count": 9060,
+    "historical_bytes": 100376649,
+    "schema_families": [
+      "campaign_summary_zip",
+      "unknown_legacy"
+    ],
+    "exact_source_reference_prefix_count": 5,
+    "no_exact_source_reference_prefix_count": 2,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "docs/ledger/NORO-GENO-01.md",
+        "line_start": 132,
+        "line_end": 132,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-GENO-01.md#L132",
+        "text": "(20 children, all SUCCEEDED), S3 `campaign/noro_geno_01_gii4/`."
+      },
+      {
+        "source_path": "docs/ledger/NORO-GENO-01.md",
+        "line_start": 169,
+        "line_end": 169,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-GENO-01.md#L169",
+        "text": "`campaign/noro_geno_01_mixture/`, 20/20 SUCCEEDED."
+      },
+      {
+        "source_path": "docs/ledger/NORO-GENO-01.md",
+        "line_start": 166,
+        "line_end": 166,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-GENO-01.md#L166",
+        "text": "S3 `campaign/noro_geno_01_nongii4/`, 20/20 SUCCEEDED. Cell C"
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/noro_geno_02_mixture_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/noro_geno_02_mixture_manifest.json#L2",
+        "text": "\"campaign\": \"noro_geno_02_mixture\","
+      },
+      {
+        "source_path": "docs/norovirus/noro_geno_02_design.md",
+        "line_start": 30,
+        "line_end": 30,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/norovirus/noro_geno_02_design.md#L30",
+        "text": "`campaign/noro_geno_02_sweep/`, 80/80 SUCCEEDED):"
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_hand_fomite_diagnostics",
+    "registered_campaigns": [
+      "noro_hand_stationary_01"
+    ],
+    "historical_prefix_count": 6,
+    "historical_prefixes": [
+      "campaign/noro_hand_carriage01/",
+      "campaign/noro_hand_carriage02/",
+      "campaign/noro_hand_practice_01/",
+      "campaign/noro_hand_reservoir_01/",
+      "campaign/noro_hand_stationary_01/",
+      "campaign/touch_share_rate_01/"
+    ],
+    "historical_object_count": 450,
+    "historical_bytes": 4674547401,
+    "schema_families": [
+      "fomite_diagnostic_gzip",
+      "growth_census_zip",
+      "unknown_legacy"
+    ],
+    "exact_source_reference_prefix_count": 6,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "docs/ledger/NORO-HAND-CARRIAGE-01.md",
+        "line_start": 142,
+        "line_end": 142,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-HAND-CARRIAGE-01.md#L142",
+        "text": "records in S3 `campaign/noro_hand_carriage01/`, merged cell table"
+      },
+      {
+        "source_path": "docs/ledger/NORO-HAND-CARRIAGE-01.md",
+        "line_start": 246,
+        "line_end": 246,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-HAND-CARRIAGE-01.md#L246",
+        "text": "(`campaign/noro_hand_carriage02/`, jobdef `picard-hand-occupancy:7`,"
+      },
+      {
+        "source_path": "docs/ledger/NORO-HAND-PRACTICE-01.md",
+        "line_start": 173,
+        "line_end": 173,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-HAND-PRACTICE-01.md#L173",
+        "text": "void 8011+8015; S3 `campaign/noro_hand_practice_01/`): occupancy"
+      },
+      {
+        "source_path": "docs/ledger/NORO-HAND-PRACTICE-01.md",
+        "line_start": 166,
+        "line_end": 166,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-HAND-PRACTICE-01.md#L166",
+        "text": "S3 `campaign/noro_hand_reservoir_01/` dump prefix family) and the"
+      },
+      {
+        "source_path": "campaigns/README.md",
+        "line_start": 31,
+        "line_end": 31,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/README.md#L31",
+        "text": "\"name\": \"noro_hand_stationary_01\",        // campaign id; default s3 prefix + jobdef stem"
+      },
+      {
+        "source_path": "deploy/aws/submit_dose_challenge.sh",
+        "line_start": 27,
+        "line_end": 27,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/submit_dose_challenge.sh#L27",
+        "text": "S3_PREFIX=\"${S3_PREFIX:-s3://${BUCKET}/campaign/touch_share_rate_01/}\""
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_importation_incidence_venue_clock",
+    "registered_campaigns": [],
+    "historical_prefix_count": 16,
+    "historical_prefixes": [
+      "campaign/noro_channel_03/",
+      "campaign/noro_channel_04/",
+      "campaign/noro_detect_01/",
+      "campaign/noro_import_01/",
+      "campaign/noro_import_01_r2/",
+      "campaign/noro_mega_01/",
+      "campaign/noro_outbreak_01/",
+      "campaign/noro_outbreak_02/",
+      "campaign/noro_outbreak_03/",
+      "campaign/noro_outbreak_04/",
+      "campaign/noro_rebase_01/",
+      "campaign/noro_rebase_01_exp_block/",
+      "campaign/noro_rhythm_01/",
+      "campaign/noro_rhythm_01_v2/",
+      "campaign/noro_venue_01/",
+      "campaign/noro_venue_02/"
+    ],
+    "historical_object_count": 82992,
+    "historical_bytes": 1141416254180,
+    "schema_families": [
+      "campaign_summary_zip",
+      "growth_census_zip",
+      "unknown_legacy"
+    ],
+    "exact_source_reference_prefix_count": 16,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "deploy/aws/batch_job_definition_noro_channel_03.json",
+        "line_start": 63,
+        "line_end": 63,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_noro_channel_03.json#L63",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_channel_03/\","
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_noro_channel_04.json",
+        "line_start": 63,
+        "line_end": 63,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_noro_channel_04.json#L63",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_channel_04/\","
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_venue_census.json",
+        "line_start": 63,
+        "line_end": 63,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_venue_census.json#L63",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_detect_01/\","
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_import_map.json",
+        "line_start": 59,
+        "line_end": 59,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_import_map.json#L59",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_import_01/\","
+      },
+      {
+        "source_path": "docs/ledger/NORO-IMPORT-01.md",
+        "line_start": 75,
+        "line_end": 75,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/NORO-IMPORT-01.md#L75",
+        "text": "rerun (`campaign/noro_import_01_r2/`) copied back over the same"
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_noro_mega_01.json",
+        "line_start": 11,
+        "line_end": 11,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_noro_mega_01.json#L11",
+        "text": "\"import json,os,runpy,sys;mp='picard_framework/runs/mega_cruise_campaign/noro_mega_01_manifest.json';m=json.loads('''{\\\"campaign\\\":\\\"noro_mega_01\\\",\\\"description\\\":\\\"NORO-MEGA-01: absolute noro outbreak measurement on mega_cruise_5000 (7000 agents, 288 epochs) in the 1e158d47 stack: CAREGIVER-V1 + PROPENSITY-V1 + hand-reservoir rebuild + presentation-share repair + funnel instruments. Cell set: fl_mega_12d_scr x boarding_prevalence diagonal {lo,mid,hi} x seeds 8000-8999 = 3000 runs. Anchors: meg"
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_noro_outbreak_01.json",
+        "line_start": 59,
+        "line_end": 59,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_noro_outbreak_01.json#L59",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_outbreak_01/\","
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_noro_outbreak_02.json",
+        "line_start": 10,
+        "line_end": 10,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_noro_outbreak_02.json#L10",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/noro_outbreak_02/\""
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_provisioned_source_PS01",
+    "registered_campaigns": [
+      "noro_provisioned_source_01",
+      "noro_provisioned_source_01_mega"
+    ],
+    "historical_prefix_count": 2,
+    "historical_prefixes": [
+      "campaign/noro_provisioned_source_01/",
+      "campaign/noro_provisioned_source_01_mega/"
+    ],
+    "historical_object_count": 39964,
+    "historical_bytes": 2539096072641,
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "exact_source_reference_prefix_count": 2,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "campaigns/noro/provisioned_source_01/LEDGER.md",
+        "line_start": 38,
+        "line_end": 38,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/provisioned_source_01/LEDGER.md#L38",
+        "text": "Manifest mirrored to `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_source_01/manifest.json`."
+      },
+      {
+        "source_path": "campaigns/noro/provisioned_source_01/LEDGER.md",
+        "line_start": 403,
+        "line_end": 403,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/campaigns/noro/provisioned_source_01/LEDGER.md#L403",
+        "text": "`:6`, which scans `campaign/noro_provisioned_source_01_mega/`"
+      }
+    ]
+  },
+  {
+    "program_group": "norovirus_structural_and_posting_counterfactuals",
+    "registered_campaigns": [],
+    "historical_prefix_count": 16,
+    "historical_prefixes": [
+      "campaign/boarding_posting_v1/",
+      "campaign/cabin_floor_01/",
+      "campaign/cabin_floor_01_declared/",
+      "campaign/cabin_floor_02_declared/",
+      "campaign/droplet_deletion_route_v1/",
+      "campaign/expedition_posting_v2/",
+      "campaign/gate37_dutyexcl_off_v1/",
+      "campaign/gate37_dutyexcl_on_v1/",
+      "campaign/gate37_lowposting_v1/",
+      "campaign/hull_compounding_route_v1/",
+      "campaign/hull_compounding_v1/",
+      "campaign/hull_posting_v1/",
+      "campaign/realism_ladder_v1/",
+      "campaign/route_attr_01/",
+      "campaign/sanitary_structure_v1_baseline/",
+      "campaign/sanitary_structure_v1_visits/"
+    ],
+    "historical_object_count": 8826,
+    "historical_bytes": 1325674903,
+    "schema_families": [
+      "campaign_summary_zip",
+      "observation_jsonl",
+      "unknown_legacy"
+    ],
+    "exact_source_reference_prefix_count": 16,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "scripts/build_boarding_posting_v1_manifest.py",
+        "line_start": 1,
+        "line_end": 1,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/scripts/build_boarding_posting_v1_manifest.py#L1",
+        "text": "\"\"\"Emit the ``boarding_posting_v1`` campaign manifest."
+      },
+      {
+        "source_path": "deploy/aws/batch_job_definition_cabin_floor.json",
+        "line_start": 57,
+        "line_end": 57,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/batch_job_definition_cabin_floor.json#L57",
+        "text": "\"s3_prefix\": \"s3://<BUCKET>/campaign/cabin_floor_01/\","
+      },
+      {
+        "source_path": "docs/ledger/CABIN-FLOOR-01.md",
+        "line_start": 34,
+        "line_end": 34,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/CABIN-FLOOR-01.md#L34",
+        "text": "`sha256:c14a3d84`, = 4e499daa tree), prefix `campaign/cabin_floor_01_declared/`."
+      },
+      {
+        "source_path": "docs/ledger/CABIN-FLOOR-02.md",
+        "line_start": 17,
+        "line_end": 17,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/CABIN-FLOOR-02.md#L17",
+        "text": "prefix `campaign/cabin_floor_02_declared/`; 26/26 cells clean."
+      },
+      {
+        "source_path": "docs/applications_guide.md",
+        "line_start": 414,
+        "line_end": 414,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/applications_guide.md#L414",
+        "text": "[norovirus/droplet_deletion_route_v1.md](norovirus/droplet_deletion_route_v1.md):"
+      },
+      {
+        "source_path": "scripts/build_boarding_posting_v1_manifest.py",
+        "line_start": 28,
+        "line_end": 28,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/scripts/build_boarding_posting_v1_manifest.py#L28",
+        "text": "# Disjoint from hull_posting_v1 (3000-4049) and expedition_posting_v2, so a"
+      },
+      {
+        "source_path": "docs/norovirus/dutyexcl_matched_37.md",
+        "line_start": 9,
+        "line_end": 9,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/norovirus/dutyexcl_matched_37.md#L9",
+        "text": "`s3://crusherbucket-994254241749-us-east-1-an/campaign/gate37_dutyexcl_off_v1/`"
+      },
+      {
+        "source_path": "docs/norovirus/dutyexcl_matched_37.md",
+        "line_start": 10,
+        "line_end": 10,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/norovirus/dutyexcl_matched_37.md#L10",
+        "text": "and `…/gate37_dutyexcl_on_v1/` (AWS Batch jobs"
+      }
+    ]
+  },
+  {
+    "program_group": "sentinel_Stan_NUTS_validation",
+    "registered_campaigns": [],
+    "historical_prefix_count": 1,
+    "historical_prefixes": [
+      "campaign/sentinel_nuts_ladder_v1/"
+    ],
+    "historical_object_count": 169,
+    "historical_bytes": 4728667,
+    "schema_families": [
+      "stan_nuts_json"
+    ],
+    "exact_source_reference_prefix_count": 1,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "deploy/aws/README.md",
+        "line_start": 683,
+        "line_end": 683,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/README.md#L683",
+        "text": "`s3://$BUCKET/campaign/sentinel_nuts_ladder_v1/`. Existing cell keys are"
+      }
+    ]
+  },
+  {
+    "program_group": "sentinel_wastewater_operating_envelope",
+    "registered_campaigns": [],
+    "historical_prefix_count": 1,
+    "historical_prefixes": [
+      "campaign/sentinel_ww_ops_scan_v1/"
+    ],
+    "historical_object_count": 37513,
+    "historical_bytes": 1290009144,
+    "schema_families": [
+      "wastewater_campaign_zip"
+    ],
+    "exact_source_reference_prefix_count": 1,
+    "no_exact_source_reference_prefix_count": 0,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "docs/ledger/OVERRIDE-FLAGS-01.md",
+        "line_start": 51,
+        "line_end": 51,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/ledger/OVERRIDE-FLAGS-01.md#L51",
+        "text": "| `wastewater_surveillance.enabled` | false | Opt-in subsystem; `sentinel_ww_ops_scan_v1` sweeps it |"
+      }
+    ]
+  },
+  {
+    "program_group": "synthetic_recovery_and_observation_degradation",
+    "registered_campaigns": [],
+    "historical_prefix_count": 4,
+    "historical_prefixes": [
+      "campaign/sentinel_synthetic_recovery_v1/",
+      "campaign/synthetic_recovery_v1/",
+      "campaign/vsp_degradation_compliance_fix_v1/",
+      "campaign/vsp_degradation_v1/"
+    ],
+    "historical_object_count": 26003,
+    "historical_bytes": 531045835,
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "exact_source_reference_prefix_count": 3,
+    "no_exact_source_reference_prefix_count": 1,
+    "normalization_basis": "documentary/current-registry plus explicit name-family grouping; not proof of exchangeability, same engine, successful cells or independent experiments",
+    "disposition": "retain attempts, stages, canaries, restarts, failed jobs, obsolete images and paired reruns as separate strata; adapt schema without pooling science",
+    "source_references": [
+      {
+        "source_path": "deploy/aws/README.md",
+        "line_start": 642,
+        "line_end": 642,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/deploy/aws/README.md#L642",
+        "text": "`campaign/sentinel_synthetic_recovery_v1/analysis/`):"
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/synthetic_recovery_v1_design.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/synthetic_recovery_v1_design.json#L2",
+        "text": "\"campaign\": \"synthetic_recovery_v1\","
+      },
+      {
+        "source_path": "picard_framework/runs/mega_cruise_campaign/vsp_degradation_v1_manifest.json",
+        "line_start": 2,
+        "line_end": 2,
+        "source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+        "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/picard_framework/runs/mega_cruise_campaign/vsp_degradation_v1_manifest.json#L2",
+        "text": "\"campaign\": \"vsp_degradation_v1\","
+      }
+    ]
+  }
+]
