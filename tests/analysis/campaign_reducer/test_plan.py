@@ -9,9 +9,8 @@ current key or run count.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
-
-import pytest
 
 from picard_framework.analysis.campaign_reducer import cli, contracts
 from picard_framework.analysis.campaign_reducer.scope import reconcile_scope
@@ -20,15 +19,21 @@ CONTRACTS = contracts.CONTRACTS_DIR
 BLOCKED_REQUEST = CONTRACTS / "BLOCKED_REQUEST.template.json"
 
 
-def _run_plan(tmp_path: Path) -> int:
+def rel(path: Path | str) -> str:
+    """CLI path args resolve against the invocation directory."""
+    return os.path.relpath(str(path), os.getcwd())
+
+
+def _run_plan(out_dir: Path) -> int:
     return cli.main([
-        "plan", "--request", str(BLOCKED_REQUEST), "--out", str(tmp_path),
+        "plan", "--request", rel(BLOCKED_REQUEST), "--out", rel(out_dir),
     ])
 
 
-def test_plan_reconciles_dated_register(tmp_path: Path) -> None:
-    assert _run_plan(tmp_path) == 0
-    scope = json.loads((tmp_path / "scope.json").read_text(encoding="utf-8"))
+def test_plan_reconciles_dated_register(scratch: Path) -> None:
+    out_dir = scratch / "out"
+    assert _run_plan(out_dir) == 0
+    scope = json.loads((out_dir / "scope.json").read_text(encoding="utf-8"))
     canonical = contracts.load(contracts.CANONICAL_INTERFACE)
 
     assert scope["status"] == "scope_reconciled"
@@ -49,9 +54,10 @@ def test_plan_reconciles_dated_register(tmp_path: Path) -> None:
     )
 
 
-def test_plan_scope_is_dated_not_current(tmp_path: Path) -> None:
-    assert _run_plan(tmp_path) == 0
-    scope = json.loads((tmp_path / "scope.json").read_text(encoding="utf-8"))
+def test_plan_scope_is_dated_not_current(scratch: Path) -> None:
+    out_dir = scratch / "out"
+    assert _run_plan(out_dir) == 0
+    scope = json.loads((out_dir / "scope.json").read_text(encoding="utf-8"))
     canonical = contracts.load(contracts.CANONICAL_INTERFACE)
 
     assert scope["counts_are_dated_not_current"] is True
@@ -62,9 +68,14 @@ def test_plan_scope_is_dated_not_current(tmp_path: Path) -> None:
     assert listing["bytes_listed"] > 0
 
 
-def test_plan_emits_request_template_from_schema_required(tmp_path: Path) -> None:
-    assert _run_plan(tmp_path) == 0
-    template = json.loads((tmp_path / "request_template.json").read_text(encoding="utf-8"))
+def test_plan_emits_request_template_from_schema_required(
+    scratch: Path,
+) -> None:
+    out_dir = scratch / "out"
+    assert _run_plan(out_dir) == 0
+    template = json.loads(
+        (out_dir / "request_template.json").read_text(encoding="utf-8"),
+    )
     schema = contracts.load(contracts.REQUEST_SCHEMA)
 
     assert set(template) == set(schema["required"])
@@ -79,9 +90,12 @@ def test_plan_emits_request_template_from_schema_required(tmp_path: Path) -> Non
     assert all(value is None for value in budgets.values())
 
 
-def test_plan_emits_blocking_inputs_checklist(tmp_path: Path) -> None:
-    assert _run_plan(tmp_path) == 0
-    blocking = json.loads((tmp_path / "blocking_inputs.json").read_text(encoding="utf-8"))
+def test_plan_emits_blocking_inputs_checklist(scratch: Path) -> None:
+    out_dir = scratch / "out"
+    assert _run_plan(out_dir) == 0
+    blocking = json.loads(
+        (out_dir / "blocking_inputs.json").read_text(encoding="utf-8"),
+    )
     canonical = contracts.load(contracts.CANONICAL_INTERFACE)
 
     assert blocking["request_required_fields"] == canonical["request_required_fields"]
@@ -105,9 +119,21 @@ def test_reconcile_scope_flags_tampered_register() -> None:
     assert "total_records" in metrics
 
 
-def test_plan_missing_request_file_is_invalid(tmp_path: Path) -> None:
+def test_plan_missing_request_file_is_invalid(scratch: Path) -> None:
     exit_code = cli.main([
-        "plan", "--request", str(tmp_path / "missing.json"),
-        "--out", str(tmp_path / "out"),
+        "plan", "--request", rel(scratch / "missing.json"),
+        "--out", rel(scratch / "out"),
+    ])
+    assert exit_code == contracts.EXIT_INVALID_CONTRACT
+
+
+def test_plan_request_outside_invocation_root_is_invalid(
+    scratch: Path, tmp_path: Path,
+) -> None:
+    """A request path escaping the invocation directory is refused (S8707)."""
+    outside = tmp_path / "request.json"
+    outside.write_text("{}", encoding="utf-8")
+    exit_code = cli.main([
+        "plan", "--request", str(outside), "--out", rel(scratch / "out"),
     ])
     assert exit_code == contracts.EXIT_INVALID_CONTRACT

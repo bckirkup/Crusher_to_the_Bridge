@@ -7,13 +7,18 @@ non-finite or conflated fields block. ``None`` is never unlimited.
 
 from __future__ import annotations
 
-import copy
 import json
+import os
 from pathlib import Path
 
 import pytest
 
 from picard_framework.analysis.campaign_reducer import cli, contracts
+
+
+def rel(path: Path | str) -> str:
+    """CLI path args resolve against the invocation directory."""
+    return os.path.relpath(str(path), os.getcwd())
 
 CONTRACTS = contracts.CONTRACTS_DIR
 BLOCKED_REQUEST = CONTRACTS / "BLOCKED_REQUEST.template.json"
@@ -25,8 +30,8 @@ _FAKE_SHA = "a" * 64
 
 def _validate(path: Path, kind: str, out: Path) -> tuple[int, dict]:
     exit_code = cli.main([
-        "validate", "--request", str(path),
-        "--request-kind", kind, "--out", str(out),
+        "validate", "--request", rel(path),
+        "--request-kind", kind, "--out", rel(out),
     ])
     report = json.loads((out / "validation.json").read_text(encoding="utf-8"))
     return exit_code, report
@@ -128,8 +133,8 @@ def valid_query() -> dict:
     return doc
 
 
-def _write(tmp_path: Path, doc: object, name: str = "request.json") -> Path:
-    path = tmp_path / name
+def _write(scratch: Path, doc: object, name: str = "request.json") -> Path:
+    path = scratch / name
     path.write_text(json.dumps(doc), encoding="utf-8")
     return path
 
@@ -143,9 +148,9 @@ def _write(tmp_path: Path, doc: object, name: str = "request.json") -> Path:
     ],
 )
 def test_shipped_blocked_fixtures_block(
-    tmp_path: Path, fixture: Path, kind: str,
+    scratch: Path, fixture: Path, kind: str,
 ) -> None:
-    out = tmp_path / "out"
+    out = scratch / "out"
     exit_code, report = _validate(fixture, kind, out)
     assert exit_code != 0
     assert report["status"] == "BLOCKED"
@@ -157,9 +162,9 @@ def test_shipped_blocked_fixtures_block(
 
 
 def test_query_blocked_example_is_schema_valid_but_semantically_blocked(
-    tmp_path: Path,
+    scratch: Path,
 ) -> None:
-    exit_code, report = _validate(BLOCKED_QUERY, "query", tmp_path / "out")
+    exit_code, report = _validate(BLOCKED_QUERY, "query", scratch / "out")
     assert report["schema_valid"] is True
     assert report["status"] == "BLOCKED"
     assert exit_code == contracts.EXIT_ACCESS_OR_RESOURCE_BLOCKED
@@ -177,20 +182,20 @@ def test_query_blocked_example_is_schema_valid_but_semantically_blocked(
     ],
 )
 def test_fully_filled_requests_pass(
-    tmp_path: Path, doc_fn: object, kind: str,
+    scratch: Path, doc_fn: object, kind: str,
 ) -> None:
-    path = _write(tmp_path, doc_fn())
-    exit_code, report = _validate(path, kind, tmp_path / "out")
+    path = _write(scratch, doc_fn())
+    exit_code, report = _validate(path, kind, scratch / "out")
     assert report["schema_valid"] is True
     assert report["status"] == "VALID"
     assert exit_code == 0
 
 
-def test_unset_budget_field_blocks(tmp_path: Path) -> None:
+def test_unset_budget_field_blocks(scratch: Path) -> None:
     doc = valid_execution_request()
     doc["budgets"].pop("max_cost_usd")
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert exit_code == contracts.EXIT_ADMISSION_REQUIRED_OR_EXCEEDED
     assert any(
@@ -199,22 +204,22 @@ def test_unset_budget_field_blocks(tmp_path: Path) -> None:
     )
 
 
-def test_null_budget_field_blocks_none_is_never_unlimited(tmp_path: Path) -> None:
+def test_null_budget_field_blocks_none_is_never_unlimited(scratch: Path) -> None:
     doc = valid_execution_request()
     doc["budgets"]["max_get_requests"] = None
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert exit_code == contracts.EXIT_ADMISSION_REQUIRED_OR_EXCEEDED
 
 
-def test_non_finite_budget_blocks(tmp_path: Path) -> None:
-    path = tmp_path / "request.json"
+def test_non_finite_budget_blocks(scratch: Path) -> None:
+    path = scratch / "request.json"
     raw = json.dumps(valid_execution_request()).replace(
         '"max_cost_usd": 25.0', '"max_cost_usd": 1e999',
     )
     path.write_text(raw, encoding="utf-8")
-    exit_code, report = _validate(path, "execution", tmp_path / "out")
+    exit_code, report = _validate(path, "execution", scratch / "out")
     assert exit_code == contracts.EXIT_ADMISSION_REQUIRED_OR_EXCEEDED
     assert any(
         reason["reason"] == "budget_not_finite"
@@ -222,30 +227,30 @@ def test_non_finite_budget_blocks(tmp_path: Path) -> None:
     )
 
 
-def test_negative_budget_blocks(tmp_path: Path) -> None:
+def test_negative_budget_blocks(scratch: Path) -> None:
     doc = valid_execution_request()
     doc["budgets"]["max_wall_seconds"] = -1
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert exit_code == contracts.EXIT_ADMISSION_REQUIRED_OR_EXCEEDED
 
 
-def test_zero_retries_is_admitted(tmp_path: Path) -> None:
+def test_zero_retries_is_admitted(scratch: Path) -> None:
     doc = valid_execution_request()
     doc["budgets"]["max_retries"] = 0
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert report["status"] == "VALID"
     assert exit_code == 0
 
 
-def test_missing_required_field_blocks(tmp_path: Path) -> None:
+def test_missing_required_field_blocks(scratch: Path) -> None:
     doc = valid_execution_request()
     doc.pop("approval")
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert exit_code != 0
     assert any(
@@ -254,11 +259,11 @@ def test_missing_required_field_blocks(tmp_path: Path) -> None:
     )
 
 
-def test_placeholder_resource_blocks(tmp_path: Path) -> None:
+def test_placeholder_resource_blocks(scratch: Path) -> None:
     doc = valid_execution_request()
     doc["job_binding"]["queue_arn"] = "<LIVE_QUEUE_ARN_REQUIRED>"
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert exit_code == contracts.EXIT_ACCESS_OR_RESOURCE_BLOCKED
     assert any(
@@ -267,11 +272,11 @@ def test_placeholder_resource_blocks(tmp_path: Path) -> None:
     )
 
 
-def test_sha_role_conflation_blocks(tmp_path: Path) -> None:
+def test_sha_role_conflation_blocks(scratch: Path) -> None:
     doc = valid_execution_request()
     doc["implementation_sha"] = doc["reducer_image_digest"]
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert exit_code != 0
     assert any(
@@ -280,11 +285,11 @@ def test_sha_role_conflation_blocks(tmp_path: Path) -> None:
     )
 
 
-def test_survey_sha_as_implementation_sha_blocks(tmp_path: Path) -> None:
+def test_survey_sha_as_implementation_sha_blocks(scratch: Path) -> None:
     doc = valid_execution_request()
     doc["implementation_sha"] = doc["survey_source_sha"]
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert exit_code != 0
     assert any(
@@ -294,36 +299,36 @@ def test_survey_sha_as_implementation_sha_blocks(tmp_path: Path) -> None:
 
 
 def test_schema_violation_without_blockage_is_invalid_contract(
-    tmp_path: Path,
+    scratch: Path,
 ) -> None:
     doc = valid_execution_request()
     doc["schema_version"] = "wrong-version"
     exit_code, report = _validate(
-        _write(tmp_path, doc), "execution", tmp_path / "out",
+        _write(scratch, doc), "execution", scratch / "out",
     )
     assert exit_code == contracts.EXIT_INVALID_CONTRACT
     assert report["schema_valid"] is False
     assert report["blocked_reasons"] == []
 
 
-def test_non_object_request_is_invalid(tmp_path: Path) -> None:
-    path = _write(tmp_path, [1, 2, 3])
-    exit_code, report = _validate(path, "execution", tmp_path / "out")
+def test_non_object_request_is_invalid(scratch: Path) -> None:
+    path = _write(scratch, [1, 2, 3])
+    exit_code, report = _validate(path, "execution", scratch / "out")
     assert exit_code == contracts.EXIT_INVALID_CONTRACT
 
 
-def test_missing_request_file_is_invalid(tmp_path: Path) -> None:
+def test_missing_request_file_is_invalid(scratch: Path) -> None:
     exit_code, _report = _validate(
-        tmp_path / "missing.json", "execution", tmp_path / "out",
+        scratch / "missing.json", "execution", scratch / "out",
     )
     assert exit_code == contracts.EXIT_INVALID_CONTRACT
 
 
-def test_wrong_kind_schema_rejects(tmp_path: Path) -> None:
+def test_wrong_kind_schema_rejects(scratch: Path) -> None:
     # A bootstrap document is not a valid execution request.
     exit_code, report = _validate(
-        _write(tmp_path, valid_bootstrap_request()),
-        "execution", tmp_path / "out",
+        _write(scratch, valid_bootstrap_request()),
+        "execution", scratch / "out",
     )
     assert exit_code != 0
     assert report["status"] != "VALID"

@@ -14,9 +14,13 @@ Writes three artifacts into ``--out DIR``:
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
+from simulation_utils.paths import validated_open
+
+from .._io import allowed_roots, ensure_out_dir, write_json
 from . import contracts
 from .scope import scope_report
 
@@ -107,8 +111,11 @@ def _load_optional_request(path: Path | None) -> dict | None:
     if path is None:
         return None
     try:
-        doc = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+        with validated_open(
+            str(path), allowed_roots=allowed_roots(), encoding="utf-8",
+        ) as fh:
+            doc = json.load(fh)
+    except (OSError, ValueError, json.JSONDecodeError):
         return None
     return doc if isinstance(doc, dict) else None
 
@@ -121,16 +128,18 @@ def run_plan(request_path: Path | None, out_dir: Path) -> int:
     template = seed_request_template(contracts.load(contracts.REQUEST_SCHEMA))
     blocking = build_blocking_inputs(canonical, _load_optional_request(request_path))
 
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "scope.json").write_text(
-        json.dumps(report, indent=2) + "\n", encoding="utf-8",
-    )
-    (out_dir / "blocking_inputs.json").write_text(
-        json.dumps(blocking, indent=2) + "\n", encoding="utf-8",
-    )
-    (out_dir / "request_template.json").write_text(
-        json.dumps(template, indent=2) + "\n", encoding="utf-8",
-    )
+    try:
+        out_root = ensure_out_dir(str(out_dir))
+    except SystemExit as exc:
+        print(json.dumps({
+            "status": "INVALID_CONTRACT",
+            "operation": "plan",
+            "error": str(exc),
+        }))
+        return contracts.EXIT_INVALID_CONTRACT
+    write_json(os.path.join(out_root, "scope.json"), report)
+    write_json(os.path.join(out_root, "blocking_inputs.json"), blocking)
+    write_json(os.path.join(out_root, "request_template.json"), template)
 
     print(json.dumps({
         "status": report["status"],

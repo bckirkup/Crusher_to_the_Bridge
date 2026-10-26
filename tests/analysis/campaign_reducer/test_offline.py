@@ -11,6 +11,7 @@ from __future__ import annotations
 import importlib.machinery
 import importlib.util
 import json
+import os
 import socket
 import subprocess
 import sys
@@ -19,6 +20,12 @@ from pathlib import Path
 import pytest
 
 from picard_framework.analysis.campaign_reducer import cli, contracts
+
+
+def rel(path: Path | str) -> str:
+    """CLI path args resolve against the invocation directory."""
+    return os.path.relpath(str(path), os.getcwd())
+
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CONTRACTS = contracts.CONTRACTS_DIR
@@ -66,39 +73,40 @@ def _load_launcher() -> object:
 
 
 def test_plan_and_validate_run_with_no_network_or_subprocess(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    scratch: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _forbid_external(monkeypatch)
     assert cli.main([
-        "plan", "--request", str(BLOCKED_REQUEST), "--out", str(tmp_path / "plan"),
+        "plan", "--request", rel(BLOCKED_REQUEST),
+        "--out", rel(scratch / "plan"),
     ]) == 0
     assert cli.main([
-        "validate", "--request", str(BLOCKED_REQUEST),
-        "--request-kind", "execution", "--out", str(tmp_path / "validate"),
+        "validate", "--request", rel(BLOCKED_REQUEST),
+        "--request-kind", "execution", "--out", rel(scratch / "validate"),
     ]) == contracts.EXIT_ADMISSION_REQUIRED_OR_EXCEEDED
 
 
 def test_launcher_analysis_path_never_invokes_simulation_launcher(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    scratch: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _forbid_external(monkeypatch)
     launcher = _load_launcher()
     exit_code = launcher.main([
-        "analysis", "plan", "--request", str(BLOCKED_REQUEST),
-        "--out", str(tmp_path / "plan"),
+        "analysis", "plan", "--request", rel(BLOCKED_REQUEST),
+        "--out", rel(scratch / "plan"),
     ])
     assert exit_code == 0
-    assert (tmp_path / "plan" / "scope.json").is_file()
+    assert (scratch / "plan" / "scope.json").is_file()
 
 
 @pytest.mark.parametrize("operation", _UNIMPLEMENTED_OPS)
 def test_unimplemented_operations_exit_nonzero(
-    tmp_path: Path, operation: str,
+    scratch: Path, operation: str,
 ) -> None:
-    out = tmp_path / operation
+    out = scratch / operation
     exit_code = cli.main([
-        operation, "--request", str(BLOCKED_REQUEST),
-        "--out", str(out), *_EXTRA_ARGV.get(operation, []),
+        operation, "--request", rel(BLOCKED_REQUEST),
+        "--out", rel(out), *_EXTRA_ARGV.get(operation, []),
     ])
     assert exit_code != 0
     status = json.loads((out / "status.json").read_text(encoding="utf-8"))

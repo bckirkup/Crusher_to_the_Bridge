@@ -12,6 +12,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from simulation_utils.paths import validated_open
+
 CONTRACTS_DIR = Path(__file__).resolve().parent / "contracts"
 
 CANONICAL_INTERFACE = "CANONICAL_INTERFACE.json"
@@ -49,7 +51,12 @@ NOT_IMPLEMENTED_EXIT = EXIT_ADMISSION_REQUIRED_OR_EXCEEDED
 
 def load(name: str) -> Any:
     """Parse a contract document by file name."""
-    return json.loads((CONTRACTS_DIR / name).read_text(encoding="utf-8"))
+    with validated_open(
+        str(CONTRACTS_DIR / name),
+        allowed_roots=(str(CONTRACTS_DIR),),
+        encoding="utf-8",
+    ) as fh:
+        return json.load(fh)
 
 
 def sha256(name: str) -> str:

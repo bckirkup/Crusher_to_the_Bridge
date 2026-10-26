@@ -22,12 +22,16 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 from pathlib import Path
 from typing import Any, Iterator
 
 import jsonschema
 
+from simulation_utils.paths import validated_open
+
+from .._io import allowed_roots, ensure_out_dir, write_json
 from . import contracts
 
 _PLACEHOLDER = re.compile(r"^\s*<[^<>]+>\s*$")
@@ -154,8 +158,11 @@ def _semantic_reasons(doc: dict, kind: str, schema: dict, canonical: dict) -> li
 
 def _load_request(path: Path, errors: list[str]) -> dict | None:
     try:
-        doc = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        with validated_open(
+            str(path), allowed_roots=allowed_roots(), encoding="utf-8",
+        ) as fh:
+            doc = json.load(fh)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
         errors.append(f"{path}: unreadable or invalid JSON — {exc}")
         return None
     if not isinstance(doc, dict):
@@ -211,9 +218,15 @@ def run_validate(request_path: Path, kind: str, out_dir: Path) -> int:
         "blocked_reasons": reasons,
         "exit_code": exit_code,
     }
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "validation.json").write_text(
-        json.dumps(result, indent=2) + "\n", encoding="utf-8",
-    )
+    try:
+        out_root = ensure_out_dir(str(out_dir))
+    except SystemExit as exc:
+        print(json.dumps({
+            "status": "INVALID_CONTRACT",
+            "operation": "validate",
+            "error": str(exc),
+        }))
+        return contracts.EXIT_INVALID_CONTRACT
+    write_json(os.path.join(out_root, "validation.json"), result)
     print(json.dumps(result))
     return exit_code
