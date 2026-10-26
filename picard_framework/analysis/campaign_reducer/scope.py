@@ -97,4 +97,4 @@ def canonical_scope_source(records: list[dict]) -> str | None:
     """The survey SHA the register records were written against."""
     shas = {record.get("survey_source_sha") for record in records}
     shas.discard(None)
-    return sorted(shas)[0] if len(shas) == 1 else None
+    return min(shas) if len(shas) == 1 else None
