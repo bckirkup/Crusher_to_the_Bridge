@@ -3,7 +3,11 @@
 Status: D0 landed — the canonical contract files are adopted and the
 strictly-offline ``plan`` and ``validate`` operations are implemented; the
 other nine registered operations return NOT_YET_IMPLEMENTED until their
-phased tickets land.
+phased tickets land. D1 adds the library layer: pinned bounded object
+readers (``pinned_reader``), ranged ZIP/ZIP64 member access
+(``zip_members``), attempt/run identity (``identity``), pre-materialization
+row payloads (``payloads``), NA-semantic readout helpers
+(``readout_helpers``) and the family adapter registry (``adapters``).
 
 The authoritative specification is ``docs/campaign_reduction/SURVEY_AND_DEVIN_SPEC.md``;
 the machine contracts under ``contracts/`` are the single schema authority
