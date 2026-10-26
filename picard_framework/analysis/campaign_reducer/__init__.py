@@ -1,6 +1,9 @@
 """Analysis-only reduction of existing campaign artifacts.
 
-Status: SKELETON — canonical contract files only, no implementation.
+Status: D0 landed — the canonical contract files are adopted and the
+strictly-offline ``plan`` and ``validate`` operations are implemented; the
+other nine registered operations return NOT_YET_IMPLEMENTED until their
+phased tickets land.
 
 The authoritative specification is ``docs/campaign_reduction/SURVEY_AND_DEVIN_SPEC.md``;
 the machine contracts under ``contracts/`` are the single schema authority

@@ -268,6 +268,17 @@ def cmd_submit(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_analysis(args: argparse.Namespace) -> int:
+    # Analysis ops live in the shared reducer package; the launcher only
+    # forwards argv. sys.path needs the repo root because this file is
+    # extensionless (script dir, not cwd, is sys.path[0]).
+    if str(_REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(_REPO_ROOT))
+    from picard_framework.analysis.campaign_reducer import cli as analysis_cli
+
+    return analysis_cli.main(args.analysis_args)
+
+
 def cmd_readout(args: argparse.Namespace) -> int:
     _, spec = _load_spec(args.campaign)
     readout = spec.get("readout")
@@ -315,6 +326,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     readout.add_argument("campaign")
     readout.add_argument("readout_args", nargs=argparse.REMAINDER)
 
+    analysis = sub.add_parser(
+        "analysis",
+        help="campaign-reducer ops (contracts/CANONICAL_INTERFACE.json); "
+             "plan/validate are offline, the rest are NOT_YET_IMPLEMENTED",
+    )
+    analysis.add_argument("analysis_args", nargs=argparse.REMAINDER)
+
     args = parser.parse_args(argv)
     return args
 
@@ -327,6 +345,7 @@ def main(argv: list[str] | None = None) -> int:
         "run": cmd_run,
         "submit": cmd_submit,
         "readout": cmd_readout,
+        "analysis": cmd_analysis,
     }
     return handlers[args.command](args)
 
