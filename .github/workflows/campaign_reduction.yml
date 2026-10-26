@@ -1,0 +1,279 @@
+name: campaign-reduction-dispatch
+
+# Proposed dispatch lane for the campaign reducer (ticket D3 — review
+# only; nothing here registers or runs until the deployer leg creates the
+# roles/jobdef and the environment approvers enable it).
+#
+# Submits ONE reducer Batch job whose container command is the canonical
+# worker argv — literal values, never Ref:: and never shell-interpolated
+# (the submit JSON is built by Python from validated inputs). Every input
+# is pattern-validated before any AWS call so an injected string cannot
+# reach the AWS CLI. The run emits an attempt-scoped receipt (request
+# URI + sha256, job ID, queue, jobdef revision, coverage bounds,
+# continuation) as a 30-day artifact and a <=32KiB issue envelope.
+#
+# dry_run=true (the default) performs every validation and the bounded
+# describes but stops before submit-job — use it to exercise the lane
+# before the jobdef revision exists.
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: "reducer phase to dispatch"
+        type: choice
+        options:
+          - return_canary
+          - pilot
+          - materialize
+          - finalize
+          - query
+        required: true
+      request_uri:
+        description: "immutable s3:// request manifest under campaign/_derived/reducer/v1/"
+        required: true
+      request_sha256:
+        description: "sha256 of the request manifest body (64 lowercase hex)"
+        required: true
+      shard_index:
+        description: "shard index for this job (non-negative integer)"
+        required: true
+        default: "0"
+      job_queue:
+        description: "Batch queue to submit into"
+        type: choice
+        options:
+          - picard-analysis-queue
+          - picard-analysis-memory-queue
+        required: true
+      job_definition:
+        description: "jobdef name:revision (e.g. picard-reducer:3) or full ARN"
+        required: true
+      attempt_id:
+        description: "attempt identifier (letters, digits, dot, dash, underscore)"
+        required: true
+      dry_run:
+        description: "validate + describe only; do not submit the job"
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+
+concurrency:
+  group: campaign-reduction-dispatch
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 15
+    env:
+      AWS_REGION: us-east-1
+      BUCKET: crusherbucket-994254241749-us-east-1-an
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Validate inputs (reject anything off-pattern)
+        env:
+          PHASE: ${{ inputs.phase }}
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+          SHARD_INDEX: ${{ inputs.shard_index }}
+          JOB_QUEUE: ${{ inputs.job_queue }}
+          JOB_DEFINITION: ${{ inputs.job_definition }}
+          ATTEMPT_ID: ${{ inputs.attempt_id }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          uri = os.environ["REQUEST_URI"].strip()
+          if not re.fullmatch(
+              r"s3://[a-z0-9][a-z0-9.\-]{1,61}[a-z0-9]/"
+              r"campaign/_derived/reducer/v1/[A-Za-z0-9._\-/]+",
+              uri,
+          ) or ".." in uri.split("/"):
+              raise SystemExit(f"refusing request_uri: {uri!r}")
+          sha = os.environ["REQUEST_SHA256"].strip().lower()
+          if not re.fullmatch(r"[0-9a-f]{64}", sha):
+              raise SystemExit(f"refusing request_sha256: {sha!r}")
+          idx = os.environ["SHARD_INDEX"].strip()
+          if not re.fullmatch(r"[0-9]{1,6}", idx):
+              raise SystemExit(f"refusing shard_index: {idx!r}")
+          jd = os.environ["JOB_DEFINITION"].strip()
+          if not (
+              re.fullmatch(r"[A-Za-z0-9_\-]{1,128}:[0-9]{1,5}", jd)
+              or re.fullmatch(
+                  r"arn:aws:batch:[a-z0-9\-]+:[0-9]{12}:"
+                  r"job-definition/[A-Za-z0-9_\-]+:[0-9]+", jd)
+          ):
+              raise SystemExit(f"refusing job_definition: {jd!r}")
+          attempt = os.environ["ATTEMPT_ID"].strip()
+          if not re.fullmatch(r"[A-Za-z0-9._\-]{1,64}", attempt):
+              raise SystemExit(f"refusing attempt_id: {attempt!r}")
+          for name in ("PHASE", "JOB_QUEUE"):
+              if not re.fullmatch(r"[a-z0-9_\-]+", os.environ[name]):
+                  raise SystemExit(f"refusing {name}")
+          print("inputs validated")
+          PY
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_REDUCTION_DISPATCH_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify assumed identity
+        run: aws sts get-caller-identity
+
+      - name: Bounded describe — queue, jobdef, request object
+        env:
+          REQUEST_URI: ${{ inputs.request_uri }}
+          JOB_QUEUE: ${{ inputs.job_queue }}
+          JOB_DEFINITION: ${{ inputs.job_definition }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          region = os.environ["AWS_REGION"]
+
+          def aws(*args):
+              return subprocess.run(
+                  ["aws", *args, "--region", region, "--output", "json"],
+                  capture_output=True, text=True, check=True).stdout
+
+          q = json.loads(aws("batch", "describe-job-queues",
+                             "--job-queues", os.environ["JOB_QUEUE"]))
+          queues = q.get("jobQueues") or []
+          if not queues or queues[0]["state"] != "ENABLED":
+              raise SystemExit("job queue missing or not ENABLED")
+          jd = json.loads(aws("batch", "describe-job-definitions",
+                              "--job-definitions",
+                              os.environ["JOB_DEFINITION"]))
+          defs = jd.get("jobDefinitions") or []
+          if not defs or defs[0]["status"] != "ACTIVE":
+              raise SystemExit("job definition missing or not ACTIVE")
+          cmd = defs[0]["containerProperties"]["command"]
+          if cmd[1] != "picard_framework.analysis.campaign_reducer.worker":
+              raise SystemExit(f"jobdef is not the reducer worker: {cmd}")
+          bucket, key = os.environ["REQUEST_URI"][5:].split("/", 1)
+          head = json.loads(aws("s3api", "head-object",
+                                "--bucket", bucket, "--key", key))
+          if head["ContentLength"] > 1048576:
+              raise SystemExit("request manifest exceeds the 1MiB cap")
+          print(json.dumps({
+              "queue": queues[0]["jobQueueArn"],
+              "jobdef": defs[0]["jobDefinitionArn"],
+              "request_bytes": head["ContentLength"],
+              "request_version": head.get("VersionId"),
+          }, indent=1))
+          PY
+
+      - name: Submit reducer job (skipped when dry_run)
+        if: ${{ inputs.dry_run == false }}
+        env:
+          PHASE: ${{ inputs.phase }}
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+          SHARD_INDEX: ${{ inputs.shard_index }}
+          JOB_QUEUE: ${{ inputs.job_queue }}
+          JOB_DEFINITION: ${{ inputs.job_definition }}
+          ATTEMPT_ID: ${{ inputs.attempt_id }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          submit = {
+              "jobName": f"reducer-{os.environ['ATTEMPT_ID']}-"
+                         f"{os.environ['PHASE']}-"
+                         f"s{int(os.environ['SHARD_INDEX'])}",
+              "jobQueue": os.environ["JOB_QUEUE"],
+              "jobDefinition": os.environ["JOB_DEFINITION"],
+              "containerOverrides": {
+                  "command": [
+                      "-m",
+                      "picard_framework.analysis.campaign_reducer.worker",
+                      "--phase", os.environ["PHASE"],
+                      "--request-uri", os.environ["REQUEST_URI"],
+                      "--request-sha256", os.environ["REQUEST_SHA256"],
+                      "--shard-index", str(int(os.environ["SHARD_INDEX"])),
+                  ],
+              },
+              "tags": {
+                  "campaign-reducer": "d3",
+                  "attempt": os.environ["ATTEMPT_ID"],
+              },
+          }
+          out = subprocess.run(
+              ["aws", "batch", "submit-job",
+               "--region", os.environ["AWS_REGION"],
+               "--cli-input-json", json.dumps(submit),
+               "--output", "json"],
+              capture_output=True, text=True)
+          print(out.stderr)
+          if out.returncode:
+              raise SystemExit("submit-job failed")
+          resp = json.loads(out.stdout)
+          receipt = {
+              "attempt_id": os.environ["ATTEMPT_ID"],
+              "phase": os.environ["PHASE"],
+              "request_uri": os.environ["REQUEST_URI"],
+              "request_sha256": os.environ["REQUEST_SHA256"],
+              "shard_index": int(os.environ["SHARD_INDEX"]),
+              "job_id": resp["jobId"],
+              "job_name": resp["jobName"],
+              "job_queue": os.environ["JOB_QUEUE"],
+              "job_definition": os.environ["JOB_DEFINITION"],
+              "coverage": {"shard_index": int(os.environ["SHARD_INDEX"])},
+              "continuation": None,
+          }
+          with open("dispatch_receipt.json", "w") as f:
+              json.dump(receipt, f, indent=2)
+          print(json.dumps(receipt, indent=1))
+          PY
+
+      - name: Emit attempt receipt envelope
+        env:
+          PHASE: ${{ inputs.phase }}
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+          SHARD_INDEX: ${{ inputs.shard_index }}
+          JOB_QUEUE: ${{ inputs.job_queue }}
+          JOB_DEFINITION: ${{ inputs.job_definition }}
+          ATTEMPT_ID: ${{ inputs.attempt_id }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          receipt = {"attempt_id": os.environ["ATTEMPT_ID"],
+                     "dry_run": os.environ["DRY_RUN"] == "true"}
+          try:
+              receipt.update(json.loads(open("dispatch_receipt.json").read()))
+          except OSError:
+              receipt.update({
+                  "phase": os.environ["PHASE"],
+                  "request_uri": os.environ["REQUEST_URI"],
+                  "request_sha256": os.environ["REQUEST_SHA256"],
+                  "shard_index": int(os.environ["SHARD_INDEX"]),
+                  "job_queue": os.environ["JOB_QUEUE"],
+                  "job_definition": os.environ["JOB_DEFINITION"],
+                  "job_id": None,
+                  "coverage": {"shard_index": int(os.environ["SHARD_INDEX"])},
+                  "continuation": None,
+              })
+          body = json.dumps(receipt, indent=2)
+          if len(body.encode()) > 32768:
+              raise SystemExit("receipt envelope exceeds 32KiB")
+          with open("dispatch_receipt.json", "w") as f:
+              f.write(body + "\n")
+          print(body)
+          PY
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: reduction-dispatch-receipt
+          path: dispatch_receipt.json
+          retention-days: 30
+          if-no-files-found: ignore

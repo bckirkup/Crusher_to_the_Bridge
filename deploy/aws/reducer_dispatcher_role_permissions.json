@@ -1,0 +1,83 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "BoundedBatchDescribe",
+      "Effect": "Allow",
+      "Action": [
+        "batch:DescribeJobQueues",
+        "batch:DescribeJobDefinitions",
+        "batch:DescribeJobs",
+        "batch:ListJobs"
+      ],
+      "Resource": [
+        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job-queue/picard-analysis*",
+        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job-definition/picard-reducer*",
+        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job/*"
+      ]
+    },
+    {
+      "Sid": "SubmitOnlyApprovedReducerJobdef",
+      "Effect": "Allow",
+      "Action": "batch:SubmitJob",
+      "Resource": [
+        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job-queue/picard-analysis-queue",
+        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job-queue/picard-analysis-memory-queue",
+        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job-definition/picard-reducer:*"
+      ]
+    },
+    {
+      "Sid": "CancelOwnReducerJobs",
+      "Effect": "Allow",
+      "Action": ["batch:CancelJob", "batch:TerminateJob"],
+      "Resource": "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job/*"
+    },
+    {
+      "Sid": "PassExactReducerRoles",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": [
+        "arn:aws:iam::<ACCOUNT_ID>:role/picard-reducer-job-role",
+        "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role"
+      ],
+      "Condition": {
+        "StringEquals": { "iam:PassedToService": "ecs-tasks.amazonaws.com" }
+      }
+    },
+    {
+      "Sid": "ReducerReadWriteAdmissionRequests",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject"],
+      "Resource": "arn:aws:s3:::<BUCKET>/campaign/_derived/reducer/v1/requests/*"
+    },
+    {
+      "Sid": "ReducerReadDerivedReceipts",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:GetObjectVersion"],
+      "Resource": "arn:aws:s3:::<BUCKET>/campaign/_derived/reducer/v1/attempts/*"
+    },
+    {
+      "Sid": "ReducerDenyS3MutationsOutsideRequests",
+      "Effect": "Deny",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:DeleteObjectVersion",
+        "s3:RestoreObject"
+      ],
+      "NotResource": "arn:aws:s3:::<BUCKET>/campaign/_derived/reducer/v1/requests/*"
+    },
+    {
+      "Sid": "ReducerDenyJobdefLifecycle",
+      "Effect": "Deny",
+      "Action": [
+        "batch:RegisterJobDefinition",
+        "batch:DeregisterJobDefinition",
+        "batch:UpdateJobQueue",
+        "batch:CreateJobQueue",
+        "batch:DeleteJobQueue"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

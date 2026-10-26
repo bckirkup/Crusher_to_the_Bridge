@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess  # noqa: S404 - fixed argv, no shell
 import sys
 from datetime import datetime, timezone
@@ -35,6 +36,27 @@ _JOBDEF_TEMPLATE = _REPO_ROOT / "deploy" / "aws" / "campaign_jobdef.json"
 _DEFAULT_REGION = "us-east-1"
 _DEFAULT_QUEUE = "picard-campaign-queue"
 _DEFAULT_PROFILE = "picard"
+
+_WORKER_MODULE = "picard_framework.analysis.campaign_reducer.worker"
+# Canonical worker argv shape (CANONICAL_INTERFACE.worker_transport) —
+# registered as the jobdef's default command so the binding documents
+# itself; Batch containerOverrides always supply the literal argv.
+_ANALYSIS_COMMAND = [
+    "-m", _WORKER_MODULE,
+    "--phase", "<phase>",
+    "--request-uri", "<immutable_s3_uri>",
+    "--request-sha256", "<sha256>",
+    "--shard-index", "<index>",
+]
+
+_ANALYSIS_BINDING_REQUIRED = {
+    "name", "image_repo", "job_role_name", "execution_role_name",
+}
+_ANALYSIS_BINDING_OPTIONAL = {
+    "image_tag", "image_digest", "vcpu", "memory_mib",
+    "timeout_seconds", "retry_attempts", "log_group", "log_prefix",
+}
+_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 def _die(msg: str) -> "SystemExit":
@@ -164,22 +186,81 @@ def _render_jobdef(spec: dict, account: str, region: str) -> dict:
     return json.loads(rendered)
 
 
-def cmd_submit(args: argparse.Namespace) -> int:
-    directory, spec = _load_spec(args.campaign)
-    block = _block(spec, args.block)
-    bucket = args.bucket or os.environ.get("CAMPAIGN_BUCKET")
-    if not bucket:
-        raise _die("--bucket (or CAMPAIGN_BUCKET) is required")
-    region = args.region
-    queue = args.queue or spec.get("queue", _DEFAULT_QUEUE)
-    seeds = ",".join(str(s) for s in block["seeds"])
-    s3_prefix = _s3_prefix(spec, bucket)
-    jobdef = _jobdef_name(spec)
+def _render_analysis_jobdef(binding: dict, account: str, region: str) -> dict:
+    """Render the reducer-worker jobdef through the shared template.
 
+    The template still supplies the container skeleton (retryStrategy,
+    linuxParameters, environment, logConfiguration); the analysis
+    binding re-points image, command, roles and logs at the reducer
+    worker — no bespoke jobdef file. Unsupported binding keys block
+    loudly.
+    """
+    if not isinstance(binding, dict):
+        raise _die("analysis spec must be a JSON object")
+    unknown = (
+        set(binding)
+        - _ANALYSIS_BINDING_REQUIRED
+        - _ANALYSIS_BINDING_OPTIONAL
+    )
+    if unknown:
+        raise _die(f"unsupported analysis binding keys: {sorted(unknown)}")
+    missing = _ANALYSIS_BINDING_REQUIRED - set(binding)
+    if missing:
+        raise _die(f"analysis binding missing keys: {sorted(missing)}")
+    spec = {
+        "name": binding["name"],
+        "image_tag": binding.get("image_tag", "latest"),
+        "resources": {
+            "vcpu": str(binding.get("vcpu", "1")),
+            "memory": str(binding.get("memory_mib", "4096")),
+        },
+    }
+    jobdef = _render_jobdef(spec, account, region)
+    _apply_analysis_binding(jobdef, binding, account, region)
+    return jobdef
+
+
+def _apply_analysis_binding(
+    jobdef: dict, binding: dict, account: str, region: str,
+) -> None:
+    """Re-point the rendered campaign jobdef at the reducer worker."""
+    cp = jobdef["containerProperties"]
+    repo = binding["image_repo"]
+    registry = f"{account}.dkr.ecr.{region}.amazonaws.com"
+    digest = binding.get("image_digest")
+    if digest:
+        if not _DIGEST_RE.match(digest):
+            raise _die("image_digest must be 'sha256:<64 hex>'")
+        cp["image"] = f"{registry}/{repo}@{digest}"
+    else:
+        cp["image"] = f"{registry}/{repo}:{binding.get('image_tag', 'latest')}"
+    cp["command"] = list(_ANALYSIS_COMMAND)
+    cp["jobRoleArn"] = (
+        f"arn:aws:iam::{account}:role/{binding['job_role_name']}"
+    )
+    cp["executionRoleArn"] = (
+        f"arn:aws:iam::{account}:role/{binding['execution_role_name']}"
+    )
+    logs = cp["logConfiguration"]["options"]
+    logs["awslogs-group"] = binding.get(
+        "log_group", f"/aws/batch/{repo}",
+    )
+    logs["awslogs-stream-prefix"] = binding.get(
+        "log_prefix", jobdef["jobDefinitionName"],
+    )
+    if binding.get("timeout_seconds") is not None:
+        jobdef["timeout"] = {
+            "attemptDurationSeconds": int(binding["timeout_seconds"]),
+        }
+    if binding.get("retry_attempts") is not None:
+        jobdef["retryStrategy"]["attempts"] = int(binding["retry_attempts"])
+
+
+def _aws_context(args: argparse.Namespace) -> tuple[dict, str]:
+    """(env-with-profile, account id) shared by the submit paths."""
     aws_env = dict(os.environ)
     if args.profile:
         aws_env["AWS_PROFILE"] = args.profile
-
     account = args.account
     if not account:
         whoami = subprocess.run(
@@ -193,34 +274,88 @@ def cmd_submit(args: argparse.Namespace) -> int:
                 "(sts get-caller-identity failed); pass --account",
             )
         account = whoami.stdout.strip()
+    return aws_env, account
 
-    jobdef_json = _render_jobdef(spec, account, region)
+
+def _register_jobdef(
+    args: argparse.Namespace,
+    aws_env: dict,
+    jobdef_json: dict,
+    jobdef_name: str,
+) -> int | None:
+    """Write + register the rendered jobdef; revision or None on dry-run."""
     rendered_path = (
-        _REPO_ROOT / "deploy" / "aws" / f"jobdef_{_jobdef_name(spec)}.rendered.json"
+        _REPO_ROOT / "deploy" / "aws" / f"jobdef_{jobdef_name}.rendered.json"
     )
+    rendered_path.parent.mkdir(parents=True, exist_ok=True)
     rendered_path.write_text(
         json.dumps(jobdef_json, indent=2) + "\n", encoding="utf-8",
     )
     print(f"wrote {rendered_path.relative_to(_REPO_ROOT)}")
-
-    if not args.dry_run:
-        register = subprocess.run(
-            ["aws", "batch", "register-job-definition",
-             "--region", region,
-             "--cli-input-json", rendered_path.read_text(encoding="utf-8")],
-            env=aws_env, capture_output=True, text=True,
-        )
-        if register.returncode != 0:
-            raise _die(f"register-job-definition failed:\n{register.stderr}")
-        revision = json.loads(register.stdout)["revision"]
-        print(f"registered {jobdef}:{revision}")
-    else:
+    if args.dry_run:
         print("dry run — jobdef rendered but not registered")
-        revision = None
+        return None
+    register = subprocess.run(
+        ["aws", "batch", "register-job-definition",
+         "--region", args.region,
+         "--cli-input-json", rendered_path.read_text(encoding="utf-8")],
+        env=aws_env, capture_output=True, text=True,
+    )
+    if register.returncode != 0:
+        raise _die(f"register-job-definition failed:\n{register.stderr}")
+    revision = json.loads(register.stdout)["revision"]
+    print(f"registered {jobdef_name}:{revision}")
+    return revision
 
+
+def cmd_submit_analysis(args: argparse.Namespace) -> int:
+    """Render + optionally register the reducer-worker jobdef.
+
+    A job is never submitted from this path — analysis dispatches go
+    through the canonical ``analysis submit`` operation once admitted.
+    """
+    spec_path = Path(args.analysis_spec).expanduser()
+    if not spec_path.is_file():
+        raise _die(f"analysis spec not found: {spec_path}")
+    try:
+        binding = json.loads(spec_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise _die(f"{spec_path}: invalid JSON — {exc}") from exc
+    aws_env, account = _aws_context(args)
+    jobdef_json = _render_analysis_jobdef(binding, account, args.region)
+    name = jobdef_json["jobDefinitionName"]
+    _register_jobdef(args, aws_env, jobdef_json, name)
+    print(
+        "analysis jobdef ready — reducer jobs submit via "
+        "'scripts/campaign analysis submit' once admitted",
+    )
+    return 0
+
+
+def cmd_submit(args: argparse.Namespace) -> int:
+    if args.analysis_spec:
+        return cmd_submit_analysis(args)
+    if not args.campaign or not args.block:
+        raise _die(
+            "submit needs a campaign and --block (or --analysis-spec)",
+        )
+    directory, spec = _load_spec(args.campaign)
+    block = _block(spec, args.block)
+    bucket = args.bucket or os.environ.get("CAMPAIGN_BUCKET")
+    if not bucket:
+        raise _die("--bucket (or CAMPAIGN_BUCKET) is required")
+    region = args.region
+    queue = args.queue or spec.get("queue", _DEFAULT_QUEUE)
+    seeds = ",".join(str(s) for s in block["seeds"])
+    s3_prefix = _s3_prefix(spec, bucket)
+    jobdef = _jobdef_name(spec)
+
+    aws_env, account = _aws_context(args)
+
+    jobdef_json = _render_jobdef(spec, account, region)
+    revision = _register_jobdef(args, aws_env, jobdef_json, jobdef)
     if args.register_only:
         return 0
-
     job_name = (
         f"{jobdef}-{args.block}-"
         f"{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
@@ -306,8 +441,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     run.add_argument("--out", default=None)
 
     submit = sub.add_parser("submit")
-    submit.add_argument("campaign")
-    submit.add_argument("--block", required=True)
+    submit.add_argument("campaign", nargs="?")
+    submit.add_argument("--block", default=None)
+    submit.add_argument(
+        "--analysis-spec", default=None,
+        help="render + register the reducer-worker jobdef from this "
+             "binding spec JSON (no job is ever submitted)",
+    )
     submit.add_argument("--bucket", default=None)
     submit.add_argument("--account", default=None,
                         help="AWS account id; registers the jobdef when given")

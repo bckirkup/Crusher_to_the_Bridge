@@ -1,0 +1,13 @@
+{
+  "name": "reducer",
+  "image_repo": "picard-boundary-analysis",
+  "image_tag": "reducer-v1",
+  "job_role_name": "picard-reducer-job-role",
+  "execution_role_name": "picard-campaign-execution-role",
+  "vcpu": 2,
+  "memory_mib": 8192,
+  "timeout_seconds": 3600,
+  "retry_attempts": 3,
+  "log_group": "/aws/batch/picard-boundary-analysis",
+  "log_prefix": "picard-reducer"
+}

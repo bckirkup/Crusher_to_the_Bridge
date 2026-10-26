@@ -4,9 +4,14 @@
 #
 # NOT for ABM Spot shards — use root Dockerfile / picard-campaign for Phase 1.
 #
+# The campaign-reducer worker rides in via the picard_framework/ and
+# scripts/ COPYs below (contracts/ is embedded in the package tree); the
+# reducer needs no tools/ modules. A `reducer-smoke` stage at the bottom
+# proves the worker module + argv resolve inside the built image.
+#
 # Locked uv.lock resolution + wheels-only (Sonar docker:S8541 / S8544), matching root Dockerfile.
 
-FROM python:3.11-slim-bookworm
+FROM python:3.11-slim-bookworm AS analysis
 
 WORKDIR /app
 
@@ -59,5 +64,12 @@ COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
 RUN chown -R analysis:analysis /app
 USER analysis
 
-# Job definitions supply the worker script as argv[0] (boundary, recovery, or NUTS).
+# Job definitions supply the worker argv (module path or script) wholesale.
 ENTRYPOINT ["python3"]
+
+# Reducer smoke stage — proves the campaign_reducer worker module imports
+# and resolves its argv inside the built image (imports must not drag in
+# tools/ or an SDK at module load):
+#   docker build -f deploy/aws/Dockerfile.analysis --target reducer-smoke .
+FROM analysis AS reducer-smoke
+RUN python3 -m picard_framework.analysis.campaign_reducer.worker --help >/dev/null
