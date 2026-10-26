@@ -1,0 +1,43 @@
+{
+  "schema": "crusher-reducer-spec/v1",
+  "purpose": "synthetic return-canary attempt (offline-rigged fixture)",
+  "reduction_id": "red-canary-ok",
+  "snapshot_id": "snap-red-canary-ok",
+  "source_root": "s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/canary/",
+  "source_bucket": "crusherbucket-994254241749-us-east-1-an",
+  "utc": "2026-01-01T00:00:00Z",
+  "shard_size": 1,
+  "budgets": {
+    "max_list_pages": 1000000000,
+    "max_api_calls_total": 1000000000,
+    "max_head_requests": 1000000000,
+    "max_get_requests": 1000000000,
+    "max_source_objects": 1000000000,
+    "max_source_object_bytes_referenced": 1000000000,
+    "max_compressed_bytes_read": 1000000000,
+    "max_uncompressed_bytes": 1000000000,
+    "max_member_bytes": 1000000000,
+    "max_central_directory_bytes": 1000000000,
+    "max_output_bytes": 1000000000,
+    "max_spool_bytes": 1000000000,
+    "max_wall_seconds": 1000000000,
+    "max_queue_wait_seconds": 1000000000,
+    "max_vcpu_seconds": 1000000000,
+    "max_memory_mib_seconds": 1000000000,
+    "max_jobs": 1000000000,
+    "max_inflight_jobs": 1000000000,
+    "max_retries": 1000000000,
+    "max_cost_usd": 1000000000,
+    "checkpoint_reserve_bytes": 1000000000,
+    "checkpoint_reserve_seconds": 1000000000,
+    "safety_factor": 1.5
+  },
+  "sources": [
+    {
+      "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/canary/fused_canary.zip",
+      "family": "campaign_summary_zip",
+      "source_id": "fused_canary.zip",
+      "campaign_id": "camp-canary"
+    }
+  ]
+}

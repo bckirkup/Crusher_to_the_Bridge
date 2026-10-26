@@ -1,0 +1,35 @@
+{
+  "schema_version": "crusher-campaign-distributions/1.0-proposed",
+  "request_id": "req-canary-d4",
+  "operation": "collect",
+  "source_bucket": "crusherbucket-994254241749-us-east-1-an",
+  "source_roots_allowlist": [
+    "campaign/_derived/reducer/v1/canary/"
+  ],
+  "derived_exclude_prefixes": [
+    "campaign/_derived/reducer/v1/"
+  ],
+  "scope_register_sha256": "bc1148d054947d5fdcc972920d7f769e516adb61952886268ed3874444bb59c1",
+  "budgets": {
+    "max_api_calls_total": 500,
+    "max_list_pages": 50,
+    "max_head_requests": 100,
+    "max_source_objects": 50,
+    "max_return_bytes": 52428800,
+    "max_wall_seconds": 900,
+    "max_cost_usd": 0.05
+  },
+  "admission": {
+    "admission_id": "adm-canary-d4",
+    "approved_scope_hash": "bc1148d054947d5fdcc972920d7f769e516adb61952886268ed3874444bb59c1",
+    "approved_cost_usd": 0.05,
+    "expires_utc": "2030-01-01T00:00:00Z"
+  },
+  "price_snapshot": {
+    "id": "price-canary",
+    "as_of_utc": "2026-01-01T00:00:00Z",
+    "unit_prices_json": {
+      "api_call_usd": 0.004
+    }
+  }
+}

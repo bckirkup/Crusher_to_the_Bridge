@@ -1,0 +1,503 @@
+name: campaign-reduction-return
+
+# Bounded return leg for the campaign reducer (ticket D4 — review only;
+# nothing here runs until the deployer leg enables environment
+# aws-campaign and posts the receipt prefix the dispatch run emitted).
+#
+# Chain, all bounded: poll for the attempt's durable RECEIPT.json via
+# HEAD + optional batch describe (cursor/backoff, never a long-poll) →
+# `scripts/campaign analysis collect` (pinned bounded fetch of receipt,
+# manifest and pages through the read-only collector role) → Edison
+# ingest (edison-client bounded upload when the EDISON_PLATFORM_API_KEY
+# secret exists; otherwise a typed RETURN_PATH_BLOCKED ingestion
+# receipt — never a secret prompt, never a file relay) →
+# `scripts/campaign analysis acknowledge` (idempotent ack record under
+# the dispatcher role's admitted requests/acks/ prefix) → a <=32KiB
+# issue envelope, deduplicated on the ack marker.
+#
+# dry_run=true (the default) validates inputs and emits the plan only —
+# no AWS call and no spend.
+
+on:
+  workflow_dispatch:
+    inputs:
+      attempt_id:
+        description: "attempt identifier (letters, digits, dot, dash, underscore)"
+        required: true
+      request_uri:
+        description: "immutable s3:// bootstrap request under campaign/_derived/reducer/v1/requests/"
+        required: true
+      request_sha256:
+        description: "sha256 of the bootstrap request body (64 lowercase hex)"
+        required: true
+      job_id:
+        description: "optional Batch job id to describe while polling"
+        required: false
+        default: ""
+      poll_interval_seconds:
+        description: "base poll interval (bounded exponential backoff)"
+        required: true
+        default: "60"
+      max_polls:
+        description: "maximum polls before typed RETURN_PATH_BLOCKED"
+        required: true
+        default: "30"
+      issue_number:
+        description: "optional tracking issue for the ack envelope"
+        required: false
+        default: ""
+      edison_ingest:
+        description: "run the Edison upload leg when the secret exists"
+        type: boolean
+        required: true
+        default: true
+      dry_run:
+        description: "validate only; no AWS calls"
+        type: boolean
+        required: true
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: campaign-return-${{ inputs.attempt_id }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  BUCKET: crusherbucket-994254241749-us-east-1-an
+
+jobs:
+  poll:
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 60
+    outputs:
+      receipt_found: ${{ steps.poll.outputs.receipt_found }}
+      receipt_key: ${{ steps.validate.outputs.receipt_key }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Validate inputs (reject anything off-pattern)
+        id: validate
+        env:
+          ATTEMPT_ID: ${{ inputs.attempt_id }}
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+          JOB_ID: ${{ inputs.job_id }}
+          POLL_INTERVAL: ${{ inputs.poll_interval_seconds }}
+          MAX_POLLS: ${{ inputs.max_polls }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          attempt = os.environ["ATTEMPT_ID"].strip()
+          if not re.fullmatch(r"[A-Za-z0-9._\-]{1,64}", attempt):
+              raise SystemExit(f"refusing attempt_id: {attempt!r}")
+          uri = os.environ["REQUEST_URI"].strip()
+          if not re.fullmatch(
+              r"s3://[a-z0-9][a-z0-9.\-]{1,61}[a-z0-9]/"
+              r"campaign/_derived/reducer/v1/requests/"
+              r"[A-Za-z0-9._\-/]+\.json",
+              uri,
+          ) or ".." in uri.split("/"):
+              raise SystemExit(f"refusing request_uri: {uri!r}")
+          sha = os.environ["REQUEST_SHA256"].strip().lower()
+          if not re.fullmatch(r"[0-9a-f]{64}", sha):
+              raise SystemExit(f"refusing request_sha256: {sha!r}")
+          job = os.environ["JOB_ID"].strip()
+          if job and not re.fullmatch(r"[0-9a-f\-]{8,64}", job):
+              raise SystemExit(f"refusing job_id: {job!r}")
+          for name, hi in (("POLL_INTERVAL", 3600), ("MAX_POLLS", 200)):
+              value = os.environ[name].strip()
+              if not re.fullmatch(r"[0-9]{1,5}", value) or not (
+                  1 <= int(value) <= hi
+              ):
+                  raise SystemExit(f"refusing {name}: {value!r}")
+          issue = os.environ["ISSUE_NUMBER"].strip()
+          if issue and not re.fullmatch(r"[0-9]{1,6}", issue):
+              raise SystemExit(f"refusing issue_number: {issue!r}")
+          key = (
+              "campaign/_derived/reducer/v1/attempts/"
+              f"{attempt}/RECEIPT.json"
+          )
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write(f"receipt_key={key}\n")
+          print(f"inputs validated; receipt_key={key}")
+          PY
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_REDUCTION_COLLECTOR_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify assumed identity
+        run: aws sts get-caller-identity
+
+      - name: Bounded poll — receipt presence + optional job describe
+        id: poll
+        env:
+          BUCKET: ${{ env.BUCKET }}
+          RECEIPT_KEY: ${{ steps.validate.outputs.receipt_key }}
+          JOB_ID: ${{ inputs.job_id }}
+          POLL_INTERVAL: ${{ inputs.poll_interval_seconds }}
+          MAX_POLLS: ${{ inputs.max_polls }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, time
+          region = os.environ["AWS_REGION"]
+          bucket = os.environ["BUCKET"]
+          key = os.environ["RECEIPT_KEY"]
+          job = os.environ["JOB_ID"].strip()
+          interval = min(int(os.environ["POLL_INTERVAL"]), 3600)
+          max_polls = min(int(os.environ["MAX_POLLS"]), 200)
+
+          def aws(*args, check=True):
+              proc = subprocess.run(
+                  ["aws", *args, "--region", region, "--output", "json"],
+                  capture_output=True, text=True)
+              if check and proc.returncode:
+                  raise SystemExit(proc.stderr or "aws call failed")
+              return proc
+
+          result = {"polls": 0, "receipt_found": False, "cursor": [],
+                    "job_status": None}
+          if os.environ["DRY_RUN"] == "true":
+              result["dry_run"] = True
+              print(json.dumps(result, indent=1))
+          else:
+              wait = interval
+              for i in range(max_polls):
+                  result["polls"] = i + 1
+                  head = aws("s3api", "head-object", "--bucket", bucket,
+                             "--key", key, check=False)
+                  if head.returncode == 0:
+                      meta = json.loads(head.stdout)
+                      result["receipt_found"] = True
+                      result["receipt_bytes"] = meta["ContentLength"]
+                      result["receipt_version"] = meta.get("VersionId")
+                      break
+                  if job:
+                      desc = aws("batch", "describe-jobs", "--jobs", job,
+                                 check=False)
+                      if desc.returncode == 0:
+                          jobs = json.loads(desc.stdout).get("jobs") or []
+                          if jobs:
+                              result["job_status"] = jobs[0]["status"]
+                  result["cursor"].append(
+                      {"poll": i + 1, "slept": wait})
+                  time.sleep(wait)
+                  wait = min(int(wait * 1.5), 600)
+          with open("poll_result.json", "w") as fh:
+              json.dump(result, fh, indent=2)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+              fh.write(
+                  f"receipt_found={str(result['receipt_found']).lower()}\n")
+          print(json.dumps(result, indent=1))
+          PY
+
+      - name: Emit typed blocked envelope when the poll expired
+        if: ${{ steps.poll.outputs.receipt_found != 'true' }}
+        env:
+          ATTEMPT_ID: ${{ inputs.attempt_id }}
+          RECEIPT_KEY: ${{ steps.validate.outputs.receipt_key }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          envelope = {
+              "schema": "crusher-reducer-return-envelope/v1",
+              "status": "return_blocked",
+              "error_owner": "s3_return_path",
+              "kind": "missing_receipt",
+              "attempt_id": os.environ["ATTEMPT_ID"],
+              "s3_pointer": "s3://" + os.environ["BUCKET"] + "/"
+                            + os.environ["RECEIPT_KEY"],
+              "github_run_id": os.environ.get("GITHUB_RUN_ID", ""),
+              "github_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+          }
+          body = json.dumps(envelope, indent=2)
+          if len(body.encode()) > 32768:
+              raise SystemExit("envelope exceeds 32KiB")
+          with open("blocked_envelope.json", "w") as fh:
+              fh.write(body + "\n")
+          issue = os.environ["ISSUE_NUMBER"].strip()
+          if issue:
+              marker = ("<!-- crusher-reducer-return:"
+                        + os.environ["ATTEMPT_ID"] + " -->")
+              seen = subprocess.run(
+                  ["gh", "issue", "view", issue, "--json", "comments",
+                   "--jq",
+                   "[.comments[].body | contains(\"" + marker + "\")] | any"],
+                  capture_output=True, text=True)
+              if seen.returncode == 0 and seen.stdout.strip() == "true":
+                  print("deduplicated: blocked marker already posted")
+              else:
+                  subprocess.run(
+                      ["gh", "issue", "comment", issue,
+                       "--body", marker + "\n" + body],
+                      check=True)
+          print(body)
+          PY
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: return-poll-${{ inputs.attempt_id }}
+          path: |
+            poll_result.json
+            blocked_envelope.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+  collect:
+    permissions:
+      contents: read
+      id-token: write
+    needs: poll
+    if: ${{ needs.poll.outputs.receipt_found == 'true' }}
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
+
+      - name: Resolve locked env
+        run: uv sync --locked --all-extras --no-install-project --no-build
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_REDUCTION_COLLECTOR_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Fetch + pin the bootstrap request (<=1MiB)
+        env:
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          region = os.environ["AWS_REGION"]
+          bucket, key = os.environ["REQUEST_URI"][5:].split("/", 1)
+          head = subprocess.run(
+              ["aws", "s3api", "head-object", "--bucket", bucket,
+               "--key", key, "--region", region, "--output", "json"],
+              capture_output=True, text=True, check=True).stdout
+          if json.loads(head)["ContentLength"] > 1048576:
+              raise SystemExit("request exceeds 1MiB cap")
+          subprocess.run(
+              ["aws", "s3api", "get-object", "--bucket", bucket,
+               "--key", key, "--region", region,
+               "bootstrap_request.json"], check=True)
+          body = open("bootstrap_request.json", "rb").read()
+          want = os.environ["REQUEST_SHA256"].strip().lower()
+          got = hashlib.sha256(body).hexdigest()
+          if got != want:
+              raise SystemExit(
+                  f"request sha256 {got} != declared {want}")
+          print(f"request pinned {got[:12]} ({len(body)}B)")
+          PY
+
+      - name: Bounded collect (analysis collect)
+        env:
+          BUCKET: ${{ env.BUCKET }}
+          RECEIPT_KEY: ${{ needs.poll.outputs.receipt_key }}
+        run: |
+          uv run --frozen --no-build python3 scripts/campaign analysis collect \
+            --request bootstrap_request.json \
+            --receipt "s3://${BUCKET}/${RECEIPT_KEY}" \
+            --store-uri "s3://${BUCKET}/" \
+            --out return_run
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: return-collect-${{ inputs.attempt_id }}
+          path: |
+            return_run/
+            bootstrap_request.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+  ingest:
+    permissions:
+      contents: read
+    needs: [poll, collect]
+    if: ${{ needs.poll.outputs.receipt_found == 'true' }}
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
+
+      - name: Resolve locked env
+        run: uv sync --locked --all-extras --no-install-project --no-build
+
+      - uses: actions/download-artifact@fa0a9367b6c5a34a14f9058a8fcd0a0ff65a4ab7 # v5
+        with:
+          name: return-collect-${{ inputs.attempt_id }}
+          path: return_run
+
+      - name: Edison ingest (typed blocked when key absent — never a workaround)
+        env:
+          EDISON_PLATFORM_API_KEY: ${{ secrets.EDISON_PLATFORM_API_KEY }}
+          EDISON_INGEST: ${{ inputs.edison_ingest }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          if os.environ["EDISON_INGEST"] != "true":
+              print("edison_ingest disabled by input — skipping upload leg")
+              raise SystemExit(0)
+          proc = subprocess.run(
+              ["uv", "run", "--frozen", "--no-build",
+               "--with", "edison-client==0.18.0",
+               "python3", "-m",
+               "picard_framework.analysis.campaign_reducer.edison_ingest",
+               "--manifest",
+               "return_run/durable_ingestion_request.json",
+               "--out", "return_run/ingest"],
+              capture_output=True, text=True)
+          print(proc.stdout)
+          print(proc.stderr)
+          # exit 9 = typed RETURN_PATH_BLOCKED (connector/key absent) —
+          # the receipt is the evidence; do not fail the job on it.
+          if proc.returncode not in (0, 9):
+              raise SystemExit(proc.returncode)
+          PY
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: return-ingest-${{ inputs.attempt_id }}
+          path: return_run/ingest/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  acknowledge:
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+    needs: [poll, collect, ingest]
+    if: ${{ needs.poll.outputs.receipt_found == 'true' }}
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
+
+      - name: Resolve locked env
+        run: uv sync --locked --all-extras --no-install-project --no-build
+
+      - uses: actions/download-artifact@fa0a9367b6c5a34a14f9058a8fcd0a0ff65a4ab7 # v5
+        with:
+          name: return-collect-${{ inputs.attempt_id }}
+          path: return_run
+
+      - uses: actions/download-artifact@fa0a9367b6c5a34a14f9058a8fcd0a0ff65a4ab7 # v5
+        with:
+          name: return-ingest-${{ inputs.attempt_id }}
+          path: return_run/ingest
+
+      - name: Compose ACK.json from collect + ingest receipts
+        env:
+          ATTEMPT_ID: ${{ inputs.attempt_id }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          ingest = {}
+          try:
+              ingest = json.loads(
+                  open("return_run/ingest/ingestion_receipt.json").read())
+          except OSError:
+              pass
+          collect = json.loads(
+              open("return_run/status.json").read())
+          ack = {
+              "schema": "crusher-reducer-ack/v1",
+              "receipt_id": os.environ["ATTEMPT_ID"],
+              "reduction_id": os.environ["ATTEMPT_ID"],
+              "project_asset_ids": ingest.get("project_asset_ids") or [],
+              "accepted_page_ids": [
+                  a["s3_key"] for a in
+                  collect.get("verified_artifacts") or []
+              ],
+              "artifact_sha256s": {
+                  a["s3_key"]: a["sha256"] for a in
+                  collect.get("verified_artifacts") or []
+              },
+              "ingest_status": ingest.get("status", "absent"),
+          }
+          with open("ack.json", "w") as fh:
+              json.dump(ack, fh, indent=2)
+          print(json.dumps(ack, indent=1))
+          PY
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_REDUCTION_DISPATCH_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Idempotent acknowledge (analysis acknowledge)
+        env:
+          BUCKET: ${{ env.BUCKET }}
+        run: |
+          uv run --frozen --no-build python3 scripts/campaign analysis acknowledge \
+            --request bootstrap_request.json \
+            --ack ack.json \
+            --store-uri "s3://${BUCKET}/" \
+            --out return_run/ack
+
+      - name: Publish bounded ack envelope to tracking issue (deduplicated)
+        env:
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          ATTEMPT_ID: ${{ inputs.attempt_id }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          issue = os.environ["ISSUE_NUMBER"].strip()
+          if not issue:
+              print("no issue_number — envelope stays an artifact")
+              raise SystemExit(0)
+          body = open("return_run/ack/ack_envelope.json").read()
+          marker = ("<!-- crusher-reducer-ack:"
+                    + os.environ["ATTEMPT_ID"] + " -->")
+          seen = subprocess.run(
+              ["gh", "issue", "view", issue, "--json", "comments",
+               "--jq",
+               "[.comments[].body | contains(\"" + marker + "\")] | any"],
+              capture_output=True, text=True)
+          if seen.returncode == 0 and seen.stdout.strip() == "true":
+              print("deduplicated: ack marker already posted")
+          else:
+              subprocess.run(
+                  ["gh", "issue", "comment", issue,
+                   "--body", marker + "\n" + body],
+                  check=True)
+          print(body)
+          PY
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: return-ack-${{ inputs.attempt_id }}
+          path: return_run/ack/
+          retention-days: 30
+          if-no-files-found: ignore

@@ -1,0 +1,95 @@
+{
+  "schema_version": "crusher-campaign-distributions/1.0-proposed",
+  "reduction_id": "red-canary-ok",
+  "parent_reduction_id": null,
+  "purpose": "synthetic return-canary attempt (offline-rigged fixture)",
+  "implementation_sha": "1d80f81af46c43132608bb714c91f366209ba6e90d89ffee4cb757ed04ae8f9b",
+  "reducer_image_digest": "sha256:21367d0ce5da170f132ccb5e7d3c54e39382789d48a3f2b6b83c9f3f0f99c980",
+  "adapter_registry_sha256": "afca28d96cb8ad0fcc5017d0a7182370472dc92eef8f5a7e23054039e9b13b1b",
+  "scope_register_sha256": "bc1148d054947d5fdcc972920d7f769e516adb61952886268ed3874444bb59c1",
+  "source_bucket": "crusherbucket-994254241749-us-east-1-an",
+  "derived_root": "s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/",
+  "source_prefix_allowlist": [
+    "campaign/_derived/reducer/v1/canary/"
+  ],
+  "source_exclude_prefixes": [
+    "campaign/_derived/reducer/v1/"
+  ],
+  "inventory_snapshot": {
+    "id": "inv-canary",
+    "sha256": "a078fd5dbfd851121e5ca7d7c9bee2a1951024bf4a1f4def7795341b01fcb0a8"
+  },
+  "job_binding": {
+    "queue_arn": "arn:aws:batch:us-east-1:994254241749:job-queue/picard-analysis-queue",
+    "job_definition_revision_arn": "arn:aws:batch:us-east-1:994254241749:job-definition/picard-reducer:1",
+    "job_role_arn": "arn:aws:iam::994254241749:role/picard-reducer-job-role",
+    "execution_role_arn": "arn:aws:iam::994254241749:role/picard-campaign-execution-role",
+    "image_digest": "sha256:21367d0ce5da170f132ccb5e7d3c54e39382789d48a3f2b6b83c9f3f0f99c980",
+    "platform": "EC2",
+    "vcpu": 2,
+    "memory_mib": 8192,
+    "timeout_seconds": 3600
+  },
+  "budgets": {
+    "max_list_pages": 1000000000,
+    "max_api_calls_total": 1000000000,
+    "max_head_requests": 1000000000,
+    "max_get_requests": 1000000000,
+    "max_source_objects": 1000000000,
+    "max_source_object_bytes_referenced": 1000000000,
+    "max_compressed_bytes_read": 1000000000,
+    "max_uncompressed_bytes": 1000000000,
+    "max_member_bytes": 1000000000,
+    "max_central_directory_bytes": 1000000000,
+    "max_output_bytes": 1000000000,
+    "max_spool_bytes": 1000000000,
+    "max_wall_seconds": 1000000000,
+    "max_queue_wait_seconds": 1000000000,
+    "max_vcpu_seconds": 1000000000,
+    "max_memory_mib_seconds": 1000000000,
+    "max_jobs": 1000000000,
+    "max_inflight_jobs": 1000000000,
+    "max_retries": 1000000000,
+    "max_cost_usd": 1000000000,
+    "checkpoint_reserve_bytes": 1000000000,
+    "checkpoint_reserve_seconds": 1000000000,
+    "safety_factor": 1.5
+  },
+  "readback": {
+    "receipt_bytes": 262144,
+    "summary_bytes": 1048576,
+    "index_page_bytes": 1048576,
+    "export_object_bytes": 5242880,
+    "request_manifest_bytes": 1048576,
+    "files_per_collect": 20,
+    "total_bytes_per_collect": 52428800,
+    "max_query_rows_per_page": 10000,
+    "issue_envelope_bytes": 32768
+  },
+  "approval": {
+    "admission_id": "adm-canary-d4",
+    "scope_hash": "bc1148d054947d5fdcc972920d7f769e516adb61952886268ed3874444bb59c1",
+    "quote_id": "quote-canary",
+    "approved_cost_usd": 0.05,
+    "expires_utc": "2030-01-01T00:00:00Z"
+  },
+  "phase": "return_canary",
+  "request_id": "req-exec-canary-d4",
+  "survey_source_sha": "496a919ca3af4563da34b958db37e737b58bab4b",
+  "quote": {
+    "quote_id": "quote-canary",
+    "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/quotes/quote-canary.json",
+    "sha256": "bb387a5ce05e2e905e26c7f2f79543651dc387bdfe1a1ec7f8b4a17f0153e2d6",
+    "price_snapshot_id": "price-canary",
+    "price_as_of_utc": "2026-01-01T00:00:00Z",
+    "input_inventory_sha256": "a078fd5dbfd851121e5ca7d7c9bee2a1951024bf4a1f4def7795341b01fcb0a8",
+    "scope_hash": "bc1148d054947d5fdcc972920d7f769e516adb61952886268ed3874444bb59c1",
+    "valid_until_utc": "2030-01-01T00:00:00Z",
+    "estimates_json": {
+      "total_usd": 0.01
+    },
+    "resource_bindings_json": {
+      "queue": "picard-analysis-queue"
+    }
+  }
+}

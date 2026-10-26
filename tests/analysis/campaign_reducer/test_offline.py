@@ -32,9 +32,12 @@ CONTRACTS = contracts.CONTRACTS_DIR
 BLOCKED_REQUEST = CONTRACTS / "BLOCKED_REQUEST.template.json"
 
 _UNIMPLEMENTED_OPS = (
-    "preflight", "inventory", "quote", "submit", "status",
-    "resume", "query", "collect", "acknowledge",
+    "preflight", "inventory", "quote", "submit",
 )
+
+# D4 return-canary ops: implemented — a blocked request yields a typed
+# failure status (never NOT_YET_IMPLEMENTED, never a fake success).
+_RETURN_OPS = ("status", "resume", "query", "collect", "acknowledge")
 
 _EXTRA_ARGV = {
     "quote": ["--evidence", "evidence.json"],
@@ -111,6 +114,23 @@ def test_unimplemented_operations_exit_nonzero(
     assert exit_code != 0
     status = json.loads((out / "status.json").read_text(encoding="utf-8"))
     assert status["status"] == "NOT_YET_IMPLEMENTED"
+    assert status["operation"] == operation
+
+
+@pytest.mark.parametrize("operation", _RETURN_OPS)
+def test_return_operations_fail_typed_on_blocked_request(
+    scratch: Path, operation: str,
+) -> None:
+    """D4 ops fail closed with a typed status against a blocked request —
+    they may never report NOT_YET_IMPLEMENTED or a fake success."""
+    out = scratch / operation
+    exit_code = cli.main([
+        operation, "--request", rel(BLOCKED_REQUEST),
+        "--out", rel(out), *_EXTRA_ARGV.get(operation, []),
+    ])
+    assert exit_code != 0
+    status = json.loads((out / "status.json").read_text(encoding="utf-8"))
+    assert status["status"] not in ("NOT_YET_IMPLEMENTED", "completed")
     assert status["operation"] == operation
 
 

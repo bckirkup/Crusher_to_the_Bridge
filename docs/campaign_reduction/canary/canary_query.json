@@ -1,0 +1,33 @@
+{
+  "contract_id": "crusher-campaign-distributions/1.0-proposed",
+  "catalog_snapshot_id": "snap-canary",
+  "operation": "query",
+  "analysis_version": "canary-d4",
+  "source_table": "run_scalars",
+  "metric_ids": [],
+  "filters": {
+    "ne": [
+      "row_id",
+      "__never__"
+    ]
+  },
+  "group_by": [],
+  "statistic": "exact_rows",
+  "weight_set_id": "w-equal",
+  "missing_policy": "report_separately",
+  "max_export_rows": 2,
+  "max_export_bytes": 5242880,
+  "page_rows": 2,
+  "allow_raw_agent_export": false,
+  "scan_budget": {
+    "max_scan_bytes": 1048576,
+    "max_wall_seconds": 300,
+    "max_cost_usd": 0.01
+  },
+  "grain": "run",
+  "joins": [],
+  "order_by": [
+    "native_path"
+  ],
+  "continuation_token": null
+}

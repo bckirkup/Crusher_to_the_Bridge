@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import uuid
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -26,9 +27,11 @@ def rel(path: Path | str) -> str:
 
 @pytest.fixture
 def scratch() -> Iterator[Path]:
-    shutil.rmtree(SCRATCH, ignore_errors=True)
-    SCRATCH.mkdir(parents=True)
+    # Per-test unique dir: -n auto workers must not rmtree each other's
+    # scratch while still living under the repo tree (CLI confinement).
+    root = SCRATCH / f"{os.getpid()}-{uuid.uuid4().hex[:12]}"
+    root.mkdir(parents=True)
     try:
-        yield SCRATCH
+        yield root
     finally:
-        shutil.rmtree(SCRATCH, ignore_errors=True)
+        shutil.rmtree(root, ignore_errors=True)
