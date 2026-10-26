@@ -1,0 +1,1778 @@
+[
+  {
+    "normalized_family": "admissible_region_v2",
+    "program_groups": [
+      "norovirus_Morris_Sobol_screening"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:admissible_region_v2"
+    ],
+    "schema_families": [
+      "bounded_region_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "boarding_posting_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:boarding_posting_v1"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "bounded_design_v1",
+    "program_groups": [
+      "norovirus_Morris_Sobol_screening"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:bounded_design_v1"
+    ],
+    "schema_families": [
+      "bounded_region_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "bounded_design_v2",
+    "program_groups": [
+      "norovirus_Morris_Sobol_screening"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:bounded_design_v2"
+    ],
+    "schema_families": [
+      "bounded_region_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "c1_reported_case_refit",
+    "program_groups": [
+      "norovirus_dose_clock_containment"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:c1_reported_case_refit"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "c1_reported_case_refit_trackA_20260905",
+    "program_groups": [
+      "norovirus_dose_clock_containment"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:c1_reported_case_refit_trackA_20260905"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "c1_single_dose_hours_v1",
+    "program_groups": [
+      "norovirus_dose_clock_containment"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:c1_single_dose_hours_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "cabin_floor",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:cabin_floor_01",
+      "historical_prefix:cabin_floor_01_declared",
+      "historical_prefix:cabin_floor_02_declared"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "classmix_stage0",
+    "program_groups": [
+      "classmix_staged_feasibility_and_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:classmix_stage0",
+      "historical_prefix:classmix_stage0_berth01",
+      "historical_prefix:classmix_stage0_dineparty01",
+      "historical_prefix:classmix_stage0_dineseg01",
+      "historical_prefix:classmix_stage0_foodrole01",
+      "historical_prefix:classmix_stage0_seat01",
+      "historical_prefix:classmix_stage0_seat02"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "classmix_stage1",
+    "program_groups": [
+      "classmix_staged_feasibility_and_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:classmix_stage1"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "classmix_stage2",
+    "program_groups": [
+      "classmix_staged_feasibility_and_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:classmix_stage2"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "clock_arm_c1_v1",
+    "program_groups": [
+      "norovirus_dose_clock_containment"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:clock_arm_c1_v1"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "common_dose_containment",
+    "program_groups": [
+      "norovirus_dose_clock_containment"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:common_dose_containment_v1",
+      "historical_prefix:common_dose_containment_v2",
+      "historical_prefix:common_dose_containment_v3",
+      "historical_prefix:common_dose_containment_v4"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "contactarch",
+    "program_groups": [
+      "norovirus_contact_architecture_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:contactarch_expedition_control",
+      "historical_prefix:contactarch_expedition_high",
+      "historical_prefix:contactarch_expedition_low",
+      "historical_prefix:contactarch_expedition_mid"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "contactarch2",
+    "program_groups": [
+      "norovirus_contact_architecture_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:contactarch2_expedition_control",
+      "historical_prefix:contactarch2_expedition_high",
+      "historical_prefix:contactarch2_expedition_high_tau05",
+      "historical_prefix:contactarch2_expedition_high_tau1",
+      "historical_prefix:contactarch2_expedition_high_tau2",
+      "historical_prefix:contactarch2_expedition_low",
+      "historical_prefix:contactarch2_expedition_mid",
+      "historical_prefix:contactarch2_expedition_mid_tau1",
+      "historical_prefix:contactarch2_expedition_mid_tau2"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "contactscale",
+    "program_groups": [
+      "norovirus_contact_architecture_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:contactscale_expedition_phi0",
+      "historical_prefix:contactscale_expedition_phi05",
+      "historical_prefix:contactscale_expedition_phi1",
+      "historical_prefix:contactscale_expedition_phi2",
+      "historical_prefix:contactscale_expedition_phim1"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_ascertain_v1",
+    "program_groups": [
+      "covid_observation_funnel_hull_validation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_ascertain_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_boarding_screen",
+    "program_groups": [
+      "covid_observation_funnel_hull_validation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_boarding_screen_v1",
+      "historical_prefix:covid_boarding_screen_v2"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_caregiver_off_v1",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_caregiver_off_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_cg_floor_v1",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_cg_floor_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_coop_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_coop_v1",
+      "historical_prefix:covid_coop_v1_fleet"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_crew_berth_01",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [
+      "registered:covid_crew_berth_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_crew_berth_01"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_crew_mess_01",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [
+      "registered:covid_crew_mess_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_crew_mess_01"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_crew_reach_01",
+    "program_groups": [
+      "covid_observation_funnel_hull_validation"
+    ],
+    "registered_record_ids": [
+      "registered:covid_crew_reach_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_crew_reach_01"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_crew_window_01",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [
+      "registered:covid_crew_window_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_crew_window_01"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_crew_window_02",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [
+      "registered:covid_crew_window_02"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_crew_window_02"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_first_look",
+    "program_groups": [
+      "covid_observation_funnel_hull_validation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_first_look_v6",
+      "historical_prefix:covid_first_look_v6c"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_frailty_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_frailty_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_gm_rescore_02",
+    "program_groups": [
+      "covid_observation_funnel_hull_validation"
+    ],
+    "registered_record_ids": [
+      "registered:covid_gm_rescore_02"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_gm_rescore_02"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_gm_rescore_v1",
+    "program_groups": [
+      "covid_observation_funnel_hull_validation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_gm_rescore_v1",
+      "historical_prefix:covid_gm_rescore_v1_imports3"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_hand_ab_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_hand_ab_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_hand_carriage01",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_hand_carriage01"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_heat_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_heat_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_import_sweep",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_import_sweep_v1",
+      "historical_prefix:covid_import_sweep_v1r",
+      "historical_prefix:covid_import_sweep_v1rr"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_info_suppress_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_info_suppress_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_lambda_cross_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_lambda_cross_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_meal_service_01",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [
+      "registered:covid_meal_service_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_meal_service_01"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_meal_service_02",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [
+      "registered:covid_meal_service_02"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_meal_service_02"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_mech_v2",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_mech_v2"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_mech_v2_fleet",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_mech_v2_fleet"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_onset_rec_01",
+    "program_groups": [
+      "covid_observation_funnel_hull_validation"
+    ],
+    "registered_record_ids": [
+      "registered:covid_onset_rec_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:covid_onset_rec_01"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_partner_rate_assay_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_partner_rate_assay_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_plume_dose_assay_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_plume_dose_assay_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_propensity_cv_screen",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_propensity_cv_screen"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_propensity_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_propensity_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_quar_suppression_v1",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_quar_suppression_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_quarantine_attribution",
+    "program_groups": [
+      "covid_crew_confinement_service_mechanisms"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_quarantine_attribution_v1",
+      "historical_prefix:covid_quarantine_attribution_v2"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_rebase_01",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_rebase_01",
+      "historical_prefix:covid_rebase_01_boarding",
+      "historical_prefix:covid_rebase_01_stage2"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_rhythm_ab_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_rhythm_ab_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_ring_cap_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_ring_cap_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_seed_geom_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_seed_geom_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_sensitivity_assay_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_sensitivity_assay_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_sero_channel_v1",
+    "program_groups": [
+      "covid_observation_funnel_hull_validation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_sero_channel_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_suppress_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_suppress_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_susc_pool_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_susc_pool_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_suscept_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_suscept_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_takeoff_attr_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_takeoff_attr_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_theta_refit_bracket_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_theta_refit_bracket_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_theta_refit_floor_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_theta_refit_floor_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_theta_refit_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_theta_refit_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_theta_screen_v15",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_theta_screen_v15"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_theta_screen_v15_stage2",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_theta_screen_v15_stage2"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "covid_vuln_ab_v1",
+    "program_groups": [
+      "covid_mechanistic_parameter_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:covid_vuln_ab_v1"
+    ],
+    "schema_families": [
+      "covid_screen_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "droplet_deletion_route_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:droplet_deletion_route_v1"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "expedition_posting_v2",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:expedition_posting_v2"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "flu_age_01",
+    "program_groups": [
+      "influenza_open_voyage_age_visibility_response"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:flu_age_01"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "flu_open_voyage_01",
+    "program_groups": [
+      "influenza_open_voyage_age_visibility_response"
+    ],
+    "registered_record_ids": [
+      "registered:flu_open_voyage_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:flu_open_voyage_01"
+    ],
+    "schema_families": [
+      "flu_cell_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "flu_reassess_01",
+    "program_groups": [
+      "influenza_open_voyage_age_visibility_response"
+    ],
+    "registered_record_ids": [
+      "registered:flu_reassess_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:flu_reassess_01"
+    ],
+    "schema_families": [
+      "flu_cell_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "flu_rhythm_01",
+    "program_groups": [
+      "influenza_open_voyage_age_visibility_response"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:flu_rhythm_01"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "flu_rhythm_02",
+    "program_groups": [
+      "influenza_open_voyage_age_visibility_response"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:flu_rhythm_02"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "flu_social_01",
+    "program_groups": [
+      "influenza_open_voyage_age_visibility_response"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:flu_social_01"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "flu_visibility_01",
+    "program_groups": [
+      "influenza_open_voyage_age_visibility_response"
+    ],
+    "registered_record_ids": [
+      "registered:flu_visibility_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:flu_visibility_01"
+    ],
+    "schema_families": [
+      "flu_cell_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "flush_sweep_v1",
+    "program_groups": [
+      "norovirus_flush_stage_parameter_sweeps"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:flush_sweep_v1_1e-5_s1",
+      "historical_prefix:flush_sweep_v1_1e-5_s3",
+      "historical_prefix:flush_sweep_v1_1e-7_s1",
+      "historical_prefix:flush_sweep_v1_1e-7_s2",
+      "historical_prefix:flush_sweep_v1_1e-7_s2e",
+      "historical_prefix:flush_sweep_v1_1e-7_s2r",
+      "historical_prefix:flush_sweep_v1_1e-7_s3",
+      "historical_prefix:flush_sweep_v1_1e-8_s2",
+      "historical_prefix:flush_sweep_v1_1e-8_s2e",
+      "historical_prefix:flush_sweep_v1_1e-8_s2r",
+      "historical_prefix:flush_sweep_v1_1e-8_s4",
+      "historical_prefix:flush_sweep_v1_1e-9_s1",
+      "historical_prefix:flush_sweep_v1_1e-9_s3",
+      "historical_prefix:flush_sweep_v1_3e-7_s4",
+      "historical_prefix:flush_sweep_v1_3e-8_s2",
+      "historical_prefix:flush_sweep_v1_3e-8_s2e",
+      "historical_prefix:flush_sweep_v1_3e-8_s2r",
+      "historical_prefix:flush_sweep_v1_3e-8_s4",
+      "historical_prefix:flush_sweep_v1_3e-9_s2",
+      "historical_prefix:flush_sweep_v1_3e-9_s2e",
+      "historical_prefix:flush_sweep_v1_3e-9_s2r",
+      "historical_prefix:flush_sweep_v1_3e-9_s4",
+      "historical_prefix:flush_sweep_v1_off_s1",
+      "historical_prefix:flush_sweep_v1_off_s2",
+      "historical_prefix:flush_sweep_v1_off_s2e",
+      "historical_prefix:flush_sweep_v1_off_s2r",
+      "historical_prefix:flush_sweep_v1_off_s3",
+      "historical_prefix:flush_sweep_v1_off_s4"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "gate37_dutyexcl_off_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:gate37_dutyexcl_off_v1"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "gate37_dutyexcl_on_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:gate37_dutyexcl_on_v1"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "gate37_lowposting_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:gate37_lowposting_v1"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "hull_compounding_route_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:hull_compounding_route_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "hull_compounding_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:hull_compounding_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "hull_posting_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:hull_posting_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "leverage",
+    "program_groups": [
+      "cross_pathogen_leverage_perturbations"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:leverage01",
+      "historical_prefix:leverage02"
+    ],
+    "schema_families": [
+      "perturbation_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_age_food_01",
+    "program_groups": [
+      "norovirus_food_object_growth_sweeps"
+    ],
+    "registered_record_ids": [
+      "registered:noro_age_food_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:noro_age_food_01",
+      "historical_prefix:noro_age_food_01_confpair",
+      "historical_prefix:noro_age_food_01_defpair"
+    ],
+    "schema_families": [
+      "campaign_summary_zip",
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_age_food_01_mega",
+    "program_groups": [
+      "norovirus_food_object_growth_sweeps"
+    ],
+    "registered_record_ids": [
+      "registered:noro_age_food_01_mega"
+    ],
+    "historical_record_ids": [],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_channel",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_channel_03",
+      "historical_prefix:noro_channel_04"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_detect_01",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_detect_01"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_dose_refit_01",
+    "program_groups": [
+      "norovirus_dose_clock_containment"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_dose_refit_01"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_entrain_01",
+    "program_groups": [
+      "norovirus_food_object_growth_sweeps"
+    ],
+    "registered_record_ids": [
+      "registered:noro_entrain_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:noro_entrain_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_food_early",
+    "program_groups": [
+      "norovirus_food_object_growth_sweeps"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_food_01",
+      "historical_prefix:noro_food_02"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_food_score_01",
+    "program_groups": [
+      "norovirus_food_object_growth_sweeps"
+    ],
+    "registered_record_ids": [
+      "registered:noro_food_score_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:noro_food_score_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_food_shapes_01",
+    "program_groups": [
+      "norovirus_food_object_growth_sweeps"
+    ],
+    "registered_record_ids": [
+      "registered:noro_food_shapes_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:noro_food_shapes_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_geno_01",
+    "program_groups": [
+      "norovirus_genotype_mixtures"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_geno_01_gii4",
+      "historical_prefix:noro_geno_01_mixture",
+      "historical_prefix:noro_geno_01_nongii4"
+    ],
+    "schema_families": [
+      "campaign_summary_zip",
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_geno_02",
+    "program_groups": [
+      "norovirus_genotype_mixtures"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_geno_02_gii4",
+      "historical_prefix:noro_geno_02_mixture",
+      "historical_prefix:noro_geno_02_nongii4",
+      "historical_prefix:noro_geno_02_sweep"
+    ],
+    "schema_families": [
+      "campaign_summary_zip",
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_hand_carriage",
+    "program_groups": [
+      "norovirus_hand_fomite_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_hand_carriage01",
+      "historical_prefix:noro_hand_carriage02"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_hand_practice_01",
+    "program_groups": [
+      "norovirus_hand_fomite_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_hand_practice_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_hand_reservoir_01",
+    "program_groups": [
+      "norovirus_hand_fomite_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_hand_reservoir_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_hand_stationary_01",
+    "program_groups": [
+      "norovirus_hand_fomite_diagnostics"
+    ],
+    "registered_record_ids": [
+      "registered:noro_hand_stationary_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:noro_hand_stationary_01"
+    ],
+    "schema_families": [
+      "fomite_diagnostic_gzip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_import_01",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_import_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_import_01_r2",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_import_01_r2"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_mega_01",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_mega_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_mega_impact_01",
+    "program_groups": [
+      "norovirus_food_object_growth_sweeps"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_mega_impact_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_mint_rate_01",
+    "program_groups": [
+      "norovirus_food_object_growth_sweeps"
+    ],
+    "registered_record_ids": [
+      "registered:noro_mint_rate_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:noro_mint_rate_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_outbreak",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_outbreak_01",
+      "historical_prefix:noro_outbreak_02",
+      "historical_prefix:noro_outbreak_03",
+      "historical_prefix:noro_outbreak_04"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_provisioned_source_01",
+    "program_groups": [
+      "norovirus_provisioned_source_PS01"
+    ],
+    "registered_record_ids": [
+      "registered:noro_provisioned_source_01"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:noro_provisioned_source_01"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_provisioned_source_01_mega",
+    "program_groups": [
+      "norovirus_provisioned_source_PS01"
+    ],
+    "registered_record_ids": [
+      "registered:noro_provisioned_source_01_mega"
+    ],
+    "historical_record_ids": [
+      "historical_prefix:noro_provisioned_source_01_mega"
+    ],
+    "schema_families": [
+      "growth_census_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_rebase_01",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_rebase_01"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_rebase_01_exp_block",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_rebase_01_exp_block"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_rhythm",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_rhythm_01",
+      "historical_prefix:noro_rhythm_01_v2"
+    ],
+    "schema_families": [
+      "campaign_summary_zip",
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "noro_venue",
+    "program_groups": [
+      "norovirus_importation_incidence_venue_clock"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:noro_venue_01",
+      "historical_prefix:noro_venue_02"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "realism_ladder_v1",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:realism_ladder_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "route_attr_01",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:route_attr_01"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "sanitary_structure",
+    "program_groups": [
+      "norovirus_structural_and_posting_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:sanitary_structure_v1_baseline",
+      "historical_prefix:sanitary_structure_v1_visits"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "sentinel_nuts_ladder_v1",
+    "program_groups": [
+      "sentinel_Stan_NUTS_validation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:sentinel_nuts_ladder_v1"
+    ],
+    "schema_families": [
+      "stan_nuts_json"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "sentinel_synthetic_recovery_v1",
+    "program_groups": [
+      "synthetic_recovery_and_observation_degradation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:sentinel_synthetic_recovery_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "sentinel_ww_ops_scan_v1",
+    "program_groups": [
+      "sentinel_wastewater_operating_envelope"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:sentinel_ww_ops_scan_v1"
+    ],
+    "schema_families": [
+      "wastewater_campaign_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "synthetic_recovery_v1",
+    "program_groups": [
+      "synthetic_recovery_and_observation_degradation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:synthetic_recovery_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "threearm_expedition",
+    "program_groups": [
+      "norovirus_contact_architecture_counterfactuals"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:threearm_expedition_base",
+      "historical_prefix:threearm_expedition_surfko"
+    ],
+    "schema_families": [
+      "observation_jsonl"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "touch_share_rate_01",
+    "program_groups": [
+      "norovirus_hand_fomite_diagnostics"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:touch_share_rate_01"
+    ],
+    "schema_families": [
+      "unknown_legacy"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "vsp_degradation_compliance_fix_v1",
+    "program_groups": [
+      "synthetic_recovery_and_observation_degradation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:vsp_degradation_compliance_fix_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  },
+  {
+    "normalized_family": "vsp_degradation_v1",
+    "program_groups": [
+      "synthetic_recovery_and_observation_degradation"
+    ],
+    "registered_record_ids": [],
+    "historical_record_ids": [
+      "historical_prefix:vsp_degradation_v1"
+    ],
+    "schema_families": [
+      "campaign_summary_zip"
+    ],
+    "no_pooling_without_fingerprint_and_estimand_compatibility": true
+  }
+]
