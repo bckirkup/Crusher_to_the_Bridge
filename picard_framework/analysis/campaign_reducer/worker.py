@@ -8,11 +8,14 @@ This is the argv surface named by
         --shard-index <n> [--out-uri <uri>]
 
 The worker is the AWS-side projection/filter path's transport shim: on
-Batch it will fetch the request from an immutable S3 URI and write to
-the derived S3 namespace. Implemented and proven offline here —
-``--request-uri`` accepts a local path (or ``file://``) and ``--out-uri``
-a local directory (or ``dir://``); the same code paths run against
-``MemoryDerivedStore`` in tests. No network, no boto3.
+Batch it fetches the request from an immutable S3 URI, reads sources
+through the pinned boto3 transport, and writes to the derived S3
+namespace. ``--request-uri`` accepts ``s3://bucket/key``, a local path,
+or ``file://``; ``--out-uri`` accepts ``s3://bucket/prefix`` (create-only
+``S3DerivedStore``), a local directory, or ``dir://``; the same code
+paths run against ``MemoryDerivedStore``/stubbed client objects in
+tests. boto3 imports stay lazy inside ``_s3_client`` so offline runs
+never touch the SDK.
 
 Exit codes follow the contract's table: 0 completed, 2 invalid contract,
 3 access/resource blocked, 4 admission required/exceeded, 5 budget
@@ -34,12 +37,21 @@ from .derived_store import DerivedStoreError, LocalDirStore, MemoryDerivedStore
 from .ledger import BudgetBlocked, BudgetLedger, parse_ceilings
 from .materialize import MaterializeSpec, run_materialization
 from .pinned_reader import (
+    STATE_AVAILABLE,
     GetResponse,
     HeadInfo,
+    ReadBudget,
     TransportError,
+    boto3_transport,
+    parse_s3_uri,
+    read_object,
 )
 from .query_engine import QueryError, run_query
 from .rows import ReductionContext, SourceSpec
+from .s3_store import S3DerivedStore
+
+# CANONICAL_INTERFACE readback cap for the request manifest itself.
+_REQUEST_MANIFEST_MAX_BYTES = 1048576
 
 
 class LocalTransport:
@@ -110,6 +122,17 @@ EXIT_PARTIAL = 8
 EXIT_RETURN_BLOCKED = 9
 
 
+def _s3_client():
+    """Build the S3 client; lazy boto3 import keeps offline runs clean.
+
+    Tests substitute a stubbed client object by monkeypatching this
+    factory — no moto, no network.
+    """
+    import boto3  # noqa: PLC0415
+
+    return boto3.client("s3")
+
+
 def _request_path(uri: str) -> Path:
     """Resolve the request URI to an existing regular file."""
     raw = uri[len("file://"):] if uri.startswith("file://") else uri
@@ -119,8 +142,36 @@ def _request_path(uri: str) -> Path:
     return path
 
 
-def _fetch_request(uri: str) -> tuple[dict, Path]:
-    """Read and parse the offline request document."""
+def _fetch_request_s3(uri: str) -> dict:
+    """Read the request document through the pinned boto3 transport.
+
+    Bounded by the canonical request-manifest readback cap (1 MiB) and
+    pinned to the VersionId/ETag HEAD reports — the immutable-URI rule.
+    """
+    bucket, key = parse_s3_uri(uri)
+    if not key:
+        raise QueryError("invalid_contract", f"request uri has no key: {uri}")
+    transport = boto3_transport(_s3_client(), bucket)
+    budget = ReadBudget(
+        max_total_bytes=_REQUEST_MANIFEST_MAX_BYTES,
+        max_object_bytes=_REQUEST_MANIFEST_MAX_BYTES,
+    )
+    outcome = read_object(transport, bucket, key, budget)
+    if outcome.state != STATE_AVAILABLE or outcome.body is None:
+        raise QueryError(
+            "access_denied",
+            f"request fetch blocked: {outcome.state} {outcome.detail}",
+        )
+    try:
+        return json.loads(outcome.body)
+    except json.JSONDecodeError as exc:
+        raise QueryError("invalid_contract", f"request uri unreadable: {exc}")
+
+
+def _fetch_request(uri: str) -> tuple[dict, Path | None]:
+    """Read and parse the request document (local or immutable S3 URI)."""
+    if uri.startswith("s3://"):
+        return _fetch_request_s3(uri), None
     path = _request_path(uri)
     try:
         return json.loads(path.read_text()), path
@@ -128,9 +179,49 @@ def _fetch_request(uri: str) -> tuple[dict, Path]:
         raise QueryError("invalid_contract", f"request uri unreadable: {exc}")
 
 
+def _source_transport(request: dict, request_path: Path | None):
+    """Pick the ObjectTransport for the request's declared sources.
+
+    Every ``s3://`` source URI and the optional ``source_bucket`` field
+    must name one bucket — the request schema declares a single
+    ``source_bucket``, so a mixed-bucket request is invalid contract.
+    Non-``s3://`` URIs under an S3 request resolve as plain object keys
+    in that bucket (the transport is bucket-bound at construction).
+    """
+    uris = [request.get("source_root")]
+    uris += [s.get("uri") for s in request.get("sources") or []]
+    buckets = {
+        parse_s3_uri(u)[0]
+        for u in uris
+        if isinstance(u, str) and u.startswith("s3://")
+    }
+    if request.get("source_bucket"):
+        buckets.add(request["source_bucket"])
+    if not buckets:
+        root = request.get("source_root") or (
+            request_path.parent if request_path else None
+        )
+        if root is None:
+            raise QueryError(
+                "invalid_contract", "no source_root or local request path"
+            )
+        return LocalTransport(root)
+    if len(buckets) != 1:
+        raise QueryError(
+            "invalid_contract",
+            f"source bucket ambiguity: {sorted(buckets)}",
+        )
+    return boto3_transport(_s3_client(), next(iter(buckets)))
+
+
 def _open_store(out_uri: str | None):
     if not out_uri:
         return MemoryDerivedStore()
+    if out_uri.startswith("s3://"):
+        bucket, prefix = parse_s3_uri(out_uri)
+        if not bucket:
+            raise QueryError("invalid_contract", f"out uri has no bucket: {out_uri}")
+        return S3DerivedStore(_s3_client(), bucket, prefix)
     raw = out_uri[len("dir://"):] if out_uri.startswith("dir://") else out_uri
     try:
         # The derived-root CLI argument is confined to the working
@@ -221,9 +312,20 @@ def main(argv: list[str] | None = None) -> int:
         request, request_path = _fetch_request(args.request_uri)
         _verify_sha(request, args.request_sha256)
         ceilings = parse_ceilings(request.get("budgets"))
+        transport = (
+            _source_transport(request, request_path)
+            if args.phase in ("materialize", "finalize")
+            else None
+        )
     except (QueryError, BudgetBlocked) as exc:
         print(json.dumps({"status": "blocked", "error": str(exc)}))
-        return EXIT_INVALID_CONTRACT if isinstance(exc, QueryError) else EXIT_ADMISSION
+        if isinstance(exc, BudgetBlocked):
+            return EXIT_ADMISSION
+        return (
+            EXIT_BLOCKED
+            if exc.kind == "access_denied"
+            else EXIT_INVALID_CONTRACT
+        )
     try:
         store = _open_store(args.out_uri or None)
     except QueryError as exc:
@@ -244,13 +346,7 @@ def main(argv: list[str] | None = None) -> int:
             utc=request.get("utc") or "",
         )
         try:
-            result = run_materialization(
-                spec,
-                LocalTransport(
-                    request.get("source_root") or request_path.parent
-                ),
-                store, ledger,
-            )
+            result = run_materialization(spec, transport, store, ledger)
         except (DerivedStoreError, BudgetBlocked) as exc:
             print(json.dumps({"status": "blocked", "error": str(exc)}))
             return EXIT_BLOCKED

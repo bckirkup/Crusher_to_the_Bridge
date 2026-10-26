@@ -8,6 +8,14 @@ name: campaign-collect
 # An optional exact_key input fetches ONE reviewed object under a byte
 # ceiling, verifies nothing beyond its own integrity, and exposes it only
 # as a workflow artifact — never inline in an issue body.
+#
+# Reduction lane (D3): derived_key fetches ONE object under
+# campaign/_derived/reducer/v1/ at a per-kind ceiling (pages 5MiB,
+# indexes 1MiB, receipts 256KiB, issue envelopes 32KiB); derived_manifest
+# fetches one manifest plus every derived object it lists (<=20 files,
+# <=50MiB total); derived_prefix lists keys only — no object bodies.
+# All derived fetches are HEAD-pinned GETs, sha256-verified, and confined
+# to the derived namespace by scripts/campaign_collect_guard.py.
 
 on:
   workflow_dispatch:
@@ -28,6 +36,18 @@ on:
         description: "byte ceiling for exact_key fetch"
         required: false
         default: "52428800"
+      derived_key:
+        description: "optional single object under campaign/_derived/reducer/v1/ to fetch"
+        required: false
+        default: ""
+      derived_manifest:
+        description: "optional derived manifest/index key; fetches it plus listed objects"
+        required: false
+        default: ""
+      derived_prefix:
+        description: "optional prefix under campaign/_derived/ to enumerate (list-only)"
+        required: false
+        default: ""
   schedule:
     - cron: "0 6 * * 1" # Mondays 06:00 UTC; remove if unwanted
 
@@ -196,6 +216,161 @@ jobs:
           with open("fetched/SHA256SUMS", "w") as f:
               f.write(f"{sha}  {key}\n")
           print(f"fetched {key} ({size} B), sha256 {sha}")
+          PY
+
+      - name: Bounded derived-namespace listing (when derived_prefix supplied)
+        if: ${{ inputs.derived_prefix != '' }}
+        env:
+          DERIVED_PREFIX: ${{ inputs.derived_prefix }}
+          KEYS_PER_PREFIX: ${{ inputs.keys_per_prefix }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          sys.path.insert(0, "scripts")
+          import campaign_collect_guard as guard
+
+          bucket = os.environ["BUCKET"]
+          prefix = os.environ["DERIVED_PREFIX"].strip()
+          if not prefix.startswith("campaign/_derived/") or ".." in prefix.split("/"):
+              raise SystemExit(f"refusing prefix outside campaign/_derived/: {prefix!r}")
+          max_keys = int(os.environ.get("KEYS_PER_PREFIX") or 5000)
+          keys, token = [], None
+          while len(keys) < max_keys + 1:
+              args = ["aws", "s3api", "list-objects-v2", "--bucket", bucket,
+                      "--prefix", prefix, "--max-keys",
+                      str(max_keys + 1 - len(keys)), "--no-paginate",
+                      "--output", "json"]
+              if token:
+                  args += ["--continuation-token", token]
+              page = json.loads(subprocess.run(
+                  args, capture_output=True, text=True, check=True).stdout)
+              keys += [o["Key"] for o in page.get("Contents") or []]
+              token = page.get("NextContinuationToken")
+              if not token:
+                  break
+          os.makedirs("fetched", exist_ok=True)
+          listing = {"prefix": prefix, "objects": keys[:max_keys],
+                     "truncated": bool(token) or len(keys) > max_keys}
+          with open("fetched/derived_listing.json", "w") as f:
+              json.dump(listing, f, indent=2)
+          print(f"listed {len(listing['objects'])} keys under {prefix} "
+                f"(truncated={listing['truncated']})")
+          PY
+
+      - name: Bounded derived-object fetch (when derived_key supplied)
+        if: ${{ inputs.derived_key != '' }}
+        env:
+          DERIVED_KEY: ${{ inputs.derived_key }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          sys.path.insert(0, "scripts")
+          import campaign_collect_guard as guard
+
+          bucket = os.environ["BUCKET"]
+          key = os.environ["DERIVED_KEY"].strip()
+          kind, ceiling = guard.classify_derived_key(key)
+          head = json.loads(subprocess.run(
+              ["aws", "s3api", "head-object", "--bucket", bucket, "--key", key,
+               "--output", "json"], capture_output=True, text=True, check=True).stdout)
+          size = head["ContentLength"]
+          sc = (head.get("StorageClass") or "STANDARD").upper()
+          if "ARCHIVE" in sc or sc == "GLACIER":
+              raise SystemExit(f"refusing archived object (class {sc}); restore first")
+          if size > ceiling:
+              raise SystemExit(
+                  f"refusing {size} B {kind}; ceiling {ceiling} B")
+          dest = "/tmp/fetched_derived"
+          gargs = ["aws", "s3api", "get-object", "--bucket", bucket,
+                   "--key", key]
+          if head.get("VersionId"):
+              gargs += ["--version-id", head["VersionId"]]
+          elif head.get("ETag"):
+              gargs += ["--if-match", head["ETag"]]
+          gargs += [dest]
+          subprocess.run(gargs, check=True)
+          if os.path.getsize(dest) > ceiling:
+              raise SystemExit(
+                  f"downloaded exceeds {kind} ceiling {ceiling} B — refusing")
+          sha = subprocess.run(["sha256sum", dest], capture_output=True,
+                               text=True, check=True).stdout.split()[0]
+          os.makedirs("fetched", exist_ok=True)
+          out_path = os.path.join("fetched", key.rsplit("/", 1)[-1])
+          os.rename(dest, out_path)
+          with open("fetched/SHA256SUMS", "a") as f:
+              f.write(f"{sha}  {key}\n")
+          print(f"fetched {key} ({size} B, {kind}), sha256 {sha}")
+          PY
+
+      - name: Bounded derived-manifest fan-out (when derived_manifest supplied)
+        if: ${{ inputs.derived_manifest != '' }}
+        env:
+          DERIVED_MANIFEST: ${{ inputs.derived_manifest }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          sys.path.insert(0, "scripts")
+          import campaign_collect_guard as guard
+
+          bucket = os.environ["BUCKET"]
+          mkey = os.environ["DERIVED_MANIFEST"].strip()
+          guard.validate_manifest_key(mkey)
+
+          def pinned_get(key, ceiling, dest):
+              head = json.loads(subprocess.run(
+                  ["aws", "s3api", "head-object", "--bucket", bucket,
+                   "--key", key, "--output", "json"],
+                  capture_output=True, text=True, check=True).stdout)
+              sc = (head.get("StorageClass") or "STANDARD").upper()
+              if "ARCHIVE" in sc or sc == "GLACIER":
+                  raise SystemExit(
+                      f"refusing archived object {key} (class {sc})")
+              if head["ContentLength"] > ceiling:
+                  raise SystemExit(
+                      f"refusing {head['ContentLength']} B at {key}; "
+                      f"ceiling {ceiling} B")
+              gargs = ["aws", "s3api", "get-object", "--bucket", bucket,
+                       "--key", key]
+              if head.get("VersionId"):
+                  gargs += ["--version-id", head["VersionId"]]
+              elif head.get("ETag"):
+                  gargs += ["--if-match", head["ETag"]]
+              gargs += [dest]
+              subprocess.run(gargs, check=True)
+              if os.path.getsize(dest) > ceiling:
+                  raise SystemExit(
+                      f"downloaded {key} exceeds ceiling {ceiling} B")
+              return head["ContentLength"]
+
+          os.makedirs("fetched", exist_ok=True)
+          pinned_get(mkey, guard.CEILING_INDEX, "/tmp/derived_manifest.json")
+          doc = json.loads(open("/tmp/derived_manifest.json").read())
+          keys = guard.iter_manifest_keys(doc)
+          if len(keys) > guard.MAX_COLLECT_OBJECTS:
+              raise SystemExit(
+                  f"manifest lists {len(keys)} objects; "
+                  f"collect cap {guard.MAX_COLLECT_OBJECTS}")
+          total = 0
+          os.rename("/tmp/derived_manifest.json",
+                    os.path.join("fetched", mkey.rsplit("/", 1)[-1]))
+          with open("fetched/SHA256SUMS", "a") as sums:
+              for key in keys:
+                  kind, ceiling = guard.classify_derived_key(key)
+                  dest = "/tmp/derived_item"
+                  size = pinned_get(key, ceiling, dest)
+                  total += size
+                  if total > guard.MAX_COLLECT_BYTES:
+                      raise SystemExit(
+                          f"collect byte cap {guard.MAX_COLLECT_BYTES} B "
+                          f"exceeded at {key}")
+                  sha = subprocess.run(["sha256sum", dest],
+                                       capture_output=True, text=True,
+                                       check=True).stdout.split()[0]
+                  sums.write(f"{sha}  {key}\n")
+                  os.rename(dest, os.path.join(
+                      "fetched", key.replace("/", "__")))
+                  print(f"fetched {key} ({size} B, {kind}), sha256 {sha}")
+          print(f"manifest fan-out complete: {len(keys)} objects, {total} B")
           PY
 
       - name: Publish index to tracking issue

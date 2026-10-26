@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReducerOptionalKmsDecrypt",
+      "Effect": "Allow",
+      "Action": "kms:Decrypt",
+      "Resource": "arn:aws:kms:<REGION>:<ACCOUNT_ID>:key/<KMS_KEY_ID>",
+      "Condition": {
+        "StringEquals": { "kms:ViaService": "s3.<REGION>.amazonaws.com" }
+      }
+    }
+  ]
+}
