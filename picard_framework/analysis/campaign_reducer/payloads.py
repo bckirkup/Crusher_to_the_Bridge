@@ -78,6 +78,7 @@ class ScalarRecord:
     native_type: str
     value_status: str  # metrics.value_status literal
     value: float | int | bool | str | None = None
+    asset_id: str | None = None
 
     def as_json(self) -> dict:
         return {
@@ -88,6 +89,7 @@ class ScalarRecord:
             "native_type": self.native_type,
             "value_status": self.value_status,
             "value": self.value,
+            "asset_id": self.asset_id,
         }
 
 
@@ -150,6 +152,7 @@ class GapRecord:
     reason: str  # data_gaps.reason literal
     detail: str = ""
     member: str | None = None
+    asset_id: str | None = None
 
     def as_json(self) -> dict:
         return {
@@ -158,6 +161,7 @@ class GapRecord:
             "reason": self.reason,
             "detail": self.detail,
             "member": self.member,
+            "asset_id": self.asset_id,
         }
 
 
@@ -194,6 +198,21 @@ class LinkRecord:
         }
 
 
+@dataclass(frozen=True)
+class DecodedDoc:
+    """One decoded document retained for long-table extraction (D2).
+
+    ``member_path`` identifies the archive member (or ``None`` for a
+    whole-object document); ``doc`` is the parsed JSON. Bounded by the
+    same decoded-bytes budget the adapter already charges.
+    """
+
+    run_uid: str
+    asset_id: str | None
+    member_path: str | None
+    doc: object
+
+
 @dataclass
 class AdapterResult:
     """Everything one family adapter produced from its source objects."""
@@ -204,6 +223,7 @@ class AdapterResult:
     scalars: list[ScalarRecord] = field(default_factory=list)
     runs: list[RunRecord] = field(default_factory=list)
     gaps: list[GapRecord] = field(default_factory=list)
+    docs: list[DecodedDoc] = field(default_factory=list)
 
     def counts(self) -> dict[str, int]:
         return {

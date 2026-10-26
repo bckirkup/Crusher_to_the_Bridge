@@ -30,6 +30,7 @@ from .payloads import (
     AdapterResult,
     AssetRecord,
     CapabilityRecord,
+    DecodedDoc,
     GapRecord,
     LinkRecord,
     RunRecord,
@@ -109,13 +110,15 @@ class SourceRef:
         )
 
 
-def _gap(source: SourceRef, state: str, detail: str, member: str | None = None) -> GapRecord:
+def _gap(source: SourceRef, state: str, detail: str, member: str | None = None,
+         asset_id: str | None = None) -> GapRecord:
     return GapRecord(
         gap_id=f"gap-{source.source_id}-{state}",
         source_id=source.source_id,
         reason=_GAP_REASON_BY_STATE.get(state, "malformed"),
         detail=detail,
         member=member,
+        asset_id=asset_id,
     )
 
 
@@ -133,7 +136,8 @@ def _open(ref: SourceRef, transport: ObjectTransport, budget: ReadBudget):
         return None, link_for(ref.source_id, ref.uri, None, exc.state, exc.detail)
 
 
-def _scalars_from_doc(run_id: str, doc: Any, prefix: str, metric_prefix: str) -> list[ScalarRecord]:
+def _scalars_from_doc(run_id: str, doc: Any, prefix: str, metric_prefix: str,
+                      asset_id: str | None = None) -> list[ScalarRecord]:
     """Losslessly flatten one decoded JSON document into scalar rows.
 
     Every leaf — including fields the reducer does not know — becomes a
@@ -160,6 +164,7 @@ def _scalars_from_doc(run_id: str, doc: Any, prefix: str, metric_prefix: str) ->
                 native_type=ntype,
                 value_status="exact_emitted",
                 value=node if ntype in ("number", "boolean", "string") else None,
+                asset_id=asset_id,
             ),
         )
 
@@ -181,15 +186,20 @@ def _run_record(ref: SourceRef) -> RunRecord:
     )
 
 
+def _asset_id(obj, ref: SourceRef, member: str | None) -> str:
+    """The assets.asset_id for one member (or the whole object)."""
+    if member:
+        return member_asset_id(
+            object_id(ref.campaign_id, ref.uri, obj.pin.version_id, obj.pin.etag),
+            member,
+        )
+    return object_id(ref.campaign_id, ref.uri, obj.pin.version_id, obj.pin.etag)
+
+
 def _asset(obj, ref: SourceRef, member: str | None, read_state: str,
            scope: str, sha: str | None, detail: str = "") -> AssetRecord:
     path = member or ref.uri
-    aid = (
-        member_asset_id(object_id(ref.campaign_id, ref.uri,
-                                  obj.pin.version_id, obj.pin.etag), member)
-        if member
-        else object_id(ref.campaign_id, ref.uri, obj.pin.version_id, obj.pin.etag)
-    )
+    aid = _asset_id(obj, ref, member)
     return AssetRecord(
         asset_id=aid,
         source_id=ref.source_id,
@@ -301,13 +311,14 @@ def _read_scan_member(obj, entry, ref: SourceRef,
         state, detail = "available", ""
     except SourceReadError as exc:
         body, state, detail = None, exc.state, exc.detail
+    aid = _asset_id(obj, ref, entry.name)
     result.assets.append(
         _asset(obj, ref, entry.name, _asset_state(state),
                "uncompressed_member",
                sha256_hex(body) if body is not None else None, detail),
     )
     if body is None:
-        result.gaps.append(_gap(ref, state, detail, member=entry.name))
+        result.gaps.append(_gap(ref, state, detail, member=entry.name, asset_id=aid))
         return
     payload = body
     if entry.name.endswith(".gz"):
@@ -317,7 +328,7 @@ def _read_scan_member(obj, entry, ref: SourceRef,
             result.gaps.append(
                 _gap(ref, "decode_failure",
                      f"member {entry.name!r} gzip stream invalid: {exc}",
-                     member=entry.name),
+                     member=entry.name, asset_id=aid),
             )
             return
     try:
@@ -325,11 +336,15 @@ def _read_scan_member(obj, entry, ref: SourceRef,
     except json.JSONDecodeError:
         result.gaps.append(
             _gap(ref, "malformed", f"member {entry.name!r} is not JSON",
-                 member=entry.name),
+                 member=entry.name, asset_id=aid),
         )
         return
     result.scalars.extend(
-        _scalars_from_doc(ref.run_id(), doc, "", metric_prefix),
+        _scalars_from_doc(ref.run_id(), doc, "", metric_prefix, asset_id=aid),
+    )
+    result.docs.append(
+        DecodedDoc(run_uid=ref.run_id(), asset_id=aid,
+                   member_path=entry.name, doc=doc),
     )
 
 
@@ -388,7 +403,12 @@ def _emit_json_doc(obj, ref: SourceRef, result: AdapterResult, body: bytes,
     result.links.append(link_for(ref.source_id, ref.uri, obj, STATE_AVAILABLE, sha256=sha))
     result.assets.append(_asset(obj, ref, None, "read", hash_scope, sha))
     result.runs.append(_run_record(ref))
-    result.scalars.extend(_scalars_from_doc(ref.run_id(), doc, "", metric_prefix))
+    aid = _asset_id(obj, ref, None)
+    result.scalars.extend(_scalars_from_doc(ref.run_id(), doc, "", metric_prefix,
+                                          asset_id=aid))
+    result.docs.append(
+        DecodedDoc(run_uid=ref.run_id(), asset_id=aid, member_path=None, doc=doc),
+    )
 
 
 def _adapter_jsonl(metric_prefix: str) -> Callable:
@@ -417,8 +437,14 @@ def _adapter_jsonl(metric_prefix: str) -> Callable:
                     _gap(ref, "malformed", f"JSONL line {lineno + 1} is not JSON"),
                 )
                 continue
+            aid = _asset_id(obj, ref, None)
             result.scalars.extend(
-                _scalars_from_doc(ref.run_id(), doc, str(lineno), metric_prefix),
+                _scalars_from_doc(ref.run_id(), doc, str(lineno), metric_prefix,
+                                  asset_id=aid),
+            )
+            result.docs.append(
+                DecodedDoc(run_uid=ref.run_id(), asset_id=aid,
+                           member_path=f"line:{lineno}", doc=doc),
             )
         return result
 
