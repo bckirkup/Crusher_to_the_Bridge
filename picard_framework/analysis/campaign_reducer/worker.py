@@ -27,7 +27,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
+import time
 from pathlib import Path
 
 from simulation_utils.paths import confine_to_base
@@ -35,7 +37,7 @@ from simulation_utils.paths import confine_to_base
 from .._io import cwd_root
 from .derived_store import DerivedStoreError, LocalDirStore, MemoryDerivedStore
 from .ledger import BudgetBlocked, BudgetLedger, parse_ceilings
-from .materialize import MaterializeSpec, run_materialization
+from .materialize import DERIVED_ROOT, MaterializeSpec, run_materialization
 from .pinned_reader import (
     STATE_AVAILABLE,
     GetResponse,
@@ -290,6 +292,93 @@ def _sources(request: dict) -> list[SourceSpec]:
     ]
 
 
+def _default_out_uri(request: dict) -> str | None:
+    """Derived store root when ``--out-uri`` is absent (ticket D4).
+
+    All reducer store keys are full repository-relative paths
+    (``campaign/_derived/reducer/v1/...``), so the store roots at the
+    request's ``source_bucket`` itself — a prefixed store would
+    double-prefix. Without this fallback the canonical worker argv
+    (which carries no ``--out-uri``) would discard every derived write
+    into a MemoryDerivedStore and the return leg could never poll a
+    durable receipt.
+    """
+    bucket = request.get("source_bucket")
+    return f"s3://{bucket}/" if isinstance(bucket, str) and bucket else None
+
+
+def _attempt_receipt(
+    request: dict,
+    ctx: ReductionContext,
+    phase: str,
+    status: str,
+    *,
+    ledger: BudgetLedger | None = None,
+    detail: str = "",
+    snapshot_id: str | None = None,
+    checkpoint_uri: str | None = None,
+    counts: dict | None = None,
+) -> dict:
+    """Durable attempt receipt (CANONICAL ``attempt_receipt_fields``).
+
+    The return leg polls ``attempts/{reduction_id}/RECEIPT.json`` — its
+    absence is the detectable "job produced no receipt" state; a typed
+    status here must never read as success.
+    """
+    rid = ctx.reduction_id
+    prefix = f"{DERIVED_ROOT}/attempts/{rid}"
+    job_id = os.environ.get("AWS_BATCH_JOB_ID", "")
+    return {
+        "schema": "crusher-reducer-attempt-receipt/v1",
+        "reduction_id": rid,
+        "fingerprint": ctx.fingerprint,
+        "request_sha256": request.get("request_sha256") or "",
+        "admission_id": ctx.admission_id,
+        "github_run_id": os.environ.get("GITHUB_RUN_ID", ""),
+        "github_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+        "phase": phase,
+        "status": status,
+        "batch_job_ids": [job_id] if job_id else [],
+        "jobdef_revision_arn": (
+            (request.get("job_binding") or {}).get(
+                "job_definition_revision_arn", ""
+            )
+        ),
+        "image_digest": (
+            request.get("reducer_image_digest")
+            or request.get("image_digest")
+            or ""
+        ),
+        "catalog_uri": f"{prefix}/COMMIT.json",
+        "catalog_hash": snapshot_id or "",
+        "summary_key": f"{prefix}/MANIFEST.json",
+        "files_manifest_key": f"{prefix}/MANIFEST.json",
+        "checkpoint_uri": checkpoint_uri,
+        "continuation": None,
+        "output_counts": counts or {},
+        "errors": [detail] if detail else [],
+        "budget_spent": ledger.snapshot() if ledger is not None else {},
+        "budget_remaining": (
+            {f: ledger.headroom(f) for f in ledger.ceilings}
+            if ledger is not None
+            else {}
+        ),
+        "start_utc": request.get("utc") or "",
+        "end_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+
+
+def _write_attempt_receipt(store, doc: dict) -> None:
+    """Create-only attempt receipt — the first job attempt's record wins."""
+    key = f"{DERIVED_ROOT}/attempts/{doc['reduction_id']}/RECEIPT.json"
+    try:
+        store.put_if_absent(
+            key, json.dumps(doc, sort_keys=True, indent=2).encode(),
+        )
+    except (DerivedStoreError, Exception):  # noqa: BLE001 — best-effort
+        pass
+
+
 def _status_exit(status: str) -> int:
     return {
         "completed": EXIT_COMPLETE,
@@ -332,14 +421,14 @@ def main(argv: list[str] | None = None) -> int:
             else EXIT_INVALID_CONTRACT
         )
     try:
-        store = _open_store(args.out_uri or None)
+        store = _open_store(args.out_uri or _default_out_uri(request))
     except QueryError as exc:
         print(json.dumps({"status": "blocked", "error": str(exc)}))
         return EXIT_BLOCKED
     ledger = BudgetLedger(ceilings)
     ctx = _ctx(request, args.shard_index)
 
-    if args.phase in ("materialize", "finalize"):
+    if args.phase in ("materialize", "finalize", "return_canary"):
         spec = MaterializeSpec(
             sources=_sources(request),
             ctx=ctx,
@@ -353,8 +442,20 @@ def main(argv: list[str] | None = None) -> int:
         try:
             result = run_materialization(spec, transport, store, ledger)
         except (DerivedStoreError, BudgetBlocked) as exc:
+            _write_attempt_receipt(store, _attempt_receipt(
+                request, ctx, args.phase, "failed", ledger=ledger,
+                detail=str(exc),
+            ))
             print(json.dumps({"status": "blocked", "error": str(exc)}))
             return EXIT_BLOCKED
+        _write_attempt_receipt(store, _attempt_receipt(
+            request, ctx, args.phase, result.status, ledger=ledger,
+            snapshot_id=result.snapshot_id,
+            checkpoint_uri=result.checkpoint_uri,
+            detail="; ".join(
+                str(e.get("detail") or e) for e in result.errors[:4]
+            ) or None,
+        ))
         print(json.dumps({"status": result.status,
                           "snapshot_id": result.snapshot_id}))
         return _status_exit(result.status)
@@ -368,8 +469,16 @@ def main(argv: list[str] | None = None) -> int:
             reduction_id=ctx.reduction_id,
         )
     except QueryError as exc:
+        _write_attempt_receipt(store, _attempt_receipt(
+            request, ctx, args.phase, "failed", ledger=ledger,
+            detail=exc.detail,
+        ))
         print(json.dumps({"status": "blocked", "error": exc.detail}))
         return EXIT_INVALID_CONTRACT
+    _write_attempt_receipt(store, _attempt_receipt(
+        request, ctx, args.phase, outcome.status, ledger=ledger,
+        counts={"pages": len(outcome.pages)},
+    ))
     print(json.dumps({"status": outcome.status, "pages": len(outcome.pages)}))
     return _status_exit(outcome.status)
 
