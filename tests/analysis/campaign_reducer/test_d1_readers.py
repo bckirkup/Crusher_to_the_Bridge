@@ -523,3 +523,180 @@ def test_read_outcome_is_never_exception_as_data() -> None:
     outcome = read_object(t, "bucket", "gone.zip")
     assert isinstance(outcome, ReadOutcome)
     assert outcome.state == STATE_MISSING_OBJECT
+
+
+# ---------- branch coverage: tails, malformed archives, parquet, payloads ----------
+
+
+def test_read_tail_pulls_terminal_bytes_only() -> None:
+    t = MemoryTransport()
+    body = bytes(range(256)) * 40
+    _put(t, "tail.bin", body)
+    obj = open_pinned(t, "bucket", "tail.bin", ReadBudget())
+    assert obj.read_tail(64) == body[-64:]
+
+
+def test_read_tail_clamps_to_object_size() -> None:
+    t = MemoryTransport()
+    _put(t, "tail.bin", b"abc")
+    obj = open_pinned(t, "bucket", "tail.bin", ReadBudget())
+    assert obj.read_tail(10) == b"abc"
+
+
+def test_eocd_missing_is_corrupt_archive() -> None:
+    from picard_framework.analysis.campaign_reducer.zip_members import open_zip
+
+    t = MemoryTransport()
+    _put(t, "notzip.bin", b"this is definitely not a zip archive at all!")
+    obj = open_pinned(t, "bucket", "notzip.bin", ReadBudget())
+    index, err = open_zip(obj)
+    assert index is None
+    assert err is not None
+    assert err.state == "corrupt_archive"
+
+
+def test_eocd_zip64_counts_without_locator_is_corrupt() -> None:
+    from picard_framework.analysis.campaign_reducer.zip_members import open_zip
+
+    blob = bytearray(build_zip([member("a.txt", b"hi")]))
+    # EOCD sits at the tail end of a comment-less zip: patch the two
+    # entry-count fields to 0xFFFF without a ZIP64 locator present.
+    blob[-14:-12] = b"\xff\xff"
+    blob[-12:-10] = b"\xff\xff"
+    t = MemoryTransport()
+    _put(t, "fake64.zip", bytes(blob))
+    obj = open_pinned(t, "bucket", "fake64.zip", ReadBudget())
+    index, err = open_zip(obj)
+    assert index is None
+    assert err is not None
+    assert err.state == "corrupt_archive"
+
+
+def test_encrypted_member_is_unsupported_compression() -> None:
+    z = build_zip([member("secret.txt", b"hunter2", flags=0x0001)])
+    t = MemoryTransport()
+    _put(t, "enc.zip", z)
+    obj = open_pinned(t, "bucket", "enc.zip", ReadBudget())
+    index = index_zip(obj)
+    with pytest.raises(SourceReadError) as exc:
+        read_member(obj, index.entries[0])
+    assert exc.value.state == "unsupported_compression"
+
+
+def test_member_declared_sizes_over_cap_are_typed() -> None:
+    z = build_zip([member("big.bin", b"x" * 100)])
+    t = MemoryTransport()
+    _put(t, "big.zip", z)
+    obj = open_pinned(t, "bucket", "big.zip", ReadBudget(max_member_bytes=10))
+    index = index_zip(obj)
+    with pytest.raises(SourceReadError) as exc:
+        read_member(obj, index.entries[0])
+    assert exc.value.state == STATE_RESOURCE_LIMIT
+
+
+def test_stored_member_size_lie_is_corrupt() -> None:
+    z = build_zip(
+        [member("lie.bin", b"real-bytes", method=0, comp_override=999)]
+    )
+    t = MemoryTransport()
+    _put(t, "lie.zip", z)
+    obj = open_pinned(t, "bucket", "lie.zip", ReadBudget())
+    index = index_zip(obj)
+    with pytest.raises(SourceReadError) as exc:
+        read_member(obj, index.entries[0])
+    assert exc.value.state in ("corrupt_archive", "resource_limit")
+
+
+def test_parquet_adapter_verifies_par1_magic() -> None:
+    t = MemoryTransport()
+    _put(t, "region.parquet", b"PAR1" + b"\x00" * 50 + b"PAR1")
+    result = adapters.reduce_source(
+        "bounded_region_jsonl", _ref("region.parquet"), t,
+    )
+    assert result.assets
+    assert result.assets[0].read_state == "indexed"
+
+
+def test_parquet_adapter_rejects_non_par1() -> None:
+    t = MemoryTransport()
+    _put(t, "fake.parquet", b"NOPExxxx")
+    result = adapters.reduce_source(
+        "bounded_region_jsonl", _ref("fake.parquet"), t,
+    )
+    assert result.links[-1].read_state == "unsupported_schema"
+    assert result.gaps[-1].reason == "unknown_schema"
+
+
+def test_reduce_source_unknown_family_raises() -> None:
+    with pytest.raises(KeyError):
+        adapters.reduce_source("not_a_family", _ref("x.json"), MemoryTransport())
+
+
+def test_read_outcome_for_typed_inventory() -> None:
+    t = MemoryTransport()
+    outcome = adapters.read_outcome_for(_ref("ghost.json"), t)
+    assert outcome.state == STATE_MISSING_OBJECT
+
+
+def test_json_adapter_non_json_body_is_typed() -> None:
+    t = MemoryTransport()
+    _put(t, "broken.json", b"{not json at all")
+    result = adapters.reduce_source("covid_screen_json", _ref("broken.json"), t)
+    assert result.links[-1].read_state == "unsupported_schema"
+    assert result.gaps[-1].reason == "unknown_schema"
+
+
+def test_verify_registry_flags_drift(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(adapters, "contract_families",
+                        lambda: ["growth_census_zip", "made_up_family"])
+    report = verify_registry()
+    assert not report["ok"]
+    assert "made_up_family" in report["missing_adapters"]
+    assert report["family_count"] == 2
+
+
+def test_json_pointer_escapes_tilde_and_slash() -> None:
+    from picard_framework.analysis.campaign_reducer.payloads import json_pointer
+
+    assert json_pointer("a~b", "c/d") == "/a~0b/c~1d"
+    assert json_pointer() == "/"
+
+
+def test_native_token_distinguishes_zero_false_null() -> None:
+    from picard_framework.analysis.campaign_reducer.payloads import native_token
+
+    assert native_token(0) == ("0", "number")
+    assert native_token(False) == ("false", "boolean")
+    assert native_token(None) == ("null", "null")
+    tok, ntype = native_token({"k": 1})
+    assert ntype == "object"
+    assert json.loads(tok) == {"k": 1}
+
+
+def test_canonical_state_mapping_covers_internal_states() -> None:
+    from picard_framework.analysis.campaign_reducer.pinned_reader import (
+        canonical_source_read_state,
+    )
+
+    assert canonical_source_read_state("duplicate_members") == "corrupt_archive"
+    assert canonical_source_read_state("unpinned_blocked") == "access_denied"
+    assert canonical_source_read_state("transport_error") == "not_yet_read"
+    assert canonical_source_read_state(STATE_AVAILABLE) == "available"
+
+
+def test_identity_id_roles_and_prefixes() -> None:
+    from picard_framework.analysis.campaign_reducer.identity import case_id
+
+    oid = object_id("bucket", "key", "v1", None)
+    mid = member_asset_id("zip-1", "run_3/summary.json")
+    assert oid.startswith("obj-")
+    assert mid.startswith("mem-")
+    assert oid != mid
+    assert case_id("hull", "cell", "cfg").startswith("cell-")
+
+
+def test_wilson_zero_denominator_emits_na_rows() -> None:
+    row = readout_helpers.rate_row(0, 0)
+    assert row["rate"] is None
+    assert row["denominator_status"] == "no_denominator"
+    assert readout_helpers.wilson_interval(3, 0) is None

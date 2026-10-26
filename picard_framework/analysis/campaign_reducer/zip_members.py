@@ -35,7 +35,6 @@ from .pinned_reader import (
     STATE_MISSING_MEMBER,
     STATE_RESOURCE_LIMIT,
     STATE_UNSUPPORTED_COMPRESSION,
-    BudgetExceeded,
     PinnedObject,
     ReadBudget,
     ReadOutcome,
@@ -405,8 +404,6 @@ def read_member_named(obj: PinnedObject, index: ZipIndex, name: str) -> ReadOutc
         return ReadOutcome(STATE_AVAILABLE, body=read_member(obj, matches[0]))
     except SourceReadError as exc:
         return ReadOutcome(exc.state, exc.detail)
-    except BudgetExceeded as exc:
-        return ReadOutcome(STATE_RESOURCE_LIMIT, str(exc))
 
 
 def open_zip(obj: PinnedObject) -> tuple[ZipIndex | None, ReadOutcome | None]:
@@ -415,5 +412,3 @@ def open_zip(obj: PinnedObject) -> tuple[ZipIndex | None, ReadOutcome | None]:
         return index_zip(obj), None
     except SourceReadError as exc:
         return None, ReadOutcome(exc.state, exc.detail)
-    except BudgetExceeded as exc:
-        return None, ReadOutcome(STATE_RESOURCE_LIMIT, str(exc))

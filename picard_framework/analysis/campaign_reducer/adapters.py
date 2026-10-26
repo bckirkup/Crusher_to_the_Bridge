@@ -40,9 +40,7 @@ from .payloads import (
 )
 from .pinned_reader import (
     STATE_AVAILABLE,
-    STATE_RESOURCE_LIMIT,
     STATE_UNSUPPORTED_SCHEMA,
-    BudgetExceeded,
     MemoryTransport,
     ObjectTransport,
     ReadBudget,
@@ -51,6 +49,8 @@ from .pinned_reader import (
     open_pinned,
 )
 from .zip_members import open_zip
+
+_SUMMARY_JSON = "summary.json"
 
 _CAPABILITY_BY_STATUS = {
     "known_saved": "recoverable_unread",
@@ -206,6 +206,16 @@ def _object_read_state_for_failures(ref: SourceRef, failure: LinkRecord, result:
     result.gaps.append(_gap(ref, failure.internal_state, failure.detail))
 
 
+def _read_or_fail(obj, ref: SourceRef, result: AdapterResult, reader) -> bytes | None:
+    """A bounded read with the link+gap failure pair recorded; None on fail."""
+    try:
+        return reader()
+    except SourceReadError as exc:
+        result.links.append(link_for(ref.source_id, ref.uri, obj, exc.state, exc.detail))
+        result.gaps.append(_gap(ref, exc.state, exc.detail))
+        return None
+
+
 def _adapter_zip_scan_rows(
     member_names: tuple[str, ...], metric_prefix: str,
 ) -> Callable[[SourceRef, ObjectTransport, ReadBudget], AdapterResult]:
@@ -237,25 +247,31 @@ def _adapter_zip_scan_rows(
                 _gap(ref, "duplicate_members",
                      f"{len(index.duplicates[name])} members named {name!r}", member=name),
             )
-        wanted = {e for e in index.entries if e.name.rsplit("/", 1)[-1] in member_names}
-        groups: dict[str, list] = {}
-        for entry in wanted:
-            folder = entry.name.rsplit("/", 1)[0] if "/" in entry.name else ""
-            groups.setdefault(folder, []).append(entry)
-        for folder in sorted(groups):
-            group_ref = _folder_ref(ref, folder)
-            result.runs.append(_run_record(group_ref))
-            for entry in sorted(groups[folder], key=lambda e: e.name):
-                _read_scan_member(obj, entry, group_ref, metric_prefix, result)
-        if not result.runs:
-            result.runs.append(_run_record(ref))
-            result.gaps.append(
-                _gap(ref, "member_missing",
-                     f"no member named {member_names} at any folder level"),
-            )
+        _read_zip_groups(obj, index, ref, member_names, metric_prefix, result)
         return result
 
     return adapter
+
+
+def _read_zip_groups(obj, index, ref: SourceRef, member_names: tuple[str, ...],
+                     metric_prefix: str, result: AdapterResult) -> None:
+    """Read every declared member basename, grouped by run folder."""
+    groups: dict[str, list] = {}
+    for entry in index.entries:
+        if entry.name.rsplit("/", 1)[-1] in member_names:
+            folder = entry.name.rsplit("/", 1)[0] if "/" in entry.name else ""
+            groups.setdefault(folder, []).append(entry)
+    for folder in sorted(groups):
+        group_ref = _folder_ref(ref, folder)
+        result.runs.append(_run_record(group_ref))
+        for entry in sorted(groups[folder], key=lambda e: e.name):
+            _read_scan_member(obj, entry, group_ref, metric_prefix, result)
+    if not result.runs:
+        result.runs.append(_run_record(ref))
+        result.gaps.append(
+            _gap(ref, "member_missing",
+                 f"no member named {member_names} at any folder level"),
+        )
 
 
 def _folder_ref(ref: SourceRef, folder: str) -> SourceRef:
@@ -348,29 +364,31 @@ def _adapter_json(metric_prefix: str) -> Callable:
         if obj is None:
             _object_read_state_for_failures(ref, failure, result)
             return result
-        try:
-            body = obj.read_whole()
-        except (SourceReadError, BudgetExceeded) as exc:
-            state = exc.state if isinstance(exc, SourceReadError) else STATE_RESOURCE_LIMIT
-            detail = exc.detail if isinstance(exc, SourceReadError) else str(exc)
-            result.links.append(link_for(ref.source_id, ref.uri, obj, state, detail))
-            result.gaps.append(_gap(ref, state, detail))
+        body = _read_or_fail(obj, ref, result, obj.read_whole)
+        if body is None:
             return result
-        try:
-            doc = json.loads(body)
-        except json.JSONDecodeError:
-            result.links.append(link_for(ref.source_id, ref.uri, obj, STATE_UNSUPPORTED_SCHEMA,
-                                         "object body is not valid JSON"))
-            result.gaps.append(_gap(ref, "unsupported_schema", "body is not JSON"))
-            return result
-        sha = sha256_hex(body)
-        result.links.append(link_for(ref.source_id, ref.uri, obj, STATE_AVAILABLE, sha256=sha))
-        result.assets.append(_asset(obj, ref, None, "read", "container_bytes", sha))
-        result.runs.append(_run_record(ref))
-        result.scalars.extend(_scalars_from_doc(ref.run_id(), doc, "", metric_prefix))
+        _emit_json_doc(obj, ref, result, body, metric_prefix, "container_bytes",
+                       "object body is not valid JSON")
         return result
 
     return adapter
+
+
+def _emit_json_doc(obj, ref: SourceRef, result: AdapterResult, body: bytes,
+                   metric_prefix: str, hash_scope: str, not_json_detail: str) -> None:
+    """Decode + flatten a JSON body into link/asset/run/scalar rows."""
+    try:
+        doc = json.loads(body)
+    except json.JSONDecodeError:
+        result.links.append(link_for(ref.source_id, ref.uri, obj,
+                                     STATE_UNSUPPORTED_SCHEMA, not_json_detail))
+        result.gaps.append(_gap(ref, "unsupported_schema", not_json_detail))
+        return
+    sha = sha256_hex(body)
+    result.links.append(link_for(ref.source_id, ref.uri, obj, STATE_AVAILABLE, sha256=sha))
+    result.assets.append(_asset(obj, ref, None, "read", hash_scope, sha))
+    result.runs.append(_run_record(ref))
+    result.scalars.extend(_scalars_from_doc(ref.run_id(), doc, "", metric_prefix))
 
 
 def _adapter_jsonl(metric_prefix: str) -> Callable:
@@ -382,13 +400,8 @@ def _adapter_jsonl(metric_prefix: str) -> Callable:
         if obj is None:
             _object_read_state_for_failures(ref, failure, result)
             return result
-        try:
-            body = obj.read_whole()
-        except (SourceReadError, BudgetExceeded) as exc:
-            state = exc.state if isinstance(exc, SourceReadError) else STATE_RESOURCE_LIMIT
-            detail = exc.detail if isinstance(exc, SourceReadError) else str(exc)
-            result.links.append(link_for(ref.source_id, ref.uri, obj, state, detail))
-            result.gaps.append(_gap(ref, state, detail))
+        body = _read_or_fail(obj, ref, result, obj.read_whole)
+        if body is None:
             return result
         sha = sha256_hex(body)
         result.links.append(link_for(ref.source_id, ref.uri, obj, STATE_AVAILABLE, sha256=sha))
@@ -421,31 +434,17 @@ def _adapter_gzip_json(metric_prefix: str) -> Callable:
         if obj is None:
             _object_read_state_for_failures(ref, failure, result)
             return result
-        try:
-            blob = obj.read_whole()
-            body = gzip.decompress(blob)
-        except (SourceReadError, BudgetExceeded) as exc:
-            state = exc.state if isinstance(exc, SourceReadError) else STATE_RESOURCE_LIMIT
-            detail = exc.detail if isinstance(exc, SourceReadError) else str(exc)
-            result.links.append(link_for(ref.source_id, ref.uri, obj, state, detail))
-            result.gaps.append(_gap(ref, state, detail))
+        blob = _read_or_fail(obj, ref, result, obj.read_whole)
+        if blob is None:
             return result
+        try:
+            body = gzip.decompress(blob)
         except (gzip.BadGzipFile, EOFError) as exc:
             result.links.append(link_for(ref.source_id, ref.uri, obj, "decode_failure", str(exc)))
             result.gaps.append(_gap(ref, "decode_failure", str(exc)))
             return result
-        try:
-            doc = json.loads(body)
-        except json.JSONDecodeError:
-            result.links.append(link_for(ref.source_id, ref.uri, obj, STATE_UNSUPPORTED_SCHEMA,
-                                         "gunzipped body is not JSON"))
-            result.gaps.append(_gap(ref, "unsupported_schema", "gunzipped body is not JSON"))
-            return result
-        sha = sha256_hex(body)
-        result.links.append(link_for(ref.source_id, ref.uri, obj, STATE_AVAILABLE, sha256=sha))
-        result.assets.append(_asset(obj, ref, None, "read", "file_bytes", sha))
-        result.runs.append(_run_record(ref))
-        result.scalars.extend(_scalars_from_doc(ref.run_id(), doc, "", metric_prefix))
+        _emit_json_doc(obj, ref, result, body, metric_prefix, "file_bytes",
+                       "gunzipped body is not JSON")
         return result
 
     return adapter
@@ -490,13 +489,8 @@ def _adapter_parquet(metric_prefix: str) -> Callable:
         if obj is None:
             _object_read_state_for_failures(ref, failure, result)
             return result
-        try:
-            head = obj.read_range(0, 3)
-        except (SourceReadError, BudgetExceeded) as exc:
-            state = exc.state if isinstance(exc, SourceReadError) else STATE_RESOURCE_LIMIT
-            detail = exc.detail if isinstance(exc, SourceReadError) else str(exc)
-            result.links.append(link_for(ref.source_id, ref.uri, obj, state, detail))
-            result.gaps.append(_gap(ref, state, detail))
+        head = _read_or_fail(obj, ref, result, lambda: obj.read_range(0, 3))
+        if head is None:
             return result
         if head != b"PAR1":
             result.links.append(link_for(ref.source_id, ref.uri, obj, STATE_UNSUPPORTED_SCHEMA,
@@ -516,11 +510,11 @@ def _adapter_parquet(metric_prefix: str) -> Callable:
 # Registry keys are the contract schema_family literals exactly.
 ADAPTER_REGISTRY: dict[str, Callable[[SourceRef, ObjectTransport, ReadBudget], AdapterResult]] = {
     "growth_census_zip": _adapter_zip_scan_rows(
-        ("summary.json", "growth_census.json.gz", "rss_samples.json"),
+        (_SUMMARY_JSON, "growth_census.json.gz", "rss_samples.json"),
         "growth_census_zip",
     ),
     "campaign_summary_zip": _adapter_zip_scan_rows(
-        ("summary.json", "timeseries.json", "ground_truth.json"),
+        (_SUMMARY_JSON, "timeseries.json", "ground_truth.json"),
         "campaign_summary_zip",
     ),
     "covid_screen_json": _adapter_json("covid_screen_json"),
@@ -531,7 +525,7 @@ ADAPTER_REGISTRY: dict[str, Callable[[SourceRef, ObjectTransport, ReadBudget], A
     "fomite_diagnostic_gzip": _adapter_gzip_json("fomite_diagnostic_gzip"),
     "unknown_legacy": _adapter_unknown("unknown_legacy"),
     "wastewater_campaign_zip": _adapter_zip_scan_rows(
-        ("summary.json", "timeseries.json", "wastewater.json", "ground_truth.json"),
+        (_SUMMARY_JSON, "timeseries.json", "wastewater.json", "ground_truth.json"),
         "wastewater_campaign_zip",
     ),
     "observation_jsonl": _adapter_jsonl("observation_jsonl"),

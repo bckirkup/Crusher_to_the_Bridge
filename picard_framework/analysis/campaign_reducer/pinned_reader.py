@@ -256,7 +256,7 @@ class PinnedObject:
                 return self.transport.get(self.key, **kwargs)
             except TransportError as exc:
                 attempts = self._classify_transport(exc, attempts)
-            except Exception as exc:  # noqa: BLE001 — transport bugs are typed, not leaked
+            except Exception as exc:  # transport bugs are typed, not leaked
                 raise SourceReadError(STATE_TRANSPORT_ERROR, repr(exc)) from exc
 
     def _classify_transport(self, exc: TransportError, attempts: int) -> int:
@@ -418,7 +418,7 @@ def open_pinned(
         head = transport.head(key)
     except TransportError as exc:
         raise SourceReadError(_state_of_transport(exc), exc.detail or exc.kind) from exc
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise SourceReadError(STATE_TRANSPORT_ERROR, repr(exc)) from exc
     return PinnedObject(transport, bucket, key, head, pin_for(head), budget)
 
@@ -443,8 +443,6 @@ def read_object(
         return ReadOutcome(STATE_AVAILABLE, body=obj.read_whole(max_bytes))
     except SourceReadError as exc:
         return _outcome_of(exc)
-    except BudgetExceeded as exc:
-        return ReadOutcome(STATE_RESOURCE_LIMIT, str(exc))
 
 
 class MemoryTransport:
@@ -476,7 +474,7 @@ class MemoryTransport:
 
         entry = self._objects.setdefault(key, {})
         entry["body"] = body
-        entry["etag"] = etag or '"' + hashlib.md5(body).hexdigest() + '"'  # noqa: S324 — fixture identity, not security
+        entry["etag"] = etag or '"' + hashlib.sha256(body).hexdigest() + '"'
         entry["version_id"] = version_id
         entry["storage_class"] = storage_class
         entry["last_modified"] = "1970-01-01T00:00:00Z"
@@ -488,7 +486,7 @@ class MemoryTransport:
         """Overwrite the live object — the source-changed signature."""
         entry = self._objects[key]
         entry["body"] = body
-        entry["etag"] = etag or '"' + hashlib.md5(body).hexdigest() + '"'  # noqa: S324
+        entry["etag"] = etag or '"' + hashlib.sha256(body).hexdigest() + '"'
 
     def head(self, key: str) -> HeadInfo:
         self.calls.append(("head", key))
