@@ -42,19 +42,33 @@ from .rows import ReductionContext, SourceSpec
 class LocalTransport:
     """ObjectTransport over the local filesystem (offline worker path).
 
-    Keys are treated as local paths; HEAD resolves existence/size/etag
-    (sha256 of the body — deterministic, offline) and GET honors byte
-    ranges, mirroring the fakes the tests use.
+    Keys are paths confined under ``root`` (the request's
+    ``source_root``, default the request file's own directory) — the
+    offline shim never reads outside the declared fixture root. HEAD
+    resolves existence/size/etag (sha256 of the body — deterministic,
+    offline) and GET honors byte ranges, mirroring the test fakes.
     """
 
-    def head(self, key: str) -> HeadInfo:
-        path = Path(key)
+    def __init__(self, root: str | Path) -> None:
+        self.root = Path(root).resolve()
+
+    def _path(self, key: str) -> Path:
+        path = (self.root / key.lstrip("/")).resolve()
+        if path != self.root and self.root not in path.parents:
+            raise TransportError("access_denied", key)
         if not path.is_file():
             raise TransportError("not_found", key)
-        body = path.read_bytes()
+        return path
+
+    @staticmethod
+    def _etag(body: bytes) -> str:
+        return '"' + hashlib.sha256(body).hexdigest() + '"'
+
+    def head(self, key: str) -> HeadInfo:
+        body = self._path(key).read_bytes()
         return HeadInfo(
             content_length=len(body),
-            etag='"' + hashlib.sha256(body).hexdigest() + '"',
+            etag=self._etag(body),
             version_id=None,
             storage_class="LOCAL",
             last_modified=None,
@@ -69,11 +83,8 @@ class LocalTransport:
         version_id: str | None = None,
         if_match: str | None = None,
     ) -> GetResponse:
-        path = Path(key)
-        if not path.is_file():
-            raise TransportError("not_found", key)
-        body = path.read_bytes()
-        etag = '"' + hashlib.sha256(body).hexdigest() + '"'
+        body = self._path(key).read_bytes()
+        etag = self._etag(body)
         if if_match is not None and if_match != etag:
             raise TransportError("precondition_failed", key, status=412)
         if start is None:
@@ -96,11 +107,20 @@ EXIT_PARTIAL = 8
 EXIT_RETURN_BLOCKED = 9
 
 
-def _fetch_request(uri: str) -> dict:
-    """Resolve the request document offline: local path or file:// URI."""
-    path = uri[len("file://"):] if uri.startswith("file://") else uri
+def _request_path(uri: str) -> Path:
+    """Resolve the request URI to an existing regular file."""
+    raw = uri[len("file://"):] if uri.startswith("file://") else uri
+    path = Path(raw).resolve()
+    if not path.is_file():
+        raise QueryError("invalid_contract", f"request uri unreadable: {uri}")
+    return path
+
+
+def _fetch_request(uri: str) -> tuple[dict, Path]:
+    """Read and parse the offline request document."""
+    path = _request_path(uri)
     try:
-        return json.loads(Path(path).read_text())
+        return json.loads(path.read_text()), path
     except (OSError, json.JSONDecodeError) as exc:
         raise QueryError("invalid_contract", f"request uri unreadable: {exc}")
 
@@ -190,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        request = _fetch_request(args.request_uri)
+        request, request_path = _fetch_request(args.request_uri)
         _verify_sha(request, args.request_sha256)
         ceilings = parse_ceilings(request.get("budgets"))
     except (QueryError, BudgetBlocked) as exc:
@@ -213,7 +233,11 @@ def main(argv: list[str] | None = None) -> int:
         )
         try:
             result = run_materialization(
-                spec, LocalTransport(), store, ledger,
+                spec,
+                LocalTransport(
+                    request.get("source_root") or request_path.parent
+                ),
+                store, ledger,
             )
         except (DerivedStoreError, BudgetBlocked) as exc:
             print(json.dumps({"status": "blocked", "error": str(exc)}))
