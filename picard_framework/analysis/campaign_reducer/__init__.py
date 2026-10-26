@@ -9,6 +9,13 @@ readers (``pinned_reader``), ranged ZIP/ZIP64 member access
 row payloads (``payloads``), NA-semantic readout helpers
 (``readout_helpers``) and the family adapter registry (``adapters``).
 
+D2 adds the materialization layer: the shared reservation/budget ledger
+(``ledger``), create-only derived outputs (``derived_store``), contract
+row emitters (``rows``, ``long_tables``), streaming shard materialization
+with checkpoints and the COMMIT catalog (``materialize``, ``catalog``),
+the bounded query engine (``query_engine``) and the offline worker
+transport shim (``worker``).
+
 The authoritative specification is ``docs/campaign_reduction/SURVEY_AND_DEVIN_SPEC.md``;
 the machine contracts under ``contracts/`` are the single schema authority
 (34-table field contracts, canonical CLI, request/query/bootstrap schemas,

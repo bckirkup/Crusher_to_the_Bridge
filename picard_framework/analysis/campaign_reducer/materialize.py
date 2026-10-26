@@ -1,0 +1,627 @@
+"""Streaming bounded materialization with shard checkpoints (ticket D2).
+
+Pipeline per CANONICAL_INTERFACE.proposed_storage: sources are consumed
+in deterministic order, each shard emits immutable partition files under
+``campaign/_derived/reducer/v1/attempts/{reduction_id}/`` and a
+checkpoint after it; ``COMMIT.json`` is written create-if-absent only
+after every shard's partition hashes and row counts verify.
+
+Resume semantics: a kill after a partition write but before COMMIT
+resumes from the last checkpoint; completed shards are skipped, the
+in-flight shard is re-derived deterministically, and ``put_idempotent``
+turns a byte-identical re-write into a no-op while a byte-different
+write raises ``DerivedConflict`` — never a conflicting overwrite.
+"""
+from __future__ import annotations
+
+import io
+import json
+from dataclasses import dataclass, field
+from typing import Any, Callable
+
+from .adapters import reduce_source
+from .derived_store import DerivedConflict, DerivedStoreError, write_manifest
+from .identity import sha256_hex
+from .ledger import BudgetExceeded, BudgetLedger
+from .long_tables import emit_long_tables
+from .pinned_reader import (
+    BudgetExceeded as _ReadBudgetExceeded,
+)
+from .pinned_reader import (
+    ReadBudget,
+)
+from .rows import (
+    ReductionContext,
+    SourceSpec,
+    canonical_json,
+    catalog_partition_row,
+    coverage_cell_rows,
+    distribution_rows,
+    emit_source_rows,
+    group_key_for_run,
+    merge_tables,
+    reduction_attempt_row,
+    weights_rows,
+)
+
+DERIVED_ROOT = "campaign/_derived/reducer/v1"
+COMMIT_NAME = "COMMIT.json"
+CHECKPOINT_PREFIX = "checkpoints/"
+SHARD_PREFIX = "shards/"
+_MAX_ROW_BYTES = 64 * 1024
+
+
+class MaterializationError(Exception):
+    """Typed materialization failure carried into the COMMIT status."""
+
+    def __init__(self, kind: str, detail: str):
+        super().__init__(f"{kind}: {detail}")
+        self.kind = kind
+        self.detail = detail
+
+
+class LedgerBoundBudget(ReadBudget):
+    """ReadBudget mirrored onto the shared reservation ledger.
+
+    Every ranged GET/HEAD the pinned reader charges here additionally
+    charges ``max_api_calls_total``/``max_get_requests`` and
+    ``max_compressed_bytes_read`` on the ledger — retries included,
+    because the reader charges them through the same methods.
+    """
+
+    def __init__(self, ledger: BudgetLedger, **kwargs):
+        super().__init__(**kwargs)
+        self._ledger = ledger
+
+    def charge_request(self, detail: str = "") -> None:
+        super().charge_request(detail)
+        self._ledger.charge("max_api_calls_total", 1, detail)
+        self._ledger.charge("max_get_requests", 1, detail)
+
+    def charge_bytes(self, n: int, detail: str = "") -> None:
+        super().charge_bytes(n, detail)
+        self._ledger.charge("max_compressed_bytes_read", n, detail)
+
+
+@dataclass
+class MaterializeSpec:
+    """The materialize-phase request document (offline form)."""
+
+    sources: list[SourceSpec]
+    ctx: ReductionContext
+    shard_size: int = 64
+    requested_tables: tuple[str, ...] = ()
+    metric_bindings: dict = field(default_factory=dict)
+    declared_source_count: int | None = None
+    partition_format: str = "jsonl"  # "jsonl" | "parquet"
+    distribution_dims: tuple[str, ...] = ("campaign_id", "vessel_id")
+    utc: str = ""
+
+
+@dataclass
+class MaterializationResult:
+    status: str
+    snapshot_id: str | None
+    commit_key: str | None
+    manifest: list[dict]
+    table_counts: dict[str, int]
+    errors: list[dict]
+    checkpoint_uri: str | None
+    completed_shards: list[int]
+
+
+def _attempt_prefix(ctx: ReductionContext) -> str:
+    return f"{DERIVED_ROOT}/attempts/{ctx.reduction_id}"
+
+
+def _encode_rows(rows: list[dict], fmt: str) -> bytes:
+    ordered = sorted(rows, key=lambda r: canonical_json(r))
+    if fmt == "jsonl":
+        return b"".join(
+            (canonical_json(r) + "\n").encode() for r in ordered
+        )
+    if fmt == "parquet":
+        return _encode_parquet(ordered)
+    raise MaterializationError("unsupported_format", fmt)
+
+
+def _encode_parquet(rows: list[dict]) -> bytes:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    cols: dict[str, list] = {}
+    for row in rows:
+        for k in row:
+            cols.setdefault(k, [])
+    for row in rows:
+        for k in cols:
+            v = row.get(k)
+            cols[k].append(
+                json.dumps(v, sort_keys=True, default=str)
+                if isinstance(v, (dict, list))
+                else v
+            )
+    arrays = {k: pa.array(v) for k, v in sorted(cols.items())}
+    buf = io.BytesIO()
+    pq.write_table(pa.table(arrays), buf)
+    return buf.getvalue()
+
+
+def decode_rows(data: bytes, fmt: str) -> list[dict]:
+    if fmt == "jsonl":
+        return [json.loads(line) for line in data.splitlines() if line.strip()]
+    if fmt == "parquet":
+        import pyarrow.parquet as pq
+
+        return pq.ParquetFile(io.BytesIO(data)).read().to_pylist()
+    raise MaterializationError("unsupported_format", fmt)
+
+
+def _ext(fmt: str) -> str:
+    return {"jsonl": "jsonl", "parquet": "parquet"}[fmt]
+
+
+def _min_max_key(rows: list[dict]) -> tuple[Any, Any]:
+    if not rows:
+        return None, None
+    keys = [r.get("row_id") for r in rows]
+    return min(keys), max(keys)
+
+
+class _ShardAccumulator:
+    """Per-source tallies feeding coverage_cells + distributions."""
+
+    def __init__(self, spec: MaterializeSpec) -> None:
+        self.spec = spec
+        self.cells: dict[tuple, dict] = {}
+        self.metric_values: dict[tuple, dict[str, list]] = {}
+        self.run_meta: dict[str, dict] = {}
+        self.selected_runs: set[str] = set()
+        self.errors: list[dict] = []
+        self.oversized_rows = 0
+        self.schema_or_corruption = False
+        self.unsupported_family = False
+        self.resource_stops = 0
+
+    def cell(self, spec: SourceSpec) -> dict:
+        key = (
+            spec.scope_id or spec.campaign_id,
+            spec.campaign_id,
+            spec.stage_id,
+            spec.attempt_id,
+            spec.cell_id,
+        )
+        return self.cells.setdefault(
+            key,
+            {
+                "declared_runs": spec.declared_runs,
+                "landed": 0,
+                "indexed": 0,
+                "parsed": 0,
+                "duplicates": 0,
+                "conflicts": 0,
+                "selected": 0,
+                "missing": 0,
+                "gaps": 0,
+                "unsupported": False,
+                "blocked": False,
+                "evidence": {},
+            },
+        )
+
+
+def _checkpoint_key(ctx: ReductionContext, shard_idx: int) -> str:
+    return (
+        f"{_attempt_prefix(ctx)}/{CHECKPOINT_PREFIX}shard-{shard_idx:05d}.json"
+    )
+
+
+def _load_resume(store, spec: MaterializeSpec) -> dict:
+    """Latest checkpoint state: completed shards, manifest, ledger spend."""
+    prefix = f"{_attempt_prefix(spec.ctx)}/{CHECKPOINT_PREFIX}"
+    keys = [k for k in store.list(prefix) if k.endswith(".json")]
+    state = {"completed": set(), "manifest": [], "spent": {}}
+    for key in keys:
+        try:
+            doc = json.loads(store.get(key))
+        except (DerivedStoreError, json.JSONDecodeError):
+            continue
+        state["completed"].add(doc.get("shard"))
+        state["manifest"].extend(doc.get("manifest_delta", []))
+        state["spent"] = doc.get("ledger_spent", state["spent"])
+    return state
+
+
+def _shard_tables(
+    spec: MaterializeSpec,
+    transport,
+    store,
+    ledger: BudgetLedger,
+    shard: list[SourceSpec],
+    acc: _ShardAccumulator,
+) -> dict[str, list[dict]]:
+    tables: dict[str, list[dict]] = {}
+    for src in shard:
+        ledger.charge("max_head_requests", 1, src.uri)
+        ledger.charge("max_source_objects", 1, src.uri)
+        budget = LedgerBoundBudget(ledger)
+        try:
+            result = reduce_source(src.family, src.to_ref(), transport, budget)
+        except _ReadBudgetExceeded as exc:
+            raise BudgetExceeded("read_budget", 1, 0) from exc
+        for ddoc in result.docs:
+            ledger.charge(
+                "max_uncompressed_bytes",
+                len(canonical_json(ddoc.doc).encode()),
+                src.uri,
+            )
+        _absorb(spec, src, result, tables, acc, ledger)
+    return tables
+
+
+def _absorb(
+    spec: MaterializeSpec,
+    src: SourceSpec,
+    result,
+    tables: dict,
+    acc: _ShardAccumulator,
+    ledger: BudgetLedger,
+) -> None:
+    cell = acc.cell(src)
+    cell["landed"] += 1
+    for state in {link.read_state for link in result.links}:
+        if state in ("unsupported_schema", "unsupported_compression",
+                     "corrupt_archive", "crc_failure", "decode_failure"):
+            acc.schema_or_corruption = True
+            cell["unsupported"] = True
+        if state in ("resource_limit",):
+            acc.resource_stops += 1
+        if state in ("missing_object", "access_denied",
+                     "archived_unrestored"):
+            cell["blocked"] = True
+    if src.family == "unknown_legacy":
+        acc.unsupported_family = True
+        cell["unsupported"] = True
+    cell["indexed"] += len(result.assets)
+    cell["parsed"] += len(result.runs)
+    cell["gaps"] += len(result.gaps)
+    cell["duplicates"] += sum(
+        1 for g in result.gaps if g.reason == "duplicate_members"
+    )
+    seen: set[str] = set()
+    for r in result.runs:
+        if r.run_uid in seen:
+            cell["conflicts"] += 1
+        seen.add(r.run_uid)
+        if r.selection_state == "selected":
+            cell["selected"] += 1
+            acc.selected_runs.add(r.run_uid)
+    merge_tables(tables, emit_source_rows(result, src, spec.ctx))
+    merge_tables(
+        tables,
+        emit_long_tables(
+            result, src, spec.ctx, spec.requested_tables, spec.metric_bindings
+        ),
+    )
+    for r in result.runs:
+        acc.run_meta[r.run_uid] = {
+            "campaign_id": r.campaign_id,
+            "vessel_id": r.hull_id,
+        }
+    _accumulate_metrics(acc, src, result)
+
+
+def _accumulate_metrics(acc: _ShardAccumulator, src: SourceSpec, result) -> None:
+    run_by_uid = {r.run_uid: r for r in result.runs}
+    for s in result.scalars:
+        run = run_by_uid.get(s.run_uid)
+        group = group_key_for_run(
+            {
+                "campaign_id": getattr(run, "campaign_id", src.campaign_id),
+                "vessel_id": getattr(run, "hull_id", src.hull_id),
+            },
+            acc.spec.distribution_dims,
+        )
+        value = s.value if isinstance(s.value, (int, float)) else None
+        acc.metric_values.setdefault(group, {}).setdefault(
+            s.metric_id, []
+        ).append((s.run_uid, value))
+
+
+def _write_shard_partitions(
+    spec: MaterializeSpec,
+    store,
+    tables: dict[str, list[dict]],
+    shard_name: str,
+    ledger: BudgetLedger | None = None,
+) -> list[dict]:
+    """Write one shard's per-table partitions create-only.
+
+    A row over ``_MAX_ROW_BYTES`` is not emitted: it becomes an
+    ``_oversized_row`` entry the COMMIT disqualifier path counts — the
+    row is never silently truncated and never blocks the shard.
+    """
+    entries = []
+    ext = _ext(spec.partition_format)
+    for table in sorted(tables):
+        rows = []
+        for r in tables[table]:
+            if r is None:
+                continue
+            if len(canonical_json(r).encode()) > _MAX_ROW_BYTES:
+                entries.append(
+                    {"_oversized_row": table, "row_id": r.get("row_id")}
+                )
+                continue
+            rows.append(r)
+        body = _encode_rows(rows, ext)
+        uri = (
+            f"{_attempt_prefix(spec.ctx)}/{SHARD_PREFIX}"
+            f"{shard_name}/{table}.{ext}"
+        )
+        wrote = store.put_idempotent(uri, body)
+        entries.append(
+            {
+                "partition_id": f"{shard_name}/{table}",
+                "table_name": table,
+                "uri": uri,
+                "sha256": sha256_hex(body),
+                "rows": len(rows),
+                "bytes_stored": len(body),
+                "min_key": _min_max_key(rows)[0],
+                "max_key": _min_max_key(rows)[1],
+                "statistics": None,
+                "written": wrote,
+            }
+        )
+    return entries
+
+
+def _write_checkpoint(
+    spec: MaterializeSpec,
+    store,
+    ledger: BudgetLedger,
+    shard_idx: int,
+    manifest_delta: list[dict],
+    acc: _ShardAccumulator,
+) -> str:
+    doc = {
+        "reduction_id": spec.ctx.reduction_id,
+        "shard": shard_idx,
+        "shard_count": None,
+        "manifest_delta": manifest_delta,
+        "ledger_spent": ledger.snapshot(),
+        "table_counts_delta": {
+            e["table_name"]: e["rows"]
+            for e in manifest_delta
+            if "table_name" in e
+        },
+        "utc": spec.utc,
+    }
+    body = json.dumps(doc, sort_keys=True, indent=2).encode()
+    key = _checkpoint_key(spec.ctx, shard_idx)
+    store.put_idempotent(key, body)
+    ledger.charge_checkpoint("checkpoint_reserve_bytes", len(body))
+    return key
+
+
+def _disqualifiers(acc: _ShardAccumulator, spec: MaterializeSpec) -> list[str]:
+    out = []
+    if acc.oversized_rows:
+        out.append("oversized_row")
+    if acc.schema_or_corruption:
+        out.append("schema_or_corruption")
+    if acc.unsupported_family:
+        out.append("unsupported_family")
+    if (
+        spec.declared_source_count is not None
+        and len(spec.sources) < spec.declared_source_count
+    ):
+        out.append("incomplete_inventory")
+    if acc.errors:
+        out.append("errors")
+    if any(c["gaps"] for c in acc.cells.values()):
+        out.append("coverage_gaps")
+    return out
+
+
+def _commit_status(acc: _ShardAccumulator, spec: MaterializeSpec) -> str:
+    if acc.schema_or_corruption or acc.unsupported_family:
+        return "quarantined"
+    if _disqualifiers(acc, spec):
+        return "partial"
+    return "completed"
+
+
+def run_materialization(
+    spec: MaterializeSpec,
+    transport,
+    store,
+    ledger: BudgetLedger,
+    *,
+    resume: bool = True,
+    on_shard: Callable[[str, int], None] | None = None,
+) -> MaterializationResult:
+    """Drive the materialize phase over ``spec.sources``.
+
+    ``on_shard(event, idx)`` fires after a shard's partitions are written
+    (``"partition_written"``) and after its checkpoint is written
+    (``"checkpoint_written"``) — the kill/resume test seam.
+    """
+    acc = _ShardAccumulator(spec)
+    sources = sorted(spec.sources, key=lambda s: (s.uri, s.source_id))
+    shards = [
+        sources[i : i + spec.shard_size]
+        for i in range(0, len(sources), spec.shard_size)
+    ]
+    manifest: list[dict] = []
+    completed: set[int] = set()
+    checkpoint_uri = None
+    if resume:
+        completed, manifest, checkpoint_uri = _restore_state(
+            store, spec, ledger
+        )
+    try:
+        for idx, shard in enumerate(shards):
+            if idx in completed:
+                continue
+            checkpoint_uri = _process_shard(
+                spec, transport, store, ledger, acc,
+                manifest, completed, idx, shard, on_shard,
+            )
+        if on_shard:
+            on_shard("pre_commit", len(shards))
+    except BudgetExceeded as exc:
+        acc.errors.append({"kind": "budget_stopped", "detail": str(exc)})
+        return _finalize(
+            spec, store, ledger, acc, manifest, completed,
+            checkpoint_uri, forced_status="budget_stopped",
+        )
+    status = _commit_status(acc, spec)
+    return _finalize(
+        spec, store, ledger, acc, manifest, completed,
+        checkpoint_uri, forced_status=status,
+    )
+
+
+def _restore_state(store, spec, ledger):
+    """Reload completed-shard/manifest/ledger-spend state for a resume."""
+    state = _load_resume(store, spec)
+    completed = {s for s in state["completed"] if s is not None}
+    manifest = list(state["manifest"])
+    spent = state["spent"] or {}
+    if isinstance(spent, dict):
+        ledger.spent.update(spent.get("spent") or {})
+        ledger.jobs = int(spent.get("jobs") or ledger.jobs)
+        ledger.retries = int(spent.get("retries") or ledger.retries)
+    checkpoint_uri = (
+        f"{_attempt_prefix(spec.ctx)}/{CHECKPOINT_PREFIX}"
+        f"shard-{max(completed):05d}.json"
+        if completed
+        else None
+    )
+    return completed, manifest, checkpoint_uri
+
+
+def _process_shard(
+    spec, transport, store, ledger, acc,
+    manifest, completed, idx, shard, on_shard,
+) -> str:
+    """Materialize one shard: partitions, checkpoint, manifest entries."""
+    tables = _shard_tables(spec, transport, store, ledger, shard, acc)
+    entries = _write_shard_partitions(
+        spec, store, tables, f"shard-{idx:05d}"
+    )
+    for e in entries:
+        if "_oversized_row" in e:
+            acc.oversized_rows += 1
+            continue
+        manifest.append(e)
+        ledger.charge("max_output_bytes", e["bytes_stored"], e["uri"])
+    if on_shard:
+        on_shard("partition_written", idx)
+    checkpoint_uri = _write_checkpoint(
+        spec, store, ledger, idx, entries, acc
+    )
+    completed.add(idx)
+    if on_shard:
+        on_shard("checkpoint_written", idx)
+    return checkpoint_uri
+
+
+def _finalize(
+    spec: MaterializeSpec,
+    store,
+    ledger: BudgetLedger,
+    acc: _ShardAccumulator,
+    manifest: list[dict],
+    completed: set[int],
+    checkpoint_uri: str | None,
+    forced_status: str,
+) -> MaterializationResult:
+    derived_tables = _derived_rows(spec, acc, manifest, forced_status)
+    entries = _write_shard_partitions(spec, store, derived_tables, "derived")
+    manifest.extend(e for e in entries if "table_name" in e)
+    counts: dict[str, int] = {}
+    for e in manifest:
+        if "table_name" in e:
+            counts[e["table_name"]] = counts.get(e["table_name"], 0) + e["rows"]
+    coverage = {
+        "cells": len(acc.cells),
+        "selected_unique_runs": len(acc.selected_runs),
+        "disqualifiers": _disqualifiers(acc, spec),
+    }
+    snapshot_id = f"snap-{sha256_hex(canonical_json(manifest).encode())[:16]}"
+    commit_key = f"{_attempt_prefix(spec.ctx)}/{COMMIT_NAME}"
+    commit = {
+        "catalog_snapshot_id": snapshot_id,
+        "reduction_id": spec.ctx.reduction_id,
+        "phase": spec.ctx.phase,
+        "status": forced_status,
+        "coverage": coverage,
+        "errors": acc.errors,
+        "lineage": {
+            "request_sha256": spec.ctx.request_sha256,
+            "inventory_sha256": spec.ctx.inventory_sha256,
+            "implementation_sha": spec.ctx.implementation_sha,
+            "image_digest": spec.ctx.image_digest,
+            "adapter_registry_sha256": spec.ctx.adapter_registry_sha256,
+            "fingerprint": spec.ctx.fingerprint,
+        },
+        "partitions": manifest,
+        "counts": counts,
+        "utc": spec.utc,
+    }
+    try:
+        store.put_idempotent(
+            commit_key, json.dumps(commit, sort_keys=True, indent=2).encode()
+        )
+    except DerivedConflict:
+        forced_status = "blocked"
+    manifest_key = f"{_attempt_prefix(spec.ctx)}/MANIFEST.json"
+    write_manifest(store, manifest_key, manifest)
+    status = forced_status
+    return MaterializationResult(
+        status=status,
+        snapshot_id=snapshot_id,
+        commit_key=commit_key,
+        manifest=manifest,
+        table_counts=counts,
+        errors=acc.errors,
+        checkpoint_uri=checkpoint_uri,
+        completed_shards=sorted(completed),
+    )
+
+
+def _derived_rows(
+    spec: MaterializeSpec,
+    acc: _ShardAccumulator,
+    manifest: list[dict],
+    status: str,
+) -> dict[str, list[dict]]:
+    """Post-shard base rows: coverage, weights, distributions, attempt."""
+    tables: dict[str, list[dict]] = {}
+    cell_rows = coverage_cell_rows(acc.cells, spec.ctx)
+    tables["coverage_cells"] = cell_rows
+    tables["weights"] = weights_rows(sorted(acc.selected_runs), spec.ctx)
+    tables["distributions"] = distribution_rows(
+        acc.metric_values, acc.run_meta, spec.ctx
+    )
+    snapshot_id = f"snap-{sha256_hex(canonical_json(manifest).encode())[:16]}"
+    tables["catalog_partitions"] = [
+        catalog_partition_row(e, spec.ctx, snapshot_id)
+        for e in manifest
+        if "table_name" in e
+    ]
+    tables["reduction_attempts"] = [
+        reduction_attempt_row(
+            spec.ctx,
+            status,
+            {"spent": {}},
+            {"cells": len(acc.cells)},
+            None,
+            spec.utc,
+            spec.utc,
+        )
+    ]
+    return tables
