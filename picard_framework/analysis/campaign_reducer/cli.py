@@ -78,13 +78,16 @@ def build_parser(operations: dict) -> argparse.ArgumentParser:
         extra = spec.get("extra_argv", [])
         for flag, metavar in zip(extra[::2], extra[1::2], strict=True):
             op.add_argument(flag, required=True, **_extra_kwargs(metavar))
-        optional = (
-            return_path.OPTIONAL_FLAGS if name in return_path.OPS
-            else inventory.OPTIONAL_FLAGS if name == "inventory"
-            else submit.OPTIONAL_FLAGS if name == "submit"
-            else quote.OPTIONAL_FLAGS if name == "quote"
-            else ()
-        )
+        if name in return_path.OPS:
+            optional = return_path.OPTIONAL_FLAGS
+        elif name == "inventory":
+            optional = inventory.OPTIONAL_FLAGS
+        elif name == "submit":
+            optional = submit.OPTIONAL_FLAGS
+        elif name == "quote":
+            optional = quote.OPTIONAL_FLAGS
+        else:
+            optional = ()
         for flag in optional:
             op.add_argument(flag, default="")
     return parser
