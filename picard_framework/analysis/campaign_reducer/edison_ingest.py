@@ -3,8 +3,8 @@
 Reads a ``durable_ingestion_request.json`` produced by
 ``scripts/campaign analysis collect``, sha256-verifies every declared
 file against the collected bytes, and uploads each with
-``edison_client.astore_file_content`` — the bounded-file bridge Edison
-Scientific reads on its own side (it never gets raw S3).
+``edison_client.EdisonClient.store_file_content`` — the bounded-file
+bridge Edison Scientific reads on its own side (it never gets raw S3).
 
 Typed failure, never a workaround: when the connector package or the
 ``EDISON_PLATFORM_API_KEY`` environment variable is absent this emits an
@@ -47,24 +47,54 @@ def _out_root(out_dir: str) -> str:
     return prepare_output_directory(safe, allowed_roots=(cwd_root(),))
 
 
+class _EdisonConnector:
+    """Live upload adapter over ``edison_client.EdisonClient``.
+
+    The canary-proven API surface (edison-client 0.18.0) is the sync
+    ``client.store_file_content(name, file_path, metadata=...)`` — the
+    module-level ``astore_file_content`` the first revision called does
+    not exist there and crashed the ingest leg untyped. Tests substitute
+    a fake ``edison_client`` module carrying the same constructor/method
+    names; ``upload`` keeps the ``(path, meta)`` contract.
+    """
+
+    def __init__(self, module: Any) -> None:
+        self._module = module
+        self._client = None
+
+    def upload(self, path: str, meta: dict) -> Any:
+        if self._client is None:
+            self._client = self._module.EdisonClient(
+                api_key=os.environ[_API_KEY_ENV],
+            )
+        return self._client.store_file_content(
+            name=os.path.basename(path),
+            file_path=path,
+            metadata=meta,
+        )
+
+    def close(self) -> None:
+        if self._client is not None:
+            closer = getattr(self._client, "close", None)
+            if callable(closer):
+                closer()
+
+
 def _connector():
-    """Return (module, blocked_reason); the key itself never leaves env."""
+    """Return (connector, blocked_reason); the key itself never leaves env."""
     if not os.environ.get(_API_KEY_ENV):
         return None, "missing_api_key"
     try:
         import edison_client  # noqa: PLC0415
     except ImportError:
         return None, "connector_unavailable"
-    return edison_client, None
-
-
-def _upload(module, path: str, meta: dict) -> Any:
-    """Upload seam — tests substitute a fake module; live code calls the
-    edison-client bounded-file API."""
-    return module.astore_file_content(path=path, metadata=meta)
+    return _EdisonConnector(edison_client), None
 
 
 def _asset_id(result: Any) -> str:
+    entry = getattr(result, "data_storage", None)
+    if entry is not None and getattr(entry, "id", None) is not None:
+        return str(entry.id)
     if isinstance(result, dict):
         return str(result.get("asset_id") or result.get("id") or result)
     return str(result)
@@ -136,25 +166,34 @@ def ingest(manifest_path: str, out_dir: str) -> int:
         files = _verified_files(
             manifest, os.path.dirname(manifest_path) or ".", cap,
         )
-        module, reason = _connector()
+        connector, reason = _connector()
         if reason is not None:
             receipt = _blocked_receipt(manifest, reason, len(files))
             write_json(os.path.join(out_root, "ingestion_receipt.json"), receipt)
             print(json.dumps(receipt))
             return contracts.EXIT_RETURN_PATH_BLOCKED
         assets = []
-        for entry in files:
-            result = _upload(
-                module,
-                entry["resolved"],
-                {
-                    "request_id": manifest.get("request_id"),
-                    "reduction_id": manifest.get("reduction_id"),
-                    "kind": entry.get("kind"),
-                    "sha256": entry.get("sha256"),
-                },
-            )
-            assets.append(_asset_id(result))
+        try:
+            try:
+                for entry in files:
+                    result = connector.upload(
+                        entry["resolved"],
+                        {
+                            "request_id": manifest.get("request_id"),
+                            "reduction_id": manifest.get("reduction_id"),
+                            "kind": entry.get("kind"),
+                            "sha256": entry.get("sha256"),
+                        },
+                    )
+                    assets.append(_asset_id(result))
+            finally:
+                closer = getattr(connector, "close", None)
+                if callable(closer):
+                    closer()
+        except _Failure:
+            raise
+        except Exception as exc:
+            raise _Failure("connector_error", str(exc), 9) from exc
         receipt = {
             "status": "completed",
             "project_asset_ids": assets,
