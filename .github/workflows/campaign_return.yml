@@ -348,7 +348,7 @@ jobs:
       - name: Resolve locked env
         run: uv sync --locked --all-extras --no-install-project --no-build
 
-      - uses: actions/download-artifact@fa0a9367b6c5a34a14f9058a8fcd0a0ff65a4ab7 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: return-collect-${{ inputs.attempt_id }}
           path: return_run
@@ -407,12 +407,12 @@ jobs:
       - name: Resolve locked env
         run: uv sync --locked --all-extras --no-install-project --no-build
 
-      - uses: actions/download-artifact@fa0a9367b6c5a34a14f9058a8fcd0a0ff65a4ab7 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: return-collect-${{ inputs.attempt_id }}
           path: return_run
 
-      - uses: actions/download-artifact@fa0a9367b6c5a34a14f9058a8fcd0a0ff65a4ab7 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: return-ingest-${{ inputs.attempt_id }}
           path: return_run/ingest
