@@ -635,10 +635,21 @@ def test_ingest_stubbed_connector_uploads(
 ) -> None:
     manifest = _ingest_manifest(scratch)
     uploaded = []
+
+    def _store(name, file_path, metadata):
+        uploaded.append(
+            {"name": name, "file_path": file_path, "metadata": metadata},
+        )
+        return types.SimpleNamespace(
+            data_storage=types.SimpleNamespace(
+                id=f"asset-{len(uploaded)}",
+            ),
+        )
+
     fake = types.SimpleNamespace(
-        astore_file_content=lambda path, metadata: uploaded.append(
-            {"path": path, "metadata": metadata},
-        ) or {"asset_id": f"asset-{len(uploaded)}"},
+        EdisonClient=lambda api_key: types.SimpleNamespace(
+            store_file_content=_store,
+        ),
     )
     monkeypatch.setenv("EDISON_PLATFORM_API_KEY", "test-key")
     monkeypatch.setitem(sys.modules, "edison_client", fake)
@@ -651,6 +662,39 @@ def test_ingest_stubbed_connector_uploads(
     )
     assert receipt["project_asset_ids"] == ["asset-1"]
     assert uploaded[0]["metadata"]["sha256"] == sha(b'{"row": 1}\n')
+
+
+def test_ingest_connector_crash_typed_blocked(
+    scratch: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Live-canary regression: a connector API mismatch (e.g. calling the
+    module-level ``astore_file_content`` that edison-client 0.18.0 does
+    not export) must surface as a typed ``return_blocked`` receipt with
+    ``connector_error`` — never a bare traceback exit."""
+    manifest = _ingest_manifest(scratch)
+
+    def _boom(name, file_path, metadata):
+        raise AttributeError(
+            "module 'edison_client' has no attribute 'astore_file_content'",
+        )
+
+    fake = types.SimpleNamespace(
+        EdisonClient=lambda api_key: types.SimpleNamespace(
+            store_file_content=_boom,
+        ),
+    )
+    monkeypatch.setenv("EDISON_PLATFORM_API_KEY", "test-key")
+    monkeypatch.setitem(sys.modules, "edison_client", fake)
+    rc = edison_ingest.main([
+        "--manifest", rel(manifest), "--out", rel(scratch / "ing"),
+    ])
+    assert rc == EXIT_RETURN_PATH_BLOCKED
+    receipt = json.loads(
+        (scratch / "ing" / "ingestion_receipt.json").read_text()
+    )
+    assert receipt["status"] == "return_blocked"
+    assert receipt["error"]["kind"] == "connector_error"
+    assert receipt["error"]["owner"] == "edison_connector"
 
 
 def test_ingest_hash_mismatch_quarantines(
