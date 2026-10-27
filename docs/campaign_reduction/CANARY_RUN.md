@@ -47,14 +47,19 @@ B=crusherbucket-994254241749-us-east-1-an; aws s3 cp docs/campaign_reduction/can
 
 ## 2. Dispatch the success attempt (Batch submit)
 
-`request_sha256` is the sha256 of `canary_spec_success.json` as stored —
-verify with `aws s3api head-object --bucket $B --key campaign/_derived/reducer/v1/requests/canary_spec_success.json --query ETag` if
-the doc was regenerated; the committed value is
-`cbda653d777153462d8200240b22303727b0688bd6aceb01282f9ad8a36ce978`
-(sort-keys canonical — recompute if rewritten).
+`request_sha256` is the sha256 of the request **canonicalized**, not of
+the file bytes — the worker hashes
+`json.dumps(doc, sort_keys=True, separators=(",", ":"))` of the parsed
+body. Recompute with:
+
+`python3 -c "import json,hashlib,sys;print(hashlib.sha256(json.dumps(json.load(open(sys.argv[1])),sort_keys=True,separators=(',',':')).encode()).hexdigest())" <file>`
+
+Committed canonical values: success `559ebbc6f2910323273ce2286969836328b55087b1649bf85d0f2b14996b1b4a`,
+failure `f5c085f2634db04de8a22953d918e574cdd4f59aaf49295ee20a13f4b8fc617d`,
+bootstrap `5e6f8641de4ecf0cbe5bec773aea6462ec7ac35268540a5fabb443783c8c87a7`.
 
 ```
-gh workflow run campaign_reduction.yml -f phase=return_canary -f request_uri=s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/requests/canary_spec_success.json -f request_sha256=cbda653d777153462d8200240b22303727b0688bd6aceb01282f9ad8a36ce978 -f shard_index=0 -f job_queue=picard-analysis-queue -f job_definition=picard-reducer:1 -f attempt_id=red-canary-ok -f dry_run=false
+gh workflow run campaign_reduction.yml -f phase=return_canary -f request_uri=s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/requests/canary_spec_success.json -f request_sha256=559ebbc6f2910323273ce2286969836328b55087b1649bf85d0f2b14996b1b4a -f shard_index=0 -f job_queue=picard-analysis-queue -f job_definition=picard-reducer:2 -f attempt_id=red-canary-ok -f dry_run=false
 ```
 
 The workflow's dispatch step validates inputs, describes the queue/jobdef,
@@ -67,17 +72,17 @@ any error — a failure receipt never reads as success).
 
 Optional forced-failure leg (same inputs with `attempt_id=red-canary-fail`,
 `request_uri=…/canary_spec_failure.json`, sha
-`2079c4e5a0f82b251041e9ff161e68a1425fa8a79df759d800660de65d3d056b`) — its
+`f5c085f2634db04de8a22953d918e574cdd4f59aaf49295ee20a13f4b8fc617d`) — its
 receipt must carry a non-`completed` status.
 
 ## 3. Return leg (poll → collect → ingest → acknowledge)
 
 ```
-gh workflow run campaign_return.yml -f attempt_id=red-canary-ok -f request_uri=s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/requests/canary_bootstrap.json -f request_sha256=<sha256-of-canary_bootstrap.json> -f job_id=<batch-job-id-from-dispatch-artifact> -f poll_interval_seconds=60 -f max_polls=30 -f issue_number=1087 -f edison_ingest=true -f dry_run=false
+gh workflow run campaign_return.yml -f attempt_id=red-canary-ok -f request_uri=s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/requests/canary_bootstrap.json -f request_sha256=5e6f8641de4ecf0cbe5bec773aea6462ec7ac35268540a5fabb443783c8c87a7 -f job_id=<batch-job-id-from-dispatch-artifact> -f poll_interval_seconds=60 -f max_polls=30 -f issue_number=1087 -f edison_ingest=true -f dry_run=false
 ```
 
 Stage `canary_bootstrap.json` to `requests/` first, same as step 1 —
-`request_sha256` is the sha256 of that uploaded body.
+`request_sha256` is the canonicalized sha256 of that uploaded body.
 
 What each job does:
 
