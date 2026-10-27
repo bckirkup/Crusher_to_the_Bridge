@@ -697,29 +697,15 @@ def _op_acknowledge(args, out_root: str) -> int:
 
 def _write_ack(store, key: str, body: bytes) -> bool:
     """Create-only ack write. Returns True when an identical record already
-    existed (deduplicated notification); raises typed failures otherwise."""
+    existed (deduplicated notification); raises typed failures otherwise.
+
+    Writes first, reads only on a collision: the ack prefix admits object
+    writes but no ListBucket, and a GET on a missing key is denied as
+    AccessDenied (existence-hiding), so a read-first dedupe can never
+    succeed under the dispatcher role.
+    """
     try:
-        prior = store.get(key)
-    except DerivedStoreError as exc:
-        if exc.kind == "not_found":
-            prior = None
-        else:
-            raise ReturnFailure(
-                exc.kind, f"{key}: {exc.detail}", owner="s3_return_path",
-            ) from exc
-    if prior is not None:
-        if prior == body:
-            return True
-        raise ReturnFailure(
-            "derived_conflict",
-            f"{key}: existing ack differs — idempotent retry requires "
-            "identical bytes",
-            status="blocked",
-            exit_code=contracts.EXIT_ACCESS_OR_RESOURCE_BLOCKED,
-            owner="s3_return_path",
-        )
-    try:
-        store.put_if_absent(key, body)
+        written = store.put_idempotent(key, body)
     except DerivedConflict as exc:
         raise ReturnFailure(
             "derived_conflict", f"{key}: {exc}", status="blocked",
@@ -730,7 +716,7 @@ def _write_ack(store, key: str, body: bytes) -> bool:
         raise ReturnFailure(
             exc.kind, f"{key}: {exc.detail}", owner="s3_return_path",
         ) from exc
-    return False
+    return not written
 
 
 OPS = {
