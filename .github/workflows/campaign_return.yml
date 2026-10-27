@@ -351,7 +351,7 @@ jobs:
       - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: return-collect-${{ inputs.attempt_id }}
-          path: return_run
+          path: .
 
       - name: Edison ingest (typed blocked when key absent — never a workaround)
         env:
@@ -410,7 +410,7 @@ jobs:
       - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: return-collect-${{ inputs.attempt_id }}
-          path: return_run
+          path: .
 
       - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
