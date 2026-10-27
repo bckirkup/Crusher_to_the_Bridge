@@ -10,11 +10,7 @@
         "batch:DescribeJobs",
         "batch:ListJobs"
       ],
-      "Resource": [
-        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job-queue/picard-analysis*",
-        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job-definition/picard-reducer*",
-        "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job/*"
-      ]
+      "Resource": "*"
     },
     {
       "Sid": "SubmitOnlyApprovedReducerJobdef",
