@@ -394,7 +394,8 @@ def _status_exit(status: str) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="campaign_reducer.worker")
     parser.add_argument("--phase", required=True,
-                        choices=["materialize", "finalize", "query"])
+                        choices=["materialize", "finalize", "query",
+                                 "return_canary"])
     parser.add_argument("--request-uri", required=True)
     parser.add_argument("--request-sha256", default="")
     parser.add_argument("--shard-index", type=int, default=0)
@@ -408,7 +409,8 @@ def main(argv: list[str] | None = None) -> int:
         ceilings = parse_ceilings(request.get("budgets"))
         transport = (
             _source_transport(request, request_path)
-            if args.phase in ("materialize", "finalize")
+            if args.phase in ("materialize", "finalize",
+                              "return_canary")
             else None
         )
     except (QueryError, BudgetBlocked) as exc:
