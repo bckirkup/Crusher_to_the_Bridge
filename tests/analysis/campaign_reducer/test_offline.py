@@ -32,7 +32,7 @@ CONTRACTS = contracts.CONTRACTS_DIR
 BLOCKED_REQUEST = CONTRACTS / "BLOCKED_REQUEST.template.json"
 
 _UNIMPLEMENTED_OPS = (
-    "preflight", "quote", "submit",
+    "preflight",
 )
 
 # D4 return-canary ops: implemented — a blocked request yields a typed

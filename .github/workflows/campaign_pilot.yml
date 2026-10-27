@@ -1,0 +1,286 @@
+name: campaign-reduction-pilot
+
+# Bounded admitted pilot leg for the campaign reducer (ticket D6 —
+# review only; nothing runs until the deployer enables environment
+# aws-campaign and dispatches with a pinned request + pinned specimens
+# document).
+#
+# Chain, all bounded:
+#   submit job (dispatcher role: PutObject create-only on requests/*,
+#     SubmitJob+TagResource on jobdef/queue/job) — fetches and sha-pins
+#     the admitted execution envelope and the specimen manifest,
+#     `analysis validate --request-kind execution`,
+#     `analysis submit --phase pilot --specimens`, which stages the
+#     rendered worker request under requests/ and submits ONE Batch job
+#     on the proven picard-reducer jobdef.
+#   collect job (collector role: bounded read + receipt/ack writes) —
+#     polls `analysis status --attempt` until the pilot settles, then
+#     `analysis collect` pulls RECEIPT.json + pilot_evidence.json into
+#     workflow artifacts, and posts the bounded run envelope on the
+#     tracking issue.
+#
+# dry_run=true (the default) validates inputs only — no AWS call, no
+# spend. The pilot itself spends real S3/Batch money; it is gated by
+# the environment's required reviewer.
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_uri:
+        description: "immutable s3:// admitted execution envelope under campaign/_derived/reducer/v1/requests/"
+        required: true
+      request_sha256:
+        description: "sha256 of the request body (64 lowercase hex)"
+        required: true
+      specimens_uri:
+        description: "immutable s3:// pilot_specimens.json under campaign/_derived/reducer/v1/"
+        required: true
+      specimens_sha256:
+        description: "sha256 of the specimens body (64 lowercase hex)"
+        required: true
+      issue_number:
+        description: "tracking issue for the run envelope"
+        required: false
+        default: "1089"
+      dry_run:
+        description: "validate only; no AWS calls"
+        type: boolean
+        required: true
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: campaign-pilot
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  BUCKET: crusherbucket-994254241749-us-east-1-an
+  DERIVED: campaign/_derived/reducer/v1
+
+jobs:
+  submit:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 30
+    outputs:
+      request_uri: ${{ steps.submit.outputs.request_uri }}
+      batch_job_id: ${{ steps.submit.outputs.batch_job_id }}
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Validate inputs
+        env:
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+          SPECIMENS_URI: ${{ inputs.specimens_uri }}
+          SPECIMENS_SHA256: ${{ inputs.specimens_sha256 }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          case "$REQUEST_URI" in
+            s3://${BUCKET}/${DERIVED}/requests/*) ;;
+            *) echo "request_uri escapes the derived requests/ prefix"; exit 2 ;;
+          esac
+          case "$SPECIMENS_URI" in
+            s3://${BUCKET}/${DERIVED}/*) ;;
+            *) echo "specimens_uri escapes the derived prefix"; exit 2 ;;
+          esac
+          echo "$REQUEST_SHA256" | grep -qiE '^[0-9a-f]{64}$'
+          echo "$SPECIMENS_SHA256" | grep -qiE '^[0-9a-f]{64}$'
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "dry_run: inputs valid; no AWS calls made"
+            exit 78
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        if: inputs.dry_run == false
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        if: inputs.dry_run == false
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Sync dependencies
+        if: inputs.dry_run == false
+        run: uv sync --locked --all-extras --no-install-project --no-build
+
+      - name: Assume collector role (read inputs)
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        if: inputs.dry_run == false
+        with:
+          role-to-assume: ${{ vars.AWS_REDUCTION_COLLECTOR_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Fetch and pin request + specimens
+        if: inputs.dry_run == false
+        env:
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+          SPECIMENS_URI: ${{ inputs.specimens_uri }}
+          SPECIMENS_SHA256: ${{ inputs.specimens_sha256 }}
+        run: |
+          set -euo pipefail
+          mkdir -p pilot_run
+          aws s3 cp "$REQUEST_URI" pilot_run/request.json
+          aws s3 cp "$SPECIMENS_URI" pilot_run/specimens.json
+          got=$(sha256sum pilot_run/request.json | cut -d' ' -f1)
+          want=$(echo "$REQUEST_SHA256" | tr 'A-F' 'a-f')
+          [ "$got" = "$want" ] || { echo "request sha mismatch"; exit 6; }
+          got=$(sha256sum pilot_run/specimens.json | cut -d' ' -f1)
+          want=$(echo "$SPECIMENS_SHA256" | tr 'A-F' 'a-f')
+          [ "$got" = "$want" ] || { echo "specimens sha mismatch"; exit 6; }
+
+      - name: Validate the admitted envelope
+        if: inputs.dry_run == false
+        run: |
+          set -euo pipefail
+          uv run --frozen --no-build python3 scripts/campaign analysis validate \
+            --request pilot_run/request.json \
+            --out pilot_run/validate \
+            --request-kind execution
+
+      - name: Assume dispatcher role (stage + submit)
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        if: inputs.dry_run == false
+        with:
+          role-to-assume: ${{ vars.AWS_REDUCTION_DISPATCH_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Submit the bounded pilot
+        id: submit
+        if: inputs.dry_run == false
+        run: |
+          set -euo pipefail
+          uv run --frozen --no-build python3 scripts/campaign analysis submit \
+            --phase pilot \
+            --request pilot_run/request.json \
+            --specimens pilot_run/specimens.json \
+            --out pilot_run/submit
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import json
+          rc = json.load(open("pilot_run/submit/durable_attempt_receipt.json"))
+          print(f"request_uri={rc['request_uri']}")
+          print(f"batch_job_id={rc['batch_job_id']}")
+          EOF
+
+      - name: Upload submit receipt
+        if: inputs.dry_run == false && always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pilot-submit-${{ github.run_id }}
+          path: pilot_run/submit/
+          retention-days: 90
+
+  collect:
+    needs: submit
+    if: needs.submit.result == 'success'
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Sync dependencies
+        run: uv sync --locked --all-extras --no-install-project --no-build
+
+      - name: Assume collector role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_REDUCTION_COLLECTOR_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Fetch and pin the request (collector leg re-fetches)
+        env:
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+        run: |
+          set -euo pipefail
+          mkdir -p pilot_run
+          aws s3 cp "$REQUEST_URI" pilot_run/request.json
+          got=$(sha256sum pilot_run/request.json | cut -d' ' -f1)
+          want=$(echo "$REQUEST_SHA256" | tr 'A-F' 'a-f')
+          [ "$got" = "$want" ] || { echo "request sha mismatch"; exit 6; }
+
+      - name: Poll the attempt receipt until the pilot settles
+        env:
+          REQUEST_URI: ${{ needs.submit.outputs.request_uri }}
+        run: |
+          set -euo pipefail
+          rid=$(basename "$REQUEST_URI" -pilot.json)
+          for i in $(seq 1 240); do
+            uv run --frozen --no-build python3 scripts/campaign analysis status \
+              --request pilot_run/request.json \
+              --out pilot_run/status \
+              --attempt "$rid" || true
+            if [ -f pilot_run/status/attempt_status.json ]; then
+              s=$(python3 -c "import json;print(json.load(open('pilot_run/status/attempt_status.json')).get('status',''))")
+              case "$s" in
+                ""|running|submitted|in_progress) sleep 60 ;;
+                *) echo "settled: $s"; exit 0 ;;
+              esac
+            else
+              sleep 60
+            fi
+          done
+          echo "pilot did not settle within the poll window"
+          exit 1
+
+      - name: Collect the pilot receipt + evidence
+        env:
+          REQUEST_URI: ${{ needs.submit.outputs.request_uri }}
+        run: |
+          set -euo pipefail
+          rid=$(basename "$REQUEST_URI" -pilot.json)
+          uv run --frozen --no-build python3 scripts/campaign analysis collect \
+            --request pilot_run/request.json \
+            --out pilot_run/collect \
+            --attempt "$rid" || true
+          aws s3 cp "s3://${BUCKET}/${DERIVED}/attempts/${rid}/pilot_evidence.json" \
+            pilot_run/collect/pilot_evidence.json || echo "no pilot_evidence yet"
+
+      - name: Upload collect artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pilot-collect-${{ github.run_id }}
+          path: pilot_run/collect/
+          retention-days: 90
+
+      - name: Post the run envelope on the tracking issue
+        if: always() && inputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+          JOB_ID: ${{ needs.submit.outputs.batch_job_id }}
+        run: |
+          set -euo pipefail
+          marker="<!-- crusher-reducer-pilot:${RUN_ID} -->"
+          body="${marker}
+          D6 pilot run ${RUN_ID} — batch job ${JOB_ID:-?}; artifacts on the workflow run (pilot-submit-/pilot-collect-${RUN_ID}). Measured evidence: pilot_evidence.json."
+          body=$(echo "$body" | head -c 32768)
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "$body"

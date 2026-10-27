@@ -1,0 +1,339 @@
+{
+  "evidence_kind": "bootstrap_estimate",
+  "input_inventory_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "phase_rows": [
+    {
+      "api_calls": {
+        "get": 1459640.5,
+        "head": 447190.0,
+        "list": 8124.67,
+        "put": 77151.04999999999
+      },
+      "basis": "bootstrap_estimate",
+      "compressed_bytes_read": 13149551294200.0,
+      "cost": {
+        "components": {
+          "memory_gib_hour": {
+            "price_key": "batch_memory_gib_hour_usd",
+            "quantity": 9630.041666666666,
+            "unit_price": 0.00443,
+            "usd": 42.66108458333333
+          },
+          "s3_get": {
+            "price_key": "s3_get_per_1000_requests_usd",
+            "quantity": 1459.6405,
+            "unit_price": 0.0004,
+            "usd": 0.5838562
+          },
+          "s3_head": {
+            "price_key": "s3_head_per_1000_requests_usd",
+            "quantity": 447.19,
+            "unit_price": 0.0004,
+            "usd": 0.178876
+          },
+          "s3_list": {
+            "price_key": "s3_list_per_1000_requests_usd",
+            "quantity": 8.12467,
+            "unit_price": 0.005,
+            "usd": 0.04062335
+          },
+          "s3_put": {
+            "price_key": "s3_put_per_1000_requests_usd",
+            "quantity": 77.15104999999998,
+            "unit_price": 0.005,
+            "usd": 0.38575524999999994
+          },
+          "storage_gb_month": {
+            "price_key": "s3_storage_gb_month_usd",
+            "quantity": 1118.322047404945,
+            "unit_price": 0.023,
+            "usd": 25.721407090313733
+          },
+          "transfer_out_gb": {
+            "price_key": "s3_data_transfer_out_gb_usd",
+            "quantity": 1118.322047404945,
+            "unit_price": 0.09,
+            "usd": 100.64898426644504
+          },
+          "vcpu_hour": {
+            "price_key": "batch_vcpu_hour_usd",
+            "quantity": 2426.526833333334,
+            "unit_price": 0.04048,
+            "usd": 98.22580621333336
+          }
+        },
+        "fully_priced": true,
+        "total_usd": 268.44639295342546
+      },
+      "member_bytes": 35948496894000.0,
+      "memory_mib_seconds": 35500185600.0,
+      "objects": 447190.0,
+      "output_bytes": 1200789155000.0,
+      "peak_memory_mib": 2114049.024,
+      "phase": "materialize",
+      "retries": 30908.050000000003,
+      "spool_bytes": 23963715850000.0,
+      "uncompressed_bytes": 35948496894000.0,
+      "vcpu_seconds": 8735496.600000001,
+      "wall_seconds": 4367748.300000001
+    },
+    {
+      "api_calls": {
+        "get": 145964.05000000002,
+        "head": 44719.0,
+        "list": 812.4670000000001,
+        "put": 7715.105
+      },
+      "basis": "bootstrap_estimate",
+      "compressed_bytes_read": 1314955129420.0,
+      "cost": {
+        "components": {
+          "memory_gib_hour": {
+            "price_key": "batch_memory_gib_hour_usd",
+            "quantity": 2407.5104166666665,
+            "unit_price": 0.00443,
+            "usd": 10.665271145833332
+          },
+          "s3_get": {
+            "price_key": "s3_get_per_1000_requests_usd",
+            "quantity": 145.96405000000001,
+            "unit_price": 0.0004,
+            "usd": 0.058385620000000006
+          },
+          "s3_head": {
+            "price_key": "s3_head_per_1000_requests_usd",
+            "quantity": 44.719,
+            "unit_price": 0.0004,
+            "usd": 0.0178876
+          },
+          "s3_list": {
+            "price_key": "s3_list_per_1000_requests_usd",
+            "quantity": 0.812467,
+            "unit_price": 0.005,
+            "usd": 0.004062335
+          },
+          "s3_put": {
+            "price_key": "s3_put_per_1000_requests_usd",
+            "quantity": 7.715104999999999,
+            "unit_price": 0.005,
+            "usd": 0.038575525
+          },
+          "storage_gb_month": {
+            "price_key": "s3_storage_gb_month_usd",
+            "quantity": 111.83220474049449,
+            "unit_price": 0.023,
+            "usd": 2.5721407090313733
+          },
+          "transfer_out_gb": {
+            "price_key": "s3_data_transfer_out_gb_usd",
+            "quantity": 111.83220474049449,
+            "unit_price": 0.09,
+            "usd": 10.064898426644504
+          },
+          "vcpu_hour": {
+            "price_key": "batch_vcpu_hour_usd",
+            "quantity": 242.65268333333339,
+            "unit_price": 0.04048,
+            "usd": 9.822580621333335
+          }
+        },
+        "fully_priced": true,
+        "total_usd": 33.24380198284254
+      },
+      "member_bytes": 3594849689400.0,
+      "memory_mib_seconds": 8875046400.0,
+      "objects": 44719.0,
+      "output_bytes": 120078915500.0,
+      "peak_memory_mib": 2114049.024,
+      "phase": "finalize",
+      "retries": 30908.050000000003,
+      "spool_bytes": 2396371585000.0,
+      "uncompressed_bytes": 3594849689400.0,
+      "vcpu_seconds": 873549.6600000001,
+      "wall_seconds": 436774.8300000001
+    },
+    {
+      "api_calls": {
+        "get": 291928.10000000003,
+        "head": 89438.0,
+        "list": 1624.9340000000002,
+        "put": 15430.21
+      },
+      "basis": "bootstrap_estimate",
+      "compressed_bytes_read": 2629910258840.0,
+      "cost": {
+        "components": {
+          "memory_gib_hour": {
+            "price_key": "batch_memory_gib_hour_usd",
+            "quantity": 1926.0083333333334,
+            "unit_price": 0.00443,
+            "usd": 8.532216916666666
+          },
+          "s3_get": {
+            "price_key": "s3_get_per_1000_requests_usd",
+            "quantity": 291.92810000000003,
+            "unit_price": 0.0004,
+            "usd": 0.11677124000000001
+          },
+          "s3_head": {
+            "price_key": "s3_head_per_1000_requests_usd",
+            "quantity": 89.438,
+            "unit_price": 0.0004,
+            "usd": 0.0357752
+          },
+          "s3_list": {
+            "price_key": "s3_list_per_1000_requests_usd",
+            "quantity": 1.624934,
+            "unit_price": 0.005,
+            "usd": 0.00812467
+          },
+          "s3_put": {
+            "price_key": "s3_put_per_1000_requests_usd",
+            "quantity": 15.430209999999999,
+            "unit_price": 0.005,
+            "usd": 0.07715105
+          },
+          "storage_gb_month": {
+            "price_key": "s3_storage_gb_month_usd",
+            "quantity": 223.66440948098898,
+            "unit_price": 0.023,
+            "usd": 5.1442814180627465
+          },
+          "transfer_out_gb": {
+            "price_key": "s3_data_transfer_out_gb_usd",
+            "quantity": 223.66440948098898,
+            "unit_price": 0.09,
+            "usd": 20.129796853289008
+          },
+          "vcpu_hour": {
+            "price_key": "batch_vcpu_hour_usd",
+            "quantity": 485.30536666666677,
+            "unit_price": 0.04048,
+            "usd": 19.64516124266667
+          }
+        },
+        "fully_priced": true,
+        "total_usd": 53.68927859068509
+      },
+      "member_bytes": 7189699378800.0,
+      "memory_mib_seconds": 7100037120.0,
+      "objects": 89438.0,
+      "output_bytes": 240157831000.0,
+      "peak_memory_mib": 2114049.024,
+      "phase": "query",
+      "retries": 30908.050000000003,
+      "spool_bytes": 0.0,
+      "uncompressed_bytes": 7189699378800.0,
+      "vcpu_seconds": 1747099.3200000003,
+      "wall_seconds": 873549.6600000001
+    },
+    {
+      "api_calls": {
+        "get": 72982.02500000001,
+        "head": 22359.5,
+        "list": 406.23350000000005,
+        "put": 3857.5525
+      },
+      "basis": "bootstrap_estimate",
+      "compressed_bytes_read": 657477564710.0,
+      "cost": {
+        "components": {
+          "memory_gib_hour": {
+            "price_key": "batch_memory_gib_hour_usd",
+            "quantity": 481.50208333333336,
+            "unit_price": 0.00443,
+            "usd": 2.1330542291666665
+          },
+          "s3_get": {
+            "price_key": "s3_get_per_1000_requests_usd",
+            "quantity": 72.98202500000001,
+            "unit_price": 0.0004,
+            "usd": 0.029192810000000003
+          },
+          "s3_head": {
+            "price_key": "s3_head_per_1000_requests_usd",
+            "quantity": 22.3595,
+            "unit_price": 0.0004,
+            "usd": 0.0089438
+          },
+          "s3_list": {
+            "price_key": "s3_list_per_1000_requests_usd",
+            "quantity": 0.4062335,
+            "unit_price": 0.005,
+            "usd": 0.0020311675
+          },
+          "s3_put": {
+            "price_key": "s3_put_per_1000_requests_usd",
+            "quantity": 3.8575524999999997,
+            "unit_price": 0.005,
+            "usd": 0.0192877625
+          },
+          "storage_gb_month": {
+            "price_key": "s3_storage_gb_month_usd",
+            "quantity": 55.916102370247245,
+            "unit_price": 0.023,
+            "usd": 1.2860703545156866
+          },
+          "transfer_out_gb": {
+            "price_key": "s3_data_transfer_out_gb_usd",
+            "quantity": 55.916102370247245,
+            "unit_price": 0.09,
+            "usd": 5.032449213322252
+          },
+          "vcpu_hour": {
+            "price_key": "batch_vcpu_hour_usd",
+            "quantity": 121.32634166666669,
+            "unit_price": 0.04048,
+            "usd": 4.911290310666668
+          }
+        },
+        "fully_priced": true,
+        "total_usd": 13.422319647671273
+      },
+      "member_bytes": 1797424844700.0,
+      "memory_mib_seconds": 1775009280.0,
+      "objects": 22359.5,
+      "output_bytes": 60039457750.0,
+      "peak_memory_mib": 2114049.024,
+      "phase": "return",
+      "retries": 30908.050000000003,
+      "spool_bytes": 0.0,
+      "uncompressed_bytes": 1797424844700.0,
+      "vcpu_seconds": 436774.8300000001,
+      "wall_seconds": 218387.41500000004
+    }
+  ],
+  "price_snapshot": {
+    "as_of_utc": "2026-10-27T00:00:00Z",
+    "id": "s3-batch-us-east-1-2026-10-27-request-declared",
+    "owner": "evidence.price_snapshot"
+  },
+  "quote_id": "quote-1389243392d6299e",
+  "request_id": "req-d6-pilot",
+  "reserves": {
+    "api_get": 1459640.5,
+    "api_head": 447190.0,
+    "api_list": 8124.67,
+    "api_put": 77151.04999999999,
+    "compressed_bytes": 13149551294200.0,
+    "member_bytes": 35948496894000.0,
+    "memory_mib_seconds": 35500185600.0,
+    "objects": 447190.0,
+    "output_bytes": 1200789155000.0,
+    "peak_memory_mib": 2114049.024,
+    "retries": 30908.050000000003,
+    "spool_bytes": 23963715850000.0,
+    "uncompressed_bytes": 35948496894000.0,
+    "vcpu_seconds": 8735496.600000001,
+    "wall_seconds": 4367748.300000001
+  },
+  "safety_factor": 2.0,
+  "schema": "crusher-reducer-phase-quote/v1",
+  "scope_hash": "3f73b5847c47b9bee7809c89a7105585f3134f48bba07f08e82545381fb51f88",
+  "totals": {
+    "central_usd": 737.6035863492486,
+    "exceeds_declared_envelope": true
+  },
+  "unmeasured_families": [],
+  "valid_until_utc": "2027-01-01T00:00:00Z"
+}

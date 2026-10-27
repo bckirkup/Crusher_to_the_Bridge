@@ -391,11 +391,123 @@ def _status_exit(status: str) -> int:
     }.get(status, EXIT_PARTIAL)
 
 
+class _MeteredTransport:
+    """Counting ``ObjectTransport`` wrapper for the bounded pilot (D6).
+
+    Records per-key head/get request counts, compressed bytes and wall
+    seconds so the pilot evidence document carries measured per-source
+    costs with specimen pins — the quote op's ``pilot_receipt`` input.
+    """
+
+    def __init__(self, inner) -> None:
+        self._inner = inner
+        self.per_key: dict[str, dict] = {}
+        self.wall_seconds = 0.0
+
+    def _bump(self, key: str, field: str, n: float) -> dict:
+        row = self.per_key.setdefault(key, {
+            "key": key, "head_requests": 0, "get_requests": 0,
+            "bytes": 0, "wall_seconds": 0.0,
+        })
+        row[field] += n
+        return row
+
+    def head(self, key: str) -> HeadInfo:
+        self._bump(key, "head_requests", 1)
+        return self._inner.head(key)
+
+    def get(self, key: str, **kwargs) -> GetResponse:
+        start = time.monotonic()
+        resp = self._inner.get(key, **kwargs)
+        elapsed = time.monotonic() - start
+        row = self._bump(key, "get_requests", 1)
+        row["bytes"] += len(resp.body or b"")
+        row["wall_seconds"] += elapsed
+        self.wall_seconds += elapsed
+        return resp
+
+
+def _peak_memory_mib() -> float | None:
+    """Peak RSS of the worker process in MiB, where the OS reports it."""
+    try:
+        import resource  # noqa: PLC0415
+
+        return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
+    except (ImportError, ValueError, OSError):
+        return None
+
+
+def _write_pilot_evidence(
+    store, request: dict, ctx, transport, result, ledger,
+) -> None:
+    """Measured pilot evidence -> ``attempts/{rid}/pilot_evidence.json``.
+
+    Per-source metering plus ledger spend and manifest byte totals — the
+    ``pilot_receipt`` evidence document ``analysis quote`` extrapolates.
+    Specimen pins travel on the request's ``sources`` entries verbatim.
+    """
+    per_source = []
+    for src in request.get("sources") or []:
+        uri = src.get("uri") or ""
+        key = (
+            parse_s3_uri(uri)[1] if str(uri).startswith("s3://")
+            else uri
+        )
+        meter = dict(transport.per_key.get(key, {}))
+        meter["source_id"] = src.get("source_id")
+        meter["family"] = src.get("family")
+        meter["specimen_class"] = src.get("specimen_class")
+        meter["version_id"] = src.get("version_id")
+        meter["etag"] = src.get("etag")
+        per_source.append(meter)
+    out_bytes = sum(
+        int(e.get("bytes_stored") or 0) for e in result.manifest
+    )
+    doc = {
+        "schema": "crusher-reducer-pilot-evidence/v1",
+        "kind": "pilot_receipt",
+        "reduction_id": ctx.reduction_id,
+        "fingerprint": ctx.fingerprint,
+        "request_sha256": request.get("request_sha256") or "",
+        "inventory_sha256": ctx.inventory_sha256,
+        "admission_id": ctx.admission_id,
+        "utc": request.get("utc") or "",
+        "status": result.status,
+        "per_source": per_source,
+        "measured": {
+            "objects": len(request.get("sources") or []),
+            "compressed_bytes_read": sum(
+                m.get("bytes") or 0 for m in per_source
+            ),
+            "head_requests": sum(
+                m.get("head_requests") or 0 for m in per_source
+            ),
+            "get_requests": sum(
+                m.get("get_requests") or 0 for m in per_source
+            ),
+            "wall_seconds": transport.wall_seconds,
+            "peak_memory_mib": _peak_memory_mib(),
+            "output_bytes": out_bytes,
+            "retries": ledger.retries,
+            "budget_spent": ledger.snapshot(),
+        },
+    }
+    key = (
+        f"{DERIVED_ROOT}/attempts/{ctx.reduction_id}/pilot_evidence.json"
+    )
+    try:
+        store.put_idempotent(
+            key, json.dumps(doc, sort_keys=True, indent=2).encode(),
+        )
+    except DerivedStoreError:
+        pass  # evidence is best-effort beside the attempt receipt
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="campaign_reducer.worker")
     parser.add_argument("--phase", required=True,
                         choices=["materialize", "finalize", "query",
-                                 "return_canary"])
+                                 "return_canary", "pilot"])
     parser.add_argument("--request-uri", required=True)
     parser.add_argument("--request-sha256", default="")
     parser.add_argument("--shard-index", type=int, default=0)
@@ -410,7 +522,7 @@ def main(argv: list[str] | None = None) -> int:
         transport = (
             _source_transport(request, request_path)
             if args.phase in ("materialize", "finalize",
-                              "return_canary")
+                              "return_canary", "pilot")
             else None
         )
     except (QueryError, BudgetBlocked) as exc:
@@ -430,7 +542,10 @@ def main(argv: list[str] | None = None) -> int:
     ledger = BudgetLedger(ceilings)
     ctx = _ctx(request, args.shard_index)
 
-    if args.phase in ("materialize", "finalize", "return_canary"):
+    if args.phase in ("materialize", "finalize", "return_canary",
+                      "pilot"):
+        if args.phase == "pilot":
+            transport = _MeteredTransport(transport)
         spec = MaterializeSpec(
             sources=_sources(request),
             ctx=ctx,
@@ -450,6 +565,10 @@ def main(argv: list[str] | None = None) -> int:
             ))
             print(json.dumps({"status": "blocked", "error": str(exc)}))
             return EXIT_BLOCKED
+        if args.phase == "pilot":
+            _write_pilot_evidence(
+                store, request, ctx, transport, result, ledger,
+            )
         _write_attempt_receipt(store, _attempt_receipt(
             request, ctx, args.phase, result.status, ledger=ledger,
             snapshot_id=result.snapshot_id,

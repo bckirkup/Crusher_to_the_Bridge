@@ -1,0 +1,152 @@
+{
+  "schema": "crusher-reducer-pilot-evidence/v1",
+  "kind": "bootstrap_estimate",
+  "utc": "2026-10-27T00:00:00Z",
+  "inventory_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "note": "D6 bootstrap estimate: declared (unmeasured) per-family unit costs extrapolated over the dated Oct-19 register counts. Counts are labeled dated — the frozen inventory's fresh counts supersede them. Prices are request-declared ceilings reconciled at run close; per-family unit costs are conservative declarations pending the measured pilot receipt.",
+  "scope": {
+    "counts_basis": "dated_register_oct19",
+    "as_of": "2026-10-19T00:00:00Z",
+    "counts_are_dated_not_current": true,
+    "families": [
+      {"family": "bounded_region_jsonl", "objects": 732, "bytes": 8366082},
+      {"family": "campaign_summary_zip", "objects": 131848, "bytes": 2390676367490},
+      {"family": "covid_screen_json", "objects": 19660, "bytes": 2000074174},
+      {"family": "flu_cell_json", "objects": 3601, "bytes": 34568671},
+      {"family": "fomite_diagnostic_gzip", "objects": 42, "bytes": 487935459},
+      {"family": "growth_census_zip", "objects": 233429, "bytes": 9780551915580},
+      {"family": "observation_jsonl", "objects": 4024, "bytes": 340935989},
+      {"family": "perturbation_json", "objects": 596, "bytes": 658663},
+      {"family": "stan_nuts_json", "objects": 169, "bytes": 4728667},
+      {"family": "unknown_legacy", "objects": 15576, "bytes": 3860725970},
+      {"family": "wastewater_campaign_zip", "objects": 37513, "bytes": 1290009144}
+    ]
+  },
+  "price_snapshot": {
+    "id": "s3-batch-us-east-1-2026-10-27-request-declared",
+    "as_of_utc": "2026-10-27T00:00:00Z",
+    "unit_prices_json": {
+      "s3_list_per_1000_requests_usd": 0.005,
+      "s3_head_per_1000_requests_usd": 0.0004,
+      "s3_get_per_1000_requests_usd": 0.0004,
+      "s3_put_per_1000_requests_usd": 0.005,
+      "batch_vcpu_hour_usd": 0.04048,
+      "batch_memory_gib_hour_usd": 0.00443,
+      "s3_storage_gb_month_usd": 0.023,
+      "s3_data_transfer_out_gb_usd": 0.09,
+      "note": "request-declared ceiling; live pricing reconciled at run close"
+    }
+  },
+  "per_class": [
+    {
+      "class": "summary_archive", "family": "campaign_summary_zip",
+      "objects": 1000, "compressed_bytes": 20000000000,
+      "uncompressed_bytes": 60000000000, "member_bytes": 60000000000,
+      "api_list": 20, "api_head": 1000, "api_get": 3000, "api_put": 200,
+      "wall_seconds": 7200, "vcpu_seconds": 14400,
+      "memory_mib_seconds": 58982400, "peak_memory_mib": 4096,
+      "spool_bytes": 40000000000, "output_bytes": 2000000000,
+      "retries": 50
+    },
+    {
+      "class": "census", "family": "growth_census_zip",
+      "objects": 1000, "compressed_bytes": 45000000000,
+      "uncompressed_bytes": 120000000000, "member_bytes": 120000000000,
+      "api_list": 20, "api_head": 1000, "api_get": 4000, "api_put": 200,
+      "wall_seconds": 14400, "vcpu_seconds": 28800,
+      "memory_mib_seconds": 117964800, "peak_memory_mib": 6144,
+      "spool_bytes": 80000000000, "output_bytes": 4000000000,
+      "retries": 100
+    },
+    {
+      "class": "embedded_timeseries", "family": "observation_jsonl",
+      "objects": 1000, "compressed_bytes": 90000000,
+      "uncompressed_bytes": 300000000, "member_bytes": 300000000,
+      "api_list": 10, "api_head": 1000, "api_get": 1500, "api_put": 50,
+      "wall_seconds": 600, "vcpu_seconds": 1200,
+      "memory_mib_seconds": 2457600, "peak_memory_mib": 2048,
+      "spool_bytes": 200000000, "output_bytes": 50000000,
+      "retries": 10
+    },
+    {
+      "class": "clinical_non_age", "family": "covid_screen_json",
+      "objects": 1000, "compressed_bytes": 110000000,
+      "uncompressed_bytes": 350000000, "member_bytes": 350000000,
+      "api_list": 10, "api_head": 1000, "api_get": 1500, "api_put": 50,
+      "wall_seconds": 600, "vcpu_seconds": 1200,
+      "memory_mib_seconds": 2457600, "peak_memory_mib": 2048,
+      "spool_bytes": 200000000, "output_bytes": 50000000,
+      "retries": 10
+    },
+    {
+      "class": "clinical_non_age", "family": "flu_cell_json",
+      "objects": 1000, "compressed_bytes": 10000000,
+      "uncompressed_bytes": 30000000, "member_bytes": 30000000,
+      "api_list": 10, "api_head": 1000, "api_get": 1500, "api_put": 50,
+      "wall_seconds": 300, "vcpu_seconds": 600,
+      "memory_mib_seconds": 1228800, "peak_memory_mib": 1024,
+      "spool_bytes": 50000000, "output_bytes": 10000000,
+      "retries": 10
+    },
+    {
+      "class": "legacy_nested", "family": "unknown_legacy",
+      "objects": 1000, "compressed_bytes": 250000000,
+      "uncompressed_bytes": 800000000, "member_bytes": 800000000,
+      "api_list": 10, "api_head": 1000, "api_get": 2000, "api_put": 50,
+      "wall_seconds": 1200, "vcpu_seconds": 2400,
+      "memory_mib_seconds": 4915200, "peak_memory_mib": 3072,
+      "spool_bytes": 500000000, "output_bytes": 100000000,
+      "retries": 20
+    },
+    {
+      "class": "embedded_timeseries", "family": "bounded_region_jsonl",
+      "objects": 1000, "compressed_bytes": 12000000,
+      "uncompressed_bytes": 40000000, "member_bytes": 40000000,
+      "api_list": 10, "api_head": 1000, "api_get": 1500, "api_put": 50,
+      "wall_seconds": 300, "vcpu_seconds": 600,
+      "memory_mib_seconds": 1228800, "peak_memory_mib": 1024,
+      "spool_bytes": 60000000, "output_bytes": 15000000,
+      "retries": 10
+    },
+    {
+      "class": "embedded_timeseries", "family": "fomite_diagnostic_gzip",
+      "objects": 1000, "compressed_bytes": 12000000000,
+      "uncompressed_bytes": 40000000000, "member_bytes": 40000000000,
+      "api_list": 10, "api_head": 1000, "api_get": 2000, "api_put": 50,
+      "wall_seconds": 1800, "vcpu_seconds": 3600,
+      "memory_mib_seconds": 7372800, "peak_memory_mib": 3072,
+      "spool_bytes": 20000000000, "output_bytes": 500000000,
+      "retries": 30
+    },
+    {
+      "class": "legacy_nested", "family": "perturbation_json",
+      "objects": 1000, "compressed_bytes": 1200000,
+      "uncompressed_bytes": 4000000, "member_bytes": 4000000,
+      "api_list": 10, "api_head": 1000, "api_get": 1000, "api_put": 50,
+      "wall_seconds": 300, "vcpu_seconds": 600,
+      "memory_mib_seconds": 614400, "peak_memory_mib": 512,
+      "spool_bytes": 5000000, "output_bytes": 5000000,
+      "retries": 5
+    },
+    {
+      "class": "legacy_nested", "family": "stan_nuts_json",
+      "objects": 1000, "compressed_bytes": 30000000,
+      "uncompressed_bytes": 100000000, "member_bytes": 100000000,
+      "api_list": 10, "api_head": 1000, "api_get": 1500, "api_put": 50,
+      "wall_seconds": 600, "vcpu_seconds": 1200,
+      "memory_mib_seconds": 1228800, "peak_memory_mib": 1024,
+      "spool_bytes": 50000000, "output_bytes": 10000000,
+      "retries": 10
+    },
+    {
+      "class": "summary_archive", "family": "wastewater_campaign_zip",
+      "objects": 1000, "compressed_bytes": 35000000,
+      "uncompressed_bytes": 100000000, "member_bytes": 100000000,
+      "api_list": 10, "api_head": 1000, "api_get": 1500, "api_put": 50,
+      "wall_seconds": 600, "vcpu_seconds": 1200,
+      "memory_mib_seconds": 1228800, "peak_memory_mib": 1024,
+      "spool_bytes": 50000000, "output_bytes": 15000000,
+      "retries": 10
+    }
+  ]
+}

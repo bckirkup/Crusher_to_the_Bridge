@@ -13,6 +13,9 @@ Ticket D4 wires the return-path operations — ``status``, ``resume``,
 ``query``, ``collect`` and ``acknowledge`` — in
 ``campaign_reducer.return_path``. Ticket D5 wires ``inventory`` — the
 bounded metadata cold-inventory — in ``campaign_reducer.inventory``.
+Ticket D6 wires ``quote`` (offline measured-evidence pricing) in
+``campaign_reducer.quote`` and the pilot leg of ``submit`` in
+``campaign_reducer.submit``.
 Every other registered operation is present in the namespace and exits
 nonzero with a ``NOT_YET_IMPLEMENTED`` status until its phased ticket
 lands.
@@ -28,7 +31,7 @@ from pathlib import Path
 from simulation_utils.paths import confine_to_base, prepare_output_directory
 
 from .._io import cwd_root, write_json
-from . import contracts, inventory, return_path
+from . import contracts, inventory, quote, return_path, submit
 from .plan import run_plan
 from .validate import run_validate
 
@@ -78,6 +81,8 @@ def build_parser(operations: dict) -> argparse.ArgumentParser:
         optional = (
             return_path.OPTIONAL_FLAGS if name in return_path.OPS
             else inventory.OPTIONAL_FLAGS if name == "inventory"
+            else submit.OPTIONAL_FLAGS if name == "submit"
+            else quote.OPTIONAL_FLAGS if name == "quote"
             else ()
         )
         for flag in optional:
@@ -129,4 +134,8 @@ def main(argv: list[str] | None = None) -> int:
         return return_path.run(args)
     if args.operation == "inventory":
         return inventory.run(args)
+    if args.operation == "quote":
+        return quote.run(args)
+    if args.operation == "submit":
+        return submit.run(args)
     return _not_implemented(args, operations[args.operation])
