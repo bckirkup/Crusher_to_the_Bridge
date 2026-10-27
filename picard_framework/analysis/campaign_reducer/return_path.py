@@ -654,8 +654,11 @@ def _op_acknowledge(args, out_root: str) -> int:
         ).encode())[:16]
     )
     ack["ack_id"] = ack_id
-    ack.update(_run_ids())
     body = json.dumps(ack, sort_keys=True, indent=2).encode()
+    # Run ids are provenance for the envelope/status only — the stored ack
+    # must be byte-identical across idempotent reruns or every retry trips
+    # derived_conflict on the same ack_id.
+    ack.update(_run_ids())
     store = _store_for(args, request)
     key = f"{_DERIVED}{_ACK_PREFIX}{ack_id}.json"
     deduplicated = _write_ack(store, key, body)
