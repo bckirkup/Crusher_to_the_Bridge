@@ -26,6 +26,16 @@
       ]
     },
     {
+      "Sid": "CollectorBatchStatus",
+      "Effect": "Allow",
+      "Action": [
+        "batch:DescribeJobs",
+        "batch:ListJobs",
+        "batch:DescribeJobDefinitions"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "CollectorDenyAllMutations",
       "Effect": "Deny",
       "Action": [
