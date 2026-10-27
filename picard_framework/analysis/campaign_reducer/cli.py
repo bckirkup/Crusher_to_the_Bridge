@@ -11,9 +11,11 @@ implements the two strictly-offline operations:
 
 Ticket D4 wires the return-path operations — ``status``, ``resume``,
 ``query``, ``collect`` and ``acknowledge`` — in
-``campaign_reducer.return_path``. Every other registered operation is
-present in the namespace and exits nonzero with a ``NOT_YET_IMPLEMENTED``
-status until its phased ticket lands.
+``campaign_reducer.return_path``. Ticket D5 wires ``inventory`` — the
+bounded metadata cold-inventory — in ``campaign_reducer.inventory``.
+Every other registered operation is present in the namespace and exits
+nonzero with a ``NOT_YET_IMPLEMENTED`` status until its phased ticket
+lands.
 The analysis namespace never invokes the campaign simulation launcher.
 """
 from __future__ import annotations
@@ -26,7 +28,7 @@ from pathlib import Path
 from simulation_utils.paths import confine_to_base, prepare_output_directory
 
 from .._io import cwd_root, write_json
-from . import contracts, return_path
+from . import contracts, inventory, return_path
 from .plan import run_plan
 from .validate import run_validate
 
@@ -73,9 +75,13 @@ def build_parser(operations: dict) -> argparse.ArgumentParser:
         extra = spec.get("extra_argv", [])
         for flag, metavar in zip(extra[::2], extra[1::2], strict=True):
             op.add_argument(flag, required=True, **_extra_kwargs(metavar))
-        if name in return_path.OPS:
-            for flag in return_path.OPTIONAL_FLAGS:
-                op.add_argument(flag, default="")
+        optional = (
+            return_path.OPTIONAL_FLAGS if name in return_path.OPS
+            else inventory.OPTIONAL_FLAGS if name == "inventory"
+            else ()
+        )
+        for flag in optional:
+            op.add_argument(flag, default="")
     return parser
 
 
@@ -121,4 +127,6 @@ def main(argv: list[str] | None = None) -> int:
         return run_validate(args.request, args.request_kind, args.out)
     if args.operation in return_path.OPS:
         return return_path.run(args)
+    if args.operation == "inventory":
+        return inventory.run(args)
     return _not_implemented(args, operations[args.operation])

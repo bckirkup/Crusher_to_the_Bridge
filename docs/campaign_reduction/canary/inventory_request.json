@@ -1,0 +1,39 @@
+{
+  "schema_version": "crusher-campaign-distributions/1.0-proposed",
+  "request_id": "inventory-d5-20261027",
+  "operation": "inventory",
+  "source_bucket": "crusherbucket-994254241749-us-east-1-an",
+  "source_roots_allowlist": [
+    "campaign/"
+  ],
+  "derived_exclude_prefixes": [
+    "campaign/_derived/reducer/v1/"
+  ],
+  "scope_register_sha256": "3f73b5847c47b9bee7809c89a7105585f3134f48bba07f08e82545381fb51f88",
+  "budgets": {
+    "max_api_calls_total": 5000,
+    "max_list_pages": 3000,
+    "max_head_requests": 100,
+    "max_source_objects": 2000000,
+    "max_return_bytes": 4000000000,
+    "max_wall_seconds": 5400,
+    "max_cost_usd": 50.0
+  },
+  "admission": {
+    "admission_id": "github-environment-approval:aws-campaign",
+    "approved_scope_hash": "3f73b5847c47b9bee7809c89a7105585f3134f48bba07f08e82545381fb51f88",
+    "approved_cost_usd": 50.0,
+    "expires_utc": "2027-01-01T00:00:00Z"
+  },
+  "price_snapshot": {
+    "id": "s3-us-east-1-2026-10-27-request-declared",
+    "as_of_utc": "2026-10-27T00:00:00Z",
+    "unit_prices_json": {
+      "s3_list_per_1000_requests_usd": 0.005,
+      "s3_get_per_1000_requests_usd": 0.0004,
+      "s3_put_per_1000_requests_usd": 0.005,
+      "s3_storage_gb_month_usd": 0.023,
+      "note": "request-declared ceiling; live pricing reconciled at run close"
+    }
+  }
+}
