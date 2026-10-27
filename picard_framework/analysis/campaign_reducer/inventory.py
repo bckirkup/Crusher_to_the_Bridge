@@ -489,7 +489,11 @@ def _discover_roots(client, bucket: str, counters: _Counters) -> dict:
         counters.charge("max_api_calls_total")
         page = _list_call(
             client, bucket, Bucket=bucket, Delimiter="/",
-            MaxKeys=_PAGE_KEYS,
+            # An omitted Prefix leaves s3:prefix absent from the request
+            # context, so the collector's ``""`` grant cannot match and the
+            # probe denies; sending it explicitly carries ``prefix=`` on
+            # the wire (live-proven on the D5 inventory run).
+            Prefix="", MaxKeys=_PAGE_KEYS,
         )
     except InventoryFailure as exc:
         return {
