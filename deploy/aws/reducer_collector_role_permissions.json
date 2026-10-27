@@ -7,7 +7,7 @@
       "Action": ["s3:ListBucket", "s3:ListBucketVersions", "s3:GetBucketLocation"],
       "Resource": "arn:aws:s3:::<BUCKET>",
       "Condition": {
-        "StringLike": { "s3:prefix": ["campaign", "campaign/*"] }
+        "StringLike": { "s3:prefix": ["", "campaign", "campaign/*"] }
       }
     },
     {
