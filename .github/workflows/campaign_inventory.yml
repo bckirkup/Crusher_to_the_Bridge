@@ -1,0 +1,185 @@
+name: campaign-reduction-inventory
+
+# Bounded cold-inventory leg for the campaign reducer (ticket D5 —
+# review only; nothing runs until the deployer enables environment
+# aws-campaign and dispatches with a pinned request).
+#
+# Chain, all bounded: fetch the immutable bootstrap request through the
+# read-only collector role (sha256-pinned, never an unverified fetch) →
+# `scripts/campaign analysis validate` → `scripts/campaign analysis
+# inventory` on the runner itself (ListObjectsV2/ListObjectVersions only;
+# no Batch — metadata ops stay inside the bootstrap budget) → the frozen
+# inventory, scope delta, coverage and resumable continuation state
+# uploaded as workflow artifacts (the collector role cannot write, so
+# staging into _derived is a dispatcher leg if it is ever needed — not
+# required for the D5 cold list).
+#
+# Resume: re-dispatch with resume_state_uri pointing at the previous
+# run's inventory_state.json artifact (s3:// or https://) — completed
+# pages are not restarted.
+#
+# dry_run=true (the default) validates inputs and emits the plan only —
+# no AWS call and no spend.
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_uri:
+        description: "immutable s3:// bootstrap request under campaign/_derived/reducer/v1/requests/"
+        required: true
+      request_sha256:
+        description: "sha256 of the bootstrap request body (64 lowercase hex)"
+        required: true
+      resume_state_uri:
+        description: "optional URI of a prior inventory_state.json to resume from"
+        required: false
+        default: ""
+      issue_number:
+        description: "optional tracking issue for the run note"
+        required: false
+        default: ""
+      dry_run:
+        description: "validate only; no AWS calls"
+        type: boolean
+        required: true
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: campaign-inventory
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  BUCKET: crusherbucket-994254241749-us-east-1-an
+
+jobs:
+  inventory:
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+    runs-on: ubuntu-latest
+    environment: aws-campaign
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Validate inputs
+        env:
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          case "$REQUEST_URI" in
+            s3://${BUCKET}/campaign/_derived/reducer/v1/requests/*) ;;
+            *) echo "request_uri escapes the derived requests/ prefix"; exit 2 ;;
+          esac
+          echo "$REQUEST_SHA256" | grep -qiE '^[0-9a-f]{64}$'
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "dry_run: inputs valid; no AWS calls made"
+            echo "request_uri=$REQUEST_URI"
+            exit 78
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        if: inputs.dry_run == false
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        if: inputs.dry_run == false
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Sync dependencies
+        if: inputs.dry_run == false
+        run: uv sync --locked --all-extras --no-install-project --no-build
+
+      - name: Assume collector role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        if: inputs.dry_run == false
+        with:
+          role-to-assume: ${{ vars.AWS_REDUCTION_COLLECTOR_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Fetch and pin the request
+        if: inputs.dry_run == false
+        env:
+          REQUEST_URI: ${{ inputs.request_uri }}
+          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+        run: |
+          set -euo pipefail
+          mkdir -p inventory_run
+          aws s3 cp "$REQUEST_URI" inventory_run/request.json
+          got=$(sha256sum inventory_run/request.json | cut -d' ' -f1)
+          want=$(echo "$REQUEST_SHA256" | tr 'A-F' 'a-f')
+          [ "$got" = "$want" ] || { echo "request sha mismatch: $got != $want"; exit 6; }
+
+      - name: Fetch resume state (optional)
+        if: inputs.dry_run == false && inputs.resume_state_uri != ''
+        env:
+          RESUME_STATE_URI: ${{ inputs.resume_state_uri }}
+        run: |
+          set -euo pipefail
+          case "$RESUME_STATE_URI" in
+            s3://${BUCKET}/campaign/*|https://*) ;;
+            *) echo "resume_state_uri must be s3://${BUCKET}/campaign/* or https"; exit 2 ;;
+          esac
+          aws s3 cp "$RESUME_STATE_URI" inventory_run/resume_state.json \
+            || curl -fsSL "$RESUME_STATE_URI" -o inventory_run/resume_state.json
+
+      - name: Validate request
+        if: inputs.dry_run == false
+        run: |
+          set -euo pipefail
+          uv run --frozen --no-build python3 scripts/campaign analysis validate \
+            --request inventory_run/request.json \
+            --out inventory_run/validate \
+            --request-kind bootstrap
+
+      - name: Run bounded inventory
+        if: inputs.dry_run == false
+        run: |
+          set -euo pipefail
+          extra=()
+          if [ -f inventory_run/resume_state.json ]; then
+            extra+=(--resume-state inventory_run/resume_state.json)
+          fi
+          rc=0
+          uv run --frozen --no-build python3 scripts/campaign analysis inventory \
+            --request inventory_run/request.json \
+            --out inventory_run/out "${extra[@]}" || rc=$?
+          echo "inventory_exit=$rc" >> "$GITHUB_ENV"
+          cat inventory_run/out/status.json
+          # Budget-stop (5), partial (8) and blocked (3) still produce
+          # checkpointed artifacts; only contract failure (2) is fatal here.
+          [ "$rc" != "2" ] || exit "$rc"
+          exit 0
+
+      - name: Upload inventory artifacts
+        if: inputs.dry_run == false && always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: inventory-${{ github.run_id }}
+          path: inventory_run/out/
+          retention-days: 90
+
+      - name: Post run note to tracking issue
+        if: >-
+          inputs.dry_run == false && always() &&
+          inputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+        run: |
+          status=$(python3 -c "import json;print(json.load(open('inventory_run/out/status.json'))['status'])" 2>/dev/null || echo "no-status")
+          gh issue comment "$ISSUE_NUMBER" \
+            --repo "$REPO" \
+            --body "D5 inventory run $RUN_ID exited ${inventory_exit:-?} status=$status — artifacts on the workflow run (inventory-$RUN_ID)."
