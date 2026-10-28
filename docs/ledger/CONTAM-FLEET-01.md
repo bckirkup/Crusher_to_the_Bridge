@@ -3,11 +3,12 @@
 **Commit:** a35eb254
 **Pathogens:** all
 **Status:** measured
-**Measured at:** a35eb254 (working tree + fleet-compare tool PR)
+**Measured at:** a35eb254
 
 First fleet-wide native vs ContamX solver comparison: all 80 platforms ×
 9 operational arms × 2 contamination scenarios (respiratory decay 0.10;
-chemical tracer decay 0), 3 repeats × 12 epochs, via
+chemical tracer decay 0), 3 repeats × 12 epochs. Sweep ran on the working
+tree at a35eb254 plus this change's tool files, via
 `tools/contam_fleet_compare.py` + `data/config/contam_compare/fleet_arms.json`.
 Readout: `docs/contam_fleet_compare.md`; generated per-hull table:
 `docs/contam_fleet_compare_table.md`.
