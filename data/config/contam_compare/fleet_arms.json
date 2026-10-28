@@ -1,0 +1,71 @@
+{
+  "description": "Fleet native-vs-ContamX comparison arms. Each arm mutates the platform's air_flow_paths JSON (field-mutating ops) and/or an engine-level parameter (oa_fraction / filter_efficiency), and both engines see the same mutation: native reads the mutated JSON; ContamX re-exports and re-solves the PRJ for field-mutating ops, or reuses the baseline solved field for engine-level ops.",
+  "inject_mass": 1000000.0,
+  "epochs": 12,
+  "repeats": 3,
+  "baseline_filter_efficiency": 0.5,
+  "scenarios": {
+    "respiratory": {
+      "natural_decay_rate": 0.1,
+      "description": "Respiratory aerosol: shipped airborne-pool settings (0.10/epoch settling + inactivation), HVAC filtration applied."
+    },
+    "chemical_tracer": {
+      "natural_decay_rate": 0.0,
+      "description": "Conservative chemical/particulate surrogate: no inactivation or settling; HVAC filtration still applies on ducted paths."
+    }
+  },
+  "arms": {
+    "baseline": {
+      "ops": [],
+      "description": "Shipped airflow and engine parameters."
+    },
+    "ahu_casualty": {
+      "ops": [
+        {"op": "set_duty", "select": "largest_supply_group", "value": 0.0}
+      ],
+      "description": "Main habitability AHU casualty: largest-volume supply group cut to hvac_duty 0 (declared-state sibling of hull_state_audit's hvac_casualty_main_ahu)."
+    },
+    "night_setback": {
+      "ops": [
+        {"op": "set_duty", "value": 0.5}
+      ],
+      "description": "Night setback: every HVAC group and the top-level hvac_duty at 0.5."
+    },
+    "ach_surge": {
+      "ops": [
+        {"op": "scale_ach", "factor": 2.0}
+      ],
+      "description": "Ventilation surge: every HVAC group's declared ach doubled."
+    },
+    "zone_isolation": {
+      "ops": [
+        {"op": "drop_links", "key": "cross_zone_links"}
+      ],
+      "description": "Zone isolation: every cross-zone link shut (dampers/hatches between ventilation zones closed)."
+    },
+    "hatches_closed": {
+      "ops": [
+        {"op": "drop_links", "key": "adjacency"}
+      ],
+      "description": "Internal hatches/doors shut: every passive adjacency path removed."
+    },
+    "outdoor_air": {
+      "ops": [
+        {"op": "set_oa", "value": 1.0}
+      ],
+      "description": "Full outdoor air (purge): oa_fraction 1.0 — no recirculated mass returns through the AHU plenum (engine-level on both sides)."
+    },
+    "full_recirc": {
+      "ops": [
+        {"op": "set_oa", "value": 0.0}
+      ],
+      "description": "Full recirculation: oa_fraction 0.0 — maximum recirculated mixing (engine-level on both sides)."
+    },
+    "filter_merv13": {
+      "ops": [
+        {"op": "set_filter", "value": 0.9}
+      ],
+      "description": "Filter upgrade corner: filter_efficiency 0.50 -> 0.90, the Healthy Sail Panel's MERV-13 class figure (era-sweep corner, not a shipped value)."
+    }
+  }
+}

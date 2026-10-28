@@ -145,6 +145,7 @@ python3 presidio_runner.py \
 | [CONTAM_INTEROP.md](CONTAM_INTEROP.md) | Living — Path A ContamX interop, SIM reader, compare tools |
 | [CONTAM_PRJ_AUDIT.md](CONTAM_PRJ_AUDIT.md) | Living audit — fiction PRJ realism |
 | [contam_engine_divergence.md](contam_engine_divergence.md) | Measured — native vs ContamX divergence; shunt mechanism corrected 2026-10-16 (terminals enforce Fahs×sched; stale-map misread). Commissioned-terminal mode + hull→solver proof (ledgers CONTAM-DIVERGENCE-01, CONTAM-COMMISSION-01) |
+| [contam_fleet_compare.md](contam_fleet_compare.md) | Measured — fleet-wide (80 platforms) native vs ContamX: speed scaling, respiratory/chemical-tracer scenarios, 9 operational knob arms with response parity; committed vs export authoring split; expressibility gaps (ledger CONTAM-FLEET-01; generated table contam_fleet_compare_table.md) |
 | [SHIP_BLUEPRINT_IMPORT.md](SHIP_BLUEPRINT_IMPORT.md) | Implemented (`tools/ship_blueprint_import/`) |
 | [GA_IMPORT_APPROACH.md](GA_IMPORT_APPROACH.md) | Proposal + first proof — agent-driven GA digest; R-338 Gordon Gunter, Castle corvette + AM-55 Raven imported with crew manifests |
 | [hull_model_audit.md](hull_model_audit.md) | Living audit — `tools/hull_audit.py` static realism battery (referential integrity, topology, flow closure, mode consistency, derived metrics + fleet outliers) over all 22 platform bundles; first-run deviation report included |
