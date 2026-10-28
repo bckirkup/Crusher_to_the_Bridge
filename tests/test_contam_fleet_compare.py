@@ -164,3 +164,100 @@ def test_run_platform_live_contamx_cells(tmp_path) -> None:
     surge = report["arms"]["ach_surge"]["cells"]["respiratory"]
     assert surge["response_parity"] is not None
     assert report["arms"]["ach_surge"]["field_seconds"]
+
+
+def test_main_native_only_writes_outputs(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(cfc, "find_contamx", lambda *a, **k: None)
+    out_rel = "telemetry_buffer/contam_fleet_compare/test_cli"
+    md_rel = "telemetry_buffer/contam_fleet_compare/test_cli_table.md"
+    out_full = REPO_ROOT / out_rel
+    md_full = REPO_ROOT / md_rel
+    try:
+        rc = cfc.main([
+            "--platforms", "destroyer_baseline",
+            "--arms", "baseline", "zone_isolation",
+            "--scenarios", "respiratory",
+            "--epochs", "2", "--repeats", "1",
+            "--out", out_rel, "--md-out", md_rel,
+        ])
+        assert rc == 0
+        latest = out_full / "fleet_compare_latest.json"
+        assert latest.is_file()
+        data = json.loads(latest.read_text(encoding="utf-8"))
+        assert data["platforms"][0]["platform"] == "destroyer_baseline"
+        assert md_full.is_file()
+        assert "| destroyer_baseline |" in md_full.read_text(
+            encoding="utf-8")
+    finally:
+        import shutil
+        shutil.rmtree(out_full, ignore_errors=True)
+        md_full.unlink(missing_ok=True)
+
+
+def test_main_rejects_unknown_arm_and_scenario() -> None:
+    with pytest.raises(SystemExit):
+        cfc.main(["--platforms", "destroyer_baseline", "--arms", "bogus"])
+    with pytest.raises(SystemExit):
+        cfc.main(["--platforms", "destroyer_baseline",
+                  "--scenarios", "bogus"])
+
+
+def test_platform_ids_explicit_and_all() -> None:
+    assert cfc._platform_ids(["destroyer_baseline"]) == [
+        "destroyer_baseline",
+    ]
+    all_ids = cfc._platform_ids(None)
+    assert len(all_ids) >= 79
+    assert "destroyer_baseline" in all_ids
+    with pytest.raises(Exception):
+        cfc._platform_ids(["no/such"])
+
+
+def test_response_parity_no_overlap() -> None:
+    parity = cfc._response_parity(
+        {"z1": 1.0}, {"z1": 1.0}, {"z2": 2.0}, {"z2": 1.0},
+    )
+    assert parity["zones_moved_both"] == 0
+    assert parity["sign_agreement_frac"] is None
+    assert parity["magnitude_ratio_median"] is None
+
+
+def test_injection_zone_fallback_without_hvac() -> None:
+    spatial = {"zones": [
+        {"id": "a", "volume_m3": 10.0},
+        {"id": "b", "volume_m3": 50.0},
+    ]}
+    assert cfc._injection_zone(spatial, {"hvac_zones": []}) == "b"
+
+
+def test_drop_links_and_scale_ach_ops() -> None:
+    _spatial, airflow = _load_destroyer()
+    ops = [
+        {"op": "drop_links", "key": "cross_zone_links"},
+        {"op": "scale_ach", "factor": 2.0},
+    ]
+    air, meta = cfc._apply_arm_ops(airflow, ops, {})
+    assert air["cross_zone_links"] == []
+    assert meta["edits"]
+    with pytest.raises(ValueError):
+        cfc._apply_arm_ops(airflow, [{"op": "bogus"}], {})
+
+
+def test_arm_response_without_baseline() -> None:
+    cell = {"native": {"dose_per_zone": {"z": 1.0},
+                       "retained_fraction": 0.5}}
+    assert cfc._arm_response(cell, {}, "respiratory") is None
+
+
+def test_print_platform_summary_handles_empty(capsys) -> None:
+    report = {
+        "platform": "p", "n_zones": 0, "n_hvac_groups": 0,
+        "has_committed_prj": False, "injection_zone": "",
+        "inject_mass": 0.0,
+        "arms": {"a": {"cells": {}, "errors": ["e1"]}},
+        "errors": [],
+    }
+    cfc._print_platform_summary(report)
+    out = capsys.readouterr().out
+    assert "=== p " in out
+    assert "ERROR a: e1" in out

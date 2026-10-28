@@ -46,6 +46,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import dataclasses
 import json
 import os
 import statistics
@@ -81,6 +82,7 @@ _SPATIAL = "spatial_layout.json"
 _AIRFLOW = "air_flow_paths.json"
 _FIELD_OPS = frozenset({"set_duty", "scale_ach", "drop_links"})
 _EPS = 1e-9
+_MAX_EPOCHS = 5000
 
 
 # ── spec / platform loading ──────────────────────────────────────────────
@@ -134,6 +136,76 @@ def _largest_supply_group(airflow: dict[str, Any],
     )
 
 
+def _op_set_oa(
+    air: dict[str, Any], op: dict[str, Any],
+    engine_args: dict[str, Any], edits: list[str],
+    volume: dict[str, float],
+) -> None:
+    val = float(op["value"])
+    air["oa_fraction"] = val
+    for g in air.get("hvac_zones", []):
+        g["oa_fraction"] = val
+    engine_args["oa_fraction"] = val
+    edits.append(f"oa_fraction={val} on all groups")
+
+
+def _op_set_duty(
+    air: dict[str, Any], op: dict[str, Any],
+    engine_args: dict[str, Any], edits: list[str],
+    volume: dict[str, float],
+) -> None:
+    val = float(op["value"])
+    targets = _duty_targets(air, op, volume)
+    for g in targets:
+        g["hvac_duty"] = val
+    if op.get("select") != "largest_supply_group":
+        air["hvac_duty"] = val
+    edits.append(
+        f"hvac_duty={val} on {len(targets)} group(s): "
+        + ", ".join(sorted(str(g.get("id")) for g in targets))
+    )
+
+
+def _op_scale_ach(
+    air: dict[str, Any], op: dict[str, Any],
+    engine_args: dict[str, Any], edits: list[str],
+    volume: dict[str, float],
+) -> None:
+    factor = float(op["factor"])
+    for g in air.get("hvac_zones", []):
+        g["ach"] = float(g.get("ach", 0.0)) * factor
+    edits.append(f"ach x{factor} on all groups")
+
+
+def _op_drop_links(
+    air: dict[str, Any], op: dict[str, Any],
+    engine_args: dict[str, Any], edits: list[str],
+    volume: dict[str, float],
+) -> None:
+    key = str(op["key"])
+    dropped = len(air.get(key) or [])
+    air[key] = []
+    edits.append(f"dropped {dropped} {key}")
+
+
+def _op_set_filter(
+    air: dict[str, Any], op: dict[str, Any],
+    engine_args: dict[str, Any], edits: list[str],
+    volume: dict[str, float],
+) -> None:
+    engine_args["filter_efficiency"] = float(op["value"])
+    edits.append(f"filter_efficiency={op['value']}")
+
+
+_OP_HANDLERS = {
+    "set_oa": _op_set_oa,
+    "set_duty": _op_set_duty,
+    "scale_ach": _op_scale_ach,
+    "drop_links": _op_drop_links,
+    "set_filter": _op_set_filter,
+}
+
+
 def _apply_arm_ops(
     airflow: dict[str, Any], ops: list[dict[str, Any]],
     volume: dict[str, float],
@@ -144,39 +216,10 @@ def _apply_arm_ops(
     edits: list[str] = []
     for op in ops:
         name = str(op.get("op"))
-        if name == "set_oa":
-            val = float(op["value"])
-            air["oa_fraction"] = val
-            for g in air.get("hvac_zones", []):
-                g["oa_fraction"] = val
-            engine_args["oa_fraction"] = val
-            edits.append(f"oa_fraction={val} on all groups")
-        elif name == "set_duty":
-            val = float(op["value"])
-            targets = _duty_targets(air, op, volume)
-            for g in targets:
-                g["hvac_duty"] = val
-            if op.get("select") != "largest_supply_group":
-                air["hvac_duty"] = val
-            edits.append(
-                f"hvac_duty={val} on {len(targets)} group(s): "
-                + ", ".join(sorted(str(g.get("id")) for g in targets))
-            )
-        elif name == "scale_ach":
-            factor = float(op["factor"])
-            for g in air.get("hvac_zones", []):
-                g["ach"] = float(g.get("ach", 0.0)) * factor
-            edits.append(f"ach x{factor} on all groups")
-        elif name == "drop_links":
-            key = str(op["key"])
-            dropped = len(air.get(key) or [])
-            air[key] = []
-            edits.append(f"dropped {dropped} {key}")
-        elif name == "set_filter":
-            engine_args["filter_efficiency"] = float(op["value"])
-            edits.append(f"filter_efficiency={op['value']}")
-        else:
+        handler = _OP_HANDLERS.get(name)
+        if handler is None:
             raise ValueError(f"unknown arm op {name!r}")
+        handler(air, op, engine_args, edits, volume)
     return air, {"engine_args": engine_args, "edits": edits}
 
 
@@ -282,7 +325,7 @@ def _run_trajectory(
 ) -> tuple[list[dict[str, float]], dict[str, float]]:
     mass = dict(initial_mass)
     traj: list[dict[str, float]] = []
-    for _ in range(epochs):
+    for _ in range(min(max(int(epochs), 0), _MAX_EPOCHS)):
         mass = engine.transport_step(mass)
         traj.append({
             zid: (engine.zone_nodes[zid].concentration(m)
@@ -525,85 +568,138 @@ def run_platform(
         _apply = _apply_arm_ops(airflow, arm.get("ops", []), volume)
         air_mut, arm_meta = _apply[0], _apply[1]
         needs_field = _arm_needs_field(arm)
-        report["arms"][arm_id] = _run_arm(
-            arm_id, arm_meta, spatial, air_mut, spec,
-            baseline_filt=baseline_filt, baseline_oa=baseline_oa,
+        ctx = _ArmCtx(
+            spatial=spatial, air_mut=air_mut, spec=spec,
             initial_mass=initial_mass, epochs=epochs, repeats=repeats,
-            tmp_dir=tmp_dir, binary=binary, needs_field=needs_field,
+            tmp_dir=tmp_dir, binary=binary, scenarios=scenarios,
+            base_doses=base_doses, baseline_filt=baseline_filt,
+            baseline_oa=baseline_oa,
+        )
+        report["arms"][arm_id] = _run_arm(
+            ctx, arm_id, arm_meta, needs_field=needs_field,
             prj_rel=prj_rel if has_prj else None,
-            scenarios=scenarios, base_doses=base_doses,
         )
     return report
 
 
+@dataclasses.dataclass(frozen=True)
+class _ArmCtx:
+    """Shared per-platform per-arm run context."""
+
+    spatial: dict[str, Any]
+    air_mut: dict[str, Any]
+    spec: dict[str, Any]
+    initial_mass: dict[str, float]
+    epochs: int
+    repeats: int
+    tmp_dir: str
+    binary: str | None
+    scenarios: list[str]
+    base_doses: dict[str, dict[str, Any]]
+    baseline_filt: float
+    baseline_oa: float
+
+
+def _solve_arm_field(
+    ctx: _ArmCtx, arm_id: str, needs_field: bool,
+    errors: list[Any],
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """Resolve the arm's ContamX field; records solve errors, never raises."""
+    try:
+        return _resolve_arm_field(
+            ctx.spatial, ctx.air_mut, arm_id=arm_id,
+            needs_field=needs_field, tmp_dir=ctx.tmp_dir,
+            binary=ctx.binary, repeats=ctx.repeats,
+            base_doses=ctx.base_doses,
+        )
+    except (ContamXUnavailable, ValueError, OSError) as exc:
+        errors.append(f"ContamX field solve failed: {exc}")
+        return None, None
+
+
+def _solve_committed_field(
+    ctx: _ArmCtx, prj_rel: str, errors: list[Any],
+) -> dict[str, Any] | None:
+    """Baseline-arm committed-.prj solve + timing into the arm report."""
+    try:
+        committed, timing = _timed_field(
+            ctx.spatial, ctx.air_mut, tmp_dir=ctx.tmp_dir,
+            binary=ctx.binary, prj_rel=prj_rel, repeats=ctx.repeats,
+        )
+    except (ContamXUnavailable, ValueError, OSError) as exc:
+        errors.append(f"committed prj solve failed: {exc}")
+        return None
+    ctx.base_doses["committed_field"] = committed
+    return {"committed_field_seconds": timing}
+
+
+def _attach_committed_cell(
+    ctx: _ArmCtx, cell: dict[str, Any], params: dict[str, float],
+) -> None:
+    committed = ctx.base_doses.get("committed_field")
+    if committed is None:
+        return
+    cell["contamx_committed"] = _committed_cell(
+        ctx.spatial, committed, params=params,
+        initial_mass=ctx.initial_mass, epochs=ctx.epochs,
+        repeats=ctx.repeats,
+    )
+    cell["divergence_committed"] = _divergence_pair(
+        cell, "contamx_committed",
+    )
+
+
+def _run_arm_scenario(
+    ctx: _ArmCtx, arm_id: str, arm_meta: dict[str, Any],
+    scen_id: str, cx_field: dict[str, Any] | None,
+    errors: list[Any],
+) -> dict[str, Any] | None:
+    scen = ctx.spec["scenarios"][scen_id]
+    params = _engine_params(
+        arm_meta, scen, ctx.baseline_filt, ctx.baseline_oa,
+    )
+    try:
+        cell = _run_cell(
+            ctx.spatial, ctx.air_mut, params=params,
+            initial_mass=ctx.initial_mass, epochs=ctx.epochs,
+            repeats=ctx.repeats, cx_field=cx_field, binary=ctx.binary,
+        )
+    except (ContamXUnavailable, ValueError, OSError) as exc:
+        errors.append({"cell": scen_id, "error": str(exc)})
+        return None
+    if arm_id == "baseline" and ctx.binary is not None:
+        _attach_committed_cell(ctx, cell, params)
+    _record_baseline(cell, arm_id, scen_id, ctx.base_doses)
+    if arm_id != "baseline":
+        cell["response_parity"] = _arm_response(
+            cell, ctx.base_doses, scen_id,
+        )
+    return cell
+
+
 def _run_arm(
-    arm_id: str, arm_meta: dict[str, Any], spatial: dict[str, Any],
-    air_mut: dict[str, Any], spec: dict[str, Any], *,
-    baseline_filt: float, baseline_oa: float,
-    initial_mass: dict[str, float], epochs: int, repeats: int,
-    tmp_dir: str, binary: str | None, needs_field: bool,
-    prj_rel: str | None, scenarios: list[str],
-    base_doses: dict[str, dict[str, Any]],
+    ctx: _ArmCtx, arm_id: str, arm_meta: dict[str, Any], *,
+    needs_field: bool, prj_rel: str | None,
 ) -> dict[str, Any]:
     out: dict[str, Any] = {"edits": arm_meta["edits"], "cells": {}}
+    errors = out.setdefault("errors", [])
     cx_field = field_timing = None
-    if binary is not None:
-        try:
-            cx_field, field_timing = _resolve_arm_field(
-                spatial, air_mut, arm_id=arm_id, needs_field=needs_field,
-                tmp_dir=tmp_dir, binary=binary, repeats=repeats,
-                base_doses=base_doses,
-            )
-        except (ContamXUnavailable, ValueError, OSError) as exc:
-            out.setdefault("errors", []).append(
-                f"ContamX field solve failed: {exc}"
-            )
+    if ctx.binary is not None:
+        cx_field, field_timing = _solve_arm_field(
+            ctx, arm_id, needs_field, errors,
+        )
         if cx_field is None:
-            out.setdefault("errors", []).append(
-                "ContamX field unavailable for this arm"
-            )
-    if arm_id == "baseline" and prj_rel is not None and binary is not None:
-        try:
-            committed, committed_timing = _timed_field(
-                spatial, air_mut, tmp_dir=tmp_dir, binary=binary,
-                prj_rel=prj_rel, repeats=repeats,
-            )
-        except (ContamXUnavailable, ValueError, OSError) as exc:
-            out.setdefault("errors", []).append(
-                f"committed prj solve failed: {exc}"
-            )
-        else:
-            out["committed_field_seconds"] = committed_timing
-            base_doses["committed_field"] = committed
-    for scen_id in scenarios:
-        scen = spec["scenarios"][scen_id]
-        params = _engine_params(arm_meta, scen, baseline_filt, baseline_oa)
-        try:
-            cell = _run_cell(
-                spatial, air_mut, params=params,
-                initial_mass=initial_mass, epochs=epochs,
-                repeats=repeats, cx_field=cx_field, binary=binary,
-            )
-        except (ContamXUnavailable, ValueError, OSError) as exc:
-            out.setdefault("errors", []).append(
-                {"cell": scen_id, "error": str(exc)}
-            )
-            continue
-        if arm_id == "baseline" and binary is not None:
-            committed = base_doses.get("committed_field")
-            if committed is not None:
-                cell["contamx_committed"] = _committed_cell(
-                    spatial, committed, params=params,
-                    initial_mass=initial_mass, epochs=epochs,
-                    repeats=repeats, binary=binary,
-                )
-                cell["divergence_committed"] = _divergence_pair(
-                    cell, "contamx_committed",
-                )
-        out["cells"][scen_id] = cell
-        _record_baseline(cell, arm_id, scen_id, base_doses)
-        if arm_id != "baseline":
-            cell["response_parity"] = _arm_response(cell, base_doses, scen_id)
+            errors.append("ContamX field unavailable for this arm")
+    if arm_id == "baseline" and prj_rel is not None and ctx.binary:
+        committed_meta = _solve_committed_field(ctx, prj_rel, errors)
+        if committed_meta is not None:
+            out.update(committed_meta)
+    for scen_id in ctx.scenarios:
+        cell = _run_arm_scenario(
+            ctx, arm_id, arm_meta, scen_id, cx_field, errors,
+        )
+        if cell is not None:
+            out["cells"][scen_id] = cell
     if field_timing is not None:
         out["field_seconds"] = field_timing
     return out
@@ -631,7 +727,7 @@ def _resolve_arm_field(
 def _committed_cell(
     spatial: dict[str, Any], committed: dict[str, Any], *,
     params: dict[str, float], initial_mass: dict[str, float],
-    epochs: int, repeats: int, binary: str,
+    epochs: int, repeats: int,
 ) -> dict[str, Any]:
     run = _timed_traj(
         lambda: _contamx_engine(
@@ -743,12 +839,12 @@ def _write_outputs(
                         encoding="utf-8") as fh:
         json.dump(bundle, fh, indent=1)
     if md_out:
-        _write_markdown(reports, spec, md_out, binary)
+        _write_markdown(reports, md_out, binary)
     return path
 
 
 def _write_markdown(
-    reports: list[dict[str, Any]], spec: dict[str, Any],
+    reports: list[dict[str, Any]],
     md_out: str, binary: str | None,
 ) -> None:
     lines = [
