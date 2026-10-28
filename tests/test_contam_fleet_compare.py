@@ -261,3 +261,74 @@ def test_print_platform_summary_handles_empty(capsys) -> None:
     out = capsys.readouterr().out
     assert "=== p " in out
     assert "ERROR a: e1" in out
+
+
+def _stub_field(spatial, airflow):
+    prj_text, entries = cfc.export_prj_with_path_map(
+        spatial, airflow, ahs_terminal_mode="commissioned",
+    )
+    return {
+        "entries": entries,
+        "flows": {i: 50.0 for i in range(len(entries))},
+    }
+
+
+def _patch_stub_field(monkeypatch) -> None:
+    def fake_timed_field(spatial, air, *, tmp_dir, binary,
+                         prj_rel=None, repeats=1):
+        return _stub_field(spatial, air), {
+            "seconds_mean": 0.001, "seconds_values": [0.001],
+        }
+    monkeypatch.setattr(cfc, "_timed_field", fake_timed_field)
+
+
+def test_run_platform_stubbed_contamx_lanes(tmp_path, monkeypatch) -> None:
+    _patch_stub_field(monkeypatch)
+    spec = _spec()
+    report = cfc.run_platform(
+        "destroyer_baseline", spec,
+        arms=["baseline", "ach_surge", "ahu_casualty"],
+        scenarios=["respiratory"], repeats=1, epochs=2,
+        binary="stub-contamx", tmp_root=str(tmp_path),
+    )
+    base = report["arms"]["baseline"]["cells"]["respiratory"]
+    assert "contamx" in base
+    assert "divergence" in base
+    assert "contamx_committed" in base
+    assert "divergence_committed" in base
+    assert report["arms"]["baseline"]["field_seconds"]["seconds_mean"] > 0
+    assert report["arms"]["baseline"]["committed_field_seconds"]
+    for arm_id in ("ach_surge", "ahu_casualty"):
+        cell = report["arms"][arm_id]["cells"]["respiratory"]
+        assert "contamx" in cell
+        assert cell["response_parity"] is not None
+
+
+def test_run_platform_stubbed_field_solve_failure(
+        tmp_path, monkeypatch) -> None:
+    def boom(*a, **k):
+        raise ValueError("no solve")
+    monkeypatch.setattr(cfc, "_timed_field", boom)
+    spec = _spec()
+    report = cfc.run_platform(
+        "destroyer_baseline", spec,
+        arms=["baseline"], scenarios=["respiratory"],
+        repeats=1, epochs=2, binary="stub-contamx",
+        tmp_root=str(tmp_path),
+    )
+    arm = report["arms"]["baseline"]
+    assert "native" in arm["cells"]["respiratory"]
+    assert any("solve failed" in str(e) for e in arm["errors"])
+    assert any("unavailable" in str(e) for e in arm["errors"])
+
+
+def test_run_cell_without_contamx(tmp_path) -> None:
+    spatial, airflow = _load_destroyer()
+    cell = cfc._run_cell(
+        spatial, airflow,
+        params={"decay": 0.1, "filt": 0.5, "oa": 0.2},
+        initial_mass={z["id"]: 1000.0
+                      for z in spatial.get("zones", [])[:1]},
+        epochs=2, repeats=1, cx_field=None, binary=None,
+    )
+    assert set(cell) == {"native"}
