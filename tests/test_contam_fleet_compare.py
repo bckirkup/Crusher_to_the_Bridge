@@ -209,7 +209,7 @@ def test_platform_ids_explicit_and_all() -> None:
     all_ids = cfc._platform_ids(None)
     assert len(all_ids) >= 79
     assert "destroyer_baseline" in all_ids
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match="platform id"):
         cfc._platform_ids(["no/such"])
 
 
