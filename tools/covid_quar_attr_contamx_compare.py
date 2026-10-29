@@ -34,11 +34,17 @@ import os
 import statistics
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, REPO_ROOT)
 
 from picard_framework.covid_boarding_screen import (  # noqa: E402
     enumerate_cells,
     load_design,
+)
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    resolve_repo_path,
+    validated_open,
 )
 
 ATTRIBUTION_DESIGN_REL = os.path.join(
@@ -72,9 +78,18 @@ PROBE_EXTRA_COLUMNS = [
 TAKEOFF_ONSETS = 10  # design.takeoff_recorded_onsets
 
 
+def _resolve_cli_path(path: str) -> str:
+    """Resolve a CLI path argument (S8707): absolute as-is, relative under the repo."""
+    if os.path.isabs(path):
+        return os.path.realpath(path)
+    return resolve_repo_path(REPO_ROOT, path)
+
+
 def _load_settled_rows(csv_path: str, theta: float, arm_id: str) -> dict[int, dict]:
     rows: dict[int, dict] = {}
-    with open(csv_path, newline="", encoding="utf-8") as fh:
+    with validated_open(
+        csv_path, "r", allowed_roots=(REPO_ROOT,), newline="", encoding="utf-8",
+    ) as fh:
         for row in csv.DictReader(fh):
             if float(row["theta"]) == theta and row["arm_id"] == arm_id:
                 rows[int(row["seed"])] = row
@@ -144,7 +159,9 @@ def _lane_rows(directory: str, cells) -> dict[int, dict]:
         path = os.path.join(directory, cell.key)
         if not os.path.isfile(path):
             continue
-        with open(path, encoding="utf-8") as fh:
+        with validated_open(
+            path, "r", allowed_roots=(directory,), encoding="utf-8",
+        ) as fh:
             payload = json.load(fh)
         rows[cell.seed] = _payload_row(payload, cell)
     return rows
@@ -303,7 +320,9 @@ def _native_parity(native_dir: str, cells, settled_rows: dict[int, dict]) -> dic
         path = os.path.join(native_dir, cell.key)
         if not os.path.isfile(path):
             continue
-        with open(path, encoding="utf-8") as fh:
+        with validated_open(
+            path, "r", allowed_roots=(native_dir,), encoding="utf-8",
+        ) as fh:
             payload = json.load(fh)
         row = _payload_row(payload, cell)
         checked.append(cell.seed)
@@ -337,7 +356,12 @@ def main() -> int:
     parser.add_argument("--repo-root", default=os.getcwd())
     args = parser.parse_args()
 
-    design = load_design(ATTRIBUTION_DESIGN_REL, repo_root=args.repo_root)
+    repo_root = _resolve_cli_path(args.repo_root)
+    probe_dir = _resolve_cli_path(args.probe_dir)
+    native_dir = _resolve_cli_path(args.native_dir) if args.native_dir else ""
+    settled_csv = _resolve_cli_path(args.settled_csv)
+
+    design = load_design(ATTRIBUTION_DESIGN_REL, repo_root=repo_root)
     cells = [
         c for c in enumerate_cells(design)
         if c.theta == args.theta and c.arm_id == args.arm
@@ -348,7 +372,7 @@ def main() -> int:
         )
 
     settled_rows = _load_settled_rows(
-        args.settled_csv, args.theta, args.arm,
+        settled_csv, args.theta, args.arm,
     )
     missing_settled = [c.seed for c in cells if c.seed not in settled_rows]
     if missing_settled:
@@ -357,7 +381,7 @@ def main() -> int:
             f"{args.arm} @ theta {args.theta}",
         )
 
-    probe_rows = _lane_rows(args.probe_dir, cells)
+    probe_rows = _lane_rows(probe_dir, cells)
     missing_probe = [c.seed for c in cells if c.seed not in probe_rows]
     if missing_probe:
         print(f"WARNING: missing probe payloads for seeds {missing_probe}",
@@ -368,9 +392,9 @@ def main() -> int:
     verdict = _verdict_shift(settled_rows, probe_rows)
     parity = None
     paired = None
-    if args.native_dir:
-        parity = _native_parity(args.native_dir, cells, settled_rows)
-        head_rows = _lane_rows(args.native_dir, cells)
+    if native_dir:
+        parity = _native_parity(native_dir, cells, settled_rows)
+        head_rows = _lane_rows(native_dir, cells)
         if head_rows:
             paired = _paired_deltas(probe_rows, head_rows)
 
@@ -386,8 +410,8 @@ def main() -> int:
             "theta": args.theta, "arm_id": args.arm,
             "seeds": [c.seed for c in cells],
         },
-        "settled_source": args.settled_csv,
-        "probe_dir": args.probe_dir,
+        "settled_source": settled_csv,
+        "probe_dir": probe_dir,
         "probe_engine_classes": engine_classes,
         "probe_all_contamx": engine_classes == ["ContamXTransportEngine"],
         "invalid_reasons": invalid,
@@ -400,10 +424,16 @@ def main() -> int:
     print(json.dumps(summary, indent=2, default=str))
 
     if args.out_csv:
+        # Sonar pythonsecurity:S8707 — output paths stay under the repo.
+        out_csv = resolve_repo_path(REPO_ROOT, args.out_csv)
+        prepare_output_directory(
+            os.path.dirname(out_csv), allowed_roots=(REPO_ROOT,),
+        )
         fieldnames = SURFACE_COLUMNS + PROBE_EXTRA_COLUMNS
-        os.makedirs(os.path.dirname(os.path.abspath(args.out_csv)),
-                    exist_ok=True)
-        with open(args.out_csv, "w", newline="", encoding="utf-8") as fh:
+        with validated_open(
+            out_csv, "w", allowed_roots=(REPO_ROOT,), newline="",
+            encoding="utf-8",
+        ) as fh:
             writer = csv.DictWriter(
                 fh, fieldnames=fieldnames, extrasaction="ignore",
             )
@@ -412,9 +442,13 @@ def main() -> int:
                 if cell.seed in probe_rows:
                     writer.writerow(probe_rows[cell.seed])
     if args.out_json:
-        os.makedirs(os.path.dirname(os.path.abspath(args.out_json)),
-                    exist_ok=True)
-        with open(args.out_json, "w", encoding="utf-8") as fh:
+        out_json = resolve_repo_path(REPO_ROOT, args.out_json)
+        prepare_output_directory(
+            os.path.dirname(out_json), allowed_roots=(REPO_ROOT,),
+        )
+        with validated_open(
+            out_json, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as fh:
             json.dump(summary, fh, indent=2, default=str)
     return 0
 
