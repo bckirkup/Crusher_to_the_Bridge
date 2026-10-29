@@ -14,10 +14,12 @@ name: campaign-reduction-pilot
 #     rendered worker request under requests/ and submits ONE Batch job
 #     on the proven picard-reducer jobdef.
 #   collect job (collector role: bounded read + receipt/ack writes) —
-#     polls `analysis status --attempt` until the pilot settles, then
-#     `analysis collect` pulls RECEIPT.json + pilot_evidence.json into
-#     workflow artifacts, and posts the bounded run envelope on the
-#     tracking issue.
+#     fetches and sha-pins the bootstrap request, validates
+#     `--request-kind bootstrap`, polls `analysis status --attempt-id`
+#     until the pilot settles, then
+#     `analysis collect --receipt` pulls RECEIPT.json +
+#     pilot_evidence.json into workflow artifacts, and posts the
+#     bounded run envelope on the tracking issue.
 #
 # dry_run=true (the default) validates inputs only — no AWS call, no
 # spend. The pilot itself spends real S3/Batch money; it is gated by
@@ -37,6 +39,12 @@ on:
         required: true
       specimens_sha256:
         description: "sha256 of the specimens body (64 lowercase hex)"
+        required: true
+      collect_request_uri:
+        description: "immutable s3:// admitted bootstrap request (bounded return ops) under campaign/_derived/reducer/v1/requests/"
+        required: true
+      collect_request_sha256:
+        description: "sha256 of the bootstrap request body (64 lowercase hex)"
         required: true
       issue_number:
         description: "tracking issue for the run envelope"
@@ -212,17 +220,25 @@ jobs:
           role-to-assume: ${{ vars.AWS_REDUCTION_COLLECTOR_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Fetch and pin the request (collector leg re-fetches)
+      - name: Fetch and pin the bootstrap request (return ops doc)
         env:
-          REQUEST_URI: ${{ inputs.request_uri }}
-          REQUEST_SHA256: ${{ inputs.request_sha256 }}
+          COLLECT_REQUEST_URI: ${{ inputs.collect_request_uri }}
+          COLLECT_REQUEST_SHA256: ${{ inputs.collect_request_sha256 }}
         run: |
           set -euo pipefail
           mkdir -p pilot_run
-          aws s3 cp "$REQUEST_URI" pilot_run/request.json
-          got=$(sha256sum pilot_run/request.json | cut -d' ' -f1)
-          want=$(echo "$REQUEST_SHA256" | tr 'A-F' 'a-f')
-          [ "$got" = "$want" ] || { echo "request sha mismatch"; exit 6; }
+          case "$COLLECT_REQUEST_URI" in
+            s3://${BUCKET}/${DERIVED}/requests/*) ;;
+            *) echo "collect_request_uri escapes the derived requests/ prefix"; exit 2 ;;
+          esac
+          aws s3 cp "$COLLECT_REQUEST_URI" pilot_run/bootstrap.json
+          got=$(sha256sum pilot_run/bootstrap.json | cut -d' ' -f1)
+          want=$(echo "$COLLECT_REQUEST_SHA256" | tr 'A-F' 'a-f')
+          [ "$got" = "$want" ] || { echo "bootstrap request sha mismatch"; exit 6; }
+          uv run --frozen --no-build python3 scripts/campaign analysis validate \
+            --request pilot_run/bootstrap.json \
+            --out pilot_run/validate_bootstrap \
+            --request-kind bootstrap
 
       - name: Poll the attempt receipt until the pilot settles
         env:
@@ -231,14 +247,15 @@ jobs:
           set -euo pipefail
           rid=$(basename "$REQUEST_URI" -pilot.json)
           for i in $(seq 1 240); do
+            rm -f pilot_run/status/status.json
             uv run --frozen --no-build python3 scripts/campaign analysis status \
-              --request pilot_run/request.json \
+              --request pilot_run/bootstrap.json \
               --out pilot_run/status \
-              --attempt "$rid" || true
-            if [ -f pilot_run/status/attempt_status.json ]; then
-              s=$(python3 -c "import json;print(json.load(open('pilot_run/status/attempt_status.json')).get('status',''))")
+              --attempt-id "$rid" || true
+            if [ -f pilot_run/status/status.json ]; then
+              s=$(python3 -c "import json;print(json.load(open('pilot_run/status/status.json')).get('status',''))")
               case "$s" in
-                ""|running|submitted|in_progress) sleep 60 ;;
+                ""|planned|admitted|queued|running|checkpointed|submitted|in_progress|blocked|return_blocked) sleep 60 ;;
                 *) echo "settled: $s"; exit 0 ;;
               esac
             else
@@ -255,9 +272,9 @@ jobs:
           set -euo pipefail
           rid=$(basename "$REQUEST_URI" -pilot.json)
           uv run --frozen --no-build python3 scripts/campaign analysis collect \
-            --request pilot_run/request.json \
+            --request pilot_run/bootstrap.json \
             --out pilot_run/collect \
-            --attempt "$rid" || true
+            --receipt "s3://${BUCKET}/${DERIVED}/attempts/${rid}/RECEIPT.json" || true
           aws s3 cp "s3://${BUCKET}/${DERIVED}/attempts/${rid}/pilot_evidence.json" \
             pilot_run/collect/pilot_evidence.json || echo "no pilot_evidence yet"
 
