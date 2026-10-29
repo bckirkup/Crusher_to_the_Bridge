@@ -60,6 +60,7 @@ _HARDENED_MODULES = (
     "picard_framework/analysis/campaign_reducer/edison_ingest.py",
     "picard_framework/analysis/campaign_reducer/quote.py",
     "picard_framework/analysis/campaign_reducer/submit.py",
+    "tools/covid_quar_attr_contamx_compare.py",
 )
 
 # Path.write_text / read_text / unlink / open are also sinks for S2083/S8707
