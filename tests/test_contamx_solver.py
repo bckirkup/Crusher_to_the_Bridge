@@ -122,7 +122,26 @@ def _write_sim(
 
 # ── capability detection + fallback ──────────────────────────────────────
 
-def test_find_contamx_none_by_default():
+def _exclude_ambient_contamx(tmp_path, monkeypatch) -> None:
+    """Make ContamX unresolvable for a fallback-path test.
+
+    The ambient box may carry a real drop under ``third_party/contamx/``
+    (the intended local install) or a binary on PATH — both are excluded
+    so the assertion is the contract, not the machine.
+    """
+    monkeypatch.delenv("CONTAMX_BINARY", raising=False)
+    monkeypatch.delenv("CONTAMX_HOME", raising=False)
+    monkeypatch.setattr(
+        "engines.contamx_runner._repo_root", lambda: str(tmp_path),
+    )
+    monkeypatch.setattr(
+        "engines.contamx_runner.shutil.which", lambda name: None,
+    )
+
+
+def test_find_contamx_none_by_default(tmp_path, monkeypatch):
+    """No binary resolves when nothing is configured or installed."""
+    _exclude_ambient_contamx(tmp_path, monkeypatch)
     assert find_contamx({}) is None
     assert find_contamx(None) is None
 
@@ -237,7 +256,10 @@ def test_run_contamx_invokes_allowlisted_argv(tmp_path, monkeypatch):
     assert captured["shell"] is False
 
 
-def test_build_transport_engine_contamx_falls_back_to_native():
+def test_build_transport_engine_contamx_falls_back_to_native(
+    tmp_path, monkeypatch,
+):
+    _exclude_ambient_contamx(tmp_path, monkeypatch)
     cfg = {
         "ship_graph": {
             "spatial_layout": "data/platforms/destroyer_baseline/spatial_layout.json",
@@ -251,7 +273,7 @@ def test_build_transport_engine_contamx_falls_back_to_native():
         },
     }
     engine = build_transport_engine(str(REPO_ROOT), cfg)
-    # No binary in CI -> falls back to the native engine (not the subclass).
+    # No binary resolvable -> falls back to the native engine (not subclass).
     assert isinstance(engine, ContamTransportEngine)
     assert not isinstance(engine, ContamXTransportEngine)
 
@@ -425,7 +447,8 @@ def test_path_map_from_airflow_includes_adjacency_and_more():
 
 # ── benchmark harness (native-only path) ─────────────────────────────────
 
-def test_benchmark_native_only_runs(capsys):
+def test_benchmark_native_only_runs(capsys, tmp_path, monkeypatch):
+    _exclude_ambient_contamx(tmp_path, monkeypatch)
     from tools.contam_benchmark import main
 
     main([
