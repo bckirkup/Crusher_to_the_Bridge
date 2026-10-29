@@ -1,6 +1,6 @@
 # QUAR-CONTAMX-01
 **Date:** 2026-10-29
-**Commit:** b77e42d0 (+ this PR's tool/docs diff)
+**Commit:** b77e42d0
 **Pathogens:** sars_cov2_resp
 **Status:** measured
 **Measured at:** b77e42d0
@@ -12,7 +12,8 @@ Re-ran one settled transport-sensitive QUAR-ATTR-V2 cell — `A0_declared` at
 identity proven per cell by the payload `transport_engine` block: all 20
 probe cells built `ContamXTransportEngine` (2182 airflow paths); the
 4-seed native parity lane built `ContamTransportEngine` (2258).
-Readout: `docs/covid/covid_quar_attr_contamx_probe_readout.md`;
+Runs executed on the working tree at b77e42d0 plus this change's tool
+files. Readout: `docs/covid/covid_quar_attr_contamx_probe_readout.md`;
 per-seed surface: `docs/covid/covid_quar_attr_contamx_probe_surface.csv`.
 
 Measured:
