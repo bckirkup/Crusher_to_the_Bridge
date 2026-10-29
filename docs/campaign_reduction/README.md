@@ -30,6 +30,7 @@ registered campaign specs, without running any new simulation.
 | `VALIDATION.json` / `SHA256SUMS.json` | Package self-validation results + artifact hashes |
 | `FIELD_CONTRACTS.md` / `STATUS_NAMESPACES.md` | Reading views of the machine contracts |
 | `references.bib` | Primary repository BibTeX |
+| `D6_MEASURED_COST_BENEFIT.md` | Measured pilot cost-benefit (run 40802806913 + `quote-5a98544c742ef4a4`): the live-measured quote that gates the D7 envelope decision |
 
 ## Machine contracts (code-facing)
 
