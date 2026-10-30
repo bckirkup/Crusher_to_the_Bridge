@@ -14,7 +14,7 @@ outside the cell block and the new attribution keys.
 Usage:
     python3 tools/covid_attribution_arm_smoke.py [--theta 1e5]
         [--seed 20200205] [--num-epochs 432] [--arms A0_declared A5...]
-        [--out-dir DIR] [--v9-witness]
+        [--transport-engine contamx] [--out-dir DIR] [--v9-witness]
 """
 
 from __future__ import annotations
@@ -73,6 +73,9 @@ def _read_back(raw: dict) -> dict:
         "hvac.pathogen_pool_transport": overrides.get("hvac", {}).get(
             "pathogen_pool_transport",
         ),
+        "hvac.transport_engine": overrides.get("hvac", {}).get(
+            "transport_engine",
+        ),
         "transmission.near_field_air": overrides.get("transmission", {}).get(
             "near_field_air",
         ),
@@ -97,15 +100,49 @@ def _dose_route_sums(sim) -> dict[str, float]:
     return totals
 
 
-def _run_arm(design, cell, *, num_epochs: int, repo_root: str, out_dir: str):
+def _transport_engine_identity(sim, raw: dict, requested: str | None) -> dict:
+    """Which transport engine actually ran, proven from the live engine.
+
+    ``hvac.transport_engine: contamx`` silently falls back to the native
+    engine when no ContamX binary is found, and the fallback warning goes to
+    stdout — which ``run_fit_spec`` redirects away — so the engine class and
+    its airflow field are the only honest witness that ContamX ran.
+    """
+    engine = sim.contam_engine
+    flows = [
+        float(getattr(p, "flow_rate_m3h", 0.0))
+        for p in (getattr(engine, "airflow_paths", []) or [])
+    ]
+    hvac_override = (
+        raw.get("config_overrides", {}).get("hvac", {})
+    )
+    return {
+        "requested": requested or "native",
+        "config_transport_engine": hvac_override.get("transport_engine"),
+        "engine_class": type(engine).__name__ if engine is not None else None,
+        "n_airflow_paths": len(getattr(engine, "airflow_paths", []) or []),
+        "total_flow_m3h": round(sum(flows), 3),
+        "max_path_flow_m3h": round(max(flows), 3) if flows else 0.0,
+    }
+
+
+def _run_arm(design, cell, *, num_epochs: int, repo_root: str, out_dir: str,
+             transport_engine: str | None = None):
     raw = prepare_cell_run_spec(
         design, cell, num_epochs=num_epochs, repo_root=repo_root,
     )
+    if transport_engine is not None:
+        raw.setdefault("config_overrides", {}).setdefault("hvac", {})[
+            "transport_engine"
+        ] = transport_engine
     print(f"\n── {cell.arm_id} ({cell.key})")
     print(json.dumps({"read_back": _read_back(raw)}, indent=2))
     ledger = QuarantineAttributionLedger()
     sim = run_fit_spec(raw, repo_root=repo_root, epoch_observer=ledger.observe)
     payload = cell_payload(design, cell, sim, ledger, raw)
+    payload["transport_engine"] = _transport_engine_identity(
+        sim, raw, transport_engine,
+    )
     path = os.path.realpath(os.path.join(out_dir, cell.key))
     if os.path.commonpath([out_dir, path]) != out_dir:
         raise ValueError(
@@ -180,7 +217,16 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=20200205)
     parser.add_argument(
         "--num-epochs", type=int, default=432,
-        help="432 epochs = 18 days at 1 h epochs; the quarantine opens day 16",
+        help="432 epochs = 18 days at 1 h epochs; the quarantine opens day "
+             "16. Pass 0 for the scenario's full recorded voyage.",
+    )
+    parser.add_argument(
+        "--transport-engine", choices=["native", "contamx", "auto"],
+        default=None,
+        help="Inject hvac.transport_engine into the cell's config_overrides "
+             "(the only delta vs the settled campaign cell). The payload's "
+             "transport_engine block records which engine class ran, because "
+             "a contamx request falls back to native silently.",
     )
     parser.add_argument("--arms", nargs="*", default=None)
     parser.add_argument(
@@ -201,12 +247,14 @@ def main() -> int:
     if not cells:
         parser.error("no cells matched theta/seed/arms")
 
+    num_epochs = args.num_epochs if args.num_epochs > 0 else None
     a0_payload = None
     for cell in cells:
         payload = _run_arm(
-            design, cell, num_epochs=args.num_epochs,
+            design, cell, num_epochs=num_epochs,
             repo_root=args.repo_root,
             out_dir=os.path.realpath(args.out_dir),
+            transport_engine=args.transport_engine,
         )
         if cell.arm_id == design.baseline_arm_id:
             a0_payload = payload
@@ -216,7 +264,7 @@ def main() -> int:
             parser.error("--v9-witness needs the baseline arm to have run")
         _v9_witness(
             a0_payload, theta=args.theta, seed=args.seed,
-            num_epochs=args.num_epochs, repo_root=args.repo_root,
+            num_epochs=num_epochs, repo_root=args.repo_root,
         )
     return 0
 
