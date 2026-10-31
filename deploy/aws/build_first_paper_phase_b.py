@@ -62,7 +62,7 @@ BUDGETS = {
     "max_jobs": 1,
     "max_inflight_jobs": 1,
     "max_retries": 500,
-    "max_cost_usd": 10.0,
+    "max_cost_usd": 100.0,
     "checkpoint_reserve_bytes": 200000000,
     "checkpoint_reserve_seconds": 3600,
     "safety_factor": 2.0,
