@@ -751,6 +751,23 @@ def _verify_declared_sha(declared: dict, key: str, body: bytes) -> None:
 _ACK_REQUIRED = ("receipt_id", "project_asset_ids", "accepted_page_ids")
 
 
+def _digest_ids(values) -> dict:
+    """Bound an id list to a digest record for the issue envelope.
+
+    The envelope is the 32KiB-capped issue payload; the durable ack on
+    S3 keeps the verbatim caller-supplied lists. ``first``/``last``
+    keep spot-verifiability without the bulk payload.
+    """
+    items = list(values) if isinstance(values, list) else []
+    canon = json.dumps(items, separators=(",", ":")).encode()
+    return {
+        "count": len(items),
+        "sha256": _sha256(canon),
+        "first": items[0] if items else None,
+        "last": items[-1] if items else None,
+    }
+
+
 def _op_acknowledge(args, out_root: str) -> int:
     request = _request_doc(args, "bootstrap")
     ack = _load_json_path(args.ack)
@@ -779,8 +796,8 @@ def _op_acknowledge(args, out_root: str) -> int:
         "deduplicated": deduplicated,
         "receipt_id": ack.get("receipt_id"),
         "reduction_id": ack.get("reduction_id"),
-        "accepted_page_ids": ack.get("accepted_page_ids"),
-        "project_asset_ids": ack.get("project_asset_ids"),
+        "accepted_page_ids": _digest_ids(ack.get("accepted_page_ids")),
+        "project_asset_ids": _digest_ids(ack.get("project_asset_ids")),
         "s3_pointer": f"s3://{request.get('source_bucket')}/{key}",
         "request_id": request.get("request_id"),
         **_run_ids(),

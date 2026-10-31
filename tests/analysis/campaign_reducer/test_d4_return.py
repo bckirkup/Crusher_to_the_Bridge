@@ -555,6 +555,41 @@ def test_acknowledge_create_dedup_conflict(
     )["error"]["kind"] == "derived_conflict"
 
 
+def test_acknowledge_envelope_bounds_oversized_lists(
+    scratch: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Tranche-sized acks (hundreds of page ids + asset ids) must still
+    fit the 32KiB issue-envelope cap: the envelope carries digest
+    records; the durable S3 ack keeps the verbatim lists."""
+    store = MemoryDerivedStore()
+    monkeypatch.setattr(return_path, "_store_for", lambda *a, **k: store)
+    req = _write(scratch / "b.json",
+                 bootstrap_request(operation="acknowledge"))
+    pages = [f"{DERIVED_ROOT}/attempts/red-ok/pages/page-{i:05d}"
+             for i in range(400)]
+    assets = [f"asset-{i:04d}" for i in range(400)]
+    ack = _write(scratch / "ack.json", ack_doc(
+        accepted_page_ids=pages, project_asset_ids=assets))
+    assert _run([
+        "acknowledge", "--request", rel(req), "--out", rel(scratch / "o"),
+        "--ack", rel(ack),
+    ]) == EXIT_COMPLETE
+    envelope = json.loads((scratch / "o" / "ack_envelope.json").read_text())
+    assert len(json.dumps(envelope).encode()) <= 32768
+    for key, items in (("accepted_page_ids", pages),
+                       ("project_asset_ids", assets)):
+        digest = envelope[key]
+        assert digest["count"] == len(items)
+        assert digest["first"] == items[0]
+        assert digest["last"] == items[-1]
+        assert len(digest["sha256"]) == 64
+    stored = json.loads(
+        store.get(f"{DERIVED_ROOT}/requests/acks/"
+                  f"{envelope['ack_id']}.json").decode())
+    assert stored["accepted_page_ids"] == pages
+    assert stored["project_asset_ids"] == assets
+
+
 def test_acknowledge_denied_write_p19(
     scratch: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
