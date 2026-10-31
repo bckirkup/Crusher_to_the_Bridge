@@ -1,7 +1,8 @@
 {
   "name": "reducer",
   "image_repo": "picard-boundary-analysis",
-  "image_tag": "reducer-v1",
+  "image_tag": "reducer-v3",
+  "image_digest": "sha256:d5664f6acf8454a806b74e6ed08dd9a7c213d33a5e396ed473df19f684124abe",
   "job_role_name": "picard-reducer-job-role",
   "execution_role_name": "picard-campaign-execution-role",
   "vcpu": 2,
