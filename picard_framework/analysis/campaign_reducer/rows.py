@@ -79,6 +79,9 @@ class SourceSpec:
     scope_id: str | None = None
     scope_delta: str = "in_scope"
     declared_runs: int | None = None
+    member_allowlist: tuple[str, ...] | None = None
+    emit_scalars: bool = True
+    source_role: str | None = None
 
     def to_ref(self) -> SourceRef:
         return SourceRef(
@@ -91,6 +94,8 @@ class SourceSpec:
             cell_id=self.cell_id,
             engine_sha=self.engine_sha,
             image_digest=self.image_digest,
+            member_allowlist=self.member_allowlist,
+            emit_scalars=self.emit_scalars,
         )
 
 
@@ -128,8 +133,14 @@ def emit_source_rows(
     result: AdapterResult,
     spec: SourceSpec,
     ctx: ReductionContext,
+    suppress: frozenset[str] = frozenset(),
 ) -> dict[str, list[dict]]:
-    """Emit contract rows for one source's adapter output."""
+    """Emit contract rows for one source's adapter output.
+
+    ``suppress`` names base tables the profile drops before rows are
+    built — ``run_scalars`` suppression skips the per-leaf row
+    materialization entirely (the cost driver measured in D6).
+    """
     out: dict[str, list[dict]] = {
         t: []
         for t in (
@@ -147,7 +158,8 @@ def emit_source_rows(
     asset_rows = _asset_rows(result, spec, ctx, obj_rows)
     out["assets"] = asset_rows
     out["runs"] = _run_rows(result, spec, ctx)
-    out["run_scalars"] = _scalar_rows(result, ctx)
+    if "run_scalars" not in suppress:
+        out["run_scalars"] = _scalar_rows(result, ctx)
     out["capabilities"] = _capability_rows(result, spec, ctx)
     out["data_gaps"] = _gap_rows(result, spec, ctx)
     out["source_links"] = _link_rows(obj_rows, asset_rows, result, ctx)

@@ -268,7 +268,18 @@ def _ctx(request: dict, shard_index: int) -> ReductionContext:
     )
 
 
+def _profile_defaults(request: dict) -> dict:
+    """Extraction-profile defaults (first_paper_scalar et al.)."""
+    from . import first_paper  # noqa: PLC0415
+
+    if request.get("extraction_profile") == first_paper.PROFILE_ID:
+        return first_paper.defaults()
+    return {}
+
+
 def _sources(request: dict) -> list[SourceSpec]:
+    defaults = _profile_defaults(request)
+    req_allow = request.get("member_allowlist")
     return [
         SourceSpec(
             uri=s["uri"],
@@ -287,6 +298,19 @@ def _sources(request: dict) -> list[SourceSpec]:
             scope_id=s.get("scope_id"),
             scope_delta=s.get("scope_delta") or "in_scope",
             declared_runs=s.get("declared_runs"),
+            member_allowlist=(
+                tuple(s["member_allowlist"])
+                if s.get("member_allowlist") is not None
+                else (
+                    tuple(req_allow) if req_allow is not None
+                    else defaults.get("member_allowlist")
+                )
+            ),
+            emit_scalars=bool(
+                s.get("emit_scalars",
+                      defaults.get("emit_scalars", True))
+            ),
+            source_role=s.get("source_role"),
         )
         for i, s in enumerate(request.get("sources") or [])
     ]
@@ -555,6 +579,9 @@ def main(argv: list[str] | None = None) -> int:
             declared_source_count=request.get("declared_source_count"),
             partition_format=request.get("partition_format") or "jsonl",
             utc=request.get("utc") or "",
+            extraction_profile=request.get("extraction_profile"),
+            suppress_tables=frozenset(
+                request.get("suppress_tables") or ()),
         )
         try:
             result = run_materialization(spec, transport, store, ledger)

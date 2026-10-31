@@ -83,7 +83,14 @@ _GAP_REASON_BY_STATE = {
 
 @dataclass(frozen=True)
 class SourceRef:
-    """One source object an adapter is asked to read."""
+    """One source object an adapter is asked to read.
+
+    ``member_allowlist`` (zip families) intersects the family's declared
+    member basenames — unlisted members are never ranged-read.
+    ``emit_scalars=False`` skips the lossless all-leaf flatten while still
+    decoding members into ``result.docs`` (declared-projection profiles
+    read the doc, not the scalars).
+    """
 
     source_id: str
     uri: str
@@ -94,6 +101,8 @@ class SourceRef:
     cell_id: str | None = None
     engine_sha: str | None = None
     image_digest: str | None = None
+    member_allowlist: tuple[str, ...] | None = None
+    emit_scalars: bool = True
 
     def run_id(self) -> str:
         """Attempt-scoped run identity — same seed in a different
@@ -257,7 +266,13 @@ def _adapter_zip_scan_rows(
                 _gap(ref, "duplicate_members",
                      f"{len(index.duplicates[name])} members named {name!r}", member=name),
             )
-        _read_zip_groups(obj, index, ref, member_names, metric_prefix, result)
+        wanted = member_names
+        if ref.member_allowlist is not None:
+            wanted = tuple(
+                name for name in member_names
+                if name in ref.member_allowlist
+            )
+        _read_zip_groups(obj, index, ref, wanted, metric_prefix, result)
         return result
 
     return adapter
@@ -298,6 +313,8 @@ def _folder_ref(ref: SourceRef, folder: str) -> SourceRef:
         cell_id=ref.cell_id,
         engine_sha=ref.engine_sha,
         image_digest=ref.image_digest,
+        member_allowlist=ref.member_allowlist,
+        emit_scalars=ref.emit_scalars,
     )
 
 
@@ -339,9 +356,11 @@ def _read_scan_member(obj, entry, ref: SourceRef,
                  member=entry.name, asset_id=aid),
         )
         return
-    result.scalars.extend(
-        _scalars_from_doc(ref.run_id(), doc, "", metric_prefix, asset_id=aid),
-    )
+    if ref.emit_scalars:
+        result.scalars.extend(
+            _scalars_from_doc(ref.run_id(), doc, "", metric_prefix,
+                              asset_id=aid),
+        )
     result.docs.append(
         DecodedDoc(run_uid=ref.run_id(), asset_id=aid,
                    member_path=entry.name, doc=doc),
@@ -404,8 +423,11 @@ def _emit_json_doc(obj, ref: SourceRef, result: AdapterResult, body: bytes,
     result.assets.append(_asset(obj, ref, None, "read", hash_scope, sha))
     result.runs.append(_run_record(ref))
     aid = _asset_id(obj, ref, None)
-    result.scalars.extend(_scalars_from_doc(ref.run_id(), doc, "", metric_prefix,
-                                          asset_id=aid))
+    if ref.emit_scalars:
+        result.scalars.extend(
+            _scalars_from_doc(ref.run_id(), doc, "", metric_prefix,
+                              asset_id=aid),
+        )
     result.docs.append(
         DecodedDoc(run_uid=ref.run_id(), asset_id=aid, member_path=None, doc=doc),
     )
@@ -438,10 +460,11 @@ def _adapter_jsonl(metric_prefix: str) -> Callable:
                 )
                 continue
             aid = _asset_id(obj, ref, None)
-            result.scalars.extend(
-                _scalars_from_doc(ref.run_id(), doc, str(lineno), metric_prefix,
-                                  asset_id=aid),
-            )
+            if ref.emit_scalars:
+                result.scalars.extend(
+                    _scalars_from_doc(ref.run_id(), doc, str(lineno),
+                                      metric_prefix, asset_id=aid),
+                )
             result.docs.append(
                 DecodedDoc(run_uid=ref.run_id(), asset_id=aid,
                            member_path=f"line:{lineno}", doc=doc),
