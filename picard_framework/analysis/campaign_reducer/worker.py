@@ -150,14 +150,17 @@ def _s3_client():
 
 
 def _request_path(uri: str) -> Path:
-    """Resolve the request URI to a filesystem path.
+    """Resolve the request URI to a file confined to the working root.
 
-    No existence probe here — probing existence before the read is a
-    filesystem oracle (S6549); the read itself reports "unreadable"
-    through the caller's OSError wrap with identical typing.
+    Canonicalize-then-validate (S8707/S6549): an escape is denied
+    before any filesystem access, and the read itself reports
+    "unreadable" through the caller's OSError wrap.
     """
     raw = uri[len("file://"):] if uri.startswith("file://") else uri
-    return Path(raw).resolve()
+    try:
+        return Path(confine_to_base(cwd_root(), raw))
+    except ValueError as exc:
+        raise QueryError("access_denied", str(exc)) from exc
 
 
 def _fetch_request_s3(uri: str) -> dict:

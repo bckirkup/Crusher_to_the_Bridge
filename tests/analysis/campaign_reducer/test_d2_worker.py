@@ -161,7 +161,8 @@ def test_worker_materialize_then_query(tmp_path, capsys, monkeypatch):
     assert len(attack) == 2
 
 
-def test_worker_rejects_bad_request_uri(tmp_path, capsys):
+def test_worker_rejects_bad_request_uri(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     rc = main([
         "--phase", "materialize",
         "--request-uri", str(tmp_path / "absent.json"),
@@ -209,7 +210,8 @@ def test_worker_sources_uri_merges_and_materializes(
     assert commit["coverage"]["selected_unique_runs"] == 4
 
 
-def test_worker_sources_uri_sha_mismatch(tmp_path, capsys):
+def test_worker_sources_uri_sha_mismatch(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     req_path, out_dir, request = _fixture(tmp_path)
     request["sources_uri"] = str(
         _sources_manifest(tmp_path, {"sources": []})
@@ -226,7 +228,8 @@ def test_worker_sources_uri_sha_mismatch(tmp_path, capsys):
     assert printed["status"] == "blocked"
 
 
-def test_worker_sources_uri_unreadable(tmp_path, capsys):
+def test_worker_sources_uri_unreadable(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     req_path, out_dir, request = _fixture(tmp_path)
     request["sources_uri"] = str(tmp_path / "absent-sources.json")
     req_path.write_text(json.dumps(request))
@@ -266,7 +269,8 @@ def test_sources_uri_s3_not_found(tmp_path, monkeypatch):
     assert ei.value.kind == "access_denied"
 
 
-def test_sources_uri_bad_shape(tmp_path):
+def test_sources_uri_bad_shape(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     request = {
         "sources_uri": str(_sources_manifest(tmp_path, {"nope": 1})),
         "sources": [],
