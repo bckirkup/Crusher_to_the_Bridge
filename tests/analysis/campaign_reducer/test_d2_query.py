@@ -72,7 +72,7 @@ def _fused_zip() -> bytes:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def catalog():
     transport = MemoryTransport()
     store = MemoryDerivedStore()
@@ -164,7 +164,8 @@ def test_continuation_resumes_without_dup_or_loss(catalog):
     )
     ledger = BudgetLedger(_ceilings())
     first = run_query(q, store, ledger, commit_key=result.commit_key)
-    assert first.pages and first.next_cursor
+    assert first.pages
+    assert first.next_cursor
     token = first.next_cursor["token"]
     q2 = _query(
         catalog_snapshot_id=result.snapshot_id,
@@ -199,9 +200,9 @@ def test_cursor_mismatch_rejects(catalog):
         max_export_rows=2,
         continuation_token=token,
     )
+    ledger = BudgetLedger(_ceilings())
     with pytest.raises(QueryError):
-        run_query(q_bad, store, BudgetLedger(_ceilings()),
-                  commit_key=result.commit_key)
+        run_query(q_bad, store, ledger, commit_key=result.commit_key)
 
 
 def test_null_aware_filters(catalog):
@@ -213,7 +214,8 @@ def test_null_aware_filters(catalog):
     outcome = run_query(q, store, BudgetLedger(_ceilings()),
                         commit_key=result.commit_key)
     rows = _page_rows(store, outcome)
-    assert rows and all(r["unit"] is None for r in rows)
+    assert rows
+    assert all(r["unit"] is None for r in rows)
     q2 = _query(
         catalog_snapshot_id=result.snapshot_id,
         filters={"eq": ["unit", None]},
@@ -233,7 +235,8 @@ def test_numeric_and_string_filters(catalog):
         store, BudgetLedger(_ceilings()), commit_key=result.commit_key,
     )
     rows = _page_rows(store, outcome)
-    assert rows and all(r["native_value_json"] == "0.5" for r in rows)
+    assert rows
+    assert all(r["native_value_json"] == "0.5" for r in rows)
 
 
 def test_max_export_rows_cap(catalog):
@@ -308,12 +311,10 @@ def test_snapshot_mismatch_blocks(catalog):
 
 def test_invalid_query_doc_rejected(catalog):
     store, result = catalog
+    query = {"catalog_snapshot_id": result.snapshot_id}
+    ledger = BudgetLedger(_ceilings())
     with pytest.raises(QueryError):
-        run_query(
-            {"catalog_snapshot_id": result.snapshot_id},
-            store, BudgetLedger(_ceilings()),
-            commit_key=result.commit_key,
-        )
+        run_query(query, store, ledger, commit_key=result.commit_key)
 
 
 def test_scan_budget_stops_qualified(catalog):
@@ -341,7 +342,8 @@ def test_cross_tab_and_ecdf_statistics(catalog):
         store, BudgetLedger(_ceilings()), commit_key=result.commit_key,
     )
     rows = _page_rows(store, outcome)
-    assert rows and all("n" in r for r in rows)
+    assert rows
+    assert all("n" in r for r in rows)
     outcome2 = run_query(
         _query(
             catalog_snapshot_id=result.snapshot_id,

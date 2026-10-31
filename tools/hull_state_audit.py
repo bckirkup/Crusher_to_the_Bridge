@@ -67,6 +67,8 @@ from tools.hull_dynamics_audit import (  # noqa: E402
     _null_infection_spec,
 )
 
+_NO_ROOMS = "selector resolved no rooms"
+
 PLATFORMS_DIR = REPO_ROOT / "data" / "platforms"
 DEFAULT_STATE_SPEC = REPO_ROOT / "tools" / "hull_declared_states.json"
 SHIPPED_PROTOCOLS = REPO_ROOT / "data" / "config" / "protocols.json"
@@ -350,7 +352,7 @@ def _rooms_for(b: PlatformBundle, sel: dict[str, Any],
 def _check_starved(rooms: set[str], flows: dict[str, dict[str, float]]
                    ) -> tuple[bool, str]:
     if not rooms:
-        return False, "selector resolved no rooms"
+        return False, _NO_ROOMS
     starved = [r for r in rooms
                if flows.get(r, {}).get("hvac_supply", 0.0) <= 0]
     residual = sorted(r for r in rooms
@@ -364,7 +366,7 @@ def _check_starved(rooms: set[str], flows: dict[str, dict[str, float]]
 def _check_supplied(rooms: set[str], flows: dict[str, dict[str, float]]
                     ) -> tuple[bool, str]:
     if not rooms:
-        return False, "selector resolved no rooms"
+        return False, _NO_ROOMS
     fed = [r for r in rooms
            if flows.get(r, {}).get("hvac_supply", 0.0) > 0]
     return len(fed) == len(rooms), f"{len(fed)}/{len(rooms)} rooms supplied"
@@ -379,7 +381,7 @@ def _check_retention(rooms: set[str], mass_base: dict[str, float],
     is the signature; per-room falls are reported as detail.
     """
     if not rooms:
-        return False, "selector resolved no rooms"
+        return False, _NO_ROOMS
     base_sum = sum(mass_base.get(r, 0.0) for r in rooms)
     state_sum = sum(mass_state.get(r, 0.0) for r in rooms)
     dropped = sorted(
@@ -445,10 +447,11 @@ def _resolve_audit_protocol(proto: dict[str, Any],
     classes = mods.pop("close_zone_class", None)
     if classes:
         wanted = {str(c) for c in classes}
-        ids = sorted(zid for zid, z in _zone_nodes(b).items()
-                     if _zone_signature(z) in wanted)
-        mods["close_zones"] = sorted(set(mods.get("close_zones") or [])
-                                     | set(ids))
+        ids = {
+            zid for zid, z in _zone_nodes(b).items()
+            if _zone_signature(z) in wanted
+        }
+        mods["close_zones"] = sorted({*(mods.get("close_zones") or []), *ids})
     return p
 
 

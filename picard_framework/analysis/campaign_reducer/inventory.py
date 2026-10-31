@@ -122,7 +122,7 @@ class InventoryFailure(ReturnFailure):
     """Typed inventory failure (same envelope shape as the return path)."""
 
 
-def _list_call(client, bucket: str, **kwargs) -> dict:
+def _list_call(client, _bucket: str, **kwargs) -> dict:
     try:
         return client.list_objects_v2(**kwargs)
     except Exception as exc:  # noqa: BLE001 — botocore ClientError maps by code
@@ -142,7 +142,7 @@ def _list_call(client, bucket: str, **kwargs) -> dict:
         ) from exc
 
 
-def _versions_call(client, bucket: str, **kwargs) -> dict:
+def _versions_call(client, _bucket: str, **kwargs) -> dict:
     try:
         return client.list_object_versions(**kwargs)
     except Exception as exc:  # noqa: BLE001
@@ -688,12 +688,14 @@ def run(args) -> int:
                 None,
             )
         exhausted = all(r.get("exhausted") for r in root_results)
-        status = (
-            "budget_stopped" if stop_reason
-            else "blocked" if blocked
-            else "partial" if not exhausted
-            else "completed"
-        )
+        if stop_reason:
+            status = "budget_stopped"
+        elif blocked:
+            status = "blocked"
+        elif not exhausted:
+            status = "partial"
+        else:
+            status = "completed"
         inventory_doc = {
             "schema": "crusher-reducer-frozen-inventory/v1",
             "request_id": request.get("request_id"),

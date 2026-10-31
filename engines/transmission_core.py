@@ -10492,7 +10492,7 @@ class TransmissionCore:
     def _caregiver_pair_emission_addback(
         self,
         emitted: list[tuple[KorkinAgent, float]],
-        target: KorkinAgent,
+        _target: KorkinAgent,
         *,
         emission_fraction: float,
         pool_share: float,

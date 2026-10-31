@@ -204,8 +204,7 @@ def _source_object_rows(
             "scope_delta": spec.scope_delta,
         }
         seen[oid] = row  # last link wins: final read state
-    for row in seen.values():
-        rows.append(row)
+    rows.extend(seen.values())
     if not rows:
         bucket, key = _bucket_key(spec.uri)
         oid = object_id(spec.campaign_id, spec.uri, None, None)
@@ -258,7 +257,7 @@ def _asset_rows(
     result: AdapterResult,
     spec: SourceSpec,
     ctx: ReductionContext,
-    obj_rows: list[dict],
+    _obj_rows: list[dict],
 ) -> list[dict]:
     obj_asset = object_id(spec.campaign_id, spec.uri, None, None)
     rows = []
@@ -365,7 +364,7 @@ def _scalar_rows(result: AdapterResult, ctx: ReductionContext) -> list[dict]:
 
 
 def _capability_rows(
-    result: AdapterResult, spec: SourceSpec, ctx: ReductionContext
+    _result: AdapterResult, spec: SourceSpec, ctx: ReductionContext
 ) -> list[dict]:
     from .adapters import family_capabilities
 
@@ -426,7 +425,7 @@ def _gap_rows(
 def _link_rows(
     obj_rows: list[dict],
     asset_rows: list[dict],
-    result: AdapterResult,
+    _result: AdapterResult,
     ctx: ReductionContext,
 ) -> list[dict]:
     rows = []
@@ -579,7 +578,7 @@ def weights_rows(run_uids: list[str], ctx: ReductionContext) -> list[dict]:
 
 def distribution_rows(
     metric_values: dict[str, dict[str, list[tuple[str, float | None]]]],
-    run_meta: dict[str, dict],
+    _run_meta: dict[str, dict],
     ctx: ReductionContext,
     weight_lookup=None,
 ) -> list[dict]:

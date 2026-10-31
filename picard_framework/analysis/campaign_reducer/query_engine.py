@@ -368,7 +368,7 @@ def _covariance_row(query, key, dims, members) -> list[dict]:
     ]
 
 
-def _ecdf_rows(query, rows, dims) -> list[dict]:
+def _ecdf_rows(_query, rows, dims) -> list[dict]:
     out = []
     for key, members in sorted(
         _groups(rows, dims).items(), key=lambda kv: str(kv[0])
@@ -397,7 +397,7 @@ def _ecdf_rows(query, rows, dims) -> list[dict]:
     return out
 
 
-def _riskset_rows(query, rows, dims, stat) -> list[dict]:
+def _riskset_rows(_query, rows, dims, stat) -> list[dict]:
     """Risk-set accounting for survival/competing_risk.
 
     Emits per (group, endpoint) risk-set rows: entries, exact events,
@@ -477,7 +477,7 @@ def _decode_cursor(token: str) -> dict:
     try:
         pad = "=" * (-len(token) % 4)
         return json.loads(base64.urlsafe_b64decode(token + pad))
-    except (ValueError, json.JSONDecodeError) as exc:
+    except ValueError as exc:
         raise QueryError("cursor_invalid", f"continuation token undecodable: {exc}")
 
 
@@ -676,7 +676,7 @@ def _paginate(
         _write_page(
             page, seq, final, query_id, q_sha, snapshot_id,
             reduction_id, store, ledger, out,
-            len(result_rows), emitted, oversized, write_pages,
+            (len(result_rows), emitted), oversized, write_pages,
         )
         if final:
             break
@@ -731,9 +731,10 @@ def _fill_page(
 def _write_page(
     page, seq, final, query_id, q_sha, snapshot_id,
     reduction_id, store, ledger, out,
-    n_selected, emitted, oversized, write_pages,
+    selected_emitted: tuple[int, int], oversized, write_pages,
 ) -> str:
     """Write one create-only page object plus its query_pages row."""
+    n_selected, emitted = selected_emitted
     cursor_doc = None if final else {
         "token": _encode_cursor(
             q_sha, snapshot_id, page[-1].get("row_id"), seq
@@ -756,8 +757,7 @@ def _write_page(
         uri=key,
         sha256=sha256_hex(body),
         returned_rows=len(page),
-        scanned_rows=out.scanned_rows,
-        scanned_bytes=out.scanned_bytes,
+        scanned=(out.scanned_rows, out.scanned_bytes),
         complete=final and not out.errors,
         next_cursor=cursor_doc,
         selection_counts={"selected": n_selected, "emitted": emitted},
@@ -769,7 +769,7 @@ def _write_page(
     return key
 
 
-def _write_query_tail(query_id, reduction_id, q_sha, snapshot_id,
+def _write_query_tail(query_id, reduction_id, _q_sha, snapshot_id,
                       out: QueryOutcome, store) -> None:
     pages_key = (
         f"campaign/_derived/reducer/v1/queries/{query_id}/query_pages.jsonl"

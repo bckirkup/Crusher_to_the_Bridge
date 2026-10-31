@@ -262,10 +262,10 @@ def test_sources_uri_s3_not_found(tmp_path, monkeypatch):
     monkeypatch.setattr(worker, "boto3_transport",
                         lambda c, b: MemoryTransport())
     monkeypatch.setattr(worker, "_s3_client", lambda: object())
+    request = {"sources_uri": "s3://bkt/absent.json", "sources": []}
+    ledger = BudgetLedger(_budgets())
     with pytest.raises(QueryError) as ei:
-        worker._resolve_sources(
-            {"sources_uri": "s3://bkt/absent.json", "sources": []},
-            BudgetLedger(_budgets()))
+        worker._resolve_sources(request, ledger)
     assert ei.value.kind == "access_denied"
 
 
@@ -275,8 +275,9 @@ def test_sources_uri_bad_shape(tmp_path, monkeypatch):
         "sources_uri": str(_sources_manifest(tmp_path, {"nope": 1})),
         "sources": [],
     }
+    ledger = BudgetLedger(_budgets())
     with pytest.raises(QueryError) as ei:
-        worker._resolve_sources(request, BudgetLedger(_budgets()))
+        worker._resolve_sources(request, ledger)
     assert ei.value.kind == "invalid_contract"
 
 

@@ -283,11 +283,12 @@ def _status_columns(values, prov, doc, hit) -> list[str]:
     emitted = values.get("num_epochs")
     declared = (doc.get("parameters") or {}).get("num_epochs")
     if _finite_num(emitted) and _finite_num(declared):
-        clock = (
-            "complete" if emitted == declared
-            else "truncated" if emitted < declared
-            else "overrun"
-        )
+        if emitted == declared:
+            clock = "complete"
+        elif emitted < declared:
+            clock = "truncated"
+        else:
+            clock = "overrun"
     else:
         clock = "unknown"
         missing.append("clock_status")
@@ -392,7 +393,7 @@ def _scan_lookup(
 
 
 def vector_rows(
-    spec,
+    _spec,
     src: SourceSpec,
     result,
     ctx: ReductionContext,

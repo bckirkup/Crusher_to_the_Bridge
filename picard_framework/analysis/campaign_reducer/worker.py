@@ -57,6 +57,8 @@ from .query_engine import QueryError, run_query
 from .rows import ReductionContext, SourceSpec
 from .s3_store import S3DerivedStore
 
+_S3_SCHEME = "s3://"
+
 # CANONICAL_INTERFACE readback cap for the request manifest itself.
 _REQUEST_MANIFEST_MAX_BYTES = 1048576
 
@@ -114,6 +116,7 @@ class LocalTransport:
         version_id: str | None = None,
         if_match: str | None = None,
     ) -> GetResponse:
+        del version_id  # local files are unversioned; the pin is ignored
         body = self._path(key).read_bytes()
         etag = self._etag(body)
         if if_match is not None and if_match != etag:
@@ -191,7 +194,7 @@ def _fetch_request_s3(uri: str) -> dict:
 
 def _fetch_request(uri: str) -> tuple[dict, Path | None]:
     """Read and parse the request document (local or immutable S3 URI)."""
-    if uri.startswith("s3://"):
+    if uri.startswith(_S3_SCHEME):
         return _fetch_request_s3(uri), None
     path = _request_path(uri)
     try:
@@ -214,7 +217,7 @@ def _source_transport(request: dict, request_path: Path | None):
     buckets = {
         parse_s3_uri(u)[0]
         for u in uris
-        if isinstance(u, str) and u.startswith("s3://")
+        if isinstance(u, str) and u.startswith(_S3_SCHEME)
     }
     if request.get("source_bucket"):
         buckets.add(request["source_bucket"])
@@ -238,7 +241,7 @@ def _source_transport(request: dict, request_path: Path | None):
 def _open_store(out_uri: str | None):
     if not out_uri:
         return MemoryDerivedStore()
-    if out_uri.startswith("s3://"):
+    if out_uri.startswith(_S3_SCHEME):
         bucket, prefix = parse_s3_uri(out_uri)
         if not bucket:
             raise QueryError("invalid_contract", f"out uri has no bucket: {out_uri}")
@@ -273,7 +276,7 @@ def _fetch_sources_manifest(uri: str, ledger: BudgetLedger) -> dict:
     binds the canonicalized manifest body exactly like
     ``--request-sha256`` binds the request.
     """
-    if uri.startswith("s3://"):
+    if uri.startswith(_S3_SCHEME):
         bucket, key = parse_s3_uri(uri)
         if not key:
             raise QueryError(
@@ -349,7 +352,7 @@ def _resolve_sources(request: dict, ledger: BudgetLedger) -> list:
     return sources + extra
 
 
-def _ctx(request: dict, shard_index: int) -> ReductionContext:
+def _ctx(request: dict, _shard_index: int) -> ReductionContext:
     return ReductionContext(
         reduction_id=request.get("reduction_id") or "red-unknown",
         snapshot_id=request.get("snapshot_id") or "snap-unspecified",
@@ -504,7 +507,7 @@ def _write_attempt_receipt(store, doc: dict) -> None:
         store.put_if_absent(
             key, json.dumps(doc, sort_keys=True, indent=2).encode(),
         )
-    except (DerivedStoreError, Exception):  # noqa: BLE001 — best-effort
+    except Exception:  # noqa: BLE001 — best-effort receipt write
         pass
 
 
@@ -579,7 +582,7 @@ def _write_pilot_evidence(
     for src in request.get("sources") or []:
         uri = src.get("uri") or ""
         key = (
-            parse_s3_uri(uri)[1] if str(uri).startswith("s3://")
+            parse_s3_uri(uri)[1] if str(uri).startswith(_S3_SCHEME)
             else uri
         )
         meter = dict(transport.per_key.get(key, {}))

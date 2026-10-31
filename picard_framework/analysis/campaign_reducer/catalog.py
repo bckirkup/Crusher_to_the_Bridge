@@ -70,7 +70,7 @@ def load_catalog(store, commit_key: str) -> Catalog:
 def query_page_row(
     *, reduction_id: str, query_id: str, page_id: str, snapshot_id: str,
     query_sha256: str, uri: str, sha256: str, returned_rows: int,
-    scanned_rows: int, scanned_bytes: int, complete: bool,
+    scanned: tuple[int, int], complete: bool,
     next_cursor, selection_counts: dict, oversized_rows: list,
 ) -> dict:
     """One ``query_pages`` row — written alongside every page artifact."""
@@ -84,8 +84,8 @@ def query_page_row(
         "uri": uri,
         "sha256": sha256,
         "returned_rows": returned_rows,
-        "scanned_rows": scanned_rows,
-        "scanned_bytes": scanned_bytes,
+        "scanned_rows": scanned[0],
+        "scanned_bytes": scanned[1],
         "complete": complete,
         "next_cursor_json": next_cursor,
         "selection_counts_json": selection_counts,

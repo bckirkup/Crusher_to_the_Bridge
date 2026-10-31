@@ -59,11 +59,14 @@ def test_parse_ceilings_rejects_missing_and_none():
 
 def test_parse_ceilings_rejects_nonpositive_and_nonfinite():
     for bad in (0, -5, float("inf"), float("nan"), "x", True):
+        ceilings = _ceilings(max_wall_seconds=bad)
         with pytest.raises(BudgetBlocked):
-            parse_ceilings(_ceilings(max_wall_seconds=bad))
-    parse_ceilings(_ceilings(max_retries=0))  # zero retries is legal
+            parse_ceilings(ceilings)
+    legal = _ceilings(max_retries=0)  # zero retries is legal
+    parse_ceilings(legal)
+    negative = _ceilings(max_retries=-1)
     with pytest.raises(BudgetBlocked):
-        parse_ceilings(_ceilings(max_retries=-1))
+        parse_ceilings(negative)
 
 
 def test_parse_ceilings_ok():
