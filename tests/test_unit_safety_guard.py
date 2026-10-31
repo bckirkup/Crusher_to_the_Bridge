@@ -68,6 +68,7 @@ ALLOWED_EPOCH_KEYS = (
     ("reports/iso_quarters_smoke*", "tending_epochs"),  # probe payload: per-agent quarantine interval epoch indices
     ("reports/iso_quarters_smoke*", "num_epochs"),  # voyage fingerprint: run-length bookkeeping
     ("reports/iso_quarters_smoke*", "total_quarantine_person_epochs"),  # voyage fingerprint: quarantine bookkeeping
+    ("docs/campaign_reduction/phase_b/*.json", "num_epochs"),  # report artifact: declared run-length bookkeeping echoed for clock_status reconciliation
 )
 
 # No current module constant should be incremented or multiplied inside an

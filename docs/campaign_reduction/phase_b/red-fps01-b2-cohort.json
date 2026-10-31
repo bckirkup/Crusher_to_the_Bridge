@@ -1,0 +1,144 @@
+{
+ "kind": "crusher-first-paper-phase-b-cohort/v1",
+ "reduction_id": "red-fps01-b2",
+ "contract": "first_paper_scalar/1.1.0",
+ "batch_job_id": "ce371bf1-8b37-43fb-b195-cacf00c828ce",
+ "declared": {
+  "cells": 8,
+  "runs_per_cell": 1000,
+  "runs_total": 8000,
+  "hulls": [
+   "expedition_cruise_450",
+   "classic_cruise_1900",
+   "spirit_cruise_3000",
+   "mega_cruise_5000"
+  ],
+  "arms": [
+   "off",
+   "ps_ship"
+  ]
+ },
+ "recovered": {
+  "rows_total": 8000,
+  "by_cell": {
+   "fl_cls_12d_scr_off": 1000,
+   "fl_cls_12d_scr_ps_ship": 1000,
+   "fl_exp_12d_scr_off": 1000,
+   "fl_exp_12d_scr_ps_ship": 1000,
+   "fl_meg_12d_scr_off": 1000,
+   "fl_meg_12d_scr_ps_ship": 1000,
+   "fl_spr_12d_scr_off": 1000,
+   "fl_spr_12d_scr_ps_ship": 1000
+  },
+  "by_hull": {
+   "classic_cruise_1900": 2000,
+   "expedition_cruise_450": 2000,
+   "mega_cruise_5000": 2000,
+   "spirit_cruise_3000": 2000
+  },
+  "distinct_seeds_by_cell": {
+   "fl_cls_12d_scr_off": 1000,
+   "fl_cls_12d_scr_ps_ship": 1000,
+   "fl_exp_12d_scr_off": 1000,
+   "fl_exp_12d_scr_ps_ship": 1000,
+   "fl_meg_12d_scr_off": 1000,
+   "fl_meg_12d_scr_ps_ship": 1000,
+   "fl_spr_12d_scr_off": 1000,
+   "fl_spr_12d_scr_ps_ship": 1000
+  },
+  "duplicate_run_uids": 0
+ },
+ "reconciliation": {
+  "scan_join_conflicts": 0,
+  "scan_key_conflicts": 0,
+  "data_gaps": 0,
+  "paired_full": 4000,
+  "paired_orphan": 0,
+  "pair_rule": "within hull_id, join arms on seed only"
+ },
+ "status_columns": {
+  "completion_status": {
+   "completed": 8000
+  },
+  "clock_status": {
+   "complete": 8000
+  },
+  "follow_up_status": {
+   "unposted": 7964,
+   "posted": 36
+  }
+ },
+ "null_valued_by_cell_and_field": {
+  "fl_cls_12d_scr_off": {
+   "confirmation_epoch": 993,
+   "detection_epoch": 801,
+   "detection_lag": 801,
+   "infections_by_route_sum_by_role": 1000,
+   "vsp_trigger_epoch": 997
+  },
+  "fl_cls_12d_scr_ps_ship": {
+   "confirmation_epoch": 986,
+   "detection_epoch": 787,
+   "detection_lag": 787,
+   "infections_by_route_sum_by_role": 1000,
+   "vsp_trigger_epoch": 993
+  },
+  "fl_exp_12d_scr_off": {
+   "confirmation_epoch": 994,
+   "detection_epoch": 940,
+   "detection_lag": 940,
+   "infections_by_route_sum_by_role": 1000,
+   "vsp_trigger_epoch": 993,
+   "r_effective_at_peak": 68,
+   "scan_burst48_centre": 16
+  },
+  "fl_exp_12d_scr_ps_ship": {
+   "confirmation_epoch": 989,
+   "detection_epoch": 936,
+   "detection_lag": 936,
+   "infections_by_route_sum_by_role": 1000,
+   "vsp_trigger_epoch": 988,
+   "r_effective_at_peak": 69,
+   "scan_burst48_centre": 16
+  },
+  "fl_meg_12d_scr_off": {
+   "confirmation_epoch": 1000,
+   "infections_by_route_sum_by_role": 1000,
+   "vsp_trigger_epoch": 1000,
+   "detection_epoch": 794,
+   "detection_lag": 794
+  },
+  "fl_meg_12d_scr_ps_ship": {
+   "confirmation_epoch": 998,
+   "infections_by_route_sum_by_role": 1000,
+   "vsp_trigger_epoch": 998,
+   "detection_epoch": 770,
+   "detection_lag": 770
+  },
+  "fl_spr_12d_scr_off": {
+   "confirmation_epoch": 999,
+   "detection_epoch": 810,
+   "detection_lag": 810,
+   "infections_by_route_sum_by_role": 1000,
+   "vsp_trigger_epoch": 1000
+  },
+  "fl_spr_12d_scr_ps_ship": {
+   "confirmation_epoch": 994,
+   "detection_epoch": 818,
+   "detection_lag": 818,
+   "infections_by_route_sum_by_role": 1000,
+   "vsp_trigger_epoch": 995
+  }
+ },
+ "sum_check_consistency": {
+  "reported_by_channel_consistent": {
+   "True": 8000
+  },
+  "reported_by_route_consistent": {
+   "True": 8000
+  },
+  "infections_by_route_consistent": {
+   "False": 8000
+  }
+ }
+}
