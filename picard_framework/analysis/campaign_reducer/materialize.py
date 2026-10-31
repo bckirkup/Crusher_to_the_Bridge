@@ -29,7 +29,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
-from . import first_paper
+from . import first_paper, observation_clock
 from .adapters import reduce_source
 from .derived_store import DerivedConflict, DerivedStoreError, write_manifest
 from .identity import sha256_hex
@@ -57,6 +57,13 @@ from .rows import (
 
 DERIVED_ROOT = "campaign/_derived/reducer/v1"
 COMMIT_NAME = "COMMIT.json"
+
+# Extraction-profile registry: PROFILE_ID -> module with the shared
+# first_paper surface (profile/defaults/vector_rows/absorb_scan_rows).
+_PROFILES = {
+    first_paper.PROFILE_ID: first_paper,
+    observation_clock.PROFILE_ID: observation_clock,
+}
 CHECKPOINT_PREFIX = "checkpoints/"
 SHARD_PREFIX = "shards/"
 _MAX_ROW_BYTES = 64 * 1024
@@ -117,10 +124,11 @@ class MaterializeSpec:
     suppress_tables: frozenset[str] = frozenset()
 
     def __post_init__(self) -> None:
-        if self.extraction_profile == first_paper.PROFILE_ID:
+        mod = _PROFILES.get(self.extraction_profile or "")
+        if mod is not None:
             self.suppress_tables = frozenset(
                 set(self.suppress_tables)
-                | set(first_paper.defaults()["suppress_tables"])
+                | set(mod.defaults()["suppress_tables"])
             )
 
 
@@ -421,10 +429,11 @@ def _absorb(
         }
     if "distributions" not in spec.suppress_tables:
         _accumulate_metrics(acc, src, result)
-    if spec.extraction_profile == first_paper.PROFILE_ID:
+    mod = _PROFILES.get(spec.extraction_profile or "")
+    if mod is not None:
         merge_tables(
             tables,
-            {first_paper.profile()["table_name"]: first_paper.vector_rows(
+            {mod.profile()["table_name"]: mod.vector_rows(
                 spec, src, result, spec.ctx, acc)},
         )
 
@@ -442,7 +451,11 @@ def _absorb_scan_role(
     no parsed/selected counts, but its object/asset/gap provenance is
     recorded like any source.
     """
-    first_paper.absorb_scan_rows(acc, src, result)
+    mod = _PROFILES.get(spec.extraction_profile or "")
+    if mod is not None:
+        mod.absorb_scan_rows(acc, src, result)
+    else:
+        first_paper.absorb_scan_rows(acc, src, result)
     emitted = emit_source_rows(
         result, src, spec.ctx, suppress=spec.suppress_tables)
     emitted.pop("runs", None)

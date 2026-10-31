@@ -1,10 +1,22 @@
 {
-  "definition_version": "first_paper_scalar/1.1.0",
+  "definition_version": "first_paper_scalar/1.2.0",
   "description": "One wide row per selected actual execution for the first cruise norovirus paper: summary.json-only member reads, declared field projection, per-field provenance, explicit missingness (never zero), no all-leaf scalarization, no distributions/ECDF materialization, no census decode.",
   "emit_scalars": false,
   "kind": "extraction_profile",
   "member_allowlist": [
     "summary.json"
+  ],
+  "operand_sum_checks": [
+    {
+      "addends": [
+        "census_n_imports",
+        "census_n_acquired"
+      ],
+      "column": "imports_plus_acquired_vs_ever_infected_consistent",
+      "note": "Every infected person is either an import or an aboard acquisition; verified independent of the route histogram.",
+      "sum_column": "imports_plus_acquired_sum",
+      "total_column": "cumulative_ever_infected"
+    }
   ],
   "profile_id": "first_paper_scalar",
   "recomputed_pairs": [
@@ -198,8 +210,17 @@
     {
       "column": "infections_by_route_consistent",
       "dict_column": "infections_by_dominant_route_json",
+      "historical_evidence": true,
+      "note": "CONFLATED definition retained as historical evidence: compares acquired-route member sums against cumulative_ever_infected (imports + acquired), so it diverges by exactly n_imports on every run with imports. Superseded by infections_by_route_vs_acquired_consistent and imports_plus_acquired_vs_ever_infected_consistent.",
       "sum_column": "infections_by_route_sum",
       "total_column": "cumulative_ever_infected"
+    },
+    {
+      "column": "infections_by_route_vs_acquired_consistent",
+      "dict_column": "infections_by_dominant_route_json",
+      "note": "Dominant-route acquisition counts are acquired infections only; the correct comparator is census.n_acquired.",
+      "sum_column": "infections_by_route_vs_acquired_sum",
+      "total_column": "census_n_acquired"
     }
   ],
   "summary_fields": [

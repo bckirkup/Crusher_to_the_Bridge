@@ -138,7 +138,7 @@ def test_status_columns_from_evidence():
     # clock is unknown by default, never guessed.
     assert row["values"]["clock_status"] == "unknown"
     assert row["values"]["completion_status"] == "unknown"
-    assert row["values"]["follow_up_status"] == "posted"
+    assert row["values"]["scan_posted_status"] == "posted"
 
     # now with a declared horizon equal to the emitted clock
     transport2, store2, ledger2 = _rig()
@@ -164,7 +164,7 @@ def test_status_columns_from_evidence():
     row2 = _vector_rows(store2)[0]
     assert row2["values"]["clock_status"] == "complete"
     assert row2["values"]["completion_status"] == "completed"
-    assert row2["values"]["follow_up_status"] == "unknown"
+    assert row2["values"]["scan_posted_status"] == "unknown"
 
 
 def test_terminal_attempt_is_blocked_with_lineage():

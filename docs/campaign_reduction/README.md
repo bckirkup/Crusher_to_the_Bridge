@@ -34,6 +34,7 @@ registered campaign specs, without running any new simulation.
 | `FIRST_PAPER_SCALAR_PANEL.md` | Phase A specimen panel + extraction quote for the `first_paper_scalar` mode (16 ranged-read specimens × 4 hulls; field-presence matrix and phase-B/C quote terms) |
 | `FIRST_PAPER_PHASE_B_REPORT.md` | Phase B measured result (attempt `red-fps01-b2`): 8,000-vector cohort reconciliation, paired-seed counts, ceiling-vs-actual metering, correction-spec dispositions, verification layer and delivery receipts |
 | `phase_b/` | Phase B request/cohort/check artifacts per attempt (`red-fps01-b`, `red-fps01-b2`) |
+| `OBSERVATION_CLOCK_PANEL.md` | Observation/clock sidecar panel + extraction quote for `first_paper_observation_clock` (16 ranged-read specimens; availability matrix, validation-definition corrections, envelope terms for `red-fps01-b-obsclock`) |
 
 ## Machine contracts (code-facing)
 
