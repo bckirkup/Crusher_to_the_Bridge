@@ -86,6 +86,10 @@
       "minimum": 1,
       "type": "integer"
     },
+    "collect_all_pages": {
+      "description": "optional: collect every selected manifest page in bounded legs (files_per_collect and total_bytes_per_collect apply per leg)",
+      "type": "boolean"
+    },
     "derived_exclude_prefixes": {
       "items": {
         "type": "string"

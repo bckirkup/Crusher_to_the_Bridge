@@ -575,6 +575,59 @@ def _select_pages(request: dict, entries: list[dict]) -> list[dict]:
     return entries
 
 
+def _collect_chunks(request: dict, entries: list[dict],
+                    base_total: int) -> list[list[dict]]:
+    """Split the selected manifest entries into bounded collect legs.
+
+    Default (no ``collect_all_pages``): the whole selection is one leg and
+    must fit ``files_per_collect`` — this is what keeps an unselective
+    request from blowing the cap. With ``collect_all_pages: true`` the
+    manifest is walked in legs each bounded by BOTH ``files_per_collect``
+    and the byte budget remaining after the shared docs, so a tranche
+    collect stays per-leg bounded while covering every page.
+    """
+    file_cap = _CAPS["files_per_collect"]
+    byte_room = _CAPS["total_bytes_per_collect"] - base_total
+    if request.get("collect_all_pages") is not True:
+        if len(entries) > file_cap:
+            raise ReturnFailure(
+                "budget_exceeded",
+                f"{len(entries)} manifest entries exceeds "
+                f"{file_cap} files/collect cap",
+                owner="s3_return_path",
+            )
+        return [entries]
+    if byte_room <= 0:
+        raise ReturnFailure(
+            "budget_exceeded",
+            "shared docs alone exceed the per-collect byte cap",
+            owner="s3_return_path",
+        )
+    chunks: list[list[dict]] = []
+    leg: list[dict] = []
+    leg_bytes = 0
+    for entry in entries:
+        size = entry.get("bytes")
+        if not isinstance(size, int) or isinstance(size, bool) or size < 0:
+            raise _invalid("collect_all_pages requires per-entry bytes in "
+                           "the pages manifest")
+        if size > byte_room:
+            raise ReturnFailure(
+                "budget_exceeded",
+                f"{entry.get('uri')}: {size}B page exceeds per-collect "
+                "byte budget",
+                owner="s3_return_path",
+            )
+        if len(leg) >= file_cap or leg_bytes + size > byte_room:
+            chunks.append(leg)
+            leg, leg_bytes = [], 0
+        leg.append(entry)
+        leg_bytes += size
+    if leg:
+        chunks.append(leg)
+    return chunks
+
+
 def _fetch_doc_from_store(store, key: str, cap: int) -> dict:
     try:
         doc = json.loads(_fetch_store(store, key, cap))
@@ -596,28 +649,23 @@ def _op_collect(args, out_root: str) -> int:
         if isinstance(ref, str) and ref
     ]
     entries = _select_pages(request, _manifest_entries(store, receipt))
-    if len(entries) > _CAPS["files_per_collect"]:
-        raise ReturnFailure(
-            "budget_exceeded",
-            f"{len(entries)} manifest entries exceeds "
-            f"{_CAPS['files_per_collect']} files/collect cap",
-            owner="s3_return_path",
-        )
-    refs += [_resolve_store_key(e["uri"]) for e in entries]
     declared = {_resolve_store_key(e["uri"]): e for e in entries}
     collected: list[dict] = []
-    total = len(receipt_body)
+
+    # Shared docs (summary/catalog) are fetched once; their bytes count
+    # against every chunk's budget so each leg stays inside the per-collect
+    # cap under any interpretation.
+    base_total = len(receipt_body)
     for key in refs:
         body = _fetch_store(store, key, _kind_cap(key))
-        total += len(body)
-        if total > _CAPS["total_bytes_per_collect"]:
+        base_total += len(body)
+        if base_total > _CAPS["total_bytes_per_collect"]:
             raise ReturnFailure(
                 "budget_exceeded",
                 f"collect exceeds {_CAPS['total_bytes_per_collect']}B "
                 "total cap",
                 owner="s3_return_path",
             )
-        _verify_declared_sha(declared, key, body)
         rel = _write_collected(out_root, key.rsplit("/", 1)[-1], body)
         collected.append({
             "path": rel,
@@ -626,6 +674,32 @@ def _op_collect(args, out_root: str) -> int:
             "bytes": len(body),
             "kind": key.rsplit("/", 1)[-1].split(".")[-1],
         })
+    chunks = _collect_chunks(request, entries, base_total)
+    total = base_total
+    for chunk in chunks:
+        leg = base_total
+        for entry in chunk:
+            key = _resolve_store_key(entry["uri"])
+            body = _fetch_store(store, key, _kind_cap(key))
+            leg += len(body)
+            if leg > _CAPS["total_bytes_per_collect"]:
+                raise ReturnFailure(
+                    "budget_exceeded",
+                    f"collect exceeds {_CAPS['total_bytes_per_collect']}B "
+                    "total cap",
+                    owner="s3_return_path",
+                )
+            _verify_declared_sha(declared, key, body)
+            rel = _write_collected(
+                out_root, key.rsplit("/", 1)[-1], body)
+            total += len(body)
+            collected.append({
+                "path": rel,
+                "s3_key": key,
+                "sha256": _sha256(body),
+                "bytes": len(body),
+                "kind": key.rsplit("/", 1)[-1].split(".")[-1],
+            })
     rel = _write_collected(out_root, "RECEIPT.json", receipt_body)
     collected.insert(0, {
         "path": rel, "s3_key": "<receipt-uri>",
