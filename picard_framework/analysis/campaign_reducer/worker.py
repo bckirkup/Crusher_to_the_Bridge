@@ -150,12 +150,14 @@ def _s3_client():
 
 
 def _request_path(uri: str) -> Path:
-    """Resolve the request URI to an existing regular file."""
+    """Resolve the request URI to a filesystem path.
+
+    No existence probe here — probing existence before the read is a
+    filesystem oracle (S6549); the read itself reports "unreadable"
+    through the caller's OSError wrap with identical typing.
+    """
     raw = uri[len("file://"):] if uri.startswith("file://") else uri
-    path = Path(raw).resolve()
-    if not path.is_file():
-        raise QueryError("invalid_contract", f"request uri unreadable: {uri}")
-    return path
+    return Path(raw).resolve()
 
 
 def _fetch_request_s3(uri: str) -> dict:
@@ -295,7 +297,7 @@ def _fetch_sources_manifest(uri: str, ledger: BudgetLedger) -> dict:
             body = _request_path(uri).read_bytes()
         except OSError as exc:
             raise QueryError(
-                "access_denied", f"sources uri unreadable: {exc}"
+                "invalid_contract", f"sources uri unreadable: {exc}"
             )
         if len(body) > _SOURCES_MANIFEST_MAX_BYTES:
             raise QueryError(

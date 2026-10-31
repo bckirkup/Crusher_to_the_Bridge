@@ -16,11 +16,18 @@ import sys
 import pytest
 from zip_builders import build_zip, member
 
-from picard_framework.analysis.campaign_reducer.ledger import BUDGET_FIELDS
+from picard_framework.analysis.campaign_reducer import worker
+from picard_framework.analysis.campaign_reducer.ledger import (
+    BUDGET_FIELDS,
+    BudgetLedger,
+)
 from picard_framework.analysis.campaign_reducer.pinned_reader import (
+    MemoryTransport,
     TransportError,
 )
+from picard_framework.analysis.campaign_reducer.query_engine import QueryError
 from picard_framework.analysis.campaign_reducer.worker import (
+    EXIT_BUDGET_STOPPED,
     EXIT_COMPLETE,
     EXIT_INVALID_CONTRACT,
     LocalTransport,
@@ -229,6 +236,62 @@ def test_worker_sources_uri_unreadable(tmp_path, capsys):
         "--out-uri", str(out_dir),
     ])
     assert rc == EXIT_INVALID_CONTRACT
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["status"] == "blocked"
+
+
+def test_sources_uri_s3_fetch_and_charge(tmp_path, monkeypatch):
+    mt = MemoryTransport()
+    mt.put(
+        "requests/src.json",
+        json.dumps({"sources": [{"uri": "x.zip", "family": "f"}]}).encode(),
+    )
+    monkeypatch.setattr(worker, "boto3_transport", lambda c, b: mt)
+    monkeypatch.setattr(worker, "_s3_client", lambda: object())
+    ledger = BudgetLedger(_budgets())
+    out = worker._resolve_sources(
+        {"sources_uri": "s3://bkt/requests/src.json", "sources": []}, ledger)
+    # the manifest GET is charged like every source read
+    assert out == [{"uri": "x.zip", "family": "f"}]
+
+
+def test_sources_uri_s3_not_found(tmp_path, monkeypatch):
+    monkeypatch.setattr(worker, "boto3_transport",
+                        lambda c, b: MemoryTransport())
+    monkeypatch.setattr(worker, "_s3_client", lambda: object())
+    with pytest.raises(QueryError) as ei:
+        worker._resolve_sources(
+            {"sources_uri": "s3://bkt/absent.json", "sources": []},
+            BudgetLedger(_budgets()))
+    assert ei.value.kind == "access_denied"
+
+
+def test_sources_uri_bad_shape(tmp_path):
+    request = {
+        "sources_uri": str(_sources_manifest(tmp_path, {"nope": 1})),
+        "sources": [],
+    }
+    with pytest.raises(QueryError) as ei:
+        worker._resolve_sources(request, BudgetLedger(_budgets()))
+    assert ei.value.kind == "invalid_contract"
+
+
+def test_worker_sources_uri_budget_exceeded(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    req_path, out_dir, request = _fixture(tmp_path)
+    mt = MemoryTransport()
+    mt.put("m/src.json", json.dumps({"sources": []}).encode())
+    monkeypatch.setattr(worker, "boto3_transport", lambda c, b: mt)
+    monkeypatch.setattr(worker, "_s3_client", lambda: object())
+    request["sources_uri"] = "s3://bkt/m/src.json"
+    request["budgets"]["max_get_requests"] = 0.5
+    req_path.write_text(json.dumps(request))
+    rc = main([
+        "--phase", "materialize",
+        "--request-uri", str(req_path),
+        "--out-uri", str(out_dir),
+    ])
+    assert rc == EXIT_BUDGET_STOPPED
     printed = json.loads(capsys.readouterr().out)
     assert printed["status"] == "blocked"
 
