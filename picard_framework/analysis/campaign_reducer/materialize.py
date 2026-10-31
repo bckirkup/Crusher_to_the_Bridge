@@ -216,7 +216,6 @@ class _ShardAccumulator:
         self.unsupported_family = False
         self.resource_stops = 0
         self.scan_index: dict[str, dict] = {}
-        self.scan_index_by_hull_seed: dict[tuple, dict] = {}
         self.scan_conflicts: list[dict] = []
 
     def mark(self) -> dict:
@@ -232,7 +231,6 @@ class _ShardAccumulator:
             "unsupported_family": self.unsupported_family,
             "resource_stops": self.resource_stops,
             "scan_keys": set(self.scan_index),
-            "scan_hs_keys": set(self.scan_index_by_hull_seed),
             "n_scan_conflicts": len(self.scan_conflicts),
         }
 
@@ -258,13 +256,6 @@ class _ShardAccumulator:
                 k: self.scan_index[k]
                 for k in self.scan_index.keys() - mark["scan_keys"]
             },
-            "scan_index_by_hull_seed": {
-                json.dumps(list(k)): self.scan_index_by_hull_seed[k]
-                for k in (
-                    self.scan_index_by_hull_seed.keys()
-                    - mark["scan_hs_keys"]
-                )
-            },
             "scan_conflicts": self.scan_conflicts[mark["n_scan_conflicts"]:],
             "metric_bindings": self.spec.metric_bindings,
         }
@@ -285,11 +276,6 @@ class _ShardAccumulator:
         self.resource_stops = delta.get(
             "resource_stops", self.resource_stops)
         self.scan_index.update(delta.get("scan_index") or {})
-        for key_json, bundle in (
-            delta.get("scan_index_by_hull_seed") or {}
-        ).items():
-            self.scan_index_by_hull_seed[tuple(json.loads(key_json))] = (
-                bundle)
         self.scan_conflicts.extend(delta.get("scan_conflicts") or [])
 
     def cell(self, spec: SourceSpec) -> dict:
@@ -633,6 +619,38 @@ def run_materialization(
     manifest: list[dict] = []
     completed: set[int] = set()
     checkpoint_uri = None
+    # Stopped attempts are terminal: a budget_stopped/blocked/partial
+    # COMMIT is not resumable (re-finalize would DerivedConflict on the
+    # create-only COMMIT). A new attempt must be approved under a fresh
+    # reduction_id; the prior COMMIT carries the lineage.
+    commit_key0 = f"{_attempt_prefix(spec.ctx)}/{COMMIT_NAME}"
+    try:
+        prior = json.loads(store.get(commit_key0).decode())
+    except DerivedStoreError:
+        prior = None
+    if prior and prior.get("status") not in (None, "completed"):
+        acc.errors.append(
+            {
+                "kind": "attempt_terminal",
+                "detail": (
+                    "attempt %s already finalized with status %s; "
+                    "create a new approved child attempt"
+                    % (spec.ctx.reduction_id, prior.get("status"))
+                ),
+                "prior_snapshot": prior.get("catalog_snapshot_id"),
+                "prior_status": prior.get("status"),
+            }
+        )
+        return MaterializationResult(
+            status="blocked",
+            snapshot_id=prior.get("catalog_snapshot_id") or "",
+            commit_key=commit_key0,
+            manifest=prior.get("partitions") or [],
+            table_counts=prior.get("counts") or {},
+            errors=acc.errors,
+            checkpoint_uri=None,
+            completed_shards=[],
+        )
     if resume:
         completed, manifest, checkpoint_uri = _restore_state(
             store, spec, ledger, acc
@@ -892,6 +910,8 @@ def _finalize(
         forced_status = "blocked"
     manifest_key = f"{_attempt_prefix(spec.ctx)}/MANIFEST.json"
     write_manifest(store, manifest_key, manifest)
+    if forced_status == "completed":
+        _emit_pages(spec, store, ledger, manifest, counts, forced_status)
     status = forced_status
     return MaterializationResult(
         status=status,
@@ -903,6 +923,136 @@ def _finalize(
         checkpoint_uri=checkpoint_uri,
         completed_shards=sorted(completed),
     )
+
+
+_PAGE_MAX_BYTES = 1_048_576  # readback index_page_bytes cap
+
+
+def _emit_pages(
+    spec: MaterializeSpec,
+    store,
+    ledger: BudgetLedger,
+    manifest: list[dict],
+    counts: dict[str, int],
+    status: str,
+) -> None:
+    """Bounded unique-named <=1MiB JSONL pages + collector manifest.
+
+    Re-chunks the ``first_paper_vectors`` shard partitions into page
+    objects under ``pages/`` so the return path's bounded collector
+    (``files_per_collect``/``total_bytes_per_collect`` caps) fetches a
+    page set rather than every materialization partition. Also writes
+    the authoritative ``status.json`` and ``asset_index.json`` at the
+    attempt root.
+    """
+    if "first_paper_vectors" not in counts:
+        return
+    attempt = _attempt_prefix(spec.ctx)
+    page_entries: list[dict] = []
+    buf: list[bytes] = []
+    buf_bytes = 0
+    seq = 0
+
+    def _flush() -> None:
+        nonlocal buf, buf_bytes, seq
+        if not buf:
+            return
+        seq += 1
+        body = b"".join(buf)
+        key = (
+            f"{attempt}/pages/first_paper_vectors/page-{seq:05d}.jsonl"
+        )
+        store.put_idempotent(key, body)
+        ledger.charge("max_api_calls_total", 1, "page put")
+        ledger.charge("max_output_bytes", len(body), key)
+        page_entries.append(
+            {
+                "page_id": f"page-{seq:05d}",
+                "uri": key,
+                "sha256": sha256_hex(body),
+                "rows": buf_bytes and len(buf) or 0,
+                "bytes": len(body),
+            }
+        )
+        buf, buf_bytes = [], 0
+
+    for e in manifest:
+        if e.get("table_name") != "first_paper_vectors":
+            continue
+        body = store.get(e["uri"])
+        ledger.charge("max_api_calls_total", 1, "page source read")
+        for line in body.splitlines(keepends=True):
+            if buf_bytes + len(line) > _PAGE_MAX_BYTES and buf:
+                _flush()
+            buf.append(line)
+            buf_bytes += len(line)
+    _flush()
+
+    manifest_body = json.dumps(
+        {
+            "kind": "first_paper_pages_manifest",
+            "reduction_id": spec.ctx.reduction_id,
+            "table_name": "first_paper_vectors",
+            "entries": page_entries,
+            "page_count": len(page_entries),
+            "rows": sum(p["rows"] for p in page_entries),
+            "bytes": sum(p["bytes"] for p in page_entries),
+        },
+        sort_keys=True,
+        indent=2,
+    ).encode()
+    manifest_key = (
+        f"{attempt}/pages/first_paper_vectors.pages_manifest.json"
+    )
+    store.put_idempotent(manifest_key, manifest_body)
+    ledger.charge("max_api_calls_total", 1, "pages manifest put")
+    ledger.charge("max_output_bytes", len(manifest_body), manifest_key)
+
+    status_key = f"{attempt}/status.json"
+    status_body = json.dumps(
+        {
+            "kind": "reduction_attempt_status",
+            "reduction_id": spec.ctx.reduction_id,
+            "status": status,
+            "counts": counts,
+            "pages_manifest_key": manifest_key,
+            "utc": spec.utc,
+        },
+        sort_keys=True,
+        indent=2,
+    ).encode()
+    store.put_idempotent(status_key, status_body)
+    ledger.charge("max_api_calls_total", 1, "status put")
+    ledger.charge("max_output_bytes", len(status_body), status_key)
+
+    index_body = json.dumps(
+        {
+            "kind": "reduction_asset_index",
+            "reduction_id": spec.ctx.reduction_id,
+            "assets": [
+                {
+                    "kind": "pages_manifest",
+                    "uri": manifest_key,
+                    "sha256": sha256_hex(manifest_body),
+                    "bytes": len(manifest_body),
+                },
+                {
+                    "kind": "status",
+                    "uri": status_key,
+                    "sha256": sha256_hex(status_body),
+                    "bytes": len(status_body),
+                },
+            ]
+            + [
+                {**p, "kind": "vector_page"} for p in page_entries
+            ],
+        },
+        sort_keys=True,
+        indent=2,
+    ).encode()
+    store.put_idempotent(f"{attempt}/asset_index.json", index_body)
+    ledger.charge("max_api_calls_total", 1, "asset index put")
+    ledger.charge("max_output_bytes", len(index_body), "asset index")
 
 
 def _derived_rows(

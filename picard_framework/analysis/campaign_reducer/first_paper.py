@@ -12,9 +12,13 @@ suppressed; the projection contract is the versioned definition
 
 Optional ``source_role: "scan_rows"`` sources contribute the scan-row
 fields (``posted`` and friends) joined onto each vector by the run
-archive's object key (scan rows carry the zip key verbatim), with a
-``(hull, seed)`` fallback for fused archives. Scan-role sources process
-before run sources deterministically and are not counted as executions.
+archive's object key (scan rows carry the zip key verbatim). The join
+is full-key only — off and ps_ship arms share seeds within a hull, so a
+``(hull, seed)`` fallback could bind the wrong arm's row; a full-key
+miss instead emits the scan fields as ``scan_source_absent`` and an
+index-level key collision as ``scan_key_conflict`` (never
+first-row-wins). Scan-role sources process before run sources
+deterministically and are not counted as executions.
 """
 from __future__ import annotations
 
@@ -79,6 +83,18 @@ def _field_value(kind: str, node: Any) -> Any:
     return node
 
 
+def _domain_ok(domain: str, node: Any) -> bool:
+    """Count/rate domain validation — bool/negative/nonfinite rejected."""
+    if domain in ("count", "rate", "number"):
+        if isinstance(node, bool) or not isinstance(node, (int, float)):
+            return False
+        if node != node or node in (float("inf"), float("-inf")):
+            return False
+        if domain in ("count", "rate") and node < 0:
+            return False
+    return True
+
+
 def _project_fields(
     doc: Any,
     fields: list[dict],
@@ -98,6 +114,10 @@ def _project_fields(
         elif node is None:
             values[col] = None
             status = "null_emitted"
+        elif not _domain_ok(f.get("domain", ""), node):
+            values[col] = None
+            status = "domain_invalid"
+            missing.append(col)
         else:
             values[col] = _field_value(f["kind"], node)
             status = "exact_emitted"
@@ -114,8 +134,14 @@ def _recomputed_pairs(
         col = pair["column"]
         num = values.get(pair["numerator"])
         den = values.get(pair["denominator"])
-        if not isinstance(num, (int, float)) or not isinstance(
-            den, (int, float)
+        if (
+            isinstance(num, bool)
+            or isinstance(den, bool)
+            or not isinstance(num, (int, float))
+            or not isinstance(den, (int, float))
+            or not (num == num and den == den)
+            or num in (float("inf"), float("-inf"))
+            or den in (float("inf"), float("-inf"))
         ):
             status = "invalid_pair_missing_operand"
             missing_cols.append(col)
@@ -153,20 +179,66 @@ def _sum_checks(
         total = values.get(check["total_column"])
         members = json.loads(raw) if isinstance(raw, str) else raw
         sum_col = check["sum_column"]
-        if (
-            not isinstance(members, dict)
-            or not all(isinstance(v, (int, float)) for v in members.values())
-            or not isinstance(total, (int, float))
-        ):
+        role_totals = check.get("role_totals") or {}
+        role_nested = isinstance(members, dict) and any(
+            isinstance(v, dict) for v in members.values()
+        )
+
+        def _flat(d: dict) -> bool:
+            return all(
+                isinstance(v, (int, float)) and not isinstance(v, bool)
+                and v == v and v not in (float("inf"), float("-inf"))
+                for v in d.values()
+            )
+
+        if role_nested:
+            flat_members = {}
+            ok = isinstance(members, dict)
+            for role, sub in (members or {}).items():
+                if isinstance(sub, dict) and _flat(sub):
+                    flat_members[role] = sub
+                else:
+                    ok = False
+            role_sums = {r: sum(sub.values())
+                         for r, sub in flat_members.items()}
+            member_sum = sum(role_sums.values()) if ok else None
+            roles_ok = ok and all(
+                isinstance(values.get(role_totals.get(r, "")), (int, float))
+                and not isinstance(values.get(role_totals.get(r, "")), bool)
+                and role_sums[r] == values[role_totals[r]]
+                for r in role_totals
+            ) if role_totals else ok
+            computable = (
+                ok
+                and member_sum is not None
+                and isinstance(total, (int, float))
+                and not isinstance(total, bool)
+            )
+            values[sum_col + "_by_role"] = (
+                canonical_json(role_sums) if ok else None
+            )
+        else:
+            member_sum = None
+            computable = (
+                isinstance(members, dict)
+                and _flat(members)
+                and isinstance(total, (int, float))
+                and not isinstance(total, bool)
+            )
+            if computable:
+                member_sum = sum(members.values())
+            roles_ok = computable
+            values[sum_col + "_by_role"] = None
+
+        if not computable:
             values[sum_col] = None
             values[check["column"]] = None
             status = "sum_uncomputable"
             missing_cols.append(sum_col)
             missing_cols.append(check["column"])
         else:
-            member_sum = sum(members.values())
             values[sum_col] = member_sum
-            consistent = member_sum == total
+            consistent = member_sum == total and roles_ok
             values[check["column"]] = consistent
             status = "sum_consistent" if consistent else "sum_divergent"
         for col in (sum_col, check["column"]):
@@ -184,6 +256,71 @@ def _sum_checks(
                 "status": status,
             }
     return missing_cols
+
+
+def _status_columns(values, prov, doc, hit) -> list[str]:
+    """Completion/follow-up/clock status from actual evidence.
+
+    A readable archive is not a completed voyage: ``completion_status``
+    is ``completed`` only when the summary decoded AND the epoch clock
+    closed at the declared horizon. ``clock_status`` compares the
+    emitted ``num_epochs`` against the declared
+    ``parameters.num_epochs``; ``follow_up_status`` reads the scan
+    row's ``posted`` flag. Any missing operand yields ``unknown``,
+    never a guessed status.
+    """
+    missing: list[str] = []
+    emitted = values.get("num_epochs")
+    params = doc.get("parameters") or {}
+    declared = params.get("num_epochs")
+    if isinstance(emitted, (int, float)) and not isinstance(emitted, bool) \
+            and isinstance(declared, (int, float)) \
+            and not isinstance(declared, bool):
+        if emitted == declared:
+            clock = "complete"
+        elif emitted < declared:
+            clock = "truncated"
+        else:
+            clock = "overrun"
+    else:
+        clock = "unknown"
+        missing.append("clock_status")
+    values["clock_status"] = clock
+    prov["clock_status"] = {
+        "native_path": "/num_epochs + /parameters/num_epochs",
+        "member": "derived:clock",
+        "status": "recomputed" if clock != "unknown" else "unknown",
+    }
+
+    if clock == "complete":
+        completion = "completed"
+    elif clock in ("truncated", "overrun"):
+        completion = clock
+    else:
+        completion = "unknown"
+        missing.append("completion_status")
+    values["completion_status"] = completion
+    prov["completion_status"] = {
+        "native_path": "derived:clock_status",
+        "member": "derived:completion",
+        "status": "recomputed" if completion != "unknown" else "unknown",
+    }
+
+    posted = hit["line"].get("posted") if hit else None
+    if posted is True:
+        follow = "posted"
+    elif posted is False or posted is None and hit is not None:
+        follow = "unposted"
+    else:
+        follow = "unknown"
+        missing.append("follow_up_status")
+    values["follow_up_status"] = follow
+    prov["follow_up_status"] = {
+        "native_path": "scan:posted",
+        "member": "derived:follow_up",
+        "status": "recomputed" if follow != "unknown" else "unknown",
+    }
+    return missing
 
 
 def absorb_scan_rows(acc, spec: SourceSpec, result) -> None:
@@ -221,18 +358,44 @@ def absorb_scan_rows(acc, spec: SourceSpec, result) -> None:
                     **bundle,
                     "source_id": spec.source_id,
                 }
-        hull, seed = line.get("hull"), line.get("seed")
-        if hull is not None and seed is not None:
-            acc.scan_index_by_hull_seed.setdefault(
-                (hull, seed), acc.scan_index.get(key) or bundle
-            )
 
 
-def _scan_lookup(acc, object_key: str, hull: Any, seed: Any) -> dict | None:
+def _scan_lookup(
+    acc,
+    object_key: str,
+    hull: Any,
+    seed: Any,
+) -> tuple[dict | None, str | None]:
+    """Full-key scan-row lookup with key/hull/seed agreement.
+
+    Returns ``(hit, conflict_kind)``. A full-key miss yields
+    ``(None, None)`` — the caller emits ``scan_source_absent``. A hit
+    whose row disagrees with the run's declared hull/seed yields
+    ``(None, "scan_key_conflict")`` — the wrong arm's row must never
+    bind (off and ps_ship share seeds within a hull), so the conflict is
+    recorded and the scan fields emit typed-missing.
+    """
     hit = acc.scan_index.get(object_key)
-    if hit is None and hull is not None and seed is not None:
-        hit = acc.scan_index_by_hull_seed.get((hull, seed))
-    return hit
+    if hit is None:
+        return None, None
+    line = hit["line"]
+    if (
+        (hull is not None and line.get("hull") != hull)
+        or (seed is not None and line.get("seed") != seed)
+    ):
+        acc.scan_conflicts.append(
+            {
+                "kind": "scan_agreement_conflict",
+                "key": object_key,
+                "expected_hull": hull,
+                "expected_seed": seed,
+                "line_hull": line.get("hull"),
+                "line_seed": line.get("seed"),
+                "source_id": hit["source_id"],
+            }
+        )
+        return None, "scan_agreement_conflict"
+    return hit, None
 
 
 def vector_rows(
@@ -260,12 +423,13 @@ def vector_rows(
         )
         missing += _recomputed_pairs(values, prov, prov, ddoc.doc)
         missing += _sum_checks(values, prov, prov)
-        hit = _scan_lookup(
+        hit, scan_status = _scan_lookup(
             acc,
             object_key,
             values.get("platform_id") or src.hull_id,
             values.get("seed") or src.seed,
         )
+        missing += _status_columns(values, prov, ddoc.doc, hit)
         for f in doc["scan_fields"]:
             col = f["column"]
             if hit is None:
@@ -274,7 +438,7 @@ def vector_rows(
                     "member": None,
                     "source_key": None,
                     "native_path": f["native"],
-                    "status": "scan_source_absent",
+                    "status": scan_status or "scan_source_absent",
                 }
                 missing.append(col)
             else:

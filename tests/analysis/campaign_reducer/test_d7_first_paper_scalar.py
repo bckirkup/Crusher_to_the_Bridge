@@ -222,7 +222,7 @@ def test_summary_only_member_reads_and_binding():
     assert prov["member"] == "summary.json"
     assert prov["source_key"] == "run_a.zip"
     assert prov["status"] == "exact_emitted"
-    assert row["definition_version"] == "first_paper_scalar/1.0.0"
+    assert row["definition_version"] == "first_paper_scalar/1.1.0"
     assert row["definition_sha256"]
     assert row["values"]["cumulative_ever_infected_passenger"] == 6
     assert row["values"]["trigger_status"] == "ALERT"

@@ -1,113 +1,448 @@
 {
-  "kind": "extraction_profile",
-  "profile_id": "first_paper_scalar",
-  "definition_version": "first_paper_scalar/1.0.0",
-  "table_name": "first_paper_vectors",
+  "definition_version": "first_paper_scalar/1.1.0",
   "description": "One wide row per selected actual execution for the first cruise norovirus paper: summary.json-only member reads, declared field projection, per-field provenance, explicit missingness (never zero), no all-leaf scalarization, no distributions/ECDF materialization, no census decode.",
-  "member_allowlist": ["summary.json"],
-  "suppress_tables": ["run_scalars", "distributions", "weights"],
   "emit_scalars": false,
-  "scan_role": "scan_rows",
-  "scan_join": {
-    "primary": "object_key",
-    "fallback": "hull_seed",
-    "note": "scan row `key` is the run archive object key; `hull`+`seed` is the fused-archive fallback"
-  },
-  "summary_fields": [
-    {"column": "run_id_native", "native": "/run_id", "kind": "value"},
-    {"column": "trigger_status", "native": "/trigger_status", "kind": "value"},
-    {"column": "num_epochs", "native": "/num_epochs", "kind": "value"},
-    {"column": "seed", "native": "/parameters/seed", "kind": "value"},
-    {"column": "engine_git_sha", "native": "/parameters/engine_git_sha", "kind": "value"},
-    {"column": "platform_id", "native": "/parameters/platform_id", "kind": "value"},
-    {"column": "tier_id", "native": "/parameters/tier_id", "kind": "value"},
-    {"column": "parameters_json", "native": "/parameters", "kind": "json"},
-    {"column": "initiation_resolved_json", "native": "/initiation/resolved", "kind": "json"},
-    {"column": "passenger_complement", "native": "/summary/passenger_complement", "kind": "value"},
-    {"column": "crew_complement", "native": "/summary/crew_complement", "kind": "value"},
-    {"column": "cumulative_ever_infected", "native": "/summary/cumulative_ever_infected", "kind": "value"},
-    {"column": "cumulative_ever_infected_passenger", "native": "/summary/cumulative_ever_infected_passenger", "kind": "value"},
-    {"column": "cumulative_ever_infected_crew", "native": "/summary/cumulative_ever_infected_crew", "kind": "value"},
-    {"column": "cumulative_ever_ill", "native": "/summary/cumulative_ever_ill", "kind": "value"},
-    {"column": "cumulative_ever_ill_passenger", "native": "/summary/cumulative_ever_ill_passenger", "kind": "value"},
-    {"column": "cumulative_ever_ill_crew", "native": "/summary/cumulative_ever_ill_crew", "kind": "value"},
-    {"column": "cumulative_reported_cases", "native": "/summary/cumulative_reported_cases", "kind": "value"},
-    {"column": "cumulative_reported_cases_passenger", "native": "/summary/cumulative_reported_cases_passenger", "kind": "value"},
-    {"column": "cumulative_reported_cases_crew", "native": "/summary/cumulative_reported_cases_crew", "kind": "value"},
-    {"column": "cumulative_reported_noise_cases", "native": "/summary/cumulative_reported_noise_cases", "kind": "value"},
-    {"column": "infection_attack_rate", "native": "/derived/attack_rate", "kind": "value"},
-    {"column": "infection_attack_rate_passenger", "native": "/summary/infection_attack_rate_passenger", "kind": "value"},
-    {"column": "infection_attack_rate_crew", "native": "/summary/infection_attack_rate_crew", "kind": "value"},
-    {"column": "ever_ill_rate_passenger", "native": "/summary/ever_ill_rate_passenger", "kind": "value"},
-    {"column": "ever_ill_rate_crew", "native": "/summary/ever_ill_rate_crew", "kind": "value"},
-    {"column": "reported_case_rate_passenger", "native": "/summary/reported_case_rate_passenger", "kind": "value"},
-    {"column": "reported_case_rate_crew", "native": "/summary/reported_case_rate_crew", "kind": "value"},
-    {"column": "reported_cases_by_channel_json", "native": "/summary/reported_cases_by_channel", "kind": "json"},
-    {"column": "reported_cases_by_dominant_route_json", "native": "/summary/reported_cases_by_dominant_route", "kind": "json"},
-    {"column": "infections_by_dominant_route_json", "native": "/summary/infections_by_dominant_route", "kind": "json"},
-    {"column": "infection_dose_share_by_route_json", "native": "/summary/infection_dose_share_by_route", "kind": "json"},
-    {"column": "census_ignited", "native": "/census/ignited", "kind": "value"},
-    {"column": "census_n_imports", "native": "/census/n_imports", "kind": "value"},
-    {"column": "census_n_acquired", "native": "/census/n_acquired", "kind": "value"},
-    {"column": "census_acquisitions_by_gen_json", "native": "/census/acquisitions_by_gen", "kind": "json"},
-    {"column": "common_source_events", "native": "/mechanisms/common_source_events", "kind": "value"},
-    {"column": "common_source_takers", "native": "/mechanisms/common_source_takers", "kind": "value"},
-    {"column": "vsp_trigger_epoch", "native": "/derived/vsp_trigger_epoch", "kind": "value"},
-    {"column": "peak_epoch", "native": "/derived/peak_epoch", "kind": "value"},
-    {"column": "detection_epoch", "native": "/derived/detection_epoch", "kind": "value"},
-    {"column": "confirmation_epoch", "native": "/derived/confirmation_epoch", "kind": "value"},
-    {"column": "detection_lag", "native": "/derived/detection_lag", "kind": "value"},
-    {"column": "peak_prevalence", "native": "/derived/peak_prevalence", "kind": "value"},
-    {"column": "outbreak_occurred", "native": "/derived/outbreak_occurred", "kind": "value"},
-    {"column": "r_effective_at_peak", "native": "/derived/r_effective_at_peak", "kind": "value"}
+  "kind": "extraction_profile",
+  "member_allowlist": [
+    "summary.json"
+  ],
+  "profile_id": "first_paper_scalar",
+  "recomputed_pairs": [
+    {
+      "column": "attack_rate_infection_pax_recomputed",
+      "denominator": "passenger_complement",
+      "numerator": "cumulative_ever_infected_passenger"
+    },
+    {
+      "column": "attack_rate_infection_crew_recomputed",
+      "denominator": "crew_complement",
+      "numerator": "cumulative_ever_infected_crew"
+    },
+    {
+      "column": "attack_rate_ill_pax_recomputed",
+      "denominator": "passenger_complement",
+      "numerator": "cumulative_ever_ill_passenger"
+    },
+    {
+      "column": "attack_rate_ill_crew_recomputed",
+      "denominator": "crew_complement",
+      "numerator": "cumulative_ever_ill_crew"
+    },
+    {
+      "column": "reported_rate_pax_recomputed",
+      "denominator": "passenger_complement",
+      "numerator": "cumulative_reported_cases_passenger"
+    },
+    {
+      "column": "reported_rate_crew_recomputed",
+      "denominator": "crew_complement",
+      "numerator": "cumulative_reported_cases_crew"
+    }
   ],
   "scan_fields": [
-    {"column": "scan_posted", "native": "/posted", "kind": "value"},
-    {"column": "scan_vsp_trigger", "native": "/vsp_trigger", "kind": "value"},
-    {"column": "scan_ignited", "native": "/ignited", "kind": "value"},
-    {"column": "scan_peak_prevalence", "native": "/peak_prevalence", "kind": "value"},
-    {"column": "scan_cs_events", "native": "/cs_events_summary", "kind": "value"},
-    {"column": "scan_cs_takers", "native": "/cs_takers_summary", "kind": "value"},
-    {"column": "scan_cs_echo_json", "native": "/cs_echo", "kind": "json"},
-    {"column": "scan_n_events", "native": "/census/n_events", "kind": "value"},
-    {"column": "scan_n_objects", "native": "/census/n_objects", "kind": "value"},
-    {"column": "scan_objects_provisioned_lot", "native": "/census/telemetry/objects_provisioned_lot", "kind": "value"},
-    {"column": "scan_objects_ill_handler", "native": "/census/telemetry/objects_ill_handler", "kind": "value"},
-    {"column": "scan_objects_ill_diner", "native": "/census/telemetry/objects_ill_diner", "kind": "value"},
-    {"column": "scan_early_objects_json", "native": "/census/early", "kind": "json"},
-    {"column": "scan_burst48", "native": "/census/burst48", "kind": "value"},
-    {"column": "scan_burst24", "native": "/census/burst24", "kind": "value"},
-    {"column": "scan_burst12", "native": "/census/burst12", "kind": "value"},
-    {"column": "scan_burst6", "native": "/census/burst6", "kind": "value"},
-    {"column": "scan_burst48_centre", "native": "/census/burst48_centre", "kind": "value"},
-    {"column": "scan_n_early_obj", "native": "/census/n_early_obj", "kind": "value"},
-    {"column": "scan_n_early_ev", "native": "/census/n_early_ev", "kind": "value"},
-    {"column": "scan_n_late_obj", "native": "/census/n_late_obj", "kind": "value"},
-    {"column": "scan_n_late_ev", "native": "/census/n_late_ev", "kind": "value"}
+    {
+      "column": "scan_posted",
+      "kind": "value",
+      "native": "/posted"
+    },
+    {
+      "column": "scan_vsp_trigger",
+      "kind": "value",
+      "native": "/vsp_trigger"
+    },
+    {
+      "column": "scan_ignited",
+      "kind": "value",
+      "native": "/ignited"
+    },
+    {
+      "column": "scan_peak_prevalence",
+      "kind": "value",
+      "native": "/peak_prevalence"
+    },
+    {
+      "column": "scan_cs_events",
+      "kind": "value",
+      "native": "/cs_events_summary"
+    },
+    {
+      "column": "scan_cs_takers",
+      "kind": "value",
+      "native": "/cs_takers_summary"
+    },
+    {
+      "column": "scan_cs_echo_json",
+      "kind": "json",
+      "native": "/cs_echo"
+    },
+    {
+      "column": "scan_n_events",
+      "kind": "value",
+      "native": "/census/n_events"
+    },
+    {
+      "column": "scan_n_objects",
+      "kind": "value",
+      "native": "/census/n_objects"
+    },
+    {
+      "column": "scan_objects_provisioned_lot",
+      "kind": "value",
+      "native": "/census/telemetry/objects_provisioned_lot"
+    },
+    {
+      "column": "scan_objects_ill_handler",
+      "kind": "value",
+      "native": "/census/telemetry/objects_ill_handler"
+    },
+    {
+      "column": "scan_objects_ill_diner",
+      "kind": "value",
+      "native": "/census/telemetry/objects_ill_diner"
+    },
+    {
+      "column": "scan_early_objects_json",
+      "kind": "json",
+      "native": "/census/early"
+    },
+    {
+      "column": "scan_burst48",
+      "kind": "value",
+      "native": "/census/burst48"
+    },
+    {
+      "column": "scan_burst24",
+      "kind": "value",
+      "native": "/census/burst24"
+    },
+    {
+      "column": "scan_burst12",
+      "kind": "value",
+      "native": "/census/burst12"
+    },
+    {
+      "column": "scan_burst6",
+      "kind": "value",
+      "native": "/census/burst6"
+    },
+    {
+      "column": "scan_burst48_centre",
+      "kind": "value",
+      "native": "/census/burst48_centre"
+    },
+    {
+      "column": "scan_n_early_obj",
+      "kind": "value",
+      "native": "/census/n_early_obj"
+    },
+    {
+      "column": "scan_n_early_ev",
+      "kind": "value",
+      "native": "/census/n_early_ev"
+    },
+    {
+      "column": "scan_n_late_obj",
+      "kind": "value",
+      "native": "/census/n_late_obj"
+    },
+    {
+      "column": "scan_n_late_ev",
+      "kind": "value",
+      "native": "/census/n_late_ev"
+    }
   ],
-  "recomputed_pairs": [
-    {"column": "attack_rate_infection_pax_recomputed", "numerator": "cumulative_ever_infected_passenger", "denominator": "passenger_complement"},
-    {"column": "attack_rate_infection_crew_recomputed", "numerator": "cumulative_ever_infected_crew", "denominator": "crew_complement"},
-    {"column": "attack_rate_ill_pax_recomputed", "numerator": "cumulative_ever_ill_passenger", "denominator": "passenger_complement"},
-    {"column": "attack_rate_ill_crew_recomputed", "numerator": "cumulative_ever_ill_crew", "denominator": "crew_complement"},
-    {"column": "reported_rate_pax_recomputed", "numerator": "cumulative_reported_cases_passenger", "denominator": "passenger_complement"},
-    {"column": "reported_rate_crew_recomputed", "numerator": "cumulative_reported_cases_crew", "denominator": "crew_complement"}
-  ],
-  "sum_checks": [
-    {"column": "reported_by_channel_consistent", "sum_column": "reported_by_channel_sum", "dict_column": "reported_cases_by_channel_json", "total_column": "cumulative_reported_cases"},
-    {"column": "reported_by_route_consistent", "sum_column": "reported_by_route_sum", "dict_column": "reported_cases_by_dominant_route_json", "total_column": "cumulative_reported_cases"},
-    {"column": "infections_by_route_consistent", "sum_column": "infections_by_route_sum", "dict_column": "infections_by_dominant_route_json", "total_column": "cumulative_ever_infected"}
-  ],
+  "scan_join": {
+    "fallback": "none",
+    "note": "scan row `key` is the run archive object key; full-key only \u2014 off/ps_ship share seeds within a hull so (hull,seed) is ambiguous; key/hull/seed disagreement or a duplicate key is a typed conflict, never first-row-wins",
+    "primary": "object_key"
+  },
+  "scan_role": "scan_rows",
   "status_vocabulary": [
+    "domain_invalid",
     "exact_emitted",
-    "null_emitted",
-    "missing",
-    "recomputed_pair",
     "invalid_pair_missing_operand",
     "invalid_pair_zero_denominator",
+    "missing",
+    "null_emitted",
+    "recomputed",
+    "recomputed_pair",
+    "scan_agreement_conflict",
+    "scan_key_conflict",
+    "scan_source_absent",
     "sum_consistent",
     "sum_divergent",
     "sum_uncomputable",
-    "scan_source_absent"
-  ]
+    "unknown"
+  ],
+  "sum_checks": [
+    {
+      "column": "reported_by_channel_consistent",
+      "dict_column": "reported_cases_by_channel_json",
+      "role_totals": {
+        "crew": "cumulative_reported_cases_crew",
+        "passenger": "cumulative_reported_cases_passenger"
+      },
+      "sum_column": "reported_by_channel_sum",
+      "total_column": "cumulative_reported_cases"
+    },
+    {
+      "column": "reported_by_route_consistent",
+      "dict_column": "reported_cases_by_dominant_route_json",
+      "role_totals": {
+        "crew": "cumulative_reported_cases_crew",
+        "passenger": "cumulative_reported_cases_passenger"
+      },
+      "sum_column": "reported_by_route_sum",
+      "total_column": "cumulative_reported_cases"
+    },
+    {
+      "column": "infections_by_route_consistent",
+      "dict_column": "infections_by_dominant_route_json",
+      "sum_column": "infections_by_route_sum",
+      "total_column": "cumulative_ever_infected"
+    }
+  ],
+  "summary_fields": [
+    {
+      "column": "run_id_native",
+      "kind": "value",
+      "native": "/run_id"
+    },
+    {
+      "column": "trigger_status",
+      "kind": "value",
+      "native": "/trigger_status"
+    },
+    {
+      "column": "num_epochs",
+      "domain": "count",
+      "kind": "value",
+      "native": "/num_epochs"
+    },
+    {
+      "column": "seed",
+      "kind": "value",
+      "native": "/parameters/seed"
+    },
+    {
+      "column": "engine_git_sha",
+      "kind": "value",
+      "native": "/parameters/engine_git_sha"
+    },
+    {
+      "column": "platform_id",
+      "kind": "value",
+      "native": "/parameters/platform_id"
+    },
+    {
+      "column": "tier_id",
+      "kind": "value",
+      "native": "/parameters/tier_id"
+    },
+    {
+      "column": "parameters_json",
+      "kind": "json",
+      "native": "/parameters"
+    },
+    {
+      "column": "initiation_resolved_json",
+      "kind": "json",
+      "native": "/initiation/resolved"
+    },
+    {
+      "column": "passenger_complement",
+      "kind": "value",
+      "native": "/summary/passenger_complement"
+    },
+    {
+      "column": "crew_complement",
+      "kind": "value",
+      "native": "/summary/crew_complement"
+    },
+    {
+      "column": "cumulative_ever_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_infected"
+    },
+    {
+      "column": "cumulative_ever_infected_passenger",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_infected_passenger"
+    },
+    {
+      "column": "cumulative_ever_infected_crew",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_infected_crew"
+    },
+    {
+      "column": "cumulative_ever_ill",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_ill"
+    },
+    {
+      "column": "cumulative_ever_ill_passenger",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_ill_passenger"
+    },
+    {
+      "column": "cumulative_ever_ill_crew",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_ill_crew"
+    },
+    {
+      "column": "cumulative_reported_cases",
+      "domain": "count",
+      "kind": "value",
+      "native": "/summary/cumulative_reported_cases"
+    },
+    {
+      "column": "cumulative_reported_cases_passenger",
+      "domain": "count",
+      "kind": "value",
+      "native": "/summary/cumulative_reported_cases_passenger"
+    },
+    {
+      "column": "cumulative_reported_cases_crew",
+      "domain": "count",
+      "kind": "value",
+      "native": "/summary/cumulative_reported_cases_crew"
+    },
+    {
+      "column": "cumulative_reported_noise_cases",
+      "kind": "value",
+      "native": "/summary/cumulative_reported_noise_cases"
+    },
+    {
+      "column": "infection_attack_rate",
+      "kind": "value",
+      "native": "/derived/attack_rate"
+    },
+    {
+      "column": "infection_attack_rate_passenger",
+      "kind": "value",
+      "native": "/summary/infection_attack_rate_passenger"
+    },
+    {
+      "column": "infection_attack_rate_crew",
+      "kind": "value",
+      "native": "/summary/infection_attack_rate_crew"
+    },
+    {
+      "column": "ever_ill_rate_passenger",
+      "kind": "value",
+      "native": "/summary/ever_ill_rate_passenger"
+    },
+    {
+      "column": "ever_ill_rate_crew",
+      "kind": "value",
+      "native": "/summary/ever_ill_rate_crew"
+    },
+    {
+      "column": "reported_case_rate_passenger",
+      "kind": "value",
+      "native": "/summary/reported_case_rate_passenger"
+    },
+    {
+      "column": "reported_case_rate_crew",
+      "kind": "value",
+      "native": "/summary/reported_case_rate_crew"
+    },
+    {
+      "column": "reported_cases_by_channel_json",
+      "kind": "json",
+      "native": "/summary/reported_cases_by_channel"
+    },
+    {
+      "column": "reported_cases_by_dominant_route_json",
+      "kind": "json",
+      "native": "/summary/reported_cases_by_dominant_route"
+    },
+    {
+      "column": "infections_by_dominant_route_json",
+      "kind": "json",
+      "native": "/summary/infections_by_dominant_route"
+    },
+    {
+      "column": "infection_dose_share_by_route_json",
+      "kind": "json",
+      "native": "/summary/infection_dose_share_by_route"
+    },
+    {
+      "column": "census_ignited",
+      "kind": "value",
+      "native": "/census/ignited"
+    },
+    {
+      "column": "census_n_imports",
+      "kind": "value",
+      "native": "/census/n_imports"
+    },
+    {
+      "column": "census_n_acquired",
+      "kind": "value",
+      "native": "/census/n_acquired"
+    },
+    {
+      "column": "census_acquisitions_by_gen_json",
+      "kind": "json",
+      "native": "/census/acquisitions_by_gen"
+    },
+    {
+      "column": "common_source_events",
+      "kind": "value",
+      "native": "/mechanisms/common_source_events"
+    },
+    {
+      "column": "common_source_takers",
+      "kind": "value",
+      "native": "/mechanisms/common_source_takers"
+    },
+    {
+      "column": "vsp_trigger_epoch",
+      "kind": "value",
+      "native": "/derived/vsp_trigger_epoch"
+    },
+    {
+      "column": "peak_epoch",
+      "kind": "value",
+      "native": "/derived/peak_epoch"
+    },
+    {
+      "column": "detection_epoch",
+      "kind": "value",
+      "native": "/derived/detection_epoch"
+    },
+    {
+      "column": "confirmation_epoch",
+      "kind": "value",
+      "native": "/derived/confirmation_epoch"
+    },
+    {
+      "column": "detection_lag",
+      "kind": "value",
+      "native": "/derived/detection_lag"
+    },
+    {
+      "column": "peak_prevalence",
+      "kind": "value",
+      "native": "/derived/peak_prevalence"
+    },
+    {
+      "column": "outbreak_occurred",
+      "kind": "value",
+      "native": "/derived/outbreak_occurred"
+    },
+    {
+      "column": "r_effective_at_peak",
+      "kind": "value",
+      "native": "/derived/r_effective_at_peak"
+    }
+  ],
+  "suppress_tables": [
+    "run_scalars",
+    "distributions",
+    "weights"
+  ],
+  "table_name": "first_paper_vectors"
 }

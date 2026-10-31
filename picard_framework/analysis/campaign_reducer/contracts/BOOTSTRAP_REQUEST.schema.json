@@ -1,77 +1,66 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:crusher:integrated-distributions:v1:bootstrap",
-  "title": "NOT_YET_IMPLEMENTED bounded metadata/return admission; no Batch submit or payload reduction",
-  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "properties": {
-    "schema_version": {
-      "const": "crusher-campaign-distributions/1.0-proposed"
-    },
-    "request_id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "operation": {
-      "enum": [
-        "preflight",
-        "inventory",
-        "status",
-        "collect",
-        "acknowledge"
-      ]
-    },
-    "source_bucket": {
-      "type": "string",
-      "minLength": 1
-    },
-    "source_roots_allowlist": {
-      "type": "array",
-      "items": {
-        "type": "string"
+    "admission": {
+      "additionalProperties": false,
+      "properties": {
+        "admission_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "approved_cost_usd": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "approved_scope_hash": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "expires_utc": {
+          "minLength": 1,
+          "type": "string"
+        }
       },
-      "minItems": 1
-    },
-    "derived_exclude_prefixes": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minItems": 1
-    },
-    "scope_register_sha256": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
+      "required": [
+        "admission_id",
+        "approved_scope_hash",
+        "approved_cost_usd",
+        "expires_utc"
+      ],
+      "type": "object"
     },
     "budgets": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "max_api_calls_total": {
-          "type": "integer",
-          "exclusiveMinimum": 0
-        },
-        "max_list_pages": {
-          "type": "integer",
-          "exclusiveMinimum": 0
-        },
-        "max_head_requests": {
-          "type": "integer",
-          "exclusiveMinimum": 0
-        },
-        "max_source_objects": {
-          "type": "integer",
-          "exclusiveMinimum": 0
-        },
-        "max_return_bytes": {
-          "type": "integer",
-          "exclusiveMinimum": 0
-        },
-        "max_wall_seconds": {
-          "type": "integer",
-          "exclusiveMinimum": 0
+          "exclusiveMinimum": 0,
+          "type": "integer"
         },
         "max_cost_usd": {
-          "type": "number",
-          "exclusiveMinimum": 0
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "max_head_requests": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "max_list_pages": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "max_return_bytes": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "max_source_objects": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        "max_wall_seconds": {
+          "exclusiveMinimum": 0,
+          "type": "integer"
         }
       },
       "required": [
@@ -83,50 +72,50 @@
         "max_wall_seconds",
         "max_cost_usd"
       ],
-      "additionalProperties": false
+      "type": "object"
     },
-    "admission": {
-      "type": "object",
-      "properties": {
-        "admission_id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "approved_scope_hash": {
-          "type": "string",
-          "minLength": 1
-        },
-        "approved_cost_usd": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "expires_utc": {
-          "type": "string",
-          "minLength": 1
-        }
+    "collect_page_ids": {
+      "description": "optional: collect only these pages manifest page_ids/uris",
+      "items": {
+        "type": "string"
       },
-      "required": [
-        "admission_id",
-        "approved_scope_hash",
-        "approved_cost_usd",
-        "expires_utc"
-      ],
-      "additionalProperties": false
+      "type": "array"
+    },
+    "collect_page_limit": {
+      "description": "optional: collect only the first N manifest pages",
+      "minimum": 1,
+      "type": "integer"
+    },
+    "derived_exclude_prefixes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "operation": {
+      "enum": [
+        "preflight",
+        "inventory",
+        "status",
+        "collect",
+        "acknowledge"
+      ]
     },
     "price_snapshot": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
-        },
         "as_of_utc": {
-          "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "type": "string"
         },
         "unit_prices_json": {
-          "type": "object",
-          "minProperties": 1
+          "minProperties": 1,
+          "type": "object"
         }
       },
       "required": [
@@ -134,7 +123,29 @@
         "as_of_utc",
         "unit_prices_json"
       ],
-      "additionalProperties": false
+      "type": "object"
+    },
+    "request_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "crusher-campaign-distributions/1.0-proposed"
+    },
+    "scope_register_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "source_bucket": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "source_roots_allowlist": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
     }
   },
   "required": [
@@ -149,5 +160,6 @@
     "admission",
     "price_snapshot"
   ],
-  "additionalProperties": false
+  "title": "NOT_YET_IMPLEMENTED bounded metadata/return admission; no Batch submit or payload reduction",
+  "type": "object"
 }
