@@ -525,7 +525,19 @@ def _op_query(args, out_root: str) -> int:
 
 
 def _manifest_entries(store, receipt: dict) -> list[dict]:
-    key = receipt.get("files_manifest_key") or receipt.get("manifest_key")
+    """Collector manifest entries — bounded pages win over partitions.
+
+    A receipt that publishes ``pages_manifest_key`` (the <=1MiB
+    unique-named page set + pages manifest emitted at finalize)
+    collects those pages; ``files_manifest_key``/``manifest_key``
+    pointing at every materialization partition remains the fallback
+    and will trip ``files_per_collect`` on a real tranche.
+    """
+    key = (
+        receipt.get("pages_manifest_key")
+        or receipt.get("files_manifest_key")
+        or receipt.get("manifest_key")
+    )
     if not isinstance(key, str) or not key:
         return []
     doc = _fetch_doc_from_store(
@@ -535,6 +547,31 @@ def _manifest_entries(store, receipt: dict) -> list[dict]:
     for entry in entries:
         if not isinstance(entry, dict) or not entry.get("uri"):
             raise _invalid(f"manifest entry missing uri: {entry!r}")
+    return entries
+
+
+def _select_pages(request: dict, entries: list[dict]) -> list[dict]:
+    """Request-scoped page selection: ``collect_page_ids`` picks named
+    pages; ``collect_page_limit`` caps the head of the manifest. The
+    selection is applied BEFORE the files_per_collect check so a
+    demonstration collect can pin one scientific page."""
+    wanted = request.get("collect_page_ids")
+    if isinstance(wanted, list) and wanted:
+        ids = {str(w) for w in wanted}
+        picked = [
+            e for e in entries
+            if e.get("page_id") in ids or e.get("uri") in ids
+        ]
+        if len(picked) != len(ids):
+            raise ReturnFailure(
+                "invalid_request",
+                "collect_page_ids names a page not in the manifest",
+                owner="s3_return_path",
+            )
+        return picked
+    limit = request.get("collect_page_limit")
+    if isinstance(limit, int) and not isinstance(limit, bool) and limit > 0:
+        return entries[:limit]
     return entries
 
 
@@ -558,7 +595,7 @@ def _op_collect(args, out_root: str) -> int:
         for ref in (receipt.get("summary_key"), receipt.get("catalog_uri"))
         if isinstance(ref, str) and ref
     ]
-    entries = _manifest_entries(store, receipt)
+    entries = _select_pages(request, _manifest_entries(store, receipt))
     if len(entries) > _CAPS["files_per_collect"]:
         raise ReturnFailure(
             "budget_exceeded",

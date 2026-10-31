@@ -477,6 +477,11 @@ def _attempt_receipt(
         "catalog_hash": snapshot_id or "",
         "summary_key": f"{prefix}/MANIFEST.json",
         "files_manifest_key": f"{prefix}/MANIFEST.json",
+        "pages_manifest_key": (
+            f"{prefix}/pages/first_paper_vectors.pages_manifest.json"
+        ),
+        "status_key": f"{prefix}/status.json",
+        "asset_index_key": f"{prefix}/asset_index.json",
         "checkpoint_uri": checkpoint_uri,
         "continuation": None,
         "output_counts": counts or {},
