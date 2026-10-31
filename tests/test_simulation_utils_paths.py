@@ -19,6 +19,53 @@ from simulation_utils.paths import (
 )
 
 
+def test_resolve_under_base_keeps_distinct_keys_inside(tmp_path) -> None:
+    """Three different keys stay inside the base and do not collapse."""
+    from simulation_utils.paths import resolve_under_base
+
+    base = tmp_path / "store"
+    base.mkdir()
+    keys = ["a/one.json", "b/two.json", "/nested/three.json"]
+    resolved = [resolve_under_base(str(base), key) for key in keys]
+    assert len(set(resolved)) == len(keys)
+    root = os.path.realpath(base)
+    prefix = root if root.endswith(os.sep) else root + os.sep
+    assert all(path.startswith(prefix) for path in resolved)
+    assert [os.path.basename(path) for path in resolved] == [
+        "one.json",
+        "two.json",
+        "three.json",
+    ]
+    assert resolve_under_base(str(base), "a/one.json/") == resolved[0]
+
+
+def test_resolve_under_base_rejects_escape(tmp_path) -> None:
+    from simulation_utils.paths import resolve_under_base
+
+    base = tmp_path / "store"
+    base.mkdir()
+    for key in ("../x", "a/../../x", "a\\b", "a/\x00b", "", ".", ".."):
+        with pytest.raises(ValueError):
+            resolve_under_base(str(base), key)
+
+
+def test_exclusive_create_is_create_only_and_contained(tmp_path) -> None:
+    from simulation_utils.paths import exclusive_create
+
+    base = tmp_path / "store"
+    base.mkdir()
+    target = base / "a" / "b.bin"
+    exclusive_create(str(target), b"one", allowed_roots=(str(base),))
+    assert target.read_bytes() == b"one"
+    with pytest.raises(FileExistsError):
+        exclusive_create(str(target), b"two", allowed_roots=(str(base),))
+    assert target.read_bytes() == b"one"
+    outside = tmp_path / "outside.bin"
+    with pytest.raises(ValueError, match="outside allowed roots"):
+        exclusive_create(str(outside), b"nope", allowed_roots=(str(base),))
+    assert not outside.exists()
+
+
 def test_resolve_repo_path_rejects_traversal(tmp_path) -> None:
     base = tmp_path / "repo"
     base.mkdir()
