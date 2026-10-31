@@ -31,6 +31,7 @@ registered campaign specs, without running any new simulation.
 | `FIELD_CONTRACTS.md` / `STATUS_NAMESPACES.md` | Reading views of the machine contracts |
 | `references.bib` | Primary repository BibTeX |
 | `D6_MEASURED_COST_BENEFIT.md` | Measured pilot cost-benefit (run 40802806913 + `quote-5a98544c742ef4a4`): the live-measured quote that gates the D7 envelope decision |
+| `FIRST_PAPER_SCALAR_PANEL.md` | Phase A specimen panel + extraction quote for the `first_paper_scalar` mode (16 ranged-read specimens × 4 hulls; field-presence matrix and phase-B/C quote terms) |
 
 ## Machine contracts (code-facing)
 
