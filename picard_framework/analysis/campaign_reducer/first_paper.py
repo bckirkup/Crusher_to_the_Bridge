@@ -23,6 +23,7 @@ deterministically and are not counted as executions.
 from __future__ import annotations
 
 import json
+import math
 from typing import Any
 
 from . import contracts
@@ -83,12 +84,19 @@ def _field_value(kind: str, node: Any) -> Any:
     return node
 
 
+def _finite_num(node: Any) -> bool:
+    """Real finite int/float — bool, NaN and inf rejected."""
+    return (
+        isinstance(node, (int, float))
+        and not isinstance(node, bool)
+        and math.isfinite(node)
+    )
+
+
 def _domain_ok(domain: str, node: Any) -> bool:
     """Count/rate domain validation — bool/negative/nonfinite rejected."""
     if domain in ("count", "rate", "number"):
-        if isinstance(node, bool) or not isinstance(node, (int, float)):
-            return False
-        if node != node or node in (float("inf"), float("-inf")):
+        if not _finite_num(node):
             return False
         if domain in ("count", "rate") and node < 0:
             return False
@@ -126,7 +134,7 @@ def _project_fields(
 
 
 def _recomputed_pairs(
-    values: dict, prov: dict, fields_prov: dict, doc: dict
+    values: dict, prov: dict, fields_prov: dict
 ) -> list[str]:
     """Ratios only from valid matching pairs; never a borrowed denominator."""
     missing_cols: list[str] = []
@@ -134,15 +142,7 @@ def _recomputed_pairs(
         col = pair["column"]
         num = values.get(pair["numerator"])
         den = values.get(pair["denominator"])
-        if (
-            isinstance(num, bool)
-            or isinstance(den, bool)
-            or not isinstance(num, (int, float))
-            or not isinstance(den, (int, float))
-            or not (num == num and den == den)
-            or num in (float("inf"), float("-inf"))
-            or den in (float("inf"), float("-inf"))
-        ):
+        if not (_finite_num(num) and _finite_num(den)):
             status = "invalid_pair_missing_operand"
             missing_cols.append(col)
         elif den == 0:
@@ -169,6 +169,46 @@ def _recomputed_pairs(
     return missing_cols
 
 
+def _role_check(
+    check: dict, values: dict, members: dict
+) -> tuple[float | None, bool, str | None]:
+    """Role-nested member sums vs role totals then combined total.
+
+    Returns ``(member_sum, roles_ok, by_role_json)`` — ``member_sum``
+    ``None`` marks the dict uncomputable (non-dict role payload or a
+    non-finite member).
+    """
+    flat: dict[str, dict] = {}
+    for role, sub in members.items():
+        if not isinstance(sub, dict) or not all(
+            _finite_num(v) for v in sub.values()
+        ):
+            return None, False, None
+        flat[role] = sub
+    role_sums = {r: sum(sub.values()) for r, sub in flat.items()}
+    role_totals = check.get("role_totals") or {}
+    roles_ok = all(
+        _finite_num(values.get(role_totals[r]))
+        and role_sums.get(r) == values[role_totals[r]]
+        for r in role_totals
+        if r in flat
+    ) and all(r in flat for r in role_totals)
+    return (
+        sum(role_sums.values()),
+        roles_ok,
+        canonical_json(role_sums),
+    )
+
+
+def _flat_check(members: Any) -> tuple[float | None, str | None]:
+    """Flat dict member sum — None marks it uncomputable."""
+    if not isinstance(members, dict) or not all(
+        _finite_num(v) for v in members.values()
+    ):
+        return None, None
+    return sum(members.values()), None
+
+
 def _sum_checks(
     values: dict, prov: dict, fields_prov: dict
 ) -> list[str]:
@@ -179,57 +219,19 @@ def _sum_checks(
         total = values.get(check["total_column"])
         members = json.loads(raw) if isinstance(raw, str) else raw
         sum_col = check["sum_column"]
-        role_totals = check.get("role_totals") or {}
         role_nested = isinstance(members, dict) and any(
             isinstance(v, dict) for v in members.values()
         )
-
-        def _flat(d: dict) -> bool:
-            return all(
-                isinstance(v, (int, float)) and not isinstance(v, bool)
-                and v == v and v not in (float("inf"), float("-inf"))
-                for v in d.values()
-            )
-
         if role_nested:
-            flat_members = {}
-            ok = isinstance(members, dict)
-            for role, sub in (members or {}).items():
-                if isinstance(sub, dict) and _flat(sub):
-                    flat_members[role] = sub
-                else:
-                    ok = False
-            role_sums = {r: sum(sub.values())
-                         for r, sub in flat_members.items()}
-            member_sum = sum(role_sums.values()) if ok else None
-            roles_ok = ok and all(
-                isinstance(values.get(role_totals.get(r, "")), (int, float))
-                and not isinstance(values.get(role_totals.get(r, "")), bool)
-                and role_sums[r] == values[role_totals[r]]
-                for r in role_totals
-            ) if role_totals else ok
-            computable = (
-                ok
-                and member_sum is not None
-                and isinstance(total, (int, float))
-                and not isinstance(total, bool)
-            )
-            values[sum_col + "_by_role"] = (
-                canonical_json(role_sums) if ok else None
-            )
+            member_sum, roles_ok, by_role = _role_check(
+                check, values, members)
+            values[sum_col + "_by_role"] = by_role
         else:
-            member_sum = None
-            computable = (
-                isinstance(members, dict)
-                and _flat(members)
-                and isinstance(total, (int, float))
-                and not isinstance(total, bool)
-            )
-            if computable:
-                member_sum = sum(members.values())
-            roles_ok = computable
+            member_sum, _ = _flat_check(members)
+            roles_ok = member_sum is not None
             values[sum_col + "_by_role"] = None
 
+        computable = member_sum is not None and _finite_num(total)
         if not computable:
             values[sum_col] = None
             values[check["column"]] = None
@@ -258,6 +260,14 @@ def _sum_checks(
     return missing_cols
 
 
+def _status_prov(member: str, native_path: str, status_value: str) -> dict:
+    return {
+        "native_path": native_path,
+        "member": member,
+        "status": "recomputed" if status_value != "unknown" else "unknown",
+    }
+
+
 def _status_columns(values, prov, doc, hit) -> list[str]:
     """Completion/follow-up/clock status from actual evidence.
 
@@ -271,55 +281,38 @@ def _status_columns(values, prov, doc, hit) -> list[str]:
     """
     missing: list[str] = []
     emitted = values.get("num_epochs")
-    params = doc.get("parameters") or {}
-    declared = params.get("num_epochs")
-    if isinstance(emitted, (int, float)) and not isinstance(emitted, bool) \
-            and isinstance(declared, (int, float)) \
-            and not isinstance(declared, bool):
-        if emitted == declared:
-            clock = "complete"
-        elif emitted < declared:
-            clock = "truncated"
-        else:
-            clock = "overrun"
+    declared = (doc.get("parameters") or {}).get("num_epochs")
+    if _finite_num(emitted) and _finite_num(declared):
+        clock = (
+            "complete" if emitted == declared
+            else "truncated" if emitted < declared
+            else "overrun"
+        )
     else:
         clock = "unknown"
         missing.append("clock_status")
     values["clock_status"] = clock
-    prov["clock_status"] = {
-        "native_path": "/num_epochs + /parameters/num_epochs",
-        "member": "derived:clock",
-        "status": "recomputed" if clock != "unknown" else "unknown",
-    }
+    prov["clock_status"] = _status_prov(
+        "derived:clock", "/num_epochs + /parameters/num_epochs", clock)
 
-    if clock == "complete":
-        completion = "completed"
-    elif clock in ("truncated", "overrun"):
-        completion = clock
-    else:
-        completion = "unknown"
+    completion = {"complete": "completed"}.get(clock, clock)
+    if completion == "unknown":
         missing.append("completion_status")
     values["completion_status"] = completion
-    prov["completion_status"] = {
-        "native_path": "derived:clock_status",
-        "member": "derived:completion",
-        "status": "recomputed" if completion != "unknown" else "unknown",
-    }
+    prov["completion_status"] = _status_prov(
+        "derived:completion", "derived:clock_status", completion)
 
     posted = hit["line"].get("posted") if hit else None
     if posted is True:
         follow = "posted"
-    elif posted is False or posted is None and hit is not None:
+    elif hit is not None:
         follow = "unposted"
     else:
         follow = "unknown"
         missing.append("follow_up_status")
     values["follow_up_status"] = follow
-    prov["follow_up_status"] = {
-        "native_path": "scan:posted",
-        "member": "derived:follow_up",
-        "status": "recomputed" if follow != "unknown" else "unknown",
-    }
+    prov["follow_up_status"] = _status_prov(
+        "derived:follow_up", "scan:posted", follow)
     return missing
 
 
@@ -421,7 +414,7 @@ def vector_rows(
         values, prov, missing = _project_fields(
             ddoc.doc, doc["summary_fields"], {**summary_base}
         )
-        missing += _recomputed_pairs(values, prov, prov, ddoc.doc)
+        missing += _recomputed_pairs(values, prov, prov)
         missing += _sum_checks(values, prov, prov)
         hit, scan_status = _scan_lookup(
             acc,
