@@ -36,7 +36,12 @@ from simulation_utils.paths import confine_to_base
 
 from .._io import cwd_root
 from .derived_store import DerivedStoreError, LocalDirStore, MemoryDerivedStore
-from .ledger import BudgetBlocked, BudgetLedger, parse_ceilings
+from .ledger import (
+    BudgetBlocked,
+    BudgetExceeded,
+    BudgetLedger,
+    parse_ceilings,
+)
 from .materialize import DERIVED_ROOT, MaterializeSpec, run_materialization
 from .pinned_reader import (
     STATE_AVAILABLE,
@@ -54,6 +59,10 @@ from .s3_store import S3DerivedStore
 
 # CANONICAL_INTERFACE readback cap for the request manifest itself.
 _REQUEST_MANIFEST_MAX_BYTES = 1048576
+
+# Cap on the pinned ``sources_uri`` cohort manifest the request may
+# point at (the request itself stays under the 1 MiB readback cap).
+_SOURCES_MANIFEST_MAX_BYTES = 16 * 1024 * 1024
 
 
 class LocalTransport:
@@ -141,12 +150,17 @@ def _s3_client():
 
 
 def _request_path(uri: str) -> Path:
-    """Resolve the request URI to an existing regular file."""
+    """Resolve the request URI to a file confined to the working root.
+
+    Canonicalize-then-validate (S8707/S6549): an escape is denied
+    before any filesystem access, and the read itself reports
+    "unreadable" through the caller's OSError wrap.
+    """
     raw = uri[len("file://"):] if uri.startswith("file://") else uri
-    path = Path(raw).resolve()
-    if not path.is_file():
-        raise QueryError("invalid_contract", f"request uri unreadable: {uri}")
-    return path
+    try:
+        return Path(confine_to_base(cwd_root(), raw))
+    except ValueError as exc:
+        raise QueryError("access_denied", str(exc)) from exc
 
 
 def _fetch_request_s3(uri: str) -> dict:
@@ -247,6 +261,92 @@ def _verify_sha(doc: dict, expected: str) -> None:
             "invalid_contract",
             f"request sha256 {actual} != declared {expected}",
         )
+
+
+def _fetch_sources_manifest(uri: str, ledger: BudgetLedger) -> dict:
+    """Bounded read of the ``sources_uri`` cohort manifest.
+
+    Same pinned-transport + canonical-sha contract as the request
+    itself: an ``s3://`` URI is read through the pinned boto3 transport
+    and charged to the shared ledger like every source read; a local
+    path serves the offline shim. ``sources_sha256`` on the request
+    binds the canonicalized manifest body exactly like
+    ``--request-sha256`` binds the request.
+    """
+    if uri.startswith("s3://"):
+        bucket, key = parse_s3_uri(uri)
+        if not key:
+            raise QueryError(
+                "invalid_contract", f"sources uri has no key: {uri}"
+            )
+        transport = boto3_transport(_s3_client(), bucket)
+        budget = ReadBudget(
+            max_total_bytes=_SOURCES_MANIFEST_MAX_BYTES,
+            max_object_bytes=_SOURCES_MANIFEST_MAX_BYTES,
+        )
+        outcome = read_object(transport, bucket, key, budget)
+        if outcome.state != STATE_AVAILABLE or outcome.body is None:
+            raise QueryError(
+                "access_denied",
+                f"sources manifest fetch blocked: "
+                f"{outcome.state} {outcome.detail}",
+            )
+        body = outcome.body
+        ledger.charge("max_api_calls_total", 1, uri)
+        ledger.charge("max_get_requests", 1, uri)
+        ledger.charge("max_compressed_bytes_read", len(body), uri)
+    else:
+        try:
+            body = _request_path(uri).read_bytes()
+        except OSError as exc:
+            raise QueryError(
+                "invalid_contract", f"sources uri unreadable: {exc}"
+            )
+        if len(body) > _SOURCES_MANIFEST_MAX_BYTES:
+            raise QueryError(
+                "invalid_contract",
+                "sources manifest exceeds the byte cap",
+            )
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError as exc:
+        raise QueryError(
+            "invalid_contract", f"sources manifest unreadable: {exc}"
+        )
+
+
+def _resolve_sources(request: dict, ledger: BudgetLedger) -> list:
+    """The request's ``sources`` list plus any ``sources_uri`` cohort.
+
+    ``sources_uri`` names a JSON document ``{"sources": [...]}`` staged
+    beside the request — it keeps a cohort larger than the 1 MiB
+    request cap explicit, immutable and sha-pinned instead of
+    runtime-enumerated. Entries merge after inline ``sources``; the
+    manifest's sha is verified when ``sources_sha256`` is declared.
+    """
+    sources = list(request.get("sources") or [])
+    uri = request.get("sources_uri")
+    if not uri:
+        return sources
+    doc = _fetch_sources_manifest(str(uri), ledger)
+    expected = request.get("sources_sha256") or ""
+    canonical = json.dumps(doc, sort_keys=True, separators=(",", ":"))
+    if expected:
+        actual = hashlib.sha256(canonical.encode()).hexdigest()
+        if actual != expected:
+            raise QueryError(
+                "invalid_contract",
+                f"sources sha256 {actual} != declared {expected}",
+            )
+    extra = doc.get("sources") if isinstance(doc, dict) else doc
+    if not isinstance(extra, list) or not all(
+        isinstance(s, dict) for s in extra
+    ):
+        raise QueryError(
+            "invalid_contract",
+            "sources manifest must carry a list of source objects",
+        )
+    return sources + extra
 
 
 def _ctx(request: dict, shard_index: int) -> ReductionContext:
@@ -543,12 +643,17 @@ def main(argv: list[str] | None = None) -> int:
         request, request_path = _fetch_request(args.request_uri)
         _verify_sha(request, args.request_sha256)
         ceilings = parse_ceilings(request.get("budgets"))
+        ledger = BudgetLedger(ceilings)
+        request["sources"] = _resolve_sources(request, ledger)
         transport = (
             _source_transport(request, request_path)
             if args.phase in ("materialize", "finalize",
                               "return_canary", "pilot")
             else None
         )
+    except BudgetExceeded as exc:
+        print(json.dumps({"status": "blocked", "error": str(exc)}))
+        return EXIT_BUDGET_STOPPED
     except (QueryError, BudgetBlocked) as exc:
         print(json.dumps({"status": "blocked", "error": str(exc)}))
         if isinstance(exc, BudgetBlocked):
@@ -563,7 +668,6 @@ def main(argv: list[str] | None = None) -> int:
     except QueryError as exc:
         print(json.dumps({"status": "blocked", "error": str(exc)}))
         return EXIT_BLOCKED
-    ledger = BudgetLedger(ceilings)
     ctx = _ctx(request, args.shard_index)
 
     if args.phase in ("materialize", "finalize", "return_canary",

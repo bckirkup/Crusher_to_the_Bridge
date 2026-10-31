@@ -6,7 +6,7 @@
   "execution_role_name": "picard-campaign-execution-role",
   "vcpu": 2,
   "memory_mib": 8192,
-  "timeout_seconds": 3600,
+  "timeout_seconds": 7200,
   "retry_attempts": 3,
   "log_group": "/aws/batch/picard-boundary-analysis",
   "log_prefix": "picard-reducer"

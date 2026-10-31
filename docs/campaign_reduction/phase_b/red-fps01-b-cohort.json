@@ -1,0 +1,44 @@
+{
+ "expected_runs": 8000,
+ "per_arm": {
+  "fl_exp_12d_scr_off": {
+   "declared": 1000,
+   "scanned": 1000
+  },
+  "fl_exp_12d_scr_ps_ship": {
+   "declared": 1000,
+   "scanned": 1000
+  },
+  "fl_cls_12d_scr_off": {
+   "declared": 1000,
+   "scanned": 1000
+  },
+  "fl_cls_12d_scr_ps_ship": {
+   "declared": 1000,
+   "scanned": 1000
+  },
+  "fl_spr_12d_scr_off": {
+   "declared": 1000,
+   "scanned": 1000
+  },
+  "fl_spr_12d_scr_ps_ship": {
+   "declared": 1000,
+   "scanned": 1000
+  },
+  "fl_meg_12d_scr_off": {
+   "declared": 1000,
+   "scanned": 1000
+  },
+  "fl_meg_12d_scr_ps_ship": {
+   "declared": 1000,
+   "scanned": 1000
+  }
+ },
+ "unique_keys": 8000,
+ "duplicate_keys": [],
+ "within_hull_seed_pairs_declared": 4000,
+ "pairs_complete": 4000,
+ "pairs_incomplete": {},
+ "sources_manifest_sha256": "1b992296a3e11630e7486b7585624ea0745e383707b706bb273f206fa1ab2dc1",
+ "request_sha256": "a772fc8058859a9d50a21d1b7f7c1d0d5e5b6e3c0eda0dd33d4693093b1bc876"
+}

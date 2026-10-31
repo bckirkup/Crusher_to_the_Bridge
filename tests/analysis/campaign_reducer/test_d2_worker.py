@@ -7,6 +7,7 @@ declared source root.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import socket
 import subprocess
@@ -15,11 +16,18 @@ import sys
 import pytest
 from zip_builders import build_zip, member
 
-from picard_framework.analysis.campaign_reducer.ledger import BUDGET_FIELDS
+from picard_framework.analysis.campaign_reducer import worker
+from picard_framework.analysis.campaign_reducer.ledger import (
+    BUDGET_FIELDS,
+    BudgetLedger,
+)
 from picard_framework.analysis.campaign_reducer.pinned_reader import (
+    MemoryTransport,
     TransportError,
 )
+from picard_framework.analysis.campaign_reducer.query_engine import QueryError
 from picard_framework.analysis.campaign_reducer.worker import (
+    EXIT_BUDGET_STOPPED,
     EXIT_COMPLETE,
     EXIT_INVALID_CONTRACT,
     LocalTransport,
@@ -153,12 +161,143 @@ def test_worker_materialize_then_query(tmp_path, capsys, monkeypatch):
     assert len(attack) == 2
 
 
-def test_worker_rejects_bad_request_uri(tmp_path, capsys):
+def test_worker_rejects_bad_request_uri(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     rc = main([
         "--phase", "materialize",
         "--request-uri", str(tmp_path / "absent.json"),
     ])
     assert rc == EXIT_INVALID_CONTRACT
+
+
+def _sources_manifest(tmp_path, doc):
+    path = tmp_path / "sources.json"
+    path.write_text(json.dumps(doc))
+    return path
+
+
+def test_worker_sources_uri_merges_and_materializes(
+    tmp_path, capsys, monkeypatch,
+):
+    monkeypatch.chdir(tmp_path)
+    req_path, out_dir, request = _fixture(tmp_path)
+    extra = {
+        "schema": "crusher-reducer-sources/v1",
+        "sources": [{
+            "uri": "fused.zip",
+            "family": "campaign_summary_zip",
+            "source_id": "manifest/fused.zip",
+            "campaign_id": "camp1",
+        }],
+    }
+    request["sources_uri"] = str(_sources_manifest(tmp_path, extra))
+    request["sources_sha256"] = hashlib.sha256(
+        json.dumps(extra, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    req_path.write_text(json.dumps(request))
+    rc = main([
+        "--phase", "materialize",
+        "--request-uri", str(req_path),
+        "--out-uri", str(out_dir),
+    ])
+    assert rc == EXIT_COMPLETE
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["status"] == "completed"
+    commit = json.loads(
+        (out_dir / "campaign/_derived/reducer/v1/attempts/red-w"
+         / "COMMIT.json").read_text()
+    )
+    assert commit["coverage"]["selected_unique_runs"] == 4
+
+
+def test_worker_sources_uri_sha_mismatch(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    req_path, out_dir, request = _fixture(tmp_path)
+    request["sources_uri"] = str(
+        _sources_manifest(tmp_path, {"sources": []})
+    )
+    request["sources_sha256"] = "0" * 64
+    req_path.write_text(json.dumps(request))
+    rc = main([
+        "--phase", "materialize",
+        "--request-uri", str(req_path),
+        "--out-uri", str(out_dir),
+    ])
+    assert rc == EXIT_INVALID_CONTRACT
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["status"] == "blocked"
+
+
+def test_worker_sources_uri_unreadable(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    req_path, out_dir, request = _fixture(tmp_path)
+    request["sources_uri"] = str(tmp_path / "absent-sources.json")
+    req_path.write_text(json.dumps(request))
+    rc = main([
+        "--phase", "materialize",
+        "--request-uri", str(req_path),
+        "--out-uri", str(out_dir),
+    ])
+    assert rc == EXIT_INVALID_CONTRACT
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["status"] == "blocked"
+
+
+def test_sources_uri_s3_fetch_and_charge(tmp_path, monkeypatch):
+    mt = MemoryTransport()
+    mt.put(
+        "requests/src.json",
+        json.dumps({"sources": [{"uri": "x.zip", "family": "f"}]}).encode(),
+    )
+    monkeypatch.setattr(worker, "boto3_transport", lambda c, b: mt)
+    monkeypatch.setattr(worker, "_s3_client", lambda: object())
+    ledger = BudgetLedger(_budgets())
+    out = worker._resolve_sources(
+        {"sources_uri": "s3://bkt/requests/src.json", "sources": []}, ledger)
+    # the manifest GET is charged like every source read
+    assert out == [{"uri": "x.zip", "family": "f"}]
+
+
+def test_sources_uri_s3_not_found(tmp_path, monkeypatch):
+    monkeypatch.setattr(worker, "boto3_transport",
+                        lambda c, b: MemoryTransport())
+    monkeypatch.setattr(worker, "_s3_client", lambda: object())
+    with pytest.raises(QueryError) as ei:
+        worker._resolve_sources(
+            {"sources_uri": "s3://bkt/absent.json", "sources": []},
+            BudgetLedger(_budgets()))
+    assert ei.value.kind == "access_denied"
+
+
+def test_sources_uri_bad_shape(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    request = {
+        "sources_uri": str(_sources_manifest(tmp_path, {"nope": 1})),
+        "sources": [],
+    }
+    with pytest.raises(QueryError) as ei:
+        worker._resolve_sources(request, BudgetLedger(_budgets()))
+    assert ei.value.kind == "invalid_contract"
+
+
+def test_worker_sources_uri_budget_exceeded(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    req_path, out_dir, request = _fixture(tmp_path)
+    mt = MemoryTransport()
+    mt.put("m/src.json", json.dumps({"sources": []}).encode())
+    monkeypatch.setattr(worker, "boto3_transport", lambda c, b: mt)
+    monkeypatch.setattr(worker, "_s3_client", lambda: object())
+    request["sources_uri"] = "s3://bkt/m/src.json"
+    request["budgets"]["max_get_requests"] = 0.5
+    req_path.write_text(json.dumps(request))
+    rc = main([
+        "--phase", "materialize",
+        "--request-uri", str(req_path),
+        "--out-uri", str(out_dir),
+    ])
+    assert rc == EXIT_BUDGET_STOPPED
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["status"] == "blocked"
 
 
 def test_local_transport_confined_to_root(tmp_path):
