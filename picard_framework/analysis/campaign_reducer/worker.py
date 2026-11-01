@@ -64,7 +64,9 @@ _REQUEST_MANIFEST_MAX_BYTES = 1048576
 
 # Cap on the pinned ``sources_uri`` cohort manifest the request may
 # point at (the request itself stays under the 1 MiB readback cap).
-_SOURCES_MANIFEST_MAX_BYTES = 16 * 1024 * 1024
+# Sized for a 38k-source explicit cohort (~25 MB); the Phase-B 8k
+# cohort's 16 MB cap was a Phase-B-scaled bound, not a contract limit.
+_SOURCES_MANIFEST_MAX_BYTES = 64 * 1024 * 1024
 
 
 class LocalTransport:
