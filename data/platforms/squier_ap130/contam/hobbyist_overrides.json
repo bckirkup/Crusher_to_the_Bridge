@@ -1,5 +1,5 @@
 {
-  "description": "Naval GA Contam starter for squier_ap130 (Target B — openings/AHS drafted; ducts are engineer handwork)",
+  "description": "Naval GA Contam starter for squier_ap130 (Target B \u2014 openings/AHS drafted; ducts are engineer handwork)",
   "orifice_type_map": {
     "ladder_well": "ladder_well",
     "ladder": "ladder",
@@ -143,5 +143,14 @@
     "Author real duct networks in ContamW (fiction Darcy spines omitted by default)",
     "Replace starter MERV/HEPA filters with ship NBC / HVAC design data",
     "Calibrate AHS Fahs / OAFrac against design ACH and TAB where available"
-  ]
+  ],
+  "zone_aliases": {
+    "FanHatchBlkSup": "Fan_Hatch_Block_Sup",
+    "Galley_Cx_Up": "Galley_Complex_Up",
+    "Medical_Cx_2D": "Medical_Complex_2D",
+    "TroopBerthing_1": "Troop_Berthing_3D_B",
+    "TroopBerthing_2": "Troop_Berthing_3D_C",
+    "TroopBerthing_3": "Troop_Berthing_1P_B",
+    "TroopBerthing_4": "Troop_Berthing_1P_C"
+  }
 }

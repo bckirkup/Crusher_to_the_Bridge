@@ -102,7 +102,12 @@ Set `hvac.transport_engine: contamx` (or `auto`) and point
 `data/platforms/<id>/contam/platform.prj`). Path map resolution:
 
 1. Sidecar `path_map.json` beside the PRJ (from `--simplify` or fiction bootstrap)
-2. Else **`path_map_from_prj`** parses the PRJ (never rebuilds fiction export order)
+2. Else **`path_map_from_prj`** parses the PRJ (never rebuilds fiction export order).
+   When canonical zone ids are supplied, prj-declared endpoint names are
+   normalized to them (`prj_zone_aliases`: declared `zone_aliases` → exact →
+   underscore-strip/15-char norm → index-validated positional) — committed
+   GA prjs mangle zone names to the CONTAMW 15-char field
+   (CONTAM-PRJNAME-01).
 
 ### Fiction bootstrap only (JSON → PRJ)
 

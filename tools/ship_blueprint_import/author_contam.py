@@ -18,7 +18,11 @@ from simulation_utils.paths import (
     resolve_child_path,
     validated_open,
 )
-from tools.contam_hobbyist import load_hobbyist_pack, resolve_orifice_type
+from tools.contam_hobbyist import (
+    load_hobbyist_overrides,
+    load_hobbyist_pack,
+    resolve_orifice_type,
+)
 from tools.contam_prj_bridge import export_platform_to_prj
 from tools.contamw34_prj import path_map_from_prj, simplify_contamw34
 from tools.ship_blueprint_import.models import ContamHints, OpeningHint, ShipDigest
@@ -444,9 +448,17 @@ def validate_prj_offline(prj_path: str, *, allowed_roots: tuple[str, ...]) -> di
     """Parse PRJ + build path_map; optionally simplify — no ContamX binary."""
     with validated_open(prj_path, "r", allowed_roots=allowed_roots, encoding="utf-8") as fh:
         text = fh.read()
-    path_map = path_map_from_prj(text)
     warn: list[str] = []
     spatial, airflow = simplify_contamw34(text, warnings_out=warn)
+    # Committed GA prjs mangle zone names to the CONTAMW 15-char field;
+    # resolve endpoints against the simplified zone ids so the validation
+    # path_map carries canonical names.
+    overrides = load_hobbyist_overrides(os.path.dirname(os.path.dirname(prj_path)))
+    path_map = path_map_from_prj(
+        text,
+        [z["id"] for z in (spatial or {}).get("zones") or []],
+        declared_aliases=overrides.get("zone_aliases"),
+    )
     return {
         "ok": bool(spatial.get("zones")) and bool(path_map),
         "zone_count": len(spatial.get("zones") or []),

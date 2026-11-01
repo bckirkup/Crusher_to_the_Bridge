@@ -75,7 +75,7 @@ python3 -m tools.ship_blueprint_import validate \
 | `platform.prj` | ContamW 3.4 project (zones, typed openings, AHS) |
 | `path_map.json` | ContamX ↔ Crusher path index |
 | `openings_draft.json` | Engineer checklist of orifice areas / status |
-| `hobbyist_overrides.json` | Naval starter overrides (`skip_duct_spines: true`) |
+| `hobbyist_overrides.json` | Naval starter overrides (`skip_duct_spines: true`, `zone_aliases` for post-prj zone renames) |
 | `CONTAM_HANDOFF.md` | What was drafted vs ContamW handwork |
 | `author_contam_provenance.json` | Gate results / timestamps |
 

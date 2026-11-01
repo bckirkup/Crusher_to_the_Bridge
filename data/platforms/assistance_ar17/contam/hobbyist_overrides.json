@@ -1,5 +1,5 @@
 {
-  "description": "Naval GA Contam starter for assistance_ar17 (Target B — openings/AHS drafted; ducts are engineer handwork)",
+  "description": "Naval GA Contam starter for assistance_ar17 (Target B \u2014 openings/AHS drafted; ducts are engineer handwork)",
   "orifice_type_map": {
     "ladder_well": "ladder_well",
     "ladder": "ladder",
@@ -64,8 +64,8 @@
     "Refrig_Provisions_2nd": "refrigerated spaces + provisions stores fwd",
     "Stores_Fwd_2nd": "bosun/general stores + windlass space fwd",
     "Aft_Shops_1P": "aft repair shops + spare parts + tool rooms",
-    "Machine_Shop_Upper": "UPPER PART OF MACHINE SHOP — double-height shop ",
-    "Shipfitter_Upper": "UPPER PART OF SHIPFITTER SHOP — double-height, z",
+    "Machine_Shop_Upper": "UPPER PART OF MACHINE SHOP \u2014 double-height shop ",
+    "Shipfitter_Upper": "UPPER PART OF SHIPFITTER SHOP \u2014 double-height, z",
     "Machinery_1P": "machinery casing level over engine room",
     "Spare_Parts_1P": "spare parts stowage + repair lockers fwd",
     "Fwd_Stores_1P": "forward stores + handling room",
@@ -147,10 +147,13 @@
   "handoff_notes": [
     "Double-height shop volumes need manual mezzanine splits if ContamX needs both levels",
     "Boiler/engine casing is the uptake path to the funnel",
-    "Oxygen/acetylene racks on weather deck — no zone linkage",
+    "Oxygen/acetylene racks on weather deck \u2014 no zone linkage",
     "Confirm orifice clear areas against watertight door / hatch schedules",
     "Author real duct networks in ContamW (fiction Darcy spines omitted by default)",
     "Replace starter MERV/HEPA filters with ship NBC / HVAC design data",
     "Calibrate AHS Fahs / OAFrac against design ACH and TAB where available"
-  ]
+  ],
+  "zone_aliases": {
+    "Gun_Crew_Qtrs": "Gun_Crew_Quarters"
+  }
 }

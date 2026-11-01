@@ -23,6 +23,7 @@ import itertools
 import math
 import re
 import warnings
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -1803,6 +1804,82 @@ def _parse_prj_path_row(ln: str) -> tuple[int, int, int, int, int, int] | None:
         return None
 
 
+def normalize_prj_zone_name(name: str) -> str:
+    """ContamW-mangled zone name → lookup key.
+
+    Committed GA prjs strip underscores and truncate zone names to the
+    CONTAMW 15-char field: ``Aux_Machinery_Room`` → ``AuxMachineryRoo``.
+    """
+    return name.replace("_", "")[:15]
+
+
+def prj_zone_aliases(
+    prj_zone_names: Sequence[str],
+    canonical_zone_ids: Sequence[str],
+    *,
+    declared_aliases: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """Resolve ContamW-mangled prj zone names to canonical zone ids.
+
+    Committed GA prjs name zones under CONTAMW limits (underscores
+    stripped, names truncated to 15 chars, colliding names deduplicated
+    as ``<base>_<N>``); a handful of zones were also renamed in JSON
+    after their prj was committed. Resolution order:
+
+    1. ``declared_aliases`` — explicit ``{prj_name: zone_id}`` overrides
+       (validated against the canonical set);
+    2. exact name;
+    3. normalized name — colliding candidates are claimed in canonical
+       declaration order;
+    4. positional alignment — only when the real-zone counts are equal
+       **and** every mechanically resolved pair lands on the same index
+       (prj and JSON then share zone order; covers post-prj renames and
+       ContamW ``_N`` dedup names). When either check fails the leftover
+       names stay unresolved instead of guessing.
+
+    Unresolved names map to themselves so callers can flag them.
+    """
+    canon = list(canonical_zone_ids)
+    canon_set = set(canon)
+    canon_index = {zid: i for i, zid in enumerate(canon)}
+    by_norm: dict[str, list[str]] = {}
+    for zid in canon:
+        by_norm.setdefault(normalize_prj_zone_name(zid), []).append(zid)
+    declared = declared_aliases or {}
+    claimed: set[str] = set()
+    out: dict[str, str] = {}
+    names = list(prj_zone_names)
+    for name in names:
+        target = declared.get(name)
+        if target is not None and target in canon_set and target not in claimed:
+            out[name] = target
+            claimed.add(target)
+    for name in names:
+        if name not in out and name in canon_set and name not in claimed:
+            out[name] = name
+            claimed.add(name)
+    for name in names:
+        if name in out:
+            continue
+        for zid in by_norm.get(normalize_prj_zone_name(name), ()):
+            if zid not in claimed:
+                out[name] = zid
+                claimed.add(zid)
+                break
+    if len(names) == len(canon) and all(
+        canon_index[out[name]] == i
+        for i, name in enumerate(names)
+        if name in out
+    ):
+        for i, name in enumerate(names):
+            if name not in out and canon[i] not in claimed:
+                out[name] = canon[i]
+                claimed.add(canon[i])
+    for name in names:
+        out.setdefault(name, name)
+    return out
+
+
 def _classify_path_kind(
     flag: int,
     *,
@@ -1834,11 +1911,24 @@ def _classify_path_kind(
     return "other"
 
 
-def path_map_from_prj(text: str) -> list[dict[str, Any]]:
+def path_map_from_prj(
+    text: str,
+    zone_ids: Sequence[str] | None = None,
+    *,
+    declared_aliases: Mapping[str, str] | None = None,
+) -> list[dict[str, Any]]:
     """Build ContamX ``path_map`` entries directly from a ContamW 3.4 ``.prj``.
 
     This is the Path A / Path B primary contract: authentic PRJs carry their
     own path numbering. Fiction JSON→PRJ export is bootstrap-only.
+
+    When ``zone_ids`` is given (canonical zone ids in declaration order),
+    prj-declared endpoint names are normalized to them via
+    :func:`prj_zone_aliases` — committed GA prjs mangle zone names to the
+    CONTAMW 15-char field, so without normalization the consumer silently
+    drops every path whose endpoints do not match JSON ids.
+    ``declared_aliases`` carries explicit ``{prj_name: zone_id}`` pairs for
+    the residual post-prj renames normalization cannot recover.
     """
     if not text.lstrip().startswith("ContamW"):
         raise ValueError(
@@ -1849,6 +1939,14 @@ def path_map_from_prj(text: str) -> list[dict[str, Any]]:
     zone_nr_to_id, phantom_nrs, real_nrs = _classify_prj_zones(
         sections.get("zones", [])
     )
+    aliases: dict[str, str] | None = None
+    if zone_ids is not None:
+        real_names = [
+            zone_nr_to_id[nr] for nr in zone_nr_to_id if nr in real_nrs
+        ]
+        aliases = prj_zone_aliases(
+            real_names, zone_ids, declared_aliases=declared_aliases,
+        )
     ahs_path_group = _ahs_path_groups(sections.get("simple AHS", []))
     elem_is_fan = {
         nr: "fan" in symbol.lower()
@@ -1860,7 +1958,10 @@ def path_map_from_prj(text: str) -> list[dict[str, Any]]:
     def _endpoint_name(nr: int) -> str:
         if nr < 0:
             return "ambient"
-        return zone_nr_to_id.get(nr, f"zone_{nr}")
+        raw = zone_nr_to_id.get(nr, f"zone_{nr}")
+        if aliases is not None:
+            return aliases.get(raw, raw)
+        return raw
 
     path_map: list[dict[str, Any]] = []
     for ln in sections.get("flow paths", []):

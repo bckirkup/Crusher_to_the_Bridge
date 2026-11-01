@@ -194,10 +194,31 @@ Ordered by how much of the measured tail each item plausibly removes.
    per-zone citadel filtration is expressible — CONTAM-FLEET-01 gap).
    Post-fix: all five at `duty_values` {0.0, 0.5}, `oa_group_coverage`
    1.0.
-6. **Committed-prj zone-name normalization** — the 15-char/underscore
+6. **Committed-prj zone-name normalization** — **SHIPPED
+   (CONTAM-PRJNAME-01)**. `prj_zone_aliases` in
+   `tools/contamw34_prj.py` resolves ContamW-mangled names to canonical
+   ids — declared `zone_aliases` (per-hull
+   `contam/hobbyist_overrides.json`) → exact → underscore-strip/15-char
+   norm (collisions claimed in declaration order) → index-validated
+   positional alignment (only when real-zone counts are equal and every
+   resolved pair lands on its own index). `path_map_from_prj` normalizes
+   endpoints whenever canonical zone ids are supplied, wired through the
+   `ContamXTransportEngine` fallback, `contam_fleet_compare`'s committed
+   lane, `contam_prj_bridge` Path B, `author_contam.validate_prj_offline`,
+   and this audit. Post-fix fleet re-audit: every real prj zone resolves
+   on all 75 committed-prj hulls — zero prj-only names, zero unresolved
+   path endpoints (previously ~40% of committed-prj endpoint names
+   aliased silently or dropped: erie 18, lexington 46, saratoga 40,
+   olympia 58 resolved rename pairs). The 9 true post-prj renames on
+   count-mismatched hulls are declared via `zone_aliases`
+   (assistance_ar17 1, luzon_arg2 1, squier_ap130 7); the only residual
+   json-only zones are 4 genuine post-prj inserts (`Gun_Tubs_Sup`,
+   `Gun_Weather_Sup`, `HD_Sup`, `Lounge_Sup`) — honest, not drift.
+   Cosmetic for dose, real for provenance.
+   Original fix text: the 15-char/underscore
    name drift means any per-zone committed-vs-JSON check silently
    aliases; normalize names at prj parse (now done in
-   `tools/museum_hull_audit.py`). Cosmetic for dose, real for provenance.
+   `tools/museum_hull_audit.py`).
 
 ## Keep-vs-remove verdict for dead-in-both zones (Q2 follow-through)
 

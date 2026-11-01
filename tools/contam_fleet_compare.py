@@ -74,6 +74,7 @@ from simulation_utils.paths import (  # noqa: E402
     validate_path_component,
     validated_open,
 )
+from tools.contam_hobbyist import load_hobbyist_overrides  # noqa: E402
 from tools.contam_prj_bridge import export_prj_with_path_map  # noqa: E402
 from tools.contamw34_prj import path_map_from_prj  # noqa: E402
 
@@ -295,7 +296,16 @@ def _contamx_field(
         with validated_open(full, "r", allowed_roots=(REPO_ROOT,),
                             encoding="utf-8") as fh:
             prj_text = fh.read()
-        entries = path_map_from_prj(prj_text)
+        # Committed GA prjs mangle zone names to the CONTAMW 15-char field;
+        # normalize endpoints to JSON ids or the committed lane drops them.
+        overrides = load_hobbyist_overrides(
+            os.path.dirname(os.path.dirname(full))
+        )
+        entries = path_map_from_prj(
+            prj_text,
+            [z["id"] for z in spatial.get("zones", [])],
+            declared_aliases=overrides.get("zone_aliases"),
+        )
     else:
         prj_text, entries = export_prj_with_path_map(
             spatial, airflow, ahs_terminal_mode="commissioned",
