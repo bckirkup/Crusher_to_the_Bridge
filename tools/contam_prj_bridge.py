@@ -537,7 +537,14 @@ def simplify_prj_to_platform(
     spatial_layout, air_flow_paths = simplify_contamw34(text, warnings_out=warn)
     for w in warn:
         print(f"  warning: {w}")
-    path_map = path_map_from_prj(text)
+    # Normalize ContamW-mangled zone names to the simplified ids so the
+    # committed path_map carries canonical endpoints.
+    overrides = load_hobbyist_overrides(output_dir)
+    path_map = path_map_from_prj(
+        text,
+        [z["id"] for z in spatial_layout.get("zones", [])],
+        declared_aliases=overrides.get("zone_aliases"),
+    )
     spatial_path, airflow_path = _write_platform_json(
         spatial_layout, air_flow_paths, output_dir,
     )

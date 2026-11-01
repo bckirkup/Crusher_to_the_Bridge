@@ -369,13 +369,23 @@ def build_contamx_engine(
             if entries is None:
                 # Primary Path A contract: derive path_map from the PRJ itself
                 # (never rebuild export order from JSON — that only matches
-                # fiction bootstrap bundles).
+                # fiction bootstrap bundles). Committed GA prjs mangle zone
+                # names to the CONTAMW 15-char field; normalize endpoints to
+                # the JSON zone ids or those paths drop on `known` below.
+                from tools.contam_hobbyist import load_hobbyist_overrides
                 from tools.contamw34_prj import path_map_from_prj
 
+                overrides = load_hobbyist_overrides(
+                    os.path.dirname(os.path.dirname(prj_path))
+                )
                 with validated_open(
                     prj_path, "r", allowed_roots=allowed_roots, encoding="utf-8",
                 ) as fh:
-                    entries = path_map_from_prj(fh.read())
+                    entries = path_map_from_prj(
+                        fh.read(),
+                        [z["id"] for z in spatial.get("zones", [])],
+                        declared_aliases=overrides.get("zone_aliases"),
+                    )
 
         sim_path = run_contamx(
             prj_path, binary, config=cfg, allowed_roots=allowed_roots,

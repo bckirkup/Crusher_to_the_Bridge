@@ -1,5 +1,5 @@
 {
-  "description": "Naval GA Contam starter for luzon_arg2 (Target B — openings/AHS drafted; ducts are engineer handwork)",
+  "description": "Naval GA Contam starter for luzon_arg2 (Target B \u2014 openings/AHS drafted; ducts are engineer handwork)",
   "orifice_type_map": {
     "ladder_well": "ladder_well",
     "ladder": "ladder",
@@ -75,7 +75,7 @@
     "Electrical_Stowage_1P": "electrical stowage + diesel stores",
     "Engine_Room": "ENGINE & BOILER ROOM (diesel): spans hold->2nd d",
     "Machine_Shop_1P": "machine shop",
-    "ICE_Repair_Shop": "INTERNAL COMBUSTION ENGINE repair shop — signatu",
+    "ICE_Repair_Shop": "INTERNAL COMBUSTION ENGINE repair shop \u2014 signatu",
     "Repair_Stores_1P": "engine repair parts + stores",
     "Fwd_Mags_1P": "fwd magazines + handling rooms",
     "Fwd_Peak_1P": "fwd stores bosun + sail locker",
@@ -177,5 +177,8 @@
     "Author real duct networks in ContamW (fiction Darcy spines omitted by default)",
     "Replace starter MERV/HEPA filters with ship NBC / HVAC design data",
     "Calibrate AHS Fahs / OAFrac against design ACH and TAB where available"
-  ]
+  ],
+  "zone_aliases": {
+    "CrewsBerthing_1": "Crews_Berthing_2nd_F"
+  }
 }

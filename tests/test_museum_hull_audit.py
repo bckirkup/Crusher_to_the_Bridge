@@ -101,9 +101,13 @@ class TestQ1:
         assert q1["notes_only_zones"] == ["extra_notes_zone"]
         assert q1["unnoted_zones"] == ["aux", "cabin_b"]
         assert q1["zone_count_drift"] == 2
-        assert q1["prj"]["prj_only_zones"] == ["aux_prj"]
+        # CONTAM-PRJNAME-01: the fixture prj carries a 4th real zone
+        # (orphan_prj) so the prj/json zone counts mismatch and positional
+        # alignment refuses — aux_prj stays a genuine unresolved prj-only
+        # zone rather than being re-paired to aux.
+        assert q1["prj"]["prj_only_zones"] == ["aux_prj", "orphan_prj"]
         assert q1["prj"]["json_only_zones"] == ["aux"]
-        assert q1["prj"]["n_prj_zones"] == 3
+        assert q1["prj"]["n_prj_zones"] == 4
         assert q1["prj"]["volume_drift_zones"] == {}
 
     def test_orphan_requires_volume(self) -> None:

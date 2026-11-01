@@ -59,11 +59,13 @@ from simulation_utils.paths import (  # noqa: E402
     resolve_repo_path,
     validated_open,
 )
+from tools.contam_hobbyist import load_hobbyist_overrides  # noqa: E402
 from tools.contam_prj_bridge import export_prj_with_path_map  # noqa: E402
 from tools.contamw34_prj import (  # noqa: E402
     _is_phantom_zone,
     _section_blocks,
     path_map_from_prj,
+    prj_zone_aliases,
 )
 
 PLATFORMS_DIR = "data/platforms"
@@ -219,20 +221,6 @@ def _provenance_q1(platform_dir: str,
     return result
 
 
-def _normalize_prj_name(name: str) -> str:
-    """Committed GA prjs strip underscores and truncate zone names to the
-    CONTAMW 15-char field: ``Aux_Machinery_Room`` → ``AuxMachineryRoo``."""
-    return name.replace("_", "")[:15]
-
-
-def _prj_to_json_names(zone_ids: set[str]) -> dict[str, str]:
-    """{normalized prj name: json zone id} — collisions keep the first id."""
-    mapping: dict[str, str] = {}
-    for zid in sorted(zone_ids):
-        mapping.setdefault(_normalize_prj_name(zid), zid)
-    return mapping
-
-
 def _prj_zone_records(text: str) -> dict[str, float]:
     """Committed prj ``zones`` section → {name: volume} for real zones."""
     sections = dict(_section_blocks(text))
@@ -260,17 +248,22 @@ def _prj_zone_diff(platform_dir: str,
         return {"prj": None}
     prj_zones = _prj_zone_records(
         _read_text(prj_path))
-    norm = _prj_to_json_names(set(zones))
-    # Map each prj name back to its JSON id via underscore-strip + 15-char
-    # truncation; whatever still does not resolve is a genuine prj-only zone.
+    # Resolve ContamW-mangled prj names to JSON ids (strip/truncate, ContamW
+    # ``_N`` dedup, declared post-prj renames); whatever still does not
+    # resolve is a genuine prj-only zone.
+    overrides = load_hobbyist_overrides(platform_dir)
+    aliases = prj_zone_aliases(
+        list(prj_zones), list(zones),
+        declared_aliases=overrides.get("zone_aliases"),
+    )
     resolved = {
-        norm[name] if name in norm else name: vol
+        aliases[name]: vol
         for name, vol in prj_zones.items()
     }
     renamed = sorted(
-        (norm[name], name)
+        (aliases[name], name)
         for name in prj_zones
-        if name in norm and norm[name] != name
+        if aliases[name] != name
     )
     drift = {
         zid: {"json": float(zones[zid].get("volume_m3", 0.0)),
@@ -413,16 +406,14 @@ def audit_q2(platform_dir: str, spatial: dict[str, Any],
 
     prj_path = os.path.join(platform_dir, PRJ_REL_PATH)
     if os.path.exists(prj_path):
-        prj_entries = path_map_from_prj(_read_text(prj_path))
-        # Committed GA prjs strip underscores and truncate names at 15
-        # chars — map back to the JSON zone ids before building the graph.
-        norm = _prj_to_json_names(zone_ids)
-        prj_entries = [
-            {**e,
-             "from_zone": norm.get(e["from_zone"], e["from_zone"]),
-             "to_zone": norm.get(e["to_zone"], e["to_zone"])}
-            for e in prj_entries
-        ]
+        # Committed GA prjs mangle zone names to the CONTAMW 15-char field —
+        # endpoints are normalized to JSON ids inside the parser.
+        overrides = load_hobbyist_overrides(platform_dir)
+        prj_entries = path_map_from_prj(
+            _read_text(prj_path),
+            list(zones),
+            declared_aliases=overrides.get("zone_aliases"),
+        )
         out["contamx_committed"] = _zone_classes(
             zone_ids, _contamx_edges(prj_entries, zone_ids), injection)
     else:
