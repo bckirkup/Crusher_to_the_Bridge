@@ -1,0 +1,19 @@
+{
+ "oa_fraction": 0.2,
+ "hvac_duty": 0.5,
+ "hvac_zones": [
+  {"id": "hv_main", "rooms": ["main", "cabin_a"], "ach": 8.0,
+   "oa_fraction": 0.2, "hvac_duty": 0.5, "vent_mode": "ducted"},
+  {"id": "hd_san", "rooms": ["hd_head"], "ach": 12.0,
+   "oa_fraction": 1.0, "hvac_duty": 0.0, "vent_mode": "extract"}
+ ],
+ "cross_zone_links": [
+  {"from": "hv_main", "to": "hd_san", "flow_rate_m3h": 20.0,
+   "path": "door_gap", "is_hvac_ducted": false},
+  {"from": "hv_main", "to": "void", "flow_rate_m3h": 5.0,
+   "path": "deck_leak", "is_hvac_ducted": false}
+ ],
+ "adjacency": [
+  {"from": "main", "to": "cabin_a", "type": "passageway"}
+ ]
+}

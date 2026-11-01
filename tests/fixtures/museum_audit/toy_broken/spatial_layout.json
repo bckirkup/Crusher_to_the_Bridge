@@ -1,0 +1,11 @@
+{
+ "ship_class": "toy_broken",
+ "zones": [
+  {"id": "main", "type": "living", "volume_m3": 100.0, "deck": "d1",
+   "display": {"x": 0.0, "y": 0.0}},
+  {"id": "cabin_b", "type": "living", "volume_m3": 60.0, "deck": "d1",
+   "display": {"x": 6.0, "y": 0.0}},
+  {"id": "aux", "type": "service", "volume_m3": 20.0, "deck": "d1",
+   "display": {"x": 2.0, "y": 2.0}}
+ ]
+}

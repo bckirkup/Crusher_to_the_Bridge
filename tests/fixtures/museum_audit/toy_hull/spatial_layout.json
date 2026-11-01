@@ -1,0 +1,15 @@
+{
+ "ship_class": "toy_hull",
+ "zones": [
+  {"id": "main", "type": "living", "volume_m3": 100.0, "deck": "d1",
+   "display": {"x": 0.0, "y": 0.0}},
+  {"id": "cabin_a", "type": "living", "volume_m3": 50.0, "deck": "d1",
+   "display": {"x": 5.0, "y": 0.0}},
+  {"id": "hd_head", "type": "sanitary", "volume_m3": 10.0, "deck": "d1",
+   "display": {"x": 1.0, "y": 1.0}},
+  {"id": "void", "type": "void", "volume_m3": 30.0, "deck": "d0",
+   "display": {"x": 0.0, "y": 0.0}},
+  {"id": "ghost", "type": "void", "volume_m3": 15.0, "deck": "d0",
+   "display": {"x": 1.0, "y": 0.0}}
+ ]
+}
