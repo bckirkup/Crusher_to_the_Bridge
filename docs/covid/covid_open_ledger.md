@@ -471,6 +471,17 @@ AR by suppressing takeoff, not the taken-off voyage). No Θ is
 fitted; A1–A5 score no anchor. Successor prompt for the Θ re-screen:
 `docs/covid/covid_theta_handoff_2026_09_19.md` §16.
 
+*Update (2026-11-01, `668fe379`, QUAR-CONTRAST-01 re-measured —
+`docs/ledger/QUAR-CONTRAST-01.md`,
+`docs/covid/covid_quar_contrast_head_readout.md`):* the −66% A2 pool-transport
+shift does NOT survive at HEAD — both arms re-run on the frozen criterion,
+seeds 20200205–20200224, under native (+5.9%) and contamx (+12.0%), band
+`non_load_bearing_shift` on both solvers; the outbreak regime is now
+droplet/caregiver-dominated (pool route ~0 in both arms). The crew-confinement
+arm (A1) was not re-measured here. Which merge(s) moved the surface is the
+open drift-attribution question; the −66% figure must not be quoted as the
+current channel split.
+
 Before that — `AERO-NEAR-02`, measured at `7d8b0d2` (`docs/ledger/AERO-NEAR-02.md`): seed
 `20200206`, Θ = 3.16e7 — 2 infections (extinction); seed `20200210`, Θ = 1e9 —
 1,390 infections (37.5%), 952 of them in the two crew messes after 5 Feb, 303
