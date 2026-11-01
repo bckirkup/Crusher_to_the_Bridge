@@ -1,7 +1,7 @@
 {
   "name": "reducer",
   "image_repo": "picard-boundary-analysis",
-  "image_tag": "reducer-v6",
+  "image_tag": "reducer-v7",
   "job_role_name": "picard-reducer-job-role",
   "execution_role_name": "picard-campaign-execution-role",
   "vcpu": 2,
@@ -10,5 +10,5 @@
   "retry_attempts": 3,
   "log_group": "/aws/batch/picard-boundary-analysis",
   "log_prefix": "picard-reducer",
-  "image_digest": "sha256:af2d49cfa9495d8c89794420a78d8ec45a2ce1ab1fcad457911d8938e3061a16"
+  "image_digest": "sha256:bd6fd44d5bfa7db95ff80f68fb4801559abf7dbe4de049364c8e69af7f1b8c6f"
 }
