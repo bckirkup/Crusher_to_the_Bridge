@@ -130,7 +130,12 @@ class S3DerivedStore:
         }
 
     def list(self, prefix: str = "") -> list[str]:
-        full = self._key(prefix) if prefix else (self._prefix + "/" if self._prefix else "")
+        if prefix:
+            full = self._key(prefix)
+        elif self._prefix:
+            full = self._prefix + "/"
+        else:
+            full = ""
         keys: list[str] = []
         token: str | None = None
         while True:

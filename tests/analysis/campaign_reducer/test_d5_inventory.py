@@ -241,7 +241,8 @@ def test_resume_across_budget_cap(
         c.get("ContinuationToken") for c in client.list_calls[first_calls:]
         if c.get("Prefix") == "campaign/"
     ]
-    assert tokens and tokens[0] == root_state["next_token"]
+    assert tokens
+    assert tokens[0] == root_state["next_token"]
 
 
 def test_denied_root_blocks_completeness_not_absent(

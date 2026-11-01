@@ -197,22 +197,24 @@ def _fan_path_flow(e: dict) -> float:
     return (e["nums"][0] if e["nums"] else 0.0) / RHO * 3600.0
 
 
-def _orifice_path_flow(p: dict, e: dict, P: np.ndarray, idx: dict[int, int]) -> float:
+def _orifice_path_flow(
+    p: dict, e: dict, pressure: np.ndarray, idx: dict[int, int],
+) -> float:
     coeff = _orifice_coeff(e["nums"])
     C = coeff * p["mult"]
     C *= SIM_SCHED_MULT.get(p["sched"], 1.0)
-    dp = (P[idx[p["n"]]] if p["n"] in idx else 0.0) - (
-        P[idx[p["m"]]] if p["m"] in idx else 0.0
+    dp = (pressure[idx[p["n"]]] if p["n"] in idx else 0.0) - (
+        pressure[idx[p["m"]]] if p["m"] in idx else 0.0
     )
     return C * np.sign(dp) * np.sqrt(abs(dp)) * 3600.0
 
 
 def _path_steady_flow(
-    pnr: int,
+    _pnr: int,
     p: dict,
     ent: dict | None,
     elems: dict,
-    P: np.ndarray,
+    pressure: np.ndarray,
     idx: dict[int, int],
 ) -> float:
     e = _elem_lookup(elems, p["e"])
@@ -220,7 +222,7 @@ def _path_steady_flow(
         return _ahs_path_flow(p)
     if e["type"] == "fan_cvf":
         return _fan_path_flow(e)
-    return _orifice_path_flow(p, e, P, idx)
+    return _orifice_path_flow(p, e, pressure, idx)
 
 
 def contamx_flows(platform):

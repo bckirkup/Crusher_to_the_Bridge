@@ -9,6 +9,7 @@ unqualified ``completed`` status.
 from __future__ import annotations
 
 import json
+import os
 import socket
 import subprocess
 import sys
@@ -18,6 +19,7 @@ from zip_builders import build_zip, member
 
 from picard_framework.analysis.campaign_reducer.derived_store import (
     DerivedConflict,
+    DerivedStoreError,
     LocalDirStore,
     MemoryDerivedStore,
 )
@@ -187,6 +189,47 @@ def test_local_dir_store_create_only(tmp_path):
         store.put_if_absent("a/b.json", b"{ }")
 
 
+def test_local_dir_store_contains_keys(tmp_path):
+    """Traversal keys raise, and distinct safe keys land as distinct files."""
+    root = tmp_path / "store"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "secret.txt").write_bytes(b"secret")
+    store = LocalDirStore(root)
+    bodies = (b"one", b"two", b"three")
+    keys = ("a/one.json", "b/two.json", "/nested/three.json")
+    for key, body in zip(keys, bodies, strict=True):
+        assert store.put_idempotent(key, body) is True
+    assert store.put_idempotent(keys[0], bodies[0]) is False
+    with pytest.raises(DerivedConflict):
+        store.put_idempotent(keys[0], b"changed")
+    written = [root / "a" / "one.json", root / "b" / "two.json", root / "nested" / "three.json"]
+    assert [path.read_bytes() for path in written] == list(bodies)
+    root_real = os.path.realpath(root)
+    assert all(os.path.realpath(path).startswith(root_real + os.sep) for path in written)
+    for key in ("../outside/pwned.txt", "a/../../outside/pwned.txt", "a\\..\\x", "a/\x00b", ".."):
+        with pytest.raises(DerivedStoreError):
+            store.put_idempotent(key, b"pwn")
+        with pytest.raises(DerivedStoreError):
+            store.get(key)
+    assert not (outside / "pwned.txt").exists()
+    with pytest.raises(DerivedStoreError):
+        store.get("../outside/secret.txt")
+
+
+def test_local_dir_store_rejects_symlink_escape(tmp_path):
+    if os.name == "nt":
+        return
+    root = tmp_path / "store"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    store = LocalDirStore(root)
+    (root / "door").symlink_to(outside, target_is_directory=True)
+    with pytest.raises(DerivedStoreError):
+        store.put_idempotent("door/pwned.txt", b"nope")
+    assert not (outside / "pwned.txt").exists()
+
+
 def test_unsupported_family_prevents_completed():
     transport, store, ledger = _rig()
     transport.put("mystery.bin", b"\x00\x01\x02")
@@ -303,7 +346,8 @@ def test_distributions_and_weights_base_tables():
     weights_keys = [
         k for k in store.list() if k.endswith("/weights.jsonl")
     ]
-    assert dist_keys and weights_keys
+    assert dist_keys
+    assert weights_keys
     dists = [
         json.loads(line)
         for k in dist_keys
@@ -313,7 +357,8 @@ def test_distributions_and_weights_base_tables():
         d["metric_id"].endswith("attack_rate") for d in dists
     )
     cdfs = sorted(d["cdf"] for d in dists if d["cdf"] is not None)
-    assert cdfs and cdfs[-1] == pytest.approx(1.0)
+    assert cdfs
+    assert cdfs[-1] == pytest.approx(1.0)
     weights = [
         json.loads(line)
         for k in weights_keys

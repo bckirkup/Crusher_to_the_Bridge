@@ -34,6 +34,7 @@ from .return_path import _load_json_path, _out_root
 
 OPTIONAL_FLAGS: tuple[str, ...] = ()
 
+_STATUS_NAME = "status.json"
 _QUOTE_SCHEMA = "crusher-reducer-phase-quote/v1"
 _UNCERTAINTY_SCHEMA = "crusher-reducer-quote-uncertainty/v1"
 _BLOCKING_SCHEMA = "crusher-reducer-blocking-inputs/v1"
@@ -165,12 +166,12 @@ def _scale_units(
     cost — it lands as a typed uncertainty row instead (no inferred
     all-family compatibility from measured classes).
     """
-    totals = {k: 0.0 for k in (
+    totals = dict.fromkeys((
         "objects", "compressed_bytes", "uncompressed_bytes",
         "member_bytes", "api_list", "api_head", "api_get", "api_put",
         "wall_seconds", "vcpu_seconds", "memory_mib_seconds",
         "peak_memory_mib", "spool_bytes", "output_bytes", "retries",
-    )}
+    ), 0.0)
     unmeasured: list[dict] = []
     bands: list[dict] = []
     for row in scope_rows:
@@ -293,7 +294,7 @@ def run(args) -> int:
         doc = _status_doc("invalid_contract", error={
             "kind": "unreadable_input", "detail": str(exc),
         })
-        _emit(out_root, "status.json", doc)
+        _emit(out_root, _STATUS_NAME, doc)
         print(json.dumps(doc))
         return contracts.EXIT_INVALID_CONTRACT
     if not isinstance(request, dict) or not isinstance(evidence, dict):
@@ -301,7 +302,7 @@ def run(args) -> int:
             "kind": "malformed_input",
             "detail": "request and evidence must be JSON objects",
         })
-        _emit(out_root, "status.json", doc)
+        _emit(out_root, _STATUS_NAME, doc)
         print(json.dumps(doc))
         return contracts.EXIT_INVALID_CONTRACT
     kind = evidence.get("kind")
@@ -311,7 +312,7 @@ def run(args) -> int:
             "detail": f"evidence.kind must be one of "
                       f"{sorted(_EVIDENCE_KINDS)}, got {kind!r}",
         })
-        _emit(out_root, "status.json", doc)
+        _emit(out_root, _STATUS_NAME, doc)
         print(json.dumps(doc))
         return contracts.EXIT_INVALID_CONTRACT
     return _quote(request, evidence, kind, out_root)
@@ -330,7 +331,6 @@ def _quote(request: dict, evidence: dict, kind: str, out_root: str) -> int:
     safety = float(
         (request.get("budgets") or {}).get("safety_factor") or 1.0
     )
-    all_missing: list[str] = []
     phase_rows = []
     for phase in _PHASES:
         row = _phase_row(phase, basis, totals)
@@ -343,7 +343,6 @@ def _quote(request: dict, evidence: dict, kind: str, out_root: str) -> int:
                 "needed_for": f"phase_quote.{phase}.cost",
                 "detail": "unit price not declared — stop, never guess",
             })
-        all_missing += missing
         phase_rows.append(row)
     quote_body = {
         "request_id": request.get("request_id") or request.get("reduction_id"),
@@ -403,6 +402,6 @@ def _quote(request: dict, evidence: dict, kind: str, out_root: str) -> int:
         blocking_count=len(blocking),
         unmeasured_families=len(unmeasured),
     )
-    _emit(out_root, "status.json", doc)
+    _emit(out_root, _STATUS_NAME, doc)
     print(json.dumps(doc))
     return rc

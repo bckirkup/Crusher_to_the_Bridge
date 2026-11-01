@@ -248,7 +248,7 @@ def _tte_rows(elem, i, ddoc, spec, ctx, key) -> dict | None:
     return _tte_row(elem, i, ddoc, spec, ctx, endpoint=_text(elem, "endpoint_id", "endpoint"))
 
 
-def _tte_row(elem, i, ddoc, spec, ctx, endpoint=None) -> dict | None:
+def _tte_row(elem, i, ddoc, _spec, ctx, endpoint=None) -> dict | None:
     censor = _text(elem, "censor_type", "censor") or "unknown"
     if censor not in (
         "exact", "right", "left", "interval",
@@ -330,7 +330,7 @@ def _participant_rows(ddoc, eid, kind, agents, ctx) -> Iterable[dict]:
         }
 
 
-def _participants_from_events(result, spec, ctx, want) -> list[tuple[str, dict]]:
+def _participants_from_events(result, _spec, ctx, _want) -> list[tuple[str, dict]]:
     """event_participants rows from participant sublists on event atoms."""
     rows: list[tuple[str, dict]] = []
     for ddoc, i, elem in _event_elements(result):
@@ -440,7 +440,7 @@ def _mechanism_rows(elem, i, ddoc, spec, ctx, key) -> dict | None:
     }
 
 
-def _metric_rows(result, spec, ctx, bindings: dict) -> list[dict]:
+def _metric_rows(result, _spec, ctx, bindings: dict) -> list[dict]:
     """metrics rows only for request-declared numerator/denominator bindings.
 
     A binding maps a FIELD_CONTRACTS metric_id onto two native paths in

@@ -607,6 +607,19 @@ def test_acknowledge_denied_write_p19(
     assert doc["error"]["owner"] == "s3_return_path"
 
 
+def test_acknowledge_rejects_ack_id_that_is_not_one_segment(scratch: Path) -> None:
+    req = _write(scratch / "b.json", bootstrap_request(operation="acknowledge"))
+    for bad in ("../escape", "acks/nested", "ack id", "..", "ack/../x"):
+        ack = _write(scratch / "ack.json", ack_doc(ack_id=bad))
+        rc = _run([
+            "acknowledge", "--request", rel(req), "--out", rel(scratch / "o"),
+            "--ack", rel(ack),
+        ])
+        assert rc == EXIT_INVALID_CONTRACT
+        doc = json.loads((scratch / "o" / "status.json").read_text())
+        assert doc["error"]["kind"] == "invalid_contract"
+
+
 def test_acknowledge_missing_fields(scratch: Path) -> None:
     req = _write(scratch / "b.json",
                  bootstrap_request(operation="acknowledge"))
@@ -843,7 +856,8 @@ def test_return_workflow_gated_validated_bounded() -> None:
             uses = step.get("uses", "")
             if uses:
                 repo, _, ref = uses.partition("@")
-                assert len(ref) == 40 and all(
+                assert len(ref) == 40, f"unpinned action: {uses}"
+                assert all(
                     c in "0123456789abcdef" for c in ref
                 ), f"unpinned action: {uses}"
             run = step.get("run", "")

@@ -337,7 +337,7 @@ def _load_resume(store, spec: MaterializeSpec) -> dict:
 def _shard_tables(
     spec: MaterializeSpec,
     transport,
-    store,
+    _store,
     ledger: BudgetLedger,
     shard: list[SourceSpec],
     acc: _ShardAccumulator,
@@ -369,7 +369,7 @@ def _absorb(
     result,
     tables: dict,
     acc: _ShardAccumulator,
-    ledger: BudgetLedger,
+    _ledger: BudgetLedger,
 ) -> None:
     cell = acc.cell(src)
     cell["landed"] += 1
@@ -472,7 +472,7 @@ def _write_shard_partitions(
     store,
     tables: dict[str, list[dict]],
     shard_name: str,
-    ledger: BudgetLedger | None = None,
+    _ledger: BudgetLedger | None = None,
 ) -> list[dict]:
     """Write one shard's per-table partitions create-only.
 

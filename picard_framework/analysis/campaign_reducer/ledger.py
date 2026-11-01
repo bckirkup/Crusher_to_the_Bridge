@@ -130,7 +130,7 @@ class Reservation:
     def __init__(self, ledger: "BudgetLedger", amounts: dict[str, float]):
         self._ledger = ledger
         self.amounts = dict(amounts)
-        self._consumed: dict[str, float] = {k: 0.0 for k in amounts}
+        self._consumed: dict[str, float] = dict.fromkeys(amounts, 0.0)
         self._closed = False
 
     def consume(self, field: str, amount: float, detail: str = "") -> None:
@@ -152,14 +152,8 @@ class Reservation:
         self._closed = True
 
     def release(self) -> None:
-        if self._closed:
-            return
-        for field, used in self._consumed.items():
-            self._ledger.reserved[field] -= self.amounts[field]
-            self._ledger.spent[field] = (
-                self._ledger.spent.get(field, 0.0) + used
-            )
-        self._closed = True
+        """Return the reservation. Same ledger effect as :meth:`commit`."""
+        self.commit()
 
 
 class ShardBudget:
@@ -227,7 +221,7 @@ class BudgetLedger:
         )
 
     def _consume(
-        self, reservation: Reservation | None, field: str, amount: float, detail: str
+        self, reservation: Reservation | None, field: str, amount: float, _detail: str
     ) -> None:
         if field in _UNSPENDABLE:
             raise BudgetBlocked(f"{field}: not a spendable ceiling")
@@ -263,7 +257,7 @@ class BudgetLedger:
             raise BudgetExceeded(field, amount, remaining)
         self.spent[field] = self.spent.get(field, 0.0) + amount
 
-    def cap(self, field: str, amount: float, detail: str = "") -> None:
+    def cap(self, field: str, amount: float, _detail: str = "") -> None:
         """Per-occurrence ceiling: one event may not exceed the cap."""
         ceiling = self._ceiling(field)
         if amount > ceiling:
@@ -296,7 +290,7 @@ class BudgetLedger:
     def shard(self, amounts: Mapping[str, float]) -> ShardBudget:
         return ShardBudget(self, self.reserve(amounts))
 
-    def acquire_job(self, detail: str = "") -> None:
+    def acquire_job(self, _detail: str = "") -> None:
         """One inflight slot + one cumulative job, charged atomically."""
         if self.inflight + 1 > self._ceiling("max_inflight_jobs"):
             raise BudgetExceeded(

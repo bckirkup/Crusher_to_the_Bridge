@@ -293,12 +293,14 @@ def test_select_specimens_covers_classes(scratch: Path) -> None:
     assert mega["pin"]["pin_kind"] == "etag"
     missing = [s for s in doc["specimens"]
                if s["class"] == "missing_witness"]
-    assert missing and missing[0]["key"] is None
+    assert missing
+    assert missing[0]["key"] is None
     assert missing[0]["pin"]["pin_kind"] == "unpinned"
     assert missing[0]["fresh_observation"] == "blocked"
     # every uncovered class is an explicit entry, never a silent skip
     for u in doc["uncovered"]:
-        assert u["class"] and u["reason"]
+        assert u["class"]
+        assert u["reason"]
     # deterministic: second call identical
     again = pilot.select_specimens(
         _frozen(), _register(), _objects(), _versions())
@@ -462,8 +464,8 @@ def test_submit_pilot_happy_path(scratch: Path, monkeypatch) -> None:
     assert call["jobDefinition"] == \
         req["job_binding"]["job_definition_revision_arn"]
     argv = call["containerOverrides"]["command"]
-    assert "--phase" in argv and argv[argv.index("--phase") + 1] \
-        == "pilot"
+    assert "--phase" in argv
+    assert argv[argv.index("--phase") + 1] == "pilot"
     assert "--request-sha256" in argv
 
 

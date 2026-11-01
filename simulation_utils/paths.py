@@ -9,6 +9,8 @@ Always canonicalize then contain via one of:
 
 * :func:`validated_open` — preferred for all file reads/writes
 * :func:`confine_to_base` / :func:`resolve_repo_path` — before other FS ops
+* :func:`resolve_under_base` — for a slash-separated relative key joined
+  under a store or output root (campaign derived keys)
 * :func:`validate_path_component` / :func:`resolve_child_path` — for single
   path segments joined under a known parent (run ids, filenames)
 
@@ -135,6 +137,44 @@ def resolve_repo_path(repo_root: str, path: str) -> str:
     return _contain(base, resolved, f"Path {path!r} escapes repository root {repo_root!r}")
 
 
+def _relative_key(relative_key: str) -> str:
+    """Return a slash-separated key with no parent or empty segments."""
+    if (
+        not isinstance(relative_key, str)
+        or not relative_key
+        or "\x00" in relative_key
+        or "\\" in relative_key
+    ):
+        raise ValueError(f"Invalid relative key: {relative_key!r}")
+    rel = relative_key.strip("/")
+    parts = rel.split("/")
+    if not rel or any(part in {"", ".", ".."} for part in parts):
+        raise ValueError(f"Invalid relative key: {relative_key!r}")
+    return rel
+
+
+def resolve_under_base(base_dir: str, relative_key: str) -> str:
+    """Join *relative_key* under *base_dir* and return the canonical path.
+
+    Leading and trailing slashes are stripped so an absolute-looking key
+    or a directory prefix cannot leave *base_dir*. Backslashes, null
+    bytes, empty segments, and ``..`` are rejected before the join.
+    The return value is the path the
+    canonicalize-then-``startswith`` check accepted, which is the value
+    later reads and writes must use.
+    """
+    if not base_dir:
+        raise ValueError("base_dir is required")
+    rel = _relative_key(relative_key)
+    base = _real(base_dir)
+    resolved = _real(os.path.join(base, *rel.split("/")))
+    return _contain(
+        base,
+        resolved,
+        f"Path {relative_key!r} escapes allowed base {base_dir!r}",
+    )
+
+
 def resolve_child_path(parent_dir: str, child_name: str) -> str:
     """Join a single validated filename under *parent_dir*."""
     parent = _real(parent_dir)
@@ -222,6 +262,28 @@ def _open_resolved(
     if newline is not None:
         open_kwargs["newline"] = newline
     return open(safe, mode, **open_kwargs)  # NOSONAR
+
+
+def exclusive_create(
+    path: str,
+    body: bytes,
+    *,
+    allowed_roots: tuple[str, ...],
+) -> None:
+    """Create *path* with ``O_EXCL`` after containment checks.
+
+    ``FileExistsError`` propagates so a create-only store can compare
+    bytes instead of truncating an existing object. The open is the
+    contained primitive, same as :func:`validated_open`.
+    """
+    safe = _confine_to_roots(_real(path), allowed_roots)
+    parent = os.path.dirname(safe)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    fd = os.open(safe, flags, 0o644)  # NOSONAR - path confined to allowed_roots
+    with os.fdopen(fd, "wb") as fh:
+        fh.write(body)
 
 
 def validated_open(

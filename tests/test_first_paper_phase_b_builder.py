@@ -47,7 +47,8 @@ def test_builder_emits_manifest_request_cohort(tmp_path, monkeypatch):
     # 8 scan sources + 16 run sources
     assert len(sources) == 24
     scans = [s for s in sources if s.get("source_role") == "scan_rows"]
-    assert len(scans) == 8 and scans == sources[:8]
+    assert len(scans) == 8
+    assert scans == sources[:8]
     runs = [s for s in sources if s.get("source_role") != "scan_rows"]
     assert all(r["family"] == "campaign_summary_zip" for r in runs)
     assert all(r["uri"].startswith("s3://") for r in sources)

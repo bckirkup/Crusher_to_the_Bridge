@@ -22,6 +22,8 @@ import hashlib
 import os
 from pathlib import Path
 
+from simulation_utils.paths import exclusive_create, resolve_under_base, validated_open
+
 
 def _sha(body: bytes) -> str:
     return hashlib.sha256(body).hexdigest()
@@ -121,68 +123,90 @@ class MemoryDerivedStore:
         return sorted(k for k in self.objects if k.startswith(prefix))
 
 
+def _files_under(root: str, prefix: str) -> list[str]:
+    """Return slash-separated file keys under *root* that start with *prefix*."""
+    out: list[str] = []
+    for dirpath, _dirnames, filenames in os.walk(root):
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            if rel.startswith(prefix):
+                out.append(rel)
+    return sorted(out)
+
+
 class LocalDirStore:
-    """Filesystem create-only store rooted at a local directory."""
+    """Filesystem create-only store rooted at a local directory.
+
+    Keys are relative paths. ``_path`` returns the canonical path
+    :func:`resolve_under_base` already contained, and every read or
+    write uses that string rather than the caller's key.
+    """
 
     def __init__(self, root: str | Path) -> None:
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
 
-    def _path(self, key: str) -> Path:
-        rel = key.lstrip("/")
-        path = (self.root / rel).resolve()
-        if self.root.resolve() not in path.parents and path != self.root.resolve():
-            raise DerivedStoreError("denied", f"{key} escapes store root")
-        return path
+    def _roots(self) -> tuple[str, ...]:
+        return (os.path.realpath(os.fspath(self.root)),)
+
+    def _path(self, key: str) -> str:
+        try:
+            return resolve_under_base(os.fspath(self.root), key)
+        except ValueError as exc:
+            raise DerivedStoreError("denied", str(exc)) from exc
+
+    def _read(self, path: str) -> bytes:
+        with validated_open(path, "rb", allowed_roots=self._roots()) as fh:
+            return fh.read()
+
+    def _same_bytes_or_conflict(self, key: str, path: str, body: bytes) -> bool:
+        """Return False when *path* already holds *body*; else raise."""
+        existing = self._read(path)
+        if _sha(existing) == _sha(body):
+            return False
+        raise DerivedConflict(key, _sha(existing), _sha(body))
 
     def put_if_absent(self, key: str, body: bytes) -> str:
         path = self._path(key)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
         try:
-            fd = os.open(path, flags, 0o644)
+            exclusive_create(path, body, allowed_roots=self._roots())
         except FileExistsError:
             raise DerivedConflict(
-                key, _sha(path.read_bytes()), _sha(body)
+                key, _sha(self._read(path)), _sha(body)
             ) from None
-        with os.fdopen(fd, "wb") as fh:
-            fh.write(body)
         return _sha(body)
 
     def put_idempotent(self, key: str, body: bytes) -> bool:
         path = self._path(key)
-        if path.exists():
-            if _sha(path.read_bytes()) == _sha(body):
-                return False
-            raise DerivedConflict(key, _sha(path.read_bytes()), _sha(body))
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(body)
+        if os.path.exists(path):
+            return self._same_bytes_or_conflict(key, path, body)
+        try:
+            exclusive_create(path, body, allowed_roots=self._roots())
+        except FileExistsError:
+            return self._same_bytes_or_conflict(key, path, body)
         return True
 
     def get(self, key: str) -> bytes:
         path = self._path(key)
-        if not path.exists():
+        if not os.path.exists(path):
             raise DerivedStoreError("not_found", key)
-        return path.read_bytes()
+        return self._read(path)
 
     def head(self, key: str) -> dict | None:
         path = self._path(key)
-        if not path.exists():
+        if not os.path.exists(path):
             return None
-        body = path.read_bytes()
+        body = self._read(path)
         return {"key": key, "bytes": len(body), "sha256": _sha(body)}
 
     def list(self, prefix: str = "") -> list[str]:
-        base = self._path(prefix or ".")
-        if not base.exists():
+        root = os.path.realpath(os.fspath(self.root))
+        if prefix not in {"", "."} and not os.path.exists(self._path(prefix)):
             return []
-        out: list[str] = []
-        for path in sorted(self.root.rglob("*")):
-            if path.is_file():
-                rel = path.relative_to(self.root).as_posix()
-                if rel.startswith(prefix):
-                    out.append(rel)
-        return out
+        if not os.path.isdir(root):
+            return []
+        return _files_under(root, prefix)
 
 
 def write_manifest(store, key: str, entries: list[dict]) -> dict:

@@ -628,8 +628,10 @@ def test_parquet_adapter_rejects_non_par1() -> None:
 
 
 def test_reduce_source_unknown_family_raises() -> None:
+    ref = _ref("x.json")
+    transport = MemoryTransport()
     with pytest.raises(KeyError):
-        adapters.reduce_source("not_a_family", _ref("x.json"), MemoryTransport())
+        adapters.reduce_source("not_a_family", ref, transport)
 
 
 def test_read_outcome_for_typed_inventory() -> None:

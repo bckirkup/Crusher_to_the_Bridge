@@ -39,6 +39,7 @@ from typing import Any
 from simulation_utils.paths import (
     confine_to_base,
     prepare_output_directory,
+    validate_path_component,
     validated_open,
 )
 
@@ -67,6 +68,8 @@ from .worker import _status_exit
 _CAPS = contracts.load(contracts.CANONICAL_INTERFACE)["readback"][
     "proposed_hard_caps"
 ]
+_S3_SCHEME = "s3://"
+_STATUS_NAME = "status.json"
 _DERIVED = f"{DERIVED_ROOT}/"
 _ACK_PREFIX = "requests/acks/"
 _LISTING_BOUND = 1024
@@ -114,6 +117,20 @@ class ReturnFailure(Exception):
         self.status = status
         self.exit_code = exit_code
         self.owner = owner
+
+
+def _ack_component(ack_id: object) -> str:
+    """Reject an ack id that is not one safe path segment.
+
+    The id is interpolated into a derived-store key. A value with a
+    separator or ``..`` would otherwise be path content from the ack file.
+    """
+    if not isinstance(ack_id, str):
+        raise _invalid("ack_id must be a single path component")
+    try:
+        return validate_path_component(ack_id, label="ack_id")
+    except ValueError as exc:
+        raise _invalid(str(exc)) from exc
 
 
 def _invalid(detail: str) -> ReturnFailure:
@@ -208,7 +225,7 @@ def _store_for(args, request: dict):
             uri = request["derived_root"]
         else:
             raise _invalid("request names neither source_bucket nor derived_root")
-    if uri.startswith("s3://"):
+    if uri.startswith(_S3_SCHEME):
         bucket, _ = parse_s3_uri(uri)
         if not bucket:
             raise _invalid(f"store uri has no bucket: {uri}")
@@ -228,7 +245,7 @@ def _resolve_store_key(ref: str) -> str:
     """Normalize an artifact reference to a derived-rooted store key."""
     if not isinstance(ref, str) or not ref:
         raise _invalid("empty artifact reference")
-    key = parse_s3_uri(ref)[1] if ref.startswith("s3://") else ref
+    key = parse_s3_uri(ref)[1] if ref.startswith(_S3_SCHEME) else ref
     key = key.lstrip("/")
     if not key.startswith(_DERIVED) or ".." in key.split("/"):
         raise ReturnFailure(
@@ -265,7 +282,7 @@ def _fetch_store(store, key: str, cap: int) -> bytes:
 
 def _fetch_uri(uri: str, max_bytes: int) -> bytes:
     """Bounded fetch of an external URI (s3://, file:// or local path)."""
-    if uri.startswith("s3://"):
+    if uri.startswith(_S3_SCHEME):
         bucket, key = parse_s3_uri(uri)
         if not key:
             raise _invalid(f"uri has no key: {uri}")
@@ -377,7 +394,7 @@ def _op_status(args, out_root: str) -> int:
         "continuation": checkpoints[-1] if checkpoints else None,
         **_run_ids(),
     }
-    _emit(out_root, "status.json", doc)
+    _emit(out_root, _STATUS_NAME, doc)
     if receipt is not None:
         _emit(out_root, "qualified_receipt.json", receipt)
     print(json.dumps(doc))
@@ -425,7 +442,7 @@ def _op_resume(args, out_root: str) -> int:
         "new_child_receipt": new_child_receipt,
         **_run_ids(),
     }
-    _emit(out_root, "status.json", doc)
+    _emit(out_root, _STATUS_NAME, doc)
     print(json.dumps(doc))
     return contracts.EXIT_COMPLETE
 
@@ -454,7 +471,7 @@ def _op_query(args, out_root: str) -> int:
     commit = request.get("commit_uri") or (
         f"{_DERIVED}attempts/{request.get('reduction_id')}/COMMIT.json"
     )
-    commit_key = _resolve_store_key(commit) if commit.startswith("s3://") else commit
+    commit_key = _resolve_store_key(commit) if commit.startswith(_S3_SCHEME) else commit
     try:
         outcome = run_query(
             query_doc,
@@ -506,13 +523,13 @@ def _op_query(args, out_root: str) -> int:
     }
     if swappable:
         doc["error"] = {
-            "kind": sorted(swappable)[0],
+            "kind": min(swappable),
             "detail": "catalog snapshot changed behind the frozen cursor",
             "owner": "query_engine",
         }
     elif outcome.errors:
         doc["errors"] = outcome.errors[:8]
-    _emit(out_root, "status.json", doc)
+    _emit(out_root, _STATUS_NAME, doc)
     print(json.dumps(doc))
     if swappable:
         return contracts.EXIT_SOURCE_CHANGED
@@ -725,7 +742,7 @@ def _op_collect(args, out_root: str) -> int:
         "durable_ingestion_request": "durable_ingestion_request.json",
         **_run_ids(),
     }
-    _emit(out_root, "status.json", doc)
+    _emit(out_root, _STATUS_NAME, doc)
     print(json.dumps(doc))
     return contracts.EXIT_COMPLETE
 
@@ -781,6 +798,7 @@ def _op_acknowledge(args, out_root: str) -> int:
             ack, sort_keys=True, separators=(",", ":"),
         ).encode())[:16]
     )
+    ack_id = _ack_component(ack_id)
     ack["ack_id"] = ack_id
     body = json.dumps(ack, sort_keys=True, indent=2).encode()
     # Run ids are provenance for the envelope/status only — the stored ack
@@ -821,7 +839,7 @@ def _op_acknowledge(args, out_root: str) -> int:
         "ack_envelope": "ack_envelope.json",
         **_run_ids(),
     }
-    _emit(out_root, "status.json", doc)
+    _emit(out_root, _STATUS_NAME, doc)
     print(json.dumps(doc))
     return contracts.EXIT_COMPLETE
 
@@ -882,6 +900,6 @@ def run(args) -> int:
             },
             **_run_ids(),
         }
-        _emit(out_root, "status.json", doc)
+        _emit(out_root, _STATUS_NAME, doc)
         print(json.dumps(doc))
         return exc.exit_code

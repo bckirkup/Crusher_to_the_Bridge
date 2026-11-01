@@ -57,6 +57,7 @@ _HARDENED_MODULES = (
     "picard_framework/analysis/campaign_reducer/plan.py",
     "picard_framework/analysis/campaign_reducer/validate.py",
     "picard_framework/analysis/campaign_reducer/return_path.py",
+    "picard_framework/analysis/campaign_reducer/derived_store.py",
     "picard_framework/analysis/campaign_reducer/edison_ingest.py",
     "picard_framework/analysis/campaign_reducer/quote.py",
     "picard_framework/analysis/campaign_reducer/submit.py",

@@ -39,6 +39,8 @@ from simulation_utils.paths import (
 from .._io import allowed_roots, cwd_root, read_json, write_json
 from . import contracts
 
+_RECEIPT_NAME = "ingestion_receipt.json"
+
 _API_KEY_ENV = "EDISON_PLATFORM_API_KEY"
 
 
@@ -123,11 +125,12 @@ class _Failure(Exception):
         self.kind = kind
         self.detail = detail
         self.exit_code = exit_code
-        self.status = (
-            "quarantined" if kind == "hash_mismatch"
-            else "blocked" if exit_code in (2, 3)
-            else "return_blocked"
-        )
+        if kind == "hash_mismatch":
+            self.status = "quarantined"
+        elif exit_code in (2, 3):
+            self.status = "blocked"
+        else:
+            self.status = "return_blocked"
 
 
 def _verified_files(manifest: dict, base: str, cap: int) -> list[dict]:
@@ -169,7 +172,7 @@ def ingest(manifest_path: str, out_dir: str) -> int:
         connector, reason = _connector()
         if reason is not None:
             receipt = _blocked_receipt(manifest, reason, len(files))
-            write_json(os.path.join(out_root, "ingestion_receipt.json"), receipt)
+            write_json(os.path.join(out_root, _RECEIPT_NAME), receipt)
             print(json.dumps(receipt))
             return contracts.EXIT_RETURN_PATH_BLOCKED
         assets = []
@@ -202,7 +205,7 @@ def ingest(manifest_path: str, out_dir: str) -> int:
             "reduction_id": manifest.get("reduction_id"),
             "s3_pointer": manifest.get("s3_pointer"),
         }
-        write_json(os.path.join(out_root, "ingestion_receipt.json"), receipt)
+        write_json(os.path.join(out_root, _RECEIPT_NAME), receipt)
         print(json.dumps(receipt))
         return contracts.EXIT_COMPLETE
     except _Failure as exc:
@@ -211,7 +214,7 @@ def ingest(manifest_path: str, out_dir: str) -> int:
             "error": {"kind": exc.kind, "detail": exc.detail,
                       "owner": "edison_connector"},
         }
-        write_json(os.path.join(out_root, "ingestion_receipt.json"), receipt)
+        write_json(os.path.join(out_root, _RECEIPT_NAME), receipt)
         print(json.dumps(receipt))
         return exc.exit_code
 

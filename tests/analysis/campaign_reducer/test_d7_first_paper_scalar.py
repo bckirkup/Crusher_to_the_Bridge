@@ -364,10 +364,9 @@ def test_restart_byte_identical_store():
         if event == "checkpoint_written" and idx == 1:
             raise Kill()
 
+    ledger = BudgetLedger(_ceilings())
     with pytest.raises(Kill):
-        run_materialization(
-            spec, transport, store_b, BudgetLedger(_ceilings()),
-            on_shard=killer)
+        run_materialization(spec, transport, store_b, ledger, on_shard=killer)
     res_b = run_materialization(
         spec, transport, store_b, BudgetLedger(_ceilings()))
     assert res_b.status == "completed"
@@ -400,10 +399,9 @@ def test_restart_byte_identical_store_with_scalars():
         if event == "checkpoint_written" and idx == 1:
             raise Kill()
 
+    ledger = BudgetLedger(_ceilings())
     with pytest.raises(Kill):
-        run_materialization(
-            spec, transport, store_b, BudgetLedger(_ceilings()),
-            on_shard=killer)
+        run_materialization(spec, transport, store_b, ledger, on_shard=killer)
     res_b = run_materialization(
         spec, transport, store_b, BudgetLedger(_ceilings()))
     assert res_b.status == res_a.status

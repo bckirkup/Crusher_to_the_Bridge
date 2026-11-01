@@ -322,21 +322,17 @@ def test_analysis_jobdef_renders_reducer_binding() -> None:
 
 def test_analysis_jobdef_blocks_unsupported_and_incomplete() -> None:
     launcher = _load_launcher()
+    account = "994254241749"
+    region = "us-east-1"
+    escaped = _BINDING | {"shell_escape": "; rm -rf /"}
     with pytest.raises(SystemExit, match="unsupported"):
-        launcher._render_analysis_jobdef(
-            _BINDING | {"shell_escape": "; rm -rf /"},
-            "994254241749", "us-east-1",
-        )
+        launcher._render_analysis_jobdef(escaped, account, region)
+    incomplete = {k: v for k, v in _BINDING.items() if k != "job_role_name"}
     with pytest.raises(SystemExit, match="missing"):
-        launcher._render_analysis_jobdef(
-            {k: v for k, v in _BINDING.items() if k != "job_role_name"},
-            "994254241749", "us-east-1",
-        )
+        launcher._render_analysis_jobdef(incomplete, account, region)
+    bad_digest = _BINDING | {"image_digest": "sha256:not-hex"}
     with pytest.raises(SystemExit, match="sha256"):
-        launcher._render_analysis_jobdef(
-            _BINDING | {"image_digest": "sha256:not-hex"},
-            "994254241749", "us-east-1",
-        )
+        launcher._render_analysis_jobdef(bad_digest, account, region)
 
 
 def test_analysis_jobdef_tagged_image_form() -> None:
