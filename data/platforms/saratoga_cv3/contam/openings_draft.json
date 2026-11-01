@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "platform_id": "saratoga_cv3",
-  "created_utc": "2026-11-01T18:55:35.414027+00:00",
+  "created_utc": "2026-11-01T19:01:23.875606+00:00",
   "description": "Draft Contam orifice checklist from naval GA import. Engineers confirm areas/schedules in ContamW; as-built ducts are out of scope here.",
   "openings": [
     {
@@ -797,17 +797,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Berthing_2D_Aft",
-      "to": "Head_2D",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Bomb_Stowage_2P",
       "to": "Diesel_Gen_Trunk",
       "type": "ladder",
@@ -896,17 +885,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Bunk_Rooms_Fwd",
-      "to": "UHD_Head",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "CPO_Quarters",
       "to": "Elevator_3D",
       "type": "passageway",
@@ -953,17 +931,6 @@
     {
       "from": "Crew_Berthing_Aft",
       "to": "Radio_Store_Aft",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "Crew_Berthing_Aft",
-      "to": "Wash_Room_Main",
       "type": "passageway",
       "area_m2": 2.0,
       "area_source": "hobbyist_orifice_catalog",
@@ -1052,17 +1019,6 @@
     {
       "from": "Crews_Space_Mid",
       "to": "Galley",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "Crews_Space_Mid",
-      "to": "Wash_Room_Main",
       "type": "passageway",
       "area_m2": 2.0,
       "area_source": "hobbyist_orifice_catalog",
@@ -1193,17 +1149,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Engine_Testing_Shop",
-      "to": "UHD_Head",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Engineers_Office",
       "to": "Pipe_Shop",
       "type": "passageway",
@@ -1303,28 +1248,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Firemans_Wash_Rm",
-      "to": "Marines_Berthing_MHD",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "Firemans_Wash_Rm",
-      "to": "Mens_Wash_Rm",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Flag_Bridge",
       "to": "Funnel_Uptake",
       "type": "passageway",
@@ -1402,28 +1325,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "General_Mess",
-      "to": "Wash_Room_Main",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "Hangar_Aft",
-      "to": "Head_2D",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Hangar_Fwd",
       "to": "Lockers_2D",
       "type": "passageway",
@@ -1437,17 +1338,6 @@
     {
       "from": "Hangar_Mid",
       "to": "Laundry",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "Head_2D",
-      "to": "Sick_Bay",
       "type": "passageway",
       "area_m2": 2.0,
       "area_source": "hobbyist_orifice_catalog",
@@ -1567,17 +1457,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Marines_Berthing_MHD",
-      "to": "Mens_Wash_Rm",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Metalsmith_Shop",
       "to": "Mezzanine_Gallery_Stowage",
       "type": "passageway",
@@ -1688,17 +1567,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Parachute_Loft",
-      "to": "Wash_Room_Main",
-      "type": "ladder",
-      "area_m2": 0.6,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Peacoat_Lockers",
       "to": "Pipe_Shop",
       "type": "passageway",
@@ -1787,17 +1655,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Radio_Store_Aft",
-      "to": "Wash_Room_Main",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Rocket_Motor_Radio_Gen",
       "to": "Torpedo_Space",
       "type": "passageway",
@@ -1875,8 +1732,63 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "UHD_Head",
-      "to": "Wardroom_Mess",
+      "from": "Crew_Berthing_Aft",
+      "to": "Berthing_2D_Aft",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Radio_Store_Aft",
+      "to": "Berthing_2D_Aft",
+      "type": "ladder",
+      "area_m2": 0.6,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Engine_Testing_Shop",
+      "to": "Shipfitters_Shop",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Wardroom_Mess",
+      "to": "Parachute_Loft",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Bunk_Rooms_Fwd",
+      "to": "Parachute_Loft",
+      "type": "passageway",
+      "area_m2": 2.0,
+      "area_source": "hobbyist_orifice_catalog",
+      "schedule": null,
+      "status": "draft",
+      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
+      "contam_element": "plr_orfc"
+    },
+    {
+      "from": "Marines_Berthing_MHD",
+      "to": "Crew_Berthing_Aft_MHD",
       "type": "passageway",
       "area_m2": 2.0,
       "area_source": "hobbyist_orifice_catalog",

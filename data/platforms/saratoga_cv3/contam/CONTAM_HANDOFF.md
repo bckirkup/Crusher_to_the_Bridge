@@ -11,7 +11,7 @@ GA drawings**.
 
 - Contam **levels / zones** with volume, floor area, ceiling height, elevation
 - SketchPad-ish display coordinates from zone overlays
-- **171** typed `plr_orfc` openings (doors / hatches / ladders) —
+- **163** typed `plr_orfc` openings (doors / hatches / ladders) —
   see `openings_draft.json`
 - **6** starter **AHS** branches from HVAC hints (ACH → Fahs)
 - Cross-zone ladder/fan links from the synthesized airflow graph

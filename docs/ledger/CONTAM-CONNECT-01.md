@@ -35,11 +35,16 @@ New adjacency edges authored from the GA source record conventions:
 - Cross-deck pairs that would have been typed `passageway` are emitted as
   `ladder`.
 
-Same mechanism both hulls, 114 new edges on lexington_cv2 (164 total) and
-121 on saratoga_cv3 (171 total). Contam artifacts regenerated via
+Same mechanism both hulls: net +104 edges on lexington_cv2 (50 → 154)
+and +113 on saratoga_cv3 (50 → 163). `Sanitary`-type zones are
+excluded from new adjacency — they connect only via their
+`Sanitary_Makeup` cross-zone links and own exhaust (the shared-sanitary
+wiring invariant), so the generator's drafted head edges were dropped
+and the compartments they orphaned re-attached to non-sanitary
+neighbours. Contam artifacts regenerated via
 `author_contam --platform-dir` so `openings_draft.json`, `path_map.json`
 and `platform.prj` mirror the new adjacency (offline PRJ gate PASS:
-97/108 zones, 310/328 paths).
+97/108 zones, 300/320 paths).
 
 ## Honesty note
 
@@ -62,7 +67,7 @@ Post-fix re-audit (`tools/museum_hull_audit.py`):
 | lexington_cv2 | committed prj | 78 | 5 |
 | saratoga_cv3 | native | 92 | 0 |
 | saratoga_cv3 | export | 92 | 0 |
-| saratoga_cv3 | committed prj | 92 | 3 |
+| saratoga_cv3 | committed prj | 92 | 4 |
 
 Residual committed-prj unreachable counts are the 15-char /
 underscore-stripping name-normalization drift (ranked fix #6), not real

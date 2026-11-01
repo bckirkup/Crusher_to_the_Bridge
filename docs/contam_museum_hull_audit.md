@@ -162,9 +162,10 @@ Ordered by how much of the measured tail each item plausibly removes.
    `ContamTransportEngine._get_zone_rooms` to resolve bare room ids (as
    the export lane does) or fail loudly at import/validation.
 3. **lexington_cv2 / saratoga_cv3 disconnected-compartment blocks** —
-   **SHIPPED (CONTAM-CONNECT-01)**. Authored 114/121 new adjacency
+   **SHIPPED (CONTAM-CONNECT-01)**. Authored +104/+113 net adjacency
    edges per the GA-record conventions (same-deck fore-aft `passageway`
-   corridors + `ladder` links through named circulation trunks/hoists),
+   corridors + `ladder` links through named circulation trunks/hoists;
+   `Sanitary` zones excluded — heads keep `Sanitary_Makeup` wiring),
    regenerated `openings_draft.json`/`path_map.json`/`platform.prj` via
    `author_contam`. Post-fix measurement: unreachable 78 → 0
    (lexington) and 92 → 0 (saratoga) in both native and

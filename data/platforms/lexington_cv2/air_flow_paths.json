@@ -407,11 +407,6 @@
       "type": "passageway"
     },
     {
-      "from": "Aft_Berths_UHD",
-      "to": "UHD_Head_Aft",
-      "type": "passageway"
-    },
-    {
       "from": "After_Gyro",
       "to": "Boiler_Room_1P_2",
       "type": "passageway"
@@ -513,11 +508,6 @@
     },
     {
       "from": "Blower_Space_UHD",
-      "to": "UHD_Head_Fwd",
-      "type": "passageway"
-    },
-    {
-      "from": "Blower_Space_UHD",
       "to": "Warrant_Mess",
       "type": "ladder"
     },
@@ -602,11 +592,6 @@
       "type": "passageway"
     },
     {
-      "from": "Capstan_Room",
-      "to": "Wash_Room_Aft",
-      "type": "passageway"
-    },
-    {
       "from": "Captains_Space",
       "to": "Uptakes_Mid",
       "type": "passageway"
@@ -647,18 +632,8 @@
       "type": "passageway"
     },
     {
-      "from": "Crew_Berthing_2D_Aft",
-      "to": "Head_2D",
-      "type": "passageway"
-    },
-    {
       "from": "Crew_Berthing_3D",
       "to": "Elevator_Machinery_3D",
-      "type": "passageway"
-    },
-    {
-      "from": "Crew_Berthing_Aft",
-      "to": "Wash_Room_Aft",
       "type": "passageway"
     },
     {
@@ -674,16 +649,6 @@
     {
       "from": "Crew_Berthing_Fwd",
       "to": "Windlass_Motor_Room",
-      "type": "passageway"
-    },
-    {
-      "from": "Crew_Berthing_Fwd_MHD",
-      "to": "Firemens_Washroom",
-      "type": "passageway"
-    },
-    {
-      "from": "Dirty_Clothes",
-      "to": "Firemens_Washroom",
       "type": "passageway"
     },
     {
@@ -729,11 +694,6 @@
     {
       "from": "Elevator_Well_2D",
       "to": "Wire_Welding_Shop",
-      "type": "ladder"
-    },
-    {
-      "from": "Financial_Office",
-      "to": "UHD_Head_Aft",
       "type": "ladder"
     },
     {
@@ -807,11 +767,6 @@
       "type": "passageway"
     },
     {
-      "from": "Hangar_Aft",
-      "to": "Head_2D",
-      "type": "passageway"
-    },
-    {
       "from": "Hangar_Fwd",
       "to": "Shell_Handling",
       "type": "passageway"
@@ -819,16 +774,6 @@
     {
       "from": "Hangar_Mid",
       "to": "Laundry",
-      "type": "passageway"
-    },
-    {
-      "from": "Head_2D",
-      "to": "Sick_Bay",
-      "type": "passageway"
-    },
-    {
-      "from": "Jr_Officers_Fwd",
-      "to": "UHD_Head_Fwd",
       "type": "passageway"
     },
     {
@@ -917,19 +862,24 @@
       "type": "passageway"
     },
     {
-      "from": "Ship_Service_Canteen",
-      "to": "Wash_Room_Aft",
-      "type": "passageway"
-    },
-    {
-      "from": "UHD_Head_Aft",
-      "to": "Wing_Fuselage_Repair",
-      "type": "passageway"
-    },
-    {
       "from": "Wardroom_Mess",
       "to": "Wing_Fuselage_Repair",
       "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft_MHD",
+      "to": "Crew_Berthing_Mid",
+      "type": "ladder"
+    },
+    {
+      "from": "Dirty_Clothes",
+      "to": "Capstan_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Berthing_Fwd_MHD",
+      "to": "Crew_Berthing_2D_Aft",
+      "type": "ladder"
     }
   ]
 }

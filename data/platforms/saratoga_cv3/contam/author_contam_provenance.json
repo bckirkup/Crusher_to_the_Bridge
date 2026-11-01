@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "created_utc": "2026-11-01T18:55:35.434210+00:00",
+  "created_utc": "2026-11-01T19:01:23.891271+00:00",
   "platform_id": "saratoga_cv3",
   "target": "B_contam_starter",
   "hobbyist": true,
-  "openings_count": 171,
+  "openings_count": 163,
   "skip_duct_spines": true,
   "offline_gate": {
     "ok": true,
     "zone_count": 108,
-    "path_map_entries": 328,
+    "path_map_entries": 320,
     "hvac_zones": 6,
     "simplify_warnings": [
       "Dropped Contam section on simplify: day-schedules",
