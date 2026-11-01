@@ -84,6 +84,12 @@ Measured floors vs native outflow rates:
 
 ## 3. Head-deck sinks
 
+> **Shipped baseline (CONTAM-DUTY0-01):** the sink behaviour measured
+> below is `hvac.duty0_terminal_mode: sealed`. The shipped default
+> `extract` gives every duty-0 `oa_fraction: 1.0` branch return/exhaust
+> legs at `ach · V_room` — heads now drain overboard natively, matching
+> the commissioned export and the SIM behaviour below.
+
 Every platform declares `HD_*` sanitary zones (`ach 19.2`,
 `oa_fraction 1.0`, `hvac_duty 0.0` — exhaust-only branches). Under native
 they are **permanent sinks**: `Sanitary_Makeup` cross-zone links push mass

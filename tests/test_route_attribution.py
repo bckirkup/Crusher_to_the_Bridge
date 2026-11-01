@@ -161,6 +161,13 @@ class TestRouteAttribution:
         # fixture sterile. The mode: off baseline is the pre-V1 tree this
         # fixture is authored on; it reproduces the one fomite event.
         spec.legacy_cfg["transmission"]["caregiver"] = {"mode": "off"}
+        # CONTAM-DUTY0-01: the shipped extract terminal drains the hull's
+        # AHU_HD_* head branches at their declared ach, shifting realized
+        # dose enough that this seed's fixture goes sterile. The sealed
+        # baseline is the pre-change tree the fixture is authored on.
+        spec.legacy_cfg.setdefault("hvac", {})[
+            "duty0_terminal_mode"
+        ] = "sealed"
         first = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         monkeypatch.setattr(
             ship_simulation_module,
