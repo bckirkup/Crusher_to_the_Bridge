@@ -162,12 +162,20 @@ Ordered by how much of the measured tail each item plausibly removes.
    `ContamTransportEngine._get_zone_rooms` to resolve bare room ids (as
    the export lane does) or fail loudly at import/validation.
 3. **lexington_cv2 / saratoga_cv3 disconnected-compartment blocks** —
-   restore the missing deck-to-deck / room-to-network connectivity from
-   the GA source record (38/39 zones have zero incidence; ~78/92
-   unreachable in both engines). These zones currently cannot receive
-   dose in *either* engine; the fix restores ~80% of each hull to the
-   network rather than collapsing divergence directly — the divergence
-   they do carry comes from their 5 duty-0 sinks (item 1).
+   **SHIPPED (CONTAM-CONNECT-01)**. Authored +104/+113 net adjacency
+   edges per the GA-record conventions (same-deck fore-aft `passageway`
+   corridors + `ladder` links through named circulation trunks/hoists;
+   `Sanitary` zones excluded — heads keep `Sanitary_Makeup` wiring),
+   regenerated `openings_draft.json`/`path_map.json`/`platform.prj` via
+   `author_contam`. Post-fix measurement: unreachable 78 → 0
+   (lexington) and 92 → 0 (saratoga) in both native and
+   commissioned-export lanes; the small committed-prj residual is the
+   name-normalization drift (item 6), not a real disconnect. Original
+   fix text: restore the missing deck-to-deck / room-to-network
+   connectivity from the GA source record (38/39 zones have zero
+   incidence; ~78/92 unreachable in both engines). These zones could
+   not receive dose in *either* engine; the fix restores ~80% of each
+   hull to the network rather than collapsing divergence directly.
 4. **Directed vs bidirectional passive links** — native treats
    `cross_zone_links` as one-way; ContamX orifices are bidirectional.
    Drives the battleship near-total-unreachable class (96–99% native

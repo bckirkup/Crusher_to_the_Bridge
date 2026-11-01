@@ -1423,24 +1423,1041 @@
   },
   {
     "path_nr": 159,
-    "from_zone": "Hangar_Aft",
-    "to_zone": "Wash_Room_Main",
+    "from_zone": "Aerological_Office",
+    "to_zone": "Drying_Rooms",
     "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
+    "kind": "ladder",
     "crusher_transfer": true,
     "ahs_nr": 0
   },
   {
     "path_nr": 160,
-    "from_zone": "Hangar_Mid",
-    "to_zone": "Wash_Room_Main",
+    "from_zone": "Aerological_Office",
+    "to_zone": "Nav_Bridge",
     "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
+    "kind": "passageway",
     "crusher_transfer": true,
     "ahs_nr": 0
   },
   {
     "path_nr": 161,
+    "from_zone": "Aft_Machinery_2P",
+    "to_zone": "Fuel_Oil_2P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 162,
+    "from_zone": "Aft_Machinery_2P",
+    "to_zone": "Motor_Room_2P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 163,
+    "from_zone": "Air_Bilge_Pump",
+    "to_zone": "Bomb_Stowage_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 164,
+    "from_zone": "Air_Bilge_Pump",
+    "to_zone": "Evaporator_Room",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 165,
+    "from_zone": "Air_Compressor_2D",
+    "to_zone": "Hangar_Mid",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 166,
+    "from_zone": "Air_Compressor_2D",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 167,
+    "from_zone": "Aircraft_Parts_3D",
+    "to_zone": "Aviation_Stores_3D",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 168,
+    "from_zone": "Aircraft_Parts_3D",
+    "to_zone": "Clothing_Small_Stores",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 169,
+    "from_zone": "Aircraft_Parts_3D",
+    "to_zone": "Lighting_Workshop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 170,
+    "from_zone": "Aircraft_Parts_3D",
+    "to_zone": "Marine_Issue",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 171,
+    "from_zone": "Aircraft_Parts_Aft",
+    "to_zone": "Aviation_Stores_3D",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 172,
+    "from_zone": "Aircraft_Parts_Aft",
+    "to_zone": "CPO_Quarters_2",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 173,
+    "from_zone": "Aircraft_Parts_Aft",
+    "to_zone": "Provisions_3D",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 174,
+    "from_zone": "Aircraft_Parts_Aft",
+    "to_zone": "Rags_Waste",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 175,
+    "from_zone": "Armory",
+    "to_zone": "Warrant_Mess",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 176,
+    "from_zone": "Aviation_Stores_3D",
+    "to_zone": "Hangar_Mid",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 177,
+    "from_zone": "Aviation_Stores_3D",
+    "to_zone": "Provisions_3D",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 178,
+    "from_zone": "Aviation_Stores_MHD",
+    "to_zone": "Bunk_Room_MHD",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 179,
+    "from_zone": "Bar_Metals",
+    "to_zone": "Loading_Machine_Rm",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 180,
+    "from_zone": "Berthing_2D_Aft",
+    "to_zone": "Hangar_Aft",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 181,
+    "from_zone": "Bomb_Stowage_2P",
+    "to_zone": "Diesel_Gen_Trunk",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 182,
+    "from_zone": "Bomb_Stowage_2P",
+    "to_zone": "Fresh_Water_Hold",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 183,
+    "from_zone": "Bomb_Stowage_2P",
+    "to_zone": "Fwd_Machinery_2P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 184,
+    "from_zone": "Bomb_Stowage_2P",
+    "to_zone": "Main_Turbine_Gen_2",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 185,
+    "from_zone": "Bomb_Stowage_Hold",
+    "to_zone": "Prov_Room_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 186,
+    "from_zone": "Bunk_Room_MHD",
+    "to_zone": "Officers_Mess_MHD",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 187,
+    "from_zone": "Bunk_Room_MHD",
+    "to_zone": "Warrant_Mess",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 188,
+    "from_zone": "Bunk_Rooms_Fwd",
+    "to_zone": "Engine_Testing_Shop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 189,
+    "from_zone": "CPO_Quarters",
+    "to_zone": "Elevator_3D",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 190,
+    "from_zone": "Captains_Office",
+    "to_zone": "Crew_Space_Aft_Port",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 191,
+    "from_zone": "Captains_Office",
+    "to_zone": "Powder_Handling_MHD",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 192,
+    "from_zone": "Clothing_Small_Stores",
+    "to_zone": "Lighting_Workshop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 193,
+    "from_zone": "Crew_Berthing_Aft",
+    "to_zone": "Radio_Store_Aft",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 194,
+    "from_zone": "Crew_Berthing_Aft_MHD",
+    "to_zone": "Engineers_Office",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 195,
+    "from_zone": "Crew_Berthing_Aft_MHD",
+    "to_zone": "Pipe_Shop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 196,
+    "from_zone": "Crew_Berthing_Fwd",
+    "to_zone": "Galley",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 197,
+    "from_zone": "Crew_Berthing_Fwd",
+    "to_zone": "Watch_Station",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 198,
+    "from_zone": "Crew_Space_Mid",
+    "to_zone": "Powder_Handling_MHD",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 199,
+    "from_zone": "Crew_Space_Mid",
+    "to_zone": "Uptakes_Mid",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 200,
+    "from_zone": "Crews_Space_Mid",
+    "to_zone": "Flight_Deck",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 201,
+    "from_zone": "Crews_Space_Mid",
+    "to_zone": "Galley",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 202,
+    "from_zone": "Diesel_Electric_Spares",
+    "to_zone": "Hangar_Fwd",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 203,
+    "from_zone": "Diesel_Electric_Spares",
+    "to_zone": "Lockers_2D",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 204,
+    "from_zone": "Diesel_Gen_Trunk",
+    "to_zone": "Machinery_1P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 205,
+    "from_zone": "Diesel_Gen_Trunk",
+    "to_zone": "Rags_Waste",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 206,
+    "from_zone": "Drying_Rooms",
+    "to_zone": "Watch_Station",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 207,
+    "from_zone": "Elevator_3D",
+    "to_zone": "Loading_Machine_Rm",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 208,
+    "from_zone": "Elevator_3D",
+    "to_zone": "Stores_2D_Aft",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 209,
+    "from_zone": "Elevator_3D",
+    "to_zone": "Stores_Incline",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 210,
+    "from_zone": "Emerg_Diesel_Gen",
+    "to_zone": "Main_Turbine_Gen_2",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 211,
+    "from_zone": "Emerg_Dist_Pump",
+    "to_zone": "Ice_Machine",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 212,
+    "from_zone": "Emerg_Dist_Pump",
+    "to_zone": "Scuttle_Pump_Room",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 213,
+    "from_zone": "Engineers_Office",
+    "to_zone": "Pipe_Shop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 214,
+    "from_zone": "Evaporator_Room",
+    "to_zone": "Fire_Room_3",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 215,
+    "from_zone": "Evaporator_Room",
+    "to_zone": "Fresh_Water_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 216,
+    "from_zone": "Fire_Room_1",
+    "to_zone": "Fuel_Oil_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 217,
+    "from_zone": "Fire_Room_1",
+    "to_zone": "Pump_Room_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 218,
+    "from_zone": "Fire_Room_2",
+    "to_zone": "Machinery_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 219,
+    "from_zone": "Fire_Room_2",
+    "to_zone": "Pump_Room_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 220,
+    "from_zone": "Fire_Room_3",
+    "to_zone": "Fresh_Water_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 221,
+    "from_zone": "Fire_Room_3",
+    "to_zone": "Fwd_Machinery_2P",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 222,
+    "from_zone": "Flag_Bridge",
+    "to_zone": "Funnel_Uptake",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 223,
+    "from_zone": "Fuel_Oil_2P",
+    "to_zone": "Main_Turbine_Gen_1",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 224,
+    "from_zone": "Fuel_Oil_2P",
+    "to_zone": "Rocket_Stowage_2P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 225,
+    "from_zone": "Fuel_Oil_Hold",
+    "to_zone": "Thrust_Block_Room",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 226,
+    "from_zone": "Funnel_Uptake",
+    "to_zone": "Watch_Station",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 227,
+    "from_zone": "Fwd_Machinery_2P",
+    "to_zone": "Packing_Incendiary",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 228,
+    "from_zone": "Galley",
+    "to_zone": "Officers_Country",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 229,
+    "from_zone": "Hangar_Fwd",
+    "to_zone": "Lockers_2D",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 230,
+    "from_zone": "Hangar_Mid",
+    "to_zone": "Laundry",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 231,
+    "from_zone": "Ice_Machine",
+    "to_zone": "Scuttle_Pump_Room",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 232,
+    "from_zone": "Ice_Machine",
+    "to_zone": "Small_Stores_1P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 233,
+    "from_zone": "Junior_Officers",
+    "to_zone": "Powder_Handling_MHD",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 234,
+    "from_zone": "Lighting_Workshop",
+    "to_zone": "Marine_Issue",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 235,
+    "from_zone": "Lockers_2D",
+    "to_zone": "Marine_Issue",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 236,
+    "from_zone": "Lockers_2D",
+    "to_zone": "Uptakes_Mid",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 237,
+    "from_zone": "Machinery_1P",
+    "to_zone": "Steering_Gear_Motor",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 238,
+    "from_zone": "Machinery_Hold",
+    "to_zone": "Pump_Room_Hold",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 239,
+    "from_zone": "Main_Turbine_Gen_1",
+    "to_zone": "Packing_Incendiary",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 240,
+    "from_zone": "Main_Turbine_Gen_1",
+    "to_zone": "Rocket_Stowage_2P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 241,
+    "from_zone": "Metalsmith_Shop",
+    "to_zone": "Mezzanine_Gallery_Stowage",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 242,
+    "from_zone": "Metalsmith_Shop",
+    "to_zone": "Shipfitters_Shop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 243,
+    "from_zone": "Metalsmith_Shop",
+    "to_zone": "Workshop_40MM",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 244,
+    "from_zone": "Mezzanine_Gallery_Stowage",
+    "to_zone": "Rocket_Motor_Radio_Gen",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 245,
+    "from_zone": "Mezzanine_Gallery_Stowage",
+    "to_zone": "Torpedo_Shop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 246,
+    "from_zone": "Motor_Room_2P",
+    "to_zone": "Rocket_Stowage_2P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 247,
+    "from_zone": "Motor_Room_2P",
+    "to_zone": "Scuttle_Pump_Room",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 248,
+    "from_zone": "Officers_Country",
+    "to_zone": "Torpedo_Space",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 249,
+    "from_zone": "Officers_Mess_MHD",
+    "to_zone": "Stores_2D_Aft",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 250,
+    "from_zone": "Parachute_Loft",
+    "to_zone": "Peacoat_Lockers",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 251,
+    "from_zone": "Peacoat_Lockers",
+    "to_zone": "Pipe_Shop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 252,
+    "from_zone": "Powder_Handling_MHD",
+    "to_zone": "Uptakes_Mid",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 253,
+    "from_zone": "Powder_Handling_UHD",
+    "to_zone": "Rocket_Motor_Radio_Gen",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 254,
+    "from_zone": "Powder_Handling_UHD",
+    "to_zone": "Torpedo_Space",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 255,
+    "from_zone": "Powder_Mag_5in",
+    "to_zone": "Rocket_Motor_Stowage",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 256,
+    "from_zone": "Powder_Mag_5in",
+    "to_zone": "Steering_Gear_Motor",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 257,
+    "from_zone": "Prov_Room_Hold",
+    "to_zone": "Small_Arms",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 258,
+    "from_zone": "Radio_Bunk_Room",
+    "to_zone": "Sick_Bay",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 259,
+    "from_zone": "Rocket_Motor_Radio_Gen",
+    "to_zone": "Torpedo_Space",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 260,
+    "from_zone": "Rocket_Motor_Stowage",
+    "to_zone": "Small_Stores_1P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 261,
+    "from_zone": "Scuttle_Pump_Room",
+    "to_zone": "Small_Stores_1P",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 262,
+    "from_zone": "Shipfitters_Shop",
+    "to_zone": "Workshop_40MM",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 263,
+    "from_zone": "Squadron_Office",
+    "to_zone": "Tool_Room",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 264,
+    "from_zone": "Steering_Gear_Motor",
+    "to_zone": "Stores_Incline",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 265,
+    "from_zone": "Torpedo_Space",
+    "to_zone": "Uptakes_Mid",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 266,
+    "from_zone": "Crew_Berthing_Aft",
+    "to_zone": "Berthing_2D_Aft",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 267,
+    "from_zone": "Radio_Store_Aft",
+    "to_zone": "Berthing_2D_Aft",
+    "is_hvac_ducted": false,
+    "kind": "ladder",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 268,
+    "from_zone": "Engine_Testing_Shop",
+    "to_zone": "Shipfitters_Shop",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 269,
+    "from_zone": "Wardroom_Mess",
+    "to_zone": "Parachute_Loft",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 270,
+    "from_zone": "Bunk_Rooms_Fwd",
+    "to_zone": "Parachute_Loft",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 271,
+    "from_zone": "Marines_Berthing_MHD",
+    "to_zone": "Crew_Berthing_Aft_MHD",
+    "is_hvac_ducted": false,
+    "kind": "passageway",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 272,
+    "from_zone": "Hangar_Aft",
+    "to_zone": "Wash_Room_Main",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 273,
+    "from_zone": "Hangar_Mid",
+    "to_zone": "Wash_Room_Main",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 274,
     "from_zone": "Hangar_Fwd",
     "to_zone": "Wash_Room_Main",
     "is_hvac_ducted": false,
@@ -1449,7 +2466,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 162,
+    "path_nr": 275,
     "from_zone": "Hangar_Aft",
     "to_zone": "UHD_Head",
     "is_hvac_ducted": false,
@@ -1458,7 +2475,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 163,
+    "path_nr": 276,
     "from_zone": "Hangar_Mid",
     "to_zone": "UHD_Head",
     "is_hvac_ducted": false,
@@ -1467,7 +2484,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 164,
+    "path_nr": 277,
     "from_zone": "Hangar_Fwd",
     "to_zone": "UHD_Head",
     "is_hvac_ducted": false,
@@ -1476,7 +2493,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 165,
+    "path_nr": 278,
     "from_zone": "Hangar_Aft",
     "to_zone": "Firemans_Wash_Rm",
     "is_hvac_ducted": false,
@@ -1485,7 +2502,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 166,
+    "path_nr": 279,
     "from_zone": "Hangar_Mid",
     "to_zone": "Firemans_Wash_Rm",
     "is_hvac_ducted": false,
@@ -1494,7 +2511,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 167,
+    "path_nr": 280,
     "from_zone": "Hangar_Fwd",
     "to_zone": "Firemans_Wash_Rm",
     "is_hvac_ducted": false,
@@ -1503,7 +2520,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 168,
+    "path_nr": 281,
     "from_zone": "Hangar_Aft",
     "to_zone": "Mens_Wash_Rm",
     "is_hvac_ducted": false,
@@ -1512,7 +2529,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 169,
+    "path_nr": 282,
     "from_zone": "Hangar_Mid",
     "to_zone": "Mens_Wash_Rm",
     "is_hvac_ducted": false,
@@ -1521,7 +2538,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 170,
+    "path_nr": 283,
     "from_zone": "Hangar_Fwd",
     "to_zone": "Mens_Wash_Rm",
     "is_hvac_ducted": false,
@@ -1530,7 +2547,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 171,
+    "path_nr": 284,
     "from_zone": "Hangar_Aft",
     "to_zone": "Head_2D",
     "is_hvac_ducted": false,
@@ -1539,7 +2556,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 172,
+    "path_nr": 285,
     "from_zone": "Hangar_Mid",
     "to_zone": "Head_2D",
     "is_hvac_ducted": false,
@@ -1548,7 +2565,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 173,
+    "path_nr": 286,
     "from_zone": "Hangar_Fwd",
     "to_zone": "Head_2D",
     "is_hvac_ducted": false,
@@ -1557,7 +2574,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 174,
+    "path_nr": 287,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -1566,7 +2583,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 175,
+    "path_nr": 288,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1575,7 +2592,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 176,
+    "path_nr": 289,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -1584,7 +2601,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 177,
+    "path_nr": 290,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": true,
@@ -1593,7 +2610,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 178,
+    "path_nr": 291,
     "from_zone": "Hangar_Aft",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -1602,7 +2619,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 179,
+    "path_nr": 292,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Hangar_Mid",
     "is_hvac_ducted": true,
@@ -1611,7 +2628,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 180,
+    "path_nr": 293,
     "from_zone": "Hangar_Mid",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -1620,7 +2637,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 181,
+    "path_nr": 294,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": true,
@@ -1629,7 +2646,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 182,
+    "path_nr": 295,
     "from_zone": "Hangar_Fwd",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -1638,7 +2655,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 183,
+    "path_nr": 296,
     "from_zone": "ambient",
     "to_zone": "ahs2(Sup)",
     "is_hvac_ducted": true,
@@ -1647,7 +2664,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 184,
+    "path_nr": 297,
     "from_zone": "ahs2(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1656,7 +2673,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 185,
+    "path_nr": 298,
     "from_zone": "ahs2(Ret)",
     "to_zone": "ahs2(Sup)",
     "is_hvac_ducted": true,
@@ -1665,7 +2682,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 186,
+    "path_nr": 299,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Wash_Room_Main",
     "is_hvac_ducted": true,
@@ -1674,7 +2691,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 187,
+    "path_nr": 300,
     "from_zone": "Wash_Room_Main",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -1683,7 +2700,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 188,
+    "path_nr": 301,
     "from_zone": "ambient",
     "to_zone": "ahs3(Sup)",
     "is_hvac_ducted": true,
@@ -1692,7 +2709,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 189,
+    "path_nr": 302,
     "from_zone": "ahs3(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1701,7 +2718,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 190,
+    "path_nr": 303,
     "from_zone": "ahs3(Ret)",
     "to_zone": "ahs3(Sup)",
     "is_hvac_ducted": true,
@@ -1710,7 +2727,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 191,
+    "path_nr": 304,
     "from_zone": "ahs3(Sup)",
     "to_zone": "UHD_Head",
     "is_hvac_ducted": true,
@@ -1719,7 +2736,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 192,
+    "path_nr": 305,
     "from_zone": "UHD_Head",
     "to_zone": "ahs3(Ret)",
     "is_hvac_ducted": true,
@@ -1728,7 +2745,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 193,
+    "path_nr": 306,
     "from_zone": "ambient",
     "to_zone": "ahs4(Sup)",
     "is_hvac_ducted": true,
@@ -1737,7 +2754,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 194,
+    "path_nr": 307,
     "from_zone": "ahs4(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1746,7 +2763,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 195,
+    "path_nr": 308,
     "from_zone": "ahs4(Ret)",
     "to_zone": "ahs4(Sup)",
     "is_hvac_ducted": true,
@@ -1755,7 +2772,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 196,
+    "path_nr": 309,
     "from_zone": "ahs4(Sup)",
     "to_zone": "Firemans_Wash_Rm",
     "is_hvac_ducted": true,
@@ -1764,7 +2781,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 197,
+    "path_nr": 310,
     "from_zone": "Firemans_Wash_Rm",
     "to_zone": "ahs4(Ret)",
     "is_hvac_ducted": true,
@@ -1773,7 +2790,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 198,
+    "path_nr": 311,
     "from_zone": "ambient",
     "to_zone": "ahs5(Sup)",
     "is_hvac_ducted": true,
@@ -1782,7 +2799,7 @@
     "ahs_nr": 5
   },
   {
-    "path_nr": 199,
+    "path_nr": 312,
     "from_zone": "ahs5(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1791,7 +2808,7 @@
     "ahs_nr": 5
   },
   {
-    "path_nr": 200,
+    "path_nr": 313,
     "from_zone": "ahs5(Ret)",
     "to_zone": "ahs5(Sup)",
     "is_hvac_ducted": true,
@@ -1800,7 +2817,7 @@
     "ahs_nr": 5
   },
   {
-    "path_nr": 201,
+    "path_nr": 314,
     "from_zone": "ahs5(Sup)",
     "to_zone": "Mens_Wash_Rm",
     "is_hvac_ducted": true,
@@ -1809,7 +2826,7 @@
     "ahs_nr": 5
   },
   {
-    "path_nr": 202,
+    "path_nr": 315,
     "from_zone": "Mens_Wash_Rm",
     "to_zone": "ahs5(Ret)",
     "is_hvac_ducted": true,
@@ -1818,7 +2835,7 @@
     "ahs_nr": 5
   },
   {
-    "path_nr": 203,
+    "path_nr": 316,
     "from_zone": "ambient",
     "to_zone": "ahs6(Sup)",
     "is_hvac_ducted": true,
@@ -1827,7 +2844,7 @@
     "ahs_nr": 6
   },
   {
-    "path_nr": 204,
+    "path_nr": 317,
     "from_zone": "ahs6(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1836,7 +2853,7 @@
     "ahs_nr": 6
   },
   {
-    "path_nr": 205,
+    "path_nr": 318,
     "from_zone": "ahs6(Ret)",
     "to_zone": "ahs6(Sup)",
     "is_hvac_ducted": true,
@@ -1845,7 +2862,7 @@
     "ahs_nr": 6
   },
   {
-    "path_nr": 206,
+    "path_nr": 319,
     "from_zone": "ahs6(Sup)",
     "to_zone": "Head_2D",
     "is_hvac_ducted": true,
@@ -1854,7 +2871,7 @@
     "ahs_nr": 6
   },
   {
-    "path_nr": 207,
+    "path_nr": 320,
     "from_zone": "Head_2D",
     "to_zone": "ahs6(Ret)",
     "is_hvac_ducted": true,

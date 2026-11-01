@@ -11,11 +11,15 @@ GA drawings**.
 
 - Contam **levels / zones** with volume, floor area, ceiling height, elevation
 - SketchPad-ish display coordinates from zone overlays
-- **50** typed `plr_orfc` openings (doors / hatches / ladders) —
+- **163** typed `plr_orfc` openings (doors / hatches / ladders) —
   see `openings_draft.json`
 - **6** starter **AHS** branches from HVAC hints (ACH → Fahs)
 - Cross-zone ladder/fan links from the synthesized airflow graph
 - `path_map.json` for ContamX ↔ Crusher alignment
+
+## Source
+
+U.S. Navy CV-3 USS Saratoga (Lexington class), Booklet of General Plans, 1944 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cv3.pdf](https://maritime.org/doc/plans/cv3.pdf).
 
 ## Engineer handwork (Target C — not on GAs)
 
@@ -45,7 +49,3 @@ python3 -m tools.ship_blueprint_import author_contam \
 python3 -m tools.ship_blueprint_import validate \
   --platform-dir data/platforms/saratoga_cv3 --contam-gate
 ```
-
-## Source
-
-U.S. Navy CV-3 USS Saratoga (Lexington class), Booklet of General Plans, 1944 — courtesy of the [San Francisco Maritime National Park Association](https://maritime.org/about/), Booklets of General Plans Online: [cv3.pdf](https://maritime.org/doc/plans/cv3.pdf).

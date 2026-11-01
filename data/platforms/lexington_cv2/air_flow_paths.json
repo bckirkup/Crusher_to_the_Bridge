@@ -360,6 +360,526 @@
       "from": "Bomb_Magazine",
       "to": "Bomb_Elevator_Hold",
       "type": "passageway"
+    },
+    {
+      "from": "AA_Magazine_1P",
+      "to": "Boiler_Room_1P_1",
+      "type": "passageway"
+    },
+    {
+      "from": "AA_Magazine_1P",
+      "to": "Main_Motor_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "AA_Magazine_1P",
+      "to": "Officers_Stores_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Access_Trunk_1P",
+      "to": "Expeditionary_Stores",
+      "type": "ladder"
+    },
+    {
+      "from": "Access_Trunk_1P",
+      "to": "Flats_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Access_Trunk_1P",
+      "to": "Machinery_Space_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Access_Trunk_1P",
+      "to": "Machinery_Space_2P",
+      "type": "ladder"
+    },
+    {
+      "from": "Access_Trunk_1P",
+      "to": "Officers_Stores_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Aft_Berths_UHD",
+      "to": "Boatswains_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "After_Gyro",
+      "to": "Boiler_Room_1P_2",
+      "type": "passageway"
+    },
+    {
+      "from": "After_Gyro",
+      "to": "IC_Control_Workshop",
+      "type": "passageway"
+    },
+    {
+      "from": "Ammo_Hoist_5in",
+      "to": "Captains_Space",
+      "type": "passageway"
+    },
+    {
+      "from": "Ammo_Hoist_5in",
+      "to": "Ex_Officers_Country",
+      "type": "passageway"
+    },
+    {
+      "from": "Ammo_Hoist_5in",
+      "to": "Uptakes_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Ammo_Hoist_5in",
+      "to": "Wire_Welding_Shop",
+      "type": "passageway"
+    },
+    {
+      "from": "Apt_Magazine",
+      "to": "GSK_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Apt_Magazine",
+      "to": "Provisions_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Apt_Magazine",
+      "to": "Ships_Service_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Apt_Magazine",
+      "to": "Small_Stores_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Aviation_Stores_3D",
+      "to": "Blower_Heater_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Aviation_Stores_3D",
+      "to": "Elevator_Machinery_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Aviation_Stores_Incline",
+      "to": "Machinery_Space_1P",
+      "type": "ladder"
+    },
+    {
+      "from": "Aviation_Stores_Incline",
+      "to": "Small_Stores_3D",
+      "type": "ladder"
+    },
+    {
+      "from": "Berthing_Mid_Stbd",
+      "to": "General_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Mid_Stbd",
+      "to": "Photographic_Lab",
+      "type": "passageway"
+    },
+    {
+      "from": "Berthing_Mid_Stbd",
+      "to": "Wardroom_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Blower_Heater_3D",
+      "to": "Crew_Berthing_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Blower_Heater_3D",
+      "to": "Elevator_Machinery_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Blower_Heater_3D",
+      "to": "Elevator_Well_2D",
+      "type": "ladder"
+    },
+    {
+      "from": "Blower_Space_UHD",
+      "to": "Warrant_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Boatswains_Stores",
+      "to": "Photographic_Lab",
+      "type": "ladder"
+    },
+    {
+      "from": "Boatswains_Stores",
+      "to": "Wardroom_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Room_1P_1",
+      "to": "Main_Motor_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Room_2P",
+      "to": "Elevator_Air_Mach",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Room_2P",
+      "to": "Mag_Charging_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Bomb_Elevator_Hold",
+      "to": "Machinery_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Bomb_Elevator_Hold",
+      "to": "Machinery_Space_2P",
+      "type": "ladder"
+    },
+    {
+      "from": "Bomb_Handling",
+      "to": "Funnel_Uptake",
+      "type": "ladder"
+    },
+    {
+      "from": "Bomb_Handling",
+      "to": "Gasoline_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Bomb_Handling",
+      "to": "Marines_Berthing",
+      "type": "ladder"
+    },
+    {
+      "from": "Bomb_Handling",
+      "to": "Transmitter_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Bomb_Magazine",
+      "to": "Fresh_Water_Tanks",
+      "type": "passageway"
+    },
+    {
+      "from": "Bomb_Magazine",
+      "to": "Machinery_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Bomb_Magazine",
+      "to": "Oil_Tanks_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Capstan_Room",
+      "to": "Crew_Berthing_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Capstan_Room",
+      "to": "Ship_Service_Canteen",
+      "type": "passageway"
+    },
+    {
+      "from": "Captains_Space",
+      "to": "Uptakes_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Cleaning_Gear_2P",
+      "to": "Machinery_Space_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Cleaning_Gear_2P",
+      "to": "Tank_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Cleaning_Gear_2P",
+      "to": "Torpedo_Body_Rooms",
+      "type": "passageway"
+    },
+    {
+      "from": "Compressor_Room",
+      "to": "Elevator_Air_Mach",
+      "type": "ladder"
+    },
+    {
+      "from": "Compressor_Room",
+      "to": "Provisions_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Compressor_Room",
+      "to": "Thrust_Block_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_2D_Aft",
+      "to": "Hangar_Aft",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_3D",
+      "to": "Elevator_Machinery_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft_MHD",
+      "to": "Crew_Berthing_Fwd_MHD",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft_MHD",
+      "to": "Dirty_Clothes",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Fwd",
+      "to": "Windlass_Motor_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Dope_Shop",
+      "to": "Financial_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Dope_Shop",
+      "to": "Warrant_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Elevator_Air_Mach",
+      "to": "Machinery_Space_1P",
+      "type": "ladder"
+    },
+    {
+      "from": "Elevator_Air_Mach",
+      "to": "Mag_Charging_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Elevator_Machinery_3D",
+      "to": "Expeditionary_Stores",
+      "type": "ladder"
+    },
+    {
+      "from": "Elevator_Machinery_3D",
+      "to": "Laundry",
+      "type": "ladder"
+    },
+    {
+      "from": "Elevator_Well_2D",
+      "to": "Laundry",
+      "type": "passageway"
+    },
+    {
+      "from": "Elevator_Well_2D",
+      "to": "Medical_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Elevator_Well_2D",
+      "to": "Wire_Welding_Shop",
+      "type": "ladder"
+    },
+    {
+      "from": "Flag_Radio_Plot",
+      "to": "Funnel_Uptake",
+      "type": "passageway"
+    },
+    {
+      "from": "Flag_Radio_Plot",
+      "to": "Gasoline_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Flats_1P",
+      "to": "Machinery_Space_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Flight_Deck",
+      "to": "Transmitter_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Fresh_Water_Tanks",
+      "to": "Officers_Country",
+      "type": "ladder"
+    },
+    {
+      "from": "Fresh_Water_Tanks",
+      "to": "Oil_Tanks_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "GSK_Stores",
+      "to": "Mag_Flood_Control",
+      "type": "passageway"
+    },
+    {
+      "from": "GSK_Stores",
+      "to": "Reserve_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Gasoline_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Attendants",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Pantry",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Serving_2D",
+      "to": "Shell_Handling",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley_Serving_2D",
+      "to": "Vegetable_Prep",
+      "type": "passageway"
+    },
+    {
+      "from": "Gasoline_Room",
+      "to": "Transmitter_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Hangar_Fwd",
+      "to": "Shell_Handling",
+      "type": "passageway"
+    },
+    {
+      "from": "Hangar_Mid",
+      "to": "Laundry",
+      "type": "passageway"
+    },
+    {
+      "from": "Jr_Officers_Fwd",
+      "to": "Wardroom_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Hold",
+      "to": "Provisions_Hold",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Hold",
+      "to": "Thrust_Block_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Space_1P",
+      "to": "Officers_Stores_1P",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Space_2P",
+      "to": "Mag_Charging_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Space_2P",
+      "to": "Tank_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Machinery_Space_2P",
+      "to": "Torpedo_Body_Rooms",
+      "type": "passageway"
+    },
+    {
+      "from": "Mag_Charging_Stores",
+      "to": "Tank_2P",
+      "type": "passageway"
+    },
+    {
+      "from": "Mag_Flood_Control",
+      "to": "Reserve_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Attendants",
+      "to": "Pantry",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Mess",
+      "to": "Pantry",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Mess_Room",
+      "to": "Sheet_Metal_Shop",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Mess_Room",
+      "to": "Wire_Welding_Shop",
+      "type": "passageway"
+    },
+    {
+      "from": "Provisions_3D",
+      "to": "Stores_Fwd_3D",
+      "type": "passageway"
+    },
+    {
+      "from": "Provisions_Hold",
+      "to": "Thrust_Block_Room",
+      "type": "passageway"
+    },
+    {
+      "from": "Shell_Handling",
+      "to": "Uptakes_Mid",
+      "type": "ladder"
+    },
+    {
+      "from": "Shell_Handling",
+      "to": "Vegetable_Prep",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom_Mess",
+      "to": "Wing_Fuselage_Repair",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Berthing_Aft_MHD",
+      "to": "Crew_Berthing_Mid",
+      "type": "ladder"
+    },
+    {
+      "from": "Dirty_Clothes",
+      "to": "Capstan_Room",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Berthing_Fwd_MHD",
+      "to": "Crew_Berthing_2D_Aft",
+      "type": "ladder"
     }
   ]
 }
