@@ -1013,24 +1013,8 @@ def _emit_pages(
     manifest_key = None
     manifest_body = b""
     if page_entries:
-        manifest_body = json.dumps(
-            {
-                "kind": "first_paper_pages_manifest",
-                "reduction_id": spec.ctx.reduction_id,
-                "table_name": table,
-                "entries": page_entries,
-                "page_count": len(page_entries),
-                "rows": sum(p["rows"] for p in page_entries),
-                "bytes": sum(p["bytes"] for p in page_entries),
-            },
-            sort_keys=True,
-            indent=2,
-        ).encode()
-        manifest_key = f"{attempt}/pages/{table}.pages_manifest.json"
-        store.put_idempotent(manifest_key, manifest_body)
-        ledger.charge("max_api_calls_total", 1, "pages manifest put")
-        ledger.charge(
-            "max_output_bytes", len(manifest_body), manifest_key
+        manifest_key, manifest_body = _write_pages_manifest(
+            spec, store, ledger, attempt, table, page_entries
         )
 
     status_key = f"{attempt}/status.json"
@@ -1085,6 +1069,35 @@ def _emit_pages(
     ledger.charge("max_api_calls_total", 1, "asset index put")
     ledger.charge("max_output_bytes", len(index_body), "asset index")
     return manifest_key
+
+
+def _write_pages_manifest(
+    spec: MaterializeSpec,
+    store,
+    ledger: BudgetLedger,
+    attempt: str,
+    table: str,
+    page_entries: list[dict],
+) -> tuple[str, bytes]:
+    """Write ``pages/<table>.pages_manifest.json``; return key + body."""
+    manifest_body = json.dumps(
+        {
+            "kind": "first_paper_pages_manifest",
+            "reduction_id": spec.ctx.reduction_id,
+            "table_name": table,
+            "entries": page_entries,
+            "page_count": len(page_entries),
+            "rows": sum(p["rows"] for p in page_entries),
+            "bytes": sum(p["bytes"] for p in page_entries),
+        },
+        sort_keys=True,
+        indent=2,
+    ).encode()
+    manifest_key = f"{attempt}/pages/{table}.pages_manifest.json"
+    store.put_idempotent(manifest_key, manifest_body)
+    ledger.charge("max_api_calls_total", 1, "pages manifest put")
+    ledger.charge("max_output_bytes", len(manifest_body), manifest_key)
+    return manifest_key, manifest_body
 
 
 def _derived_rows(
