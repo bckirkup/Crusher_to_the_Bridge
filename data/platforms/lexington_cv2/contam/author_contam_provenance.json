@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "created_utc": "2026-10-16T12:30:00.379519+00:00",
+  "created_utc": "2026-11-01T18:55:35.080701+00:00",
   "platform_id": "lexington_cv2",
   "target": "B_contam_starter",
   "hobbyist": true,
-  "openings_count": 50,
+  "openings_count": 164,
   "skip_duct_spines": true,
   "offline_gate": {
     "ok": true,
     "zone_count": 97,
-    "path_map_entries": 196,
+    "path_map_entries": 310,
     "hvac_zones": 6,
     "simplify_warnings": [
       "Dropped Contam section on simplify: day-schedules",
@@ -21,6 +21,9 @@
       "Dropped Contam section on simplify: annotations"
     ]
   },
-  "contamx": null,
-  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/lexington_cv2"
+  "contamx": {
+    "available": true,
+    "note": "ContamX install detected under third_party/contamx (contamx3). Run tools/contam_flow_compare.py --platform lexington_cv2 after SIM generation."
+  },
+  "workdir": null
 }

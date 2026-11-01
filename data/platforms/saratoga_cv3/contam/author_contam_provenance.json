@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "created_utc": "2026-10-16T12:32:29.088152+00:00",
+  "created_utc": "2026-11-01T18:55:35.434210+00:00",
   "platform_id": "saratoga_cv3",
   "target": "B_contam_starter",
   "hobbyist": true,
-  "openings_count": 50,
+  "openings_count": 171,
   "skip_duct_spines": true,
   "offline_gate": {
     "ok": true,
     "zone_count": 108,
-    "path_map_entries": 207,
+    "path_map_entries": 328,
     "hvac_zones": 6,
     "simplify_warnings": [
       "Dropped Contam section on simplify: day-schedules",
@@ -21,6 +21,9 @@
       "Dropped Contam section on simplify: annotations"
     ]
   },
-  "contamx": null,
-  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/saratoga_cv3"
+  "contamx": {
+    "available": true,
+    "note": "ContamX install detected under third_party/contamx (contamx3). Run tools/contam_flow_compare.py --platform saratoga_cv3 after SIM generation."
+  },
+  "workdir": null
 }

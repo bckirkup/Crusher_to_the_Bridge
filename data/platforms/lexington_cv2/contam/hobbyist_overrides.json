@@ -1,5 +1,5 @@
 {
-  "description": "Naval GA Contam starter for lexington_cv2 (Target B — openings/AHS drafted; ducts are engineer handwork)",
+  "description": "Naval GA Contam starter for lexington_cv2 (Target B \u2014 openings/AHS drafted; ducts are engineer handwork)",
   "orifice_type_map": {
     "ladder_well": "ladder_well",
     "ladder": "ladder",
