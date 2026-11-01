@@ -61,7 +61,8 @@ def _series(doc: Any) -> tuple[list, str | None]:
 
 
 def _observatory_fields(
-    values: dict, prov: dict, doc: Any, window: str
+    values: dict, prov: dict, doc: Any, window: str,
+    fields: list[dict] | None = None,
 ) -> list[str]:
     """Timeseries-derived observation/clock fields.
 
@@ -71,7 +72,9 @@ def _observatory_fields(
     ``observation_window`` actually scanned. A threshold never crossed
     inside the retained window emits ``null`` +
     ``not_crossed_in_window`` (distinct from ``timeseries_absent`` and
-    from ``missing``).
+    from ``missing``). ``fields`` defaults to this profile's own
+    ``observation_fields``; ``first_paper_scalar``/1.3.0 passes its
+    compact observed-window subset through the same code path.
     """
     missing: list[str] = []
     ts, absent = _series(doc)
@@ -90,7 +93,7 @@ def _observatory_fields(
             if f.get(label) is not None:
                 prov[col][label] = f[label]
 
-    for f in profile()["observation_fields"]:
+    for f in fields if fields is not None else profile()["observation_fields"]:
         col = f["column"]
         derive = f["derive"]
         if absent is not None:

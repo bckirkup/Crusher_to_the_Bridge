@@ -1,10 +1,32 @@
 {
-  "definition_version": "first_paper_scalar/1.2.0",
-  "description": "One wide row per selected actual execution for the first cruise norovirus paper: summary.json-only member reads, declared field projection, per-field provenance, explicit missingness (never zero), no all-leaf scalarization, no distributions/ECDF materialization, no census decode.",
+  "definition_version": "first_paper_scalar/1.3.0",
+  "description": "One wide row per selected actual execution for the first cruise norovirus paper: summary.json-only member reads, declared field projection, per-field provenance, explicit missingness (never zero), no all-leaf scalarization, no distributions/ECDF materialization, no census decode. 1.3.0 adds the compact observed-window witness fields (observed_first_epoch, observed_terminal_epoch, retained_epoch_rows, epoch_index_contiguous) derived from summary.timeseries with the same observation_fields machinery as first_paper_observation_clock — it does not re-emit the obsclock vector set.",
   "emit_scalars": false,
   "kind": "extraction_profile",
   "member_allowlist": [
     "summary.json"
+  ],
+  "observation_fields": [
+    {
+      "column": "observed_first_epoch",
+      "derive": "first_epoch",
+      "window": "timeseries"
+    },
+    {
+      "column": "observed_terminal_epoch",
+      "derive": "last_epoch",
+      "window": "timeseries"
+    },
+    {
+      "column": "retained_epoch_rows",
+      "derive": "row_count",
+      "window": "timeseries"
+    },
+    {
+      "column": "epoch_index_contiguous",
+      "derive": "contiguous",
+      "window": "timeseries"
+    }
   ],
   "operand_sum_checks": [
     {
@@ -176,6 +198,7 @@
     "invalid_pair_zero_denominator",
     "missing",
     "null_emitted",
+    "observed",
     "recomputed",
     "recomputed_pair",
     "scan_agreement_conflict",
@@ -184,6 +207,7 @@
     "sum_consistent",
     "sum_divergent",
     "sum_uncomputable",
+    "timeseries_absent",
     "unknown"
   ],
   "sum_checks": [

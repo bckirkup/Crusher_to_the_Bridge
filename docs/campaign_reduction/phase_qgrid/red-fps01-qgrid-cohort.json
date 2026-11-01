@@ -1,0 +1,238 @@
+{
+ "expected_runs": 38000,
+ "per_arm": {
+  "fl_exp_12d_scr_q01": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_q02": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_q03": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_q05": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_q08": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_q15": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_q30": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_ind": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_ship": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_exp_12d_scr_mint": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8000,
+   "seed_max": 8999
+  },
+  "fl_cls_12d_scr_q01": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_q02": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_q03": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_q05": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_q08": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_q15": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_q30": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_ind": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_ship": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_cls_12d_scr_mint": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_q01": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_q02": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_q03": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_q05": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_q08": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_q15": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_q30": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_ind": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_ship": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_spr_12d_scr_mint": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_meg_12d_scr_q01": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_meg_12d_scr_q02": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_meg_12d_scr_q03": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_meg_12d_scr_q05": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_meg_12d_scr_q08": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_meg_12d_scr_q15": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_meg_12d_scr_q30": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  },
+  "fl_meg_12d_scr_ind": {
+   "declared": 1000,
+   "scanned": 1000,
+   "seed_min": 8105,
+   "seed_max": 9104
+  }
+ },
+ "unique_keys": 38000,
+ "duplicate_keys": [],
+ "pairing": "none \u2014 q-grid arms join scientific groups via tier_id/platform_id on each row; off/ps_ship pairing lives in the accepted red-fps01-b2 tranche",
+ "sources_manifest_sha256": "875b660679efdd44b4e869ef6fabef8a4026a5e48836a46c0a3d3353cff7444c",
+ "request_sha256": "b0c867cfe2efb0c382cb12b33fb8683795707eb09c00fe23cb599a8b75d3870b"
+}
