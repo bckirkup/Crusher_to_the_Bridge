@@ -1,6 +1,8 @@
 {
   "platform": "san_antonio_class_lpd",
   "description": "San Antonio-class LPD HVAC network. Modern centralized air handling with MERV-13 filtration. NBC collective protection system (citadel) covers superstructure and inhabited spaces. Engine rooms on independent ventilation. Well deck and flight deck partially open.",
+  "hvac_duty": 0.5,
+  "oa_fraction": 0.2,
   "hvac_zones": [
     {
       "id": "HVAC_Superstructure",
@@ -10,6 +12,7 @@
         "Marine_Planning"
       ],
       "ach": 10.0,
+      "oa_fraction": 0.2,
       "filter_efficiency": 0.5,
       "filter_type": "MERV-13",
       "description": "Superstructure HVAC zone. NBC citadel protected. Positive pressure maintained for CPS."
@@ -22,6 +25,7 @@
         "Wardroom"
       ],
       "ach": 8.0,
+      "oa_fraction": 0.2,
       "filter_efficiency": 0.5,
       "filter_type": "MERV-13",
       "description": "Officer/CPO berthing and wardroom HVAC. Standard Navy habitability ventilation."
@@ -34,6 +38,7 @@
         "Passageway_Main"
       ],
       "ach": 8.0,
+      "oa_fraction": 0.2,
       "filter_efficiency": 0.5,
       "filter_type": "MERV-13",
       "description": "Ship's company enlisted berthing, mess, and main passageway. Standard habitability HVAC."
@@ -48,6 +53,7 @@
         "Troop_Recreation"
       ],
       "ach": 7.0,
+      "oa_fraction": 0.2,
       "filter_efficiency": 0.5,
       "filter_type": "MERV-13",
       "description": "Marine troop berthing and mess HVAC zone. Despite MERV-13 filtration, high occupancy density (800 Marines) in relatively small volume creates high aerosol concentrations. This zone is the primary transmission risk area."
@@ -58,6 +64,7 @@
         "Medical_Ward"
       ],
       "ach": 12.0,
+      "oa_fraction": 0.5,
       "filter_efficiency": 0.5,
       "filter_type": "MERV-13",
       "description": "Medical ward HVAC. Higher ACH than standard. Negative pressure capability for isolation rooms."
@@ -68,6 +75,7 @@
         "Galley"
       ],
       "ach": 15.0,
+      "oa_fraction": 0.3,
       "filter_efficiency": 0.5,
       "filter_type": "MERV-13",
       "description": "Galley ventilation. High ACH for heat/steam/grease removal. Supply and exhaust with makeup air."
@@ -78,6 +86,7 @@
         "Vehicle_Deck"
       ],
       "ach": 10.0,
+      "oa_fraction": 0.8,
       "filter_efficiency": 0.2,
       "filter_type": "MERV-8",
       "description": "Vehicle deck ventilation for exhaust gas removal. Lower filtration grade, primarily CO/fumes extraction."
@@ -89,6 +98,7 @@
         "Flight_Deck"
       ],
       "ach": 8.0,
+      "oa_fraction": 0.8,
       "filter_efficiency": 0.2,
       "filter_type": "MERV-8",
       "description": "Aviation spaces ventilation. Hangar has fuel vapor extraction. Flight deck largely open to weather."
@@ -99,6 +109,7 @@
         "Well_Deck"
       ],
       "ach": 6.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Well deck ventilation. Partially open to sea when stern gate lowered. Exhaust ventilation for LCAC operations."
@@ -110,6 +121,7 @@
         "Engine_Room_Aft"
       ],
       "ach": 20.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Machinery room ventilation. Independent from habitability HVAC. High ACH for gas turbine combustion air and heat removal."

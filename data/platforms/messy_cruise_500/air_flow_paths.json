@@ -1,6 +1,8 @@
 {
   "platform": "messy_cruise_500",
   "description": "LEGACY HVAC topology for messy_cruise_500. Two coarse cabin AHU networks (port and stbd/central) serve all aggregated cabin blocks. Archived; see docs/PLATFORM_CABIN_REVISION.md for deck-level revision.",
+  "hvac_duty": 0.5,
+  "oa_fraction": 0.2,
   "hvac_zones": [
     {
       "id": "AHU_Network_Forward_Public",
@@ -11,6 +13,7 @@
         "Main_Theater"
       ],
       "ach": 8.0,
+      "oa_fraction": 0.2,
       "description": "Forward public venues and theater complex. High ACH for large assembly."
     },
     {
@@ -23,6 +26,7 @@
         "Comedy_Club_Lounge"
       ],
       "ach": 6.0,
+      "oa_fraction": 0.2,
       "description": "Midship multi-deck atrium, promenade, and enclosed public spaces."
     },
     {
@@ -40,6 +44,7 @@
         "Ice_Rink_Studio"
       ],
       "ach": 10.0,
+      "oa_fraction": 0.3,
       "description": "Aft dining, pool deck, buffet, and recreation venues."
     },
     {
@@ -56,6 +61,7 @@
         "Passenger_Cabins_D14_Port"
       ],
       "ach": 6.0,
+      "oa_fraction": 0.2,
       "description": "Port-side passenger cabin fresh air supply. 25-30% fresh air fraction to individual fan-coils."
     },
     {
@@ -81,6 +87,7 @@
         "Passenger_Cabins_D14_Central"
       ],
       "ach": 6.0,
+      "oa_fraction": 0.2,
       "description": "Starboard and Central passenger cabin fresh air supply."
     },
     {
@@ -94,6 +101,7 @@
         "Crew_Quarters_D4"
       ],
       "ach": 8.0,
+      "oa_fraction": 0.2,
       "description": "Crew accommodation and messing areas."
     },
     {
@@ -103,6 +111,7 @@
         "Isolation_Ward"
       ],
       "ach": 12.0,
+      "oa_fraction": 0.5,
       "description": "Dedicated medical exhaust. Medical Center at 10-12 ACH, Isolation Ward at 12 ACH (100% negative exhaust, HEPA filtered before overboard)."
     },
     {
@@ -116,6 +125,7 @@
         "Waste_Treatment_Plant"
       ],
       "ach": 15.0,
+      "oa_fraction": 0.3,
       "description": "High-volume service exhaust for galleys, laundry, and waste processing."
     },
     {
@@ -125,6 +135,7 @@
         "Engine_Control_Room"
       ],
       "ach": 20.0,
+      "oa_fraction": 1.0,
       "description": "Engine room forced ventilation and combustion air supply. Massive airflow, non-recirculating to accommodation."
     },
     {

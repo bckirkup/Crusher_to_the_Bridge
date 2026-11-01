@@ -65,6 +65,22 @@
           "minimum": 0,
           "description": "AHU duty multiplier on supply/return (1.0 = design; Contam hobbyist night ≈ 0.5)"
         },
+        "filter_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Advisory-only annotation: NOT consumed by the native engine or the ContamX export. Filtration is a single global hvac.filter_efficiency scalar in both lanes; per-zone filtration (citadel) is inexpressible until it is modelled (CONTAM-FLEET-01 recorded gap)."
+        },
+        "nbc_filter_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Advisory-only annotation: NOT consumed in either lane; documents intended NBC/citadel filtration until per-zone filtration is expressible (CONTAM-FLEET-01 recorded gap)."
+        },
+        "nbc_filter_type": {
+          "type": "string",
+          "description": "Advisory-only annotation: NOT consumed in either lane; documents intended NBC filter media until per-zone filtration is expressible (CONTAM-FLEET-01 recorded gap)."
+        },
         "description": {"type": "string"}
       }
     },
