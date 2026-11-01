@@ -179,14 +179,18 @@ def audit_q1(platform_dir: str, spatial: dict[str, Any],
             if not _resolve_link_rooms(link["from"], airflow, set(zones))
             or not _resolve_link_rooms(link["to"], airflow, set(zones))
         ),
-        # Native resolves link endpoints through hvac group ids only (export
-        # also accepts bare room ids) — a room-id endpoint means native
-        # silently drops the whole link.
-        "native_dropped_xzone": sorted(
+        # Links whose endpoints are bare room ids (not HVAC group ids).
+        # Pre-CONTAM-XZONE-01 the native engine silently dropped these
+        # (~45 links on 10 hulls); it now resolves them like the export
+        # lane and raises on endpoints that are neither group nor room.
+        "room_id_xzone_endpoints": sorted(
             f"{link['from']}->{link['to']}"
             for link in airflow.get("cross_zone_links", [])
-            if {link["from"], link["to"]}
-            - {g["id"] for g in airflow.get("hvac_zones", [])}
+            if any(
+                ep in zones
+                and ep not in {g["id"] for g in airflow.get("hvac_zones", [])}
+                for ep in (link["from"], link["to"])
+            )
         ),
     }
     out.update(_provenance_q1(platform_dir, zones))
@@ -389,11 +393,18 @@ def audit_q2(platform_dir: str, spatial: dict[str, Any],
     injection = _injection_zone(spatial, airflow)
     out: dict[str, Any] = {"injection_zone": injection, "n_zones": len(zone_ids)}
 
-    engine = ContamTransportEngine(
-        spatial_layout=dict(spatial), air_flow_paths=dict(airflow),
-        filter_efficiency=0.5, natural_decay_rate=0.0,
-    )
-    out["native"] = _zone_classes(zone_ids, _native_edges(engine), injection)
+    # An unresolvable cross-zone endpoint raises in the engine — the
+    # audit reports it instead of crashing the fleet run.
+    try:
+        engine = ContamTransportEngine(
+            spatial_layout=dict(spatial), air_flow_paths=dict(airflow),
+            filter_efficiency=0.5, natural_decay_rate=0.0,
+        )
+        out["native"] = _zone_classes(
+            zone_ids, _native_edges(engine), injection)
+    except ValueError as exc:
+        out["native"] = None
+        out["native_error"] = str(exc)
 
     _, entries = export_prj_with_path_map(
         spatial, airflow, ahs_terminal_mode="commissioned")
@@ -417,12 +428,15 @@ def audit_q2(platform_dir: str, spatial: dict[str, Any],
     else:
         out["contamx_committed"] = None
 
-    native_dead = set(out["native"]["dead"])
+    native_dead = set(out["native"]["dead"]) if out["native"] else set()
     cx_dead = set(out["contamx_export"]["dead"])
-    out["native_only_dead"] = sorted(native_dead - cx_dead)
+    out["native_only_dead"] = (
+        sorted(native_dead - cx_dead) if out["native"] else None
+    )
     out["contamx_only_dead"] = sorted(cx_dead - native_dead)
     out["native_only_dead_frac"] = (
-        len(native_dead - cx_dead) / len(zone_ids) if zone_ids else 0.0
+        len(native_dead - cx_dead) / len(zone_ids)
+        if out["native"] and zone_ids else None
     )
     duty0 = {
         r for g in airflow.get("hvac_zones", [])
@@ -434,7 +448,9 @@ def audit_q2(platform_dir: str, spatial: dict[str, Any],
         float(zones[z].get("volume_m3", 0.0)) for z in native_dead
     )
     total_vol = sum(float(z.get("volume_m3", 0.0)) for z in zones.values())
-    out["native_dead_volume_share"] = dead_vol / total_vol if total_vol else 0.0
+    out["native_dead_volume_share"] = (
+        dead_vol / total_vol if out["native"] and total_vol else None
+    )
     return out
 
 
@@ -603,9 +619,16 @@ def fleet_correlations(results: dict[str, dict[str, Any]],
     }
     corr: dict[str, Any] = {"n_hulls": len(rows), "vs_mean_l1": {}}
     for name, fn in metrics.items():
-        xs = [float(fn(q)) for _p, q, _l in rows]
-        ys = [float(l) for _p, _q, l in rows]
-        corr["vs_mean_l1"][name] = round(spearman(xs, ys), 3)
+        # Metrics needing the native graph skip hulls whose engine failed
+        # to build (dangling link endpoint — the CONTAM-XZONE-01 raise).
+        pairs = [
+            (float(fn(q)), float(l)) for _p, q, l in rows
+            if q.get("native") is not None or "native" not in name
+        ]
+        corr["vs_mean_l1"][name] = (
+            round(spearman([x for x, _ in pairs], [y for _, y in pairs]), 3)
+            if len(pairs) >= 2 else None
+        )
     return corr
 
 
@@ -616,6 +639,8 @@ def _fmt_dead(q2: dict[str, Any] | None) -> str:
     if not q2:
         return "-"
     n, c = q2["native"], q2["contamx_export"]
+    if n is None:
+        return f"ERR/{c['dead_frac']:.2f}"
     return (f"{n['dead_frac']:.2f}/{c['dead_frac']:.2f}"
             f" ({len(q2['native_only_dead'])} native-only)")
 
@@ -692,7 +717,7 @@ def main(argv: list[str] | None = None) -> int:
             (pid, r["q2"], committed[pid])
             for pid, r in results.items()
             if pid in committed and r.get("q2")
-            and r["q2"]["contamx_committed"]
+            and r["q2"].get("native") and r["q2"]["contamx_committed"]
         ]
         corr["vs_committed_dose_l1"] = {
             "n_hulls": len(cx_rows),

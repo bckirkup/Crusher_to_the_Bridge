@@ -148,11 +148,19 @@ Ordered by how much of the measured tail each item plausibly removes.
    (37 sinks), spirit_cruise_3000 (28), messy_cruise_500 (63), fletcher
    (13), expedition_300 (11), legend/san_antonio (9/7). The single
    mechanism shared by the entire divergence tail.
-2. **Native room-id cross-zone endpoints silently dropped** — extend
+2. **Native room-id cross-zone endpoints silently dropped** — **SHIPPED
+   (CONTAM-XZONE-01)**: `_get_zone_rooms` resolves a bare room id to
+   itself (the export convention — a ContamX zone *is* a room) and raises
+   on endpoints that are neither group nor room; the same resolution was
+   applied to `build_hvac_downstream_map` in `transmission_core`, which
+   had the identical drop. Post-fix measurement: **52 room-id links on 10
+   hulls** now emit paths (astoria 9, chicago/miami/wright 10 each,
+   classic_cruise_1900 2, expedition_300 5, expedition_450 2,
+   spirit_cruise_3000 2, enterprise_constitution/galaxy 1 each); zero
+   dangling endpoints fleet-wide, so the raise fires nowhere in
+   committed data. Original fix text: extend
    `ContamTransportEngine._get_zone_rooms` to resolve bare room ids (as
-   the export lane does) or fail loudly at import/validation. 10 hulls,
-   ~45 links; includes tail hulls spirit_cruise_3000 and
-   enterprise_galaxy_tng.
+   the export lane does) or fail loudly at import/validation.
 3. **lexington_cv2 / saratoga_cv3 disconnected-compartment blocks** —
    restore the missing deck-to-deck / room-to-network connectivity from
    the GA source record (38/39 zones have zero incidence; ~78/92

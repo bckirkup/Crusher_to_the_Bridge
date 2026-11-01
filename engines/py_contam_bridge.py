@@ -570,11 +570,23 @@ class ContamTransportEngine:
     def _get_zone_rooms(
         self, zone_id: str, airflow: dict[str, Any],
     ) -> list[str]:
-        """Get room list for an HVAC zone ID."""
+        """Resolve a cross-zone-link endpoint to rooms.
+
+        An endpoint names either an HVAC group (expanded to its declared
+        rooms) or a bare room id, matching the export lane where a
+        ContamX zone *is* a room. An endpoint that is neither raises —
+        silently dropping the link was the CONTAM-XZONE-01 defect
+        class (~45 links on 10 hulls).
+        """
         for hz in airflow.get("hvac_zones", []):
             if hz["id"] == zone_id:
                 return [r for r in hz.get("rooms", []) if r in self.zone_nodes]
-        return []
+        if zone_id in self.zone_nodes:
+            return [zone_id]
+        raise ValueError(
+            f"cross_zone_links endpoint {zone_id!r} is neither an HVAC "
+            "zone id nor a room in the spatial layout"
+        )
 
     def _accumulate_path_rates(
         self,

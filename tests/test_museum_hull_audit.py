@@ -82,7 +82,10 @@ class TestQ1:
         assert q1["hvac_groups_all_rooms_missing"] == []
         assert q1["dangling_xzone_endpoints"] == []
         assert q1["orphan_zones"] == ["ghost"]
-        assert q1["native_dropped_xzone"] == ["hv_main->void"]
+        # void is a real room id — post-CONTAM-XZONE-01 the engine
+        # resolves the link; the classifier lists it as the room-endpoint
+        # class the fix targets.
+        assert q1["room_id_xzone_endpoints"] == ["hv_main->void"]
         assert q1["provenance_absent"] is True
         assert q1["prj"] is None
 
@@ -92,7 +95,9 @@ class TestQ1:
         assert q1["missing_zone_refs"] == ["ghost_room", "gone", "nowhere"]
         assert q1["hvac_groups_all_rooms_missing"] == ["hv_empty"]
         assert q1["dangling_xzone_endpoints"] == ["hv_a->phantom_zone"]
-        assert q1["native_dropped_xzone"] == ["hv_a->phantom_zone"]
+        # phantom_zone is neither group nor room — not a room-id
+        # endpoint, and the engine now raises on it.
+        assert q1["room_id_xzone_endpoints"] == []
         assert q1["notes_only_zones"] == ["extra_notes_zone"]
         assert q1["unnoted_zones"] == ["aux", "cabin_b"]
         assert q1["zone_count_drift"] == 2
@@ -156,11 +161,14 @@ class TestZoneClasses:
         spatial, airflow = _load("toy_hull")
         q2 = mha.audit_q2(str(REPO_ROOT / TOY), spatial, airflow)
         assert q2["injection_zone"] == "main"
-        # Native post-CONTAM-DUTY0-01: the duty-0 head exfils through its
-        # exhaust return leg (makeup in, drain out — no longer a sink);
-        # void link dropped; ghost isolated.
-        assert q2["native"]["sinks"] == []
-        assert q2["native"]["orphans"] == ["ghost", "void"]
+        # Native post-CONTAM-XZONE-01: void is a room-id endpoint — its
+        # deck_leak link resolves, making void a REACHABLE sink (one-way
+        # in-link, no out leg: the residual class fix #4 targets). The
+        # duty-0 head exfils through its exhaust leg (no sink, DUTY0-01);
+        # ghost stays isolated.
+        assert q2["native"]["sinks"] == ["void"]
+        assert q2["native"]["orphans"] == ["ghost"]
+        assert q2["native"]["unreachable"] == ["ghost"]
         assert q2["native"]["dead"] == ["ghost", "void"]
         assert q2["native"]["dead_frac"] == pytest.approx(0.4)
         # ContamX: orifice links are bidirectional — only ghost stays dead.
@@ -175,9 +183,13 @@ class TestZoneClasses:
         spatial, airflow = _load("toy_broken")
         q2 = mha.audit_q2(str(REPO_ROOT / BROKEN), spatial, airflow)
         assert q2["injection_zone"] == "main"
+        # phantom_zone resolves to neither group nor room — the engine
+        # raises (CONTAM-XZONE-01 fail-loudly); the audit reports it
+        # rather than crashing.
+        assert q2["native"] is None
+        assert "phantom_zone" in q2["native_error"]
         # aux is unreachable in every lane; in the committed prj its
         # drifted name (aux_prj) leaves the JSON zone an orphan.
-        assert q2["native"]["dead"] == ["aux"]
         assert q2["contamx_export"]["dead"] == ["aux"]
         assert q2["contamx_committed"]["orphans"] == ["aux"]
 
@@ -280,8 +292,13 @@ def test_main_fixtures() -> None:
     report = json.loads(
         (REPO_ROOT / "telemetry_buffer" / "test_museum_audit"
          / "museum_hull_audit_latest.json").read_text())
-    # Post-CONTAM-DUTY0-01: the duty-0 head exfils via its exhaust leg.
-    assert report["hulls"]["toy_hull"]["q2"]["native"]["sinks"] == []
+    # Post-CONTAM-XZONE-01: the room-endpoint link resolves, so void is a
+    # reachable one-way sink; toy_broken's phantom endpoint makes its
+    # native lane unbuildable (reported, not fatal).
+    assert report["hulls"]["toy_hull"]["q2"]["native"]["sinks"] == ["void"]
+    assert report["hulls"]["toy_broken"]["q2"]["native"] is None
+    assert "phantom_zone" in \
+        report["hulls"]["toy_broken"]["q2"]["native_error"]
     assert report["correlations"]["n_hulls"] == 2
     assert "vs_committed_dose_l1" in report["correlations"]
 
