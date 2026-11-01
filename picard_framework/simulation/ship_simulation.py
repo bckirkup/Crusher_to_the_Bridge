@@ -58,6 +58,7 @@ from engines.py_contam_bridge import (
     build_transport_engine,
     load_air_flow_paths,
     parse_outdoor_air_fraction_override,
+    parse_passive_link_mode,
     parse_pathogen_pool_transport,
 )
 from engines.py_contam_bridge import (
@@ -423,7 +424,12 @@ class ShipSimulation:
         ) = _zone_layout_fields(platform_layout)
         self.zone_types = zone_types
         self.hvac_downstream = (
-            build_hvac_downstream_map(airflow_data) if airflow_data else {}
+            build_hvac_downstream_map(
+                airflow_data,
+                passive_link_mode=parse_passive_link_mode(
+                    self.cfg.get("hvac", {}),
+                ),
+            ) if airflow_data else {}
         )
         # Room -> air changes per hour from the hull's declared AHU figures;
         # the room-pool routes dilute each epoch's emission through this

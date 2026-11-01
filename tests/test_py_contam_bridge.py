@@ -32,7 +32,9 @@ from engines.py_contam_bridge import (
     build_transport_engine,
     is_plenum_zone,
     parse_duty0_terminal_mode,
+    parse_passive_link_mode,
 )
+from engines.transmission_core import build_hvac_downstream_map
 
 # ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -737,7 +739,11 @@ class TestXzoneEndpointResolution:
         airflow = {
             "hvac_zones": [{"id": "hz1", "rooms": ["R1", "R2"], "ach": 6.0}],
             "cross_zone_links": [
-                {"from": "hz1", "to": "R3", "flow_rate_m3h": 40.0},
+                # direction pinned: CONTAM-BIDIR-01 makes passive links
+                # bidirectional by default; this test keeps asserting
+                # forward-only group expansion.
+                {"from": "hz1", "to": "R3", "flow_rate_m3h": 40.0,
+                 "direction": "oneway"},
             ],
             "adjacency": [],
         }
@@ -749,3 +755,133 @@ class TestXzoneEndpointResolution:
             for p in engine.airflow_paths if p.path_type == "cross_zone"
         }
         assert pairs == {("R1", "R3"), ("R2", "R3")}
+
+
+# ── Passive cross-zone link directionality (CONTAM-BIDIR-01) ────────────
+
+class TestPassiveLinkMode:
+    """Passive links emit both senses (the ContamX orifice semantics);
+    ``direction`` pins a declared sense and ``oneway`` restores the
+    labelled pre-change baseline.
+    """
+
+    @staticmethod
+    def _layout() -> dict:
+        return {
+            "zones": [
+                {"id": "A", "volume_m3": 100.0},
+                {"id": "B", "volume_m3": 100.0},
+            ],
+        }
+
+    @staticmethod
+    def _airflow(link: dict | None = None) -> dict:
+        return {
+            "hvac_zones": [],
+            "cross_zone_links": [
+                link or {"from": "A", "to": "B", "flow_rate_m3h": 60.0},
+            ],
+            "adjacency": [],
+        }
+
+    def _pairs(self, engine: ContamTransportEngine) -> set:
+        return {
+            (p.from_zone, p.to_zone)
+            for p in engine.airflow_paths if p.path_type == "cross_zone"
+        }
+
+    def test_default_passive_link_is_bidirectional(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._airflow(), natural_decay_rate=0.0,
+        )
+        assert self._pairs(engine) == {("A", "B"), ("B", "A")}
+        flows = {
+            (p.from_zone, p.to_zone): p.flow_rate_m3h
+            for p in engine.airflow_paths if p.path_type == "cross_zone"
+        }
+        assert flows[("A", "B")] == pytest.approx(60.0)
+        assert flows[("B", "A")] == pytest.approx(60.0)
+
+    def test_bidirectional_moves_mass_both_ways(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._airflow(), natural_decay_rate=0.0,
+        )
+        fwd = engine.transport_step(
+            {"A": 1000.0, "B": 0.0}, natural_decay_rate=0.0,
+        )
+        rev = engine.transport_step(
+            {"A": 0.0, "B": 1000.0}, natural_decay_rate=0.0,
+        )
+        assert fwd["B"] == pytest.approx(rev["A"])
+        assert fwd["B"] > 0.0
+
+    def test_reverse_leg_rate_grades_with_declared_flow(self) -> None:
+        """Larger declared flow moves more mass B→A in one step."""
+        moved: list[float] = []
+        for flow in (10.0, 60.0, 240.0):
+            engine = ContamTransportEngine(
+                self._layout(),
+                self._airflow(
+                    {"from": "A", "to": "B", "flow_rate_m3h": flow},
+                ),
+                natural_decay_rate=0.0,
+            )
+            result = engine.transport_step(
+                {"A": 0.0, "B": 1000.0}, natural_decay_rate=0.0,
+            )
+            moved.append(result["A"])
+        assert moved[0] > 0.0
+        assert moved[0] < moved[1] < moved[2] <= 1000.0
+
+    def test_declared_oneway_direction_is_honored(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(),
+            self._airflow({"from": "A", "to": "B", "flow_rate_m3h": 60.0,
+                           "direction": "oneway"}),
+            natural_decay_rate=0.0,
+        )
+        assert self._pairs(engine) == {("A", "B")}
+
+    def test_ducted_link_stays_oneway(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(),
+            self._airflow({"from": "A", "to": "B", "flow_rate_m3h": 60.0,
+                           "is_hvac_ducted": True}),
+            natural_decay_rate=0.0,
+        )
+        assert self._pairs(engine) == {("A", "B")}
+
+    def test_oneway_mode_restores_labelled_baseline(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._airflow(), natural_decay_rate=0.0,
+            passive_link_mode="oneway",
+        )
+        assert self._pairs(engine) == {("A", "B")}
+        result = engine.transport_step(
+            {"A": 0.0, "B": 1000.0}, natural_decay_rate=0.0,
+        )
+        assert result["A"] == pytest.approx(0.0)
+
+    def test_bad_mode_rejected(self) -> None:
+        with pytest.raises(ValueError, match="passive_link_mode"):
+            parse_passive_link_mode({"passive_link_mode": "two-way"})
+        with pytest.raises(ValueError, match="passive_link_mode"):
+            ContamTransportEngine(
+                self._layout(), self._airflow(), passive_link_mode="x",
+            )
+
+    def test_parse_defaults_to_bidirectional(self) -> None:
+        assert parse_passive_link_mode({}) == "bidirectional"
+        assert parse_passive_link_mode(
+            {"passive_link_mode": "oneway"},
+        ) == "oneway"
+
+    def test_downstream_map_matches_engine_edges(self) -> None:
+        downstream = build_hvac_downstream_map(self._airflow())
+        assert "B" in downstream["A"]
+        assert "A" in downstream["B"]
+        legacy = build_hvac_downstream_map(
+            self._airflow(), passive_link_mode="oneway",
+        )
+        assert "B" in legacy["A"]
+        assert "A" not in legacy.get("B", [])

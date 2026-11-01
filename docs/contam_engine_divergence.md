@@ -84,6 +84,12 @@ Measured floors vs native outflow rates:
 
 ## 3. Head-deck sinks
 
+> **Shipped baseline (CONTAM-BIDIR-01):** numbers below were measured
+> while native treated every `cross_zone_links` entry as one-way
+> (`hvac.passive_link_mode: oneway`). The shipped default
+> `bidirectional` emits both senses on passive links, matching the
+> ContamX orifice; per-link `direction` pins a declared sense.
+>
 > **Shipped baseline (CONTAM-DUTY0-01):** the sink behaviour measured
 > below is `hvac.duty0_terminal_mode: sealed`. The shipped default
 > `extract` gives every duty-0 `oa_fraction: 1.0` branch return/exhaust

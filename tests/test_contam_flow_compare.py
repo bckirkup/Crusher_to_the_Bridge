@@ -36,14 +36,17 @@ def _load_destroyer() -> tuple[dict, dict, list]:
 def test_native_destroyer_has_star_hvac_links() -> None:
     spatial, airflow, _ = _load_destroyer()
     native = native_links_report(spatial, airflow)
-    # 12 HVAC star (6 rooms × ret+sup) + 18 cross-zone + 12 adjacency + 3
-    # duty-0 head exhaust legs (CONTAM-DUTY0-01 extract terminal) = 45;
-    # cross_zone was 11 before the three head blocks (shared_sanitary_zones),
-    # whose Sanitary_Makeup links expand to 7 room-level paths.
-    assert native["n_paths"] == 45
+    # 12 HVAC star (6 rooms × ret+sup) + 18 cross-zone forward + 16
+    # reverse legs on the 5 passive (non-ducted) links under
+    # CONTAM-BIDIR-01's bidirectional default (34 cross-zone) + 12
+    # adjacency + 3 duty-0 head exhaust legs (CONTAM-DUTY0-01) = 61;
+    # forward cross_zone was 11 before the three head blocks
+    # (shared_sanitary_zones), whose Sanitary_Makeup links expand to 7
+    # room-level paths per sense.
+    assert native["n_paths"] == 61
     assert native["by_path_type"]["hvac_return"] == 9
     assert native["by_path_type"]["hvac_supply"] == 6
-    assert native["by_path_type"]["cross_zone"] == 18
+    assert native["by_path_type"]["cross_zone"] == 34
     # Bridge now has single-room AHS return as well as adjacency/cross-zone
     assert native["zone_degree"]["Bridge"]["out_edges"] >= 4
     assert native["zone_degree"]["Bridge"]["out_m3h"] > 0
@@ -101,8 +104,10 @@ def test_build_report_offline_without_sim() -> None:
         inject_zones=["Bridge"],
     )
     # 42 since the three head blocks landed (shared_sanitary_zones), +3
-    # duty-0 head exhaust legs under CONTAM-DUTY0-01's extract terminal.
-    assert report["native"]["n_paths"] == 45
+    # duty-0 head exhaust legs under CONTAM-DUTY0-01's extract terminal,
+    # +16 reverse legs on the 5 passive cross-zone links under
+    # CONTAM-BIDIR-01's bidirectional default.
+    assert report["native"]["n_paths"] == 61
     assert report["contamx"]["sim_flows_loaded"] is False
     assert report["connectivity_gap"][0]["zone"] == "Bridge"
     assert any("SIM flows not loaded" in h for h in report["hypotheses"])

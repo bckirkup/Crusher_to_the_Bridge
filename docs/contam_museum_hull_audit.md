@@ -176,11 +176,14 @@ Ordered by how much of the measured tail each item plausibly removes.
    incidence; ~78/92 unreachable in both engines). These zones could
    not receive dose in *either* engine; the fix restores ~80% of each
    hull to the network rather than collapsing divergence directly.
-4. **Directed vs bidirectional passive links** — native treats
-   `cross_zone_links` as one-way; ContamX orifices are bidirectional.
-   Drives the battleship near-total-unreachable class (96–99% native
-   dead, L1 ≈ 12 — low measured divergence but mechanically wrong).
-   Declare direction per link; default passive links bidirectional.
+4. **Directed vs bidirectional passive links** — **SHIPPED
+   (CONTAM-BIDIR-01)**. `hvac.passive_link_mode: bidirectional`
+   (default) emits both senses on passive links — the ContamX orifice
+   semantics; per-link `direction` pins a declared sense, ducted fan
+   legs stay one-way, `oneway` is the labelled baseline pinned on
+   `contam_engine_divergence.md` §3. Post-fix measurement: fleet native
+   unreachable ~600+ → **52** (battleships 96–99% dead → 0); residual
+   is the Q1 orphan class, not direction.
 5. **Q3 declaration hygiene on the five authored hulls** — declare
    top-level `hvac_duty` + complete per-group `oa_fraction` on
    expedition_cruise_300, fletcher_class_destroyer, legend_class_nsc,

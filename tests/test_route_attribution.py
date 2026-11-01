@@ -168,6 +168,11 @@ class TestRouteAttribution:
         spec.legacy_cfg.setdefault("hvac", {})[
             "duty0_terminal_mode"
         ] = "sealed"
+        # CONTAM-BIDIR-01: passive cross-zone links now emit reverse
+        # legs by default, shifting realized dose enough that this
+        # seed's fixture goes sterile. The oneway baseline is the
+        # pre-change tree the fixture is authored on.
+        spec.legacy_cfg["hvac"]["passive_link_mode"] = "oneway"
         first = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         monkeypatch.setattr(
             ship_simulation_module,
