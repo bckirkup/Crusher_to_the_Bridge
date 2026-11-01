@@ -1,6 +1,8 @@
 {
   "platform": "expedition_cruise_300",
   "description": "HVAC zone definitions and airflow network for small expedition cruise ship. 2 main air handling units (AHUs): one serving upper/public decks, one serving lower/service decks. Cabin HVAC uses fan-coil units with partial recirculation (~30% fresh air, ~70% recirculated per ISO 7547). Medical bay on dedicated exhaust with negative pressure. ACH values from ASHRAE 62.1 and classification society guidelines (Lloyd's Register, DNV).",
+  "hvac_duty": 0.5,
+  "oa_fraction": 0.3,
   "hvac_zones": [
     {
       "id": "AHU_1_Upper",
@@ -15,6 +17,7 @@
         "Cabin_Deck6_Stbd"
       ],
       "ach": 8.0,
+      "oa_fraction": 0.3,
       "description": "Primary AHU serving Decks 6-7. Public areas at 8 ACH; cabin fan-coil units draw from this supply with ~30% fresh air fraction."
     },
     {
@@ -31,6 +34,7 @@
         "Cabin_Deck4_Stbd"
       ],
       "ach": 6.0,
+      "oa_fraction": 0.3,
       "description": "Secondary AHU serving Decks 4-5. Standard passenger area ventilation at 6 ACH."
     },
     {
@@ -44,6 +48,7 @@
         "Engine_Room"
       ],
       "ach": 12.0,
+      "oa_fraction": 0.3,
       "description": "Service AHU serving Decks 2-3. Higher ACH for galley exhaust, engine room, and laundry ventilation requirements."
     },
     {
@@ -52,6 +57,7 @@
         "MedBay"
       ],
       "ach": 15.0,
+      "oa_fraction": 1.0,
       "description": "Dedicated medical bay ventilation with negative pressure isolation capability. 100% exhaust, no recirculation. 15 ACH per CDC/ASHRAE healthcare guidelines."
     },
     {

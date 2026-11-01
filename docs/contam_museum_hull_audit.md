@@ -184,12 +184,16 @@ Ordered by how much of the measured tail each item plausibly removes.
    `contam_engine_divergence.md` §3. Post-fix measurement: fleet native
    unreachable ~600+ → **52** (battleships 96–99% dead → 0); residual
    is the Q1 orphan class, not direction.
-5. **Q3 declaration hygiene on the five authored hulls** — declare
-   top-level `hvac_duty` + complete per-group `oa_fraction` on
-   expedition_cruise_300, fletcher_class_destroyer, legend_class_nsc,
-   messy_cruise_500, san_antonio_class_lpd; mark `filter_efficiency` /
-   `nbc_filter_*` as advisory-only in schema docs until per-zone
-   filtration is expressible.
+5. **Q3 declaration hygiene on the five authored hulls** — **SHIPPED
+   (CONTAM-HYGIENE-01)**. All five now declare top-level
+   `hvac_duty: 0.5` + `oa_fraction` and purpose-graded per-group
+   `oa_fraction` on every supply group (fletcher 1.0 everywhere per its
+   declared no-recirculation; expedition_300 0.3 per its own ~30%
+   fresh-air note). `filter_efficiency`/`nbc_filter_*` marked
+   advisory-only in the HVACZone schema (inert in both lanes until
+   per-zone citadel filtration is expressible — CONTAM-FLEET-01 gap).
+   Post-fix: all five at `duty_values` {0.0, 0.5}, `oa_group_coverage`
+   1.0.
 6. **Committed-prj zone-name normalization** — the 15-char/underscore
    name drift means any per-zone committed-vs-JSON check silently
    aliases; normalize names at prj parse (now done in

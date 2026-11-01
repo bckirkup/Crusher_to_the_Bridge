@@ -312,3 +312,51 @@ def test_main_missing_platform() -> None:
         "--platforms-root", FIXTURES,
     ])
     assert rc == 0
+
+
+class TestFleetDeclarationHygiene:
+    """CONTAM-HYGIENE-01: the five authored hulls flagged by the audit
+    (fix #5) must stay on the tuned declaration convention, and every
+    platform must declare the top-level fleet defaults.
+
+    Per-group ``oa_fraction`` coverage is asserted fleet-wide only for
+    the five fixed hulls; older cruise hulls still inherit the top-level
+    fraction on some groups (tracked, out of this fix's scope).
+    """
+
+    HYGIENE_HULLS = (
+        "expedition_cruise_300",
+        "fletcher_class_destroyer",
+        "legend_class_nsc",
+        "messy_cruise_500",
+        "san_antonio_class_lpd",
+    )
+
+    @staticmethod
+    def _platform_airflows() -> dict:
+        root = REPO_ROOT / "data" / "platforms"
+        return {
+            p.name: json.loads((p / "air_flow_paths.json").read_text())
+            for p in sorted(root.iterdir())
+            if (p / "air_flow_paths.json").is_file()
+        }
+
+    def test_every_platform_declares_top_level_defaults(self) -> None:
+        missing = [
+            (pid, k)
+            for pid, af in self._platform_airflows().items()
+            for k in ("hvac_duty", "oa_fraction")
+            if k not in af
+        ]
+        assert missing == []
+
+    def test_hygiene_hulls_have_complete_group_oa(self) -> None:
+        airflows = self._platform_airflows()
+        gaps = [
+            (pid, z["id"])
+            for pid in self.HYGIENE_HULLS
+            for z in airflows[pid].get("hvac_zones", [])
+            if z.get("hvac_duty", airflows[pid].get("hvac_duty", 0.5)) != 0.0
+            and "oa_fraction" not in z
+        ]
+        assert gaps == []

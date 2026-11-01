@@ -1,6 +1,8 @@
 {
   "platform": "fletcher_class_destroyer",
   "description": "WWII Fletcher-class destroyer ventilation network. Forced-draft supply ventilation only, no filtration, no recirculation. Boiler rooms maintained positive pressure for combustion air. Extreme inter-compartment airflow through open hatches and ladder wells during non-battle conditions.",
+  "hvac_duty": 0.5,
+  "oa_fraction": 1.0,
   "hvac_zones": [
     {
       "id": "HVAC_Superstructure",
@@ -11,6 +13,7 @@
         "Gun_Mount_51"
       ],
       "ach": 6.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Superstructure supply ventilation. Unfiltered outside air via mushroom vents and forced-draft blowers. No recirculation."
@@ -24,6 +27,7 @@
         "CPO_Quarters"
       ],
       "ach": 5.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Forward main deck ventilation. Supply blowers draw outside air through vent trunks. No filtration."
@@ -36,6 +40,7 @@
         "Passageway_Main"
       ],
       "ach": 8.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Midships main deck ventilation. Higher ACH in galley for cooking exhaust. Torpedo mount partially open to weather."
@@ -48,6 +53,7 @@
         "Mess_Deck"
       ],
       "ach": 4.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Below-deck berthing and mess ventilation. Chronically inadequate in tropical waters. Supply blowers only, no exhaust fans in many compartments."
@@ -59,6 +65,7 @@
         "Boiler_Room_2"
       ],
       "ach": 25.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Forced-draft boiler room ventilation. Massive airflow for combustion supply. Positive pressure maintained. Air drawn from topside and exhausted through stacks."
@@ -70,6 +77,7 @@
         "Engine_Room_Aft"
       ],
       "ach": 18.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Engine room forced ventilation. High ACH for heat removal from turbines and reduction gears."
@@ -81,6 +89,7 @@
         "Magazine_Aft"
       ],
       "ach": 8.0,
+      "oa_fraction": 1.0,
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Magazine ventilation for ordnance temperature control. Supply blowers with some temperature monitoring."
