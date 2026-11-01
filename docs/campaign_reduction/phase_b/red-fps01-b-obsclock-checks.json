@@ -1,0 +1,45 @@
+{
+  "kind": "crusher-first-paper-phase-b-checks/v1",
+  "reduction_id": "red-fps01-b-obsclock",
+  "attempt": "red-fps01-b-obsclock-v2",
+  "contract": "first_paper_observation_clock/1.0.0",
+  "rows_total": 8000,
+  "cell_balance": "4 hulls x 2 cells (scr_off, ps_ship) x 1000 — exact",
+  "checks": {
+    "imports_plus_acquired_vs_ever_infected_consistent": {"true": 8000, "disposition": "PASS — corrected operand-sum check (Edison correction 1): imports + acquired = ever_infected on every row"},
+    "infections_by_route_consistent": {"false": 8000, "disposition": "historical_evidence — the pre-correction conflated flag; diverges by exactly n_imports on runs with imports. Preserved as labelled historical evidence, not used for validation"},
+    "detection_ts_vs_derived_consistent": {"true": 8000},
+    "confirmation_ts_vs_derived_consistent": {"true": 8000},
+    "scan_num_epochs_vs_configured_consistent": {"true": 8000},
+    "epoch_index_contiguous": {"true": 8000},
+    "scan_posted": {"true": 36, "false": 7964},
+    "scan_vsp_trigger": {"true": 36, "false": 7964}
+  },
+  "observed_clock": {
+    "observed_terminal_epoch": {"287": 8000},
+    "retained_epoch_rows": {"288": 8000},
+    "observed_coverage_fraction": {"1.0": 8000}
+  },
+  "crossing_presence": {
+    "first_noise_report_epoch": {"present": 8000, "null": 0},
+    "first_etiologic_report_passenger_epoch": {"present": 7623, "null": 377},
+    "first_etiologic_report_crew_epoch": {"present": 6642, "null": 1358},
+    "first_etiologic_report_epoch": {"present": 7701, "null": 299},
+    "first_quarantined_epoch": {"present": 7790, "null": 210},
+    "first_isolated_epoch": {"present": 0, "null": 8000},
+    "derived_detection_epoch": {"present": 1344, "null": 6656},
+    "derived_confirmation_epoch": {"present": 47, "null": 7953},
+    "derived_vsp_trigger_epoch": {"present": 36, "null": 7964},
+    "vsp_either_channel_first_epoch": {"present": 36, "null": 7964}
+  },
+  "typed_unavailable_null_counts": {
+    "noise_reports_passenger": 8000,
+    "noise_reports_crew": 8000,
+    "reported_persons_overlap_etiologic_noise": 8000,
+    "reported_persons_union_etiologic_noise": 8000,
+    "per_epoch_sick_call_rosters": 8000,
+    "embarkation_wall_date": 8000,
+    "infections_by_route_sum_by_role": 8000,
+    "infections_by_route_vs_acquired_sum_by_role": 8000
+  }
+}

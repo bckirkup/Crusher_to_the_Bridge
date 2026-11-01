@@ -1,0 +1,106 @@
+{
+  "kind": "crusher-first-paper-obsclock-availability-matrix/v1",
+  "reduction_id": "red-fps01-b-obsclock",
+  "attempt": "red-fps01-b-obsclock-v2",
+  "parent_reduction_id": "red-fps01-b",
+  "contract": "first_paper_observation_clock/1.0.0",
+  "contract_sha256": "73f024fd652fdf97edccdac91a904756e5fd1c1851970b255303fc53c9973244",
+  "sources_sha256": "1b992296a3e11630e7486b7585624ea0745e383707b706bb273f206fa1ab2dc1",
+  "rows_total": 8000,
+  "measured_on": "2026-11-01",
+  "status": "measured from the materialized vector layer (shards/shard-*/first_paper_observation_clock_vectors.jsonl), 126 partitions, 8,000 rows",
+  "entries": [
+    {
+      "field": "etiologic report counts (passenger, crew, total) + role denominators",
+      "columns": ["cumulative_reported_cases", "cumulative_reported_cases_passenger", "cumulative_reported_cases_crew", "passenger_denominator", "crew_denominator", "reported_cases_by_dominant_route", "reported_cases_by_channel"],
+      "availability": "available",
+      "measured": "present and non-null on all 8,000 rows",
+      "source": "summary.json summary block + timeseries (orchestrator_record._summary_counts, role split via role_group_for_agent)",
+      "note": "etiologic = distinct persons with a symptomatic presentation in true_positive_ids; per-person role split is emitted"
+    },
+    {
+      "field": "noise report counts (total)",
+      "columns": ["cumulative_reported_noise_cases"],
+      "availability": "available",
+      "measured": "present on all 8,000 rows; first_noise_report_epoch non-null 8,000/8,000",
+      "source": "summary.json (state.ever_reported_noise_ids count)",
+      "note": "fleet total only — see per-role noise for the typed unavailability"
+    },
+    {
+      "field": "noise report counts per role (passenger, crew)",
+      "columns": ["noise_reports_passenger", "noise_reports_crew"],
+      "availability": "unavailable",
+      "availability_reason": "role_split_never_emitted",
+      "measured": "null on 8,000/8,000 rows",
+      "schema_evidence": "orchestrator_record._summary_counts emits cumulative_reported_noise_cases = len(state.ever_reported_noise_ids) as a single fleet scalar; no role split is computed at emission (orchestrator_record.py:235 at sha 668fe379)",
+      "code_evidence": "ever_reported_noise_ids members' roles are never grouped at the write site; deriving per-role noise from population proportions would manufacture values (FIELD_CONTRACTS union/inference rules)",
+      "note": "NOT inferable — left null, not estimated"
+    },
+    {
+      "field": "etiologic ∩ noise overlap count",
+      "columns": ["reported_persons_overlap_etiologic_noise"],
+      "availability": "unavailable",
+      "availability_reason": "person_id_sets_not_serialized",
+      "measured": "null on 8,000/8,000 rows",
+      "schema_evidence": "state.ever_reported_ids and state.ever_reported_noise_ids live only in SimulationState; the archive writer (campaign_execution._write_timeseries_and_summary, ~L1045-1069 at sha 668fe379) emits the last-epoch summary + compact series only",
+      "code_evidence": "campaign default run.history_retention='compact' (campaign_execution.py:816-817 at sha 668fe379) drops syn_result and per-epoch rosters; |A∩B| cannot be derived from |A|+|B|",
+      "note": "union therefore also unavailable — the union-not-sum rule is preserved rather than approximated"
+    },
+    {
+      "field": "etiologic ∪ noise unique-person union count",
+      "columns": ["reported_persons_union_etiologic_noise"],
+      "availability": "unavailable",
+      "availability_reason": "person_id_sets_not_serialized",
+      "measured": "null on 8,000/8,000 rows",
+      "note": "same root cause as overlap — the two reporter sets are never serialized anywhere in the archive"
+    },
+    {
+      "field": "observed terminal epoch / observed coverage",
+      "columns": ["observed_terminal_epoch", "retained_epoch_rows", "observed_coverage_fraction", "configured_num_epochs", "num_epochs", "scan_num_epochs", "epoch_index_contiguous"],
+      "availability": "available",
+      "measured": "observed_terminal_epoch=287 and retained_epoch_rows=288 with observed_coverage_fraction=1.0 on 8,000/8,000 rows; epoch_index_contiguous=true 8,000/8,000",
+      "source": "timeseries array itself (row count + last epoch index), separated from configured run.num_epochs per spec",
+      "note": "summary.num_epochs/meta.epochs carry the CONFIGURED value and are emitted as configured_num_epochs/num_epochs — never used as the observed window"
+    },
+    {
+      "field": "first etiologic reports and threshold crossings (category + clock + origin + window)",
+      "columns": ["first_etiologic_report_epoch", "first_etiologic_report_passenger_epoch", "first_etiologic_report_crew_epoch", "first_noise_report_epoch", "first_symptomatic_epoch", "first_isolated_epoch", "first_quarantined_epoch", "vsp_either_channel_first_epoch", "derived_vsp_trigger_epoch", "derived_detection_epoch", "derived_detection_lag", "derived_confirmation_epoch", "derived_peak_epoch", "detection_epoch_ts", "confirmation_epoch_ts", "terminal_ts_trigger_status", "scan_vsp_trigger", "scan_posted"],
+      "availability": "available (per-crossing sparsity is honest null, not zero)",
+      "measured": "first_noise_report_epoch present 8,000/8,000; first_etiologic_report_passenger_epoch 7,623/8,000; first_etiologic_report_crew_epoch 6,642/8,000; first_quarantined_epoch 7,790/8,000; first_isolated_epoch 0/8,000 (isolation never triggered on any run); derived_detection_epoch 1,344/8,000; derived_confirmation_epoch 47/8,000; derived_vsp_trigger_epoch 36/8,000",
+      "source": "timeseries first-nonzero scan + summary.derived witnesses; clock=epoch index (hours, natural_history_clock); window=epoch 0..287 aboard-only reporters",
+      "note": "null = the crossing never occurred in that run, labelled by column semantics; detection/confirmation/VSP are legitimately rare"
+    },
+    {
+      "field": "per-epoch sick-call rosters",
+      "columns": ["per_epoch_sick_call_rosters"],
+      "availability": "unavailable",
+      "availability_reason": "compact_history_drops_rosters",
+      "measured": "null on 8,000/8,000 rows",
+      "schema_evidence": "compact history retains summary/spaces/cost rows only (campaign_execution.py:816-817); syn_result.sick_call_ids per-epoch rosters are dropped",
+      "note": "last-epoch aggregate counts remain available as last_epoch_sick_call_count/last_epoch_onset_observation_count — LAST-EPOCH values, not voyage cumulatives"
+    },
+    {
+      "field": "embarkation wall-clock date",
+      "columns": ["embarkation_wall_date"],
+      "availability": "unavailable",
+      "availability_reason": "date_anchor_is_campaign_manifest_level",
+      "measured": "null on 8,000/8,000 rows",
+      "note": "wall dates live in the campaign manifest, not the run archive; join to the manifest by campaign_id is the recovery path (out of sidecar scope)"
+    },
+    {
+      "field": "role-split infections-by-route sums",
+      "columns": ["infections_by_route_sum_by_role", "infections_by_route_vs_acquired_sum_by_role"],
+      "availability": "unavailable",
+      "availability_reason": "role_split_never_emitted",
+      "measured": "null on 8,000/8,000 rows",
+      "note": "fleet-level route sums remain in infections_by_dominant_route / reported_cases_by_dominant_route"
+    },
+    {
+      "field": "scanner/reducer provenance + join identity",
+      "columns": ["source_id", "source_key", "source_uri", "run_uid", "original_run_id", "seed", "hull_id", "cell_id", "engine_sha", "image_digest", "definition_sha256", "definition_version", "member", "member_asset_id", "campaign_id", "reduction_id", "provenance"],
+      "availability": "available",
+      "measured": "present on all 8,000 rows; join proof = identical sources_uri/sources_sha256 to reduction red-fps01-b (8,008 declared sources); scan_posted=true on 36/8,000 (scanner row exists iff VSP crossed)",
+      "note": "per-column member/native_path provenance carried in values.provenance"
+    }
+  ]
+}

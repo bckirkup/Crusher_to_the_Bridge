@@ -1878,6 +1878,56 @@
       "line_end": 139,
       "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/496a919ca3af4563da34b958db37e737b58bab4b/docs/literature/consensus_tranche_53_fleet_age_norovirus_share.md#L112-L139",
       "claim": "Repo-transcribed external etiologic fractions have differing denominators; no native norovirus scaling."
+    },
+    {
+      "integrated_id": "integration:114",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "668fe379f5244c4c480e29b7fdbf4be698280237",
+      "path": "orchestrator_record.py",
+      "line_start": 226,
+      "line_end": 235,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/668fe379f5244c4c480e29b7fdbf4be698280237/orchestrator_record.py#L226-L235",
+      "claim": "Noise reports emitted as single fleet scalar len(ever_reported_noise_ids); role split exists only for etiologic reported_cases \u2014 per-role noise is typed-unavailable, not inferable."
+    },
+    {
+      "integrated_id": "integration:115",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "668fe379f5244c4c480e29b7fdbf4be698280237",
+      "path": "orchestrator_record.py",
+      "line_start": 185,
+      "line_end": 204,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/668fe379f5244c4c480e29b7fdbf4be698280237/orchestrator_record.py#L185-L204",
+      "claim": "Etiologic reported_counts grouped via role_group_for_agent against ever_reported_ids \u2014 the role split that noise never receives."
+    },
+    {
+      "integrated_id": "integration:116",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "668fe379f5244c4c480e29b7fdbf4be698280237",
+      "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+      "line_start": 816,
+      "line_end": 817,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/668fe379f5244c4c480e29b7fdbf4be698280237/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L816-L817",
+      "claim": "Campaign default run.history_retention='compact' \u2014 per-epoch syn_result rosters (sick_call_ids, true_positive_ids) dropped from archives."
+    },
+    {
+      "integrated_id": "integration:117",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "668fe379f5244c4c480e29b7fdbf4be698280237",
+      "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+      "line_start": 1045,
+      "line_end": 1069,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/668fe379f5244c4c480e29b7fdbf4be698280237/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L1045-L1069",
+      "claim": "Archive writer emits last-epoch summary + extracted compact timeseries only; ever_reported_ids/ever_reported_noise_ids person-ID sets never serialized \u2014 overlap and union counts unrecoverable."
+    },
+    {
+      "integrated_id": "integration:118",
+      "kind": "DIRECT_PINNED_SOURCE_INSPECTION_NOT_RUNTIME",
+      "source_sha": "668fe379f5244c4c480e29b7fdbf4be698280237",
+      "path": "picard_framework/runs/mega_cruise_campaign/campaign_execution.py",
+      "line_start": 454,
+      "line_end": 466,
+      "permalink": "https://github.com/bckirkup/Crusher_to_the_Bridge/blob/668fe379f5244c4c480e29b7fdbf4be698280237/picard_framework/runs/mega_cruise_campaign/campaign_execution.py#L454-L466",
+      "claim": "extract_timeseries builds the compact per-epoch series whose row count/index give the OBSERVED terminal epoch and retained coverage, distinct from configured num_epochs."
     }
   ],
   "census_all_record_lineage": "CAMPAIGN_COVERAGE.json",
