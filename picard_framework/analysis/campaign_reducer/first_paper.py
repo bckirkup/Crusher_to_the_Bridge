@@ -257,6 +257,59 @@ def _sum_checks(
                 },
                 "status": status,
             }
+            if check.get("historical_evidence"):
+                prov[col]["historical_evidence"] = True
+    return missing_cols
+
+
+def _operand_sum_checks(
+    values: dict, prov: dict, fields_prov: dict
+) -> list[str]:
+    """Named-addend sums recomputed and compared against a total column.
+
+    Unlike :func:`_sum_checks` (which sums members of a dict-typed
+    field), this checks a declared list of scalar operands — e.g.
+    ``n_imports + n_acquired`` against ``cumulative_ever_infected``.
+    """
+    missing_cols: list[str] = []
+    for check in profile().get("operand_sum_checks") or []:
+        col, sum_col = check["column"], check["sum_column"]
+        total = values.get(check["total_column"])
+        addends = [values.get(a) for a in check["addends"]]
+        computable = all(_finite_num(a) for a in addends) and _finite_num(
+            total
+        )
+        if not computable:
+            values[sum_col] = None
+            values[col] = None
+            status = "sum_uncomputable"
+            missing_cols += [sum_col, col]
+        else:
+            member_sum = sum(addends)
+            values[sum_col] = member_sum
+            values[col] = member_sum == total
+            status = "sum_consistent" if member_sum == total \
+                else "sum_divergent"
+        for c in (sum_col, col):
+            prov[c] = {
+                "native_path": None,
+                "member": "derived:operand_sum_check",
+                "operands": {
+                    "addends": check["addends"],
+                    "total": check["total_column"],
+                },
+                "operand_status": {
+                    **{
+                        a: fields_prov[a]["status"]
+                        for a in check["addends"]
+                        if a in fields_prov
+                    },
+                    "total": fields_prov[check["total_column"]]["status"],
+                },
+                "status": status,
+            }
+            if check.get("historical_evidence"):
+                prov[c]["historical_evidence"] = True
     return missing_cols
 
 
@@ -275,9 +328,11 @@ def _status_columns(values, prov, doc, hit) -> list[str]:
     is ``completed`` only when the summary decoded AND the epoch clock
     closed at the declared horizon. ``clock_status`` compares the
     emitted ``num_epochs`` against the declared
-    ``parameters.num_epochs``; ``follow_up_status`` reads the scan
-    row's ``posted`` flag. Any missing operand yields ``unknown``,
-    never a guessed status.
+    ``parameters.num_epochs``; ``scan_posted_status`` reads the scan
+    row's ``posted`` flag (the scanner's own rollup only — it is not
+    evidence that follow-up observation was complete; renamed from
+    ``follow_up_status`` for exactly that reason). Any missing operand
+    yields ``unknown``, never a guessed status.
     """
     missing: list[str] = []
     emitted = values.get("num_epochs")
@@ -305,21 +360,23 @@ def _status_columns(values, prov, doc, hit) -> list[str]:
 
     posted = hit["line"].get("posted") if hit else None
     if posted is True:
-        follow = "posted"
+        posted_status = "posted"
     elif hit is not None:
-        follow = "unposted"
+        posted_status = "unposted"
     else:
-        follow = "unknown"
-        missing.append("follow_up_status")
-    values["follow_up_status"] = follow
-    prov["follow_up_status"] = _status_prov(
-        "derived:follow_up", "scan:posted", follow)
+        posted_status = "unknown"
+        missing.append("scan_posted_status")
+    values["scan_posted_status"] = posted_status
+    prov["scan_posted_status"] = _status_prov(
+        "derived:scan_posted", "scan:posted", posted_status)
     return missing
 
 
-def absorb_scan_rows(acc, spec: SourceSpec, result) -> None:
+def absorb_scan_rows(
+    acc, spec: SourceSpec, result, scan_fields: list | None = None
+) -> None:
     """Index a scan_rows-role source's per-line docs for the join."""
-    fields = profile()["scan_fields"]
+    fields = scan_fields if scan_fields is not None else profile()["scan_fields"]
     for ddoc in result.docs:
         line = ddoc.doc
         key = line.get("key")
@@ -392,6 +449,83 @@ def _scan_lookup(
     return hit, None
 
 
+def _absorb_scan_fields(
+    doc: dict,
+    hit,
+    scan_status: str | None,
+    values: dict,
+    prov: dict,
+) -> list[str]:
+    """Project the profile's scan fields off the joined scan-row entry.
+
+    Absent join → typed ``scan_source_absent``/conflict status, never
+    first-row-wins; a ``missing`` scan-prov status propagates to missing.
+    """
+    missing = []
+    for f in doc["scan_fields"]:
+        col = f["column"]
+        if hit is None:
+            values[col] = None
+            prov[col] = {
+                "member": None,
+                "source_key": None,
+                "native_path": f["native"],
+                "status": scan_status or "scan_source_absent",
+            }
+            missing.append(col)
+        else:
+            values[col] = hit["values"].get(col)
+            prov[col] = {
+                "member": hit["prov"][col]["member"],
+                "source_key": hit["prov"][col]["source_key"],
+                "source_id": hit["source_id"],
+                "native_path": f["native"],
+                "status": hit["prov"][col]["status"],
+            }
+            if hit["prov"][col]["status"] == "missing":
+                missing.append(col)
+    return missing
+
+
+def _row_envelope(
+    prefix: str,
+    ddoc,
+    src: SourceSpec,
+    ctx: ReductionContext,
+    object_key: str,
+    member: str,
+    doc: dict,
+    values: dict,
+    prov: dict,
+    missing: list,
+    defn_sha: str,
+) -> dict:
+    """The versioned wide-row envelope shared by the extraction profiles."""
+    return {
+        "row_id": row_id(prefix, ddoc.run_uid),
+        "reduction_id": ctx.reduction_id,
+        "run_uid": ddoc.run_uid,
+        "source_id": src.source_id,
+        "campaign_id": src.campaign_id,
+        "cell_id": src.cell_id,
+        "hull_id": src.hull_id,
+        "seed": src.seed if src.seed is not None
+        else values.get("seed"),
+        "original_run_id": src.original_run_id,
+        "engine_sha": src.engine_sha,
+        "image_digest": src.image_digest,
+        "source_uri": src.uri,
+        "source_key": object_key,
+        "member": member,
+        "member_asset_id": ddoc.asset_id,
+        "definition_version": doc["definition_version"],
+        "definition_sha256": defn_sha,
+        "values": values,
+        "provenance": prov,
+        "missing": sorted(set(missing)),
+    }
+
+
 def vector_rows(
     _spec,
     src: SourceSpec,
@@ -417,6 +551,7 @@ def vector_rows(
         )
         missing += _recomputed_pairs(values, prov, prov)
         missing += _sum_checks(values, prov, prov)
+        missing += _operand_sum_checks(values, prov, prov)
         hit, scan_status = _scan_lookup(
             acc,
             object_key,
@@ -424,51 +559,10 @@ def vector_rows(
             values.get("seed") or src.seed,
         )
         missing += _status_columns(values, prov, ddoc.doc, hit)
-        for f in doc["scan_fields"]:
-            col = f["column"]
-            if hit is None:
-                values[col] = None
-                prov[col] = {
-                    "member": None,
-                    "source_key": None,
-                    "native_path": f["native"],
-                    "status": scan_status or "scan_source_absent",
-                }
-                missing.append(col)
-            else:
-                values[col] = hit["values"].get(col)
-                prov[col] = {
-                    "member": hit["prov"][col]["member"],
-                    "source_key": hit["prov"][col]["source_key"],
-                    "source_id": hit["source_id"],
-                    "native_path": f["native"],
-                    "status": hit["prov"][col]["status"],
-                }
-                if hit["prov"][col]["status"] == "missing":
-                    missing.append(col)
+        missing += _absorb_scan_fields(doc, hit, scan_status, values, prov)
         rows.append(
-            {
-                "row_id": row_id("fpv", ddoc.run_uid),
-                "reduction_id": ctx.reduction_id,
-                "run_uid": ddoc.run_uid,
-                "source_id": src.source_id,
-                "campaign_id": src.campaign_id,
-                "cell_id": src.cell_id,
-                "hull_id": src.hull_id,
-                "seed": src.seed if src.seed is not None
-                else values.get("seed"),
-                "original_run_id": src.original_run_id,
-                "engine_sha": src.engine_sha,
-                "image_digest": src.image_digest,
-                "source_uri": src.uri,
-                "source_key": object_key,
-                "member": member,
-                "member_asset_id": ddoc.asset_id,
-                "definition_version": doc["definition_version"],
-                "definition_sha256": definition_sha256(),
-                "values": values,
-                "provenance": prov,
-                "missing": sorted(set(missing)),
-            }
+            _row_envelope(
+                "fpv", ddoc, src, ctx, object_key, member, doc,
+                values, prov, missing, definition_sha256())
         )
     return rows

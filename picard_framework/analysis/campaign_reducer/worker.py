@@ -373,10 +373,13 @@ def _ctx(request: dict, _shard_index: int) -> ReductionContext:
 
 def _profile_defaults(request: dict) -> dict:
     """Extraction-profile defaults (first_paper_scalar et al.)."""
-    from . import first_paper  # noqa: PLC0415
+    from . import first_paper, observation_clock  # noqa: PLC0415
 
-    if request.get("extraction_profile") == first_paper.PROFILE_ID:
+    profile_id = request.get("extraction_profile")
+    if profile_id == first_paper.PROFILE_ID:
         return first_paper.defaults()
+    if profile_id == observation_clock.PROFILE_ID:
+        return observation_clock.defaults()
     return {}
 
 

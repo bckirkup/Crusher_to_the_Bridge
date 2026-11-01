@@ -128,11 +128,13 @@ def _run_zip(ar_pax=0.5, n=316, crew=134, inf_pax=6, inf_crew=9,
             "reported_cases_by_dominant_route": {
                 "fomite": rep_pax + rep_crew},
             "infections_by_dominant_route": {
-                "fomite": inf_pax + inf_crew},
+                # acquired infections only (imports are never
+                # route-tagged): inf_pax + inf_crew - n_imports
+                "fomite": inf_pax + inf_crew - 4},
             "infection_dose_share_by_route": {"fomite": 9.9},
         },
-        "census": {"ignited": True, "n_imports": 4, "n_acquired": 15,
-                   "acquisitions_by_gen": {"0": 4, "1": 11}},
+        "census": {"ignited": True, "n_imports": 4, "n_acquired": 11,
+                   "acquisitions_by_gen": {"0": 4, "1": 7}},
         "mechanisms": {"common_source_events": 1,
                        "common_source_takers": 2},
         "derived": {"vsp_trigger_epoch": 40, "peak_epoch": 53,
@@ -222,13 +224,24 @@ def test_summary_only_member_reads_and_binding():
     assert prov["member"] == "summary.json"
     assert prov["source_key"] == "run_a.zip"
     assert prov["status"] == "exact_emitted"
-    assert row["definition_version"] == "first_paper_scalar/1.1.0"
+    assert row["definition_version"] == "first_paper_scalar/1.2.0"
     assert row["definition_sha256"]
     assert row["values"]["cumulative_ever_infected_passenger"] == 6
     assert row["values"]["trigger_status"] == "ALERT"
-    assert row["values"]["census_n_acquired"] == 15
+    assert row["values"]["census_n_acquired"] == 11
     assert row["values"]["reported_by_channel_consistent"] is True
-    assert row["values"]["infections_by_route_consistent"] is True
+    # historical conflated flag: route sum (11) vs ever_infected (15)
+    # diverges by exactly n_imports (4) — retained as evidence
+    assert row["values"]["infections_by_route_consistent"] is False
+    assert row["provenance"]["infections_by_route_consistent"][
+        "historical_evidence"] is True
+    # corrected checks: route sums vs acquired, imports+acquired vs
+    # ever-infected, each separately
+    assert row["values"][
+        "infections_by_route_vs_acquired_consistent"] is True
+    assert row["values"][
+        "imports_plus_acquired_vs_ever_infected_consistent"] is True
+    assert row["values"]["imports_plus_acquired_sum"] == 15
     # no scan source declared: posted is explicit missing, never fabricated
     assert row["values"]["scan_posted"] is None
     assert row["provenance"]["scan_posted"]["status"] == "scan_source_absent"

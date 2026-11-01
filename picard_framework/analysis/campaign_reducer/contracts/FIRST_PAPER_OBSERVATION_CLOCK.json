@@ -1,0 +1,662 @@
+{
+  "availability_fields": [
+    {
+      "availability": "not_recorded",
+      "column": "noise_reports_passenger",
+      "evidence": "orchestrator_record._summary_counts writes cumulative_reported_noise_cases as a single fleet total; state.ever_reported_noise_ids exists but its members' roles are never split at emission. Not inferable from population proportions.",
+      "reason_code": "role_split_never_emitted"
+    },
+    {
+      "availability": "not_recorded",
+      "column": "noise_reports_crew",
+      "evidence": "same as noise_reports_passenger.",
+      "reason_code": "role_split_never_emitted"
+    },
+    {
+      "availability": "not_recoverable",
+      "column": "reported_persons_overlap_etiologic_noise",
+      "evidence": "state.ever_reported_ids and state.ever_reported_noise_ids are SimulationState sets; _summary_counts serializes len() only; compact history drops syn_result; the growth_census payload carries transmission-chain rows only. Sets are disjoint within an epoch by construction but NOT across epochs.",
+      "reason_code": "person_id_sets_not_serialized"
+    },
+    {
+      "availability": "not_recoverable",
+      "column": "reported_persons_union_etiologic_noise",
+      "evidence": "union requires |A intersect B| (FIELD_CONTRACTS reported_noise_count.v1: never sum unless disjoint IDs proved); the intersection is not recoverable.",
+      "reason_code": "person_id_sets_not_serialized"
+    },
+    {
+      "availability": "not_recorded_in_run_archive",
+      "column": "embarkation_wall_date",
+      "evidence": "parameters carry natural_history_clock and initiation.manifest.boarding_epoch only; the embarkation calendar date lives in the campaign manifest (noro_provisioned_source_01_manifest.json), not the run zip.",
+      "reason_code": "date_anchor_is_campaign_manifest_level"
+    },
+    {
+      "availability": "not_recoverable",
+      "column": "per_epoch_sick_call_rosters",
+      "evidence": "epoch syn_result (sick_call_agents, true_positive_ids, noise_ids, first_detection_events, onset_observations) is excluded by the compact-history filter; only scalar counters survive.",
+      "reason_code": "compact_history_drops_rosters"
+    }
+  ],
+  "definition_version": "first_paper_observation_clock/1.0.0",
+  "description": "Observation/clock sidecar for the red-fps01-b cohort, joined by exact existing execution/source identity: report counts by role, observed (not configured) terminal epoch and retained trajectory coverage, first-report and threshold-crossing times labelled with category/clock/origin/window, scanner provenance, and typed availability declarations for fields the producing version never serialized. summary.json-only member reads; no census/event decode; null with a typed status, never a manufactured value.",
+  "emit_scalars": false,
+  "equality_checks": [
+    {
+      "column": "terminal_ts_reported_vs_summary_consistent",
+      "left": "terminal_ts_reported",
+      "right": "cumulative_reported_cases"
+    },
+    {
+      "column": "terminal_ts_reported_passenger_vs_summary_consistent",
+      "left": "terminal_ts_reported_passenger",
+      "right": "cumulative_reported_cases_passenger"
+    },
+    {
+      "column": "terminal_ts_reported_crew_vs_summary_consistent",
+      "left": "terminal_ts_reported_crew",
+      "right": "cumulative_reported_cases_crew"
+    },
+    {
+      "column": "terminal_ts_noise_vs_summary_consistent",
+      "left": "terminal_ts_noise",
+      "right": "cumulative_reported_noise_cases"
+    },
+    {
+      "column": "terminal_ts_ever_infected_vs_summary_consistent",
+      "left": "terminal_ts_ever_infected",
+      "right": "cumulative_ever_infected"
+    },
+    {
+      "column": "vsp_ts_vs_derived_consistent",
+      "left": "vsp_either_channel_first_epoch",
+      "right": "derived_vsp_trigger_epoch"
+    },
+    {
+      "column": "detection_ts_vs_derived_consistent",
+      "left": "detection_epoch_ts",
+      "right": "derived_detection_epoch"
+    },
+    {
+      "column": "confirmation_ts_vs_derived_consistent",
+      "left": "confirmation_epoch_ts",
+      "right": "derived_confirmation_epoch"
+    }
+  ],
+  "kind": "extraction_profile",
+  "member_allowlist": [
+    "summary.json"
+  ],
+  "observation_fields": [
+    {
+      "column": "observed_first_epoch",
+      "derive": "first_epoch",
+      "window": "timeseries"
+    },
+    {
+      "column": "observed_terminal_epoch",
+      "derive": "last_epoch",
+      "window": "timeseries"
+    },
+    {
+      "column": "retained_epoch_rows",
+      "derive": "row_count",
+      "window": "timeseries"
+    },
+    {
+      "column": "epoch_index_contiguous",
+      "derive": "contiguous",
+      "window": "timeseries"
+    },
+    {
+      "column": "observed_coverage_fraction",
+      "denominator": "configured_num_epochs",
+      "derive": "coverage",
+      "window": "timeseries"
+    },
+    {
+      "column": "terminal_ts_trigger_status",
+      "derive": "last_value",
+      "ts_key": "trigger_status"
+    },
+    {
+      "column": "terminal_ts_reported",
+      "derive": "last_value",
+      "ts_key": "cumulative_reported_cases"
+    },
+    {
+      "column": "terminal_ts_reported_passenger",
+      "derive": "last_value",
+      "ts_key": "cumulative_reported_cases_passenger"
+    },
+    {
+      "column": "terminal_ts_reported_crew",
+      "derive": "last_value",
+      "ts_key": "cumulative_reported_cases_crew"
+    },
+    {
+      "column": "terminal_ts_noise",
+      "derive": "last_value",
+      "ts_key": "cumulative_reported_noise_cases"
+    },
+    {
+      "column": "terminal_ts_ever_infected",
+      "derive": "last_value",
+      "ts_key": "cumulative_ever_infected"
+    },
+    {
+      "category": "etiologic_report",
+      "column": "first_etiologic_report_passenger_epoch",
+      "derive": "first_gt0",
+      "origin": "timeseries:cumulative_reported_cases_passenger",
+      "role": "passenger",
+      "ts_key": "cumulative_reported_cases_passenger"
+    },
+    {
+      "category": "etiologic_report",
+      "column": "first_etiologic_report_crew_epoch",
+      "derive": "first_gt0",
+      "origin": "timeseries:cumulative_reported_cases_crew",
+      "role": "crew",
+      "ts_key": "cumulative_reported_cases_crew"
+    },
+    {
+      "category": "etiologic_report",
+      "column": "first_etiologic_report_epoch",
+      "derive": "first_gt0",
+      "origin": "timeseries:cumulative_reported_cases",
+      "role": "any",
+      "ts_key": "cumulative_reported_cases"
+    },
+    {
+      "category": "noise_report",
+      "column": "first_noise_report_epoch",
+      "derive": "first_gt0",
+      "origin": "timeseries:cumulative_reported_noise_cases",
+      "role": "all (no role split serialized)",
+      "ts_key": "cumulative_reported_noise_cases"
+    },
+    {
+      "category": "symptomatic_prevalence",
+      "column": "first_symptomatic_epoch",
+      "derive": "first_gt0",
+      "origin": "timeseries:symptomatic",
+      "ts_key": "symptomatic"
+    },
+    {
+      "category": "confinement",
+      "column": "first_quarantined_epoch",
+      "derive": "first_gt0",
+      "origin": "timeseries:quarantined",
+      "ts_key": "quarantined"
+    },
+    {
+      "category": "confinement",
+      "column": "first_isolated_epoch",
+      "derive": "first_gt0",
+      "origin": "timeseries:isolated",
+      "ts_key": "isolated"
+    },
+    {
+      "category": "vsp_threshold",
+      "column": "vsp_either_channel_first_epoch",
+      "derive": "first_any_flag",
+      "origin": "timeseries:*_reported_case_rate_exceeded (VSP-EITHER-CHANNEL-01 either-channel rule)",
+      "ts_keys": [
+        "passenger_reported_case_rate_exceeded",
+        "crew_reported_case_rate_exceeded"
+      ]
+    },
+    {
+      "category": "trigger_detection",
+      "column": "detection_epoch_ts",
+      "derive": "first_status_in",
+      "origin": "timeseries:trigger_status",
+      "ts_key": "trigger_status",
+      "values": [
+        "SUSPECTED",
+        "CONFIRMED"
+      ]
+    },
+    {
+      "category": "trigger_confirmation",
+      "column": "confirmation_epoch_ts",
+      "derive": "first_status_in",
+      "origin": "timeseries:trigger_status",
+      "ts_key": "trigger_status",
+      "values": [
+        "CONFIRMED"
+      ]
+    }
+  ],
+  "operand_sum_checks": [
+    {
+      "addends": [
+        "census_n_imports",
+        "census_n_acquired"
+      ],
+      "column": "imports_plus_acquired_vs_ever_infected_consistent",
+      "note": "Every infected person is either an import or an aboard acquisition; checked separately from the route histogram.",
+      "sum_column": "imports_plus_acquired_sum",
+      "total_column": "cumulative_ever_infected"
+    }
+  ],
+  "profile_id": "first_paper_observation_clock",
+  "recomputed_pairs": [],
+  "scan_agreement_checks": [
+    {
+      "column": "scan_rep_pax_vs_terminal_consistent",
+      "own_column": "terminal_ts_reported_passenger",
+      "scan_column": "scan_rep_pax_n"
+    },
+    {
+      "column": "scan_rep_crew_vs_terminal_consistent",
+      "own_column": "terminal_ts_reported_crew",
+      "scan_column": "scan_rep_crew_n"
+    },
+    {
+      "column": "scan_num_epochs_vs_configured_consistent",
+      "own_column": "configured_num_epochs",
+      "scan_column": "scan_num_epochs"
+    },
+    {
+      "column": "scan_n_imports_vs_census_consistent",
+      "own_column": "census_n_imports",
+      "scan_column": "scan_n_imports"
+    },
+    {
+      "column": "scan_n_acquired_vs_census_consistent",
+      "own_column": "census_n_acquired",
+      "scan_column": "scan_n_acquired"
+    },
+    {
+      "column": "scan_vsp_vs_derived_consistent",
+      "own_column": "derived_vsp_trigger_epoch",
+      "own_compare": "present",
+      "scan_column": "scan_vsp_trigger"
+    }
+  ],
+  "scan_fields": [
+    {
+      "column": "scan_posted",
+      "kind": "value",
+      "native": "/posted"
+    },
+    {
+      "column": "scan_vsp_trigger",
+      "kind": "value",
+      "native": "/vsp_trigger"
+    },
+    {
+      "column": "scan_rep_pax_n",
+      "domain": "count",
+      "kind": "value",
+      "native": "/rep_pax_n"
+    },
+    {
+      "column": "scan_rep_crew_n",
+      "domain": "count",
+      "kind": "value",
+      "native": "/rep_crew_n"
+    },
+    {
+      "column": "scan_rep_pax_ar",
+      "kind": "value",
+      "native": "/rep_pax_ar"
+    },
+    {
+      "column": "scan_rep_crew_ar",
+      "kind": "value",
+      "native": "/rep_crew_ar"
+    },
+    {
+      "column": "scan_num_epochs",
+      "domain": "count",
+      "kind": "value",
+      "native": "/num_epochs"
+    },
+    {
+      "column": "scan_ignited",
+      "kind": "value",
+      "native": "/ignited"
+    },
+    {
+      "column": "scan_n_imports",
+      "domain": "count",
+      "kind": "value",
+      "native": "/n_imports"
+    },
+    {
+      "column": "scan_n_acquired",
+      "domain": "count",
+      "kind": "value",
+      "native": "/n_acquired"
+    },
+    {
+      "column": "scan_peak_prevalence",
+      "kind": "value",
+      "native": "/peak_prevalence"
+    }
+  ],
+  "scan_join": {
+    "fallback": "none",
+    "note": "scan row `key` is the run archive object key; full-key only \u2014 off/ps_ship share seeds within a hull so (hull,seed) is ambiguous; key/hull/seed disagreement or a duplicate key is a typed conflict, never first-row-wins",
+    "primary": "object_key"
+  },
+  "scan_role": "scan_rows",
+  "status_vocabulary": [
+    "agreement_consistent",
+    "agreement_divergent",
+    "agreement_uncomputable",
+    "both_absent_consistent",
+    "domain_invalid",
+    "exact_emitted",
+    "invalid_pair_missing_operand",
+    "invalid_pair_zero_denominator",
+    "missing",
+    "not_crossed_in_window",
+    "not_recorded",
+    "not_recoverable",
+    "null_emitted",
+    "observed",
+    "recomputed",
+    "recomputed_pair",
+    "scan_agreement_conflict",
+    "scan_key_conflict",
+    "scan_source_absent",
+    "sum_consistent",
+    "sum_divergent",
+    "sum_uncomputable",
+    "timeseries_absent",
+    "unknown"
+  ],
+  "sum_checks": [
+    {
+      "column": "reported_by_channel_consistent",
+      "dict_column": "reported_cases_by_channel_json",
+      "role_totals": {
+        "crew": "cumulative_reported_cases_crew",
+        "passenger": "cumulative_reported_cases_passenger"
+      },
+      "sum_column": "reported_by_channel_sum",
+      "total_column": "cumulative_reported_cases"
+    },
+    {
+      "column": "reported_by_route_consistent",
+      "dict_column": "reported_cases_by_dominant_route_json",
+      "role_totals": {
+        "crew": "cumulative_reported_cases_crew",
+        "passenger": "cumulative_reported_cases_passenger"
+      },
+      "sum_column": "reported_by_route_sum",
+      "total_column": "cumulative_reported_cases"
+    },
+    {
+      "column": "infections_by_route_consistent",
+      "dict_column": "infections_by_dominant_route_json",
+      "historical_evidence": true,
+      "note": "CONFLATED definition retained as historical evidence: compares acquired-route member sums against cumulative_ever_infected (imports + acquired), diverging by exactly n_imports on every run with imports. Superseded by infections_by_route_vs_acquired_consistent and imports_plus_acquired_vs_ever_infected_consistent.",
+      "sum_column": "infections_by_route_sum",
+      "total_column": "cumulative_ever_infected"
+    },
+    {
+      "column": "infections_by_route_vs_acquired_consistent",
+      "dict_column": "infections_by_dominant_route_json",
+      "note": "Dominant-route acquisition counts are acquired infections only; the correct comparator is census.n_acquired.",
+      "sum_column": "infections_by_route_vs_acquired_sum",
+      "total_column": "census_n_acquired"
+    }
+  ],
+  "summary_fields": [
+    {
+      "column": "run_id_native",
+      "kind": "value",
+      "native": "/run_id"
+    },
+    {
+      "column": "trigger_status",
+      "kind": "value",
+      "native": "/trigger_status"
+    },
+    {
+      "column": "num_epochs",
+      "domain": "count",
+      "kind": "value",
+      "native": "/num_epochs"
+    },
+    {
+      "column": "seed",
+      "kind": "value",
+      "native": "/parameters/seed"
+    },
+    {
+      "column": "engine_git_sha",
+      "kind": "value",
+      "native": "/parameters/engine_git_sha"
+    },
+    {
+      "column": "platform_id",
+      "kind": "value",
+      "native": "/parameters/platform_id"
+    },
+    {
+      "column": "tier_id",
+      "kind": "value",
+      "native": "/parameters/tier_id"
+    },
+    {
+      "column": "natural_history_clock",
+      "kind": "value",
+      "native": "/parameters/natural_history_clock"
+    },
+    {
+      "column": "configured_num_epochs",
+      "domain": "count",
+      "kind": "value",
+      "native": "/parameters/num_epochs"
+    },
+    {
+      "column": "num_agents",
+      "domain": "count",
+      "kind": "value",
+      "native": "/parameters/num_agents"
+    },
+    {
+      "column": "initiation_manifest_json",
+      "kind": "json",
+      "native": "/initiation/manifest"
+    },
+    {
+      "column": "passenger_complement",
+      "kind": "value",
+      "native": "/summary/passenger_complement"
+    },
+    {
+      "column": "crew_complement",
+      "kind": "value",
+      "native": "/summary/crew_complement"
+    },
+    {
+      "column": "cumulative_ever_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_infected"
+    },
+    {
+      "column": "cumulative_ever_infected_passenger",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_infected_passenger"
+    },
+    {
+      "column": "cumulative_ever_infected_crew",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_infected_crew"
+    },
+    {
+      "column": "cumulative_ever_ill",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_ill"
+    },
+    {
+      "column": "cumulative_ever_ill_passenger",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_ill_passenger"
+    },
+    {
+      "column": "cumulative_ever_ill_crew",
+      "kind": "value",
+      "native": "/summary/cumulative_ever_ill_crew"
+    },
+    {
+      "column": "cumulative_reported_cases",
+      "domain": "count",
+      "kind": "value",
+      "native": "/summary/cumulative_reported_cases"
+    },
+    {
+      "column": "cumulative_reported_cases_passenger",
+      "kind": "value",
+      "native": "/summary/cumulative_reported_cases_passenger"
+    },
+    {
+      "column": "cumulative_reported_cases_crew",
+      "kind": "value",
+      "native": "/summary/cumulative_reported_cases_crew"
+    },
+    {
+      "column": "cumulative_reported_noise_cases",
+      "domain": "count",
+      "kind": "value",
+      "native": "/summary/cumulative_reported_noise_cases"
+    },
+    {
+      "column": "reported_cases_by_channel_json",
+      "kind": "json",
+      "native": "/summary/reported_cases_by_channel"
+    },
+    {
+      "column": "reported_cases_by_dominant_route_json",
+      "kind": "json",
+      "native": "/summary/reported_cases_by_dominant_route"
+    },
+    {
+      "column": "infections_by_dominant_route_json",
+      "kind": "json",
+      "native": "/summary/infections_by_dominant_route"
+    },
+    {
+      "column": "last_epoch_sick_call_count",
+      "kind": "value",
+      "native": "/summary/sick_call_count",
+      "note": "LAST-EPOCH value only \u2014 the summary block carries the final epoch's sick-call count, not a voyage cumulative."
+    },
+    {
+      "column": "last_epoch_onset_observation_count",
+      "kind": "value",
+      "native": "/summary/onset_observation_count",
+      "note": "LAST-EPOCH value only \u2014 same semantics as sick_call_count."
+    },
+    {
+      "column": "campaign_confirmed",
+      "kind": "value",
+      "native": "/summary/campaign_confirmed"
+    },
+    {
+      "column": "quarantine_refusers",
+      "kind": "value",
+      "native": "/summary/quarantine_refusers"
+    },
+    {
+      "column": "census_ignited",
+      "kind": "value",
+      "native": "/census/ignited"
+    },
+    {
+      "column": "census_n_imports",
+      "domain": "count",
+      "kind": "value",
+      "native": "/census/n_imports"
+    },
+    {
+      "column": "census_n_acquired",
+      "domain": "count",
+      "kind": "value",
+      "native": "/census/n_acquired"
+    },
+    {
+      "column": "census_acquisitions_by_gen_json",
+      "kind": "json",
+      "native": "/census/acquisitions_by_gen"
+    },
+    {
+      "column": "mechanisms_caregiver_reports",
+      "kind": "value",
+      "native": "/mechanisms/caregiver_reports"
+    },
+    {
+      "column": "mechanisms_caregiver_responses",
+      "kind": "value",
+      "native": "/mechanisms/caregiver_responses"
+    },
+    {
+      "column": "derived_vsp_trigger_epoch",
+      "kind": "value",
+      "native": "/derived/vsp_trigger_epoch"
+    },
+    {
+      "column": "derived_detection_epoch",
+      "kind": "value",
+      "native": "/derived/detection_epoch"
+    },
+    {
+      "column": "derived_confirmation_epoch",
+      "kind": "value",
+      "native": "/derived/confirmation_epoch"
+    },
+    {
+      "column": "derived_detection_lag",
+      "kind": "value",
+      "native": "/derived/detection_lag"
+    },
+    {
+      "column": "derived_peak_epoch",
+      "kind": "value",
+      "native": "/derived/peak_epoch"
+    },
+    {
+      "column": "derived_outbreak_occurred",
+      "kind": "value",
+      "native": "/derived/outbreak_occurred"
+    },
+    {
+      "column": "derived_attack_rate",
+      "kind": "value",
+      "native": "/derived/attack_rate"
+    },
+    {
+      "column": "derived_infection_attack_rate_passenger",
+      "kind": "value",
+      "native": "/derived/infection_attack_rate_passenger"
+    },
+    {
+      "column": "derived_infection_attack_rate_crew",
+      "kind": "value",
+      "native": "/derived/infection_attack_rate_crew"
+    },
+    {
+      "column": "derived_reported_case_attack_rate_passenger",
+      "kind": "value",
+      "native": "/derived/reported_case_attack_rate_passenger"
+    },
+    {
+      "column": "derived_reported_case_attack_rate_crew",
+      "kind": "value",
+      "native": "/derived/reported_case_attack_rate_crew"
+    }
+  ],
+  "suppress_tables": [
+    "run_scalars",
+    "distributions",
+    "weights"
+  ],
+  "table_name": "first_paper_observation_clock_vectors"
+}
