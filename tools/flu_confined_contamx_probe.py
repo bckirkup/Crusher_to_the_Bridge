@@ -26,7 +26,11 @@ from typing import Any
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, REPO_ROOT)
 
-from simulation_utils.paths import validated_open  # noqa: E402
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    resolve_repo_path,
+    validated_open,
+)
 from tools.covid_route_attribution import CabinPairChallengeLedger  # noqa: E402
 from tools.diag.conditioned_cell import (  # noqa: E402
     ACTIVE,
@@ -188,8 +192,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    out_dir = os.path.realpath(args.out_dir)
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir = resolve_repo_path(REPO_ROOT, args.out_dir)
+    prepare_output_directory(out_dir, allowed_roots=(REPO_ROOT,))
     for seed in args.seeds:
         payload = run_cell(
             bundle=args.bundle, pathogen_id=args.pathogen_id, seed=seed,
