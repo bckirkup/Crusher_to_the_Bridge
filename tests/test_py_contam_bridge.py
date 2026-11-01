@@ -727,9 +727,10 @@ class TestXzoneEndpointResolution:
             ],
             "adjacency": [],
         }
+        layout = self._layout()
         with pytest.raises(ValueError, match="GHOST"):
             ContamTransportEngine(
-                self._layout(), airflow, natural_decay_rate=0.0,
+                layout, airflow, natural_decay_rate=0.0,
             )
 
     def test_group_endpoint_still_expands(self) -> None:
