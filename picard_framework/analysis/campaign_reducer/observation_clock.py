@@ -324,12 +324,14 @@ def _eq_clock(left, right) -> str:
 
 
 def _ge_clock(span, declared) -> str:
-    """complete when the retained span covers the declared horizon."""
+    """complete when the retained span covers the declared horizon.
+
+    Callers pass finite numbers, so a span that does not cover the horizon
+    is truncated. There is no overrun arm: covering the horizon is ``>=``.
+    """
     if span >= declared:
         return "complete"
-    if span < declared:
-        return "truncated"
-    return "overrun"
+    return "truncated"
 
 
 def _configured_clock_status(emitted, declared) -> tuple[str, bool]:
