@@ -1,0 +1,36 @@
+{
+ "schema_version": "crusher-campaign-distributions/1.0-proposed",
+ "request_id": "req-fps01-b-obsclock-return",
+ "operation": "collect",
+ "source_bucket": "crusherbucket-994254241749-us-east-1-an",
+ "source_roots_allowlist": [
+  "campaign/_derived/reducer/v1/attempts/red-fps01-b-obsclock/"
+ ],
+ "derived_exclude_prefixes": [
+  "campaign/_derived/reducer/v1/"
+ ],
+ "scope_register_sha256": "3f73b5847c47b9bee7809c89a7105585f3134f48bba07f08e82545381fb51f88",
+ "budgets": {
+  "max_api_calls_total": 2000,
+  "max_list_pages": 50,
+  "max_head_requests": 100,
+  "max_source_objects": 1024,
+  "max_return_bytes": 800000000,
+  "max_wall_seconds": 900,
+  "max_cost_usd": 0.5
+ },
+ "admission": {
+  "admission_id": "adm-fps01-b-obsclock-return",
+  "approved_scope_hash": "3f73b5847c47b9bee7809c89a7105585f3134f48bba07f08e82545381fb51f88",
+  "approved_cost_usd": 0.5,
+  "expires_utc": "2027-01-01T00:00:00Z"
+ },
+ "price_snapshot": {
+  "id": "price-fps01-b-obsclock",
+  "as_of_utc": "2026-11-01T00:00:00Z",
+  "unit_prices_json": {
+   "api_call_usd": 0.004
+  }
+ },
+ "collect_all_pages": true
+}
