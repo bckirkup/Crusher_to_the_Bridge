@@ -689,6 +689,10 @@ class ShipSimulation:
             ever_reported_ids=preboarding_reportable_ids(self.engine),
         )
         self.state = sim_state
+        return self._attach_initialized_world(cfg, voyage_cfg, ship, sim_state)
+
+    def _attach_initialized_world(self, cfg, voyage_cfg, ship, sim_state):
+        """Trackers, world, and the decision runtime. Called once per run."""
         self.crew_exclusion = build_crew_duty_exclusion_tracker(
             cfg.get("crew_duty_exclusion"),
             self.engine.agents,

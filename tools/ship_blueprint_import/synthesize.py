@@ -480,6 +480,15 @@ def _berthing_zones(
     return berthing
 
 
+def _copy_optional_zone_fields(entry: dict, meta) -> None:
+    if meta and meta.max_occupancy:
+        entry["max_occupancy"] = int(meta.max_occupancy)
+    if meta and meta.serves:
+        entry["serves"] = list(meta.serves)
+    if meta and meta.notes:
+        entry["description"] = meta.notes
+
+
 def _zone_entry(
     poly: OverlayPolygon,
     zone_meta: dict[str, ZoneDigest],
@@ -518,12 +527,7 @@ def _zone_entry(
         "deck": deck,
         "display": geom["display"],
     }
-    if meta and meta.max_occupancy:
-        entry["max_occupancy"] = int(meta.max_occupancy)
-    if meta and meta.serves:
-        entry["serves"] = list(meta.serves)
-    if meta and meta.notes:
-        entry["description"] = meta.notes
+    _copy_optional_zone_fields(entry, meta)
     if ztype == "Sanitary":
         # Heads carry fixture-geometry: the ceiling is the MLC headroom
         # figure, volume follows floor area, and the exhaust ACH is the

@@ -233,24 +233,37 @@ def exercise_gate(client, bucket: str, args) -> bool:
     return ok
 
 
+def _one_rss_sample(client, bucket, canary_prefix, tier, seed):
+    """Peak and summary RSS readings for one canary seed."""
+    rid = _RID.format(seed=seed)
+    key = f"{canary_prefix}/{tier}/{rid}"
+    rss = _fetch_member_json(client, bucket, key, "rss_samples.json")
+    summary = _fetch_summary(client, bucket, key)
+    peak = rss["peak_rss_mb"] if rss is not None else None
+    voyage = fold = None
+    if summary is not None:
+        rmb = summary.get("rss_mb") or {}
+        if rmb.get("voyage"):
+            voyage = rmb["voyage"]
+        if rmb.get("fold"):
+            fold = rmb["fold"]
+    return peak, voyage, fold
+
+
 def _collect_rss_samples(
     client, bucket: str, canary_prefix: str, tiers: tuple,
 ) -> tuple[list[float], list[float], list[float]]:
     peaks, voyages, folds = [], [], []
     for tier, seeds in tiers:
         for seed in seeds:
-            rid = _RID.format(seed=seed)
-            key = f"{canary_prefix}/{tier}/{rid}"
-            rss = _fetch_member_json(client, bucket, key, "rss_samples.json")
-            s = _fetch_summary(client, bucket, key)
-            if rss is not None:
-                peaks.append(rss["peak_rss_mb"])
-            if s is not None:
-                rmb = s.get("rss_mb") or {}
-                if rmb.get("voyage"):
-                    voyages.append(rmb["voyage"])
-                if rmb.get("fold"):
-                    folds.append(rmb["fold"])
+            peak, voyage, fold = _one_rss_sample(
+                client, bucket, canary_prefix, tier, seed)
+            if peak is not None:
+                peaks.append(peak)
+            if voyage is not None:
+                voyages.append(voyage)
+            if fold is not None:
+                folds.append(fold)
     return peaks, voyages, folds
 
 

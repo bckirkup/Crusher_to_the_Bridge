@@ -588,6 +588,20 @@ def _inf_ar_drift_lines(cells: dict, off: list[dict]) -> list[str]:
     return lines
 
 
+def _worst_route_shift(counts, total, base_counts, base_total, arm, worst):
+    """Return ``worst`` updated with this arm's largest non-food shift."""
+    for route in set(counts) | set(base_counts):
+        if route == "common_source_food":
+            continue
+        shift = (
+            (counts.get(route, 0) / total if total else 0)
+            - (base_counts.get(route, 0) / base_total if base_total else 0)
+        ) * 100
+        if abs(shift) > abs(worst[0]):
+            worst = (shift, route, arm)
+    return worst
+
+
 def _route_drift_line(cells: dict, off: list[dict]) -> str:
     base_counts, base_total = _route_totals(off)
     worst_overall = (0.0, "-", "-")
@@ -596,15 +610,9 @@ def _route_drift_line(cells: dict, off: list[dict]) -> str:
             continue
         rows = cells.get(arm, [])
         counts, total = _route_totals(rows)
-        for route in set(counts) | set(base_counts):
-            if route == "common_source_food":
-                continue
-            shift = (
-                (counts.get(route, 0) / total if total else 0)
-                - (base_counts.get(route, 0) / base_total if base_total else 0)
-            ) * 100
-            if abs(shift) > abs(worst_overall[0]):
-                worst_overall = (shift, route, arm)
+        worst_overall = _worst_route_shift(
+            counts, total, base_counts, base_total, arm, worst_overall,
+        )
     return (
         f"- worst non-cs route-share drift vs `off` (pooled):"
         f" {worst_overall[0]:+.2f}pp ({worst_overall[1]} on"

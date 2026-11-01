@@ -576,6 +576,59 @@ def weights_rows(run_uids: list[str], ctx: ReductionContext) -> list[dict]:
     return rows
 
 
+def _distribution_metric_rows(
+    group_key, metric_id, entries, ctx, weight_lookup,
+) -> list[dict]:
+    """ECDF rows for one (group, metric) pair."""
+    observed = [(u, v) for u, v in entries if v is not None]
+    missing = [u for u, v in entries if v is None]
+    n_eligible = len(entries)
+    n_observed = len(observed)
+    n_missing = len(missing)
+    atoms: dict[float, dict] = {}
+    weights = {
+        u: (weight_lookup(u) if weight_lookup else 1.0)
+        for u, _ in observed
+    }
+    total_w = sum(weights.values())
+    for u, v in observed:
+        atom = atoms.setdefault(v, {"n": 0, "w": 0.0})
+        atom["n"] += 1
+        atom["w"] += weights[u]
+    cum = 0.0
+    n_eff = _kish(list(weights.values()))
+    rows = []
+    for i, v in enumerate(sorted(atoms)):
+        atom = atoms[v]
+        cum += atom["w"]
+        rows.append(
+            {
+                "row_id": row_id("d", group_key, metric_id, i),
+                "reduction_id": ctx.reduction_id,
+                "distribution_id": f"dist-{group_key}-{metric_id}",
+                "metric_id": metric_id,
+                "group_json": {"group": group_key},
+                "support_id": f"{group_key}:{metric_id}:{i}",
+                "support_value": v,
+                "mass_count": atom["n"],
+                "weight_sum": atom["w"],
+                "cdf": (cum / total_w) if total_w else None,
+                "n_eligible": n_eligible,
+                "n_observed": n_observed,
+                "n_missing": n_missing,
+                "n_effective": n_eff,
+                "missing_reason_counts_json": (
+                    {"not_identifiable": n_missing}
+                    if n_missing
+                    else {}
+                ),
+                "distribution_payload_json": None,
+                "query_id": None,
+            }
+        )
+    return rows
+
+
 def distribution_rows(
     metric_values: dict[str, dict[str, list[tuple[str, float | None]]]],
     _run_meta: dict[str, dict],
@@ -593,51 +646,11 @@ def distribution_rows(
     rows = []
     for group_key, by_metric in sorted(metric_values.items()):
         for metric_id, entries in sorted(by_metric.items()):
-            observed = [(u, v) for u, v in entries if v is not None]
-            missing = [u for u, v in entries if v is None]
-            n_eligible = len(entries)
-            n_observed = len(observed)
-            n_missing = len(missing)
-            atoms: dict[float, dict] = {}
-            weights = {
-                u: (weight_lookup(u) if weight_lookup else 1.0)
-                for u, _ in observed
-            }
-            total_w = sum(weights.values())
-            for u, v in observed:
-                a = atoms.setdefault(v, {"n": 0, "w": 0.0})
-                a["n"] += 1
-                a["w"] += weights[u]
-            cum = 0.0
-            n_eff = _kish(list(weights.values()))
-            for i, v in enumerate(sorted(atoms)):
-                a = atoms[v]
-                cum += a["w"]
-                rows.append(
-                    {
-                        "row_id": row_id("d", group_key, metric_id, i),
-                        "reduction_id": ctx.reduction_id,
-                        "distribution_id": f"dist-{group_key}-{metric_id}",
-                        "metric_id": metric_id,
-                        "group_json": {"group": group_key},
-                        "support_id": f"{group_key}:{metric_id}:{i}",
-                        "support_value": v,
-                        "mass_count": a["n"],
-                        "weight_sum": a["w"],
-                        "cdf": (cum / total_w) if total_w else None,
-                        "n_eligible": n_eligible,
-                        "n_observed": n_observed,
-                        "n_missing": n_missing,
-                        "n_effective": n_eff,
-                        "missing_reason_counts_json": (
-                            {"not_identifiable": n_missing}
-                            if n_missing
-                            else {}
-                        ),
-                        "distribution_payload_json": None,
-                        "query_id": None,
-                    }
+            rows.extend(
+                _distribution_metric_rows(
+                    group_key, metric_id, entries, ctx, weight_lookup,
                 )
+            )
     return rows
 
 

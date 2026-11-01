@@ -2123,6 +2123,119 @@ def _berth_pool_cabin_size(
     return cabin_size * max(int(meta.get("hot_bunk_ratio") or 1), 1)
 
 
+def _stagger_crew_meal_slots(sched: list, offset: int, seat: int) -> None:
+    """Move Meal tokens onto sitting ``seat`` within one copied schedule."""
+    for i, tok in enumerate(sched):
+        if not str(tok).startswith("Meal"):
+            continue
+        target = i - offset + seat
+        if (
+            0 <= target < len(sched)
+            and not str(sched[target]).startswith("Meal")
+        ):
+            sched[target], sched[i] = sched[i], sched[target]
+
+
+def _split_berth_anchors(members, moved):
+    """Original-cabin anchors (min id, still in the pool) vs everyone else."""
+    orig: dict[frozenset[int], list] = {}
+    for agent in members:
+        key = frozenset(set(agent.cabin_mate_ids) | {int(agent.agent_id)})
+        orig.setdefault(key, []).append(agent)
+    anchors: list = []
+    free: list = []
+    for ids, group in orig.items():
+        orig_min = min(ids)
+        for agent in group:
+            if (
+                int(agent.agent_id) == orig_min
+                and int(agent.agent_id) not in moved
+            ):
+                anchors.append(agent)
+            else:
+                free.append(agent)
+    return anchors, free
+
+
+def _pull_into_cabin(cabin, pool_free, cabin_size, predicate) -> None:
+    """Append matching free members, mutating ``pool_free`` in iteration order."""
+    for member in pool_free:
+        if len(cabin) >= cabin_size:
+            break
+        if predicate(member):
+            cabin.append(member)
+            pool_free.remove(member)
+
+
+def _cabins_for_status(pool_anchors, pool_free, cabin_size):
+    """Status-pure cabins: original mates, then higher ids, then leftovers."""
+    new_cabins: list = []
+    anchored_cabins: list = []
+    for anch in pool_anchors:
+        cabin = [anch]
+        orig_ids = set(anch.cabin_mate_ids)
+        _pull_into_cabin(
+            cabin, pool_free, cabin_size,
+            lambda member, ids=orig_ids: int(member.agent_id) in ids,
+        )
+        _pull_into_cabin(
+            cabin, pool_free, cabin_size,
+            lambda member, anchor=anch: int(member.agent_id) > int(anchor.agent_id),
+        )
+        _pull_into_cabin(
+            cabin, pool_free, cabin_size, lambda _member: True,
+        )
+        new_cabins.append(cabin)
+        anchored_cabins.append(cabin)
+    for start in range(0, len(pool_free), cabin_size):
+        new_cabins.append(pool_free[start : start + cabin_size])
+    return new_cabins, anchored_cabins
+
+
+def _tally_redealt_cabins(wit, new_cabins, anchored_cabins, working) -> None:
+    """Write cabin-mate ids and the pool's witness counters."""
+    wit["pools_redealt"] += 1
+    wit["cabins_formed"] += len(new_cabins)
+    anchored = {id(cabin) for cabin in anchored_cabins}
+    for cabin in new_cabins:
+        ids = {int(agent.agent_id) for agent in cabin}
+        for agent in cabin:
+            agent.cabin_mate_ids = frozenset(ids - {int(agent.agent_id)})
+        if len(cabin) == 1:
+            wit["single_occupancy"] += 1
+        if (
+            id(cabin) in anchored
+            and min(ids) == int(cabin[0].agent_id)
+        ):
+            wit["keys_preserved"] += 1
+        statuses = {agent_id in working for agent_id in ids}
+        if len(statuses) > 1:
+            wit["mixed_status_cabins"] += 1
+
+
+def _split_posted_work_blocks(sched, pods: int, pod: int):
+    """Return ``(new_schedule, work_hours_removed)`` for one posted agent."""
+    new_sched = list(sched)
+    removed = 0
+    index = 0
+    while index < len(sched):
+        if sched[index] != "Work":
+            index += 1
+            continue
+        end = index
+        while end < len(sched) and sched[end] == "Work":
+            end += 1
+        turn = max(1, -(-(end - index) // pods))
+        start = index + pod * turn
+        keep_end = min(end, index + (pod + 1) * turn)
+        for slot in range(index, end):
+            if not start <= slot < keep_end:
+                new_sched[slot] = "Rest"
+                removed += 1
+        index = end
+    return new_sched, removed
+
+
 class KorkinShipEngine:
     """Python bridge to the Korkin Lab infection-dynamics ABM.
 
@@ -3140,15 +3253,7 @@ class KorkinShipEngine:
             seat = int(agent.agent_id) % seatings
             if seat == 0:
                 continue
-            for i, tok in enumerate(sched):
-                if not str(tok).startswith("Meal"):
-                    continue
-                target = i - offset + seat
-                if (
-                    0 <= target < len(sched)
-                    and not str(sched[target]).startswith("Meal")
-                ):
-                    sched[target], sched[i] = sched[i], sched[target]
+            _stagger_crew_meal_slots(sched, offset, seat)
             self._saved_crew_schedules[int(agent.agent_id)] = (
                 list(agent.schedule), int(getattr(agent, "meal_seating", 0) or 0),
             )
@@ -3358,78 +3463,29 @@ class KorkinShipEngine:
         leftovers form new staterooms by ascending id; unmatched
         anchors hold single occupancy.
         """
-        orig: dict[frozenset[int], list[KorkinAgent]] = {}
-        for a in members:
-            key = frozenset(set(a.cabin_mate_ids) | {int(a.agent_id)})
-            orig.setdefault(key, []).append(a)
-        anchors: list[KorkinAgent] = []
-        free: list[KorkinAgent] = []
-        for ids, group in orig.items():
-            orig_min = min(ids)
-            for a in group:
-                if (
-                    int(a.agent_id) == orig_min
-                    and int(a.agent_id) not in moved
-                ):
-                    anchors.append(a)
-                else:
-                    free.append(a)
+        anchors, free = _split_berth_anchors(members, moved)
         anchors.sort(key=lambda a: int(a.agent_id))
         free.sort(key=lambda a: int(a.agent_id))
         by_status: dict[bool, tuple[list[KorkinAgent], list[KorkinAgent]]] = {
             True: ([], []),
             False: ([], []),
         }
-        for a in anchors:
-            by_status[int(a.agent_id) in working][0].append(a)
-        for a in free:
-            by_status[int(a.agent_id) in working][1].append(a)
+        for agent in anchors:
+            by_status[int(agent.agent_id) in working][0].append(agent)
+        for agent in free:
+            by_status[int(agent.agent_id) in working][1].append(agent)
         new_cabins: list[list[KorkinAgent]] = []
         anchored_cabins: list[list[KorkinAgent]] = []
         for status in (True, False):
             pool_anchors, pool_free = by_status[status]
-            for anch in pool_anchors:
-                cabin = [anch]
-                orig_ids = set(anch.cabin_mate_ids)
-                for f in pool_free:
-                    if len(cabin) >= cabin_size:
-                        break
-                    if int(f.agent_id) in orig_ids:
-                        cabin.append(f)
-                        pool_free.remove(f)
-                for f in pool_free:
-                    if len(cabin) >= cabin_size:
-                        break
-                    if int(f.agent_id) > int(anch.agent_id):
-                        cabin.append(f)
-                        pool_free.remove(f)
-                for f in pool_free:
-                    if len(cabin) >= cabin_size:
-                        break
-                    cabin.append(f)
-                    pool_free.remove(f)
-                new_cabins.append(cabin)
-                anchored_cabins.append(cabin)
-            for i in range(0, len(pool_free), cabin_size):
-                new_cabins.append(pool_free[i : i + cabin_size])
-        wit = self._crew_berth_witness
-        wit["pools_redealt"] += 1
-        wit["cabins_formed"] += len(new_cabins)
-        anchored = {id(c) for c in anchored_cabins}
-        for cabin in new_cabins:
-            ids = {int(a.agent_id) for a in cabin}
-            for a in cabin:
-                a.cabin_mate_ids = frozenset(ids - {int(a.agent_id)})
-            if len(cabin) == 1:
-                wit["single_occupancy"] += 1
-            if (
-                id(cabin) in anchored
-                and min(ids) == int(cabin[0].agent_id)
-            ):
-                wit["keys_preserved"] += 1
-            statuses = {i in working for i in ids}
-            if len(statuses) > 1:
-                wit["mixed_status_cabins"] += 1
+            cabins, anchored = _cabins_for_status(
+                pool_anchors, pool_free, cabin_size,
+            )
+            new_cabins.extend(cabins)
+            anchored_cabins.extend(anchored)
+        _tally_redealt_cabins(
+            self._crew_berth_witness, new_cabins, anchored_cabins, working,
+        )
 
     def _crew_berth_restore(self) -> None:
         """Restore home zones + cabin mates saved at the rising edge."""
@@ -3509,24 +3565,7 @@ class KorkinShipEngine:
             if not sched:
                 continue
             pod = int(agent.agent_id) % pods
-            new_sched = list(sched)
-            removed = 0
-            i = 0
-            while i < len(sched):
-                if sched[i] != "Work":
-                    i += 1
-                    continue
-                j = i
-                while j < len(sched) and sched[j] == "Work":
-                    j += 1
-                turn = max(1, -(-(j - i) // pods))  # ceil
-                start = i + pod * turn
-                end = min(j, i + (pod + 1) * turn)
-                for k in range(i, j):
-                    if not start <= k < end:
-                        new_sched[k] = "Rest"
-                        removed += 1
-                i = j
+            new_sched, removed = _split_posted_work_blocks(sched, pods, pod)
             if removed:
                 self._saved_crew_cohort_schedules[int(agent.agent_id)] = sched
                 agent.schedule = new_sched

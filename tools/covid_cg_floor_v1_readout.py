@@ -181,18 +181,22 @@ def _row_triggers(theta: float, arm_id: str, stats: dict) -> dict | None:
 _MISSING = object()
 
 
+def _diff_dict_leaves(a: dict, b: dict, path: str, diffs: list) -> None:
+    for key in sorted(set(a) | set(b)):
+        if key in REPLICATION_IGNORED_KEYS:
+            continue
+        _leaf_diffs(
+            a.get(key, _MISSING), b.get(key, _MISSING),
+            f"{path}.{key}" if path else key, diffs,
+        )
+
+
 def _leaf_diffs(
     a: Any, b: Any, path: str, diffs: list[tuple[str, Any, Any]],
 ) -> None:
     """Recursive leaf diff, ignoring REPLICATION_IGNORED_KEYS anywhere."""
     if isinstance(a, dict) and isinstance(b, dict):
-        for key in sorted(set(a) | set(b)):
-            if key in REPLICATION_IGNORED_KEYS:
-                continue
-            _leaf_diffs(
-                a.get(key, _MISSING), b.get(key, _MISSING),
-                f"{path}.{key}" if path else key, diffs,
-            )
+        _diff_dict_leaves(a, b, path, diffs)
         return
     if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
         for i, (x, y) in enumerate(zip(a, b)):
@@ -200,6 +204,25 @@ def _leaf_diffs(
         return
     if a is _MISSING or b is _MISSING or a != b:
         diffs.append((path, a, b))
+
+
+def _replication_seed_diff(payload, ref, seed, sample_room: int):
+    """``(identical, max_abs_delta, sample_rows)`` for one paired seed."""
+    diffs: list[tuple[str, Any, Any]] = []
+    _leaf_diffs(payload, ref, "", diffs)
+    max_abs_delta = 0.0
+    for _path, left, right in diffs:
+        if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+            max_abs_delta = max(max_abs_delta, abs(left - right))
+    samples = [
+        {
+            "seed": seed, "path": path,
+            "got": left if left is not _MISSING else "<missing>",
+            "ref": right if right is not _MISSING else "<missing>",
+        }
+        for path, left, right in diffs[:sample_room]
+    ]
+    return int(not diffs), max_abs_delta, samples
 
 
 def _replication_theta_block(
@@ -220,23 +243,17 @@ def _replication_theta_block(
     n_paired = 0
     max_abs_delta = 0.0
     samples: list[dict] = []
-    for (t, seed), p in sorted(own.items()):
+    for (t, seed), payload in sorted(own.items()):
         if abs(t - theta) > 1e-9 or seed not in refs:
             continue
         n_paired += 1
-        diffs: list[tuple[str, Any, Any]] = []
-        _leaf_diffs(p, refs[seed], "", diffs)
-        if not diffs:
-            n_identical += 1
-        for path, a, b in diffs:
-            if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-                max_abs_delta = max(max_abs_delta, abs(a - b))
-        for path, a, b in diffs[: max(0, REPLICATION_DIFF_SAMPLE - len(samples))]:
-            samples.append(
-                {"seed": seed, "path": path,
-                 "got": a if a is not _MISSING else "<missing>",
-                 "ref": b if b is not _MISSING else "<missing>"},
-            )
+        identical, delta, sample = _replication_seed_diff(
+            payload, refs[seed], seed,
+            max(0, REPLICATION_DIFF_SAMPLE - len(samples)),
+        )
+        n_identical += identical
+        max_abs_delta = max(max_abs_delta, delta)
+        samples.extend(sample)
     return {
         "ref_dir": ref_dir,
         "n_paired": n_paired,

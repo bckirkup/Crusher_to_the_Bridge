@@ -279,6 +279,15 @@ def decompose_cell(
     }
 
 
+def _add_role_counts(bucket: dict, key: str, roles: dict) -> int:
+    bucket.setdefault(key, dict.fromkeys(ROLES, 0))
+    added = 0
+    for role, count in roles.items():
+        bucket[key][role] += count
+        added += count
+    return added
+
+
 def _pool_cells(cells: list[dict[str, Any]]) -> dict[str, Any]:
     classes: dict[str, dict[str, int]] = {}
     windowed: dict[str, dict[str, int]] = {}
@@ -287,15 +296,11 @@ def _pool_cells(cells: list[dict[str, Any]]) -> dict[str, Any]:
     for cell in cells:
         total += cell["lab_confirmed_total"]
         for key, roles in cell["catch_classes"].items():
-            classes.setdefault(key, dict.fromkeys(ROLES, 0))
-            for role, n in roles.items():
-                classes[key][role] += n
-                if key.endswith("_pre_onset"):
-                    pre += n
+            added = _add_role_counts(classes, key, roles)
+            if key.endswith("_pre_onset"):
+                pre += added
         for key, roles in cell["window_coverage"].items():
-            windowed.setdefault(key, dict.fromkeys(ROLES, 0))
-            for role, n in roles.items():
-                windowed[key][role] += n
+            _add_role_counts(windowed, key, roles)
     return {
         "lab_confirmed_total": total,
         "pre_onset_share_of_confirmed": (pre / total if total else None),

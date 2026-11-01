@@ -218,6 +218,31 @@ def _conversion_table(
     return lines
 
 
+def _tally_posted_route(events, mix_post: Counter, driver: Counter) -> None:
+    for event in events:
+        mix_post[event.get("k") or "?"] += 1
+    if events:
+        top = max(events, key=lambda event: int(event.get("t") or 0))
+        driver[top.get("k") or "?"] += 1
+    else:
+        driver["(none)"] += 1
+
+
+def _route_arm_counts(rows: list[dict]):
+    """Posted mix, all-censused mix, and voyage-max driver for one arm."""
+    cen = [row for row in rows if _cen(row)]
+    mix_post: Counter[str] = Counter()
+    mix_all: Counter[str] = Counter()
+    driver: Counter[str] = Counter()
+    for row in cen:
+        events = _early_events(row)
+        for event in events:
+            mix_all[event.get("k") or "?"] += 1
+        if row["posted"]:
+            _tally_posted_route(events, mix_post, driver)
+    return mix_post, mix_all, driver
+
+
 def _route_tables(
     cells: dict[tuple[str, str], list[dict]],
 ) -> list[str]:
@@ -235,22 +260,7 @@ def _route_tables(
         ]
         for arm in _ARMS:
             rows = cells.get((hull, arm), [])
-            cen = [r for r in rows if _cen(r)]
-            mix_post: Counter[str] = Counter()
-            mix_all: Counter[str] = Counter()
-            driver: Counter[str] = Counter()
-            for r in cen:
-                evs = _early_events(r)
-                for e in evs:
-                    mix_all[e.get("k") or "?"] += 1
-                if r["posted"]:
-                    for e in evs:
-                        mix_post[e.get("k") or "?"] += 1
-                    if evs:
-                        top = max(evs, key=lambda e: int(e.get("t") or 0))
-                        driver[top.get("k") or "?"] += 1
-                    else:
-                        driver["(none)"] += 1
+            mix_post, mix_all, driver = _route_arm_counts(rows)
             lines.append(
                 f"| {_ARM_LABEL.get(arm, arm)}"
                 f" | {'/'.join(str(mix_post.get(k, 0)) for k in _KINDS)}"
@@ -451,6 +461,20 @@ def _shedder_table(
     return lines
 
 
+def _integrity_agg(cen: list[dict]):
+    """Integrity counters and the pw>80 object count for one cell."""
+    agg: Counter[str] = Counter()
+    pw_over = 0
+    for row in cen:
+        census = _cen(row)
+        for key, value in (census.get("integrity") or {}).items():
+            agg[key] += int(value or 0)
+        for obj in _obj_rows(row):
+            if int(obj.get("pw_max") or 0) > 80:
+                pw_over += 1
+    return agg, pw_over
+
+
 def _integrity_table(
     cells: dict[tuple[str, str], list[dict]],
 ) -> list[str]:
@@ -465,16 +489,7 @@ def _integrity_table(
             cen = [r for r in rows if _cen(r)]
             if not cen:
                 continue
-            agg: Counter[str] = Counter()
-            pw_over = 0
-            for r in cen:
-                c = _cen(r)
-                integ = c.get("integrity") or {}
-                for k, v in integ.items():
-                    agg[k] += int(v or 0)
-                for o in _obj_rows(r):
-                    if int(o.get("pw_max") or 0) > 80:
-                        pw_over += 1
+            agg, pw_over = _integrity_agg(cen)
             n_obj = sum(int(_cen(r).get("n_objects") or 0) for r in cen)
             lines.append(
                 f"| {hull} {_ARM_LABEL.get(arm, arm)} | {len(cen)}"
@@ -535,7 +550,7 @@ def _windows_check(
     shipped shelf-life envelope; a_ext may run longer (its arm)."""
     lines = [
         "| cell | objects | windows max | objects w>8 | w>16 |",
-        "|---|---|---|---|---|",
+        _MD_SEP_5,
     ]
     for hull in _HULLS:
         for arm in ("ship", "ext", "thin"):
@@ -563,7 +578,7 @@ def _immune_echo(
     lines = [
         "| cell | immune_init med | expected* | imports med"
         " | crew comp |",
-        "|---|---|---|---|---|",
+        _MD_SEP_5,
     ]
     for hull in _HULLS:
         for arm in ("ship", "bi50", "bmix"):

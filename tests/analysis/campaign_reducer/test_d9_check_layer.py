@@ -85,7 +85,8 @@ def test_verify_page_ok_and_mismatch(tmp_path):
              "bytes": len(body), "rows": 2,
              "sha256": hashlib.sha256(body).hexdigest()}
     out = verify_page(str(p), entry)
-    assert out["ok"] is True and out["rows"] == 2
+    assert out["ok"] is True
+    assert out["rows"] == 2
     bad = verify_page(str(p), dict(entry, rows=3))
     assert bad["ok"] is False
     assert bad["mismatches"][0]["field"] == "rows"
@@ -103,13 +104,15 @@ def test_recompute_aggregate_sum_and_where(tmp_path):
     pages = _write_pages(tmp_path, rows)
     out = recompute_aggregate(
         pages, "n", "sum", where={"hull_id": "h1"})
-    assert out["ok"] is True and out["value"] == 14
+    assert out["ok"] is True
+    assert out["value"] == 14
     assert out["rows_matched"] == 2
     out = recompute_aggregate(pages, "n", "mean")
     assert out["value"] == pytest.approx((10 + 4 + 8) / 3)
     out = recompute_aggregate(
         pages, "n", "sum", where={"hull_id": "nope"})
-    assert out["ok"] is False and out["rows_matched"] == 0
+    assert out["ok"] is False
+    assert out["rows_matched"] == 0
 
 
 def test_recompute_aggregate_rejects_non_numeric(tmp_path):

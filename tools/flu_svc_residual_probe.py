@@ -122,6 +122,36 @@ def _load_vis_cell():
     return module
 
 
+def _apply_confinement_entry(
+    entry, uses_escort, intervals, confined, pending,
+) -> None:
+    """Replay one compliance-log row into the interval sets."""
+    aid = entry.get("agent_id")
+    epoch = entry.get("epoch")
+    action = entry.get("action")
+    if aid is None or epoch is None:
+        return
+    if action in _PENDING_ACTIONS:
+        pending.add(aid)
+        return
+    if action == _DELAYED_ADMIT and uses_escort:
+        pending.add(aid)
+        return
+    if action in _ADMIT_ACTIONS or action == _DELAYED_ADMIT:
+        if aid in confined:
+            pending.discard(aid)
+            return
+        confined.add(aid)
+        pending.discard(aid)
+        intervals.setdefault(aid, []).append([epoch, None])
+        return
+    if action in _RELEASE_ACTIONS and aid in confined:
+        confined.discard(aid)
+        open_iv = intervals.get(aid)
+        if open_iv and open_iv[-1][1] is None:
+            open_iv[-1][1] = epoch
+
+
 def _confinement_intervals(
     compliance_log: list[dict[str, Any]],
 ) -> dict[int, list[tuple[int, int | None]]]:
@@ -139,30 +169,9 @@ def _confinement_intervals(
     confined: set[int] = set()
     pending: set[int] = set()
     for entry in compliance_log:
-        aid = entry.get("agent_id")
-        epoch = entry.get("epoch")
-        action = entry.get("action")
-        if aid is None or epoch is None:
-            continue
-        if action in _PENDING_ACTIONS:
-            pending.add(aid)
-            continue
-        if action == _DELAYED_ADMIT and uses_escort:
-            pending.add(aid)
-            continue
-        if action in _ADMIT_ACTIONS or action == _DELAYED_ADMIT:
-            if aid in confined:
-                pending.discard(aid)
-                continue
-            confined.add(aid)
-            pending.discard(aid)
-            intervals.setdefault(aid, []).append([epoch, None])
-            continue
-        if action in _RELEASE_ACTIONS and aid in confined:
-            confined.discard(aid)
-            open_iv = intervals.get(aid)
-            if open_iv and open_iv[-1][1] is None:
-                open_iv[-1][1] = epoch
+        _apply_confinement_entry(
+            entry, uses_escort, intervals, confined, pending,
+        )
     return {aid: [tuple(iv) for iv in ivs] for aid, ivs in intervals.items()}
 
 
@@ -340,6 +349,21 @@ def _surplus_admit_epoch(
     return ivs[0][0] if ivs else None
 
 
+def _surplus_contributor(src_s, dose, clique, epoch, rows_a, iv_a) -> dict:
+    """One establishing-event contributor, with confinement at ``epoch``."""
+    src = None if src_s in ("None", "") else int(src_s)
+    src_rec = rows_a.get(src) if src is not None else None
+    confined = bool(src is not None and _confined_at(iv_a, src, epoch))
+    return {
+        "agent_id": src,
+        "dose": dose,
+        "role": (src_rec or {}).get("role"),
+        "same_clique": bool(src_rec and src_rec["clique"] == clique),
+        "confined_at_epoch": confined,
+        "first_infection_epoch": (src_rec or {}).get("first_infection_epoch"),
+    }
+
+
 def _surplus_source_rows(
     aid: int,
     epoch: int,
@@ -356,23 +380,9 @@ def _surplus_source_rows(
         contribs = []
         total = 0.0
         for src_s, dose in (ev.get("contributors") or {}).items():
-            src = None if src_s in ("None", "") else int(src_s)
-            src_rec = rows_a.get(src) if src is not None else None
-            confined = bool(
-                src is not None and _confined_at(iv_a, src, epoch)
+            contribs.append(
+                _surplus_contributor(src_s, dose, clique, epoch, rows_a, iv_a)
             )
-            contribs.append({
-                "agent_id": src,
-                "dose": dose,
-                "role": (src_rec or {}).get("role"),
-                "same_clique": bool(
-                    src_rec and src_rec["clique"] == clique
-                ),
-                "confined_at_epoch": confined,
-                "first_infection_epoch": (
-                    src_rec or {}
-                ).get("first_infection_epoch"),
-            })
             total += dose
         contribs.sort(key=lambda c: -c["dose"])
         confined_share = sum(

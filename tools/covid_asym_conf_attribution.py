@@ -144,6 +144,27 @@ def _confirmed_channels(pools: dict[str, Any]) -> dict[str, dict[str, int]]:
     return out
 
 
+def _tally_campaign_specimen(row: dict, entry: dict, infection_day: dict) -> None:
+    """Fold one campaign-log specimen into its day row."""
+    row["specimens"] += 1
+    aid = int(entry["agent_id"])
+    symptomatic = bool(entry["symptomatic_at_specimen"])
+    row["to_symptomatic" if symptomatic else "to_asymptomatic"] += 1
+    if entry["positive"]:
+        key = (
+            "positive_symptomatic" if symptomatic else "positive_asymptomatic"
+        )
+        row[key] += 1
+    if entry["role"] == "crew":
+        row["crew_specimens"] += 1
+    if aid in infection_day:
+        row["infected_swabbed"] += 1
+        if not entry["positive"]:
+            row["infected_negative"] += 1
+            dpi = row["day"] - infection_day[aid]
+            row["negative_dpi_hist"][dpi] += 1
+
+
 def _campaign_days(pools: dict[str, Any]) -> list[dict[str, Any]]:
     """Per campaign day: capacity spent and who the roster swabbed."""
     infection_day = {
@@ -165,24 +186,7 @@ def _campaign_days(pools: dict[str, Any]) -> list[dict[str, Any]]:
             "infected_negative": 0,
             "negative_dpi_hist": Counter(),
         })
-        row["specimens"] += 1
-        aid = int(entry["agent_id"])
-        symptomatic = bool(entry["symptomatic_at_specimen"])
-        row["to_symptomatic" if symptomatic else "to_asymptomatic"] += 1
-        if entry["positive"]:
-            key = (
-                "positive_symptomatic" if symptomatic
-                else "positive_asymptomatic"
-            )
-            row[key] += 1
-        if entry["role"] == "crew":
-            row["crew_specimens"] += 1
-        if aid in infection_day:
-            row["infected_swabbed"] += 1
-            if not entry["positive"]:
-                row["infected_negative"] += 1
-                dpi = day - infection_day[aid]
-                row["negative_dpi_hist"][dpi] += 1
+        _tally_campaign_specimen(row, entry, infection_day)
     campaign = pools["campaign"]
     days = []
     for day in sorted(by_day):

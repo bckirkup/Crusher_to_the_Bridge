@@ -452,6 +452,57 @@ def _op_resume(args, out_root: str) -> int:
 # ----------------------------------------------------------------------
 
 
+def _query_error_failure(exc) -> ReturnFailure:
+    code = (
+        contracts.EXIT_SOURCE_CHANGED
+        if exc.kind == "cursor_invalid"
+        else contracts.EXIT_INVALID_CONTRACT
+    )
+    status = "source_changed" if exc.kind == "cursor_invalid" else "blocked"
+    return ReturnFailure(
+        exc.kind, exc.detail, status=status, exit_code=code,
+        owner="query_engine",
+    )
+
+
+def _catalog_error_failure(exc) -> ReturnFailure:
+    quarantine = exc.kind == "partition_corrupt"
+    return ReturnFailure(
+        exc.kind, exc.detail,
+        status="quarantined" if quarantine else "return_blocked",
+        exit_code=(
+            contracts.EXIT_SCHEMA_OR_CORRUPTION_QUARANTINE
+            if quarantine
+            else contracts.EXIT_RETURN_PATH_BLOCKED
+        ),
+        owner="catalog",
+    )
+
+
+def _query_result_doc(request, outcome, status, swappable) -> dict:
+    doc = {
+        "status": status,
+        "operation": "query",
+        "request_id": request.get("request_id"),
+        "query_id": outcome.query_id,
+        "pages": len(outcome.pages),
+        "bounded_query_pages": outcome.page_keys,
+        "continuation": (
+            outcome.next_cursor.get("token") if outcome.next_cursor else None
+        ),
+        **_run_ids(),
+    }
+    if swappable:
+        doc["error"] = {
+            "kind": min(swappable),
+            "detail": "catalog snapshot changed behind the frozen cursor",
+            "owner": "query_engine",
+        }
+    elif outcome.errors:
+        doc["errors"] = outcome.errors[:8]
+    return doc
+
+
 def _op_query(args, out_root: str) -> int:
     request = _request_doc(args, "execution")
     query_doc = _load_json_path(args.query)
@@ -481,54 +532,16 @@ def _op_query(args, out_root: str) -> int:
             reduction_id=str(request.get("reduction_id") or ""),
         )
     except QueryError as exc:
-        code = (
-            contracts.EXIT_SOURCE_CHANGED
-            if exc.kind == "cursor_invalid"
-            else contracts.EXIT_INVALID_CONTRACT
-        )
-        status = "source_changed" if exc.kind == "cursor_invalid" else "blocked"
-        raise ReturnFailure(
-            exc.kind, exc.detail, status=status, exit_code=code,
-            owner="query_engine",
-        ) from exc
+        raise _query_error_failure(exc) from exc
     except CatalogError as exc:
-        quarantine = exc.kind == "partition_corrupt"
-        raise ReturnFailure(
-            exc.kind, exc.detail,
-            status="quarantined" if quarantine else "return_blocked",
-            exit_code=(
-                contracts.EXIT_SCHEMA_OR_CORRUPTION_QUARANTINE
-                if quarantine
-                else contracts.EXIT_RETURN_PATH_BLOCKED
-            ),
-            owner="catalog",
-        ) from exc
+        raise _catalog_error_failure(exc) from exc
     # A catalog version that changed behind a frozen cursor is typed
     # source_changed (the P20 surface), never a generic block or success.
     swappable = {
         e.get("kind") for e in outcome.errors if isinstance(e, dict)
     } & {"snapshot_mismatch", "cursor_invalid"}
     status = "source_changed" if swappable else outcome.status
-    doc = {
-        "status": status,
-        "operation": "query",
-        "request_id": request.get("request_id"),
-        "query_id": outcome.query_id,
-        "pages": len(outcome.pages),
-        "bounded_query_pages": outcome.page_keys,
-        "continuation": (
-            outcome.next_cursor.get("token") if outcome.next_cursor else None
-        ),
-        **_run_ids(),
-    }
-    if swappable:
-        doc["error"] = {
-            "kind": min(swappable),
-            "detail": "catalog snapshot changed behind the frozen cursor",
-            "owner": "query_engine",
-        }
-    elif outcome.errors:
-        doc["errors"] = outcome.errors[:8]
+    doc = _query_result_doc(request, outcome, status, swappable)
     _emit(out_root, _STATUS_NAME, doc)
     print(json.dumps(doc))
     if swappable:

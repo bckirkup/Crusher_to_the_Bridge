@@ -64,26 +64,35 @@ def _terminal_room(rooms: list[str], eng: ContamTransportEngine, pick: str) -> s
     return max(rooms, key=lambda z, vols=vols: vols[z])
 
 
+def _plen_room(path, kind: str) -> str:
+    return path.from_zone if kind == "ret" else path.to_zone
+
+
+def _shunt_kind(group: dict[str, list], kind: str, terminal: str, s: float) -> None:
+    """Scale non-terminal paths and add the shunted flow onto the terminal."""
+    paths = group.get(kind, [])
+    tot = sum(
+        path.flow_rate_m3h
+        for path in paths
+        if _plen_room(path, kind) != terminal
+    )
+    for path in paths:
+        room = _plen_room(path, kind)
+        path.flow_rate_m3h *= (1.0 - s) if room != terminal else 1.0
+    for path in paths:
+        if _plen_room(path, kind) == terminal:
+            path.flow_rate_m3h += s * tot
+
+
 def _shunt_one_plen_group(
     g: dict[str, list], eng: ContamTransportEngine, s: float, pick: str
 ) -> None:
     rooms = [p.from_zone for p in g.get("ret", [])]
     if len(rooms) < 2:
         return
-    t = _terminal_room(rooms, eng, pick)
+    terminal = _terminal_room(rooms, eng, pick)
     for kind in ("ret", "sup"):
-        tot = sum(
-            p.flow_rate_m3h
-            for p in g.get(kind, [])
-            if (p.from_zone if kind == "ret" else p.to_zone) != t
-        )
-        for p in g.get(kind, []):
-            room = p.from_zone if kind == "ret" else p.to_zone
-            p.flow_rate_m3h *= (1.0 - s) if room != t else 1.0
-        for p in g.get(kind, []):
-            room = p.from_zone if kind == "ret" else p.to_zone
-            if room == t:
-                p.flow_rate_m3h += s * tot
+        _shunt_kind(g, kind, terminal, s)
 
 
 def _hd_exhaust_rates(d: str) -> dict[str, float]:

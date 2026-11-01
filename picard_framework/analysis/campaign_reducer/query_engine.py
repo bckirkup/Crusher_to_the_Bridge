@@ -90,16 +90,28 @@ def _eval_bool_op(op: str, arg: Any, row: dict) -> bool | None:
     return None if inner is None else not inner
 
 
+def _cmp_eq(v: Any, target: Any) -> bool:
+    return v == target if target is not None or v is not None else True
+
+
+def _cmp_ne(v: Any, target: Any) -> bool | None:
+    if target is None:
+        return v is not None
+    return v != target if v is not None else None
+
+
+def _cmp_in(v: Any, target: Any) -> bool:
+    return (v in target) if v is not None else (None in target)
+
+
 def _eval_cmp(op: str, v: Any, target: Any) -> bool | None:
     """Tri-state field-vs-literal comparison (None propagates)."""
     if op == "eq":
-        return v == target if target is not None or v is not None else True
+        return _cmp_eq(v, target)
     if op == "ne":
-        if target is None:
-            return v is not None
-        return v != target if v is not None else None
+        return _cmp_ne(v, target)
     if op == "in":
-        return (v in target) if v is not None else (None in target)
+        return _cmp_in(v, target)
     if v is None or target is None:
         return None
     if op == "lt":

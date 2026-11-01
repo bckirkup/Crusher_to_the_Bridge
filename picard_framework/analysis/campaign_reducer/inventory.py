@@ -332,15 +332,43 @@ def _probe_family(client, bucket: str, prefix: str, counters: _Counters) -> dict
     }
 
 
+def _saved_root_state(prior, section: str, root: str) -> dict:
+    return dict((prior or {}).get(section, {}).get(root) or {})
+
+
+def _listing_page_rows(page, excludes, counters, root):
+    """One listing page. A budget stop returns the exception unwritten."""
+    rows = []
+    excluded = 0
+    objects = 0
+    try:
+        for obj in page.get("Contents") or []:
+            key = obj["Key"]
+            if _excluded(key, excludes):
+                excluded += 1
+                continue
+            counters.charge("max_source_objects")
+            objects += 1
+            rows.append(_listing_row(key, obj, root))
+    except _BudgetStop as exc:
+        return rows, objects, excluded, exc
+    return rows, objects, excluded, None
+
+
+def _budget_block(exc: _BudgetStop) -> dict:
+    return {
+        "kind": "budget_stopped", "detail": exc.field,
+        "owner": "budget_ledger",
+    }
+
+
 def _enumerate_root(
     client, bucket: str, root: str, excludes: list[str],
     counters: _Counters, out_root: str, prior: dict | None,
 ) -> dict:
     """Paginated exact-key listing of one root; explicit continuation."""
     slug = _root_slug(root)
-    state = dict(
-        (prior or {}).get("roots", {}).get(root) or {},
-    )
+    state = _saved_root_state(prior, "roots", root)
     token = state.get("next_token")
     index = int(state.get("pages_completed") or 0)
     objects = int(state.get("objects") or 0)
@@ -354,8 +382,7 @@ def _enumerate_root(
             counters.charge("max_api_calls_total")
             counters.charge("max_list_pages")
         except _BudgetStop as exc:
-            blocked = {"kind": "budget_stopped", "detail": exc.field,
-                       "owner": "budget_ledger"}
+            blocked = _budget_block(exc)
             break
         kwargs: dict = {
             "Bucket": bucket, "Prefix": root, "MaxKeys": _PAGE_KEYS,
@@ -368,21 +395,14 @@ def _enumerate_root(
             blocked = {"kind": exc.kind, "detail": exc.detail,
                        "owner": exc.owner}
             break
-        rows = []
-        try:
-            for obj in page.get("Contents") or []:
-                key = obj["Key"]
-                if _excluded(key, excludes):
-                    excluded += 1
-                    continue
-                counters.charge("max_source_objects")
-                objects += 1
-                rows.append(_listing_row(key, obj, root))
-        except _BudgetStop as exc:
+        rows, n_obj, n_excl, stop = _listing_page_rows(
+            page, excludes, counters, root)
+        objects += n_obj
+        excluded += n_excl
+        if stop is not None:
             # A cap mid-page drops the unwritten page — the retained
             # token still points before it, so resume re-fetches it.
-            blocked = {"kind": "budget_stopped", "detail": exc.field,
-                       "owner": "budget_ledger"}
+            blocked = _budget_block(stop)
             break
         index += 1
         if rows:
@@ -401,15 +421,52 @@ def _enumerate_root(
     }
 
 
+def _apply_version_markers(kwargs, key_marker, version_marker) -> None:
+    if key_marker:
+        kwargs["KeyMarker"] = key_marker
+    if version_marker:
+        kwargs["VersionIdMarker"] = version_marker
+
+
+def _version_page_rows(page, counters):
+    """Version and delete-marker rows. A budget stop returns the exception."""
+    rows = []
+    objects = 0
+    try:
+        for obj in page.get("Versions") or []:
+            counters.charge("max_source_objects")
+            objects += 1
+            rows.append({
+                "key": obj["Key"],
+                "version_id": obj.get("VersionId"),
+                "is_latest": obj.get("IsLatest"),
+                "bytes": obj.get("Size"),
+                "storage_class": obj.get("StorageClass"),
+                "last_modified": str(obj.get("LastModified", "")),
+                "provenance": "list_object_versions",
+            })
+    except _BudgetStop as exc:
+        return rows, objects, exc
+    for marker in page.get("DeleteMarkers") or []:
+        rows.append({
+            "key": marker["Key"],
+            "version_id": marker.get("VersionId"),
+            "is_latest": marker.get("IsLatest"),
+            "bytes": None,
+            "storage_class": "DELETE_MARKER",
+            "last_modified": str(marker.get("LastModified", "")),
+            "provenance": "list_object_versions",
+        })
+    return rows, objects, None
+
+
 def _enumerate_versions(
     client, bucket: str, root: str, counters: _Counters,
     out_root: str, prior: dict | None,
 ) -> dict:
     """VersionId provenance pass — separate rows from the listing."""
     slug = _root_slug(root)
-    state = dict(
-        (prior or {}).get("version_roots", {}).get(root) or {},
-    )
+    state = _saved_root_state(prior, "version_roots", root)
     key_marker = state.get("key_marker")
     version_marker = state.get("version_id_marker")
     index = int(state.get("pages_completed") or 0)
@@ -423,14 +480,10 @@ def _enumerate_versions(
             counters.charge("max_api_calls_total")
             counters.charge("max_list_pages")
         except _BudgetStop as exc:
-            blocked = {"kind": "budget_stopped", "detail": exc.field,
-                       "owner": "budget_ledger"}
+            blocked = _budget_block(exc)
             break
         kwargs: dict = {"Bucket": bucket, "Prefix": root}
-        if key_marker:
-            kwargs["KeyMarker"] = key_marker
-        if version_marker:
-            kwargs["VersionIdMarker"] = version_marker
+        _apply_version_markers(kwargs, key_marker, version_marker)
         try:
             page = _versions_call(client, bucket, **kwargs)
         except InventoryFailure as exc:
@@ -438,34 +491,11 @@ def _enumerate_versions(
                        "owner": exc.owner}
             break
         index += 1
-        rows = []
-        try:
-            for obj in page.get("Versions") or []:
-                counters.charge("max_source_objects")
-                objects += 1
-                rows.append({
-                    "key": obj["Key"],
-                    "version_id": obj.get("VersionId"),
-                    "is_latest": obj.get("IsLatest"),
-                    "bytes": obj.get("Size"),
-                    "storage_class": obj.get("StorageClass"),
-                    "last_modified": str(obj.get("LastModified", "")),
-                    "provenance": "list_object_versions",
-                })
-        except _BudgetStop as exc:
-            blocked = {"kind": "budget_stopped", "detail": exc.field,
-                       "owner": "budget_ledger"}
+        rows, n_obj, stop = _version_page_rows(page, counters)
+        objects += n_obj
+        if stop is not None:
+            blocked = _budget_block(stop)
             break
-        for marker in page.get("DeleteMarkers") or []:
-            rows.append({
-                "key": marker["Key"],
-                "version_id": marker.get("VersionId"),
-                "is_latest": marker.get("IsLatest"),
-                "bytes": None,
-                "storage_class": "DELETE_MARKER",
-                "last_modified": str(marker.get("LastModified", "")),
-                "provenance": "list_object_versions",
-            })
         if rows:
             pages.append(_write_version_page(out_root, slug, index, rows))
         key_marker = page.get("NextKeyMarker")
@@ -619,6 +649,57 @@ def _blocked_records(roots: list[dict], versions: list[dict], discovery: dict) -
     return records
 
 
+def _slash_prefix(prefix: str) -> str:
+    return prefix if prefix.endswith("/") else f"{prefix}/"
+
+
+def _inventory_status(stop_reason, blocked, exhausted) -> str:
+    if stop_reason:
+        return "budget_stopped"
+    if blocked:
+        return "blocked"
+    if not exhausted:
+        return "partial"
+    return "completed"
+
+
+def _stop_reason_from_blocked(blocked) -> str | None:
+    return next(
+        (
+            f"budget_stopped:{record.get('detail')}"
+            for record in blocked
+            if record.get("kind") == "budget_stopped"
+        ),
+        None,
+    )
+
+
+def _collect_inventory(
+    client, bucket, roots, excludes, counters, out_root, prior, records,
+):
+    """Discovery, root listings, version pages, and family probes."""
+    discovery = _discover_roots(client, bucket, counters)
+    root_results = [
+        _enumerate_root(
+            client, bucket, root, excludes, counters, out_root, prior,
+        )
+        for root in roots
+    ]
+    version_results = [
+        _enumerate_versions(
+            client, bucket, root, counters, out_root, prior,
+        )
+        for root in roots
+    ]
+    probes = {}
+    for record in records:
+        prefix = record.get("prefix")
+        if not prefix or prefix in probes:
+            continue
+        probes[prefix] = _probe_family(client, bucket, prefix, counters)
+    return discovery, root_results, version_results, probes
+
+
 def run(args) -> int:
     """Dispatch the inventory op; typed failures still write coverage."""
     out_root = _out_root(args.out, "inventory")
@@ -639,11 +720,11 @@ def run(args) -> int:
             raise _invalid("request names no source_bucket")
         client = _s3_client()
         roots = [
-            r if r.endswith("/") else f"{r}/"
+            _slash_prefix(r)
             for r in request.get("source_roots_allowlist") or []
         ]
         excludes = [
-            p if p.endswith("/") else f"{p}/"
+            _slash_prefix(p)
             for p in request.get("derived_exclude_prefixes") or []
         ]
         if not excludes:
@@ -656,46 +737,21 @@ def run(args) -> int:
         discovery = {"state": "skipped", "blocked": None,
                      "discovered_top_level": []}
         try:
-            discovery = _discover_roots(client, bucket, counters)
-            for root in roots:
-                root_results.append(_enumerate_root(
-                    client, bucket, root, excludes, counters,
-                    out_root, prior,
-                ))
-            for root in roots:
-                version_results.append(_enumerate_versions(
-                    client, bucket, root, counters, out_root, prior,
-                ))
-            for record in records:
-                prefix = record.get("prefix")
-                if not prefix or prefix in probes:
-                    continue
-                probes[prefix] = _probe_family(
-                    client, bucket, prefix, counters,
+            discovery, root_results, version_results, probes = (
+                _collect_inventory(
+                    client, bucket, roots, excludes, counters,
+                    out_root, prior, records,
                 )
+            )
         except _BudgetStop as exc:
             stop_reason = f"budget_stopped:{exc.field}"
         ended_utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         family_rows = _family_rows(records, probes)
         blocked = _blocked_records(root_results, version_results, discovery)
         if not stop_reason:
-            stop_reason = next(
-                (
-                    f"budget_stopped:{b.get('detail')}"
-                    for b in blocked
-                    if b.get("kind") == "budget_stopped"
-                ),
-                None,
-            )
+            stop_reason = _stop_reason_from_blocked(blocked)
         exhausted = all(r.get("exhausted") for r in root_results)
-        if stop_reason:
-            status = "budget_stopped"
-        elif blocked:
-            status = "blocked"
-        elif not exhausted:
-            status = "partial"
-        else:
-            status = "completed"
+        status = _inventory_status(stop_reason, blocked, exhausted)
         inventory_doc = {
             "schema": "crusher-reducer-frozen-inventory/v1",
             "request_id": request.get("request_id"),

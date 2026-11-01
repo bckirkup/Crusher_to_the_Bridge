@@ -60,6 +60,114 @@ def _series(doc: Any) -> tuple[list, str | None]:
     return [], "timeseries_absent"
 
 
+def _put_obs_field(
+    values: dict, prov: dict, window: str,
+    col: str, value: Any, status: str, field: dict,
+) -> None:
+    """One observation column plus its provenance labels."""
+    values[col] = value
+    prov[col] = {
+        "member": "summary.json",
+        "native_path": "/timeseries",
+        "status": status,
+        "clock": "epoch index on natural_history_clock units",
+        "observation_window": window,
+    }
+    for label in ("category", "role", "origin"):
+        if field.get(label) is not None:
+            prov[col][label] = field[label]
+
+
+def _obs_epoch(value: Any, *, crossed: bool) -> tuple[Any, str, bool]:
+    """``(value, status, missing)`` for a threshold that may never fire."""
+    if crossed:
+        status = "observed" if value is not None else "not_crossed_in_window"
+        return value, status, False
+    status = "observed" if value is not None else "missing"
+    return value, status, value is None
+
+
+def _derive_first_epoch(_field, ts, _n_rows, _values):
+    return ts[0].get("epoch"), "observed", False
+
+
+def _derive_last_epoch(_field, ts, _n_rows, _values):
+    return ts[-1].get("epoch"), "observed", False
+
+
+def _derive_row_count(_field, _ts, n_rows, _values):
+    return n_rows, "observed", False
+
+
+def _derive_contiguous(_field, ts, n_rows, _values):
+    epochs = [row.get("epoch") for row in ts]
+    return epochs == list(range(n_rows)), "observed", False
+
+
+def _derive_coverage(field, _ts, n_rows, values):
+    den = values.get(field.get("denominator", ""))
+    if first_paper._finite_num(den) and den:
+        return n_rows / den, "observed", False
+    return None, "missing", True
+
+
+def _derive_last_value(field, ts, _n_rows, _values):
+    return _obs_epoch(ts[-1].get(field["ts_key"]), crossed=False)
+
+
+def _derive_first_gt0(field, ts, _n_rows, _values):
+    key = field["ts_key"]
+    hit = next(
+        (
+            row.get("epoch")
+            for row in ts
+            if first_paper._finite_num(row.get(key)) and row[key] > 0
+        ),
+        None,
+    )
+    return _obs_epoch(hit, crossed=True)
+
+
+def _derive_first_any_flag(field, ts, _n_rows, _values):
+    keys = field.get("ts_keys") or []
+    hit = next(
+        (
+            row.get("epoch")
+            for row in ts
+            if any(row.get(key) for key in keys)
+        ),
+        None,
+    )
+    return _obs_epoch(hit, crossed=True)
+
+
+def _derive_first_status_in(field, ts, _n_rows, _values):
+    wanted = set(field.get("values") or [])
+    key = field["ts_key"]
+    hit = next(
+        (
+            row.get("epoch")
+            for row in ts
+            if row.get(key) in wanted
+        ),
+        None,
+    )
+    return _obs_epoch(hit, crossed=True)
+
+
+_OBS_DERIVE = {
+    "first_epoch": _derive_first_epoch,
+    "last_epoch": _derive_last_epoch,
+    "row_count": _derive_row_count,
+    "contiguous": _derive_contiguous,
+    "coverage": _derive_coverage,
+    "last_value": _derive_last_value,
+    "first_gt0": _derive_first_gt0,
+    "first_any_flag": _derive_first_any_flag,
+    "first_status_in": _derive_first_status_in,
+}
+
+
 def _observatory_fields(
     values: dict, prov: dict, doc: Any, window: str,
     fields: list[dict] | None = None,
@@ -79,97 +187,22 @@ def _observatory_fields(
     missing: list[str] = []
     ts, absent = _series(doc)
     n_rows = len(ts)
-
-    def put(col: str, value: Any, status: str, f: dict) -> None:
-        values[col] = value
-        prov[col] = {
-            "member": "summary.json",
-            "native_path": "/timeseries",
-            "status": status,
-            "clock": "epoch index on natural_history_clock units",
-            "observation_window": window,
-        }
-        for label in ("category", "role", "origin"):
-            if f.get(label) is not None:
-                prov[col][label] = f[label]
-
-    for f in fields if fields is not None else profile()["observation_fields"]:
-        col = f["column"]
-        derive = f["derive"]
+    spec_fields = (
+        fields if fields is not None else profile()["observation_fields"]
+    )
+    for field in spec_fields:
+        col = field["column"]
         if absent is not None:
-            put(col, None, absent, f)
+            _put_obs_field(values, prov, window, col, None, absent, field)
             missing.append(col)
             continue
-        if derive == "first_epoch":
-            put(col, ts[0].get("epoch"), "observed", f)
-        elif derive == "last_epoch":
-            put(col, ts[-1].get("epoch"), "observed", f)
-        elif derive == "row_count":
-            put(col, n_rows, "observed", f)
-        elif derive == "contiguous":
-            epochs = [e.get("epoch") for e in ts]
-            ok = epochs == list(range(n_rows))
-            put(col, ok, "observed", f)
-        elif derive == "coverage":
-            den = values.get(f.get("denominator", ""))
-            if first_paper._finite_num(den) and den:
-                put(col, n_rows / den, "observed", f)
-            else:
-                put(col, None, "missing", f)
-                missing.append(col)
-        elif derive == "last_value":
-            v = ts[-1].get(f["ts_key"])
-            put(col, v, "observed" if v is not None else "missing", f)
-            if v is None:
-                missing.append(col)
-        elif derive == "first_gt0":
-            hit = next(
-                (
-                    e.get("epoch")
-                    for e in ts
-                    if first_paper._finite_num(e.get(f["ts_key"]))
-                    and e[f["ts_key"]] > 0
-                ),
-                None,
-            )
-            put(
-                col,
-                hit,
-                "observed" if hit is not None else "not_crossed_in_window",
-                f,
-            )
-        elif derive == "first_any_flag":
-            keys = f.get("ts_keys") or []
-            hit = next(
-                (
-                    e.get("epoch")
-                    for e in ts
-                    if any(e.get(k) for k in keys)
-                ),
-                None,
-            )
-            put(
-                col,
-                hit,
-                "observed" if hit is not None else "not_crossed_in_window",
-                f,
-            )
-        elif derive == "first_status_in":
-            wanted = set(f.get("values") or [])
-            hit = next(
-                (
-                    e.get("epoch")
-                    for e in ts
-                    if e.get(f["ts_key"]) in wanted
-                ),
-                None,
-            )
-            put(
-                col,
-                hit,
-                "observed" if hit is not None else "not_crossed_in_window",
-                f,
-            )
+        derive = _OBS_DERIVE.get(field["derive"])
+        if derive is None:
+            continue
+        value, status, is_missing = derive(field, ts, n_rows, values)
+        _put_obs_field(values, prov, window, col, value, status, field)
+        if is_missing:
+            missing.append(col)
     return missing
 
 
@@ -210,34 +243,38 @@ def _equality_checks(
     return missing_cols
 
 
+def _scan_agreement_value(check: dict, values: dict, hit):
+    """``(column, value, status, missing)`` for one scan-agreement check."""
+    col = check["column"]
+    scan_v = values.get(check["scan_column"])
+    own = values.get(check["own_column"])
+    if check.get("own_compare") == "present":
+        own = own is not None
+    if scan_v is None or hit is None:
+        status = (
+            "scan_source_absent" if hit is None
+            else "agreement_uncomputable"
+        )
+        return col, None, status, True
+    if check.get("own_compare") is None and own is None:
+        return col, None, "agreement_uncomputable", True
+    status = (
+        "agreement_consistent" if scan_v == own else "agreement_divergent"
+    )
+    return col, scan_v == own, status, False
+
+
 def _scan_agreement_checks(
     values: dict, prov: dict, fields_prov: dict, hit
 ) -> list[str]:
     """Cross-source agreement between scanner counters and our own."""
     missing_cols: list[str] = []
     for check in profile().get("scan_agreement_checks") or []:
-        col = check["column"]
-        scan_v = values.get(check["scan_column"])
-        own = values.get(check["own_column"])
-        if check.get("own_compare") == "present":
-            own = own is not None
-        if scan_v is None or hit is None:
-            values[col] = None
-            status = (
-                "scan_source_absent" if hit is None
-                else "agreement_uncomputable"
-            )
+        col, value, status, missing = _scan_agreement_value(
+            check, values, hit)
+        values[col] = value
+        if missing:
             missing_cols.append(col)
-        elif check.get("own_compare") is None and own is None:
-            values[col] = None
-            status = "agreement_uncomputable"
-            missing_cols.append(col)
-        else:
-            values[col] = scan_v == own
-            status = (
-                "agreement_consistent" if scan_v == own
-                else "agreement_divergent"
-            )
         prov[col] = {
             "native_path": None,
             "member": "derived:scan_agreement_check",
@@ -273,6 +310,58 @@ def _availability_fields(values: dict, prov: dict) -> None:
         }
 
 
+def _both_finite(left, right) -> bool:
+    return first_paper._finite_num(left) and first_paper._finite_num(right)
+
+
+def _eq_clock(left, right) -> str:
+    """complete / truncated / overrun for an equality comparison."""
+    if left == right:
+        return "complete"
+    if left < right:
+        return "truncated"
+    return "overrun"
+
+
+def _ge_clock(span, declared) -> str:
+    """complete when the retained span covers the declared horizon.
+
+    Callers pass finite numbers, so a span that does not cover the horizon
+    is truncated. There is no overrun arm: covering the horizon is ``>=``.
+    """
+    if span >= declared:
+        return "complete"
+    return "truncated"
+
+
+def _configured_clock_status(emitted, declared) -> tuple[str, bool]:
+    """``(label, missing)`` for configured-vs-configured ``clock_status``."""
+    if _both_finite(emitted, declared):
+        return _eq_clock(emitted, declared), False
+    return "unknown", True
+
+
+def _observed_clock_label(absent, retained, observed, declared) -> tuple[str, bool]:
+    """``(label, missing)`` for the retained-span clock witness."""
+    if absent is None and _both_finite(retained, declared):
+        return _ge_clock(retained, declared), False
+    if _both_finite(observed, declared):
+        if observed + 1 >= declared:
+            return "complete", False
+        return "truncated", False
+    return "unknown", True
+
+
+def _posted_label(hit) -> tuple[str, bool]:
+    """``(label, missing)`` for the scanner's own posted rollup."""
+    posted = hit["line"].get("posted") if hit else None
+    if posted is True:
+        return "posted", False
+    if hit is not None:
+        return "unposted", False
+    return "unknown", True
+
+
 def _status_columns(values: dict, prov: dict, doc: Any, hit) -> list[str]:
     """Observation/scan status columns.
 
@@ -288,16 +377,8 @@ def _status_columns(values: dict, prov: dict, doc: Any, hit) -> list[str]:
     missing: list[str] = []
     emitted = values.get("num_epochs")
     declared = (doc.get("parameters") or {}).get("num_epochs")
-    if first_paper._finite_num(emitted) and first_paper._finite_num(
-        declared
-    ):
-        clock = (
-            "complete" if emitted == declared
-            else "truncated" if emitted < declared
-            else "overrun"
-        )
-    else:
-        clock = "unknown"
+    clock, clock_missing = _configured_clock_status(emitted, declared)
+    if clock_missing:
         missing.append("clock_status")
     values["clock_status"] = clock
     prov["clock_status"] = first_paper._status_prov(
@@ -309,26 +390,12 @@ def _status_columns(values: dict, prov: dict, doc: Any, hit) -> list[str]:
         "information (see observed_clock_status)."
     )
 
-    ts, absent = _series(doc)
+    _ts, absent = _series(doc)
     observed = values.get("observed_terminal_epoch")
     retained = values.get("retained_epoch_rows")
-    if absent is None and first_paper._finite_num(retained) and (
-        first_paper._finite_num(declared)
-    ):
-        obs_clock = (
-            "complete" if retained >= declared
-            else "truncated" if retained < declared
-            else "overrun"
-        )
-    elif first_paper._finite_num(observed) and first_paper._finite_num(
-        declared
-    ):
-        obs_clock = (
-            "complete" if observed + 1 >= declared
-            else "truncated"
-        )
-    else:
-        obs_clock = "unknown"
+    obs_clock, obs_missing = _observed_clock_label(
+        absent, retained, observed, declared)
+    if obs_missing:
         missing.append("observed_clock_status")
     values["observed_clock_status"] = obs_clock
     prov["observed_clock_status"] = first_paper._status_prov(
@@ -347,13 +414,8 @@ def _status_columns(values: dict, prov: dict, doc: Any, hit) -> list[str]:
         completion,
     )
 
-    posted = hit["line"].get("posted") if hit else None
-    if posted is True:
-        posted_status = "posted"
-    elif hit is not None:
-        posted_status = "unposted"
-    else:
-        posted_status = "unknown"
+    posted_status, posted_missing = _posted_label(hit)
+    if posted_missing:
         missing.append("scan_posted_status")
     values["scan_posted_status"] = posted_status
     prov["scan_posted_status"] = first_paper._status_prov(
@@ -368,7 +430,7 @@ def absorb_scan_rows(acc, spec: SourceSpec, result) -> None:
 
 
 def vector_rows(
-    spec,
+    _spec,
     src: SourceSpec,
     result,
     ctx: ReductionContext,
