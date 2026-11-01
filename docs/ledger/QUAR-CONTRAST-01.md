@@ -1,9 +1,9 @@
 # QUAR-CONTRAST-01
 **Date:** 2026-11-01
-**Commit:** `668fe379`
+**Commit:** 668fe379
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** `668fe379`
+**Measured at:** 668fe379
 
 Re-ran both arms of the settled QUAR-ATTR-V2 pool-transport contrast —
 `A0_declared` vs `A2_pool_transport_off` at Θ 1e9 on `diamond_princess_2020`
