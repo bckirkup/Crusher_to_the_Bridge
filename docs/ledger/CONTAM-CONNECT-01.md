@@ -3,7 +3,7 @@
 **Commit:** 338b5634
 **Pathogens:** all
 **Status:** measured
-**Measured at:** ec3036d9 (baseline), post-change re-audit below
+**Measured at:** ec3036d9
 
 Implements ranked fix #3 of `docs/contam_museum_hull_audit.md`
 (CONTAM-MUSEUM-01): lexington_cv2 / saratoga_cv3 disconnected-compartment
