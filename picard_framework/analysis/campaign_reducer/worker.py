@@ -722,6 +722,7 @@ def main(argv: list[str] | None = None) -> int:
             ) or None,
             pages_manifest_key=result.pages_manifest_key,
             assets_written=result.status == "completed",
+            counts=result.table_counts,
         ))
         print(json.dumps({"status": result.status,
                           "snapshot_id": result.snapshot_id}))
