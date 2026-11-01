@@ -224,8 +224,17 @@ def test_summary_only_member_reads_and_binding():
     assert prov["member"] == "summary.json"
     assert prov["source_key"] == "run_a.zip"
     assert prov["status"] == "exact_emitted"
-    assert row["definition_version"] == "first_paper_scalar/1.2.0"
+    assert row["definition_version"] == "first_paper_scalar/1.3.0"
     assert row["definition_sha256"]
+    # 1.3.0 observed-window witness fields (same machinery as obsclock)
+    assert row["values"]["observed_first_epoch"] == 0
+    assert row["values"]["observed_terminal_epoch"] == 287
+    assert row["values"]["retained_epoch_rows"] == 288
+    assert row["values"]["epoch_index_contiguous"] is True
+    assert row["provenance"]["observed_terminal_epoch"]["status"] \
+        == "observed"
+    assert row["provenance"]["observed_terminal_epoch"]["member"] \
+        == "summary.json"
     assert row["values"]["cumulative_ever_infected_passenger"] == 6
     assert row["values"]["trigger_status"] == "ALERT"
     assert row["values"]["census_n_acquired"] == 11

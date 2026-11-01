@@ -552,6 +552,24 @@ def vector_rows(
         missing += _recomputed_pairs(values, prov, prov)
         missing += _sum_checks(values, prov, prov)
         missing += _operand_sum_checks(values, prov, prov)
+        obs_fields = doc.get("observation_fields") or []
+        if obs_fields:
+            # Lazy import: observation_clock imports this module, so a
+            # top-level import would cycle. The derives run through the
+            # same code path as first_paper_observation_clock's
+            # observation_fields (1.3.0 compact witnessed-window set).
+            from . import observation_clock
+            ts, absent = observation_clock._series(ddoc.doc)
+            window = (
+                "unavailable"
+                if absent
+                else canonical_json(
+                    [ts[0].get("epoch"), ts[-1].get("epoch")]
+                )
+            )
+            missing += observation_clock._observatory_fields(
+                values, prov, ddoc.doc, window, fields=obs_fields
+            )
         hit, scan_status = _scan_lookup(
             acc,
             object_key,
