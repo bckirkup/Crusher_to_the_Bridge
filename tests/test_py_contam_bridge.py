@@ -675,3 +675,77 @@ class TestDuty0TerminalMode:
         assert parse_duty0_terminal_mode(
             {"duty0_terminal_mode": "sealed"},
         ) == "sealed"
+
+
+# ── Cross-zone-link endpoint resolution (CONTAM-XZONE-01) ────────────────
+
+class TestXzoneEndpointResolution:
+    """Bare room-id endpoints resolve like the export lane; neither-group-
+    nor-room endpoints fail loudly instead of silently dropping the link.
+    """
+
+    @staticmethod
+    def _layout() -> dict:
+        return {
+            "zones": [
+                {"id": "R1", "volume_m3": 100.0},
+                {"id": "R2", "volume_m3": 100.0},
+                {"id": "R3", "volume_m3": 50.0},
+            ],
+        }
+
+    def test_room_id_endpoints_emit_paths(self) -> None:
+        airflow = {
+            "hvac_zones": [{"id": "hz1", "rooms": ["R1"], "ach": 6.0}],
+            "cross_zone_links": [
+                {"from": "R1", "to": "R2", "flow_rate_m3h": 30.0},
+                {"from": "hz1", "to": "R3", "flow_rate_m3h": 60.0},
+            ],
+            "adjacency": [],
+        }
+        engine = ContamTransportEngine(
+            self._layout(), airflow, natural_decay_rate=0.0,
+        )
+        xzone = [
+            (p.from_zone, p.to_zone, p.flow_rate_m3h)
+            for p in engine.airflow_paths if p.path_type == "cross_zone"
+        ]
+        assert ("R1", "R2", pytest.approx(30.0)) in xzone
+        assert ("R1", "R3", pytest.approx(60.0)) in xzone
+        result = engine.transport_step(
+            {"R1": 100.0, "R2": 0.0, "R3": 0.0},
+            natural_decay_rate=0.0,
+        )
+        assert result["R2"] > 0.0
+        assert result["R3"] > 0.0
+
+    def test_unknown_endpoint_raises(self) -> None:
+        airflow = {
+            "hvac_zones": [],
+            "cross_zone_links": [
+                {"from": "R1", "to": "GHOST", "flow_rate_m3h": 10.0},
+            ],
+            "adjacency": [],
+        }
+        layout = self._layout()
+        with pytest.raises(ValueError, match="GHOST"):
+            ContamTransportEngine(
+                layout, airflow, natural_decay_rate=0.0,
+            )
+
+    def test_group_endpoint_still_expands(self) -> None:
+        airflow = {
+            "hvac_zones": [{"id": "hz1", "rooms": ["R1", "R2"], "ach": 6.0}],
+            "cross_zone_links": [
+                {"from": "hz1", "to": "R3", "flow_rate_m3h": 40.0},
+            ],
+            "adjacency": [],
+        }
+        engine = ContamTransportEngine(
+            self._layout(), airflow, natural_decay_rate=0.0,
+        )
+        pairs = {
+            (p.from_zone, p.to_zone)
+            for p in engine.airflow_paths if p.path_type == "cross_zone"
+        }
+        assert pairs == {("R1", "R3"), ("R2", "R3")}

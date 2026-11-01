@@ -14513,8 +14513,11 @@ def build_hvac_downstream_map(
         zone_rooms[hvac_zone["id"]] = hvac_zone.get("rooms", [])
 
     for link in airflow_paths.get("cross_zone_links", []):
-        from_rooms = zone_rooms.get(link["from"], [])
-        to_rooms = zone_rooms.get(link["to"], [])
+        # A non-group endpoint is a bare room id, matching both the export
+        # lane (a ContamX zone is a room) and the native bridge's
+        # _get_zone_rooms resolution (CONTAM-XZONE-01).
+        from_rooms = zone_rooms.get(link["from"], [link["from"]])
+        to_rooms = zone_rooms.get(link["to"], [link["to"]])
         for fr in from_rooms:
             for tr in to_rooms:
                 downstream.setdefault(fr, []).append(tr)
