@@ -1906,6 +1906,28 @@ def _route_attribution_from_acquisitions(
     }
 
 
+def _verbatim_run_identity(spec_dict, platform, bundle, epochs, seed):
+    """Platform, bundle, epochs, and seed as a verbatim spec declares them."""
+    catalog = spec_dict.get("catalog") or {}
+    platform = str(catalog.get("platform_id") or platform)
+    bundle = str(catalog.get("pathogen_bundle_id") or bundle)
+    epochs = int((spec_dict.get("run") or {}).get("num_epochs", epochs))
+    seed = int((spec_dict.get("run") or {}).get("random_seed", seed))
+    return platform, bundle, epochs, seed
+
+
+def _resolved_share_table(sweep):
+    share_table = sweep.fomite_touch_share_table
+    if (
+        share_table is None
+        and sweep.fomite_touch_share_table_path is not None
+    ):
+        share_table = load_declared_share_table(
+            sweep.fomite_touch_share_table_path,
+        )
+    return share_table
+
+
 def run_seed(
     *,
     seed: int,
@@ -1926,19 +1948,13 @@ def run_seed(
     started_total = time.perf_counter()
     verbatim = spec_dict is not None
     if verbatim:
-        catalog = spec_dict.get("catalog") or {}
-        platform = str(catalog.get("platform_id") or platform)
-        bundle = str(catalog.get("pathogen_bundle_id") or bundle)
-        epochs = int((spec_dict.get("run") or {}).get("num_epochs", epochs))
-        seed = int((spec_dict.get("run") or {}).get("random_seed", seed))
+        platform, bundle, epochs, seed = _verbatim_run_identity(
+            spec_dict, platform, bundle, epochs, seed,
+        )
     num_agents = declared_total(platform)
     alpha, beta = load_dose_response(pathogen_id, bundle)
     if spec_dict is None:
-        share_table = sw.fomite_touch_share_table
-        if share_table is None and sw.fomite_touch_share_table_path is not None:
-            share_table = load_declared_share_table(
-                sw.fomite_touch_share_table_path,
-            )
+        share_table = _resolved_share_table(sw)
         spec_dict = build_spec(
             seed=seed, platform=platform, bundle=bundle,
             epochs=epochs, num_agents=num_agents,

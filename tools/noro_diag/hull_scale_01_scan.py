@@ -68,26 +68,32 @@ def _load_done(out_path: Path) -> set[str]:
     return done
 
 
-def _object_rows_all(objects: list[dict],
-                     events: list[dict]) -> list[dict]:
-    """One row per cs object (all arms), with linked pans/diners."""
+def _index_object_events(events: list[dict]):
+    """Diners, takers, take fractions, and doses keyed by object id."""
     diners: dict[str, set] = {}
     pan_takers: dict[str, list[int]] = {}
     take_fracs: dict[str, list[float]] = {}
     doses: dict[str, list[float]] = {}
-    for e in events:
-        oid = e.get("object_id")
-        if oid is not None:
-            taken = int(e.get("servings_taken", 0) or 0)
-            pan_takers.setdefault(oid, []).append(taken)
-            diners.setdefault(oid, set()).update(
-                e.get("taker_ids") or ())
-            cohort = int(e.get("cohort_size", 0) or 0)
-            if cohort:
-                take_fracs.setdefault(oid, []).append(taken / cohort)
-            dose = e.get("per_serving_dose")
-            if dose is not None:
-                doses.setdefault(oid, []).append(float(dose))
+    for event in events:
+        oid = event.get("object_id")
+        if oid is None:
+            continue
+        taken = int(event.get("servings_taken", 0) or 0)
+        pan_takers.setdefault(oid, []).append(taken)
+        diners.setdefault(oid, set()).update(event.get("taker_ids") or ())
+        cohort = int(event.get("cohort_size", 0) or 0)
+        if cohort:
+            take_fracs.setdefault(oid, []).append(taken / cohort)
+        dose = event.get("per_serving_dose")
+        if dose is not None:
+            doses.setdefault(oid, []).append(float(dose))
+    return diners, pan_takers, take_fracs, doses
+
+
+def _object_rows_all(objects: list[dict],
+                     events: list[dict]) -> list[dict]:
+    """One row per cs object (all arms), with linked pans/diners."""
+    diners, pan_takers, take_fracs, doses = _index_object_events(events)
     rows = []
     for o in objects:
         oid = o.get("object_id")

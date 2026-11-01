@@ -158,6 +158,25 @@ def _fresh_prefixes(
                                        f.get("record_id") or ""))
 
 
+def _pick_ps01_prefix(
+    prefixes, families, object_rows, vessels_by_prefix, vessel,
+    max_specimen_bytes,
+):
+    """First fresh PS01 object for ``vessel``, or ``(None, None)``."""
+    for prefix in prefixes:
+        fam = families.get(prefix)
+        if not fam or fam.get("fresh_observation") != "present":
+            continue
+        pool = _objects_under(object_rows, prefix)
+        if len(vessels_by_prefix.get(prefix) or ()) > 1:
+            # Shared hull prefix: only keys naming this vessel count.
+            pool = [r for r in pool if vessel in (r.get("key") or "")]
+        picked = _pick(pool, max_specimen_bytes)
+        if picked is not None:
+            return picked, fam
+    return None, None
+
+
 def _select_ps01(
     specimens: list[dict], uncovered: list[dict],
     frozen: dict, register: list[dict], object_rows: list[dict],
@@ -174,18 +193,10 @@ def _select_ps01(
         cls = f"ps01_hull:{vessel}"
         picked = None
         picked_fam = None
-        for prefix in prefixes:
-            fam = families.get(prefix)
-            if not fam or fam.get("fresh_observation") != "present":
-                continue
-            pool = _objects_under(object_rows, prefix)
-            if len(vessels_by_prefix.get(prefix) or ()) > 1:
-                # Shared hull prefix: only keys naming this vessel count.
-                pool = [r for r in pool if vessel in (r.get("key") or "")]
-            picked = _pick(pool, max_specimen_bytes)
-            if picked is not None:
-                picked_fam = fam
-                break
+        picked, picked_fam = _pick_ps01_prefix(
+            prefixes, families, object_rows, vessels_by_prefix, vessel,
+            max_specimen_bytes,
+        )
         if picked is None:
             uncovered.append({
                 "class": cls,
@@ -358,6 +369,21 @@ def _norm_key(k: str) -> str:
     return k.lstrip("/")
 
 
+def _match_sibling(embedded, norm: str, base: str):
+    """Exact normalized-key match, else the first basename match."""
+    hit = None
+    hit_kind = None
+    for i, (_row, ek) in enumerate(embedded):
+        if ek is None:
+            continue
+        ne = _norm_key(ek)
+        if ne == norm:
+            return i, "exact"
+        if hit is None and ne.rsplit("/", 1)[-1] == base:
+            hit, hit_kind = i, "basename"
+    return hit, hit_kind
+
+
 def join_scan_rows(
     scan_rows: list[dict], sibling_keys: list[str],
 ) -> dict:
@@ -376,17 +402,7 @@ def join_scan_rows(
     for raw_key in sibling_keys:
         norm = _norm_key(raw_key)
         base = norm.rsplit("/", 1)[-1]
-        hit = None
-        hit_kind = None
-        for i, (row, ek) in enumerate(embedded):
-            if ek is None:
-                continue
-            ne = _norm_key(ek)
-            if ne == norm:
-                hit, hit_kind = i, "exact"
-                break
-            if hit is None and ne.rsplit("/", 1)[-1] == base:
-                hit, hit_kind = i, "basename"
+        hit, hit_kind = _match_sibling(embedded, norm, base)
         if hit is not None:
             used_rows.add(hit)
             matched.append({

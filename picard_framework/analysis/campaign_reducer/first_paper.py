@@ -209,56 +209,71 @@ def _flat_check(members: Any) -> tuple[float | None, str | None]:
     return sum(members.values()), None
 
 
+def _apply_one_sum_check(check, values, prov, fields_prov) -> list[str]:
+    """Recompute one dict-member sum and record its provenance."""
+    raw = values.get(check["dict_column"])
+    total = values.get(check["total_column"])
+    members = json.loads(raw) if isinstance(raw, str) else raw
+    sum_col = check["sum_column"]
+    role_nested = isinstance(members, dict) and any(
+        isinstance(v, dict) for v in members.values()
+    )
+    if role_nested:
+        member_sum, roles_ok, by_role = _role_check(check, values, members)
+        values[sum_col + "_by_role"] = by_role
+    else:
+        member_sum, _ = _flat_check(members)
+        roles_ok = member_sum is not None
+        values[sum_col + "_by_role"] = None
+    return _record_sum_check(
+        check, values, prov, fields_prov, sum_col, member_sum, total, roles_ok,
+    )
+
+
+def _record_sum_check(
+    check, values, prov, fields_prov, sum_col, member_sum, total, roles_ok,
+) -> list[str]:
+    """Write the sum column, the consistency column, and their provenance."""
+    missing: list[str] = []
+    computable = member_sum is not None and _finite_num(total)
+    if not computable:
+        values[sum_col] = None
+        values[check["column"]] = None
+        status = "sum_uncomputable"
+        missing.extend((sum_col, check["column"]))
+    else:
+        values[sum_col] = member_sum
+        consistent = member_sum == total and roles_ok
+        values[check["column"]] = consistent
+        status = "sum_consistent" if consistent else "sum_divergent"
+    for col in (sum_col, check["column"]):
+        prov[col] = {
+            "native_path": None,
+            "member": "derived:sum_check",
+            "operands": {
+                "members": check["dict_column"],
+                "total": check["total_column"],
+            },
+            "operand_status": {
+                "members": fields_prov[check["dict_column"]]["status"],
+                "total": fields_prov[check["total_column"]]["status"],
+            },
+            "status": status,
+        }
+        if check.get("historical_evidence"):
+            prov[col]["historical_evidence"] = True
+    return missing
+
+
 def _sum_checks(
     values: dict, prov: dict, fields_prov: dict
 ) -> list[str]:
     """Dict-member sums recomputed and compared against report totals."""
     missing_cols: list[str] = []
     for check in profile()["sum_checks"]:
-        raw = values.get(check["dict_column"])
-        total = values.get(check["total_column"])
-        members = json.loads(raw) if isinstance(raw, str) else raw
-        sum_col = check["sum_column"]
-        role_nested = isinstance(members, dict) and any(
-            isinstance(v, dict) for v in members.values()
+        missing_cols.extend(
+            _apply_one_sum_check(check, values, prov, fields_prov)
         )
-        if role_nested:
-            member_sum, roles_ok, by_role = _role_check(
-                check, values, members)
-            values[sum_col + "_by_role"] = by_role
-        else:
-            member_sum, _ = _flat_check(members)
-            roles_ok = member_sum is not None
-            values[sum_col + "_by_role"] = None
-
-        computable = member_sum is not None and _finite_num(total)
-        if not computable:
-            values[sum_col] = None
-            values[check["column"]] = None
-            status = "sum_uncomputable"
-            missing_cols.append(sum_col)
-            missing_cols.append(check["column"])
-        else:
-            values[sum_col] = member_sum
-            consistent = member_sum == total and roles_ok
-            values[check["column"]] = consistent
-            status = "sum_consistent" if consistent else "sum_divergent"
-        for col in (sum_col, check["column"]):
-            prov[col] = {
-                "native_path": None,
-                "member": "derived:sum_check",
-                "operands": {
-                    "members": check["dict_column"],
-                    "total": check["total_column"],
-                },
-                "operand_status": {
-                    "members": fields_prov[check["dict_column"]]["status"],
-                    "total": fields_prov[check["total_column"]]["status"],
-                },
-                "status": status,
-            }
-            if check.get("historical_evidence"):
-                prov[col]["historical_evidence"] = True
     return missing_cols
 
 

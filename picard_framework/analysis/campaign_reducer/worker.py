@@ -640,6 +640,72 @@ def _write_pilot_evidence(
         pass  # evidence is best-effort beside the attempt receipt
 
 
+_STORED_PHASES = ("materialize", "finalize", "return_canary", "pilot")
+
+
+def _fetch_blocked(exc) -> int:
+    print(json.dumps({"status": "blocked", "error": str(exc)}))
+    if isinstance(exc, BudgetBlocked):
+        return EXIT_ADMISSION
+    return (
+        EXIT_BLOCKED
+        if getattr(exc, "kind", None) == "access_denied"
+        else EXIT_INVALID_CONTRACT
+    )
+
+
+def _materialize_spec(request, ctx) -> MaterializeSpec:
+    return MaterializeSpec(
+        sources=_sources(request),
+        ctx=ctx,
+        shard_size=int(request.get("shard_size") or 64),
+        requested_tables=tuple(request.get("requested_tables") or ()),
+        metric_bindings=dict(request.get("metric_bindings") or {}),
+        declared_source_count=request.get("declared_source_count"),
+        partition_format=request.get("partition_format") or "jsonl",
+        utc=request.get("utc") or "",
+        extraction_profile=request.get("extraction_profile"),
+        suppress_tables=frozenset(request.get("suppress_tables") or ()),
+    )
+
+
+def _error_detail(errors) -> str | None:
+    return "; ".join(
+        str(e.get("detail") or e) for e in errors[:4]
+    ) or None
+
+
+def _run_stored_phase(args, request, ctx, transport, store, ledger) -> int:
+    if args.phase == "pilot":
+        transport = _MeteredTransport(transport)
+    spec = _materialize_spec(request, ctx)
+    try:
+        result = run_materialization(spec, transport, store, ledger)
+    except (DerivedStoreError, BudgetBlocked) as exc:
+        _write_attempt_receipt(store, _attempt_receipt(
+            request, ctx, args.phase, "failed", ledger=ledger,
+            detail=str(exc),
+        ))
+        print(json.dumps({"status": "blocked", "error": str(exc)}))
+        return EXIT_BLOCKED
+    if args.phase == "pilot":
+        _write_pilot_evidence(
+            store, request, ctx, transport, result, ledger,
+        )
+    _write_attempt_receipt(store, _attempt_receipt(
+        request, ctx, args.phase, result.status, ledger=ledger,
+        snapshot_id=result.snapshot_id,
+        checkpoint_uri=result.checkpoint_uri,
+        detail=_error_detail(result.errors),
+        pages_manifest_key=result.pages_manifest_key,
+        assets_written=result.status == "completed",
+        counts=result.table_counts,
+    ))
+    print(json.dumps({"status": result.status,
+                      "snapshot_id": result.snapshot_id}))
+    return _status_exit(result.status)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="campaign_reducer.worker")
     parser.add_argument("--phase", required=True,
@@ -660,22 +726,14 @@ def main(argv: list[str] | None = None) -> int:
         request["sources"] = _resolve_sources(request, ledger)
         transport = (
             _source_transport(request, request_path)
-            if args.phase in ("materialize", "finalize",
-                              "return_canary", "pilot")
+            if args.phase in _STORED_PHASES
             else None
         )
     except BudgetExceeded as exc:
         print(json.dumps({"status": "blocked", "error": str(exc)}))
         return EXIT_BUDGET_STOPPED
     except (QueryError, BudgetBlocked) as exc:
-        print(json.dumps({"status": "blocked", "error": str(exc)}))
-        if isinstance(exc, BudgetBlocked):
-            return EXIT_ADMISSION
-        return (
-            EXIT_BLOCKED
-            if exc.kind == "access_denied"
-            else EXIT_INVALID_CONTRACT
-        )
+        return _fetch_blocked(exc)
     try:
         store = _open_store(args.out_uri or _default_out_uri(request))
     except QueryError as exc:
@@ -683,50 +741,9 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_BLOCKED
     ctx = _ctx(request, args.shard_index)
 
-    if args.phase in ("materialize", "finalize", "return_canary",
-                      "pilot"):
-        if args.phase == "pilot":
-            transport = _MeteredTransport(transport)
-        spec = MaterializeSpec(
-            sources=_sources(request),
-            ctx=ctx,
-            shard_size=int(request.get("shard_size") or 64),
-            requested_tables=tuple(request.get("requested_tables") or ()),
-            metric_bindings=dict(request.get("metric_bindings") or {}),
-            declared_source_count=request.get("declared_source_count"),
-            partition_format=request.get("partition_format") or "jsonl",
-            utc=request.get("utc") or "",
-            extraction_profile=request.get("extraction_profile"),
-            suppress_tables=frozenset(
-                request.get("suppress_tables") or ()),
-        )
-        try:
-            result = run_materialization(spec, transport, store, ledger)
-        except (DerivedStoreError, BudgetBlocked) as exc:
-            _write_attempt_receipt(store, _attempt_receipt(
-                request, ctx, args.phase, "failed", ledger=ledger,
-                detail=str(exc),
-            ))
-            print(json.dumps({"status": "blocked", "error": str(exc)}))
-            return EXIT_BLOCKED
-        if args.phase == "pilot":
-            _write_pilot_evidence(
-                store, request, ctx, transport, result, ledger,
-            )
-        _write_attempt_receipt(store, _attempt_receipt(
-            request, ctx, args.phase, result.status, ledger=ledger,
-            snapshot_id=result.snapshot_id,
-            checkpoint_uri=result.checkpoint_uri,
-            detail="; ".join(
-                str(e.get("detail") or e) for e in result.errors[:4]
-            ) or None,
-            pages_manifest_key=result.pages_manifest_key,
-            assets_written=result.status == "completed",
-            counts=result.table_counts,
-        ))
-        print(json.dumps({"status": result.status,
-                          "snapshot_id": result.snapshot_id}))
-        return _status_exit(result.status)
+    if args.phase in _STORED_PHASES:
+        return _run_stored_phase(
+            args, request, ctx, transport, store, ledger)
 
     try:
         outcome = run_query(

@@ -372,16 +372,8 @@ def _shard_tables(
     return tables
 
 
-def _absorb(
-    spec: MaterializeSpec,
-    src: SourceSpec,
-    result,
-    tables: dict,
-    acc: _ShardAccumulator,
-    _ledger: BudgetLedger,
-) -> None:
-    cell = acc.cell(src)
-    cell["landed"] += 1
+def _absorb_link_states(acc, cell, result) -> None:
+    """Fold link read-states into the shard accumulator and the cell."""
     for state in {link.read_state for link in result.links}:
         if state in ("unsupported_schema", "unsupported_compression",
                      "corrupt_archive", "crc_failure", "decode_failure"):
@@ -392,6 +384,31 @@ def _absorb(
         if state in ("missing_object", "access_denied",
                      "archived_unrestored"):
             cell["blocked"] = True
+
+
+def _absorb_run_selection(acc, cell, result) -> None:
+    """Count conflicts and selected runs on the cell."""
+    seen: set[str] = set()
+    for run in result.runs:
+        if run.run_uid in seen:
+            cell["conflicts"] += 1
+        seen.add(run.run_uid)
+        if run.selection_state == "selected":
+            cell["selected"] += 1
+            acc.selected_runs.add(run.run_uid)
+
+
+def _absorb(
+    spec: MaterializeSpec,
+    src: SourceSpec,
+    result,
+    tables: dict,
+    acc: _ShardAccumulator,
+    _ledger: BudgetLedger,
+) -> None:
+    cell = acc.cell(src)
+    cell["landed"] += 1
+    _absorb_link_states(acc, cell, result)
     if src.family == "unknown_legacy":
         acc.unsupported_family = True
         cell["unsupported"] = True
@@ -404,14 +421,7 @@ def _absorb(
         _absorb_scan_role(spec, src, result, tables, acc)
         return
     cell["parsed"] += len(result.runs)
-    seen: set[str] = set()
-    for r in result.runs:
-        if r.run_uid in seen:
-            cell["conflicts"] += 1
-        seen.add(r.run_uid)
-        if r.selection_state == "selected":
-            cell["selected"] += 1
-            acc.selected_runs.add(r.run_uid)
+    _absorb_run_selection(acc, cell, result)
     merge_tables(
         tables,
         emit_source_rows(
@@ -946,6 +956,30 @@ def _finalize(
 _PAGE_MAX_BYTES = 1_048_576  # readback index_page_bytes cap
 
 
+def _flush_vector_page(
+    buf, buf_bytes, seq, attempt, table, store, ledger, page_entries,
+):
+    """Write one JSONL page when ``buf`` is non-empty. Returns the reset buffer."""
+    if not buf:
+        return buf, buf_bytes, seq
+    seq += 1
+    body = b"".join(buf)
+    key = f"{attempt}/pages/{table}/page-{seq:05d}.jsonl"
+    store.put_idempotent(key, body)
+    ledger.charge("max_api_calls_total", 1, "page put")
+    ledger.charge("max_output_bytes", len(body), key)
+    page_entries.append(
+        {
+            "page_id": f"page-{seq:05d}",
+            "uri": key,
+            "sha256": sha256_hex(body),
+            "rows": len(buf),
+            "bytes": len(body),
+        }
+    )
+    return [], 0, seq
+
+
 def _emit_pages(
     spec: MaterializeSpec,
     store,
@@ -977,27 +1011,6 @@ def _emit_pages(
     buf_bytes = 0
     seq = 0
 
-    def _flush() -> None:
-        nonlocal buf, buf_bytes, seq
-        if not buf:
-            return
-        seq += 1
-        body = b"".join(buf)
-        key = f"{attempt}/pages/{table}/page-{seq:05d}.jsonl"
-        store.put_idempotent(key, body)
-        ledger.charge("max_api_calls_total", 1, "page put")
-        ledger.charge("max_output_bytes", len(body), key)
-        page_entries.append(
-            {
-                "page_id": f"page-{seq:05d}",
-                "uri": key,
-                "sha256": sha256_hex(body),
-                "rows": len(buf),
-                "bytes": len(body),
-            }
-        )
-        buf, buf_bytes = [], 0
-
     for e in manifest:
         if e.get("table_name") != table:
             continue
@@ -1005,10 +1018,15 @@ def _emit_pages(
         ledger.charge("max_api_calls_total", 1, "page source read")
         for line in body.splitlines(keepends=True):
             if buf_bytes + len(line) > _PAGE_MAX_BYTES and buf:
-                _flush()
+                buf, buf_bytes, seq = _flush_vector_page(
+                    buf, buf_bytes, seq, attempt, table,
+                    store, ledger, page_entries,
+                )
             buf.append(line)
             buf_bytes += len(line)
-    _flush()
+    buf, buf_bytes, seq = _flush_vector_page(
+        buf, buf_bytes, seq, attempt, table, store, ledger, page_entries,
+    )
 
     manifest_key = None
     manifest_body = b""

@@ -1021,43 +1021,38 @@ def build_readout(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _pooled_caregiver(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
-    """Pool per-seed caregiver blocks; shares recompute on summed counts."""
-    blocks = [row.get("caregiver") or {} for row in per_seed]
-    counters = [block.get("engine_counters") or {} for block in blocks]
-    dominant = sum(
-        int(block.get("transmissions_dominant_caregiver") or 0)
-        for block in blocks
-    )
-    any_dose = sum(
-        int(block.get("transmissions_any_caregiver_dose") or 0)
-        for block in blocks
-    )
-    attributed = sum(
-        int(block.get("transmissions_attributed") or 0) for block in blocks
-    )
-    zero_response_voyages = 0
+def _sum_block_int(blocks, key: str) -> int:
+    return sum(int(block.get(key) or 0) for block in blocks)
+
+
+def _zero_response_voyages(blocks) -> int:
+    zero = 0
     for block in blocks:
         engine = block.get("engine_counters") or {}
         responses = float(engine.get("caregiver_responses") or 0) + float(
             engine.get("steward_responses") or 0,
         )
         if block.get("vomiting_course_hosts") and not responses:
-            zero_response_voyages += 1
+            zero += 1
+    return zero
+
+
+def _pooled_caregiver(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
+    """Pool per-seed caregiver blocks; shares recompute on summed counts."""
+    blocks = [row.get("caregiver") or {} for row in per_seed]
+    counters = [block.get("engine_counters") or {} for block in blocks]
+    dominant = _sum_block_int(blocks, "transmissions_dominant_caregiver")
+    any_dose = _sum_block_int(blocks, "transmissions_any_caregiver_dose")
+    attributed = _sum_block_int(blocks, "transmissions_attributed")
+    zero_response_voyages = _zero_response_voyages(blocks)
     return {
         "engine_counters_total": {
             key: sum(float(counter.get(key) or 0.0) for counter in counters)
             for key in {k for counter in counters for k in counter}
         },
-        "stamped_hosts": sum(
-            int(block.get("stamped_hosts") or 0) for block in blocks
-        ),
-        "stamped_not_reported": sum(
-            int(block.get("stamped_not_reported") or 0) for block in blocks
-        ),
-        "reports_via_caregiver": sum(
-            int(block.get("reports_via_caregiver") or 0) for block in blocks
-        ),
+        "stamped_hosts": _sum_block_int(blocks, "stamped_hosts"),
+        "stamped_not_reported": _sum_block_int(blocks, "stamped_not_reported"),
+        "reports_via_caregiver": _sum_block_int(blocks, "reports_via_caregiver"),
         "transmissions_dominant_caregiver": dominant,
         "transmissions_any_caregiver_dose": any_dose,
         "transmissions_attributed": attributed,

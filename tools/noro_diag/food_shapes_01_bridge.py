@@ -158,6 +158,25 @@ def _diff_keys(a, b, path: str = "", diffs: list[str] | None = None,
     return diffs
 
 
+def _census_pair_status(client, bucket, key_a, key_b, row: dict) -> None:
+    """Attach the census comparison onto ``row`` when both members exist."""
+    ca = _s3_member_blob(client, bucket, key_a, _CENSUS_MEMBER)
+    cb = _s3_member_blob(client, bucket, key_b, _CENSUS_MEMBER)
+    if ca is None or cb is None:
+        row["census"] = "missing_member"
+        return
+    try:
+        da = json.loads(gzip.decompress(ca))
+        db = json.loads(gzip.decompress(cb))
+    except (OSError, ValueError) as exc:
+        row["census"] = f"parse: {exc}"
+        return
+    cdiffs = _diff_keys(da, db, tol=_CENSUS_TOL)
+    row["census"] = "identical" if not cdiffs else "diverged"
+    if cdiffs:
+        row["census_first_diff"] = cdiffs[:5]
+
+
 def _check_seed(
     client, bucket: str, key_a: str, key_b: str, do_census: bool,
 ) -> dict:
@@ -176,23 +195,7 @@ def _check_seed(
         row["verdict"] = "diverged"
         row["diffs"] = _diff_keys(sa, sb)[:40]
     if do_census:
-        ca = _s3_member_blob(client, bucket, key_a, _CENSUS_MEMBER)
-        cb = _s3_member_blob(client, bucket, key_b, _CENSUS_MEMBER)
-        if ca is None or cb is None:
-            row["census"] = "missing_member"
-        else:
-            try:
-                da = json.loads(gzip.decompress(ca))
-                db = json.loads(gzip.decompress(cb))
-            except (OSError, ValueError) as exc:
-                row["census"] = f"parse: {exc}"
-            else:
-                cdiffs = _diff_keys(da, db, tol=_CENSUS_TOL)
-                row["census"] = (
-                    "identical" if not cdiffs else "diverged"
-                )
-                if cdiffs:
-                    row["census_first_diff"] = cdiffs[:5]
+        _census_pair_status(client, bucket, key_a, key_b, row)
     return row
 
 

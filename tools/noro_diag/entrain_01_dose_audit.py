@@ -212,6 +212,26 @@ def _marker_value_start(buf: bytes, name: bytes) -> int | None:
     return s
 
 
+def _advance_census_target(buf, ti, val_start, st, out, decoder):
+    """Scan ``buf`` for the current target. Returns the updated cursor."""
+    name = _TARGETS[ti]
+    if val_start is None:
+        start = _marker_value_start(buf, name)
+        if start is None:
+            if len(buf) > _CHUNK:
+                buf = buf[-_TAIL_KEEP:]
+            return buf, ti, val_start, st, True
+        if start < 0:
+            return buf, ti, val_start, st, True
+        val_start = start
+        st = {"pos": start, "depth": 0}
+    end = _value_end(buf, val_start, st)
+    if end is None:
+        return buf, ti, val_start, st, True
+    _store_target_value(out, name, buf[val_start:end], decoder)
+    return buf[end:], ti + 1, None, st, False
+
+
 def _extract_census(blob: bytes) -> dict[str, Any]:
     """Decode only the four target keys; skip everything between them.
 
@@ -227,25 +247,10 @@ def _extract_census(blob: bytes) -> dict[str, Any]:
     for part in _iter_decompressed(blob):
         buf += part
         while ti < len(_TARGETS):
-            name = _TARGETS[ti]
-            if val_start is None:
-                s = _marker_value_start(buf, name)
-                if s is None:
-                    if len(buf) > _CHUNK:
-                        buf = buf[-_TAIL_KEEP:]
-                    break
-                if s < 0:
-                    break
-                val_start = s
-                st = {"pos": s, "depth": 0}
-            end = _value_end(buf, val_start, st)
-            if end is None:
+            buf, ti, val_start, st, stop = _advance_census_target(
+                buf, ti, val_start, st, out, decoder)
+            if stop:
                 break
-            span = buf[val_start:end]
-            _store_target_value(out, name, span, decoder)
-            buf = buf[end:]
-            val_start = None
-            ti += 1
         if ti >= len(_TARGETS):
             break
     return out

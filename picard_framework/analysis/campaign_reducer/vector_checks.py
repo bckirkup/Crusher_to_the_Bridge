@@ -103,6 +103,35 @@ def _numeric(value, field):
     return value
 
 
+def _fold_aggregate(acc, op: str, value, matched):
+    """One running accumulator step. ``count`` ignores ``value``."""
+    if op == "count":
+        return matched
+    if op in ("sum", "mean"):
+        return value if acc is None else acc + value
+    if op == "min":
+        return value if acc is None else min(acc, value)
+    return value if acc is None else max(acc, value)
+
+
+def _aggregate_result(
+    *, ok, op, field, where, matched, scanned, pages_scanned, value,
+    reason=None, sample_rows=None,
+) -> dict:
+    out = {
+        "check": "recompute_aggregate", "kind": _KIND, "ok": ok,
+        "op": op, "field": field, "where": where,
+        "rows_matched": matched, "rows_scanned": scanned,
+        "pages_scanned": pages_scanned,
+        "value": value,
+    }
+    if ok:
+        out["sample_rows"] = sample_rows
+    else:
+        out["reason"] = reason
+    return out
+
+
 def recompute_aggregate(pages, field: str, op: str,
                         where: dict | None = None) -> dict:
     """Recompute ONE aggregate over one ``values`` field.
@@ -131,37 +160,26 @@ def recompute_aggregate(pages, field: str, op: str,
         if any(row.get(k) != v for k, v in where.items()):
             continue
         matched += 1
-        if op == "count":
-            acc = matched
+        if op != "count":
+            value = _numeric((row.get("values") or {}).get(field), field)
         else:
-            v = _numeric((row.get("values") or {}).get(field), field)
-            if op == "sum" or op == "mean":
-                acc = v if acc is None else acc + v
-            elif op == "min":
-                acc = v if acc is None else min(acc, v)
-            else:
-                acc = v if acc is None else max(acc, v)
+            value = None
+        acc = _fold_aggregate(acc, op, value, matched)
         if len(matched_refs) < 8:
             matched_refs.append(
                 {"page": page, "run_uid": row.get("run_uid")})
     if matched == 0:
-        return {
-            "check": "recompute_aggregate", "kind": _KIND, "ok": False,
-            "op": op, "field": field, "where": where,
-            "rows_matched": 0, "rows_scanned": scanned,
-            "pages_scanned": pages_scanned,
-            "value": None,
-            "reason": "no rows matched the predicates",
-        }
+        return _aggregate_result(
+            ok=False, op=op, field=field, where=where, matched=0,
+            scanned=scanned, pages_scanned=pages_scanned, value=None,
+            reason="no rows matched the predicates",
+        )
     value = acc / matched if op == "mean" else acc
-    return {
-        "check": "recompute_aggregate", "kind": _KIND, "ok": True,
-        "op": op, "field": field, "where": where,
-        "rows_matched": matched, "rows_scanned": scanned,
-        "pages_scanned": pages_scanned,
-        "value": value,
-        "sample_rows": matched_refs,
-    }
+    return _aggregate_result(
+        ok=True, op=op, field=field, where=where, matched=matched,
+        scanned=scanned, pages_scanned=pages_scanned, value=value,
+        sample_rows=matched_refs,
+    )
 
 
 def _arm_of(row: dict) -> str | None:

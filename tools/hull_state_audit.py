@@ -636,42 +636,52 @@ def _run_occupancy_state(b: PlatformBundle, state: dict[str, Any],
     }
 
 
+def _platform_state_result(
+    b, spec, sid, *, epochs, seed, workdir, cache,
+) -> dict[str, Any]:
+    """Expressibility plus the airflow/occupancy checks for one state."""
+    state = merged_state(spec, b.platform_id, sid)
+    result: dict[str, Any] = {
+        "verdict": "verified",
+        "blockers": _expressibility(b, state),
+        "notes": [],
+    }
+    if result["blockers"]:
+        result["verdict"] = "cannot_express"
+        return result
+    inside_groups, _ = _citadel_groups(b, state) if (
+        _state_needs_citadel(state)) else ([], None)
+    if state.get("airflow"):
+        _run_airflow_state(
+            b, state, inside_groups, epochs=epochs, cache=cache)
+        result["edits"] = state.get("_edits", [])
+        result["drainage"] = state.get("drainage")
+        result["notes"].extend(state.get("notes", []))
+        result["blockers"].extend(state.get("blockers", []))
+    if state.get("occupancy") and not result["blockers"]:
+        _run_occupancy_state(
+            b, state, sid, workdir, epochs=epochs, seed=seed, cache=cache)
+        result["occupancy"] = state["occupancy_result"]
+    result["checks"] = state.get("_checks", [])
+    if result["blockers"]:
+        result["verdict"] = "cannot_express"
+    elif any(not c["pass"] for c in result["checks"]):
+        result["verdict"] = "no_signature"
+    else:
+        result["verdict"] = "verified"
+    return result
+
+
 def run_platform(b: PlatformBundle, spec: dict[str, Any],
                  state_ids: list[str], *, epochs: int, seed: int,
                  workdir: Path) -> dict[str, Any]:
     row: dict[str, Any] = {"platform": b.platform_id, "states": {}}
     cache: dict[str, Any] = {}
     for sid in state_ids:
-        state = merged_state(spec, b.platform_id, sid)
-        result: dict[str, Any] = {
-            "verdict": "verified",
-            "blockers": _expressibility(b, state),
-            "notes": [],
-        }
-        if result["blockers"]:
-            result["verdict"] = "cannot_express"
-        else:
-            inside_groups, _ = _citadel_groups(b, state) if (
-                _state_needs_citadel(state)) else ([], None)
-            if state.get("airflow"):
-                _run_airflow_state(b, state, inside_groups,
-                                   epochs=epochs, cache=cache)
-                result["edits"] = state.get("_edits", [])
-                result["drainage"] = state.get("drainage")
-                result["notes"].extend(state.get("notes", []))
-                result["blockers"].extend(state.get("blockers", []))
-            if state.get("occupancy") and not result["blockers"]:
-                _run_occupancy_state(b, state, sid, workdir,
-                                     epochs=epochs, seed=seed, cache=cache)
-                result["occupancy"] = state["occupancy_result"]
-            result["checks"] = state.get("_checks", [])
-            if result["blockers"]:
-                result["verdict"] = "cannot_express"
-            elif any(not c["pass"] for c in result["checks"]):
-                result["verdict"] = "no_signature"
-            else:
-                result["verdict"] = "verified"
-        row["states"][sid] = result
+        row["states"][sid] = _platform_state_result(
+            b, spec, sid, epochs=epochs, seed=seed,
+            workdir=workdir, cache=cache,
+        )
     return row
 
 

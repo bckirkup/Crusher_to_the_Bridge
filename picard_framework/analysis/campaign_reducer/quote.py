@@ -318,32 +318,22 @@ def run(args) -> int:
     return _quote(request, evidence, kind, out_root)
 
 
-def _quote(request: dict, evidence: dict, kind: str, out_root: str) -> int:
-    blocking: list[dict] = []
-    prices, price_snap, price_block = _prices_of(request, evidence)
-    if price_block:
-        blocking.append(price_block)
-    scope_rows, scope_blocking = _scope_families(evidence)
-    blocking += scope_blocking
-    basis = "measured" if kind == "pilot_receipt" else "bootstrap_estimate"
-    per_family = _evidence_classes(evidence)
-    totals, unmeasured, bands = _scale_units(scope_rows, per_family)
-    safety = float(
-        (request.get("budgets") or {}).get("safety_factor") or 1.0
-    )
-    phase_rows = []
-    for phase in _PHASES:
-        row = _phase_row(phase, basis, totals)
-        cost, missing = _cost_breakdown(row, prices)
-        row["cost"] = cost
-        for key in missing:
-            blocking.append({
-                "kind": "price_absent",
-                "input": f"price_snapshot.unit_prices_json.{key}",
-                "needed_for": f"phase_quote.{phase}.cost",
-                "detail": "unit price not declared — stop, never guess",
-            })
-        phase_rows.append(row)
+def _price_gap_blocks(phase: str, missing) -> list[dict]:
+    return [
+        {
+            "kind": "price_absent",
+            "input": f"price_snapshot.unit_prices_json.{key}",
+            "needed_for": f"phase_quote.{phase}.cost",
+            "detail": "unit price not declared — stop, never guess",
+        }
+        for key in missing
+    ]
+
+
+def _quote_document(
+    request, kind, price_snap, evidence, phase_rows, unmeasured, safety, totals,
+) -> tuple[dict, str]:
+    """The phase-quote document and its content-addressed id."""
     quote_body = {
         "request_id": request.get("request_id") or request.get("reduction_id"),
         "evidence_kind": kind,
@@ -377,9 +367,45 @@ def _quote(request: dict, evidence: dict, kind: str, out_root: str) -> int:
         r["cost"]["total_usd"] for r in phase_rows
         if r["cost"]["total_usd"] is not None
     ) * safety
-    quote_doc["totals"] = {"central_usd": grand,
-                           "exceeds_declared_envelope": (
-                               bool(max_cost) and grand > max_cost)}
+    quote_doc["totals"] = {
+        "central_usd": grand,
+        "exceeds_declared_envelope": bool(max_cost) and grand > max_cost,
+    }
+    return quote_doc, quote_id
+
+
+def _quote_exit(blocking, unmeasured) -> tuple[str, int]:
+    if blocking:
+        return "blocked", contracts.EXIT_ACCESS_OR_RESOURCE_BLOCKED
+    if unmeasured:
+        return "partial", contracts.EXIT_PARTIAL_COVERAGE
+    return "complete", contracts.EXIT_COMPLETE
+
+
+def _quote(request: dict, evidence: dict, kind: str, out_root: str) -> int:
+    blocking: list[dict] = []
+    prices, price_snap, price_block = _prices_of(request, evidence)
+    if price_block:
+        blocking.append(price_block)
+    scope_rows, scope_blocking = _scope_families(evidence)
+    blocking += scope_blocking
+    basis = "measured" if kind == "pilot_receipt" else "bootstrap_estimate"
+    per_family = _evidence_classes(evidence)
+    totals, unmeasured, bands = _scale_units(scope_rows, per_family)
+    safety = float(
+        (request.get("budgets") or {}).get("safety_factor") or 1.0
+    )
+    phase_rows = []
+    for phase in _PHASES:
+        row = _phase_row(phase, basis, totals)
+        cost, missing = _cost_breakdown(row, prices)
+        row["cost"] = cost
+        blocking.extend(_price_gap_blocks(phase, missing))
+        phase_rows.append(row)
+    quote_doc, quote_id = _quote_document(
+        request, kind, price_snap, evidence, phase_rows,
+        unmeasured, safety, totals,
+    )
     _emit(out_root, "phase_quote.json", quote_doc)
     _emit(out_root, "uncertainty.json", {
         "schema": _UNCERTAINTY_SCHEMA,
@@ -391,12 +417,7 @@ def _quote(request: dict, evidence: dict, kind: str, out_root: str) -> int:
         "quote_id": quote_id,
         "blocking": blocking,
     })
-    if blocking:
-        status, rc = "blocked", contracts.EXIT_ACCESS_OR_RESOURCE_BLOCKED
-    elif unmeasured:
-        status, rc = "partial", contracts.EXIT_PARTIAL_COVERAGE
-    else:
-        status, rc = "complete", contracts.EXIT_COMPLETE
+    status, rc = _quote_exit(blocking, unmeasured)
     doc = _status_doc(
         status, quote_id=quote_id,
         blocking_count=len(blocking),

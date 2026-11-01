@@ -217,9 +217,8 @@ def test_local_dir_store_contains_keys(tmp_path):
         store.get("../outside/secret.txt")
 
 
+@pytest.mark.skipif(os.name == "nt", reason="symlink escape is a POSIX check")
 def test_local_dir_store_rejects_symlink_escape(tmp_path):
-    if os.name == "nt":
-        return
     root = tmp_path / "store"
     outside = tmp_path / "outside"
     outside.mkdir()

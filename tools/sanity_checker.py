@@ -2379,6 +2379,16 @@ def _provisioned_source_registry(
     return registry, sources
 
 
+def _check_source_entry_genotypes(sources, report: Report) -> None:
+    for sid, source_entry in sources.items():
+        if isinstance(source_entry, dict):
+            _check_source_genotype_distribution(
+                source_entry.get("genotype_distribution"),
+                f"sources.{sid}.genotype_distribution",
+                _PROVISIONING_SOURCES_JSON, report,
+            )
+
+
 def _check_common_source_provisioned_arm(
     ps: dict[str, Any],
     report: Report,
@@ -2416,13 +2426,7 @@ def _check_common_source_provisioned_arm(
         "provisioned_source.genotype_distribution",
         _CONFIG_YAML, report,
     )
-    for sid, source_entry in sources.items():
-        if isinstance(source_entry, dict):
-            _check_source_genotype_distribution(
-                source_entry.get("genotype_distribution"),
-                f"sources.{sid}.genotype_distribution",
-                _PROVISIONING_SOURCES_JSON, report,
-            )
+    _check_source_entry_genotypes(sources, report)
     if layout is not None and not any(
         z.type == "Dining" for z in layout.zones
     ):
@@ -2564,6 +2568,19 @@ def _check_ppe_fatigue_policy(
                      "no types")
 
 
+def _report_unknown_ppe_types(
+    names, registry, report: Report, name: str, role: str,
+) -> None:
+    for ppe_type in names:
+        if ppe_type is not None and ppe_type not in registry:
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                f"npi.{name}.coverage_by_role.{role} names "
+                f"ppe_type {ppe_type!r}, which has no ppe_types "
+                "entry",
+            )
+
+
 def _check_npi_ppe_type_refs(
     cfg: dict[str, Any],
     registry: dict[str, Any],
@@ -2580,14 +2597,8 @@ def _check_npi_ppe_type_refs(
             if isinstance(entry, dict):
                 types = entry.get("ppe_type")
                 names = types if isinstance(types, list) else [types]
-                for t in names:
-                    if t is not None and t not in registry:
-                        report.error(
-                            _CONFIG_YAML, "CONFIG",
-                            f"npi.{name}.coverage_by_role.{role} names "
-                            f"ppe_type {t!r}, which has no ppe_types "
-                            "entry",
-                        )
+                _report_unknown_ppe_types(
+                    names, registry, report, name, role)
 
 
 def _check_ppe_fatigue(cfg: dict[str, Any], report: Report) -> None:
