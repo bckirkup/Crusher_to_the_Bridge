@@ -14527,14 +14527,11 @@ def build_hvac_downstream_map(
         # _get_zone_rooms resolution (CONTAM-XZONE-01).
         from_rooms = zone_rooms.get(link["from"], [link["from"]])
         to_rooms = zone_rooms.get(link["to"], [link["to"]])
-        bidirectional = cross_zone_link_bidirectional(
-            link, passive_link_mode,
-        )
-        for fr in from_rooms:
-            for tr in to_rooms:
-                downstream.setdefault(fr, []).append(tr)
-                if bidirectional:
-                    downstream.setdefault(tr, []).append(fr)
+        room_pairs = [(fr, tr) for fr in from_rooms for tr in to_rooms]
+        if cross_zone_link_bidirectional(link, passive_link_mode):
+            room_pairs += [(tr, fr) for fr in from_rooms for tr in to_rooms]
+        for fr, tr in room_pairs:
+            downstream.setdefault(fr, []).append(tr)
 
     # From adjacency: direct room-to-room connections
     for adj in airflow_paths.get("adjacency", []):

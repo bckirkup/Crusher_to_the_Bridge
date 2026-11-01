@@ -862,12 +862,15 @@ class TestPassiveLinkMode:
         )
         assert result["A"] == pytest.approx(0.0)
 
-    def test_bad_mode_rejected(self) -> None:
+    def test_bad_mode_rejected_by_parser(self) -> None:
         with pytest.raises(ValueError, match="passive_link_mode"):
             parse_passive_link_mode({"passive_link_mode": "two-way"})
+
+    def test_bad_mode_rejected_by_ctor(self) -> None:
+        layout, airflow = self._layout(), self._airflow()
         with pytest.raises(ValueError, match="passive_link_mode"):
             ContamTransportEngine(
-                self._layout(), self._airflow(), passive_link_mode="x",
+                layout, airflow, passive_link_mode="x",
             )
 
     def test_parse_defaults_to_bidirectional(self) -> None:
