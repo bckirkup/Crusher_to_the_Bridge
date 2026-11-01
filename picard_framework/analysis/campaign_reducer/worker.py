@@ -448,6 +448,8 @@ def _attempt_receipt(
     snapshot_id: str | None = None,
     checkpoint_uri: str | None = None,
     counts: dict | None = None,
+    pages_manifest_key: str | None = None,
+    assets_written: bool = False,
 ) -> dict:
     """Durable attempt receipt (CANONICAL ``attempt_receipt_fields``).
 
@@ -483,11 +485,11 @@ def _attempt_receipt(
         "catalog_hash": snapshot_id or "",
         "summary_key": f"{prefix}/MANIFEST.json",
         "files_manifest_key": f"{prefix}/MANIFEST.json",
-        "pages_manifest_key": (
-            f"{prefix}/pages/first_paper_vectors.pages_manifest.json"
+        "pages_manifest_key": pages_manifest_key or "",
+        "status_key": f"{prefix}/status.json" if assets_written else "",
+        "asset_index_key": (
+            f"{prefix}/asset_index.json" if assets_written else ""
         ),
-        "status_key": f"{prefix}/status.json",
-        "asset_index_key": f"{prefix}/asset_index.json",
         "checkpoint_uri": checkpoint_uri,
         "continuation": None,
         "output_counts": counts or {},
@@ -718,6 +720,8 @@ def main(argv: list[str] | None = None) -> int:
             detail="; ".join(
                 str(e.get("detail") or e) for e in result.errors[:4]
             ) or None,
+            pages_manifest_key=result.pages_manifest_key,
+            assets_written=result.status == "completed",
         ))
         print(json.dumps({"status": result.status,
                           "snapshot_id": result.snapshot_id}))

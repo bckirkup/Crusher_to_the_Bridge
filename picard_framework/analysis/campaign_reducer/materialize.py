@@ -142,6 +142,7 @@ class MaterializationResult:
     errors: list[dict]
     checkpoint_uri: str | None
     completed_shards: list[int]
+    pages_manifest_key: str | None = None
 
 
 def _attempt_prefix(ctx: ReductionContext) -> str:
@@ -923,8 +924,11 @@ def _finalize(
         forced_status = "blocked"
     manifest_key = f"{_attempt_prefix(spec.ctx)}/MANIFEST.json"
     write_manifest(store, manifest_key, manifest)
+    pages_manifest_key = None
     if forced_status == "completed":
-        _emit_pages(spec, store, ledger, manifest, counts, forced_status)
+        pages_manifest_key = _emit_pages(
+            spec, store, ledger, manifest, counts, forced_status
+        )
     status = forced_status
     return MaterializationResult(
         status=status,
@@ -935,6 +939,7 @@ def _finalize(
         errors=acc.errors,
         checkpoint_uri=checkpoint_uri,
         completed_shards=sorted(completed),
+        pages_manifest_key=pages_manifest_key,
     )
 
 
@@ -948,18 +953,24 @@ def _emit_pages(
     manifest: list[dict],
     counts: dict[str, int],
     status: str,
-) -> None:
+) -> str | None:
     """Bounded unique-named <=1MiB JSONL pages + collector manifest.
 
-    Re-chunks the ``first_paper_vectors`` shard partitions into page
-    objects under ``pages/`` so the return path's bounded collector
-    (``files_per_collect``/``total_bytes_per_collect`` caps) fetches a
-    page set rather than every materialization partition. Also writes
-    the authoritative ``status.json`` and ``asset_index.json`` at the
-    attempt root.
+    Re-chunks the profile's vector table (``mod.profile()``.``table_name``,
+    ``first_paper_vectors`` for the base profile) shard partitions into
+    page objects under ``pages/<table>/`` so the return path's bounded
+    collector (``files_per_collect``/``total_bytes_per_collect`` caps)
+    fetches a page set rather than every materialization partition. Also
+    writes the authoritative ``status.json`` and ``asset_index.json`` at
+    the attempt root — unconditionally, so receipt keys never dangle.
+
+    Returns the pages manifest key, or ``None`` when no vector table was
+    emitted (non-vector attempt).
     """
-    if "first_paper_vectors" not in counts:
-        return
+    mod = _PROFILES.get(spec.extraction_profile or "")
+    table = (
+        mod.profile()["table_name"] if mod else "first_paper_vectors"
+    )
     attempt = _attempt_prefix(spec.ctx)
     page_entries: list[dict] = []
     buf: list[bytes] = []
@@ -972,9 +983,7 @@ def _emit_pages(
             return
         seq += 1
         body = b"".join(buf)
-        key = (
-            f"{attempt}/pages/first_paper_vectors/page-{seq:05d}.jsonl"
-        )
+        key = f"{attempt}/pages/{table}/page-{seq:05d}.jsonl"
         store.put_idempotent(key, body)
         ledger.charge("max_api_calls_total", 1, "page put")
         ledger.charge("max_output_bytes", len(body), key)
@@ -983,14 +992,14 @@ def _emit_pages(
                 "page_id": f"page-{seq:05d}",
                 "uri": key,
                 "sha256": sha256_hex(body),
-                "rows": buf_bytes and len(buf) or 0,
+                "rows": len(buf),
                 "bytes": len(body),
             }
         )
         buf, buf_bytes = [], 0
 
     for e in manifest:
-        if e.get("table_name") != "first_paper_vectors":
+        if e.get("table_name") != table:
             continue
         body = store.get(e["uri"])
         ledger.charge("max_api_calls_total", 1, "page source read")
@@ -1001,25 +1010,28 @@ def _emit_pages(
             buf_bytes += len(line)
     _flush()
 
-    manifest_body = json.dumps(
-        {
-            "kind": "first_paper_pages_manifest",
-            "reduction_id": spec.ctx.reduction_id,
-            "table_name": "first_paper_vectors",
-            "entries": page_entries,
-            "page_count": len(page_entries),
-            "rows": sum(p["rows"] for p in page_entries),
-            "bytes": sum(p["bytes"] for p in page_entries),
-        },
-        sort_keys=True,
-        indent=2,
-    ).encode()
-    manifest_key = (
-        f"{attempt}/pages/first_paper_vectors.pages_manifest.json"
-    )
-    store.put_idempotent(manifest_key, manifest_body)
-    ledger.charge("max_api_calls_total", 1, "pages manifest put")
-    ledger.charge("max_output_bytes", len(manifest_body), manifest_key)
+    manifest_key = None
+    manifest_body = b""
+    if page_entries:
+        manifest_body = json.dumps(
+            {
+                "kind": "first_paper_pages_manifest",
+                "reduction_id": spec.ctx.reduction_id,
+                "table_name": table,
+                "entries": page_entries,
+                "page_count": len(page_entries),
+                "rows": sum(p["rows"] for p in page_entries),
+                "bytes": sum(p["bytes"] for p in page_entries),
+            },
+            sort_keys=True,
+            indent=2,
+        ).encode()
+        manifest_key = f"{attempt}/pages/{table}.pages_manifest.json"
+        store.put_idempotent(manifest_key, manifest_body)
+        ledger.charge("max_api_calls_total", 1, "pages manifest put")
+        ledger.charge(
+            "max_output_bytes", len(manifest_body), manifest_key
+        )
 
     status_key = f"{attempt}/status.json"
     status_body = json.dumps(
@@ -1028,7 +1040,7 @@ def _emit_pages(
             "reduction_id": spec.ctx.reduction_id,
             "status": status,
             "counts": counts,
-            "pages_manifest_key": manifest_key,
+            "pages_manifest_key": manifest_key or "",
             "utc": spec.utc,
         },
         sort_keys=True,
@@ -1043,12 +1055,18 @@ def _emit_pages(
             "kind": "reduction_asset_index",
             "reduction_id": spec.ctx.reduction_id,
             "assets": [
-                {
-                    "kind": "pages_manifest",
-                    "uri": manifest_key,
-                    "sha256": sha256_hex(manifest_body),
-                    "bytes": len(manifest_body),
-                },
+                *(
+                    [
+                        {
+                            "kind": "pages_manifest",
+                            "uri": manifest_key,
+                            "sha256": sha256_hex(manifest_body),
+                            "bytes": len(manifest_body),
+                        }
+                    ]
+                    if manifest_key
+                    else []
+                ),
                 {
                     "kind": "status",
                     "uri": status_key,
@@ -1066,6 +1084,7 @@ def _emit_pages(
     store.put_idempotent(f"{attempt}/asset_index.json", index_body)
     ledger.charge("max_api_calls_total", 1, "asset index put")
     ledger.charge("max_output_bytes", len(index_body), "asset index")
+    return manifest_key
 
 
 def _derived_rows(
