@@ -14,8 +14,8 @@
   "max_api_calls_total": 2000,
   "max_list_pages": 50,
   "max_head_requests": 100,
-  "max_source_objects": 512,
-  "max_return_bytes": 400000000,
+  "max_source_objects": 1024,
+  "max_return_bytes": 800000000,
   "max_wall_seconds": 900,
   "max_cost_usd": 0.5
  },
