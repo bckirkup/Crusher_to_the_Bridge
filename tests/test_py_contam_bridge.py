@@ -31,6 +31,7 @@ from engines.py_contam_bridge import (
     ContamZoneNode,
     build_transport_engine,
     is_plenum_zone,
+    parse_duty0_terminal_mode,
 )
 
 # ── Helpers ──────────────────────────────────────────────────────────────
@@ -306,7 +307,7 @@ class TestEdgeCases:
         engine = _engine_with_single_path(flow=10.0, decay=0.0)
         initial = {"A": 100.0, "B": 0.0, "NONEXISTENT": 50.0}
         result = engine.transport_step(initial)
-        assert result["NONEXISTENT"] == 50.0
+        assert result["NONEXISTENT"] == pytest.approx(50.0)
         assert set(result) == {"A", "B", "NONEXISTENT"}
 
 
@@ -528,3 +529,147 @@ class TestTransportSummary:
         assert summary["hvac_return_paths"] == 2
         assert summary["hvac_supply_paths"] == 2
         assert all(not is_plenum_zone(z) for z in summary["zone_concentrations"])
+
+
+# ── Duty-0 exhaust terminals ────────────────────────────────────────────
+
+class TestDuty0TerminalMode:
+    """``extract`` drains exhaust-only groups at their declared ach;
+    ``sealed`` restores the pre-CONTAM-DUTY0-01 zero-leg baseline."""
+
+    @staticmethod
+    def _layout() -> dict:
+        return {
+            "zones": [
+                {"id": "HEAD", "volume_m3": 10.0},
+                {"id": "CABIN", "volume_m3": 100.0},
+            ],
+        }
+
+    @staticmethod
+    def _duty0_airflow(ach: float = 19.1) -> dict:
+        return {
+            "hvac_zones": [
+                {
+                    "id": "AHU_HD_head",
+                    "rooms": ["HEAD"],
+                    "ach": ach,
+                    "oa_fraction": 1.0,
+                    "hvac_duty": 0.0,
+                },
+            ],
+            "cross_zone_links": [],
+            "adjacency": [],
+        }
+
+    def test_extract_emits_return_only_at_full_ach(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._duty0_airflow(), natural_decay_rate=0.0,
+        )
+        returns = [
+            p for p in engine.airflow_paths
+            if p.path_type == PATH_TYPE_HVAC_RETURN
+        ]
+        supplies = [
+            p for p in engine.airflow_paths
+            if p.path_type == PATH_TYPE_HVAC_SUPPLY
+        ]
+        assert len(returns) == 1
+        assert supplies == []
+        assert returns[0].from_zone == "HEAD"
+        assert is_plenum_zone(returns[0].to_zone)
+        assert not returns[0].is_hvac_ducted
+        assert returns[0].flow_rate_m3h == pytest.approx(19.1 * 10.0)
+
+    def test_extract_outflow_rate_equals_ach(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._duty0_airflow(), natural_decay_rate=0.0,
+        )
+        assert engine.zone_specific_outflow_rate("HEAD") == pytest.approx(19.1)
+
+    def test_extract_drains_mass_at_ach(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._duty0_airflow(), natural_decay_rate=0.0,
+        )
+        result = engine.transport_step(
+            {"HEAD": 1000.0, "CABIN": 0.0}, natural_decay_rate=0.0,
+        )
+        assert result["HEAD"] == pytest.approx(1000.0 * math.exp(-19.1))
+        assert result["CABIN"] == pytest.approx(0.0)
+        assert all(not is_plenum_zone(z) for z in result)
+
+    @pytest.mark.parametrize("ach", [5.0, 19.1, 40.0])
+    def test_extract_drain_rate_grades_with_ach(self, ach: float) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._duty0_airflow(ach=ach),
+            natural_decay_rate=0.0,
+        )
+        result = engine.transport_step({"HEAD": 1000.0}, natural_decay_rate=0.0)
+        assert result["HEAD"] == pytest.approx(1000.0 * math.exp(-ach))
+
+    def test_sealed_baseline_emits_no_legs_and_retains_mass(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._duty0_airflow(), natural_decay_rate=0.0,
+            duty0_terminal_mode="sealed",
+        )
+        hvac_paths = [
+            p for p in engine.airflow_paths
+            if p.path_type in (PATH_TYPE_HVAC_RETURN, PATH_TYPE_HVAC_SUPPLY)
+        ]
+        assert hvac_paths == []
+        result = engine.transport_step(
+            {"HEAD": 1000.0, "CABIN": 0.0}, natural_decay_rate=0.0,
+        )
+        assert result["HEAD"] == pytest.approx(1000.0)
+
+    def test_duty0_below_full_oa_stays_sealed(self) -> None:
+        """A duty-0 group at oa<1.0 reads as a disabled AHU, not exhaust."""
+        airflow = self._duty0_airflow()
+        airflow["hvac_zones"][0]["oa_fraction"] = 0.2
+        engine = ContamTransportEngine(
+            self._layout(), airflow, natural_decay_rate=0.0,
+        )
+        hvac_paths = [
+            p for p in engine.airflow_paths
+            if p.path_type in (PATH_TYPE_HVAC_RETURN, PATH_TYPE_HVAC_SUPPLY)
+        ]
+        assert hvac_paths == []
+        result = engine.transport_step(
+            {"HEAD": 1000.0}, natural_decay_rate=0.0,
+        )
+        assert result["HEAD"] == pytest.approx(1000.0)
+
+    def test_normal_duty_group_unaffected(self) -> None:
+        airflow = self._duty0_airflow()
+        airflow["hvac_zones"].append(
+            {"id": "AHU_cabin", "rooms": ["CABIN"], "ach": 6.0,
+             "oa_fraction": 0.2, "hvac_duty": 1.0},
+        )
+        engine = ContamTransportEngine(
+            self._layout(), airflow, natural_decay_rate=0.0,
+        )
+        cabin_legs = [
+            p for p in engine.airflow_paths
+            if p.path_id.startswith("AHU_cabin_")
+        ]
+        assert {
+            (p.path_type, p.is_hvac_ducted) for p in cabin_legs
+        } == {
+            (PATH_TYPE_HVAC_RETURN, False),
+            (PATH_TYPE_HVAC_SUPPLY, True),
+        }
+
+    def test_bad_mode_rejected(self) -> None:
+        with pytest.raises(ValueError, match="duty0_terminal_mode"):
+            ContamTransportEngine(
+                self._layout(), self._duty0_airflow(),
+                duty0_terminal_mode="vent",
+            )
+        with pytest.raises(ValueError, match="duty0_terminal_mode"):
+            parse_duty0_terminal_mode({"duty0_terminal_mode": "vent"})
+
+    def test_parse_defaults_to_extract(self) -> None:
+        assert parse_duty0_terminal_mode({}) == "extract"
+        assert parse_duty0_terminal_mode(
+            {"duty0_terminal_mode": "sealed"},
+        ) == "sealed"

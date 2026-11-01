@@ -67,6 +67,9 @@ UNSOURCED_LEGACY_FILTER_EFFICIENCY = 0.50
 PATHOGEN_POOL_TRANSPORT_MODES = ("none", "airflow")
 DEFAULT_PATHOGEN_POOL_TRANSPORT = "airflow"
 
+DUTY0_TERMINAL_MODES = ("extract", "sealed")
+DEFAULT_DUTY0_TERMINAL_MODE = "extract"
+
 
 def parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
     """Read the declared transport mode for per-pathogen airborne pools."""
@@ -105,6 +108,29 @@ def parse_outdoor_air_fraction_override(hvac_cfg: dict[str, Any]) -> float | Non
             "and in [0, 1]",
         )
     return value
+
+
+def parse_duty0_terminal_mode(hvac_cfg: dict[str, Any]) -> str:
+    """Read the terminal behaviour of ``hvac_duty`` <= 0 HVAC groups.
+
+    ``"extract"`` (default): exhaust-only branches pull room air at the
+    declared ``ach`` and supply nothing back, so airborne mass drains
+    overboard — the commissioned-export ``exhaust_only`` convention
+    (supply 0, return ``ach * V_room``). Only a duty-0 group declared
+    with ``oa_fraction`` 1.0 counts as exhaust-only; a duty-0 group at
+    lower oa reads as a disabled AHU and stays sealed. ``"sealed"``: the
+    labelled pre-CONTAM-DUTY0-01 baseline that emitted zero legs and
+    trapped mass in the room forever.
+    """
+    mode = str(hvac_cfg.get(
+        "duty0_terminal_mode", DEFAULT_DUTY0_TERMINAL_MODE,
+    ))
+    if mode not in DUTY0_TERMINAL_MODES:
+        raise ValueError(
+            "hvac.duty0_terminal_mode must be one of "
+            f"{DUTY0_TERMINAL_MODES}, got {mode!r}",
+        )
+    return mode
 
 
 def _matrix_exponential(operator: np.ndarray) -> np.ndarray:
@@ -269,6 +295,15 @@ class ContamTransportEngine:
         Continuous natural decay rate λ [1/h] for settling and
         viral inactivation (folded into removal rate ``k``).
         Default 0.10 /h.
+    duty0_terminal_mode : str
+        Terminal behaviour of ``hvac_duty`` <= 0 HVAC groups:
+        ``"extract"`` (default) emits return-only legs at the declared
+        ``ach`` so exhaust-only branches (the fleet's ``AHU_HD_*``
+        sanitary heads, declared ``oa_fraction`` 1.0) drain room air
+        overboard; ``"sealed"`` restores the pre-CONTAM-DUTY0-01 baseline
+        of zero legs, which trapped mass in the room forever. A duty-0
+        group below ``oa_fraction`` 1.0 stays sealed under either mode —
+        it reads as a disabled AHU, which moves no air.
     """
 
     def __init__(
@@ -278,11 +313,18 @@ class ContamTransportEngine:
         filter_efficiency: float = UNSOURCED_LEGACY_FILTER_EFFICIENCY,
         natural_decay_rate: float = 0.10,
         outdoor_air_fraction_override: float | None = None,
+        duty0_terminal_mode: str = DEFAULT_DUTY0_TERMINAL_MODE,
         clock: SimClock | None = None,
     ) -> None:
+        if duty0_terminal_mode not in DUTY0_TERMINAL_MODES:
+            raise ValueError(
+                "duty0_terminal_mode must be one of "
+                f"{DUTY0_TERMINAL_MODES}, got {duty0_terminal_mode!r}",
+            )
         self.filter_efficiency = filter_efficiency
         self.natural_decay_rate = natural_decay_rate
         self.outdoor_air_fraction_override = outdoor_air_fraction_override
+        self.duty0_terminal_mode = duty0_terminal_mode
         self.clock = clock or SimClock.from_config({})
 
         self.zone_nodes: dict[str, ContamZoneNode] = {}
@@ -383,10 +425,11 @@ class ContamTransportEngine:
         total_volume = sum(self.zone_nodes[r].volume_m3 for r in rooms)
         if total_volume <= 0:
             return
+        declared_oa = float(hvac_zone.get("oa_fraction", default_oa))
         oa = (
             self.outdoor_air_fraction_override
             if self.outdoor_air_fraction_override is not None
-            else float(hvac_zone.get("oa_fraction", default_oa))
+            else declared_oa
         )
         duty = float(hvac_zone.get("hvac_duty", default_duty))
         oa = min(max(oa, 0.0), 1.0)
@@ -394,6 +437,15 @@ class ContamTransportEngine:
         ach = float(hvac_zone.get("ach", 6.0))
         supply_total = ach * total_volume * duty
         if supply_total <= 0:
+            # Declared oa 1.0 marks the exhaust-only branch (makeup in, all
+            # out overboard); the runtime override only rescales supply
+            # composition, it cannot retype the terminal. Duty-0 below
+            # declared oa 1.0 reads as a disabled AHU — sealed either way.
+            if (
+                self.duty0_terminal_mode == "extract"
+                and declared_oa >= 1.0 and ach > 0.0
+            ):
+                self._append_exhaust_paths(zone_id, rooms, ach)
             return
         plenum_id = f"{PLENUM_PREFIX}{zone_id}"
         self._ensure_plenum_node(plenum_id)
@@ -403,6 +455,33 @@ class ContamTransportEngine:
             self._append_hvac_room_paths(
                 zone_id, plenum_id, room, room_flow, oa,
             )
+
+    def _append_exhaust_paths(
+        self,
+        zone_id: str,
+        rooms: list[str],
+        ach: float,
+    ) -> None:
+        """Exhaust-only terminal for duty-0 groups declared oa 1.0.
+
+        Each room returns air to a plenum that has no supply legs, so the
+        plenum fold drains mass out of the domain at ``ach * V_room`` per
+        room — the commissioned-export ``exhaust_only`` convention
+        (``flows[room] = (0.0, ach * vol)``).  This is the terminal the
+        fleet's ``AHU_HD_*`` sanitary branches declare; the ``"sealed"``
+        baseline mode never reaches this helper.
+        """
+        plenum_id = f"{PLENUM_PREFIX}{zone_id}"
+        self._ensure_plenum_node(plenum_id)
+        for room in rooms:
+            self.airflow_paths.append(ContamAirflowPath(
+                path_id=f"{zone_id}_ret_{room}",
+                from_zone=room,
+                to_zone=plenum_id,
+                flow_rate_m3h=ach * self.zone_nodes[room].volume_m3,
+                path_type=PATH_TYPE_HVAC_RETURN,
+                is_hvac_ducted=False,
+            ))
 
     def _build_hvac_recirculation_paths(self, airflow: dict[str, Any]) -> None:
         """Build star-topology HVAC paths through a virtual AHU plenum.
@@ -417,6 +496,13 @@ class ContamTransportEngine:
         at the air_flow_paths top level. Defaults: OA 0.2 (Contam OAFrac),
         duty 1.0 (design). Fiction Contam twins that freeze ContamX at the
         hobbyist night half-duty set ``hvac_duty: 0.5``.
+
+        A group whose effective duty is <= 0 and declared ``oa_fraction``
+        1.0 is an exhaust-only terminal: under
+        ``duty0_terminal_mode == "extract"`` it keeps return legs at the
+        full ``ach`` exhaust rate and no supply legs; under ``"sealed"``
+        it emits no legs at all. A duty-0 group below oa 1.0 is sealed in
+        both modes — it reads as a disabled AHU, which moves no air.
 
         Single-room AHUs are included (OA + filter removal with no mixing).
         """
@@ -804,6 +890,7 @@ def _build_native_engine(
         filter_efficiency=require_filter_efficiency(hvac_cfg),
         natural_decay_rate=hvac_cfg.get("natural_decay_rate", 0.10),
         outdoor_air_fraction_override=outdoor_air_fraction_override,
+        duty0_terminal_mode=parse_duty0_terminal_mode(hvac_cfg),
         clock=clock,
     )
 

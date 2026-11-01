@@ -5,7 +5,8 @@ test_museum_hull_audit.py – mechanical audit metrics for museum/GA hulls
 Offline tests for ``tools/museum_hull_audit.py`` against the committed
 fixtures under ``tests/fixtures/museum_audit/``:
 
-- ``toy_hull``: clean references; one duty-0 sanitary group (native sink),
+- ``toy_hull``: clean references; one duty-0 sanitary group (extract leg
+  post-CONTAM-DUTY0-01),
   one cross-zone link the native engine drops (room-id endpoint), one
   void link, one volume-bearing zone referenced nowhere (orphan).
 - ``toy_broken``: hvac/adjacency/cross-zone references to zones that do
@@ -155,19 +156,20 @@ class TestZoneClasses:
         spatial, airflow = _load("toy_hull")
         q2 = mha.audit_q2(str(REPO_ROOT / TOY), spatial, airflow)
         assert q2["injection_zone"] == "main"
-        # Native: duty-0 head is a sink; void link dropped; ghost isolated.
-        assert q2["native"]["sinks"] == ["hd_head"]
+        # Native post-CONTAM-DUTY0-01: the duty-0 head exfils through its
+        # exhaust return leg (makeup in, drain out — no longer a sink);
+        # void link dropped; ghost isolated.
+        assert q2["native"]["sinks"] == []
         assert q2["native"]["orphans"] == ["ghost", "void"]
-        assert sorted(q2["native"]["dead"]) == ["ghost", "hd_head", "void"]
-        assert q2["native"]["dead_frac"] == pytest.approx(0.6)
-        # ContamX: orifice links are bidirectional and the duty-0 head
-        # still exfils via its return AHS — only ghost stays dead.
+        assert q2["native"]["dead"] == ["ghost", "void"]
+        assert q2["native"]["dead_frac"] == pytest.approx(0.4)
+        # ContamX: orifice links are bidirectional — only ghost stays dead.
         assert q2["contamx_export"]["dead"] == ["ghost"]
         assert q2["contamx_export"]["dead_frac"] == pytest.approx(0.2)
-        assert q2["native_only_dead"] == ["hd_head", "void"]
+        assert q2["native_only_dead"] == ["void"]
         assert q2["contamx_committed"] is None
         assert q2["duty0_rooms"] == ["hd_head"]
-        assert q2["native_dead_volume_share"] == pytest.approx(55.0 / 205.0)
+        assert q2["native_dead_volume_share"] == pytest.approx(45.0 / 205.0)
 
     def test_toy_broken_committed_prj_drift(self) -> None:
         spatial, airflow = _load("toy_broken")
@@ -278,7 +280,8 @@ def test_main_fixtures() -> None:
     report = json.loads(
         (REPO_ROOT / "telemetry_buffer" / "test_museum_audit"
          / "museum_hull_audit_latest.json").read_text())
-    assert report["hulls"]["toy_hull"]["q2"]["native"]["sinks"] == ["hd_head"]
+    # Post-CONTAM-DUTY0-01: the duty-0 head exfils via its exhaust leg.
+    assert report["hulls"]["toy_hull"]["q2"]["native"]["sinks"] == []
     assert report["correlations"]["n_hulls"] == 2
     assert "vs_committed_dose_l1" in report["correlations"]
 

@@ -132,10 +132,15 @@ set the size of the trap.
 
 ## Ranked fix list (by expected divergence collapse)
 
-Ordered by how much of the measured tail each item plausibly removes. All
-are follow-ups; none is in this change.
+Ordered by how much of the measured tail each item plausibly removes.
 
-1. **Duty-0 sanitary-group terminal asymmetry** — give the native engine
+1. **Duty-0 sanitary-group terminal asymmetry** — **SHIPPED
+   (CONTAM-DUTY0-01)** as `hvac.duty0_terminal_mode: extract` (default;
+   `sealed` is the labelled pre-change baseline this audit measured):
+   duty-0 groups declared `oa_fraction` 1.0 emit return/exhaust legs at
+   `ach · V_room`. Post-fix fleet re-audit: native sinks 535 → 8 (the
+   residual 8 are one-way-link deck zones, item 4's class); dead_frac
+   0.0 on every divergence-tail hull. Original fix text: give the native engine
    the commissioned-terminal convention the export lane already uses:
    a duty-0 group emits a return/exhaust leg (drain) instead of zero
    legs (trap), matching `vent_mode: extract` semantics and the ContamX
