@@ -659,12 +659,14 @@ class TestDuty0TerminalMode:
             (PATH_TYPE_HVAC_SUPPLY, True),
         }
 
-    def test_bad_mode_rejected(self) -> None:
+    def test_bad_mode_rejected_by_ctor(self) -> None:
         with pytest.raises(ValueError, match="duty0_terminal_mode"):
             ContamTransportEngine(
                 self._layout(), self._duty0_airflow(),
                 duty0_terminal_mode="vent",
             )
+
+    def test_bad_mode_rejected_by_parser(self) -> None:
         with pytest.raises(ValueError, match="duty0_terminal_mode"):
             parse_duty0_terminal_mode({"duty0_terminal_mode": "vent"})
 
