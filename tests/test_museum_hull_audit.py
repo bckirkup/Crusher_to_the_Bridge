@@ -256,6 +256,7 @@ def test_write_table(tmp_path: Path) -> None:
         for pid in ("toy_hull", "toy_broken")
     }
     out = REPO_ROOT / "telemetry_buffer" / "test_museum_audit" / "table.md"
+    out.parent.mkdir(parents=True, exist_ok=True)
     mha.write_table(results, {"toy_hull": 100.0, "toy_broken": 900.0},
                     str(out))
     text = out.read_text(encoding="utf-8")
