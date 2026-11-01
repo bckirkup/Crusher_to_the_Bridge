@@ -102,13 +102,30 @@ From `RECEIPT.json` `budget_spent` + `describe-jobs` + ECR/jobdef pins:
 | Failed prior attempt | `red-fps01-b-obsclock-v1` (job `8cfd38b6…`, 3×2s) | — | sha-pin defect (canonical vs raw); counted as spend, not reruns |
 
 Return leg: collect bootstrap `red-fps01-b-obsclock-return-bootstrap.json`
-(canonical sha `c31127f0…`), dispatch run `41263365329`, budgets
-2,000 api / 50 list pages / 100 head / 1,024 objects / 800 MB / 900 s /
-$0.50. Edison ingest receipts append below when the run lands.
+(canonical sha `c31127f0…`, raw-bytes sha `610957a0…`), completed in run
+`41264992091`, budgets 2,000 api / 50 list pages / 100 head / 1,024 objects /
+800 MB / 900 s / $0.50. Two superseded dispatches — `41263365329` (wrong
+`attempt_id` input, cancelled pre-collect) and `41264594326` (canonical sha
+passed where the workflow pins raw bytes, failed at bootstrap fetch) — cost
+nothing against AWS; the pins are now codified in
+`.agents/skills/reducer-dispatch-pins/SKILL.md`.
 
 ## 7. Delivery receipts
 
 - **Materialize:** `RECEIPT.json` status `completed`, `errors: []`,
   `image_digest sha256:2b9272da…`, `jobdef_revision_arn …/picard-reducer:7`.
-- **Collect/ingest:** see `red-fps01-b-obsclock-return-bootstrap.json` +
-  the run-`41263365329` ack envelope (§8 single open decision pending it).
+- **Collect:** `analysis collect` over `pages_manifest` (364 page objects +
+  manifest + `status.json` + `asset_index.json`), artifact
+  `return-collect-red-fps01-b-obsclock` 30,518,860 B, ~49 s in run
+  `41264992091`.
+- **Ingest:** `{"status": "completed", "files_uploaded": 367,
+  "request_id": "req-fps01-b-obsclock-return",
+  "reduction_id": "red-fps01-b-obsclock",
+  "s3_pointer": "s3://crusherbucket-994254241749-us-east-1-an/campaign/_derived/reducer/v1/attempts/red-fps01-b-obsclock/RECEIPT.json"}`
+  — all 364 pages + pages manifest + status + asset index landed as Edison
+  `project_asset_ids`. No `return_blocked` path taken; the platform key was
+  live.
+- **Acknowledge:** durable ack `ack-5cf27fdf7bcc97ee` at
+  `campaign/_derived/reducer/v1/requests/acks/ack-5cf27fdf7bcc97ee.json`
+  (sha256 `2a417daa3b021c0f39a7fd7fba02cbd6947c13fa8a2067e4ef74c02daa8f8c07`),
+  `deduplicated: false` — first delivery, not a replay.
