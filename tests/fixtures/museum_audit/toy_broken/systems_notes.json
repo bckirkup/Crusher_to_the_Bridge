@@ -1,0 +1,7 @@
+{
+ "zone_modes": {
+  "main": {"mode": "recirc", "evidence": "GA note"},
+  "extra_notes_zone": {"mode": "extract", "evidence": "GA note"}
+ },
+ "vent_markers": []
+}

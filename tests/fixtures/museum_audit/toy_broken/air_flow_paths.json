@@ -1,0 +1,18 @@
+{
+ "oa_fraction": 0.2,
+ "hvac_zones": [
+  {"id": "hv_a", "rooms": ["main", "ghost_room"], "ach": 6.0,
+   "oa_fraction": 0.2},
+  {"id": "hv_empty", "rooms": ["gone"], "ach": 4.0,
+   "filter_efficiency": 0.8, "nbc_filter_stage": "hepa"},
+  {"id": "hv_aux", "rooms": ["aux"], "ach": 6.0, "hvac_duty": 0.0}
+ ],
+ "cross_zone_links": [
+  {"from": "hv_a", "to": "phantom_zone", "flow_rate_m3h": 10.0,
+   "path": "bad_link", "is_hvac_ducted": false}
+ ],
+ "adjacency": [
+  {"from": "main", "to": "cabin_b", "type": "passageway"},
+  {"from": "main", "to": "nowhere", "type": "passageway"}
+ ]
+}

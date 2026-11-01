@@ -1,0 +1,168 @@
+ContamW 3.4.0.0 0
+
+! rows cols ud uf    T   uT     N     wH  u  Ao    a
+    40   40  0  0 293.150 2    0.00 10.00 0 0.600 0.280
+!  scale     us  orgRow  orgCol  invYaxis showGeom
+  1.000e+00   0       1       1     0        0
+! Ta       Pb      Ws    Wd    rh  day u..
+293.150 101325.0  0.000   0.0 0.000 1 2 0 0 1 ! steady simulation
+293.150 101325.0  1.000 270.0 0.000 1 2 0 0 1 ! wind pressure test
+null ! no weather file
+null ! no contaminant file
+null ! no continuous values file
+null ! no discrete values file
+null ! no WPC file
+null ! no EWC file
+Crusher platform crusher_platfor (skeleton)
+!  Xref    Yref    Zref   angle u
+   0.000   0.000   0.000   0.00 0
+! epsP epsS  tShift  dStart dEnd wp mf wpctrig
+  0.01 0.01 00:00:00   1/1   1/1  0  0  0
+! latd  longtd   tznr  altd  Tgrnd u..
+ 40.00  -90.00  -6.00     0 283.15 2 0
+!sim_af afcalc afmaxi afrcnvg afacnvg afrelax uac Pbldg uPb
+     1      1     30   1e-05   1e-06    0.75   0 50.00   0
+!   slae rs aflmaxi aflcnvg aflinit Tadj
+      0   1    100   1e-06      1    0
+!sim_mf slae rs maxi   relcnvg   abscnvg relax gamma ucc
+    2             30  1.00e-04  1.00e-15 1.250         0 ! (cyclic)
+          0   1  100  1.00e-06  1.00e-15 1.100 1.000   0 ! (non-trace)
+          0   1  100  1.00e-06  1.00e-15 1.100 1.000   0 ! (trace)
+          0   1  100  1.00e-06  1.00e-15 1.100         0 ! (cvode)
+!mf_solver sim_1dz sim_1dd   celldx  sim_vjt udx
+     0        1       0     1.00e-01    0     0
+!cvode    rcnvg     acnvg    dtmax
+   0     1.00e-06  1.00e-13   0.00
+!tsdens relax tsmaxi cnvgSS densZP stackD dodMdt
+   0    0.75    20     1      0      0      0
+!date_st time_st  date_0 time_0   date_1 time_1    t_step   t_list   t_scrn
+  Jan01 00:00:00  Jan01 00:00:00  Jan01 01:00:00  00:01:00 00:01:00 01:00:00
+!restart  date  time
+    0    Jan01 00:00:00
+!list doDlg pfsave zfsave zcsave
+   1     0      1      1      1
+!vol ach -bw cbw exp -bw age -bw
+  0   0   0   0   0   0   0   0
+!rzf rzm rz1 csm srf log
+  0   0   0   1   1   1
+!bcx dcx pfq zfq zcq
+  0   0   0   0   0
+!dens   grav
+ 1.2041 9.8055
+! 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 <- extra[]
+  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+0 ! rvals:
+!valZ valD valC
+   0    0    0
+!cfd   cfdcnvg  var zref maxi dtcmo solv smooth   cnvgUVW     cnvgT
+   0  1.00e-02    0    0 1000     1    1      1  1.00e-03  1.00e-03
+-999
+1 ! contaminants:
+   1
+1 ! species:
+! # s t   molwt    mdiam       edens       decay         Dm         CCdef        Cp          Kuv     u[5]      name
+  1 1 0  28.9600  0.0000e+00  0.0000e+00  0.0000e+00  2.0000e-05  0.0000e+00  1.0000e+03  0.0000e+00 0 0 0 0 0 Air
+default
+-999
+1 ! levels plus icon data:
+! #  refHt   delHt  ni  u  name
+  1 0.000 3.000 0 0 0 d1
+-999
+1 ! day-schedules:
+! # npts shap utyp ucnv name
+  1    2    0    1    0 OAFrac
+Outdoor-air fraction on AHS recirculation path
+ 00:00:00 0.2
+ 24:00:00 0.2
+-999
+1 ! week-schedules:
+! # utyp ucnv name
+  1    1    0 OAFracW
+Week schedule for outdoor-air fraction
+ 1 1 1 1 1 1 1 1 1 1 1 1
+-999
+0 ! wind pressure profiles:
+-999
+0 ! kinetic reactions:
+-999
+0 ! filter elements:
+-999
+0 ! filters:
+-999
+0 ! source/sink elements:
+-999
+2 ! flow elements:
+1 23 plr_orfc Opening
+
+ 2.70811e-05 0.00848528 0.5 0.01 0.112838 0.6 30 0 0
+2 23 plr_orfc EnvLeak
+
+ 2.70811e-07 8.48528e-05 0.5 0.0001 0.0112838 0.6 30 0 0
+-999
+0 ! duct elements:
+-999
+0 ! control super elements:
+-999
+0 ! control nodes:
+-999
+2 ! simple AHS:
+! # zr# zs# pr# ps# px# name
+  1   4   5   7   5   6 -1 ahs1
+Crusher HVAC hv_a ach=9.0
+  2   6   7   12   10   11 -1 ahs2
+Crusher HVAC hv_aux ach=6.0
+-999
+7 ! zones:
+! Z#  f  s#  c#  k#  l#  relHt    Vol  T0  P0  name  clr uH uT uP uV axs cdvf <cdvfName> cfd <cfdName> <1dData:>
+   1  3   0   0   0   1   0.000  100 293.15 0 main -1 0 2 0 0 0 0 0
+   2  3   0   0   0   1   0.000  60 293.15 0 cabin_b -1 0 2 0 0 0 0 0
+   3  3   0   0   0   1   0.000  20 293.15 0 aux_prj -1 0 2 0 0 0 0 0
+   4  10   0   0   0   1   0.000  0 293.15 0 ahs1(Ret) -1 0 2 0 0 0 0 0
+   5  10   0   0   0   1   0.000  0 293.15 0 ahs1(Sup) -1 0 2 0 0 0 0 0
+   6  10   0   0   0   1   0.000  0 293.15 0 ahs2(Ret) -1 0 2 0 0 0 0 0
+   7  10   0   0   0   1   0.000  0 293.15 0 ahs2(Sup) -1 0 2 0 0 0 0 0
+-999
+7 ! initial zone concentrations:
+! Z#       Air
+   1  0.000e+00
+   2  0.000e+00
+   3  0.000e+00
+   4  0.000e+00
+   5  0.000e+00
+   6  0.000e+00
+   7  0.000e+00
+-999
+14 ! flow paths:
+! P#    f  n#  m#  e#  f#  w#  a#  s#  c#  l#    X       Y      relHt  mult wPset wPmod wazm Fahs Xmax Xmin icn dir u[4] cdvf <cdvfName> cfd <cfdData[4]>
+   1    0  1   -1   2   0   0   0   0   0   1   0.000   0.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   2    0  2   -1   2   0   0   0   0   0   1   6.000   0.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   3    0  3   -1   2   0   0   0   0   0   1   2.000   2.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   4    0  1   2   1   0   0   0   0   0   1   3.000   0.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   5    32  -1   5   0   0   0   0   0   0   1   0.000   0.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   6    64  4   -1   0   0   0   0   0   0   1   0.000   0.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   7    16  4   5   0   0   0   0   1   0   1   0.000   0.000   0.000 1 0 0 -1 0.16054667 0 0   0  1 -1 0 0 0 0 0 0
+   8    8  5   1   0   0   0   1   0   0   1   0.000   0.000   0.000 1 0 0 0 0.20068333 0 0   0  1 -1 0 0 0 0 0 0
+   9    8  1   4   0   0   0   1   0   0   1   0.000   0.000   0.000 1 0 0 0 0.20068333 0 0   0  1 -1 0 0 0 0 0 0
+   10    32  -1   7   0   0   0   0   0   0   1   0.000   0.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   11    64  6   -1   0   0   0   0   0   0   1   0.000   0.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   12    16  6   7   0   0   0   0   1   0   1   0.000   0.000   0.000 1 0 0 -1 0 0 0   0  1 -1 0 0 0 0 0 0
+   13    8  7   3   0   0   0   2   0   0   1   2.000   2.000   0.000 1 0 0 0 0 0 0   0  1 -1 0 0 0 0 0 0
+   14    8  3   6   0   0   0   2   0   0   1   2.000   2.000   0.000 1 0 0 0 0.040136667 0 0   0  1 -1 0 0 0 0 0 0
+-999
+0 ! duct junctions:
+-999
+0 ! initial junction concentrations:
+-999
+0 ! duct segments:
+-999
+0 ! source/sinks:
+-999
+0 ! occupancy schedules:
+-999
+0 ! exposures:
+-999
+0 ! annotations:
+-999
+* end project file.
+
+! CRUSHER_PATH_MAP_COUNT 14 zones=3 phantoms=4 hobbyist=0
