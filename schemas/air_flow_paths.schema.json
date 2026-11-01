@@ -89,6 +89,11 @@
           "type": "boolean",
           "description": "Whether airflow passes through HVAC filtration"
         },
+        "direction": {
+          "type": "string",
+          "enum": ["oneway", "bidirectional"],
+          "description": "Declared direction (CONTAM-BIDIR-01). Absent: ducted links are one-way fan legs, passive links are bidirectional like the ContamX orifice they export as. Pin \"oneway\" on a genuinely directed link."
+        },
         "path": {"type": "string"},
         "description": {"type": "string"}
       }

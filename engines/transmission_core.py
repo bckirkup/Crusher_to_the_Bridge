@@ -14492,12 +14492,21 @@ class TransmissionCore:
 
 def build_hvac_downstream_map(
     airflow_paths: dict[str, Any],
+    passive_link_mode: str = "bidirectional",
 ) -> dict[str, list[str]]:
     """Build a map of zone → downstream zones from air_flow_paths.json.
 
     A zone B is downstream of zone A if there is any airflow path
     (HVAC recirculation, cross-zone link, or adjacency) from A → B.
+
+    ``passive_link_mode`` follows ``hvac.passive_link_mode``
+    (CONTAM-BIDIR-01): under the default ``"bidirectional"`` a passive
+    cross-zone link adds reverse edges too — matching the ContamX
+    orifice it exports as and the native bridge's own paths — while
+    ``"oneway"`` restores the labelled pre-change baseline.
     """
+    from engines.py_contam_bridge import cross_zone_link_bidirectional
+
     downstream: dict[str, list[str]] = {}
 
     # From HVAC zones: rooms within the same HVAC zone are all mutually downstream
@@ -14518,9 +14527,11 @@ def build_hvac_downstream_map(
         # _get_zone_rooms resolution (CONTAM-XZONE-01).
         from_rooms = zone_rooms.get(link["from"], [link["from"]])
         to_rooms = zone_rooms.get(link["to"], [link["to"]])
-        for fr in from_rooms:
-            for tr in to_rooms:
-                downstream.setdefault(fr, []).append(tr)
+        room_pairs = [(fr, tr) for fr in from_rooms for tr in to_rooms]
+        if cross_zone_link_bidirectional(link, passive_link_mode):
+            room_pairs += [(tr, fr) for fr in from_rooms for tr in to_rooms]
+        for fr, tr in room_pairs:
+            downstream.setdefault(fr, []).append(tr)
 
     # From adjacency: direct room-to-room connections
     for adj in airflow_paths.get("adjacency", []):

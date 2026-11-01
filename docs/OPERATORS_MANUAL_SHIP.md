@@ -99,6 +99,7 @@ Key knobs in `crusher_labs/config.yaml` (overridable via Picard `config_override
 | `transmission.sanitary_visit_mode` | `none` | `dwell_weighted` resolves shared-head visits ([shared_sanitary_zones.md](shared_sanitary_zones.md)) |
 | `hvac.pathogen_pool_transport` | `airflow` | Per-pathogen pools move through the declared airflow network; `none` is the labelled baseline |
 | `hvac.duty0_terminal_mode` | `extract` | Duty-0 groups declared `oa_fraction` 1.0 (the `AHU_HD_*` sanitary branches) emit exhaust legs at `ach · V`; `sealed` is the labelled pre-CONTAM-DUTY0-01 baseline |
+| `hvac.passive_link_mode` | `bidirectional` | Passive (non-ducted) `cross_zone_links` emit both senses, matching their ContamX orifice; per-link `direction` overrides; `oneway` is the labelled pre-CONTAM-BIDIR-01 baseline |
 | `rhythm.enabled` | `true` | SHIP-RHYTHM daily program on catalogued platforms; `false` is the labelled baseline ([rhythm/rhythm_spec.md](rhythm/rhythm_spec.md)) |
 | `observation.surface_swab_source` | `surface_pool_density` | `airborne_fraction` is the labelled pre-change baseline |
 | `observation.wastewater_assay_mode` | `holding_tank` | Copies/L assay on the blackwater tank; `none` is the labelled baseline |

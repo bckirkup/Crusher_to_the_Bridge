@@ -11,7 +11,8 @@
   {"from": "hv_main", "to": "hd_san", "flow_rate_m3h": 20.0,
    "path": "door_gap", "is_hvac_ducted": false},
   {"from": "hv_main", "to": "void", "flow_rate_m3h": 5.0,
-   "path": "deck_leak", "is_hvac_ducted": false}
+   "path": "deck_leak", "is_hvac_ducted": false,
+   "direction": "oneway"}
  ],
  "adjacency": [
   {"from": "main", "to": "cabin_a", "type": "passageway"}

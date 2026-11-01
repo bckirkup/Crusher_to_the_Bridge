@@ -70,6 +70,48 @@ DEFAULT_PATHOGEN_POOL_TRANSPORT = "airflow"
 DUTY0_TERMINAL_MODES = ("extract", "sealed")
 DEFAULT_DUTY0_TERMINAL_MODE = "extract"
 
+PASSIVE_LINK_MODES = ("bidirectional", "oneway")
+DEFAULT_PASSIVE_LINK_MODE = "bidirectional"
+
+
+def parse_passive_link_mode(hvac_cfg: dict[str, Any]) -> str:
+    """Read the directionality of passive ``cross_zone_links``.
+
+    ``"bidirectional"`` (default): a passive (non-ducted) link emits
+    paths both ways, matching the ContamX export lane where the same
+    link becomes a pressure-driven orifice — CONTAM-BIDIR-01. A link
+    that declares ``direction`` keeps its declared sense, and a ducted
+    link (a fan leg) stays one-way. ``"oneway"`` restores the labelled
+    pre-CONTAM-BIDIR-01 baseline: every link emits from\u2192to only.
+    """
+    mode = str(hvac_cfg.get(
+        "passive_link_mode", DEFAULT_PASSIVE_LINK_MODE,
+    ))
+    if mode not in PASSIVE_LINK_MODES:
+        raise ValueError(
+            "hvac.passive_link_mode must be one of "
+            f"{PASSIVE_LINK_MODES}, got {mode!r}",
+        )
+    return mode
+
+
+def cross_zone_link_bidirectional(
+    link: dict[str, Any], passive_link_mode: str,
+) -> bool:
+    """Whether one ``cross_zone_links`` entry emits reverse paths.
+
+    Mode ``oneway`` never does. Under ``bidirectional`` a declared
+    ``direction`` wins (``"oneway"`` pins a genuinely directed link);
+    absent a declaration, ducted fan legs are one-way and passive
+    openings are bidirectional, matching the orifice they export as.
+    """
+    if passive_link_mode == "oneway":
+        return False
+    declared = link.get("direction")
+    if declared is not None:
+        return str(declared) == "bidirectional"
+    return not bool(link.get("is_hvac_ducted", False))
+
 
 def parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
     """Read the declared transport mode for per-pathogen airborne pools."""
@@ -314,6 +356,7 @@ class ContamTransportEngine:
         natural_decay_rate: float = 0.10,
         outdoor_air_fraction_override: float | None = None,
         duty0_terminal_mode: str = DEFAULT_DUTY0_TERMINAL_MODE,
+        passive_link_mode: str = DEFAULT_PASSIVE_LINK_MODE,
         clock: SimClock | None = None,
     ) -> None:
         if duty0_terminal_mode not in DUTY0_TERMINAL_MODES:
@@ -321,10 +364,16 @@ class ContamTransportEngine:
                 "duty0_terminal_mode must be one of "
                 f"{DUTY0_TERMINAL_MODES}, got {duty0_terminal_mode!r}",
             )
+        if passive_link_mode not in PASSIVE_LINK_MODES:
+            raise ValueError(
+                "passive_link_mode must be one of "
+                f"{PASSIVE_LINK_MODES}, got {passive_link_mode!r}",
+            )
         self.filter_efficiency = filter_efficiency
         self.natural_decay_rate = natural_decay_rate
         self.outdoor_air_fraction_override = outdoor_air_fraction_override
         self.duty0_terminal_mode = duty0_terminal_mode
+        self.passive_link_mode = passive_link_mode
         self.clock = clock or SimClock.from_config({})
 
         self.zone_nodes: dict[str, ContamZoneNode] = {}
@@ -522,16 +571,22 @@ class ContamTransportEngine:
             is_ducted = link.get("is_hvac_ducted", False)
             n_pairs = len(from_rooms) * len(to_rooms)
             pair_flow = flow / n_pairs if n_pairs > 0 else 0
-            for fr in from_rooms:
-                for tr in to_rooms:
-                    self.airflow_paths.append(ContamAirflowPath(
-                        path_id=f"xzone_{path_name}_{fr}_{tr}",
-                        from_zone=fr,
-                        to_zone=tr,
-                        flow_rate_m3h=pair_flow,
-                        path_type="cross_zone",
-                        is_hvac_ducted=is_ducted,
-                    ))
+            bidirectional = cross_zone_link_bidirectional(
+                link, self.passive_link_mode,
+            )
+            room_pairs = [(fr, tr) for fr in from_rooms for tr in to_rooms]
+            if bidirectional:
+                room_pairs += [(tr, fr) for fr in from_rooms
+                               for tr in to_rooms]
+            for fr, tr in room_pairs:
+                self.airflow_paths.append(ContamAirflowPath(
+                    path_id=f"xzone_{path_name}_{fr}_{tr}",
+                    from_zone=fr,
+                    to_zone=tr,
+                    flow_rate_m3h=pair_flow,
+                    path_type="cross_zone",
+                    is_hvac_ducted=is_ducted,
+                ))
 
     def _build_adjacency_paths(self, airflow: dict[str, Any]) -> None:
         passive_rates = {
@@ -903,6 +958,7 @@ def _build_native_engine(
         natural_decay_rate=hvac_cfg.get("natural_decay_rate", 0.10),
         outdoor_air_fraction_override=outdoor_air_fraction_override,
         duty0_terminal_mode=parse_duty0_terminal_mode(hvac_cfg),
+        passive_link_mode=parse_passive_link_mode(hvac_cfg),
         clock=clock,
     )
 

@@ -163,8 +163,11 @@ class TestZoneClasses:
         assert q2["injection_zone"] == "main"
         # Native post-CONTAM-XZONE-01: void is a room-id endpoint — its
         # deck_leak link resolves, making void a REACHABLE sink (one-way
-        # in-link, no out leg: the residual class fix #4 targets). The
-        # duty-0 head exfils through its exhaust leg (no sink, DUTY0-01);
+        # in-link, no out leg). CONTAM-BIDIR-01: the fixture pins
+        # direction:"oneway" on deck_leak — a genuinely directed leak —
+        # so void stays the one-way-sink class while the default passive
+        # link (hv_main→hd_san) is now bidirectional. The duty-0 head
+        # exfils through its exhaust leg (no sink, DUTY0-01);
         # ghost stays isolated.
         assert q2["native"]["sinks"] == ["void"]
         assert q2["native"]["orphans"] == ["ghost"]
