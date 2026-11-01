@@ -23,7 +23,7 @@ from __future__ import annotations
 from typing import Any
 
 from . import contracts, first_paper
-from .rows import ReductionContext, SourceSpec, canonical_json, row_id
+from .rows import ReductionContext, SourceSpec, canonical_json
 
 PROFILE_ID = "first_paper_observation_clock"
 SCAN_ROLE = "scan_rows"
@@ -393,28 +393,8 @@ def vector_rows(
             values.get("platform_id") or src.hull_id,
             values.get("seed") or src.seed,
         )
-        for f in doc["scan_fields"]:
-            col = f["column"]
-            if hit is None:
-                values[col] = None
-                prov[col] = {
-                    "member": None,
-                    "source_key": None,
-                    "native_path": f["native"],
-                    "status": scan_status or "scan_source_absent",
-                }
-                missing.append(col)
-            else:
-                values[col] = hit["values"].get(col)
-                prov[col] = {
-                    "member": hit["prov"][col]["member"],
-                    "source_key": hit["prov"][col]["source_key"],
-                    "source_id": hit["source_id"],
-                    "native_path": f["native"],
-                    "status": hit["prov"][col]["status"],
-                }
-                if hit["prov"][col]["status"] == "missing":
-                    missing.append(col)
+        missing += first_paper._absorb_scan_fields(
+            doc, hit, scan_status, values, prov)
         ts, absent = _series(ddoc.doc)
         window = (
             "unavailable"
@@ -434,28 +414,8 @@ def vector_rows(
         missing += _scan_agreement_checks(values, prov, prov, hit)
         _availability_fields(values, prov)
         rows.append(
-            {
-                "row_id": row_id("fpoc", ddoc.run_uid),
-                "reduction_id": ctx.reduction_id,
-                "run_uid": ddoc.run_uid,
-                "source_id": src.source_id,
-                "campaign_id": src.campaign_id,
-                "cell_id": src.cell_id,
-                "hull_id": src.hull_id,
-                "seed": src.seed if src.seed is not None
-                else values.get("seed"),
-                "original_run_id": src.original_run_id,
-                "engine_sha": src.engine_sha,
-                "image_digest": src.image_digest,
-                "source_uri": src.uri,
-                "source_key": object_key,
-                "member": member,
-                "member_asset_id": ddoc.asset_id,
-                "definition_version": doc["definition_version"],
-                "definition_sha256": definition_sha256(),
-                "values": values,
-                "provenance": prov,
-                "missing": sorted(set(missing)),
-            }
+            first_paper._row_envelope(
+                "fpoc", ddoc, src, ctx, object_key, member, doc,
+                values, prov, missing, definition_sha256())
         )
     return rows

@@ -448,6 +448,83 @@ def _scan_lookup(
     return hit, None
 
 
+def _absorb_scan_fields(
+    doc: dict,
+    hit,
+    scan_status: str | None,
+    values: dict,
+    prov: dict,
+) -> list[str]:
+    """Project the profile's scan fields off the joined scan-row entry.
+
+    Absent join → typed ``scan_source_absent``/conflict status, never
+    first-row-wins; a ``missing`` scan-prov status propagates to missing.
+    """
+    missing = []
+    for f in doc["scan_fields"]:
+        col = f["column"]
+        if hit is None:
+            values[col] = None
+            prov[col] = {
+                "member": None,
+                "source_key": None,
+                "native_path": f["native"],
+                "status": scan_status or "scan_source_absent",
+            }
+            missing.append(col)
+        else:
+            values[col] = hit["values"].get(col)
+            prov[col] = {
+                "member": hit["prov"][col]["member"],
+                "source_key": hit["prov"][col]["source_key"],
+                "source_id": hit["source_id"],
+                "native_path": f["native"],
+                "status": hit["prov"][col]["status"],
+            }
+            if hit["prov"][col]["status"] == "missing":
+                missing.append(col)
+    return missing
+
+
+def _row_envelope(
+    prefix: str,
+    ddoc,
+    src: SourceSpec,
+    ctx: ReductionContext,
+    object_key: str,
+    member: str,
+    doc: dict,
+    values: dict,
+    prov: dict,
+    missing: list,
+    defn_sha: str,
+) -> dict:
+    """The versioned wide-row envelope shared by the extraction profiles."""
+    return {
+        "row_id": row_id(prefix, ddoc.run_uid),
+        "reduction_id": ctx.reduction_id,
+        "run_uid": ddoc.run_uid,
+        "source_id": src.source_id,
+        "campaign_id": src.campaign_id,
+        "cell_id": src.cell_id,
+        "hull_id": src.hull_id,
+        "seed": src.seed if src.seed is not None
+        else values.get("seed"),
+        "original_run_id": src.original_run_id,
+        "engine_sha": src.engine_sha,
+        "image_digest": src.image_digest,
+        "source_uri": src.uri,
+        "source_key": object_key,
+        "member": member,
+        "member_asset_id": ddoc.asset_id,
+        "definition_version": doc["definition_version"],
+        "definition_sha256": defn_sha,
+        "values": values,
+        "provenance": prov,
+        "missing": sorted(set(missing)),
+    }
+
+
 def vector_rows(
     spec,
     src: SourceSpec,
@@ -481,51 +558,10 @@ def vector_rows(
             values.get("seed") or src.seed,
         )
         missing += _status_columns(values, prov, ddoc.doc, hit)
-        for f in doc["scan_fields"]:
-            col = f["column"]
-            if hit is None:
-                values[col] = None
-                prov[col] = {
-                    "member": None,
-                    "source_key": None,
-                    "native_path": f["native"],
-                    "status": scan_status or "scan_source_absent",
-                }
-                missing.append(col)
-            else:
-                values[col] = hit["values"].get(col)
-                prov[col] = {
-                    "member": hit["prov"][col]["member"],
-                    "source_key": hit["prov"][col]["source_key"],
-                    "source_id": hit["source_id"],
-                    "native_path": f["native"],
-                    "status": hit["prov"][col]["status"],
-                }
-                if hit["prov"][col]["status"] == "missing":
-                    missing.append(col)
+        missing += _absorb_scan_fields(doc, hit, scan_status, values, prov)
         rows.append(
-            {
-                "row_id": row_id("fpv", ddoc.run_uid),
-                "reduction_id": ctx.reduction_id,
-                "run_uid": ddoc.run_uid,
-                "source_id": src.source_id,
-                "campaign_id": src.campaign_id,
-                "cell_id": src.cell_id,
-                "hull_id": src.hull_id,
-                "seed": src.seed if src.seed is not None
-                else values.get("seed"),
-                "original_run_id": src.original_run_id,
-                "engine_sha": src.engine_sha,
-                "image_digest": src.image_digest,
-                "source_uri": src.uri,
-                "source_key": object_key,
-                "member": member,
-                "member_asset_id": ddoc.asset_id,
-                "definition_version": doc["definition_version"],
-                "definition_sha256": definition_sha256(),
-                "values": values,
-                "provenance": prov,
-                "missing": sorted(set(missing)),
-            }
+            _row_envelope(
+                "fpv", ddoc, src, ctx, object_key, member, doc,
+                values, prov, missing, definition_sha256())
         )
     return rows
