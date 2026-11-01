@@ -67,6 +67,7 @@ from tools.contamw34_prj import (  # noqa: E402
 )
 
 PLATFORMS_DIR = "data/platforms"
+PRJ_REL_PATH = os.path.join("contam", "platform.prj")
 _DEFAULT_TABLE = "docs/contam_fleet_compare_table.md"
 
 # Hulls named in the audit brief: the union of both divergence tails, the
@@ -250,7 +251,7 @@ def _prj_zone_records(text: str) -> dict[str, float]:
 
 def _prj_zone_diff(platform_dir: str,
                    zones: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    prj_path = os.path.join(platform_dir, "contam", "platform.prj")
+    prj_path = os.path.join(platform_dir, PRJ_REL_PATH)
     if not os.path.exists(prj_path):
         return {"prj": None}
     prj_zones = _prj_zone_records(
@@ -304,7 +305,8 @@ def _contamx_edges(entries: list[dict[str, Any]],
     """
     edges: list[tuple[str, str]] = []
     for e in entries:
-        if e.get("declared_flow_m3h") == 0.0:
+        flow = e.get("declared_flow_m3h")
+        if isinstance(flow, int | float) and flow <= 0.0:
             continue
         frm, to = e["from_zone"], e["to_zone"]
         edges.append((frm, to))
@@ -341,8 +343,8 @@ def _reachable(edges: list[tuple[str, str]], source: str) -> set[str]:
 def _zone_classes(zone_ids: set[str], edges: list[tuple[str, str]],
                   injection: str | None) -> dict[str, Any]:
     """sink / orphan / unreachable / dead classification per real zone."""
-    in_deg: dict[str, int] = {z: 0 for z in zone_ids}
-    out_deg: dict[str, int] = {z: 0 for z in zone_ids}
+    in_deg: dict[str, int] = dict.fromkeys(zone_ids, 0)
+    out_deg: dict[str, int] = dict.fromkeys(zone_ids, 0)
     for frm, to in edges:
         if to in in_deg:
             in_deg[to] += 1
@@ -398,7 +400,7 @@ def audit_q2(platform_dir: str, spatial: dict[str, Any],
     out["contamx_export"] = _zone_classes(
         zone_ids, _contamx_edges(entries, zone_ids), injection)
 
-    prj_path = os.path.join(platform_dir, "contam", "platform.prj")
+    prj_path = os.path.join(platform_dir, PRJ_REL_PATH)
     if os.path.exists(prj_path):
         prj_entries = path_map_from_prj(_read_text(prj_path))
         # Committed GA prjs strip underscores and truncate names at 15
@@ -487,7 +489,7 @@ def audit_q3(platform_dir: str, airflow: dict[str, Any]) -> dict[str, Any]:
         "nbc_groups": sum(
             1 for g in groups if any(k.startswith("nbc_filter") for k in g)),
     }
-    prj_path = os.path.join(platform_dir, "contam", "platform.prj")
+    prj_path = os.path.join(platform_dir, PRJ_REL_PATH)
     if os.path.exists(prj_path):
         prj_ach = _prj_ahs_ach(_read_text(prj_path))
         json_ach = {g["id"]: float(g.get("ach", 0.0)) for g in groups}
@@ -518,8 +520,7 @@ def audit_platform(platform_id: str,
         "platform": platform_id,
         "ga_imported": os.path.exists(
             os.path.join(pdir, "import_provenance.json")),
-        "has_prj": os.path.exists(
-            os.path.join(pdir, "contam", "platform.prj")),
+        "has_prj": os.path.exists(os.path.join(pdir, PRJ_REL_PATH)),
         "n_zones": len(zones),
         "total_volume_m3": round(sum(
             float(z.get("volume_m3", 0.0)) for z in zones.values()), 2),
