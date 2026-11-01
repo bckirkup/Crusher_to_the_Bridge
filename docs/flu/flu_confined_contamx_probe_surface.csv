@@ -1,0 +1,9 @@
+seed,lane,infections_total,infections_imported,infections_acquired,pairs_observed,confined_index_pairs,confined_slots,confined_secondaries,observed_mate_case_attack_confined,implied_sar_confined_median,channel_pool,channel_plume,channel_contact,channel_hvac,channel_emesis,channel_flush,channel_fomite,acquired_droplet,acquired_hvac_airborne,acquired_caregiver,acquired_direct_contact,acquired_fomite,dominant_droplet,dominant_hvac_airborne,dominant_caregiver,dominant_direct_contact,engine_class,n_airflow_paths,total_flow_m3h,transport_engine_requested
+8105,contamx,19,19,0,24,11,11,0,0.0,0.0014834186452465925,1540.8991,3752.6232,0.0001,0.0,0.0,0.0,0.0315,0.0,0.0,0.0,0.0,0.0,0,0,0,0,ContamXTransportEngine,666,410833.635,contamx
+8105,native,19,19,0,23,11,11,0,0.0,0.0014834186452465925,1526.6814,3729.467,0.0004,0.0,0.0,0.0,0.0394,0.0,0.0,0.0,0.0,0.0,0,0,0,0,ContamTransportEngine,705,391682.7,native
+8106,contamx,11,10,1,8,5,5,1,0.2,0.0007133854195383593,1288.2861,1649.5937,0.0001,0.0073,0.0,0.0,0.0005,2891.6213,0.0,0.0,0.0001,0.0005,1,0,0,0,ContamXTransportEngine,666,410833.635,contamx
+8106,native,11,10,1,7,5,5,1,0.2,0.0007072098091777113,1214.9576,1547.1866,0.0001,0.0072,0.0,0.0,0.0005,2716.1661,0.0,0.0,0.0001,0.0005,1,0,0,0,ContamTransportEngine,705,391682.7,native
+8112,contamx,22,22,0,23,14,14,0,0.0,0.003028046192276923,233.0757,589.6256,0.0,0.0004,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,ContamXTransportEngine,666,410833.635,contamx
+8112,native,22,22,0,25,14,14,0,0.0,0.002995983058669993,236.0451,596.2443,0.0,0.0004,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,ContamTransportEngine,705,391682.7,native
+8184,contamx,7,6,1,6,4,4,1,0.25,0.002436207617680153,159.5099,251.5097,0.0,0.0,0.0,0.0,0.0,222.0542,0.0,0.0,0.0,0.0,1,0,0,0,ContamXTransportEngine,666,410833.635,contamx
+8184,native,7,6,1,6,4,4,1,0.25,0.002436207617680153,159.5099,251.5097,0.0,0.0,0.0,0.0,0.0,222.0542,0.0,0.0,0.0,0.0,1,0,0,0,ContamTransportEngine,705,391682.7,native
