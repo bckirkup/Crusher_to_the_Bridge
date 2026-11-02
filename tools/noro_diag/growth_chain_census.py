@@ -1849,9 +1849,9 @@ def _write_run_zip(
             # summary.json so first_paper_scalar can range-read
             # n_lots_placed / actual_venues_used / source_venue_arm
             # without decompressing the census member.
-            "provisioned_source": payload["common_source"][
-                "provisioned_source"
-            ],
+            "provisioned_source": payload["common_source"].get(
+                "provisioned_source", {},
+            ),
         },
         "rss_mb": {
             "voyage": payload["meta"]["voyage_rss_mb"],
