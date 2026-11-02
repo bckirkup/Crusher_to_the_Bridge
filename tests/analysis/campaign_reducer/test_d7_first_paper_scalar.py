@@ -224,8 +224,14 @@ def test_summary_only_member_reads_and_binding():
     assert prov["member"] == "summary.json"
     assert prov["source_key"] == "run_a.zip"
     assert prov["status"] == "exact_emitted"
-    assert row["definition_version"] == "first_paper_scalar/1.3.0"
+    assert row["definition_version"] == "first_paper_scalar/1.4.0"
     assert row["definition_sha256"]
+    # 1.4.0 venue-pin fields: absent on a pre-pin summary — explicit
+    # missingness, never fabricated
+    assert row["values"]["source_venue_arm"] is None
+    assert row["values"]["actual_venues_used"] is None
+    assert row["values"]["n_lots_placed"] is None
+    assert row["provenance"]["n_lots_placed"]["status"] == "missing"
     # 1.3.0 observed-window witness fields (same machinery as obsclock)
     assert row["values"]["observed_first_epoch"] == 0
     assert row["values"]["observed_terminal_epoch"] == 287
