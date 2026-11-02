@@ -24,6 +24,7 @@ The §4 integrity gates pinned here:
 import numpy as np
 import pytest
 
+from engines.sim_clock import HOURS, SimClock
 from engines.transmission_core import (
     _COMMON_SOURCE_STREAM_KEY,
     COMMON_SOURCE_LOT_ITEM_LINES,
@@ -31,11 +32,13 @@ from engines.transmission_core import (
     TransmissionCore,
 )
 from tests.test_common_source_events import (
+    MDR_ZONE,
     PATHOGEN,
     ZONE,
     _core,
     _diner,
     _handler,
+    _profile,
 )
 from tests.test_common_source_lot_objects import (
     _object_cfg,
@@ -478,6 +481,159 @@ def test_fiat_ignores_the_source_mix() -> None:
         },
     )
     assert set(_lot_genotypes(core)) == {"GII.4"}
+
+
+# ── Phase-2 venue-pin counterfactual ───────────────────────────────
+
+def _two_zone_core(cfg_cs: dict, seed: int = 7) -> TransmissionCore:
+    """ZONE (buffet) and MDR_ZONE (plated) both served Dining zones."""
+    core = TransmissionCore(
+        rng=np.random.default_rng(seed),
+        zone_volumes={ZONE: 50.0, MDR_ZONE: 50.0},
+        pathogen_profiles={PATHOGEN: _profile()},
+        zone_types={ZONE: "Dining", MDR_ZONE: "Dining"},
+        cfg={"transmission": {"common_source": cfg_cs}},
+        clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+    )
+    core.initialize_zones([ZONE, MDR_ZONE])
+    core._quarantined_ids = set()
+    return core
+
+
+def _pin_cfg(
+    pin: list,
+    arm: str = "passenger_venue",
+    q: float = 1.0,
+) -> dict:
+    return _ps_cfg(q, **{
+        "provisioned_source": {
+            "source_id": SOURCE_ID,
+            "q_source": q,
+            "station_zone_pin": pin,
+            "source_venue_arm": arm,
+        },
+    })
+
+
+def test_pin_remaps_every_minted_station_onto_the_pin_set() -> None:
+    """q=1, pin=[MDR]: every census station mints a lot bound to the
+    pinned venue — n_lots_placed == n_contaminated and
+    actual_venues_used is exactly the pin."""
+    core = _two_zone_core(_pin_cfg([MDR_ZONE]))
+    agents = (
+        [_diner(i, dining_zone=ZONE) for i in range(1, 20)]
+        + [_diner(i + 40, dining_zone=MDR_ZONE, location=MDR_ZONE)
+           for i in range(1, 20)]
+    )
+    _plan(core, agents)
+    witness = core._cs_provisioned_source[PATHOGEN]
+    n_stations = 2 * len(COMMON_SOURCE_LOT_ITEM_LINES)
+    assert witness["n_stations"] == n_stations
+    assert witness["n_contaminated"] == n_stations
+    assert witness["n_lots_placed"] == n_stations
+    assert witness["station_zone_pin"] == [MDR_ZONE]
+    assert witness["source_venue_arm"] == "passenger_venue"
+    assert witness["actual_venues_used"] == [MDR_ZONE]
+    for row in core._cs_objects[PATHOGEN]:
+        assert row["zone"] == MDR_ZONE
+    items = {row["item_label"] for row in core._cs_objects[PATHOGEN]}
+    assert items == set(COMMON_SOURCE_LOT_ITEM_LINES)
+
+
+def test_pin_keeps_the_contamination_draw_stream_seed_paired() -> None:
+    """Placement-only: the Bernoulli census draws are identical pinned
+    vs unpinned on the same seed — the pin re-maps zones after the
+    draws, never consuming uniforms."""
+    base = _two_zone_core(_ps_cfg(0.5))
+    pin = _two_zone_core(_pin_cfg([MDR_ZONE], arm="crew_venue", q=0.5))
+    agents = [_diner(i, dining_zone=MDR_ZONE, location=MDR_ZONE)
+              for i in range(1, 40)]
+    _plan(base, agents)
+    _plan(pin, agents)
+    assert (
+        base._cs_contaminated_stations[PATHOGEN]
+        == pin._cs_contaminated_stations[PATHOGEN]
+    )
+
+
+def test_pin_round_robins_a_multi_zone_pin() -> None:
+    """A two-venue pin spreads minted stations alternately in census
+    order — deterministic, still count-preserving."""
+    core = _two_zone_core(_pin_cfg([ZONE, MDR_ZONE]))
+    agents = (
+        [_diner(i, dining_zone=ZONE) for i in range(1, 20)]
+        + [_diner(i + 40, dining_zone=MDR_ZONE, location=MDR_ZONE)
+           for i in range(1, 20)]
+    )
+    _plan(core, agents)
+    witness = core._cs_provisioned_source[PATHOGEN]
+    assert witness["actual_venues_used"] == [MDR_ZONE, ZONE]
+    assert witness["n_lots_placed"] == witness["n_contaminated"]
+    zones = [o["zone"] for o in core._cs_objects[PATHOGEN]]
+    assert zones[0::2] == [ZONE] * (len(zones) // 2)
+    assert zones[1::2] == [MDR_ZONE] * (len(zones) // 2)
+
+
+def test_pin_to_an_unserved_venue_witnesses_the_drop() -> None:
+    """The guard the spec names: pin to a venue whose cohort never
+    serves inside the embarkation span → every minted lot drops,
+    n_lots_placed falls below n_contaminated, and the witness says so."""
+    core = _two_zone_core(_pin_cfg([MDR_ZONE]))
+    _plan(core, [_diner(i) for i in range(1, 40)])  # all dine at ZONE
+    witness = core._cs_provisioned_source[PATHOGEN]
+    assert witness["n_contaminated"] > 0
+    assert witness["n_lots_placed"] == 0
+    assert witness["actual_venues_used"] == []
+
+
+def test_unpinned_witness_fields_are_null() -> None:
+    """Baseline arm: the pin fields witness as null and placement
+    stays on the census venues."""
+    core = _two_zone_core(_ps_cfg(1.0))
+    agents = (
+        [_diner(i, dining_zone=ZONE) for i in range(1, 20)]
+        + [_diner(i + 40, dining_zone=MDR_ZONE, location=MDR_ZONE)
+           for i in range(1, 20)]
+    )
+    _plan(core, agents)
+    witness = core._cs_provisioned_source[PATHOGEN]
+    assert witness["station_zone_pin"] is None
+    assert witness["source_venue_arm"] is None
+    assert witness["n_lots_placed"] == witness["n_contaminated"]
+    assert set(witness["actual_venues_used"]) == {ZONE, MDR_ZONE}
+
+
+def test_sanity_checker_flags_a_bad_station_zone_pin() -> None:
+    """Pin shape is validated: non-list errors, a pin naming an
+    unknown zone errors when a layout is available, and a clean pin
+    passes."""
+    from tools.sanity_checker import Report, _check_common_source
+
+    report = Report()
+    _check_common_source(
+        {"transmission": {"common_source": {
+            "lot_mint_model": "provisioned_source",
+            "provisioned_source": {
+                "source_id": SOURCE_ID,
+                "station_zone_pin": "MainDining",
+            },
+        }}},
+        report,
+    )
+    assert report.errors
+    report2 = Report()
+    _check_common_source(
+        {"transmission": {"common_source": {
+            "lot_mint_model": "provisioned_source",
+            "provisioned_source": {
+                "source_id": SOURCE_ID,
+                "station_zone_pin": ["MainDining"],
+                "source_venue_arm": "passenger_venue",
+            },
+        }}},
+        report2,
+    )
+    assert not report2.errors
 
 
 def test_sanity_checker_flags_a_bad_genotype_distribution() -> None:

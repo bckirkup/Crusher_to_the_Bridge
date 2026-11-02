@@ -3431,6 +3431,8 @@ class TransmissionCore:
         """PROVISIONED-SOURCE-01 registry resolution; returns resolved ``q_source``."""
         self._cs_ps_source_id = None
         self._cs_ps_genotype_distribution = {}
+        self._cs_ps_station_zone_pin = None
+        self._cs_ps_venue_arm = None
         ps_q = None
         if self._cs_lot_mint_model != "provisioned_source":
             return ps_q
@@ -3452,6 +3454,14 @@ class TransmissionCore:
             ps_mix = entry.get("genotype_distribution")
         if isinstance(ps_mix, dict):
             self._cs_ps_genotype_distribution = ps_mix
+        pin = ps.get("station_zone_pin")
+        if isinstance(pin, (list, tuple)):
+            pin = [str(z).strip() for z in pin if str(z).strip()]
+            if pin:
+                self._cs_ps_station_zone_pin = list(dict.fromkeys(pin))
+        arm = ps.get("source_venue_arm")
+        if arm is not None and str(arm).strip():
+            self._cs_ps_venue_arm = str(arm).strip()
         return ps_q
 
     def _init_common_source_state_buckets(self) -> None:
@@ -12824,8 +12834,17 @@ class TransmissionCore:
         ``_cs_rng`` stream, in canonical census order; every
         contaminated station mints exactly one object bound to that
         (zone, item) pair — the zone/item uniforms the fiat grammar
-        consumes are never drawn."""
+        consumes are never drawn.
+
+        ``provisioned_source.station_zone_pin`` (Phase-2 venue
+        counterfactual): after the Bernoulli draws, each minted
+        station's zone is re-mapped onto the declared pin set —
+        round-robin over a multi-zone pin, in census order. The
+        census is never restricted and no extra uniforms are drawn,
+        so n_lots and the non-placement draw stream stay seed-paired
+        with the unpinned baseline arm."""
         stations = self._cs_station_census(zones)
+        pin = self._cs_ps_station_zone_pin
         for pid, rates in self._cs_rates.items():
             q = rates["q_source"]
             contaminated = [
@@ -12833,16 +12852,29 @@ class TransmissionCore:
                 if self._cs_rng.random() < q
             ]
             self._cs_contaminated_stations[pid] = set(contaminated)
+            placed = (
+                [
+                    (pin[i % len(pin)], item)
+                    for i, (zone, item) in enumerate(contaminated)
+                ]
+                if pin else contaminated
+            )
+            pre = len(self._cs_objects.get(pid, []))
+            for station in placed:
+                self._cs_realize_lot_object(
+                    pid, cells, zones, station=station,
+                )
+            bound = self._cs_objects.get(pid, [])[pre:]
             self._cs_provisioned_source[pid] = {
                 "source_id": self._cs_ps_source_id,
                 "q_source_drawn": q,
                 "n_stations": len(stations),
                 "n_contaminated": len(contaminated),
+                "station_zone_pin": list(pin) if pin else None,
+                "source_venue_arm": self._cs_ps_venue_arm,
+                "n_lots_placed": len(bound),
+                "actual_venues_used": sorted({o["zone"] for o in bound}),
             }
-            for station in contaminated:
-                self._cs_realize_lot_object(
-                    pid, cells, zones, station=station,
-                )
 
     def _cs_realize_lot_object(
         self,

@@ -1845,6 +1845,13 @@ def _write_run_zip(
                     "caregiver_reports", 0,
                 ),
             ),
+            # Phase-2 venue-pin extraction: the voyage witness rides
+            # summary.json so first_paper_scalar can range-read
+            # n_lots_placed / actual_venues_used / source_venue_arm
+            # without decompressing the census member.
+            "provisioned_source": payload["common_source"][
+                "provisioned_source"
+            ],
         },
         "rss_mb": {
             "voyage": payload["meta"]["voyage_rss_mb"],
