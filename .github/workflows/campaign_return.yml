@@ -338,7 +338,7 @@ jobs:
     if: ${{ needs.poll.outputs.receipt_found == 'true' }}
     runs-on: ubuntu-latest
     environment: aws-campaign
-    timeout-minutes: 15
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
