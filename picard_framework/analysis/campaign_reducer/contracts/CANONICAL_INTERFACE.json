@@ -433,7 +433,7 @@
       "summary_bytes": 1048576,
       "index_page_bytes": 1048576,
       "export_object_bytes": 5242880,
-      "request_manifest_bytes": 1048576,
+      "request_manifest_bytes": 4194304,
       "files_per_collect": 20,
       "total_bytes_per_collect": 52428800,
       "max_query_rows_per_page": 10000,
