@@ -35,18 +35,74 @@ dose 7.57, embarkation 2026-01-10, rung shipped. Only delta:
 `station_zone_pin` (+ `station_zone_pin_weights` on mixed_venue) +
 `source_venue_arm`.
 
-**Submit gate:** PENDING — the weighted-pin seam must merge first;
-image `picard-campaign:noro-provisioned-venue02` builds FROM that
-merge SHA (campaign-preflight: local smoke → dry-run count → pinned
-digest → canary → STOP and report).
+**Submit gate:** seam merged 2026-11-03 as `526cf856` (#1149); image
+`picard-campaign:noro-provisioned-venue02` built FROM that SHA, pushed
+digest `sha256:12293ea9e4b9714cf4c2ee128805ec240678fa2960a5c998366daa18b806a3f2`,
+ENGINE_GIT_SHA `526cf856`, verified to contain the seam + this design.
+Manifest mirrored to
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_02/manifest.json`.
+Canary 12 cells submitted + read out 2026-11-03 — **STOP until the
+user gates the 12k array.**
 
 ## Waves
 
 | wave | blocks | cells | status |
 |---|---|---|---|
-| canary | 4 hulls × 3 arms × 1 seed | 12 | not submitted |
-| 1 | 4 hulls × 3 arms × 1,000 seeds | 12,000 | gated on canary readout + user |
+| canary | 4 hulls × 3 arms × 1 seed | 12 | 12/12 SUCCEEDED, gates pass 2026-11-03 |
+| 1 | 4 hulls × 3 arms × 1,000 seeds | 12,000 | awaiting user gate after canary |
+
+### canary — submitted 2026-11-03
+
+Image `picard-campaign:noro-provisioned-venue02` @ `526cf856`
+(digest `sha256:12293ea9`). Jobdef `picard-noro-provisioned-venue-02`
+revs 2–10 + `…-mega` revs 1–3 (fresh rev per submit, per convention).
+
+| cell | jobdef | seed | job id |
+|---|---|---|---|
+| canary_exp_crewv | :2 | 8169 | e6b124fa-28c7-484f-b32a-beadc7b7cac8 |
+| canary_exp_paxv | :3 | 8169 | 36f71a58-275c-4452-bbc8-207138f730b5 |
+| canary_exp_mixv | :4 | 8169 | 5bcf73fd-4aa9-44c4-84c5-62bc21cb8322 |
+| canary_cls_crewv | :5 | 8169 | 20c9eb5d-5fc0-4fa7-b79b-8f3d13ab32d1 |
+| canary_cls_paxv | :6 | 8169 | a7c77a24-71df-4cec-97f6-3f9f32ce1d95 |
+| canary_cls_mixv | :7 | 8169 | 575b4f8a-c794-4128-ba99-c364726f8807 |
+| canary_spr_crewv | :8 | 8152 | 7a06e94f-155a-4523-ba17-f6f6cb22512c |
+| canary_spr_paxv | :9 | 8152 | 6d6b0c68-51b7-483a-9b02-36430ca6c7cd |
+| canary_spr_mixv | :10 | 8152 | 8ec8738d-1626-46bd-b220-a10a5681aaa8 |
+| canary_meg_crewv | mega:1 | 8152 | 8dfefe3f-6f64-4a2d-a21b-0c536c305d3b |
+| canary_meg_paxv | mega:2 | 8152 | 52bbf6b6-e2a9-42af-ab08-7e6714f81702 |
+| canary_meg_mixv | mega:3 | 8152 | 984f27af-714f-4cd9-845b-ca87e2cfba7b |
+
+### canary readout — 2026-11-03, measured at image `526cf856`
+
+All 12 children SUCCEEDED; per-cell summary.json
+`mechanisms.provisioned_source.norwalk_gi` witness verified —
+`actual_venues_used` ⊆ pin set and `n_lots_placed` ==
+`n_contaminated` on every cell (placement moved, count preserved;
+seed-paired with the q30 baseline: every canary seed carried 2
+lots in the baseline and places 2 here).
+
+| cell | venues used | n_lots |
+|---|---|---|
+| exp/crewv s8169 | CrewMess | 2/2 |
+| exp/paxv s8169 | MainDining | 2/2 |
+| exp/mixv s8169 | CrewMess, MainDining | 2/2 |
+| cls/crewv s8169 | CrewMess | 2/2 |
+| cls/paxv s8169 | MainDining_L | 2/2 |
+| cls/mixv s8169 | CrewMess, MainDining_U | 2/2 |
+| spr/crewv s8152 | CrewMessMain, CrewMessOff | 2/2 |
+| spr/paxv s8152 | MainDining_L | 2/2 |
+| spr/mixv s8152 | MainDining_L, SpecialtyB | 2/2 |
+| meg/crewv s8152 | CrewMess_Fwd, Crew_Mess_Main | 2/2 |
+| meg/paxv s8152 | MainDining_L | 2/2 |
+| meg/mixv s8152 | ComedyClub, MainDining_L | 2/2 |
+
+**Canary verdict:** gates pass on every hull — venue ⊆ pin, lot
+count preserved vs the seed-paired baseline, weights echoed in the
+witness on the mixed arm, and the mixed arm spreads each seed's 2
+lots across distinct venues (weighted placement, not round-robin:
+indices would have pinned MainDining+CasualDining on exp, not
+CrewMess+MainDining).
 
 ## Readout log
 
-_(none yet)_
+_(wave 1 not yet submitted)_
