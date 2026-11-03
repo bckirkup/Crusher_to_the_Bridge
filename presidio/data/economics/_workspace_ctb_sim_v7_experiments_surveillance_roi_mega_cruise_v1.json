@@ -42,7 +42,7 @@
     "respiratory_outbreak": {
       "pathogen_id": "sars_cov2_resp",
       "initial_infected": 1,
-      "dose_adjustment": 5.5,
+      "environmental_release_log10_per_day": 5.5,
       "initial_time_infected": 0,
       "immune_ratio": 0.0,
       "notes": "Single respiratory case. Variable outcome."

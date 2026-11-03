@@ -63,7 +63,7 @@ can be reproduced or tweaked for sensitivity analysis.
 
   "pathogen_parameters": {
     "norovirus_gii4": {"dose_adjustment": 7.0, "initial_time_infected": -2},
-    "sars_cov2_resp": {"dose_adjustment": 6.0, "initial_time_infected": -3}
+    "sars_cov2_resp": {"environmental_release_log10_per_day": 6.0, "initial_time_infected": -3}
   },
 
   "regimes": {
