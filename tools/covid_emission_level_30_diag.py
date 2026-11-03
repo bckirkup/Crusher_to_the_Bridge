@@ -67,10 +67,12 @@ def observe_deposit(sim, work, out):
     out["sv_sum"] += sv_sum
 
 
-def run_cell(scenario_id: str, seed: int) -> dict:
+def run_cell(scenario_id: str, seed: int, num_epochs: int | None) -> dict:
     scenarios = load_hull_scenarios(repo_root=REPO_ROOT)
     scenario = scenarios[scenario_id]
-    raw = scenario.to_run_spec_dict(random_seed=int(seed))
+    raw = scenario.to_run_spec_dict(
+        random_seed=int(seed), num_epochs=num_epochs,
+    )
     raw["run"]["history_retention"] = "compact"
     spec = PicardRunSpec.from_picard_dict(REPO_ROOT, raw)
     out = {"shedder_epochs": 0, "sv_sum": 0.0, "per_shedder_deposit": []}
@@ -86,6 +88,7 @@ def run_cell(scenario_id: str, seed: int) -> dict:
     return {
         "scenario_id": scenario_id,
         "seed": int(seed),
+        "num_epochs": int(sim.num_epochs),
         "shedder_epochs": out["shedder_epochs"],
         "sv_sum_all_epochs": out["sv_sum"],
         "deposit_5e5": {
@@ -117,6 +120,13 @@ def main() -> None:
     ap.add_argument("--scenarios", nargs="+", default=["diamond_princess_2020", "greg_mortimer_2020"])
     ap.add_argument("--out", default=None)
     ap.add_argument("--only", default=None, help="scenario:seed single cell")
+    ap.add_argument(
+        "--num-epochs", type=int, default=None,
+        help="window cap; the DP hull defaults to 480 (day 20) because a "
+        "full 840-epoch DP voyage on 3,711 agents is a Batch-scale cell "
+        "on this box. The window spans the index's whole shedding course, "
+        "the pre-quarantine transmission mass and the day-16 order.",
+    )
     args = ap.parse_args()
     cells = [
         (sid, seed)
@@ -126,7 +136,7 @@ def main() -> None:
     ]
     results = []
     for sid, seed in cells:
-        res = run_cell(sid, seed)
+        res = run_cell(sid, seed, args.num_epochs)
         results.append(res)
         print(json.dumps(res["deposit_5e5"], indent=None), sid, seed, flush=True)
     low, high = EMISSION_BRACKET_COPIES_PER_EPOCH

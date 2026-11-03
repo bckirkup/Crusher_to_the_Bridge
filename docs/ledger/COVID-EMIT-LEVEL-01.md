@@ -3,7 +3,7 @@
 **Commit:** 7b7f0ea0
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 7b7f0ea0
+**Measured at:** e2f761be
 
 Item #30 (Edison task 2): the `sars_cov2_resp` arm's emission level was a
 nasal titre offset by `dose_adjustment = 3.0`, a norovirus stool-mass
@@ -57,7 +57,19 @@ verified against the declared measured bracket.
   per-shedder deposit recorded at the shipped fraction; Theta-regime
   witness quoted analytically (peak-0 curve, adj 0 → deposit 2.1e-6,
   i.e. the composite carried the entire scale, which is why the
-  comparison is by regime not by seed).
+  comparison is by regime not by seed). DP cells ran
+  `--num-epochs 480` (day 20; the full 840-epoch voyage on 3,711
+  agents is a Batch-scale cell on this box — the window covers the
+  index's whole shedding course, the pre-quarantine transmission mass
+  and the day-16 SOP-017 order); GM cells ran the full 672-epoch
+  voyage. **Measured:** per-shedder-epoch deposit at 5e-5 sits ~3–6
+  orders under the 4.2e3 floor as central tendency (cell medians
+  3.5e-5–3.1e-2); only high-multiplier shedder-epochs reach the
+  bracket — in-bracket share 1.1% (DP seed 20201004, max 1.7e5) and
+  3.5% (GM seed 20201001, max 1.04e4), 0% on the other six cells.
+  The simulation confirms the analytic pair inconsistency: the
+  shipped fraction cannot carry a real exhaled rate; the licensed
+  0.85 fine share would deposit level × 0.85 in-bracket.
 - **Also corrected in the record:** tranche 9's "5 × 10⁴
   copies/epoch" and the register's "7.6× above Alsved's talking
   median" omitted the release normalizer and the per-day→epoch

@@ -290,8 +290,11 @@ finding: the level and the shipped `airborne_emission_fraction`
 shipped level, ~170× under the bracket floor; the measured fine
 share 0.85 (tranche 27's licensed adoption) is the consistent
 multiplicand and stays unadopted as the open Edison decision.
-8-run diagnostic (4 seeds × DP + GM) at
-`reports/covid_emission_level_30_diag.json`.
+8-run diagnostic (4 seeds × DP + GM, DP windowed to day 20) at
+`reports/covid_emission_level_30_diag.json` confirms it in-sim:
+per-shedder-epoch deposit medians 3.5e-5–3.1e-2, in-bracket share
+0% on six cells and ≤3.5% tail-only on two (high shedder
+multipliers).
 
 `MEAL-SVC-02` full grid, measured at `54086e4ca8e6d9af301b7249707fdab10437b38f`
 (`docs/ledger/MEAL-SVC-02.md`, `docs/covid/covid_meal_service_02_readout.md`,

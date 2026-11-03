@@ -1,0 +1,127 @@
+{
+ "bracket_per_epoch": [
+  4200.0,
+  58000000.0
+ ],
+ "theta_regime_deposit_per_epoch": 2.0833333333333334e-06,
+ "licensed_fine_share": 0.85,
+ "window_note": "diamond_princess_2020 cells ran --num-epochs 480 (day 20 of the 35-day scenario): the full 840-epoch DP voyage on 3,711 agents is a Batch-scale cell on a 2-core box. The window covers the index case's whole shedding course (infection_age 6.8 d at embarkation), the pre-quarantine transmission mass, and the day-16 SOP-017 order; greg_mortimer_2020 cells ran the full 672-epoch voyage.",
+ "cells": [
+  {
+   "scenario_id": "diamond_princess_2020",
+   "seed": 20201001,
+   "num_epochs": 480,
+   "shedder_epochs": 667,
+   "sv_sum_all_epochs": 56744815.74656413,
+   "deposit_5e5": {
+    "count": 667,
+    "median": 0.0008179506076326018,
+    "max": 70.38321301580046,
+    "total": 2837.2407873282154,
+    "share_below_floor": 1.0,
+    "share_in_bracket": 0.0
+   }
+  },
+  {
+   "scenario_id": "diamond_princess_2020",
+   "seed": 20201002,
+   "num_epochs": 480,
+   "shedder_epochs": 336,
+   "sv_sum_all_epochs": 78176775.66887575,
+   "deposit_5e5": {
+    "count": 336,
+    "median": 0.030699059612960582,
+    "max": 97.07895040224258,
+    "total": 3908.838783443799,
+    "share_below_floor": 1.0,
+    "share_in_bracket": 0.0
+   }
+  },
+  {
+   "scenario_id": "diamond_princess_2020",
+   "seed": 20201003,
+   "num_epochs": 480,
+   "shedder_epochs": 736,
+   "sv_sum_all_epochs": 678789570.2094688,
+   "deposit_5e5": {
+    "count": 736,
+    "median": 0.0006612996057024266,
+    "max": 842.8463390436449,
+    "total": 33939.47851047367,
+    "share_below_floor": 1.0,
+    "share_in_bracket": 0.0
+   }
+  },
+  {
+   "scenario_id": "diamond_princess_2020",
+   "seed": 20201004,
+   "num_epochs": 480,
+   "shedder_epochs": 8721,
+   "sv_sum_all_epochs": 138967841543.82404,
+   "deposit_5e5": {
+    "count": 8721,
+    "median": 7.683921844182229e-05,
+    "max": 169971.65789742238,
+    "total": 6948392.077191192,
+    "share_below_floor": 0.9889920880632955,
+    "share_in_bracket": 0.011007911936704506
+   }
+  },
+  {
+   "scenario_id": "greg_mortimer_2020",
+   "seed": 20201001,
+   "shedder_epochs": 692,
+   "sv_sum_all_epochs": 8372699194.007079,
+   "deposit_5e5": {
+    "count": 692,
+    "median": 0.011087958675476912,
+    "max": 10363.369856333025,
+    "total": 418634.95970035373,
+    "share_below_floor": 0.9653179190751445,
+    "share_in_bracket": 0.03468208092485549
+   }
+  },
+  {
+   "scenario_id": "greg_mortimer_2020",
+   "seed": 20201002,
+   "shedder_epochs": 736,
+   "sv_sum_all_epochs": 712978782.1145986,
+   "deposit_5e5": {
+    "count": 736,
+    "median": 0.002589214473976901,
+    "max": 818.7815088441779,
+    "total": 35648.93910572993,
+    "share_below_floor": 1.0,
+    "share_in_bracket": 0.0
+   }
+  },
+  {
+   "scenario_id": "greg_mortimer_2020",
+   "seed": 20201003,
+   "shedder_epochs": 408,
+   "sv_sum_all_epochs": 1345682.019102871,
+   "deposit_5e5": {
+    "count": 408,
+    "median": 5.284305447935426e-05,
+    "max": 1.6710441067512256,
+    "total": 67.28410095514326,
+    "share_below_floor": 1.0,
+    "share_in_bracket": 0.0
+   }
+  },
+  {
+   "scenario_id": "greg_mortimer_2020",
+   "seed": 20201004,
+   "shedder_epochs": 408,
+   "sv_sum_all_epochs": 886198.8459687609,
+   "deposit_5e5": {
+    "count": 408,
+    "median": 3.479979165381746e-05,
+    "max": 1.1004660372538095,
+    "total": 44.30994229843805,
+    "share_below_floor": 1.0,
+    "share_in_bracket": 0.0
+   }
+  }
+ ]
+}
