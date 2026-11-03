@@ -1,0 +1,148 @@
+{
+ "rule": "Every arm reuses the delivered NORO-PROVISIONED-SOURCE-01 q30 seed set verbatim (exp 8000-8999; cls/spr/meg 8105-9104), so crew_venue/passenger_venue/mixed_venue pair seed-for-seed with the delivered q30 baseline.",
+ "reuse_verdict": "The delivered q30 arm is NOT capacity-proportional: its census contributes 7 item-line stations per served venue uniformly, and the measured realized venue shares across the 4,000 delivered runs track 1/N_venues (max |measured - capacity| = 25.0 pp on exp CrewMess). The q30 cohort is the distributed arm; mixed_venue runs fresh on the weighted pin.",
+ "canary_seeds": {
+  "exp": 8169,
+  "cls": 8169,
+  "spr": 8152,
+  "meg": 8152
+ },
+ "hulls": {
+  "exp": {
+   "platform": "expedition_cruise_450",
+   "n_seeds": 1000,
+   "seed_range": [
+    8000,
+    8999
+   ],
+   "venue_pin": {
+    "crew_venue": [
+     "CrewMess"
+    ],
+    "passenger_venue": [
+     "MainDining"
+    ],
+    "mixed_venue": [
+     "MainDining",
+     "CasualDining",
+     "CrewMess"
+    ]
+   },
+   "mixed_venue_weights": [
+    300,
+    150,
+    60
+   ]
+  },
+  "cls": {
+   "platform": "classic_cruise_1900",
+   "n_seeds": 1000,
+   "seed_range": [
+    8105,
+    9104
+   ],
+   "venue_pin": {
+    "crew_venue": [
+     "CrewMess"
+    ],
+    "passenger_venue": [
+     "MainDining_L"
+    ],
+    "mixed_venue": [
+     "MainDining_L",
+     "MainDining_U",
+     "LidoBuffet",
+     "Specialty",
+     "CrewMess"
+    ]
+   },
+   "mixed_venue_weights": [
+    400,
+    400,
+    350,
+    80,
+    200
+   ]
+  },
+  "spr": {
+   "platform": "spirit_cruise_3000",
+   "n_seeds": 1000,
+   "seed_range": [
+    8105,
+    9104
+   ],
+   "venue_pin": {
+    "crew_venue": [
+     "CrewMessMain",
+     "CrewMessOff"
+    ],
+    "passenger_venue": [
+     "MainDining_L"
+    ],
+    "mixed_venue": [
+     "MainDining_L",
+     "MainDining_U",
+     "LidoBuffet",
+     "PizzaGrill",
+     "SpecialtyA",
+     "SpecialtyB",
+     "SpecialtyC",
+     "CrewMessMain",
+     "CrewMessOff"
+    ]
+   },
+   "mixed_venue_weights": [
+    500,
+    500,
+    400,
+    120,
+    80,
+    80,
+    80,
+    250,
+    60
+   ]
+  },
+  "meg": {
+   "platform": "mega_cruise_5000",
+   "n_seeds": 1000,
+   "seed_range": [
+    8105,
+    9104
+   ],
+   "venue_pin": {
+    "crew_venue": [
+     "Crew_Mess_Main",
+     "CrewMess_Fwd"
+    ],
+    "passenger_venue": [
+     "MainDining_L"
+    ],
+    "mixed_venue": [
+     "MainDining_L",
+     "MainDining_U",
+     "Windjammer",
+     "SpecRest_A",
+     "SpecRest_B",
+     "Pool_Bar_Grill",
+     "ComedyClub",
+     "CafeBakery",
+     "Crew_Mess_Main",
+     "CrewMess_Fwd"
+    ]
+   },
+   "mixed_venue_weights": [
+    1400,
+    1100,
+    1600,
+    450,
+    400,
+    300,
+    300,
+    250,
+    700,
+    350
+   ]
+  }
+ }
+}
