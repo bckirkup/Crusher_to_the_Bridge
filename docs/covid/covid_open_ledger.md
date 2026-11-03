@@ -274,6 +274,25 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
+`COVID-EMIT-LEVEL-01` (item #30 resolution, `7b7f0ea0`,
+`docs/ledger/COVID-EMIT-LEVEL-01.md`,
+`docs/literature/consensus_tranche_54_covid_emission_level.md`):
+the arm's emission level is now a sourced exhaled rate —
+`environmental_release_log10_per_day` = **1.93**, peak emission
+1.19e7 copies/day = the geometric midpoint of the declared Grade-B
+bracket [4.2e3, 5.8e7] copies/epoch (Alsved 2022 floor / Zheng 2022
+top; Coleman 2021, Ma 2021, Li 2021, Malik 2023 corroborating) —
+replacing `dose_adjustment` 3.0, which stays on the arms that use
+it. Theta-fit and Presidio-workspace overrides migrated to pin the
+new key so their adj = 0 semantics are bit-identical. **Measured
+finding: the level and the shipped `airborne_emission_fraction`
+5e-5 are an inconsistent pair** — deposit ~25 copies/epoch at the
+shipped level, ~170× under the bracket floor; the measured fine
+share 0.85 (tranche 27's licensed adoption) is the consistent
+multiplicand and stays unadopted as the open Edison decision.
+8-run diagnostic (4 seeds × DP + GM) at
+`reports/covid_emission_level_30_diag.json`.
+
 `MEAL-SVC-02` full grid, measured at `54086e4ca8e6d9af301b7249707fdab10437b38f`
 (`docs/ledger/MEAL-SVC-02.md`, `docs/covid/covid_meal_service_02_readout.md`,
 `campaigns/covid/meal_service_02/LEDGER.md`): the `contact_factor_to_host`
@@ -498,6 +517,16 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 (48 and 347). Change-detector cell: CPython 3.12 `(105, 51, 217, 118, 20)`.
 
 ## 3. Outstanding
+
+- **Adopt the measured fine share as `airborne_emission_fraction` —
+  the follow-on Edison decision #30 hands off.** With the level now a
+  real exhaled rate (`COVID-EMIT-LEVEL-01`), the shipped 5e-5 deposits
+  ~170× under the measured bracket floor; the consistent multiplicand
+  is the tranche-27-licensed fine share (interval [0.76, 0.92],
+  Coleman's 0.85 inside it). Adopting it moves every droplet/direct/
+  airborne deposit ×1.7e4 and re-denominates the Theta composite
+  beside a real emission scale — a value change with its own
+  attribution, not part of #30's scope.
 
 - **`CREW-MESS-01` canary measured (20/20 cells at `cca98cdc`,
   `docs/covid/covid_crew_mess_01_readout.md`,
