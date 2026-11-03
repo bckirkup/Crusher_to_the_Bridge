@@ -2426,36 +2426,7 @@ def _check_common_source_provisioned_arm(
         "provisioned_source.genotype_distribution",
         _CONFIG_YAML, report,
     )
-    pin = ps.get("station_zone_pin")
-    if pin is not None:
-        if not isinstance(pin, list) or any(
-            not isinstance(z, str) or not z.strip() for z in pin
-        ):
-            report.error(
-                _CONFIG_YAML, "CONFIG",
-                "provisioned_source.station_zone_pin must be a list of "
-                "non-empty zone names",
-            )
-        elif layout is not None:
-            dining = {
-                z.id for z in layout.zones if z.type == "Dining"
-            }
-            missing = [z for z in pin if z not in dining]
-            if missing:
-                report.error(
-                    _CONFIG_YAML, "CONFIG",
-                    "provisioned_source.station_zone_pin names "
-                    f"non-Dining/unknown zones: {missing}",
-                )
-    arm = ps.get("source_venue_arm")
-    if arm is not None and (
-        not isinstance(arm, str) or not arm.strip()
-    ):
-        report.error(
-            _CONFIG_YAML, "CONFIG",
-            "provisioned_source.source_venue_arm must be a non-empty "
-            "string when declared",
-        )
+    _check_provisioned_venue_pin(ps, layout, report)
     _check_source_entry_genotypes(sources, report)
     if layout is not None and not any(
         z.type == "Dining" for z in layout.zones
@@ -2465,6 +2436,50 @@ def _check_common_source_provisioned_arm(
             "lot_mint_model 'provisioned_source' is armed but the "
             "platform declares no Dining zones — the station census "
             "resolves N_lots == 0 and no lot object ever mints",
+        )
+
+
+def _check_provisioned_venue_pin(
+    ps: dict[str, Any],
+    layout: "SpatialLayout | None",
+    report: Report,
+) -> None:
+    """``station_zone_pin``/``source_venue_arm`` venue-pin grammar.
+
+    The pin is a list of non-empty zone names; when the platform
+    layout is available every pin must name a declared Dining zone.
+    The arm label is a non-empty string when declared.
+    """
+    pin = ps.get("station_zone_pin")
+    if pin is None:
+        valid_pin = True
+    else:
+        valid_pin = isinstance(pin, list) and all(
+            isinstance(z, str) and z.strip() for z in pin
+        )
+    if not valid_pin:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "provisioned_source.station_zone_pin must be a list of "
+            "non-empty zone names",
+        )
+    elif pin is not None and layout is not None:
+        dining = {z.id for z in layout.zones if z.type == "Dining"}
+        missing = [z for z in pin if z not in dining]
+        if missing:
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                "provisioned_source.station_zone_pin names "
+                f"non-Dining/unknown zones: {missing}",
+            )
+    arm = ps.get("source_venue_arm")
+    if arm is not None and (
+        not isinstance(arm, str) or not arm.strip()
+    ):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "provisioned_source.source_venue_arm must be a non-empty "
+            "string when declared",
         )
 
 
