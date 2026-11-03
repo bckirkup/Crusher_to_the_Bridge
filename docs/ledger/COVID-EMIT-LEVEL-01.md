@@ -3,7 +3,7 @@
 **Commit:** 7b7f0ea0
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** e2f761be
+**Measured at:** e529721d
 
 Item #30 (Edison task 2): the `sars_cov2_resp` arm's emission level was a
 nasal titre offset by `dose_adjustment = 3.0`, a norovirus stool-mass
