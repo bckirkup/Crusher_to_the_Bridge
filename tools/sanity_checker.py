@@ -2447,6 +2447,26 @@ def _check_common_source_provisioned_arm(
                     "provisioned_source.station_zone_pin names "
                     f"non-Dining/unknown zones: {missing}",
                 )
+    pin_weights = ps.get("station_zone_pin_weights")
+    if pin_weights is not None:
+        weight_bad = (
+            not isinstance(pin_weights, list)
+            or not isinstance(pin, list)
+            or len(pin_weights) != len(pin)
+            or any(
+                not isinstance(w, (int, float))
+                or isinstance(w, bool)
+                or not math.isfinite(w) or w <= 0
+                for w in pin_weights
+            )
+        )
+        if weight_bad:
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                "provisioned_source.station_zone_pin_weights must be "
+                "a list of finite positive numbers parallel to "
+                "station_zone_pin",
+            )
     arm = ps.get("source_venue_arm")
     if arm is not None and (
         not isinstance(arm, str) or not arm.strip()

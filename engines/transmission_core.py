@@ -1641,6 +1641,10 @@ COMMON_SOURCE_DINER_COURSE_CONTAMINATION_PROBABILITY_RANGE = (0.005, 0.15)
 # per-window Bernoulli, cohort take-share, titres) runs on it, so
 # ``mode: off`` draws nothing anywhere and stays bit-identical.
 _COMMON_SOURCE_STREAM_KEY = 0xF00D
+# Sub-key under the common-source stream partition for the
+# Phase-2 venue-pin placement draws — a parallel SeedSequence on the
+# voyage entropy, never the shared ``_cs_rng`` stream.
+_VENUE_PIN_STREAM_KEY = 0xFE11E
 # Spawn-tree address of the service-section stream, same convention as
 # _COMMON_SOURCE_STREAM_KEY: the section partition sizes and the sticky
 # steward draws of ``service_responder_mode: "section"`` (MEAL-SVC-01)
@@ -3432,6 +3436,7 @@ class TransmissionCore:
         self._cs_ps_source_id = None
         self._cs_ps_genotype_distribution = {}
         self._cs_ps_station_zone_pin = None
+        self._cs_ps_station_zone_weights = None
         self._cs_ps_venue_arm = None
         ps_q = None
         if self._cs_lot_mint_model != "provisioned_source":
@@ -3458,7 +3463,37 @@ class TransmissionCore:
         if isinstance(pin, (list, tuple)):
             pin = [str(z).strip() for z in pin if str(z).strip()]
             if pin:
-                self._cs_ps_station_zone_pin = list(dict.fromkeys(pin))
+                # First-occurrence dedup; ``station_zone_pin_weights``
+                # (Phase-2 mixed_venue) is parallel to the declared
+                # pin, each zone keeping its first declared weight.
+                declared_weights = ps.get("station_zone_pin_weights")
+                deduped: list[str] = []
+                weights: list[Any] = []
+                for i, zone_name in enumerate(pin):
+                    if zone_name in deduped:
+                        continue
+                    deduped.append(zone_name)
+                    weight = None
+                    if (
+                        isinstance(declared_weights, (list, tuple))
+                        and i < len(declared_weights)
+                    ):
+                        try:
+                            weight = float(declared_weights[i])
+                        except (TypeError, ValueError):
+                            weight = None
+                    weights.append(weight)
+                self._cs_ps_station_zone_pin = deduped
+                if (
+                    isinstance(declared_weights, (list, tuple))
+                    and len(declared_weights) == len(pin)
+                    and all(
+                        isinstance(w, float)
+                        and math.isfinite(w) and w > 0
+                        for w in weights
+                    )
+                ):
+                    self._cs_ps_station_zone_weights = weights
         arm = ps.get("source_venue_arm")
         if arm is not None and str(arm).strip():
             self._cs_ps_venue_arm = str(arm).strip()
@@ -3489,6 +3524,7 @@ class TransmissionCore:
         self._cs_lot_plan_done = False
         self._cs_provisioned_source = {}
         self._cs_contaminated_stations = {}
+        self._cs_venue_pin_rng = None
         self._cs_windows = {}
         self._cs_members_epoch = -1
         self._cs_members = {}
@@ -12853,10 +12889,7 @@ class TransmissionCore:
             ]
             self._cs_contaminated_stations[pid] = set(contaminated)
             placed = (
-                [
-                    (pin[i % len(pin)], item)
-                    for i, (zone, item) in enumerate(contaminated)
-                ]
+                self._cs_place_pinned_stations(contaminated)
                 if pin else contaminated
             )
             pre = len(self._cs_objects.get(pid, []))
@@ -12871,10 +12904,62 @@ class TransmissionCore:
                 "n_stations": len(stations),
                 "n_contaminated": len(contaminated),
                 "station_zone_pin": list(pin) if pin else None,
+                "station_zone_pin_weights": (
+                    list(self._cs_ps_station_zone_weights)
+                    if self._cs_ps_station_zone_weights else None
+                ),
                 "source_venue_arm": self._cs_ps_venue_arm,
                 "n_lots_placed": len(bound),
                 "actual_venues_used": sorted({o["zone"] for o in bound}),
             }
+
+    def _cs_place_pinned_stations(
+        self,
+        contaminated: list[tuple[str, str]],
+    ) -> list[tuple[str, str]]:
+        """Re-map each minted station's zone onto the pin set.
+
+        Bare pin: deterministic round-robin in census order
+        (PROVISIONED-VENUE-01). ``station_zone_pin_weights``: one
+        weighted pick per station on a dedicated placement stream — a
+        ``SeedSequence`` parallel to the census stream on the same
+        voyage entropy (spawn_key ``(STREAM_KEY, "venue_pin")``), so
+        placement varies per voyage without consuming ``_cs_rng``
+        draws or shifting ``_cs_seed_seq``'s spawn counter — n_lots
+        and the shared stream stay seed-paired. An entropy-less
+        parent rng falls back to the shared stream (bit-identity is
+        already unavailable there)."""
+        pin = self._cs_ps_station_zone_pin
+        weights = self._cs_ps_station_zone_weights
+        if weights is None:
+            return [
+                (pin[i % len(pin)], item)
+                for i, (_zone, item) in enumerate(contaminated)
+            ]
+        if self._cs_venue_pin_rng is None:
+            placement_seq = (
+                np.random.SeedSequence(
+                    self._cs_seed_seq.entropy,
+                    spawn_key=(
+                        _COMMON_SOURCE_STREAM_KEY,
+                        _VENUE_PIN_STREAM_KEY,
+                    ),
+                )
+                if self._cs_seed_seq is not None else None
+            )
+            self._cs_venue_pin_rng = (
+                np.random.default_rng(placement_seq)
+                if placement_seq is not None else self._cs_rng
+            )
+        probs = np.asarray(weights, dtype=float)
+        probs = probs / probs.sum()
+        picks = self._cs_venue_pin_rng.choice(
+            len(pin), size=len(contaminated), p=probs,
+        )
+        return [
+            (pin[int(pick)], item)
+            for pick, (_zone, item) in zip(picks, contaminated)
+        ]
 
     def _cs_realize_lot_object(
         self,

@@ -603,6 +603,148 @@ def test_unpinned_witness_fields_are_null() -> None:
     assert set(witness["actual_venues_used"]) == {ZONE, MDR_ZONE}
 
 
+def _weighted_pin_cfg(
+    pin: list,
+    weights: list,
+    arm: str = "mixed_venue",
+    q: float = 1.0,
+) -> dict:
+    return _ps_cfg(q, **{
+        "provisioned_source": {
+            "source_id": SOURCE_ID,
+            "q_source": q,
+            "station_zone_pin": pin,
+            "station_zone_pin_weights": weights,
+            "source_venue_arm": arm,
+        },
+    })
+
+
+def test_weighted_pin_places_each_minted_station() -> None:
+    """``station_zone_pin_weights``: every minted station still places
+    (n_lots_placed == n_contaminated), onto pin venues only, and the
+    witness carries the declared weights."""
+    core = _two_zone_core(_weighted_pin_cfg([ZONE, MDR_ZONE], [3.0, 1.0]))
+    agents = (
+        [_diner(i, dining_zone=ZONE) for i in range(1, 20)]
+        + [_diner(i + 40, dining_zone=MDR_ZONE, location=MDR_ZONE)
+           for i in range(1, 20)]
+    )
+    _plan(core, agents)
+    witness = core._cs_provisioned_source[PATHOGEN]
+    n_stations = 2 * len(COMMON_SOURCE_LOT_ITEM_LINES)
+    assert witness["n_lots_placed"] == n_stations
+    assert witness["station_zone_pin"] == [ZONE, MDR_ZONE]
+    assert witness["station_zone_pin_weights"] == [3.0, 1.0]
+    assert witness["source_venue_arm"] == "mixed_venue"
+    assert set(witness["actual_venues_used"]) <= {ZONE, MDR_ZONE}
+    for row in core._cs_objects[PATHOGEN]:
+        assert row["zone"] in (ZONE, MDR_ZONE)
+
+
+def test_weighted_pin_converges_to_the_declared_shares() -> None:
+    """Placement is a per-voyage weighted draw on a dedicated stream —
+    across seeds the realized venue share approaches the declared
+    weights, not the round-robin 50/50 alternation."""
+    counts = {ZONE: 0, MDR_ZONE: 0}
+    for seed in range(40):
+        core = _two_zone_core(
+            _weighted_pin_cfg([ZONE, MDR_ZONE], [3.0, 1.0]), seed=seed,
+        )
+        agents = (
+            [_diner(i, dining_zone=ZONE) for i in range(1, 20)]
+            + [_diner(i + 40, dining_zone=MDR_ZONE, location=MDR_ZONE)
+               for i in range(1, 20)]
+        )
+        _plan(core, agents)
+        for row in core._cs_objects[PATHOGEN]:
+            counts[row["zone"]] += 1
+    total = sum(counts.values())
+    assert total == 40 * 2 * len(COMMON_SOURCE_LOT_ITEM_LINES)
+    share = counts[ZONE] / total
+    assert 0.6 < share < 0.9
+
+
+def test_weighted_pin_keeps_streams_seed_paired() -> None:
+    """Placement draws run on a parallel SeedSequence — the census
+    draws and the minted lot count are identical to the unpinned
+    baseline on the same seed."""
+    base = _two_zone_core(_ps_cfg(1.0))
+    pin = _two_zone_core(_weighted_pin_cfg([ZONE, MDR_ZONE], [3.0, 1.0]))
+    agents = (
+        [_diner(i, dining_zone=ZONE) for i in range(1, 20)]
+        + [_diner(i + 40, dining_zone=MDR_ZONE, location=MDR_ZONE)
+           for i in range(1, 20)]
+    )
+    _plan(base, agents)
+    _plan(pin, agents)
+    assert (
+        base._cs_contaminated_stations[PATHOGEN]
+        == pin._cs_contaminated_stations[PATHOGEN]
+    )
+    assert (
+        pin._cs_provisioned_source[PATHOGEN]["n_lots_placed"]
+        == base._cs_provisioned_source[PATHOGEN]["n_lots_placed"]
+    )
+
+
+def test_weighted_placement_consumes_no_shared_stream_draws() -> None:
+    """The placement stream is a parallel SeedSequence — weighted
+    remapping leaves ``_cs_rng`` state untouched, so the census draw
+    stream stays seed-paired with the unpinned baseline."""
+    core = _two_zone_core(_weighted_pin_cfg([ZONE, MDR_ZONE], [3.0, 1.0]))
+    contaminated = [
+        (ZONE, item) for item in COMMON_SOURCE_LOT_ITEM_LINES
+    ]
+    before = core._cs_rng.bit_generator.state
+    placed = core._cs_place_pinned_stations(contaminated)
+    assert core._cs_rng.bit_generator.state == before
+    assert all(zone in (ZONE, MDR_ZONE) for zone, _item in placed)
+
+
+def test_invalid_weights_fall_back_to_round_robin() -> None:
+    """A malformed weights list (wrong length / non-positive) is inert
+    at runtime — the pin keeps its deterministic round-robin, and the
+    sanity checker is the gate that errors."""
+    core = _two_zone_core(_weighted_pin_cfg([ZONE, MDR_ZONE], [3.0]))
+    agents = (
+        [_diner(i, dining_zone=ZONE) for i in range(1, 20)]
+        + [_diner(i + 40, dining_zone=MDR_ZONE, location=MDR_ZONE)
+           for i in range(1, 20)]
+    )
+    _plan(core, agents)
+    witness = core._cs_provisioned_source[PATHOGEN]
+    assert witness["station_zone_pin_weights"] is None
+    assert witness["n_lots_placed"] == witness["n_contaminated"]
+    zones = [o["zone"] for o in core._cs_objects[PATHOGEN]]
+    assert zones[0::2] == [ZONE] * (len(zones) // 2)
+    assert zones[1::2] == [MDR_ZONE] * (len(zones) // 2)
+
+
+def test_sanity_checker_flags_bad_pin_weights() -> None:
+    """Weights must be a list of finite positive numbers parallel to
+    the pin — length mismatch and non-positive entries error."""
+    from tools.sanity_checker import Report, _check_common_source
+
+    def _cfg(weights: object) -> dict:
+        return {"transmission": {"common_source": {
+            "lot_mint_model": "provisioned_source",
+            "provisioned_source": {
+                "source_id": SOURCE_ID,
+                "station_zone_pin": ["MainDining", "LidoBuffet"],
+                "station_zone_pin_weights": weights,
+            },
+        }}}
+
+    for bad in ([1.0], [1.0, 0.0], [1.0, "x"], "not-a-list"):
+        report = Report()
+        _check_common_source(_cfg(bad), report)
+        assert report.errors, bad
+    report_ok = Report()
+    _check_common_source(_cfg([3.0, 1.0]), report_ok)
+    assert not report_ok.errors
+
+
 def test_sanity_checker_flags_a_bad_station_zone_pin() -> None:
     """Pin shape is validated: non-list errors, a pin naming an
     unknown zone errors when a layout is available, and a clean pin
