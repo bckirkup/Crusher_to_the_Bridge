@@ -127,4 +127,20 @@ CrewMess+MainDining).
 
 ## Readout log
 
-_(wave 1 not yet submitted)_
+Wave 1 in flight as of 2026-11-03 (~12,000 cells across 12 array jobs;
+expedition hull complete first — 3,000 cells, 0 failures).
+
+### Delivery-leg preparation (2026-11-03)
+
+- `deploy/aws/build_first_paper_venue02.py` — sources/request/cohort
+  builder for `red-fps02-venue02`: 12 arms (4 hulls × crewv/paxv/mixv),
+  `first_paper_scalar`/1.4.0 extraction, shard_size 64, Phase-B-scale
+  budgets (~12k sources, $100 cap).
+- `docs/campaign_reduction/phase_venue02/red-fps02-venue02-return-request.json`
+  — `crusher-campaign-distributions/1.0-proposed` collect request,
+  allowlist = `attempts/red-fps02-venue02/`, scope register
+  `3f73b584…`, budgets scaled for the ~190-shard page set.
+- Scan-row producer: `tools/noro_diag/food_shapes_01_scan.py` per tier
+  prefix (same tool as the venue pilot); canary cells excluded by
+  prefix (`canary_*` prefixes never match `fl_*` tier prefixes); meg
+  rows upload under the PARENT `_scan_rows/` prefix per convention.
