@@ -39,8 +39,8 @@ gates the 32-cell array.
 
 | wave | blocks | cells | status |
 |---|---|---|---|
-| canary | 4 hulls × 2 arms × 1 seed | 8 | submitted 2026-11-03, RUNNABLE |
-| 1 | 4 hulls × 2 arms × 4 seeds | 32 | not submitted |
+| canary | 4 hulls × 2 arms × 1 seed | 8 | 8/8 SUCCEEDED, gates pass 2026-11-03 |
+| 1 | 4 hulls × 2 arms × 4 seeds | 32 | awaiting user gate after canary |
 
 ### canary — submitted 2026-11-03
 
@@ -59,6 +59,30 @@ revs 1–6 + `…-mega` revs 1–2 (fresh rev per submit, per convention).
 | canary_meg_crewv | mega:1 | 8548 | 88d1f680-882f-4cb4-8158-457b54945984 |
 | canary_meg_paxv | mega:2 | 8548 | 66bf8c42-b1cc-47d9-bce1-52048918e447 |
 
+### canary readout — 2026-11-03, all measured at image `13fa0f2f`
+
+All 8 children SUCCEEDED; per-cell summary.json `mechanisms.provisioned_source.norwalk_gi`
+witness verified — `actual_venues_used` ⊆ pin set and
+`n_lots_placed` == `n_contaminated` on every cell (placement moved,
+count preserved; multi-zone pins round-robin index 0 → first venue).
+
+| cell | pin resolved to | n_lots | trigger_status |
+|---|---|---|---|
+| exp/crewv s8869 | CrewMess | 1/1 | LOCKDOWN |
+| exp/paxv s8869 | MainDining | 1/1 | BASELINE |
+| cls/crewv s8892 | CrewMess | 2/2 | LOCKDOWN |
+| cls/paxv s8892 | MainDining_L | 2/2 | CONFIRMED |
+| spr/crewv s8620 | CrewMessMain | 1/1 | LOCKDOWN |
+| spr/paxv s8620 | MainDining_L | 1/1 | SUSPECTED |
+| meg/crewv s8548 | Crew_Mess_Main | 1/1 | CONFIRMED |
+| meg/paxv s8548 | MainDining_L | 1/1 | SUSPECTED |
+
+**Canary verdict:** gates pass (venue ⊆ pin, lot count preserved,
+witness on summary.json, image SHA stamped). Observed pattern on the
+single canary seed per hull — hypothesis-grade only: crew-mess
+placement lands a strictly more severe trigger than passenger-venue
+placement on all four hulls.
+
 ## Readout log
 
-(none yet)
+(none yet — wave 1 not submitted)
