@@ -85,4 +85,56 @@ placement on all four hulls.
 
 ## Readout log
 
-(none yet — wave 1 not submitted)
+### wave-1 array — 2026-11-03, measured at image `13fa0f2f`
+
+All 32 cells SUCCEEDED (jobdefs `picard-noro-provisioned-venue-01`
+revs 7–12 + `…-mega` revs 3–4; 30 zips under
+`campaign/noro_provisioned_venue_01/`, 10 under `…_mega/` incl.
+canary cells). Scan jobdef `picard-noro-scan-readout-ec2:7` wrote 8
+`_scan_rows` files under the parent prefix, 4 rows each, 0 dupes.
+
+Scan-row comparison (`posted` = trigger crossing; `rep_*_ar` = report
+attack rate by role; `rep_*_n` = report counts). MEASURED:
+
+| hull/seed | crewv posted | paxv posted | crewv split p/c | paxv split p/c |
+|---|---|---|---|---|
+| exp 8326 | yes | yes | 0.00/0.06 | 0.05/0.01 |
+| exp 8494 | yes | yes | 0.00/0.11 | 0.09/0.01 |
+| exp 8557 | no | no | 0.02/0.01 | 0.02/0.01 |
+| exp 8869 | yes | yes | 0.01/0.10 | 0.05/0.01 |
+| cls 8452 | yes | yes | 0.01/0.07 | 0.04/0.02 |
+| cls 8498 | yes | yes | 0.00/0.07 | 0.05/0.02 |
+| cls 8892 | yes | yes | 0.00/0.06 | 0.03/0.02 |
+| cls 8983 | yes | yes | 0.01/0.06 | 0.05/0.03 |
+| spr 8143 | yes | yes | 0.02/0.04 | 0.03/0.02 |
+| spr 8620 | yes | no | 0.02/0.05 | 0.02/0.02 |
+| spr 8869 | yes | yes | 0.01/0.05 | 0.05/0.03 |
+| spr 8894 | yes | yes | 0.02/0.04 | 0.03/0.03 |
+| meg 8199 | no | no | 0.02/0.03 | 0.02/0.01 |
+| meg 8461 | yes | no | 0.01/0.05 | 0.03/0.01 |
+| meg 8548 | yes | no | 0.02/0.04 | 0.02/0.02 |
+| meg 8577 | yes | no | 0.01/0.05 | 0.02/0.02 |
+
+Readout (measured; Edison owns acceptance analysis):
+
+- Posted: crewv 14/16 vs paxv 10/16.
+- Role split inverts on 15/16 paired seeds: crewv lands crew-heavy
+  report rates, paxv lands passenger-heavy. Exception — exp/8557:
+  identical pax-heavy split (0.019/0.0075) in BOTH arms; placement-
+  invariant non-poster (inferred: no lot-driven exposure on that seed).
+- Counterfactual trigger answer is hull-dependent: on meg, moving the
+  source to `MainDining_L` drops 4/4 seeds below the trigger while
+  still inverting the role split; on exp/cls the crossing survives
+  with the inverted split; spr splits (8620 crosses only under crewv).
+- Non-posters: exp/8557 (both arms), meg/8199 (both arms),
+  spr/8620 (paxv only), meg/8461+8548+8577 (paxv only).
+
+Reducer leg: request `red-fps02-venue` uploaded under
+`campaign/_derived/reducer/v1/requests/` (canonical request sha
+`eec0bcf2b54f02f4c93404daac755425d13ad41f5e7e7de21a425259d2114f33`,
+sources manifest sha `6f93a4468aee70f248706f350740c83a3c1f4fac2bf39e50d9b540e75c000164`,
+40 sources = 32 run zips + 8 scan-row files). `picard-reducer:11`
+registered on `picard-boundary-analysis:reducer-v8` (image digest
+`sha256:9e6d48bcf57c7821c5f330556015d6ddf0b849cde52d5a34035306468c249911`,
+contract `first_paper_scalar/1.4.0`). Materialize dispatch:
+`campaign-reduction-dispatch` run 41563269750.
