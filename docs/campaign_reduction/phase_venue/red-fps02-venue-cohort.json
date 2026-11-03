@@ -1,0 +1,58 @@
+{
+ "expected_runs": 32,
+ "per_arm": {
+  "fl_exp_12d_scr_q30_crewv": {
+   "declared": 4,
+   "scanned": 4,
+   "seed_min": 8326,
+   "seed_max": 8869
+  },
+  "fl_exp_12d_scr_q30_paxv": {
+   "declared": 4,
+   "scanned": 4,
+   "seed_min": 8326,
+   "seed_max": 8869
+  },
+  "fl_cls_12d_scr_q30_crewv": {
+   "declared": 4,
+   "scanned": 4,
+   "seed_min": 8452,
+   "seed_max": 8983
+  },
+  "fl_cls_12d_scr_q30_paxv": {
+   "declared": 4,
+   "scanned": 4,
+   "seed_min": 8452,
+   "seed_max": 8983
+  },
+  "fl_spr_12d_scr_q30_crewv": {
+   "declared": 4,
+   "scanned": 4,
+   "seed_min": 8143,
+   "seed_max": 8894
+  },
+  "fl_spr_12d_scr_q30_paxv": {
+   "declared": 4,
+   "scanned": 4,
+   "seed_min": 8143,
+   "seed_max": 8894
+  },
+  "fl_meg_12d_scr_q30_crewv": {
+   "declared": 4,
+   "scanned": 4,
+   "seed_min": 8199,
+   "seed_max": 8577
+  },
+  "fl_meg_12d_scr_q30_paxv": {
+   "declared": 4,
+   "scanned": 4,
+   "seed_min": 8199,
+   "seed_max": 8577
+  }
+ },
+ "unique_keys": 32,
+ "duplicate_keys": [],
+ "pairing": "per-(hull,seed) arm pairs: crewv is the labelled baseline mirror of the delivered q30 allocation grammar pinned to crew-mess venues; paxv is the counterfactual. Pair on (hull_id, seed) \u2014 venue_venue_01 SEED_MANIFEST.json",
+ "sources_manifest_sha256": "6f93a4468aee70f248706f350740c83a3c1f4fac2bf39e50d9b540e75c000164",
+ "request_sha256": "eec0bcf2b54f02f4c93404daac755425d13ad41f5e7e7de21a425259d2114f33"
+}
