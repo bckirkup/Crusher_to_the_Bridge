@@ -49,7 +49,29 @@ user gates the 12k array.**
 | wave | blocks | cells | status |
 |---|---|---|---|
 | canary | 4 hulls × 3 arms × 1 seed | 12 | 12/12 SUCCEEDED, gates pass 2026-11-03 |
-| 1 | 4 hulls × 3 arms × 1,000 seeds | 12,000 | awaiting user gate after canary |
+| 1 | 4 hulls × 3 arms × 1,000 seeds | 12,000 | submitted 2026-11-03 (user gate passed) |
+
+### wave-1 array — submitted 2026-11-03, user gate passed
+
+Jobdef `picard-noro-provisioned-venue-02` revs 11–19 + `…-mega`
+revs 4–6, image `picard-campaign:noro-provisioned-venue02` @
+`526cf856` (digest `sha256:12293ea9`), Spot queue
+`picard-campaign-queue`.
+
+| block | jobdef | job id |
+|---|---|---|
+| fl_exp_12d_scr_q30_crewv | :11 | 6cd6dccd-3d75-4715-bb0b-365f651a1783 |
+| fl_exp_12d_scr_q30_paxv | :12 | 9e6970cc-4d1a-4bb0-a800-5136a1388192 |
+| fl_exp_12d_scr_q30_mixv | :13 | 273f24e6-ea88-4c90-9df1-5b8dddcf7cd9 |
+| fl_cls_12d_scr_q30_crewv | :14 | 3e2bb318-404b-4c26-adfe-737b5f3a10f5 |
+| fl_cls_12d_scr_q30_paxv | :15 | 5d5b9760-42cc-4ec5-81c1-e2100b7b391f |
+| fl_cls_12d_scr_q30_mixv | :16 | 11a03212-2f3b-4a2d-8aae-dd7d5673959a |
+| fl_spr_12d_scr_q30_crewv | :17 | e6e1e1a0-28dc-4e22-847b-73c793bb901f |
+| fl_spr_12d_scr_q30_paxv | :18 | 09034887-4f9a-49cb-8145-72612699b68f |
+| fl_spr_12d_scr_q30_mixv | :19 | 393a62f3-959c-4b9d-ba56-7cc489e8edf0 |
+| fl_meg_12d_scr_q30_crewv | mega:4 | 855d2141-772a-4b4a-bb5f-727ee2707c47 |
+| fl_meg_12d_scr_q30_paxv | mega:5 | 4297ab72-6a6d-4200-80cd-cfc0c2f32326 |
+| fl_meg_12d_scr_q30_mixv | mega:6 | 144d9aa6-8210-4ba0-8f76-804b2a18941e |
 
 ### canary — submitted 2026-11-03
 
