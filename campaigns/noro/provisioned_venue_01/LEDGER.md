@@ -137,4 +137,28 @@ sources manifest sha `6f93a4468aee70f248706f350740c83a3c1f4fac2bf39e50d9b540e75c
 registered on `picard-boundary-analysis:reducer-v8` (image digest
 `sha256:9e6d48bcf57c7821c5f330556015d6ddf0b849cde52d5a34035306468c249911`,
 contract `first_paper_scalar/1.4.0`). Materialize dispatch:
-`campaign-reduction-dispatch` run 41563269750.
+`campaign-reduction-dispatch` run 41563269750 → Batch job
+`777cc082-2b6d-438f-b41f-015cf1b35337` SUCCEEDED (~90 s) —
+`attempts/red-fps02-venue/` COMMIT/MANIFEST/RECEIPT/status, 32/32
+`first_paper_vectors`, 8 coverage cells, 0 data gaps, 160
+capabilities, 186 API calls / 3.0 MB compressed read (~99.5%
+headroom on declared ceilings).
+
+Return leg: `campaign_return` run 41565523407 — all four legs green.
+First dispatch (41564206408) exited 4 on `collect`: the workflow's
+`request_uri` expects a `crusher-campaign-distributions/1.0-proposed`
+bootstrap collect request, not the reducer-spec request — recorded
+as reducer-dispatch-pins §4; re-dispatched with
+`requests/red-fps02-venue-return-request.json`. Collect verified 5
+artifacts (1.44 MB) → Edison ingest `completed`, 5 files →
+`project_asset_ids` `17656d75-6c99-49b3-ae7d-059cb8106fd7`,
+`687ef97f-09b2-4cea-9da7-816232bdf6d4`,
+`1a766c0a-cb43-4326-b1a0-82336cccfea7`,
+`6edd5894-eecb-48cb-878d-88430503968b`,
+`0422c632-e3dd-4328-a8e3-839e133efb98`; all 32 vectors carry the
+1.4.0 fields `exact_emitted` (0 missing). Durable ack
+`ack-91cc6608cc903eea` at
+`campaign/_derived/reducer/v1/requests/acks/ack-91cc6608cc903eea.json`.
+Run report: `docs/campaign_reduction/FIRST_PAPER_VENUE_REPORT.md`;
+request/cohort/bootstrap register under
+`docs/campaign_reduction/phase_venue/`.

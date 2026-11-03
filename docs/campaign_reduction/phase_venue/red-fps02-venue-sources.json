@@ -1,0 +1,430 @@
+{
+ "schema": "crusher-reducer-sources/v1",
+ "reduction_id": "red-fps02-venue",
+ "sources": [
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/_scan_rows/fl_exp_12d_scr_q30_crewv.jsonl",
+   "family": "observation_jsonl",
+   "source_id": "campaign/noro_provisioned_venue_01/_scan_rows/fl_exp_12d_scr_q30_crewv.jsonl",
+   "campaign_id": "noro_provisioned_venue_01",
+   "cell_id": "fl_exp_12d_scr_q30_crewv",
+   "declared_runs": 4,
+   "source_role": "scan_rows"
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/_scan_rows/fl_exp_12d_scr_q30_paxv.jsonl",
+   "family": "observation_jsonl",
+   "source_id": "campaign/noro_provisioned_venue_01/_scan_rows/fl_exp_12d_scr_q30_paxv.jsonl",
+   "campaign_id": "noro_provisioned_venue_01",
+   "cell_id": "fl_exp_12d_scr_q30_paxv",
+   "declared_runs": 4,
+   "source_role": "scan_rows"
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/_scan_rows/fl_cls_12d_scr_q30_crewv.jsonl",
+   "family": "observation_jsonl",
+   "source_id": "campaign/noro_provisioned_venue_01/_scan_rows/fl_cls_12d_scr_q30_crewv.jsonl",
+   "campaign_id": "noro_provisioned_venue_01",
+   "cell_id": "fl_cls_12d_scr_q30_crewv",
+   "declared_runs": 4,
+   "source_role": "scan_rows"
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/_scan_rows/fl_cls_12d_scr_q30_paxv.jsonl",
+   "family": "observation_jsonl",
+   "source_id": "campaign/noro_provisioned_venue_01/_scan_rows/fl_cls_12d_scr_q30_paxv.jsonl",
+   "campaign_id": "noro_provisioned_venue_01",
+   "cell_id": "fl_cls_12d_scr_q30_paxv",
+   "declared_runs": 4,
+   "source_role": "scan_rows"
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/_scan_rows/fl_spr_12d_scr_q30_crewv.jsonl",
+   "family": "observation_jsonl",
+   "source_id": "campaign/noro_provisioned_venue_01/_scan_rows/fl_spr_12d_scr_q30_crewv.jsonl",
+   "campaign_id": "noro_provisioned_venue_01",
+   "cell_id": "fl_spr_12d_scr_q30_crewv",
+   "declared_runs": 4,
+   "source_role": "scan_rows"
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/_scan_rows/fl_spr_12d_scr_q30_paxv.jsonl",
+   "family": "observation_jsonl",
+   "source_id": "campaign/noro_provisioned_venue_01/_scan_rows/fl_spr_12d_scr_q30_paxv.jsonl",
+   "campaign_id": "noro_provisioned_venue_01",
+   "cell_id": "fl_spr_12d_scr_q30_paxv",
+   "declared_runs": 4,
+   "source_role": "scan_rows"
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/_scan_rows/fl_meg_12d_scr_q30_crewv.jsonl",
+   "family": "observation_jsonl",
+   "source_id": "campaign/noro_provisioned_venue_01/_scan_rows/fl_meg_12d_scr_q30_crewv.jsonl",
+   "campaign_id": "noro_provisioned_venue_01",
+   "cell_id": "fl_meg_12d_scr_q30_crewv",
+   "declared_runs": 4,
+   "source_role": "scan_rows"
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/_scan_rows/fl_meg_12d_scr_q30_paxv.jsonl",
+   "family": "observation_jsonl",
+   "source_id": "campaign/noro_provisioned_venue_01/_scan_rows/fl_meg_12d_scr_q30_paxv.jsonl",
+   "campaign_id": "noro_provisioned_venue_01",
+   "cell_id": "fl_meg_12d_scr_q30_paxv",
+   "declared_runs": 4,
+   "source_role": "scan_rows"
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8494.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8494.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "expedition_cruise_450",
+   "cell_id": "fl_exp_12d_scr_q30_crewv",
+   "seed": 8494,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8869.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8869.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "expedition_cruise_450",
+   "cell_id": "fl_exp_12d_scr_q30_crewv",
+   "seed": 8869,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8326.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8326.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "expedition_cruise_450",
+   "cell_id": "fl_exp_12d_scr_q30_crewv",
+   "seed": 8326,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8557.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8557.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "expedition_cruise_450",
+   "cell_id": "fl_exp_12d_scr_q30_crewv",
+   "seed": 8557,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_paxv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8494.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_paxv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8494.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "expedition_cruise_450",
+   "cell_id": "fl_exp_12d_scr_q30_paxv",
+   "seed": 8494,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_paxv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8869.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_paxv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8869.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "expedition_cruise_450",
+   "cell_id": "fl_exp_12d_scr_q30_paxv",
+   "seed": 8869,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_paxv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8557.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_paxv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8557.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "expedition_cruise_450",
+   "cell_id": "fl_exp_12d_scr_q30_paxv",
+   "seed": 8557,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_paxv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8326.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_exp_12d_scr_q30_paxv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8326.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "expedition_cruise_450",
+   "cell_id": "fl_exp_12d_scr_q30_paxv",
+   "seed": 8326,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_crewv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8498.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_crewv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8498.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "classic_cruise_1900",
+   "cell_id": "fl_cls_12d_scr_q30_crewv",
+   "seed": 8498,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_crewv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8892.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_crewv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8892.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "classic_cruise_1900",
+   "cell_id": "fl_cls_12d_scr_q30_crewv",
+   "seed": 8892,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_crewv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8452.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_crewv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8452.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "classic_cruise_1900",
+   "cell_id": "fl_cls_12d_scr_q30_crewv",
+   "seed": 8452,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_crewv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8983.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_crewv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8983.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "classic_cruise_1900",
+   "cell_id": "fl_cls_12d_scr_q30_crewv",
+   "seed": 8983,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_paxv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8452.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_paxv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8452.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "classic_cruise_1900",
+   "cell_id": "fl_cls_12d_scr_q30_paxv",
+   "seed": 8452,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_paxv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8892.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_paxv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8892.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "classic_cruise_1900",
+   "cell_id": "fl_cls_12d_scr_q30_paxv",
+   "seed": 8892,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_paxv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8983.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_paxv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8983.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "classic_cruise_1900",
+   "cell_id": "fl_cls_12d_scr_q30_paxv",
+   "seed": 8983,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_paxv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8498.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_cls_12d_scr_q30_paxv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8498.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "classic_cruise_1900",
+   "cell_id": "fl_cls_12d_scr_q30_paxv",
+   "seed": 8498,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_crewv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8869.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_crewv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8869.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "spirit_cruise_3000",
+   "cell_id": "fl_spr_12d_scr_q30_crewv",
+   "seed": 8869,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_crewv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8620.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_crewv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8620.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "spirit_cruise_3000",
+   "cell_id": "fl_spr_12d_scr_q30_crewv",
+   "seed": 8620,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_crewv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8894.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_crewv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8894.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "spirit_cruise_3000",
+   "cell_id": "fl_spr_12d_scr_q30_crewv",
+   "seed": 8894,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_crewv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8143.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_crewv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8143.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "spirit_cruise_3000",
+   "cell_id": "fl_spr_12d_scr_q30_crewv",
+   "seed": 8143,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_paxv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8620.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_paxv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8620.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "spirit_cruise_3000",
+   "cell_id": "fl_spr_12d_scr_q30_paxv",
+   "seed": 8620,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_paxv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8894.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_paxv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8894.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "spirit_cruise_3000",
+   "cell_id": "fl_spr_12d_scr_q30_paxv",
+   "seed": 8894,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_paxv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8143.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_paxv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8143.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "spirit_cruise_3000",
+   "cell_id": "fl_spr_12d_scr_q30_paxv",
+   "seed": 8143,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_paxv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8869.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01/fl_spr_12d_scr_q30_paxv/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n3000_ep288_syndromic_comp65_s8869.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "spirit_cruise_3000",
+   "cell_id": "fl_spr_12d_scr_q30_paxv",
+   "seed": 8869,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_crewv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8199.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_crewv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8199.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "mega_cruise_5000",
+   "cell_id": "fl_meg_12d_scr_q30_crewv",
+   "seed": 8199,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_crewv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8548.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_crewv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8548.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "mega_cruise_5000",
+   "cell_id": "fl_meg_12d_scr_q30_crewv",
+   "seed": 8548,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_crewv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8577.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_crewv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8577.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "mega_cruise_5000",
+   "cell_id": "fl_meg_12d_scr_q30_crewv",
+   "seed": 8577,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_crewv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8461.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_crewv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8461.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "mega_cruise_5000",
+   "cell_id": "fl_meg_12d_scr_q30_crewv",
+   "seed": 8461,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_paxv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8199.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_paxv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8199.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "mega_cruise_5000",
+   "cell_id": "fl_meg_12d_scr_q30_paxv",
+   "seed": 8199,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_paxv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8548.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_paxv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8548.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "mega_cruise_5000",
+   "cell_id": "fl_meg_12d_scr_q30_paxv",
+   "seed": 8548,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_paxv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8577.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_paxv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8577.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "mega_cruise_5000",
+   "cell_id": "fl_meg_12d_scr_q30_paxv",
+   "seed": 8577,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  },
+  {
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_paxv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8461.zip",
+   "family": "campaign_summary_zip",
+   "source_id": "campaign/noro_provisioned_venue_01_mega/fl_meg_12d_scr_q30_paxv/fl_norovirus_mega_cruise_5000_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n7000_ep288_syndromic_comp65_s8461.zip",
+   "campaign_id": "noro_provisioned_venue_01",
+   "hull_id": "mega_cruise_5000",
+   "cell_id": "fl_meg_12d_scr_q30_paxv",
+   "seed": 8461,
+   "attempt_kind": "production",
+   "declared_runs": 1
+  }
+ ]
+}
