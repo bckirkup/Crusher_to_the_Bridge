@@ -96,15 +96,19 @@ DECLARED_ASSUMPTIONS: tuple[DeclaredAssumption, ...] = (
         ),
     ),
     DeclaredAssumption(
-        name="dose_adjustment folded into Theta",
-        value="dose_adjustment = 0 while Theta is fitted",
+        name="release normalizer folded into Theta",
+        value=(
+            "environmental_release_log10_per_day = 0 while Theta is fitted "
+            "(the dose_adjustment role before #30 gave the arm a real "
+            "exhaled-rate level)"
+        ),
         evidence_grade="declared, not sourced",
         source=(
-            "The respiratory arm's inherited dose_adjustment is an "
-            "emission-side scalar of the previous dose representation. "
-            "Leaving it in place would put a second multiplier on the one "
-            "axis Theta occupies, which would make the composite "
-            "unidentifiable against itself."
+            "The respiratory arm's emission-side release normalizer is the "
+            "scale the previous dose representation carried in "
+            "dose_adjustment. Leaving it non-zero would put a second "
+            "multiplier on the one axis Theta occupies, which would make "
+            "the composite unidentifiable against itself."
         ),
     ),
     DeclaredAssumption(
@@ -219,7 +223,7 @@ def theta_profile_overrides(
         "asymptomatic_shedding_log10": [
             round(v - peak, 6) for v in asymptomatic
         ],
-        "dose_adjustment": 0.0,
+        "environmental_release_log10_per_day": 0.0,
         "dose_response": {
             "model": "beta_poisson",
             "alpha": alpha,

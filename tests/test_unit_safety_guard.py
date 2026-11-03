@@ -65,6 +65,11 @@ ALLOWED_EPOCH_KEYS = (
     ("presidio/data/experiences/smoke_runs/*.json", "num_epochs"),  # gitignored presidio smoke output; run-length bookkeeping
     ("reports/flu_svc_residual_*.json", "episode_epochs"),  # probe payload: per-agent infection-record epoch indices (unit is the epoch index itself)
     ("reports/flu_svc_residual_*.json", "tending_epochs"),  # probe payload: per-agent quarantine interval epoch indices
+    ("reports/covid_emission_level_30_diag.json", "bracket_per_epoch"),  # diagnostic payload: declared measured bracket in epoch-native copies/epoch — the witness axis itself
+    ("reports/covid_emission_level_30_diag.json", "theta_regime_deposit_per_epoch"),  # diagnostic payload: analytic Theta-regime deposit witness, epoch-native unit
+    ("reports/covid_emission_level_30_diag.json", "num_epochs"),  # diagnostic payload: run-length bookkeeping (records windowed vs full voyage)
+    ("reports/covid_emission_level_30_diag.json", "shedder_epochs"),  # diagnostic payload: per-epoch shedder-count bookkeeping
+    ("reports/covid_emission_level_30_diag.json", "sv_sum_all_epochs"),  # diagnostic payload: summed per-epoch emission bookkeeping
     ("reports/iso_quarters_smoke*", "tending_epochs"),  # probe payload: per-agent quarantine interval epoch indices
     ("reports/iso_quarters_smoke*", "num_epochs"),  # voyage fingerprint: run-length bookkeeping
     ("reports/iso_quarters_smoke*", "total_quarantine_person_epochs"),  # voyage fingerprint: quarantine bookkeeping
