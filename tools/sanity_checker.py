@@ -2426,6 +2426,36 @@ def _check_common_source_provisioned_arm(
         "provisioned_source.genotype_distribution",
         _CONFIG_YAML, report,
     )
+    pin = ps.get("station_zone_pin")
+    if pin is not None:
+        if not isinstance(pin, list) or any(
+            not isinstance(z, str) or not z.strip() for z in pin
+        ):
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                "provisioned_source.station_zone_pin must be a list of "
+                "non-empty zone names",
+            )
+        elif layout is not None:
+            dining = {
+                z.id for z in layout.zones if z.type == "Dining"
+            }
+            missing = [z for z in pin if z not in dining]
+            if missing:
+                report.error(
+                    _CONFIG_YAML, "CONFIG",
+                    "provisioned_source.station_zone_pin names "
+                    f"non-Dining/unknown zones: {missing}",
+                )
+    arm = ps.get("source_venue_arm")
+    if arm is not None and (
+        not isinstance(arm, str) or not arm.strip()
+    ):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "provisioned_source.source_venue_arm must be a non-empty "
+            "string when declared",
+        )
     _check_source_entry_genotypes(sources, report)
     if layout is not None and not any(
         z.type == "Dining" for z in layout.zones

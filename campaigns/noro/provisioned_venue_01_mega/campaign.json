@@ -1,0 +1,52 @@
+{
+ "name": "noro_provisioned_venue_01_mega",
+ "pathogen": "norovirus",
+ "manifest": "picard_framework/runs/mega_cruise_campaign/noro_provisioned_venue_01_manifest.json",
+ "pathogen_id": "norwalk_gi",
+ "epochs": 288,
+ "s3_prefix": "campaign/noro_provisioned_venue_01_mega/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "noro-provisioned-venue01",
+ "resources": {
+  "vcpu": "1",
+  "memory": "8192",
+  "shm": 512
+ },
+ "blocks": {
+  "fl_meg_12d_scr_q30_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_scr_q30_crewv",
+   "seeds": [
+    8548,
+    8461,
+    8199,
+    8577
+   ]
+  },
+  "fl_meg_12d_scr_q30_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_scr_q30_paxv",
+   "seeds": [
+    8548,
+    8461,
+    8199,
+    8577
+   ]
+  },
+  "canary_meg_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_scr_q30_crewv",
+   "seeds": [
+    8548
+   ]
+  },
+  "canary_meg_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_scr_q30_paxv",
+   "seeds": [
+    8548
+   ]
+  }
+ },
+ "readout": "tools/noro_diag/outbreak_anchor_readout.py"
+}

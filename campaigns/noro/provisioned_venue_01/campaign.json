@@ -1,0 +1,120 @@
+{
+ "name": "noro_provisioned_venue_01",
+ "pathogen": "norovirus",
+ "manifest": "picard_framework/runs/mega_cruise_campaign/noro_provisioned_venue_01_manifest.json",
+ "pathogen_id": "norwalk_gi",
+ "epochs": 288,
+ "s3_prefix": "campaign/noro_provisioned_venue_01/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "noro-provisioned-venue01",
+ "resources": {
+  "vcpu": "1",
+  "memory": "4096",
+  "shm": 512
+ },
+ "blocks": {
+  "fl_exp_12d_scr_q30_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_exp_12d_scr_q30_crewv",
+   "seeds": [
+    8869,
+    8326,
+    8494,
+    8557
+   ]
+  },
+  "fl_exp_12d_scr_q30_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_exp_12d_scr_q30_paxv",
+   "seeds": [
+    8869,
+    8326,
+    8494,
+    8557
+   ]
+  },
+  "canary_exp_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_exp_12d_scr_q30_crewv",
+   "seeds": [
+    8869
+   ]
+  },
+  "canary_exp_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_exp_12d_scr_q30_paxv",
+   "seeds": [
+    8869
+   ]
+  },
+  "fl_cls_12d_scr_q30_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_scr_q30_crewv",
+   "seeds": [
+    8892,
+    8452,
+    8498,
+    8983
+   ]
+  },
+  "fl_cls_12d_scr_q30_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_scr_q30_paxv",
+   "seeds": [
+    8892,
+    8452,
+    8498,
+    8983
+   ]
+  },
+  "canary_cls_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_scr_q30_crewv",
+   "seeds": [
+    8892
+   ]
+  },
+  "canary_cls_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_scr_q30_paxv",
+   "seeds": [
+    8892
+   ]
+  },
+  "fl_spr_12d_scr_q30_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_scr_q30_crewv",
+   "seeds": [
+    8620,
+    8894,
+    8869,
+    8143
+   ]
+  },
+  "fl_spr_12d_scr_q30_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_scr_q30_paxv",
+   "seeds": [
+    8620,
+    8894,
+    8869,
+    8143
+   ]
+  },
+  "canary_spr_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_scr_q30_crewv",
+   "seeds": [
+    8620
+   ]
+  },
+  "canary_spr_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_scr_q30_paxv",
+   "seeds": [
+    8620
+   ]
+  }
+ },
+ "readout": "tools/noro_diag/outbreak_anchor_readout.py"
+}
