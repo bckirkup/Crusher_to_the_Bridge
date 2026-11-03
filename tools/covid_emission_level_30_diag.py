@@ -48,7 +48,7 @@ from picard_framework.simulation.ship_simulation import (  # noqa: E402
 LICENSED_FINE_SHARE = 0.85  # Coleman 2021, inside [0.76, 0.92] - tranche 27
 
 
-def observe_deposit(sim, work, out):
+def observe_deposit(sim, _work, out):
     """Sum this epoch's per-shedder sv and deposit into ``out``."""
     prof = sim.pathogen_profiles.get(PATHOGEN_ID)
     if prof is None:
@@ -148,9 +148,15 @@ def main() -> None:
     }
     text = json.dumps(payload, indent=1)
     if args.out:
-        with open(args.out, "w") as fh:
+        out_path = os.path.realpath(args.out)
+        base_dir = os.path.realpath(os.getcwd())
+        if out_path != base_dir and not out_path.startswith(base_dir + os.sep):
+            raise ValueError(
+                f"--out {args.out!r} resolves outside the working directory"
+            )
+        with open(out_path, "w") as fh:
             fh.write(text + "\n")
-        print("wrote", args.out)
+        print("wrote", out_path)
     else:
         print(text)
 
