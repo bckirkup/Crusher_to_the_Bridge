@@ -67,7 +67,32 @@ a reasonable follow-up.
 - `put_idempotent` semantics: identical content at the same key is fine;
   different content at the same key is a `DerivedConflict`.
 
-## 4. Receipt keys can dangle — verify before the return leg
+## 4. Return-leg `request_uri` is the bootstrap collect request, not the reducer spec
+
+`campaign_return.yml`'s `request_uri`/`request_sha256` point at a
+`crusher-campaign-distributions/1.0-proposed` bootstrap request
+(operation `collect`), **not** the `crusher-reducer-spec/v1` request the
+materialize leg consumed. The collect step fetches `request_uri` into
+`bootstrap_request.json` and validates the bootstrap envelope; passing
+the reducer spec exits 4 with
+`admission:required_field_missing; ... :required_field_missing`.
+
+Required bootstrap fields: `schema_version`, `request_id`,
+`operation: "collect"`, `source_bucket`, `source_roots_allowlist`
+(= the attempt prefix `campaign/_derived/reducer/v1/attempts/<rid>/`),
+`derived_exclude_prefixes` (`["campaign/_derived/reducer/v1/"]`),
+`scope_register_sha256` (= `contracts.sha256(CAMPAIGN_COVERAGE)` — raw
+file bytes of the contract on the workflow's ref),
+`budgets` (metadata-collect shape: `max_api_calls_total`,
+`max_list_pages`, `max_head_requests`, `max_source_objects`,
+`max_return_bytes`, `max_wall_seconds`, `max_cost_usd`),
+`admission` (`admission_id`, `approved_scope_hash` = scope sha,
+`approved_cost_usd`, `expires_utc`), `price_snapshot`.
+`requests/pilot_d6_bootstrap.json` on the derived store is the working
+template. And because the return leg verifies raw bytes, pass
+`sha256sum` of that file — never the canonical sha.
+
+## 5. Receipt keys can dangle — verify before the return leg
 
 `worker._attempt_receipt` published `pages_manifest_key`/`status_key`/
 `asset_index_key` unconditionally while `_emit_pages` only emitted for the
