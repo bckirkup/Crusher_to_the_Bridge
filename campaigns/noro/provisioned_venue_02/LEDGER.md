@@ -166,16 +166,18 @@ on the last arm).
 - Cohort built clean: 12,012 sources (12,000 zips + 12 scan files),
   12,000 unique run keys, 0 duplicates, seed spans 8000–8999 (exp) /
   8105–9104 (cls/spr/meg) as designed.
-- `red-fps02-venue02-{request,sources}.json` uploaded to
-  `campaign/_derived/reducer/v1/requests/`; canonical request sha256
-  `01418a88aff6aebef62f8032578aaebf559b9416d0c28984580bf270d9fa8f91`;
-  sources manifest `2c8bff77…f5cd874`.
-- `campaign_reduction.yml` phase=materialize dispatched
-  (jobdef `picard-reducer:11`, queue `picard-analysis-queue`,
-  `dry_run=false`) — job waits on the `aws-campaign` environment
-  approval (Benjamin gate), then submits to Batch.
-- Return request uploaded to the same `requests/` prefix; return-leg
-  sha = raw `sha256sum` of the file body
-  `b9ed0f30cfe8c8e23d66980ee4a25581954fc1ce37f88b3fb7e0bd7646394e37`
+- **Attempt A** `red-fps02-venue02` (request sha `01418a88…`,
+  sources `2c8bff77…`): materialize `budget_stopped` at shard 0 —
+  `checkpoint_reserve_bytes` 100 MB under-sized vs the 142 MB
+  cohort-delta checkpoint (see report §7). Objects under
+  `attempts/red-fps02-venue02/` are inert strays.
+- **Attempt B** `red-fps02-venue02-b` (request sha `abe0960c…`,
+  sources `38641803…`): same cohort, reserve raised to 300 MB /
+  3600 s; dispatched on `picard-analysis-queue`,
+  `picard-reducer:11`, `dry_run=false`, `aws-campaign` env approval.
+- Return request `red-fps02-venue02-b-return-request.json`
+  (allowlist `attempts/red-fps02-venue02-b/`); return-leg sha =
+  raw `sha256sum` of the file body
+  `691f9b9b1724a286e422079f94772587af0b29c10c664cf91f4f9ecf728eecb5`
   (the workflow verifies raw bytes, materialize verifies canonical —
   per `reducer-dispatch-pins`).
