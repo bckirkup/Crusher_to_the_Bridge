@@ -127,8 +127,24 @@ CrewMess+MainDining).
 
 ## Readout log
 
-Wave 1 in flight as of 2026-11-03 (~12,000 cells across 12 array jobs;
-expedition hull complete first — 3,000 cells, 0 failures).
+Wave 1 complete as of 2026-11-04 ~22:10 UTC — **12,000/12,000 cells
+SUCCEEDED, 0 failed cells** across all 12 array jobs (9 small-hull
+blocks + 3 mega). Mega legs were the wall-clock tail (vCPU-bound at
+the 256-vCPU Spot CE cap, ~50 concurrent ~28-min cells, ~95 cells/hr
+on the last arm).
+
+### Scan rows (2026-11-04)
+
+- 12/12 `_scan_rows` files delivered under
+  `campaign/noro_provisioned_venue_02/_scan_rows/` — 1,000 rows each,
+  0 errors; meg rows under the parent prefix per convention.
+- **Decision:** rows generated with `--no-census` (summary.json only).
+  Census-member decode measured ~2 h/tier (~400–800 MB member per
+  zip); the reducer's `observation_jsonl` adapter only indexes rows,
+  so census content is not consumed downstream — venue fields come
+  from the run zips' summary.json via the extraction profile. Row
+  `cs_echo` retains the full venue witness (pin + weights +
+  `source_venue_arm`).
 
 ### Delivery-leg preparation (2026-11-03)
 
@@ -144,3 +160,22 @@ expedition hull complete first — 3,000 cells, 0 failures).
   prefix (same tool as the venue pilot); canary cells excluded by
   prefix (`canary_*` prefixes never match `fl_*` tier prefixes); meg
   rows upload under the PARENT `_scan_rows/` prefix per convention.
+
+### Materialize dispatch (2026-11-04)
+
+- Cohort built clean: 12,012 sources (12,000 zips + 12 scan files),
+  12,000 unique run keys, 0 duplicates, seed spans 8000–8999 (exp) /
+  8105–9104 (cls/spr/meg) as designed.
+- `red-fps02-venue02-{request,sources}.json` uploaded to
+  `campaign/_derived/reducer/v1/requests/`; canonical request sha256
+  `01418a88aff6aebef62f8032578aaebf559b9416d0c28984580bf270d9fa8f91`;
+  sources manifest `2c8bff77…f5cd874`.
+- `campaign_reduction.yml` phase=materialize dispatched
+  (jobdef `picard-reducer:11`, queue `picard-analysis-queue`,
+  `dry_run=false`) — job waits on the `aws-campaign` environment
+  approval (Benjamin gate), then submits to Batch.
+- Return request uploaded to the same `requests/` prefix; return-leg
+  sha = raw `sha256sum` of the file body
+  `b9ed0f30cfe8c8e23d66980ee4a25581954fc1ce37f88b3fb7e0bd7646394e37`
+  (the workflow verifies raw bytes, materialize verifies canonical —
+  per `reducer-dispatch-pins`).
