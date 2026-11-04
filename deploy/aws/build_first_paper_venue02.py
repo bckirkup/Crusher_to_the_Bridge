@@ -41,7 +41,12 @@ ARMS = [
     for hull in ("exp", "cls", "spr", "meg")
     for arm in ("crewv", "paxv", "mixv")
 ]
-REDUCTION_ID = "red-fps02-venue02"
+# Attempt -b: attempt a (red-fps02-venue02) budget_stopped on
+# checkpoint_reserve_bytes — the shard-0 checkpoint carries the
+# cohort-wide accumulator delta (~142 MB at 12k sources; shards 1+
+# are ~25 KB each). 300 MB reserve covers it with headroom; the
+# prior attempt's stray objects are inert (create-only store).
+REDUCTION_ID = "red-fps02-venue02-b"
 
 # 12k-source cohort: budgets mirror the Phase-B leg (same 12k-source
 # scale, same ranged summary.json member reads ~92 KB/source; the 45 MB
@@ -68,8 +73,8 @@ BUDGETS = {
     "max_inflight_jobs": 1,
     "max_retries": 500,
     "max_cost_usd": 100.0,
-    "checkpoint_reserve_bytes": 100000000,
-    "checkpoint_reserve_seconds": 1800,
+    "checkpoint_reserve_bytes": 300000000,
+    "checkpoint_reserve_seconds": 3600,
     "safety_factor": 2.0,
 }
 

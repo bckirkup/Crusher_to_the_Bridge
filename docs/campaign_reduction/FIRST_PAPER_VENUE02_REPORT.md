@@ -1,12 +1,12 @@
 # first_paper_scalar — venue-placement sweep report: red-fps02-venue02 (12,000 vectors)
 
-**Status: _(pending — attempt `red-fps02-venue02` planned; fill on
-completion)_**
+**Status: _(pending — attempt `red-fps02-venue02-b` in flight; fill on
+completion. Attempt `red-fps02-venue02` budget_stopped — see §7)_**
 
 Deliverable: `first_paper_vectors` for the 12,000 provisioned-venue-02
 cells (4 hulls × `crew_venue`/`passenger_venue`/`mixed_venue` × 1,000
 seeds, q = 0.003) under
-`campaign/_derived/reducer/v1/attempts/red-fps02-venue02/`
+`campaign/_derived/reducer/v1/attempts/red-fps02-venue02-b/`
 (RECEIPT/COMMIT/MANIFEST/status + bounded page layer), collected
 through the bounded return path and delivered to Edison, on the
 `first_paper_scalar/1.4.0` definition (three additive venue fields;
@@ -51,7 +51,7 @@ _(partially pending — rows measured; RECEIPT fields fill on attempt completion
 | data gaps | 0 allowed unaccounted | _pending (RECEIPT)_ |
 | duplicate run keys | — | 0 (cohort reconciliation) |
 
-Cohort composition — `phase_venue02/red-fps02-venue02-cohort.json`:
+Cohort composition — `red-fps02-venue02-b-cohort.json` (identical under attempt A's id):
 `fl_{exp,cls,spr}_12d_scr_q30_{crewv,paxv,mixv}` (9 arms under
 `campaign/noro_provisioned_venue_02/`) + `fl_meg_12d_scr_q30_{crewv,paxv,mixv}`
 (3 arms under `…_mega/`). All three arms reuse the q30 seed set —
@@ -117,3 +117,15 @@ under `campaign/_derived/reducer/v1/requests/acks/`)_
 - **Dispatch input trap avoided:** `dry_run` is a required input
   defaulting to `true`; the first dispatch was cancelled and
   re-submitted with `dry_run=false` before it consumed a run.
+- **Attempt A `budget_stopped` (2026-11-04 23:09 UTC):** shard 0
+  processed 64 sources (52 vectors emitted) then stopped —
+  `checkpoint_reserve_bytes: charge 142,472,112 exceeds remaining
+  100,000,000`. The shard-0 checkpoint carries the cohort-wide
+  accumulator delta (~142 MB at 12k sources; the b-obsclock
+  precedent shows it scales with source count — 75 MB at 8k — and
+  that every later shard checkpoint is ~18–25 KB). Attempt A's
+  objects under `attempts/red-fps02-venue02/` are inert strays
+  (create-only store). Attempt B re-dispatched as
+  `red-fps02-venue02-b` with `checkpoint_reserve_bytes` 300 MB /
+  `checkpoint_reserve_seconds` 3600 (the Phase-B2 values); sources
+  manifest and cohort unchanged.
