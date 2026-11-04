@@ -12,7 +12,7 @@ S3 prefix `campaign/noro_provisioned_venue_02_mega/`.
 | wave | blocks | cells | status |
 |---|---|---|---|
 | canary | 1 hull × 3 arms × 1 seed (8152) | 3 | 3/3 SUCCEEDED 2026-11-03 (jobdef `picard-noro-provisioned-venue-02-mega` revs 1–3; readout on the main ledger) |
-| 1 | 3 arms × 1,000 seeds | 3,000 | awaiting user gate after canary |
+| 1 | 3 arms × 1,000 seeds | 3,000 | submitted 2026-11-03 (job ids on the main ledger) |
 
 ## Readout log
 
