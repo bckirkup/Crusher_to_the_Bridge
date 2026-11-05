@@ -4682,6 +4682,32 @@ split); entry `docs/ledger/PROVISIONED-SOURCE-01.md`. Does not
 submit until the implementation leg lands the mechanism + witnesses
 and the image pins a SHA containing them.
 
+**`PROVISIONED-SOURCE` sourcing leg (tranche 55, 2026-11-05 — the
+`generic_cruise_port` `q_source` interval is now sourced, U(8.6e-4,
+4.7e-3), replacing the declared U(2e-4, 5e-4); measured overcorrection
+of 4–9× at the implicated-titre rung and 30–67× at the RNA-detection
+rung, reported not corrected):** per-item-line dispatch/retail
+norovirus RNA prevalences (shellfish 3.9–14.4%, salad leaf 0–5.3%,
+berries 0.36–3.6%; deli/bakery/dairy/garnish null for the high-income
+stratum) fold through the station census as q = (1/7) Σ p_line, then
+× the implicated-titre share f = 0.141 (Lowther 2018), since the
+shipped `two_mode` titre draw mints every lot at implicated scale.
+The small-hull in-band window [2e-4, 5e-4] lies below every sourced
+rung; the sourced lower edge touches the measured mega window
+[8e-4, 1.5e-3]. Shellfish stratifies by origin (UK POS 68.7%) and is
+not averaged — a separate source id. Plausibility bound (inferred):
+~6% of small-hull voyages posting from food alone at the sourced
+centre vs ~3–7e-4 food-vehicle outbreak voyages implied by VSP ×
+Mouchtouri 2024 — a measurement about the minted-lot → posting chain
+or about RNA-positive ≠ infectious lots, not a licence to move q.
+Residual mapping gaps recorded, not filled: every venue carries every
+line; stations independent across venues and voyages (Rispens 2020
+documents one fleet-wide, multi-voyage lot). Record
+`docs/literature/consensus_tranche_55_provisioned_lot_prevalence.md`;
+register §3.12 row; entry `docs/ledger/PROVISIONED-SOURCE-01.md`.
+Campaign manifests all pin `q_source` explicitly, so no measured cell
+moves; no campaign adopts the new interval until a spec says so.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
