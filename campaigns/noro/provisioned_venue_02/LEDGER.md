@@ -181,3 +181,47 @@ on the last arm).
   `691f9b9b1724a286e422079f94772587af0b29c10c664cf91f4f9ecf728eecb5`
   (the workflow verifies raw bytes, materialize verifies canonical —
   per `reducer-dispatch-pins`).
+
+### Attempt B outcome + publish-layer repair (2026-11-05)
+
+- Batch `3199014b-f18b-4d9f-81d6-751a5da12383` FAILED at job level but
+  completed the data: attempt-1 wrote all 185 checkpoints, 1,295 shard
+  objects, COMMIT.json (`completed`, snapshot `snap-f8f09d4e47939619`,
+  12,000 vectors, 0 errors), MANIFEST.json (1,319 entries) and 398/504
+  vector pages, then exited 1 inside `_emit_pages`; retries 2–3
+  DerivedConflicted on re-finalize and wrote a `blocked` RECEIPT
+  (create-only `put_if_absent` — first write wins, permanent).
+- Repair (new keys only, per reducer-dispatch-pins #5): byte-faithful
+  re-chunk of the 188 `first_paper_vectors` shard partitions at the
+  ≤1 MiB/page rule reproduced the 398 job-written pages exactly;
+  tail pages 399–504 + `first_paper_vectors.pages_manifest.json` +
+  `status.json` + `asset_index.json` written at the canonical `-b`
+  keys; a truthful `completed` RECEIPT at the sibling
+  `attempts/red-fps02-venue02-b-pub/RECEIPT.json`. The `blocked`
+  receipt remains as an inert stray.
+- Corrected return request
+  `requests/red-fps02-venue02-b2-return-request.json` (the first `-b`
+  request lacked `collect_all_pages` — required above the collector's
+  20-file cap — and a 200 MB return ceiling vs ~522 MB of pages):
+  `collect_all_pages: true`, budgets api 5000 / head 1500 /
+  objects 600 / return 1 GiB / $6.00, allowlist covers both `-b/` and
+  `-b-pub/`. Raw `sha256sum`
+  `513aac7917c8828468c92726faceba2f47ff8b575178c56374db81f504341dc4`.
+- Return leg dispatched `campaign_return.yml` with
+  `attempt_id=red-fps02-venue02-b-pub` (the workflow resolves
+  `attempts/{attempt_id}/RECEIPT.json`; the receipt's own
+  `reduction_id` remains `red-fps02-venue02-b`), run 41949099363.
+
+### Return leg + Edison delivery (2026-11-05)
+
+- `campaign_return.yml` run 41949099363 — poll/collect/ingest/
+  acknowledge all SUCCESS. Collect sha-verified all 504 pages
+  (521,963,762 B) against the pages manifest.
+- **Edison ack `ack-c5ade4b314c56697`**
+  (`requests/acks/ack-c5ade4b314c56697.json`): `ingest_status`
+  `completed`, 507 `project_asset_ids` (504 pages + COMMIT +
+  MANIFEST + receipt), 507 `artifact_sha256s` — durable receipt.
+  Ack's `receipt_id/reduction_id` echoes the `-bpub` dispatch label;
+  the receipt's own `reduction_id` is `red-fps02-venue02-b`.
+- **DELIVERED:** `first_paper_vectors` 1.4.0, 12,000 vectors
+  (4 hulls × 3 venue conditions × 1,000 seeds), to Edison.
