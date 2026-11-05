@@ -30,6 +30,7 @@ from engines.transmission_core import (
     COMMON_SOURCE_LOT_ITEM_LINES,
     ContactTracingMatrix,
     TransmissionCore,
+    _provisioning_source_registry,
 )
 from tests.test_common_source_events import (
     MDR_ZONE,
@@ -173,8 +174,9 @@ def test_registry_resolves_source_id_and_q_interval() -> None:
     core = _core(cfg_cs=_ps_cfg(None))
     assert core._cs_ps_source_id == SOURCE_ID
     q = core._cs_rates[PATHOGEN]["q_source"]
-    assert q >= 0.0002
-    assert q <= 0.0005
+    lo, hi = _provisioning_source_registry()["sources"][SOURCE_ID]["q_source"]
+    assert lo < hi
+    assert lo <= q <= hi
 
 
 def test_station_census_is_served_zones_times_item_lines() -> None:

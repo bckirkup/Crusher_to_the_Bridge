@@ -97,3 +97,35 @@ shipped config explicitly; the user then settled it the other way —
 absent→`"provisioned_source"`, with `"fiat"` pinned on every
 artifact whose measured cells ran the fiat grammar. This file
 records that resolution so a later reader does not re-litigate it.
+
+Sourcing leg (2026-11-05, tranche 55 —
+`docs/literature/consensus_tranche_55_provisioned_lot_prevalence.md`):
+the `generic_cruise_port` registry interval moves from the declared
+U(2e-4, 5e-4) to the sourced composite **U(8.6e-4, 4.7e-3)** —
+q = (1/7) Σ per-item-line dispatch/retail norovirus RNA prevalence
+(shellfish [0.039, 0.144]: Woods 2010, EFSA 2019 dispatch batches
+10.8%; salad_leaf [0, 0.053]: Terio 2017 0/911, Cook 2019 5.3%;
+fresh_produce [0.0036, 0.036]: Steele 2022 0.36%, Cook 2019 3.6%,
+Miotti 2024 pooled 2.12%; deli/bakery/dairy/garnish ∅ for the
+high-income stratum, carried at 0) × the implicated-titre share
+f = 0.141 (Lowther 2018: 9.7% of 68.7% POS oysters >100 copies/g),
+because the shipped `titre_draw_mode: two_mode` mints every lot at
+implicated titre. Measured overcorrection, reported not corrected:
+the RNA-detection rung lands [6.1e-3, 3.3e-2] (30–67× declared), the
+shipped implicated rung 4–9× declared; its lower edge touches the
+measured mega in-band window [8e-4, 1.5e-3] and its centre is the q30
+rung, so the small-hull in-band window [2e-4, 5e-4] is **below** every
+sourced rung. Plausibility (inferred): at q = 3.1e-3 with the measured
+P(post|minted) ladder, ~6% of small-hull voyages would post from food
+alone, vs ~3–7e-4 food-vehicle outbreak voyages implied by VSP
+(133/29,107 × Mouchtouri 2024 3/45–6/41). Stratification reported
+rather than averaged: oyster prevalence runs 3.9% (US market) →
+10.8% (EU dispatch) → 68.7% (UK POS); UK/IE-origin shellfish belongs
+to a separate source id. Not touched: the module fallback
+`COMMON_SOURCE_Q_SOURCE_RANGE` (engine constant, out of this leg's
+scope — registry outranks it), every frozen campaign manifest (all pin
+`q_source` explicitly), and the fiat baseline. The per-item-line
+registry extension (`q_source_by_item_line`, log-uniform shape,
+shared-lot correlation per Rispens 2020) is proposed in tranche 55 §7;
+the grammar reads a scalar|[lo, hi] only today.
+
