@@ -1,9 +1,9 @@
 # first_paper_scalar — venue-placement sweep report: red-fps02-venue02 (12,000 vectors)
 
-**Status: _(pending Edison ack — materialize complete, return leg
-`red-fps02-venue02-b2-return` dispatched; §6 fills on ack. Attempts
+**Status: delivered — Edison ingest `completed`, ack
+`ack-c5ade4b314c56697` (2026-11-05 02:19 UTC). Attempts
 `red-fps02-venue02` budget_stopped and `red-fps02-venue02-b`
-publish-tail crash + repair — see §7)_**
+publish-tail crash + repair — see §7**
 
 Deliverable: `first_paper_vectors` for the 12,000 provisioned-venue-02
 cells (4 hulls × `crew_venue`/`passenger_venue`/`mixed_venue` × 1,000
@@ -121,8 +121,25 @@ for all 398 (§7 incident).
 
 ## 6. Edison delivery receipts
 
-_(pending — collect artifact list, ingest `project_asset_ids`, ack hex
-under `campaign/_derived/reducer/v1/requests/acks/`)_
+Return leg `campaign_return.yml` run 41949099363
+(`attempt_id=red-fps02-venue02-b-pub`, request
+`requests/red-fps02-venue02-b2-return-request.json`, raw sha
+`513aac79…`): poll → collect (504 pages, sha-verified per entry) →
+ingest → acknowledge — all green.
+
+- **Ack:** `campaign/_derived/reducer/v1/requests/acks/ack-c5ade4b314c56697.json`
+  — schema `crusher-reducer-ack/v1`, `ingest_status: completed`,
+  `request_id: req-fps02-venue02-b2-return`,
+  `receipt_id/reduction_id: red-fps02-venue02-b-pub` (the ack echoes
+  the workflow's attempt input; the receipt's own `reduction_id` is
+  `red-fps02-venue02-b`).
+- **Edison `project_asset_ids`:** 507 entries — the 504 vector pages
+  plus `COMMIT.json`, `MANIFEST.json`, and the receipt object
+  (`<receipt-uri>`). Each entry carries its collected sha256 under
+  `artifact_sha256s` (all verified against the pages manifest at
+  collect time).
+- **Collected bytes:** 521,963,762 across 504 pages
+  (12,000 vectors); well inside the -b2 request's 1 GiB return budget.
 
 ## 7. Incidents during execution
 

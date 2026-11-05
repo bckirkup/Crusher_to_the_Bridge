@@ -211,3 +211,17 @@ on the last arm).
   `attempt_id=red-fps02-venue02-b-pub` (the workflow resolves
   `attempts/{attempt_id}/RECEIPT.json`; the receipt's own
   `reduction_id` remains `red-fps02-venue02-b`), run 41949099363.
+
+### Return leg + Edison delivery (2026-11-05)
+
+- `campaign_return.yml` run 41949099363 — poll/collect/ingest/
+  acknowledge all SUCCESS. Collect sha-verified all 504 pages
+  (521,963,762 B) against the pages manifest.
+- **Edison ack `ack-c5ade4b314c56697`**
+  (`requests/acks/ack-c5ade4b314c56697.json`): `ingest_status`
+  `completed`, 507 `project_asset_ids` (504 pages + COMMIT +
+  MANIFEST + receipt), 507 `artifact_sha256s` — durable receipt.
+  Ack's `receipt_id/reduction_id` echoes the `-bpub` dispatch label;
+  the receipt's own `reduction_id` is `red-fps02-venue02-b`.
+- **DELIVERED:** `first_paper_vectors` 1.4.0, 12,000 vectors
+  (4 hulls × 3 venue conditions × 1,000 seeds), to Edison.
