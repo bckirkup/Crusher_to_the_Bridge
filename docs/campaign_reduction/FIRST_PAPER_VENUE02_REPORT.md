@@ -1,7 +1,9 @@
 # first_paper_scalar — venue-placement sweep report: red-fps02-venue02 (12,000 vectors)
 
-**Status: _(pending — attempt `red-fps02-venue02-b` in flight; fill on
-completion. Attempt `red-fps02-venue02` budget_stopped — see §7)_**
+**Status: _(pending Edison ack — materialize complete, return leg
+`red-fps02-venue02-b2-return` dispatched; §6 fills on ack. Attempts
+`red-fps02-venue02` budget_stopped and `red-fps02-venue02-b`
+publish-tail crash + repair — see §7)_**
 
 Deliverable: `first_paper_vectors` for the 12,000 provisioned-venue-02
 cells (4 hulls × `crew_venue`/`passenger_venue`/`mixed_venue` × 1,000
@@ -40,15 +42,15 @@ baseline by construction (canary-verified 12/12).
 
 ## 1. Expected vs recovered cohort
 
-_(partially pending — rows measured; RECEIPT fields fill on attempt completion)_
+_(rows measured; receipt fields from the repaired `completed` RECEIPT — see §7)_
 
 | measure | declared | recovered |
 |---|---|---|
 | cells (arm-sets) | 12 | 12 arrays SUCCEEDED (0 failed cells) |
 | runs per cell | 1,000 | 1,000 per arm (scan rows, 0 errors) |
 | runs total | 12,000 | 12,000 unique run keys |
-| source objects | 12,012 (12,000 zips + 12 scan files) | _pending (RECEIPT)_ |
-| data gaps | 0 allowed unaccounted | _pending (RECEIPT)_ |
+| source objects | 12,012 (12,000 zips + 12 scan files) | 12,012 |
+| data gaps | 0 allowed unaccounted | 0 |
 | duplicate run keys | — | 0 (cohort reconciliation) |
 
 Cohort composition — `red-fps02-venue02-b-cohort.json` (identical under attempt A's id):
@@ -87,11 +89,35 @@ Venue pins + mixed weights (merged `campaigns/noro/provisioned_venue_02/design/b
 
 ## 4. Ceiling-vs-actual metering
 
-_(pending — fill from RECEIPT.json `budget_spent`)_
+Measured `budget_spent` on `attempts/red-fps02-venue02-b-pub/RECEIPT.json`
+(attempt-B ledger — the blocked retry inherited attempt-1's charges):
+
+| dimension | ceiling | spent |
+|---|---|---|
+| api calls total | 120,000 | 60,025 |
+| get requests | 100,000 | 60,025 |
+| head requests | 30,000 | 12,012 |
+| compressed bytes read | 2 GB | 1.09 GB |
+| uncompressed bytes | 16 GB | 4.73 GB |
+| source objects | 13,000 | 12,012 |
+| output bytes | 1 GB | 586 MB |
+| checkpoint reserve | 300 MB | 145.9 MB |
+
+Headroom everywhere after the attempt-B reserve bump — the attempt-A
+failure was the reserve, not the workload (§7).
 
 ## 5. Page layer
 
-_(pending — page count/rows + register pointer)_
+`pages/first_paper_vectors/`: **504 pages, 12,000 rows,
+521,963,762 bytes** (≤1 MiB/page, row-aligned, shard-partition order).
+Pages manifest at
+`attempts/red-fps02-venue02-b/pages/first_paper_vectors.pages_manifest.json`
+(`first_paper_pages_manifest`, per-entry `page_id`/`uri`/`sha256`/`rows`/`bytes`);
+`status.json` + `asset_index.json` at the attempt root. The first 398
+pages were written by the materialize job; pages 399–504 and the three
+publish objects were synthesized post-hoc by a byte-faithful re-chunk
+of the shard partitions — verified identical to the job-written pages
+for all 398 (§7 incident).
 
 ## 6. Edison delivery receipts
 
@@ -117,6 +143,32 @@ under `campaign/_derived/reducer/v1/requests/acks/`)_
 - **Dispatch input trap avoided:** `dry_run` is a required input
   defaulting to `true`; the first dispatch was cancelled and
   re-submitted with `dry_run=false` before it consumed a run.
+- **Attempt B publish-tail crash + repair (2026-11-05):** attempt-1
+  (Batch `3199014b-…`, ~82 min) wrote all 185 checkpoints, 1,295 shard
+  objects, COMMIT.json (`completed`, snapshot `snap-f8f09d4e47939619`,
+  12,000 vectors, 0 errors), MANIFEST.json and 398 of 504 vector
+  pages, then died exit-1 inside `_emit_pages` before writing the
+  pages manifest, `status.json` and `asset_index.json`. Retries 2–3
+  re-finalized into a `DerivedConflict` (the committed COMMIT already
+  carried `completed` with a different `utc`) and wrote a `blocked`
+  RECEIPT via the create-only `put_if_absent` — permanent at that
+  key. CloudWatch `logs:GetLogEvents` is denied to the deploy role,
+  so the exit-1 cause is undiagnosed (not budgets: the ledger shows
+  headroom in every dimension).
+  **Repair (create-only store — no overwrites):** the 188
+  `first_paper_vectors` shard partitions were re-chunked at the
+  documented ≤1 MiB/page rule; the regenerated sequence matched all
+  398 job-written pages byte-for-byte, so tail pages 399–504 were
+  written as new keys, then `first_paper_vectors.pages_manifest.json`,
+  `status.json` and `asset_index.json` at the canonical attempt keys,
+  and a truthful `completed` RECEIPT at the sibling prefix
+  `attempts/red-fps02-venue02-b-pub/RECEIPT.json` (the `blocked`
+  receipt remains as an inert stray). The `-b` return request also
+  lacked `collect_all_pages` — required above the collector's
+  20-file cap — so a corrected request
+  `requests/red-fps02-venue02-b2-return-request.json` carries
+  `collect_all_pages: true` + scaled budgets; the return leg runs
+  with `attempt_id=red-fps02-venue02-b-pub`.
 - **Attempt A `budget_stopped` (2026-11-04 23:09 UTC):** shard 0
   processed 64 sources (52 vectors emitted) then stopped —
   `checkpoint_reserve_bytes: charge 142,472,112 exceeds remaining
