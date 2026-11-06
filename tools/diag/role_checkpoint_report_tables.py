@@ -14,9 +14,15 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import json
+import sys
 from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from picard_framework.analysis._io import read_json, safe_path  # noqa: E402
 
 MEASURES: tuple[str, ...] = (
     "infected", "ill", "unique_etiologic_reporters",
@@ -32,14 +38,21 @@ MEASURE_ABBR: dict[str, str] = {
 DAYS: tuple[str, ...] = ("day_3", "day_7", "day_10", "day_12")
 
 
+NO = "**no**"
+
+
 def _yn(value: Any) -> str:
-    return "yes" if value else "**no**"
+    return "yes" if value else NO
+
+
+def _yn_plain(value: Any) -> str:
+    return "yes" if value else "no"
 
 
 def _load_runs(paths: list[Path]) -> list[dict[str, Any]]:
     runs: list[dict[str, Any]] = []
     for path in paths:
-        ledger = json.loads(path.read_text(encoding="utf-8"))
+        ledger = read_json(safe_path(path))
         for rec in ledger["runs"]:
             runs.append(rec | {"_ledger": path.name})
     return sorted(runs, key=lambda r: (r["tier"], r["seed"]))
@@ -82,8 +95,8 @@ def baseline_table(runs: list[dict[str, Any]]) -> list[str]:
             lines.append(_row([r["tier"], r["seed"], "—", "no baseline", "", "", "", ""]))
             continue
         lines.append(_row([
-            r["tier"], r["seed"], _yn(b["baseline_has_sidecar"]).replace("**no**", "no"),
-            _yn(b["blocks_equal"]).replace("**no**", "no"),
+            r["tier"], r["seed"], _yn_plain(b["baseline_has_sidecar"]),
+            _yn_plain(b["blocks_equal"]),
             _yn(b.get("blocks_equal_modulo_float_drift", b["blocks_equal"])),
             b.get("n_float_drift_leaves", 0),
             ", ".join(f"`{p}`" for p in b.get("float_drift_paths", [])) or "—",
@@ -136,9 +149,9 @@ def render(paths: list[Path]) -> str:
     out += baseline_table(runs)
     out.append("")
     out.append("### Day-12 sidecar vs the 526cf856 baseline `summary` endpoints")
-    out += [l for l in endpoint_table(
+    out += endpoint_table(
         [r | {"day12_vs_baseline_summary": (r.get("baseline") or {}).get("day12_vs_baseline_summary")}
-         for r in runs], "day12_vs_baseline_summary")]
+         for r in runs], "day12_vs_baseline_summary")
     out.append("")
     out.append("### Cumulative checkpoints (emitter on)")
     out += checkpoint_table(runs)

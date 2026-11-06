@@ -277,6 +277,18 @@ def _sum_checks(
     return missing_cols
 
 
+def _declared_operand_checks(fields_prov: dict) -> list[dict]:
+    """Operand checks whose total column the calling profile declares.
+
+    The observation-clock profile reuses this module's helpers, so a check
+    naming a scalar-only column (e.g. the rc_* partitions) is skipped there.
+    """
+    return [
+        check for check in profile().get("operand_sum_checks") or []
+        if check["total_column"] in fields_prov
+    ]
+
+
 def _operand_sum_checks(
     values: dict, prov: dict, fields_prov: dict
 ) -> list[str]:
@@ -287,9 +299,7 @@ def _operand_sum_checks(
     ``n_imports + n_acquired`` against ``cumulative_ever_infected``.
     """
     missing_cols: list[str] = []
-    for check in profile().get("operand_sum_checks") or []:
-        if check["total_column"] not in fields_prov:
-            continue  # operand not declared by the calling profile
+    for check in _declared_operand_checks(fields_prov):
         col, sum_col = check["column"], check["sum_column"]
         total = values.get(check["total_column"])
         addends = [values.get(a) for a in check["addends"]]

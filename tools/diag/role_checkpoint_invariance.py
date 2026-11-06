@@ -45,7 +45,12 @@ if str(_CAMPAIGN_DIR) not in sys.path:
 
 from campaign_runner import generate_tier_runs  # noqa: E402
 
+from picard_framework.analysis._io import allowed_roots, safe_path  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    validated_open,
+)
 from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
 from tools.noro_diag.growth_chain_census import (  # noqa: E402
     _load_manifest,
@@ -82,21 +87,31 @@ def _diff_paths(a: Any, b: Any, prefix: str = "",
     if len(out) >= limit:
         return out
     if isinstance(a, dict) and isinstance(b, dict):
-        for key in sorted(set(a) | set(b)):
-            if key not in a or key not in b:
-                out.append({"path": f"{prefix}/{key}", "a": a.get(key),
-                            "b": b.get(key), "kind": "material"})
-            else:
-                _diff_paths(a[key], b[key], f"{prefix}/{key}", out, limit)
+        _diff_dicts(a, b, prefix, out, limit)
     elif isinstance(a, list) and isinstance(b, list):
-        if len(a) != len(b):
-            out.append({"path": prefix, "a": len(a), "b": len(b),
-                        "kind": "material"})
-        for i, (x, y) in enumerate(zip(a, b)):
-            _diff_paths(x, y, f"{prefix}[{i}]", out, limit)
+        _diff_lists(a, b, prefix, out, limit)
     elif a != b and _canon(a) != _canon(b):
         out.append({"path": prefix, "a": a, "b": b, "kind": _leaf_kind(a, b)})
     return out
+
+
+def _diff_dicts(a: dict[str, Any], b: dict[str, Any], prefix: str,
+                out: list[dict[str, Any]], limit: int) -> None:
+    for key in sorted(set(a) | set(b)):
+        if key not in a or key not in b:
+            out.append({"path": f"{prefix}/{key}", "a": a.get(key),
+                        "b": b.get(key), "kind": "material"})
+        else:
+            _diff_paths(a[key], b[key], f"{prefix}/{key}", out, limit)
+
+
+def _diff_lists(a: list[Any], b: list[Any], prefix: str,
+                out: list[dict[str, Any]], limit: int) -> None:
+    if len(a) != len(b):
+        out.append({"path": prefix, "a": len(a), "b": len(b),
+                    "kind": "material"})
+    for i, (x, y) in enumerate(zip(a, b)):
+        _diff_paths(x, y, f"{prefix}[{i}]", out, limit)
 
 
 def _leaf_kind(a: Any, b: Any) -> str:
@@ -295,8 +310,11 @@ def main(argv: list[str] | None = None) -> int:
         "n_runs": len(records), "all_pass": all(r["pass"] for r in records),
         "runs": records,
     }
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(ledger, indent=1, sort_keys=True) + "\n")
+    out_path = safe_path(args.out)
+    prepare_output_directory(str(Path(out_path).parent), allowed_roots=allowed_roots())
+    with validated_open(out_path, "w", allowed_roots=allowed_roots(),
+                        encoding="utf-8") as fh:
+        fh.write(json.dumps(ledger, indent=1, sort_keys=True) + "\n")
     print(f"written: {args.out} all_pass={ledger['all_pass']}")
     return 0 if ledger["all_pass"] else 1
 
