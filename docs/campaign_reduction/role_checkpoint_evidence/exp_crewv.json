@@ -1,0 +1,838 @@
+{
+ "all_pass": true,
+ "baseline_dir": "/home/ubuntu/repos/crusher_baseline_526cf856/telemetry_buffer/rc_baseline",
+ "manifest": "picard_framework/runs/mega_cruise_campaign/noro_provisioned_venue_02_manifest.json",
+ "n_runs": 3,
+ "runs": [
+  {
+   "baseline": {
+    "baseline_has_sidecar": false,
+    "blocks_equal": true,
+    "blocks_equal_modulo_float_drift": true,
+    "day12_vs_baseline_summary": {
+     "agree": true,
+     "all.noise==cumulative_reported_noise_cases": [
+      50,
+      50
+     ],
+     "available": true,
+     "crew.complement": [
+      134,
+      134
+     ],
+     "crew.ill==cumulative_ever_ill_crew": [
+      0,
+      0
+     ],
+     "crew.infected==cumulative_ever_infected_crew": [
+      5,
+      5
+     ],
+     "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+      0,
+      0
+     ],
+     "passenger.complement": [
+      316,
+      316
+     ],
+     "passenger.ill==cumulative_ever_ill_passenger": [
+      5,
+      5
+     ],
+     "passenger.infected==cumulative_ever_infected_passenger": [
+      29,
+      29
+     ],
+     "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+      5,
+      5
+     ]
+    },
+    "diffs": [],
+    "float_drift_paths": [],
+    "n_float_drift_leaves": 0,
+    "zip": "/home/ubuntu/repos/crusher_baseline_526cf856/telemetry_buffer/rc_baseline/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8105.zip"
+   },
+   "census_diffs": [],
+   "census_equal": true,
+   "checkpoints": {
+    "day_10": {
+     "all": {
+      "complement": 450,
+      "ill": 5,
+      "infected": 31,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 4,
+      "union_not_ill": 41,
+      "unique_clinical_noise_reporters": 42,
+      "unique_etiologic_reporters": 4,
+      "unique_person_union": 45
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 4,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 11,
+      "unique_clinical_noise_reporters": 11,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 11
+     },
+     "epoch_index": 239,
+     "passenger": {
+      "complement": 316,
+      "ill": 5,
+      "infected": 27,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 4,
+      "union_not_ill": 30,
+      "unique_clinical_noise_reporters": 31,
+      "unique_etiologic_reporters": 4,
+      "unique_person_union": 34
+     }
+    },
+    "day_12": {
+     "all": {
+      "complement": 450,
+      "ill": 5,
+      "infected": 34,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 5,
+      "union_not_ill": 49,
+      "unique_clinical_noise_reporters": 50,
+      "unique_etiologic_reporters": 5,
+      "unique_person_union": 54
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 5,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 15,
+      "unique_clinical_noise_reporters": 15,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 15
+     },
+     "epoch_index": 287,
+     "passenger": {
+      "complement": 316,
+      "ill": 5,
+      "infected": 29,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 5,
+      "union_not_ill": 34,
+      "unique_clinical_noise_reporters": 35,
+      "unique_etiologic_reporters": 5,
+      "unique_person_union": 39
+     }
+    },
+    "day_3": {
+     "all": {
+      "complement": 450,
+      "ill": 0,
+      "infected": 19,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 14,
+      "unique_clinical_noise_reporters": 14,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 14
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 2,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 3,
+      "unique_clinical_noise_reporters": 3,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 3
+     },
+     "epoch_index": 71,
+     "passenger": {
+      "complement": 316,
+      "ill": 0,
+      "infected": 17,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 11,
+      "unique_clinical_noise_reporters": 11,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 11
+     }
+    },
+    "day_7": {
+     "all": {
+      "complement": 450,
+      "ill": 3,
+      "infected": 25,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 0,
+      "union_ever_ill": 3,
+      "union_not_ill": 25,
+      "unique_clinical_noise_reporters": 26,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 28
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 3,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 6,
+      "unique_clinical_noise_reporters": 6,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 6
+     },
+     "epoch_index": 167,
+     "passenger": {
+      "complement": 316,
+      "ill": 3,
+      "infected": 22,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 0,
+      "union_ever_ill": 3,
+      "union_not_ill": 19,
+      "unique_clinical_noise_reporters": 20,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 22
+     }
+    }
+   },
+   "day12_vs_own_summary": {
+    "agree": true,
+    "all.noise==cumulative_reported_noise_cases": [
+     50,
+     50
+    ],
+    "available": true,
+    "crew.complement": [
+     134,
+     134
+    ],
+    "crew.ill==cumulative_ever_ill_crew": [
+     0,
+     0
+    ],
+    "crew.infected==cumulative_ever_infected_crew": [
+     5,
+     5
+    ],
+    "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+     0,
+     0
+    ],
+    "passenger.complement": [
+     316,
+     316
+    ],
+    "passenger.ill==cumulative_ever_ill_passenger": [
+     5,
+     5
+    ],
+    "passenger.infected==cumulative_ever_infected_passenger": [
+     29,
+     29
+    ],
+    "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+     5,
+     5
+    ]
+   },
+   "epoch_mapping": {
+    "day_10": 239,
+    "day_12": 287,
+    "day_3": 71,
+    "day_7": 167
+   },
+   "initiation_equal": true,
+   "off_has_sidecar": false,
+   "on_has_sidecar": true,
+   "pass": true,
+   "rng_witness": {
+    "history_equal_minus_sidecar": true,
+    "rng_state_equal": true
+   },
+   "run_id": "fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8105",
+   "seed": 8105,
+   "tier": "fl_exp_12d_scr_q30_crewv",
+   "voyage_diffs": [],
+   "voyage_equal": true
+  },
+  {
+   "baseline": {
+    "baseline_has_sidecar": false,
+    "blocks_equal": true,
+    "blocks_equal_modulo_float_drift": true,
+    "day12_vs_baseline_summary": {
+     "agree": true,
+     "all.noise==cumulative_reported_noise_cases": [
+      62,
+      62
+     ],
+     "available": true,
+     "crew.complement": [
+      134,
+      134
+     ],
+     "crew.ill==cumulative_ever_ill_crew": [
+      0,
+      0
+     ],
+     "crew.infected==cumulative_ever_infected_crew": [
+      6,
+      6
+     ],
+     "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+      0,
+      0
+     ],
+     "passenger.complement": [
+      316,
+      316
+     ],
+     "passenger.ill==cumulative_ever_ill_passenger": [
+      3,
+      3
+     ],
+     "passenger.infected==cumulative_ever_infected_passenger": [
+      21,
+      21
+     ],
+     "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+      2,
+      2
+     ]
+    },
+    "diffs": [],
+    "float_drift_paths": [],
+    "n_float_drift_leaves": 0,
+    "zip": "/home/ubuntu/repos/crusher_baseline_526cf856/telemetry_buffer/rc_baseline/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8106.zip"
+   },
+   "census_diffs": [],
+   "census_equal": true,
+   "checkpoints": {
+    "day_10": {
+     "all": {
+      "complement": 450,
+      "ill": 3,
+      "infected": 23,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 2,
+      "union_not_ill": 52,
+      "unique_clinical_noise_reporters": 52,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 54
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 5,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 13,
+      "unique_clinical_noise_reporters": 13,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 13
+     },
+     "epoch_index": 239,
+     "passenger": {
+      "complement": 316,
+      "ill": 3,
+      "infected": 18,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 2,
+      "union_not_ill": 39,
+      "unique_clinical_noise_reporters": 39,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 41
+     }
+    },
+    "day_12": {
+     "all": {
+      "complement": 450,
+      "ill": 3,
+      "infected": 27,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 2,
+      "union_not_ill": 62,
+      "unique_clinical_noise_reporters": 62,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 64
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 6,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 16,
+      "unique_clinical_noise_reporters": 16,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 16
+     },
+     "epoch_index": 287,
+     "passenger": {
+      "complement": 316,
+      "ill": 3,
+      "infected": 21,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 2,
+      "union_not_ill": 46,
+      "unique_clinical_noise_reporters": 46,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 48
+     }
+    },
+    "day_3": {
+     "all": {
+      "complement": 450,
+      "ill": 0,
+      "infected": 12,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 19,
+      "unique_clinical_noise_reporters": 19,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 19
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 3,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 5,
+      "unique_clinical_noise_reporters": 5,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 5
+     },
+     "epoch_index": 71,
+     "passenger": {
+      "complement": 316,
+      "ill": 0,
+      "infected": 9,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 14,
+      "unique_clinical_noise_reporters": 14,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 14
+     }
+    },
+    "day_7": {
+     "all": {
+      "complement": 450,
+      "ill": 3,
+      "infected": 19,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 2,
+      "union_not_ill": 42,
+      "unique_clinical_noise_reporters": 42,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 44
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 5,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 12,
+      "unique_clinical_noise_reporters": 12,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 12
+     },
+     "epoch_index": 167,
+     "passenger": {
+      "complement": 316,
+      "ill": 3,
+      "infected": 14,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 2,
+      "union_not_ill": 30,
+      "unique_clinical_noise_reporters": 30,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 32
+     }
+    }
+   },
+   "day12_vs_own_summary": {
+    "agree": true,
+    "all.noise==cumulative_reported_noise_cases": [
+     62,
+     62
+    ],
+    "available": true,
+    "crew.complement": [
+     134,
+     134
+    ],
+    "crew.ill==cumulative_ever_ill_crew": [
+     0,
+     0
+    ],
+    "crew.infected==cumulative_ever_infected_crew": [
+     6,
+     6
+    ],
+    "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+     0,
+     0
+    ],
+    "passenger.complement": [
+     316,
+     316
+    ],
+    "passenger.ill==cumulative_ever_ill_passenger": [
+     3,
+     3
+    ],
+    "passenger.infected==cumulative_ever_infected_passenger": [
+     21,
+     21
+    ],
+    "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+     2,
+     2
+    ]
+   },
+   "epoch_mapping": {
+    "day_10": 239,
+    "day_12": 287,
+    "day_3": 71,
+    "day_7": 167
+   },
+   "initiation_equal": true,
+   "off_has_sidecar": false,
+   "on_has_sidecar": true,
+   "pass": true,
+   "rng_witness": {
+    "history_equal_minus_sidecar": true,
+    "rng_state_equal": true
+   },
+   "run_id": "fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8106",
+   "seed": 8106,
+   "tier": "fl_exp_12d_scr_q30_crewv",
+   "voyage_diffs": [],
+   "voyage_equal": true
+  },
+  {
+   "baseline": {
+    "baseline_has_sidecar": false,
+    "blocks_equal": true,
+    "blocks_equal_modulo_float_drift": true,
+    "day12_vs_baseline_summary": {
+     "agree": true,
+     "all.noise==cumulative_reported_noise_cases": [
+      59,
+      59
+     ],
+     "available": true,
+     "crew.complement": [
+      134,
+      134
+     ],
+     "crew.ill==cumulative_ever_ill_crew": [
+      2,
+      2
+     ],
+     "crew.infected==cumulative_ever_infected_crew": [
+      4,
+      4
+     ],
+     "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+      1,
+      1
+     ],
+     "passenger.complement": [
+      316,
+      316
+     ],
+     "passenger.ill==cumulative_ever_ill_passenger": [
+      5,
+      5
+     ],
+     "passenger.infected==cumulative_ever_infected_passenger": [
+      22,
+      22
+     ],
+     "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+      5,
+      5
+     ]
+    },
+    "diffs": [],
+    "float_drift_paths": [],
+    "n_float_drift_leaves": 0,
+    "zip": "/home/ubuntu/repos/crusher_baseline_526cf856/telemetry_buffer/rc_baseline/fl_exp_12d_scr_q30_crewv/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8107.zip"
+   },
+   "census_diffs": [],
+   "census_equal": true,
+   "checkpoints": {
+    "day_10": {
+     "all": {
+      "complement": 450,
+      "ill": 4,
+      "infected": 19,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 3,
+      "union_not_ill": 48,
+      "unique_clinical_noise_reporters": 49,
+      "unique_etiologic_reporters": 3,
+      "unique_person_union": 51
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 1,
+      "infected": 2,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 14,
+      "unique_clinical_noise_reporters": 14,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 14
+     },
+     "epoch_index": 239,
+     "passenger": {
+      "complement": 316,
+      "ill": 3,
+      "infected": 17,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 3,
+      "union_not_ill": 34,
+      "unique_clinical_noise_reporters": 35,
+      "unique_etiologic_reporters": 3,
+      "unique_person_union": 37
+     }
+    },
+    "day_12": {
+     "all": {
+      "complement": 450,
+      "ill": 7,
+      "infected": 26,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 6,
+      "union_not_ill": 58,
+      "unique_clinical_noise_reporters": 59,
+      "unique_etiologic_reporters": 6,
+      "unique_person_union": 64
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 2,
+      "infected": 4,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 1,
+      "union_not_ill": 17,
+      "unique_clinical_noise_reporters": 17,
+      "unique_etiologic_reporters": 1,
+      "unique_person_union": 18
+     },
+     "epoch_index": 287,
+     "passenger": {
+      "complement": 316,
+      "ill": 5,
+      "infected": 22,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 5,
+      "union_not_ill": 41,
+      "unique_clinical_noise_reporters": 42,
+      "unique_etiologic_reporters": 5,
+      "unique_person_union": 46
+     }
+    },
+    "day_3": {
+     "all": {
+      "complement": 450,
+      "ill": 0,
+      "infected": 8,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 16,
+      "unique_clinical_noise_reporters": 16,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 16
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 1,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 5,
+      "unique_clinical_noise_reporters": 5,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 5
+     },
+     "epoch_index": 71,
+     "passenger": {
+      "complement": 316,
+      "ill": 0,
+      "infected": 7,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 11,
+      "unique_clinical_noise_reporters": 11,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 11
+     }
+    },
+    "day_7": {
+     "all": {
+      "complement": 450,
+      "ill": 2,
+      "infected": 12,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 2,
+      "union_not_ill": 33,
+      "unique_clinical_noise_reporters": 34,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 35
+     },
+     "available": true,
+     "crew": {
+      "complement": 134,
+      "ill": 0,
+      "infected": 1,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 10,
+      "unique_clinical_noise_reporters": 10,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 10
+     },
+     "epoch_index": 167,
+     "passenger": {
+      "complement": 316,
+      "ill": 2,
+      "infected": 11,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 2,
+      "union_not_ill": 23,
+      "unique_clinical_noise_reporters": 24,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 25
+     }
+    }
+   },
+   "day12_vs_own_summary": {
+    "agree": true,
+    "all.noise==cumulative_reported_noise_cases": [
+     59,
+     59
+    ],
+    "available": true,
+    "crew.complement": [
+     134,
+     134
+    ],
+    "crew.ill==cumulative_ever_ill_crew": [
+     2,
+     2
+    ],
+    "crew.infected==cumulative_ever_infected_crew": [
+     4,
+     4
+    ],
+    "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+     1,
+     1
+    ],
+    "passenger.complement": [
+     316,
+     316
+    ],
+    "passenger.ill==cumulative_ever_ill_passenger": [
+     5,
+     5
+    ],
+    "passenger.infected==cumulative_ever_infected_passenger": [
+     22,
+     22
+    ],
+    "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+     5,
+     5
+    ]
+   },
+   "epoch_mapping": {
+    "day_10": 239,
+    "day_12": 287,
+    "day_3": 71,
+    "day_7": 167
+   },
+   "initiation_equal": true,
+   "off_has_sidecar": false,
+   "on_has_sidecar": true,
+   "pass": true,
+   "rng_witness": {
+    "history_equal_minus_sidecar": true,
+    "rng_state_equal": true
+   },
+   "run_id": "fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n450_ep288_syndromic_comp65_s8107",
+   "seed": 8107,
+   "tier": "fl_exp_12d_scr_q30_crewv",
+   "voyage_diffs": [],
+   "voyage_equal": true
+  }
+ ],
+ "seeds": [
+  8105,
+  8106,
+  8107
+ ],
+ "tiers": [
+  "fl_exp_12d_scr_q30_crewv"
+ ]
+}

@@ -96,7 +96,7 @@ def _rig():
 
 def _run_zip(ar_pax=0.5, n=316, crew=134, inf_pax=6, inf_crew=9,
              rep_pax=2, rep_crew=3, extra_members=True, seed=8000,
-             omit=()):
+             omit=(), role_checkpoints=None):
     summary = {
         "run_id": f"fl_x_s{seed}",
         "trigger_status": "ALERT",
@@ -144,6 +144,8 @@ def _run_zip(ar_pax=0.5, n=316, crew=134, inf_pax=6, inf_crew=9,
                     "r_effective_at_peak": 2.1},
         "timeseries": [{"epoch": e} for e in range(288)],
     }
+    if role_checkpoints is not None:
+        summary["role_checkpoints"] = role_checkpoints
     for path in omit:
         node = summary
         parts = path.split(".")
@@ -224,7 +226,7 @@ def test_summary_only_member_reads_and_binding():
     assert prov["member"] == "summary.json"
     assert prov["source_key"] == "run_a.zip"
     assert prov["status"] == "exact_emitted"
-    assert row["definition_version"] == "first_paper_scalar/1.4.0"
+    assert row["definition_version"] == "first_paper_scalar/1.5.0"
     assert row["definition_sha256"]
     # 1.4.0 venue-pin fields: absent on a pre-pin summary — explicit
     # missingness, never fabricated
@@ -232,6 +234,17 @@ def test_summary_only_member_reads_and_binding():
     assert row["values"]["actual_venues_used"] is None
     assert row["values"]["n_lots_placed"] is None
     assert row["provenance"]["n_lots_placed"]["status"] == "missing"
+    # 1.5.0 role-checkpoint sidecar: absent on a pre-sidecar summary —
+    # explicit missingness, never zero
+    assert row["values"]["rc_d12_passenger_unique_person_union"] is None
+    assert row["values"]["rc_d3_crew_infected"] is None
+    assert row["values"]["rc_d12_available"] is None
+    assert row["provenance"]["rc_d7_crew_ill"]["status"] == "missing"
+    assert row["values"]["rc_d12_crew_union_eligibility_partition_consistent"] \
+        is None
+    assert row["provenance"][
+        "rc_d12_crew_union_eligibility_partition_consistent"
+    ]["status"] == "sum_uncomputable"
     # 1.3.0 observed-window witness fields (same machinery as obsclock)
     assert row["values"]["observed_first_epoch"] == 0
     assert row["values"]["observed_terminal_epoch"] == 287
@@ -451,3 +464,71 @@ def test_pre_read_scan_budgets_honored():
     assert result.status == "budget_stopped"
     commit = json.loads(store.get(result.commit_key))
     assert commit["status"] == "budget_stopped"
+
+
+def _sidecar_block():
+    """A real emitter block from synthetic state: pax 1-5, crew 6-9."""
+    from orchestrator_types import SimulationState
+    from picard_framework.simulation import role_checkpoints as rc
+
+    agents = [
+        {"agent_id": i, "role": "passenger" if i <= 5 else "crew"}
+        for i in range(1, 10)
+    ]
+    state = SimulationState()
+    state.ever_infected_ids.update({1, 2, 3, 6, 7})
+    state.ever_ill_ids.update({1, 2, 6})
+    state.ever_reported_ids.update({1, 2, 6})       # etiologic, eligible
+    state.ever_reported_noise_ids.update({2, 4, 8})  # 2 overlaps etiologic
+    cfg = {"role_checkpoints": {"days": [3, 7, 10, 12]}}
+    for epoch in (71, 167, 239, 287):
+        rc.maybe_record(state, agents, epoch=epoch, cfg=cfg, hours_per_epoch=1.0)
+    return rc.finalize_block(
+        state, cfg=cfg, hours_per_epoch=1.0, clock_mode="hours", num_epochs=288,
+    )
+
+
+def test_role_checkpoint_sidecar_columns_project_from_summary_only():
+    """1.5.0: the sidecar's unique-person counts are range-read from
+    summary.json, the day-12 union partitions by eligibility, and the
+    clock/definitions ride along as JSON columns."""
+    transport, store, ledger = _rig()
+    transport.put(
+        "run_a.zip", _run_zip(seed=8000, role_checkpoints=_sidecar_block()),
+    )
+    spec = _spec(
+        [_src("run_a.zip", seed=8000, hull_id="expedition_cruise_450")],
+        extraction_profile="first_paper_scalar",
+    )
+    spec.sources[0] = SourceSpec(
+        **{**spec.sources[0].__dict__,
+           "member_allowlist": ("summary.json",), "emit_scalars": False})
+    result = run_materialization(spec, transport, store, ledger)
+    assert result.status == "completed"
+    assert ledger.spent["max_compressed_bytes_read"] < 1_000_000
+    row = _vector_rows(store)[0]
+    v, prov = row["values"], row["provenance"]
+    assert row["definition_version"] == "first_paper_scalar/1.5.0"
+    assert v["rc_d12_available"] is True
+    assert v["rc_d12_epoch_index"] == 287
+    assert v["rc_d3_epoch_index"] == 71
+    assert v["rc_d12_hours_elapsed"] == pytest.approx(288.0)
+    assert v["rc_d12_passenger_complement"] == 5
+    assert v["rc_d12_passenger_infected"] == 3
+    assert v["rc_d12_passenger_unique_etiologic_reporters"] == 2
+    assert v["rc_d12_passenger_unique_clinical_noise_reporters"] == 2
+    assert v["rc_d12_passenger_reporter_overlap"] == 1
+    assert v["rc_d12_passenger_unique_person_union"] == 3
+    assert v["rc_d12_passenger_union_ever_ill"] == 2
+    assert v["rc_d12_passenger_union_not_ill"] == 1
+    assert v["rc_d12_crew_unique_person_union"] == 2
+    assert v["rc_d12_crew_noise_reporters_ever_ill"] == 0
+    assert prov["rc_d12_crew_unique_person_union"]["status"] == "exact_emitted"
+    assert prov["rc_d12_crew_unique_person_union"]["member"] == "summary.json"
+    assert v["rc_d12_passenger_union_eligibility_partition_sum"] == 3
+    assert v["rc_d12_passenger_union_eligibility_partition_consistent"] is True
+    assert prov["rc_d12_passenger_union_eligibility_partition_consistent"][
+        "status"] == "sum_consistent"
+    assert json.loads(v["role_checkpoints_clock_json"])["epoch_mapping"] == {
+        "day_3": 71, "day_7": 167, "day_10": 239, "day_12": 287}
+    assert "timing" in json.loads(v["role_checkpoints_definitions_json"])

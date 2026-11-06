@@ -1,6 +1,6 @@
 {
-  "definition_version": "first_paper_scalar/1.4.0",
-  "description": "One wide row per selected actual execution for the first cruise norovirus paper: summary.json-only member reads, declared field projection, per-field provenance, explicit missingness (never zero), no all-leaf scalarization, no distributions/ECDF materialization, no census decode. 1.3.0 added the compact observed-window witness fields. 1.4.0 adds the Phase-2 venue-pin extraction fields (source_venue_arm, actual_venues_used, n_lots_placed) range-read from summary.mechanisms.provisioned_source \u2014 additive only, every 1.3.0 column unchanged.",
+  "definition_version": "first_paper_scalar/1.5.0",
+  "description": "One wide row per selected actual execution for the first cruise norovirus paper: summary.json-only member reads, declared field projection, per-field provenance, explicit missingness (never zero), no all-leaf scalarization, no distributions/ECDF materialization, no census decode. 1.3.0 added the compact observed-window witness fields. 1.4.0 adds the Phase-2 venue-pin extraction fields (source_venue_arm, actual_venues_used, n_lots_placed) range-read from summary.mechanisms.provisioned_source — additive only, every 1.3.0 column unchanged. 1.5.0 adds the cumulative role-checkpoint sidecar (PAPER1-SENS Child A): for voyage days 3/7/10/12 (hourly epoch boundary 24*d, snapshot at the end of epoch index 24*d/hours_per_epoch - 1) and separately for passenger/crew, unique-person counts range-read from summary.role_checkpoints.checkpoints (infected, ill, unique etiologic reporters, unique clinical-noise reporters, their overlap, unique-person union, union members satisfying clinical eligibility, complement) plus per-day observed clock and availability, and the sidecar's definitions/clock JSON — additive only, every 1.4.0 column unchanged. Union/overlap are set cardinalities emitted by the engine, never recovered from totals; the reporter union is a sick-call presentation set, not a matched clinical-AGE endpoint.",
   "emit_scalars": false,
   "kind": "extraction_profile",
   "member_allowlist": [
@@ -38,6 +38,26 @@
       "note": "Every infected person is either an import or an aboard acquisition; verified independent of the route histogram.",
       "sum_column": "imports_plus_acquired_sum",
       "total_column": "cumulative_ever_infected"
+    },
+    {
+      "addends": [
+        "rc_d12_passenger_union_ever_ill",
+        "rc_d12_passenger_union_not_ill"
+      ],
+      "column": "rc_d12_passenger_union_eligibility_partition_consistent",
+      "note": "The reporter union partitions exactly into members who satisfied clinical eligibility (ever ill) and members who never did; verifies the emitted sets are consistent without recovering the union from totals.",
+      "sum_column": "rc_d12_passenger_union_eligibility_partition_sum",
+      "total_column": "rc_d12_passenger_unique_person_union"
+    },
+    {
+      "addends": [
+        "rc_d12_crew_union_ever_ill",
+        "rc_d12_crew_union_not_ill"
+      ],
+      "column": "rc_d12_crew_union_eligibility_partition_consistent",
+      "note": "The reporter union partitions exactly into members who satisfied clinical eligibility (ever ill) and members who never did; verifies the emitted sets are consistent without recovering the union from totals.",
+      "sum_column": "rc_d12_crew_union_eligibility_partition_sum",
+      "total_column": "rc_d12_crew_unique_person_union"
     }
   ],
   "profile_id": "first_paper_scalar",
@@ -187,7 +207,7 @@
   ],
   "scan_join": {
     "fallback": "none",
-    "note": "scan row `key` is the run archive object key; full-key only \u2014 off/ps_ship share seeds within a hull so (hull,seed) is ambiguous; key/hull/seed disagreement or a duplicate key is a typed conflict, never first-row-wins",
+    "note": "scan row `key` is the run archive object key; full-key only — off/ps_ship share seeds within a hull so (hull,seed) is ambiguous; key/hull/seed disagreement or a duplicate key is a typed conflict, never first-row-wins",
     "primary": "object_key"
   },
   "scan_role": "scan_rows",
@@ -498,6 +518,564 @@
       "domain": "count",
       "kind": "value",
       "native": "/mechanisms/provisioned_source/norwalk_gi/n_lots_placed"
+    },
+    {
+      "column": "rc_d3_available",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/available"
+    },
+    {
+      "column": "rc_d3_epoch_index",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/epoch_index"
+    },
+    {
+      "column": "rc_d3_hours_elapsed",
+      "domain": "number",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/hours_elapsed"
+    },
+    {
+      "column": "rc_d3_passenger_complement",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/complement"
+    },
+    {
+      "column": "rc_d3_passenger_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/infected"
+    },
+    {
+      "column": "rc_d3_passenger_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/ill"
+    },
+    {
+      "column": "rc_d3_passenger_unique_etiologic_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/unique_etiologic_reporters"
+    },
+    {
+      "column": "rc_d3_passenger_unique_clinical_noise_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/unique_clinical_noise_reporters"
+    },
+    {
+      "column": "rc_d3_passenger_reporter_overlap",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/reporter_overlap"
+    },
+    {
+      "column": "rc_d3_passenger_unique_person_union",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/unique_person_union"
+    },
+    {
+      "column": "rc_d3_passenger_union_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/union_ever_ill"
+    },
+    {
+      "column": "rc_d3_passenger_union_not_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/union_not_ill"
+    },
+    {
+      "column": "rc_d3_passenger_noise_reporters_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/passenger/noise_reporters_ever_ill"
+    },
+    {
+      "column": "rc_d3_crew_complement",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/complement"
+    },
+    {
+      "column": "rc_d3_crew_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/infected"
+    },
+    {
+      "column": "rc_d3_crew_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/ill"
+    },
+    {
+      "column": "rc_d3_crew_unique_etiologic_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/unique_etiologic_reporters"
+    },
+    {
+      "column": "rc_d3_crew_unique_clinical_noise_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/unique_clinical_noise_reporters"
+    },
+    {
+      "column": "rc_d3_crew_reporter_overlap",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/reporter_overlap"
+    },
+    {
+      "column": "rc_d3_crew_unique_person_union",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/unique_person_union"
+    },
+    {
+      "column": "rc_d3_crew_union_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/union_ever_ill"
+    },
+    {
+      "column": "rc_d3_crew_union_not_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/union_not_ill"
+    },
+    {
+      "column": "rc_d3_crew_noise_reporters_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_3/crew/noise_reporters_ever_ill"
+    },
+    {
+      "column": "rc_d7_available",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/available"
+    },
+    {
+      "column": "rc_d7_epoch_index",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/epoch_index"
+    },
+    {
+      "column": "rc_d7_hours_elapsed",
+      "domain": "number",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/hours_elapsed"
+    },
+    {
+      "column": "rc_d7_passenger_complement",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/complement"
+    },
+    {
+      "column": "rc_d7_passenger_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/infected"
+    },
+    {
+      "column": "rc_d7_passenger_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/ill"
+    },
+    {
+      "column": "rc_d7_passenger_unique_etiologic_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/unique_etiologic_reporters"
+    },
+    {
+      "column": "rc_d7_passenger_unique_clinical_noise_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/unique_clinical_noise_reporters"
+    },
+    {
+      "column": "rc_d7_passenger_reporter_overlap",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/reporter_overlap"
+    },
+    {
+      "column": "rc_d7_passenger_unique_person_union",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/unique_person_union"
+    },
+    {
+      "column": "rc_d7_passenger_union_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/union_ever_ill"
+    },
+    {
+      "column": "rc_d7_passenger_union_not_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/union_not_ill"
+    },
+    {
+      "column": "rc_d7_passenger_noise_reporters_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/passenger/noise_reporters_ever_ill"
+    },
+    {
+      "column": "rc_d7_crew_complement",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/complement"
+    },
+    {
+      "column": "rc_d7_crew_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/infected"
+    },
+    {
+      "column": "rc_d7_crew_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/ill"
+    },
+    {
+      "column": "rc_d7_crew_unique_etiologic_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/unique_etiologic_reporters"
+    },
+    {
+      "column": "rc_d7_crew_unique_clinical_noise_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/unique_clinical_noise_reporters"
+    },
+    {
+      "column": "rc_d7_crew_reporter_overlap",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/reporter_overlap"
+    },
+    {
+      "column": "rc_d7_crew_unique_person_union",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/unique_person_union"
+    },
+    {
+      "column": "rc_d7_crew_union_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/union_ever_ill"
+    },
+    {
+      "column": "rc_d7_crew_union_not_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/union_not_ill"
+    },
+    {
+      "column": "rc_d7_crew_noise_reporters_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_7/crew/noise_reporters_ever_ill"
+    },
+    {
+      "column": "rc_d10_available",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/available"
+    },
+    {
+      "column": "rc_d10_epoch_index",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/epoch_index"
+    },
+    {
+      "column": "rc_d10_hours_elapsed",
+      "domain": "number",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/hours_elapsed"
+    },
+    {
+      "column": "rc_d10_passenger_complement",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/complement"
+    },
+    {
+      "column": "rc_d10_passenger_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/infected"
+    },
+    {
+      "column": "rc_d10_passenger_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/ill"
+    },
+    {
+      "column": "rc_d10_passenger_unique_etiologic_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/unique_etiologic_reporters"
+    },
+    {
+      "column": "rc_d10_passenger_unique_clinical_noise_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/unique_clinical_noise_reporters"
+    },
+    {
+      "column": "rc_d10_passenger_reporter_overlap",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/reporter_overlap"
+    },
+    {
+      "column": "rc_d10_passenger_unique_person_union",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/unique_person_union"
+    },
+    {
+      "column": "rc_d10_passenger_union_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/union_ever_ill"
+    },
+    {
+      "column": "rc_d10_passenger_union_not_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/union_not_ill"
+    },
+    {
+      "column": "rc_d10_passenger_noise_reporters_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/passenger/noise_reporters_ever_ill"
+    },
+    {
+      "column": "rc_d10_crew_complement",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/complement"
+    },
+    {
+      "column": "rc_d10_crew_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/infected"
+    },
+    {
+      "column": "rc_d10_crew_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/ill"
+    },
+    {
+      "column": "rc_d10_crew_unique_etiologic_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/unique_etiologic_reporters"
+    },
+    {
+      "column": "rc_d10_crew_unique_clinical_noise_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/unique_clinical_noise_reporters"
+    },
+    {
+      "column": "rc_d10_crew_reporter_overlap",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/reporter_overlap"
+    },
+    {
+      "column": "rc_d10_crew_unique_person_union",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/unique_person_union"
+    },
+    {
+      "column": "rc_d10_crew_union_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/union_ever_ill"
+    },
+    {
+      "column": "rc_d10_crew_union_not_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/union_not_ill"
+    },
+    {
+      "column": "rc_d10_crew_noise_reporters_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_10/crew/noise_reporters_ever_ill"
+    },
+    {
+      "column": "rc_d12_available",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/available"
+    },
+    {
+      "column": "rc_d12_epoch_index",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/epoch_index"
+    },
+    {
+      "column": "rc_d12_hours_elapsed",
+      "domain": "number",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/hours_elapsed"
+    },
+    {
+      "column": "rc_d12_passenger_complement",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/complement"
+    },
+    {
+      "column": "rc_d12_passenger_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/infected"
+    },
+    {
+      "column": "rc_d12_passenger_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/ill"
+    },
+    {
+      "column": "rc_d12_passenger_unique_etiologic_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/unique_etiologic_reporters"
+    },
+    {
+      "column": "rc_d12_passenger_unique_clinical_noise_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/unique_clinical_noise_reporters"
+    },
+    {
+      "column": "rc_d12_passenger_reporter_overlap",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/reporter_overlap"
+    },
+    {
+      "column": "rc_d12_passenger_unique_person_union",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/unique_person_union"
+    },
+    {
+      "column": "rc_d12_passenger_union_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/union_ever_ill"
+    },
+    {
+      "column": "rc_d12_passenger_union_not_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/union_not_ill"
+    },
+    {
+      "column": "rc_d12_passenger_noise_reporters_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/passenger/noise_reporters_ever_ill"
+    },
+    {
+      "column": "rc_d12_crew_complement",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/complement"
+    },
+    {
+      "column": "rc_d12_crew_infected",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/infected"
+    },
+    {
+      "column": "rc_d12_crew_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/ill"
+    },
+    {
+      "column": "rc_d12_crew_unique_etiologic_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/unique_etiologic_reporters"
+    },
+    {
+      "column": "rc_d12_crew_unique_clinical_noise_reporters",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/unique_clinical_noise_reporters"
+    },
+    {
+      "column": "rc_d12_crew_reporter_overlap",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/reporter_overlap"
+    },
+    {
+      "column": "rc_d12_crew_unique_person_union",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/unique_person_union"
+    },
+    {
+      "column": "rc_d12_crew_union_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/union_ever_ill"
+    },
+    {
+      "column": "rc_d12_crew_union_not_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/union_not_ill"
+    },
+    {
+      "column": "rc_d12_crew_noise_reporters_ever_ill",
+      "domain": "count",
+      "kind": "value",
+      "native": "/role_checkpoints/checkpoints/day_12/crew/noise_reporters_ever_ill"
+    },
+    {
+      "column": "role_checkpoints_clock_json",
+      "kind": "json",
+      "native": "/role_checkpoints/clock"
+    },
+    {
+      "column": "role_checkpoints_definitions_json",
+      "kind": "json",
+      "native": "/role_checkpoints/definitions"
     }
   ],
   "suppress_tables": [

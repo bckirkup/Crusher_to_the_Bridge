@@ -288,6 +288,8 @@ def _operand_sum_checks(
     """
     missing_cols: list[str] = []
     for check in profile().get("operand_sum_checks") or []:
+        if check["total_column"] not in fields_prov:
+            continue  # operand not declared by the calling profile
         col, sum_col = check["column"], check["sum_column"]
         total = values.get(check["total_column"])
         addends = [values.get(a) for a in check["addends"]]

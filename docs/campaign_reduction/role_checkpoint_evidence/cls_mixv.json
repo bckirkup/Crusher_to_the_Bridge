@@ -1,0 +1,1110 @@
+{
+ "all_pass": true,
+ "baseline_dir": "/home/ubuntu/repos/crusher_baseline_526cf856/telemetry_buffer/rc_baseline",
+ "manifest": "picard_framework/runs/mega_cruise_campaign/noro_provisioned_venue_02_manifest.json",
+ "n_runs": 3,
+ "runs": [
+  {
+   "baseline": {
+    "baseline_has_sidecar": false,
+    "blocks_equal": true,
+    "blocks_equal_modulo_float_drift": true,
+    "day12_vs_baseline_summary": {
+     "agree": true,
+     "all.noise==cumulative_reported_noise_cases": [
+      195,
+      195
+     ],
+     "available": true,
+     "crew.complement": [
+      572,
+      572
+     ],
+     "crew.ill==cumulative_ever_ill_crew": [
+      5,
+      5
+     ],
+     "crew.infected==cumulative_ever_infected_crew": [
+      41,
+      41
+     ],
+     "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+      3,
+      3
+     ],
+     "passenger.complement": [
+      1338,
+      1338
+     ],
+     "passenger.ill==cumulative_ever_ill_passenger": [
+      17,
+      17
+     ],
+     "passenger.infected==cumulative_ever_infected_passenger": [
+      113,
+      113
+     ],
+     "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+      13,
+      13
+     ]
+    },
+    "diffs": [],
+    "float_drift_paths": [],
+    "n_float_drift_leaves": 0,
+    "zip": "/home/ubuntu/repos/crusher_baseline_526cf856/telemetry_buffer/rc_baseline/fl_cls_12d_scr_q30_mixv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8105.zip"
+   },
+   "census_diffs": [],
+   "census_equal": true,
+   "checkpoints": {
+    "day_10": {
+     "all": {
+      "complement": 1910,
+      "ill": 14,
+      "infected": 126,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 7,
+      "union_not_ill": 161,
+      "unique_clinical_noise_reporters": 161,
+      "unique_etiologic_reporters": 7,
+      "unique_person_union": 168
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 4,
+      "infected": 33,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 3,
+      "union_not_ill": 43,
+      "unique_clinical_noise_reporters": 43,
+      "unique_etiologic_reporters": 3,
+      "unique_person_union": 46
+     },
+     "epoch_index": 239,
+     "passenger": {
+      "complement": 1338,
+      "ill": 10,
+      "infected": 93,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 4,
+      "union_not_ill": 118,
+      "unique_clinical_noise_reporters": 118,
+      "unique_etiologic_reporters": 4,
+      "unique_person_union": 122
+     }
+    },
+    "day_12": {
+     "all": {
+      "complement": 1910,
+      "ill": 22,
+      "infected": 154,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 16,
+      "union_not_ill": 195,
+      "unique_clinical_noise_reporters": 195,
+      "unique_etiologic_reporters": 16,
+      "unique_person_union": 211
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 5,
+      "infected": 41,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 3,
+      "union_not_ill": 51,
+      "unique_clinical_noise_reporters": 51,
+      "unique_etiologic_reporters": 3,
+      "unique_person_union": 54
+     },
+     "epoch_index": 287,
+     "passenger": {
+      "complement": 1338,
+      "ill": 17,
+      "infected": 113,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 13,
+      "union_not_ill": 144,
+      "unique_clinical_noise_reporters": 144,
+      "unique_etiologic_reporters": 13,
+      "unique_person_union": 157
+     }
+    },
+    "day_3": {
+     "all": {
+      "complement": 1910,
+      "ill": 0,
+      "infected": 54,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 51,
+      "unique_clinical_noise_reporters": 51,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 51
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 0,
+      "infected": 13,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 16,
+      "unique_clinical_noise_reporters": 16,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 16
+     },
+     "epoch_index": 71,
+     "passenger": {
+      "complement": 1338,
+      "ill": 0,
+      "infected": 41,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 35,
+      "unique_clinical_noise_reporters": 35,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 35
+     }
+    },
+    "day_7": {
+     "all": {
+      "complement": 1910,
+      "ill": 7,
+      "infected": 91,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 3,
+      "union_not_ill": 113,
+      "unique_clinical_noise_reporters": 113,
+      "unique_etiologic_reporters": 3,
+      "unique_person_union": 116
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 3,
+      "infected": 24,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 1,
+      "union_not_ill": 32,
+      "unique_clinical_noise_reporters": 32,
+      "unique_etiologic_reporters": 1,
+      "unique_person_union": 33
+     },
+     "epoch_index": 167,
+     "passenger": {
+      "complement": 1338,
+      "ill": 4,
+      "infected": 67,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 2,
+      "union_not_ill": 81,
+      "unique_clinical_noise_reporters": 81,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 83
+     }
+    }
+   },
+   "day12_vs_own_summary": {
+    "agree": true,
+    "all.noise==cumulative_reported_noise_cases": [
+     195,
+     195
+    ],
+    "available": true,
+    "crew.complement": [
+     572,
+     572
+    ],
+    "crew.ill==cumulative_ever_ill_crew": [
+     5,
+     5
+    ],
+    "crew.infected==cumulative_ever_infected_crew": [
+     41,
+     41
+    ],
+    "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+     3,
+     3
+    ],
+    "passenger.complement": [
+     1338,
+     1338
+    ],
+    "passenger.ill==cumulative_ever_ill_passenger": [
+     17,
+     17
+    ],
+    "passenger.infected==cumulative_ever_infected_passenger": [
+     113,
+     113
+    ],
+    "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+     13,
+     13
+    ]
+   },
+   "epoch_mapping": {
+    "day_10": 239,
+    "day_12": 287,
+    "day_3": 71,
+    "day_7": 167
+   },
+   "initiation_equal": true,
+   "off_has_sidecar": false,
+   "on_has_sidecar": true,
+   "pass": true,
+   "run_id": "fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8105",
+   "seed": 8105,
+   "tier": "fl_cls_12d_scr_q30_mixv",
+   "voyage_diffs": [],
+   "voyage_equal": true
+  },
+  {
+   "baseline": {
+    "baseline_has_sidecar": false,
+    "blocks_equal": false,
+    "blocks_equal_modulo_float_drift": true,
+    "day12_vs_baseline_summary": {
+     "agree": true,
+     "all.noise==cumulative_reported_noise_cases": [
+      178,
+      178
+     ],
+     "available": true,
+     "crew.complement": [
+      572,
+      572
+     ],
+     "crew.ill==cumulative_ever_ill_crew": [
+      8,
+      8
+     ],
+     "crew.infected==cumulative_ever_infected_crew": [
+      41,
+      41
+     ],
+     "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+      7,
+      7
+     ],
+     "passenger.complement": [
+      1338,
+      1338
+     ],
+     "passenger.ill==cumulative_ever_ill_passenger": [
+      19,
+      19
+     ],
+     "passenger.infected==cumulative_ever_infected_passenger": [
+      116,
+      116
+     ],
+     "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+      13,
+      13
+     ]
+    },
+    "diffs": [
+     {
+      "a": 71271.690128,
+      "b": 71271.690033,
+      "block": "summary",
+      "kind": "float_drift",
+      "path": "/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 27118.036231,
+      "b": 27118.03623,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[181]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 27650.647861,
+      "b": 27650.647859,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[182]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 28137.326381,
+      "b": 28137.326379,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[183]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 28653.944981,
+      "b": 28653.944976,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[184]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 28969.89936,
+      "b": 28969.899355,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[185]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 29342.62293,
+      "b": 29342.622924,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[186]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 29563.391129,
+      "b": 29563.391123,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[187]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 29814.545928,
+      "b": 29814.545922,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[188]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 30250.323844,
+      "b": 30250.323835,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[189]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41047.610472,
+      "b": 41047.610462,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[190]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41233.611237,
+      "b": 41233.611227,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[191]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41367.517265,
+      "b": 41367.517255,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[192]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41414.774733,
+      "b": 41414.774723,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[193]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41498.540321,
+      "b": 41498.54031,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[194]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41519.374594,
+      "b": 41519.374584,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[195]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41520.988235,
+      "b": 41520.988225,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[196]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41536.922403,
+      "b": 41536.922392,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[197]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41562.142494,
+      "b": 41562.142484,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[198]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41655.838801,
+      "b": 41655.838791,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[199]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 41945.773391,
+      "b": 41945.77338,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[200]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 42348.951717,
+      "b": 42348.9517,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[201]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 42762.356654,
+      "b": 42762.35663,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[202]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 43135.956479,
+      "b": 43135.956452,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[203]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 43474.454053,
+      "b": 43474.454023,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[204]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 43896.222926,
+      "b": 43896.222895,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[205]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 44302.871818,
+      "b": 44302.871785,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[206]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 44686.75119,
+      "b": 44686.751157,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[207]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 45101.146643,
+      "b": 45101.146608,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[208]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 45461.10715,
+      "b": 45461.107113,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[209]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 45914.675678,
+      "b": 45914.675639,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[210]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 46115.92033,
+      "b": 46115.920289,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[211]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 46407.152724,
+      "b": 46407.152682,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[212]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 46814.16522,
+      "b": 46814.165177,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[213]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 47096.061596,
+      "b": 47096.061551,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[214]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 47350.397049,
+      "b": 47350.397004,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[215]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 47567.941947,
+      "b": 47567.9419,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[216]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 47679.687077,
+      "b": 47679.687031,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[217]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 47778.985167,
+      "b": 47778.985121,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[218]/sanitary_activity/dose_delivered"
+     },
+     {
+      "a": 47797.47649,
+      "b": 47797.476444,
+      "block": "timeseries",
+      "kind": "float_drift",
+      "path": "[219]/sanitary_activity/dose_delivered"
+     }
+    ],
+    "float_drift_paths": [
+     "summary/sanitary_activity/dose_delivered",
+     "timeseries"
+    ],
+    "n_float_drift_leaves": 108,
+    "zip": "/home/ubuntu/repos/crusher_baseline_526cf856/telemetry_buffer/rc_baseline/fl_cls_12d_scr_q30_mixv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8106.zip"
+   },
+   "census_diffs": [],
+   "census_equal": true,
+   "checkpoints": {
+    "day_10": {
+     "all": {
+      "complement": 1910,
+      "ill": 20,
+      "infected": 137,
+      "noise_reporters_ever_ill": 2,
+      "reporter_overlap": 1,
+      "union_ever_ill": 15,
+      "union_not_ill": 147,
+      "unique_clinical_noise_reporters": 149,
+      "unique_etiologic_reporters": 14,
+      "unique_person_union": 162
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 7,
+      "infected": 36,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 6,
+      "union_not_ill": 47,
+      "unique_clinical_noise_reporters": 47,
+      "unique_etiologic_reporters": 6,
+      "unique_person_union": 53
+     },
+     "epoch_index": 239,
+     "passenger": {
+      "complement": 1338,
+      "ill": 13,
+      "infected": 101,
+      "noise_reporters_ever_ill": 2,
+      "reporter_overlap": 1,
+      "union_ever_ill": 9,
+      "union_not_ill": 100,
+      "unique_clinical_noise_reporters": 102,
+      "unique_etiologic_reporters": 8,
+      "unique_person_union": 109
+     }
+    },
+    "day_12": {
+     "all": {
+      "complement": 1910,
+      "ill": 27,
+      "infected": 157,
+      "noise_reporters_ever_ill": 3,
+      "reporter_overlap": 1,
+      "union_ever_ill": 22,
+      "union_not_ill": 175,
+      "unique_clinical_noise_reporters": 178,
+      "unique_etiologic_reporters": 20,
+      "unique_person_union": 197
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 8,
+      "infected": 41,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 0,
+      "union_ever_ill": 8,
+      "union_not_ill": 54,
+      "unique_clinical_noise_reporters": 55,
+      "unique_etiologic_reporters": 7,
+      "unique_person_union": 62
+     },
+     "epoch_index": 287,
+     "passenger": {
+      "complement": 1338,
+      "ill": 19,
+      "infected": 116,
+      "noise_reporters_ever_ill": 2,
+      "reporter_overlap": 1,
+      "union_ever_ill": 14,
+      "union_not_ill": 121,
+      "unique_clinical_noise_reporters": 123,
+      "unique_etiologic_reporters": 13,
+      "unique_person_union": 135
+     }
+    },
+    "day_3": {
+     "all": {
+      "complement": 1910,
+      "ill": 5,
+      "infected": 57,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 5,
+      "union_not_ill": 62,
+      "unique_clinical_noise_reporters": 62,
+      "unique_etiologic_reporters": 5,
+      "unique_person_union": 67
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 1,
+      "infected": 17,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 1,
+      "union_not_ill": 22,
+      "unique_clinical_noise_reporters": 22,
+      "unique_etiologic_reporters": 1,
+      "unique_person_union": 23
+     },
+     "epoch_index": 71,
+     "passenger": {
+      "complement": 1338,
+      "ill": 4,
+      "infected": 40,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 4,
+      "union_not_ill": 40,
+      "unique_clinical_noise_reporters": 40,
+      "unique_etiologic_reporters": 4,
+      "unique_person_union": 44
+     }
+    },
+    "day_7": {
+     "all": {
+      "complement": 1910,
+      "ill": 11,
+      "infected": 97,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 8,
+      "union_not_ill": 116,
+      "unique_clinical_noise_reporters": 116,
+      "unique_etiologic_reporters": 8,
+      "unique_person_union": 124
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 4,
+      "infected": 28,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 2,
+      "union_not_ill": 37,
+      "unique_clinical_noise_reporters": 37,
+      "unique_etiologic_reporters": 2,
+      "unique_person_union": 39
+     },
+     "epoch_index": 167,
+     "passenger": {
+      "complement": 1338,
+      "ill": 7,
+      "infected": 69,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 6,
+      "union_not_ill": 79,
+      "unique_clinical_noise_reporters": 79,
+      "unique_etiologic_reporters": 6,
+      "unique_person_union": 85
+     }
+    }
+   },
+   "day12_vs_own_summary": {
+    "agree": true,
+    "all.noise==cumulative_reported_noise_cases": [
+     178,
+     178
+    ],
+    "available": true,
+    "crew.complement": [
+     572,
+     572
+    ],
+    "crew.ill==cumulative_ever_ill_crew": [
+     8,
+     8
+    ],
+    "crew.infected==cumulative_ever_infected_crew": [
+     41,
+     41
+    ],
+    "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+     7,
+     7
+    ],
+    "passenger.complement": [
+     1338,
+     1338
+    ],
+    "passenger.ill==cumulative_ever_ill_passenger": [
+     19,
+     19
+    ],
+    "passenger.infected==cumulative_ever_infected_passenger": [
+     116,
+     116
+    ],
+    "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+     13,
+     13
+    ]
+   },
+   "epoch_mapping": {
+    "day_10": 239,
+    "day_12": 287,
+    "day_3": 71,
+    "day_7": 167
+   },
+   "initiation_equal": true,
+   "off_has_sidecar": false,
+   "on_has_sidecar": true,
+   "pass": true,
+   "run_id": "fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8106",
+   "seed": 8106,
+   "tier": "fl_cls_12d_scr_q30_mixv",
+   "voyage_diffs": [],
+   "voyage_equal": true
+  },
+  {
+   "baseline": {
+    "baseline_has_sidecar": false,
+    "blocks_equal": true,
+    "blocks_equal_modulo_float_drift": true,
+    "day12_vs_baseline_summary": {
+     "agree": true,
+     "all.noise==cumulative_reported_noise_cases": [
+      194,
+      194
+     ],
+     "available": true,
+     "crew.complement": [
+      572,
+      572
+     ],
+     "crew.ill==cumulative_ever_ill_crew": [
+      12,
+      12
+     ],
+     "crew.infected==cumulative_ever_infected_crew": [
+      42,
+      42
+     ],
+     "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+      10,
+      10
+     ],
+     "passenger.complement": [
+      1338,
+      1338
+     ],
+     "passenger.ill==cumulative_ever_ill_passenger": [
+      34,
+      34
+     ],
+     "passenger.infected==cumulative_ever_infected_passenger": [
+      147,
+      147
+     ],
+     "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+      33,
+      33
+     ]
+    },
+    "diffs": [],
+    "float_drift_paths": [],
+    "n_float_drift_leaves": 0,
+    "zip": "/home/ubuntu/repos/crusher_baseline_526cf856/telemetry_buffer/rc_baseline/fl_cls_12d_scr_q30_mixv/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8107.zip"
+   },
+   "census_diffs": [],
+   "census_equal": true,
+   "checkpoints": {
+    "day_10": {
+     "all": {
+      "complement": 1910,
+      "ill": 30,
+      "infected": 171,
+      "noise_reporters_ever_ill": 2,
+      "reporter_overlap": 1,
+      "union_ever_ill": 19,
+      "union_not_ill": 161,
+      "unique_clinical_noise_reporters": 163,
+      "unique_etiologic_reporters": 18,
+      "unique_person_union": 180
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 7,
+      "infected": 38,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 4,
+      "union_not_ill": 51,
+      "unique_clinical_noise_reporters": 51,
+      "unique_etiologic_reporters": 4,
+      "unique_person_union": 55
+     },
+     "epoch_index": 239,
+     "passenger": {
+      "complement": 1338,
+      "ill": 23,
+      "infected": 133,
+      "noise_reporters_ever_ill": 2,
+      "reporter_overlap": 1,
+      "union_ever_ill": 15,
+      "union_not_ill": 110,
+      "unique_clinical_noise_reporters": 112,
+      "unique_etiologic_reporters": 14,
+      "unique_person_union": 125
+     }
+    },
+    "day_12": {
+     "all": {
+      "complement": 1910,
+      "ill": 46,
+      "infected": 189,
+      "noise_reporters_ever_ill": 3,
+      "reporter_overlap": 3,
+      "union_ever_ill": 43,
+      "union_not_ill": 191,
+      "unique_clinical_noise_reporters": 194,
+      "unique_etiologic_reporters": 43,
+      "unique_person_union": 234
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 12,
+      "infected": 42,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 10,
+      "union_not_ill": 64,
+      "unique_clinical_noise_reporters": 64,
+      "unique_etiologic_reporters": 10,
+      "unique_person_union": 74
+     },
+     "epoch_index": 287,
+     "passenger": {
+      "complement": 1338,
+      "ill": 34,
+      "infected": 147,
+      "noise_reporters_ever_ill": 3,
+      "reporter_overlap": 3,
+      "union_ever_ill": 33,
+      "union_not_ill": 127,
+      "unique_clinical_noise_reporters": 130,
+      "unique_etiologic_reporters": 33,
+      "unique_person_union": 160
+     }
+    },
+    "day_3": {
+     "all": {
+      "complement": 1910,
+      "ill": 6,
+      "infected": 65,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 3,
+      "union_not_ill": 58,
+      "unique_clinical_noise_reporters": 58,
+      "unique_etiologic_reporters": 3,
+      "unique_person_union": 61
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 2,
+      "infected": 15,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 0,
+      "union_not_ill": 17,
+      "unique_clinical_noise_reporters": 17,
+      "unique_etiologic_reporters": 0,
+      "unique_person_union": 17
+     },
+     "epoch_index": 71,
+     "passenger": {
+      "complement": 1338,
+      "ill": 4,
+      "infected": 50,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 3,
+      "union_not_ill": 41,
+      "unique_clinical_noise_reporters": 41,
+      "unique_etiologic_reporters": 3,
+      "unique_person_union": 44
+     }
+    },
+    "day_7": {
+     "all": {
+      "complement": 1910,
+      "ill": 15,
+      "infected": 121,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 11,
+      "union_not_ill": 109,
+      "unique_clinical_noise_reporters": 110,
+      "unique_etiologic_reporters": 11,
+      "unique_person_union": 120
+     },
+     "available": true,
+     "crew": {
+      "complement": 572,
+      "ill": 4,
+      "infected": 27,
+      "noise_reporters_ever_ill": 0,
+      "reporter_overlap": 0,
+      "union_ever_ill": 3,
+      "union_not_ill": 37,
+      "unique_clinical_noise_reporters": 37,
+      "unique_etiologic_reporters": 3,
+      "unique_person_union": 40
+     },
+     "epoch_index": 167,
+     "passenger": {
+      "complement": 1338,
+      "ill": 11,
+      "infected": 94,
+      "noise_reporters_ever_ill": 1,
+      "reporter_overlap": 1,
+      "union_ever_ill": 8,
+      "union_not_ill": 72,
+      "unique_clinical_noise_reporters": 73,
+      "unique_etiologic_reporters": 8,
+      "unique_person_union": 80
+     }
+    }
+   },
+   "day12_vs_own_summary": {
+    "agree": true,
+    "all.noise==cumulative_reported_noise_cases": [
+     194,
+     194
+    ],
+    "available": true,
+    "crew.complement": [
+     572,
+     572
+    ],
+    "crew.ill==cumulative_ever_ill_crew": [
+     12,
+     12
+    ],
+    "crew.infected==cumulative_ever_infected_crew": [
+     42,
+     42
+    ],
+    "crew.unique_etiologic_reporters==cumulative_reported_cases_crew": [
+     10,
+     10
+    ],
+    "passenger.complement": [
+     1338,
+     1338
+    ],
+    "passenger.ill==cumulative_ever_ill_passenger": [
+     34,
+     34
+    ],
+    "passenger.infected==cumulative_ever_infected_passenger": [
+     147,
+     147
+    ],
+    "passenger.unique_etiologic_reporters==cumulative_reported_cases_passenger": [
+     33,
+     33
+    ]
+   },
+   "epoch_mapping": {
+    "day_10": 239,
+    "day_12": 287,
+    "day_3": 71,
+    "day_7": 167
+   },
+   "initiation_equal": true,
+   "off_has_sidecar": false,
+   "on_has_sidecar": true,
+   "pass": true,
+   "run_id": "fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8107",
+   "seed": 8107,
+   "tier": "fl_cls_12d_scr_q30_mixv",
+   "voyage_diffs": [],
+   "voyage_equal": true
+  }
+ ],
+ "seeds": [
+  8105,
+  8106,
+  8107
+ ],
+ "tiers": [
+  "fl_cls_12d_scr_q30_mixv"
+ ]
+}

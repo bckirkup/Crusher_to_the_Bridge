@@ -20,6 +20,16 @@ epoch_duration_hours: 1
 # kept only as the control arm for re-testing published results.
 natural_history_clock: hours
 
+# Role-checkpoint sidecar (PAPER1-SENS Child A, picard_framework/simulation/
+# role_checkpoints.py): read-only cumulative passenger/crew unique-person
+# counts at hourly day boundaries 24*d (snapshot at the end of epoch index
+# 24*d/epoch_duration_hours - 1). Zero RNG draws, no engine state written;
+# days the voyage never reaches are emitted unavailable, never as zero.
+# enabled: false removes the block entirely (paired-replay control arm).
+role_checkpoints:
+  enabled: true
+  days: [3, 7, 10, 12]
+
 # ── Ship Graph (infection-dynamics reference) ─────────────────
 ship_graph:
   num_agents: 20
