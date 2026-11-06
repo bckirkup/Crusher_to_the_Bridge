@@ -155,3 +155,31 @@ def test_path_overrides_dose_grades_and_init_is_independent() -> None:
     boarding = IndexCaseAxis.for_tier({}, "norwalk_gi")
     over = boarding.pathogen_overrides({}, boarding.points[0], dose_adjustment=10.6)
     assert over == {"norwalk_gi": {"dose_adjustment": 10.6}}
+
+
+def test_tier_pathogen_overrides_deep_merge_over_manifest_base() -> None:
+    from picard_framework.runs.mega_cruise_campaign.tier_iterators import (
+        tier_pathogen_overrides,
+    )
+
+    base = {
+        "remove": ["sars_cov2_resp"],
+        "norwalk_gi": {
+            "route_efficiency_multipliers": {"droplet": 0.1, "fomite": 0.3},
+            "dose_adjustment": 7.57,
+        },
+    }
+    tier = {"pathogen_overrides": {"norwalk_gi": {
+        "route_efficiency_multipliers": {"droplet": 0.2},
+        "illness_duration": {"draw": "empirical_survival"},
+    }}}
+    merged = tier_pathogen_overrides(tier, base)
+    assert merged["remove"] == ["sars_cov2_resp"]
+    assert merged["norwalk_gi"] == {
+        "route_efficiency_multipliers": {"droplet": 0.2, "fomite": 0.3},
+        "dose_adjustment": 7.57,
+        "illness_duration": {"draw": "empirical_survival"},
+    }
+    assert base["norwalk_gi"]["route_efficiency_multipliers"]["droplet"] == 0.1
+    assert tier_pathogen_overrides({}, None) is None
+    assert tier_pathogen_overrides({}, base) == base

@@ -36,6 +36,7 @@ from functools import lru_cache
 from itertools import product
 from typing import Any
 
+from engines.illness_duration import SUPPORTED_DRAWS
 from engines.initiation import BOARDING_MODE_PREVALENCE as MODE_PREVALENCE
 from picard_framework.catalog.registry import CatalogRegistry
 from picard_framework.pathogen_overrides import (
@@ -898,6 +899,9 @@ class IndexCaseAxis:
                     prevalence_swept=sweeps_prevalence(self.tier),
                 ),
             }
+            declared_draw = tier_illness_duration_draw(self.tier, self.pathogen_id)
+            if declared_draw is not None:
+                factors[FACTOR_ILLNESS_DRAW] = declared_draw
             return _drop_inapplicable(self.pathogen_id, factors)
         return {} if point is None else {FACTOR_FIAT_COUNT: int(point)}
 
@@ -917,11 +921,16 @@ class IndexCaseAxis:
         if not self.boarding and point is not None:
             fields["initial_infected"] = int(point)
         rung = getattr(point, "mechanism_rung", None)
+        declared_draw = tier_illness_duration_draw(self.tier, self.pathogen_id)
         if self.boarding and rung is not None and rung != "default":
             # The rung's illness-duration mode rides the profile patch — it
-            # is a per-pathogen field, not an initiation coordinate.
+            # is a per-pathogen field, not an initiation coordinate. A tier
+            # that declares the draw itself (``pathogen_overrides.<pid>.
+            # illness_duration.draw``) sweeps that coordinate independently
+            # of the rung, so the declaration wins and the rung's mode is
+            # not written over it.
             fields["illness_duration"] = {
-                "draw": MECHANISM_RUNGS[rung]["illness_duration_draw"],
+                "draw": declared_draw or MECHANISM_RUNGS[rung]["illness_duration_draw"],
             }
         path_over = dict(base or {})
         if fields:
@@ -929,6 +938,30 @@ class IndexCaseAxis:
                 **(path_over.get(self.pathogen_id) or {}), **fields,
             }
         return path_over
+
+
+def tier_illness_duration_draw(
+    tier: Mapping[str, Any], pathogen_id: str,
+) -> str | None:
+    """The illness-duration draw a tier declares for this pathogen, if any.
+
+    Read from the tier's own ``pathogen_overrides.<pathogen_id>.
+    illness_duration.draw``. A mechanism rung carries an illness-duration
+    mode of its own (``MECHANISM_RUNGS``), so without this seam a tier could
+    not sweep the draw against a fixed rung: the rung's mode would be
+    written over the declaration and the archive would label a point the
+    engine never ran.
+    """
+    patch = (tier.get("pathogen_overrides") or {}).get(str(pathogen_id)) or {}
+    draw = (patch.get("illness_duration") or {}).get("draw")
+    if draw is None:
+        return None
+    if draw not in SUPPORTED_DRAWS:
+        raise ValueError(
+            f"tier pathogen_overrides.{pathogen_id}.illness_duration.draw "
+            f"must be one of {SUPPORTED_DRAWS}, got {draw!r}",
+        )
+    return str(draw)
 
 
 def axis_for_mixed_tier(

@@ -471,3 +471,40 @@ def test_reportable_rung_preboarding_matches_the_engine_reference() -> None:
     assert rung["lookback_days"] == ref["lookback_days"]
     assert rung["crew"]["enabled"] == ref["crew"]["enabled"]
     assert rung["passenger"]["enabled"] == ref["passenger"]["enabled"]
+
+
+def test_tier_declared_illness_draw_wins_over_the_rung() -> None:
+    """A tier sweeping ``illness_duration.draw`` against a fixed rung.
+
+    ``shipped`` pins ``point``; a tier that declares the draw in its own
+    ``pathogen_overrides`` must see that declaration in the profile patch
+    AND in the stamped factor, or the archive labels a point the engine
+    never ran (the venue02 / sensitivity_01 D-factor trap).
+    """
+    declared = {
+        "boarding_mechanism_rungs": ["shipped"],
+        "pathogen_overrides": {
+            "norwalk_gi": {"illness_duration": {"draw": "empirical_survival"}},
+        },
+    }
+    axis = IndexCaseAxis.for_tier(declared, "norwalk_gi")
+    (point,) = axis.points
+    assert axis.pathogen_overrides({}, point)["norwalk_gi"]["illness_duration"] == {
+        "draw": "empirical_survival",
+    }
+    assert axis.factors(point)["illness_duration_draw"] == "empirical_survival"
+
+    undeclared = IndexCaseAxis.for_tier(
+        {"boarding_mechanism_rungs": ["shipped"]}, "norwalk_gi",
+    )
+    (point,) = undeclared.points
+    assert undeclared.pathogen_overrides({}, point)["norwalk_gi"]["illness_duration"] == {
+        "draw": "point",
+    }
+    assert undeclared.factors(point)["illness_duration_draw"] == "point"
+
+    with pytest.raises(ValueError, match="illness_duration.draw"):
+        boarding_axis.tier_illness_duration_draw(
+            {"pathogen_overrides": {"norwalk_gi": {"illness_duration": {"draw": "gamma"}}}},
+            "norwalk_gi",
+        )

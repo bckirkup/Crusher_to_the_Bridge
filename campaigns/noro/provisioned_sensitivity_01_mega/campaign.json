@@ -1,0 +1,1746 @@
+{
+ "name": "noro_provisioned_sensitivity_01_mega",
+ "pathogen": "norovirus",
+ "manifest": "picard_framework/runs/mega_cruise_campaign/noro_provisioned_sensitivity_01_manifest.json",
+ "pathogen_id": "norwalk_gi",
+ "epochs": 288,
+ "s3_prefix": "campaign/noro_provisioned_sensitivity_01_mega/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "noro-provisioned-sensitivity01",
+ "resources": {
+  "vcpu": "1",
+  "memory": "8192",
+  "shm": 512
+ },
+ "blocks": {
+  "scout_fl_meg_12d_sens_p01_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p01_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p01_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p01_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p01_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p01_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p01_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p01_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p01_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p01_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p01_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p01_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p02_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p02_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p02_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p02_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p02_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p02_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p02_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p02_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p02_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p02_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p02_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p02_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p03_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p03_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p03_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p03_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p03_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p03_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p03_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p03_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p03_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p03_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p03_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p03_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p04_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p04_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p04_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p04_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p04_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p04_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p04_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p04_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p04_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p04_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p04_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p04_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p05_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p05_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p05_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p05_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p05_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p05_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p05_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p05_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p05_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p05_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p05_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p05_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p06_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p06_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p06_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p06_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p06_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p06_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p07_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p07_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p07_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p07_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p07_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p07_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p07_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p07_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p07_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p07_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p07_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p07_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p08_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p08_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p08_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p08_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p08_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p08_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p08_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p08_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p08_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p08_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p08_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p08_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p09_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p09_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p09_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p09_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p09_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p09_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p09_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p09_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p09_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p09_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p09_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p09_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p10_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p10_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p10_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p10_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p10_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p10_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p10_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p10_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p10_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p10_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p10_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p10_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p11_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p11_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p11_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p11_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p11_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p11_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p11_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p11_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p11_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p11_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p11_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p11_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p12_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p12_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p12_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p12_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p12_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p12_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p12_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p12_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p12_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p12_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p12_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p12_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p13_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p13_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p13_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p13_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p13_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p13_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p13_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p13_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p13_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p13_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p13_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p13_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p14_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p14_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p14_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p14_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p14_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p14_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p14_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p14_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p14_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p14_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p14_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p14_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p15_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p15_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p15_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p15_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p15_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p15_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p15_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p15_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p15_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p15_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p15_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p15_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p16_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p16_crewv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p16_crewv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p16_crewv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p16_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p16_paxv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p16_paxv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p16_paxv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  },
+  "scout_fl_meg_12d_sens_p16_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p16_mixv",
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112
+   ]
+  },
+  "fl_meg_12d_sens_p16_mixv": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p16_mixv",
+   "seeds": [
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128
+   ]
+  }
+ },
+ "readout": "tools/noro_diag/outbreak_anchor_readout.py"
+}
