@@ -61,6 +61,9 @@ from engines.transmission_core import (  # noqa: E402
     HIGH_TOUCH_AREA_M2,
     HIGH_TOUCH_AREA_SCALE_BOUNDS,
 )
+from picard_framework.simulation.role_checkpoints import (  # noqa: E402
+    checkpoint_epoch_index,
+)
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import validated_open  # noqa: E402
 
@@ -2270,6 +2273,52 @@ def _check_config_yaml(
     _check_fomite_representation(cfg, report)
     _check_ppe_fatigue(cfg, report)
     _check_common_source(cfg, report, layout)
+    _check_role_checkpoints(cfg, report)
+
+
+def _check_role_checkpoints(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the ``role_checkpoints`` sidecar block (PAPER1-SENS Child A).
+
+    Absent resolves to the shipped default (enabled, days 3/7/10/12).
+    ``enabled`` must be a bool; ``days`` a non-empty list of distinct
+    positive integers. Each day is an hourly boundary ``24*d``, so under an
+    hourly voyage clock it must land on an epoch boundary. A day beyond the
+    configured voyage is not a config fault: the emitter writes it as
+    ``available: false`` with null counts, never as zero.
+    """
+    block = cfg.get("role_checkpoints")
+    if block is None:
+        return
+    if not isinstance(block, dict):
+        report.error(_CONFIG_YAML, "CONFIG", "role_checkpoints must be a mapping")
+        return
+    enabled = block.get("enabled", True)
+    if not isinstance(enabled, bool):
+        report.error(_CONFIG_YAML, "CONFIG", "role_checkpoints.enabled must be a bool")
+    days = block.get("days", [3, 7, 10, 12])
+    valid = (
+        isinstance(days, list) and len(days) > 0
+        and all(isinstance(d, int) and not isinstance(d, bool) and d > 0 for d in days)
+        and len(set(days)) == len(days)
+    )
+    if not valid:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "role_checkpoints.days must be a non-empty list of distinct positive integers",
+        )
+        return
+    hours = (cfg.get("voyage") or {}).get(
+        "epoch_duration_hours", cfg.get("epoch_duration_hours"),
+    )
+    if not isinstance(hours, (int, float)) or hours <= 0:
+        return
+    for d in days:
+        _, exact = checkpoint_epoch_index(d, float(hours))
+        if not exact:
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                f"role_checkpoints day {d} is not an epoch boundary at {hours}h epochs",
+            )
 
 
 def _check_q_source_spec(spec: Any, field: str, report: Report) -> None:

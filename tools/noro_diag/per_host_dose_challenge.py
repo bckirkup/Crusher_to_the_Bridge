@@ -2058,6 +2058,8 @@ def _attach_voyage_blocks(
     final = history[-1] if history else {}
     summary["summary"] = record_block(final, RECORD_SUMMARY)
     summary["cost_accounting"] = record_block(final, RECORD_COST_ACCOUNTING)
+    if "role_checkpoints" in final:
+        summary["role_checkpoints"] = final["role_checkpoints"]
     _restore_rate_precision(summary["summary"])
 
 

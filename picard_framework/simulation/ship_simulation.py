@@ -159,6 +159,7 @@ from orchestrator_types import (
     SimulationState,
 )
 from picard_framework.run_spec import PicardRunSpec
+from picard_framework.simulation import role_checkpoints
 from picard_framework.simulation.action_applier import apply_action_envelope
 from picard_framework.simulation.info_suppression import InfoSuppressionSpec
 from picard_framework.simulation.step_result import StepResult
@@ -1892,6 +1893,12 @@ class ShipSimulation:
             # at voyage end close on the final epoch's matrix as
             # ``end_reason: voyage_end``.
             self.tx_core._cs_close_voyage(work.epoch, work.tracing_matrix)
+        # Role-checkpoint sidecar (read-only over the state ID sets, zero
+        # draws): snapshot after surveillance + escalation closed the epoch.
+        role_checkpoints.maybe_record(
+            work.state, work.agents, epoch=work.epoch, cfg=work.cfg,
+            hours_per_epoch=self.clock.hours_per_epoch,
+        )
         work.epoch_record = record_epoch(
             EpochRecordRequest(
                 epoch=work.epoch,
@@ -1926,6 +1933,14 @@ class ShipSimulation:
             work.epoch_record["decisions"] = work.applied
         if work.function_capacity is not None:
             work.epoch_record["function_capacity"] = work.function_capacity
+        if work.epoch + 1 >= self.num_epochs:
+            block = role_checkpoints.finalize_block(
+                work.state, cfg=work.cfg,
+                hours_per_epoch=self.clock.hours_per_epoch,
+                clock_mode=self.clock.mode, num_epochs=self.num_epochs,
+            )
+            if block is not None:
+                work.epoch_record["role_checkpoints"] = block
         if work.state.epoch_voyage is not None:
             work.epoch_record["voyage_epoch"] = work.state.epoch_voyage.to_telemetry()
         self._attach_decision_telemetry(work)

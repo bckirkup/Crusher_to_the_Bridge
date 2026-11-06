@@ -1859,6 +1859,10 @@ def _write_run_zip(
         },
         "initiation": initiation,
     }
+    # Role-checkpoint sidecar (PAPER1-SENS Child A): rides summary.json so
+    # first_paper_scalar/1.5.0 range-reads it without a census decode.
+    if "role_checkpoints" in voyage:
+        anchor["role_checkpoints"] = voyage["role_checkpoints"]
     return write_run_zip(out_dir, tier, run_id, anchor, {
         "growth_census.json.gz": gzip.compress(
             json.dumps(payload).encode("utf-8"),

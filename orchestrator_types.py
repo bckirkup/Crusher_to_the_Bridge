@@ -120,6 +120,9 @@ class SimulationState:
     ever_ill_ids: set[int] = field(default_factory=set)
     ever_reported_ids: set[int] = field(default_factory=set)
     ever_reported_noise_ids: set[int] = field(default_factory=set)
+    # Read-only role-checkpoint sidecar scratch (picard_framework.simulation
+    # .role_checkpoints); never read by any engine phase.
+    role_checkpoints: dict[str, Any] = field(default_factory=dict)
     infections_by_dominant_route: dict[str, int] = field(default_factory=dict)
     # agent_id -> per-agent acquired route ledger at establishment
     # (accumulated alongside infections_by_dominant_route by
