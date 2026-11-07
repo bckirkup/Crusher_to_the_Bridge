@@ -145,7 +145,7 @@ HULLS = {
             "pin_mix": ["MainDining_L", "MainDining_U", "LidoBuffet",
                         "Specialty", "CrewMess"],
             "w_mix": [400, 400, 350, 80, 200],
-            "seed_block": (8105, 9104), "n": 64, "scout": 8, "reserve": 2},
+            "seed_block": (8105, 9104), "n": 96, "scout": 8, "reserve": 2},
     "spr": {"platform": "spirit_cruise_3000", "num_agents": 3000,
             "pin_crew": ["CrewMessMain", "CrewMessOff"],
             "pin_pax": ["MainDining_L"],

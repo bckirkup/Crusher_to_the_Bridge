@@ -445,22 +445,22 @@
   "cls": {
    "platform": "classic_cruise_1900",
    "num_agents": 1910,
-   "n_per_cell": 64,
+   "n_per_cell": 96,
    "scout_per_cell": 8,
    "seed_range": [
     8105,
-    8168
+    8200
    ],
    "scout_seed_range": [
     8105,
     8112
    ],
    "reserve_seeds": [
-    8169,
-    8170
+    8201,
+    8202
    ],
    "cells": 48,
-   "runs_main": 3072,
+   "runs_main": 4608,
    "runs_scout": 384,
    "venue_pin": {
     "crew_venue": [
@@ -594,7 +594,7 @@
  },
  "totals": {
   "cells": 192,
-  "runs_main": 11136,
+  "runs_main": 12672,
   "runs_scout": 1536
  }
 }

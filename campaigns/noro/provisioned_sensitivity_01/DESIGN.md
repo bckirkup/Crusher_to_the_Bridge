@@ -53,10 +53,10 @@ minutes), with 12k as the order of magnitude, not a cap:
 | hull | platform | agents | n / cell | scout / cell | main runs | scout runs | reserve seeds |
 |---|---|---|---|---|---|---|---|
 | exp | expedition_cruise_450 | 450 | 96 | 8 | 4,608 | 384 | 8096–8097 |
-| cls | classic_cruise_1900 | 1,910 | 64 | 8 | 3,072 | 384 | 8169–8170 |
+| cls | classic_cruise_1900 | 1,910 | 96 | 8 | 4,608 | 384 | 8201–8202 |
 | spr | spirit_cruise_3000 | 3,000 | 48 | 8 | 2,304 | 384 | 8153–8154 |
 | meg | mega_cruise_5000 | 7,000 | 24 | 8 | 1,152 | 384 | 8129–8130 |
-| **total** | | | | | **11,136** | **1,536** | |
+| **total** | | | | | **12,672** | **1,536** | |
 
 The scout (first 8 seeds of every cell) is nested in the main set: the
 `scout_<tier>` blocks run first, the `<tier>` blocks carry seeds 9..n.
@@ -64,6 +64,19 @@ Per-hull `n` is revisited **only** on the scout's measured cost before
 the main submit (recorded in LEDGER.md); the manifest tier seed list
 already carries `n + reserve`, so a change in `n` is a `build.py` edit
 and a `--dry-run` recount, nothing else.
+
+**Sizing revision after the scout (PI decision, 2026-11-07):** cls
+n 64 → 96 to match exp (table above is the revised sizing; the scout
+ran at 96/64/48/24). Only the 48 cls tiers change, and only their
+`seeds` list (8105–8200 main + 8201–8202 reserve); exp/spr/meg tier
+specs are byte-identical to the scout's. Because
+`campaign_entrypoint._seed_run_index` resolves a seed against the
+manifest baked into the image, the cls remainder (seeds 8171–8200
+absent from the scout image) needs an image built from the main that
+carries this manifest; the exp/spr/meg remainder runs on the scout
+image. Dry-run after the edit: manifest `--tier all` = 13,056 runs
+(12,672 main + 384 reserve); `scripts/campaign list` = 288 blocks /
+11,520 cells (small hulls) + 96 blocks / 1,152 cells (mega).
 
 Reserve: 2 ascending seeds per hull beyond the prefix (= 96 retry slots
 per hull across its 48 cells). Used only by a hand-added retry block
@@ -141,9 +154,10 @@ contract unchanged except for the 1.5.0 additive columns.
 
 ## §7 Gates (campaign-preflight) and frozen admissibility criteria
 
-Order: local smoke → `--dry-run` count = design (manifest 11,520 =
-11,136 main + 384 reserve; `scripts/campaign list` 288 blocks / 9,984
-cells small hulls, 96 blocks / 1,152 cells mega) → design PR merged →
+Order: local smoke → `--dry-run` count = design (scout sizing: manifest
+11,520 = 11,136 main + 384 reserve; `scripts/campaign list` 288 blocks /
+9,984 cells small hulls, 96 blocks / 1,152 cells mega — revised sizing
+§3: 13,056 = 12,672 + 384; 288 / 11,520 + 96 / 1,152) → design PR merged →
 image `picard-campaign:noro-provisioned-sensitivity01` built FROM the
 post-merge SHA, digest pinned in LEDGER.md and passed to every jobdef →
 manifest mirrored to S3 → **scout wave (1,536 runs) → STOP and report
