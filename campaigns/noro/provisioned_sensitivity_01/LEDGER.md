@@ -504,3 +504,32 @@ queue `picard-campaign-queue`.
   8171–8200 absent from the scout image's manifest). Submit with
   `scripts/campaign submit noro/provisioned_sensitivity_01 --block
   fl_cls_12d_sens_p<NN>_<arm>` once the new digest is pinned here.
+
+## cls remainder image `noro-provisioned-sensitivity01-r2` (2026-11-07 15:20 UTC)
+
+- Built FROM merged main `7f935df26b43327247e23569501bb4a3eff4cc04` (#1164
+  merge): root `Dockerfile` base + `deploy/aws/Dockerfile.campaign` overlay,
+  both with `--build-arg ENGINE_GIT_SHA=7f935df2…`; pushed as
+  `picard-campaign:noro-provisioned-sensitivity01-r2`, digest
+  **`sha256:efc18c7df8a1ae224eaf2e10d10fc372462f949b5c26312ef41c042fbf72b18d`**
+  (pin of record; `campaign.json` `image_tag` carries `<tag>@<digest>` so the
+  cls jobdef is digest-pinned, not tag-pinned). The mega `campaign.json`
+  keeps `noro-provisioned-sensitivity01` (its remainder arrays are RUNNABLE
+  against that tag, which is not re-pointed).
+- Verified in-container: ENTRYPOINT `python3`, ENGINE_GIT_SHA = 7f935df2…,
+  `campaigns/`, `deploy/aws/campaign_entrypoint.py` present, in-image
+  manifest cls tier seeds = 98 (8105–8202), block
+  `fl_cls_12d_sens_p01_crewv` = 88 seeds 8113–8200.
+- Smoke (in-container `--local`, cls p01 crewv seed **8171**, the first
+  seed the scout image could not resolve): `seed 8171: ignited=True
+  imports=35 acquired=168`, manifest index 66 (= 8171 − 8105), zip 52.2 MB
+  (scout cls zips 51.1 MB), growth-chain census ran, zip member list
+  identical to the scout's cls s8105 zip.
+- Mis-push, recorded for the ECR inventory: an interim push of the same
+  tag at 15:10 UTC carried the root-Dockerfile-only image
+  (`sha256:4634aa793a86…`, ENGINE_GIT_SHA=unknown, no `campaigns/`);
+  never registered in any jobdef, overwritten by the digest above;
+  `picard-deploy-role` lacks `ecr:BatchDeleteImage`, so the untagged
+  layer set stays until the repo lifecycle policy expires it.
+- Manifest + SEED_MANIFEST re-mirrored to both campaign S3 prefixes from
+  main 7f935df2 (cls 96 + 2 seeds).
