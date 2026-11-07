@@ -265,3 +265,23 @@ queue `picard-campaign-queue`.
 | scout_fl_meg_12d_sens_p16_crewv | mega:47 | 03b6e8f8-6af3-4170-a43a-2a98ed783ee4 |
 | scout_fl_meg_12d_sens_p16_paxv | mega:48 | b6fbce0b-2d18-42c2-b5d4-4de66d652ac2 |
 | scout_fl_meg_12d_sens_p16_mixv | mega:49 | ba6aa90c-4f26-45f5-9360-67ef44d79ea0 |
+
+### Scout wave — in-flight measurements (2026-11-07 02:45 UTC, operational only)
+
+- Small hulls complete: 1,152/1,152 zips, 145/145 arrays SUCCEEDED, 0 FAILED.
+  Child wall-clock (1 vCPU / 4 GiB): exp 1.1–1.2 min, cls 5.2–5.6 min,
+  spr 8.7–9.3 min. Mean zip: exp 9.7 MB, cls 51.1 MB, spr 82.2 MB
+  (scout small-hull total 55 GB; `growth_census.json.gz` dominates).
+- Mega (1 vCPU / 8 GiB, RSS 3.4 GB): 28.3–29.7 min/child, ~201–215 MB zip.
+  Children pack ~4 per c7i/c7a (2 GiB/vCPU) so the 256-vCPU CE runs
+  ~55–64 at once; 384 children ≈ 3+ h. First children got capacity at
+  01:24 UTC after the small hulls drained — submit mega first next time.
+  `scout_fl_meg_12d_sens_p01_crewv` index 0 (seed 8105) exited in 2 s:
+  the canary had already written that zip (idempotent skip, benign).
+- Projection (slot-hours; mega counted as 4 slots by memory): scout
+  842 slot-h / 136 GB; main remainder 2,098 slot-h / 497 GB, of which mega
+  1,485 slot-h (71 %, ~5.8 h wall at 256 vCPU). At an assumed
+  $0.02–0.04 per vCPU-h Spot rate (pricing API denied to the deploy
+  role): scout $17–34, main $42–84. Storage lever available without any
+  engine change: block-level `"args": {"payload": "lean"}` → worker
+  `--payload lean` (census-member diet); NOT applied to the scout.
