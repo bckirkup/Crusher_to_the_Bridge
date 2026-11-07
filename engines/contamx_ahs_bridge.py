@@ -11,6 +11,7 @@ virtual plenums matching Contam AHS mixing, not an N×N room digraph.
 
 from __future__ import annotations
 
+import warnings
 from collections import defaultdict
 from typing import Any
 
@@ -24,6 +25,7 @@ from engines.py_contam_bridge import (
 _FLOW_EPS = 1e-9
 # Contam fiction export / OAFracW default when Rec Flow0 is absent.
 _DEFAULT_OA_FRACTION = 0.2
+_RECIRC_DIVERGENCE_RTOL = 1e-3
 
 
 def ahs_plenum_id(ahs_nr: int) -> str:
@@ -49,9 +51,17 @@ def synthesize_ahs_recirculation_paths(
     ``Rec`` is the recirculation path Ret→Sup (all ContamX volumetric flows).
 
     When ContamX reports Rec≈0 (common for simple-AHS SIM frames that only
-    expose terminal flows), fall back to PRJ outdoor-air intent::
+    expose terminal flows), fall back to declared PRJ outdoor-air intent.
+    Terminal entries may carry ``declared_oa_fraction``; the fallback is
+    the supply-weighted mean of those per-room values, or the scalar
+    ``oa_fraction`` when no entry declares one::
 
-        Rec ≈ (1 − oa_fraction) · min(ΣR, ΣS)
+        Rec ≈ (1 − oa_effective) · min(ΣR, ΣS)
+
+    When ContamX reports a nonzero Rec that disagrees with declared
+    per-entry OA intent, the measured Rec still supersedes it but a
+    ``UserWarning`` surfaces the divergence. Scalar-fallback path maps
+    keep the previous silent measured-Rec behaviour.
 
     Single-room AHUs yield return+supply legs (OA + filter removal).
     """
@@ -70,7 +80,9 @@ def _group_ahs_terminal_flows(
 ) -> dict[int, dict[str, Any]]:
     """Bucket AHS return/supply/recirc flows by AHS group number."""
     by_ahs: dict[int, dict[str, Any]] = defaultdict(
-        lambda: {"returns": {}, "supplies": {}, "recirc": 0.0}
+        lambda: {
+            "returns": {}, "supplies": {}, "recirc": 0.0, "oa_by_room": {},
+        }
     )
 
     for entry in path_map_entries:
@@ -82,6 +94,14 @@ def _group_ahs_terminal_flows(
         flow = abs(float(path_flows_m3h.get(pnr, 0.0)))
 
         group = by_ahs[ahs_nr]
+        declared_oa = entry.get("declared_oa_fraction")
+        if declared_oa is not None and kind in {"ahs_return", "ahs_supply"}:
+            room = (
+                entry["from_zone"] if kind == "ahs_return"
+                else entry["to_zone"]
+            )
+            if room in known_zones:
+                group["oa_by_room"][room] = float(declared_oa)
         if kind == "ahs_return":
             room = entry["from_zone"]
             if room in known_zones:
@@ -121,17 +141,59 @@ def _ahs_group_star_paths(
     paths = _ahs_return_paths(ahs_nr, plenum_id, returns)
     if sum_s < _FLOW_EPS:
         return paths
+    declared_oa = _effective_oa_fraction(group, supplies, oa_fraction)
+    declared_recirc = (1.0 - declared_oa) * min(sum_r, sum_s)
     if recirc < _FLOW_EPS:
         # ContamX often reports Rec/OA/exhaust Flow0 as 0 for simple AHS
         # while terminals carry the scheduled duty flow. Recover PRJ
-        # recirculation: Rec = (1 − oa) · min(ΣR, ΣS).
-        oa = min(max(float(oa_fraction), 0.0), 1.0)
-        recirc = (1.0 - oa) * min(sum_r, sum_s)
+        # recirculation from declared outdoor-air intent.
+        recirc = declared_recirc
+    elif group.get("oa_by_room") and _recirc_diverges(recirc, declared_recirc):
+        warnings.warn(
+            f"AHS {ahs_nr} recirc {recirc:.6g} m3/h diverges from "
+            f"declared-OA intent {declared_recirc:.6g} m3/h; "
+            "using measured ContamX recirc",
+            UserWarning,
+            stacklevel=3,
+        )
     if recirc >= _FLOW_EPS:
         paths.extend(
             _ahs_supply_paths(ahs_nr, plenum_id, supplies, recirc, sum_s)
         )
     return paths
+
+
+def _clamp_oa(value: float) -> float:
+    return min(max(float(value), 0.0), 1.0)
+
+
+def _effective_oa_fraction(
+    group: dict[str, Any], supplies: dict[str, float], fallback: float,
+) -> float:
+    """Supply-weighted declared OA for one AHS group, else the scalar."""
+    fallback_oa = _clamp_oa(fallback)
+    oa_by_room = group.get("oa_by_room") or {}
+    if not oa_by_room:
+        return fallback_oa
+    weighted = 0.0
+    total_supply = 0.0
+    for room, supply in supplies.items():
+        if supply < _FLOW_EPS:
+            continue
+        declared = oa_by_room.get(room)
+        oa = _clamp_oa(declared) if declared is not None else fallback_oa
+        weighted += oa * supply
+        total_supply += supply
+    if total_supply < _FLOW_EPS:
+        return fallback_oa
+    return _clamp_oa(weighted / total_supply)
+
+
+def _recirc_diverges(measured: float, declared: float) -> bool:
+    scale = max(abs(measured), abs(declared))
+    return abs(measured - declared) > max(
+        _FLOW_EPS, _RECIRC_DIVERGENCE_RTOL * scale,
+    )
 
 
 def _ahs_return_paths(
