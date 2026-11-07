@@ -6,20 +6,25 @@
   "type": "object",
   "additionalProperties": true,
   "properties": {
-    "schema_version": { "type": "string" },
+    "schema_version": {
+      "type": "string"
+    },
     "platform_class": {
       "type": "string",
-      "description": "Hull class of the platform this itinerary belongs to. The first four are the cruise platforms in data/platforms/; constitution and galaxy are the fictional Enterprise platforms (docs/paper3/variant_surveillance_spec.md §3). Consumed as an opaque grouping label (sentinel itinerary/line-list metadata), so adding a class does not change any behaviour keyed on the cruise four.",
+      "description": "Hull class of the platform this itinerary belongs to. The first five are the cruise platforms in data/platforms/; constitution and galaxy are the fictional Enterprise platforms (docs/paper3/variant_surveillance_spec.md §3). Consumed as an opaque grouping label (sentinel itinerary/line-list metadata), so adding a class does not change any behaviour keyed on the cruise four.",
       "enum": [
         "expedition",
         "classic",
         "spirit",
         "mega",
+        "diamond",
         "constitution",
         "galaxy"
       ]
     },
-    "description": { "type": "string" },
+    "description": {
+      "type": "string"
+    },
     "voyage": {
       "type": "object",
       "additionalProperties": true,
@@ -29,7 +34,10 @@
           "default": false,
           "description": "When false (default), EpochState is identity sea-day; ashore/contact/dining/embarkation effects are not applied."
         },
-        "total_epochs": { "type": "integer", "minimum": 1 },
+        "total_epochs": {
+          "type": "integer",
+          "minimum": 1
+        },
         "embarkation_date": {
           "type": "string",
           "format": "date",
@@ -43,22 +51,35 @@
         },
         "natural_history_clock": {
           "type": "string",
-          "enum": ["hours", "legacy_epoch_day"],
+          "enum": [
+            "hours",
+            "legacy_epoch_day"
+          ],
           "default": "hours",
           "description": "hours (default): one epoch lasts epoch_duration_hours of physical time and day-valued pathogen parameters are converted. legacy_epoch_day: one epoch is one day of natural history regardless of the voyage grid, retained only as the historical control arm for paired sensitivity analysis."
         },
         "itinerary": {
           "type": "array",
-          "items": { "$ref": "#/$defs/itinerary_day" }
+          "items": {
+            "$ref": "#/$defs/itinerary_day"
+          }
         },
         "defaults": {
           "type": "object",
           "additionalProperties": true,
           "properties": {
-            "sea_day": { "$ref": "#/$defs/day_defaults" },
-            "port_day": { "$ref": "#/$defs/day_defaults" },
-            "embarkation": { "$ref": "#/$defs/day_defaults" },
-            "disembarkation": { "$ref": "#/$defs/day_defaults" }
+            "sea_day": {
+              "$ref": "#/$defs/day_defaults"
+            },
+            "port_day": {
+              "$ref": "#/$defs/day_defaults"
+            },
+            "embarkation": {
+              "$ref": "#/$defs/day_defaults"
+            },
+            "disembarkation": {
+              "$ref": "#/$defs/day_defaults"
+            }
           }
         },
         "shore_exposure": {
@@ -79,18 +100,29 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "breakfast": { "$ref": "#/$defs/meal_weights" },
-        "lunch": { "$ref": "#/$defs/meal_weights" },
-        "dinner": { "$ref": "#/$defs/meal_weights" }
+        "breakfast": {
+          "$ref": "#/$defs/meal_weights"
+        },
+        "lunch": {
+          "$ref": "#/$defs/meal_weights"
+        },
+        "dinner": {
+          "$ref": "#/$defs/meal_weights"
+        }
       }
     },
-    "medical_response": { "$ref": "#/$defs/medical_response" },
+    "medical_response": {
+      "$ref": "#/$defs/medical_response"
+    },
     "ship_functions": {
       "type": "object",
       "additionalProperties": true,
       "description": "Ship-function capacity declarations (docs/ship_functions/ship_function_capacity_spec.md §3): function instances keyed by (function_id, serves), scored each epoch from crew availability. enabled: false by default; absent = bit-identical.",
       "properties": {
-        "enabled": { "type": "boolean", "default": false },
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
         "symptomatic_effectiveness": {
           "type": "number",
           "minimum": 0,
@@ -99,32 +131,45 @@
         },
         "functions": {
           "type": "array",
-          "items": { "$ref": "#/$defs/ship_function" }
+          "items": {
+            "$ref": "#/$defs/ship_function"
+          }
         }
       }
     },
     "ship_systems": {
       "type": "array",
       "description": "Named ship systems with health state, degradation, and repair labor (spec §5).",
-      "items": { "$ref": "#/$defs/ship_system" }
+      "items": {
+        "$ref": "#/$defs/ship_system"
+      }
     },
     "hazard_sources": {
       "type": "object",
       "additionalProperties": true,
       "description": "Hazard source-model declarations (docs/ship_functions/ship_function_capacity_spec.md §8, ENV-SOURCE-01): substances riding the environmental reservoirs, emitters writing into env_contamination zone pools, and off-ship field penetrations resolved through named adapters. enabled: false by default; absent = bit-identical. All rates are *_per_hour / *_hours and carry source+grade (NULL-SOURCE for declared arms).",
       "properties": {
-        "enabled": { "type": "boolean", "default": false },
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
         "substances": {
           "type": "array",
-          "items": { "$ref": "#/$defs/hazard_substance" }
+          "items": {
+            "$ref": "#/$defs/hazard_substance"
+          }
         },
         "emitters": {
           "type": "array",
-          "items": { "$ref": "#/$defs/hazard_emitter" }
+          "items": {
+            "$ref": "#/$defs/hazard_emitter"
+          }
         },
         "penetrations": {
           "type": "array",
-          "items": { "$ref": "#/$defs/hazard_penetration" }
+          "items": {
+            "$ref": "#/$defs/hazard_penetration"
+          }
         }
       }
     },
@@ -133,11 +178,22 @@
       "description": "Chemical/environmental hazard arm (docs/ship_functions/ship_function_capacity_spec.md §8): chemical substances declared as pathogen-schema profiles (category 'chemical', dose_response.model 'cumulative_toxicity'). enabled: false by default; absent or disabled = bit-identical — the merge into pathogen_profiles is the only enablement gate.",
       "additionalProperties": true,
       "properties": {
-        "enabled": { "type": "boolean", "default": false },
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
         "hazards": {
           "type": "array",
           "description": "Hazard profiles; each is a pathogen-schema profile carrying category 'chemical' and a cumulative_toxicity dose_response with haber_ct_threshold.",
-          "items": { "type": "object", "required": ["pathogen_id", "name", "category", "dose_response"] }
+          "items": {
+            "type": "object",
+            "required": [
+              "pathogen_id",
+              "name",
+              "category",
+              "dose_response"
+            ]
+          }
         }
       }
     }
@@ -145,44 +201,70 @@
   "$defs": {
     "ship_function": {
       "type": "object",
-      "required": ["function_id", "serves"],
+      "required": [
+        "function_id",
+        "serves"
+      ],
       "additionalProperties": true,
       "properties": {
-        "function_id": { "type": "string" },
+        "function_id": {
+          "type": "string"
+        },
         "serves": {
           "type": "string",
-          "enum": ["passengers", "crew", "both", "mission"]
+          "enum": [
+            "passengers",
+            "crew",
+            "both",
+            "mission"
+          ]
         },
         "staffing": {
           "type": "object",
-          "additionalProperties": { "$ref": "#/$defs/watch_demand" },
+          "additionalProperties": {
+            "$ref": "#/$defs/watch_demand"
+          },
           "description": "Agent-class staffing requirements. Exclusive with staffing_by_duty_zone."
         },
         "staffing_by_duty_zone": {
           "type": "object",
-          "additionalProperties": { "$ref": "#/$defs/watch_demand" },
+          "additionalProperties": {
+            "$ref": "#/$defs/watch_demand"
+          },
           "description": "Duty-zone staffing for legacy binary platforms. Exclusive with staffing."
         },
         "required_zone_types": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "required_zone_ids": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "required_systems": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "capacity_model": {
           "type": "string",
-          "enum": ["staffing_fraction", "bottleneck_min"],
+          "enum": [
+            "staffing_fraction",
+            "bottleneck_min"
+          ],
           "default": "staffing_fraction"
         },
         "capacity_schedule": {
           "type": "object",
-          "additionalProperties": { "type": "number", "minimum": 0 },
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0
+          },
           "description": "Hour-of-day demand multipliers (0-23 keys)."
         },
         "feedback": {
@@ -199,13 +281,28 @@
                 "readout_only"
               ]
             },
-            "enabled": { "type": "boolean", "default": true },
-            "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
-            "sustained_hours": { "type": "number", "exclusiveMinimum": 0 },
-            "crew_sustenance": { "type": "boolean", "default": false },
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "sustained_hours": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "crew_sustenance": {
+              "type": "boolean",
+              "default": false
+            },
             "zone_close_on_loss": {
               "type": "array",
-              "items": { "type": "string" }
+              "items": {
+                "type": "string"
+              }
             },
             "scalar_name": {
               "type": "string",
@@ -216,7 +313,11 @@
                 "fomite_scalar"
               ]
             },
-            "floor": { "type": "number", "minimum": 0, "maximum": 1 }
+            "floor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
           }
         }
       }
@@ -225,8 +326,14 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "required_on_watch": { "type": "integer", "minimum": 0 },
-        "minimum_on_watch": { "type": "integer", "minimum": 0 },
+        "required_on_watch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimum_on_watch": {
+          "type": "integer",
+          "minimum": 0
+        },
         "symptomatic_effectiveness": {
           "type": "number",
           "minimum": 0,
@@ -236,14 +343,25 @@
     },
     "hazard_substance": {
       "type": "object",
-      "required": ["substance_id", "parameters_provenance"],
+      "required": [
+        "substance_id",
+        "parameters_provenance"
+      ],
       "additionalProperties": true,
       "properties": {
-        "substance_id": { "type": "string" },
-        "enabled": { "type": "boolean", "default": true },
+        "substance_id": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
         "transport": {
           "type": "string",
-          "enum": ["armed", "none"],
+          "enum": [
+            "armed",
+            "none"
+          ],
           "default": "armed",
           "description": "Whether the zone pool rides the armed transport (native airflow network or CONTAM); 'none' keeps a standing field."
         },
@@ -252,14 +370,32 @@
           "additionalProperties": true,
           "description": "Reservoir-arm scalars (baseline_environmental_load, base_emission_rate_per_day, exposure_probability_per_day, spore_decay_rate_per_day, colonization_rate_per_day, source_zones). 'enabled' and 'person_to_person' are owned by the machinery and refused.",
           "properties": {
-            "source_zones": { "type": "array", "items": { "type": "string" } },
-            "baseline_environmental_load": { "type": "number", "minimum": 0 },
-            "base_emission_rate_per_day": { "type": "number", "minimum": 0 },
-            "exposure_probability_per_day": {
-              "type": "number", "minimum": 0, "maximum": 1
+            "source_zones": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
-            "spore_decay_rate_per_day": { "type": "number", "minimum": 0 },
-            "colonization_rate_per_day": { "type": "number" }
+            "baseline_environmental_load": {
+              "type": "number",
+              "minimum": 0
+            },
+            "base_emission_rate_per_day": {
+              "type": "number",
+              "minimum": 0
+            },
+            "exposure_probability_per_day": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "spore_decay_rate_per_day": {
+              "type": "number",
+              "minimum": 0
+            },
+            "colonization_rate_per_day": {
+              "type": "number"
+            }
           }
         },
         "parameters_provenance": {
@@ -270,54 +406,103 @@
     },
     "hazard_emitter": {
       "type": "object",
-      "required": ["emitter_id", "substance_id", "kind", "zones", "rate"],
+      "required": [
+        "emitter_id",
+        "substance_id",
+        "kind",
+        "zones",
+        "rate"
+      ],
       "additionalProperties": true,
       "properties": {
-        "emitter_id": { "type": "string" },
+        "emitter_id": {
+          "type": "string"
+        },
         "substance_id": {
           "type": "string",
           "description": "A declared hazard_sources substance_id or an existing pathogen profile id."
         },
-        "enabled": { "type": "boolean", "default": true },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
         "kind": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["placement", "field"],
+          "required": [
+            "placement",
+            "field"
+          ],
           "properties": {
-            "placement": { "type": "string", "enum": ["point", "multipoint"] },
-            "field": { "type": "string", "enum": ["standing", "dynamic"] }
+            "placement": {
+              "type": "string",
+              "enum": [
+                "point",
+                "multipoint"
+              ]
+            },
+            "field": {
+              "type": "string",
+              "enum": [
+                "standing",
+                "dynamic"
+              ]
+            }
           },
           "description": "kind is the placement x field pair: point = one zone; multipoint = the full declared rate replicated into every zone. standing = constant rate; dynamic = series or functional schedule recomputed per epoch."
         },
         "zones": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "minItems": 1,
           "description": "Zone ids on this platform; exactly one for placement 'point'."
         },
-        "schedule": { "$ref": "#/$defs/hazard_schedule" },
-        "rate": { "$ref": "#/$defs/hazard_rate" }
+        "schedule": {
+          "$ref": "#/$defs/hazard_schedule"
+        },
+        "rate": {
+          "$ref": "#/$defs/hazard_rate"
+        }
       }
     },
     "hazard_penetration": {
       "type": "object",
       "required": [
-        "penetration_id", "substance_id", "adapter", "zones",
-        "penetration_factor", "outdoor_field", "source", "grade"
+        "penetration_id",
+        "substance_id",
+        "adapter",
+        "zones",
+        "penetration_factor",
+        "outdoor_field",
+        "source",
+        "grade"
       ],
       "additionalProperties": true,
       "properties": {
-        "penetration_id": { "type": "string" },
-        "substance_id": { "type": "string" },
-        "enabled": { "type": "boolean", "default": true },
+        "penetration_id": {
+          "type": "string"
+        },
+        "substance_id": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
         "adapter": {
           "type": "string",
-          "enum": ["uniform_outdoor"],
+          "enum": [
+            "uniform_outdoor"
+          ],
           "description": "Registered penetration adapter name; a QUIC or other CFD adapter registers under its own name at this seam (PENETRATION_ADAPTERS in engines/hazard_sources.py)."
         },
         "zones": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "minItems": 1,
           "description": "Penetration points as zone ids on this platform."
         },
@@ -329,20 +514,40 @@
         "outdoor_field": {
           "type": "object",
           "additionalProperties": true,
-          "required": ["kind"],
+          "required": [
+            "kind"
+          ],
           "properties": {
-            "kind": { "type": "string", "enum": ["uniform", "series"] },
-            "concentration_per_hour": { "type": "number", "minimum": 0 },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "uniform",
+                "series"
+              ]
+            },
+            "concentration_per_hour": {
+              "type": "number",
+              "minimum": 0
+            },
             "series_per_hour": {
               "type": "array",
-              "items": { "type": "number", "minimum": 0 },
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
               "minItems": 1
             }
           }
         },
-        "schedule": { "$ref": "#/$defs/hazard_schedule" },
-        "source": { "type": "string" },
-        "grade": { "type": "string" }
+        "schedule": {
+          "$ref": "#/$defs/hazard_schedule"
+        },
+        "source": {
+          "type": "string"
+        },
+        "grade": {
+          "type": "string"
+        }
       }
     },
     "hazard_schedule": {
@@ -363,12 +568,20 @@
     },
     "hazard_rate": {
       "type": "object",
-      "required": ["kind", "source", "grade"],
+      "required": [
+        "kind",
+        "source",
+        "grade"
+      ],
       "additionalProperties": true,
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["constant", "series", "functional"],
+          "enum": [
+            "constant",
+            "series",
+            "functional"
+          ],
           "description": "constant pairs with field 'standing'; series or functional pairs with 'dynamic'."
         },
         "mass_per_hour": {
@@ -378,13 +591,19 @@
         },
         "series_per_hour": {
           "type": "array",
-          "items": { "type": "number", "minimum": 0 },
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
           "minItems": 1,
           "description": "One per-hour rate per epoch from the schedule onset."
         },
         "functional_form": {
           "type": "string",
-          "enum": ["exponential_decay", "linear_ramp"],
+          "enum": [
+            "exponential_decay",
+            "linear_ramp"
+          ],
           "description": "Closed form integrated over each epoch; nothing compounds by hand."
         },
         "decay_rate_per_hour": {
@@ -401,41 +620,72 @@
           "type": "string",
           "description": "Citation or 'NULL-SOURCE' for a declared arm."
         },
-        "grade": { "type": "string" }
+        "grade": {
+          "type": "string"
+        }
       }
     },
     "ship_system": {
       "type": "object",
-      "required": ["system_id"],
+      "required": [
+        "system_id"
+      ],
       "additionalProperties": true,
       "properties": {
-        "system_id": { "type": "string" },
-        "health_start": { "type": "number", "minimum": 0, "maximum": 1 },
+        "system_id": {
+          "type": "string"
+        },
+        "health_start": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
         "degradation": {
           "type": "object",
           "properties": {
-            "rate_per_day": { "type": "number", "minimum": 0 },
-            "model": { "type": "string", "enum": ["linear"] }
+            "rate_per_day": {
+              "type": "number",
+              "minimum": 0
+            },
+            "model": {
+              "type": "string",
+              "enum": [
+                "linear"
+              ]
+            }
           }
         },
         "repair": {
           "type": "object",
           "properties": {
-            "labor_class": { "type": "string" },
-            "rate_per_person_hour": { "type": "number", "minimum": 0 }
+            "labor_class": {
+              "type": "string"
+            },
+            "rate_per_person_hour": {
+              "type": "number",
+              "minimum": 0
+            }
           }
         },
-        "failure_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "failure_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
         "effects": {
           "type": "object",
           "additionalProperties": {
             "type": "object",
             "properties": {
-              "capacity_multiplier_at_failure": { "type": "number" }
+              "capacity_multiplier_at_failure": {
+                "type": "number"
+              }
             }
           }
         },
-        "repair_priority": { "type": "integer" }
+        "repair_priority": {
+          "type": "integer"
+        }
       }
     },
     "medical_response": {
@@ -463,59 +713,123 @@
         "crew_screening_interval_hours": {
           "description": "If set to a positive int, crew are proactively screened every N hours. null = off.",
           "oneOf": [
-            { "type": "null" },
-            { "type": "integer", "minimum": 1 }
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
           ]
         },
-        "notes": { "type": "string" }
+        "notes": {
+          "type": "string"
+        }
       }
     },
     "meal_weights": {
       "type": "object",
-      "additionalProperties": { "type": "number", "minimum": 0 },
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      },
       "properties": {
-        "buffet": { "type": "number", "minimum": 0 },
-        "mdr": { "type": "number", "minimum": 0 },
-        "specialty": { "type": "number", "minimum": 0 },
-        "crew_mess": { "type": "number", "minimum": 0 },
-        "galley": { "type": "number", "minimum": 0 }
+        "buffet": {
+          "type": "number",
+          "minimum": 0
+        },
+        "mdr": {
+          "type": "number",
+          "minimum": 0
+        },
+        "specialty": {
+          "type": "number",
+          "minimum": 0
+        },
+        "crew_mess": {
+          "type": "number",
+          "minimum": 0
+        },
+        "galley": {
+          "type": "number",
+          "minimum": 0
+        }
       }
     },
     "day_defaults": {
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "onboard_passenger_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
-        "contact_rate_multiplier": { "type": "number", "minimum": 0 },
+        "onboard_passenger_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "contact_rate_multiplier": {
+          "type": "number",
+          "minimum": 0
+        },
         "dining_demand_multiplier": {
           "oneOf": [
-            { "type": "number", "minimum": 0 },
+            {
+              "type": "number",
+              "minimum": 0
+            },
             {
               "type": "object",
-              "additionalProperties": { "type": "number", "minimum": 0 },
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              },
               "properties": {
-                "breakfast": { "type": "number", "minimum": 0 },
-                "lunch": { "type": "number", "minimum": 0 },
-                "dinner": { "type": "number", "minimum": 0 }
+                "breakfast": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "lunch": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "dinner": {
+                  "type": "number",
+                  "minimum": 0
+                }
               }
             }
           ]
         },
-        "embarkation_buffet_surge": { "type": "boolean" },
-        "notes": { "type": "string" }
+        "embarkation_buffet_surge": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
       }
     },
     "itinerary_day": {
       "type": "object",
-      "required": ["day", "type"],
+      "required": [
+        "day",
+        "type"
+      ],
       "additionalProperties": true,
       "properties": {
-        "day": { "type": "integer", "minimum": 1 },
+        "day": {
+          "type": "integer",
+          "minimum": 1
+        },
         "type": {
           "type": "string",
-          "enum": ["sea_day", "port_day", "embarkation", "disembarkation"]
+          "enum": [
+            "sea_day",
+            "port_day",
+            "embarkation",
+            "disembarkation"
+          ]
         },
-        "port": { "type": "string" },
+        "port": {
+          "type": "string"
+        },
         "port_id": {
           "type": "string",
           "description": "Stable port identifier (UN-LOCODE preferred, e.g. MXCZM). Sentinel analysis keys port hazards on this; falls back to a slug of `port` when absent."
@@ -539,24 +853,44 @@
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
-          "items": { "type": "number", "minimum": 0 },
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
           "description": "Hour-of-day interval in which embarkation occurs."
         },
-        "stateroom_available_epoch": { "type": "integer", "minimum": 0 },
-        "buffet_surge_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
-        "disembark_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "stateroom_available_epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "buffet_surge_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "disembark_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
         "disembark_window_hours_of_day": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
-          "items": { "type": "number", "minimum": 0 },
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
           "description": "Hour-of-day interval in which disembarkation occurs."
         },
         "reembark_window_hours_of_day": {
           "type": "array",
           "minItems": 2,
           "maxItems": 2,
-          "items": { "type": "number", "minimum": 0 },
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
           "description": "Hour-of-day interval in which reembarkation occurs."
         },
         "shore_infection_probability_per_hour": {
@@ -569,7 +903,9 @@
           "type": "string",
           "description": "Pathogen id introduced ashore at this port. Defaults to the lowest-sorted configured pathogen id."
         },
-        "notes": { "type": "string" }
+        "notes": {
+          "type": "string"
+        }
       }
     }
   }

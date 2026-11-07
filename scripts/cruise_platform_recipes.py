@@ -1134,8 +1134,716 @@ SPIRIT_CRUISE_3000 = CruisePlatformRecipe(
 )
 
 
+def _diamond_vent(deck: int, side: str, section: str) -> str:
+    # Princess fact sheet: 976 outside / 377 inside staterooms (~72% / 28%).
+    # The Port/Stbd grid carries no Central band, so the outside share is set
+    # by deck: decks 10-12 and the forward Lido cabins are balcony-dominant,
+    # decks 8-9 split by section, and the lower decks keep interior cabins.
+    if deck >= 10 or deck == 14:
+        return "balcony_partial"
+    if deck in (8, 9):
+        return "balcony_partial" if section in ("Fwd", "Aft") else "interior_hvac"
+    if deck in (5, 6):
+        return "balcony_partial" if section == "Fwd" else "interior_hvac"
+    return "interior_hvac"
+
+
+def _diamond_public_zones() -> tuple[PublicZoneRecipe, ...]:
+    return (
+        PublicZoneRecipe(
+            "MedicalCenter", "Medical", "medium", 350.0, "4_Gala", 20,
+            {"x": 110, "y": 62},
+            "Medical center. Deck 4 (Gala).",
+        ),
+        PublicZoneRecipe(
+            "IsolWard", "Medical", "low", 140.0, "4_Gala", 4,
+            {"x": 130, "y": 62},
+            "Isolation ward (~4 beds). Deck 4.",
+        ),
+        PublicZoneRecipe(
+            "GrandPlaza", "Free", "high", 6000.0, "5_Plaza", 800,
+            {"x": 118, "y": 56},
+            "Grand Plaza atrium (multi-deck void, decks 5-7). Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "Vivaldi", "Dining", "high", 2200.0, "5_Plaza", 380,
+            {"x": 188, "y": 56},
+            "Vivaldi Dining Room (anytime dining). Deck 5. ~380 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "Savoy", "Dining", "high", 2200.0, "5_Plaza", 380,
+            {"x": 168, "y": 56},
+            "Savoy Dining Room (traditional). Deck 5. ~380 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "MainGalley", "Dining", "high", 1100.0, "5_Plaza", 80,
+            {"x": 30, "y": 56},
+            "Main galley (crew-only service). Deck 5.",
+            dining_service_type="galley", food_contamination_multiplier=0.5,
+        ),
+        PublicZoneRecipe(
+            "TheLibrary", "Free", "low", 180.0, "5_Plaza", 30,
+            {"x": 58, "y": 56},
+            "The Library. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "InternetCafe", "Free", "low", 140.0, "5_Plaza", 40,
+            {"x": 78, "y": 56},
+            "Internet Café (snacks and drinks). Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "FineArts", "Free", "low", 250.0, "5_Plaza", 40,
+            {"x": 92, "y": 56},
+            "Princess Fine Arts Gallery. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "GoodSpirits", "Free", "medium", 180.0, "5_Plaza", 60,
+            {"x": 104, "y": 56},
+            "Good Spirits lounge and bar. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "CaptainCircle", "Free", "low", 120.0, "5_Plaza", 20,
+            {"x": 134, "y": 56},
+            "Captain's Circle (loyalty lounge). Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "ShoreExcursions", "Free", "low", 100.0, "5_Plaza", 15,
+            {"x": 150, "y": 56},
+            "Shore Excursions desk. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "SelfLaundry", "Free", "low", 150.0, "5_Plaza", 10,
+            {"x": 205, "y": 56},
+            "Self-service laundromat. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "PrincessTheater", "Free", "high", 5200.0, "6_Fiesta", 1200,
+            {"x": 42, "y": 50},
+            "Princess Theater (lower level deck 6, upper level deck 7). ~1,200 seats.",
+        ),
+        PublicZoneRecipe(
+            "ChurchillLounge", "Free", "medium", 350.0, "6_Fiesta", 80,
+            {"x": 62, "y": 50},
+            "Churchill's Cigar Lounge. Deck 6.",
+        ),
+        PublicZoneRecipe(
+            "WeddingChapel", "Free", "low", 120.0, "6_Fiesta", 30,
+            {"x": 78, "y": 50},
+            "Wedding Chapel. Deck 6.",
+        ),
+        PublicZoneRecipe(
+            "GrandCasino", "Free", "high", 1100.0, "6_Fiesta", 250,
+            {"x": 100, "y": 50},
+            "Grand Casino. Deck 6.",
+        ),
+        PublicZoneRecipe(
+            "GuestServices", "Free", "low", 200.0, "6_Fiesta", 30,
+            {"x": 122, "y": 50},
+            "Guest / passenger services desk. Deck 6.",
+        ),
+        PublicZoneRecipe(
+            "PacificMoon", "Dining", "high", 2400.0, "6_Fiesta", 380,
+            {"x": 150, "y": 50},
+            "Pacific Moon Dining Room (anytime). Deck 6. ~380 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "SantaFe", "Dining", "high", 2400.0, "6_Fiesta", 380,
+            {"x": 166, "y": 50},
+            "Santa Fe Dining Room (anytime). Deck 6. ~380 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "International", "Dining", "high", 2600.0, "6_Fiesta", 400,
+            {"x": 190, "y": 50},
+            "International Dining Room (traditional). Deck 6 aft. ~400 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "WakeViewBar", "Free", "low", 120.0, "6_Fiesta", 30,
+            {"x": 208, "y": 50},
+            "Wake View Bar. Deck 6 aft.",
+        ),
+        PublicZoneRecipe(
+            "WheelhouseBar", "Free", "medium", 200.0, "7_Promenade", 60,
+            {"x": 40, "y": 44},
+            "Wheelhouse Bar. Deck 7 forward.",
+        ),
+        PublicZoneRecipe(
+            "MeridianBay", "Free", "low", 250.0, "7_Promenade", 40,
+            {"x": 58, "y": 44},
+            "Meridian Bay lounge. Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "PromGalleria", "Free", "high", 900.0, "7_Promenade", 200,
+            {"x": 82, "y": 44},
+            "Promenade Galleria / The Shops of Princess. Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "Crooners", "Free", "medium", 200.0, "7_Promenade", 60,
+            {"x": 100, "y": 44},
+            "Crooners Bar. Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "Facets", "Free", "low", 150.0, "7_Promenade", 40,
+            {"x": 116, "y": 44},
+            "Facets lounge. Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "ExplorersLounge", "Free", "medium", 350.0, "7_Promenade", 80,
+            {"x": 136, "y": 44},
+            "Explorers Lounge (dance club). Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "PhotoGallery", "Free", "low", 150.0, "7_Promenade", 30,
+            {"x": 152, "y": 44},
+            "Photo Gallery. Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "KaiSushi", "Dining", "medium", 280.0, "7_Promenade", 60,
+            {"x": 168, "y": 44},
+            "Kai Sushi (Japanese). Deck 7. ~60 seats.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "Sabatini", "Dining", "medium", 320.0, "7_Promenade", 80,
+            {"x": 184, "y": 44},
+            "Sabatini's Italian Trattoria. Deck 7. ~80 seats.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "ClubFusion", "Free", "high", 700.0, "7_Promenade", 150,
+            {"x": 206, "y": 44},
+            "Club Fusion (music and dance club). Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "OceanFront", "Free", "medium", 800.0, "7_Promenade", 150,
+            {"x": 120, "y": 47},
+            "OceanFront open-deck promenade. Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "TerracePool", "Free", "high", 1500.0, "12_Aloha", 250,
+            {"x": 180, "y": 14},
+            "Terrace Pool, aft open-air pool deck. Deck 12.",
+        ),
+        PublicZoneRecipe(
+            "PregoPizza", "Dining", "high", 420.0, "14_Lido", 120,
+            {"x": 45, "y": 12},
+            "Prego Pizzeria (quick service). Deck 14. ~120 seats.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "NeptunePool", "Free", "high", 2500.0, "14_Lido", 400,
+            {"x": 62, "y": 12},
+            "Neptune's Reef & Pool (main pool). Deck 14, open-air.",
+        ),
+        PublicZoneRecipe(
+            "MermaidTail", "Free", "medium", 150.0, "14_Lido", 50,
+            {"x": 108, "y": 12},
+            "The Mermaid's Tail Bar. Deck 14.",
+        ),
+        PublicZoneRecipe(
+            "CalypsoPool", "Free", "high", 1800.0, "14_Lido", 300,
+            {"x": 80, "y": 12},
+            "Calypso Reef & Pool. Deck 14, open-air.",
+        ),
+        PublicZoneRecipe(
+            "TridentGrill", "Dining", "high", 420.0, "14_Lido", 120,
+            {"x": 98, "y": 12},
+            "Trident Grill (quick service). Deck 14. ~120 seats.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "Swirls", "Dining", "medium", 80.0, "14_Lido", 20,
+            {"x": 100, "y": 12},
+            "Swirls ice cream bar. Deck 14.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "CalypsoBar", "Free", "medium", 150.0, "14_Lido", 50,
+            {"x": 122, "y": 12},
+            "Calypso Bar (pool bar). Deck 14.",
+        ),
+        PublicZoneRecipe(
+            "HorizonCourt", "Dining", "high", 3200.0, "14_Lido", 600,
+            {"x": 140, "y": 12},
+            "Horizon Court buffet. Deck 14. ~600 seats.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "Churrascaria", "Dining", "medium", 320.0, "14_Lido", 80,
+            {"x": 158, "y": 12},
+            "Churrascaria Brazilian Grill. Deck 14. ~80 seats.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "SterlingSteak", "Dining", "medium", 320.0, "14_Lido", 80,
+            {"x": 172, "y": 12},
+            "Sterling Steakhouse. Deck 14. ~80 seats.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "OutriggerBar", "Free", "low", 150.0, "14_Lido", 50,
+            {"x": 188, "y": 12},
+            "Outrigger Bar. Deck 14.",
+        ),
+        PublicZoneRecipe(
+            "HorizonTerrace", "Free", "medium", 600.0, "14_Lido", 100,
+            {"x": 205, "y": 12},
+            "Horizon Terrace (aft open deck). Deck 14.",
+        ),
+        PublicZoneRecipe(
+            "TheConservatory", "Free", "medium", 700.0, "15_Sun", 120,
+            {"x": 40, "y": 10},
+            "The Conservatory (forward lounge). Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "FitnessCenter", "Free", "medium", 700.0, "15_Sun", 100,
+            {"x": 62, "y": 10},
+            "Fitness Center. Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "Aerobics", "Free", "medium", 400.0, "15_Sun", 80,
+            {"x": 80, "y": 10},
+            "Aerobics studio. Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "LotusSpa", "Free", "medium", 1200.0, "15_Sun", 150,
+            {"x": 100, "y": 10},
+            "Lotus Spa. Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "BeautySalon", "Free", "low", 150.0, "15_Sun", 20,
+            {"x": 118, "y": 10},
+            "Beauty Salon. Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "Tradewinds", "Free", "low", 150.0, "15_Sun", 50,
+            {"x": 132, "y": 10},
+            "Tradewinds Bar. Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "OpenAirCinema", "Free", "medium", 800.0, "15_Sun", 200,
+            {"x": 155, "y": 10},
+            "Movies Under the Stars (open-air cinema). Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "YouthCenter", "Free", "medium", 400.0, "15_Sun", 80,
+            {"x": 175, "y": 10},
+            "Youth Center. Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "TeenLounge", "Free", "medium", 300.0, "15_Sun", 60,
+            {"x": 192, "y": 10},
+            "Teen Lounge (Beach House). Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "IzumiBath", "Free", "low", 500.0, "15_Sun", 40,
+            {"x": 210, "y": 10},
+            "Izumi Japanese bath. Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "TheSanctuary", "Free", "medium", 800.0, "16_Sports", 120,
+            {"x": 90, "y": 8},
+            "The Sanctuary (adults-only retreat). Deck 16.",
+        ),
+        PublicZoneRecipe(
+            "OasisBar", "Free", "low", 150.0, "16_Sports", 50,
+            {"x": 112, "y": 8},
+            "Oasis Bar. Deck 16.",
+        ),
+        PublicZoneRecipe(
+            "SportsCourt", "Free", "medium", 600.0, "16_Sports", 100,
+            {"x": 138, "y": 8},
+            "Sports court. Deck 16, open-air.",
+        ),
+        PublicZoneRecipe(
+            "Skywalkers", "Free", "high", 500.0, "17_Sky", 150,
+            {"x": 90, "y": 6},
+            "Skywalkers Nightclub. Deck 17.",
+        ),
+        PublicZoneRecipe(
+            "CenterCourt", "Free", "medium", 400.0, "17_Sky", 80,
+            {"x": 140, "y": 6},
+            "Center Court sports area. Deck 17, open-air.",
+        ),
+        PublicZoneRecipe(
+            "Bridge", "Free", "low", 300.0, "18_Bridge", 12,
+            {"x": 150, "y": 4},
+            "Navigating bridge and chartroom. Deck 18.",
+        ),
+        PublicZoneRecipe(
+            "Engine_Room", "Free", "low", 6500.0, "0_Engine", 25,
+            {"x": 80, "y": 100},
+            "Engine room (diesel-electric plant). Deck 0.",
+        ),
+        PublicZoneRecipe(
+            "CrewMess", "Dining", "high", 900.0, "1_Crew", 250,
+            {"x": 70, "y": 95},
+            "Crew mess. Deck 1. ~250 seats.",
+            dining_service_type="crew_mess", food_contamination_multiplier=1.0,
+            meal_seatings=4,
+        ),
+        PublicZoneRecipe(
+            "CrewMessOff", "Dining", "medium", 280.0, "2_Crew", 60,
+            {"x": 70, "y": 84},
+            "Officers mess. Deck 2. ~60 seats.",
+            dining_service_type="crew_mess", food_contamination_multiplier=1.0,
+            meal_seatings=4,
+        ),
+        PublicZoneRecipe(
+            "Laundry", "Free", "medium", 300.0, "3_Crew", 15,
+            {"x": 110, "y": 72},
+            "Industrial laundry. Deck 3.",
+        ),
+        PublicZoneRecipe(
+            "Stores", "Free", "low", 400.0, "3_Crew", 5,
+            {"x": 130, "y": 72},
+            "Provision stores. Deck 3.",
+        ),
+    )
+
+
+def _diamond_adjacency() -> tuple[dict[str, str], ...]:
+    links: list[dict[str, str]] = [
+        {"from": "GrandPlaza", "to": "TheLibrary", "type": "passageway"},
+        {"from": "GrandPlaza", "to": "FineArts", "type": "passageway"},
+        {"from": "GrandPlaza", "to": "GoodSpirits", "type": "passageway"},
+        {"from": "GrandPlaza", "to": "CaptainCircle", "type": "doorway"},
+        {"from": "Vivaldi", "to": "MainGalley", "type": "service_hatch"},
+        {"from": "Savoy", "to": "MainGalley", "type": "service_hatch"},
+        {"from": "MedicalCenter", "to": "IsolWard", "type": "doorway"},
+        {"from": "MedicalCenter", "to": "GrandPlaza", "type": "stairwell"},
+        {"from": "PrincessTheater", "to": "ChurchillLounge", "type": "passageway"},
+        {"from": "ChurchillLounge", "to": "WeddingChapel", "type": "doorway"},
+        {"from": "ChurchillLounge", "to": "GrandCasino", "type": "passageway"},
+        {"from": "GrandCasino", "to": "GuestServices", "type": "passageway"},
+        {"from": "PacificMoon", "to": "SantaFe", "type": "passageway"},
+        {"from": "SantaFe", "to": "International", "type": "passageway"},
+        {"from": "International", "to": "WakeViewBar", "type": "passageway"},
+        {"from": "WheelhouseBar", "to": "MeridianBay", "type": "passageway"},
+        {"from": "MeridianBay", "to": "PromGalleria", "type": "passageway"},
+        {"from": "PromGalleria", "to": "Crooners", "type": "passageway"},
+        {"from": "Crooners", "to": "Facets", "type": "passageway"},
+        {"from": "Facets", "to": "ExplorersLounge", "type": "passageway"},
+        {"from": "ExplorersLounge", "to": "PhotoGallery", "type": "passageway"},
+        {"from": "PhotoGallery", "to": "KaiSushi", "type": "passageway"},
+        {"from": "KaiSushi", "to": "Sabatini", "type": "passageway"},
+        {"from": "Sabatini", "to": "ClubFusion", "type": "passageway"},
+        {"from": "OceanFront", "to": "PromGalleria", "type": "open_front"},
+        {"from": "PregoPizza", "to": "TridentGrill", "type": "passageway"},
+        {"from": "PregoPizza", "to": "NeptunePool", "type": "doorway"},
+        {"from": "TridentGrill", "to": "CalypsoPool", "type": "doorway"},
+        {"from": "NeptunePool", "to": "CalypsoPool", "type": "open_deck"},
+        {"from": "CalypsoPool", "to": "CalypsoBar", "type": "doorway"},
+        {"from": "NeptunePool", "to": "HorizonCourt", "type": "doorway"},
+        {"from": "HorizonCourt", "to": "CalypsoBar", "type": "passageway"},
+        {"from": "HorizonCourt", "to": "SterlingSteak", "type": "passageway"},
+        {"from": "HorizonCourt", "to": "OutriggerBar", "type": "passageway"},
+        {"from": "OutriggerBar", "to": "HorizonTerrace", "type": "passageway"},
+        {"from": "MermaidTail", "to": "CalypsoBar", "type": "passageway"},
+        {"from": "Swirls", "to": "CalypsoBar", "type": "passageway"},
+        {"from": "TheConservatory", "to": "OpenAirCinema", "type": "open_deck"},
+        {"from": "OpenAirCinema", "to": "Tradewinds", "type": "passageway"},
+        {"from": "FitnessCenter", "to": "LotusSpa", "type": "passageway"},
+        {"from": "LotusSpa", "to": "Aerobics", "type": "passageway"},
+        {"from": "BeautySalon", "to": "LotusSpa", "type": "passageway"},
+        {"from": "YouthCenter", "to": "TeenLounge", "type": "passageway"},
+        {"from": "TeenLounge", "to": "IzumiBath", "type": "passageway"},
+        {"from": "TheSanctuary", "to": "SportsCourt", "type": "passageway"},
+        {"from": "TheSanctuary", "to": "OasisBar", "type": "passageway"},
+        {"from": "Skywalkers", "to": "CenterCourt", "type": "passageway"},
+        {"from": "Bridge", "to": "Skywalkers", "type": "stairwell"},
+        {"from": "CrewMess", "to": "MainGalley", "type": "service_stairwell"},
+        {"from": "CrewMessOff", "to": "MainGalley", "type": "service_stairwell"},
+        {"from": "Laundry", "to": "Stores", "type": "service_corridor"},
+        {"from": "Stores", "to": "Engine_Room", "type": "ladder_well"},
+        # Corridor-to-public links
+        {"from": "PC_D5_P_M", "to": "GrandPlaza", "type": "corridor"},
+        {"from": "PC_D5_S_M", "to": "Savoy", "type": "corridor"},
+        {"from": "PC_D6_P_F", "to": "PrincessTheater", "type": "corridor"},
+        {"from": "PC_D6_P_M", "to": "PacificMoon", "type": "corridor"},
+        {"from": "PC_D6_S_A", "to": "International", "type": "corridor"},
+        {"from": "PC_D14_P_F", "to": "HorizonCourt", "type": "corridor"},
+        {"from": "PC_D12_S_A", "to": "TerracePool", "type": "corridor"},
+        {"from": "CC_D1_F", "to": "CrewMess", "type": "corridor"},
+        {"from": "CC_D1_A", "to": "Engine_Room", "type": "ladder_well"},
+        {"from": "CC_D2_M", "to": "CrewMessOff", "type": "corridor"},
+        {"from": "CC_D3_F", "to": "Laundry", "type": "corridor"},
+        {"from": "CC_D3_A", "to": "Stores", "type": "corridor"},
+    ]
+    # Same-deck corridor chains on every cabin bank (5/6 lower, 8-12 main)
+    for deck in (5, 6, 8, 9, 10, 11, 12):
+        for side in ("Port", "Stbd"):
+            links.append({
+                "from": pax_zone_id(deck, side, "Fwd"),
+                "to": pax_zone_id(deck, side, "Mid"),
+                "type": "corridor",
+            })
+            links.append({
+                "from": pax_zone_id(deck, side, "Mid"),
+                "to": pax_zone_id(deck, side, "Aft"),
+                "type": "corridor",
+            })
+        links.append({
+            "from": pax_zone_id(deck, "Port", "Mid"),
+            "to": pax_zone_id(deck, "Stbd", "Mid"),
+            "type": "passageway",
+        })
+    # Vertical trunks: contiguous banks, plus the deck-7 gap (6->8) and the
+    # deck-13 void (12->14 forward cabins) which have no corridor zones.
+    for d1, d2 in ((5, 6), (8, 9), (9, 10), (10, 11), (11, 12), (6, 8)):
+        links.append({
+            "from": pax_zone_id(d1, "Port", "Mid"),
+            "to": pax_zone_id(d2, "Port", "Mid"),
+            "type": "elevator_bank",
+        })
+        links.append({
+            "from": pax_zone_id(d1, "Stbd", "Mid"),
+            "to": pax_zone_id(d2, "Stbd", "Mid"),
+            "type": "stairwell",
+        })
+    links.append({
+        "from": pax_zone_id(12, "Port", "Fwd"),
+        "to": pax_zone_id(14, "Port", "Fwd"),
+        "type": "stairwell",
+    })
+    links.append({
+        "from": pax_zone_id(12, "Stbd", "Fwd"),
+        "to": pax_zone_id(14, "Stbd", "Fwd"),
+        "type": "elevator_bank",
+    })
+    # Lido forward bank: port/stbd pair only
+    links.append({
+        "from": pax_zone_id(14, "Port", "Fwd"),
+        "to": pax_zone_id(14, "Stbd", "Fwd"),
+        "type": "passageway",
+    })
+    # Crew corridors
+    for deck in (1, 2, 3):
+        links.append({
+            "from": crew_zone_id(deck, "Fwd"),
+            "to": crew_zone_id(deck, "Mid"),
+            "type": "corridor",
+        })
+        links.append({
+            "from": crew_zone_id(deck, "Mid"),
+            "to": crew_zone_id(deck, "Aft"),
+            "type": "corridor",
+        })
+        if deck < 3:
+            for section in ("Fwd", "Mid", "Aft"):
+                links.append({
+                    "from": crew_zone_id(deck, section),
+                    "to": crew_zone_id(deck + 1, section),
+                    "type": "stairwell",
+                })
+    return tuple(links)
+
+
+DIAMOND_PRINCESS = CruisePlatformRecipe(
+    platform_id="diamond_princess",
+    nominal_complement={"passengers": 2710, "crew": 1100},
+    description=(
+        "Diamond Princess cruise ship (~2,710 passengers + ~1,100 crew = 3,810). "
+        "Princess Cruises Grand-class, built 2004 by Mitsubishi Heavy Industries: "
+        "290m LOA × 37.5m beam, 115,875 GT, twin-funnel silhouette, 18 decks. "
+        "1,353 staterooms across 8 cabin decks (5, 6, 8-12, 14; no deck 13); "
+        "deck 7 Promenade is all-public. Cabin-corridor resolution "
+        "(44 pax + 9 crew corridors). Key venues: five main dining rooms, "
+        "Promenade specialty dining, Grand Plaza atrium, Lido pools and buffet, "
+        "Sun Deck spa and fitness. CDC Extra-Large AGE target 22.1/100K TD "
+        "(calibration deferred). Layout follows the Princess accessible-route "
+        "map and cruisedeckplans.com deck plans (2020 configuration: Kai Sushi "
+        "and Savoy; the 2026 Crown Grill / Makoto Ocean rebrands are not modeled)."
+    ),
+    length_m=290.0,
+    beam_m=37.5,
+    population=3810,
+    graywater_zones=("Engine_Room",),
+    pax_corridors=CorridorRecipe(
+        decks=(8, 9, 10, 11, 12),
+        sides=("Port", "Stbd"),
+        sections=("Fwd", "Mid", "Aft"),
+        max_occupancy=70,
+        volume_m3=1300.0,
+        cabin_size=2,
+        traffic="low",
+        deck_label="{deck}_Cabins",
+        ventilation=_diamond_vent,
+        description_template=(
+            "Passenger cabin corridor, Deck {deck} {side} {section}. "
+            "~35 cabins, ~70 pax, ventilation={vent}."
+        ),
+        id_prefix="PC",
+    ),
+    extra_corridors=(
+        CorridorRecipe(
+            decks=(5, 6),
+            sides=("Port", "Stbd"),
+            sections=("Fwd", "Mid", "Aft"),
+            max_occupancy=44,
+            volume_m3=900.0,
+            cabin_size=2,
+            traffic="low",
+            deck_label="{deck}_Cabins",
+            ventilation=_diamond_vent,
+            description_template=(
+                "Passenger cabin corridor (lower bank), Deck {deck} {side} {section}. "
+                "~22 cabins, ~44 pax, ventilation={vent}."
+            ),
+            id_prefix="PC",
+        ),
+        CorridorRecipe(
+            decks=(14,),
+            sides=("Port", "Stbd"),
+            sections=("Fwd",),
+            max_occupancy=64,
+            volume_m3=1300.0,
+            cabin_size=2,
+            traffic="low",
+            deck_label="{deck}_Cabins",
+            ventilation=_diamond_vent,
+            description_template=(
+                "Passenger cabin corridor (Lido forward bank), "
+                "Deck {deck} {side} {section}. ~32 cabins, ~64 pax, ventilation={vent}."
+            ),
+            id_prefix="PC",
+        ),
+    ),
+    crew_corridors=CorridorRecipe(
+        decks=(1, 2, 3),
+        sides=(),
+        sections=("Fwd", "Mid", "Aft"),
+        max_occupancy=120,
+        volume_m3=800.0,
+        cabin_size=3,
+        traffic="medium",
+        deck_label="{deck}_Crew",
+        ventilation=lambda d, s, sec: "interior_hvac",
+        description_template=(
+            "Crew cabin corridor, Deck {deck} {section}. "
+            "~120 crew, interior HVAC."
+        ),
+        id_prefix="CC",
+        cabin_size_by_class={"crew_engineering": 2, "crew_medical": 2},
+    ),
+    public_zones=_diamond_public_zones(),
+    exterior_zones=(
+        "OceanFront", "TerracePool", "NeptunePool", "CalypsoPool",
+        "HorizonTerrace", "OpenAirCinema", "SportsCourt", "CenterCourt",
+    ),
+    public_hvac=(
+        HvacGroupRecipe(
+            "AHU_Public_Fwd",
+            ("PrincessTheater", "GrandCasino", "GuestServices", "ChurchillLounge",
+             "WeddingChapel", "WakeViewBar", "WheelhouseBar", "Bridge"),
+            8.0,
+            "Forward / entertainment.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Public_Mid",
+            ("GrandPlaza", "PromGalleria", "PhotoGallery", "Crooners", "Facets",
+             "ExplorersLounge", "ClubFusion", "MeridianBay", "FineArts",
+             "TheLibrary", "InternetCafe", "GoodSpirits", "CaptainCircle",
+             "ShoreExcursions"),
+            8.0,
+            "Midship promenade / atrium / shops.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Public_Aft",
+            ("CalypsoBar", "MermaidTail", "OutriggerBar", "FitnessCenter",
+             "LotusSpa", "Aerobics", "BeautySalon", "TheConservatory",
+             "Tradewinds", "YouthCenter", "TeenLounge", "IzumiBath"),
+            10.0,
+            "Lido bars / Sun Deck spa / fitness.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Public_Upper",
+            ("TheSanctuary", "OasisBar", "Skywalkers"),
+            8.0,
+            "Sports / Sky decks.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Dining",
+            ("Vivaldi", "Savoy", "PacificMoon", "SantaFe", "International",
+             "KaiSushi", "Sabatini", "Churrascaria", "SterlingSteak",
+             "HorizonCourt", "PregoPizza", "TridentGrill", "Swirls",
+             "CrewMess", "CrewMessOff"),
+            8.0,
+            "Dining venues including crew messes.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Medical",
+            ("MedicalCenter", "IsolWard"),
+            12.0,
+            "Medical + isolation ward.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Service",
+            ("MainGalley", "Laundry", "Stores", "Engine_Room", "SelfLaundry"),
+            15.0,
+            "Service / galley / engine.",
+        ),
+    ),
+    auto_pax_ahu=True,
+    auto_crew_ahu=True,
+    crew_ahu_merged=False,
+    pax_trunk_m3h=1800.0,
+    crew_trunk_m3h=900.0,
+    cabin_relief_m3h=2000.0,
+    cabin_relief_target_ahu="AHU_Public_Mid",
+    cross_zone_links=(
+        {
+            "from": "International",
+            "to": "MainGalley",
+            "flow_rate_m3h": 18000.0,
+            "is_hvac_ducted": False,
+            "path": "Dining_Galley_Exhaust",
+        },
+        {
+            "from": "AHU_Medical",
+            "to": "AHU_Public_Mid",
+            "flow_rate_m3h": 100.0,
+            "is_hvac_ducted": False,
+            "path": "Medical_Door_Leakage",
+        },
+        {
+            "from": "HorizonCourt",
+            "to": "NeptunePool",
+            "flow_rate_m3h": 1000.0,
+            "is_hvac_ducted": False,
+            "path": "Lido_Open_Doorway",
+        },
+    ),
+    adjacency=_diamond_adjacency(),
+    pax_deck_y={
+        5: 56.0, 6: 50.0, 8: 38.0, 9: 32.0, 10: 26.0, 11: 20.0, 12: 14.0,
+        14: 12.0,
+    },
+    crew_deck_y={1: 95.0, 2: 84.0, 3: 72.0},
+    side_x={"Port": 200.0, "Stbd": 200.0},
+)
+
+
 RECIPES: dict[str, CruisePlatformRecipe] = {
     EXPEDITION_CRUISE_450.platform_id: EXPEDITION_CRUISE_450,
     CLASSIC_CRUISE_1900.platform_id: CLASSIC_CRUISE_1900,
     SPIRIT_CRUISE_3000.platform_id: SPIRIT_CRUISE_3000,
+    DIAMOND_PRINCESS.platform_id: DIAMOND_PRINCESS,
 }

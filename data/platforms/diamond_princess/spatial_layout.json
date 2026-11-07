@@ -1,0 +1,2739 @@
+{
+  "platform": "diamond_princess",
+  "description": "Diamond Princess cruise ship (~2,710 passengers + ~1,100 crew = 3,810). Princess Cruises Grand-class, built 2004 by Mitsubishi Heavy Industries: 290m LOA \u00d7 37.5m beam, 115,875 GT, twin-funnel silhouette, 18 decks. 1,353 staterooms across 8 cabin decks (5, 6, 8-12, 14; no deck 13); deck 7 Promenade is all-public. Cabin-corridor resolution (44 pax + 9 crew corridors). Key venues: five main dining rooms, Promenade specialty dining, Grand Plaza atrium, Lido pools and buffet, Sun Deck spa and fitness. CDC Extra-Large AGE target 22.1/100K TD (calibration deferred). Layout follows the Princess accessible-route map and cruisedeckplans.com deck plans (2020 configuration: Kai Sushi and Savoy; the 2026 Crown Grill / Makoto Ocean rebrands are not modeled).",
+  "isolation_unit_capacity": 0,
+  "deck_dimensions": {
+    "length_m": 290.0,
+    "beam_m": 37.5
+  },
+  "confinement_isolation_factor": 0.05,
+  "corridor_direct_contact_factor": 0.15,
+  "graywater_zones": [
+    "Engine_Room"
+  ],
+  "zones": [
+    {
+      "id": "MedicalCenter",
+      "type": "Medical",
+      "traffic": "medium",
+      "volume_m3": 350.0,
+      "deck": "4_Gala",
+      "max_occupancy": 20,
+      "display": {
+        "x": 110,
+        "y": 62
+      },
+      "description": "Medical center. Deck 4 (Gala)."
+    },
+    {
+      "id": "IsolWard",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 140.0,
+      "deck": "4_Gala",
+      "max_occupancy": 4,
+      "display": {
+        "x": 130,
+        "y": 62
+      },
+      "description": "Isolation ward (~4 beds). Deck 4."
+    },
+    {
+      "id": "GrandPlaza",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 6000.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 800,
+      "display": {
+        "x": 118,
+        "y": 56
+      },
+      "description": "Grand Plaza atrium (multi-deck void, decks 5-7). Deck 5."
+    },
+    {
+      "id": "Vivaldi",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 2200.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 380,
+      "display": {
+        "x": 188,
+        "y": 56
+      },
+      "description": "Vivaldi Dining Room (anytime dining). Deck 5. ~380 seats.",
+      "dining_service_type": "mdr",
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "Savoy",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 2200.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 380,
+      "display": {
+        "x": 168,
+        "y": 56
+      },
+      "description": "Savoy Dining Room (traditional). Deck 5. ~380 seats.",
+      "dining_service_type": "mdr",
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "MainGalley",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 1100.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 80,
+      "display": {
+        "x": 30,
+        "y": 56
+      },
+      "description": "Main galley (crew-only service). Deck 5.",
+      "dining_service_type": "galley",
+      "food_contamination_multiplier": 0.5
+    },
+    {
+      "id": "TheLibrary",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 180.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 30,
+      "display": {
+        "x": 58,
+        "y": 56
+      },
+      "description": "The Library. Deck 5."
+    },
+    {
+      "id": "InternetCafe",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 140.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 40,
+      "display": {
+        "x": 78,
+        "y": 56
+      },
+      "description": "Internet Caf\u00e9 (snacks and drinks). Deck 5."
+    },
+    {
+      "id": "FineArts",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 250.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 40,
+      "display": {
+        "x": 92,
+        "y": 56
+      },
+      "description": "Princess Fine Arts Gallery. Deck 5."
+    },
+    {
+      "id": "GoodSpirits",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 180.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 60,
+      "display": {
+        "x": 104,
+        "y": 56
+      },
+      "description": "Good Spirits lounge and bar. Deck 5."
+    },
+    {
+      "id": "CaptainCircle",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 120.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 20,
+      "display": {
+        "x": 134,
+        "y": 56
+      },
+      "description": "Captain's Circle (loyalty lounge). Deck 5."
+    },
+    {
+      "id": "ShoreExcursions",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 100.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 15,
+      "display": {
+        "x": 150,
+        "y": 56
+      },
+      "description": "Shore Excursions desk. Deck 5."
+    },
+    {
+      "id": "SelfLaundry",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 150.0,
+      "deck": "5_Plaza",
+      "max_occupancy": 10,
+      "display": {
+        "x": 205,
+        "y": 56
+      },
+      "description": "Self-service laundromat. Deck 5."
+    },
+    {
+      "id": "PrincessTheater",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 5200.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 1200,
+      "display": {
+        "x": 42,
+        "y": 50
+      },
+      "description": "Princess Theater (lower level deck 6, upper level deck 7). ~1,200 seats."
+    },
+    {
+      "id": "ChurchillLounge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 350.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 80,
+      "display": {
+        "x": 62,
+        "y": 50
+      },
+      "description": "Churchill's Cigar Lounge. Deck 6."
+    },
+    {
+      "id": "WeddingChapel",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 120.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 30,
+      "display": {
+        "x": 78,
+        "y": 50
+      },
+      "description": "Wedding Chapel. Deck 6."
+    },
+    {
+      "id": "GrandCasino",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 1100.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 250,
+      "display": {
+        "x": 100,
+        "y": 50
+      },
+      "description": "Grand Casino. Deck 6."
+    },
+    {
+      "id": "GuestServices",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 200.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 30,
+      "display": {
+        "x": 122,
+        "y": 50
+      },
+      "description": "Guest / passenger services desk. Deck 6."
+    },
+    {
+      "id": "PacificMoon",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 2400.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 380,
+      "display": {
+        "x": 150,
+        "y": 50
+      },
+      "description": "Pacific Moon Dining Room (anytime). Deck 6. ~380 seats.",
+      "dining_service_type": "mdr",
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "SantaFe",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 2400.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 380,
+      "display": {
+        "x": 166,
+        "y": 50
+      },
+      "description": "Santa Fe Dining Room (anytime). Deck 6. ~380 seats.",
+      "dining_service_type": "mdr",
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "International",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 2600.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 400,
+      "display": {
+        "x": 190,
+        "y": 50
+      },
+      "description": "International Dining Room (traditional). Deck 6 aft. ~400 seats.",
+      "dining_service_type": "mdr",
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "WakeViewBar",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 120.0,
+      "deck": "6_Fiesta",
+      "max_occupancy": 30,
+      "display": {
+        "x": 208,
+        "y": 50
+      },
+      "description": "Wake View Bar. Deck 6 aft."
+    },
+    {
+      "id": "WheelhouseBar",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 200.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 60,
+      "display": {
+        "x": 40,
+        "y": 44
+      },
+      "description": "Wheelhouse Bar. Deck 7 forward."
+    },
+    {
+      "id": "MeridianBay",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 250.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 40,
+      "display": {
+        "x": 58,
+        "y": 44
+      },
+      "description": "Meridian Bay lounge. Deck 7."
+    },
+    {
+      "id": "PromGalleria",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 900.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 200,
+      "display": {
+        "x": 82,
+        "y": 44
+      },
+      "description": "Promenade Galleria / The Shops of Princess. Deck 7."
+    },
+    {
+      "id": "Crooners",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 200.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 60,
+      "display": {
+        "x": 100,
+        "y": 44
+      },
+      "description": "Crooners Bar. Deck 7."
+    },
+    {
+      "id": "Facets",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 150.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 40,
+      "display": {
+        "x": 116,
+        "y": 44
+      },
+      "description": "Facets lounge. Deck 7."
+    },
+    {
+      "id": "ExplorersLounge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 350.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 80,
+      "display": {
+        "x": 136,
+        "y": 44
+      },
+      "description": "Explorers Lounge (dance club). Deck 7."
+    },
+    {
+      "id": "PhotoGallery",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 150.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 30,
+      "display": {
+        "x": 152,
+        "y": 44
+      },
+      "description": "Photo Gallery. Deck 7."
+    },
+    {
+      "id": "KaiSushi",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 280.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 60,
+      "display": {
+        "x": 168,
+        "y": 44
+      },
+      "description": "Kai Sushi (Japanese). Deck 7. ~60 seats.",
+      "dining_service_type": "specialty",
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
+    },
+    {
+      "id": "Sabatini",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 320.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 80,
+      "display": {
+        "x": 184,
+        "y": 44
+      },
+      "description": "Sabatini's Italian Trattoria. Deck 7. ~80 seats.",
+      "dining_service_type": "specialty",
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
+    },
+    {
+      "id": "ClubFusion",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 700.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 150,
+      "display": {
+        "x": 206,
+        "y": 44
+      },
+      "description": "Club Fusion (music and dance club). Deck 7."
+    },
+    {
+      "id": "OceanFront",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "7_Promenade",
+      "max_occupancy": 150,
+      "display": {
+        "x": 120,
+        "y": 47
+      },
+      "description": "OceanFront open-deck promenade. Deck 7."
+    },
+    {
+      "id": "TerracePool",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 1500.0,
+      "deck": "12_Aloha",
+      "max_occupancy": 250,
+      "display": {
+        "x": 180,
+        "y": 14
+      },
+      "description": "Terrace Pool, aft open-air pool deck. Deck 12."
+    },
+    {
+      "id": "PregoPizza",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 420.0,
+      "deck": "14_Lido",
+      "max_occupancy": 120,
+      "display": {
+        "x": 45,
+        "y": 12
+      },
+      "description": "Prego Pizzeria (quick service). Deck 14. ~120 seats.",
+      "dining_service_type": "buffet",
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "NeptunePool",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 2500.0,
+      "deck": "14_Lido",
+      "max_occupancy": 400,
+      "display": {
+        "x": 62,
+        "y": 12
+      },
+      "description": "Neptune's Reef & Pool (main pool). Deck 14, open-air."
+    },
+    {
+      "id": "MermaidTail",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 150.0,
+      "deck": "14_Lido",
+      "max_occupancy": 50,
+      "display": {
+        "x": 108,
+        "y": 12
+      },
+      "description": "The Mermaid's Tail Bar. Deck 14."
+    },
+    {
+      "id": "CalypsoPool",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 1800.0,
+      "deck": "14_Lido",
+      "max_occupancy": 300,
+      "display": {
+        "x": 80,
+        "y": 12
+      },
+      "description": "Calypso Reef & Pool. Deck 14, open-air."
+    },
+    {
+      "id": "TridentGrill",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 420.0,
+      "deck": "14_Lido",
+      "max_occupancy": 120,
+      "display": {
+        "x": 98,
+        "y": 12
+      },
+      "description": "Trident Grill (quick service). Deck 14. ~120 seats.",
+      "dining_service_type": "buffet",
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "Swirls",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 80.0,
+      "deck": "14_Lido",
+      "max_occupancy": 20,
+      "display": {
+        "x": 100,
+        "y": 12
+      },
+      "description": "Swirls ice cream bar. Deck 14.",
+      "dining_service_type": "buffet",
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "CalypsoBar",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 150.0,
+      "deck": "14_Lido",
+      "max_occupancy": 50,
+      "display": {
+        "x": 122,
+        "y": 12
+      },
+      "description": "Calypso Bar (pool bar). Deck 14."
+    },
+    {
+      "id": "HorizonCourt",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 3200.0,
+      "deck": "14_Lido",
+      "max_occupancy": 600,
+      "display": {
+        "x": 140,
+        "y": 12
+      },
+      "description": "Horizon Court buffet. Deck 14. ~600 seats.",
+      "dining_service_type": "buffet",
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "Churrascaria",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 320.0,
+      "deck": "14_Lido",
+      "max_occupancy": 80,
+      "display": {
+        "x": 158,
+        "y": 12
+      },
+      "description": "Churrascaria Brazilian Grill. Deck 14. ~80 seats.",
+      "dining_service_type": "specialty",
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
+    },
+    {
+      "id": "SterlingSteak",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 320.0,
+      "deck": "14_Lido",
+      "max_occupancy": 80,
+      "display": {
+        "x": 172,
+        "y": 12
+      },
+      "description": "Sterling Steakhouse. Deck 14. ~80 seats.",
+      "dining_service_type": "specialty",
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
+    },
+    {
+      "id": "OutriggerBar",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 150.0,
+      "deck": "14_Lido",
+      "max_occupancy": 50,
+      "display": {
+        "x": 188,
+        "y": 12
+      },
+      "description": "Outrigger Bar. Deck 14."
+    },
+    {
+      "id": "HorizonTerrace",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "14_Lido",
+      "max_occupancy": 100,
+      "display": {
+        "x": 205,
+        "y": 12
+      },
+      "description": "Horizon Terrace (aft open deck). Deck 14."
+    },
+    {
+      "id": "TheConservatory",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 700.0,
+      "deck": "15_Sun",
+      "max_occupancy": 120,
+      "display": {
+        "x": 40,
+        "y": 10
+      },
+      "description": "The Conservatory (forward lounge). Deck 15."
+    },
+    {
+      "id": "FitnessCenter",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 700.0,
+      "deck": "15_Sun",
+      "max_occupancy": 100,
+      "display": {
+        "x": 62,
+        "y": 10
+      },
+      "description": "Fitness Center. Deck 15."
+    },
+    {
+      "id": "Aerobics",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 400.0,
+      "deck": "15_Sun",
+      "max_occupancy": 80,
+      "display": {
+        "x": 80,
+        "y": 10
+      },
+      "description": "Aerobics studio. Deck 15."
+    },
+    {
+      "id": "LotusSpa",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 1200.0,
+      "deck": "15_Sun",
+      "max_occupancy": 150,
+      "display": {
+        "x": 100,
+        "y": 10
+      },
+      "description": "Lotus Spa. Deck 15."
+    },
+    {
+      "id": "BeautySalon",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 150.0,
+      "deck": "15_Sun",
+      "max_occupancy": 20,
+      "display": {
+        "x": 118,
+        "y": 10
+      },
+      "description": "Beauty Salon. Deck 15."
+    },
+    {
+      "id": "Tradewinds",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 150.0,
+      "deck": "15_Sun",
+      "max_occupancy": 50,
+      "display": {
+        "x": 132,
+        "y": 10
+      },
+      "description": "Tradewinds Bar. Deck 15."
+    },
+    {
+      "id": "OpenAirCinema",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "15_Sun",
+      "max_occupancy": 200,
+      "display": {
+        "x": 155,
+        "y": 10
+      },
+      "description": "Movies Under the Stars (open-air cinema). Deck 15."
+    },
+    {
+      "id": "YouthCenter",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 400.0,
+      "deck": "15_Sun",
+      "max_occupancy": 80,
+      "display": {
+        "x": 175,
+        "y": 10
+      },
+      "description": "Youth Center. Deck 15."
+    },
+    {
+      "id": "TeenLounge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 300.0,
+      "deck": "15_Sun",
+      "max_occupancy": 60,
+      "display": {
+        "x": 192,
+        "y": 10
+      },
+      "description": "Teen Lounge (Beach House). Deck 15."
+    },
+    {
+      "id": "IzumiBath",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 500.0,
+      "deck": "15_Sun",
+      "max_occupancy": 40,
+      "display": {
+        "x": 210,
+        "y": 10
+      },
+      "description": "Izumi Japanese bath. Deck 15."
+    },
+    {
+      "id": "TheSanctuary",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "16_Sports",
+      "max_occupancy": 120,
+      "display": {
+        "x": 90,
+        "y": 8
+      },
+      "description": "The Sanctuary (adults-only retreat). Deck 16."
+    },
+    {
+      "id": "OasisBar",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 150.0,
+      "deck": "16_Sports",
+      "max_occupancy": 50,
+      "display": {
+        "x": 112,
+        "y": 8
+      },
+      "description": "Oasis Bar. Deck 16."
+    },
+    {
+      "id": "SportsCourt",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 600.0,
+      "deck": "16_Sports",
+      "max_occupancy": 100,
+      "display": {
+        "x": 138,
+        "y": 8
+      },
+      "description": "Sports court. Deck 16, open-air."
+    },
+    {
+      "id": "Skywalkers",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 500.0,
+      "deck": "17_Sky",
+      "max_occupancy": 150,
+      "display": {
+        "x": 90,
+        "y": 6
+      },
+      "description": "Skywalkers Nightclub. Deck 17."
+    },
+    {
+      "id": "CenterCourt",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 400.0,
+      "deck": "17_Sky",
+      "max_occupancy": 80,
+      "display": {
+        "x": 140,
+        "y": 6
+      },
+      "description": "Center Court sports area. Deck 17, open-air."
+    },
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 300.0,
+      "deck": "18_Bridge",
+      "max_occupancy": 12,
+      "display": {
+        "x": 150,
+        "y": 4
+      },
+      "description": "Navigating bridge and chartroom. Deck 18."
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 6500.0,
+      "deck": "0_Engine",
+      "max_occupancy": 25,
+      "display": {
+        "x": 80,
+        "y": 100
+      },
+      "description": "Engine room (diesel-electric plant). Deck 0."
+    },
+    {
+      "id": "CrewMess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 900.0,
+      "deck": "1_Crew",
+      "max_occupancy": 250,
+      "display": {
+        "x": 70,
+        "y": 95
+      },
+      "description": "Crew mess. Deck 1. ~250 seats.",
+      "dining_service_type": "crew_mess",
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 4
+    },
+    {
+      "id": "CrewMessOff",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 280.0,
+      "deck": "2_Crew",
+      "max_occupancy": 60,
+      "display": {
+        "x": 70,
+        "y": 84
+      },
+      "description": "Officers mess. Deck 2. ~60 seats.",
+      "dining_service_type": "crew_mess",
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 4
+    },
+    {
+      "id": "Laundry",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 300.0,
+      "deck": "3_Crew",
+      "max_occupancy": 15,
+      "display": {
+        "x": 110,
+        "y": 72
+      },
+      "description": "Industrial laundry. Deck 3."
+    },
+    {
+      "id": "Stores",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 400.0,
+      "deck": "3_Crew",
+      "max_occupancy": 5,
+      "display": {
+        "x": 130,
+        "y": 72
+      },
+      "description": "Provision stores. Deck 3."
+    },
+    {
+      "id": "PC_D8_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "8_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 36.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Port Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D8_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "8_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 36.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Port Mid. ~35 cabins, ~70 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D8_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "8_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 36.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Port Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D8_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "8_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 40.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Stbd Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D8_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "8_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 40.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Stbd Mid. ~35 cabins, ~70 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D8_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "8_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 40.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Stbd Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D9_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "9_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 30.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Port Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D9_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "9_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 30.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Port Mid. ~35 cabins, ~70 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D9_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "9_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 30.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Port Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D9_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "9_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Stbd Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D9_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "9_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Stbd Mid. ~35 cabins, ~70 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D9_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "9_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 34.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Stbd Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D10_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "10_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 24.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Port Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D10_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "10_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 24.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Port Mid. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D10_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "10_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 24.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Port Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D10_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "10_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Stbd Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D10_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "10_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Stbd Mid. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D10_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "10_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 28.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Stbd Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D11_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "11_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 18.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Port Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D11_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "11_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 18.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Port Mid. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D11_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "11_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 18.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Port Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D11_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "11_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 22.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Stbd Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D11_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "11_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 22.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Stbd Mid. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D11_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "11_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 22.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Stbd Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D12_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "12_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 12.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Port Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D12_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "12_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 12.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Port Mid. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D12_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "12_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 12.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Port Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D12_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "12_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 180.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Stbd Fwd. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D12_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "12_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 200.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Stbd Mid. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D12_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "12_Cabins",
+      "max_occupancy": 70,
+      "display": {
+        "x": 220.0,
+        "y": 16.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Stbd Aft. ~35 cabins, ~70 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "CC_D1_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "1_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 144.5,
+        "y": 95.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 1 Fwd. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "CC_D1_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "1_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 159.5,
+        "y": 95.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 1 Mid. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "CC_D1_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "1_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 174.5,
+        "y": 95.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 1 Aft. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "CC_D2_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "2_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 144.5,
+        "y": 84.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 2 Fwd. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "CC_D2_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "2_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 159.5,
+        "y": 84.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 2 Mid. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "CC_D2_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "2_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 174.5,
+        "y": 84.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 2 Aft. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "CC_D3_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "3_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 144.5,
+        "y": 72.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 3 Fwd. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "CC_D3_M",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "3_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 159.5,
+        "y": 72.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 3 Mid. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "CC_D3_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "deck": "3_Crew",
+      "max_occupancy": 120,
+      "display": {
+        "x": 174.5,
+        "y": 72.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 3,
+      "description": "Crew cabin corridor, Deck 3 Aft. ~120 crew, interior HVAC.",
+      "cabin_size_by_class": {
+        "crew_engineering": 2,
+        "crew_medical": 2
+      }
+    },
+    {
+      "id": "PC_D5_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "5_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 180.0,
+        "y": 54.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 5 Port Fwd. ~22 cabins, ~44 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D5_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "5_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 200.0,
+        "y": 54.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 5 Port Mid. ~22 cabins, ~44 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D5_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "5_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 220.0,
+        "y": 54.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 5 Port Aft. ~22 cabins, ~44 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D5_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "5_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 180.0,
+        "y": 58.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 5 Stbd Fwd. ~22 cabins, ~44 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D5_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "5_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 200.0,
+        "y": 58.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 5 Stbd Mid. ~22 cabins, ~44 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D5_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "5_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 220.0,
+        "y": 58.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 5 Stbd Aft. ~22 cabins, ~44 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D6_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "6_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 180.0,
+        "y": 48.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 6 Port Fwd. ~22 cabins, ~44 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D6_P_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "6_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 200.0,
+        "y": 48.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 6 Port Mid. ~22 cabins, ~44 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D6_P_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "6_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 220.0,
+        "y": 48.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 6 Port Aft. ~22 cabins, ~44 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D6_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "6_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 180.0,
+        "y": 52.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 6 Stbd Fwd. ~22 cabins, ~44 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D6_S_M",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "6_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 200.0,
+        "y": 52.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 6 Stbd Mid. ~22 cabins, ~44 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D6_S_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "6_Cabins",
+      "max_occupancy": 44,
+      "display": {
+        "x": 220.0,
+        "y": 52.0
+      },
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (lower bank), Deck 6 Stbd Aft. ~22 cabins, ~44 pax, ventilation=interior_hvac."
+    },
+    {
+      "id": "PC_D14_P_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "14_Cabins",
+      "max_occupancy": 64,
+      "display": {
+        "x": 180.0,
+        "y": 10.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (Lido forward bank), Deck 14 Port Fwd. ~32 cabins, ~64 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "PC_D14_S_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 1300.0,
+      "deck": "14_Cabins",
+      "max_occupancy": 64,
+      "display": {
+        "x": 180.0,
+        "y": 14.0
+      },
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor (Lido forward bank), Deck 14 Stbd Fwd. ~32 cabins, ~64 pax, ventilation=balcony_partial."
+    },
+    {
+      "id": "HD_0E_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "0_Engine",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Engine_Room"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 96.0
+      },
+      "description": "Public head (male, 1 water closet) serving Engine_Room."
+    },
+    {
+      "id": "HD_12A_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "12_Aloha",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "TerracePool"
+      ],
+      "display": {
+        "x": 180.0,
+        "y": 10.0
+      },
+      "description": "Public head (male, 2 water closets) serving TerracePool."
+    },
+    {
+      "id": "HD_12A_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "12_Aloha",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "TerracePool"
+      ],
+      "display": {
+        "x": 180.0,
+        "y": 10.0
+      },
+      "description": "Public head (female, 4 water closets) serving TerracePool."
+    },
+    {
+      "id": "HD_14L_M_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Lido",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "PregoPizza",
+        "NeptunePool",
+        "MermaidTail",
+        "CalypsoPool",
+        "TridentGrill",
+        "Swirls",
+        "CalypsoBar",
+        "HorizonCourt",
+        "Churrascaria",
+        "SterlingSteak",
+        "OutriggerBar",
+        "HorizonTerrace"
+      ],
+      "display": {
+        "x": 123.16666666666667,
+        "y": 8.0
+      },
+      "description": "Public head (male, 9 water closets) serving PregoPizza, NeptunePool, MermaidTail, CalypsoPool, +8 more."
+    },
+    {
+      "id": "HD_14L_M_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Lido",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "PregoPizza",
+        "NeptunePool",
+        "MermaidTail",
+        "CalypsoPool",
+        "TridentGrill",
+        "Swirls",
+        "CalypsoBar",
+        "HorizonCourt",
+        "Churrascaria",
+        "SterlingSteak",
+        "OutriggerBar",
+        "HorizonTerrace"
+      ],
+      "display": {
+        "x": 123.16666666666667,
+        "y": 8.0
+      },
+      "description": "Public head (male, 9 water closets) serving PregoPizza, NeptunePool, MermaidTail, CalypsoPool, +8 more."
+    },
+    {
+      "id": "HD_14L_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Lido",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "PregoPizza",
+        "NeptunePool",
+        "MermaidTail",
+        "CalypsoPool",
+        "TridentGrill",
+        "Swirls",
+        "CalypsoBar",
+        "HorizonCourt",
+        "Churrascaria",
+        "SterlingSteak",
+        "OutriggerBar",
+        "HorizonTerrace"
+      ],
+      "display": {
+        "x": 123.16666666666667,
+        "y": 8.0
+      },
+      "description": "Public head (female, 8 water closets) serving PregoPizza, NeptunePool, MermaidTail, CalypsoPool, +8 more."
+    },
+    {
+      "id": "HD_14L_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Lido",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "PregoPizza",
+        "NeptunePool",
+        "MermaidTail",
+        "CalypsoPool",
+        "TridentGrill",
+        "Swirls",
+        "CalypsoBar",
+        "HorizonCourt",
+        "Churrascaria",
+        "SterlingSteak",
+        "OutriggerBar",
+        "HorizonTerrace"
+      ],
+      "display": {
+        "x": 123.16666666666667,
+        "y": 8.0
+      },
+      "description": "Public head (female, 8 water closets) serving PregoPizza, NeptunePool, MermaidTail, CalypsoPool, +8 more."
+    },
+    {
+      "id": "HD_14L_F_3",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Lido",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "PregoPizza",
+        "NeptunePool",
+        "MermaidTail",
+        "CalypsoPool",
+        "TridentGrill",
+        "Swirls",
+        "CalypsoBar",
+        "HorizonCourt",
+        "Churrascaria",
+        "SterlingSteak",
+        "OutriggerBar",
+        "HorizonTerrace"
+      ],
+      "display": {
+        "x": 123.16666666666667,
+        "y": 8.0
+      },
+      "description": "Public head (female, 8 water closets) serving PregoPizza, NeptunePool, MermaidTail, CalypsoPool, +8 more."
+    },
+    {
+      "id": "HD_15S_M_1",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Sun",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "TheConservatory",
+        "FitnessCenter",
+        "Aerobics",
+        "LotusSpa",
+        "BeautySalon",
+        "Tradewinds",
+        "OpenAirCinema",
+        "YouthCenter",
+        "TeenLounge",
+        "IzumiBath"
+      ],
+      "display": {
+        "x": 126.4,
+        "y": 6.0
+      },
+      "description": "Public head (male, 6 water closets) serving TheConservatory, FitnessCenter, Aerobics, LotusSpa, +6 more."
+    },
+    {
+      "id": "HD_15S_M_2",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Sun",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "TheConservatory",
+        "FitnessCenter",
+        "Aerobics",
+        "LotusSpa",
+        "BeautySalon",
+        "Tradewinds",
+        "OpenAirCinema",
+        "YouthCenter",
+        "TeenLounge",
+        "IzumiBath"
+      ],
+      "display": {
+        "x": 126.4,
+        "y": 6.0
+      },
+      "description": "Public head (male, 6 water closets) serving TheConservatory, FitnessCenter, Aerobics, LotusSpa, +6 more."
+    },
+    {
+      "id": "HD_15S_F_1",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Sun",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "TheConservatory",
+        "FitnessCenter",
+        "Aerobics",
+        "LotusSpa",
+        "BeautySalon",
+        "Tradewinds",
+        "OpenAirCinema",
+        "YouthCenter",
+        "TeenLounge",
+        "IzumiBath"
+      ],
+      "display": {
+        "x": 126.4,
+        "y": 6.0
+      },
+      "description": "Public head (female, 7 water closets) serving TheConservatory, FitnessCenter, Aerobics, LotusSpa, +6 more."
+    },
+    {
+      "id": "HD_15S_F_2",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Sun",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "TheConservatory",
+        "FitnessCenter",
+        "Aerobics",
+        "LotusSpa",
+        "BeautySalon",
+        "Tradewinds",
+        "OpenAirCinema",
+        "YouthCenter",
+        "TeenLounge",
+        "IzumiBath"
+      ],
+      "display": {
+        "x": 126.4,
+        "y": 6.0
+      },
+      "description": "Public head (female, 7 water closets) serving TheConservatory, FitnessCenter, Aerobics, LotusSpa, +6 more."
+    },
+    {
+      "id": "HD_16S_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Sports",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "TheSanctuary",
+        "OasisBar",
+        "SportsCourt"
+      ],
+      "display": {
+        "x": 113.33333333333333,
+        "y": 4.0
+      },
+      "description": "Public head (male, 3 water closets) serving TheSanctuary, OasisBar, SportsCourt."
+    },
+    {
+      "id": "HD_16S_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Sports",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "TheSanctuary",
+        "OasisBar",
+        "SportsCourt"
+      ],
+      "display": {
+        "x": 113.33333333333333,
+        "y": 4.0
+      },
+      "description": "Public head (female, 4 water closets) serving TheSanctuary, OasisBar, SportsCourt."
+    },
+    {
+      "id": "HD_17S_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "17_Sky",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Skywalkers",
+        "CenterCourt"
+      ],
+      "display": {
+        "x": 115.0,
+        "y": 2.0
+      },
+      "description": "Public head (male, 2 water closets) serving Skywalkers, CenterCourt."
+    },
+    {
+      "id": "HD_17S_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "17_Sky",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Skywalkers",
+        "CenterCourt"
+      ],
+      "display": {
+        "x": 115.0,
+        "y": 2.0
+      },
+      "description": "Public head (female, 3 water closets) serving Skywalkers, CenterCourt."
+    },
+    {
+      "id": "HD_18B_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "18_Bridge",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge"
+      ],
+      "display": {
+        "x": 150.0,
+        "y": 0.0
+      },
+      "description": "Public head (male, 1 water closet) serving Bridge."
+    },
+    {
+      "id": "HD_1C_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "CrewMess"
+      ],
+      "display": {
+        "x": 70.0,
+        "y": 91.0
+      },
+      "description": "Public head (male, 2 water closets) serving CrewMess."
+    },
+    {
+      "id": "HD_1C_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "CrewMess"
+      ],
+      "display": {
+        "x": 70.0,
+        "y": 91.0
+      },
+      "description": "Public head (female, 2 water closets) serving CrewMess."
+    },
+    {
+      "id": "HD_2C_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "CrewMessOff"
+      ],
+      "display": {
+        "x": 70.0,
+        "y": 80.0
+      },
+      "description": "Public head (male, 1 water closet) serving CrewMessOff."
+    },
+    {
+      "id": "HD_2C_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "CrewMessOff"
+      ],
+      "display": {
+        "x": 70.0,
+        "y": 80.0
+      },
+      "description": "Public head (female, 1 water closet) serving CrewMessOff."
+    },
+    {
+      "id": "HD_3C_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Laundry",
+        "Stores"
+      ],
+      "display": {
+        "x": 120.0,
+        "y": 68.0
+      },
+      "description": "Public head (male, 2 water closets) serving Laundry, Stores."
+    },
+    {
+      "id": "HD_3C_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Laundry",
+        "Stores"
+      ],
+      "display": {
+        "x": 120.0,
+        "y": 68.0
+      },
+      "description": "Public head (female, 2 water closets) serving Laundry, Stores."
+    },
+    {
+      "id": "HD_4G_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Gala",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "MedicalCenter"
+      ],
+      "display": {
+        "x": 110.0,
+        "y": 58.0
+      },
+      "description": "Public head (male, 1 water closet) serving MedicalCenter."
+    },
+    {
+      "id": "HD_4G_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Gala",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "MedicalCenter"
+      ],
+      "display": {
+        "x": 110.0,
+        "y": 58.0
+      },
+      "description": "Public head (female, 1 water closet) serving MedicalCenter."
+    },
+    {
+      "id": "HD_5P_M_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Plaza",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "GrandPlaza",
+        "Vivaldi",
+        "Savoy",
+        "MainGalley",
+        "TheLibrary",
+        "InternetCafe",
+        "FineArts",
+        "GoodSpirits",
+        "CaptainCircle",
+        "ShoreExcursions",
+        "SelfLaundry"
+      ],
+      "display": {
+        "x": 120.45454545454545,
+        "y": 52.0
+      },
+      "description": "Public head (male, 10 water closets) serving GrandPlaza, Vivaldi, Savoy, MainGalley, +7 more."
+    },
+    {
+      "id": "HD_5P_M_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Plaza",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "GrandPlaza",
+        "Vivaldi",
+        "Savoy",
+        "MainGalley",
+        "TheLibrary",
+        "InternetCafe",
+        "FineArts",
+        "GoodSpirits",
+        "CaptainCircle",
+        "ShoreExcursions",
+        "SelfLaundry"
+      ],
+      "display": {
+        "x": 120.45454545454545,
+        "y": 52.0
+      },
+      "description": "Public head (male, 10 water closets) serving GrandPlaza, Vivaldi, Savoy, MainGalley, +7 more."
+    },
+    {
+      "id": "HD_5P_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Plaza",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "GrandPlaza",
+        "Vivaldi",
+        "Savoy",
+        "MainGalley",
+        "TheLibrary",
+        "InternetCafe",
+        "FineArts",
+        "GoodSpirits",
+        "CaptainCircle",
+        "ShoreExcursions",
+        "SelfLaundry"
+      ],
+      "display": {
+        "x": 120.45454545454545,
+        "y": 52.0
+      },
+      "description": "Public head (female, 8 water closets) serving GrandPlaza, Vivaldi, Savoy, MainGalley, +7 more."
+    },
+    {
+      "id": "HD_5P_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Plaza",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "GrandPlaza",
+        "Vivaldi",
+        "Savoy",
+        "MainGalley",
+        "TheLibrary",
+        "InternetCafe",
+        "FineArts",
+        "GoodSpirits",
+        "CaptainCircle",
+        "ShoreExcursions",
+        "SelfLaundry"
+      ],
+      "display": {
+        "x": 120.45454545454545,
+        "y": 52.0
+      },
+      "description": "Public head (female, 8 water closets) serving GrandPlaza, Vivaldi, Savoy, MainGalley, +7 more."
+    },
+    {
+      "id": "HD_5P_F_3",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Plaza",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "GrandPlaza",
+        "Vivaldi",
+        "Savoy",
+        "MainGalley",
+        "TheLibrary",
+        "InternetCafe",
+        "FineArts",
+        "GoodSpirits",
+        "CaptainCircle",
+        "ShoreExcursions",
+        "SelfLaundry"
+      ],
+      "display": {
+        "x": 120.45454545454545,
+        "y": 52.0
+      },
+      "description": "Public head (female, 8 water closets) serving GrandPlaza, Vivaldi, Savoy, MainGalley, +7 more."
+    },
+    {
+      "id": "HD_6F_M_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Fiesta",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "PrincessTheater",
+        "ChurchillLounge",
+        "WeddingChapel",
+        "GrandCasino",
+        "GuestServices",
+        "PacificMoon",
+        "SantaFe",
+        "International",
+        "WakeViewBar"
+      ],
+      "display": {
+        "x": 124.22222222222223,
+        "y": 46.0
+      },
+      "description": "Public head (male, 10 water closets) serving PrincessTheater, ChurchillLounge, WeddingChapel, GrandCasino, +5 more."
+    },
+    {
+      "id": "HD_6F_M_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Fiesta",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "PrincessTheater",
+        "ChurchillLounge",
+        "WeddingChapel",
+        "GrandCasino",
+        "GuestServices",
+        "PacificMoon",
+        "SantaFe",
+        "International",
+        "WakeViewBar"
+      ],
+      "display": {
+        "x": 124.22222222222223,
+        "y": 46.0
+      },
+      "description": "Public head (male, 10 water closets) serving PrincessTheater, ChurchillLounge, WeddingChapel, GrandCasino, +5 more."
+    },
+    {
+      "id": "HD_6F_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Fiesta",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "PrincessTheater",
+        "ChurchillLounge",
+        "WeddingChapel",
+        "GrandCasino",
+        "GuestServices",
+        "PacificMoon",
+        "SantaFe",
+        "International",
+        "WakeViewBar"
+      ],
+      "display": {
+        "x": 124.22222222222223,
+        "y": 46.0
+      },
+      "description": "Public head (female, 9 water closets) serving PrincessTheater, ChurchillLounge, WeddingChapel, GrandCasino, +5 more."
+    },
+    {
+      "id": "HD_6F_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Fiesta",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "PrincessTheater",
+        "ChurchillLounge",
+        "WeddingChapel",
+        "GrandCasino",
+        "GuestServices",
+        "PacificMoon",
+        "SantaFe",
+        "International",
+        "WakeViewBar"
+      ],
+      "display": {
+        "x": 124.22222222222223,
+        "y": 46.0
+      },
+      "description": "Public head (female, 9 water closets) serving PrincessTheater, ChurchillLounge, WeddingChapel, GrandCasino, +5 more."
+    },
+    {
+      "id": "HD_6F_F_3",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Fiesta",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "PrincessTheater",
+        "ChurchillLounge",
+        "WeddingChapel",
+        "GrandCasino",
+        "GuestServices",
+        "PacificMoon",
+        "SantaFe",
+        "International",
+        "WakeViewBar"
+      ],
+      "display": {
+        "x": 124.22222222222223,
+        "y": 46.0
+      },
+      "description": "Public head (female, 9 water closets) serving PrincessTheater, ChurchillLounge, WeddingChapel, GrandCasino, +5 more."
+    },
+    {
+      "id": "HD_7P_M_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "WheelhouseBar",
+        "MeridianBay",
+        "PromGalleria",
+        "Crooners",
+        "Facets",
+        "ExplorersLounge",
+        "PhotoGallery",
+        "KaiSushi",
+        "Sabatini",
+        "ClubFusion",
+        "OceanFront"
+      ],
+      "display": {
+        "x": 123.81818181818181,
+        "y": 40.27272727272727
+      },
+      "description": "Public head (male, 6 water closets) serving WheelhouseBar, MeridianBay, PromGalleria, Crooners, +7 more."
+    },
+    {
+      "id": "HD_7P_M_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "WheelhouseBar",
+        "MeridianBay",
+        "PromGalleria",
+        "Crooners",
+        "Facets",
+        "ExplorersLounge",
+        "PhotoGallery",
+        "KaiSushi",
+        "Sabatini",
+        "ClubFusion",
+        "OceanFront"
+      ],
+      "display": {
+        "x": 123.81818181818181,
+        "y": 40.27272727272727
+      },
+      "description": "Public head (male, 6 water closets) serving WheelhouseBar, MeridianBay, PromGalleria, Crooners, +7 more."
+    },
+    {
+      "id": "HD_7P_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "WheelhouseBar",
+        "MeridianBay",
+        "PromGalleria",
+        "Crooners",
+        "Facets",
+        "ExplorersLounge",
+        "PhotoGallery",
+        "KaiSushi",
+        "Sabatini",
+        "ClubFusion",
+        "OceanFront"
+      ],
+      "display": {
+        "x": 123.81818181818181,
+        "y": 40.27272727272727
+      },
+      "description": "Public head (female, 7 water closets) serving WheelhouseBar, MeridianBay, PromGalleria, Crooners, +7 more."
+    },
+    {
+      "id": "HD_7P_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "WheelhouseBar",
+        "MeridianBay",
+        "PromGalleria",
+        "Crooners",
+        "Facets",
+        "ExplorersLounge",
+        "PhotoGallery",
+        "KaiSushi",
+        "Sabatini",
+        "ClubFusion",
+        "OceanFront"
+      ],
+      "display": {
+        "x": 123.81818181818181,
+        "y": 40.27272727272727
+      },
+      "description": "Public head (female, 7 water closets) serving WheelhouseBar, MeridianBay, PromGalleria, Crooners, +7 more."
+    }
+  ],
+  "nominal_complement": {
+    "passengers": 2710,
+    "crew": 1100
+  }
+}

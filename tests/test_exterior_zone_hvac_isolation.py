@@ -21,6 +21,10 @@ CRUISE_EXTERIORS = {
     "classic_cruise_1900": {"PoolDeck"},
     "expedition_cruise_300": {"Pool_Deck"},
     "expedition_cruise_450": {"PoolDeck"},
+    "diamond_princess": {
+        "OceanFront", "TerracePool", "NeptunePool", "CalypsoPool",
+        "HorizonTerrace", "OpenAirCinema", "SportsCourt", "CenterCourt",
+    },
 }
 
 

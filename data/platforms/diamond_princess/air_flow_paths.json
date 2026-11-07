@@ -1,0 +1,1680 @@
+{
+  "platform": "diamond_princess",
+  "description": "HVAC for diamond_princess cabin-corridor layout. Population ~3810.",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "AHU_Pax_D8",
+      "rooms": [
+        "PC_D8_P_F",
+        "PC_D8_P_M",
+        "PC_D8_P_A",
+        "PC_D8_S_F",
+        "PC_D8_S_M",
+        "PC_D8_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 8 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D9",
+      "rooms": [
+        "PC_D9_P_F",
+        "PC_D9_P_M",
+        "PC_D9_P_A",
+        "PC_D9_S_F",
+        "PC_D9_S_M",
+        "PC_D9_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 9 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D10",
+      "rooms": [
+        "PC_D10_P_F",
+        "PC_D10_P_M",
+        "PC_D10_P_A",
+        "PC_D10_S_F",
+        "PC_D10_S_M",
+        "PC_D10_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 10 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D11",
+      "rooms": [
+        "PC_D11_P_F",
+        "PC_D11_P_M",
+        "PC_D11_P_A",
+        "PC_D11_S_F",
+        "PC_D11_S_M",
+        "PC_D11_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 11 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_Pax_D12",
+      "rooms": [
+        "PC_D12_P_F",
+        "PC_D12_P_M",
+        "PC_D12_P_A",
+        "PC_D12_S_F",
+        "PC_D12_S_M",
+        "PC_D12_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 12 passenger cabin fan-coil branch."
+    },
+    {
+      "id": "AHU_PC_D5",
+      "rooms": [
+        "PC_D5_P_F",
+        "PC_D5_P_M",
+        "PC_D5_P_A",
+        "PC_D5_S_F",
+        "PC_D5_S_M",
+        "PC_D5_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 5 PC cabin branch."
+    },
+    {
+      "id": "AHU_PC_D6",
+      "rooms": [
+        "PC_D6_P_F",
+        "PC_D6_P_M",
+        "PC_D6_P_A",
+        "PC_D6_S_F",
+        "PC_D6_S_M",
+        "PC_D6_S_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 6 PC cabin branch."
+    },
+    {
+      "id": "AHU_PC_D14",
+      "rooms": [
+        "PC_D14_P_F",
+        "PC_D14_S_F"
+      ],
+      "ach": 6.0,
+      "description": "Deck 14 PC cabin branch."
+    },
+    {
+      "id": "AHU_Public_Fwd",
+      "rooms": [
+        "PrincessTheater",
+        "GrandCasino",
+        "GuestServices",
+        "ChurchillLounge",
+        "WeddingChapel",
+        "WakeViewBar",
+        "WheelhouseBar",
+        "Bridge"
+      ],
+      "ach": 8.0,
+      "description": "Forward / entertainment."
+    },
+    {
+      "id": "AHU_Public_Mid",
+      "rooms": [
+        "GrandPlaza",
+        "PromGalleria",
+        "PhotoGallery",
+        "Crooners",
+        "Facets",
+        "ExplorersLounge",
+        "ClubFusion",
+        "MeridianBay",
+        "FineArts",
+        "TheLibrary",
+        "InternetCafe",
+        "GoodSpirits",
+        "CaptainCircle",
+        "ShoreExcursions"
+      ],
+      "ach": 8.0,
+      "description": "Midship promenade / atrium / shops."
+    },
+    {
+      "id": "AHU_Public_Aft",
+      "rooms": [
+        "CalypsoBar",
+        "MermaidTail",
+        "OutriggerBar",
+        "FitnessCenter",
+        "LotusSpa",
+        "Aerobics",
+        "BeautySalon",
+        "TheConservatory",
+        "Tradewinds",
+        "YouthCenter",
+        "TeenLounge",
+        "IzumiBath"
+      ],
+      "ach": 10.0,
+      "description": "Lido bars / Sun Deck spa / fitness."
+    },
+    {
+      "id": "AHU_Public_Upper",
+      "rooms": [
+        "TheSanctuary",
+        "OasisBar",
+        "Skywalkers"
+      ],
+      "ach": 8.0,
+      "description": "Sports / Sky decks."
+    },
+    {
+      "id": "AHU_Dining",
+      "rooms": [
+        "Vivaldi",
+        "Savoy",
+        "PacificMoon",
+        "SantaFe",
+        "International",
+        "KaiSushi",
+        "Sabatini",
+        "Churrascaria",
+        "SterlingSteak",
+        "HorizonCourt",
+        "PregoPizza",
+        "TridentGrill",
+        "Swirls",
+        "CrewMess",
+        "CrewMessOff"
+      ],
+      "ach": 8.0,
+      "description": "Dining venues including crew messes."
+    },
+    {
+      "id": "AHU_Medical",
+      "rooms": [
+        "MedicalCenter",
+        "IsolWard"
+      ],
+      "ach": 12.0,
+      "description": "Medical + isolation ward."
+    },
+    {
+      "id": "AHU_Service",
+      "rooms": [
+        "MainGalley",
+        "Laundry",
+        "Stores",
+        "Engine_Room",
+        "SelfLaundry"
+      ],
+      "ach": 15.0,
+      "description": "Service / galley / engine."
+    },
+    {
+      "id": "AHU_Crew_D1",
+      "rooms": [
+        "CC_D1_F",
+        "CC_D1_M",
+        "CC_D1_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 1 crew accommodation branch."
+    },
+    {
+      "id": "AHU_Crew_D2",
+      "rooms": [
+        "CC_D2_F",
+        "CC_D2_M",
+        "CC_D2_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 2 crew accommodation branch."
+    },
+    {
+      "id": "AHU_Crew_D3",
+      "rooms": [
+        "CC_D3_F",
+        "CC_D3_M",
+        "CC_D3_A"
+      ],
+      "ach": 6.0,
+      "description": "Deck 3 crew accommodation branch."
+    },
+    {
+      "id": "AHU_HD_0E_M",
+      "rooms": [
+        "HD_0E_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_0E_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_12A_M",
+      "rooms": [
+        "HD_12A_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_12A_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_12A_F",
+      "rooms": [
+        "HD_12A_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_12A_F, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_14L_M_1",
+      "rooms": [
+        "HD_14L_M_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_14L_M_1, 9 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_14L_M_2",
+      "rooms": [
+        "HD_14L_M_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_14L_M_2, 9 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_14L_F_1",
+      "rooms": [
+        "HD_14L_F_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_14L_F_1, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_14L_F_2",
+      "rooms": [
+        "HD_14L_F_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_14L_F_2, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_14L_F_3",
+      "rooms": [
+        "HD_14L_F_3"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_14L_F_3, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_15S_M_1",
+      "rooms": [
+        "HD_15S_M_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_15S_M_1, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_15S_M_2",
+      "rooms": [
+        "HD_15S_M_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_15S_M_2, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_15S_F_1",
+      "rooms": [
+        "HD_15S_F_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_15S_F_1, 7 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_15S_F_2",
+      "rooms": [
+        "HD_15S_F_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_15S_F_2, 7 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_16S_M",
+      "rooms": [
+        "HD_16S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_16S_M, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_16S_F",
+      "rooms": [
+        "HD_16S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_16S_F, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_17S_M",
+      "rooms": [
+        "HD_17S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_17S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_17S_F",
+      "rooms": [
+        "HD_17S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_17S_F, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_18B_M",
+      "rooms": [
+        "HD_18B_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_18B_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_1C_M",
+      "rooms": [
+        "HD_1C_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_1C_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_1C_F",
+      "rooms": [
+        "HD_1C_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_1C_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_2C_M",
+      "rooms": [
+        "HD_2C_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_2C_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_2C_F",
+      "rooms": [
+        "HD_2C_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_2C_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_3C_M",
+      "rooms": [
+        "HD_3C_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_3C_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_3C_F",
+      "rooms": [
+        "HD_3C_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_3C_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_4G_M",
+      "rooms": [
+        "HD_4G_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_4G_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_4G_F",
+      "rooms": [
+        "HD_4G_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_4G_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_5P_M_1",
+      "rooms": [
+        "HD_5P_M_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_5P_M_1, 10 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_5P_M_2",
+      "rooms": [
+        "HD_5P_M_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_5P_M_2, 10 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_5P_F_1",
+      "rooms": [
+        "HD_5P_F_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_5P_F_1, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_5P_F_2",
+      "rooms": [
+        "HD_5P_F_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_5P_F_2, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_5P_F_3",
+      "rooms": [
+        "HD_5P_F_3"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_5P_F_3, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_6F_M_1",
+      "rooms": [
+        "HD_6F_M_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_6F_M_1, 10 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_6F_M_2",
+      "rooms": [
+        "HD_6F_M_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_6F_M_2, 10 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_6F_F_1",
+      "rooms": [
+        "HD_6F_F_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_6F_F_1, 9 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_6F_F_2",
+      "rooms": [
+        "HD_6F_F_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_6F_F_2, 9 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_6F_F_3",
+      "rooms": [
+        "HD_6F_F_3"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_6F_F_3, 9 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_7P_M_1",
+      "rooms": [
+        "HD_7P_M_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_7P_M_1, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_7P_M_2",
+      "rooms": [
+        "HD_7P_M_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_7P_M_2, 6 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_7P_F_1",
+      "rooms": [
+        "HD_7P_F_1"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_7P_F_1, 7 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_7P_F_2",
+      "rooms": [
+        "HD_7P_F_2"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_7P_F_2, 7 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "International",
+      "to": "MainGalley",
+      "flow_rate_m3h": 18000.0,
+      "is_hvac_ducted": false,
+      "path": "Dining_Galley_Exhaust"
+    },
+    {
+      "from": "AHU_Medical",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 100.0,
+      "is_hvac_ducted": false,
+      "path": "Medical_Door_Leakage"
+    },
+    {
+      "from": "HorizonCourt",
+      "to": "NeptunePool",
+      "flow_rate_m3h": 1000.0,
+      "is_hvac_ducted": false,
+      "path": "Lido_Open_Doorway"
+    },
+    {
+      "from": "AHU_Pax_D8",
+      "to": "AHU_Pax_D9",
+      "flow_rate_m3h": 1800.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D8_D9"
+    },
+    {
+      "from": "AHU_Pax_D9",
+      "to": "AHU_Pax_D10",
+      "flow_rate_m3h": 1800.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D9_D10"
+    },
+    {
+      "from": "AHU_Pax_D10",
+      "to": "AHU_Pax_D11",
+      "flow_rate_m3h": 1800.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D10_D11"
+    },
+    {
+      "from": "AHU_Pax_D11",
+      "to": "AHU_Pax_D12",
+      "flow_rate_m3h": 1800.0,
+      "is_hvac_ducted": true,
+      "path": "Pax_Trunk_D11_D12"
+    },
+    {
+      "from": "AHU_Crew_D1",
+      "to": "AHU_Crew_D2",
+      "flow_rate_m3h": 900.0,
+      "is_hvac_ducted": true,
+      "path": "Crew_Trunk_D1_D2"
+    },
+    {
+      "from": "AHU_Crew_D2",
+      "to": "AHU_Crew_D3",
+      "flow_rate_m3h": 900.0,
+      "is_hvac_ducted": true,
+      "path": "Crew_Trunk_D2_D3"
+    },
+    {
+      "from": "AHU_Pax_D8",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 2000.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D8"
+    },
+    {
+      "from": "AHU_Pax_D9",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 2000.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D9"
+    },
+    {
+      "from": "AHU_Pax_D10",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 2000.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D10"
+    },
+    {
+      "from": "AHU_Pax_D11",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 2000.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D11"
+    },
+    {
+      "from": "AHU_Pax_D12",
+      "to": "AHU_Public_Mid",
+      "flow_rate_m3h": 2000.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Relief_D12"
+    },
+    {
+      "from": "AHU_Service",
+      "to": "AHU_HD_0E_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_0E_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Pax_D12",
+      "to": "AHU_HD_12A_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_12A_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Pax_D12",
+      "to": "AHU_HD_12A_F",
+      "flow_rate_m3h": 475.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_12A_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_14L_M_1",
+      "flow_rate_m3h": 1070.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_14L_M_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_14L_M_2",
+      "flow_rate_m3h": 1070.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_14L_M_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_14L_F_1",
+      "flow_rate_m3h": 951.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_14L_F_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_14L_F_2",
+      "flow_rate_m3h": 951.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_14L_F_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_14L_F_3",
+      "flow_rate_m3h": 951.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_14L_F_3; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Aft",
+      "to": "AHU_HD_15S_M_1",
+      "flow_rate_m3h": 713.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_15S_M_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Aft",
+      "to": "AHU_HD_15S_M_2",
+      "flow_rate_m3h": 713.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_15S_M_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Aft",
+      "to": "AHU_HD_15S_F_1",
+      "flow_rate_m3h": 832.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_15S_F_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Aft",
+      "to": "AHU_HD_15S_F_2",
+      "flow_rate_m3h": 832.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_15S_F_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Upper",
+      "to": "AHU_HD_16S_M",
+      "flow_rate_m3h": 356.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_16S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Upper",
+      "to": "AHU_HD_16S_F",
+      "flow_rate_m3h": 475.7,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_16S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Upper",
+      "to": "AHU_HD_17S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_17S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Upper",
+      "to": "AHU_HD_17S_F",
+      "flow_rate_m3h": 356.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_17S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Fwd",
+      "to": "AHU_HD_18B_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_18B_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_1C_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_1C_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_1C_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_1C_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_2C_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_2C_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Dining",
+      "to": "AHU_HD_2C_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_2C_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Service",
+      "to": "AHU_HD_3C_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_3C_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Service",
+      "to": "AHU_HD_3C_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_3C_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Medical",
+      "to": "AHU_HD_4G_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_4G_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Medical",
+      "to": "AHU_HD_4G_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_4G_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_5P_M_1",
+      "flow_rate_m3h": 1189.3,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_5P_M_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_5P_M_2",
+      "flow_rate_m3h": 1189.3,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_5P_M_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_5P_F_1",
+      "flow_rate_m3h": 951.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_5P_F_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_5P_F_2",
+      "flow_rate_m3h": 951.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_5P_F_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_5P_F_3",
+      "flow_rate_m3h": 951.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_5P_F_3; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Fwd",
+      "to": "AHU_HD_6F_M_1",
+      "flow_rate_m3h": 1189.3,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_6F_M_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Fwd",
+      "to": "AHU_HD_6F_M_2",
+      "flow_rate_m3h": 1189.3,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_6F_M_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Fwd",
+      "to": "AHU_HD_6F_F_1",
+      "flow_rate_m3h": 1070.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_6F_F_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Fwd",
+      "to": "AHU_HD_6F_F_2",
+      "flow_rate_m3h": 1070.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_6F_F_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Fwd",
+      "to": "AHU_HD_6F_F_3",
+      "flow_rate_m3h": 1070.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_6F_F_3; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_7P_M_1",
+      "flow_rate_m3h": 713.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_7P_M_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_7P_M_2",
+      "flow_rate_m3h": 713.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_7P_M_2; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_7P_F_1",
+      "flow_rate_m3h": 832.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_7P_F_1; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_HD_7P_F_2",
+      "flow_rate_m3h": 832.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_7P_F_2; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "GrandPlaza",
+      "to": "TheLibrary",
+      "type": "passageway"
+    },
+    {
+      "from": "GrandPlaza",
+      "to": "FineArts",
+      "type": "passageway"
+    },
+    {
+      "from": "GrandPlaza",
+      "to": "GoodSpirits",
+      "type": "passageway"
+    },
+    {
+      "from": "GrandPlaza",
+      "to": "CaptainCircle",
+      "type": "doorway"
+    },
+    {
+      "from": "Vivaldi",
+      "to": "MainGalley",
+      "type": "service_hatch"
+    },
+    {
+      "from": "Savoy",
+      "to": "MainGalley",
+      "type": "service_hatch"
+    },
+    {
+      "from": "MedicalCenter",
+      "to": "IsolWard",
+      "type": "doorway"
+    },
+    {
+      "from": "MedicalCenter",
+      "to": "GrandPlaza",
+      "type": "stairwell"
+    },
+    {
+      "from": "PrincessTheater",
+      "to": "ChurchillLounge",
+      "type": "passageway"
+    },
+    {
+      "from": "ChurchillLounge",
+      "to": "WeddingChapel",
+      "type": "doorway"
+    },
+    {
+      "from": "ChurchillLounge",
+      "to": "GrandCasino",
+      "type": "passageway"
+    },
+    {
+      "from": "GrandCasino",
+      "to": "GuestServices",
+      "type": "passageway"
+    },
+    {
+      "from": "PacificMoon",
+      "to": "SantaFe",
+      "type": "passageway"
+    },
+    {
+      "from": "SantaFe",
+      "to": "International",
+      "type": "passageway"
+    },
+    {
+      "from": "International",
+      "to": "WakeViewBar",
+      "type": "passageway"
+    },
+    {
+      "from": "WheelhouseBar",
+      "to": "MeridianBay",
+      "type": "passageway"
+    },
+    {
+      "from": "MeridianBay",
+      "to": "PromGalleria",
+      "type": "passageway"
+    },
+    {
+      "from": "PromGalleria",
+      "to": "Crooners",
+      "type": "passageway"
+    },
+    {
+      "from": "Crooners",
+      "to": "Facets",
+      "type": "passageway"
+    },
+    {
+      "from": "Facets",
+      "to": "ExplorersLounge",
+      "type": "passageway"
+    },
+    {
+      "from": "ExplorersLounge",
+      "to": "PhotoGallery",
+      "type": "passageway"
+    },
+    {
+      "from": "PhotoGallery",
+      "to": "KaiSushi",
+      "type": "passageway"
+    },
+    {
+      "from": "KaiSushi",
+      "to": "Sabatini",
+      "type": "passageway"
+    },
+    {
+      "from": "Sabatini",
+      "to": "ClubFusion",
+      "type": "passageway"
+    },
+    {
+      "from": "OceanFront",
+      "to": "PromGalleria",
+      "type": "open_front"
+    },
+    {
+      "from": "PregoPizza",
+      "to": "TridentGrill",
+      "type": "passageway"
+    },
+    {
+      "from": "PregoPizza",
+      "to": "NeptunePool",
+      "type": "doorway"
+    },
+    {
+      "from": "TridentGrill",
+      "to": "CalypsoPool",
+      "type": "doorway"
+    },
+    {
+      "from": "NeptunePool",
+      "to": "CalypsoPool",
+      "type": "open_deck"
+    },
+    {
+      "from": "CalypsoPool",
+      "to": "CalypsoBar",
+      "type": "doorway"
+    },
+    {
+      "from": "NeptunePool",
+      "to": "HorizonCourt",
+      "type": "doorway"
+    },
+    {
+      "from": "HorizonCourt",
+      "to": "CalypsoBar",
+      "type": "passageway"
+    },
+    {
+      "from": "HorizonCourt",
+      "to": "SterlingSteak",
+      "type": "passageway"
+    },
+    {
+      "from": "HorizonCourt",
+      "to": "OutriggerBar",
+      "type": "passageway"
+    },
+    {
+      "from": "OutriggerBar",
+      "to": "HorizonTerrace",
+      "type": "passageway"
+    },
+    {
+      "from": "MermaidTail",
+      "to": "CalypsoBar",
+      "type": "passageway"
+    },
+    {
+      "from": "Swirls",
+      "to": "CalypsoBar",
+      "type": "passageway"
+    },
+    {
+      "from": "TheConservatory",
+      "to": "OpenAirCinema",
+      "type": "open_deck"
+    },
+    {
+      "from": "OpenAirCinema",
+      "to": "Tradewinds",
+      "type": "passageway"
+    },
+    {
+      "from": "FitnessCenter",
+      "to": "LotusSpa",
+      "type": "passageway"
+    },
+    {
+      "from": "LotusSpa",
+      "to": "Aerobics",
+      "type": "passageway"
+    },
+    {
+      "from": "BeautySalon",
+      "to": "LotusSpa",
+      "type": "passageway"
+    },
+    {
+      "from": "YouthCenter",
+      "to": "TeenLounge",
+      "type": "passageway"
+    },
+    {
+      "from": "TeenLounge",
+      "to": "IzumiBath",
+      "type": "passageway"
+    },
+    {
+      "from": "TheSanctuary",
+      "to": "SportsCourt",
+      "type": "passageway"
+    },
+    {
+      "from": "TheSanctuary",
+      "to": "OasisBar",
+      "type": "passageway"
+    },
+    {
+      "from": "Skywalkers",
+      "to": "CenterCourt",
+      "type": "passageway"
+    },
+    {
+      "from": "Bridge",
+      "to": "Skywalkers",
+      "type": "stairwell"
+    },
+    {
+      "from": "CrewMess",
+      "to": "MainGalley",
+      "type": "service_stairwell"
+    },
+    {
+      "from": "CrewMessOff",
+      "to": "MainGalley",
+      "type": "service_stairwell"
+    },
+    {
+      "from": "Laundry",
+      "to": "Stores",
+      "type": "service_corridor"
+    },
+    {
+      "from": "Stores",
+      "to": "Engine_Room",
+      "type": "ladder_well"
+    },
+    {
+      "from": "PC_D5_P_M",
+      "to": "GrandPlaza",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_S_M",
+      "to": "Savoy",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_F",
+      "to": "PrincessTheater",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_M",
+      "to": "PacificMoon",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_S_A",
+      "to": "International",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D14_P_F",
+      "to": "HorizonCourt",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D12_S_A",
+      "to": "TerracePool",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D1_F",
+      "to": "CrewMess",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D1_A",
+      "to": "Engine_Room",
+      "type": "ladder_well"
+    },
+    {
+      "from": "CC_D2_M",
+      "to": "CrewMessOff",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D3_F",
+      "to": "Laundry",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D3_A",
+      "to": "Stores",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_P_F",
+      "to": "PC_D5_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_P_M",
+      "to": "PC_D5_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_S_F",
+      "to": "PC_D5_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_S_M",
+      "to": "PC_D5_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D5_P_M",
+      "to": "PC_D5_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D6_P_F",
+      "to": "PC_D6_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_M",
+      "to": "PC_D6_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_S_F",
+      "to": "PC_D6_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_S_M",
+      "to": "PC_D6_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D6_P_M",
+      "to": "PC_D6_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D8_P_F",
+      "to": "PC_D8_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D8_P_M",
+      "to": "PC_D8_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D8_S_F",
+      "to": "PC_D8_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D8_S_M",
+      "to": "PC_D8_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D8_P_M",
+      "to": "PC_D8_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D9_P_F",
+      "to": "PC_D9_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_P_M",
+      "to": "PC_D9_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_S_F",
+      "to": "PC_D9_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_S_M",
+      "to": "PC_D9_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D9_P_M",
+      "to": "PC_D9_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D10_P_F",
+      "to": "PC_D10_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_P_M",
+      "to": "PC_D10_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_S_F",
+      "to": "PC_D10_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_S_M",
+      "to": "PC_D10_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D10_P_M",
+      "to": "PC_D10_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D11_P_F",
+      "to": "PC_D11_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D11_P_M",
+      "to": "PC_D11_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D11_S_F",
+      "to": "PC_D11_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D11_S_M",
+      "to": "PC_D11_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D11_P_M",
+      "to": "PC_D11_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D12_P_F",
+      "to": "PC_D12_P_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D12_P_M",
+      "to": "PC_D12_P_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D12_S_F",
+      "to": "PC_D12_S_M",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D12_S_M",
+      "to": "PC_D12_S_A",
+      "type": "corridor"
+    },
+    {
+      "from": "PC_D12_P_M",
+      "to": "PC_D12_S_M",
+      "type": "passageway"
+    },
+    {
+      "from": "PC_D5_P_M",
+      "to": "PC_D6_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D5_S_M",
+      "to": "PC_D6_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D8_P_M",
+      "to": "PC_D9_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D8_S_M",
+      "to": "PC_D9_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D9_P_M",
+      "to": "PC_D10_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D9_S_M",
+      "to": "PC_D10_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D10_P_M",
+      "to": "PC_D11_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D10_S_M",
+      "to": "PC_D11_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D11_P_M",
+      "to": "PC_D12_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D11_S_M",
+      "to": "PC_D12_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D6_P_M",
+      "to": "PC_D8_P_M",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D6_S_M",
+      "to": "PC_D8_S_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D12_P_F",
+      "to": "PC_D14_P_F",
+      "type": "stairwell"
+    },
+    {
+      "from": "PC_D12_S_F",
+      "to": "PC_D14_S_F",
+      "type": "elevator_bank"
+    },
+    {
+      "from": "PC_D14_P_F",
+      "to": "PC_D14_S_F",
+      "type": "passageway"
+    },
+    {
+      "from": "CC_D1_F",
+      "to": "CC_D1_M",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D1_M",
+      "to": "CC_D1_A",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D1_F",
+      "to": "CC_D2_F",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D1_M",
+      "to": "CC_D2_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D1_A",
+      "to": "CC_D2_A",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D2_F",
+      "to": "CC_D2_M",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D2_M",
+      "to": "CC_D2_A",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D2_F",
+      "to": "CC_D3_F",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D2_M",
+      "to": "CC_D3_M",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D2_A",
+      "to": "CC_D3_A",
+      "type": "stairwell"
+    },
+    {
+      "from": "CC_D3_F",
+      "to": "CC_D3_M",
+      "type": "corridor"
+    },
+    {
+      "from": "CC_D3_M",
+      "to": "CC_D3_A",
+      "type": "corridor"
+    }
+  ]
+}
