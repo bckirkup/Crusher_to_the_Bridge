@@ -346,3 +346,22 @@ queue `picard-campaign-queue`.
   Needs `reducer-v10` → `picard-reducer:13` (PassRole leg) and a
   re-dispatch under a new reduction id (derived store is create-only).
 
+### Reducer image `reducer-v10` (2026-11-07 11:32 UTC)
+
+- PR #1159 merged (main 8812cdf3): `materialize._MAX_ROW_BYTES` 64 KiB →
+  256 KiB. `deploy/aws/Dockerfile.analysis` rebuilt from 8812cdf3 as
+  `picard-boundary-analysis:reducer-v10` @
+  `sha256:006954a6a6acbe08d499ac8ed54ff985a86341a0e2d2e0a2c2872ff06d2bc426`
+  (in-image cap 262144, `FIRST_PAPER_SCALAR.json` = 1.5.0, reducer-smoke
+  target passed). `deploy/aws/reducer_jobdef_spec.json` pinned to it;
+  `picard-reducer:13` register is the PassRole leg (Benjamin, CloudShell).
+- Re-dispatch request `red-fps01-sens01-scout2` (same 1,728 sources,
+  1,536-run cohort; builder utc 2026-11-07T11:16Z) uploaded to
+  `campaign/_derived/reducer/v1/requests/red-fps01-sens01-scout2-{sources,request,cohort}.json`.
+  Request sha — canonical (materialize)
+  `85ea4660c72608baafe34c9f5181f8436e0157bfb80c80fff0a9adb5b1fdd452`;
+  raw bytes `a981f04da38bd5e55a85c2cb871f3431235be5fabe458d5f853af7e8254cab7c`.
+  Budget check: `max_output_bytes` 300 MB vs ≈170 MB projected scout vectors
+  (1,536 × ~110 KB) — the main-wave request must size `max_output_bytes`
+  for ≈1.2 GB (11,136 rows) before dispatch.
+
