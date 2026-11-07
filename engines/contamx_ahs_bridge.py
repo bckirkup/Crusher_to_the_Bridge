@@ -84,36 +84,56 @@ def _group_ahs_terminal_flows(
             "returns": {}, "supplies": {}, "recirc": 0.0, "oa_by_room": {},
         }
     )
-
     for entry in path_map_entries:
-        ahs_nr = int(entry.get("ahs_nr") or 0)
-        if ahs_nr <= 0:
-            continue
-        kind = str(entry.get("kind", ""))
-        pnr = int(entry["path_nr"])
-        flow = abs(float(path_flows_m3h.get(pnr, 0.0)))
-
-        group = by_ahs[ahs_nr]
-        declared_oa = entry.get("declared_oa_fraction")
-        if declared_oa is not None and kind in {"ahs_return", "ahs_supply"}:
-            room = (
-                entry["from_zone"] if kind == "ahs_return"
-                else entry["to_zone"]
-            )
-            if room in known_zones:
-                group["oa_by_room"][room] = float(declared_oa)
-        if kind == "ahs_return":
-            room = entry["from_zone"]
-            if room in known_zones:
-                group["returns"][room] = group["returns"].get(room, 0.0) + flow
-        elif kind == "ahs_supply":
-            room = entry["to_zone"]
-            if room in known_zones:
-                group["supplies"][room] = group["supplies"].get(room, 0.0) + flow
-        elif kind == "ahs_recirc":
-            group["recirc"] += flow
-
+        _accumulate_ahs_entry(by_ahs, entry, path_flows_m3h, known_zones)
     return by_ahs
+
+
+def _accumulate_ahs_entry(
+    by_ahs: dict[int, dict[str, Any]],
+    entry: dict[str, Any],
+    path_flows_m3h: dict[int, float],
+    known_zones: set[str],
+) -> None:
+    """Add one path-map entry's flow and declared OA to its AHS group."""
+    ahs_nr = int(entry.get("ahs_nr") or 0)
+    if ahs_nr <= 0:
+        return
+    kind = str(entry.get("kind", ""))
+    pnr = int(entry["path_nr"])
+    flow = abs(float(path_flows_m3h.get(pnr, 0.0)))
+
+    group = by_ahs[ahs_nr]
+    _record_declared_oa(group, entry, kind, known_zones)
+    if kind == "ahs_return":
+        _add_room_flow(group["returns"], entry["from_zone"], flow, known_zones)
+    elif kind == "ahs_supply":
+        _add_room_flow(group["supplies"], entry["to_zone"], flow, known_zones)
+    elif kind == "ahs_recirc":
+        group["recirc"] += flow
+
+
+def _record_declared_oa(
+    group: dict[str, Any],
+    entry: dict[str, Any],
+    kind: str,
+    known_zones: set[str],
+) -> None:
+    """Store a terminal entry's declared OA fraction for its room."""
+    declared_oa = entry.get("declared_oa_fraction")
+    if declared_oa is None or kind not in {"ahs_return", "ahs_supply"}:
+        return
+    room = entry["from_zone"] if kind == "ahs_return" else entry["to_zone"]
+    if room in known_zones:
+        group["oa_by_room"][room] = float(declared_oa)
+
+
+def _add_room_flow(
+    flows: dict[str, float], room: str, flow: float, known_zones: set[str],
+) -> None:
+    """Accumulate ``flow`` for ``room`` when the room is known."""
+    if room in known_zones:
+        flows[room] = flows.get(room, 0.0) + flow
 
 
 def _ahs_group_star_paths(
