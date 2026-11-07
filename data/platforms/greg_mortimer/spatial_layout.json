@@ -1,0 +1,560 @@
+{
+  "platform": "greg_mortimer",
+  "description": "MV Greg Mortimer (IMO 9834648), Aurora Expeditions expedition cruise ship, 104.4 m LOA x 18.4 m beam, Polar Class 6, built 2019. Deck-plan-derived passenger/public zones for published decks 3-8 plus inferred below-deck crew/service zones. Cabin-corridor resolution for ~148 passengers and ~95 crew.",
+  "isolation_unit_capacity": 0,
+  "deck_dimensions": {
+    "length_m": 104.4,
+    "beam_m": 18.4
+  },
+  "confinement_isolation_factor": 0.05,
+  "corridor_direct_contact_factor": 0.15,
+  "graywater_zones": [
+    "Engine_Room"
+  ],
+  "nominal_complement": {
+    "passengers": 148,
+    "crew": 95
+  },
+  "zones": [
+    {
+      "id": "PC_D3_P",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 360.0,
+      "deck": "3_Passenger",
+      "max_occupancy": 18,
+      "display": {
+        "x": 30.0,
+        "y": 62.0
+      },
+      "description": "Deck 3 port cabin block (plan cabins 301-318 side); inferred 9 twin-share staterooms.",
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2
+    },
+    {
+      "id": "PC_D3_S",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 360.0,
+      "deck": "3_Passenger",
+      "max_occupancy": 18,
+      "display": {
+        "x": 68.0,
+        "y": 62.0
+      },
+      "description": "Deck 3 starboard cabin block (plan cabins 301-318 side); inferred 9 twin-share staterooms.",
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2
+    },
+    {
+      "id": "PC_D4_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 420.0,
+      "deck": "4_Passenger",
+      "max_occupancy": 28,
+      "display": {
+        "x": 32.0,
+        "y": 52.0
+      },
+      "description": "Deck 4 forward cabin block (plan cabins 401-434 forward group); balcony/suite mix.",
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2
+    },
+    {
+      "id": "PC_D4_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 420.0,
+      "deck": "4_Passenger",
+      "max_occupancy": 28,
+      "display": {
+        "x": 72.0,
+        "y": 52.0
+      },
+      "description": "Deck 4 aft cabin block (plan cabins 401-434 aft group); balcony/suite mix.",
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2
+    },
+    {
+      "id": "PC_D6_F",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 360.0,
+      "deck": "6_Passenger",
+      "max_occupancy": 24,
+      "display": {
+        "x": 32.0,
+        "y": 32.0
+      },
+      "description": "Deck 6 forward cabin block (plan cabins 601-630 forward group); balcony staterooms.",
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2
+    },
+    {
+      "id": "PC_D6_A",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 360.0,
+      "deck": "6_Passenger",
+      "max_occupancy": 24,
+      "display": {
+        "x": 72.0,
+        "y": 32.0
+      },
+      "description": "Deck 6 aft cabin block (plan cabins 601-630 aft group); balcony staterooms.",
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2
+    },
+    {
+      "id": "PC_D7_Suites",
+      "type": "Cabin_Corridor",
+      "traffic": "low",
+      "volume_m3": 180.0,
+      "deck": "7_Public",
+      "max_occupancy": 8,
+      "display": {
+        "x": 50.0,
+        "y": 22.0
+      },
+      "description": "Deck 7 suite block (plan cabins 701-704: balcony suites / Captains Suite area).",
+      "cabin_ventilation_type": "balcony_partial",
+      "cabin_size": 2
+    },
+    {
+      "id": "CC_D1_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 360.0,
+      "deck": "1_Crew",
+      "max_occupancy": 24,
+      "display": {
+        "x": 30.0,
+        "y": 84.0
+      },
+      "description": "Inferred crew cabin corridor, deck 1 forward (below published deck plan).",
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2
+    },
+    {
+      "id": "CC_D1_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 360.0,
+      "deck": "1_Crew",
+      "max_occupancy": 24,
+      "display": {
+        "x": 70.0,
+        "y": 84.0
+      },
+      "description": "Inferred crew cabin corridor, deck 1 aft (below published deck plan).",
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2
+    },
+    {
+      "id": "CC_D2_F",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 360.0,
+      "deck": "2_Crew",
+      "max_occupancy": 24,
+      "display": {
+        "x": 30.0,
+        "y": 82.0
+      },
+      "description": "Inferred crew cabin corridor, deck 2 forward (below published deck plan).",
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2
+    },
+    {
+      "id": "CC_D2_A",
+      "type": "Cabin_Corridor",
+      "traffic": "medium",
+      "volume_m3": 360.0,
+      "deck": "2_Crew",
+      "max_occupancy": 24,
+      "display": {
+        "x": 70.0,
+        "y": 82.0
+      },
+      "description": "Inferred crew cabin corridor, deck 2 aft (below published deck plan).",
+      "cabin_ventilation_type": "interior_hvac",
+      "cabin_size": 2
+    },
+    {
+      "id": "Mudroom",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 40.0,
+      "deck": "3_Passenger",
+      "max_occupancy": 12,
+      "display": {
+        "x": 18.0,
+        "y": 58.0
+      },
+      "description": "Change room / mudroom (feature 1), Deck 3."
+    },
+    {
+      "id": "ZodiacPlatforms",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 220.0,
+      "deck": "3_Passenger",
+      "max_occupancy": 30,
+      "display": {
+        "x": 12.0,
+        "y": 66.0
+      },
+      "description": "Zodiac-loading platforms (feature 2), Deck 3 semi-open working area."
+    },
+    {
+      "id": "ActivityPlat",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 180.0,
+      "deck": "3_Passenger",
+      "max_occupancy": 30,
+      "display": {
+        "x": 88.0,
+        "y": 56.0
+      },
+      "description": "Activity launching platform (feature 3), Deck 3 semi-open working area."
+    },
+    {
+      "id": "MedicalClinic",
+      "type": "Medical",
+      "traffic": "medium",
+      "volume_m3": 120.0,
+      "deck": "3_Passenger",
+      "max_occupancy": 6,
+      "display": {
+        "x": 55.0,
+        "y": 64.0
+      },
+      "description": "Medical clinic (feature 22), Deck 3; fully stocked remote-area clinic per operator description."
+    },
+    {
+      "id": "LectureLounge",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 320.0,
+      "deck": "5_Public",
+      "max_occupancy": 120,
+      "display": {
+        "x": 65.0,
+        "y": 40.0
+      },
+      "description": "Lounge / lecture theatre (feature 4), Deck 5."
+    },
+    {
+      "id": "AssemblyStation",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 120.0,
+      "deck": "5_Public",
+      "max_occupancy": 148,
+      "display": {
+        "x": 42.0,
+        "y": 43.0
+      },
+      "description": "Assembly station (feature 5), Deck 5 muster point."
+    },
+    {
+      "id": "Reception",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 180.0,
+      "deck": "5_Public",
+      "max_occupancy": 60,
+      "display": {
+        "x": 52.0,
+        "y": 45.0
+      },
+      "description": "Reception (feature 6), Deck 5."
+    },
+    {
+      "id": "ShipShop",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 80.0,
+      "deck": "5_Public",
+      "max_occupancy": 20,
+      "display": {
+        "x": 78.0,
+        "y": 45.0
+      },
+      "description": "Ship shop (feature 7), Deck 5."
+    },
+    {
+      "id": "DiningRoom",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 450.0,
+      "deck": "5_Public",
+      "max_occupancy": 148,
+      "display": {
+        "x": 62.0,
+        "y": 37.0
+      },
+      "description": "Main dining room (feature 8), Deck 5; buffet-style family meals with a la carte dinner per operator copy.",
+      "dining_service_type": "buffet",
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
+    },
+    {
+      "id": "PrivateDining",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 80.0,
+      "deck": "5_Public",
+      "max_occupancy": 12,
+      "display": {
+        "x": 82.0,
+        "y": 38.0
+      },
+      "description": "Optional private dining area (feature 9), Deck 5.",
+      "dining_service_type": "specialty",
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
+    },
+    {
+      "id": "BarsDeck5",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 100.0,
+      "deck": "5_Public",
+      "max_occupancy": 60,
+      "display": {
+        "x": 72.0,
+        "y": 41.0
+      },
+      "description": "Bars (feature 17), Deck 5."
+    },
+    {
+      "id": "ViewPlatforms",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 160.0,
+      "deck": "5_Public",
+      "max_occupancy": 40,
+      "display": {
+        "x": 18.0,
+        "y": 34.0
+      },
+      "description": "Viewing platforms (feature 18), Deck 5 semi-open bow/shoulder areas."
+    },
+    {
+      "id": "ExpedOffice",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 80.0,
+      "deck": "7_Public",
+      "max_occupancy": 20,
+      "display": {
+        "x": 80.0,
+        "y": 20.0
+      },
+      "description": "Expedition team office (feature 10), Deck 7."
+    },
+    {
+      "id": "Library",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 60.0,
+      "deck": "7_Public",
+      "max_occupancy": 20,
+      "display": {
+        "x": 74.0,
+        "y": 23.0
+      },
+      "description": "Library and multi-media room (feature 11), Deck 7."
+    },
+    {
+      "id": "Gym",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 120.0,
+      "deck": "7_Public",
+      "max_occupancy": 30,
+      "display": {
+        "x": 86.0,
+        "y": 17.0
+      },
+      "description": "Gym (feature 12), Deck 7."
+    },
+    {
+      "id": "SaunaWellness",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 80.0,
+      "deck": "7_Public",
+      "max_occupancy": 20,
+      "display": {
+        "x": 68.0,
+        "y": 17.0
+      },
+      "description": "Sauna / wellness centre (feature 13), Deck 7."
+    },
+    {
+      "id": "SunDeck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 300.0,
+      "deck": "7_Public",
+      "max_occupancy": 100,
+      "display": {
+        "x": 58.0,
+        "y": 13.0
+      },
+      "description": "Sun deck (feature 14), Deck 7 semi-open."
+    },
+    {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 120.0,
+      "deck": "7_Public",
+      "max_occupancy": 8,
+      "display": {
+        "x": 92.0,
+        "y": 10.0
+      },
+      "description": "Bridge (feature 23), Deck 7."
+    },
+    {
+      "id": "ObsDeck7",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 180.0,
+      "deck": "7_Public",
+      "max_occupancy": 80,
+      "display": {
+        "x": 48.0,
+        "y": 16.0
+      },
+      "description": "Observation deck (feature 20), Deck 7."
+    },
+    {
+      "id": "TopDeck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 250.0,
+      "deck": "8_Top",
+      "max_occupancy": 80,
+      "display": {
+        "x": 70.0,
+        "y": 8.0
+      },
+      "description": "Top deck (feature 16), Deck 8 semi-open."
+    },
+    {
+      "id": "BarsDeck8",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 100.0,
+      "deck": "8_Top",
+      "max_occupancy": 60,
+      "display": {
+        "x": 82.0,
+        "y": 8.0
+      },
+      "description": "Bars (feature 17), Deck 8."
+    },
+    {
+      "id": "ObsLounge",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 180.0,
+      "deck": "8_Top",
+      "max_occupancy": 80,
+      "display": {
+        "x": 60.0,
+        "y": 10.0
+      },
+      "description": "Observation lounge (feature 15), Deck 8."
+    },
+    {
+      "id": "Jacuzzis",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 80.0,
+      "deck": "8_Top",
+      "max_occupancy": 20,
+      "display": {
+        "x": 42.0,
+        "y": 9.0
+      },
+      "description": "Jacuzzis / plunge pools (feature 21), Deck 8."
+    },
+    {
+      "id": "ObsDeck8",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 160.0,
+      "deck": "8_Top",
+      "max_occupancy": 60,
+      "display": {
+        "x": 55.0,
+        "y": 6.0
+      },
+      "description": "Observation deck (feature 20), Deck 8."
+    },
+    {
+      "id": "CrewMess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 140.0,
+      "deck": "2_Crew",
+      "max_occupancy": 40,
+      "display": {
+        "x": 30.0,
+        "y": 88.0
+      },
+      "description": "Inferred crew mess, deck 2 (below published passenger deck plan).",
+      "dining_service_type": "crew_mess",
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 3
+    },
+    {
+      "id": "MainGalley",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 200.0,
+      "deck": "2_Crew",
+      "max_occupancy": 20,
+      "display": {
+        "x": 15.0,
+        "y": 88.0
+      },
+      "description": "Inferred main galley, deck 2 (below published passenger deck plan).",
+      "dining_service_type": "galley",
+      "food_contamination_multiplier": 0.5
+    },
+    {
+      "id": "Laundry",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 80.0,
+      "deck": "2_Crew",
+      "max_occupancy": 10,
+      "display": {
+        "x": 45.0,
+        "y": 88.0
+      },
+      "description": "Inferred laundry / stores space, deck 2 (below published passenger deck plan)."
+    },
+    {
+      "id": "Engine_Room",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 900.0,
+      "deck": "0_Engine",
+      "max_occupancy": 12,
+      "display": {
+        "x": 50.0,
+        "y": 95.0
+      },
+      "description": "Inferred machinery space below deck 1 (not shown on passenger deck plan)."
+    }
+  ]
+}
