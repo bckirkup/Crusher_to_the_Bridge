@@ -1,6 +1,6 @@
 # NORO-PROVISIONED-SENSITIVITY-01 — ledger
 
-**Status: scout wave submitted 2026-11-07 — main remainder held for the user gate.** Paper-1
+**Status: remainder wave in flight (2026-11-07) — sizing revised to 96/96/48/24, mega → exp → spr submitted on the scout image; cls remainder waits for the image carrying the revised manifest.** Paper-1
 sensitivity screen, Child B: 16 Res-V profiles × 4 hulls × 3 venue
 arms = 192 cells, seed-paired with NORO-PROVISIONED-VENUE-02, 1.5.0
 emitter. Design: `DESIGN.md`; profile table: `PROFILE_TABLE.md`;
@@ -445,3 +445,62 @@ queue `picard-campaign-queue`.
   (sha `33e33ea0...`), accepted_page_ids count 157, deduplicated false.
 - Scout vectors (1,536 rows, 1.5.0) are now with Edison; the remainder gate is
   still open and nothing from the 9,600-run remainder is submitted.
+
+## Remainder sizing (PI decision, 2026-11-07 14:30 UTC) — measured before submit
+
+- Per-hull n per cell revised to **exp 96 / cls 96 / spr 48 / meg 24**
+  (cls 64 → 96, matching exp; not re-derived here). `design/build.py`
+  edited (`HULLS["cls"]["n"] = 96`), artefacts regenerated: only the 48
+  cls tiers change and only their `seeds` (8105–8200 main, reserve
+  8201–8202); exp/spr/meg tier specs byte-identical to the scout manifest
+  (asserted field-by-field), mega `campaign.json` unchanged.
+- Remainder set = nominal minus the scout's first 8 seeds per cell:
+  exp 88 × 48 = 4,224; cls 88 × 48 = 4,224; spr 40 × 48 = 1,920;
+  meg 16 × 48 = 768 → **11,136 remainder runs** (12,672 nominal − 1,536
+  scout). Reserve 2 seeds per hull-cell untouched.
+- Dry-run (repo HEAD, venv): manifest `--tier all` = **13,056** runs =
+  12,672 main + 384 reserve ✓; `scripts/campaign list` = 288 blocks /
+  11,520 cells (small hulls: 1,152 scout + 10,368 remainder) + 96 blocks /
+  1,152 cells (mega) ✓. Loaded-config checks unchanged (tier specs
+  identical except cls seeds).
+- Cost basis (scout-measured child wall × count; mega = 4 slots by
+  memory): exp 81 slot-h, cls 380, spr 288, meg 1,485 → **2,234 slot-h**
+  (vs 2,098 projected at the old sizing; +136 for the cls bump), ≈ 562 GB
+  of zips, **$45–89** at $0.02–0.04 per vCPU-h Spot. Not materially above
+  the scout basis.
+- Image: cls seeds 8171–8200 are not in the manifest baked into
+  `noro-provisioned-sensitivity01` @ `sha256:354ddfda…` (main 71794db5)
+  and `campaign_entrypoint._seed_run_index` exits `seed … not in tier`
+  for them, so the **cls remainder needs a new image** built from the
+  main that carries this manifest (design PR merge → build → digest
+  pinned here → cls submit). exp/spr/meg remainder blocks are unchanged
+  and run on the scout image (digest re-verified at ECR 2026-11-07 14:25
+  UTC, pushed 00:13 UTC; latest jobdef revs before submit: small :145,
+  mega :49).
+- Pre-submit state: `picard-campaign-queue` 0 RUNNABLE/STARTING/RUNNING;
+  CE `picard-abm-campaign-spot` ENABLED/VALID max 256 vCPU; main `<tier>`
+  prefixes empty under both campaign prefixes (only 144 + 48
+  `scout_<tier>/` prefixes, `_scan_rows/`, manifests).
+
+## Remainder wave 1 — submitted 2026-11-07 14:27–14:44 UTC (exp / spr / meg on the scout image)
+
+- Sizing PR: #1164 (branch `devin/1794061495-sens01-remainder-sizing`).
+- 144 arrays via `scripts/campaign submit`, one per block, jobdef re-rendered
+  per submit from the same template (image tag
+  `noro-provisioned-sensitivity01`, resolved at ECR to
+  `sha256:354ddfda0816abc10dca787f720b97e128a83db9ce1952f6e11c2ed64a8f5cef`):
+  mega :50–:97 (48 × 16 = 768 children, 1 vCPU / 8,192 MiB),
+  exp then spr :146–:241 (48 × 88 = 4,224 + 48 × 40 = 1,920 children).
+  Total **6,912 children** in flight; order meg → exp → spr as committed.
+- Block → jobdef revision → array job id table:
+  `campaigns/noro/provisioned_sensitivity_01/remainder_submits.tsv`
+  (one row per block; no submit errors).
+- Canary: the scout wave (same image, same tier specs, same jobdef template)
+  is the canary for these blocks; mega array 1 child 0 (seed 8113) was
+  inspected RUNNING at 14:31 UTC before the fan-out, 16/16 children STARTING
+  within 3 min of submit; CE `picard-abm-campaign-spot` at 256 / 256 vCPU.
+- **cls remainder (48 × 88 = 4,224 children) NOT submitted** — waits for
+  #1164 to merge and the image to be rebuilt from main (cls seeds
+  8171–8200 absent from the scout image's manifest). Submit with
+  `scripts/campaign submit noro/provisioned_sensitivity_01 --block
+  fl_cls_12d_sens_p<NN>_<arm>` once the new digest is pinned here.
