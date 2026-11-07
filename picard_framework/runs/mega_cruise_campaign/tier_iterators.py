@@ -3,8 +3,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import product
-from typing import Any, Iterator
+from typing import Any, Iterator, Mapping
 
+from picard_framework.pathogen_overrides import deep_merge_dict
 from picard_framework.runs.mega_cruise_campaign import boarding_axis
 
 
@@ -560,9 +561,30 @@ def _calibration_epochs(ctx: Any) -> tuple[list[int], bool]:
     return [int(ctx.default_epochs)], False
 
 
+def tier_pathogen_overrides(
+    tier: Mapping[str, Any],
+    base_overrides: Mapping[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Manifest-level pathogen overrides with the tier's own patch merged in.
+
+    ``pathogen_overrides`` on a tier is ``{pathogen_id: profile_patch}``,
+    deep-merged over the manifest's ``pathogen_configs.<pathogen>.overrides``
+    so one manifest can carry tiers at different profile coordinates (route
+    efficiencies, illness-duration draw) without a manifest per tier.
+    """
+    patch = tier.get("pathogen_overrides")
+    if not patch:
+        return dict(base_overrides) if base_overrides is not None else None
+    merged = dict(base_overrides or {})
+    for pid, fields in patch.items():
+        merged[pid] = deep_merge_dict(dict(merged.get(pid) or {}), dict(fields))
+    return merged
+
+
 def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
     pathogen = ctx.tier["pathogen"]
     bundle, pathogen_id, base_overrides = ctx.get_pathogen_config(ctx.manifest, pathogen)
+    base_overrides = tier_pathogen_overrides(ctx.tier, base_overrides)
     platforms = ctx.resolve_tier_platforms(
         ctx.tier,
         fallback_platform=ctx.manifest["platform"],

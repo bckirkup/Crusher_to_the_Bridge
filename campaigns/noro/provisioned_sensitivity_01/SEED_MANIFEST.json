@@ -1,0 +1,600 @@
+{
+ "rule": "Every cell takes the ascending prefix of its hull's NORO-PROVISIONED-VENUE-02 seed block (exp 8000-8999; cls/spr/meg 8105-9104), so each (hull, profile, arm) cell pairs seed-for-seed with the venue02 arm of the same hull and venue pin, and with every other profile on that hull.",
+ "scout_rule": "Nested canary = the first 8 seeds of every cell (192 x 8 = 1,536 runs), submitted first; the main remainder is submitted only after the scout readout gate.",
+ "reserve_rule": "Reserve seeds = the next ascending seeds after the main prefix, 2 per hull x 48 cells = 96 slots per hull; used only to replace a cell's failed/truncated seed by a hand-added retry block recorded in LEDGER.md.  A cell short of its n after the reserve is published as missing, never reseeded.",
+ "design": {
+  "generator": "E = ABCD (I = ABCDE), Resolution V",
+  "factors": {
+   "A": {
+    "name": "q_source",
+    "low": 0.00086,
+    "high": 0.0047
+   },
+   "B": {
+    "name": "boarding_passenger_prevalence",
+    "low": 0.025,
+    "high": 0.04
+   },
+   "C": {
+    "name": "boarding_crew_prevalence",
+    "low": 0.007,
+    "high": 0.03
+   },
+   "D": {
+    "name": "illness_duration.draw",
+    "low": "point",
+    "high": "empirical_survival"
+   },
+   "E": {
+    "name": "route_efficiency_multipliers scale",
+    "low": 0.5,
+    "high": 2.0
+   }
+  },
+  "profiles": [
+   {
+    "profile_id": "p01",
+    "A": -1,
+    "B": -1,
+    "C": -1,
+    "D": -1,
+    "E": 1,
+    "levels": {
+     "q_source": 0.00086,
+     "boarding_passenger_prevalence": 0.025,
+     "boarding_crew_prevalence": 0.007,
+     "illness_duration_draw": "point",
+     "route_scale": 2.0,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p02",
+    "A": 1,
+    "B": -1,
+    "C": -1,
+    "D": -1,
+    "E": -1,
+    "levels": {
+     "q_source": 0.0047,
+     "boarding_passenger_prevalence": 0.025,
+     "boarding_crew_prevalence": 0.007,
+     "illness_duration_draw": "point",
+     "route_scale": 0.5,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.175,
+      "droplet": 0.05,
+      "hvac_airborne": 0.025,
+      "fomite": 0.15,
+      "food_contamination": 0.1,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p03",
+    "A": -1,
+    "B": 1,
+    "C": -1,
+    "D": -1,
+    "E": -1,
+    "levels": {
+     "q_source": 0.00086,
+     "boarding_passenger_prevalence": 0.04,
+     "boarding_crew_prevalence": 0.007,
+     "illness_duration_draw": "point",
+     "route_scale": 0.5,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.175,
+      "droplet": 0.05,
+      "hvac_airborne": 0.025,
+      "fomite": 0.15,
+      "food_contamination": 0.1,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p04",
+    "A": 1,
+    "B": 1,
+    "C": -1,
+    "D": -1,
+    "E": 1,
+    "levels": {
+     "q_source": 0.0047,
+     "boarding_passenger_prevalence": 0.04,
+     "boarding_crew_prevalence": 0.007,
+     "illness_duration_draw": "point",
+     "route_scale": 2.0,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p05",
+    "A": -1,
+    "B": -1,
+    "C": 1,
+    "D": -1,
+    "E": -1,
+    "levels": {
+     "q_source": 0.00086,
+     "boarding_passenger_prevalence": 0.025,
+     "boarding_crew_prevalence": 0.03,
+     "illness_duration_draw": "point",
+     "route_scale": 0.5,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.175,
+      "droplet": 0.05,
+      "hvac_airborne": 0.025,
+      "fomite": 0.15,
+      "food_contamination": 0.1,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p06",
+    "A": 1,
+    "B": -1,
+    "C": 1,
+    "D": -1,
+    "E": 1,
+    "levels": {
+     "q_source": 0.0047,
+     "boarding_passenger_prevalence": 0.025,
+     "boarding_crew_prevalence": 0.03,
+     "illness_duration_draw": "point",
+     "route_scale": 2.0,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p07",
+    "A": -1,
+    "B": 1,
+    "C": 1,
+    "D": -1,
+    "E": 1,
+    "levels": {
+     "q_source": 0.00086,
+     "boarding_passenger_prevalence": 0.04,
+     "boarding_crew_prevalence": 0.03,
+     "illness_duration_draw": "point",
+     "route_scale": 2.0,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p08",
+    "A": 1,
+    "B": 1,
+    "C": 1,
+    "D": -1,
+    "E": -1,
+    "levels": {
+     "q_source": 0.0047,
+     "boarding_passenger_prevalence": 0.04,
+     "boarding_crew_prevalence": 0.03,
+     "illness_duration_draw": "point",
+     "route_scale": 0.5,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.175,
+      "droplet": 0.05,
+      "hvac_airborne": 0.025,
+      "fomite": 0.15,
+      "food_contamination": 0.1,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p09",
+    "A": -1,
+    "B": -1,
+    "C": -1,
+    "D": 1,
+    "E": -1,
+    "levels": {
+     "q_source": 0.00086,
+     "boarding_passenger_prevalence": 0.025,
+     "boarding_crew_prevalence": 0.007,
+     "illness_duration_draw": "empirical_survival",
+     "route_scale": 0.5,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.175,
+      "droplet": 0.05,
+      "hvac_airborne": 0.025,
+      "fomite": 0.15,
+      "food_contamination": 0.1,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p10",
+    "A": 1,
+    "B": -1,
+    "C": -1,
+    "D": 1,
+    "E": 1,
+    "levels": {
+     "q_source": 0.0047,
+     "boarding_passenger_prevalence": 0.025,
+     "boarding_crew_prevalence": 0.007,
+     "illness_duration_draw": "empirical_survival",
+     "route_scale": 2.0,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p11",
+    "A": -1,
+    "B": 1,
+    "C": -1,
+    "D": 1,
+    "E": 1,
+    "levels": {
+     "q_source": 0.00086,
+     "boarding_passenger_prevalence": 0.04,
+     "boarding_crew_prevalence": 0.007,
+     "illness_duration_draw": "empirical_survival",
+     "route_scale": 2.0,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p12",
+    "A": 1,
+    "B": 1,
+    "C": -1,
+    "D": 1,
+    "E": -1,
+    "levels": {
+     "q_source": 0.0047,
+     "boarding_passenger_prevalence": 0.04,
+     "boarding_crew_prevalence": 0.007,
+     "illness_duration_draw": "empirical_survival",
+     "route_scale": 0.5,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.175,
+      "droplet": 0.05,
+      "hvac_airborne": 0.025,
+      "fomite": 0.15,
+      "food_contamination": 0.1,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p13",
+    "A": -1,
+    "B": -1,
+    "C": 1,
+    "D": 1,
+    "E": 1,
+    "levels": {
+     "q_source": 0.00086,
+     "boarding_passenger_prevalence": 0.025,
+     "boarding_crew_prevalence": 0.03,
+     "illness_duration_draw": "empirical_survival",
+     "route_scale": 2.0,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p14",
+    "A": 1,
+    "B": -1,
+    "C": 1,
+    "D": 1,
+    "E": -1,
+    "levels": {
+     "q_source": 0.0047,
+     "boarding_passenger_prevalence": 0.025,
+     "boarding_crew_prevalence": 0.03,
+     "illness_duration_draw": "empirical_survival",
+     "route_scale": 0.5,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.175,
+      "droplet": 0.05,
+      "hvac_airborne": 0.025,
+      "fomite": 0.15,
+      "food_contamination": 0.1,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p15",
+    "A": -1,
+    "B": 1,
+    "C": 1,
+    "D": 1,
+    "E": -1,
+    "levels": {
+     "q_source": 0.00086,
+     "boarding_passenger_prevalence": 0.04,
+     "boarding_crew_prevalence": 0.03,
+     "illness_duration_draw": "empirical_survival",
+     "route_scale": 0.5,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.175,
+      "droplet": 0.05,
+      "hvac_airborne": 0.025,
+      "fomite": 0.15,
+      "food_contamination": 0.1,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   {
+    "profile_id": "p16",
+    "A": 1,
+    "B": 1,
+    "C": 1,
+    "D": 1,
+    "E": 1,
+    "levels": {
+     "q_source": 0.0047,
+     "boarding_passenger_prevalence": 0.04,
+     "boarding_crew_prevalence": 0.03,
+     "illness_duration_draw": "empirical_survival",
+     "route_scale": 2.0,
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   }
+  ]
+ },
+ "hulls": {
+  "exp": {
+   "platform": "expedition_cruise_450",
+   "num_agents": 450,
+   "n_per_cell": 96,
+   "scout_per_cell": 8,
+   "seed_range": [
+    8000,
+    8095
+   ],
+   "scout_seed_range": [
+    8000,
+    8007
+   ],
+   "reserve_seeds": [
+    8096,
+    8097
+   ],
+   "cells": 48,
+   "runs_main": 4608,
+   "runs_scout": 384,
+   "venue_pin": {
+    "crew_venue": [
+     "CrewMess"
+    ],
+    "passenger_venue": [
+     "MainDining"
+    ],
+    "mixed_venue": [
+     "MainDining",
+     "CasualDining",
+     "CrewMess"
+    ]
+   },
+   "mixed_venue_weights": [
+    300,
+    150,
+    60
+   ]
+  },
+  "cls": {
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "n_per_cell": 64,
+   "scout_per_cell": 8,
+   "seed_range": [
+    8105,
+    8168
+   ],
+   "scout_seed_range": [
+    8105,
+    8112
+   ],
+   "reserve_seeds": [
+    8169,
+    8170
+   ],
+   "cells": 48,
+   "runs_main": 3072,
+   "runs_scout": 384,
+   "venue_pin": {
+    "crew_venue": [
+     "CrewMess"
+    ],
+    "passenger_venue": [
+     "MainDining_L"
+    ],
+    "mixed_venue": [
+     "MainDining_L",
+     "MainDining_U",
+     "LidoBuffet",
+     "Specialty",
+     "CrewMess"
+    ]
+   },
+   "mixed_venue_weights": [
+    400,
+    400,
+    350,
+    80,
+    200
+   ]
+  },
+  "spr": {
+   "platform": "spirit_cruise_3000",
+   "num_agents": 3000,
+   "n_per_cell": 48,
+   "scout_per_cell": 8,
+   "seed_range": [
+    8105,
+    8152
+   ],
+   "scout_seed_range": [
+    8105,
+    8112
+   ],
+   "reserve_seeds": [
+    8153,
+    8154
+   ],
+   "cells": 48,
+   "runs_main": 2304,
+   "runs_scout": 384,
+   "venue_pin": {
+    "crew_venue": [
+     "CrewMessMain",
+     "CrewMessOff"
+    ],
+    "passenger_venue": [
+     "MainDining_L"
+    ],
+    "mixed_venue": [
+     "MainDining_L",
+     "MainDining_U",
+     "LidoBuffet",
+     "PizzaGrill",
+     "SpecialtyA",
+     "SpecialtyB",
+     "SpecialtyC",
+     "CrewMessMain",
+     "CrewMessOff"
+    ]
+   },
+   "mixed_venue_weights": [
+    500,
+    500,
+    400,
+    120,
+    80,
+    80,
+    80,
+    250,
+    60
+   ]
+  },
+  "meg": {
+   "platform": "mega_cruise_5000",
+   "num_agents": 7000,
+   "n_per_cell": 24,
+   "scout_per_cell": 8,
+   "seed_range": [
+    8105,
+    8128
+   ],
+   "scout_seed_range": [
+    8105,
+    8112
+   ],
+   "reserve_seeds": [
+    8129,
+    8130
+   ],
+   "cells": 48,
+   "runs_main": 1152,
+   "runs_scout": 384,
+   "venue_pin": {
+    "crew_venue": [
+     "Crew_Mess_Main",
+     "CrewMess_Fwd"
+    ],
+    "passenger_venue": [
+     "MainDining_L"
+    ],
+    "mixed_venue": [
+     "MainDining_L",
+     "MainDining_U",
+     "Windjammer",
+     "SpecRest_A",
+     "SpecRest_B",
+     "Pool_Bar_Grill",
+     "ComedyClub",
+     "CafeBakery",
+     "Crew_Mess_Main",
+     "CrewMess_Fwd"
+    ]
+   },
+   "mixed_venue_weights": [
+    1400,
+    1100,
+    1600,
+    450,
+    400,
+    300,
+    300,
+    250,
+    700,
+    350
+   ]
+  }
+ },
+ "totals": {
+  "cells": 192,
+  "runs_main": 11136,
+  "runs_scout": 1536
+ }
+}
