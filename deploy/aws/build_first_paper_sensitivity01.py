@@ -49,20 +49,24 @@ TIERS = [
 # Budgets scale from the venue-02 12k-source leg (measured 60k GETs,
 # 12k HEADs, 1.09 GB compressed read, 586 MB output, 146 MB shard-0
 # checkpoint): ~5 GETs + 1 HEAD + ~92 KB compressed per source.
+# max_output_bytes is charged twice per vector row (shard partition, then
+# the 1 MiB return page): the 1,536-run scout measured 168 MB of
+# partitions (~110 KB/row on first_paper_scalar/1.5.0) + ~160 MB of pages,
+# so ~330 MB; main (11,136 rows) needs ~2.4 GB.
 BUDGETS_BY_WAVE = {
     "scout": {
         "max_source_objects": 2000, "max_api_calls_total": 30000,
         "max_head_requests": 5000, "max_get_requests": 25000,
         "max_compressed_bytes_read": 600_000_000,
         "max_uncompressed_bytes": 4_000_000_000,
-        "max_output_bytes": 300_000_000, "max_cost_usd": 20.0,
+        "max_output_bytes": 1_200_000_000, "max_cost_usd": 20.0,
     },
     "main": {
         "max_source_objects": 12000, "max_api_calls_total": 120000,
         "max_head_requests": 30000, "max_get_requests": 100000,
         "max_compressed_bytes_read": 2_000_000_000,
         "max_uncompressed_bytes": 16_000_000_000,
-        "max_output_bytes": 1_000_000_000, "max_cost_usd": 100.0,
+        "max_output_bytes": 6_000_000_000, "max_cost_usd": 100.0,
     },
 }
 BUDGETS_COMMON = {
@@ -71,7 +75,7 @@ BUDGETS_COMMON = {
     "max_member_bytes": 8_000_000,
     "max_central_directory_bytes": 4_000_000,
     "max_spool_bytes": 16_000_000_000,
-    "max_wall_seconds": 7200,
+    "max_wall_seconds": 14400,
     "max_queue_wait_seconds": 7200,
     "max_vcpu_seconds": 28800,
     "max_memory_mib_seconds": 117964800,

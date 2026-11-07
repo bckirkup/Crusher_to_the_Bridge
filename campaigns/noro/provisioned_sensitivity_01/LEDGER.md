@@ -365,3 +365,30 @@ queue `picard-campaign-queue`.
   (1,536 × ~110 KB) — the main-wave request must size `max_output_bytes`
   for ≈1.2 GB (11,136 rows) before dispatch.
 
+
+## Scout2 readout (`red-fps01-sens01-scout2`, `picard-reducer:13`, measured)
+
+- Batch job `0141fb1c-b993-409d-9bb5-810f4e0646fa`, workflow run 42369342333.
+- COMMIT `completed`: runs 1,536; first_paper_vectors **1,536**; coverage cells 192;
+  disqualifiers []; data_gaps 0; scan_join_conflicts 0; 9.2 min wall. The 256 KiB
+  row cap (PR #1159) resolves the `oversized_row` drop.
+- Job then failed in `_emit_pages`: `BudgetExceeded: max_output_bytes: charge
+  1041373 exceeds remaining 107426`. `max_output_bytes` is charged once for shard
+  partitions (167.8 MB total; `first_paper_vectors` 24 objects, 158.7 MB,
+  ~110 KB/row) and again for the 1 MiB return pages (~160 MB) plus status/index/
+  manifest, so the scout needs ~330 MB vs the 300 MB builder budget. RECEIPT is
+  `blocked` with empty page/status/index keys (dangling); derived store is
+  create-only, so no finalize retry under this id.
+- Fix (no code/image change): builder budgets `max_output_bytes` scout
+  300 MB -> 1.2 GB, main 1 GB -> 6 GB (11,136 rows ~ 2.4 GB), `max_wall_seconds`
+  7200 -> 14400 (scout 9.2 min x 7.25 ~ 67 min main). Other caps vs measured
+  scout x7.25: GET 8,065 -> ~58k (cap 100k), HEAD 1,728 -> ~12.5k (cap 30k),
+  compressed read 141 MB -> ~1.0 GB (cap 2 GB), uncompressed 612 MB -> ~4.4 GB
+  (cap 16 GB).
+
+## Scout3 request (`red-fps01-sens01-scout3`)
+
+- Same 1,728 sources / 1,536 runs; canonical sha
+  `a31fbd0c2dd75b1b061c659d14c30acc43aa91ff55c61f9486c8cb767882c2c8` (materialize
+  leg); raw sha `99dd4e655f36fb4f43c260f4ff6c0efe3b9be7c0dc45004e015a848e8ebae1ac`
+  (return leg); uploaded to `campaign/_derived/reducer/v1/requests/`.
