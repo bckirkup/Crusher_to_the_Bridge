@@ -1,0 +1,312 @@
+{
+  "schema_version": "1.0",
+  "platform_class": "diamond",
+  "description": "Diamond Princess cruise voyage defaults (copied from spirit_cruise_3000; effects_enabled=false keeps campaigns identical to pre-voyage baseline).",
+  "voyage": {
+    "effects_enabled": false,
+    "total_epochs": 168,
+    "epoch_duration_hours": 1,
+    "itinerary": [],
+    "defaults": {
+      "sea_day": {
+        "onboard_passenger_fraction": 1.0,
+        "contact_rate_multiplier": 1.0,
+        "dining_demand_multiplier": 1.0
+      },
+      "port_day": {
+        "onboard_passenger_fraction": 0.3,
+        "contact_rate_multiplier": 0.4,
+        "dining_demand_multiplier": {
+          "breakfast": 0.8,
+          "lunch": 0.3,
+          "dinner": 0.9
+        }
+      },
+      "embarkation": {
+        "onboard_passenger_fraction": 1.0,
+        "embarkation_buffet_surge": true,
+        "contact_rate_multiplier": 1.2
+      },
+      "disembarkation": {
+        "onboard_passenger_fraction": 0.0,
+        "contact_rate_multiplier": 0.2,
+        "dining_demand_multiplier": {
+          "breakfast": 0.5,
+          "lunch": 0.1,
+          "dinner": 0.1
+        }
+      }
+    }
+  },
+  "dining_meal_weights": {
+    "breakfast": {
+      "buffet": 0.8,
+      "mdr": 0.18,
+      "specialty": 0.02
+    },
+    "lunch": {
+      "buffet": 0.65,
+      "mdr": 0.25,
+      "specialty": 0.1
+    },
+    "dinner": {
+      "buffet": 0.25,
+      "mdr": 0.65,
+      "specialty": 0.1
+    }
+  },
+  "medical_response": {
+    "sick_call_probability": 0.7,
+    "isolation_compliance": 0.85,
+    "detection_delay_hours": 0,
+    "crew_screening_interval_hours": null,
+    "notes": "Stock defaults (= current global behavior). Class gradient available via campaign overrides."
+  },
+  "ship_systems": [
+    {
+      "system_id": "hvac_plant",
+      "health_start": 1.0,
+      "degradation": {
+        "rate_per_day": 0.01,
+        "model": "linear"
+      },
+      "repair": {
+        "labor_class": "crew_engineering",
+        "rate_per_person_hour": 0.05
+      },
+      "failure_threshold": 0.3,
+      "effects": {
+        "food_service": {
+          "capacity_multiplier_at_failure": 0.6
+        },
+        "housekeeping": {
+          "capacity_multiplier_at_failure": 0.8
+        }
+      },
+      "repair_priority": 0,
+      "parameters_provenance": "null_source: declared weak range pending the ship-function parameter register"
+    },
+    {
+      "system_id": "propulsion",
+      "health_start": 1.0,
+      "degradation": {
+        "rate_per_day": 0.005,
+        "model": "linear"
+      },
+      "repair": {
+        "labor_class": "crew_engineering",
+        "rate_per_person_hour": 0.02
+      },
+      "failure_threshold": 0.4,
+      "effects": {
+        "engineering_watch": {
+          "capacity_multiplier_at_failure": 0.0
+        }
+      },
+      "repair_priority": 1,
+      "parameters_provenance": "null_source: declared weak range pending the ship-function parameter register"
+    }
+  ],
+  "ship_functions": {
+    "enabled": false,
+    "symptomatic_effectiveness": 0.7,
+    "parameters_provenance": "null_source: declared weak ranges pending the ship-function parameter register (docs/ship_functions/parameter_sources.md)",
+    "functions": [
+      {
+        "function_id": "food_service",
+        "serves": "passengers",
+        "staffing": {
+          "crew_galley": {
+            "required_on_watch": 24,
+            "minimum_on_watch": 8
+          }
+        },
+        "required_zone_types": [
+          "Dining"
+        ],
+        "capacity_model": "staffing_fraction",
+        "feedback": {
+          "kind": "dining_weights",
+          "threshold": 0.5,
+          "sustained_hours": 4.0,
+          "degraded_weights": {
+            "buffet": 0.0,
+            "mdr": 0.0,
+            "specialty": 0.0
+          }
+        }
+      },
+      {
+        "function_id": "food_service",
+        "serves": "crew",
+        "staffing": {
+          "crew_galley": {
+            "required_on_watch": 6,
+            "minimum_on_watch": 2
+          }
+        },
+        "capacity_model": "staffing_fraction",
+        "feedback": {
+          "kind": "readout_only",
+          "crew_sustenance": true,
+          "sustenance_threshold": 1.0
+        }
+      },
+      {
+        "function_id": "housekeeping",
+        "serves": "both",
+        "staffing": {
+          "crew_general": {
+            "required_on_watch": 40
+          }
+        },
+        "required_zone_types": [
+          "Cabin_Corridor"
+        ],
+        "capacity_model": "staffing_fraction",
+        "feedback": {
+          "kind": "cleaning_coverage_scale",
+          "floor": 0.0
+        }
+      },
+      {
+        "function_id": "entertainment",
+        "serves": "passengers",
+        "staffing": {
+          "crew_general": {
+            "required_on_watch": 10
+          }
+        },
+        "required_zone_types": [
+          "Free"
+        ],
+        "capacity_model": "staffing_fraction",
+        "feedback": {
+          "kind": "zone_modifiers",
+          "threshold": 0.3,
+          "sustained_hours": 24.0,
+          "zone_close_on_loss": [
+            "MainTheater"
+          ]
+        }
+      },
+      {
+        "function_id": "engineering_watch",
+        "serves": "mission",
+        "staffing": {
+          "crew_engineering": {
+            "required_on_watch": 3,
+            "minimum_on_watch": 1
+          }
+        },
+        "required_systems": [
+          "propulsion",
+          "hvac_plant"
+        ],
+        "capacity_model": "bottleneck_min",
+        "feedback": {
+          "kind": "readout_only"
+        }
+      },
+      {
+        "function_id": "medical_bay",
+        "serves": "mission",
+        "staffing": {
+          "crew_medical": {
+            "required_on_watch": 2,
+            "minimum_on_watch": 1
+          }
+        },
+        "required_zone_ids": [
+          "MedCenter"
+        ],
+        "capacity_model": "bottleneck_min",
+        "feedback": {
+          "kind": "readout_only"
+        }
+      }
+    ]
+  },
+  "hazard_sources": {
+    "enabled": false,
+    "description": "ENV-SOURCE-01 worked example (docs/hazard_sources.md): a point/dynamic engine-room VOC spill plus a uniform-outdoor penetration. Arm with hazard_sources.enabled=true via config_overrides; every rate is NULL-SOURCE pending the hazard parameter register.",
+    "substances": [
+      {
+        "substance_id": "voc_spill",
+        "label": "Engine-room volatile organic compound spill",
+        "transport": "armed",
+        "environmental_contamination": {
+          "source_zones": [
+            "Engine_Room"
+          ],
+          "baseline_environmental_load": 0.0,
+          "base_emission_rate_per_day": 1.0,
+          "exposure_probability_per_day": 0.5,
+          "spore_decay_rate_per_day": 2.0,
+          "colonization_rate_per_day": 0.0
+        },
+        "parameters_provenance": "NULL-SOURCE: declared spill-scenario arm (spec §8). Emission 1.0/day keeps dose in declared mass units; exposure 0.5/day is a declared occupancy-contact share; decay 2.0/day is a declared volatile dissipation arm — none fitted."
+      },
+      {
+        "substance_id": "harbor_plume",
+        "label": "Harbor industrial plume intrusion",
+        "transport": "armed",
+        "environmental_contamination": {
+          "baseline_environmental_load": 0.0,
+          "base_emission_rate_per_day": 1.0,
+          "exposure_probability_per_day": 0.5,
+          "spore_decay_rate_per_day": 1.0,
+          "colonization_rate_per_day": 0.0
+        },
+        "parameters_provenance": "NULL-SOURCE: declared plume arm (spec §8). Same null-sourced defaults as voc_spill; the penetration factor on the adapter is the sourced side of the coupling."
+      }
+    ],
+    "emitters": [
+      {
+        "emitter_id": "engine_room_voc_release",
+        "substance_id": "voc_spill",
+        "kind": {
+          "placement": "point",
+          "field": "dynamic"
+        },
+        "zones": [
+          "Engine_Room"
+        ],
+        "schedule": {
+          "start_epoch": 6,
+          "duration_hours": 6
+        },
+        "rate": {
+          "kind": "functional",
+          "functional_form": "exponential_decay",
+          "mass_per_hour": 2500.0,
+          "decay_rate_per_hour": 0.7,
+          "source": "NULL-SOURCE: declared six-hour evaporating-spill arm, exponential source depletion 0.7/h; epoch mass integrates the rate analytically.",
+          "grade": "C"
+        }
+      }
+    ],
+    "penetrations": [
+      {
+        "penetration_id": "harbor_plume_promenade",
+        "substance_id": "harbor_plume",
+        "adapter": "uniform_outdoor",
+        "zones": [
+          "Promenade",
+          "LidoBuffet"
+        ],
+        "penetration_factor": 0.3,
+        "outdoor_field": {
+          "kind": "uniform",
+          "concentration_per_hour": 40.0
+        },
+        "schedule": {
+          "start_epoch": 0,
+          "duration_hours": 12
+        },
+        "source": "NULL-SOURCE: declared harbor-plume coupling — uniform outdoor concentration times a declared 0.3 shell-penetration factor; the adapter seam a QUIC plume solve would feed is PENETRATION_ADAPTERS in engines/hazard_sources.py.",
+        "grade": "C"
+      }
+    ]
+  }
+}

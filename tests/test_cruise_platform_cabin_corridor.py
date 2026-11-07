@@ -262,3 +262,72 @@ def test_expedition_450_architectural_loader() -> None:
     arch = load_architectural_graphics(str(PLATFORMS / "expedition_cruise_450"))
     assert arch.has_elevation
     assert arch.has_plan
+
+
+def test_diamond_princess_corridor_topology() -> None:
+    spatial, airflow = _load_platform("diamond_princess")
+    zones = spatial["zones"]
+    corridors = [z for z in zones if z["type"] == "Cabin_Corridor"]
+    pax = [z for z in corridors if z["id"].startswith("PC_")]
+    crew = [z for z in corridors if z["id"].startswith("CC_")]
+    assert len(pax) == 44
+    assert len(crew) == 9
+    # 67 public + 53 corridors + 39 derived sanitary (head) zones.
+    assert len(zones) == 159
+    vents = {z["cabin_ventilation_type"] for z in corridors}
+    assert vents == {"balcony_partial", "interior_hvac"}
+    assert all(len(z["id"]) <= 15 for z in zones)
+    covered = {r for hz in airflow["hvac_zones"] for r in hz["rooms"]}
+    # Deliberate contract change: exterior zones are not duct-coupled.
+    exterior = {
+        "OceanFront", "TerracePool", "NeptunePool", "CalypsoPool",
+        "HorizonTerrace", "OpenAirCinema", "SportsCourt", "CenterCourt",
+    }
+    assert covered == {z["id"] for z in zones} - exterior
+    assert spatial["deck_dimensions"] == {"length_m": 290.0, "beam_m": 37.5}
+    assert spatial["nominal_complement"] == {"passengers": 2710, "crew": 1100}
+    crew_ahus = [hz for hz in airflow["hvac_zones"] if hz["id"].startswith("AHU_Crew_D")]
+    assert len(crew_ahus) == 3
+    trunks = [
+        cl for cl in airflow["cross_zone_links"]
+        if str(cl.get("path", "")).startswith("Pax_Trunk_")
+    ]
+    # Main-bank decks 8-12 chain into four trunk links; the lower (5/6) and
+    # Lido (14) banks have their own per-deck AHUs without trunk links.
+    assert len(trunks) == 4
+    zone_ids = {z["id"] for z in zones}
+    assert {"GrandPlaza", "HorizonCourt", "PrincessTheater", "LotusSpa", "Bridge"} <= zone_ids
+
+
+def test_diamond_princess_generator_roundtrip() -> None:
+    from cruise_platform_recipes import RECIPES
+    from generate_cruise_platform_layout import (
+        build_air_flow_paths,
+        build_spatial_layout,
+    )
+
+    recipe = RECIPES["diamond_princess"]
+    spatial = build_spatial_layout(recipe)
+    airflow = build_air_flow_paths(recipe, {z["id"] for z in spatial["zones"]})
+    committed_s, committed_a = _load_platform("diamond_princess")
+    assert {z["id"] for z in spatial["zones"]} == {z["id"] for z in committed_s["zones"]}
+    assert {hz["id"] for hz in airflow["hvac_zones"]} == {
+        hz["id"] for hz in committed_a["hvac_zones"]
+    }
+
+
+def test_diamond_princess_graphics_and_contam_present() -> None:
+    base = PLATFORMS / "diamond_princess"
+    assert (base / "graphics" / "elevation.jpg").is_file()
+    assert (base / "graphics" / "plan_overview.jpg").is_file()
+    assert (base / "deck_graphics.geojson").is_file()
+    paths = json.loads((base / "contam" / "path_map.json").read_text(encoding="utf-8"))
+    assert len(paths) >= 1000
+
+
+def test_diamond_princess_architectural_loader() -> None:
+    from dashboard.architectural_graphics import load_architectural_graphics
+
+    arch = load_architectural_graphics(str(PLATFORMS / "diamond_princess"))
+    assert arch.has_elevation
+    assert arch.has_plan

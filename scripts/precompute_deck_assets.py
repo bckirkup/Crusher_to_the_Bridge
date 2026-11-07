@@ -52,6 +52,7 @@ PLATFORMS = [
     "classic_cruise_1900",
     "spirit_cruise_3000",
     "mega_cruise_5000",
+    "diamond_princess",
     "messy_cruise_500",
     "gordon_gunter_r338",
     "castle_class_corvette",
