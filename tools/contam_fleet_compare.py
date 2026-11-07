@@ -18,11 +18,11 @@ Two ContamX lanes are measured:
   re-exported to a commissioned PRJ and solved, so a knob arm reaches the
   solver in the same shape the native engine sees.
 
-Engine-level arms (``set_oa`` / ``set_filter``) reuse the baseline exported
-flow field: ``oa_fraction`` and ``filter_efficiency`` are applied by the
-Crusher-side ContamX bridge and propagator, so re-solving would be
-wasted work. ``set_oa`` still mutates the JSON copy the *native* engine
-reads (its per-zone ``oa_fraction`` keys) so both engines see the knob.
+Field-changing arms (``set_oa`` / ``set_filter`` included) re-export and
+re-solve the commissioned PRJ so the ContamX lane sees the same declared
+airflow field as the native engine. ``set_oa`` defaults to
+``scope: "supply_groups"`` so duty-0 exhaust branches keep their declared
+``oa_fraction``; ``scope: "all_groups"`` is the labelled legacy baseline.
 
 Per arm the report records, besides raw divergence, the **knob-response
 parity**: whether the two solvers agree on the direction and magnitude of
@@ -81,9 +81,16 @@ from tools.contamw34_prj import path_map_from_prj  # noqa: E402
 _DEFAULT_SPEC = "data/config/contam_compare/fleet_arms.json"
 _SPATIAL = "spatial_layout.json"
 _AIRFLOW = "air_flow_paths.json"
-_FIELD_OPS = frozenset({"set_duty", "scale_ach", "drop_links"})
+_FIELD_OPS = frozenset({
+    "set_oa", "set_duty", "scale_ach", "drop_links", "set_filter",
+})
+_OA_SCOPES = frozenset({"supply_groups", "all_groups"})
+_AHS_OA_ENTRY_KINDS = frozenset({
+    "ahs_oa", "ahs_exhaust", "ahs_recirc", "ahs_supply", "ahs_return",
+})
 _EPS = 1e-9
 _MAX_EPOCHS = 5000
+_DEFAULT_OA_FRACTION = 0.2
 
 
 # ── spec / platform loading ──────────────────────────────────────────────
@@ -143,11 +150,44 @@ def _op_set_oa(
     volume: dict[str, float],
 ) -> None:
     val = float(op["value"])
+    scope = str(op.get("scope", "supply_groups"))
+    if scope not in _OA_SCOPES:
+        raise ValueError(
+            f"unknown set_oa scope {scope!r}; "
+            f"expected one of {sorted(_OA_SCOPES)}"
+        )
+    if scope == "all_groups":
+        _set_oa_all_groups(air, val)
+        edits.append(f"oa_fraction={val} on all groups (legacy all_groups)")
+    else:
+        preserved = _set_oa_supply_groups(air, val)
+        edits.append(
+            f"oa_fraction={val} on supply groups; "
+            f"preserved {preserved} duty-0 group(s)"
+        )
+    engine_args["oa_fraction"] = val
+
+
+def _set_oa_all_groups(air: dict[str, Any], val: float) -> None:
     air["oa_fraction"] = val
     for g in air.get("hvac_zones", []):
         g["oa_fraction"] = val
-    engine_args["oa_fraction"] = val
-    edits.append(f"oa_fraction={val} on all groups")
+
+
+def _set_oa_supply_groups(air: dict[str, Any], val: float) -> int:
+    default_duty = float(air.get("hvac_duty", 1.0))
+    default_oa = float(air.get("oa_fraction", _DEFAULT_OA_FRACTION))
+    preserved = 0
+    for g in air.get("hvac_zones", []):
+        duty = float(g.get("hvac_duty", default_duty))
+        declared_oa = float(g.get("oa_fraction", default_oa))
+        if duty <= 0.0:
+            g["oa_fraction"] = declared_oa
+            preserved += 1
+        else:
+            g["oa_fraction"] = val
+    air["oa_fraction"] = val
+    return preserved
 
 
 def _op_set_duty(
@@ -237,6 +277,27 @@ def _arm_needs_field(arm: dict[str, Any]) -> bool:
     return any(str(o.get("op")) in _FIELD_OPS for o in arm.get("ops", []))
 
 
+def _annotate_ahs_declared_oa(
+    entries: list[dict[str, Any]], airflow: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Stamp each exported AHS path with its group's declared OA fraction.
+
+    ``ahs_nr`` is the 1-based ``hvac_zones`` export order. Duty-0 exhaust
+    branches keep their declared ``oa_fraction`` (normally 1.0) even when a
+    supply-side ``set_oa`` arm moves the top-level default.
+    """
+    default_oa = float(airflow.get("oa_fraction", _DEFAULT_OA_FRACTION))
+    for ahs_nr, group in enumerate(airflow.get("hvac_zones", []), start=1):
+        declared_oa = float(group.get("oa_fraction", default_oa))
+        for entry in entries:
+            if int(entry.get("ahs_nr") or 0) != ahs_nr:
+                continue
+            if str(entry.get("kind")) not in _AHS_OA_ENTRY_KINDS:
+                continue
+            entry["declared_oa_fraction"] = declared_oa
+    return entries
+
+
 # ── injection site ────────────────────────────────────────────────────────
 
 def _injection_zone(spatial: dict[str, Any],
@@ -289,6 +350,7 @@ def _solve_prj(prj_text: str, entries: list[dict[str, Any]],
 def _contamx_field(
     spatial: dict[str, Any], airflow: dict[str, Any], *,
     tmp_dir: str, binary: str, prj_rel: str | None,
+    filter_efficiency: float | None = None,
 ) -> dict[str, Any]:
     """Solved field (entries + flows) from a committed or exported PRJ."""
     if prj_rel is not None:
@@ -308,8 +370,11 @@ def _contamx_field(
         )
     else:
         prj_text, entries = export_prj_with_path_map(
-            spatial, airflow, ahs_terminal_mode="commissioned",
+            spatial, airflow,
+            filter_efficiency=filter_efficiency,
+            ahs_terminal_mode="commissioned",
         )
+        entries = _annotate_ahs_declared_oa(entries, airflow)
     flows = _solve_prj(prj_text, entries, tmp_dir, binary)
     return {"entries": entries, "flows": flows}
 
@@ -470,6 +535,7 @@ def _timed_traj(
 def _timed_field(
     spatial: dict[str, Any], airflow: dict[str, Any], *,
     tmp_dir: str, binary: str, prj_rel: str | None, repeats: int,
+    filter_efficiency: float | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Solve a ContamX field *repeats* times; return (field, timing)."""
     samples: list[float] = []
@@ -480,6 +546,7 @@ def _timed_field(
             spatial, airflow,
             tmp_dir=tempfile.mkdtemp(dir=tmp_dir),
             binary=binary, prj_rel=prj_rel,
+            filter_efficiency=filter_efficiency,
         )
         samples.append(time.perf_counter() - t0)
     assert field is not None
@@ -611,16 +678,21 @@ class _ArmCtx:
 
 
 def _solve_arm_field(
-    ctx: _ArmCtx, arm_id: str, needs_field: bool,
+    ctx: _ArmCtx, arm_id: str, arm_meta: dict[str, Any], needs_field: bool,
     errors: list[Any],
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     """Resolve the arm's ContamX field; records solve errors, never raises."""
+    engine_args = arm_meta.get("engine_args") or {}
+    field_filter = float(engine_args.get(
+        "filter_efficiency", ctx.baseline_filt,
+    ))
     try:
         return _resolve_arm_field(
             ctx.spatial, ctx.air_mut, arm_id=arm_id,
             needs_field=needs_field, tmp_dir=ctx.tmp_dir,
             binary=ctx.binary, repeats=ctx.repeats,
             base_doses=ctx.base_doses,
+            filter_efficiency=field_filter,
         )
     except (ContamXUnavailable, ValueError, OSError) as exc:
         errors.append(f"ContamX field solve failed: {exc}")
@@ -696,7 +768,7 @@ def _run_arm(
     cx_field = field_timing = None
     if ctx.binary is not None:
         cx_field, field_timing = _solve_arm_field(
-            ctx, arm_id, needs_field, errors,
+            ctx, arm_id, arm_meta, needs_field, errors,
         )
         if cx_field is None:
             errors.append("ContamX field unavailable for this arm")
@@ -719,6 +791,7 @@ def _resolve_arm_field(
     spatial: dict[str, Any], air_mut: dict[str, Any], *,
     arm_id: str, needs_field: bool, tmp_dir: str, binary: str,
     repeats: int, base_doses: dict[str, dict[str, Any]],
+    filter_efficiency: float | None = None,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     """Arm's ContamX field: fresh solve for field ops, baseline reuse else."""
     if not needs_field:
@@ -728,6 +801,7 @@ def _resolve_arm_field(
     field, timing = _timed_field(
         spatial, air_mut, tmp_dir=tmp_dir, binary=binary,
         prj_rel=None, repeats=repeats,
+        filter_efficiency=filter_efficiency,
     )
     if arm_id == "baseline":
         base_doses["baseline_field"] = field

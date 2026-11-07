@@ -50,8 +50,9 @@ def test_spec_and_ops_validate() -> None:
 def test_field_ops_classification() -> None:
     spec = _spec()
     assert not cfc._arm_needs_field(spec["arms"]["baseline"])
-    assert not cfc._arm_needs_field(spec["arms"]["outdoor_air"])
-    assert not cfc._arm_needs_field(spec["arms"]["filter_merv13"])
+    assert cfc._arm_needs_field(spec["arms"]["outdoor_air"])
+    assert cfc._arm_needs_field(spec["arms"]["full_recirc"])
+    assert cfc._arm_needs_field(spec["arms"]["filter_merv13"])
     assert cfc._arm_needs_field(spec["arms"]["ahu_casualty"])
     assert cfc._arm_needs_field(spec["arms"]["ach_surge"])
     assert cfc._arm_needs_field(spec["arms"]["zone_isolation"])
@@ -68,6 +69,64 @@ def test_apply_arm_ops_set_oa_mutates_json_and_engine() -> None:
         assert zone["oa_fraction"] == pytest.approx(1.0)
     assert meta["engine_args"]["oa_fraction"] == pytest.approx(1.0)
     assert airflow.get("oa_fraction", 0.2) != pytest.approx(1.0)
+
+
+def test_apply_arm_ops_set_oa_preserves_duty0_exhaust_groups() -> None:
+    _spatial, airflow = _load_destroyer()
+    air, meta = cfc._apply_arm_ops(
+        airflow, [{"op": "set_oa", "value": 0.0}], {},
+    )
+    by_id = {g["id"]: g for g in air["hvac_zones"]}
+    for group_id in ("zone_upper", "zone_main", "zone_lower"):
+        assert by_id[group_id]["oa_fraction"] == pytest.approx(0.0)
+    for group_id in ("AHU_HD_MAIN_M", "AHU_HD_MAIN_F", "AHU_HD_UPPER_M"):
+        assert by_id[group_id]["oa_fraction"] == pytest.approx(1.0)
+    assert air["oa_fraction"] == pytest.approx(0.0)
+    assert meta["engine_args"]["oa_fraction"] == pytest.approx(0.0)
+
+
+def test_apply_arm_ops_set_oa_supply_sweep_is_graduated() -> None:
+    _spatial, airflow = _load_destroyer()
+    observed: list[float] = []
+    for val in (0.0, 0.5, 1.0):
+        air, _meta = cfc._apply_arm_ops(
+            airflow, [{"op": "set_oa", "value": val}], {},
+        )
+        zone_main = next(
+            g for g in air["hvac_zones"] if g["id"] == "zone_main"
+        )
+        observed.append(float(zone_main["oa_fraction"]))
+        heads = [
+            g for g in air["hvac_zones"]
+            if str(g["id"]).startswith("AHU_HD_")
+        ]
+        assert all(float(g["oa_fraction"]) == pytest.approx(1.0) for g in heads)
+    assert observed[0] < observed[1] < observed[2]
+    assert observed[1] - observed[0] == pytest.approx(0.5)
+    assert observed[2] - observed[1] == pytest.approx(0.5)
+
+
+def test_apply_arm_ops_set_oa_all_groups_scope_is_labelled_baseline() -> None:
+    _spatial, airflow = _load_destroyer()
+    air, _meta = cfc._apply_arm_ops(
+        airflow,
+        [{"op": "set_oa", "value": 0.0, "scope": "all_groups"}],
+        {},
+    )
+    assert all(
+        float(g["oa_fraction"]) == pytest.approx(0.0)
+        for g in air["hvac_zones"]
+    )
+
+
+def test_apply_arm_ops_set_oa_rejects_unknown_scope() -> None:
+    _spatial, airflow = _load_destroyer()
+    with pytest.raises(ValueError, match="scope"):
+        cfc._apply_arm_ops(
+            airflow,
+            [{"op": "set_oa", "value": 0.0, "scope": "bogus"}],
+            {},
+        )
 
 
 def test_apply_arm_ops_ahu_casualty_hits_one_group() -> None:
@@ -267,19 +326,84 @@ def _stub_field(spatial, airflow):
     prj_text, entries = cfc.export_prj_with_path_map(
         spatial, airflow, ahs_terminal_mode="commissioned",
     )
-    return {
-        "entries": entries,
-        "flows": {i: 50.0 for i in range(len(entries))},
-    }
+    entries = cfc._annotate_ahs_declared_oa(entries, airflow)
+    flows = {i: 50.0 for i in range(len(entries))}
+    for entry in entries:
+        if entry.get("kind") in {"ahs_oa", "ahs_exhaust", "ahs_recirc"}:
+            flows[int(entry["path_nr"])] = 0.0
+    return {"entries": entries, "flows": flows}
 
 
 def _patch_stub_field(monkeypatch) -> None:
     def fake_timed_field(spatial, air, *, tmp_dir, binary,
-                         prj_rel=None, repeats=1):
+                         prj_rel=None, repeats=1, filter_efficiency=None):
         return _stub_field(spatial, air), {
             "seconds_mean": 0.001, "seconds_values": [0.001],
         }
     monkeypatch.setattr(cfc, "_timed_field", fake_timed_field)
+
+
+def test_contamx_field_export_annotates_declared_oa_and_passes_filter(
+        monkeypatch) -> None:
+    spatial, airflow = _load_destroyer()
+    air, _meta = cfc._apply_arm_ops(
+        airflow, [{"op": "set_oa", "value": 0.0}], {},
+    )
+    entries = [
+        {"path_nr": 1, "kind": "ahs_supply", "ahs_nr": 1},
+        {"path_nr": 2, "kind": "ahs_return", "ahs_nr": 1},
+        {"path_nr": 3, "kind": "ahs_supply", "ahs_nr": 4},
+        {"path_nr": 4, "kind": "ahs_return", "ahs_nr": 4},
+    ]
+    captured: dict = {}
+
+    def fake_export(spatial_arg, airflow_arg, **kwargs):
+        captured.update(kwargs)
+        return "", [dict(entry) for entry in entries]
+
+    monkeypatch.setattr(cfc, "export_prj_with_path_map", fake_export)
+    monkeypatch.setattr(cfc, "_solve_prj", lambda *a, **k: {1: 100.0})
+    field = cfc._contamx_field(
+        spatial, air, tmp_dir=".", binary="stub", prj_rel=None,
+        filter_efficiency=0.9,
+    )
+    assert captured["filter_efficiency"] == pytest.approx(0.9)
+    assert captured["ahs_terminal_mode"] == "commissioned"
+    declared = {
+        int(e["ahs_nr"]): float(e["declared_oa_fraction"])
+        for e in field["entries"]
+    }
+    assert declared[1] == pytest.approx(0.0)
+    assert declared[4] == pytest.approx(1.0)
+
+
+def test_run_platform_engine_ops_rebuild_field_with_arm_params(
+        tmp_path, monkeypatch) -> None:
+    seen: list[tuple[str | None, float | None]] = []
+
+    def fake_timed_field(spatial, air, *, tmp_dir, binary,
+                         prj_rel=None, repeats=1, filter_efficiency=None):
+        seen.append((prj_rel, filter_efficiency))
+        return _stub_field(spatial, air), {
+            "seconds_mean": 0.001, "seconds_values": [0.001],
+        }
+
+    monkeypatch.setattr(cfc, "_timed_field", fake_timed_field)
+    spec = _spec()
+    spec["epochs"] = 1
+    report = cfc.run_platform(
+        "destroyer_baseline", spec,
+        arms=["baseline", "outdoor_air", "filter_merv13"],
+        scenarios=["respiratory"], repeats=1, epochs=1,
+        binary="stub-contamx", tmp_root=str(tmp_path),
+    )
+    export_filters = [f for prj, f in seen if prj is None]
+    values = [float(f) for f in export_filters if f is not None]
+    assert any(f == pytest.approx(0.5) for f in values)
+    assert any(f == pytest.approx(0.9) for f in values)
+    filter_field = report["arms"]["filter_merv13"]["field_seconds"]
+    assert "reused" not in filter_field
+    assert filter_field["seconds_mean"] == pytest.approx(0.001)
 
 
 def test_run_platform_stubbed_contamx_lanes(tmp_path, monkeypatch) -> None:
