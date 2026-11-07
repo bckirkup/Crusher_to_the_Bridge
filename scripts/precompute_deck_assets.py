@@ -48,6 +48,7 @@ PLATFORMS = [
     "san_antonio_class_lpd",
     "expedition_cruise_300",
     "expedition_cruise_450",
+    "greg_mortimer",
     "classic_cruise_1900",
     "spirit_cruise_3000",
     "mega_cruise_5000",
