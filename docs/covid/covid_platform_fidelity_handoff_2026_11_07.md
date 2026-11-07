@@ -1,12 +1,13 @@
 # Platform fidelity: state of play at 2026-11-07 handoff
 
 > **Status:** Handoff record (2026-11-07), authored against `main` after #1171
-> merged (`7c776a83`). It retires the session that built the Diamond Princess
-> hull and closed Edison's pre-freeze HVAC blocker. It states what exists, what
-> is settled, and the one decision the next session must get from the user
-> before any campaign work starts. It reports no new numbers: every figure it
-> refers to is quoted from the committed handoff or scenario file that measured
-> or declared it. Nothing here is a fit, and nothing here has been run.
+> merged (`7c776a83`); amended after #1173 merged with the user's θ-structure
+> decision (§8) and the external review's pre-lock changes. It retires the
+> session that built the Diamond Princess hull and closed Edison's pre-freeze
+> HVAC blocker. It states what exists, what is settled, and the single next
+> action (§8). It reports no new numbers: every figure it refers to is quoted
+> from the committed handoff or scenario file that measured or declared it.
+> Nothing here is a fit, and nothing here has been run.
 
 ## 1. The question
 
@@ -128,35 +129,70 @@ points at `mega_cruise_5000` and `greg_mortimer_2020` at
 runtime consumer before #1171. `docs/covid/covid_open_ledger.md` §1 is
 unchanged and no entry there is withdrawn by this session.
 
-## 8. The single open decision
+## 8. The design, as settled (2026-11-07)
 
-**Freeze the platform-fidelity design parameters** so the pre-registration doc
-and campaign registration can be written. The user must pick:
+The user settled the θ structure after external review (Edison/Kosmos
+`DESIGN_REVIEW.md`, whose own M1 recommendation to move everything to 2.37e11
+was WITHDRAWN by its author as GM-informed parameter selection):
 
-1. **Theta operating point (per event):** DP arms at the replay point 7.9e6;
-   GM arms at the GM-RESCORE-02 anchor row 2.37e11 — vs one shared θ for both
-   events. External review (2026-11-07) first recommended moving everything to
-   2.37e11, then WITHDREW that as GM-informed parameter selection (GM looked
-   better there); the paired contrast is immune to θ's absolute value only
-   because both arms share it within an event, and the canary measures whether
-   the chosen regime is informative (P(takeoff) not degenerate). A
-   pre-declared θ lattice is legitimate but multiplies GM cost and must be the
-   user's explicit choice.
-2. **Seed budget per cell:** 20 seeds (DP replay parity) vs fewer for GM's
-   223-agent voyages. The campaign gate requires a canary of ≥20 seeds at one
-   cell before any array, so 20 is the natural floor for the canary regardless.
-   External review's power note: the GM-RESCORE-02 convention is 50 seeds per
-   row; detecting a 10% median shift would need ~200 seeds, so the prereg must
-   declare its minimum detectable effect (e.g. 30%) rather than imply
-   precision it will not have.
-3. **Edison deliverable form:** pre-registration doc only vs doc plus
-   `campaigns/covid/<name>/` registration (`campaign.json`, `cell.py`,
-   `entry.py`, `readout.py`) with the paired-seed readout schema.
+**Primary (frozen first) — shared Θ = 7.9e6, four arms:**
 
-What settles it: the user's answers, then the DP-arm canary readout (which
-measures whether 20 seeds resolve the platform effect above seed noise). GM's
-arm is then run once, both platforms scored in a single batch, reported
-as-is.
+- DP event on `diamond_princess` vs `mega_cruise_5000`; GM event on
+  `greg_mortimer` vs `expedition_cruise_450`.
+- Event populations fixed (3,711 / 223), full voyage, one shared SHA, one
+  emission-fraction state (5e-5, "declared not applied" per the provenance
+  register tranche 27 §6), campaign-level `platform_id` overrides — the frozen
+  scenario records and split are untouched.
+- Resolved `platform_id` and relevant input hashes echoed in every cell (the
+  payload does not echo `platform_id` today — small code change, part of the
+  campaign registration).
+- DP-side debugging first; GM arms revealed once, after DP machinery is
+  proven. GM canary is TECHNICAL acceptance only; Θ is frozen before any GM
+  epidemiological output is examined. If GM fizzles on both hulls at 7.9e6,
+  that is reported as-is — no Θ change to make GM informative.
+
+**Descriptive layers (pre-declared, none selectable, none fitted):**
+
+1. GM pair at Θ = 2.37e11 (GM-RESCORE-02 anchor row) — historical continuity
+   and a hedge against GM fizzle at 7.9e6.
+2. GM θ-lattice {1e11, 2.37e11, 1e12} × both GM hulls — maps the
+   geometry×θ interaction on the cheap hull. No DP lattice unless a
+   pre-declared escalation rule (written in the prereg) fires; DP cells cost
+   ~10–11 min each.
+
+**Protocol discipline (adopted from external review, strengthened):** prevent
+unwanted closures by construction — a frozen per-event-pair protocols file
+carrying SOP-017 only; fired-protocol ids echoed per cell; any cell where a
+`close_zones` protocol fired is a FAILED COMPARISON, not a deletable cell
+(firing is outbreak-severity-dependent; deletion would bias the contrast).
+Stop, diagnose, apply a predeclared correction/rerun policy; failed attempts
+stay in the record.
+
+**GM prior evidence acknowledged:** GM has been scored twice at the
+fleet-shape θ lattice on the proxy hull (RESCORE-01/02). This is a paired
+sensitivity comparison, not a fresh holdout; no parameter is revised from any
+result of this campaign.
+
+**Metrics (all frozen in the prereg as labeled design choices, not sourced
+constants):** paired hull delta (per-seed dedicated − proxy recorded_onsets,
+takeoff-conditional; median Δ with q05–q95); P(takeoff) per hull
+(recorded_onsets ≥ 10 gate); takeoff-conditional asymptomatic share;
+declared minimum detectable effect (proposal: 30%); seeds per row (proposal:
+20 — 20 matched seeds × 2 platforms = 40 executions per event pair, per the
+external review's cell-count clarification); CRN correlation measured on the
+first canary batch (ρ < 0.3 → unpaired analysis); technical-failure policy
+(>10% failed cells → stop, diagnose, resubmit).
+
+**Remaining before freeze (proposed defaults, user confirms at prereg
+review):** seed budget per row (20 vs GM-RESCORE's 50 convention) and
+deliverable form (proposed: prereg doc under `docs/covid/` + campaign
+registration `campaigns/covid/platform_fidelity_01/` in one PR). Then: local
+smoke → Batch canary (≥20 seeds at one arm-row) → stop and report; the user
+decides the full array.
+
+**The single next action:** write the pre-registration doc (all of the above,
+frozen) and, in the same change, the campaign registration with the
+platform-override cell worker. Nothing runs before the user merges it.
 
 ## 9. Do not reopen
 
@@ -168,6 +204,12 @@ as-is.
 - No theta refit on the faithful hulls inside this study. A refit would be a
   separate pre-registered study: DP-only fitting, which forces a NEW held-out
   event — that is the user's decision, not this study's.
+- No Θ adaptation to GM outcomes: if GM fizzles or saturates at 7.9e6, that is
+  reported as-is; the descriptive layers never promote an arm to "the result"
+  and no arm is selectable after outcomes are seen.
+- Unexpected trigger-protocol firing is a FAILED COMPARISON, never a deletable
+  cell — firing is outbreak-severity-dependent and deletion would bias the
+  hull contrast; failed attempts stay in the record.
 - No fitting any constant to the covid anchors (AGENTS.md); report ranges and
   tails (user preference).
 - Campaign gate (`bounded-research-sessions` rule): geometry/seed gate
