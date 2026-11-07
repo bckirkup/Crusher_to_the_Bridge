@@ -58,7 +58,14 @@ MANIFEST_REL = (
     "picard_framework/runs/mega_cruise_campaign/"
     f"{CAMPAIGN}_manifest.json"
 )
-IMAGE_TAG = "noro-provisioned-sensitivity01"
+# Small hulls run the remainder (cls seeds 8171-8200) on the image built
+# from the post-#1164 main; the mega campaign keeps the scout image, whose
+# tag must not be re-pointed while its remainder arrays are RUNNABLE.
+IMAGE_TAG = (
+    "noro-provisioned-sensitivity01-r2"
+    "@sha256:efc18c7df8a1ae224eaf2e10d10fc372462f949b5c26312ef41c042fbf72b18d"
+)
+IMAGE_TAG_MEGA = "noro-provisioned-sensitivity01"
 
 # ---------------------------------------------------------------- factors
 FACTOR_LEVELS: dict[str, dict[str, object]] = {
@@ -384,7 +391,7 @@ def build_campaign(hulls: tuple[str, ...], name: str, memory: str) -> dict:
         "epochs": 288,
         "s3_prefix": f"campaign/{CAMPAIGN}{suffix}/",
         "queue": "picard-campaign-queue",
-        "image_tag": IMAGE_TAG,
+        "image_tag": IMAGE_TAG_MEGA if suffix else IMAGE_TAG,
         "resources": {"vcpu": "1", "memory": memory, "shm": 512},
         "blocks": _blocks(hulls),
         "readout": "tools/noro_diag/outbreak_anchor_readout.py",

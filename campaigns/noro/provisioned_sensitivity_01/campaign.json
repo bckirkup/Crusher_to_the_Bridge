@@ -6,7 +6,7 @@
  "epochs": 288,
  "s3_prefix": "campaign/noro_provisioned_sensitivity_01/",
  "queue": "picard-campaign-queue",
- "image_tag": "noro-provisioned-sensitivity01",
+ "image_tag": "noro-provisioned-sensitivity01-r2@sha256:efc18c7df8a1ae224eaf2e10d10fc372462f949b5c26312ef41c042fbf72b18d",
  "resources": {
   "vcpu": "1",
   "memory": "4096",
