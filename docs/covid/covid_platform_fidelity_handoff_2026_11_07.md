@@ -78,13 +78,24 @@ that is what the canary gate exists to measure.
 - **No platform-effect measurement exists.** The comparison has never been
   run; every claim about its size or sign is hypothesis until the canary
   readout exists.
-- **Protocol zone-name asymmetry (known confound, unresolved).** SOP-007 /
-  SOP-009 `close_zones` reference `Main_Galley_Aft` / `Crew_Mess_Main`, which
-  exist on `mega_cruise_5000` but not on `diamond_princess` (which has
-  `MainGalley` / `Crew_Mess`-free naming per its recipe). `apply_zone_closures`
-  no-ops on unknown ids, so the asymmetry is silent, not loud. Candidate
-  mitigation: one shared custom `catalog.protocols_path` per event pair, or
-  verify the trigger protocols never fire in the replay window.
+- **Trigger-protocol zone-name asymmetry (unverified — freeze as an admissibility criterion).** SOP-007 /
+  SOP-009 carry `modifiers.close_zones = [Main_Galley_Aft, Crew_Mess_Main]` —
+  mega-only zone ids; `diamond_princess` and `greg_mortimer` use different
+  dining names (`MainGalley`, `CrewMess`) — and the SOP-017 diagnostic
+  counterfactual variants carry mega zone names in `exempt_work_zones`.
+  `build_fit_run_spec` disables `diagnostic_cascade`
+  (`picard_framework/covid_theta_fit.py` L395), which covers the cascade
+  trigger path, but SOP-007/009 trigger on lab-instrument stoplights
+  (`clinical_microbiology` / `clinical_qpcr` RED) AND
+  `min_escalation_status` (SUSPECTED / LOCKDOWN), neither of which the
+  cascade override disables; whether they can fire in the declared replay is
+  UNVERIFIED. `apply_zone_closures` no-ops on unknown ids, so if they fire on
+  the proxy arm and silently no-op on a dedicated arm, that is a
+  differential-intervention confound. External design review (2026-11-07)
+  flagged the same item. Frozen mitigation for the prereg (decide before any
+  cell runs): echo fired protocol ids per cell and declare any cell where a
+  `close_zones` protocol fired VOID, or strip SOP-007/009 via one shared
+  `catalog.protocols_path` per event pair.
 - **GM voyage length vs platform.** GM's 28-day, 223-agent event on the
   faithful hull is far smaller than the DP arm; seed-noise dominance is more
   likely there, which is why the seed budget is an open design parameter.
@@ -122,11 +133,22 @@ unchanged and no entry there is withdrawn by this session.
 **Freeze the platform-fidelity design parameters** so the pre-registration doc
 and campaign registration can be written. The user must pick:
 
-1. **Theta operating point:** fixed at the DP replay point 7.9e6 (recommended
-   for a pure sensitivity axis) vs a small theta screen on the DP arm first.
+1. **Theta operating point (per event):** DP arms at the replay point 7.9e6;
+   GM arms at the GM-RESCORE-02 anchor row 2.37e11 — vs one shared θ for both
+   events. External review (2026-11-07) first recommended moving everything to
+   2.37e11, then WITHDREW that as GM-informed parameter selection (GM looked
+   better there); the paired contrast is immune to θ's absolute value only
+   because both arms share it within an event, and the canary measures whether
+   the chosen regime is informative (P(takeoff) not degenerate). A
+   pre-declared θ lattice is legitimate but multiplies GM cost and must be the
+   user's explicit choice.
 2. **Seed budget per cell:** 20 seeds (DP replay parity) vs fewer for GM's
    223-agent voyages. The campaign gate requires a canary of ≥20 seeds at one
    cell before any array, so 20 is the natural floor for the canary regardless.
+   External review's power note: the GM-RESCORE-02 convention is 50 seeds per
+   row; detecting a 10% median shift would need ~200 seeds, so the prereg must
+   declare its minimum detectable effect (e.g. 30%) rather than imply
+   precision it will not have.
 3. **Edison deliverable form:** pre-registration doc only vs doc plus
    `campaigns/covid/<name>/` registration (`campaign.json`, `cell.py`,
    `entry.py`, `readout.py`) with the paired-seed readout schema.
