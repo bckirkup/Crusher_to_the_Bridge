@@ -54,7 +54,7 @@ queue `picard-campaign-queue`.
 
 | wave | blocks | cells | status |
 |---|---|---|---|
-| scout | 192 × `scout_<tier>` (8 seeds each) | 1,536 | 144 small-hull arrays submitted 2026-11-07 00:20–00:38 UTC; mega arrays after the mega canary |
+| scout | 192 × `scout_<tier>` (8 seeds each) | 1,536 | 144 small-hull arrays submitted 2026-11-07 00:20–00:38 UTC; 48 mega arrays 00:50–00:54 UTC after the mega canary |
 | main | 192 × `<tier>` (n−8 seeds each) | 9,600 | not submitted — user gate after scout |
 
 ### canary children — submitted 2026-11-07 00:15 UTC
@@ -62,7 +62,7 @@ queue `picard-campaign-queue`.
 | cell | jobdef | seed | job id |
 |---|---|---|---|
 | scout_fl_exp_12d_sens_p16_mixv index 0 | :1 | 8000 | 8ebe10ac-7abe-4541-bd60-4b5b1ba2044d (SUCCEEDED, 65 s container wall) |
-| scout_fl_meg_12d_sens_p01_crewv index 0 | mega:1 | 8105 | db1f4e31-94e7-4034-b3b8-ace01bc7538e |
+| scout_fl_meg_12d_sens_p01_crewv index 0 | mega:1 | 8105 | db1f4e31-94e7-4034-b3b8-ace01bc7538e (SUCCEEDED, 30.4 min wall, rss 3.4 GB, zip 215 MB) |
 
 ### scout arrays — small hulls, jobdef `picard-noro-provisioned-sensitivity-01` (array size 8 each)
 
@@ -212,3 +212,56 @@ queue `picard-campaign-queue`.
 | scout_fl_spr_12d_sens_p16_crewv | :143 | 81899586-8c5b-45ec-afc1-6b2d8ba36feb |
 | scout_fl_spr_12d_sens_p16_paxv | :144 | e35907b1-b7ef-46d6-8449-0b79da991487 |
 | scout_fl_spr_12d_sens_p16_mixv | :145 | 886fc569-102b-4bf2-853e-64fda9ddaedd |
+
+### scout arrays — mega hull, jobdef `picard-noro-provisioned-sensitivity-01-mega` (array size 8 each)
+
+| block | jobdef | job id |
+|---|---|---|
+| scout_fl_meg_12d_sens_p01_crewv | mega:2 | 39e33710-1490-406f-8395-262115b1735d |
+| scout_fl_meg_12d_sens_p01_paxv | mega:3 | 9aaab617-98d6-4331-bef9-bd319ff62a79 |
+| scout_fl_meg_12d_sens_p01_mixv | mega:4 | 02609ca0-c323-45a4-b44c-71a879566293 |
+| scout_fl_meg_12d_sens_p02_crewv | mega:5 | 781e1b50-86b7-4e38-9897-9bfc64cb8711 |
+| scout_fl_meg_12d_sens_p02_paxv | mega:6 | b7587392-eab5-4783-8c59-49c44cce6637 |
+| scout_fl_meg_12d_sens_p02_mixv | mega:7 | 46c990e2-660b-405b-932c-a99e678ddf60 |
+| scout_fl_meg_12d_sens_p03_crewv | mega:8 | b2805a48-a289-4381-85ea-e75973cb4d7e |
+| scout_fl_meg_12d_sens_p03_paxv | mega:9 | 199fedb9-ab2c-4f3b-b104-58f00dcdb9e9 |
+| scout_fl_meg_12d_sens_p03_mixv | mega:10 | d8e5277c-608c-415b-bc28-d01165995acd |
+| scout_fl_meg_12d_sens_p04_crewv | mega:11 | d3e09bec-6ca2-41b4-89a5-849b914b5126 |
+| scout_fl_meg_12d_sens_p04_paxv | mega:12 | 1c2f6129-adaf-4020-93c7-a7bfb755836c |
+| scout_fl_meg_12d_sens_p04_mixv | mega:13 | 3cdac181-fba2-418e-a783-ce255748132a |
+| scout_fl_meg_12d_sens_p05_crewv | mega:14 | f6adc792-56e4-4099-bbee-490785eb0711 |
+| scout_fl_meg_12d_sens_p05_paxv | mega:15 | 5c3660c2-bc46-4765-af0f-5e6f3335a3fc |
+| scout_fl_meg_12d_sens_p05_mixv | mega:16 | e4eb1994-41da-42ef-b438-7e3e530129d0 |
+| scout_fl_meg_12d_sens_p06_crewv | mega:17 | 779a7698-1710-4026-ba24-02e91866abb5 |
+| scout_fl_meg_12d_sens_p06_paxv | mega:18 | 2642978f-49b6-4793-b4ef-0abe2f8c4f1f |
+| scout_fl_meg_12d_sens_p06_mixv | mega:19 | 1ca57c8a-d2cc-45dd-835d-2be92b4bba64 |
+| scout_fl_meg_12d_sens_p07_crewv | mega:20 | 5815e36b-226b-4e9e-b04b-1ee5d4dbb8ca |
+| scout_fl_meg_12d_sens_p07_paxv | mega:21 | d7019a17-10c4-4bc5-8dce-a812ab229c3b |
+| scout_fl_meg_12d_sens_p07_mixv | mega:22 | 91f33eed-decd-4022-815c-54def5c972cf |
+| scout_fl_meg_12d_sens_p08_crewv | mega:23 | 23889c38-5708-4faa-97a9-dc06180c3e62 |
+| scout_fl_meg_12d_sens_p08_paxv | mega:24 | 0c5cef68-7824-4915-94fb-ce962038c684 |
+| scout_fl_meg_12d_sens_p08_mixv | mega:25 | efa10859-b8d8-44af-8de8-1779bdb148c2 |
+| scout_fl_meg_12d_sens_p09_crewv | mega:26 | 5a325292-7f6c-481a-8db8-8c199a6ad8aa |
+| scout_fl_meg_12d_sens_p09_paxv | mega:27 | 5ea16bf6-5141-49c0-a2e2-dff4d1e06711 |
+| scout_fl_meg_12d_sens_p09_mixv | mega:28 | 130e7ea6-79de-4688-b15d-2c63ef31d69e |
+| scout_fl_meg_12d_sens_p10_crewv | mega:29 | 318a25d9-6e64-48fa-b39b-c69fbfd34c68 |
+| scout_fl_meg_12d_sens_p10_paxv | mega:30 | 5b508c81-0031-4823-8cc8-4e8ec0871ce1 |
+| scout_fl_meg_12d_sens_p10_mixv | mega:31 | efd79136-0899-4d6c-bb0c-0324fe6ef8c0 |
+| scout_fl_meg_12d_sens_p11_crewv | mega:32 | fa021fc7-02e6-40f4-bc97-fdbea5e08005 |
+| scout_fl_meg_12d_sens_p11_paxv | mega:33 | 77f86b2f-f1a3-4dfa-8781-5f7d4e1439e5 |
+| scout_fl_meg_12d_sens_p11_mixv | mega:34 | 5d895931-b5a1-4bff-a21d-70633a73cfb5 |
+| scout_fl_meg_12d_sens_p12_crewv | mega:35 | 92842684-aa0e-418d-bf0b-5a33fb3a9140 |
+| scout_fl_meg_12d_sens_p12_paxv | mega:36 | 48759f0a-0fd9-401a-b206-3e29268752fa |
+| scout_fl_meg_12d_sens_p12_mixv | mega:37 | 2a07ff0d-5ab6-4bd7-93a7-0fac60660c7e |
+| scout_fl_meg_12d_sens_p13_crewv | mega:38 | 255fedf9-24b0-4142-9929-35a33d60568b |
+| scout_fl_meg_12d_sens_p13_paxv | mega:39 | 9ec4dabd-a996-46f3-9659-7bd56e465842 |
+| scout_fl_meg_12d_sens_p13_mixv | mega:40 | f58e1b72-fb1a-4ec4-87bf-aeb93fbb27b2 |
+| scout_fl_meg_12d_sens_p14_crewv | mega:41 | 31dfa11c-a9b3-4ed6-8965-ad518a04c01f |
+| scout_fl_meg_12d_sens_p14_paxv | mega:42 | 776ae94c-0381-422b-9fd7-96f8a490cbe3 |
+| scout_fl_meg_12d_sens_p14_mixv | mega:43 | 2b4d8afb-9330-4888-a836-c907b9d28d44 |
+| scout_fl_meg_12d_sens_p15_crewv | mega:44 | a7989b87-6be7-416c-8e65-83778070e868 |
+| scout_fl_meg_12d_sens_p15_paxv | mega:45 | 77b2c5ec-bad0-4e58-b0e1-ba9bb9d57dc7 |
+| scout_fl_meg_12d_sens_p15_mixv | mega:46 | f860b9d9-5d36-4533-9b6c-96fad082a95d |
+| scout_fl_meg_12d_sens_p16_crewv | mega:47 | 03b6e8f8-6af3-4170-a43a-2a98ed783ee4 |
+| scout_fl_meg_12d_sens_p16_paxv | mega:48 | b6fbce0b-2d18-42c2-b5d4-4de66d652ac2 |
+| scout_fl_meg_12d_sens_p16_mixv | mega:49 | ba6aa90c-4f26-45f5-9360-67ef44d79ea0 |
