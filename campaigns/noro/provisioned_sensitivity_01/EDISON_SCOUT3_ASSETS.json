@@ -1,0 +1,18 @@
+{
+  "reduction_id": "red-fps01-sens01-scout3",
+  "request_id": "req-fps01-sens01-scout3-return",
+  "contract": "first_paper_scalar/1.5.0",
+  "rows": 1536,
+  "pages": 154,
+  "files_uploaded": 4,
+  "ack_id": "ack-9523d1856c0a43cb",
+  "ack_s3_key": "campaign/_derived/reducer/v1/requests/acks/ack-9523d1856c0a43cb.json",
+  "ack_sha256": "33e33ea029b4d7bf28d52532974c4178ed6d153d1953718810081f1d9fffc5cb",
+  "github_run_id": "42373863829",
+  "project_asset_ids": {
+    "count": 157,
+    "first": "5bf8ecfa-b96f-4805-a7f1-30127df19a97",
+    "last": "36d387b5-17a0-4329-9e4c-0044ff9062a2",
+    "sha256": "edf007b1939ac5def9715cc329bc5c1f43de21cc64a91d77300445b6d3441e33"
+  }
+}

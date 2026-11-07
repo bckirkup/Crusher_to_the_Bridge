@@ -422,3 +422,26 @@ queue `picard-campaign-queue`.
   9,600-run remainder (mega first) on the pinned campaign image
   (`picard-campaign:noro-provisioned-sensitivity01` @ sha256:354ddfda...,
   main 71794db5) — user gate.
+
+## Scout3 return leg -> Edison (2026-11-07 12:56 UTC)
+
+- First attempt (run 42373325980, dispatched by hand) failed at collect, exit 4
+  `request_blocked: admission/operation/... required_field_missing`: the reducer
+  spec was passed as `request_uri`; the return leg needs a
+  `crusher-campaign-distributions/1.0-proposed` bootstrap collect request
+  (reducer-dispatch-pins §4). No data moved.
+- Bootstrap request `red-fps01-sens01-scout3-bootstrap.json`
+  (`campaign/_derived/reducer/v1/requests/`, raw sha
+  `0b6f3a151612e003b0095a7ced6b1baaf4fa8ffab15f11f3878698ac951947be`):
+  request_id `req-fps01-sens01-scout3-return`, allowlist = the scout3 attempt
+  prefix, `collect_all_pages: true`, `max_return_bytes` 1 GiB, admission
+  `adm-fps01-sens01-scout3-return` $8, scope sha `3f73b584...`.
+- Run 42373863829 (`attempt_id` = reduction id, `edison_ingest=true`): poll,
+  collect, ingest, acknowledge all `completed`. Collected RECEIPT + MANIFEST +
+  COMMIT + 154 pages (158.65 MB). Edison ingest: **157 project asset ids**
+  (`files_uploaded: 157`), listed in `EDISON_SCOUT3_ASSETS.json`. Ack
+  `ack-9523d1856c0a43cb`, durable at
+  `campaign/_derived/reducer/v1/requests/acks/ack-9523d1856c0a43cb.json`
+  (sha `33e33ea0...`), accepted_page_ids count 157, deduplicated false.
+- Scout vectors (1,536 rows, 1.5.0) are now with Edison; the remainder gate is
+  still open and nothing from the 9,600-run remainder is submitted.
