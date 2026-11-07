@@ -285,3 +285,34 @@ queue `picard-campaign-queue`.
   role): scout $17–34, main $42–84. Storage lever available without any
   engine change: block-level `"args": {"payload": "lean"}` → worker
   `--payload lean` (census-member diet); NOT applied to the scout.
+
+### Scout wave — closed (2026-11-07 05:11 UTC, operational only)
+
+- 192/192 arrays SUCCEEDED, 0 FAILED; 1,536 zips, every block exactly 8.
+  Storage measured: small hulls 54.9 GB (1,152 zips), mega 80.4 GB
+  (384 zips, 191–222 MB, mean 209 MB) → 135 GB vs 136 GB projected.
+  Mega wave wall clock 01:24 → 05:11 UTC (memory-packed ~55–64 at once).
+- Scan rows: `tools/noro_diag/food_shapes_01_scan.py --no-census`, 192
+  files × 8 rows, 0 errors, 1,536 unique keys, mirrored to
+  `campaign/noro_provisioned_sensitivity_01/_scan_rows/scout_<tier>.jsonl`
+  (mega rows under the parent prefix, not `_mega/`).
+- Reducer request `red-fps01-sens01-scout` built by
+  `deploy/aws/build_first_paper_sensitivity01.py --wave scout`
+  (utc 2026-11-07T05:16:13Z): 1,728 sources (192 scan + 1,536 zips),
+  cohort 1,536 expected / 1,536 unique / 0 duplicates; uploaded to
+  `campaign/_derived/reducer/v1/requests/red-fps01-sens01-scout-{sources,request,cohort}.json`.
+  Request sha — canonical (materialize leg)
+  `ee2523f0d88f429da4cf4dcb43b51f800bbb040e83c6db7f3d04ff84352a4e7f`;
+  raw bytes `492489062b3ce77e0becfe62d84a55598d1048064eb601684f8d8b84517b69d3`.
+  Sources sha `5f9be6f0560453ae428c6555b34bd78653c04e7cb43e8c67ecfe886e0ad06cfd`.
+- **Reducer image gap (found before dispatch):** `picard-reducer:11` runs
+  `reducer-v8` (pushed 2026-11-03), which predates the 1.5.0 contract
+  (bc4ca70a) — it would emit 1.4.0 vectors without role checkpoints.
+  Rebuilt `deploy/aws/Dockerfile.analysis` from main 71794db5 as
+  `picard-boundary-analysis:reducer-v9` @
+  `sha256:0007eb3994bd6b61b8c832784bd7db59f5daa1605f3d3e26a4c1704e11811acd`
+  (in-image `FIRST_PAPER_SCALAR.json` = `first_paper_scalar/1.5.0`;
+  reducer-smoke target passed). `deploy/aws/reducer_jobdef_spec.json`
+  pinned to it; `register-job-definition` is denied to the deploy role
+  (`iam:PassRole` on `picard-reducer-job-role`) → the `picard-reducer:12`
+  register is Benjamin's CloudShell leg. No reducer job dispatched yet.
