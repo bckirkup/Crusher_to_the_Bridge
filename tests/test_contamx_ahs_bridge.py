@@ -5,6 +5,7 @@ test_contamx_ahs_bridge.py – AHS → star (room↔plenum) flow synthesis
 from __future__ import annotations
 
 import sys
+import warnings
 from pathlib import Path
 
 import pytest
@@ -104,6 +105,106 @@ def test_synthesize_rec_zero_applies_oa_fraction() -> None:
     # Rec = 0.8 * 200 = 160 → supply = 100 * (160/200) = 80
     assert supplies["A"] == pytest.approx(80.0)
     assert supplies["B"] == pytest.approx(80.0)
+
+
+def test_synthesize_rec_zero_uses_declared_oa_per_group() -> None:
+    entries = [
+        {"path_nr": 1, "from_zone": "A", "to_zone": "ahs1(Ret)",
+         "kind": "ahs_return", "ahs_nr": 1, "declared_oa_fraction": 0.2},
+        {"path_nr": 2, "from_zone": "ahs1(Sup)", "to_zone": "A",
+         "kind": "ahs_supply", "ahs_nr": 1, "declared_oa_fraction": 0.2},
+        {"path_nr": 3, "from_zone": "ahs1(Ret)", "to_zone": "ahs1(Sup)",
+         "kind": "ahs_recirc", "ahs_nr": 1},
+        {"path_nr": 4, "from_zone": "B", "to_zone": "ahs2(Ret)",
+         "kind": "ahs_return", "ahs_nr": 2, "declared_oa_fraction": 0.8},
+        {"path_nr": 5, "from_zone": "ahs2(Sup)", "to_zone": "B",
+         "kind": "ahs_supply", "ahs_nr": 2, "declared_oa_fraction": 0.8},
+        {"path_nr": 6, "from_zone": "ahs2(Ret)", "to_zone": "ahs2(Sup)",
+         "kind": "ahs_recirc", "ahs_nr": 2},
+    ]
+    flows = {1: 100.0, 2: 100.0, 3: 0.0, 4: 100.0, 5: 100.0, 6: 0.0}
+    paths = synthesize_ahs_recirculation_paths(
+        entries, flows, {"A", "B"}, oa_fraction=0.5,
+    )
+    supplies = {
+        p.to_zone: p.flow_rate_m3h
+        for p in paths
+        if p.path_type == PATH_TYPE_HVAC_SUPPLY
+    }
+    assert supplies["A"] == pytest.approx(80.0)
+    assert supplies["B"] == pytest.approx(20.0)
+
+
+def test_synthesize_rec_zero_scalar_fallback_is_graduated() -> None:
+    entries = [
+        {"path_nr": 1, "from_zone": "A", "to_zone": "ahs1(Ret)",
+         "kind": "ahs_return", "ahs_nr": 1},
+        {"path_nr": 2, "from_zone": "B", "to_zone": "ahs1(Ret)",
+         "kind": "ahs_return", "ahs_nr": 1},
+        {"path_nr": 3, "from_zone": "ahs1(Sup)", "to_zone": "A",
+         "kind": "ahs_supply", "ahs_nr": 1},
+        {"path_nr": 4, "from_zone": "ahs1(Sup)", "to_zone": "B",
+         "kind": "ahs_supply", "ahs_nr": 1},
+        {"path_nr": 5, "from_zone": "ahs1(Ret)", "to_zone": "ahs1(Sup)",
+         "kind": "ahs_recirc", "ahs_nr": 1},
+    ]
+    flows = {1: 100.0, 2: 100.0, 3: 100.0, 4: 100.0, 5: 0.0}
+    expected = {0.2: 80.0, 0.8: 20.0}
+    for oa, supply_flow in expected.items():
+        paths = synthesize_ahs_recirculation_paths(
+            entries, flows, {"A", "B"}, oa_fraction=oa,
+        )
+        supplies = {
+            p.to_zone: p.flow_rate_m3h
+            for p in paths
+            if p.path_type == PATH_TYPE_HVAC_SUPPLY
+        }
+        assert supplies["A"] == pytest.approx(supply_flow)
+        assert supplies["B"] == pytest.approx(supply_flow)
+
+
+def test_synthesize_nonzero_rec_warns_when_it_diverges_from_declared_oa() -> None:
+    entries = [
+        {"path_nr": 1, "from_zone": "A", "to_zone": "ahs1(Ret)",
+         "kind": "ahs_return", "ahs_nr": 1, "declared_oa_fraction": 0.2},
+        {"path_nr": 2, "from_zone": "ahs1(Sup)", "to_zone": "A",
+         "kind": "ahs_supply", "ahs_nr": 1, "declared_oa_fraction": 0.2},
+        {"path_nr": 3, "from_zone": "ahs1(Ret)", "to_zone": "ahs1(Sup)",
+         "kind": "ahs_recirc", "ahs_nr": 1},
+    ]
+    flows = {1: 100.0, 2: 100.0, 3: 120.0}
+    with pytest.warns(UserWarning, match="AHS 1 recirc"):
+        paths = synthesize_ahs_recirculation_paths(
+            entries, flows, {"A"}, oa_fraction=0.5,
+        )
+    supplies = [
+        p.flow_rate_m3h for p in paths
+        if p.path_type == PATH_TYPE_HVAC_SUPPLY
+    ]
+    assert supplies == [pytest.approx(120.0)]
+
+
+def test_synthesize_nonzero_rec_matching_declared_oa_does_not_warn() -> None:
+    entries = [
+        {"path_nr": 1, "from_zone": "A", "to_zone": "ahs1(Ret)",
+         "kind": "ahs_return", "ahs_nr": 1, "declared_oa_fraction": 0.2},
+        {"path_nr": 2, "from_zone": "ahs1(Sup)", "to_zone": "A",
+         "kind": "ahs_supply", "ahs_nr": 1, "declared_oa_fraction": 0.2},
+        {"path_nr": 3, "from_zone": "ahs1(Ret)", "to_zone": "ahs1(Sup)",
+         "kind": "ahs_recirc", "ahs_nr": 1},
+    ]
+    flows = {1: 100.0, 2: 100.0, 3: 80.0}
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        paths = synthesize_ahs_recirculation_paths(
+            entries, flows, {"A"}, oa_fraction=0.5,
+        )
+    assert not record
+    supplies = [
+        p.flow_rate_m3h for p in paths
+        if p.path_type == PATH_TYPE_HVAC_SUPPLY
+    ]
+    assert supplies == [pytest.approx(80.0)]
 
 
 def test_contamx_engine_includes_synthesized_ahs_star() -> None:
