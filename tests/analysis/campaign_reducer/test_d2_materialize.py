@@ -265,9 +265,22 @@ def test_incomplete_inventory_prevents_completed():
     assert "incomplete_inventory" in commit["coverage"]["disqualifiers"]
 
 
+def test_wide_row_under_cap_is_emitted():
+    # first_paper_scalar/1.5.0 rows measure ~100-110 KiB; they must not
+    # trip the oversized_row disqualifier.
+    transport, store, ledger = _rig()
+    wide = json.dumps({"blob": "x" * 110_000}).encode()
+    transport.put("wide.json", wide)
+    spec = _spec([_src("wide.json", family="covid_screen_json")])
+    result = run_materialization(spec, transport, store, ledger)
+    commit = json.loads(store.get(result.commit_key))
+    assert "oversized_row" not in commit["coverage"]["disqualifiers"]
+    assert result.status == "completed"
+
+
 def test_oversized_row_prevents_completed():
     transport, store, ledger = _rig()
-    big = json.dumps({"blob": "x" * 100_000}).encode()
+    big = json.dumps({"blob": "x" * 300_000}).encode()
     transport.put("big.json", big)
     spec = _spec([_src("big.json", family="covid_screen_json")])
     result = run_materialization(spec, transport, store, ledger)

@@ -66,7 +66,11 @@ _PROFILES = {
 }
 CHECKPOINT_PREFIX = "checkpoints/"
 SHARD_PREFIX = "shards/"
-_MAX_ROW_BYTES = 64 * 1024
+# Per-row cap on canonical JSON bytes. first_paper_scalar/1.5.0 wide rows
+# carry ~190 provenance entries and measure ~100-110 KiB against
+# sensitivity_01 source keys (64 KiB dropped every row as oversized_row);
+# 256 KiB keeps a row well inside the 1 MiB return pages.
+_MAX_ROW_BYTES = 256 * 1024
 
 
 class MaterializationError(Exception):
