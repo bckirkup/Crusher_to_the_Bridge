@@ -392,3 +392,33 @@ queue `picard-campaign-queue`.
   `a31fbd0c2dd75b1b061c659d14c30acc43aa91ff55c61f9486c8cb767882c2c8` (materialize
   leg); raw sha `99dd4e655f36fb4f43c260f4ff6c0efe3b9be7c0dc45004e015a848e8ebae1ac`
   (return leg); uploaded to `campaign/_derived/reducer/v1/requests/`.
+
+## Scout3 readout (`red-fps01-sens01-scout3`, `picard-reducer:13`) — SCOUT GATE CLOSED (2026-11-07 12:22 UTC, operational only)
+
+- Workflow run 42370447647; Batch job `494785f3-2734-4270-9f35-660268c2bc67`,
+  2 vCPU / 8 GiB, exit 0, 12:12:03 -> 12:21:37 UTC (584 s wall; RSS not
+  instrumented by the worker, no OOM). RECEIPT `completed`; pages manifest,
+  status.json and asset_index.json all present (HEAD-checked: 44,862 / 554 /
+  49,728 bytes).
+- COMMIT counts: runs 1,536; first_paper_vectors **1,536**; coverage cells 192;
+  disqualifiers []; data_gaps 0; scan_join_conflicts 0; assets 1,728;
+  capabilities 6,912; catalog_partitions 183.
+- Requests: 1,728 HEAD + 8,065 GET (8,246 API calls) over 1,728 sources
+  (1,536 zips + 192 scan-row files). Bytes read: 141.2 MB compressed /
+  612.4 MB uncompressed out of 135 GB of archives (summary.json-only reads).
+- Output charged: 326.6 MB of the 1.2 GB budget = shard partitions 168 MB
+  (first_paper_vectors 158.7 MB, ~103 KB/row) + 154 return pages 158.65 MB
+  (~1.03 MB/page) + status/index/manifest. Attempt prefix on S3: 373 objects,
+  346.3 MB (incl. 19.4 MB checkpoints). Return leg will move 154 pages /
+  158.65 MB to Edison.
+- Projection for the 11,136-row main set (x7.25): ~1.0 GB compressed read,
+  ~4.4 GB uncompressed, ~2.4 GB output (6 GB budget), ~58k GET / ~12.5k HEAD,
+  ~70 min wall; return pages ~1.15 GB. Simulation side unchanged from the
+  scout-closed section: remainder 9,600 runs (192 arrays x 50/28/20/4 seeds
+  per hull; mega first), ~2,098 slot-h, ~497 GB, $42-84 at $0.02-0.04 per
+  vCPU-h Spot; reserve 384 seeds untouched. Scout cost $17-34 vs the $60-80
+  estimate for the wave.
+- Nothing from the remainder is submitted. Open decision: submit the
+  9,600-run remainder (mega first) on the pinned campaign image
+  (`picard-campaign:noro-provisioned-sensitivity01` @ sha256:354ddfda...,
+  main 71794db5) — user gate.
