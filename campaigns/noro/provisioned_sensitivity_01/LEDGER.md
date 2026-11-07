@@ -316,3 +316,33 @@ queue `picard-campaign-queue`.
   pinned to it; `register-job-definition` is denied to the deploy role
   (`iam:PassRole` on `picard-reducer-job-role`) → the `picard-reducer:12`
   register is Benjamin's CloudShell leg. No reducer job dispatched yet.
+
+### Scout reducer materialize, attempt 1 — `partial`, 0 vectors (2026-11-07 10:46–11:01 UTC)
+
+- `picard-reducer:12` registered by Benjamin (CloudShell) on `reducer-v9`
+  @ `sha256:0007eb39…`; dispatched via `campaign_reduction.yml` run
+  42365347433 (phase materialize, `picard-analysis-queue`, attempt
+  `red-fps01-sens01-scout`, canonical sha `ee2523f0…`). Batch job
+  `e9eaf521-6cf9-4e9e-b54e-0164f07a1b74`.
+- Operational readout (RECEIPT/COMMIT at
+  `campaign/_derived/reducer/v1/attempts/red-fps01-sens01-scout/`):
+  27 shards (3 scan-row + 24 zip), 1,728 sources, 1,536 runs,
+  192 coverage cells, 0 data gaps, 0 scan-join conflicts; 1,728 HEAD +
+  8,065 GET, 141 MB compressed read / 612 MB uncompressed out of 135 GB
+  of archives (summary.json-only member reads); 9.4 min wall on
+  2 vCPU / 8 GiB; two Batch retries exited `blocked` in 2 s (create-only
+  receipt already present).
+- **Defect:** `first_paper_vectors = 0` — every row disqualified as
+  `oversized_row`. Reproduced locally (main a2079df7): a
+  `first_paper_scalar/1.5.0` row against a sensitivity_01 source key is
+  ~100 KB canonical without the scan join (~110 KB with the 22 scan
+  fields) vs `materialize._MAX_ROW_BYTES = 64 KiB`; 1.3/1.4 rows measured
+  43.4 KB (venue02-b). 86 KB of the row is per-field provenance, 52 KB of
+  it the 175-char `source_id`/`source_key` repeated across 192 entries.
+- Decision (Benjamin, option A): raise `_MAX_ROW_BYTES` to 256 KiB, row
+  shape unchanged (1.5.0 as-is; provenance slimming deferred to a 1.5.1).
+  Consequence: scout vectors ≈170 MB, full 11,136-run set ≈1.2 GB on the
+  return leg (venue02-b pages were 522 MB) — return budgets sized to that.
+  Needs `reducer-v10` → `picard-reducer:13` (PassRole leg) and a
+  re-dispatch under a new reduction id (derived store is create-only).
+
