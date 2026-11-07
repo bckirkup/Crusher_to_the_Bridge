@@ -25,6 +25,10 @@ CRUISE_EXTERIORS = {
         "OceanFront", "TerracePool", "NeptunePool", "CalypsoPool",
         "HorizonTerrace", "OpenAirCinema", "SportsCourt", "CenterCourt",
     },
+    "greg_mortimer": {
+        "ZodiacPlatforms", "ActivityPlat", "ViewPlatforms", "SunDeck",
+        "TopDeck",
+    },
 }
 
 

@@ -54,9 +54,7 @@
     {
       "id": "AHU_Expedition",
       "rooms": [
-        "Mudroom",
-        "ZodiacPlatforms",
-        "ActivityPlat"
+        "Mudroom"
       ],
       "ach": 8.0,
       "description": "Deck 3 expedition working spaces."
@@ -76,8 +74,7 @@
         "AssemblyStation",
         "Reception",
         "ShipShop",
-        "BarsDeck5",
-        "ViewPlatforms"
+        "BarsDeck5"
       ],
       "ach": 8.0,
       "description": "Deck 5 public venues."
@@ -98,10 +95,8 @@
         "Library",
         "Gym",
         "SaunaWellness",
-        "SunDeck",
         "Bridge",
         "ObsDeck7",
-        "TopDeck",
         "BarsDeck8",
         "ObsLounge",
         "Jacuzzis",
