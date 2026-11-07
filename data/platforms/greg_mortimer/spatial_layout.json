@@ -555,6 +555,259 @@
         "y": 95.0
       },
       "description": "Inferred machinery space below deck 1 (not shown on passenger deck plan)."
+    },
+    {
+      "id": "HD_0E_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "0_Engine",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Engine_Room"
+      ],
+      "display": {
+        "x": 50.0,
+        "y": 91.0
+      },
+      "description": "Public head (male, 1 water closet) serving Engine_Room."
+    },
+    {
+      "id": "HD_2C_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "CrewMess",
+        "MainGalley",
+        "Laundry"
+      ],
+      "display": {
+        "x": 30.0,
+        "y": 84.0
+      },
+      "description": "Public head (male, 3 water closets) serving CrewMess, MainGalley, Laundry."
+    },
+    {
+      "id": "HD_2C_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "CrewMess",
+        "MainGalley",
+        "Laundry"
+      ],
+      "display": {
+        "x": 30.0,
+        "y": 84.0
+      },
+      "description": "Public head (female, 2 water closets) serving CrewMess, MainGalley, Laundry."
+    },
+    {
+      "id": "HD_3P_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Passenger",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Mudroom",
+        "ZodiacPlatforms",
+        "ActivityPlat",
+        "MedicalClinic"
+      ],
+      "display": {
+        "x": 43.25,
+        "y": 57.0
+      },
+      "description": "Public head (male, 4 water closets) serving Mudroom, ZodiacPlatforms, ActivityPlat, MedicalClinic."
+    },
+    {
+      "id": "HD_3P_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Passenger",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Mudroom",
+        "ZodiacPlatforms",
+        "ActivityPlat",
+        "MedicalClinic"
+      ],
+      "display": {
+        "x": 43.25,
+        "y": 57.0
+      },
+      "description": "Public head (female, 4 water closets) serving Mudroom, ZodiacPlatforms, ActivityPlat, MedicalClinic."
+    },
+    {
+      "id": "HD_5P_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Public",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "LectureLounge",
+        "AssemblyStation",
+        "Reception",
+        "ShipShop",
+        "DiningRoom",
+        "PrivateDining",
+        "BarsDeck5",
+        "ViewPlatforms"
+      ],
+      "display": {
+        "x": 58.875,
+        "y": 36.375
+      },
+      "description": "Public head (male, 8 water closets) serving LectureLounge, AssemblyStation, Reception, ShipShop, +4 more."
+    },
+    {
+      "id": "HD_5P_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Public",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "LectureLounge",
+        "AssemblyStation",
+        "Reception",
+        "ShipShop",
+        "DiningRoom",
+        "PrivateDining",
+        "BarsDeck5",
+        "ViewPlatforms"
+      ],
+      "display": {
+        "x": 58.875,
+        "y": 36.375
+      },
+      "description": "Public head (female, 9 water closets) serving LectureLounge, AssemblyStation, Reception, ShipShop, +4 more."
+    },
+    {
+      "id": "HD_7P_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Public",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "ExpedOffice",
+        "Library",
+        "Gym",
+        "SaunaWellness",
+        "SunDeck",
+        "Bridge",
+        "ObsDeck7"
+      ],
+      "display": {
+        "x": 72.28571428571429,
+        "y": 12.571428571428573
+      },
+      "description": "Public head (male, 7 water closets) serving ExpedOffice, Library, Gym, SaunaWellness, +3 more."
+    },
+    {
+      "id": "HD_7P_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Public",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "ExpedOffice",
+        "Library",
+        "Gym",
+        "SaunaWellness",
+        "SunDeck",
+        "Bridge",
+        "ObsDeck7"
+      ],
+      "display": {
+        "x": 72.28571428571429,
+        "y": 12.571428571428573
+      },
+      "description": "Public head (female, 6 water closets) serving ExpedOffice, Library, Gym, SaunaWellness, +3 more."
+    },
+    {
+      "id": "HD_8T_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 31.05,
+      "floor_area_m2": 13.5,
+      "ceiling_height_m": 2.3,
+      "deck": "8_Top",
+      "base_ach": 19.2,
+      "max_occupancy": 5,
+      "serves": [
+        "TopDeck",
+        "BarsDeck8",
+        "ObsLounge",
+        "Jacuzzis",
+        "ObsDeck8"
+      ],
+      "display": {
+        "x": 61.8,
+        "y": 4.199999999999999
+      },
+      "description": "Public head (male, 5 water closets) serving TopDeck, BarsDeck8, ObsLounge, Jacuzzis, +1 more."
+    },
+    {
+      "id": "HD_8T_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 31.05,
+      "floor_area_m2": 13.5,
+      "ceiling_height_m": 2.3,
+      "deck": "8_Top",
+      "base_ach": 19.2,
+      "max_occupancy": 5,
+      "serves": [
+        "TopDeck",
+        "BarsDeck8",
+        "ObsLounge",
+        "Jacuzzis",
+        "ObsDeck8"
+      ],
+      "display": {
+        "x": 61.8,
+        "y": 4.199999999999999
+      },
+      "description": "Public head (female, 5 water closets) serving TopDeck, BarsDeck8, ObsLounge, Jacuzzis, +1 more."
     }
   ]
 }

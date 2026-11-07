@@ -17,3 +17,4 @@
 - `nominal_complement` uses 148 passengers and 95 crew. The 95-crew value is within the operator fact sheet crew-component range and matches the documented 2020 complement; it is an archetype declaration, not a fitted constant.
 - HVAC ACHs, `oa_fraction`, `hvac_duty`, confinement/contact factors, and buffet contamination multiplier use existing repository cruise-platform conventions; no Greg Mortimer HVAC drawings or measurements were available.
 - Dining service is declared `buffet` for the main dining room because Aurora describes buffet-style family meals with a la carte dinner; the optional private dining area is `specialty`.
+- Shared public sanitary heads are not itemized on the A3 sheet; they are derived with `scripts/derive_sanitary_provisioning.py` regulatory fixture ratios (11 head zones / 54 water closets here) and the repository's exhaust-only sanitary HVAC wiring.

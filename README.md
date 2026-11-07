@@ -585,7 +585,7 @@ booklet scanned:
 | `enterprise_galaxy_tng` | Galaxy-class explorer (TNG fiction-adapted; enlisted/officer/family corridors, ~91 zones, ~1000 agents — see `docs/ENTERPRISE_CABIN_REVISION.md`) |
 | `expedition_cruise_300` | **Legacy** well-mixed expedition berthing (25 zones); superseded by `expedition_cruise_450` |
 | `expedition_cruise_450` | Small/medium expedition cruise (~300 pax + 150 crew; cabin-corridor berthing, ~33 zones) |
-| `greg_mortimer` | MV Greg Mortimer expedition cruise (Aurora Expeditions; published deck-plan-derived decks 3-8 + inferred crew/service, ~148 pax + 95 crew, 39 zones) |
+| `greg_mortimer` | MV Greg Mortimer expedition cruise (Aurora Expeditions; published deck-plan-derived decks 3-8 + inferred crew/service, ~148 pax + 95 crew, 50 zones) |
 | `classic_cruise_1900` | Large classic cruise (~1,350 pax + 560 crew; cabin-corridor, buffet + promenade + atrium, ~61 zones) |
 | `spirit_cruise_3000` | Extra-large Spirit-class cruise (~2,100 pax + 900 crew; multi-specialty dining, teen/sports, ~86 zones) |
 | `fletcher_class_destroyer` | Fletcher-class WWII destroyer |
