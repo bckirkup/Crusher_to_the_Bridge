@@ -533,3 +533,60 @@ queue `picard-campaign-queue`.
   layer set stays until the repo lifecycle policy expires it.
 - Manifest + SEED_MANIFEST re-mirrored to both campaign S3 prefixes from
   main 7f935df2 (cls 96 + 2 seeds).
+
+## Wave 2 — cls remainder (submitted 2026-11-08 ~02:05 UTC)
+
+Wave 1 closed 2026-11-08 ~01:55 UTC: mega 768/768, exp 4,224/4,224, spr 1,920/1,920 SUCCEEDED, 0 FAILED (S3 zip counts match per block). Note: 30 exp zips (seed 8011, one per block in 30/48 exp blocks) are 0.16 MB — complete 288-epoch runs with infected=0 (no imported case at boarding); published as-is, flagged for Edison.
+
+cls canary `6fb43154-dd36-4f54-b5b0-4944ce15bb82` (jobdef :242, seed 8113, image `noro-provisioned-sensitivity01-r2@sha256:efc18c7d…`) SUCCEEDED exit 0, 5.3 min, zip 50.9 MB, member list identical to scout cls zip; summary infected=197, reported=50, 288 epochs. 48 cls arrays × 88 children = 4,224 submitted on jobdefs :243–:290 (job ids in `remainder_submits.tsv`).
+
+| block | jobdef | job id |
+|---|---|---|
+| fl_cls_12d_sens_p01_crewv | picard-noro-provisioned-sensitivity-01:243 | 90cb4eef-6e8c-4a75-8fc5-a9c1f493c399 |
+| fl_cls_12d_sens_p01_paxv | picard-noro-provisioned-sensitivity-01:244 | 58e6c139-c6ce-4215-b197-52d4afc74426 |
+| fl_cls_12d_sens_p01_mixv | picard-noro-provisioned-sensitivity-01:245 | d17a1326-cebd-4d5f-b123-ffe203c19725 |
+| fl_cls_12d_sens_p02_crewv | picard-noro-provisioned-sensitivity-01:246 | 29610647-e344-420b-aab9-cd69b10b6b1a |
+| fl_cls_12d_sens_p02_paxv | picard-noro-provisioned-sensitivity-01:247 | 05a0b927-c6e1-4c9d-8644-755d54cd2411 |
+| fl_cls_12d_sens_p02_mixv | picard-noro-provisioned-sensitivity-01:248 | 12d668f1-727b-4635-b65f-6f3cf6dcacff |
+| fl_cls_12d_sens_p03_crewv | picard-noro-provisioned-sensitivity-01:249 | 63861afc-fa66-4494-a9f3-6c01afd0e5b6 |
+| fl_cls_12d_sens_p03_paxv | picard-noro-provisioned-sensitivity-01:250 | 7e135051-ae19-41a5-84a6-37fd58c8de9e |
+| fl_cls_12d_sens_p03_mixv | picard-noro-provisioned-sensitivity-01:251 | 83027e03-f3e4-4c27-b22a-8598fd49c63d |
+| fl_cls_12d_sens_p04_crewv | picard-noro-provisioned-sensitivity-01:252 | e51125f9-dfea-469f-bb8d-61a65a93c300 |
+| fl_cls_12d_sens_p04_paxv | picard-noro-provisioned-sensitivity-01:253 | eef97f87-b44e-4f23-8fc7-ccc2f0026007 |
+| fl_cls_12d_sens_p04_mixv | picard-noro-provisioned-sensitivity-01:254 | 6961e52d-627a-481c-9447-9f5c059ee523 |
+| fl_cls_12d_sens_p05_crewv | picard-noro-provisioned-sensitivity-01:255 | 402c8047-365f-4b1a-aa13-469c0f9a16a6 |
+| fl_cls_12d_sens_p05_paxv | picard-noro-provisioned-sensitivity-01:256 | 7ec3d5d8-b96f-44ca-85ad-24128a0af0cc |
+| fl_cls_12d_sens_p05_mixv | picard-noro-provisioned-sensitivity-01:257 | 0dabbedb-bd1c-4b22-b383-ab25d248bfda |
+| fl_cls_12d_sens_p06_crewv | picard-noro-provisioned-sensitivity-01:258 | 166fd0e7-fb0e-4e86-86e5-bfdc6d7ad988 |
+| fl_cls_12d_sens_p06_paxv | picard-noro-provisioned-sensitivity-01:259 | 39be142f-ce21-4a0e-a90e-d09bfa6492a8 |
+| fl_cls_12d_sens_p06_mixv | picard-noro-provisioned-sensitivity-01:260 | 86fe3e78-41ab-4ffb-93bc-d4c82ae750e3 |
+| fl_cls_12d_sens_p07_crewv | picard-noro-provisioned-sensitivity-01:261 | ef31636f-90a1-488f-a2a3-56267e15481a |
+| fl_cls_12d_sens_p07_paxv | picard-noro-provisioned-sensitivity-01:262 | d4c6f2ff-a090-4dc9-9d1a-9430aa25fd62 |
+| fl_cls_12d_sens_p07_mixv | picard-noro-provisioned-sensitivity-01:263 | 34709af3-2668-473c-87d9-f1f3a859f1f6 |
+| fl_cls_12d_sens_p08_crewv | picard-noro-provisioned-sensitivity-01:264 | 6d780c5f-17d0-4f09-99be-72df5020c1bd |
+| fl_cls_12d_sens_p08_paxv | picard-noro-provisioned-sensitivity-01:265 | 9a5b4ff3-6aa2-4bd7-8749-9eef119e956f |
+| fl_cls_12d_sens_p08_mixv | picard-noro-provisioned-sensitivity-01:266 | b37b3682-34a9-430b-a842-c630f235b117 |
+| fl_cls_12d_sens_p09_crewv | picard-noro-provisioned-sensitivity-01:267 | b82e3de8-649e-4025-af6c-c73a13eb8304 |
+| fl_cls_12d_sens_p09_paxv | picard-noro-provisioned-sensitivity-01:268 | 9b152a1b-2609-455f-8c9a-44ec1f13c423 |
+| fl_cls_12d_sens_p09_mixv | picard-noro-provisioned-sensitivity-01:269 | 28f4d15d-22b7-49d8-9546-e43caa70fb01 |
+| fl_cls_12d_sens_p10_crewv | picard-noro-provisioned-sensitivity-01:270 | 38175696-f14f-40b9-8cf4-bf6b84857e9c |
+| fl_cls_12d_sens_p10_paxv | picard-noro-provisioned-sensitivity-01:271 | 479eb722-4864-40d2-b4a3-81067adf2ae6 |
+| fl_cls_12d_sens_p10_mixv | picard-noro-provisioned-sensitivity-01:272 | c8acd0b4-0d0f-45e9-94ab-bc7a215c40bf |
+| fl_cls_12d_sens_p11_crewv | picard-noro-provisioned-sensitivity-01:273 | 4e76652c-7735-4374-8911-dd0b7c7562ae |
+| fl_cls_12d_sens_p11_paxv | picard-noro-provisioned-sensitivity-01:274 | 0f40407e-47d8-41e6-a7d1-587d0eae4b7e |
+| fl_cls_12d_sens_p11_mixv | picard-noro-provisioned-sensitivity-01:275 | 7ad80d50-f189-4adb-9073-6a8a83020b66 |
+| fl_cls_12d_sens_p12_crewv | picard-noro-provisioned-sensitivity-01:276 | 51beaff2-ffbb-4ecd-9b18-2ebfb9929e99 |
+| fl_cls_12d_sens_p12_paxv | picard-noro-provisioned-sensitivity-01:277 | ff35f6df-4fa8-483b-bc10-d7028b0e29e3 |
+| fl_cls_12d_sens_p12_mixv | picard-noro-provisioned-sensitivity-01:278 | 1c193efd-a4d0-4a0a-a57c-6cbed246fb01 |
+| fl_cls_12d_sens_p13_crewv | picard-noro-provisioned-sensitivity-01:279 | 302e1a0a-6f0e-4376-872d-190b6223111e |
+| fl_cls_12d_sens_p13_paxv | picard-noro-provisioned-sensitivity-01:280 | 3f588f74-5eba-46b1-a2a3-60bc97372484 |
+| fl_cls_12d_sens_p13_mixv | picard-noro-provisioned-sensitivity-01:281 | 95f11b84-4b3e-43f1-bcb6-c76e2835ffb3 |
+| fl_cls_12d_sens_p14_crewv | picard-noro-provisioned-sensitivity-01:282 | 8ed44d6c-0066-46d5-93da-87fa373d90b3 |
+| fl_cls_12d_sens_p14_paxv | picard-noro-provisioned-sensitivity-01:283 | 3986c29c-63e3-440b-8f49-b74dd8ec32f1 |
+| fl_cls_12d_sens_p14_mixv | picard-noro-provisioned-sensitivity-01:284 | c85920df-b987-451b-a8b4-51d567fa42a7 |
+| fl_cls_12d_sens_p15_crewv | picard-noro-provisioned-sensitivity-01:285 | a17f5afd-4812-4b3a-817f-2de2d73035ea |
+| fl_cls_12d_sens_p15_paxv | picard-noro-provisioned-sensitivity-01:286 | 8044b146-bd3b-4b32-8349-acea898f43b9 |
+| fl_cls_12d_sens_p15_mixv | picard-noro-provisioned-sensitivity-01:287 | 77f4d028-2853-4559-bf2a-1cb3759d9a4f |
+| fl_cls_12d_sens_p16_crewv | picard-noro-provisioned-sensitivity-01:288 | cb958479-4df7-4026-af9e-ec36850fdf33 |
+| fl_cls_12d_sens_p16_paxv | picard-noro-provisioned-sensitivity-01:289 | 324bfeb6-6136-476d-b35d-9d2f1d4de7a8 |
+| fl_cls_12d_sens_p16_mixv | picard-noro-provisioned-sensitivity-01:290 | 41ad9871-41fd-4157-bc45-b757c071e1dc |
