@@ -9,6 +9,7 @@ skip when no binary is present.
 
 from __future__ import annotations
 
+import copy
 import json
 import sys
 from pathlib import Path
@@ -56,6 +57,17 @@ def test_field_ops_classification() -> None:
     assert cfc._arm_needs_field(spec["arms"]["ahu_casualty"])
     assert cfc._arm_needs_field(spec["arms"]["ach_surge"])
     assert cfc._arm_needs_field(spec["arms"]["zone_isolation"])
+
+
+def test_scale_ach_remains_field_op() -> None:
+    assert "scale_ach" in cfc._FIELD_OPS
+    assert cfc._arm_needs_field({"ops": [{"op": "scale_ach", "factor": 1.5}]})
+
+
+def test_ach_surge_arm_pins_labelled_all_groups_scope() -> None:
+    assert _spec()["arms"]["ach_surge"]["ops"] == [
+        {"op": "scale_ach", "factor": 2.0, "scope": "all_groups"},
+    ]
 
 
 def test_apply_arm_ops_set_oa_mutates_json_and_engine() -> None:
@@ -125,6 +137,50 @@ def test_apply_arm_ops_set_oa_rejects_unknown_scope() -> None:
         cfc._apply_arm_ops(
             airflow,
             [{"op": "set_oa", "value": 0.0, "scope": "bogus"}],
+            {},
+        )
+
+
+def test_apply_arm_ops_scale_ach_defaults_to_supply_groups() -> None:
+    _spatial, airflow = _load_destroyer()
+    air, meta = cfc._apply_arm_ops(
+        airflow, [{"op": "scale_ach", "factor": 1.5}], {},
+    )
+    original = {g["id"]: g for g in airflow["hvac_zones"]}
+    current = {g["id"]: g for g in air["hvac_zones"]}
+    for group_id in ("zone_upper", "zone_main", "zone_lower"):
+        assert current[group_id]["ach"] == pytest.approx(
+            float(original[group_id]["ach"]) * 1.5
+        )
+    for group_id in ("AHU_HD_MAIN_M", "AHU_HD_MAIN_F", "AHU_HD_UPPER_M"):
+        assert current[group_id]["ach"] == pytest.approx(
+            float(original[group_id]["ach"])
+        )
+    scale_edit = next(edit for edit in meta["edits"] if "ach x1.5" in edit)
+    assert "on supply groups" in scale_edit
+    assert "duty-0 group(s)" in scale_edit
+
+
+def test_apply_arm_ops_scale_ach_all_groups_matches_legacy_baseline() -> None:
+    _spatial, airflow = _load_destroyer()
+    expected = copy.deepcopy(airflow)
+    for group in expected["hvac_zones"]:
+        group["ach"] = float(group.get("ach", 0.0)) * 2.0
+    air, meta = cfc._apply_arm_ops(
+        airflow,
+        [{"op": "scale_ach", "factor": 2.0, "scope": "all_groups"}],
+        {},
+    )
+    assert air == expected
+    assert any("legacy all_groups" in edit for edit in meta["edits"])
+
+
+def test_apply_arm_ops_scale_ach_rejects_unknown_scope() -> None:
+    _spatial, airflow = _load_destroyer()
+    with pytest.raises(ValueError, match="scale_ach scope"):
+        cfc._apply_arm_ops(
+            airflow,
+            [{"op": "scale_ach", "factor": 2.0, "scope": "bogus"}],
             {},
         )
 
