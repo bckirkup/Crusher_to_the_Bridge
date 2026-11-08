@@ -1,6 +1,6 @@
 # CONTAM Phase 2 four-cruise contrast campaign ledger
 
-Status: design frozen before any cell runs (`frozen_before_first_cell`); cost pilot executed 2026-11-08 — `mega_cruise_5000_e_baseline` 20/20 SUCCEEDED with 0 `BLOCKED_ENGINE_FALLBACK` and audit counts 0/0/0, but the frozen §7 full-panel extrapolation bounds failed (CPU 2.114069 > 1.697352 CPU-h; artifacts 131,855,220 > 126,060,180 bytes). Recommendation: NO-GO; the full panel remains Benjamin's decision.
+Status: full panel executed 2026-11-08 — 60/60 array blocks SUCCEEDED (1,200/1,200 cells), coverage/audit clean, §8 gates evaluated, and measured cost below the amended §7 expectation; the pilot NO-GO under the original uniform bounds remains recorded in `CONTAM-PHASE2-PILOT-01`.
 
 ## Frozen inputs
 
@@ -47,6 +47,13 @@ Status: design frozen before any cell runs (`frozen_before_first_cell`); cost pi
 
 - Manifest §7 amended with a stratified per-hull cost estimate (point 1.216761 CPU-h / 93,133,925 bytes; expectation × 1.5 = 1.825142 CPU-h / 139,700,888 bytes) and Benjamin's approval of the full 1,200-trajectory panel on that basis; pilot cells and pilot gate record unchanged. Entry: `docs/ledger/CONTAM-PHASE2-AMEND-01.md`.
 
+## Full panel execution (2026-11-08)
+
+- Preflight: the five frozen spec files had an empty `git diff db95a4f2..03a264be`; S3 `manifest.json` and `field_cache/field_cache.json` SHA256s matched the frozen values; ECR digest `sha256:7a8a92bba521efb5b6add9760ba124cc9b51faa7459776b6634e0e2ceb66a1d7` and jobdef `picard-contam-phase2-cruise-contrasts-01:1` were verified before submit. Dry-runs rendered all 59 remaining blocks at array size 20 (1,180 trajectories); the pilot block was not resubmitted.
+- Submit: the 59 rendered array payloads were submitted with `jobDefinition` pinned to `picard-contam-phase2-cruise-contrasts-01:1` on `picard-campaign-queue`; all 59 parents SUCCEEDED and children reached 1,180/1,180 SUCCEEDED with 0 FAILED.
+- Readout: `readout.py` over the full S3 prefix (all 60 blocks) gave coverage 1,200/1,200, missing 0, `BLOCKED_ENGINE_FALLBACK=0`, audit counts 0/0/0, and every §8 gate evaluated in `docs/ledger/CONTAM-PHASE2-FULL-01.md`.
+- Cost: trajectory CPU 0.9247781320 CPU-h, artifact bytes 71,790,882, trajectory wall p95 8.248256591 s, peak RSS 120.667969 MiB; measured totals are below the amended expectation (1.825142 CPU-h / 139,700,888 bytes) and the historical uniform bound (2.1140694828 CPU-h / 131,855,220 bytes).
+
 ## Stop rule
 
-Pilot complete and NO-GO under the frozen §7 bounds; `CONTAM-PHASE2-AMEND-01` records the stratified estimate and Benjamin's approval of the full panel. The 59 remaining blocks are submitted by a separate session after the amendment merges; no block beyond the pilot has been submitted at this entry.
+Full panel complete and ledgered in `docs/ledger/CONTAM-PHASE2-FULL-01.md`; `CONTAM-PHASE2-AMEND-01` is closed against the measured totals. The committed readout results (`readout/phase2_readout.json` / `READOUT.md` equivalent) are the next session's deliverable; no further campaign blocks are pending.

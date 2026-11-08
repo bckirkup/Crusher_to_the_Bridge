@@ -2,7 +2,7 @@
 **Date:** 2026-11-08
 **Commit:** 94f21379
 **Pathogens:** all
-**Status:** open
+**Status:** closed
 **Measured at:** db95a4f2b63c3dc115100c7421e1261fcf61bfd7
 
 Amendment of the Phase 2 CONTAM four-cruise contrast manifest §7
@@ -117,3 +117,10 @@ this expectation and the historical uniform bound; exceeding the expectation
 is a ledgered finding, not a reason to revise it. Pilot-gate thresholds,
 `design/phase2_cruise_contrasts_design.json`, `campaign.json`, arm specs and
 `readout.py` are unchanged.
+
+## Closure
+
+Closed by `CONTAM-PHASE2-FULL-01` (2026-11-08): the completed panel's measured
+trajectory CPU and artifact bytes are recorded there against the point
+estimate, the ×1.5 expectation above, and the historical uniform bound; the
+expectation was not exceeded.
