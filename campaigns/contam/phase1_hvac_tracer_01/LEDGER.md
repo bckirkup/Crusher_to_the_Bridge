@@ -1,6 +1,6 @@
 # CONTAM Phase 1 HVAC tracer campaign ledger
 
-Status: Option A field pre-stage and `missouri_bb63_e` pilot executed on AWS Batch; readout `go=True`; full panel awaits Benjamin's decision.
+Status: Phase 1 panel complete — Option A field pre-stage, `missouri_bb63_e` pilot, and all 340 trajectories executed on AWS Batch; readout coverage 340/340; Phase 3 decision remains Benjamin's.
 
 ## Frozen inputs
 
@@ -38,6 +38,13 @@ Status: Option A field pre-stage and `missouri_bb63_e` pilot executed on AWS Bat
 - Readout: `readout.py` pilot gate `go=True`; all frozen §7 thresholds pass (E field solve 0.240678 s, trajectory p95 2.597248 s, array wall-clock 2.199567 min, CPU 0.0131034 CPU-h, peak RSS 100.894531 MiB, artifacts 892,670 bytes, audit counts 0). Conservative full-panel extrapolation is 3.343x size-proportional / 9.052x conservative vs pilot, both ≤12x. Full entry: `docs/ledger/CONTAM-PHASE1-PILOT-01.md`.
 - Phase 2 validation: `design/build.py --check` OK; `scripts/campaign describe` still 17 blocks / 340 cells; targeted pytest `tests/test_contam_phase1_hvac_tracer_campaign.py` 16 passed; Ruff and `scripts/sonar_guard.py` on `design/build.py` passed.
 
+## Phase 3 full-panel execution (2026-11-08)
+
+- Authorization: Benjamin's "go ahead" after the `CONTAM-PHASE1-PILOT-01` GO; no other blocks were submitted before that message.
+- Submit: 16 non-pilot trajectory blocks via `scripts/campaign submit` on merged `main` `801ea44c`; jobdef revisions `picard-contam-phase1-hvac-tracer-01:2`–`:17`, same image digest `sha256:8956cf37e530e9ccda1f349580727f0a51e95fe052206bf7d1170827cfd4d42f`; per-block parent job IDs and wall-clocks are tabulated in `docs/ledger/CONTAM-PHASE1-FULL-01.md`.
+- Result: all 16 arrays SUCCEEDED 20/20 (320/320 cells); with the pilot, coverage is 340/340. Full-panel remaining wall-clock 3.842567 min; per-array 2.925783–3.500983 min.
+- Readout/cost: `readout.py` coverage 340/340, missing 0, pilot gate `go=True`, no `BLOCKED_ENGINE_FALLBACK`, audit counts 0; trajectory p95 2.454948 s, peak RSS 100.894531 MiB, artifacts 10,505,015 bytes, trajectory CPU-hours 0.141446. Full entry: `docs/ledger/CONTAM-PHASE1-FULL-01.md`.
+
 ## Stop rule
 
-Stop after the Missouri lane-E pilot/canary readout. The full panel requires Benjamin's explicit decision.
+Phase 1 panel is complete. Coupled epidemiology and Edison data-return packaging remain separate Phase 3+ decisions.
