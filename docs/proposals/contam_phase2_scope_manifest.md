@@ -1,6 +1,7 @@
 # CONTAM-vs-native HVAC Phase 2 thin scope manifest (four-cruise contrasts)
 
-> **Status:** Proposed — awaiting Benjamin's sign-off. No campaign files,
+> **Status:** Proposed — awaiting Benjamin's sign-off; amended 2026-11-08
+> with the `decisive_contrasts.csv` reconciliation (§2.4, §11.7). No campaign files,
 > AWS submission, pilot submit, Ship X adapter, S lane, epidemiology coupling,
 > or `engines/`/`tools/` change is authorized by this document. The design
 > freeze (campaign files under `campaigns/contam/phase2_cruise_contrasts_01/`)
@@ -36,9 +37,9 @@ Settled inputs, not re-derived here:
   (7 November 2026, baseline pin `f5d32477`) are **proposals**. Where they
   conflict with the settled scope, the settled scope governs and the
   deviation is noted in §2.4. The governing contrast registry they cite,
-  `decisive_contrasts.csv`, was **not** supplied with the attachments; §2
-  quotes the contrast definitions from the protocol/handoff prose and §11
-  asks for the CSV to be checked before freeze.
+  `decisive_contrasts.csv`, was received on 2026-11-08
+  (`solver_study_review_package.zip`, Distribution A) and reconciled against
+  §2 — record in §2.4; the prose quotations in §2.3 stand unchanged.
 - Machinery: `tools/contam_fleet_compare.py` field ops (`set_oa` scope-aware
   default `supply_groups` with labelled `all_groups` baseline; `set_filter`;
   `scale_ach`; `_FIELD_OPS` forces a fresh ContamX export + solve — PR #1169),
@@ -181,7 +182,11 @@ between N and E; same for the per-zone `ΔE_i` tail), and the realized
 per-AHS supply / return / OA / recirculation flows read from the solved E
 field entries against the declared values, so the DC04 "matched in N"
 pairing is checked in E rather than assumed. Path-type flow differences are
-reported separately from exposure differences (protocol §5.2).
+reported separately from exposure differences (protocol §5.2). The registry's
+DC05 decisive outcomes also name "decision/tie/regret under existing
+proposed margins"; that is the Phase 3 epidemiology decision gate, deferred
+and not a Phase 2 tracer deliverable (the Phase 2 readout reports the burden
+gaps the decision would be made on, §8).
 
 **DC07 — selected source / receptor responses.** Protocol: "**DC07**
 selected source/receptor responses"; "For source map \(U\) and nonnegative
@@ -219,10 +224,39 @@ sources.
   campaign-local versioned op in the Phase 2 `cell.py`; (c) drop the A arm,
   leaving DC04 as `oa_080` vs `baseline`, which is unmatched and collapses
   into the DC01 monotone family.
-- **`decisive_contrasts.csv` not supplied.** Definitions above are from
-  prose; the CSV must be reconciled before freeze (§11.7). Edison's
-  priority order ("front-load DC03–DC05 … with DC07") is honoured by making
-  the DC01/DC02 control arms separable (§4 "core" matrix).
+- **`decisive_contrasts.csv` reconciliation (2026-11-08).** The registry
+  (12 rows DC01–DC12, every row `status =
+  PROPOSED_NOT_RUN_REVIEWED_PENDING_SCOPE_APPROVAL`, `baseline_sha =
+  f5d32477`, from `solver_study_review_package.zip`, Distribution A) was
+  checked row by row against §2.3/§2.5. Results: (1) DC01–DC05 and DC07
+  `contrast` / `matching_conditions` / `decisive_outcomes` match §2.3 — no
+  definition changes; (2) DC04 `matching_conditions` "Per-group loss matched;
+  exclude duty-zero/exhaust groups; rnew in [0,1]; physical capacity/makeup
+  unverified" confirms the `scale_ach` scope gap above and the "nominal,
+  groupwise" label; (3) DC03 (`exact_matched_mean_different_mixing`; "1^T
+  L_j=0; shared k and source/initial/volume/receptor mapping"; "Reuse existing
+  F3 oracle … hull diagnostic only if it resolves a gap") is consistent with
+  the closed-form fixture plan (§11.6); (4) DC05 `contrast` "N vs commissioned
+  E for B and admitted matched-removal contrasts" is consistent with §2.3, and
+  its "decision/tie/regret" outcome is deferred to Phase 3 (noted in §2.3);
+  (5) DC07 (`scope` "existing three source-class selectors with absence/overlap
+  recorded"; `decisive_outcomes` "… never-arrived distinct from zero") is
+  consistent with the never-reached receptor count; the registry does not
+  resolve the "circulation" source-class gap, which stays the deviation below
+  (§11.4) and is recorded as a class absence; (6) the §2.5 DC09–DC11
+  assignment is confirmed (`switching_and_cache_control`,
+  `independent_integrator`, `response_algorithm_profile`; DC12
+  `vessel_plus_fleet_synthesis`). Rows bearing on §11.2 (matrix size), quoted:
+  DC01 `priority = prerequisite`, `efficient_computation_or_reuse` =
+  "Coefficient audit plus applicable independent fixture; derive implied
+  ordering, no routine source-arm trajectories"; DC02 `priority =
+  prerequisite`, `efficient_computation_or_reuse` = "Operator identity
+  suffices mathematically; compact control validates implementation; no full
+  OA x eta grid by default"; DC05 `contrast` = "N vs commissioned E for B and
+  admitted matched-removal contrasts". Edison's priority order ("front-load
+  DC03–DC05 … with DC07") is honoured by keeping the DC01/DC02 control arms
+  separable (§4 "core" matrix). The package's `acceptance_metrics.csv`
+  (A00–A27) remains excluded as thinned scope (below).
 - **No "passenger circulation" source class.** Edison lists "eligible large
   public/venue, passenger circulation, remote/weakly connected or sanitary
   region"; Phase 2 reuses the Phase 1 selector unchanged (`large_venue` /
@@ -246,7 +280,9 @@ pressure-response or representation alternatives only when informative.
 **DC09–DC11** establish switching/cache, independent integration, and
 response-computation performance; **DC12** preserves vessel and fleet
 scope."); the DC09/DC10/DC11 assignment below follows that listed order and
-is an inference pending the CSV.
+is confirmed against `decisive_contrasts.csv` (2026-11-08; roles
+`switching_and_cache_control`, `independent_integrator`,
+`response_algorithm_profile`, and DC12 `vessel_plus_fleet_synthesis`).
 
 - **DC06 (boundary / pressure response)** — excluded: "DC06 requires
   supported boundary accounting" and "the current adapter skips
@@ -571,7 +607,17 @@ Edison.
    A arm and accept DC04 as unmatched.
 2. **Matrix size:** full 7-arm matrix (1,200 trajectories, 60 blocks) with
    the DC01/DC02 controls, or core B/A/R matrix (560 trajectories, 28
-   blocks).
+   blocks). Registry evidence (2026-11-08, `decisive_contrasts.csv`): DC01
+   and DC02 carry `role` monotonicity / equal-gain **control** and `priority
+   = prerequisite`; DC01 `efficient_computation_or_reuse` = "Coefficient audit
+   plus applicable independent fixture; derive implied ordering, no routine
+   source-arm trajectories"; DC02 = "Operator identity suffices
+   mathematically; compact control validates implementation; no full OA x eta
+   grid by default"; DC05 `contrast` = "N vs commissioned E for B and admitted
+   matched-removal contrasts". This supports the core B/A/R trajectory matrix
+   with DC01/DC02 verified as operator-level controls (coefficient audit of
+   the built operators plus closed-form fixtures, zero trajectories); the
+   full 7-arm matrix remains an option. The decision is Benjamin's.
 3. **P lane:** keep the bounded `baseline`-only P for all four hulls (80
    trajectories, 4 committed-PRJ solves) or drop it for strict N/E.
 4. **Tracer and selector:** confirm Phase 1 tracer protocol and source-pool
@@ -582,9 +628,11 @@ Edison.
    extrapolation bound.
 6. **DC03:** confirm it is satisfied by a closed-form `tests/` fixture
    (zero trajectories) added at design freeze.
-7. **Registry check:** obtain `decisive_contrasts.csv` from Edison and
-   reconcile the DC01–DC05/DC07 definitions and the DC09–DC11 assignment in
-   §2.5 before freeze; any difference is a manifest amendment, not a silent
-   change.
+7. **Registry check — COMPLETE (2026-11-08,
+   `solver_study_review_package.zip` → `decisive_contrasts.csv`):** the
+   DC01–DC05/DC07 definitions and the DC09–DC11 assignment reconcile with no
+   definition change (§2.4). The only remaining pre-freeze check is re-pinning
+   the registry's `baseline_sha` (`f5d32477`) to current `main` in the Phase 2
+   design file at design freeze.
 8. **Edison return:** confirm the bounded S3 dump with schema deferred to
    Phase 4.
