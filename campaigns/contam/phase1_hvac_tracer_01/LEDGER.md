@@ -1,6 +1,6 @@
 # CONTAM Phase 1 HVAC tracer campaign ledger
 
-Status: design amended locally for Option A local field pre-staging; no AWS submission, no array submit, no pilot submit.
+Status: Option A field pre-stage and `missouri_bb63_e` pilot executed on AWS Batch; readout `go=True`; full panel awaits Benjamin's decision.
 
 ## Frozen inputs
 
@@ -29,6 +29,14 @@ Status: design amended locally for Option A local field pre-staging; no AWS subm
 - Full fast tier: `.venv/bin/python -m pytest tests/ -m 'not slow' -n auto -q` -> `1 failed, 8333 passed, 6 skipped`; the only failure is the known local CmdStan drift `tests/test_sentinel_wastewater.py::test_stan_and_numpy_agree_on_the_wastewater_channel` (CI is the authority).
 - `python3 tools/sanity_checker.py --from-config` -> validation passed with 2 pre-existing TAT warnings.
 - `git diff --check` -> clean.
+
+## Phase 2 pilot execution (2026-11-08)
+
+- Field cache: 11 fields (schema `contam_phase1_hvac_tracer_field_cache_v1`), 2,015,906 bytes, SHA256 `b91665323192f95591f538aeb9badfefc1c6e7393aa7c4cafaef0748a496f5b5`, uploaded to `s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json`; generated at repo SHA `a3dab46fcf50ee4c51b5962d9139c27a3f76e0f3` with NIST ContamX `3.4.0.3 64 bit` binary SHA256 `d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b`. Design manifest mirrored byte-identically to `s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/manifest.json`.
+- Image/jobdef: `picard-campaign:contam-phase1-hvac-tracer-01@sha256:8956cf37e530e9ccda1f349580727f0a51e95fe052206bf7d1170827cfd4d42f` built from root `Dockerfile` + `deploy/aws/Dockerfile.campaign` at `a3dab46f`; jobdef `picard-contam-phase1-hvac-tracer-01:1`; `campaign.json` and `design/build.py` now pin that digest so later submits stay digest-pinned.
+- Batch pilot: job `3d8d615c-b35d-4a23-a96b-b2f384c12345` (`picard-contam-phase1-hvac-tracer-01-missouri_bb63_e-20261108-155628`), array size 20 -> SUCCEEDED 20/20; artifacts at `s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/missouri_bb63_e/cell_{1..20}.json`.
+- Readout: `readout.py` pilot gate `go=True`; all frozen §7 thresholds pass (E field solve 0.240678 s, trajectory p95 2.597248 s, array wall-clock 2.199567 min, CPU 0.0131034 CPU-h, peak RSS 100.894531 MiB, artifacts 892,670 bytes, audit counts 0). Conservative full-panel extrapolation is 3.343x size-proportional / 9.052x conservative vs pilot, both ≤12x. Full entry: `docs/ledger/CONTAM-PHASE1-PILOT-01.md`.
+- Phase 2 validation: `design/build.py --check` OK; `scripts/campaign describe` still 17 blocks / 340 cells; targeted pytest `tests/test_contam_phase1_hvac_tracer_campaign.py` 16 passed; Ruff and `scripts/sonar_guard.py` on `design/build.py` passed.
 
 ## Stop rule
 

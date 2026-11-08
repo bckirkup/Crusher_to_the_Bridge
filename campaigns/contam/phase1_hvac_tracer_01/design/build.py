@@ -315,7 +315,10 @@ def _campaign_spec() -> dict[str, Any]:
         "pathogen_id": None,
         "s3_prefix": "campaign/contam_phase1_hvac_tracer_01/",
         "queue": "picard-campaign-queue",
-        "image_tag": "contam-phase1-hvac-tracer-01",
+        "image_tag": (
+            "contam-phase1-hvac-tracer-01@sha256:"
+            "8956cf37e530e9ccda1f349580727f0a51e95fe052206bf7d1170827cfd4d42f"
+        ),
         "epochs": EPOCHS,
         "epoch_hours": EPOCH_HOURS,
         "resources": {"vcpu": "1", "memory": "2048"},
