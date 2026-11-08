@@ -18,11 +18,12 @@ Two ContamX lanes are measured:
   re-exported to a commissioned PRJ and solved, so a knob arm reaches the
   solver in the same shape the native engine sees.
 
-Field-changing arms (``set_oa`` / ``set_filter`` included) re-export and
-re-solve the commissioned PRJ so the ContamX lane sees the same declared
-airflow field as the native engine. ``set_oa`` defaults to
-``scope: "supply_groups"`` so duty-0 exhaust branches keep their declared
-``oa_fraction``; ``scope: "all_groups"`` is the labelled legacy baseline.
+Field-changing arms (``set_oa`` / ``scale_ach`` / ``set_filter`` included)
+re-export and re-solve the commissioned PRJ so the ContamX lane sees the
+same declared airflow field as the native engine. ``set_oa`` and
+``scale_ach`` default to ``scope: "supply_groups"`` so duty-0 exhaust
+branches keep their declared values; ``scope: "all_groups"`` is the
+labelled legacy baseline.
 
 Per arm the report records, besides raw divergence, the **knob-response
 parity**: whether the two solvers agree on the direction and magnitude of
@@ -84,7 +85,7 @@ _AIRFLOW = "air_flow_paths.json"
 _FIELD_OPS = frozenset({
     "set_oa", "set_duty", "scale_ach", "drop_links", "set_filter",
 })
-_OA_SCOPES = frozenset({"supply_groups", "all_groups"})
+_GROUP_SCOPES = frozenset({"supply_groups", "all_groups"})
 _AHS_OA_ENTRY_KINDS = frozenset({
     "ahs_oa", "ahs_exhaust", "ahs_recirc", "ahs_supply", "ahs_return",
 })
@@ -128,13 +129,18 @@ def _committed_prj_path(platform_id: str) -> str:
 
 # ── arm mutations ─────────────────────────────────────────────────────────
 
+def _is_supply_group(airflow: dict[str, Any], group: dict[str, Any]) -> bool:
+    """Supply groups have positive duty, inheriting the top-level default."""
+    default_duty = float(airflow.get("hvac_duty", 1.0))
+    return float(group.get("hvac_duty", default_duty)) > 0.0
+
+
 def _largest_supply_group(airflow: dict[str, Any],
                           volume: dict[str, float]) -> dict[str, Any] | None:
     """Supply group (duty>0) serving the largest summed room volume."""
-    default_duty = float(airflow.get("hvac_duty", 1.0))
     supply = [
         g for g in airflow.get("hvac_zones", [])
-        if float(g.get("hvac_duty", default_duty)) > 0.0
+        if _is_supply_group(airflow, g)
     ]
     if not supply:
         return None
@@ -151,10 +157,10 @@ def _op_set_oa(
 ) -> None:
     val = float(op["value"])
     scope = str(op.get("scope", "supply_groups"))
-    if scope not in _OA_SCOPES:
+    if scope not in _GROUP_SCOPES:
         raise ValueError(
             f"unknown set_oa scope {scope!r}; "
-            f"expected one of {sorted(_OA_SCOPES)}"
+            f"expected one of {sorted(_GROUP_SCOPES)}"
         )
     if scope == "all_groups":
         _set_oa_all_groups(air, val)
@@ -175,17 +181,14 @@ def _set_oa_all_groups(air: dict[str, Any], val: float) -> None:
 
 
 def _set_oa_supply_groups(air: dict[str, Any], val: float) -> int:
-    default_duty = float(air.get("hvac_duty", 1.0))
     default_oa = float(air.get("oa_fraction", _DEFAULT_OA_FRACTION))
     preserved = 0
     for g in air.get("hvac_zones", []):
-        duty = float(g.get("hvac_duty", default_duty))
-        declared_oa = float(g.get("oa_fraction", default_oa))
-        if duty <= 0.0:
-            g["oa_fraction"] = declared_oa
-            preserved += 1
-        else:
+        if _is_supply_group(air, g):
             g["oa_fraction"] = val
+        else:
+            g["oa_fraction"] = float(g.get("oa_fraction", default_oa))
+            preserved += 1
     air["oa_fraction"] = val
     return preserved
 
@@ -213,9 +216,40 @@ def _op_scale_ach(
     volume: dict[str, float],
 ) -> None:
     factor = float(op["factor"])
+    scope = str(op.get("scope", "supply_groups"))
+    if scope not in _GROUP_SCOPES:
+        raise ValueError(
+            f"unknown scale_ach scope {scope!r}; "
+            f"expected one of {sorted(_GROUP_SCOPES)}"
+        )
+    if scope == "all_groups":
+        _scale_ach_all_groups(air, factor)
+        edits.append(f"ach x{factor} on all groups (legacy all_groups)")
+    else:
+        preserved = _scale_ach_supply_groups(air, factor)
+        edits.append(
+            f"ach x{factor} on supply groups; "
+            f"preserved {preserved} duty-0 group(s)"
+        )
+
+
+def _scale_group_ach(group: dict[str, Any], factor: float) -> None:
+    group["ach"] = float(group.get("ach", 0.0)) * factor
+
+
+def _scale_ach_all_groups(air: dict[str, Any], factor: float) -> None:
     for g in air.get("hvac_zones", []):
-        g["ach"] = float(g.get("ach", 0.0)) * factor
-    edits.append(f"ach x{factor} on all groups")
+        _scale_group_ach(g, factor)
+
+
+def _scale_ach_supply_groups(air: dict[str, Any], factor: float) -> int:
+    preserved = 0
+    for g in air.get("hvac_zones", []):
+        if _is_supply_group(air, g):
+            _scale_group_ach(g, factor)
+        else:
+            preserved += 1
+    return preserved
 
 
 def _op_drop_links(

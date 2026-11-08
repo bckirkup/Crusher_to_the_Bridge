@@ -33,9 +33,9 @@
     },
     "ach_surge": {
       "ops": [
-        {"op": "scale_ach", "factor": 2.0}
+        {"op": "scale_ach", "factor": 2.0, "scope": "all_groups"}
       ],
-      "description": "Ventilation surge: every HVAC group's declared ach doubled."
+      "description": "Ventilation surge: every HVAC group's declared ach doubled (legacy all_groups scope)."
     },
     "zone_isolation": {
       "ops": [
