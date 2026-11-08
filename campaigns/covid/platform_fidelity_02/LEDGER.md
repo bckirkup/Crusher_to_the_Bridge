@@ -62,8 +62,8 @@ calculation: `campaigns/covid/platform_fidelity_02/power_analysis.py` +
 | block | arm | seeds | cells | status |
 |---|---|---:|---:|---|
 | `dp_t7e6_dedicated_canary` | `dedicated_diamond_princess` | 20200205–20200224 | 20 | complete — 20/20 SUCCEEDED; replication clean |
-| `dp_t7e6_dedicated_rest` | `dedicated_diamond_princess` | 20200225–20200404 | 180 | pending owner approval |
-| `dp_t7e6_proxy` | `proxy_mega_cruise` | 20200205–20200404 | 200 | pending owner approval |
+| `dp_t7e6_dedicated_rest` | `dedicated_diamond_princess` | 20200225–20200404 | 180 | running (submitted 2026-11-08) |
+| `dp_t7e6_proxy` | `proxy_mega_cruise` | 20200205–20200404 | 200 | running (submitted 2026-11-08) |
 
 Total new executions: 400. No GM cells.
 
@@ -73,6 +73,8 @@ Total new executions: 400. No GM cells.
 |---|---|---|---:|---:|---|---|---|---|---|
 | 2026-11-08 | `dp_t7e6_dedicated_canary` index 0 | 20200205 | 1 | `015a87fb-faf2-4bd1-9008-164ae1765816` | `db95a4f2` | `sha256:d641a0d6…` | `:1` | ~8.9 min | SUCCEEDED; S3 payload contract-clean, 395 leaf fields vs 01b with only `cell.index`/`design_id`/`design_sha256` metadata diffs |
 | 2026-11-08 | `dp_t7e6_dedicated_canary` | 20200205–20200224 | 20 | `a63d7a13-408b-45cf-b8f1-539b462fbacd` | `db95a4f2` | `sha256:d641a0d6…` | `:2` | ~26 min | SUCCEEDED 20/20 (index 0 skipped the already-uploaded inspected artifact) |
+| 2026-11-08 | `dp_t7e6_dedicated_rest` | 20200225–20200404 | 180 | `982768ff-930c-4c80-a45e-da8dab93a115` | `db95a4f2` | `sha256:d641a0d6…` | `:3` | — | RUNNING |
+| 2026-11-08 | `dp_t7e6_proxy` | 20200205–20200404 | 200 | `0f3e898f-35ba-490d-ab89-fe04a6f98201` | `db95a4f2` | `sha256:d641a0d6…` | `:4` | — | RUNNING |
 
 ## 7. Canary readout (2026-11-08)
 
@@ -93,3 +95,13 @@ Total new executions: 400. No GM cells.
   unexpected diffs (leaf-field counts 370–500 by seed).
 - Gate decision: STOP. `dp_t7e6_dedicated_rest` (180) and `dp_t7e6_proxy`
   (200) were not submitted; owner decides whether the remaining 380 cells run.
+
+## 8. Full array (owner-approved 2026-11-08)
+
+- Owner approved the remaining 380 cells ("go ahead with them") after the
+  canary readout above.
+- Submitted `dp_t7e6_dedicated_rest` (180 cells, job
+  `982768ff-930c-4c80-a45e-da8dab93a115`, jobdef `:3`) and `dp_t7e6_proxy`
+  (200 cells, job `0f3e898f-35ba-490d-ab89-fe04a6f98201`, jobdef `:4`) through
+  `scripts/campaign submit` on the same digest-pinned image. ETA to be filled
+  from Batch status; the 20-cell canary wall was ~26 min.

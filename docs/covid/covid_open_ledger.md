@@ -541,7 +541,8 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
   follow-up to the platform-fidelity study — pre-registered; image/canary gate
-  passed 2026-11-08, awaiting owner decision on the remaining 380 cells.**
+  passed and owner approved the remaining 380 cells on 2026-11-08; arrays
+  running.**
   The pre-registered paired-seed power calculation on the observed 01b effect
   sizes is committed at `campaigns/covid/platform_fidelity_02/power_analysis.py`
   + `power_analysis.json` (criterion of record
@@ -558,8 +559,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   20200205–20200224) ran 20/20 SUCCEEDED and replicated 01b on all 20 seeds
   (only `cell.index`/`design_id`/`design_sha256` metadata echoes differ;
   witness audit clean; campaign ledger
-  `campaigns/covid/platform_fidelity_02/LEDGER.md`). STOP — owner decides
-  whether `dp_t7e6_dedicated_rest` (180) + `dp_t7e6_proxy` (200) run.
+  `campaigns/covid/platform_fidelity_02/LEDGER.md`). Owner approved the
+  remaining 380 cells on 2026-11-08; `dp_t7e6_dedicated_rest` (180) and
+  `dp_t7e6_proxy` (200) are submitted and running on jobdef `:3`/`:4`.
 
 - **Adopt the measured fine share as `airborne_emission_fraction` —
   the follow-on Edison decision #30 hands off.** With the level now a
