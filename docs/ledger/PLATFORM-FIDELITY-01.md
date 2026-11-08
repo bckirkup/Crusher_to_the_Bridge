@@ -3,7 +3,11 @@
 **Commit:** e2eb7163
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** e2eb7163 (cells ran on image `picard-campaign:covid-platform-fidelity-01@sha256:cd59519ab17135252fe13519fac37ad465c5dbb825a80a25c55bcbe0882dd346`, built at `bba29d19`; engine/data tree identical)
+**Measured at:** e2eb7163
+
+Cells ran on image
+`picard-campaign:covid-platform-fidelity-01@sha256:cd59519ab17135252fe13519fac37ad465c5dbb825a80a25c55bcbe0882dd346`,
+built at `bba29d19` (engine/data tree identical to `e2eb7163`).
 
 PLATFORM-FIDELITY-01 measured how much hull fidelity moves the two frozen
 2020 COVID event replays — Diamond Princess (training) and Greg Mortimer
