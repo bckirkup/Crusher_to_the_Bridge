@@ -26,14 +26,38 @@ calculation: `campaigns/covid/platform_fidelity_02/power_analysis.py` +
 - [x] Power calculation committed and reproducible from the synced S3 cells
       (`power_analysis.py`; S3 prefixes are the PF-01 proxy and PF-01b
       dedicated 20-seed cells).
-- [ ] Local smoke proving the `platform_id` override + witness contract.
+- [x] Local smoke proving the `platform_id` override + witness contract.
 - [x] `scripts/campaign describe covid/platform_fidelity_02` (arrays 20 +
       180 + 200 = 400) and canary `--dry-run` render; count == design file.
-- [ ] Image built and pinned by digest.
+- [x] Image built and pinned by digest.
 - [ ] Canary `dp_t7e6_dedicated_canary` (20 cells) submitted and read out —
       STOP per the gate; owner decides the remaining 380 cells.
 
-## 3. Blocks
+## 3. Local smoke (2026-11-08, dev venv)
+
+- Dedicated `dedicated_diamond_princess` seed 20200205, Θ 7.9e6, full
+  288-epoch voyage: PASS.
+- `platform_fidelity` echo: resolved `diamond_princess` vs scenario-declared
+  `mega_cruise_5000`; protocols `data/config/protocols_covid_pf_dp_01b.json`;
+  fired `SOP-017-MESSBOX`; no `close_zones`; 8 input hashes echoed.
+- Witness audit clean (`platform_fidelity_01b.readout._witness_audit`): working
+  crew 120/1045 at activation, posted zones ⊆ the 7 DP-native essential IDs,
+  boxed `crew_meal_service` active_epochs 360.
+- Replication check vs the 01b S3 cell for the same seed: 395 leaf fields,
+  3 differences, all metadata echoes (`cell.index`, `design_id`,
+  `design_sha256`); every epidemiological field bit-identical.
+
+## 4. Image
+
+| Field | Value |
+|---|---|
+| Tag | `covid-platform-fidelity-02` |
+| Digest | `sha256:d641a0d69e54b4e054b2f9237ddb7d689d75413aaba2760c8f9cf8f0060c6705` |
+| Built from | `db95a4f2` (root `Dockerfile` base + `deploy/aws/Dockerfile.campaign` overlay, stamped `ENGINE_GIT_SHA=db95a4f2`) |
+| Preflight | ENTRYPOINT `["python3"]`; `ENGINE_GIT_SHA` `db95a4f2b63c3dc115100c7421e1261fcf61bfd7`; PF-02 worker/entry/campaign/design/protocols and `deploy/aws/campaign_entrypoint.py` present in-container |
+| ECR | `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:covid-platform-fidelity-02`, pushed 2026-11-08T20:18:21Z |
+
+## 5. Blocks
 
 | block | arm | seeds | cells | status |
 |---|---|---:|---:|---|
