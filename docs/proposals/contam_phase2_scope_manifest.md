@@ -2,13 +2,13 @@
 
 > **Status:** Signed off by Benjamin on 2026-11-08 (all eight §11 decisions;
 > record at the end of §11); amended the same day with the
-> `decisive_contrasts.csv` reconciliation (§2.4, §11.7). Design freeze
-> (`campaigns/contam/phase2_cruise_contrasts_01/`) is the next session, after
-> the §11.1 `scale_ach` scope PR. No campaign files,
+> `decisive_contrasts.csv` reconciliation (§2.4, §11.7). **Design frozen**
+> (2026-11-08) in `campaigns/contam/phase2_cruise_contrasts_01/` after the
+> §11.1 `scale_ach` scope PR (#1187): 1,200 trajectories / 60 blocks, 32-field
+> pre-stage plan, DC03 fixture, `baseline_sha` re-pinned to `71dd32ec`. No
 > AWS submission, pilot submit, Ship X adapter, S lane, epidemiology coupling,
-> or `engines/`/`tools/` change is authorized by this document. The design
-> freeze (campaign files under `campaigns/contam/phase2_cruise_contrasts_01/`)
-> is a later session, after sign-off.
+> or `engines/`/`tools/` change is authorized by this document; the cost pilot
+> is a later session after review of the frozen design.
 > **Filing:** `docs/proposals/` per the `docs/README.md` filing rule; the
 > campaign artifact does not exist yet. Verified against `origin/main`
 > `6f368f67` (post PR #1181).
