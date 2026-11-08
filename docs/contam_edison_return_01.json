@@ -1,0 +1,201 @@
+{
+  "manifest_id": "CONTAM-EDISON-RETURN-01",
+  "created": "2026-11-08",
+  "authored_against_main": "1c059625bb750dfff9f26599ecb2e5d4207d9fc5",
+  "scope": {
+    "study": "CONTAM-vs-native HVAC tracer transport contrasts",
+    "phases": [
+      "contam_phase1_hvac_tracer_01",
+      "contam_phase2_cruise_contrasts_01"
+    ],
+    "lane_honesty": "Lanes N/E/P share engines/py_contam_bridge.py expm propagator; differences isolate airflow-field generation, not independent solver validation; S lane excluded.",
+    "schema_confirmation": "Phase 4",
+    "credentials": "none; fetch through the existing campaign-collect OIDC collector or repo-committed readouts"
+  },
+  "access": {
+    "bucket": "crusherbucket-994254241749-us-east-1-an",
+    "collector_workflow": ".github/workflows/campaign_collect.yml",
+    "collector_role": "github-crusher-collector",
+    "allowed_root": "campaign/",
+    "prefix_positions_at_inventory": {
+      "total_campaign_prefixes": 209,
+      "contam_phase1_hvac_tracer_01_index": 44,
+      "contam_phase2_cruise_contrasts_01_index": 45,
+      "default_max_prefixes": 50,
+      "default_keys_per_prefix": 5000
+    },
+    "notes": [
+      "No raw S3 credentials are part of this package.",
+      "campaign-collect enumerates campaign/ prefixes and can fetch one exact object per dispatch under campaign/; at inventory time the two CONTAM prefixes were inside the default 50-prefix window.",
+      "The collector role is read-only and confined to campaign/* by deploy/aws/github_oidc_stack.yaml."
+    ]
+  },
+  "campaigns": {
+    "phase1_hvac_tracer_01": {
+      "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/",
+      "campaign_dir": "campaigns/contam/phase1_hvac_tracer_01/",
+      "objects": {
+        "total_objects": 342,
+        "total_bytes": 12564272,
+        "families": {
+          "cells": {
+            "objects": 340,
+            "bytes": 10505015,
+            "key_pattern": "campaign/contam_phase1_hvac_tracer_01/<block>/cell_{seed}.json",
+            "blocks": 17,
+            "seeds_per_block": 20,
+            "seed_range": [1, 20]
+          },
+          "field_cache": {
+            "objects": 1,
+            "bytes": 2015906,
+            "key": "campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json"
+          },
+          "manifest": {
+            "objects": 1,
+            "bytes": 43351,
+            "key": "campaign/contam_phase1_hvac_tracer_01/manifest.json"
+          },
+          "other": {
+            "objects": 0,
+            "bytes": 0
+          }
+        }
+      },
+      "artifact_schemas": {
+        "cell": "contam_phase1_hvac_tracer_cell_v1",
+        "field_cache": "contam_phase1_hvac_tracer_field_cache_v1",
+        "schema_source": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+      },
+      "repo_inputs": {
+        "campaign_spec": "campaigns/contam/phase1_hvac_tracer_01/campaign.json",
+        "design_manifest": "campaigns/contam/phase1_hvac_tracer_01/design/phase1_hvac_tracer_design.json",
+        "source_pools": "campaigns/contam/phase1_hvac_tracer_01/source_pools.json",
+        "cell_worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py",
+        "readout_script": "campaigns/contam/phase1_hvac_tracer_01/readout.py"
+      },
+      "readouts": {
+        "repo_json": "campaigns/contam/phase1_hvac_tracer_01/readout/phase1_readout.json",
+        "repo_markdown": "campaigns/contam/phase1_hvac_tracer_01/READOUT.md",
+        "s3_campaign_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/"
+      },
+      "sha256": {
+        "field_cache": "b91665323192f95591f538aeb9badfefc1c6e7393aa7c4cafaef0748a496f5b5",
+        "manifest": "85c9063dbd4986dd459c1274297b11e6e4142c4bdf1cc166510faba804b4e804"
+      },
+      "object_uris": {
+        "field_cache": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json",
+        "manifest": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/manifest.json"
+      },
+      "execution_provenance": {
+        "field_cache_producer_commit": "a3dab46fcf50ee4c51b5962d9139c27a3f76e0f3",
+        "full_panel_measured_at": "801ea44c83cb6c9230bc0d7e78bd3cf8fb378f80",
+        "image_digest": "sha256:8956cf37e530e9ccda1f349580727f0a51e95fe052206bf7d1170827cfd4d42f",
+        "jobdef": "picard-contam-phase1-hvac-tracer-01:1",
+        "full_panel_jobdef_revisions": "picard-contam-phase1-hvac-tracer-01:2 through :17"
+      }
+    },
+    "phase2_cruise_contrasts_01": {
+      "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase2_cruise_contrasts_01/",
+      "campaign_dir": "campaigns/contam/phase2_cruise_contrasts_01/",
+      "objects": {
+        "total_objects": 1202,
+        "total_bytes": 84059091,
+        "families": {
+          "cells": {
+            "objects": 1200,
+            "bytes": 71790882,
+            "key_pattern": "campaign/contam_phase2_cruise_contrasts_01/<block>/cell_{seed}.json",
+            "blocks": 60,
+            "seeds_per_block": 20,
+            "seed_range": [1, 20]
+          },
+          "field_cache": {
+            "objects": 1,
+            "bytes": 12209971,
+            "key": "campaign/contam_phase2_cruise_contrasts_01/field_cache/field_cache.json"
+          },
+          "manifest": {
+            "objects": 1,
+            "bytes": 58238,
+            "key": "campaign/contam_phase2_cruise_contrasts_01/manifest.json"
+          },
+          "other": {
+            "objects": 0,
+            "bytes": 0
+          }
+        }
+      },
+      "artifact_schemas": {
+        "cell": "contam_phase2_cruise_contrasts_cell_v1",
+        "field_cache": "contam_phase2_cruise_contrasts_field_cache_v1",
+        "schema_source": "campaigns/contam/phase2_cruise_contrasts_01/cell.py"
+      },
+      "repo_inputs": {
+        "campaign_spec": "campaigns/contam/phase2_cruise_contrasts_01/campaign.json",
+        "design_manifest": "campaigns/contam/phase2_cruise_contrasts_01/design/phase2_cruise_contrasts_design.json",
+        "source_pools": "campaigns/contam/phase2_cruise_contrasts_01/source_pools.json",
+        "cell_worker": "campaigns/contam/phase2_cruise_contrasts_01/cell.py",
+        "readout_script": "campaigns/contam/phase2_cruise_contrasts_01/readout.py"
+      },
+      "readouts": {
+        "repo_json": "campaigns/contam/phase2_cruise_contrasts_01/readout/phase2_readout.json",
+        "repo_markdown": "campaigns/contam/phase2_cruise_contrasts_01/readout/READOUT.md",
+        "s3_campaign_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase2_cruise_contrasts_01/"
+      },
+      "sha256": {
+        "field_cache": "e8d61dd4703ee6c2a7e5624db35d8c80f3f034c6f76ac533e91a5bfdd74fc6c6",
+        "manifest": "abce9949f2169ffa21535db9be828183c05270fa9c54b6d4dbfaa5e178db3cf0"
+      },
+      "object_uris": {
+        "field_cache": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase2_cruise_contrasts_01/field_cache/field_cache.json",
+        "manifest": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase2_cruise_contrasts_01/manifest.json"
+      },
+      "execution_provenance": {
+        "field_cache_producer_commit": "db95a4f2b63c3dc115100c7421e1261fcf61bfd7",
+        "full_panel_measured_at": "03a264be6f502dadbddd3a0286ddbb5222f2ff77",
+        "image_digest": "sha256:7a8a92bba521efb5b6add9760ba124cc9b51faa7459776b6634e0e2ceb66a1d7",
+        "jobdef": "picard-contam-phase2-cruise-contrasts-01:1"
+      }
+    }
+  },
+  "registry_coverage": {
+    "decisive_contrasts_csv": {
+      "source": "solver_study_review_package.zip:evidence/decisive_contrasts.csv",
+      "baseline_sha_in_registry": "f5d32477f0b7fd5312fbfa8d2b3b3ed462657f36",
+      "design_freeze_baseline_sha": "71dd32ec5fd79803adf1b07fffb59cd2a481544a",
+      "rows": [
+        {"id": "DC01", "disposition": "covered", "evidence": "Phase 2 dc01_ordering_control and O/F/OF-vs-B arms in campaigns/contam/phase2_cruise_contrasts_01/readout/phase2_readout.json"},
+        {"id": "DC02", "disposition": "covered", "evidence": "Phase 2 dc02_equal_gain_control and eq_gain_025_filter arm"},
+        {"id": "DC03", "disposition": "covered_fixture_only", "evidence": "tests/test_contam_analytic_fixtures.py::TestDC03ExactMeanLossDifferentMixing; zero trajectories"},
+        {"id": "DC04", "disposition": "covered_with_declared_limits", "evidence": "Phase 2 dc04_matched_removal; ach_150_supply/oa_080 arms; physical capacity/makeup unverified"},
+        {"id": "DC05", "disposition": "covered_transport_only", "evidence": "Phase 2 lane_contrasts, dc05_arm_effect_parity, dc05_realized_ahs_flows; decision/tie/regret deferred"},
+        {"id": "DC06", "disposition": "excluded", "reason": "boundary/pressure response requires unsupported boundary accounting"},
+        {"id": "DC07", "disposition": "covered_with_declared_limits", "evidence": "Phase 2 dc07_source_receptor_responses; passenger-circulation source class absent"},
+        {"id": "DC08", "disposition": "excluded", "reason": "conditional representation alternatives; no DC05 finding authorized expansion"},
+        {"id": "DC09", "disposition": "excluded", "reason": "switching/cache controls are T04 machinery, not a fixed-field transport contrast"},
+        {"id": "DC10", "disposition": "excluded", "reason": "independent stock ContamX integrator/S lane deferred"},
+        {"id": "DC11", "disposition": "excluded", "reason": "response-computation performance profiling is engineering benchmarking"},
+        {"id": "DC12", "disposition": "excluded", "reason": "vessel-plus-fleet synthesis / all-80-platform scope excluded"}
+      ]
+    },
+    "acceptance_metrics_csv": {
+      "source": "solver_study_review_package.zip:evidence/acceptance_metrics.csv",
+      "rows": "A00-A27",
+      "disposition": "excluded_under_thinned_scope",
+      "note": "The A00-A27 acceptance-metric stack is not part of the returned contract; Phase 1/Phase 2 manifests have their own frozen gates."
+    }
+  },
+  "provenance": {
+    "contamx": {
+      "version": "3.4.0.3 64 bit",
+      "binary_sha256": "d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b",
+      "tarball_sha256": "3612798dff9a4f1ea4f0279c4c7b526b244b88875dea425fafd868f3570df4fa",
+      "license": "NIST Contam is U.S. public domain (17 U.S.C. §105); official tarball redistributable with notice."
+    },
+    "phase2_image_digest": "sha256:7a8a92bba521efb5b6add9760ba124cc9b51faa7459776b6634e0e2ceb66a1d7",
+    "phase2_jobdef": "picard-contam-phase2-cruise-contrasts-01:1",
+    "phase1_image_digest": "sha256:8956cf37e530e9ccda1f349580727f0a51e95fe052206bf7d1170827cfd4d42f",
+    "phase1_jobdef": "picard-contam-phase1-hvac-tracer-01:1 with full-panel revisions :2 through :17"
+  }
+}
