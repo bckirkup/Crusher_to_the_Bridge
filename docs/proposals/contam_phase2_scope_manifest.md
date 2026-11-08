@@ -1,7 +1,10 @@
 # CONTAM-vs-native HVAC Phase 2 thin scope manifest (four-cruise contrasts)
 
-> **Status:** Proposed — awaiting Benjamin's sign-off; amended 2026-11-08
-> with the `decisive_contrasts.csv` reconciliation (§2.4, §11.7). No campaign files,
+> **Status:** Signed off by Benjamin on 2026-11-08 (all eight §11 decisions;
+> record at the end of §11); amended the same day with the
+> `decisive_contrasts.csv` reconciliation (§2.4, §11.7). Design freeze
+> (`campaigns/contam/phase2_cruise_contrasts_01/`) is the next session, after
+> the §11.1 `scale_ach` scope PR. No campaign files,
 > AWS submission, pilot submit, Ship X adapter, S lane, epidemiology coupling,
 > or `engines/`/`tools/` change is authorized by this document. The design
 > freeze (campaign files under `campaigns/contam/phase2_cruise_contrasts_01/`)
@@ -616,8 +619,12 @@ Edison.
    grid by default"; DC05 `contrast` = "N vs commissioned E for B and admitted
    matched-removal contrasts". This supports the core B/A/R trajectory matrix
    with DC01/DC02 verified as operator-level controls (coefficient audit of
-   the built operators plus closed-form fixtures, zero trajectories); the
-   full 7-arm matrix remains an option. The decision is Benjamin's.
+   the built operators plus closed-form fixtures, zero trajectories).
+   **Decision (2026-11-08): Benjamin chose the full 7-arm matrix** (1,200
+   trajectories, 60 blocks), explicitly exceeding the registry's
+   efficient-computation guidance ("less efficient, perhaps, but that's ok");
+   the DC01/DC02 arms therefore run as trajectories and their operator-level
+   checks are reported alongside.
 3. **P lane:** keep the bounded `baseline`-only P for all four hulls (80
    trajectories, 4 committed-PRJ solves) or drop it for strict N/E.
 4. **Tracer and selector:** confirm Phase 1 tracer protocol and source-pool
@@ -636,3 +643,23 @@ Edison.
    design file at design freeze.
 8. **Edison return:** confirm the bounded S3 dump with schema deferred to
    Phase 4.
+
+### Sign-off record (2026-11-08)
+
+Benjamin signed off all eight decision points:
+
+| § | Decision |
+|---|---|
+| 11.1 | **Option (a)** — `scope` on `scale_ach` in `tools/contam_fleet_compare.py` (`supply_groups` default, `all_groups` labelled baseline) as a separate PR before design freeze. |
+| 11.2 | **Full 7-arm matrix** — 1,200 trajectories / 60 array blocks; chosen over the registry-supported core matrix by explicit decision. |
+| 11.3 | **Keep P** — bounded `baseline`-only P lane for all four hulls (80 trajectories, 4 committed-PRJ solves). |
+| 11.4 | **Tracer and selector unchanged** — Phase 1 tracer protocol and source-pool selector reused verbatim. |
+| 11.5 | **Pilot `mega_cruise_5000_e_baseline`** with the §7 thresholds, including the 12 × Phase-1-full-panel extrapolation bound. |
+| 11.6 | **DC03 as a closed-form `tests/` fixture**, zero trajectories. |
+| 11.7 | **Registry reconciled** — satisfied by this amendment; `baseline_sha` re-pin remains for design freeze. |
+| 11.8 | **Edison return** — bounded S3 dump, schema deferred to Phase 4. |
+
+Next: the §11.1 `scale_ach` scope PR, then the design-freeze session that
+materializes `campaigns/contam/phase2_cruise_contrasts_01/`. Nothing here
+authorizes a simulation or AWS submission before that freeze and its
+campaign-preflight gates.
