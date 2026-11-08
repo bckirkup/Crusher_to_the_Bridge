@@ -70,8 +70,23 @@ Neither touches an epidemiological constant.
   no `close_zones`; aboard 3711; 8 input hashes echoed (incl. agent profile
   bundle). ~3m51s for 400 epochs → full 840-epoch DP cell ≈ 8 min.
 
-## 5. Runs
+## 5. Image
 
-| Date | Block | Seeds | Cells | Job | SHA | Digest | Wall | Result |
-|---|---|---|---|---|---|---|---|---|
-| 2026-11-07 | declared | — | 0 | — | — | — | — | prereg + campaign registration frozen pre-run |
+| Field | Value |
+|---|---|
+| Tag | `covid-platform-fidelity-01` |
+| Digest | `sha256:cd59519ab17135252fe13519fac37ad465c5dbb825a80a25c55bcbe0882dd346` |
+| Built from | `bba29d19` (root `Dockerfile` + `deploy/aws/Dockerfile.campaign` overlay, both stamped `ENGINE_GIT_SHA=bba29d19`) |
+| Preflight | ENTRYPOINT `["python3"]`; `deploy/aws/`, `tools/`, `campaigns/` layout present; designs + frozen protocols files + repaired `diamond_princess/voyage_config.json` inside; one full `campaign_entrypoint.py --local` GM proxy voyage wrote `cell_20200205.json` |
+
+## 6. Runs
+
+| Date | Block | Seeds | Cells | Job | SHA | Digest | Jobdef rev | Wall | Result |
+|---|---|---|---|---|---|---|---|---|---|
+| 2026-11-08 | `dp_t7e6_proxy` | 20200205–224 | 20 | `6a7e6185-951b-4bfb-987c-4eeb23f48554` | `bba29d19` | `sha256:cd59519a…` | `:1` | — | RUNNING (canary) |
+| 2026-11-08 | `dp_t7e6_dedicated` | 20200205–224 | 20 | `4e914d4d-2bdf-4fd5-9c8e-178bb772b2b2` | `bba29d19` | `sha256:cd59519a…` | `:2` | — | RUNNING (canary) |
+
+Canary = the DP pair only (40 executions). GM blocks (`gm_*`, 160 cells) are
+NOT submitted — they await owner approval after the DP canary is read out,
+and the GM canary is technical acceptance only with Θ frozen before any GM
+epidemiological output is examined.
