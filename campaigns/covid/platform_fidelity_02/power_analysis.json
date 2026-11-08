@@ -1,0 +1,184 @@
+{
+  "analysis_only": true,
+  "campaign": "covid_platform_fidelity_02",
+  "grid": [
+    {
+      "cells_both_arms": 40,
+      "power_size_halved_both_rate": 0.12317806161533625,
+      "power_size_observed": 0.1409252427116047,
+      "power_takeoff_halved_rates": 0.02305,
+      "power_takeoff_observed": 0.19535,
+      "seeds_per_arm": 20
+    },
+    {
+      "cells_both_arms": 80,
+      "power_size_halved_both_rate": 0.14502581616518814,
+      "power_size_observed": 0.3521155228023473,
+      "power_takeoff_halved_rates": 0.19255,
+      "power_takeoff_observed": 0.56255,
+      "seeds_per_arm": 40
+    },
+    {
+      "cells_both_arms": 120,
+      "power_size_halved_both_rate": 0.22723091438495122,
+      "power_size_observed": 0.6071957224374382,
+      "power_takeoff_halved_rates": 0.4028,
+      "power_takeoff_observed": 0.7965,
+      "seeds_per_arm": 60
+    },
+    {
+      "cells_both_arms": 160,
+      "power_size_halved_both_rate": 0.352721399976772,
+      "power_size_observed": 0.7839300929868168,
+      "power_takeoff_halved_rates": 0.56595,
+      "power_takeoff_observed": 0.90845,
+      "seeds_per_arm": 80
+    },
+    {
+      "cells_both_arms": 200,
+      "power_size_halved_both_rate": 0.48517530744406906,
+      "power_size_observed": 0.8892426729853662,
+      "power_takeoff_halved_rates": 0.6941,
+      "power_takeoff_observed": 0.961,
+      "seeds_per_arm": 100
+    },
+    {
+      "cells_both_arms": 240,
+      "power_size_halved_both_rate": 0.603975745315341,
+      "power_size_observed": 0.9464211243813613,
+      "power_takeoff_halved_rates": 0.7889,
+      "power_takeoff_observed": 0.98505,
+      "seeds_per_arm": 120
+    },
+    {
+      "cells_both_arms": 320,
+      "power_size_halved_both_rate": 0.780349336602371,
+      "power_size_observed": 0.9887939544244575,
+      "power_takeoff_halved_rates": 0.9084,
+      "power_takeoff_observed": 0.9984,
+      "seeds_per_arm": 160
+    },
+    {
+      "cells_both_arms": 400,
+      "power_size_halved_both_rate": 0.8862457031486438,
+      "power_size_observed": 0.9977535640663725,
+      "power_takeoff_halved_rates": 0.95995,
+      "power_takeoff_observed": 0.9999,
+      "seeds_per_arm": 200
+    },
+    {
+      "cells_both_arms": 480,
+      "power_size_halved_both_rate": 0.9443182127019016,
+      "power_size_observed": 0.9995844134699197,
+      "power_takeoff_halved_rates": 0.9848,
+      "power_takeoff_observed": 0.99995,
+      "seeds_per_arm": 240
+    },
+    {
+      "cells_both_arms": 600,
+      "power_size_halved_both_rate": 0.9823211417153334,
+      "power_size_observed": 0.9999754005081551,
+      "power_takeoff_halved_rates": 0.99705,
+      "power_takeoff_observed": 0.99995,
+      "seeds_per_arm": 300
+    },
+    {
+      "cells_both_arms": 800,
+      "power_size_halved_both_rate": 0.9975658762295926,
+      "power_size_observed": 0.999999988420361,
+      "power_takeoff_halved_rates": 0.9997,
+      "power_takeoff_observed": 1.0,
+      "seeds_per_arm": 400
+    },
+    {
+      "cells_both_arms": 1200,
+      "power_size_halved_both_rate": 0.9999704690213926,
+      "power_size_observed": 1.0,
+      "power_takeoff_halved_rates": 1.0,
+      "power_takeoff_observed": 1.0,
+      "seeds_per_arm": 600
+    },
+    {
+      "cells_both_arms": 1600,
+      "power_size_halved_both_rate": 0.9999999721168843,
+      "power_size_observed": 0.9999999999999996,
+      "power_takeoff_halved_rates": 1.0,
+      "power_takeoff_observed": 1.0,
+      "seeds_per_arm": 800
+    }
+  ],
+  "inputs": {
+    "alpha": 0.05,
+    "dedicated_source": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_01b/dp_t7e6_dedicated/",
+    "proxy_source": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_01/dp_t7e6_proxy/",
+    "takeoff_recorded_onsets": 10
+  },
+  "observed_01b": {
+    "P_takeoff_dedicated": 0.3,
+    "P_takeoff_proxy": 0.5,
+    "both_takeoff_delta_mean": 109.0,
+    "both_takeoff_delta_sd": 193.61688975913233,
+    "both_takeoff_deltas": [
+      114.0,
+      -37.0,
+      417.0,
+      125.0,
+      -74.0
+    ],
+    "dedicated_only_takeoff": 1,
+    "n_both_takeoff": 5,
+    "n_discordant": 6,
+    "n_seeds": 20,
+    "p_both_takeoff": 0.25,
+    "p_discordant": 0.3,
+    "p_proxy_only_given_discordant": 0.8333333333333334,
+    "proxy_only_takeoff": 5,
+    "unconditional_onset_mean_dedicated": 72.85,
+    "unconditional_onset_mean_proxy": 55.15,
+    "unconditional_onset_total_dedicated": 1457.0,
+    "unconditional_onset_total_proxy": 1103.0
+  },
+  "selection": {
+    "feasible_within_batch_budget": true,
+    "rule": "smallest grid n with >=0.90 power on P(takeoff) and both-takeoff paired size at observed plug-in rates, and >=0.80 on both under halved event rates",
+    "selected_cells_both_arms": 400,
+    "selected_seeds_per_arm": 200
+  },
+  "unconditional_burden_report_only": [
+    {
+      "power_paired_t_unconditional_onsets": 0.052,
+      "power_welch_unconditional_onsets": 0.062,
+      "seeds_per_arm": 20
+    },
+    {
+      "power_paired_t_unconditional_onsets": 0.13,
+      "power_welch_unconditional_onsets": 0.12766666666666668,
+      "seeds_per_arm": 60
+    },
+    {
+      "power_paired_t_unconditional_onsets": 0.20933333333333334,
+      "power_welch_unconditional_onsets": 0.19433333333333333,
+      "seeds_per_arm": 100
+    },
+    {
+      "power_paired_t_unconditional_onsets": 0.3893333333333333,
+      "power_welch_unconditional_onsets": 0.3556666666666667,
+      "seeds_per_arm": 200
+    },
+    {
+      "power_paired_t_unconditional_onsets": 0.6783333333333333,
+      "power_welch_unconditional_onsets": 0.6316666666666667,
+      "seeds_per_arm": 400
+    },
+    {
+      "power_paired_t_unconditional_onsets": 0.8596666666666667,
+      "power_welch_unconditional_onsets": 0.7913333333333333,
+      "seeds_per_arm": 600
+    },
+    {
+      "power_paired_t_unconditional_onsets": 0.9273333333333333,
+      "power_welch_unconditional_onsets": 0.891,
+      "seeds_per_arm": 800
+    }
+  ]
+}
