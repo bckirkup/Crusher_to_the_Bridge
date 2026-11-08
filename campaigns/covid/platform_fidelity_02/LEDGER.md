@@ -61,8 +61,14 @@ calculation: `campaigns/covid/platform_fidelity_02/power_analysis.py` +
 
 | block | arm | seeds | cells | status |
 |---|---|---:|---:|---|
-| `dp_t7e6_dedicated_canary` | `dedicated_diamond_princess` | 20200205–20200224 | 20 | pending |
+| `dp_t7e6_dedicated_canary` | `dedicated_diamond_princess` | 20200205–20200224 | 20 | running (single child 0 inspected first) |
 | `dp_t7e6_dedicated_rest` | `dedicated_diamond_princess` | 20200225–20200404 | 180 | pending owner approval |
 | `dp_t7e6_proxy` | `proxy_mega_cruise` | 20200205–20200404 | 200 | pending owner approval |
 
 Total new executions: 400. No GM cells.
+
+## 6. Runs
+
+| Date | Block | Seeds | Cells | Job | SHA | Digest | Jobdef rev | Wall | Result |
+|---|---|---|---:|---:|---|---|---|---|---|
+| 2026-11-08 | `dp_t7e6_dedicated_canary` index 0 | 20200205 | 1 | `015a87fb-faf2-4bd1-9008-164ae1765816` | `db95a4f2` | `sha256:d641a0d6…` | `:1` | — | RUNNING |
