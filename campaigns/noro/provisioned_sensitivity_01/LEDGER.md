@@ -590,3 +590,38 @@ cls canary `6fb43154-dd36-4f54-b5b0-4944ce15bb82` (jobdef :242, seed 8113, image
 | fl_cls_12d_sens_p16_crewv | picard-noro-provisioned-sensitivity-01:288 | cb958479-4df7-4026-af9e-ec36850fdf33 |
 | fl_cls_12d_sens_p16_paxv | picard-noro-provisioned-sensitivity-01:289 | 324bfeb6-6136-476d-b35d-9d2f1d4de7a8 |
 | fl_cls_12d_sens_p16_mixv | picard-noro-provisioned-sensitivity-01:290 | 41ad9871-41fd-4157-bc45-b757c071e1dc |
+
+## Wave 2 closed + main reduction dispatched (2026-11-08 13:12–14:34 UTC, operational only)
+
+- cls remainder: 48/48 arrays, 4,224/4,224 children SUCCEEDED, 0 FAILED
+  (jobdefs :243–:290, r2 image `sha256:efc18c7d…`). S3: every cls block
+  prefix holds exactly 8 (scout) or 88 (remainder) zips. **Full nominal
+  set complete: 12,672 runs (1,536 scout + 11,136 remainder), 0 FAILED
+  across 192 remainder arrays, reserve untouched.**
+- Scan rows for the 192 main blocks: `tools/noro_diag/food_shapes_01_scan.py
+  --no-census --workers 16` per block prefix (mega under `…_01_mega/`),
+  192 files, 11,136 rows, 0 errors, 11,136 unique keys, every row
+  `num_epochs` 288; per hull exp 4,224 / cls 4,224 / spr 1,920 / meg 768;
+  mirrored to `campaign/noro_provisioned_sensitivity_01/_scan_rows/<tier>.jsonl`.
+  Scan flags 957/4,224 exp remainder runs `ignited=false` (scout exp 0/384);
+  30 of them are the 0.16 MB seed-8011 zips (infected=0). Published as-is.
+- Reducer request `red-fps01-sens01-main` (`build_first_paper_sensitivity01.py
+  --wave main`, utc 2026-11-08T13:31:11Z): 11,328 sources (192 scan +
+  11,136 zips), cohort 11,136 expected / 11,136 unique / 0 duplicates,
+  shard_size 64, main budgets (6 GB output, 14,400 s wall, 100k GET, 30k
+  HEAD, 2 GB compressed read). Uploaded to
+  `campaign/_derived/reducer/v1/requests/red-fps01-sens01-main-{request,sources,cohort,bootstrap}.json`.
+  Request sha — canonical (materialize leg)
+  `ad0d89de46d24445bd9e26e7c9e7a21f9dd1e5ec1e617bf358ad9f461e2d640c`;
+  raw `caf88090ba033eb1c98ca74527bb790cc3c0e823a915f3f04b1fd2f1ed6d1b06`.
+  Sources sha `6f7e29de25b8af3673d7f2f91d2e399e7567f796b0368e55691ab4146d061bf2`.
+  Bootstrap collect request `req-fps01-sens01-main-return` (allowlist = the
+  main attempt prefix, `max_return_bytes` 4 GiB, admission
+  `adm-fps01-sens01-main-return` $60, scope sha `3f73b584…` unchanged from
+  scout3) raw sha `bb4be7bf40a69bee31a91a3bb339c16e236b38ceb9778920b320fdcc55affca3`
+  (return leg).
+- Materialize: dry-run workflow run 42485707071 ✓; live run 42486056392
+  (`aws-campaign` approval by Benjamin 14:32 UTC) → Batch job
+  `b4410d76-0a3c-48ca-9fa9-89a9ca32ff50` on `picard-reducer:13`
+  (`reducer-v10` @ `sha256:006954a6…`), RUNNING from 14:34 UTC; projected
+  ~70 min.
