@@ -17,6 +17,24 @@ for the COVID arm.
 
 ## 1. Currently withdrawn
 
+**PLATFORM-FIDELITY-01's DP hull-fidelity contrast is SUPERSEDED for
+hull-fidelity inference (2026-11-08).** The frozen PF-01 DP protocols file
+(`data/config/protocols_covid_pf_dp.json`) declared 11 `exempt_work_zones`,
+all `mega_cruise_5000` IDs, of which the event-faithful
+`diamond_princess` hull carries only `Bridge`; the dedicated arm therefore
+quarantined ~318 more crew than the proxy arm (working crew at activation
+10–21 vs 295–368 of 1045; readout
+`docs/covid/covid_platform_fidelity_readout.md`, ledger
+`docs/ledger/PLATFORM-FIDELITY-01.md`, measured at `e2eb7163`). The PF-01 DP
+row mixed hull geometry with a different effective quarantine
+intervention; it is preserved as evidence of the zone-name-dependent
+intervention defect but carries no hull-fidelity weight. Corrected by
+PLATFORM-FIDELITY-01b (`docs/covid/covid_platform_fidelity_01b_addendum.md`,
+ledger `docs/ledger/PLATFORM-FIDELITY-01B.md`, measured at `7d79b7d0`): DP-only
+rerun under a function-matched union of essential-workplace zone IDs, with
+the PF-01 proxy cells reused as baseline on proven behavioral equivalence.
+GM rows are unaffected by this defect (SOP-017 exempts by class only).
+
 **CABIN-OCC-01 + ROOM-AIR-01 move every airborne-route dose figure on any
 hull that declares AHU rates, and every confined-cabinmate figure.** Every
 room-pool inhalation route now doses the epoch-mean of a pool exchanging
