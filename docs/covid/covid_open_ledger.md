@@ -540,9 +540,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 ## 3. Outstanding
 
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
-  follow-up to the platform-fidelity study — pre-registered; image/canary gate
-  passed and owner approved the remaining 380 cells on 2026-11-08; arrays
-  running.**
+  follow-up to the platform-fidelity study — measured 2026-11-08: 400/400
+  cells, both-takeoff size endpoint rejects (p=0.0202), takeoff McNemar
+  p=0.6785; witness-band diagnosis in the readout.**
   The pre-registered paired-seed power calculation on the observed 01b effect
   sizes is committed at `campaigns/covid/platform_fidelity_02/power_analysis.py`
   + `power_analysis.json` (criterion of record
@@ -554,14 +554,15 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   endpoints: exact two-sided McNemar on P(takeoff) and one-sample t on
   both-takeoff paired `dedicated - proxy` onset deltas; unconditional burden
   and asymptomatic share are reported, never selected. GM stays closed — no
-  GM cells. Gate status: local smoke + dry-run count + digest-pinned image
+  GM cells. Result: local smoke + dry-run count + digest-pinned image
   passed; the 20-seed dedicated canary (`dp_t7e6_dedicated_canary`,
   20200205–20200224) ran 20/20 SUCCEEDED and replicated 01b on all 20 seeds
   (only `cell.index`/`design_id`/`design_sha256` metadata echoes differ;
   witness audit clean; campaign ledger
-  `campaigns/covid/platform_fidelity_02/LEDGER.md`). Owner approved the
-  remaining 380 cells on 2026-11-08; `dp_t7e6_dedicated_rest` (180) and
-  `dp_t7e6_proxy` (200) are submitted and running on jobdef `:3`/`:4`.
+  `campaigns/covid/platform_fidelity_02/LEDGER.md`). Arrays complete 400/400;
+  canonical readout `docs/covid/covid_platform_fidelity_02_readout.md`
+  (both-takeoff size p=0.0202; takeoff p=0.6785; 16 inherited working-crew
+  band misses diagnosed as extended-seed confinement variation).
 
 - **Adopt the measured fine share as `airborne_emission_fraction` —
   the follow-on Edison decision #30 hands off.** With the level now a

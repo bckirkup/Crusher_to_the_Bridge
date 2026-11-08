@@ -62,8 +62,8 @@ calculation: `campaigns/covid/platform_fidelity_02/power_analysis.py` +
 | block | arm | seeds | cells | status |
 |---|---|---:|---:|---|
 | `dp_t7e6_dedicated_canary` | `dedicated_diamond_princess` | 20200205–20200224 | 20 | complete — 20/20 SUCCEEDED; replication clean |
-| `dp_t7e6_dedicated_rest` | `dedicated_diamond_princess` | 20200225–20200404 | 180 | running (submitted 2026-11-08) |
-| `dp_t7e6_proxy` | `proxy_mega_cruise` | 20200205–20200404 | 200 | running (submitted 2026-11-08) |
+| `dp_t7e6_dedicated_rest` | `dedicated_diamond_princess` | 20200225–20200404 | 180 | complete — 180/180 SUCCEEDED; readout audit diagnosed below |
+| `dp_t7e6_proxy` | `proxy_mega_cruise` | 20200205–20200404 | 200 | complete — 200/200 SUCCEEDED; readout audit clean |
 
 Total new executions: 400. No GM cells.
 
@@ -73,8 +73,8 @@ Total new executions: 400. No GM cells.
 |---|---|---|---:|---:|---|---|---|---|---|
 | 2026-11-08 | `dp_t7e6_dedicated_canary` index 0 | 20200205 | 1 | `015a87fb-faf2-4bd1-9008-164ae1765816` | `db95a4f2` | `sha256:d641a0d6…` | `:1` | ~8.9 min | SUCCEEDED; S3 payload contract-clean, 395 leaf fields vs 01b with only `cell.index`/`design_id`/`design_sha256` metadata diffs |
 | 2026-11-08 | `dp_t7e6_dedicated_canary` | 20200205–20200224 | 20 | `a63d7a13-408b-45cf-b8f1-539b462fbacd` | `db95a4f2` | `sha256:d641a0d6…` | `:2` | ~26 min | SUCCEEDED 20/20 (index 0 skipped the already-uploaded inspected artifact) |
-| 2026-11-08 | `dp_t7e6_dedicated_rest` | 20200225–20200404 | 180 | `982768ff-930c-4c80-a45e-da8dab93a115` | `db95a4f2` | `sha256:d641a0d6…` | `:3` | — | RUNNING |
-| 2026-11-08 | `dp_t7e6_proxy` | 20200205–20200404 | 200 | `0f3e898f-35ba-490d-ab89-fe04a6f98201` | `db95a4f2` | `sha256:d641a0d6…` | `:4` | — | RUNNING |
+| 2026-11-08 | `dp_t7e6_dedicated_rest` | 20200225–20200404 | 180 | `982768ff-930c-4c80-a45e-da8dab93a115` | `db95a4f2` | `sha256:d641a0d6…` | `:3` | ~43 min | SUCCEEDED 180/180 |
+| 2026-11-08 | `dp_t7e6_proxy` | 20200205–20200404 | 200 | `0f3e898f-35ba-490d-ab89-fe04a6f98201` | `db95a4f2` | `sha256:d641a0d6…` | `:4` | ~59 min | SUCCEEDED 200/200 |
 
 ## 7. Canary readout (2026-11-08)
 
@@ -103,5 +103,15 @@ Total new executions: 400. No GM cells.
 - Submitted `dp_t7e6_dedicated_rest` (180 cells, job
   `982768ff-930c-4c80-a45e-da8dab93a115`, jobdef `:3`) and `dp_t7e6_proxy`
   (200 cells, job `0f3e898f-35ba-490d-ab89-fe04a6f98201`, jobdef `:4`) through
-  `scripts/campaign submit` on the same digest-pinned image. ETA to be filled
-  from Batch status; the 20-cell canary wall was ~26 min.
+  `scripts/campaign submit` on the same digest-pinned image.
+- Completion: `dp_t7e6_dedicated_rest` SUCCEEDED 180/180 (~43 min wall) and
+  `dp_t7e6_proxy` SUCCEEDED 200/200 (~59 min wall); 0 Batch failures. With the
+  20-cell canary this is 400/400 PF-02 cells.
+- Readout: `campaigns/covid/platform_fidelity_02/readout.py` over the PF-02
+  proxy prefix and the canary+rest dedicated prefixes wrote
+  `campaigns/covid/platform_fidelity_02/readout.json`; canonical readout is
+  `docs/covid/covid_platform_fidelity_02_readout.md`. Audit: 0 missing cells,
+  0 missing echoes, 0 `close_zones` failed comparisons, technical-failure rate
+  0.0; 16 dedicated rest seeds exceed the inherited PF-01b working-crew band
+  (diagnosed as extended-seed confinement variation, not a contract breach —
+  see the readout doc).

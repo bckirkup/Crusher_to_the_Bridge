@@ -1,0 +1,102 @@
+{
+  "audit": {
+    "failed_comparisons": [],
+    "missing_cells": [],
+    "missing_echo": [],
+    "technical_failure_rate": 0.0,
+    "witness_failures": {
+      "20200230": [
+        "working_crew_count=81 outside band"
+      ],
+      "20200254": [
+        "working_crew_count=79 outside band"
+      ],
+      "20200258": [
+        "working_crew_count=82 outside band"
+      ],
+      "20200271": [
+        "working_crew_count=90 outside band"
+      ],
+      "20200275": [
+        "working_crew_count=94 outside band"
+      ],
+      "20200293": [
+        "working_crew_count=71 outside band"
+      ],
+      "20200309": [
+        "working_crew_count=144 outside band"
+      ],
+      "20200339": [
+        "working_crew_count=79 outside band"
+      ],
+      "20200348": [
+        "working_crew_count=86 outside band"
+      ],
+      "20200360": [
+        "working_crew_count=94 outside band"
+      ],
+      "20200365": [
+        "working_crew_count=94 outside band"
+      ],
+      "20200384": [
+        "working_crew_count=75 outside band"
+      ],
+      "20200394": [
+        "working_crew_count=89 outside band"
+      ],
+      "20200399": [
+        "working_crew_count=94 outside band"
+      ],
+      "20200400": [
+        "working_crew_count=77 outside band"
+      ],
+      "20200401": [
+        "working_crew_count=93 outside band"
+      ]
+    }
+  },
+  "campaign": "covid_platform_fidelity_02",
+  "dedicated_source": [
+    "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_02/dp_t7e6_dedicated_canary/",
+    "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_02/dp_t7e6_dedicated_rest/"
+  ],
+  "n_seeds_paired": 200,
+  "note": "q05-q95 are seedwise spreads, NOT confidence intervals; unconditional onset burden is reported alongside the takeoff-conditional endpoint; no platform-equivalence conclusion from an interval crossing zero.",
+  "primary": {
+    "P_takeoff_dedicated": 0.51,
+    "P_takeoff_proxy": 0.535,
+    "both_takeoff_delta_median": 27.5,
+    "both_takeoff_delta_q05": -371.1,
+    "both_takeoff_delta_q95": 619.4499999999998,
+    "both_takeoff_size": {
+      "ci95": [
+        15.033488354637598,
+        170.3113392315693
+      ],
+      "mean": 92.67241379310344,
+      "n": 58,
+      "p_two_sided": 0.020166520984730506,
+      "sd": 295.27622440578335
+    },
+    "crn_rho_both_takeoff": 0.44120290972589216,
+    "dedicated_only_takeoff": 44,
+    "mcnemar_exact_p_two_sided": 0.6785320136533249,
+    "n_both_takeoff": 58,
+    "proxy_only_takeoff": 49,
+    "takeoff_difference_dedicated_minus_proxy": -0.025
+  },
+  "proxy_source": [
+    "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_02/dp_t7e6_proxy/"
+  ],
+  "reported_never_selected": {
+    "asym_share_dedicated_takeoff": 0.4976425203600514,
+    "asym_share_proxy_takeoff": 0.39522455940875495,
+    "unconditional_onset_mean_dedicated": 112.67,
+    "unconditional_onset_mean_proxy": 85.615,
+    "unconditional_onset_median_dedicated": 12.5,
+    "unconditional_onset_median_proxy": 15.5,
+    "unconditional_onset_total_dedicated": 22534.0,
+    "unconditional_onset_total_proxy": 17123.0,
+    "unconditional_welch_p_two_sided": 0.16830412214539983
+  }
+}
