@@ -1,0 +1,72 @@
+{
+  "design_id": "covid-platform-fidelity-gm",
+  "task_id": "covid-platform-fidelity-01",
+  "design_doc": "docs/covid/covid_platform_fidelity_prereg_v1.md",
+  "parent_design": "covid-gm-rescore-02",
+  "description": "PLATFORM-FIDELITY-01 Greg Mortimer held-out pair: the as-declared greg_mortimer_2020 replay (SOP-017 day 8 -> day 27, day-20 screen, expedition_cruise_450 proxy) on the event-faithful greg_mortimer hull vs the proxy, everything else held fixed. Primary row is the shared theta 7.9e6; the descriptive layers (GM pair at 2.37e11; theta lattice {1e11, 2.37e11, 1e12} x both hulls) are pre-declared, none selectable, none fitted. No theta refit on the faithful hulls; if GM fizzles at 7.9e6 on both hulls that is reported as-is.",
+  "scenario_id": "greg_mortimer_2020",
+  "split_role": "held_out",
+  "split_role_note": "Declared in writing before any cell ran: this design scores the split's held-out hull, exactly as covid_gm_rescore_v2_design.json does. load_design verifies the declaration against the fixed split (a mismatch refuses at load).",
+  "voyage_mode": "declared",
+  "thetas": [7900000.0, 100000000000.0, 237000000000.0, 1000000000000.0],
+  "theta_note": "Row 1 (7.9e6) is the shared primary Theta frozen for the platform-fidelity contrast. Rows 2-4 (1e11, 2.37e11, 1e12) are the pre-declared descriptive layers from the handoff: the GM pair at the GM-RESCORE-02 anchor theta 2.37e11, and the v13 lattice {1e11, 2.37e11, 1e12} x both hulls. 2.37e11 appears once (it is both the anchor and a lattice member). None of these rows is selectable; no theta is fitted to GM outcomes inside this study.",
+  "infection_age_days": [0.0],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seed_note": "20 seeds (20200205..20200224), the handoff's proposed default, uniform across every row of both event pairs (vs GM-RESCORE's 50-seed convention). Confirmed by the prereg merge; the same seed list on both arms of a pair gives the CRN pairing.",
+  "takeoff_recorded_onsets": 10,
+  "split_day": 20,
+  "turn_day": 8,
+  "seed_ring_readout": true,
+  "protocols_path": "data/config/protocols_covid_pf_gm.json",
+  "protocols_note": "Frozen per-event-pair protocols file carrying SOP-017 only (the scheduled confinement protocol, day 8 -> 27) and no reactive protocols - the SOP-007/SOP-009 close_zones protocols are absent by construction.",
+  "cells": 160,
+  "cells_note": "4 thetas x 2 arms x 20 seeds = 160 cells. The primary contrast is the theta-7.9e6 pair (40 cells); the remaining 120 cells are the pre-declared descriptive layers.",
+  "cell_payload_additions": ["run", "cohort", "quarantine_witness", "board", "crew_window", "guard_windows", "crew_ledger", "infection_log_tail", "through_day14", "takeoff_calibration", "q_zone_reach", "source_channel_during", "during_quarantine_by_route", "sanitary_visits", "platform_fidelity"],
+  "cell_payload_additions_note": "The GM-RESCORE payload shape plus this campaign's platform_fidelity echo block: resolved platform_id, protocols_path, per-input-file SHA-256 hashes, and the set of protocol ids the protocol engine activated during the voyage (with the close_zones-firing audit flag).",
+  "arms": [
+    {
+      "arm_id": "proxy_expedition_cruise",
+      "role": "baseline",
+      "overrides": {},
+      "note": "First arm so empty overrides per the arm grammar. Rides the scenario's declared proxy platform expedition_cruise_450 (the hull the GM held-out replays have run on). The declared baseline."
+    },
+    {
+      "arm_id": "dedicated_greg_mortimer",
+      "role": "platform_dedicated",
+      "overrides": {
+        "platform_id": "greg_mortimer"
+      },
+      "note": "Same cell on the event-faithful greg_mortimer hull (50 zones; PR #1171). The only difference from the baseline arm is catalog.platform_id."
+    }
+  ],
+  "freeze": {
+    "declared_before_running": true,
+    "metrics": [
+      "paired hull delta: per-seed dedicated - proxy recorded_onsets (takeoff-conditional: seeds where BOTH arms record >= 10 onsets), median delta with q05-q95, per theta row",
+      "P(takeoff) per hull per theta row: fraction of the 20 seeds with recorded_onsets >= 10",
+      "takeoff-conditional asymptomatic share of lab_confirmed per hull per theta row",
+      "CRN pairing diagnostic: Pearson correlation of recorded_onsets across the two arms over both-takeoff seeds (rho < 0.3 -> unpaired analysis declared)",
+      "failed-comparison audit: any cell whose protocol engine fired a close_zones protocol is a FAILED COMPARISON, reported, never deleted"
+    ],
+    "minimum_detectable_effect": "30% of the proxy arm's takeoff-conditional median recorded_onsets, declared at prereg review",
+    "report_immediately": [
+      "any cell where a close_zones protocol fired (FAILED COMPARISON)",
+      "technical-failure rate above 10% of cells",
+      "the paired delta's q05-q95 interval excluding zero"
+    ],
+    "held_out_discipline": "GM is scored once, reported whatever it shows. Any parameter revision voids the held-out claim; no theta adaptation to GM outcomes inside this study."
+  },
+  "execution": {
+    "runner": "campaigns/covid/platform_fidelity_01/cell.py via deploy/aws/campaign_entrypoint.py",
+    "task": "covid_platform_fidelity_01",
+    "voyage": "greg_mortimer_2020",
+    "campaign_dir": "campaigns/covid/platform_fidelity_01",
+    "s3_prefix": "campaign/covid_platform_fidelity_01/",
+    "queue": "picard-analysis-queue",
+    "image_tag": "covid-platform-fidelity-01",
+    "submission_order": ["DP canary pair first (40 cells) - read out and STOP; GM blocks run only after the DP machinery is proven and the owner approves; GM canary is TECHNICAL acceptance only, with theta frozen before any GM epidemiological output is examined"]
+  }
+}
