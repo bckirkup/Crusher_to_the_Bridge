@@ -54,13 +54,15 @@ _DEFAULT_PREFIX = (
 )
 
 
-def _expected_cells() -> dict[tuple[str, float], set[int]]:
-    """(design_id, theta) -> the seed set the design declares."""
-    expected: dict[tuple[str, float], set[int]] = {}
+def _expected_cells() -> dict[tuple[str, float], set[tuple[int, str]]]:
+    """(design_id, theta) -> {(seed, arm_id)} the design declares."""
+    expected: dict[tuple[str, float], set[tuple[int, str]]] = {}
     for design_id, rel in _DESIGNS.items():
         design = load_design(str(_REPO_ROOT / rel))
         for cell in enumerate_cells(design):
-            expected.setdefault((design_id, cell.theta), set()).add(cell.seed)
+            expected.setdefault((design_id, cell.theta), set()).add(
+                (cell.seed, str(cell.arm_id))
+            )
     return expected
 
 
@@ -247,29 +249,44 @@ def main(argv: list[str] | None = None) -> int:
         gate = takeoff_gates.get(design_id, 10)
         rows[f"{design_id} @ theta={theta}"] = _row_summary(by_seed, gate)
 
-    # Audits.
+    # Audits. Arm-aware: a row is in scope once ANY of its cells has landed,
+    # so a staged campaign (canary before the full array) does not count
+    # unsubmitted rows as missing. Unexpected cells are checked against the
+    # full design enumeration.
     failed_comparisons = [
         c["key"] for c in cells
         if (c["pf"].get("close_zones_fired_flag"))
     ]
     missing_echo = [c["key"] for c in cells if not c["pf"].get("resolved_platform_id")]
     expected = _expected_cells()
-    found = {(c["design_id"], c["theta"], c["seed"]) for c in cells}
-    expected_flat = {
-        (design_id, theta, seed)
-        for (design_id, theta), seeds in expected.items()
-        for seed in seeds
+    all_expected = {
+        (design_id, theta, seed, arm)
+        for (design_id, theta), cells_ in expected.items()
+        for seed, arm in cells_
     }
-    missing = sorted(expected_flat - found)
-    extra = sorted(found - expected_flat)
-    n_expected = len(expected_flat)
-    failure_rate = (len(missing) + len(failed_comparisons)) / max(n_expected, 1)
+    found = {
+        (c["design_id"], c["theta"], c["seed"], str(c["arm_id"]))
+        for c in cells
+        if c["design_id"] is not None and c["theta"] is not None
+    }
+    found_rows = {(c["design_id"], c["theta"]) for c in cells
+                  if c["design_id"] is not None and c["theta"] is not None}
+    in_scope_expected = {
+        (design_id, theta, seed, arm)
+        for (design_id, theta) in found_rows
+        for seed, arm in expected.get((design_id, theta), set())
+    }
+    missing = sorted(in_scope_expected - found)
+    extra = sorted(found - all_expected)
+    n_in_scope = len(in_scope_expected)
+    failure_rate = (len(missing) + len(failed_comparisons)) / max(n_in_scope, 1)
 
     summary = {
         "campaign": "covid_platform_fidelity_01",
         "prefix": args.prefix if not args.dir else f"dir:{args.dir}",
         "n_cells_found": len(cells),
-        "n_cells_expected": n_expected,
+        "n_cells_expected_in_scope": n_in_scope,
+        "n_cells_expected_total": len(all_expected),
         "rows": rows,
         "audit": {
             "failed_comparisons_close_zones": failed_comparisons,
