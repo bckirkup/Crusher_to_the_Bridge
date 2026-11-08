@@ -74,6 +74,42 @@ against those echoes.
   those two rows. At 1e11 ρ = 0.258 declares unpaired. No descriptive row
   shows a platform effect that survives its interval.
 
+## PLATFORM-FIDELITY-01b — corrected DP contrast (2026-11-08)
+
+The DP row above is confounded (see the caveat) and is superseded for
+hull-fidelity inference by the 01b corrective rerun
+(`docs/covid/covid_platform_fidelity_01b_addendum.md`,
+`campaigns/covid/platform_fidelity_01b/`, ledger
+`docs/ledger/PLATFORM-FIDELITY-01B.md`). The 01b design reran ONLY the 20
+dedicated cells with the function-matched union `exempt_work_zones`
+(Θ 7.9e6, seeds 20200205–20200224, frozen); the 20 PF-01 proxy cells are
+reused as the baseline on proven behavioral equivalence (addendum §3:
+union list inert on the proxy per-seed, and one full local proxy cell
+bit-identical in every epidemiological field to its PF-01 payload).
+20/20 cells, 0 technical failures; witness audit clean on every cell
+(working crew 98–135 at activation, posted zones ⊆ the 7 hull-native
+essential IDs, boxed service active, `SOP-017-MESSBOX` fired, no
+`close_zones`). Input-hash contract vs PF-01 dedicated cells: platform,
+scenario, pathogen, and agent-profile hashes identical; only the design,
+protocols, and run-spec hashes differ.
+
+| Row | P(takeoff) proxy | P(takeoff) dedicated | n both-takeoff | paired Δ median [q05, q95] | CRN ρ | unpaired? | asym share proxy | asym share dedicated | onsets med proxy (all seeds) | onsets med dedicated (all seeds) | onsets total proxy | onsets total dedicated |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| DP @ 7.9e6 (01b corrected) | 0.50 | 0.30 | 5 | +114 [−66.6, +358.6] | −0.137 | yes | 0.367 | 0.427 | 12.5 | 2.0 | 1103 | 1457 |
+
+Reading, per the addendum §6 corrections: the q05–q95 is a SEEDWISE SPREAD
+across the 5 both-takeoff pairs, not a confidence interval, and it includes
+zero — no platform-equivalence conclusion is drawn from that. The
+unconditional onset burden (all 20 seeds regardless of the takeoff gate)
+shows the dedicated hull's outbreaks are LARGER when they take off (total
+1457 vs 1103 onsets; conditional medians on the 6 dedicated takeoff seeds
+run to 441) despite a LOWER takeoff probability (0.30 vs 0.50) and a lower
+unconditional median (2.0 vs 12.5). This is the same directional pattern
+the confounded PF-01 DP row hinted at (dedicated conditional median 243 vs
+64), now measured with the same effective quarantine policy on both hulls.
+At 20 seeds/arm the frozen criteria resolve nothing; no platform is
+selected, no Θ refit, the train/test split untouched.
+
 ## What this settles and what it does not
 
 Settles (measured): the platform-fidelity machinery is proven end-to-end on
@@ -84,10 +120,14 @@ seed noise, with no row meeting a frozen significance criterion.
 
 Does not settle (per prereg §7): no platform is selected or crowned, no Θ
 is refit, the train/test split is untouched, and the descriptive GM layers
-carry no criterion. The DP takeoff-probability gap (0.50 vs 0.35) and the
-GM 7.9e6 rare-takeoff regime are the two observations a follow-up design
-would need more seeds or a different gate to resolve; neither is asserted
-here.
+carry no criterion. For DP, the corrected 01b contrast (above) replaces
+the confounded PF-01 row: takeoff probability favors the proxy (0.50 vs
+0.30) while outbreak size conditional on takeoff favors the dedicated hull
+(unconditional totals 1103 vs 1457), and the paired endpoint rests on 5
+both-takeoff seeds with a seedwise spread that includes zero — unresolved
+at 20 seeds/arm. The GM 7.9e6 rare-takeoff regime remains the other
+observation a follow-up design would need more seeds or a different gate
+to resolve; neither is asserted here.
 
 ## Provenance
 
@@ -95,3 +135,5 @@ here.
 - Readout: `python3 campaigns/covid/platform_fidelity_01/readout.py --prefix s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_01/`
 - Batch jobs: canary `6a7e6185-…`/`4e914d4d-…` (DP), `533758d0-…`/`84caa2e3-…` (GM 7.9e6); full array `d8d4cbb7-…`, `411dc224-…`, `a1aecf18-…`, `8bcc7cc2-…`, `7ce2d5d3-…`, `41308e2f-…` (jobdef revs :1–:10, all digest-pinned).
 - Bring-up repairs (declared, no epidemiological constant touched): prereg §8.
+- 01b cells: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_01b/dp_t7e6_dedicated/cell_<seed>.json` (20 payloads); proxy baseline reused from the PF-01 `dp_t7e6_proxy` block. Batch job `5bd3f49c-3483-4a33-94fb-772f18f5c807` (jobdef rev :1, digest `sha256:ed4700c6…`, image built at `7d79b7d0`).
+- 01b readout: `python3 campaigns/covid/platform_fidelity_01b/readout.py --proxy-prefix s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_01/dp_t7e6_proxy/ --dedicated-prefix s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_01b/dp_t7e6_dedicated/`

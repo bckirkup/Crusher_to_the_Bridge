@@ -1,0 +1,47 @@
+{
+  "name": "covid_platform_fidelity_01b",
+  "pathogen": "covid",
+  "manifest": null,
+  "pathogen_id": null,
+  "s3_prefix": "campaign/covid_platform_fidelity_01b/",
+  "queue": "picard-analysis-queue",
+  "image_tag": "covid-platform-fidelity-01b@sha256:ed4700c6ce9a8b47b66fbba4e7a2f54b36e12a218504259fa3c614511e52bdfc",
+  "resources": {
+    "vcpu": "1",
+    "memory": "2048"
+  },
+  "readout": "campaigns/covid/platform_fidelity_01b/readout.py",
+  "blocks": {
+    "dp_t7e6_dedicated": {
+      "worker": "campaigns/covid/platform_fidelity_01b/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 7900000.0,
+        "arm_id": "dedicated_diamond_princess",
+        "design": "picard_framework/runs/covid_platform_fidelity_01b_dp_design.json"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214,
+        20200215,
+        20200216,
+        20200217,
+        20200218,
+        20200219,
+        20200220,
+        20200221,
+        20200222,
+        20200223,
+        20200224
+      ]
+    }
+  }
+}
