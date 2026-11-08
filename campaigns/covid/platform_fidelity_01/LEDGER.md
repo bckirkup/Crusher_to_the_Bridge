@@ -88,11 +88,19 @@ Neither touches an epidemiological constant.
 | 2026-11-08 | `gm_t7e6_proxy` | 20200205–224 | 20 | `533758d0-c7b7-4a11-97d5-f9980e1afaba` | `bba29d19` | `sha256:cd59519a…` | `:3` | ~8 min | SUCCEEDED 20/20 |
 | 2026-11-08 | `gm_t7e6_dedicated` | 20200205–224 | 20 | `84caa2e3-43ed-4340-9407-67bc644d4015` | `bba29d19` | `sha256:cd59519a…` | `:4` | ~8 min | SUCCEEDED 20/20 |
 
-Canary = both event pairs' Θ=7.9e6 arm-rows (80 executions). GM canary is
-TECHNICAL acceptance only: Θ frozen before any GM epidemiological output is
-examined; no GM outcome is used for any decision here. The descriptive GM
-layers (`gm_t1e11_*`, `gm_t2p37e11_*`, `gm_t1e12_*`, 120 cells) are NOT
-submitted — they await the owner decision after the canary readout.
+| 2026-11-08 | `gm_t1e11_proxy` | 20200205–224 | 20 | `d8d4cbb7-57f3-4f27-a3ce-1ffb3466f3c9` | `bba29d19` | `sha256:cd59519a…` | `:5` | ~6 min | SUCCEEDED 20/20 |
+| 2026-11-08 | `gm_t1e11_dedicated` | 20200205–224 | 20 | `411dc224-e945-4169-b966-be6ce202ff39` | `bba29d19` | `sha256:cd59519a…` | `:6` | ~6 min | SUCCEEDED 20/20 |
+| 2026-11-08 | `gm_t2p37e11_proxy` | 20200205–224 | 20 | `a1aecf18-c51c-4b8d-95e1-eb5a10ef8d79` | `bba29d19` | `sha256:cd59519a…` | `:7` | ~6 min | SUCCEEDED 20/20 |
+| 2026-11-08 | `gm_t2p37e11_dedicated` | 20200205–224 | 20 | `8bcc7cc2-87f4-4987-8526-407166738daf` | `bba29d19` | `sha256:cd59519a…` | `:8` | ~6 min | SUCCEEDED 20/20 |
+| 2026-11-08 | `gm_t1e12_proxy` | 20200205–224 | 20 | `7ce2d5d3-eef7-4aa1-9b1a-efb1c655e699` | `bba29d19` | `sha256:cd59519a…` | `:9` | ~6 min | SUCCEEDED 20/20 |
+| 2026-11-08 | `gm_t1e12_dedicated` | 20200205–224 | 20 | `41308e2f-dc55-4d2e-9413-16d21d5473c8` | `bba29d19` | `sha256:cd59519a…` | `:10` | ~6 min | SUCCEEDED 20/20 |
+
+Canary = both event pairs' Θ=7.9e6 arm-rows (80 executions). The full array
+(the 120 descriptive GM cells above) was submitted after the canary readout
+and owner approval ("go ahead", 2026-11-08). Campaign COMPLETE: 200/200
+cells, 0 technical failures. Canonical readout:
+`docs/covid/covid_platform_fidelity_readout.md`; ledger entry:
+`docs/ledger/PLATFORM-FIDELITY-01.md`.
 
 ## 7. Canary readout (2026-11-08, 80/80 cells, audit clean)
 
