@@ -1,8 +1,9 @@
 # CONTAM-vs-native HVAC Phase 1 thin scope manifest
 
-> **Status:** Proposed — awaiting Benjamin sign-off; no simulation, campaign,
-> AWS submission, code change, Ship X adapter, S lane, or epidemiology coupling
-> is authorized by this document.
+> **Status:** Signed off by Benjamin; Phase 1 campaign design frozen in
+> `campaigns/contam/phase1_hvac_tracer_01/` before any cell runs. No AWS
+> submission, array submit, pilot submit, Ship X adapter, S lane, or
+> epidemiology coupling is authorized by this document.
 > **Filing:** `docs/proposals/` per the `docs/README.md` filing rule; the panel
 > artifact does not exist yet. Verified against `origin/main` `c5f4ea97`.
 

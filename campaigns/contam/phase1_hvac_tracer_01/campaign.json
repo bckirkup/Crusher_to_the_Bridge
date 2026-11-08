@@ -1,0 +1,555 @@
+{
+  "blocks": {
+    "destroyer_baseline_e": {
+      "args": {
+        "hull": "destroyer_baseline",
+        "lane": "E",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "destroyer_baseline_n": {
+      "args": {
+        "hull": "destroyer_baseline",
+        "lane": "N",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "destroyer_baseline_p": {
+      "args": {
+        "hull": "destroyer_baseline",
+        "lane": "P",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "expedition_cruise_450_e": {
+      "args": {
+        "hull": "expedition_cruise_450",
+        "lane": "E",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "expedition_cruise_450_n": {
+      "args": {
+        "hull": "expedition_cruise_450",
+        "lane": "N",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "expedition_cruise_450_p": {
+      "args": {
+        "hull": "expedition_cruise_450",
+        "lane": "P",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "field_cache": {
+      "args": {
+        "mode": "field_cache"
+      },
+      "artifact": "field_cache.json",
+      "seeds": [
+        1
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "fletcher_class_destroyer_e": {
+      "args": {
+        "hull": "fletcher_class_destroyer",
+        "lane": "E",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "fletcher_class_destroyer_n": {
+      "args": {
+        "hull": "fletcher_class_destroyer",
+        "lane": "N",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "lexington_cv2_e": {
+      "args": {
+        "hull": "lexington_cv2",
+        "lane": "E",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "lexington_cv2_n": {
+      "args": {
+        "hull": "lexington_cv2",
+        "lane": "N",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "lexington_cv2_p": {
+      "args": {
+        "hull": "lexington_cv2",
+        "lane": "P",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "missouri_bb63_e": {
+      "args": {
+        "hull": "missouri_bb63",
+        "lane": "E",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "missouri_bb63_n": {
+      "args": {
+        "hull": "missouri_bb63",
+        "lane": "N",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "missouri_bb63_p": {
+      "args": {
+        "hull": "missouri_bb63",
+        "lane": "P",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "saratoga_cv3_e": {
+      "args": {
+        "hull": "saratoga_cv3",
+        "lane": "E",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "saratoga_cv3_n": {
+      "args": {
+        "hull": "saratoga_cv3",
+        "lane": "N",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    },
+    "saratoga_cv3_p": {
+      "args": {
+        "hull": "saratoga_cv3",
+        "lane": "P",
+        "mode": "trajectory"
+      },
+      "artifact": "cell_{seed}.json",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
+    }
+  },
+  "epoch_hours": 1.0,
+  "epochs": 12,
+  "image_tag": "contam-phase1-hvac-tracer-01",
+  "manifest": "campaigns/contam/phase1_hvac_tracer_01/design/phase1_hvac_tracer_design.json",
+  "name": "contam_phase1_hvac_tracer_01",
+  "pathogen": "contam",
+  "pathogen_id": null,
+  "queue": "picard-campaign-queue",
+  "readout": "campaigns/contam/phase1_hvac_tracer_01/readout.py",
+  "resources": {
+    "memory": "2048",
+    "vcpu": "1"
+  },
+  "s3_prefix": "campaign/contam_phase1_hvac_tracer_01/"
+}

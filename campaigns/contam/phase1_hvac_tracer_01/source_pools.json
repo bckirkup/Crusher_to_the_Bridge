@@ -1,0 +1,644 @@
+{
+  "design_id": "contam_phase1_hvac_tracer_01",
+  "source_pools": {
+    "destroyer_baseline": [
+      {
+        "adjacency_degree": 2,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "zone_main",
+        "id": "Mess_Hall",
+        "occupancy": 0.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 120.0
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "zone_upper",
+        "id": "Bridge",
+        "occupancy": 0.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 80.0
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "zone_main",
+        "id": "Galley",
+        "occupancy": 0.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 60.0
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "zone_main",
+        "id": "MedBay",
+        "occupancy": 0.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 45.0
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_MAIN_M",
+        "id": "HD_MAIN_M",
+        "occupancy": 3.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 18.63
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_MAIN_F",
+        "id": "HD_MAIN_F",
+        "occupancy": 2.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 12.42
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_UPPER_M",
+        "id": "HD_UPPER_M",
+        "occupancy": 1.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 6.21
+      }
+    ],
+    "expedition_cruise_450": [
+      {
+        "adjacency_degree": 4,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "AHU_Dining",
+        "id": "MainDining",
+        "occupancy": 300.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 1050.0
+      },
+      {
+        "adjacency_degree": 4,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "AHU_Public_Fwd",
+        "id": "TheaterLng",
+        "occupancy": 250.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 1250.0
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "AHU_Public_Aft",
+        "id": "CasualDining",
+        "occupancy": 150.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 525.0
+      },
+      {
+        "adjacency_degree": 3,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "AHU_Public_Fwd",
+        "id": "ExpedLounge",
+        "occupancy": 100.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 420.0
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_5P_F",
+        "id": "HD_5P_F",
+        "occupancy": 6.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 37.26
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_5P_M",
+        "id": "HD_5P_M",
+        "occupancy": 5.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 31.05
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_7S_F",
+        "id": "HD_7S_F",
+        "occupancy": 4.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 24.84
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "PoolDeck",
+        "occupancy": 120.0,
+        "served": false,
+        "type": "Free",
+        "volume_m3": 1050.0
+      },
+      {
+        "adjacency_degree": 1,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "AHU_Public_Fwd",
+        "id": "Library",
+        "occupancy": 20.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 105.0
+      },
+      {
+        "adjacency_degree": 1,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "AHU_Medical",
+        "id": "MedBay",
+        "occupancy": 4.0,
+        "served": true,
+        "type": "Medical",
+        "volume_m3": 105.0
+      }
+    ],
+    "fletcher_class_destroyer": [
+      {
+        "adjacency_degree": 4,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Berthing",
+        "id": "Mess_Deck",
+        "occupancy": 60.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 110.0
+      },
+      {
+        "adjacency_degree": 5,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Main_Deck_Mid",
+        "id": "Passageway_Main",
+        "occupancy": 20.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 80.0
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Main_Deck_Fwd",
+        "id": "Wardroom",
+        "occupancy": 16.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 40.0
+      },
+      {
+        "adjacency_degree": 4,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Superstructure",
+        "id": "CIC",
+        "occupancy": 15.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 48.0
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_MAINDEC_M",
+        "id": "HD_MAINDEC_M",
+        "occupancy": 5.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 31.05
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_LOWERDE_M",
+        "id": "HD_LOWERDE_M",
+        "occupancy": 4.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 24.84
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_MAINDEC_F",
+        "id": "HD_MAINDEC_F",
+        "occupancy": 4.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 24.84
+      },
+      {
+        "adjacency_degree": 1,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Superstructure",
+        "id": "Gun_Mount_51",
+        "occupancy": 8.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 15.0
+      },
+      {
+        "adjacency_degree": 1,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Main_Deck_Mid",
+        "id": "Torpedo_Mount_Midships",
+        "occupancy": 10.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 35.0
+      },
+      {
+        "adjacency_degree": 1,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Main_Deck_Fwd",
+        "id": "CPO_Quarters",
+        "occupancy": 20.0,
+        "served": true,
+        "type": "Room",
+        "volume_m3": 50.0
+      }
+    ],
+    "lexington_cv2": [
+      {
+        "adjacency_degree": 4,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "General_Mess",
+        "occupancy": 500.0,
+        "served": false,
+        "type": "Dining",
+        "volume_m3": 761.93
+      },
+      {
+        "adjacency_degree": 8,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "Flight_Deck",
+        "occupancy": 300.0,
+        "served": false,
+        "type": "Free",
+        "volume_m3": 14777.49
+      },
+      {
+        "adjacency_degree": 4,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "VENT_Hangar",
+        "id": "Hangar_Aft",
+        "occupancy": 250.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 2814.38
+      },
+      {
+        "adjacency_degree": 6,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "VENT_Hangar",
+        "id": "Hangar_Mid",
+        "occupancy": 250.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 2814.38
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_Firemens_Washroom",
+        "id": "Firemens_Washroom",
+        "occupancy": 14.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 86.3
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_Head_2D",
+        "id": "Head_2D",
+        "occupancy": 12.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 74.68
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_UHD_Head_Aft",
+        "id": "UHD_Head_Aft",
+        "occupancy": 9.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 54.83
+      },
+      {
+        "adjacency_degree": 1,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "Aft_Berths_UHD",
+        "occupancy": 50.0,
+        "served": false,
+        "type": "Room",
+        "volume_m3": 192.8
+      },
+      {
+        "adjacency_degree": 1,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "Wing_Fuselage_Repair",
+        "occupancy": 0.0,
+        "served": false,
+        "type": "Room",
+        "volume_m3": 413.14
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "Reserve_Room",
+        "occupancy": 0.0,
+        "served": false,
+        "type": "Room",
+        "volume_m3": 69.59
+      }
+    ],
+    "missouri_bb63": [
+      {
+        "adjacency_degree": 5,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Berthing",
+        "id": "Crews_Mess_2D",
+        "occupancy": 400.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 1815.4
+      },
+      {
+        "adjacency_degree": 3,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Berthing",
+        "id": "Wardroom_Mess_MD",
+        "occupancy": 60.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 501.19
+      },
+      {
+        "adjacency_degree": 3,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Berthing",
+        "id": "CPO_Mess_Galley_2D",
+        "occupancy": 60.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 250.6
+      },
+      {
+        "adjacency_degree": 3,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "HVAC_Berthing",
+        "id": "Crews_Galley_2D",
+        "occupancy": 40.0,
+        "served": true,
+        "type": "Dining",
+        "volume_m3": 481.26
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_HD_2D",
+        "id": "HD_2D",
+        "occupancy": 45.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 277.1
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_HD_MD",
+        "id": "HD_MD",
+        "occupancy": 32.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 201.53
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_HD_3D_Aft",
+        "id": "HD_3D_Aft",
+        "occupancy": 29.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 178.18
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "VENT_Weather",
+        "id": "Catwalk_02L",
+        "occupancy": 0.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 351.08
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "VENT_Tanks_Voids",
+        "id": "Fuel_Tanks_3D_Stbd",
+        "occupancy": 0.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 448.87
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "VENT_Tanks_Voids",
+        "id": "Tankage_3B",
+        "occupancy": 0.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 14439.87
+      }
+    ],
+    "saratoga_cv3": [
+      {
+        "adjacency_degree": 2,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "General_Mess",
+        "occupancy": 550.0,
+        "served": false,
+        "type": "Dining",
+        "volume_m3": 1131.05
+      },
+      {
+        "adjacency_degree": 9,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "Flight_Deck",
+        "occupancy": 350.0,
+        "served": false,
+        "type": "Free",
+        "volume_m3": 19047.89
+      },
+      {
+        "adjacency_degree": 4,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "VENT_Hangar",
+        "id": "Hangar_Aft",
+        "occupancy": 250.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 2964.69
+      },
+      {
+        "adjacency_degree": 6,
+        "category": "large_venue",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "VENT_Hangar",
+        "id": "Hangar_Mid",
+        "occupancy": 250.0,
+        "served": true,
+        "type": "Free",
+        "volume_m3": 2964.69
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_Wash_Room_Main",
+        "id": "Wash_Room_Main",
+        "occupancy": 14.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 85.77
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_Firemans_Wash_Rm",
+        "id": "Firemans_Wash_Rm",
+        "occupancy": 14.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 85.03
+      },
+      {
+        "adjacency_degree": 0,
+        "category": "sanitary_branch",
+        "hvac_duty": 0.0,
+        "hvac_group_id": "AHU_HD_Head_2D",
+        "id": "Head_2D",
+        "occupancy": 12.0,
+        "served": true,
+        "type": "Sanitary",
+        "volume_m3": 74.06
+      },
+      {
+        "adjacency_degree": 1,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "Marines_Berthing_MHD",
+        "occupancy": 90.0,
+        "served": false,
+        "type": "Room",
+        "volume_m3": 123.57
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "Prov_Room_Hold",
+        "occupancy": 0.0,
+        "served": false,
+        "type": "Room",
+        "volume_m3": 35.28
+      },
+      {
+        "adjacency_degree": 2,
+        "category": "remote_weak",
+        "hvac_duty": 0.5,
+        "hvac_group_id": "",
+        "id": "Small_Arms",
+        "occupancy": 0.0,
+        "served": false,
+        "type": "Room",
+        "volume_m3": 65.86
+      }
+    ]
+  }
+}
