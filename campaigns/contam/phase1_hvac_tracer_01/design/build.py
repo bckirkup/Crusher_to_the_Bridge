@@ -37,6 +37,28 @@ EPOCH_HOURS = 1.0
 TRACER_MASS = 1_000_000.0
 NATURAL_DECAY_RATE = 0.0
 FILTER_EFFICIENCY = 0.5
+FIELD_CACHE_S3_URI = (
+    "s3://crusherbucket-994254241749-us-east-1-an/"
+    "campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json"
+)
+FIELD_CACHE_SCHEMA = "contam_phase1_hvac_tracer_field_cache_v1"
+FIELD_CACHE_FIELD_COUNT = 11
+CONTAMX_VERSION = "3.4.0.3 64 bit"
+CONTAMX_BINARY = "third_party/contamx/contamx3"
+CONTAMX_BINARY_SHA256 = (
+    "d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b"
+)
+CONTAMX_DOWNLOAD_URL = (
+    "https://www.nist.gov/document/contam-x-3403-linux-64bittargz"
+)
+CONTAMX_TARBALL = "contam-x-3.4.0.3-Linux-64bit.tar.gz"
+CONTAMX_TARBALL_SHA256 = (
+    "3612798dff9a4f1ea4f0279c4c7b526b244b88875dea425fafd868f3570df4fa"
+)
+CONTAMX_LICENSE_NOTICE = (
+    "NIST Contam is U.S. public domain (17 U.S.C. §105); the official NIST "
+    "tarball is redistributable with notice."
+)
 
 LARGE_VENUE_TYPES = {"Dining", "Free", "Cabin_Corridor", "Medical"}
 CATEGORY_LIMITS = {"large_venue": 4, "sanitary_branch": 3, "remote_weak": 3}
@@ -50,7 +72,6 @@ PILOT = {
     "epoch_hours": EPOCH_HOURS,
     "vcpu": 1,
     "memory_mib": 2048,
-    "field_cache_block": "field_cache",
     "trajectory_block": "missouri_bb63_e",
 }
 
@@ -286,15 +307,7 @@ def _trajectory_blocks() -> dict[str, Any]:
 
 
 def _campaign_spec() -> dict[str, Any]:
-    blocks = {
-        "field_cache": {
-            "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py",
-            "artifact": "field_cache.json",
-            "args": {"mode": "field_cache"},
-            "seeds": [1],
-        },
-    }
-    blocks.update(_trajectory_blocks())
+    blocks = _trajectory_blocks()
     return {
         "name": "contam_phase1_hvac_tracer_01",
         "pathogen": "contam",
@@ -308,6 +321,33 @@ def _campaign_spec() -> dict[str, Any]:
         "resources": {"vcpu": "1", "memory": "2048"},
         "readout": "campaigns/contam/phase1_hvac_tracer_01/readout.py",
         "blocks": blocks,
+    }
+
+
+def _field_cache_prestage() -> dict[str, Any]:
+    return {
+        "mode": "local_only",
+        "aws_submit": False,
+        "producer": (
+            "python3 campaigns/contam/phase1_hvac_tracer_01/cell.py "
+            "--mode field-cache --design "
+            "campaigns/contam/phase1_hvac_tracer_01/design/"
+            "phase1_hvac_tracer_design.json --out <local-dir>"
+        ),
+        "artifact": "field_cache.json",
+        "schema": FIELD_CACHE_SCHEMA,
+        "field_count": FIELD_CACHE_FIELD_COUNT,
+        "s3_uri": FIELD_CACHE_S3_URI,
+        "trajectory_consumer_arg": "--field-cache-uri",
+        "contamx": {
+            "version": CONTAMX_VERSION,
+            "binary": CONTAMX_BINARY,
+            "binary_sha256": CONTAMX_BINARY_SHA256,
+            "download_url": CONTAMX_DOWNLOAD_URL,
+            "tarball": CONTAMX_TARBALL,
+            "tarball_sha256": CONTAMX_TARBALL_SHA256,
+            "license_notice": CONTAMX_LICENSE_NOTICE,
+        },
     }
 
 
@@ -392,14 +432,12 @@ def build_design() -> dict[str, Any]:
         },
         "execution": {
             "submit_path": "scripts/campaign submit contam/phase1_hvac_tracer_01 --block <block>",
-            "field_cache_block": "field_cache",
-            "field_cache_artifact": "campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json",
+            "field_cache_prestage": _field_cache_prestage(),
             "trajectory_blocks": len(_trajectory_blocks()),
             "trajectory_array_children": trajectory_cells,
-            "field_cache_children": 1,
-            "total_array_children": trajectory_cells + 1,
+            "total_array_children": trajectory_cells,
             "submit_order": [
-                "field_cache",
+                "field_cache_prestage_local_upload (not a Batch block)",
                 "missouri_bb63_e pilot/canary",
                 "remaining blocks after user decision",
             ],
@@ -441,12 +479,17 @@ def main(argv: list[str] | None = None) -> int:
     trajectory_cells = design["execution"]["trajectory_array_children"]
     if trajectory_cells != 340:
         raise SystemExit(f"trajectory cell count {trajectory_cells} != 340")
-    if design["execution"]["total_array_children"] != 341:
-        raise SystemExit("array child count must be 341")
+    if design["execution"]["total_array_children"] != 340:
+        raise SystemExit("array child count must be 340")
+    if len(spec["blocks"]) != 17:
+        raise SystemExit("campaign block count must be 17 trajectory blocks")
     if len(pools) != len(HULLS):
         raise SystemExit("source pools missing a hull")
     if args.check:
-        print(f"OK design={design['design_id']} trajectories={trajectory_cells} array_children=341")
+        print(
+            f"OK design={design['design_id']} trajectories={trajectory_cells} "
+            "array_children=340"
+        )
         return 0
     _write_json(DESIGN_PATH, design)
     _write_json(POOLS_PATH, {"design_id": design["design_id"], "source_pools": pools})

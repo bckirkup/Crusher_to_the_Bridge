@@ -163,8 +163,6 @@ def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
 def _expected_cells(campaign: dict[str, Any]) -> dict[tuple[str, str], list[int]]:
     expected: dict[tuple[str, str], list[int]] = {}
     for name, block in (campaign.get("blocks") or {}).items():
-        if name == "field_cache":
-            continue
         args = block.get("args") or {}
         if args.get("mode") != "trajectory":
             continue

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Argv builder for the Phase 1 CONTAM tracer campaign."""
+"""Argv builder for Phase 1 CONTAM tracer trajectory cells.
+
+The E/P field cache is generated locally and uploaded to S3 before any
+Batch submit; trajectory argv points at that cache (or uses --inline-field
+for a local smoke).
+"""
 from __future__ import annotations
 
 import json
@@ -25,13 +30,12 @@ def _artifact(block: dict[str, Any], seed: int, out_dir: Path) -> Path:
 def build_argv(
     args: Any, block: dict[str, Any], seed: int, out_dir: Path,
 ) -> tuple[list[str], Path]:
-    """Argv for one field-cache job or one (hull, lane, seed) trajectory."""
-    mode = str(block.get("args", {}).get("mode") or "trajectory")
+    """Argv for one (hull, lane, seed) trajectory cell."""
     command = [
         sys.executable,
         str(_REPO_ROOT / _CELL),
         "--mode",
-        "field-cache" if mode == "field_cache" else "trajectory",
+        "trajectory",
         "--design",
         _DESIGN,
         "--epochs",
@@ -41,9 +45,6 @@ def build_argv(
         "--out",
         str(out_dir),
     ]
-    if mode == "field_cache":
-        return command, _artifact(block, seed, out_dir)
-
     block_args = block.get("args") or {}
     command += [
         "--hull", str(block_args["hull"]),

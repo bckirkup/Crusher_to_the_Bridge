@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Phase 1 tracer cell worker for the CONTAM HVAC field panel.
 
-One array child either materializes the commissioned/committed ContamX field
-cache once (``field-cache``) or runs one paired-seed tracer trajectory through
-the shared ``py_contam_bridge`` propagator (``trajectory``). The worker emits a
-slim JSON artifact; full hourly frames stay out of the campaign prefix unless
-the pilot readout later justifies them.
+One worker invocation either materializes the commissioned/committed ContamX
+field cache locally (``field-cache``) or runs one paired-seed tracer trajectory
+through the shared ``py_contam_bridge`` propagator (``trajectory``). Batch
+trajectory cells consume the uploaded cache; the worker emits a slim JSON
+artifact, and full hourly frames stay out of the campaign prefix unless the
+pilot readout later justifies them.
 """
 from __future__ import annotations
 
@@ -422,7 +423,10 @@ def _field_from_cache(cache: str, hull: str, lane: str) -> dict[str, Any]:
     key = _cache_key(hull, lane)
     field = (doc.get("fields") or {}).get(key)
     if field is None:
-        raise SystemExit(f"field cache {cache} has no {key}; submit field_cache first")
+        raise SystemExit(
+            f"field cache {cache} has no {key}; run and upload the local "
+            "field-cache prestage first"
+        )
     return field
 
 
