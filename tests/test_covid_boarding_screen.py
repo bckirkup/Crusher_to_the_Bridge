@@ -1295,6 +1295,35 @@ def test_ship_graph_arm_writes_the_declared_fractions():
     assert "crew_immune_fraction" not in base["config_overrides"]["ship_graph"]
 
 
+def test_platform_id_arm_swaps_only_the_catalog_platform():
+    design = _arm_design([
+        {"arm_id": "B0_proxy", "overrides": {}},
+        {"arm_id": "B1_dedicated",
+         "overrides": {"platform_id": "diamond_princess"}},
+    ])
+    cells = enumerate_cells(design)
+    proxy = next(c for c in cells if c.arm_id == "B0_proxy")
+    dedicated = next(c for c in cells if c.arm_id == "B1_dedicated")
+    raw_proxy = prepare_cell_run_spec(design, proxy, num_epochs=6)
+    raw_dedicated = prepare_cell_run_spec(design, dedicated, num_epochs=6)
+    assert raw_proxy["catalog"]["platform_id"] == "mega_cruise_5000"
+    assert raw_dedicated["catalog"]["platform_id"] == "diamond_princess"
+    # Everything else the cell carries is held fixed.
+    assert raw_proxy["run"] == raw_dedicated["run"]
+    assert raw_proxy["config_overrides"] == raw_dedicated["config_overrides"]
+
+
+@pytest.mark.parametrize("bad", ["", 7, None, ["diamond_princess"]])
+def test_platform_id_arm_rejects_non_string_values(bad):
+    design = _arm_design([
+        {"arm_id": "B0_proxy", "overrides": {}},
+        {"arm_id": "B1_bad", "overrides": {"platform_id": bad}},
+    ])
+    cell = next(c for c in enumerate_cells(design) if c.arm_id == "B1_bad")
+    with pytest.raises(ValueError, match="platform_id override"):
+        prepare_cell_run_spec(design, cell, num_epochs=6)
+
+
 def test_dose_response_frailty_preserves_theta_at_every_lattice_point():
     design = load_design(str(SUSCEPT_V1_DESIGN))
     for theta in design.thetas:

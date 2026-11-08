@@ -1,0 +1,78 @@
+{
+  "design_id": "covid-platform-fidelity-dp",
+  "task_id": "covid-platform-fidelity-01",
+  "design_doc": "docs/covid/covid_platform_fidelity_prereg_v1.md",
+  "parent_design": "covid-crew-mess-01",
+  "description": "PLATFORM-FIDELITY-01 Diamond Princess training pair: the boxed sect_mess_boxed replica (SOP-017-MESSBOX + boxed service block, theta 7.9e6, seeds 20200205-20200224) replayed on the event-faithful diamond_princess hull vs the generic mega_cruise_5000 proxy it currently rides, everything else held fixed. Pre-registered sensitivity measurement; no Theta selection, no canonical-platform crowning.",
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [7900000.0],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "base_overrides": {
+    "scheduled_protocol_id": "SOP-017-MESSBOX",
+    "transmission_overrides": {
+      "caregiver": {
+        "service": {
+          "direction": "both",
+          "service_responder_mode": "section",
+          "service_section_cabins": [10, 15],
+          "contact_factor_to_host": [0.005, 0.02]
+        }
+      }
+    }
+  },
+  "base_overrides_note": "The boxed crew-mess configuration, verbatim from covid_crew_mess_01_design.json arm sect_mess_boxed (the DP believability operating point per docs/covid/covid_dp_replay_handoff_2026_10_09.md section 2), applied by campaigns/covid/platform_fidelity_01/cell.py after prepare_cell_run_spec. Frozen reading of the handoff's 'SOP-017 only' protocol discipline: the per-event-pair protocols file carries the single scheduled protocol id the cell resolves (SOP-017-MESSBOX here, SOP-017 on GM) and no reactive protocols; the frozen file is data/config/protocols_covid_pf_dp.json.",
+  "protocols_path": "data/config/protocols_covid_pf_dp.json",
+  "cells": 40,
+  "cells_note": "1 theta x 1 infection_age x 1 imports x 2 arms x 20 seeds = 40 cells. Seeded in-order per arm (20200205..20200224); the same seed list on both arms gives the CRN pairing.",
+  "cell_payload_additions": ["run", "cohort", "quarantine_witness", "board", "crew_window", "guard_windows", "crew_ledger", "infection_log_tail", "through_day14", "takeoff_calibration", "q_zone_reach", "source_channel_during", "during_quarantine_by_route", "sanitary_visits", "platform_fidelity"],
+  "cell_payload_additions_note": "The crew-mess-01 payload set plus this campaign's platform_fidelity echo block: resolved platform_id, protocols_path, per-input-file SHA-256 hashes, and the set of protocol ids the protocol engine activated during the voyage (with the close_zones-firing audit flag).",
+  "arms": [
+    {
+      "arm_id": "proxy_mega_cruise",
+      "role": "baseline",
+      "overrides": {},
+      "note": "First arm so empty overrides per the arm grammar. Rides the scenario's declared proxy platform mega_cruise_5000 (the hull every prior boxed DP campaign ran on). The declared baseline."
+    },
+    {
+      "arm_id": "dedicated_diamond_princess",
+      "role": "platform_dedicated",
+      "overrides": {
+        "platform_id": "diamond_princess"
+      },
+      "note": "Same cell on the event-faithful diamond_princess hull (159 zones, 57 AHUs; PR #1167). The only difference from the baseline arm is catalog.platform_id."
+    }
+  ],
+  "freeze": {
+    "declared_before_running": true,
+    "metrics": [
+      "paired hull delta: per-seed dedicated - proxy recorded_onsets (takeoff-conditional: seeds where BOTH arms record >= 10 onsets), median delta with q05-q95",
+      "P(takeoff) per hull: fraction of the 20 seeds with recorded_onsets >= 10",
+      "takeoff-conditional asymptomatic share of lab_confirmed per hull",
+      "CRN pairing diagnostic: Pearson correlation of recorded_onsets across the two arms over both-takeoff seeds (rho < 0.3 -> unpaired analysis declared)",
+      "failed-comparison audit: any cell whose protocol engine fired a close_zones protocol is a FAILED COMPARISON, reported, never deleted"
+    ],
+    "minimum_detectable_effect": "30% of the proxy arm's takeoff-conditional median recorded_onsets, declared at prereg review",
+    "report_immediately": [
+      "any cell where a close_zones protocol fired (FAILED COMPARISON)",
+      "technical-failure rate above 10% of cells",
+      "the paired delta's q05-q95 interval excluding zero"
+    ]
+  },
+  "execution": {
+    "runner": "campaigns/covid/platform_fidelity_01/cell.py via deploy/aws/campaign_entrypoint.py",
+    "task": "covid_platform_fidelity_01",
+    "voyage": "diamond_princess_2020",
+    "campaign_dir": "campaigns/covid/platform_fidelity_01",
+    "s3_prefix": "campaign/covid_platform_fidelity_01/",
+    "queue": "picard-analysis-queue",
+    "image_tag": "covid-platform-fidelity-01",
+    "submission_order": ["canary: the two DP blocks (40 cells) - read out and STOP; GM blocks and any further array are the owner's call after the canary report"]
+  }
+}

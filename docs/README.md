@@ -174,6 +174,7 @@ longer justifications.
 | [pathogen_notes.md](pathogen_notes.md) | Living — per-pathogen literature justifications |
 | [covid/](covid/) | The SARS-CoV-2 thread — arm status and the parameter provenance audit. Read the audit before quoting any `sars_cov2_resp` constant |
 | [covid/covid_open_ledger.md](covid/covid_open_ledger.md) | Living — current withdrawals and measurement status for the COVID arm |
+| [covid/covid_platform_fidelity_prereg_v1.md](covid/covid_platform_fidelity_prereg_v1.md) | Pre-registered (frozen before any cell ran) — PLATFORM-FIDELITY-01: the paired hull-fidelity contrast (event-faithful vs proxy platform) on the two frozen 2020 COVID replays; criterion of record for the campaign |
 | [flu/](flu/) | The influenza-A thread — the scored surface lives in `data/observation/flu_fit_targets.json` |
 | [flu/flu_open_ledger.md](flu/flu_open_ledger.md) | Living — current withdrawals and measurement status for the flu arm |
 | [covid/covid_theta_handoff_2026_09_19.md](covid/covid_theta_handoff_2026_09_19.md) | Handoff record (2026-09-19) — where the Θ calibration stands: the four repairs that landed, what the empty v7 admissible region does and does not mean, the never-run `covid_theta_screen_v8`, and `covid_theta_screen_v9` from declaration to result (§9–10). Numbers live in the ledger entries it cites |

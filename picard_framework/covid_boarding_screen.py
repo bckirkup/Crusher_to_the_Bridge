@@ -79,8 +79,11 @@ FLEET_IQR_WINDOW = (0.0003, 0.015)
 FLEET_MEAN_MAX = 0.06
 # Attribution-design arm axes (covid_quarantine_attribution_v1). Every key a
 # declared arm may override; anything else refuses at design load rather than
-# drifting into a silently-ignored counterfactual.
+# drifting into a silently-ignored counterfactual. ``platform_id`` is the
+# PLATFORM-FIDELITY-01 hull-swap axis: it rewrites ``catalog.platform_id`` so
+# one event population rides two hulls with every other input held fixed.
 ARM_OVERRIDE_KEYS = frozenset({
+    "platform_id",
     "scheduled_protocol_id",
     "scheduled_protocol_window",
     "pathogen_pool_transport",
@@ -884,6 +887,25 @@ def _apply_hazard_frailty(raw: dict[str, Any], spec: Any) -> None:
     }
 
 
+def _apply_platform_id(raw: dict[str, Any], platform_id: Any) -> None:
+    """Swap the run's hull by rewriting ``catalog.platform_id`` in place.
+
+    PLATFORM-FIDELITY-01 hull-swap axis. ``PicardRunSpec.from_picard_dict``
+    resolves the id through the platform registry (spatial layout, air-flow
+    paths, zone catalog), so the swap reaches the engine exactly as a
+    scenario-declared platform would — every other spec field (population,
+    seed, theta profile, protocols path) is untouched. The id is validated
+    as a non-empty string here; existence is enforced at spec-resolution
+    time, where an unknown platform raises.
+    """
+    if not isinstance(platform_id, str) or not platform_id:
+        raise ValueError(
+            f"platform_id override must be a non-empty string, got "
+            f"{platform_id!r}",
+        )
+    raw.setdefault("catalog", {})["platform_id"] = platform_id
+
+
 def _dispatch_arm_overrides(
     raw: dict[str, Any],
     overrides: Mapping[str, Any],
@@ -891,6 +913,8 @@ def _dispatch_arm_overrides(
     theta: float | None,
 ) -> None:
     """Apply declared override keys in the frozen arm order."""
+    if "platform_id" in overrides:
+        _apply_platform_id(raw, overrides["platform_id"])
     if "scheduled_protocol_window" in overrides:
         _apply_scheduled_window(raw, overrides["scheduled_protocol_window"])
     if "scheduled_protocol_id" in overrides:
