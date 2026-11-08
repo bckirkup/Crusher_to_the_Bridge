@@ -1,0 +1,79 @@
+{
+  "design_id": "covid-platform-fidelity-01b-dp",
+  "task_id": "covid-platform-fidelity-01b",
+  "design_doc": "docs/covid/covid_platform_fidelity_01b_addendum.md",
+  "parent_design": "covid-platform-fidelity-dp",
+  "description": "PLATFORM-FIDELITY-01b Diamond Princess corrective rerun: the PLATFORM-FIDELITY-01 DP pair's dedicated arm only, replayed with the function-matched union exempt_work_zones (data/config/protocols_covid_pf_dp_01b.json) so the same quarantine exemption policy resolves on the event-faithful diamond_princess hull. Theta 7.9e6, seeds 20200205-20200224, infection_age_days 6.8, imports 1 — frozen. The proxy arm's 20 PF-01 cells are reused unchanged (preflight probe: union list is inert on mega_cruise_5000, exempt counts identical to PF-01); the corrected contrast pairs those cells against the 20 rerun dedicated cells. Pre-registered sensitivity measurement; no Theta selection, no canonical-platform crowning.",
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [7900000.0],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "base_overrides": {
+    "scheduled_protocol_id": "SOP-017-MESSBOX",
+    "transmission_overrides": {
+      "caregiver": {
+        "service": {
+          "direction": "both",
+          "service_responder_mode": "section",
+          "service_section_cabins": [10, 15],
+          "contact_factor_to_host": [0.005, 0.02]
+        }
+      }
+    }
+  },
+  "base_overrides_note": "The boxed crew-mess configuration, verbatim from covid_crew_mess_01_design.json arm sect_mess_boxed (the DP believability operating point per docs/covid/covid_dp_replay_handoff_2026_10_09.md section 2), applied by the 01b cell worker after prepare_cell_run_spec. Identical to the PF-01 DP design; only protocols_path differs.",
+  "protocols_path": "data/config/protocols_covid_pf_dp_01b.json",
+  "cells": 40,
+  "cells_note": "1 theta x 1 infection_age x 1 imports x 2 arms x 20 seeds = 40 enumerated cells; the campaign submits only the dedicated_diamond_princess block (20 cells) — the proxy block is satisfied by reuse of the PF-01 cells (campaign/covid_platform_fidelity_01/ dp_t7e6_proxy), per the addendum's execution-count resolution and baseline-equivalence evidence.",
+  "cell_payload_additions": ["run", "cohort", "quarantine_witness", "board", "crew_window", "guard_windows", "crew_ledger", "infection_log_tail", "through_day14", "takeoff_calibration", "q_zone_reach", "source_channel_during", "during_quarantine_by_route", "sanitary_visits", "platform_fidelity"],
+  "cell_payload_additions_note": "The PF-01 payload set, unchanged. The crew_window witness blocks carry the 01b preflight evidence: at_activation and at_end working_crew_count / working_crew_by_posted_zone, boxed service_deliveries active epochs, and crew_meal_service mode — the repaired exemption policy is verified per cell, not assumed.",
+  "arms": [
+    {
+      "arm_id": "proxy_mega_cruise",
+      "role": "baseline",
+      "overrides": {},
+      "note": "First arm so empty overrides per the arm grammar. Rides the scenario's declared proxy platform mega_cruise_5000. NOT resubmitted in 01b: the PF-01 proxy cells (same seed list, same theta, union list proven inert on this hull) are the baseline of record."
+    },
+    {
+      "arm_id": "dedicated_diamond_princess",
+      "role": "platform_dedicated",
+      "overrides": {
+        "platform_id": "diamond_princess"
+      },
+      "note": "Same cell on the event-faithful diamond_princess hull (159 zones, 57 AHUs; PR #1167) with the amended union exempt_work_zones. The only difference from the baseline arm is catalog.platform_id plus the protocols file named by protocols_path."
+    }
+  ],
+  "freeze": {
+    "declared_before_running": true,
+    "metrics": [
+      "paired hull delta: per-seed dedicated - proxy recorded_onsets (takeoff-conditional: seeds where BOTH arms record >= 10 onsets), median delta with q05-q95 — q05-q95 are seedwise spreads, NOT confidence intervals",
+      "P(takeoff) per hull: fraction of the 20 seeds with recorded_onsets >= 10",
+      "unconditional onset burden per hull: median and total recorded_onsets across all 20 seeds regardless of takeoff gate",
+      "takeoff-conditional asymptomatic share of lab_confirmed per hull",
+      "CRN pairing diagnostic: Pearson correlation of recorded_onsets across the two arms over both-takeoff seeds (rho < 0.3 -> unpaired analysis declared)",
+      "failed-comparison audit: any cell whose protocol engine fired a close_zones protocol is a FAILED COMPARISON, reported, never deleted"
+    ],
+    "minimum_detectable_effect": "30% of the proxy arm's takeoff-conditional median recorded_onsets, declared at prereg review",
+    "report_immediately": [
+      "any cell where a close_zones protocol fired (FAILED COMPARISON)",
+      "technical-failure rate above 10% of cells",
+      "the paired delta's q05-q95 interval excluding zero — a seedwise spread, not a confidence interval; do not conclude platform equivalence from an interval crossing zero"
+    ]
+  },
+  "execution": {
+    "runner": "campaigns/covid/platform_fidelity_01b/cell.py via deploy/aws/campaign_entrypoint.py",
+    "task": "covid_platform_fidelity_01b",
+    "voyage": "diamond_princess_2020",
+    "campaign_dir": "campaigns/covid/platform_fidelity_01b",
+    "s3_prefix": "campaign/covid_platform_fidelity_01b/",
+    "queue": "picard-analysis-queue",
+    "image_tag": "covid-platform-fidelity-01b",
+    "submission_order": "BLOCKED pending owner approval of docs/covid/covid_platform_fidelity_01b_addendum.md: local smoke + dry-run count, then the dedicated block (20 cells) only. No GM cells, no proxy block, no theta or seed changes."
+  }
+}

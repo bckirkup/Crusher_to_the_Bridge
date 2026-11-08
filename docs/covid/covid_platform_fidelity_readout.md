@@ -12,11 +12,28 @@ record, frozen before any cell ran):
 - coverage: 200/200 cells (DP 40 + GM 160), 20 seeds per row (20200205–20200224), audit clean — 0 failed comparisons (no `close_zones` fired anywhere), 0 missing platform echoes, 0 missing/unexpected cells, technical failure rate 0.0
 - measured at: `e2eb7163`
 
+> **Caveat (2026-11-08): the DP row below is confounded and superseded for
+> hull-fidelity inference.** The frozen DP protocols file declared 11
+> `exempt_work_zones`, all `mega_cruise_5000` IDs; the `diamond_princess`
+> hull carries only `Bridge` of them, so the dedicated arm quarantined ~318
+> more crew than the proxy arm (working crew at activation 10–21 vs
+> 295–368 of 1045). The DP contrast mixed hull geometry with a different
+> effective intervention. The cells are preserved (not deleted, not
+> re-scored) and remain evidence of a zone-name-dependent intervention
+> defect. The corrective DP-only rerun is pre-registered in
+> `docs/covid/covid_platform_fidelity_01b_addendum.md`; the revised DP
+> readout will follow it. GM rows are unaffected by this defect (the GM
+> protocols file declares no `exempt_work_zones`), though their statistical
+> wording is subject to the same corrections listed in the addendum §6.
+
 ## Frozen metrics per row
 
 Paired hull delta = dedicated − proxy `recorded_onsets`, takeoff-conditional
 (both arms ≥ 10 onsets), median with q05–q95. CRN ρ < 0.3 declares the
 unpaired analysis (prereg §4). Takeoff gate: `recorded_onsets ≥ 10`.
+**The q05–q95 ranges below are seedwise spreads across the paired seeds,
+not confidence intervals**, and no platform-equivalence conclusion may be
+drawn from an interval crossing zero (see the 01b addendum §6).
 
 | Row | P(takeoff) proxy | P(takeoff) dedicated | n both-takeoff | paired Δ median [q05, q95] | CRN ρ | unpaired? | asym share proxy | asym share dedicated | onsets med proxy | onsets med dedicated |
 |---|---|---|---|---|---|---|---|---|---|---|

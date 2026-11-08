@@ -1,0 +1,48 @@
+{
+  "description": "PLATFORM-FIDELITY-01b amended per-event-pair protocols for the diamond_princess_2020 pair (addendum docs/covid/covid_platform_fidelity_01b_addendum.md). Identical to data/config/protocols_covid_pf_dp.json except exempt_work_zones: the essential-workplace function-to-zone mapping is now the union of the proxy hull's (mega_cruise_5000) native IDs and the event-faithful hull's (diamond_princess) native IDs, so the same exemption policy resolves on both hulls. IDs a hull does not carry are inert (exact-match intersection in orchestrator_epoch._order_exempt_ids); the hulls' real zone IDs are kept, not renamed. SOP-017-MESSBOX remains the single scheduled protocol the boxed cells resolve, and no reactive protocols are declared, so an unwanted closure cannot fire on either hull. The protocol engine may only activate what this file declares.",
+  "protocols": [
+    {
+      "protocol_id": "SOP-017-MESSBOX",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Boxed Crew Meals, Essential-Zone Crew Only Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-MESS-01 (docs/covid/covid_crew_mess_01_design.md): verbatim SOP-017-NARROW plus crew_meal_service mode boxed — the documented Diamond Princess response of distributing crew meals rather than seating a communal mess. While the order is active every crew placement resolving into a crew-mess zone resolves to home_zone (mess-posted staff keep their posting: the kitchen still produces the boxes). An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it. PLATFORM-FIDELITY-01b: exempt_work_zones is the function-matched union of both hulls' native essential-workplace IDs (galley, engineering/waste, bridge, stores, laundry, crew-mess operations); see docs/covid/covid_platform_fidelity_01b_addendum.md for the per-hull resolution table and preflight witnesses.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd",
+          "MainGalley",
+          "Engine_Room",
+          "Stores",
+          "Laundry",
+          "CrewMess",
+          "CrewMessOff"
+        ],
+        "crew_meal_service": {
+          "mode": "boxed"
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    }
+  ]
+}
