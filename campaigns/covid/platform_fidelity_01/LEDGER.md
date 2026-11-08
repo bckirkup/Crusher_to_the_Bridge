@@ -83,10 +83,13 @@ Neither touches an epidemiological constant.
 
 | Date | Block | Seeds | Cells | Job | SHA | Digest | Jobdef rev | Wall | Result |
 |---|---|---|---|---|---|---|---|---|---|
-| 2026-11-08 | `dp_t7e6_proxy` | 20200205–224 | 20 | `6a7e6185-951b-4bfb-987c-4eeb23f48554` | `bba29d19` | `sha256:cd59519a…` | `:1` | — | RUNNING (canary) |
-| 2026-11-08 | `dp_t7e6_dedicated` | 20200205–224 | 20 | `4e914d4d-2bdf-4fd5-9c8e-178bb772b2b2` | `bba29d19` | `sha256:cd59519a…` | `:2` | — | RUNNING (canary) |
+| 2026-11-08 | `dp_t7e6_proxy` | 20200205–224 | 20 | `6a7e6185-951b-4bfb-987c-4eeb23f48554` | `bba29d19` | `sha256:cd59519a…` | `:1` | ~22 min | SUCCEEDED 20/20 |
+| 2026-11-08 | `dp_t7e6_dedicated` | 20200205–224 | 20 | `4e914d4d-2bdf-4fd5-9c8e-178bb772b2b2` | `bba29d19` | `sha256:cd59519a…` | `:2` | ~22 min | SUCCEEDED 20/20 |
+| 2026-11-08 | `gm_t7e6_proxy` | 20200205–224 | 20 | `533758d0-c7b7-4a11-97d5-f9980e1afaba` | `bba29d19` | `sha256:cd59519a…` | `:3` | — | RUNNING (canary, technical acceptance only) |
+| 2026-11-08 | `gm_t7e6_dedicated` | 20200205–224 | 20 | `84caa2e3-43ed-4340-9407-67bc644d4015` | `bba29d19` | `sha256:cd59519a…` | `:4` | — | RUNNING (canary, technical acceptance only) |
 
-Canary = the DP pair only (40 executions). GM blocks (`gm_*`, 160 cells) are
-NOT submitted — they await owner approval after the DP canary is read out,
-and the GM canary is technical acceptance only with Θ frozen before any GM
-epidemiological output is examined.
+Canary = both event pairs' Θ=7.9e6 arm-rows (80 executions). GM canary is
+TECHNICAL acceptance only: Θ frozen before any GM epidemiological output is
+examined; no GM outcome is used for any decision here. The descriptive GM
+layers (`gm_t1e11_*`, `gm_t2p37e11_*`, `gm_t1e12_*`, 120 cells) are NOT
+submitted — they await the owner decision after the canary readout.
