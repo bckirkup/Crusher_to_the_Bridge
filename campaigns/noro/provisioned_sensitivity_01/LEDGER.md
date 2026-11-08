@@ -1,6 +1,6 @@
 # NORO-PROVISIONED-SENSITIVITY-01 — ledger
 
-**Status: remainder wave in flight (2026-11-07) — sizing revised to 96/96/48/24, mega → exp → spr submitted on the scout image; cls remainder waits for the image carrying the revised manifest.** Paper-1
+**Status: full nominal set complete (2026-11-08) — 12,672/12,672 runs, 0 FAILED; `red-fps01-sens01-main` materialized 11,136 vectors / 0 data gaps; return leg to Edison in flight (run 42495909835). Report: `docs/campaign_reduction/FIRST_PAPER_SENSITIVITY01_REPORT.md`.** Paper-1
 sensitivity screen, Child B: 16 Res-V profiles × 4 hulls × 3 venue
 arms = 192 cells, seed-paired with NORO-PROVISIONED-VENUE-02, 1.5.0
 emitter. Design: `DESIGN.md`; profile table: `PROFILE_TABLE.md`;
@@ -625,3 +625,37 @@ cls canary `6fb43154-dd36-4f54-b5b0-4944ce15bb82` (jobdef :242, seed 8113, image
   `b4410d76-0a3c-48ca-9fa9-89a9ca32ff50` on `picard-reducer:13`
   (`reducer-v10` @ `sha256:006954a6…`), RUNNING from 14:34 UTC; projected
   ~70 min.
+
+## Main reduction readout (`red-fps01-sens01-main`, `picard-reducer:13`) — 2026-11-08 15:38 UTC, operational only
+
+- Batch job `b4410d76-0a3c-48ca-9fa9-89a9ca32ff50` SUCCEEDED exit 0,
+  started 14:34:13 UTC, stopped 15:36:29 UTC (~62 min wall; projection
+  was ~70). RECEIPT `completed`, `end_utc` 15:36:28Z, `errors: []`,
+  `continuation: null`; catalog snapshot `snap-62ac4c76743c485e`.
+- COMMIT / status.json counts: runs **11,136**; first_paper_vectors
+  **11,136**; coverage cells 192; `selected_unique_runs` 11,136;
+  disqualifiers []; data_gaps **0**; scan_join_conflicts 0; assets 11,328;
+  capabilities 45,312; catalog_partitions 1,233. Together with the scout3
+  attempt (1,536 vectors) every one of the 12,672 nominal runs now has a
+  1.5.0 vector; nothing published as missing.
+- Spent (RECEIPT `budget_spent`): 57,356 API calls (11,328 HEAD + 56,065
+  GET — the GET count is the worker's own ledger and exceeds the API total
+  by the retried range reads it does not double-count), 995.5 MB compressed /
+  4.417 GB uncompressed read, output 2.316 GB of the 6 GB budget,
+  checkpoint reserve 135.9 MB of 300 MB. Scout3 ×7.25 projection was
+  ~1.0 GB / ~4.4 GB / ~2.4 GB / ~58k GET / ~12.5k HEAD / ~70 min — every
+  dimension landed within ~5 % of it.
+- Publish layer HEAD-checked: `pages/first_paper_vectors.pages_manifest.json`
+  321,035 B, `status.json` 557 B, `asset_index.json` 353,735 B. Pages manifest:
+  **1,114 pages, 11,136 rows, 1,126,917,839 bytes** (≤1 MiB/page) — inside
+  the bootstrap request's 4 GiB `max_return_bytes`. Attempt prefix: 177
+  checkpoints, 1,236 shard objects, 1,115 page objects + 4 publish objects.
+- Return leg: a `dry_run=true` dispatch (run 42495850336) was cancelled
+  before approval — `campaign_return.yml` gates every job on
+  `aws-campaign` even for dry runs, so it would have spent an approval on
+  no AWS call; inputs were already verified locally (raw sha of the
+  bootstrap object on S3 = `bb4be7bf…`, attempt_id = reduction id per
+  reducer-dispatch-pins §2/§4). Live dispatch run **42495909835**
+  (`attempt_id=red-fps01-sens01-main`, `job_id=b4410d76…`,
+  `edison_ingest=true`, `dry_run=false`) is waiting on the environment
+  approval.
