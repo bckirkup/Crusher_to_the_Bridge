@@ -30,7 +30,7 @@ calculation: `campaigns/covid/platform_fidelity_02/power_analysis.py` +
 - [x] `scripts/campaign describe covid/platform_fidelity_02` (arrays 20 +
       180 + 200 = 400) and canary `--dry-run` render; count == design file.
 - [x] Image built and pinned by digest.
-- [ ] Canary `dp_t7e6_dedicated_canary` (20 cells) submitted and read out —
+- [x] Canary `dp_t7e6_dedicated_canary` (20 cells) submitted and read out —
       STOP per the gate; owner decides the remaining 380 cells.
 
 ## 3. Local smoke (2026-11-08, dev venv)
@@ -61,7 +61,7 @@ calculation: `campaigns/covid/platform_fidelity_02/power_analysis.py` +
 
 | block | arm | seeds | cells | status |
 |---|---|---:|---:|---|
-| `dp_t7e6_dedicated_canary` | `dedicated_diamond_princess` | 20200205–20200224 | 20 | running (20-cell array; index 0 artifact already present) |
+| `dp_t7e6_dedicated_canary` | `dedicated_diamond_princess` | 20200205–20200224 | 20 | complete — 20/20 SUCCEEDED; replication clean |
 | `dp_t7e6_dedicated_rest` | `dedicated_diamond_princess` | 20200225–20200404 | 180 | pending owner approval |
 | `dp_t7e6_proxy` | `proxy_mega_cruise` | 20200205–20200404 | 200 | pending owner approval |
 
@@ -72,4 +72,24 @@ Total new executions: 400. No GM cells.
 | Date | Block | Seeds | Cells | Job | SHA | Digest | Jobdef rev | Wall | Result |
 |---|---|---|---:|---:|---|---|---|---|---|
 | 2026-11-08 | `dp_t7e6_dedicated_canary` index 0 | 20200205 | 1 | `015a87fb-faf2-4bd1-9008-164ae1765816` | `db95a4f2` | `sha256:d641a0d6…` | `:1` | ~8.9 min | SUCCEEDED; S3 payload contract-clean, 395 leaf fields vs 01b with only `cell.index`/`design_id`/`design_sha256` metadata diffs |
-| 2026-11-08 | `dp_t7e6_dedicated_canary` | 20200205–20200224 | 20 | `a63d7a13-408b-45cf-b8f1-539b462fbacd` | `db95a4f2` | `sha256:d641a0d6…` | `:2` | — | RUNNING |
+| 2026-11-08 | `dp_t7e6_dedicated_canary` | 20200205–20200224 | 20 | `a63d7a13-408b-45cf-b8f1-539b462fbacd` | `db95a4f2` | `sha256:d641a0d6…` | `:2` | ~26 min | SUCCEEDED 20/20 (index 0 skipped the already-uploaded inspected artifact) |
+
+## 7. Canary readout (2026-11-08)
+
+- Batch: inspected child `015a87fb-faf2-4bd1-9008-164ae1765816` (jobdef `:1`)
+  plus array `a63d7a13-408b-45cf-b8f1-539b462fbacd` (jobdef `:2`); array
+  `statusSummary` SUCCEEDED 20 / FAILED 0. Index 0 reused the inspected child's
+  S3 artifact, so the block has 20 cell payloads from 19 additional array
+  simulations plus the inspected child.
+- S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_02/dp_t7e6_dedicated_canary/`.
+- Replication vs PLATFORM-FIDELITY-01b dedicated cells (same 20 seeds): all 20
+  PF-02 payloads present; `recorded_onsets` identical on every seed (0
+  mismatches); P(takeoff) = 6/20 = 0.30, matching 01b. Witness audit clean on
+  all 20 (resolved `diamond_princess`, fired `SOP-017-MESSBOX`, no
+  `close_zones`, working-crew band, DP-native posted zones, boxed meal service
+  active).
+- Leaf-level replication: per-cell diffs vs 01b are only `cell.index`,
+  `design_id`, and `platform_fidelity.input_hashes.design_sha256`; no
+  unexpected diffs (leaf-field counts 370–500 by seed).
+- Gate decision: STOP. `dp_t7e6_dedicated_rest` (180) and `dp_t7e6_proxy`
+  (200) were not submitted; owner decides whether the remaining 380 cells run.
