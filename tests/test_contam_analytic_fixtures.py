@@ -323,6 +323,119 @@ class TestF3BalancedStar:
         )
 
 
+# ── DC03: exact mean-loss / different-mixing control (Phase 2 §2.3) ──────
+
+class TestDC03ExactMeanLossDifferentMixing:
+    """Phase 2 DC03: two balanced three-room stars with equal mean loss
+    a(1 - r) = 1.08/h but different mixing rate a.
+
+    Case 1 is the DC04 high-turnover shape (ach 1.8, OA 0.2, eta 0.5, r = 0.4)
+    and case 2 the matched-removal shape (ach 1.2, OA 0.8, eta 0.5, r = 0.1).
+    Expected values are derived here from the ODE: for the balanced star
+    A_M = a (r J/3 - I) the mean concentration obeys d c_bar/dt = -a(1-r) c_bar
+    and each deviation from the mean decays at rate a, so with C0 = (10, 0, 0)
+    C_source(t) = c_bar0 e^{-a(1-r)t} + (10 - c_bar0) e^{-a t} and
+    C_remote(t) = c_bar0 e^{-a(1-r)t} - c_bar0 e^{-a t}, c_bar0 = 10/3.
+    The protocol's published controls (mean 1.13198508548 at 1 h; source
+    2.23397767363 / 3.13994649823; remote .580988791411 / .128004379109) are
+    cited as provenance and cross-checked, never used as the derivation.
+    """
+
+    CASES = {
+        "high_turnover": {"ach": 1.8, "oa": 0.2, "eta": 0.5},
+        "matched_removal": {"ach": 1.2, "oa": 0.8, "eta": 0.5},
+    }
+    PROTOCOL = {
+        "mean": 1.13198508548,
+        "high_turnover": {"source": 2.23397767363, "remote": 0.580988791411},
+        "matched_removal": {"source": 3.13994649823, "remote": 0.128004379109},
+    }
+    VOLUME = 100.0
+    C0_SOURCE = 10.0
+    HOURS = 1.0
+
+    @staticmethod
+    def _gain(oa: float, eta: float) -> float:
+        return (1.0 - oa) * (1.0 - eta)
+
+    @classmethod
+    def _closed_form(cls, ach: float, oa: float, eta: float) -> dict[str, float]:
+        r = cls._gain(oa, eta)
+        mean0 = cls.C0_SOURCE / 3.0
+        mean = mean0 * math.exp(-ach * (1.0 - r) * cls.HOURS)
+        deviation = math.exp(-ach * cls.HOURS)
+        return {
+            "mean_rate": ach * (1.0 - r),
+            "mean": mean,
+            "source": mean + (cls.C0_SOURCE - mean0) * deviation,
+            "remote": mean - mean0 * deviation,
+        }
+
+    def _make(self, ach: float, oa: float, eta: float) -> ContamTransportEngine:
+        return _engine(
+            _layout(("A", self.VOLUME), ("B", self.VOLUME), ("C", self.VOLUME)),
+            _ahu_airflow(["A", "B", "C"], ach=ach, oa=oa, duty=1.0),
+            eta=eta, decay=0.0,
+        )
+
+    def _engine_concentrations(self, ach: float, oa: float, eta: float) -> dict[str, float]:
+        engine = self._make(ach, oa, eta)
+        mass = engine.transport_step(
+            {"A": self.C0_SOURCE * self.VOLUME, "B": 0.0, "C": 0.0},
+            natural_decay_rate=0.0,
+        )
+        return {z: _concentration(engine, z, mass[z]) for z in ("A", "B", "C")}
+
+    def test_both_cases_share_the_mean_loss_rate(self) -> None:
+        rates = [self._closed_form(**case)["mean_rate"] for case in self.CASES.values()]
+        assert rates[0] == pytest.approx(1.08, rel=REL, abs=ABS)
+        assert rates[1] == pytest.approx(1.08, rel=REL, abs=ABS)
+
+    def test_closed_form_reproduces_protocol_controls(self) -> None:
+        for name, case in self.CASES.items():
+            expected = self._closed_form(**case)
+            assert expected["mean"] == pytest.approx(self.PROTOCOL["mean"], rel=REL, abs=ABS)
+            assert expected["source"] == pytest.approx(self.PROTOCOL[name]["source"], rel=REL, abs=ABS)
+            assert expected["remote"] == pytest.approx(self.PROTOCOL[name]["remote"], rel=REL, abs=ABS)
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_operator_matches_balanced_star_form(self, name: str) -> None:
+        case = self.CASES[name]
+        a = case["ach"]
+        r = self._gain(case["oa"], case["eta"])
+        expected = np.full((3, 3), a * r / 3.0)
+        np.fill_diagonal(expected, a * (r / 3.0 - 1.0))
+        assert _operator(self._make(**case)) == pytest.approx(expected, rel=REL, abs=ABS)
+
+    @pytest.mark.parametrize("name", sorted(CASES))
+    def test_engine_matches_closed_form(self, name: str) -> None:
+        case = self.CASES[name]
+        expected = self._closed_form(**case)
+        c = self._engine_concentrations(**case)
+        assert c["A"] == pytest.approx(expected["source"], rel=REL, abs=ABS)
+        assert c["B"] == pytest.approx(expected["remote"], rel=REL, abs=ABS)
+        assert c["C"] == pytest.approx(expected["remote"], rel=REL, abs=ABS)
+
+    def test_equal_mean_different_mixing(self) -> None:
+        high = self._engine_concentrations(**self.CASES["high_turnover"])
+        low = self._engine_concentrations(**self.CASES["matched_removal"])
+        mean_high = sum(high.values()) / 3.0
+        mean_low = sum(low.values()) / 3.0
+        assert mean_high == pytest.approx(mean_low, rel=REL, abs=ABS)
+        assert mean_high == pytest.approx(self.PROTOCOL["mean"], rel=REL, abs=ABS)
+        # Faster mixing lowers the source room and raises the remote rooms.
+        assert high["A"] < low["A"]
+        assert high["B"] > low["B"]
+        assert abs(high["A"] - low["A"]) > 0.5
+
+    def test_single_rate_misreading_is_rejected(self) -> None:
+        """Negative oracle: a one-rate well-mixed guess misses both cases."""
+        for case in self.CASES.values():
+            c = self._engine_concentrations(**case)
+            wrong_source = self.C0_SOURCE * math.exp(-case["ach"] * self.HOURS)
+            assert abs(c["A"] - wrong_source) > 0.1
+
+
 # ── F4: head exhaust, V=50, ACH=2, duty=0, declared OA=1 ─────────────────
 
 class TestF4HeadExhaust:
