@@ -85,11 +85,50 @@ Neither touches an epidemiological constant.
 |---|---|---|---|---|---|---|---|---|---|
 | 2026-11-08 | `dp_t7e6_proxy` | 20200205–224 | 20 | `6a7e6185-951b-4bfb-987c-4eeb23f48554` | `bba29d19` | `sha256:cd59519a…` | `:1` | ~22 min | SUCCEEDED 20/20 |
 | 2026-11-08 | `dp_t7e6_dedicated` | 20200205–224 | 20 | `4e914d4d-2bdf-4fd5-9c8e-178bb772b2b2` | `bba29d19` | `sha256:cd59519a…` | `:2` | ~22 min | SUCCEEDED 20/20 |
-| 2026-11-08 | `gm_t7e6_proxy` | 20200205–224 | 20 | `533758d0-c7b7-4a11-97d5-f9980e1afaba` | `bba29d19` | `sha256:cd59519a…` | `:3` | — | RUNNING (canary, technical acceptance only) |
-| 2026-11-08 | `gm_t7e6_dedicated` | 20200205–224 | 20 | `84caa2e3-43ed-4340-9407-67bc644d4015` | `bba29d19` | `sha256:cd59519a…` | `:4` | — | RUNNING (canary, technical acceptance only) |
+| 2026-11-08 | `gm_t7e6_proxy` | 20200205–224 | 20 | `533758d0-c7b7-4a11-97d5-f9980e1afaba` | `bba29d19` | `sha256:cd59519a…` | `:3` | ~8 min | SUCCEEDED 20/20 |
+| 2026-11-08 | `gm_t7e6_dedicated` | 20200205–224 | 20 | `84caa2e3-43ed-4340-9407-67bc644d4015` | `bba29d19` | `sha256:cd59519a…` | `:4` | ~8 min | SUCCEEDED 20/20 |
 
 Canary = both event pairs' Θ=7.9e6 arm-rows (80 executions). GM canary is
 TECHNICAL acceptance only: Θ frozen before any GM epidemiological output is
 examined; no GM outcome is used for any decision here. The descriptive GM
 layers (`gm_t1e11_*`, `gm_t2p37e11_*`, `gm_t1e12_*`, 120 cells) are NOT
 submitted — they await the owner decision after the canary readout.
+
+## 7. Canary readout (2026-11-08, 80/80 cells, audit clean)
+
+Audit: 0 failed comparisons (no `close_zones` fired anywhere), 0 missing
+platform echoes, 0 missing/unexpected cells vs the design enumeration,
+technical failure rate 0.0 (stop rule not breached). Every cell echoes
+resolved `platform_id`, fired protocol ids, and 7–8 input SHA-256 hashes.
+
+**DP row (Θ=7.9e6, 20 seeds/arm — the training-hull measurement):**
+
+| Metric | proxy (`mega_cruise_5000`) | dedicated (`diamond_princess`) |
+|---|---|---|
+| P(takeoff) (recorded_onsets ≥ 10) | 0.50 (10/20) | 0.35 (7/20) |
+| Takeoff-conditional median recorded_onsets | 64 | 243 |
+| Takeoff-conditional asymptomatic share | 0.3665 | 0.4517 |
+
+- Paired hull delta (dedicated − proxy), both-takeoff seeds only (n=6):
+  median **+130**, q05–q95 **[−44.75, +297.5]** — the interval includes
+  zero, so the prereg's report-immediately trigger does NOT fire.
+- CRN diagnostic: Pearson ρ = 0.0124 on recorded_onsets across arms →
+  ρ < 0.3, so the **unpaired analysis is declared** per prereg §4; the
+  paired delta above is the small-n both-takeoff subset, not the primary
+  read.
+- MDE reference: 30% of the proxy takeoff-conditional median = 19.2
+  onsets; the point estimate (+130) exceeds it but the interval does not
+  exclude zero at n=6 — underpowered at this seed count, exactly what the
+  full-array decision is for.
+
+**GM row (Θ=7.9e6):** technical acceptance PASSED — 40/40 cells succeeded,
+both arms resolved their hulls (`expedition_cruise_450` proxy,
+`greg_mortimer` dedicated), SOP-017 fired, no `close_zones`, no technical
+failures. Per prereg §6 the GM epidemiological outputs are NOT examined at
+canary stage; they are in the cell payloads under the S3 prefix for the
+owner's decision.
+
+Cell payloads: `s3://crusherbucket-994254241749-us-east-1-an/campaign/
+covid_platform_fidelity_01/{dp,gm}_t7e6_{proxy,dedicated}/cell_<seed>.json`.
+Readout: `python3 campaigns/covid/platform_fidelity_01/readout.py --prefix
+s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_platform_fidelity_01/`.
