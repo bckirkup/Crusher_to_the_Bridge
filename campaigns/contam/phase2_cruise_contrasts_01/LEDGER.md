@@ -43,6 +43,10 @@ Status: design frozen before any cell runs (`frozen_before_first_cell`); cost pi
 - Batch pilot: job `7e82041b-2abb-42d5-8f4d-2eecf1040011` (`picard-contam-phase2-cruise-contrasts-01-mega_cruise_5000_e_baseline-20261108-210106`), array size 20 -> SUCCEEDED 20/20; artifacts at `s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase2_cruise_contrasts_01/mega_cruise_5000_e_baseline/cell_{1..20}.json`.
 - Readout: `readout.py` pilot gate `go=false`; pilot block coverage 20/20 seeds, campaign-wide coverage 20/1,200 because only the pilot was submitted, `BLOCKED_ENGINE_FALLBACK=0`, audit counts 0/0/0. Passed: trajectory p95 6.798478769 s, array wall-clock 3.468983 min, pilot CPU 0.0353220550 CPU-h, peak RSS 120.667969 MiB, artifacts 2,197,587 bytes, all 32 field solves ≤ 30 s. Failed frozen §7 extrapolations: full-panel trajectory CPU 2.1140694828 CPU-h > 1.697352 and artifact bytes 131,855,220 > 126,060,180. Full entry: `docs/ledger/CONTAM-PHASE2-PILOT-01.md`.
 
+## Amendment (2026-11-08)
+
+- Manifest §7 amended with a stratified per-hull cost estimate (point 1.216761 CPU-h / 93,133,925 bytes; expectation × 1.5 = 1.825142 CPU-h / 139,700,888 bytes) and Benjamin's approval of the full 1,200-trajectory panel on that basis; pilot cells and pilot gate record unchanged. Entry: `docs/ledger/CONTAM-PHASE2-AMEND-01.md`.
+
 ## Stop rule
 
-Pilot complete and NO-GO under the frozen §7 bounds. No full-panel or other block was submitted; the full 1,200-trajectory panel remains Benjamin's decision after reviewing `docs/ledger/CONTAM-PHASE2-PILOT-01.md`.
+Pilot complete and NO-GO under the frozen §7 bounds; `CONTAM-PHASE2-AMEND-01` records the stratified estimate and Benjamin's approval of the full panel. The 59 remaining blocks are submitted by a separate session after the amendment merges; no block beyond the pilot has been submitted at this entry.
