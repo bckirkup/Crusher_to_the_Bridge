@@ -540,11 +540,12 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 ## 3. Outstanding
 
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
-  follow-up to the platform-fidelity study — pre-registered, campaign
-  registered, awaiting the image/canary gate.** The pre-registered paired-seed
-  power calculation on the observed 01b effect sizes is committed at
-  `campaigns/covid/platform_fidelity_02/power_analysis.py` +
-  `power_analysis.json` (criterion of record
+  follow-up to the platform-fidelity study — pre-registered; image/canary gate
+  passed and owner approved the remaining 380 cells on 2026-11-08; arrays
+  running.**
+  The pre-registered paired-seed power calculation on the observed 01b effect
+  sizes is committed at `campaigns/covid/platform_fidelity_02/power_analysis.py`
+  + `power_analysis.json` (criterion of record
   `docs/covid/covid_platform_fidelity_02_prereg.md`); it fixes **200
   seeds/arm = 400 cells**, full rerun of both DP arms, under the frozen
   operating point (Θ 7.9e6, infection_age_days 6.8, imports 1,
@@ -553,10 +554,14 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   endpoints: exact two-sided McNemar on P(takeoff) and one-sample t on
   both-takeoff paired `dedicated - proxy` onset deltas; unconditional burden
   and asymptomatic share are reported, never selected. GM stays closed — no
-  GM cells. Next gate: local smoke + dry-run count + digest-pinned image, then
-  the 20-seed dedicated canary (`dp_t7e6_dedicated_canary`,
-  20200205–20200224, replication row against 01b) read out and STOP for owner
-  decision before the remaining 380 cells.
+  GM cells. Gate status: local smoke + dry-run count + digest-pinned image
+  passed; the 20-seed dedicated canary (`dp_t7e6_dedicated_canary`,
+  20200205–20200224) ran 20/20 SUCCEEDED and replicated 01b on all 20 seeds
+  (only `cell.index`/`design_id`/`design_sha256` metadata echoes differ;
+  witness audit clean; campaign ledger
+  `campaigns/covid/platform_fidelity_02/LEDGER.md`). Owner approved the
+  remaining 380 cells on 2026-11-08; `dp_t7e6_dedicated_rest` (180) and
+  `dp_t7e6_proxy` (200) are submitted and running on jobdef `:3`/`:4`.
 
 - **Adopt the measured fine share as `airborne_emission_fraction` —
   the follow-on Edison decision #30 hands off.** With the level now a

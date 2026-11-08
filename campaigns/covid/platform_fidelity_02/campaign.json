@@ -5,7 +5,7 @@
   "pathogen_id": null,
   "s3_prefix": "campaign/covid_platform_fidelity_02/",
   "queue": "picard-analysis-queue",
-  "image_tag": "covid-platform-fidelity-02",
+  "image_tag": "covid-platform-fidelity-02@sha256:d641a0d69e54b4e054b2f9237ddb7d689d75413aaba2760c8f9cf8f0060c6705",
   "resources": {
     "vcpu": "1",
     "memory": "2048"
