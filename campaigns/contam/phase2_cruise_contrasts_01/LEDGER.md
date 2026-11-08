@@ -1,6 +1,6 @@
 # CONTAM Phase 2 four-cruise contrast campaign ledger
 
-Status: design frozen before any cell runs (`frozen_before_first_cell`). No AWS submission, S3 upload, image build, or jobdef registration has been made from this campaign. The cost pilot (`mega_cruise_5000_e_baseline` canary after the local 32-field pre-stage upload) is a separate session after Benjamin reviews the frozen design.
+Status: design frozen before any cell runs (`frozen_before_first_cell`); cost pilot executed 2026-11-08 — `mega_cruise_5000_e_baseline` 20/20 SUCCEEDED with 0 `BLOCKED_ENGINE_FALLBACK` and audit counts 0/0/0, but the frozen §7 full-panel extrapolation bounds failed (CPU 2.114069 > 1.697352 CPU-h; artifacts 131,855,220 > 126,060,180 bytes). Recommendation: NO-GO; the full panel remains Benjamin's decision.
 
 ## Frozen inputs
 
@@ -36,6 +36,13 @@ Status: design frozen before any cell runs (`frozen_before_first_cell`). No AWS 
 - `readout.py` on the smoke cells → coverage 10 / 1,200, DC04/DC05/DC07 tables populated, pilot gate `go=False` (seeds incomplete, as expected).
 - Targeted pytest: `tests/test_contam_phase2_cruise_contrasts_campaign.py`, `tests/test_contam_analytic_fixtures.py` (F1–F6 untouched; DC03 class added, 7 tests), `tests/test_contam_phase1_hvac_tracer_campaign.py` all green.
 
+## Phase 2 pilot execution (2026-11-08)
+
+- Field cache: 32 fields (schema `contam_phase2_cruise_contrasts_field_cache_v1`), 12,209,971 bytes, SHA256 `e8d61dd4703ee6c2a7e5624db35d8c80f3f034c6f76ac533e91a5bfdd74fc6c6`, uploaded to `s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase2_cruise_contrasts_01/field_cache/field_cache.json`; generated at repo SHA `db95a4f2b63c3dc115100c7421e1261fcf61bfd7` with NIST ContamX `3.4.0.3 64 bit` binary SHA256 `d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b`. Max field solve 0.453761105 s; pilot field `mega_cruise_5000:E:baseline` 0.315229132 s; the two Phase 1 reusable controls compared byte-identical. Manifest mirrored byte-identically (SHA256 `abce9949f2169ffa21535db9be828183c05270fa9c54b6d4dbfaa5e178db3cf0`) to `.../manifest.json`.
+- Image/jobdef: `picard-campaign:contam-phase2-cruise-contrasts-01@sha256:7a8a92bba521efb5b6add9760ba124cc9b51faa7459776b6634e0e2ceb66a1d7` built from root `Dockerfile` + `deploy/aws/Dockerfile.campaign` at `db95a4f2`; jobdef `picard-contam-phase2-cruise-contrasts-01:1`; in-container check confirmed `deploy/aws/`, `tools/`, `campaigns/` present and 60 trajectory blocks with no Batch `field_cache` block.
+- Batch pilot: job `7e82041b-2abb-42d5-8f4d-2eecf1040011` (`picard-contam-phase2-cruise-contrasts-01-mega_cruise_5000_e_baseline-20261108-210106`), array size 20 -> SUCCEEDED 20/20; artifacts at `s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase2_cruise_contrasts_01/mega_cruise_5000_e_baseline/cell_{1..20}.json`.
+- Readout: `readout.py` pilot gate `go=false`; pilot block coverage 20/20 seeds, campaign-wide coverage 20/1,200 because only the pilot was submitted, `BLOCKED_ENGINE_FALLBACK=0`, audit counts 0/0/0. Passed: trajectory p95 6.798478769 s, array wall-clock 3.468983 min, pilot CPU 0.0353220550 CPU-h, peak RSS 120.667969 MiB, artifacts 2,197,587 bytes, all 32 field solves ≤ 30 s. Failed frozen §7 extrapolations: full-panel trajectory CPU 2.1140694828 CPU-h > 1.697352 and artifact bytes 131,855,220 > 126,060,180. Full entry: `docs/ledger/CONTAM-PHASE2-PILOT-01.md`.
+
 ## Stop rule
 
-Design frozen; nothing here authorizes a simulation or AWS submission. Next: Benjamin reviews the frozen design; the pilot session then runs the local 32-field pre-stage, uploads the cache and the byte-identical manifest, pins image digest and jobdef revision, submits only `mega_cruise_5000_e_baseline`, reads it out against the frozen §7 thresholds, and STOPs.
+Pilot complete and NO-GO under the frozen §7 bounds. No full-panel or other block was submitted; the full 1,200-trajectory panel remains Benjamin's decision after reviewing `docs/ledger/CONTAM-PHASE2-PILOT-01.md`.
