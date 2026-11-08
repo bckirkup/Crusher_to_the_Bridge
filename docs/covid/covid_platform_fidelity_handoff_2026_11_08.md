@@ -126,21 +126,33 @@ For the record (provenance only):
 - Nothing else. GM rows stand (unaffected by the DP defect), subject to
   the statistical-wording corrections in the 01b addendum §6.
 
-## 8. The single open decision
+## 8. The decision (RESOLVED 2026-11-08)
 
-**Does the corrected DP contrast (lower takeoff probability, larger
-outbreaks on the event-faithful hull, unresolved at n = 20) warrant a
-larger-seed follow-up design, or does the platform-fidelity line close
-here?** Options: (a) commission a pre-registered power calculation and,
-if warranted, a larger-seed DP-only design reusing the 01b machinery and
-frozen protocols; (b) close the line — the machinery is proven, the
-frozen criteria are answered as "unresolved at this n", and hull choice
-remains a declared modeling assumption; (c) hand the decision to Edison
-with the statistical audit `platform-fidelity-01-statistical-audit-v47d`
-as input. Evidence that would settle it: a paired-seed power calculation
-on the observed effect sizes, and Edison's read on whether the
-takeoff-probability vs outbreak-size split is decision-relevant for the
-COVID line's next stage.
+**DECIDED (Benjamin, 2026-11-08): commission the larger-seed DP follow-up.**
+The corrected DP contrast — lower takeoff probability on the
+event-faithful hull, larger outbreaks when takeoff occurs, unresolved at
+n = 20 seeds/arm — is decision-relevant enough to resolve. The next stage,
+in order, starting from this handoff:
+
+1. **Pre-registered paired-seed power calculation** on the observed 01b
+   effect sizes (analysis only, no new cells) to fix the seed count and
+   the stopping rule BEFORE any run. Inputs: the 20 proxy + 20 dedicated
+   01b cell payloads (S3 prefixes in §6), the readout
+   `docs/covid/covid_platform_fidelity_readout.md` §01b, and Edison's
+   statistical audit `platform-fidelity-01-statistical-audit-v47d`.
+2. **If warranted: a larger-seed DP-only design** (next campaign id),
+   pre-registered before any cell runs, reusing the 01b machinery
+   (`campaigns/covid/platform_fidelity_01b/`, frozen Θ 7.9e6, extended seed
+   set, union protocols file `data/config/protocols_covid_pf_dp_01b.json`).
+   Whether the PF-01 proxy cells can be reused at the larger n or both
+   arms rerun is settled by the power calculation's equivalence evidence,
+   exactly as 01b resolved it. GM stays closed — no GM cells in the
+   follow-up.
+
+The options that were on the table (for the record): (a) this — commission
+the power calculation and, if warranted, the larger-seed design; (b) close
+the line with hull choice as a declared modeling assumption; (c) hand the
+decision to Edison with the audit as input. Option (a) was chosen.
 
 ## 9. Do not reopen
 

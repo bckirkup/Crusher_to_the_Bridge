@@ -539,6 +539,23 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
+  follow-up to the platform-fidelity study.** The corrected 01b DP
+  contrast (P(takeoff) 0.50 proxy vs 0.30 dedicated; outbreaks larger on
+  the event-faithful hull when takeoff occurs; unresolved at n = 20
+  seeds/arm; `docs/covid/covid_platform_fidelity_readout.md` §01b,
+  `docs/ledger/PLATFORM-FIDELITY-01B.md`) was judged decision-relevant
+  enough to resolve (`docs/covid/covid_platform_fidelity_handoff_2026_11_08.md`
+  §8). Next stage, in order: (1) a pre-registered paired-seed power
+  calculation on the observed 01b effect sizes — analysis only, fixes the
+  seed count and stopping rule before any run; (2) if warranted, a
+  larger-seed DP-only design reusing the 01b machinery
+  (`campaigns/covid/platform_fidelity_01b/`, frozen Θ 7.9e6, union
+  protocols file `data/config/protocols_covid_pf_dp_01b.json`), with proxy
+  reuse vs full rerun settled by the power calculation's equivalence
+  evidence exactly as 01b settled it. GM stays closed — no GM cells in
+  the follow-up.
+
 - **Adopt the measured fine share as `airborne_emission_fraction` —
   the follow-on Edison decision #30 hands off.** With the level now a
   real exhaled rate (`COVID-EMIT-LEVEL-01`), the shipped 5e-5 deposits
