@@ -152,6 +152,14 @@ no `engines/` or `tools/` code. If `scripts/campaign` does not admit a
 non-pathogen tracer namespace, the closest grammar-admissible namespace is
 chosen at design freeze without touching engines/tools.
 
+Amendment (2026-11-08, authorized by Benjamin as Option A): the E/P ContamX
+fields are generated locally from the official NIST ContamX 3.4.0.3 Linux
+binary and uploaded to
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json`;
+trajectory cells consume that object through the existing `--field-cache-uri`
+path. No ContamX binary is added to the campaign image, and no `engines/` or
+`tools/` code changes.
+
 Before any AWS submission, campaign-preflight Rule A applies: admissibility,
 selectors, thresholds, and report-only diagnostics are frozen in the design
 file before the first cell runs. Required gates: geometry/seed gate validated;

@@ -24,21 +24,37 @@
   ],
   "execution": {
     "aws_profile": "picard",
-    "field_cache_artifact": "campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json",
-    "field_cache_block": "field_cache",
-    "field_cache_children": 1,
+    "field_cache_prestage": {
+      "artifact": "field_cache.json",
+      "aws_submit": false,
+      "contamx": {
+        "binary": "third_party/contamx/contamx3",
+        "binary_sha256": "d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b",
+        "download_url": "https://www.nist.gov/document/contam-x-3403-linux-64bittargz",
+        "license_notice": "NIST Contam is U.S. public domain (17 U.S.C. \u00a7105); the official NIST tarball is redistributable with notice.",
+        "tarball": "contam-x-3.4.0.3-Linux-64bit.tar.gz",
+        "tarball_sha256": "3612798dff9a4f1ea4f0279c4c7b526b244b88875dea425fafd868f3570df4fa",
+        "version": "3.4.0.3 64 bit"
+      },
+      "field_count": 11,
+      "mode": "local_only",
+      "producer": "python3 campaigns/contam/phase1_hvac_tracer_01/cell.py --mode field-cache --design campaigns/contam/phase1_hvac_tracer_01/design/phase1_hvac_tracer_design.json --out <local-dir>",
+      "s3_uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json",
+      "schema": "contam_phase1_hvac_tracer_field_cache_v1",
+      "trajectory_consumer_arg": "--field-cache-uri"
+    },
     "queue": "picard-campaign-queue",
     "resources": {
       "memory_mib": 2048,
       "vcpu": 1
     },
     "submit_order": [
-      "field_cache",
+      "field_cache_prestage_local_upload (not a Batch block)",
       "missouri_bb63_e pilot/canary",
       "remaining blocks after user decision"
     ],
     "submit_path": "scripts/campaign submit contam/phase1_hvac_tracer_01 --block <block>",
-    "total_array_children": 341,
+    "total_array_children": 340,
     "trajectory_array_children": 340,
     "trajectory_blocks": 17
   },
@@ -92,7 +108,6 @@
   "pilot": {
     "epoch_hours": 1.0,
     "epochs": 12,
-    "field_cache_block": "field_cache",
     "hull": "missouri_bb63",
     "lane": "E",
     "memory_mib": 2048,

@@ -1,9 +1,10 @@
 """Phase 1 CONTAM tracer campaign contract tests.
 
 Pins the frozen design before any cell runs: source pools and seed mapping,
-campaign block coverage and dry-run child count, entrypoint argv for the
-field-cache/trajectory split, the worker's engine constants and slim output
-contract, and the readout's coverage/contrast/pilot aggregation.
+campaign block coverage and dry-run child count, entrypoint argv for
+trajectory cells consuming the pre-staged field cache, the worker's engine
+constants and slim output contract, and the readout's coverage/contrast/pilot
+aggregation.
 """
 from __future__ import annotations
 
@@ -102,6 +103,15 @@ class TestFrozenDesign:
         assert design["thresholds"]["trajectory_wall_p95_seconds_max"] == pytest.approx(60.0)
         assert design["thresholds"]["artifact_bytes_max"] == 25 * 1024 * 1024
         assert design["acceptance_gates"]["stop_after_canary"] is True
+        assert design["execution"]["total_array_children"] == 340
+        prestage = design["execution"]["field_cache_prestage"]
+        assert prestage["mode"] == "local_only"
+        assert prestage["aws_submit"] is False
+        assert prestage["s3_uri"].endswith("/field_cache/field_cache.json")
+        assert prestage["contamx"]["version"] == "3.4.0.3 64 bit"
+        assert prestage["contamx"]["binary_sha256"] == (
+            "d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b"
+        )
 
     def test_source_pools_are_deterministic_and_capped(self, design) -> None:
         pools = design["source_pools"]
@@ -155,10 +165,8 @@ class TestCampaignRegistration:
         assert campaign["readout"].endswith("readout.py")
         assert campaign["resources"] == {"vcpu": "1", "memory": "2048"}
 
-    def test_blocks_cover_matrix_and_field_cache(self, campaign, design) -> None:
-        assert campaign["blocks"]["field_cache"]["artifact"] == "field_cache.json"
-        assert campaign["blocks"]["field_cache"]["args"] == {"mode": "field_cache"}
-        assert campaign["blocks"]["field_cache"]["seeds"] == [1]
+    def test_blocks_cover_matrix_without_field_cache_block(self, campaign, design) -> None:
+        assert "field_cache" not in campaign["blocks"]
         cells = _trajectory_cells(campaign)
         expected = {
             (hull, lane, seed)
@@ -169,13 +177,13 @@ class TestCampaignRegistration:
         assert cells == expected
         assert len(cells) == 340
         assert design["execution"]["trajectory_array_children"] == 340
-        assert design["execution"]["total_array_children"] == 341
-        assert len(campaign["blocks"]) == 18
+        assert design["execution"]["total_array_children"] == 340
+        assert "field_cache_block" not in design["execution"]
+        assert "field_cache_children" not in design["execution"]
+        assert len(campaign["blocks"]) == 17
 
     def test_block_args_match_frozen_lanes(self, campaign) -> None:
         for name, block in campaign["blocks"].items():
-            if name == "field_cache":
-                continue
             args = block["args"]
             assert args["mode"] == "trajectory"
             assert args["hull"] in HULLS
@@ -215,15 +223,6 @@ class TestEntryArgv:
         text = " ".join(argv)
         assert "--field-cache-uri s3://bucket/campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json" in text
         assert "--inline-field" not in text
-
-    def test_field_cache_block_argv(self, campaign) -> None:
-        block = campaign["blocks"]["field_cache"]
-        args = SimpleNamespace(epochs=12, epoch_hours=1.0, local=False, s3_prefix=None)
-        argv, artifact = entry_mod.build_argv(args, block, 1, Path("/tmp/out"))
-        text = " ".join(argv)
-        assert "--mode field-cache" in text
-        assert artifact.name == "field_cache.json"
-
 
 class TestCellWorkerContracts:
     def test_native_engine_receives_frozen_tracer_constants(self) -> None:

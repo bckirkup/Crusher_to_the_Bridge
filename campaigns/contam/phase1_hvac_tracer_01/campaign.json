@@ -186,16 +186,6 @@
       ],
       "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
     },
-    "field_cache": {
-      "args": {
-        "mode": "field_cache"
-      },
-      "artifact": "field_cache.json",
-      "seeds": [
-        1
-      ],
-      "worker": "campaigns/contam/phase1_hvac_tracer_01/cell.py"
-    },
     "fletcher_class_destroyer_e": {
       "args": {
         "hull": "fletcher_class_destroyer",
