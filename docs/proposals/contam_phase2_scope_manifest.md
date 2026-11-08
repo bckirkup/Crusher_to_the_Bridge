@@ -9,6 +9,10 @@
 > AWS submission, pilot submit, Ship X adapter, S lane, epidemiology coupling,
 > or `engines/`/`tools/` change is authorized by this document; the cost pilot
 > is a later session after review of the frozen design.
+> **Amended 2026-11-08 (§7, `CONTAM-PHASE2-AMEND-01`):** the pilot's uniform
+> full-panel extrapolation failed the frozen 12× bound; Benjamin approved the
+> full panel on a ledgered stratified per-hull cost estimate (see the §7
+> amendment). The frozen pilot-gate record is unchanged.
 > **Filing:** `docs/proposals/` per the `docs/README.md` filing rule; the
 > campaign artifact does not exist yet. Verified against `origin/main`
 > `6f368f67` (post PR #1181).
@@ -520,6 +524,127 @@ which is the empirical basis Benjamin asked for.
 cruise hull; message Benjamin with the measured number before any further
 submit. Thresholds are frozen in the design file; they are never adjusted
 after a measurement.
+
+**Amendment (2026-11-08, approved by Benjamin; ledger
+`docs/ledger/CONTAM-PHASE2-AMEND-01.md`) — stratified panel-scope
+expectation.** This amendment changes the *panel-scope expectation* only. The
+pilot-gate thresholds above and in `design/phase2_cruise_contrasts_design.json`
+are not edited; the pilot result stands as measured.
+
+*(a) Pilot result under the frozen rule (`CONTAM-PHASE2-PILOT-01`, measured at
+`db95a4f2`).* `mega_cruise_5000_e_baseline` ran 20/20 SUCCEEDED,
+`BLOCKED_ENGINE_FALLBACK` 0, audit counts 0 / 0 / 0, trajectory wall mean
+6.342208448 s (p95 6.798478769 s), trajectory CPU 0.0352344914 CPU-h,
+artifacts 2,197,587 bytes (109,879.35 bytes per cell), peak RSS 120.667969
+MiB, array wall-clock 3.468983 min. Every per-pilot threshold passed. The two
+uniform extrapolations failed: `1200 × 6.342208448 / 3600 = 2.1140694828`
+CPU-h against 1.697352, and `1200 × 109,879.35 = 131,855,220` bytes against
+126,060,180. Pilot gate `go = false`.
+
+*Defect class.* The frozen rule prices all 1,200 trajectories at the pilot
+hull's rate. The pilot hull is `mega_cruise_5000` (192 zones, 275 operator
+nodes), the largest hull in either phase, chosen in §7 precisely because it
+sits outside the flat per-trajectory regime Phase 1 measured up to 108 zones.
+Only 300 of the 1,200 trajectories run on that hull; the other 900 run on
+hulls of 47, 79 and 115 zones. The bound was therefore pre-declared
+conservative by construction and its failure is an accounting artefact of
+the uniform rule, not a cost finding. Nothing measured is void: the 20 pilot
+cells remain valid panel cells and Phase 1 is untouched.
+
+*(b) Stratified estimate.* Per-hull per-trajectory costs, all lanes and arms
+priced at each hull's worst measured lane (assumptions below). Sources:
+Phase 1 cell artifacts
+(`s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_phase1_hvac_tracer_01/<block>/cell_{1..20}.json`,
+340 cells, measured at `801ea44c`, `CONTAM-PHASE1-FULL-01`) and the 20 Phase
+2 pilot cells (measured at `db95a4f2`). Read-only; no new run.
+
+Phase 1 per-hull measurements (block mean of `timing.trajectory_seconds`,
+worst lane; bytes = on-disk `cell_{seed}.json`, worst lane; nodes = zones +
+HVAC groups = `engine.zone_node_count`):
+
+| Phase 1 hull | Zones | Nodes | Worst-lane trajectory mean (s) | Worst-lane bytes per cell |
+|---|---:|---:|---:|---:|
+| `destroyer_baseline` | 9 | 15 | 1.5298 (P) | 7,178 (N) |
+| `fletcher_class_destroyer` | 33 | 53 | 1.4284 (E) | 17,027 (N) |
+| `expedition_cruise_450` | 47 | 69 | 1.6816 (P); E 1.6453, N 1.1920 | 23,479 (N); E 21,434, P 22,397 |
+| `lexington_cv2` | 97 | 103 | 1.6702 (E) | 43,567 (N) |
+| `missouri_bb63` | 103 | 114 | 2.3466 (E) | 46,297 (P) |
+| `saratoga_cv3` | 108 | 114 | 1.6754 (N) | 48,209 (N) |
+| `mega_cruise_5000` (Phase 2 pilot) | 192 | 275 | 6.3422 (E, `baseline`) | 109,879 (E, `baseline`) |
+
+Method. *CPU:* the two measured cruise hulls anchor a straight line (chord)
+in zone count — `expedition_cruise_450` at 1.6816 s / 47 zones and
+`mega_cruise_5000` at 6.3422 s / 192 zones — slope 0.03214238 s per zone;
+`classic_cruise_1900` (79 zones) and `spirit_cruise_3000` (115 zones) are
+read off the chord. The chord is an upper envelope for the interior, not a
+central estimate: every Phase 1 hull inside the interval lies well below it
+(97–108 zones measured 1.67–2.35 s where the chord gives 3.29–3.64 s, i.e.
+the chord over-predicts by 1.4–2.2×), consistent with a cost that is flat up
+to ~114 nodes and then grows super-linearly, so the chord bounds any convex
+interpolant. The node-count chord (69 → 275 nodes) gives slightly lower
+values (`classic` 2.5865 s, `spirit` 3.7404 s) and is not used. *Bytes:* a
+Phase 2 cell is a Phase 1 cell plus `ahs_flow_table`, `arm_record`, `arm` and
+`field_sha256`, which together are 30,031 bytes on every one of the 20 mega
+pilot cells. Per-cell bytes = `3,566.7 + 414.00 × zones` (least-squares fit
+on the six Phase 1 worst-lane per-hull means, maximum residual 455 bytes)
++ 30,031. The model predicts 113,086 bytes for `mega_cruise_5000` against
+109,879 measured (+2.9 %), which validates it; the measured value is used
+for mega. Taking the full mega-sized extras for every hull is conservative
+(the extras scale with HVAC-group count: 83 on mega vs 22 / 30 / 45).
+
+| Phase 2 hull | Zones | Nodes | Trajectories | Trajectory s (provenance) | CPU-h per trajectory | Hull CPU-h | Bytes per cell (provenance) | Hull bytes |
+|---|---:|---:|---:|---|---:|---:|---|---:|
+| `expedition_cruise_450` | 47 | 69 | 300 | 1.6816 (measured, Phase 1 worst lane) | 0.0004671 | 0.14013 | 53,056 (measured Phase 1 fit + measured Phase 2 extras) | 15,916,714 |
+| `classic_cruise_1900` | 79 | 109 | 300 | 2.7101 (interpolated, zone chord) | 0.0007528 | 0.22584 | 66,304 (model) | 19,891,107 |
+| `spirit_cruise_3000` | 115 | 160 | 300 | 3.8672 (interpolated, zone chord) | 0.0010742 | 0.32227 | 81,208 (model) | 24,362,299 |
+| `mega_cruise_5000` | 192 | 275 | 300 | 6.3422 (measured, Phase 2 pilot) | 0.0017617 | 0.52852 | 109,879 (measured, Phase 2 pilot) | 32,963,805 |
+| **Panel point estimate** | | | **1,200** | | | **1.216761** | | **93,133,925** |
+| **Panel expectation, × 1.5 safety factor** | | | **1,200** | | | **1.825142** | | **139,700,888** (≈ 133.2 MiB) |
+
+For reference the uniform rule gives 2.1140694828 CPU-h / 131,855,220 bytes;
+the stratified point estimate is 58 % / 71 % of that. The remaining 59 blocks
+(1,180 trajectories) are expected at 1.181527 CPU-h / 90,936,338 bytes
+(point) and 1.789907 CPU-h / 137,503,301 bytes (expectation after
+subtracting the measured pilot block).
+
+Assumptions (declared, not fitted): (1) *lanes* — N and P are priced at each
+hull's worst measured lane; in Phase 1 N was faster than E on every hull
+except `saratoga_cv3` (N/E 1.017) and P tracked E; mega N and P are
+unmeasured and covered by (1) plus the safety factor. (2) *arms* — arm ops
+change operator coefficients (OA, filter, `ach`), not operator dimension
+(zones, nodes, paths), so per-trajectory cost is taken as arm-independent;
+the pilot is the `baseline` arm. (3) *epoch parity of the expedition anchor
+(verified)* — both designs run `epochs = 12`, `epoch_hours = 1.0`, the same
+tracer block (`unchanged_from_phase1: true`), the same `expedition_cruise_450`
+source pool and seed mapping; the Phase 2 pre-stage reproduced the two Phase 1
+`expedition_cruise_450` fields byte-identically, and the Phase 2 worker
+reproduced Phase 1 `expedition_cruise_450` N seeds 1 and 14 bit-identically
+(campaign `LEDGER.md`, local validation log). (4) *safety factor 1.5×* — a
+declared margin covering Spot instance heterogeneity (Phase 1 per-array
+wall-clock spread 2.93–3.50 min), the pilot p95/mean of 1.072, the
+unmeasured mega N/P lanes, and the ~3 % bytes-model error. It is applied to
+the panel totals.
+
+Sanity context: the absolute amounts are trivial — about two CPU-hours on
+AWS Batch Spot and about 130–140 MB in S3 — so this is an honest accounting
+of expected cost, not a budget constraint. Had the stratified expectation
+exceeded ~3 CPU-h or ~300 MB it would have been reported as a finding
+instead of amended.
+
+*(c) Decision.* Benjamin, 2026-11-08: amend §7 with this stratified estimate
+(ledgered) and then run the full 1,200-trajectory panel — the remaining 59
+blocks, the pilot block's 20 cells already being in S3. The panel submit is a
+separate session after this amendment merges.
+
+*(d) Panel-scope expectation (replaces the uniform 12× bound for panel scope
+only).* Expected full-panel trajectory CPU ≤ **1.825142 CPU-h** and expected
+full-panel artifact bytes ≤ **139,700,888 bytes**, i.e. the stratified point
+estimate × 1.5. The full-panel readout will report the measured totals
+against both this expectation and the historical uniform bound. Exceeding
+the expectation is a ledgered finding, not a reason to revise it. The
+pilot-gate thresholds, the design JSON (`thresholds`, `threshold_basis`) and
+`readout.py` are unchanged; the pilot record stays `go = false` under the
+frozen rule.
 
 ## 8. Acceptance gates and metrics
 
