@@ -1,0 +1,1548 @@
+{
+  "coverage": {
+    "blocks": [
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "destroyer_baseline",
+        "lane": "E",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "destroyer_baseline",
+        "lane": "N",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "destroyer_baseline",
+        "lane": "P",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "expedition_cruise_450",
+        "lane": "E",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "expedition_cruise_450",
+        "lane": "N",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "expedition_cruise_450",
+        "lane": "P",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "fletcher_class_destroyer",
+        "lane": "E",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "fletcher_class_destroyer",
+        "lane": "N",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "lexington_cv2",
+        "lane": "E",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "lexington_cv2",
+        "lane": "N",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "lexington_cv2",
+        "lane": "P",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "missouri_bb63",
+        "lane": "E",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "missouri_bb63",
+        "lane": "N",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "missouri_bb63",
+        "lane": "P",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "saratoga_cv3",
+        "lane": "E",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "saratoga_cv3",
+        "lane": "N",
+        "missing_seeds": [],
+        "observed": 20
+      },
+      {
+        "expected": 20,
+        "extra_seeds": [],
+        "hull": "saratoga_cv3",
+        "lane": "P",
+        "missing_seeds": [],
+        "observed": 20
+      }
+    ],
+    "expected_cells": 340,
+    "missing_cells": 0,
+    "observed_cells": 340
+  },
+  "design_id": "contam_phase1_hvac_tracer_01",
+  "metrics_by_hull_lane": {
+    "destroyer_baseline:E": {
+      "auc_sum": {
+        "max": 80515.3,
+        "mean": 10175.676067709199,
+        "median": 2836.9449999999997,
+        "min": 0.000246215
+      },
+      "b_v_h": {
+        "max": 0.566556,
+        "mean": 0.27172290568804847,
+        "median": 0.28327789999999997,
+        "min": 4.58699e-09
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 80515.3,
+        "mean": 9919.779317709199,
+        "median": 2371.995,
+        "min": 0.000246215
+      },
+      "retained_final": {
+        "max": 7.39582e-16,
+        "mean": 7.99334160178e-17,
+        "median": 2.21399e-21,
+        "min": 8.6762e-101
+      },
+      "source_final_mass": {
+        "max": 3.36672e-10,
+        "mean": 3.6383215240315e-11,
+        "median": 1.49566e-15,
+        "min": 8.6762e-95
+      }
+    },
+    "destroyer_baseline:N": {
+      "auc_sum": {
+        "max": 81021.5,
+        "mean": 10342.0478,
+        "median": 2816.6375,
+        "min": 261.636
+      },
+      "b_v_h": {
+        "max": 0.560951,
+        "mean": 0.28787449499999995,
+        "median": 0.29038575,
+        "min": 0.0198201
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 80567.1,
+        "mean": 9913.480635,
+        "median": 2283.179,
+        "min": 48.1255
+      },
+      "retained_final": {
+        "max": 1.37039e-15,
+        "mean": 4.16650055e-16,
+        "median": 2.4527500000000003e-16,
+        "min": 3.24903e-17
+      },
+      "source_final_mass": {
+        "max": 1.95407e-10,
+        "mean": 3.797390105e-11,
+        "median": 8.29173e-12,
+        "min": 2.22226e-13
+      }
+    },
+    "destroyer_baseline:P": {
+      "auc_sum": {
+        "max": 81017.1,
+        "mean": 10984.695150000001,
+        "median": 4145.195,
+        "min": 176.663
+      },
+      "b_v_h": {
+        "max": 0.692969,
+        "mean": 0.3451260275,
+        "median": 0.348298,
+        "min": 0.00362676
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 80762.1,
+        "mean": 10350.8062,
+        "median": 3153.63,
+        "min": 158.115
+      },
+      "retained_final": {
+        "max": 3.14745e-10,
+        "mean": 7.3090604235e-11,
+        "median": 2.87947e-11,
+        "min": 8.46027e-14
+      },
+      "source_final_mass": {
+        "max": 0.000225181,
+        "mean": 4.166388139135e-05,
+        "median": 1.1756540000000001e-05,
+        "min": 6.88997e-25
+      }
+    },
+    "expedition_cruise_450:E": {
+      "auc_sum": {
+        "max": 20128.8,
+        "mean": 3767.03891277495,
+        "median": 628.952,
+        "min": 0.000123108
+      },
+      "b_v_h": {
+        "max": 5.06622,
+        "mean": 0.7441133878880486,
+        "median": 0.5,
+        "min": 4.58699e-09
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 20128.8,
+        "mean": 3207.25241477495,
+        "median": 457.738,
+        "min": 0.000123108
+      },
+      "retained_final": {
+        "max": 0.124986,
+        "mean": 0.01207557473,
+        "median": 1.9032350000005703e-05,
+        "min": 8.67625e-101
+      },
+      "source_final_mass": {
+        "max": 117843.0,
+        "mean": 11237.000000000622,
+        "median": 6.05258e-12,
+        "min": 8.67625e-95
+      }
+    },
+    "expedition_cruise_450:N": {
+      "auc_sum": {
+        "max": 20383.7,
+        "mean": 3687.41397,
+        "median": 699.557,
+        "min": 56.0218
+      },
+      "b_v_h": {
+        "max": 3.28925,
+        "mean": 0.6361397049999999,
+        "median": 0.5405694999999999,
+        "min": 0.0160815
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 20133.9,
+        "mean": 3204.8473665,
+        "median": 450.4035,
+        "min": 6.89803
+      },
+      "retained_final": {
+        "max": 0.0260999,
+        "mean": 0.0029728361490000002,
+        "median": 1.773235e-05,
+        "min": 3.92725e-06
+      },
+      "source_final_mass": {
+        "max": 23154.1,
+        "mean": 2165.090521712375,
+        "median": 0.0063031350000000005,
+        "min": 6.25537e-05
+      }
+    },
+    "expedition_cruise_450:P": {
+      "auc_sum": {
+        "max": 20250.2,
+        "mean": 4100.519515,
+        "median": 768.842,
+        "min": 86.7649
+      },
+      "b_v_h": {
+        "max": 7.99731,
+        "mean": 1.1169275065,
+        "median": 0.5146010000000001,
+        "min": 0.00508943
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 20186.3,
+        "mean": 3278.25705,
+        "median": 509.6815,
+        "min": 21.558
+      },
+      "retained_final": {
+        "max": 0.411729,
+        "mean": 0.0409278121166055,
+        "median": 0.000153303,
+        "min": 1.21453e-09
+      },
+      "source_final_mass": {
+        "max": 393466.0,
+        "mean": 38548.51793874026,
+        "median": 0.000212611,
+        "min": 1.18052e-08
+      }
+    },
+    "fletcher_class_destroyer:E": {
+      "auc_sum": {
+        "max": 33498.9,
+        "mean": 7548.71294495265,
+        "median": 2671.8424999999997,
+        "min": 0.000147729
+      },
+      "b_v_h": {
+        "max": 0.530332,
+        "mean": 0.2625723817830485,
+        "median": 0.26516605,
+        "min": 4.58699e-09
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 33335.8,
+        "mean": 7419.6581153526495,
+        "median": 2413.5695,
+        "min": 0.000147729
+      },
+      "retained_final": {
+        "max": 5.98033e-16,
+        "mean": 1.02903949058e-16,
+        "median": 4.16808e-21,
+        "min": 8.67625e-101
+      },
+      "source_final_mass": {
+        "max": 1.49126e-13,
+        "mean": 7.75811699557801e-15,
+        "median": 9.50708925e-38,
+        "min": 8.67625e-95
+      }
+    },
+    "fletcher_class_destroyer:N": {
+      "auc_sum": {
+        "max": 33610.3,
+        "mean": 7704.1843930000005,
+        "median": 2856.4755,
+        "min": 9.04586
+      },
+      "b_v_h": {
+        "max": 0.541281,
+        "mean": 0.27087185085,
+        "median": 0.2710215,
+        "min": 0.000762117
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 33340.5,
+        "mean": 7416.6329885,
+        "median": 2365.16,
+        "min": 1.09397
+      },
+      "retained_final": {
+        "max": 2.41852e-16,
+        "mean": 6.621658425e-17,
+        "median": 1.8904199999999998e-17,
+        "min": 3.88935e-19
+      },
+      "source_final_mass": {
+        "max": 2.04289e-11,
+        "mean": 2.5674381445999997e-12,
+        "median": 4.02365e-13,
+        "min": 1.76002e-16
+      }
+    },
+    "lexington_cv2:E": {
+      "auc_sum": {
+        "max": 28754.8,
+        "mean": 10093.900670954015,
+        "median": 6244.485,
+        "min": 5.87417e-05
+      },
+      "b_v_h": {
+        "max": 11.2519,
+        "mean": 4.032737950760412,
+        "median": 1.8529205,
+        "min": 5.06941e-09
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 10079.0,
+        "mean": 2613.622543954015,
+        "median": 883.6979999999999,
+        "min": 5.87417e-05
+      },
+      "retained_final": {
+        "max": 0.775551,
+        "mean": 0.1868035745,
+        "median": 0.0043620850000000025,
+        "min": 2.88062e-100
+      },
+      "source_final_mass": {
+        "max": 199046.0,
+        "mean": 38082.19158,
+        "median": 9.118100000002775,
+        "min": 2.88062e-94
+      }
+    },
+    "lexington_cv2:N": {
+      "auc_sum": {
+        "max": 105603.0,
+        "mean": 23495.844125,
+        "median": 6346.605,
+        "min": 83.2515
+      },
+      "b_v_h": {
+        "max": 12.0,
+        "mean": 6.144323225,
+        "median": 6.2404839999999995,
+        "min": 0.0435206
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 11971.0,
+        "mean": 3034.236938,
+        "median": 1240.75,
+        "min": 3.68923
+      },
+      "retained_final": {
+        "max": 1.0,
+        "mean": 0.49945510449999997,
+        "median": 0.493967615,
+        "min": 0.0015241
+      },
+      "source_final_mass": {
+        "max": 944848.0,
+        "mean": 279450.200767355,
+        "median": 64275.61225,
+        "min": 0.0510571
+      }
+    },
+    "lexington_cv2:P": {
+      "auc_sum": {
+        "max": 170804.0,
+        "mean": 29013.181510000002,
+        "median": 6282.42,
+        "min": 35.2165
+      },
+      "b_v_h": {
+        "max": 12.0,
+        "mean": 6.169082295,
+        "median": 6.358067,
+        "min": 0.00313688
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 14347.1,
+        "mean": 3445.58476,
+        "median": 1309.885,
+        "min": 35.0565
+      },
+      "retained_final": {
+        "max": 1.0,
+        "mean": 0.5000326599588,
+        "median": 0.5000825695,
+        "min": 1.25753e-07
+      },
+      "source_final_mass": {
+        "max": 1000000.0,
+        "mean": 493150.650578078,
+        "median": 481303.001681295,
+        "min": 6.02522e-12
+      }
+    },
+    "missouri_bb63:E": {
+      "auc_sum": {
+        "max": 3440.22,
+        "mean": 1189.556396672455,
+        "median": 851.1185,
+        "min": 1.82945e-05
+      },
+      "b_v_h": {
+        "max": 2.00819,
+        "mean": 0.632810714006941,
+        "median": 0.5609415,
+        "min": 5.06941e-09
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 2806.19,
+        "mean": 870.0977274224549,
+        "median": 612.0545,
+        "min": 1.82945e-05
+      },
+      "retained_final": {
+        "max": 0.00291833,
+        "mean": 0.0002638541340729395,
+        "median": 6.90769e-11,
+        "min": 2.88063e-100
+      },
+      "source_final_mass": {
+        "max": 2881.14,
+        "mean": 257.2392626536368,
+        "median": 1.7283565e-07,
+        "min": 2.88063e-94
+      }
+    },
+    "missouri_bb63:N": {
+      "auc_sum": {
+        "max": 5584.72,
+        "mean": 1586.80335,
+        "median": 862.3415,
+        "min": 106.362
+      },
+      "b_v_h": {
+        "max": 2.03556,
+        "mean": 0.784879665,
+        "median": 0.610201,
+        "min": 0.0686879
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 2807.26,
+        "mean": 944.6887445,
+        "median": 658.2615000000001,
+        "min": 4.16163
+      },
+      "retained_final": {
+        "max": 0.00327027,
+        "mean": 0.000764995186,
+        "median": 3.566795e-06,
+        "min": 1.72953e-06
+      },
+      "source_final_mass": {
+        "max": 3268.43,
+        "mean": 754.76291527495,
+        "median": 0.00079297,
+        "min": 0.00017213
+      }
+    },
+    "missouri_bb63:P": {
+      "auc_sum": {
+        "max": 2817.1,
+        "mean": 910.250634,
+        "median": 595.7045,
+        "min": 7.20173
+      },
+      "b_v_h": {
+        "max": 6.57188,
+        "mean": 1.1262263445,
+        "median": 0.5934634999999999,
+        "min": 0.00218407
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 2811.44,
+        "mean": 737.5668935,
+        "median": 160.495,
+        "min": 4.78007
+      },
+      "retained_final": {
+        "max": 0.267363,
+        "mean": 0.0308714555823275,
+        "median": 2.39755e-06,
+        "min": 3.14343e-09
+      },
+      "source_final_mass": {
+        "max": 243025.0,
+        "mean": 23574.088408188552,
+        "median": 0.01059794,
+        "min": 8.67454e-10
+      }
+    },
+    "saratoga_cv3:E": {
+      "auc_sum": {
+        "max": 31935.7,
+        "mean": 9101.58275435869,
+        "median": 5854.91,
+        "min": 5.91047e-05
+      },
+      "b_v_h": {
+        "max": 10.6158,
+        "mean": 3.4989540907604115,
+        "median": 1.371209,
+        "min": 5.06941e-09
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 16538.0,
+        "mean": 3461.2814378586895,
+        "median": 778.3240000000001,
+        "min": 5.91047e-05
+      },
+      "retained_final": {
+        "max": 0.700158,
+        "mean": 0.1645330649,
+        "median": 9.671000000000679e-05,
+        "min": 2.88063e-100
+      },
+      "source_final_mass": {
+        "max": 411767.0,
+        "mean": 53581.89444017585,
+        "median": 0.00023396350658555,
+        "min": 2.88063e-94
+      }
+    },
+    "saratoga_cv3:N": {
+      "auc_sum": {
+        "max": 184712.0,
+        "mean": 43757.256935,
+        "median": 5944.745,
+        "min": 85.092
+      },
+      "b_v_h": {
+        "max": 12.0,
+        "mean": 6.145531650000001,
+        "median": 6.251475,
+        "min": 0.0410172
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 20884.9,
+        "mean": 4641.6609135,
+        "median": 867.1,
+        "min": 2.30498
+      },
+      "retained_final": {
+        "max": 1.0,
+        "mean": 0.49988862850000004,
+        "median": 0.49561279999999996,
+        "min": 0.00150712
+      },
+      "source_final_mass": {
+        "max": 948617.0,
+        "mean": 223106.95802666,
+        "median": 37205.68715,
+        "min": 0.0545978
+      }
+    },
+    "saratoga_cv3:P": {
+      "auc_sum": {
+        "max": 327965.0,
+        "mean": 62659.75078,
+        "median": 5890.625,
+        "min": 35.5766
+      },
+      "b_v_h": {
+        "max": 12.0,
+        "mean": 6.169392501,
+        "median": 6.359654,
+        "min": 0.00335896
+      },
+      "cells": 20,
+      "peak_concentration": {
+        "max": 28187.1,
+        "mean": 6178.8553249999995,
+        "median": 884.0954999999999,
+        "min": 34.8572
+      },
+      "retained_final": {
+        "max": 1.0,
+        "mean": 0.50008062383615,
+        "median": 0.500314049,
+        "min": 6.62706e-07
+      },
+      "source_final_mass": {
+        "max": 1000000.0,
+        "mean": 480522.0001001765,
+        "median": 437218.0003767375,
+        "min": 2.47507e-11
+      }
+    }
+  },
+  "paired_contrasts": {
+    "destroyer_baseline": {
+      "N_minus_E": {
+        "auc_sum": {
+          "ci95_half_width": 92.13584672845074,
+          "mean": 166.37173229079988,
+          "median": 223.86149999999935,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.00529398418617102,
+          "mean": 0.016151589311951497,
+          "median": 0.019820547706504987,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 33.953218165048064,
+          "mean": -6.298682709199719,
+          "median": 7.760000000001128,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 1.3314481533814126e-16,
+          "mean": 3.367166389822e-16,
+          "median": 2.1779615e-16,
+          "n": 20
+        }
+      },
+      "P_minus_N": {
+        "auc_sum": {
+          "ci95_half_width": 255.93339160717494,
+          "mean": 642.6473500000004,
+          "median": 568.0145000000002,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.028591782874268026,
+          "mean": 0.0572515325,
+          "median": 0.047214199999999984,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 171.0012690641383,
+          "mean": 437.325565,
+          "median": 271.41189999999995,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 4.089363417823748e-11,
+          "mean": 7.3090187584945e-11,
+          "median": 2.87946418973e-11,
+          "n": 20
+        }
+      }
+    },
+    "expedition_cruise_450": {
+      "N_minus_E": {
+        "auc_sum": {
+          "ci95_half_width": 273.5660068497391,
+          "mean": -79.62494277494996,
+          "median": 32.449900000000056,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.26284777559441497,
+          "mean": -0.10797368288804851,
+          "median": 0.012098500000000012,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 16.545220525068103,
+          "mean": -2.4050482749499387,
+          "median": 3.951495000000012,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 0.012930682614306866,
+          "mean": -0.009102738581,
+          "median": -1.2656365e-05,
+          "n": 20
+        }
+      },
+      "P_minus_N": {
+        "auc_sum": {
+          "ci95_half_width": 563.4828812818952,
+          "mean": 413.105545,
+          "median": -3.904299999999928,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.6525916054644973,
+          "mean": 0.4807878014999999,
+          "median": 0.023376950000000007,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 30.590804401802338,
+          "mean": 73.40968349999991,
+          "median": 59.21085000000001,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 0.051190202841494295,
+          "mean": 0.0379549759676055,
+          "median": 0.00013656585000000002,
+          "n": 20
+        }
+      }
+    },
+    "fletcher_class_destroyer": {
+      "N_minus_E": {
+        "auc_sum": {
+          "ci95_half_width": 52.137798555795676,
+          "mean": 155.47144804735007,
+          "median": 142.02499999999964,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.0037051993628741736,
+          "mean": 0.008299469066951497,
+          "median": 0.010021297706504975,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 17.24300081612893,
+          "mean": -3.025126852650012,
+          "median": 4.2499999999990905,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 6.923442896870859e-17,
+          "mean": -3.6687364808e-17,
+          "median": 4.913825e-18,
+          "n": 20
+        }
+      }
+    },
+    "lexington_cv2": {
+      "N_minus_E": {
+        "auc_sum": {
+          "ci95_half_width": 10650.660363537756,
+          "mean": 13401.943454045986,
+          "median": 1188.47755,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 1.3009466727457297,
+          "mean": 2.1115852742395886,
+          "median": 0.40097400000000044,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 404.2440723053566,
+          "mean": 420.614394045985,
+          "median": 3.9680437715499997,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 0.16276499847643108,
+          "mean": 0.31265153,
+          "median": 0.11383061500000001,
+          "n": 20
+        }
+      },
+      "P_minus_N": {
+        "auc_sum": {
+          "ci95_half_width": 9417.234241126624,
+          "mean": 5517.337385,
+          "median": -65.42155000000017,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.030061908433710493,
+          "mean": 0.02475906999999985,
+          "median": 9.999999999976694e-05,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 503.2417882519827,
+          "mean": 411.3478219999999,
+          "median": 34.049955,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 0.002177579411435041,
+          "mean": 0.0005775554587999954,
+          "median": -0.0007619011330000001,
+          "n": 20
+        }
+      }
+    },
+    "missouri_bb63": {
+      "N_minus_E": {
+        "auc_sum": {
+          "ci95_half_width": 322.85885297918173,
+          "mean": 397.24695332754504,
+          "median": 69.92600000000006,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.10478565519512124,
+          "mean": 0.152068950993059,
+          "median": 0.04809300000000005,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 74.94685095523656,
+          "mean": 74.59101707754499,
+          "median": 0.7614499999999715,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 0.0004211260496970706,
+          "mean": 0.0005011410519270605,
+          "median": 3.5667506672e-06,
+          "n": 20
+        }
+      },
+      "P_minus_N": {
+        "auc_sum": {
+          "ci95_half_width": 624.4989372183079,
+          "mean": -676.552716,
+          "median": -98.45963500000005,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.6521230312525713,
+          "mean": 0.34134667949999997,
+          "median": -0.0605281,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 206.82329547588938,
+          "mean": -207.12185099999996,
+          "median": -5.005000000000052,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 0.03422148792425079,
+          "mean": 0.0301064603963275,
+          "median": -2.272949999999999e-07,
+          "n": 20
+        }
+      }
+    },
+    "saratoga_cv3": {
+      "N_minus_E": {
+        "auc_sum": {
+          "ci95_half_width": 27367.45786247308,
+          "mean": 34655.67418064131,
+          "median": 771.354,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 1.5987581799334263,
+          "mean": 2.6465775592395886,
+          "median": 0.7223269000000001,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 1001.1707358263105,
+          "mean": 1180.3794756413101,
+          "median": 2.39743519045,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 0.17480920362216495,
+          "mean": 0.3353555636,
+          "median": 0.15146130000000005,
+          "n": 20
+        }
+      },
+      "P_minus_N": {
+        "auc_sum": {
+          "ci95_half_width": 19886.566405431644,
+          "mean": 18902.493844999997,
+          "median": -52.34734999999985,
+          "n": 20
+        },
+        "b_v_h": {
+          "ci95_half_width": 0.029262656659135057,
+          "mean": 0.023860850999999936,
+          "median": 0.0,
+          "n": 20
+        },
+        "peak_concentration": {
+          "ci95_half_width": 1586.91775773944,
+          "mean": 1537.1944115,
+          "median": 26.231985,
+          "n": 20
+        },
+        "retained_final": {
+          "ci95_half_width": 0.0017757345264684695,
+          "mean": 0.0001919953361500006,
+          "median": -0.000753094818,
+          "n": 20
+        }
+      }
+    }
+  },
+  "path_flow_by_hull_lane": {
+    "destroyer_baseline:E": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 24.0,
+          "ducted_flow_m3h": 20.000001,
+          "flow_m3h": 743.244898
+        },
+        "hvac_return": {
+          "count": 9.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 3605.399792
+        },
+        "hvac_supply": {
+          "count": 6.0,
+          "ducted_flow_m3h": 2312.004984,
+          "flow_m3h": 2312.004984
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 2332.0049844189034,
+      "path_count": 39.0,
+      "total_flow_m3h": 6660.649673944969
+    },
+    "destroyer_baseline:N": {
+      "by_path_type": {
+        "adjacency_ladder_well": {
+          "count": 2.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 24.0
+        },
+        "adjacency_passageway": {
+          "count": 8.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 120.0
+        },
+        "adjacency_service_hatch": {
+          "count": 2.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 16.0
+        },
+        "cross_zone": {
+          "count": 34.0,
+          "ducted_flow_m3h": 20.0,
+          "flow_m3h": 1707.2
+        },
+        "hvac_return": {
+          "count": 9.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 3605.392
+        },
+        "hvac_supply": {
+          "count": 6.0,
+          "ducted_flow_m3h": 2312.0,
+          "flow_m3h": 2312.0
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 2332.0,
+      "path_count": 61.0,
+      "total_flow_m3h": 7784.591999999999
+    },
+    "destroyer_baseline:P": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 24.0,
+          "ducted_flow_m3h": 20.083346,
+          "flow_m3h": 55.572318
+        },
+        "hvac_return": {
+          "count": 9.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 3255.674811
+        },
+        "hvac_supply": {
+          "count": 9.0,
+          "ducted_flow_m3h": 2604.539848,
+          "flow_m3h": 2604.539848
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 2624.6231947836623,
+      "path_count": 42.0,
+      "total_flow_m3h": 5915.78697721009
+    },
+    "expedition_cruise_450:E": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 138.0,
+          "ducted_flow_m3h": 400.000016,
+          "flow_m3h": 8151.338864
+        },
+        "hvac_return": {
+          "count": 46.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 80538.491091
+        },
+        "hvac_supply": {
+          "count": 33.0,
+          "ducted_flow_m3h": 60806.132161,
+          "flow_m3h": 60806.132161
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 61206.13217661824,
+      "path_count": 217.0,
+      "total_flow_m3h": 149495.96211588292
+    },
+    "expedition_cruise_450:N": {
+      "by_path_type": {
+        "adjacency_corridor": {
+          "count": 38.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 380.0
+        },
+        "adjacency_doorway": {
+          "count": 8.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 80.0
+        },
+        "adjacency_elevator_bank": {
+          "count": 4.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 40.0
+        },
+        "adjacency_ladder_well": {
+          "count": 2.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 24.0
+        },
+        "adjacency_open_deck": {
+          "count": 2.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 20.0
+        },
+        "adjacency_passageway": {
+          "count": 20.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 300.0
+        },
+        "adjacency_service_corridor": {
+          "count": 4.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 40.0
+        },
+        "adjacency_service_hatch": {
+          "count": 2.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 16.0
+        },
+        "adjacency_service_stairwell": {
+          "count": 2.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 20.0
+        },
+        "adjacency_stairwell": {
+          "count": 14.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 140.0
+        },
+        "cross_zone": {
+          "count": 152.0,
+          "ducted_flow_m3h": 400.0,
+          "flow_m3h": 26439.0
+        },
+        "hvac_return": {
+          "count": 46.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 80538.316
+        },
+        "hvac_supply": {
+          "count": 33.0,
+          "ducted_flow_m3h": 60806.0,
+          "flow_m3h": 60806.0
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 61206.00000000009,
+      "path_count": 327.0,
+      "total_flow_m3h": 168843.31599999958
+    },
+    "expedition_cruise_450:P": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 138.0,
+          "ducted_flow_m3h": 400.441856,
+          "flow_m3h": 3665.750917
+        },
+        "hvac_return": {
+          "count": 46.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 78359.540061
+        },
+        "hvac_supply": {
+          "count": 46.0,
+          "ducted_flow_m3h": 62687.632049,
+          "flow_m3h": 62687.632049
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 63088.07390447574,
+      "path_count": 230.0,
+      "total_flow_m3h": 144712.92302658616
+    },
+    "fletcher_class_destroyer:E": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 143.0,
+          "ducted_flow_m3h": 70.000003,
+          "flow_m3h": 3506.542989
+        },
+        "hvac_return": {
+          "count": 33.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 17253.301077
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 70.00000281539864,
+      "path_count": 176.0,
+      "total_flow_m3h": 20759.844065506422
+    },
+    "fletcher_class_destroyer:N": {
+      "by_path_type": {
+        "adjacency_ladder_well": {
+          "count": 10.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 120.0
+        },
+        "adjacency_passageway": {
+          "count": 30.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 450.0
+        },
+        "adjacency_sealed_door": {
+          "count": 4.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 8.0
+        },
+        "adjacency_service_hatch": {
+          "count": 4.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 32.0
+        },
+        "cross_zone": {
+          "count": 224.0,
+          "ducted_flow_m3h": 70.0,
+          "flow_m3h": 8492.2
+        },
+        "hvac_return": {
+          "count": 33.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 17253.264
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 70.0,
+      "path_count": 305.0,
+      "total_flow_m3h": 26355.463999999967
+    },
+    "lexington_cv2:E": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 163.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 34917.150519
+        },
+        "hvac_return": {
+          "count": 8.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 29378.082095
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 0.0,
+      "path_count": 171.0,
+      "total_flow_m3h": 64295.23261472613
+    },
+    "lexington_cv2:N": {
+      "by_path_type": {
+        "adjacency_elevator": {
+          "count": 6.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 60.0
+        },
+        "adjacency_ladder": {
+          "count": 48.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 480.0
+        },
+        "adjacency_passageway": {
+          "count": 254.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 3810.0
+        },
+        "cross_zone": {
+          "count": 30.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 12365.6
+        },
+        "hvac_return": {
+          "count": 8.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 29378.018
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 0.0,
+      "path_count": 346.0,
+      "total_flow_m3h": 46093.61799999998
+    },
+    "lexington_cv2:P": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 163.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 89.373256
+        },
+        "hvac_return": {
+          "count": 8.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 26610.594267
+        },
+        "hvac_supply": {
+          "count": 8.0,
+          "ducted_flow_m3h": 21288.475414,
+          "flow_m3h": 21288.475414
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 21288.475413515753,
+      "path_count": 179.0,
+      "total_flow_m3h": 47988.44293675605
+    },
+    "missouri_bb63:E": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 1899.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 36866.053148
+        },
+        "hvac_return": {
+          "count": 103.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 393683.341682
+        },
+        "hvac_supply": {
+          "count": 54.0,
+          "ducted_flow_m3h": 97090.226189,
+          "flow_m3h": 97090.226189
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 97090.22618925163,
+      "path_count": 2056.0,
+      "total_flow_m3h": 527639.6210195952
+    },
+    "missouri_bb63:N": {
+      "by_path_type": {
+        "adjacency_ladder_well": {
+          "count": 12.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 144.0
+        },
+        "adjacency_passageway": {
+          "count": 232.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 3480.0
+        },
+        "cross_zone": {
+          "count": 3568.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 34981.0
+        },
+        "hvac_return": {
+          "count": 103.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 393682.49
+        },
+        "hvac_supply": {
+          "count": 54.0,
+          "ducted_flow_m3h": 97090.016,
+          "flow_m3h": 97090.016
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 97090.01600000002,
+      "path_count": 3969.0,
+      "total_flow_m3h": 529377.5060000557
+    },
+    "missouri_bb63:P": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 1899.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 37.156328
+        },
+        "hvac_return": {
+          "count": 103.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 388731.465175
+        },
+        "hvac_supply": {
+          "count": 103.0,
+          "ducted_flow_m3h": 272112.025622,
+          "flow_m3h": 272112.025622
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 272112.0256222878,
+      "path_count": 2105.0,
+      "total_flow_m3h": 660880.6471251843
+    },
+    "saratoga_cv3:E": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 170.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 50323.897275
+        },
+        "hvac_return": {
+          "count": 8.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 31686.365303
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 0.0,
+      "path_count": 178.0,
+      "total_flow_m3h": 82010.26257797756
+    },
+    "saratoga_cv3:N": {
+      "by_path_type": {
+        "adjacency_elevator": {
+          "count": 6.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 60.0
+        },
+        "adjacency_ladder": {
+          "count": 46.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 460.0
+        },
+        "adjacency_passageway": {
+          "count": 274.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 4110.0
+        },
+        "cross_zone": {
+          "count": 30.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 14505.8
+        },
+        "hvac_return": {
+          "count": 8.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 31686.296
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 0.0,
+      "path_count": 364.0,
+      "total_flow_m3h": 50822.09599999998
+    },
+    "saratoga_cv3:P": {
+      "by_path_type": {
+        "contamx_path": {
+          "count": 171.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 159.875717
+        },
+        "hvac_return": {
+          "count": 8.0,
+          "ducted_flow_m3h": 0.0,
+          "flow_m3h": 28441.050042
+        },
+        "hvac_supply": {
+          "count": 8.0,
+          "ducted_flow_m3h": 22752.840033,
+          "flow_m3h": 22752.840033
+        }
+      },
+      "cells": 20,
+      "ducted_flow_m3h": 22752.840033411194,
+      "path_count": 187.0,
+      "total_flow_m3h": 51353.765791895035
+    }
+  },
+  "pilot_gate": {
+    "checks": {
+      "alias_collision_count": 0,
+      "array_wall_clock_minutes": 2.199567,
+      "artifact_bytes_total": 892670,
+      "blocked_engine_fallback_count": 0,
+      "cell_count": 20,
+      "commissioned_field_solve_seconds": 0.24067816200022207,
+      "dropped_endpoint_count": 0,
+      "estimated_cpu_hours": 0.013103412222500062,
+      "expected_cell_count": 20,
+      "go": true,
+      "limits": {
+        "alias_collision_count": 0,
+        "array_wall_clock_minutes": 30.0,
+        "artifact_bytes_total": 26214400,
+        "blocked_engine_fallback_count": 0,
+        "commissioned_field_solve_seconds": 30.0,
+        "dropped_endpoint_count": 0,
+        "estimated_cpu_hours": 1.0,
+        "peak_rss_mib": 1792,
+        "trajectory_wall_p95_seconds": 60.0,
+        "unknown_real_zone_count": 0
+      },
+      "pass": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "peak_rss_mib": 100.89453125,
+      "seeds_complete": true,
+      "trajectory_wall_p95_seconds": 2.597248275999995,
+      "unknown_real_zone_count": 0
+    },
+    "hull": "missouri_bb63",
+    "lane": "E"
+  },
+  "report_only_diagnostics": [
+    "retained_fraction_curve_12h",
+    "per_zone_concentration_stats",
+    "source_to_receptor_contrasts",
+    "path_type_flow_summaries",
+    "wall_clock_and_rss_telemetry"
+  ]
+}

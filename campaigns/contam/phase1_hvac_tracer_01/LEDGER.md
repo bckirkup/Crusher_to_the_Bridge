@@ -44,6 +44,7 @@ Status: Phase 1 panel complete — Option A field pre-stage, `missouri_bb63_e` p
 - Submit: 16 non-pilot trajectory blocks via `scripts/campaign submit` on merged `main` `801ea44c`; jobdef revisions `picard-contam-phase1-hvac-tracer-01:2`–`:17`, same image digest `sha256:8956cf37e530e9ccda1f349580727f0a51e95fe052206bf7d1170827cfd4d42f`; per-block parent job IDs and wall-clocks are tabulated in `docs/ledger/CONTAM-PHASE1-FULL-01.md`.
 - Result: all 16 arrays SUCCEEDED 20/20 (320/320 cells); with the pilot, coverage is 340/340. Full-panel remaining wall-clock 3.842567 min; per-array 2.925783–3.500983 min.
 - Readout/cost: `readout.py` coverage 340/340, missing 0, pilot gate `go=True`, no `BLOCKED_ENGINE_FALLBACK`, audit counts 0; trajectory p95 2.454948 s, peak RSS 100.894531 MiB, artifacts 10,505,015 bytes, trajectory CPU-hours 0.141446. Full entry: `docs/ledger/CONTAM-PHASE1-FULL-01.md`.
+- Durable readout: committed machine-readable output `readout/phase1_readout.json` and human summary `READOUT.md`.
 
 ## Stop rule
 
