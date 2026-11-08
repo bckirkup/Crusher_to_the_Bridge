@@ -57,3 +57,5 @@ Status: full panel executed 2026-11-08 — 60/60 array blocks SUCCEEDED (1,200/1
 ## Stop rule
 
 Full panel complete and ledgered in `docs/ledger/CONTAM-PHASE2-FULL-01.md`; `CONTAM-PHASE2-AMEND-01` is closed against the measured totals. The committed readout results (`readout/phase2_readout.json` / `READOUT.md` equivalent) are the next session's deliverable; no further campaign blocks are pending.
+
+- Durable readout: `readout/phase2_readout.json` + `readout/READOUT.md`.
