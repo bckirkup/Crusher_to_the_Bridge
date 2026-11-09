@@ -1,9 +1,10 @@
 # first_paper_scalar — Paper-1 sensitivity screen report: NORO-PROVISIONED-SENSITIVITY-01 (12,672 vectors)
 
-**Status: materialized — attempts `red-fps01-sens01-scout3` (1,536
-vectors, Edison ack `ack-9523d1856c0a43cb`) and `red-fps01-sens01-main`
-(11,136 vectors) both `completed`, 0 data gaps; main return leg to
-Edison in flight (run 42495909835) — §6 is updated when the ack lands.**
+**Status: delivered — attempts `red-fps01-sens01-scout3` (1,536
+vectors, Edison ack `ack-9523d1856c0a43cb`, 2026-11-07 12:55 UTC) and
+`red-fps01-sens01-main` (11,136 vectors, Edison ack
+`ack-a38a91b79fdaa8f2`, 2026-11-08 16:42 UTC) both `completed`, 0 data
+gaps; all 12,672 nominal vectors are with Edison.**
 
 Deliverable: `first_paper_vectors` on the `first_paper_scalar/1.5.0`
 definition (cumulative role checkpoints days 3/7/10/12, PR #1156) for
@@ -141,8 +142,22 @@ leg correctly.
   `bb4be7bf40a69bee31a91a3bb339c16e236b38ceb9778920b320fdcc55affca3`,
   request_id `req-fps01-sens01-main-return`, `collect_all_pages: true`,
   `max_return_bytes` 4 GiB, admission `adm-fps01-sens01-main-return`
-  $60, scope sha `3f73b584…`, `edison_ingest=true`): **in flight —
-  asset ids and ack recorded here when the acknowledge job completes.**
+  $60, scope sha `3f73b584…`, `edison_ingest=true`): poll (1 poll,
+  receipt found), collect, ingest, acknowledge all `completed`
+  (2026-11-08 16:42 UTC). Collected RECEIPT + MANIFEST + COMMIT + 1,114
+  pages (1,126,917,839 bytes, sha-verified per entry against the pages
+  manifest). Edison **1,117 project asset ids** (`files_uploaded: 1117`
+  = 1,114 vector pages + COMMIT.json + MANIFEST.json + the receipt);
+  count/first/last/list-sha in
+  `campaigns/noro/provisioned_sensitivity_01/EDISON_MAIN_ASSETS.json`,
+  full id ↔ page map in the ack. **Ack `ack-a38a91b79fdaa8f2`** at
+  `campaign/_derived/reducer/v1/requests/acks/ack-a38a91b79fdaa8f2.json`
+  (sha `f31dc4f536e92aecea153dde93f69a818bb7f597f655efc0d57bc3ef49cbb234`;
+  schema `crusher-reducer-ack/v1`, `ingest_status: completed`,
+  `request_id req-fps01-sens01-main-return`, `receipt_id/reduction_id
+  red-fps01-sens01-main`, accepted_page_ids 1,117).
+- **Totals with Edison:** 12,672 vectors in 1,268 pages, 1,274 project
+  asset ids, two acks. Nothing outstanding on the Devin side.
 
 ## 7. Observations and incidents (for Edison's reading of the vectors)
 

@@ -1,6 +1,6 @@
 # NORO-PROVISIONED-SENSITIVITY-01 — ledger
 
-**Status: full nominal set complete (2026-11-08) — 12,672/12,672 runs, 0 FAILED; `red-fps01-sens01-main` materialized 11,136 vectors / 0 data gaps; return leg to Edison in flight (run 42495909835). Report: `docs/campaign_reduction/FIRST_PAPER_SENSITIVITY01_REPORT.md`.** Paper-1
+**Status: full nominal set complete (2026-11-08) — 12,672/12,672 runs, 0 FAILED; `red-fps01-sens01-main` materialized 11,136 vectors / 0 data gaps; delivered to Edison, ack `ack-a38a91b79fdaa8f2` (1,117 assets). Report: `docs/campaign_reduction/FIRST_PAPER_SENSITIVITY01_REPORT.md`.** Paper-1
 sensitivity screen, Child B: 16 Res-V profiles × 4 hulls × 3 venue
 arms = 192 cells, seed-paired with NORO-PROVISIONED-VENUE-02, 1.5.0
 emitter. Design: `DESIGN.md`; profile table: `PROFILE_TABLE.md`;
@@ -659,3 +659,27 @@ cls canary `6fb43154-dd36-4f54-b5b0-4944ce15bb82` (jobdef :242, seed 8113, image
   (`attempt_id=red-fps01-sens01-main`, `job_id=b4410d76…`,
   `edison_ingest=true`, `dry_run=false`) is waiting on the environment
   approval.
+
+## Main return leg -> Edison (2026-11-08 16:42 UTC) — CAMPAIGN DELIVERED
+
+- Run 42495909835 (`attempt_id=red-fps01-sens01-main`, bootstrap raw sha
+  `bb4be7bf…`, `job_id=b4410d76…`, `edison_ingest=true`): poll (1 poll,
+  receipt found, 2,825 B), collect, ingest, acknowledge all `completed`.
+  Collected RECEIPT + MANIFEST + COMMIT + 1,114 pages (1,126,917,839 B).
+- Edison ingest: **1,117 project asset ids** (`files_uploaded: 1117` =
+  1,114 pages + COMMIT + MANIFEST + receipt), `status: completed`,
+  `s3_pointer` = the attempt RECEIPT. Summary in `EDISON_MAIN_ASSETS.json`
+  (count/first/last/list-sha, mirroring `EDISON_SCOUT3_ASSETS.json`).
+- Ack **`ack-a38a91b79fdaa8f2`**, durable at
+  `campaign/_derived/reducer/v1/requests/acks/ack-a38a91b79fdaa8f2.json`
+  (370,872 B, sha
+  `f31dc4f536e92aecea153dde93f69a818bb7f597f655efc0d57bc3ef49cbb234`):
+  `ingest_status: completed`, `request_id req-fps01-sens01-main-return`,
+  `receipt_id`/`reduction_id red-fps01-sens01-main`, accepted_page_ids
+  1,117 with per-artifact sha256s.
+- Campaign total with Edison: 12,672 / 12,672 nominal vectors (scout3
+  1,536 + main 11,136), 0 data gaps, reserve seeds untouched, 0 FAILED
+  children. Run report:
+  `docs/campaign_reduction/FIRST_PAPER_SENSITIVITY01_REPORT.md`.
+  Open decisions: none on the Devin side — Edison owns the factorial
+  analysis.
