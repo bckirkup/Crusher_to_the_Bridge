@@ -831,7 +831,8 @@ class KorkinAgent:
         "dose_response_susceptibility",
         "frailty_multiplier", "cumulative_exposure",
         "cumulative_exposure_by_route", "cumulative_supply_exposure",
-        "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
+        "hand_load_by_pathogen", "hand_strain_by_pathogen",
+        "hand_inactivation_rate_by_pathogen",
         "hand_carriage_propensity_by_pathogen",
         "hand_practice_by_pathogen", "hand_wet_transfer_by_pathogen",
         "hand_protected_load_by_pathogen", "hand_self_pool_by_pathogen",
@@ -964,6 +965,10 @@ class KorkinAgent:
         self.cumulative_supply_exposure: dict[str, float] = {}
         # Copies carried on each hand, keyed by pathogen.
         self.hand_load_by_pathogen: dict[str, float] = {}
+        # Lineage of the hand load when it did not come from this host's own
+        # shedding (fomite/hand-contact pickup). Single-id bookkeeping for the
+        # carrier-redeposit arm; mixtures resolve to UNRESOLVED_STRAIN.
+        self.hand_strain_by_pathogen: dict[str, str] = {}
         # Per-host/pathogen hand inactivation draws, sampled lazily.
         self.hand_inactivation_rate_by_pathogen: dict[str, float] = {}
         # Per-host/pathogen hand-carriage propensity, drawn once per infection.
@@ -2918,6 +2923,7 @@ class KorkinShipEngine:
                 agent.infection_status = InfectionStatus.RECOVERED
                 agent.illness_status = IllnessStatus.RECOVERED
                 agent.hand_load_by_pathogen.clear()
+                agent.hand_strain_by_pathogen.clear()
                 agent.hand_protected_load_by_pathogen.clear()
                 agent.hand_protected_pending_by_pathogen.clear()
                 agent.hand_self_pool_by_pathogen.clear()
