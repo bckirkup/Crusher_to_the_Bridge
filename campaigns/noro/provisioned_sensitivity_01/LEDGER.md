@@ -1,6 +1,6 @@
 # NORO-PROVISIONED-SENSITIVITY-01 — ledger
 
-**Status: remainder wave in flight (2026-11-07) — sizing revised to 96/96/48/24, mega → exp → spr submitted on the scout image; cls remainder waits for the image carrying the revised manifest.** Paper-1
+**Status: full nominal set complete (2026-11-08) — 12,672/12,672 runs, 0 FAILED; `red-fps01-sens01-main` materialized 11,136 vectors / 0 data gaps; delivered to Edison, ack `ack-a38a91b79fdaa8f2` (1,117 assets). Report: `docs/campaign_reduction/FIRST_PAPER_SENSITIVITY01_REPORT.md`.** Paper-1
 sensitivity screen, Child B: 16 Res-V profiles × 4 hulls × 3 venue
 arms = 192 cells, seed-paired with NORO-PROVISIONED-VENUE-02, 1.5.0
 emitter. Design: `DESIGN.md`; profile table: `PROFILE_TABLE.md`;
@@ -533,3 +533,153 @@ queue `picard-campaign-queue`.
   layer set stays until the repo lifecycle policy expires it.
 - Manifest + SEED_MANIFEST re-mirrored to both campaign S3 prefixes from
   main 7f935df2 (cls 96 + 2 seeds).
+
+## Wave 2 — cls remainder (submitted 2026-11-08 ~02:05 UTC)
+
+Wave 1 closed 2026-11-08 ~01:55 UTC: mega 768/768, exp 4,224/4,224, spr 1,920/1,920 SUCCEEDED, 0 FAILED (S3 zip counts match per block). Note: 30 exp zips (seed 8011, one per block in 30/48 exp blocks) are 0.16 MB — complete 288-epoch runs with infected=0 (no imported case at boarding); published as-is, flagged for Edison.
+
+cls canary `6fb43154-dd36-4f54-b5b0-4944ce15bb82` (jobdef :242, seed 8113, image `noro-provisioned-sensitivity01-r2@sha256:efc18c7d…`) SUCCEEDED exit 0, 5.3 min, zip 50.9 MB, member list identical to scout cls zip; summary infected=197, reported=50, 288 epochs. 48 cls arrays × 88 children = 4,224 submitted on jobdefs :243–:290 (job ids in `remainder_submits.tsv`).
+
+| block | jobdef | job id |
+|---|---|---|
+| fl_cls_12d_sens_p01_crewv | picard-noro-provisioned-sensitivity-01:243 | 90cb4eef-6e8c-4a75-8fc5-a9c1f493c399 |
+| fl_cls_12d_sens_p01_paxv | picard-noro-provisioned-sensitivity-01:244 | 58e6c139-c6ce-4215-b197-52d4afc74426 |
+| fl_cls_12d_sens_p01_mixv | picard-noro-provisioned-sensitivity-01:245 | d17a1326-cebd-4d5f-b123-ffe203c19725 |
+| fl_cls_12d_sens_p02_crewv | picard-noro-provisioned-sensitivity-01:246 | 29610647-e344-420b-aab9-cd69b10b6b1a |
+| fl_cls_12d_sens_p02_paxv | picard-noro-provisioned-sensitivity-01:247 | 05a0b927-c6e1-4c9d-8644-755d54cd2411 |
+| fl_cls_12d_sens_p02_mixv | picard-noro-provisioned-sensitivity-01:248 | 12d668f1-727b-4635-b65f-6f3cf6dcacff |
+| fl_cls_12d_sens_p03_crewv | picard-noro-provisioned-sensitivity-01:249 | 63861afc-fa66-4494-a9f3-6c01afd0e5b6 |
+| fl_cls_12d_sens_p03_paxv | picard-noro-provisioned-sensitivity-01:250 | 7e135051-ae19-41a5-84a6-37fd58c8de9e |
+| fl_cls_12d_sens_p03_mixv | picard-noro-provisioned-sensitivity-01:251 | 83027e03-f3e4-4c27-b22a-8598fd49c63d |
+| fl_cls_12d_sens_p04_crewv | picard-noro-provisioned-sensitivity-01:252 | e51125f9-dfea-469f-bb8d-61a65a93c300 |
+| fl_cls_12d_sens_p04_paxv | picard-noro-provisioned-sensitivity-01:253 | eef97f87-b44e-4f23-8fc7-ccc2f0026007 |
+| fl_cls_12d_sens_p04_mixv | picard-noro-provisioned-sensitivity-01:254 | 6961e52d-627a-481c-9447-9f5c059ee523 |
+| fl_cls_12d_sens_p05_crewv | picard-noro-provisioned-sensitivity-01:255 | 402c8047-365f-4b1a-aa13-469c0f9a16a6 |
+| fl_cls_12d_sens_p05_paxv | picard-noro-provisioned-sensitivity-01:256 | 7ec3d5d8-b96f-44ca-85ad-24128a0af0cc |
+| fl_cls_12d_sens_p05_mixv | picard-noro-provisioned-sensitivity-01:257 | 0dabbedb-bd1c-4b22-b383-ab25d248bfda |
+| fl_cls_12d_sens_p06_crewv | picard-noro-provisioned-sensitivity-01:258 | 166fd0e7-fb0e-4e86-86e5-bfdc6d7ad988 |
+| fl_cls_12d_sens_p06_paxv | picard-noro-provisioned-sensitivity-01:259 | 39be142f-ce21-4a0e-a90e-d09bfa6492a8 |
+| fl_cls_12d_sens_p06_mixv | picard-noro-provisioned-sensitivity-01:260 | 86fe3e78-41ab-4ffb-93bc-d4c82ae750e3 |
+| fl_cls_12d_sens_p07_crewv | picard-noro-provisioned-sensitivity-01:261 | ef31636f-90a1-488f-a2a3-56267e15481a |
+| fl_cls_12d_sens_p07_paxv | picard-noro-provisioned-sensitivity-01:262 | d4c6f2ff-a090-4dc9-9d1a-9430aa25fd62 |
+| fl_cls_12d_sens_p07_mixv | picard-noro-provisioned-sensitivity-01:263 | 34709af3-2668-473c-87d9-f1f3a859f1f6 |
+| fl_cls_12d_sens_p08_crewv | picard-noro-provisioned-sensitivity-01:264 | 6d780c5f-17d0-4f09-99be-72df5020c1bd |
+| fl_cls_12d_sens_p08_paxv | picard-noro-provisioned-sensitivity-01:265 | 9a5b4ff3-6aa2-4bd7-8749-9eef119e956f |
+| fl_cls_12d_sens_p08_mixv | picard-noro-provisioned-sensitivity-01:266 | b37b3682-34a9-430b-a842-c630f235b117 |
+| fl_cls_12d_sens_p09_crewv | picard-noro-provisioned-sensitivity-01:267 | b82e3de8-649e-4025-af6c-c73a13eb8304 |
+| fl_cls_12d_sens_p09_paxv | picard-noro-provisioned-sensitivity-01:268 | 9b152a1b-2609-455f-8c9a-44ec1f13c423 |
+| fl_cls_12d_sens_p09_mixv | picard-noro-provisioned-sensitivity-01:269 | 28f4d15d-22b7-49d8-9546-e43caa70fb01 |
+| fl_cls_12d_sens_p10_crewv | picard-noro-provisioned-sensitivity-01:270 | 38175696-f14f-40b9-8cf4-bf6b84857e9c |
+| fl_cls_12d_sens_p10_paxv | picard-noro-provisioned-sensitivity-01:271 | 479eb722-4864-40d2-b4a3-81067adf2ae6 |
+| fl_cls_12d_sens_p10_mixv | picard-noro-provisioned-sensitivity-01:272 | c8acd0b4-0d0f-45e9-94ab-bc7a215c40bf |
+| fl_cls_12d_sens_p11_crewv | picard-noro-provisioned-sensitivity-01:273 | 4e76652c-7735-4374-8911-dd0b7c7562ae |
+| fl_cls_12d_sens_p11_paxv | picard-noro-provisioned-sensitivity-01:274 | 0f40407e-47d8-41e6-a7d1-587d0eae4b7e |
+| fl_cls_12d_sens_p11_mixv | picard-noro-provisioned-sensitivity-01:275 | 7ad80d50-f189-4adb-9073-6a8a83020b66 |
+| fl_cls_12d_sens_p12_crewv | picard-noro-provisioned-sensitivity-01:276 | 51beaff2-ffbb-4ecd-9b18-2ebfb9929e99 |
+| fl_cls_12d_sens_p12_paxv | picard-noro-provisioned-sensitivity-01:277 | ff35f6df-4fa8-483b-bc10-d7028b0e29e3 |
+| fl_cls_12d_sens_p12_mixv | picard-noro-provisioned-sensitivity-01:278 | 1c193efd-a4d0-4a0a-a57c-6cbed246fb01 |
+| fl_cls_12d_sens_p13_crewv | picard-noro-provisioned-sensitivity-01:279 | 302e1a0a-6f0e-4376-872d-190b6223111e |
+| fl_cls_12d_sens_p13_paxv | picard-noro-provisioned-sensitivity-01:280 | 3f588f74-5eba-46b1-a2a3-60bc97372484 |
+| fl_cls_12d_sens_p13_mixv | picard-noro-provisioned-sensitivity-01:281 | 95f11b84-4b3e-43f1-bcb6-c76e2835ffb3 |
+| fl_cls_12d_sens_p14_crewv | picard-noro-provisioned-sensitivity-01:282 | 8ed44d6c-0066-46d5-93da-87fa373d90b3 |
+| fl_cls_12d_sens_p14_paxv | picard-noro-provisioned-sensitivity-01:283 | 3986c29c-63e3-440b-8f49-b74dd8ec32f1 |
+| fl_cls_12d_sens_p14_mixv | picard-noro-provisioned-sensitivity-01:284 | c85920df-b987-451b-a8b4-51d567fa42a7 |
+| fl_cls_12d_sens_p15_crewv | picard-noro-provisioned-sensitivity-01:285 | a17f5afd-4812-4b3a-817f-2de2d73035ea |
+| fl_cls_12d_sens_p15_paxv | picard-noro-provisioned-sensitivity-01:286 | 8044b146-bd3b-4b32-8349-acea898f43b9 |
+| fl_cls_12d_sens_p15_mixv | picard-noro-provisioned-sensitivity-01:287 | 77f4d028-2853-4559-bf2a-1cb3759d9a4f |
+| fl_cls_12d_sens_p16_crewv | picard-noro-provisioned-sensitivity-01:288 | cb958479-4df7-4026-af9e-ec36850fdf33 |
+| fl_cls_12d_sens_p16_paxv | picard-noro-provisioned-sensitivity-01:289 | 324bfeb6-6136-476d-b35d-9d2f1d4de7a8 |
+| fl_cls_12d_sens_p16_mixv | picard-noro-provisioned-sensitivity-01:290 | 41ad9871-41fd-4157-bc45-b757c071e1dc |
+
+## Wave 2 closed + main reduction dispatched (2026-11-08 13:12–14:34 UTC, operational only)
+
+- cls remainder: 48/48 arrays, 4,224/4,224 children SUCCEEDED, 0 FAILED
+  (jobdefs :243–:290, r2 image `sha256:efc18c7d…`). S3: every cls block
+  prefix holds exactly 8 (scout) or 88 (remainder) zips. **Full nominal
+  set complete: 12,672 runs (1,536 scout + 11,136 remainder), 0 FAILED
+  across 192 remainder arrays, reserve untouched.**
+- Scan rows for the 192 main blocks: `tools/noro_diag/food_shapes_01_scan.py
+  --no-census --workers 16` per block prefix (mega under `…_01_mega/`),
+  192 files, 11,136 rows, 0 errors, 11,136 unique keys, every row
+  `num_epochs` 288; per hull exp 4,224 / cls 4,224 / spr 1,920 / meg 768;
+  mirrored to `campaign/noro_provisioned_sensitivity_01/_scan_rows/<tier>.jsonl`.
+  Scan flags 957/4,224 exp remainder runs `ignited=false` (scout exp 0/384);
+  30 of them are the 0.16 MB seed-8011 zips (infected=0). Published as-is.
+- Reducer request `red-fps01-sens01-main` (`build_first_paper_sensitivity01.py
+  --wave main`, utc 2026-11-08T13:31:11Z): 11,328 sources (192 scan +
+  11,136 zips), cohort 11,136 expected / 11,136 unique / 0 duplicates,
+  shard_size 64, main budgets (6 GB output, 14,400 s wall, 100k GET, 30k
+  HEAD, 2 GB compressed read). Uploaded to
+  `campaign/_derived/reducer/v1/requests/red-fps01-sens01-main-{request,sources,cohort,bootstrap}.json`.
+  Request sha — canonical (materialize leg)
+  `ad0d89de46d24445bd9e26e7c9e7a21f9dd1e5ec1e617bf358ad9f461e2d640c`;
+  raw `caf88090ba033eb1c98ca74527bb790cc3c0e823a915f3f04b1fd2f1ed6d1b06`.
+  Sources sha `6f7e29de25b8af3673d7f2f91d2e399e7567f796b0368e55691ab4146d061bf2`.
+  Bootstrap collect request `req-fps01-sens01-main-return` (allowlist = the
+  main attempt prefix, `max_return_bytes` 4 GiB, admission
+  `adm-fps01-sens01-main-return` $60, scope sha `3f73b584…` unchanged from
+  scout3) raw sha `bb4be7bf40a69bee31a91a3bb339c16e236b38ceb9778920b320fdcc55affca3`
+  (return leg).
+- Materialize: dry-run workflow run 42485707071 ✓; live run 42486056392
+  (`aws-campaign` approval by Benjamin 14:32 UTC) → Batch job
+  `b4410d76-0a3c-48ca-9fa9-89a9ca32ff50` on `picard-reducer:13`
+  (`reducer-v10` @ `sha256:006954a6…`), RUNNING from 14:34 UTC; projected
+  ~70 min.
+
+## Main reduction readout (`red-fps01-sens01-main`, `picard-reducer:13`) — 2026-11-08 15:38 UTC, operational only
+
+- Batch job `b4410d76-0a3c-48ca-9fa9-89a9ca32ff50` SUCCEEDED exit 0,
+  started 14:34:13 UTC, stopped 15:36:29 UTC (~62 min wall; projection
+  was ~70). RECEIPT `completed`, `end_utc` 15:36:28Z, `errors: []`,
+  `continuation: null`; catalog snapshot `snap-62ac4c76743c485e`.
+- COMMIT / status.json counts: runs **11,136**; first_paper_vectors
+  **11,136**; coverage cells 192; `selected_unique_runs` 11,136;
+  disqualifiers []; data_gaps **0**; scan_join_conflicts 0; assets 11,328;
+  capabilities 45,312; catalog_partitions 1,233. Together with the scout3
+  attempt (1,536 vectors) every one of the 12,672 nominal runs now has a
+  1.5.0 vector; nothing published as missing.
+- Spent (RECEIPT `budget_spent`): 57,356 API calls (11,328 HEAD + 56,065
+  GET — the GET count is the worker's own ledger and exceeds the API total
+  by the retried range reads it does not double-count), 995.5 MB compressed /
+  4.417 GB uncompressed read, output 2.316 GB of the 6 GB budget,
+  checkpoint reserve 135.9 MB of 300 MB. Scout3 ×7.25 projection was
+  ~1.0 GB / ~4.4 GB / ~2.4 GB / ~58k GET / ~12.5k HEAD / ~70 min — every
+  dimension landed within ~5 % of it.
+- Publish layer HEAD-checked: `pages/first_paper_vectors.pages_manifest.json`
+  321,035 B, `status.json` 557 B, `asset_index.json` 353,735 B. Pages manifest:
+  **1,114 pages, 11,136 rows, 1,126,917,839 bytes** (≤1 MiB/page) — inside
+  the bootstrap request's 4 GiB `max_return_bytes`. Attempt prefix: 177
+  checkpoints, 1,236 shard objects, 1,115 page objects + 4 publish objects.
+- Return leg: a `dry_run=true` dispatch (run 42495850336) was cancelled
+  before approval — `campaign_return.yml` gates every job on
+  `aws-campaign` even for dry runs, so it would have spent an approval on
+  no AWS call; inputs were already verified locally (raw sha of the
+  bootstrap object on S3 = `bb4be7bf…`, attempt_id = reduction id per
+  reducer-dispatch-pins §2/§4). Live dispatch run **42495909835**
+  (`attempt_id=red-fps01-sens01-main`, `job_id=b4410d76…`,
+  `edison_ingest=true`, `dry_run=false`) is waiting on the environment
+  approval.
+
+## Main return leg -> Edison (2026-11-08 16:42 UTC) — CAMPAIGN DELIVERED
+
+- Run 42495909835 (`attempt_id=red-fps01-sens01-main`, bootstrap raw sha
+  `bb4be7bf…`, `job_id=b4410d76…`, `edison_ingest=true`): poll (1 poll,
+  receipt found, 2,825 B), collect, ingest, acknowledge all `completed`.
+  Collected RECEIPT + MANIFEST + COMMIT + 1,114 pages (1,126,917,839 B).
+- Edison ingest: **1,117 project asset ids** (`files_uploaded: 1117` =
+  1,114 pages + COMMIT + MANIFEST + receipt), `status: completed`,
+  `s3_pointer` = the attempt RECEIPT. Summary in `EDISON_MAIN_ASSETS.json`
+  (count/first/last/list-sha, mirroring `EDISON_SCOUT3_ASSETS.json`).
+- Ack **`ack-a38a91b79fdaa8f2`**, durable at
+  `campaign/_derived/reducer/v1/requests/acks/ack-a38a91b79fdaa8f2.json`
+  (370,872 B, sha
+  `f31dc4f536e92aecea153dde93f69a818bb7f597f655efc0d57bc3ef49cbb234`):
+  `ingest_status: completed`, `request_id req-fps01-sens01-main-return`,
+  `receipt_id`/`reduction_id red-fps01-sens01-main`, accepted_page_ids
+  1,117 with per-artifact sha256s.
+- Campaign total with Edison: 12,672 / 12,672 nominal vectors (scout3
+  1,536 + main 11,136), 0 data gaps, reserve seeds untouched, 0 FAILED
+  children. Run report:
+  `docs/campaign_reduction/FIRST_PAPER_SENSITIVITY01_REPORT.md`.
+  Open decisions: none on the Devin side — Edison owns the factorial
+  analysis.

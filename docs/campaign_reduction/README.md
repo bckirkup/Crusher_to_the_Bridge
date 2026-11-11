@@ -36,6 +36,7 @@ registered campaign specs, without running any new simulation.
 | `phase_b/` | Phase B request/cohort/check artifacts per attempt (`red-fps01-b`, `red-fps01-b2`, `red-fps01-b-obsclock`) |
 | `OBSERVATION_CLOCK_PANEL.md` | Observation/clock sidecar panel + extraction quote for `first_paper_observation_clock` (16 ranged-read specimens; availability matrix, validation-definition corrections, envelope terms for `red-fps01-b-obsclock`) |
 | `OBSERVATION_CLOCK_REPORT.md` | Observation/clock sidecar measured result (attempt `red-fps01-b-obsclock-v2`): 8,000-vector sidecar joined to `red-fps01-b2` identity, observed-vs-configured clock, crossing coverage, correction dispositions, typed-availability matrix, metering and delivery receipts |
+| `FIRST_PAPER_SENSITIVITY01_REPORT.md` | Paper-1 sensitivity screen measured result (attempts `red-fps01-sens01-scout3` + `red-fps01-sens01-main`): 12,672-vector cohort on `first_paper_scalar/1.5.0` (16 Res-V profiles × 4 hulls × 3 venue arms, n = 96/96/48/24), wave execution, ceiling-vs-actual metering, page layer and Edison delivery receipts; raw vectors only, Edison owns the factorial analysis |
 
 ## Machine contracts (code-facing)
 
