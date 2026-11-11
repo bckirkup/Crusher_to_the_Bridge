@@ -15,6 +15,11 @@ import pytest
 
 from engines.infection_dynamics_bridge import IllnessStatus, KorkinAgent
 from engines.sim_clock import HOURS, SimClock
+from engines.strain_dose_ledger import (
+    StrainDoseLedger,
+    attribution,
+    single_strain_mix,
+)
 from engines.transmission_core import ContactTracingMatrix, TransmissionCore
 
 PATHOGEN = "test_pathogen"
@@ -176,6 +181,77 @@ def test_ordered_fomite_defers_hygiene_until_food_pathway(
         [],
         pathogen_id=PATHOGEN,
         profile=profile,
+    )
+
+    assert hygiene_calls == [1]
+    assert PATHOGEN not in core._ordered_hygiene_occupants
+
+
+def test_record_hand_strain_keeps_dominant_source_lineage() -> None:
+    carriers = _carriers_core()
+    legacy = _core()
+    target = _agent()
+    attr = attribution(
+        StrainDoseLedger(),
+        single_strain_mix("strainA", source_agent_id=7),
+    )
+
+    legacy._record_hand_strain(target, PATHOGEN, attr)
+    assert PATHOGEN not in target.hand_strain_by_pathogen
+
+    carriers._record_hand_strain(target, PATHOGEN, attr)
+    assert target.hand_strain_by_pathogen[PATHOGEN] == "strainA"
+
+
+def test_per_partner_contact_records_donor_hand_lineage() -> None:
+    core = _carriers_core()
+    donor = _agent(agent_id=2, hand_load=100.0)
+    donor.hand_strain_by_pathogen[PATHOGEN] = "strainB"
+    target = _agent(agent_id=1)
+
+    _dose, moved = core._per_partner_contact_dose(
+        target, [(donor, 1.0)], False, PATHOGEN, 0,
+    )
+
+    assert moved
+    assert target.hand_strain_by_pathogen[PATHOGEN] == "strainB"
+    assert target.hand_load_by_pathogen[PATHOGEN] >= 0.0
+
+
+def test_carrier_hand_replenish_zeros_below_residue_floor() -> None:
+    core = _carriers_core()
+    profile = core.pathogen_profiles[PATHOGEN]
+    carrier = _agent(hand_load=1e-13)
+    carrier.hand_strain_by_pathogen[PATHOGEN] = "strainC"
+
+    core._replenish_hand(carrier, PATHOGEN, profile, ZONE)
+
+    assert carrier.hand_load_by_pathogen[PATHOGEN] == 0.0
+    assert PATHOGEN not in carrier.hand_strain_by_pathogen
+
+
+def test_ordered_fomite_without_food_runs_hygiene_inline(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    core = _core(tx={"intra_epoch_causal_order": "ordered"})
+    agent = _agent()
+    hygiene_calls: list[int] = []
+    monkeypatch.setattr(
+        core,
+        "_fomite_hygiene",
+        lambda occupants, pathogen_id, profile_arg: hygiene_calls.append(
+            len(occupants),
+        ),
+    )
+
+    core._pathway_fomite(
+        0,
+        {ZONE: [agent]},
+        {},
+        ContactTracingMatrix(epoch=0),
+        [],
+        pathogen_id=PATHOGEN,
+        profile=core.pathogen_profiles[PATHOGEN],
     )
 
     assert hygiene_calls == [1]
