@@ -1905,6 +1905,16 @@ DEFAULT_SANITARY_VISIT_MODE = "none"
 HAND_RESERVOIR_MODES = ("hygiene_cycle", "wash_reuptake", "spike_decay")
 DEFAULT_HAND_RESERVOIR_MODE = "hygiene_cycle"
 
+# NORO-HAND-CASCADE-01a: carrier redeposition and causal intra-epoch order.
+# ``carriers`` lets a non-shedder with a whole-copy hand load redeposit it;
+# ``ordered`` runs sanitary/emesis pickup before surface deposits and food
+# before end-of-epoch hygiene. The legacy arms stay the defaults until the
+# paired-seed witnesses say the repair earns the move; substeps are deferred.
+HAND_REDEPOSIT_MODES = ("shedders_only", "carriers")
+DEFAULT_HAND_REDEPOSIT_MODE = "shedders_only"
+INTRA_EPOCH_ORDER_MODES = ("legacy", "ordered")
+DEFAULT_INTRA_EPOCH_ORDER = "legacy"
+
 
 def _parse_cabin_air_mode(tx: dict[str, Any]) -> str:
     mode = str(tx.get("cabin_air_mode", DEFAULT_CABIN_AIR_MODE))
@@ -1929,6 +1939,26 @@ def _parse_hand_reservoir_mode(tx: dict[str, Any]) -> str:
         raise ValueError(
             "transmission.hand_reservoir_mode must be one of "
             f"{HAND_RESERVOIR_MODES}, got {mode!r}",
+        )
+    return mode
+
+
+def _parse_hand_redeposit_mode(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("hand_redeposit_mode", DEFAULT_HAND_REDEPOSIT_MODE))
+    if mode not in HAND_REDEPOSIT_MODES:
+        raise ValueError(
+            "transmission.hand_redeposit_mode must be one of "
+            f"{HAND_REDEPOSIT_MODES}, got {mode!r}",
+        )
+    return mode
+
+
+def _parse_intra_epoch_order(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("intra_epoch_causal_order", DEFAULT_INTRA_EPOCH_ORDER))
+    if mode not in INTRA_EPOCH_ORDER_MODES:
+        raise ValueError(
+            "transmission.intra_epoch_causal_order must be one of "
+            f"{INTRA_EPOCH_ORDER_MODES}, got {mode!r}",
         )
     return mode
 
@@ -3839,6 +3869,9 @@ class TransmissionCore:
     ) -> None:
         self.sanitary_visit_mode = _parse_sanitary_visit_mode(tx)
         self.hand_reservoir_mode = _parse_hand_reservoir_mode(tx)
+        self.hand_redeposit_mode = _parse_hand_redeposit_mode(tx)
+        self.intra_epoch_order = _parse_intra_epoch_order(tx)
+        self._ordered_hygiene_occupants: dict[str, dict[str, list]] = {}
         # Served zone id -> {"male"/"female"/"any": head zone id}, from the
         # layout's per-head ``serves`` lists.
         self.sanitary_zone_map = sanitary_zone_map or {}
@@ -4267,6 +4300,11 @@ class TransmissionCore:
         )
         if not shares:
             strain_id = self._resident_strain_id(agent, pathogen_id)
+            if strain_id is None and self.hand_redeposit_mode == "carriers":
+                strain_id = (
+                    agent.hand_strain_by_pathogen.get(pathogen_id)
+                    or UNRESOLVED_STRAIN
+                )
             return [] if strain_id is None else [(strain_id, emitted)]
         return [(sid, emitted * share) for sid, share in shares.items()]
 
@@ -7452,6 +7490,14 @@ class TransmissionCore:
             return 0.0, moved
         hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
         target.hand_load_by_pathogen[pathogen_id] = hand + acquired
+        if self.hand_redeposit_mode == "carriers" and moved:
+            donor, _amount = max(moved, key=lambda item: item[1])
+            strain_id = (
+                donor.hand_strain_by_pathogen.get(pathogen_id)
+                or self._resident_strain_id(donor, pathogen_id)
+            )
+            if strain_id:
+                target.hand_strain_by_pathogen[pathogen_id] = strain_id
         dose = self._hand_to_mouth_dose(target, epoch, hand + acquired)
         target.hand_load_by_pathogen[pathogen_id] = hand + acquired - dose
         return dose * self._confinement_factor(target), moved
@@ -8920,6 +8966,19 @@ class TransmissionCore:
             return
         rate = self._hand_inactivation_rate(agent, pathogen_id, profile)
         survival = math.exp(-rate * self.clock.hours_per_epoch)
+        if (
+            self.hand_redeposit_mode == "carriers"
+            and target <= 0.0
+            and current > 0.0
+        ):
+            # A carrier has no stool stream of its own: the picked-up load only
+            # decays. Running the shedding-host practice cycle here would draw
+            # stool/hygiene events for a host that cannot produce them.
+            decayed = floor_surface_residue(current * survival)
+            agent.hand_load_by_pathogen[pathogen_id] = decayed
+            if decayed <= 0.0:
+                agent.hand_strain_by_pathogen.pop(pathogen_id, None)
+            return
         events_per_day = self._stool_event_rate_per_day(
             agent, pathogen_id, profile,
         )
@@ -11245,6 +11304,24 @@ class TransmissionCore:
             delivered_total = surface_mass
         return delivered_total
 
+    def _record_hand_strain(
+        self,
+        target: KorkinAgent,
+        pathogen_id: str,
+        surface_attribution: DoseAttribution | None,
+    ) -> None:
+        """Remember the lineage of mass just added to a hand."""
+        if self.hand_redeposit_mode != "carriers" or surface_attribution is None:
+            return
+        shares = surface_attribution.mix.shares
+        if not shares:
+            return
+        (strain_id, _source), _weight = max(
+            shares.items(), key=lambda item: item[1],
+        )
+        if strain_id:
+            target.hand_strain_by_pathogen[pathogen_id] = strain_id
+
     def _deliver_one_pickup(
         self,
         target: KorkinAgent,
@@ -11267,6 +11344,7 @@ class TransmissionCore:
         """
         hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
         target.hand_load_by_pathogen[pathogen_id] = hand + delivered
+        self._record_hand_strain(target, pathogen_id, surface_attribution)
         dose = self._hand_to_mouth_dose(
             target,
             epoch,
@@ -11880,7 +11958,7 @@ class TransmissionCore:
             agent = agents.get(aid)
             if agent is None or self._cabin_confinement_active(agent):
                 continue
-            if not self._get_shedders([agent], pathogen_id, profile):
+            if not self._get_hand_depositors([agent], pathogen_id, profile):
                 continue
             share = share_of(agent, n)
             hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
@@ -12029,7 +12107,7 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         agent_pathway_doses: dict[int, dict[str, float]] | None,
         pathogen_id: str,
-        surface_attribution: list[tuple[str, float]] | None,
+        surface_attribution: DoseAttribution | None,
     ) -> float:
         """Deliver scaled pickup requests at one venue; returns mass removed."""
         delivered_total = 0.0
@@ -12039,6 +12117,7 @@ class TransmissionCore:
                 continue
             hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
             agent.hand_load_by_pathogen[pathogen_id] = hand + delivered
+            self._record_hand_strain(agent, pathogen_id, surface_attribution)
             dose = self._hand_to_mouth_dose(agent, epoch, hand + delivered)
             agent.hand_load_by_pathogen[pathogen_id] = (
                 hand + delivered - dose
@@ -12142,6 +12221,12 @@ class TransmissionCore:
                 agent_pathway_doses, pathogen_id, ledger,
             )
             return
+        if self.intra_epoch_order == "ordered":
+            self._pathway_fomite_ordered(
+                epoch, zone_occupants, pathogen_id, profile,
+                agent_doses, matrix, agent_pathway_doses, ledger,
+            )
+            return
         pickup_units = dict(zone_occupants)
         # Sanitary visit draws happen before any _replenish_hand call so the
         # stool venues they record this epoch are not cleared by the epoch
@@ -12191,6 +12276,77 @@ class TransmissionCore:
 
         self._fomite_hygiene(zone_occupants, pathogen_id, profile)
 
+    def _pathway_fomite_ordered(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        profile: dict | None,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Causal M=1 order: pickups before redeposition, food before hygiene."""
+        pickup_units = dict(zone_occupants)
+        # Sanitary visit draws happen before any _replenish_hand call so the
+        # stool venues they record this epoch are not cleared by rollover.
+        if self.sanitary_visit_mode != "none":
+            self._draw_sanitary_visits(epoch, pickup_units)
+        zone_occupants = self._cabin_compartments(zone_occupants)
+        pickup_units.update(zone_occupants)
+        for zone_name, occupants in zone_occupants.items():
+            self._fomite_hand_maintenance_zone(
+                zone_name, occupants, pathogen_id, profile, epoch,
+                agent_doses, agent_pathway_doses,
+            )
+        self._isolated_quarters_deposits(
+            epoch, pathogen_id, profile, agent_doses, agent_pathway_doses,
+        )
+        if self.sanitary_visit_mode != "none":
+            self._sanitary_fomite_exposure(
+                epoch, pickup_units, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, profile, ledger,
+            )
+        self._emesis_patch_pickup(
+            epoch, pickup_units, pathogen_id, agent_doses, matrix,
+            agent_pathway_doses, ledger,
+        )
+        for zone_name, occupants in zone_occupants.items():
+            self._fomite_surface_deposits(
+                zone_name, occupants, epoch, pathogen_id, profile,
+            )
+        for zone_name, occupants in pickup_units.items():
+            self._fomite_zone_pickup(
+                zone_name, occupants, epoch,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id, ledger,
+            )
+        if self._defer_ordered_hand_hygiene(profile):
+            self._ordered_hygiene_occupants[pathogen_id] = zone_occupants
+        else:
+            self._fomite_hygiene(zone_occupants, pathogen_id, profile)
+
+    def _get_hand_depositors(
+        self,
+        agents: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None = None,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Shedders, plus whole-copy hand carriers under ``carriers`` mode."""
+        shedders = self._get_shedders(agents, pathogen_id, profile)
+        if self.hand_redeposit_mode != "carriers":
+            return shedders
+        shedder_ids = {agent.agent_id for agent, _ in shedders}
+        carriers = [
+            (agent, 0.0)
+            for agent in agents
+            if agent.agent_id not in shedder_ids
+            and pickup_gate_open(
+                agent.hand_load_by_pathogen.get(pathogen_id, 0.0),
+            )
+        ]
+        return shedders + carriers
+
     def _fomite_hand_deposits(
         self,
         epoch: int,
@@ -12202,25 +12358,54 @@ class TransmissionCore:
     ) -> None:
         """Hand maintenance, emesis, and hand-to-surface deposit per unit."""
         for zone_name, occupants in zone_occupants.items():
-            for agent in occupants:
-                self._replenish_hand(agent, pathogen_id, profile, zone_name)
-                self._deposit_emesis(
-                    agent, pathogen_id, zone_name, epoch, profile or {},
-                    agent_doses, agent_pathway_doses,
-                )
-            shedders = self._get_shedders(occupants, pathogen_id, profile)
-            deposits = self._shedder_surface_deposits(
-                zone_name, shedders, epoch, pathogen_id, profile,
+            self._fomite_hand_maintenance_zone(
+                zone_name, occupants, pathogen_id, profile, epoch,
+                agent_doses, agent_pathway_doses,
             )
-            self._deposit_reservoir_strains(
-                SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
+            self._fomite_surface_deposits(
+                zone_name, occupants, epoch, pathogen_id, profile,
             )
-            deposited_mass = sum(mass for _, mass in deposits)
-            if self.strain_registry is not None and deposited_mass > 0.0:
-                key = ReservoirComposition.key(
-                    SURFACE_RESERVOIR, pathogen_id, zone_name,
-                )
-                self._surface_last_deposition_epoch[key] = int(epoch)
+
+    def _fomite_hand_maintenance_zone(
+        self,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        epoch: int,
+        agent_doses: dict[int, float] | None = None,
+        agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+    ) -> None:
+        """Hand maintenance and emesis for one mixing unit."""
+        for agent in occupants:
+            self._replenish_hand(agent, pathogen_id, profile, zone_name)
+            self._deposit_emesis(
+                agent, pathogen_id, zone_name, epoch, profile or {},
+                agent_doses, agent_pathway_doses,
+            )
+
+    def _fomite_surface_deposits(
+        self,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        """Hand-to-surface deposit and reservoir attribution for one unit."""
+        deponents = self._get_hand_depositors(occupants, pathogen_id, profile)
+        deposits = self._shedder_surface_deposits(
+            zone_name, deponents, epoch, pathogen_id, profile,
+        )
+        self._deposit_reservoir_strains(
+            SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
+        )
+        deposited_mass = sum(mass for _, mass in deposits)
+        if self.strain_registry is not None and deposited_mass > 0.0:
+            key = ReservoirComposition.key(
+                SURFACE_RESERVOIR, pathogen_id, zone_name,
+            )
+            self._surface_last_deposition_epoch[key] = int(epoch)
 
     def _shedder_surface_deposits(
         self,
@@ -12343,6 +12528,22 @@ class TransmissionCore:
             for agent in occupants:
                 self._apply_hand_hygiene(agent, pathogen_id, profile)
 
+    def _defer_ordered_hand_hygiene(self, profile: dict | None) -> bool:
+        """Food deposits must see post-pickup, pre-hygiene hands in ordered mode."""
+        return bool(
+            (profile or {}).get("food_contamination", {}).get("enabled", False),
+        )
+
+    def _flush_ordered_hand_hygiene(
+        self,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        """Run fomite hygiene deferred until after food deposits."""
+        occupants = self._ordered_hygiene_occupants.pop(pathogen_id, None)
+        if occupants is not None:
+            self._fomite_hygiene(occupants, pathogen_id, profile)
+
     def zone_item_class_state(
         self,
         zone_name: str,
@@ -12397,10 +12598,12 @@ class TransmissionCore:
         """
         fc = (profile or {}).get("food_contamination", {})
         if not fc.get("enabled", False):
+            self._flush_ordered_hand_hygiene(pathogen_id, profile)
             return
 
         food_zones = self.food_pools.get(pathogen_id, {})
         if not food_zones:
+            self._flush_ordered_hand_hygiene(pathogen_id, profile)
             return
 
         growth_factor, decay_factor = self._food_rate_factors(fc)
@@ -12449,6 +12652,7 @@ class TransmissionCore:
             self._food_zone_hygiene(
                 food_zones, zone_occupants, pathogen_id, profile,
             )
+        self._flush_ordered_hand_hygiene(pathogen_id, profile)
 
     def _replenish_food_zone_hands(
         self,
@@ -12582,7 +12786,9 @@ class TransmissionCore:
         hygiene lever pass straight through this route (FOOD-ARCH-01).
         """
         deposits: list[tuple[KorkinAgent, float]] = []
-        for agent, _sv in self._get_shedders(occupants, pathogen_id, profile):
+        for agent, _sv in self._get_hand_depositors(
+            occupants, pathogen_id, profile,
+        ):
             if self._cabin_confinement_active(agent):
                 continue
             hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
