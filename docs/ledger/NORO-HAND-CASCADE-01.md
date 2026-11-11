@@ -18,7 +18,7 @@ fitted and no VSP/Park/attack-rate target was used to choose a constant.
 
 ## Landed mechanism (default-off arms)
 
-`transmission.hand_reposit_mode` is `shedders_only` by default; the labelled
+`transmission.hand_redeposit_mode` is `shedders_only` by default; the labelled
 arm `carriers` lets a non-shedder with a whole-copy hand load
 (`pickup_gate_open`, currently the 1 GEC pickup gate) act as a hand
 depositor for surface, sanitary-venue, and food hand-transfer paths.
