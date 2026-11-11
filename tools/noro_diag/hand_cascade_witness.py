@@ -95,7 +95,7 @@ class CascadeRecorder:
             carrier_agents = (
                 {
                     agent.agent_id: agent for agent, sv in shedders
-                    if float(sv) == 0.0
+                    if float(sv) <= 0.0
                 }
                 if pathogen_id == rec.pathogen_id else {}
             )
@@ -134,7 +134,7 @@ class CascadeRecorder:
             carrier_agents = (
                 {
                     agent.agent_id: agent for agent, sv in deponents
-                    if float(sv) == 0.0
+                    if float(sv) <= 0.0
                 }
                 if pathogen_id == rec.pathogen_id else {}
             )
@@ -178,7 +178,7 @@ class CascadeRecorder:
                     deponents = self._get_hand_depositors(
                         [agent], pathogen_id, profile,
                     )
-                    if deponents and float(deponents[0][1]) == 0.0:
+                    if deponents and float(deponents[0][1]) <= 0.0:
                         carrier_ids.add(aid)
                         hand_before[aid] = float(
                             agent.hand_load_by_pathogen.get(pathogen_id, 0.0),
