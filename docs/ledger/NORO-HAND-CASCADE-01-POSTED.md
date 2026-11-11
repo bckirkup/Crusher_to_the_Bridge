@@ -1,9 +1,9 @@
 # NORO-HAND-CASCADE-01-POSTED
 **Date:** 2026-11-10
 **Commit:** f664e368
-**Measured at:** f664e368
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** f664e368
 
 Posted-conditioned witness for the default-off arms landed in
 `NORO-HAND-CASCADE-01` (`transmission.hand_redeposit_mode=carriers`,
