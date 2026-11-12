@@ -62,15 +62,17 @@ it was discarded as harness/run-order contamination rather than an engine move.
 | 8073 | `carriers_ordered` | 111 | 70 | 2,133,213 | 78,818,438 | 35,936,284 | 35,675,036 / 8,379 |
 | 8073 | `carriers_ordered_sub2` | 103 | 63 | 2,963,373 | 126,174,772 | 55,330,072 | 55,131,556 / 15,041 |
 | 8073 | `carriers_ordered_sub4` | 104 | 59 | 1,476,907 | 72,284,787 | 30,169,618 | 29,936,058 / 46,017 |
+| 8073 | `carriers_ordered_sub12` | 105 | 61 | 1,936,929 | 70,154,167 | 30,283,267 | 30,123,774 / 118,841 |
 | 8038 | `carriers_ordered` | 124 | 63 | 302,233 | 10,931,565 | 6,264,823 | 6,095,209 / 6,733 |
 | 8038 | `carriers_ordered_sub2` | 100 | 47 | 400,571 | 23,092,988 | 11,869,687 | 11,716,128 / 13,858 |
 | 8038 | `carriers_ordered_sub4` | 97 | 54 | 486,683 | 24,769,603 | 10,916,897 | 10,752,567 / 28,658 |
+| 8038 | `carriers_ordered_sub12` | 97 | 61 | 770,283 | 39,314,281 | 15,625,049 | 15,476,026 / 99,049 |
 
-Measured runtime was about 74s for M=1, 74s for sub2, and 78-80s for sub4 per
-voyage on this cell. Inferred: fixed-M is not converged by M=4 on these two
-seeds; seed 8073 peaks at sub2 then falls below M=1 at sub4, while seed 8038
-rises from M=1 to sub2/sub4. Carrier surface calls grow with M while deposit
-mass is non-monotone, so this is resolution/stochastic sensitivity rather than
-a smooth refinement. Hypothesis: two seeds are a pilot, not the solver gate;
-replicated paired posted seeds and sub12 are required before choosing DS-M*
-versus the continuous/event-driven reference.
+Measured runtime was about 74s for M=1, 74s for sub2, 78-80s for sub4, and
+86-100s for sub12 per voyage on this cell. Inferred: fixed-M is not converged
+through M=12 on these two seeds. Seed 8038 delivered/dose rise monotonically
+from M=1 to sub12, while seed 8073 is non-monotone and ends below M=1 on
+delivered/dose; carrier surface calls grow roughly with M while deposit mass
+does not follow a stable refinement pattern. Hypothesis: two seeds are a
+pilot, not the solver gate; replicated paired posted seeds are required before
+choosing DS-M* versus the continuous/event-driven reference.
