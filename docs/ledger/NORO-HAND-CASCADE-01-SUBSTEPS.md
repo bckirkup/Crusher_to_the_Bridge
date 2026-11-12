@@ -1,8 +1,9 @@
 # NORO-HAND-CASCADE-01-SUBSTEPS
 **Date:** 2026-11-12
-**Commit:** 596d6296
+**Commit:** bbabcf9d
 **Pathogens:** all
 **Status:** open
+**Measured at:** bbabcf9d
 
 Second stage of the hand/fomite cascade repair: the fixed-step arm for the
 solver gate proposed in `docs/proposals/noro_hand_cascade_solver_gate.md`.
@@ -47,3 +48,29 @@ substep rows do not collapse into the M=1 rows.
   it as a different stochastic realization, not a pure refinement.
 - Infection-serial transmission still cannot chain inside an epoch; challenge
   resolution remains once per epoch after all pathogen pathways.
+
+## Posted-cell DS-M pilot (measured)
+
+Measured at `bbabcf9d` on `fl_exp_12d_sens_p06_paxv`
+(`expedition_cruise_450`, `norwalk_gi`, 288 epochs), posted seeds 8073 and
+8038. Each row is a fresh single-seed witness process; a multi-seed run in one
+process produced M=1 rows that did not reproduce the posted-gate artifacts, so
+it was discarded as harness/run-order contamination rather than an engine move.
+
+| seed | arm | infected | symptomatic | dose GEC | delivered GEC | deposited GEC | carrier surface GEC / calls |
+|---:|---|---:|---:|---:|---:|---:|---:|
+| 8073 | `carriers_ordered` | 111 | 70 | 2,133,213 | 78,818,438 | 35,936,284 | 35,675,036 / 8,379 |
+| 8073 | `carriers_ordered_sub2` | 103 | 63 | 2,963,373 | 126,174,772 | 55,330,072 | 55,131,556 / 15,041 |
+| 8073 | `carriers_ordered_sub4` | 104 | 59 | 1,476,907 | 72,284,787 | 30,169,618 | 29,936,058 / 46,017 |
+| 8038 | `carriers_ordered` | 124 | 63 | 302,233 | 10,931,565 | 6,264,823 | 6,095,209 / 6,733 |
+| 8038 | `carriers_ordered_sub2` | 100 | 47 | 400,571 | 23,092,988 | 11,869,687 | 11,716,128 / 13,858 |
+| 8038 | `carriers_ordered_sub4` | 97 | 54 | 486,683 | 24,769,603 | 10,916,897 | 10,752,567 / 28,658 |
+
+Measured runtime was about 74s for M=1, 74s for sub2, and 78-80s for sub4 per
+voyage on this cell. Inferred: fixed-M is not converged by M=4 on these two
+seeds; seed 8073 peaks at sub2 then falls below M=1 at sub4, while seed 8038
+rises from M=1 to sub2/sub4. Carrier surface calls grow with M while deposit
+mass is non-monotone, so this is resolution/stochastic sensitivity rather than
+a smooth refinement. Hypothesis: two seeds are a pilot, not the solver gate;
+replicated paired posted seeds and sub12 are required before choosing DS-M*
+versus the continuous/event-driven reference.
