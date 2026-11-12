@@ -3917,6 +3917,8 @@ class TransmissionCore:
         self._sanitary_epoch = -1
         self._sanitary_visits: dict[int, list[str]] = {}
         self._sanitary_stool_venues: dict[str, dict[int, str]] = {}
+        self._sanitary_stool_exposed: dict[str, set[int]] = {}
+        self._sanitary_epoch_hours: float | None = None
         self.flush_aerosol_fraction = _parse_flush_aerosol_fraction(tx)
         self.flush_cabin_emission = _parse_flush_cabin_emission(tx)
         self.high_touch_area_scale = _parse_high_touch_area_scale(tx)
@@ -3937,13 +3939,10 @@ class TransmissionCore:
                 "transmission.intra_epoch_substeps > 1 requires "
                 "transmission.intra_epoch_causal_order = 'ordered'",
             )
-        if self.intra_epoch_substeps > 1 and (
-            self.sanitary_visit_mode != "none" or self._per_surface is not None
-        ):
+        if self.intra_epoch_substeps > 1 and self._per_surface is not None:
             raise ValueError(
                 "transmission.intra_epoch_substeps > 1 currently supports "
-                "pooled fomite with sanitary_visit_mode='none' and no "
-                "per_surface fomite arm",
+                "pooled fomite with no per_surface fomite arm",
             )
         self.fomite_representation = (
             "per_surface" if self._per_surface is not None else "pooled"
@@ -10052,7 +10051,12 @@ class TransmissionCore:
             SANITARY_DWELL_FEMALE_MULTIPLIER
             if agent.gender == "female" else 1.0
         )
-        epoch_seconds = self.clock.hours_per_epoch * 3600.0
+        epoch_hours = (
+            self._sanitary_epoch_hours
+            if self._sanitary_epoch_hours is not None
+            else self.clock.hours_per_epoch
+        )
+        epoch_seconds = epoch_hours * 3600.0
         return min(1.0, n_visits * dwell / epoch_seconds)
 
     def _pathway_flush_aerosol(
@@ -11898,6 +11902,7 @@ class TransmissionCore:
         self._sanitary_epoch = epoch
         self._sanitary_visits = {}
         self._sanitary_stool_venues.clear()
+        self._sanitary_stool_exposed.clear()
         for zone_name, occupants in zone_occupants.items():
             if self._is_cabin_compartment(zone_name):
                 continue
@@ -11965,7 +11970,24 @@ class TransmissionCore:
         records = self._sanitary_visit_records(epoch, zone_occupants, pathogen_id)
         if not records:
             return
+        self._sanitary_fomite_exposure_records(
+            records, agents, epoch, agent_doses, matrix,
+            agent_pathway_doses, pathogen_id, profile, ledger,
+        )
 
+    def _sanitary_fomite_exposure_records(
+        self,
+        records: dict[tuple[int, str], int],
+        agents: dict[int, KorkinAgent],
+        epoch: int,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Deposit and pickup for an already-resolved visit record set."""
         # Deposit from shedding visitors.
         self._sanitary_venue_deposits(
             records, agents, epoch, pathogen_id, profile,
@@ -11994,7 +12016,11 @@ class TransmissionCore:
         for aid, venues in self._draw_sanitary_visits(epoch, zone_occupants).items():
             for venue in venues:
                 records[(aid, venue)] = records.get((aid, venue), 0) + 1
+        exposed = self._sanitary_stool_exposed.setdefault(pathogen_id, set())
         for aid, venue in self._sanitary_stool_venues.get(pathogen_id, {}).items():
+            if aid in exposed:
+                continue
+            exposed.add(aid)
             records[(aid, venue)] = records.get((aid, venue), 0) + 1
             self.sanitary_telemetry["stool_visits"] += 1
         return records
@@ -12648,12 +12674,16 @@ class TransmissionCore:
     ) -> None:
         """Repeat the hand-mediated contamination cycle ``M`` times per epoch.
 
-        Only pooled fomite, emesis-patch pickup, and food-pool hand contacts
-        are substepped. Emesis deposition, isolated-quarter deposits, sanitary
-        visits, aerosol routes, common-source events, and the epoch-boundary
+        Pooled fomite, dwell-weighted sanitary visits, emesis-patch pickup,
+        and food-pool hand contacts are substepped. The sanitary visit
+        schedule is drawn once per epoch; emesis deposition, isolated-quarter
+        deposits, aerosol routes, common-source events, and the epoch-boundary
         infection challenge stay outside the loop.
         """
         substeps = self.intra_epoch_substeps
+        sanitary_enabled = self.sanitary_visit_mode != "none"
+        if sanitary_enabled:
+            self._draw_sanitary_visits(epoch, zone_occupants)
         zone_units = self._cabin_compartments(zone_occupants)
         pickup_units = dict(zone_occupants)
         pickup_units.update(zone_units)
@@ -12666,9 +12696,13 @@ class TransmissionCore:
         food_enabled = bool(fc.get("enabled", False)) and bool(food_zones)
         previous_clock = self.clock
         previous_book_epoch = self._book_epoch
+        previous_sanitary_epoch_hours = self._sanitary_epoch_hours
         self.clock = SimClock(
             epoch_duration_hours=previous_clock.hours_per_epoch / substeps,
             mode=HOURS,
+        )
+        self._sanitary_epoch_hours = (
+            previous_clock.hours_per_epoch if sanitary_enabled else None
         )
         self._book_epoch = epoch
         try:
@@ -12678,8 +12712,8 @@ class TransmissionCore:
             for index in range(substeps):
                 sub_epoch = epoch * substeps + index
                 self._contamination_surface_substep(
-                    sub_epoch, zone_units, pickup_units, agent_doses, matrix,
-                    agent_pathway_doses, pathogen_id, ledger,
+                    epoch, sub_epoch, zone_units, pickup_units, agent_doses,
+                    matrix, agent_pathway_doses, pathogen_id, ledger,
                 )
                 if food_enabled:
                     self._contamination_food_substep(
@@ -12691,6 +12725,7 @@ class TransmissionCore:
         finally:
             self.clock = previous_clock
             self._book_epoch = previous_book_epoch
+            self._sanitary_epoch_hours = previous_sanitary_epoch_hours
 
     def _contamination_epoch_once(
         self,
@@ -12714,6 +12749,7 @@ class TransmissionCore:
 
     def _contamination_surface_substep(
         self,
+        epoch: int,
         sub_epoch: int,
         zone_units: dict[str, list[KorkinAgent]],
         pickup_units: dict[str, list[KorkinAgent]],
@@ -12723,11 +12759,16 @@ class TransmissionCore:
         pathogen_id: str,
         ledger: StrainDoseLedger | None,
     ) -> None:
-        """One substep of hand maintenance, patch pickup, deposit, pickup."""
+        """One substep of hand maintenance, sanitary, patch, deposit, pickup."""
         profile = self.pathogen_profiles.get(pathogen_id, {})
         for zone_name, occupants in zone_units.items():
             for agent in occupants:
                 self._replenish_hand(agent, pathogen_id, profile, zone_name)
+        if self.sanitary_visit_mode != "none":
+            self._contamination_sanitary_substep(
+                epoch, sub_epoch, pickup_units, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, profile, ledger,
+            )
         self._emesis_patch_pickup(
             sub_epoch, pickup_units, pathogen_id, agent_doses, matrix,
             agent_pathway_doses, ledger,
@@ -12741,6 +12782,30 @@ class TransmissionCore:
                 zone_name, occupants, sub_epoch, agent_doses, matrix,
                 agent_pathway_doses, pathogen_id, ledger,
             )
+
+    def _contamination_sanitary_substep(
+        self,
+        epoch: int,
+        sub_epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict[str, Any],
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """One substep of dwell-weighted sanitary visit deposit/pickup."""
+        agents = {
+            a.agent_id: a for occ in zone_occupants.values() for a in occ
+        }
+        records = self._sanitary_visit_records(epoch, zone_occupants, pathogen_id)
+        if not records:
+            return
+        self._sanitary_fomite_exposure_records(
+            records, agents, sub_epoch, agent_doses, matrix,
+            agent_pathway_doses, pathogen_id, profile, ledger,
+        )
 
     def _contamination_food_substep(
         self,

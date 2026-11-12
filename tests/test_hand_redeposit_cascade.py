@@ -24,6 +24,7 @@ from engines.transmission_core import ContactTracingMatrix, TransmissionCore
 
 PATHOGEN = "test_pathogen"
 ZONE = "MainDining_L"
+HEAD = "Head_L"
 
 
 def _profile(**overrides: object) -> dict:
@@ -100,6 +101,27 @@ def _substeps_core(**kwargs: object) -> TransmissionCore:
         },
         **kwargs,  # type: ignore[arg-type]
     )
+
+
+def _sanitary_substeps_core() -> TransmissionCore:
+    core = TransmissionCore(
+        rng=np.random.default_rng(7),
+        zone_volumes={ZONE: 50.0, HEAD: 20.0},
+        pathogen_profiles={PATHOGEN: _profile()},
+        zone_types={ZONE: "Dining", HEAD: "Sanitary"},
+        sanitary_zone_map={ZONE: {"any": HEAD}},
+        clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+        cfg={
+            "transmission": {
+                "hand_redeposit_mode": "carriers",
+                "intra_epoch_causal_order": "ordered",
+                "intra_epoch_substeps": 2,
+                "sanitary_visit_mode": "dwell_weighted",
+            },
+        },
+    )
+    core.initialize_zones([ZONE, HEAD])
+    return core
 
 
 def test_redeposit_and_order_arms_default_to_legacy() -> None:
@@ -237,7 +259,7 @@ def test_carrier_hand_replenish_zeros_below_residue_floor() -> None:
 
     core._replenish_hand(carrier, PATHOGEN, profile, ZONE)
 
-    assert carrier.hand_load_by_pathogen[PATHOGEN] == 0.0
+    assert carrier.hand_load_by_pathogen[PATHOGEN] == pytest.approx(0.0)
     assert PATHOGEN not in carrier.hand_strain_by_pathogen
 
 
@@ -278,12 +300,20 @@ def test_substeps_default_to_one_and_validate() -> None:
         _core(tx={"intra_epoch_substeps": "x"})
     with pytest.raises(ValueError, match="intra_epoch_causal_order"):
         _core(tx={"intra_epoch_substeps": 2})
-    with pytest.raises(ValueError, match="pooled fomite"):
+    sanitary_core = _core(
+        tx={
+            "intra_epoch_causal_order": "ordered",
+            "intra_epoch_substeps": 2,
+            "sanitary_visit_mode": "dwell_weighted",
+        },
+    )
+    assert sanitary_core.sanitary_visit_mode == "dwell_weighted"
+    with pytest.raises(ValueError, match="per_surface"):
         _core(
             tx={
                 "intra_epoch_causal_order": "ordered",
                 "intra_epoch_substeps": 2,
-                "sanitary_visit_mode": "dwell_weighted",
+                "fomite_representation": "per_surface",
             },
         )
 
@@ -320,3 +350,64 @@ def test_contamination_substeps_restore_clock_and_hygiene_count(
     assert core._book_epoch is None
     assert core.surface_pools_by_pathogen[PATHOGEN][ZONE] >= 0.0
     assert core.food_pools[PATHOGEN][ZONE] >= 0.0
+
+
+def test_sanitary_substeps_expose_each_substep_with_epoch_schedule(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    core = _sanitary_substeps_core()
+    visitor = _agent(agent_id=1)
+    other = _agent(agent_id=2)
+    core._sanitary_epoch = 0
+    core._sanitary_visits = {visitor.agent_id: [HEAD, HEAD]}
+    calls: list[tuple[object, ...]] = []
+    monkeypatch.setattr(
+        core,
+        "_sanitary_fomite_exposure_records",
+        lambda *args: calls.append(args),
+    )
+
+    core._pathway_contamination_substeps(
+        0,
+        {ZONE: [visitor, other]},
+        {},
+        ContactTracingMatrix(epoch=0),
+        None,
+        PATHOGEN,
+        core.pathogen_profiles[PATHOGEN],
+        None,
+    )
+
+    assert [call[2] for call in calls] == [0, 1]
+    assert calls[0][0] == {(visitor.agent_id, HEAD): 2}
+    assert calls[1][0] == {(visitor.agent_id, HEAD): 2}
+    assert core.clock.hours_per_epoch == pytest.approx(1.0)
+    assert core._book_epoch is None
+    assert core._sanitary_epoch_hours is None
+
+
+def test_sanitary_stool_venues_expose_once_per_epoch() -> None:
+    core = _sanitary_substeps_core()
+    agent = _agent(agent_id=3)
+    core._sanitary_epoch = 0
+    core._sanitary_visits = {}
+    core._sanitary_stool_venues[PATHOGEN] = {agent.agent_id: HEAD}
+    zone_occupants = {ZONE: [agent]}
+
+    first = core._sanitary_visit_records(0, zone_occupants, PATHOGEN)
+    second = core._sanitary_visit_records(0, zone_occupants, PATHOGEN)
+
+    assert first == {(agent.agent_id, HEAD): 1}
+    assert second == {}
+    assert core.sanitary_telemetry["stool_visits"] == 1
+
+
+def test_sanitary_visit_share_uses_epoch_hours_during_substeps() -> None:
+    core = _sanitary_substeps_core()
+    agent = _agent(agent_id=4)
+
+    full_epoch = core._sanitary_visit_share(agent, 1)
+    core._sanitary_epoch_hours = 2.0
+    widened_epoch = core._sanitary_visit_share(agent, 1)
+
+    assert widened_epoch == pytest.approx(full_epoch / 2.0)
