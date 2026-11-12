@@ -449,8 +449,14 @@ def instrumented(rec: Recorder) -> Any:
 
 def build_spec(
     *, seed: int, platform: str, bundle: str, epochs: int, num_agents: int,
+    config_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """The shipped run, at one seed, with no override of any kind."""
+    overrides: dict[str, Any] = {
+        "ship_graph": {"num_agents": int(num_agents)},
+    }
+    for key, value in (config_overrides or {}).items():
+        overrides[key] = value
     return {
         "schema_version": "1.0.0",
         "description": "noro_diag fomite_mass_balance",
@@ -464,7 +470,7 @@ def build_spec(
         "legacy_yaml": CRUSHER_CONFIG_REL,
         "actors": [],
         "incentives": {},
-        "config_overrides": {"ship_graph": {"num_agents": int(num_agents)}},
+        "config_overrides": overrides,
         "pathogen_overrides": {},
     }
 
@@ -610,7 +616,7 @@ def _fingerprints_equal(left: dict[str, Any], right: dict[str, Any]) -> bool:
 
 def verify_draws(
     *, seed: int, platform: str, bundle: str, epochs: int,
-    pathogen_id: str,
+    pathogen_id: str, config_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Instrumented vs control voyage on the identical spec.
 
@@ -622,6 +628,7 @@ def verify_draws(
     spec_dict = build_spec(
         seed=seed, platform=platform, bundle=bundle,
         epochs=epochs, num_agents=num_agents,
+        config_overrides=config_overrides,
     )
     rec = Recorder(pathogen_id=pathogen_id)
     rec.occupancy = hand_occupancy.OccupancyRecorder(pathogen_id)
@@ -644,12 +651,14 @@ def verify_draws(
 
 def run_seed(
     *, seed: int, platform: str, bundle: str, epochs: int, pathogen_id: str,
+    config_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
     num_agents = declared_total(platform)
     spec_dict = build_spec(
         seed=seed, platform=platform, bundle=bundle,
         epochs=epochs, num_agents=num_agents,
+        config_overrides=config_overrides,
     )
     rec = Recorder(pathogen_id=pathogen_id)
     rec.occupancy = hand_occupancy.OccupancyRecorder(pathogen_id)
