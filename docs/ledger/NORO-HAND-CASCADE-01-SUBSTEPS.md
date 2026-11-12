@@ -1,6 +1,6 @@
 # NORO-HAND-CASCADE-01-SUBSTEPS
-**Date:** 2026-11-10
-**Commit:** 8a3d4b99
+**Date:** 2026-11-12
+**Commit:** 596d6296
 **Pathogens:** all
 **Status:** open
 
@@ -13,14 +13,18 @@ fitted and no VSP/Park/attack-rate target was used to choose a constant.
 
 `transmission.intra_epoch_substeps` defaults to `1`, which keeps the ordered
 M=1 call sequence. `M > 1` requires `transmission.intra_epoch_causal_order =
-"ordered"` and currently supports only pooled fomite with
-`sanitary_visit_mode = "none"` and no `per_surface` fomite arm; other
-combinations raise `ValueError` at `TransmissionCore` construction.
+"ordered"` and supports pooled fomite with `sanitary_visit_mode =
+"dwell_weighted"`; the `per_surface` fomite arm still raises `ValueError` at
+`TransmissionCore` construction.
 
-For `M > 1`, the engine repeats only the hand-mediated contamination cycle
-`M` times per epoch: hand maintenance, emesis-patch pickup, surface
-deposits/pickups, food-pool hand deposits/growth/ingestion, and per-substep
-hand hygiene. Emesis and isolated-quarter deposits, sanitary visits,
+For `M > 1`, the engine repeats the hand-mediated contamination cycle `M`
+times per epoch: hand maintenance, dwell-weighted sanitary deposit/pickup,
+emesis-patch pickup, surface deposits/pickups, food-pool hand
+deposits/growth/ingestion, and per-substep hand hygiene. The sanitary visit
+schedule is drawn once per epoch; each substep exposes that schedule with the
+same epoch-fixed dwell share while contact counts use the shorter substep
+clock, and a stool-event venue is exposed once per epoch on the first substep
+after `_replenish_hand` records it. Emesis and isolated-quarter deposits,
 aerosol/common-source/environmental/caregiver routes, and the epoch-boundary
 infection challenge stay outside the loop. Substep duration is derived as
 `SimClock.hours_per_epoch / M`; per-hour contact rates are exercised through
@@ -36,8 +40,8 @@ substep rows do not collapse into the M=1 rows.
 
 - This is the DS-M arm only. The continuous/event-driven reference and the
   convergence decision are still open in the solver-gate proposal.
-- Sanitary-visit and per-surface fomite arms are rejected for `M > 1` until
-  their epoch-once side effects are separated from the contamination loop.
+- The per-surface fomite arm is still rejected for `M > 1`; sanitary visits
+  are now inside the loop with an epoch-fixed visit schedule.
 - `M > 1` is not stream-neutral with `M = 1`: it repeats hand-hygiene and
   contact draws per substep by design, so paired-seed attribution must treat
   it as a different stochastic realization, not a pure refinement.
