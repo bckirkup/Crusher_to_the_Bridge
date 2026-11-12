@@ -86,7 +86,7 @@ from engines.rhythm_layer import (
     DEFAULT_POST_PRANDIAL_EMESIS_MULTIPLIER,
     platform_has_rhythm_catalog,
 )
-from engines.sim_clock import HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
+from engines.sim_clock import HOURS, HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
 from engines.strain_dose_ledger import (
     NO_SOURCE_AGENT,
     UNRESOLVED_STRAIN,
@@ -1914,6 +1914,11 @@ HAND_REDEPOSIT_MODES = ("shedders_only", "carriers")
 DEFAULT_HAND_REDEPOSIT_MODE = "shedders_only"
 INTRA_EPOCH_ORDER_MODES = ("legacy", "ordered")
 DEFAULT_INTRA_EPOCH_ORDER = "legacy"
+# NORO-HAND-CASCADE-01 solver gate: repeat only the hand-mediated
+# contamination cycle this many times per epoch. M=1 keeps the ordered
+# M=1 call sequence bit-identical; M>1 is the fixed-step arm measured
+# against the continuous/event-driven reference.
+DEFAULT_INTRA_EPOCH_SUBSTEPS = 1
 
 
 def _parse_cabin_air_mode(tx: dict[str, Any]) -> str:
@@ -1961,6 +1966,23 @@ def _parse_intra_epoch_order(tx: dict[str, Any]) -> str:
             f"{INTRA_EPOCH_ORDER_MODES}, got {mode!r}",
         )
     return mode
+
+
+def _parse_intra_epoch_substeps(tx: dict[str, Any]) -> int:
+    raw = tx.get("intra_epoch_substeps", DEFAULT_INTRA_EPOCH_SUBSTEPS)
+    try:
+        substeps = int(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            "transmission.intra_epoch_substeps must be an integer >= 1, "
+            f"got {raw!r}",
+        ) from exc
+    if substeps < 1:
+        raise ValueError(
+            "transmission.intra_epoch_substeps must be an integer >= 1, "
+            f"got {raw!r}",
+        )
+    return substeps
 
 
 def _parse_flush_aerosol_fraction(tx: dict[str, Any]) -> float:
@@ -3871,7 +3893,9 @@ class TransmissionCore:
         self.hand_reservoir_mode = _parse_hand_reservoir_mode(tx)
         self.hand_redeposit_mode = _parse_hand_redeposit_mode(tx)
         self.intra_epoch_order = _parse_intra_epoch_order(tx)
+        self.intra_epoch_substeps = _parse_intra_epoch_substeps(tx)
         self._ordered_hygiene_occupants: dict[str, dict[str, list]] = {}
+        self._book_epoch: int | None = None
         # Served zone id -> {"male"/"female"/"any": head zone id}, from the
         # layout's per-head ``serves`` lists.
         self.sanitary_zone_map = sanitary_zone_map or {}
@@ -3908,6 +3932,19 @@ class TransmissionCore:
             if self.per_surface_config is not None
             else None
         )
+        if self.intra_epoch_substeps > 1 and self.intra_epoch_order != "ordered":
+            raise ValueError(
+                "transmission.intra_epoch_substeps > 1 requires "
+                "transmission.intra_epoch_causal_order = 'ordered'",
+            )
+        if self.intra_epoch_substeps > 1 and (
+            self.sanitary_visit_mode != "none" or self._per_surface is not None
+        ):
+            raise ValueError(
+                "transmission.intra_epoch_substeps > 1 currently supports "
+                "pooled fomite with sanitary_visit_mode='none' and no "
+                "per_surface fomite arm",
+            )
         self.fomite_representation = (
             "per_surface" if self._per_surface is not None else "pooled"
         )
@@ -6998,9 +7035,10 @@ class TransmissionCore:
         profile: dict[str, Any],
         ec: dict[str, Any],
         ledger: StrainDoseLedger | None,
+        run_food: bool = True,
     ) -> None:
         fc = profile.get("food_contamination", {})
-        if fc.get("enabled", False):
+        if run_food and fc.get("enabled", False):
             self._pathway_food_contamination(
                 epoch, zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
@@ -7069,15 +7107,33 @@ class TransmissionCore:
             p_agent_pw, pathogen_id=pathogen_id, ledger=ledger,
         )
 
+        use_substeps = self.intra_epoch_substeps > 1 and person_to_person
         if person_to_person:
-            self._run_p2p_pathways_after_hvac(
-                epoch, zone_occupants, p_agent_doses, p_agent_pw,
-                matrix, events, pathogen_id, profile, ledger,
-            )
+            if use_substeps:
+                self._pathway_contamination_substeps(
+                    epoch, zone_occupants, p_agent_doses, matrix,
+                    p_agent_pw, pathogen_id, profile, ledger,
+                )
+                self._pathway_emesis_aerosol(
+                    epoch, zone_occupants, p_agent_doses, matrix,
+                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                    ledger=ledger,
+                )
+                self._pathway_flush_aerosol(
+                    epoch, zone_occupants, p_agent_doses, matrix,
+                    p_agent_pw, pathogen_id=pathogen_id,
+                    ledger=ledger,
+                )
+            else:
+                self._run_p2p_pathways_after_hvac(
+                    epoch, zone_occupants, p_agent_doses, p_agent_pw,
+                    matrix, events, pathogen_id, profile, ledger,
+                )
 
         self._run_supplemental_pathogen_pathways(
             epoch, zone_occupants, p_agent_doses, p_agent_pw,
             matrix, pathogen_id, profile, ec, ledger,
+            run_food=not use_substeps,
         )
 
         self._apply_route_efficiencies(profile, p_agent_doses, p_agent_pw)
@@ -12405,7 +12461,9 @@ class TransmissionCore:
             key = ReservoirComposition.key(
                 SURFACE_RESERVOIR, pathogen_id, zone_name,
             )
-            self._surface_last_deposition_epoch[key] = int(epoch)
+            self._surface_last_deposition_epoch[key] = int(
+                self._book_epoch if self._book_epoch is not None else epoch
+            )
 
     def _shedder_surface_deposits(
         self,
@@ -12576,6 +12634,148 @@ class TransmissionCore:
         return state
 
     # ── Pathway 5: Food Contamination ────────────────────────────────
+
+    def _pathway_contamination_substeps(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict[str, Any],
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Repeat the hand-mediated contamination cycle ``M`` times per epoch.
+
+        Only pooled fomite, emesis-patch pickup, and food-pool hand contacts
+        are substepped. Emesis deposition, isolated-quarter deposits, sanitary
+        visits, aerosol routes, common-source events, and the epoch-boundary
+        infection challenge stay outside the loop.
+        """
+        substeps = self.intra_epoch_substeps
+        zone_units = self._cabin_compartments(zone_occupants)
+        pickup_units = dict(zone_occupants)
+        pickup_units.update(zone_units)
+        self._contamination_epoch_once(
+            epoch, zone_units, pathogen_id, profile,
+            agent_doses, agent_pathway_doses,
+        )
+        fc = (profile or {}).get("food_contamination", {})
+        food_zones = self.food_pools.get(pathogen_id, {})
+        food_enabled = bool(fc.get("enabled", False)) and bool(food_zones)
+        previous_clock = self.clock
+        previous_book_epoch = self._book_epoch
+        self.clock = SimClock(
+            epoch_duration_hours=previous_clock.hours_per_epoch / substeps,
+            mode=HOURS,
+        )
+        self._book_epoch = epoch
+        try:
+            growth_factor = decay_factor = 1.0
+            if food_enabled:
+                growth_factor, decay_factor = self._food_rate_factors(fc)
+            for index in range(substeps):
+                sub_epoch = epoch * substeps + index
+                self._contamination_surface_substep(
+                    sub_epoch, zone_units, pickup_units, agent_doses, matrix,
+                    agent_pathway_doses, pathogen_id, ledger,
+                )
+                if food_enabled:
+                    self._contamination_food_substep(
+                        sub_epoch, zone_occupants, food_zones, fc,
+                        growth_factor, decay_factor, agent_doses, matrix,
+                        agent_pathway_doses, pathogen_id, ledger,
+                    )
+                self._fomite_hygiene(zone_units, pathogen_id, profile)
+        finally:
+            self.clock = previous_clock
+            self._book_epoch = previous_book_epoch
+
+    def _contamination_epoch_once(
+        self,
+        epoch: int,
+        zone_units: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        profile: dict[str, Any],
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+    ) -> None:
+        """Epoch-once emesis bookkeeping for the substep contamination loop."""
+        self._isolated_quarters_deposits(
+            epoch, pathogen_id, profile, agent_doses, agent_pathway_doses,
+        )
+        for zone_name, occupants in zone_units.items():
+            for agent in occupants:
+                self._deposit_emesis(
+                    agent, pathogen_id, zone_name, epoch, profile or {},
+                    agent_doses, agent_pathway_doses,
+                )
+
+    def _contamination_surface_substep(
+        self,
+        sub_epoch: int,
+        zone_units: dict[str, list[KorkinAgent]],
+        pickup_units: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """One substep of hand maintenance, patch pickup, deposit, pickup."""
+        profile = self.pathogen_profiles.get(pathogen_id, {})
+        for zone_name, occupants in zone_units.items():
+            for agent in occupants:
+                self._replenish_hand(agent, pathogen_id, profile, zone_name)
+        self._emesis_patch_pickup(
+            sub_epoch, pickup_units, pathogen_id, agent_doses, matrix,
+            agent_pathway_doses, ledger,
+        )
+        for zone_name, occupants in zone_units.items():
+            self._fomite_surface_deposits(
+                zone_name, occupants, sub_epoch, pathogen_id, profile,
+            )
+        for zone_name, occupants in pickup_units.items():
+            self._fomite_zone_pickup(
+                zone_name, occupants, sub_epoch, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, ledger,
+            )
+
+    def _contamination_food_substep(
+        self,
+        sub_epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        food_zones: dict[str, float],
+        fc: dict[str, Any],
+        growth_factor: float,
+        decay_factor: float,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """One substep of food-pool hand deposits, growth, and ingestion."""
+        profile = self.pathogen_profiles.get(pathogen_id, {})
+        for zone_name in food_zones:
+            occupants = zone_occupants.get(zone_name, [])
+            deposits = self._food_deposits(
+                zone_name, occupants, pathogen_id, profile, fc, sub_epoch,
+            )
+            self._deposit_reservoir_strains(
+                FOOD_RESERVOIR, pathogen_id, zone_name, deposits,
+            )
+            self._add_food_deposits(food_zones, zone_name, deposits)
+            self._grow_food_pool(
+                food_zones, zone_name, growth_factor, decay_factor, pathogen_id,
+            )
+            if food_zones[zone_name] <= 0 or not occupants:
+                continue
+            self._food_ingestion(
+                zone_name, occupants, food_zones, fc, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, ledger,
+            )
 
     def _pathway_food_contamination(
         self,
@@ -12842,7 +13042,7 @@ class TransmissionCore:
         """
         configured = food_cfg.get("ingestion_fraction_per_day")
         if configured is None:
-            return self.food_ingestion_fraction_per_epoch
+            return self.clock.decay_per_epoch(FOOD_INGESTION_FRACTION_PER_DAY)
         return self.clock.decay_per_epoch(max(float(configured), 0.0))
 
     def _food_rate_factors(self, food_cfg: dict[str, Any]) -> tuple[float, float]:

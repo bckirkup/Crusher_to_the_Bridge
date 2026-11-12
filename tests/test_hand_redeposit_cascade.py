@@ -91,6 +91,17 @@ def _carriers_core(**kwargs: object) -> TransmissionCore:
     )
 
 
+def _substeps_core(**kwargs: object) -> TransmissionCore:
+    return _core(
+        tx={
+            "hand_redeposit_mode": "carriers",
+            "intra_epoch_causal_order": "ordered",
+            "intra_epoch_substeps": 2,
+        },
+        **kwargs,  # type: ignore[arg-type]
+    )
+
+
 def test_redeposit_and_order_arms_default_to_legacy() -> None:
     core = _core()
     assert core.hand_redeposit_mode == "shedders_only"
@@ -256,3 +267,56 @@ def test_ordered_fomite_without_food_runs_hygiene_inline(
 
     assert hygiene_calls == [1]
     assert PATHOGEN not in core._ordered_hygiene_occupants
+
+
+def test_substeps_default_to_one_and_validate() -> None:
+    assert _core().intra_epoch_substeps == 1
+    assert _substeps_core().intra_epoch_substeps == 2
+    with pytest.raises(ValueError, match="intra_epoch_substeps"):
+        _core(tx={"intra_epoch_substeps": 0})
+    with pytest.raises(ValueError, match="intra_epoch_substeps"):
+        _core(tx={"intra_epoch_substeps": "x"})
+    with pytest.raises(ValueError, match="intra_epoch_causal_order"):
+        _core(tx={"intra_epoch_substeps": 2})
+    with pytest.raises(ValueError, match="pooled fomite"):
+        _core(
+            tx={
+                "intra_epoch_causal_order": "ordered",
+                "intra_epoch_substeps": 2,
+                "sanitary_visit_mode": "dwell_weighted",
+            },
+        )
+
+
+def test_contamination_substeps_restore_clock_and_hygiene_count(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    profile = _profile(food_contamination={"enabled": True})
+    core = _substeps_core(profile=profile)
+    carrier = _agent(agent_id=1, hand_load=1.0e6)
+    diner = _agent(agent_id=2)
+    hygiene_calls: list[int] = []
+    monkeypatch.setattr(
+        core,
+        "_fomite_hygiene",
+        lambda occupants, pathogen_id, profile_arg: hygiene_calls.append(
+            sum(len(v) for v in occupants.values()),
+        ),
+    )
+
+    core._pathway_contamination_substeps(
+        0,
+        {ZONE: [carrier, diner]},
+        {},
+        ContactTracingMatrix(epoch=0),
+        None,
+        PATHOGEN,
+        profile,
+        None,
+    )
+
+    assert hygiene_calls == [2, 2]
+    assert core.clock.hours_per_epoch == pytest.approx(1.0)
+    assert core._book_epoch is None
+    assert core.surface_pools_by_pathogen[PATHOGEN][ZONE] >= 0.0
+    assert core.food_pools[PATHOGEN][ZONE] >= 0.0
