@@ -52,6 +52,27 @@ ARMS: dict[str, dict[str, Any]] = {
             "intra_epoch_causal_order": "ordered",
         },
     },
+    "carriers_ordered_sub2": {
+        "transmission": {
+            "hand_redeposit_mode": "carriers",
+            "intra_epoch_causal_order": "ordered",
+            "intra_epoch_substeps": 2,
+        },
+    },
+    "carriers_ordered_sub4": {
+        "transmission": {
+            "hand_redeposit_mode": "carriers",
+            "intra_epoch_causal_order": "ordered",
+            "intra_epoch_substeps": 4,
+        },
+    },
+    "carriers_ordered_sub12": {
+        "transmission": {
+            "hand_redeposit_mode": "carriers",
+            "intra_epoch_causal_order": "ordered",
+            "intra_epoch_substeps": 12,
+        },
+    },
 }
 
 
@@ -212,6 +233,7 @@ class CascadeRecorder:
                 (
                     getattr(self, "hand_redeposit_mode", ""),
                     getattr(self, "intra_epoch_order", ""),
+                    getattr(self, "intra_epoch_substeps", 1),
                 )
             ] += 1
             orig_record_strain(self, target, pathogen_id, surface_attribution)
@@ -250,8 +272,8 @@ class CascadeRecorder:
             "sanitary_carrier_hand_gec": self.sanitary_carrier_hand_gec,
             "sanitary_carrier_max_hand_gec": self.sanitary_carrier_max_hand_gec,
             "mode_records": {
-                f"{reposit}|{order}": count
-                for (reposit, order), count in self.mode_records.items()
+                f"{reposit}|{order}|m{substeps}": count
+                for (reposit, order, substeps), count in self.mode_records.items()
             },
             "hand_strain_records": dict(self.hand_strain_records),
             "hand_strain_pathogens": dict(self.hand_strain_pathogens),
