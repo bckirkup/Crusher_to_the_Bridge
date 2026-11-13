@@ -191,6 +191,23 @@ Tolerance remains the solver-gate proposal's: deposited/delivered mass and
 dose within 10% relative error and same sign of posted-conditioned effect;
 infection-count movement is reported, not gated.
 
+### 6.1 Alternative hypothesis: contact/behavioural constants are binding
+
+CE cannot repair a shortage of contacts. If CE agrees with M=1, or all fixed-M
+arms converge to the same deposited/delivered/dose, the solver is not the
+binding constraint; the next suspect is the upstream constants that decide who
+contacts what, when, and how much: surface/contact rates, sanitary visit
+frequency/dwell, food-handler versus diner contacts, hand hygiene/inactivation,
+occupancy/duty schedules, and quarantine/compliance timing. Those constants are
+not all "sociological", but they are the ABM's contact/behaviour layer.
+
+Before proposing any change there, measure which are binding: active-set size
+and event counts, hand occupancy versus Liu, carrier mass entering food/pan,
+sanitary visits/dwell realised, food-handler versus diner contact split,
+quarantine epoch timing, and per-route delivered mass. Classify each as
+measured, inferred, or Grade C. Any revision still needs independent evidence or
+a declared sensitivity range; VSP/attack-rate fitting remains forbidden.
+
 ## 7. Implementation path
 
 1. **This proposal** — freeze scope and parameter budget.
@@ -212,4 +229,6 @@ infection-count movement is reported, not gated.
 - No direct-contact carrier donor sampling or infection-serial chaining.
 - No behavioural/sociological layer changes; quarantine, compliance, NPI, and
   susceptibility remain outside the contamination solver.
+- This proposal does not diagnose or repair behavioural/contact constants; it
+  only determines whether the solver is binding.
 - No campaign submission; local paired-seed witnesses first.
