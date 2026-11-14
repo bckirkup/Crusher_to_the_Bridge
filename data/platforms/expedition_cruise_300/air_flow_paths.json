@@ -217,13 +217,13 @@
       "filtered": true
     },
     {
-      "from": "AHU_MedBay_Dedicated",
-      "to": "AHU_2_Main",
+      "from": "AHU_2_Main",
+      "to": "AHU_MedBay_Dedicated",
       "flow_rate_m3h": 50.0,
       "is_hvac_ducted": false,
       "path": "MedBay_Door_Leakage",
-      "description": "Minimal passive leakage around MedBay door seal. Negative pressure ensures net inflow from corridor.",
-      "direction": "bidirectional",
+      "description": "One-way inward leakage under the stated MedBay negative-pressure regime: surrounding public/corridor air enters MedBay only (CDC VSP 2025 §33.2.1-§33.2.2 for medical spaces; ISO 9943:2009 A.2.3 pressure-ordering analogy). Magnitude unchanged, Grade C.",
+      "direction": "oneway",
       "mechanism": "pressure_opening",
       "filtered": false
     },

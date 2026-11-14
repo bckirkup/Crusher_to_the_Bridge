@@ -271,13 +271,13 @@
       "filtered": false
     },
     {
-      "from": "HVAC_Berthing",
-      "to": "HVAC_Boiler_Rooms",
+      "from": "HVAC_Boiler_Rooms",
+      "to": "HVAC_Berthing",
       "flow_rate_m3h": 150,
       "path": "access_trunk_boilers",
       "is_hvac_ducted": false,
-      "description": "Access trunk from second deck to boiler rooms. Boiler room positive pressure normally pushes air upward.",
-      "direction": "bidirectional",
+      "description": "One-way pressure-directed leakage in the stated normal regime: boiler-room positive pressure carries air upward from the boiler rooms to second-deck berthing/mess spaces (ISO 9943:2009 A.2.3 pressure-ordering analogy; naval hull, Grade C). Magnitude unchanged.",
+      "direction": "oneway",
       "mechanism": "pressure_opening",
       "filtered": false
     },
