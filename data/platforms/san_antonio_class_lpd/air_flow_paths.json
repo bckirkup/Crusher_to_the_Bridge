@@ -270,10 +270,10 @@
       "flow_rate_m3h": 200,
       "path": "medical_exhaust",
       "is_hvac_ducted": true,
-      "description": "Medical ward exhaust. Designed for negative pressure relative to surrounding spaces.",
+      "description": "Medical ward exhaust is a once-through independent exhaust stream with no recirculation-filter credit; the ward remains negative-pressure relative to surrounding spaces (CDC VSP 2025 §33.2.1 naval analogy, Grade C). Magnitude unchanged.",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": false
     },
     {
       "from": "HVAC_Vehicle_Deck",
