@@ -236,6 +236,8 @@ class HVACZone(BaseModel):
     id: str
     rooms: list[str]
     ach: float = 6.0
+    oa_fraction: float | None = None
+    hvac_duty: float | None = None
     description: str | None = None
 
     @field_validator("ach")
@@ -251,6 +253,7 @@ class CrossZoneLink(BaseModel):
     to_zone: str = Field(alias="to")
     flow_rate_m3h: float = 50.0
     is_hvac_ducted: bool = False
+    direction: Literal["oneway", "bidirectional"] | None = None
     path: str | None = None
     description: str | None = None
 
@@ -274,6 +277,8 @@ class AdjacencyEdge(BaseModel):
 
 class AirFlowPaths(BaseModel):
     platform: str
+    oa_fraction: float | None = None
+    hvac_duty: float | None = None
     hvac_zones: list[HVACZone] = []
     cross_zone_links: list[CrossZoneLink] = []
     adjacency: list[AdjacencyEdge] = []
@@ -1569,6 +1574,7 @@ def _check_airflow_graph_refs(
     """Ensure airflow zone, link, and adjacency references resolve."""
     _check_hvac_zone_rooms(airflow, valid_zones, report)
     _check_cross_zone_link_endpoints(airflow, valid_zones, report)
+    _check_exhaust_terminal_link_directions(airflow, report)
     _check_adjacency_endpoints(airflow, valid_zones, report)
 
 
@@ -1587,6 +1593,41 @@ def _check_hvac_zone_rooms(
                     f"HVAC zone '{hz.id}' references room '{room}' "
                     f"not found in spatial_layout.json zones: {valid_zones}",
                 )
+
+
+def _exhaust_only_terminal_ids(airflow: AirFlowPaths) -> set[str]:
+    """HVAC groups the native lane treats as duty-0, oa-1 exhaust terminals."""
+    default_oa = airflow.oa_fraction if airflow.oa_fraction is not None else 0.2
+    default_duty = airflow.hvac_duty if airflow.hvac_duty is not None else 1.0
+    terminals: set[str] = set()
+    for zone in airflow.hvac_zones:
+        duty = zone.hvac_duty if zone.hvac_duty is not None else default_duty
+        oa = zone.oa_fraction if zone.oa_fraction is not None else default_oa
+        if float(duty) <= 0.0 and float(oa) >= 1.0:
+            terminals.add(zone.id)
+    return terminals
+
+
+def _check_exhaust_terminal_link_directions(
+    airflow: AirFlowPaths,
+    report: Report,
+) -> None:
+    """An exhaust-only terminal may never be a link's air source or sink."""
+    terminals = _exhaust_only_terminal_ids(airflow)
+    for link in airflow.cross_zone_links:
+        endpoints = (("from", link.from_zone), ("to", link.to_zone))
+        for endpoint_name, endpoint in endpoints:
+            if endpoint not in terminals or link.direction == "oneway":
+                continue
+            declared = link.direction or "undeclared"
+            report.error(
+                _AIR_FLOW_PATHS_JSON,
+                "AIRFLOW_DIRECTION",
+                f"Cross-zone link '{link.from_zone}' -> '{link.to_zone}' has "
+                f"{endpoint_name} '{endpoint}' on an exhaust-only terminal "
+                f"(hvac_duty <= 0, oa_fraction >= 1.0) with direction "
+                f"{declared}; pin \"direction\": \"oneway\"",
+            )
 
 
 def _check_cross_zone_link_endpoints(

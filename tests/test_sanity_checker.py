@@ -9,6 +9,9 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 from tools.sanity_checker import (
+    AirFlowPaths,
+    CrossZoneLink,
+    HVACZone,
     PathogenProfile,
     PathogensFile,
     Report,
@@ -17,6 +20,7 @@ from tools.sanity_checker import (
     _check_emesis_airborne_exclusion,
     _check_emod_progression,
     _check_escalation_params,
+    _check_exhaust_terminal_link_directions,
     _check_fred_behavior,
     _check_gender_distribution,
     _check_hvac_params,
@@ -265,6 +269,50 @@ class TestHVACParams:
         report = Report()
         _check_hvac_params(cfg, report)
         assert any("natural_decay_rate" in f.message for f in report.errors)
+
+
+# ── Exhaust-terminal link direction checks ───────────────────────────────
+
+class TestExhaustTerminalLinkDirection:
+    @staticmethod
+    def _airflow(link: CrossZoneLink) -> AirFlowPaths:
+        return AirFlowPaths(
+            platform="toy",
+            hvac_zones=[HVACZone(
+                id="AHU_HD_HEAD", rooms=["HEAD"], ach=19.2,
+                oa_fraction=1.0, hvac_duty=0.0,
+            )],
+            cross_zone_links=[link],
+        )
+
+    def test_link_to_exhaust_terminal_requires_oneway(self) -> None:
+        airflow = self._airflow(CrossZoneLink(
+            **{"from": "AHU_served", "to": "AHU_HD_HEAD",
+               "flow_rate_m3h": 100.0},
+        ))
+        report = Report()
+        _check_exhaust_terminal_link_directions(airflow, report)
+        assert not report.passed
+        assert any("AHU_HD_HEAD" in f.message for f in report.errors)
+
+    def test_link_from_exhaust_terminal_requires_oneway(self) -> None:
+        airflow = self._airflow(CrossZoneLink(
+            **{"from": "AHU_HD_HEAD", "to": "AHU_served",
+               "flow_rate_m3h": 100.0},
+        ))
+        report = Report()
+        _check_exhaust_terminal_link_directions(airflow, report)
+        assert not report.passed
+        assert any("AHU_HD_HEAD" in f.message for f in report.errors)
+
+    def test_declared_oneway_passes(self) -> None:
+        airflow = self._airflow(CrossZoneLink(
+            **{"from": "AHU_served", "to": "AHU_HD_HEAD",
+               "flow_rate_m3h": 100.0, "direction": "oneway"},
+        ))
+        report = Report()
+        _check_exhaust_terminal_link_directions(airflow, report)
+        _assert_passed(report)
 
 
 # ── EMOD progression checks ──────────────────────────────────────────────

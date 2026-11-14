@@ -407,6 +407,7 @@ def sanitary_airflow_augment(
                 ),
                 "is_hvac_ducted": False,
                 "path": "Sanitary_Makeup",
+                "direction": "oneway",
                 "description": (
                     f"Transfer air into {block.zone_id}; the head exhausts "
                     f"overboard, never back to the served space."
