@@ -25,6 +25,9 @@ reports, per source zone, the exact whole-hull material-time integral next to
 the hourly endpoint sum the campaign cells record, with and without
 ``direction="oneway"`` applied in memory to ``Sanitary_Makeup`` links. With a
 ContamX binary available it adds the commissioned export (E) lane.
+``--filter-efficiency`` / ``--decay-per-hour`` evaluate other declared
+conditions and write to a ``--label``-suffixed file, leaving the frozen-
+condition artifact untouched.
 """
 
 from __future__ import annotations
@@ -438,10 +441,14 @@ def _spread(values: list[float]) -> dict[str, float]:
 
 def _lane_report(
     engine: Any, sanitary: list[str], named: list[str],
-    horizon_h: float, step_h: float,
+    horizon_h: float, step_h: float, decay_per_h: float,
 ) -> dict[str, Any]:
-    operator = engine._build_decay_free_operator()
+    import numpy as np
+
     ids = list(engine._real_zone_ids)
+    operator = engine._build_decay_free_operator() - decay_per_h * np.eye(
+        len(ids),
+    )
     report: dict[str, Any] = {"zones": len(ids), "sources": {}}
     pairs = [
         _material_time(operator, ids.index(zone), horizon_h, step_h)
@@ -547,11 +554,12 @@ def _hull_check(
         "sanitary_makeup_oneway": _oneway_sanitary(airflow),
     }
     result: dict[str, Any] = {"sanitary_source_zones": len(sanitary)}
+    decay = float(tracer["natural_decay_rate"])
     for label, variant in variants.items():
         lanes: dict[str, Any] = {
             "native": _lane_report(
                 _native(spatial, variant, tracer, step_h),
-                sanitary, named, horizon_h, step_h,
+                sanitary, named, horizon_h, step_h, decay,
             ),
         }
         if binary:
@@ -559,7 +567,7 @@ def _hull_check(
                 spatial, variant, tracer, step_h, binary, tmp_root,
             )
             lanes["contamx_commissioned_export"] = _lane_report(
-                engine, sanitary, named, horizon_h, step_h,
+                engine, sanitary, named, horizon_h, step_h, decay,
             )
             lanes["contamx_commissioned_export"][
                 "galley_related_solved_flows"
@@ -568,13 +576,33 @@ def _hull_check(
     return result
 
 
+def _tracer_conditions(
+    design: dict[str, Any], filter_efficiency: float | None,
+    decay_per_h: float | None,
+) -> dict[str, float]:
+    """Frozen Phase 1 tracer conditions unless a value is overridden."""
+    frozen = design["tracer"]
+    return {
+        "filter_efficiency": float(
+            frozen["filter_efficiency"]
+            if filter_efficiency is None else filter_efficiency,
+        ),
+        "natural_decay_rate": float(
+            frozen["natural_decay_rate"]
+            if decay_per_h is None else decay_per_h,
+        ),
+    }
+
+
 def run_exact_check(
     hulls: list[str], named: list[str], out: str, use_contamx: bool,
+    filter_efficiency: float | None = None,
+    decay_per_h: float | None = None, label: str = "",
 ) -> int:
     from engines.contamx_runner import find_contamx
 
     design = _load_json(DESIGN_REL)
-    tracer = design["tracer"]
+    tracer = _tracer_conditions(design, filter_efficiency, decay_per_h)
     step_h = float(design["matrix"]["epoch_hours"])
     horizon_h = step_h * int(design["matrix"]["epochs"])
     binary = find_contamx() if use_contamx else None
@@ -583,8 +611,13 @@ def run_exact_check(
     report: dict[str, Any] = {
         "schema": "forced_exhaust_exact_integral_check_v1",
         "design": DESIGN_REL,
-        "filter_efficiency": float(tracer["filter_efficiency"]),
-        "natural_decay_rate": float(tracer["natural_decay_rate"]),
+        "filter_efficiency": tracer["filter_efficiency"],
+        "natural_decay_rate": tracer["natural_decay_rate"],
+        "conditions": (
+            "frozen Phase 1 tracer"
+            if filter_efficiency is None and decay_per_h is None
+            else "overridden on the command line"
+        ),
         "horizon_hours": horizon_h,
         "sampling_step_hours": step_h,
         "contamx_lane": bool(binary),
@@ -601,7 +634,12 @@ def run_exact_check(
                 hull, named, tracer, horizon_h, step_h, binary, tmp_root,
             )
             print(f"checked {hull}")
-    with _open_out(out_dir, EXACT_JSON) as fh:
+    name = EXACT_JSON
+    if label:
+        if not re.fullmatch(r"[a-z0-9_]+", label):
+            raise SystemExit("--label must match [a-z0-9_]+")
+        name = EXACT_JSON.replace(".json", f"_{label}.json")
+    with _open_out(out_dir, name) as fh:
         json.dump(report, fh, indent=1, sort_keys=True)
         fh.write("\n")
     return 0
@@ -619,11 +657,29 @@ def main(argv: list[str] | None = None) -> int:
     exact.add_argument("--source", action="append", default=[])
     exact.add_argument("--out", default=DEFAULT_OUT)
     exact.add_argument("--no-contamx", action="store_true")
+    exact.add_argument(
+        "--filter-efficiency", type=float, default=None,
+        help="override the frozen Phase 1 filter efficiency",
+    )
+    exact.add_argument(
+        "--decay-per-hour", type=float, default=None,
+        help="override the frozen Phase 1 natural decay rate",
+    )
+    exact.add_argument(
+        "--label", default="",
+        help="suffix for the output file name (required with overrides)",
+    )
     args = parser.parse_args(argv)
     if args.command == "audit":
         return run_audit(args.out)
+    overridden = (
+        args.filter_efficiency is not None or args.decay_per_hour is not None
+    )
+    if overridden and not args.label:
+        parser.error("--label is required when conditions are overridden")
     return run_exact_check(
         args.hull, args.source, args.out, not args.no_contamx,
+        args.filter_efficiency, args.decay_per_hour, args.label,
     )
 
 

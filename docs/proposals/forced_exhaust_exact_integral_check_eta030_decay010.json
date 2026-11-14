@@ -1,0 +1,261 @@
+{
+ "conditions": "overridden on the command line",
+ "contamx_lane": true,
+ "definition": "unit t0 pulse in one source zone; exact_h is the integral of total retained mass fraction over the horizon; endpoint_sum_h is the sum of end-of-step retained fractions times the step",
+ "design": "campaigns/contam/phase1_hvac_tracer_01/design/phase1_hvac_tracer_design.json",
+ "filter_efficiency": 0.3,
+ "horizon_hours": 12.0,
+ "hulls": {
+  "destroyer_baseline": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 4.150482100471938e-09,
+      "mean": 4.150480446244662e-09,
+      "median": 4.150482100471938e-09,
+      "min": 4.15047713779011e-09,
+      "n": 3
+     },
+     "sanitary_exact_h": {
+      "max": 0.05181336050706207,
+      "mean": 0.05181335943707042,
+      "median": 0.05181336050706207,
+      "min": 0.05181335729708711,
+      "n": 3
+     },
+     "sources": {
+      "HD_MAIN_M": {
+       "endpoint_sum_h": 4.15047713779011e-09,
+       "exact_h": 0.05181335729708711
+      },
+      "Mess_Hall": {
+       "endpoint_sum_h": 0.03890251851979772,
+       "exact_h": 0.32778711048399706
+      }
+     },
+     "zones": 9
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.053803782429364205,
+      "mean": 0.041041802188261665,
+      "median": 0.034661941360162526,
+      "min": 0.03465968277525825,
+      "n": 3
+     },
+     "sanitary_exact_h": {
+      "max": 0.2408457661442766,
+      "mean": 0.21355052919851647,
+      "median": 0.1999081182715795,
+      "min": 0.19989770317969335,
+      "n": 3
+     },
+     "sources": {
+      "HD_MAIN_M": {
+       "endpoint_sum_h": 0.03465968277525825,
+       "exact_h": 0.19989770317969335
+      },
+      "Mess_Hall": {
+       "endpoint_sum_h": 0.07027227181008812,
+       "exact_h": 0.3723578416154153
+      }
+     },
+     "zones": 9
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 4.150482100471938e-09,
+      "mean": 4.150480446244662e-09,
+      "median": 4.150482100471938e-09,
+      "min": 4.15047713779011e-09,
+      "n": 3
+     },
+     "sanitary_exact_h": {
+      "max": 0.05181336050706207,
+      "mean": 0.05181335943707042,
+      "median": 0.05181336050706207,
+      "min": 0.05181335729708711,
+      "n": 3
+     },
+     "sources": {
+      "HD_MAIN_M": {
+       "endpoint_sum_h": 4.15047713779011e-09,
+       "exact_h": 0.05181335729708711
+      },
+      "Mess_Hall": {
+       "endpoint_sum_h": 0.03890251851979772,
+       "exact_h": 0.32778711048399706
+      }
+     },
+     "zones": 9
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.150653704926485e-09,
+      "mean": 4.150653704926485e-09,
+      "median": 4.150653704926485e-09,
+      "min": 4.150653704926485e-09,
+      "n": 3
+     },
+     "sanitary_exact_h": {
+      "max": 0.05181347150259067,
+      "mean": 0.05181347150259067,
+      "median": 0.05181347150259067,
+      "min": 0.05181347150259067,
+      "n": 3
+     },
+     "sources": {
+      "HD_MAIN_M": {
+       "endpoint_sum_h": 4.150653704926485e-09,
+       "exact_h": 0.05181347150259067
+      },
+      "Mess_Hall": {
+       "endpoint_sum_h": 0.032380764471909254,
+       "exact_h": 0.30082083603161847
+      }
+     },
+     "zones": 9
+    }
+   },
+   "sanitary_source_zones": 3
+  },
+  "expedition_cruise_450": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -416.93330987621556,
+       "min_m3h": -416.93330987621556,
+       "paths": 1,
+       "total_m3h": -416.93330987621556
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.036945376490989106,
+      "mean": 0.008259641996609403,
+      "median": 4.150482100471938e-09,
+      "min": 4.15047713779011e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.13863179177089502,
+      "mean": 0.0774769507246815,
+      "median": 0.051813360507062055,
+      "min": 0.05181335729708711,
+      "n": 13
+     },
+     "sources": {
+      "HD_5P_M": {
+       "endpoint_sum_h": 4.150479122862127e-09,
+       "exact_h": 0.051813358581077044
+      },
+      "MainDining": {
+       "endpoint_sum_h": 0.17037767887163713,
+       "exact_h": 0.5229304464899805
+      }
+     },
+     "zones": 47
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.16312961215297972,
+      "mean": 0.09579321353828957,
+      "median": 0.07245755591893682,
+      "min": 0.016210771542344838,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.35369973273081684,
+      "mean": 0.26947489522804446,
+      "median": 0.25997988790625265,
+      "min": 0.14151853520081567,
+      "n": 13
+     },
+     "sources": {
+      "HD_5P_M": {
+       "endpoint_sum_h": 0.07245755591893682,
+       "exact_h": 0.25997988790625265
+      },
+      "MainDining": {
+       "endpoint_sum_h": 0.08115770471881777,
+       "exact_h": 0.4021640960948044
+      }
+     },
+     "zones": 47
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -416.93330987621556,
+       "min_m3h": -416.93330987621556,
+       "paths": 1,
+       "total_m3h": -416.93330987621556
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.036945376490989106,
+      "mean": 0.008259641996609403,
+      "median": 4.150482100471938e-09,
+      "min": 4.15047713779011e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.13863179177089502,
+      "mean": 0.0774769507246815,
+      "median": 0.051813360507062055,
+      "min": 0.05181335729708711,
+      "n": 13
+     },
+     "sources": {
+      "HD_5P_M": {
+       "endpoint_sum_h": 4.150479122862127e-09,
+       "exact_h": 0.051813358581077044
+      },
+      "MainDining": {
+       "endpoint_sum_h": 0.17037767887163713,
+       "exact_h": 0.5229304464899805
+      }
+     },
+     "zones": 47
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.150653704926485e-09,
+      "mean": 4.150653704926485e-09,
+      "median": 4.150653704926485e-09,
+      "min": 4.150653704926485e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.05181347150259067,
+      "mean": 0.05181347150259067,
+      "median": 0.05181347150259067,
+      "min": 0.05181347150259067,
+      "n": 13
+     },
+     "sources": {
+      "HD_5P_M": {
+       "endpoint_sum_h": 4.150653704926485e-09,
+       "exact_h": 0.05181347150259067
+      },
+      "MainDining": {
+       "endpoint_sum_h": 0.0783363613925221,
+       "exact_h": 0.3982075626965899
+      }
+     },
+     "zones": 47
+    }
+   },
+   "sanitary_source_zones": 13
+  }
+ },
+ "natural_decay_rate": 0.1,
+ "sampling_step_hours": 1.0,
+ "schema": "forced_exhaust_exact_integral_check_v1"
+}
