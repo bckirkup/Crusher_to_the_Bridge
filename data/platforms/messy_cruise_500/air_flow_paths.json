@@ -820,7 +820,7 @@
       "flow_rate_m3h": 4000.0,
       "is_hvac_ducted": false,
       "path": "Crew_to_Engine_Stairwell",
-      "description": "One-way pressure-directed leakage in the stated regime: engine-room negative pressure draws air from crew accommodation/service spaces only (CDC VSP 2025 §33.2.1-§33.2.2; ISO 9943:2009 A.2.3 pressure-ordering analogy). Magnitude unchanged, Grade C.",
+      "description": "One-way pressure-directed leakage in the stated regime: engine-room negative pressure draws air from crew accommodation/service spaces only (ISO 9943:2009 A.2.3 pressure-ordering analogy). Magnitude unchanged, Grade C.",
       "direction": "oneway",
       "mechanism": "pressure_opening",
       "filtered": false

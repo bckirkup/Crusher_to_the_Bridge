@@ -45,7 +45,6 @@ EXPECTED: tuple[dict[str, Any], ...] = (
         "flow_rate_m3h": 4000.0,
         "description_tokens": [
             "engine-room negative pressure",
-            "CDC VSP 2025",
             "ISO 9943",
             "Magnitude unchanged",
         ],
@@ -72,7 +71,6 @@ EXPECTED: tuple[dict[str, Any], ...] = (
         "description_tokens": [
             "AHU_Crew_Deck_D4",
             "engine-room negative pressure",
-            "CDC VSP 2025",
             "ISO 9943",
             "Magnitude unchanged",
         ],
@@ -85,7 +83,6 @@ EXPECTED: tuple[dict[str, Any], ...] = (
         "flow_rate_m3h": 4000.0,
         "description_tokens": [
             "engine-room negative pressure",
-            "CDC VSP 2025",
             "ISO 9943",
             "Magnitude unchanged",
         ],
