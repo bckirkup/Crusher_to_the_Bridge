@@ -37,6 +37,12 @@ deposits without changing the legacy RNG path. Arms: `legacy`, `carriers`,
 | 8038 | ordered | 113 | 66 | 446,502 | 19,635,408 | 182,641 | 0 / 0 |
 | 8038 | carriers_ordered | 124 | 63 | 302,233 | 10,931,565 | 6,264,823 | 6,095,209 / 6,733 |
 
+Determinism caveat: these witness rows predate `CS-WINDOW-ORDER-01`. Common-source
+meal-token order could consume `_cs_rng` in `PYTHONHASHSEED`-dependent order, and
+the fixed engine changes at least the seed-8073 `carriers_ordered` M=1 row;
+treat the table as the pre-fix witness record, not stable paired-seed evidence.
+See `NORO-HAND-CASCADE-01-SUBSTEPS-FIXED` for the fixed-engine DS-M re-pilot.
+
 ## Reading
 
 Measured: on both posted seeds, `carriers_ordered` exceeds legacy on
