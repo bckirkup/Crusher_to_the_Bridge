@@ -42,7 +42,9 @@ rows.
 After D1 (`fc858d1c`), the same audit reconciles and reports `direction_present`
 on all 585 sanitary links, zero `native_reverse_on_stated_oneway` flags on
 `Sanitary_Makeup`, and zero sanitary reverse paths. The 14 non-sanitary flags
-remain, unchanged by this entry's scope.
+remain, unchanged by this entry's scope. The destroyer flow-compare diagnostics
+moved `n_paths` 61 → 54 and `cross_zone` 34 → 27, exactly the 7 reverse
+sanitary room paths removed on that hull.
 
 ## Exact-integral material-times
 
