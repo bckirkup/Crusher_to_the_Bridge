@@ -148,7 +148,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -156,7 +159,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_2",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Accom",
@@ -165,7 +171,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Officers; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Officers; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Accom",
@@ -174,7 +182,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -183,7 +193,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_1P; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_1P; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Accom",
@@ -192,7 +204,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_CPO_1P; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_CPO_1P; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     }
   ],
   "adjacency": [

@@ -312,7 +312,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Galley",
@@ -320,7 +323,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_2",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Machinery",
@@ -328,7 +334,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_3",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Magazines",
@@ -336,7 +345,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_4",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Stores",
@@ -344,7 +356,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_5",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -353,7 +368,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into MD_Washroom; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into MD_Washroom; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -362,7 +379,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into GD_Captains_Bath; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into GD_Captains_Bath; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -371,7 +390,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into GD_JnrWarrant_Sanitary; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into GD_JnrWarrant_Sanitary; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -380,7 +401,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into GD_Wardroom_Sanitary; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into GD_Wardroom_Sanitary; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -389,7 +412,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into GD_Servants_Washroom; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into GD_Servants_Washroom; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -398,7 +423,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into GD_Firemens_Washroom; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into GD_Firemens_Washroom; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -407,7 +434,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into GD_CPO_Washroom; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into GD_CPO_Washroom; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -416,7 +445,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into GD_Bow_Sanitary; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into GD_Bow_Sanitary; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -425,7 +456,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into GD_Crews_Showers; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into GD_Crews_Showers; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -434,7 +467,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into BD_Blower_Showers; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into BD_Blower_Showers; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Accommodation",
@@ -443,7 +478,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into BD_Sick_Bay_Bath; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into BD_Sick_Bay_Bath; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     }
   ],
   "adjacency": [

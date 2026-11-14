@@ -69,7 +69,10 @@
       "flow_rate_m3h": 50,
       "path": "ladder_well_fore",
       "is_hvac_ducted": false,
-      "description": "Passive airflow through forward ladder well (no HVAC filtration)"
+      "description": "Passive airflow through forward ladder well (no HVAC filtration)",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "zone_main",
@@ -77,7 +80,10 @@
       "flow_rate_m3h": 80,
       "path": "ladder_well_mid",
       "is_hvac_ducted": false,
-      "description": "Passive airflow through midship ladder well"
+      "description": "Passive airflow through midship ladder well",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "zone_upper",
@@ -85,7 +91,10 @@
       "flow_rate_m3h": 20,
       "path": "ventilation_shaft_aft",
       "is_hvac_ducted": true,
-      "description": "HVAC-ducted ventilation shaft with inline filtration"
+      "description": "HVAC-ducted ventilation shaft with inline filtration",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "zone_main",
@@ -94,7 +103,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_MAIN_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_MAIN_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "zone_main",
@@ -103,7 +114,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_MAIN_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_MAIN_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "zone_upper",
@@ -112,7 +125,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_UPPER_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_UPPER_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     }
   ],
   "adjacency": [

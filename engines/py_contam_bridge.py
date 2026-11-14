@@ -113,6 +113,25 @@ def cross_zone_link_bidirectional(
     return not bool(link.get("is_hvac_ducted", False))
 
 
+def cross_zone_link_semantics(link: dict[str, Any]) -> dict[str, Any]:
+    """Resolve direction, mechanism and filtration for one cross-zone link."""
+    ducted = bool(link.get("is_hvac_ducted", False))
+    fallback_direction, fallback_mechanism, fallback_filtered = (
+        ("oneway", "prescribed_flow", True)
+        if ducted else ("bidirectional", "pressure_opening", False)
+    )
+    return {
+        "direction": link.get("direction", fallback_direction),
+        "mechanism": link.get("mechanism", fallback_mechanism),
+        "filtered": link.get("filtered", fallback_filtered),
+    }
+
+
+def cross_zone_link_filtered(link: dict[str, Any]) -> bool:
+    """Whether one cross-zone link applies recirculation filtration."""
+    return bool(cross_zone_link_semantics(link)["filtered"])
+
+
 def parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
     """Read the declared transport mode for per-pathogen airborne pools."""
     mode = str(hvac_cfg.get(
@@ -281,12 +300,13 @@ class ContamAirflowPath:
 
     Filter efficiency is applied to contaminant mass passing through
     HVAC-ducted paths but NOT through passive openings (passageways,
-    ladder wells).
+    ladder wells). ``filtered`` is the per-path filtration flag; it defaults
+    to ``is_hvac_ducted`` for paths constructed without S1 link fields.
     """
 
     __slots__ = (
         "path_id", "from_zone", "to_zone",
-        "flow_rate_m3h", "path_type", "is_hvac_ducted",
+        "flow_rate_m3h", "path_type", "is_hvac_ducted", "filtered",
     )
 
     def __init__(
@@ -297,6 +317,7 @@ class ContamAirflowPath:
         flow_rate_m3h: float,
         path_type: str = "hvac_duct",
         is_hvac_ducted: bool = True,
+        filtered: bool | None = None,
     ) -> None:
         self.path_id = path_id
         self.from_zone = from_zone
@@ -304,6 +325,7 @@ class ContamAirflowPath:
         self.flow_rate_m3h = flow_rate_m3h
         self.path_type = path_type
         self.is_hvac_ducted = is_hvac_ducted
+        self.filtered = is_hvac_ducted if filtered is None else filtered
 
 
 class ContamTransportEngine:
@@ -569,6 +591,7 @@ class ContamTransportEngine:
             flow = link.get("flow_rate_m3h", 0)
             path_name = link.get("path", f"{link['from']}_to_{link['to']}")
             is_ducted = link.get("is_hvac_ducted", False)
+            filtered = cross_zone_link_filtered(link)
             n_pairs = len(from_rooms) * len(to_rooms)
             pair_flow = flow / n_pairs if n_pairs > 0 else 0
             bidirectional = cross_zone_link_bidirectional(
@@ -586,6 +609,7 @@ class ContamTransportEngine:
                     flow_rate_m3h=pair_flow,
                     path_type="cross_zone",
                     is_hvac_ducted=is_ducted,
+                    filtered=filtered,
                 ))
 
     def _build_adjacency_paths(self, airflow: dict[str, Any]) -> None:
@@ -659,7 +683,7 @@ class ContamTransportEngine:
         q = path.flow_rate_m3h
         c_src = concentrations.get(src, 0.0)
         arriving = q * c_src
-        if path.is_hvac_ducted:
+        if path.filtered:
             arriving *= (1.0 - self.filter_efficiency)
         source_rate[dst] += arriving
 
@@ -739,7 +763,7 @@ class ContamTransportEngine:
             if dst not in source_rate:
                 continue
             arriving = path.flow_rate_m3h * c_mix
-            if path.is_hvac_ducted:
+            if path.filtered:
                 arriving *= (1.0 - self.filter_efficiency)
             source_rate[dst] += arriving
 

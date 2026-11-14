@@ -249,7 +249,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Upper",
@@ -257,7 +260,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_2",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main",
@@ -265,7 +271,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_3",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Second",
@@ -273,7 +282,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_4",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Third",
@@ -281,7 +293,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_5",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Magazines",
@@ -289,7 +304,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_6",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Machinery",
@@ -297,7 +315,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well_7",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches"
+      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main",
@@ -306,7 +327,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Aft; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_Aft; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main",
@@ -315,7 +338,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Fwd; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_Fwd; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Second",
@@ -324,7 +349,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into CPO_Washroom; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into CPO_Washroom; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Second",
@@ -333,7 +360,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Machinery",
@@ -342,7 +371,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into Eng_Force_Wash; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into Eng_Force_Wash; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     }
   ],
   "adjacency": [

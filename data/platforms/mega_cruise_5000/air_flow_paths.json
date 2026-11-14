@@ -906,7 +906,10 @@
       "flow_rate_m3h": 15000.0,
       "is_hvac_ducted": true,
       "path": "Dining_to_Galley_Transfer",
-      "description": "Airflow drawn from dining rooms into galleys to maintain negative pressure in galleys, exhausting odors overboard."
+      "description": "Airflow drawn from dining rooms into galleys to maintain negative pressure in galleys, exhausting odors overboard.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Network_Midship_Atrium",
@@ -914,7 +917,10 @@
       "flow_rate_m3h": 6000.0,
       "is_hvac_ducted": false,
       "path": "Promenade_Forward_Passageway",
-      "description": "Passive multi-deck mixing between Royal Promenade and forward theater/public spaces."
+      "description": "Passive multi-deck mixing between Royal Promenade and forward theater/public spaces.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Crew_Accommodation",
@@ -922,7 +928,10 @@
       "flow_rate_m3h": 4000.0,
       "is_hvac_ducted": false,
       "path": "Crew_to_Engine_Stairwell",
-      "description": "Negative pressure in engine room draws passive air from lower crew service corridors."
+      "description": "Negative pressure in engine room draws passive air from lower crew service corridors.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Medical",
@@ -930,7 +939,10 @@
       "flow_rate_m3h": 100.0,
       "is_hvac_ducted": false,
       "path": "Medical_Door_Leakage",
-      "description": "Minimal passive leakage; Medical and Isolation Ward kept strictly negative relative to surrounding crew/public corridors."
+      "description": "Minimal passive leakage; Medical and Isolation Ward kept strictly negative relative to surrounding crew/public corridors.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Pax_Deck_D6",
@@ -938,7 +950,10 @@
       "flow_rate_m3h": 1200.0,
       "is_hvac_ducted": true,
       "path": "Pax_Trunk_D6_D7",
-      "description": "Main AHU trunk cross-deck recirculation (passenger cabins)."
+      "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D7",
@@ -946,7 +961,10 @@
       "flow_rate_m3h": 1200.0,
       "is_hvac_ducted": true,
       "path": "Pax_Trunk_D7_D8",
-      "description": "Main AHU trunk cross-deck recirculation (passenger cabins)."
+      "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D8",
@@ -954,7 +972,10 @@
       "flow_rate_m3h": 1200.0,
       "is_hvac_ducted": true,
       "path": "Pax_Trunk_D8_D9",
-      "description": "Main AHU trunk cross-deck recirculation (passenger cabins)."
+      "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D9",
@@ -962,7 +983,10 @@
       "flow_rate_m3h": 1200.0,
       "is_hvac_ducted": true,
       "path": "Pax_Trunk_D9_D10",
-      "description": "Main AHU trunk cross-deck recirculation (passenger cabins)."
+      "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D10",
@@ -970,7 +994,10 @@
       "flow_rate_m3h": 1200.0,
       "is_hvac_ducted": true,
       "path": "Pax_Trunk_D10_D11",
-      "description": "Main AHU trunk cross-deck recirculation (passenger cabins)."
+      "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D11",
@@ -978,7 +1005,10 @@
       "flow_rate_m3h": 1200.0,
       "is_hvac_ducted": true,
       "path": "Pax_Trunk_D11_D12",
-      "description": "Main AHU trunk cross-deck recirculation (passenger cabins)."
+      "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D12",
@@ -986,7 +1016,10 @@
       "flow_rate_m3h": 1200.0,
       "is_hvac_ducted": true,
       "path": "Pax_Trunk_D12_D13",
-      "description": "Main AHU trunk cross-deck recirculation (passenger cabins)."
+      "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D13",
@@ -994,7 +1027,10 @@
       "flow_rate_m3h": 1200.0,
       "is_hvac_ducted": true,
       "path": "Pax_Trunk_D13_D14",
-      "description": "Main AHU trunk cross-deck recirculation (passenger cabins)."
+      "description": "Main AHU trunk cross-deck recirculation (passenger cabins).",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Crew_Deck_D1",
@@ -1002,7 +1038,10 @@
       "flow_rate_m3h": 800.0,
       "is_hvac_ducted": true,
       "path": "Crew_Trunk_D1_D2",
-      "description": "Crew accommodation trunk cross-deck link."
+      "description": "Crew accommodation trunk cross-deck link.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Crew_Deck_D2",
@@ -1010,7 +1049,10 @@
       "flow_rate_m3h": 800.0,
       "is_hvac_ducted": true,
       "path": "Crew_Trunk_D2_D3",
-      "description": "Crew accommodation trunk cross-deck link."
+      "description": "Crew accommodation trunk cross-deck link.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Crew_Deck_D3",
@@ -1018,7 +1060,10 @@
       "flow_rate_m3h": 800.0,
       "is_hvac_ducted": true,
       "path": "Crew_Trunk_D3_D4",
-      "description": "Crew accommodation trunk cross-deck link."
+      "description": "Crew accommodation trunk cross-deck link.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D6",
@@ -1026,7 +1071,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D6",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D7",
@@ -1034,7 +1082,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D7",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D8",
@@ -1042,7 +1093,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D8",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D9",
@@ -1050,7 +1104,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D9",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D10",
@@ -1058,7 +1115,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D10",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D11",
@@ -1066,7 +1126,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D11",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D12",
@@ -1074,7 +1137,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D12",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D13",
@@ -1082,7 +1148,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D13",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_Deck_D14",
@@ -1090,7 +1159,10 @@
       "flow_rate_m3h": 1500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D14",
-      "description": "Corridor relief exhaust to atrium/promenade trunk."
+      "description": "Corridor relief exhaust to atrium/promenade trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Crew_Deck_D4",
@@ -1098,7 +1170,10 @@
       "flow_rate_m3h": 2000.0,
       "is_hvac_ducted": false,
       "path": "Crew_to_Engine_Stairwell",
-      "description": "Lower crew decks draw toward engine negative pressure."
+      "description": "Lower crew decks draw toward engine negative pressure.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Engine",
@@ -1107,7 +1182,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_0E_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_0E_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1116,7 +1193,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_0T_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_0T_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1125,7 +1204,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_0T_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_0T_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Forward_Public",
@@ -1134,7 +1215,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_14S_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_14S_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Forward_Public",
@@ -1143,7 +1226,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_14S_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_14S_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1152,7 +1237,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_14Y_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_14Y_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1161,7 +1248,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_14Y_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_14Y_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1170,7 +1259,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_15P_M_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_15P_M_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1179,7 +1270,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_15P_M_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_15P_M_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1188,7 +1281,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_15P_F_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_15P_F_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1197,7 +1292,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_15P_F_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_15P_F_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1206,7 +1303,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_15P_F_3; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_15P_F_3; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1215,7 +1314,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_15P_F_4; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_15P_F_4; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1224,7 +1325,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_15S_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_15S_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1233,7 +1336,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_15S_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_15S_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Forward_Public",
@@ -1242,7 +1347,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_16B_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_16B_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1251,7 +1358,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_16BU_M_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_16BU_M_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1260,7 +1369,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_16BU_M_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_16BU_M_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1269,7 +1380,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_16BU_F_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_16BU_F_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1278,7 +1391,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_16BU_F_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_16BU_F_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Forward_Public",
@@ -1287,7 +1402,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_16S_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_16S_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Forward_Public",
@@ -1296,7 +1413,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_16S_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_16S_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Engine",
@@ -1305,7 +1424,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_1E_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_1E_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1314,7 +1435,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_1S_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_1S_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1323,7 +1446,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_1S_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_1S_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1332,7 +1457,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_1ST_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_1ST_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1341,7 +1468,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_1ST_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_1ST_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Crew_Accommodation",
@@ -1350,7 +1479,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_2C_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_2C_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Crew_Accommodation",
@@ -1359,7 +1490,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_2C_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_2C_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Medical",
@@ -1368,7 +1501,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_2M_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_2M_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Medical",
@@ -1377,7 +1512,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_2M_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_2M_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Crew_Accommodation",
@@ -1386,7 +1523,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3C_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3C_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Crew_Accommodation",
@@ -1395,7 +1534,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3C_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3C_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1404,7 +1545,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3D_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3D_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1413,7 +1556,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3D_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3D_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1422,7 +1567,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3E_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3E_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1431,7 +1578,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3E_F_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3E_F_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1440,7 +1589,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3E_F_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3E_F_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1449,7 +1600,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3S_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3S_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1458,7 +1611,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_3S_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_3S_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1467,7 +1622,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_4D_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_4D_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1476,7 +1633,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_4D_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_4D_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Midship_Atrium",
@@ -1485,7 +1644,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_4E_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_4E_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Midship_Atrium",
@@ -1494,7 +1655,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_4E_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_4E_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Forward_Public",
@@ -1503,7 +1666,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_4T_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_4T_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Forward_Public",
@@ -1512,7 +1677,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_4T_F_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_4T_F_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Forward_Public",
@@ -1521,7 +1688,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_4T_F_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_4T_F_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Midship_Atrium",
@@ -1530,7 +1699,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_5P_M_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_5P_M_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Midship_Atrium",
@@ -1539,7 +1710,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_5P_M_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_5P_M_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Midship_Atrium",
@@ -1548,7 +1721,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_5P_F_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_5P_F_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Midship_Atrium",
@@ -1557,7 +1732,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_5P_F_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_5P_F_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Midship_Atrium",
@@ -1566,7 +1743,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_5P_F_3; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_5P_F_3; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Pax_Deck_D6",
@@ -1575,7 +1754,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_6A_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_6A_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Pax_Deck_D6",
@@ -1584,7 +1765,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_6A_F_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_6A_F_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Pax_Deck_D6",
@@ -1593,7 +1776,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_6A_F_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_6A_F_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1602,7 +1787,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_6P_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_6P_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1611,7 +1798,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_6P_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_6P_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1620,7 +1809,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_6S_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_6S_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Dedicated_Service_Exhaust",
@@ -1629,7 +1820,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_6S_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_6S_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1638,7 +1831,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_8C_M_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_8C_M_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1647,7 +1842,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_8C_M_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_8C_M_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1656,7 +1853,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_8C_F_1; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_8C_F_1; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Network_Aft_Dining_Rec",
@@ -1665,7 +1864,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_8C_F_2; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_8C_F_2; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     }
   ],
   "adjacency": [
