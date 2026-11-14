@@ -27,7 +27,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from engines.py_contam_bridge import derive_volume_m3
+from engines.py_contam_bridge import cross_zone_link_semantics, derive_volume_m3
 from tools import contam_hobbyist as _hobby
 
 PRJ_SIGNATURE_34 = "ContamW 3.4.0.0 0"
@@ -42,8 +42,9 @@ _CONTAM_NAME_MAX = 15
 _DEFAULT_OA_FRACTION = 0.2
 _OA_SCHEDULE_NR = 1  # week-schedule index for skeleton OAFracW
 
-# Element type codes (CONTAM 3.4)
+# Element icon codes (CONTAM 3.4); ContamX ignores the icon field.
 _ELEM_ORIFICE = 23
+_ELEM_BACKDRAFT_BDQ = 24
 _ELEM_FAN_CVF = 28
 
 # Zone flags
@@ -351,6 +352,7 @@ class _NetworkBuilder:
         self.orifice_elem_by_key: dict[str, int] = {"envelope": 2}
         self.fan_elem_by_m3s: dict[float, int] = {}
         self.orifice_elem_by_area: dict[float, int] = {}
+        self.backdraft_elem_by_m3s: dict[float, int] = {}
 
         # Hobbyist schedules / wind / filters (indices are 1-based Contam refs)
         self.sched_oa_week = 0
@@ -557,6 +559,44 @@ class _NetworkBuilder:
         })
         self.fan_elem_by_m3s[key] = nr
         return nr
+
+    def _backdraft_elem_for_flow(self, flow_m3h: float) -> int:
+        """Sized plr_bdq one-way passive opening for declared design flow.
+
+        NIST TN 1887r1 Appendix A: ``plr_bdq`` is the volume-flow powerlaw
+        backdraft damper; the negative-pressure branch is set to zero so the
+        path cannot reverse. The positive branch is sized at the same 1 Pa
+        reference used for ``plr_orfc``.
+        """
+        area = _orifice_area_m2_for_flow_m3h(flow_m3h)
+        flow_m3s = max(float(flow_m3h), 0.0) / 3600.0
+        key = round(flow_m3s, 12)
+        if key in self.backdraft_elem_by_m3s:
+            return self.backdraft_elem_by_m3s[key]
+        nr = len(self.elements) + 1
+        el_name = _unique_contam_name(f"XZBDQ_{nr}", self.used_contam_names)
+        self.elements.append({
+            "nr": nr,
+            "type": _ELEM_BACKDRAFT_BDQ,
+            "symbol": "plr_bdq",
+            "name": el_name,
+            "params": f"0 {flow_m3s:.12g} 0.5 0 0.5",
+            "area_m2": area,
+            "flow_m3h": flow_m3h,
+        })
+        self.backdraft_elem_by_m3s[key] = nr
+        return nr
+
+    def _cross_zone_filter_nr(self) -> int:
+        """Filter ref for a filtered cross-zone path (0 when not emitted)."""
+        if not self.hobbyist or not self.pack:
+            return 0
+        preset = _hobby.resolve_filter_preset(
+            self.pack,
+            self.overrides,
+            filter_efficiency=self.filter_efficiency,
+        )
+        return self._ensure_filter(preset)
 
     def _orifice_elem_for_flow(self, flow_m3h: float) -> int:
         """Sized plr_orfc for passive cross-zone design flow at 1 Pa."""
@@ -806,14 +846,22 @@ class _NetworkBuilder:
             pair_flow = flow / n_pairs if n_pairs > 0 else 0.0
             if pair_flow <= 0.0:
                 continue
-            kind = link.get("path", "cross_zone")
+            kind = str(link.get("path", "cross_zone"))
+            semantics = cross_zone_link_semantics(link)
+            direction = str(semantics.get("direction") or "")
+            mechanism = str(semantics.get("mechanism") or "")
+            filtered = bool(semantics.get("filtered"))
             ducted = bool(link.get("is_hvac_ducted", False))
-            if ducted:
+            if mechanism == "prescribed_flow":
                 elem = self._fan_elem(pair_flow)
                 sched_nr = 0
             else:
-                elem = self._orifice_elem_for_flow(pair_flow)
-                sched_nr = self._passive_cross_zone_schedule(str(kind))
+                sched_nr = self._passive_cross_zone_schedule(kind)
+                if direction == "oneway":
+                    elem = self._backdraft_elem_for_flow(pair_flow)
+                else:
+                    elem = self._orifice_elem_for_flow(pair_flow)
+            filter_nr = self._cross_zone_filter_nr() if filtered else 0
             for fr, tr in itertools.product(from_rooms, to_rooms):
                 self._add_path(
                     self.zone_name_to_nr[fr], self.zone_name_to_nr[tr], elem,
@@ -821,7 +869,10 @@ class _NetworkBuilder:
                     kind=kind,
                     is_hvac_ducted=ducted,
                     crusher_transfer=True,
-                    fields=self.PathFields(sched_nr=sched_nr),
+                    fields=self.PathFields(
+                        sched_nr=sched_nr,
+                        filter_nr=filter_nr,
+                    ),
                 )
 
     # ── air-handling systems ──────────────────────────────────────────────

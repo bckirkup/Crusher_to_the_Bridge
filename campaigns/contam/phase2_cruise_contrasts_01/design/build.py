@@ -25,6 +25,7 @@ POOLS_PATH = CAMPAIGN_DIR / "source_pools.json"
 CAMPAIGN_JSON_PATH = CAMPAIGN_DIR / "campaign.json"
 
 DESIGN_ID = "contam_phase2_cruise_contrasts_01"
+DESIGN_ID_V2 = "contam_phase2_cruise_contrasts_02"
 MANIFEST_REL = "docs/proposals/contam_phase2_scope_manifest.md"
 MANIFEST_PR = 1183
 MANIFEST_AMENDMENT_PR = 1185
@@ -54,6 +55,10 @@ S3_BUCKET = "crusherbucket-994254241749-us-east-1-an"
 S3_PREFIX = f"campaign/{DESIGN_ID}/"
 FIELD_CACHE_S3_URI = f"s3://{S3_BUCKET}/{S3_PREFIX}field_cache/field_cache.json"
 FIELD_CACHE_SCHEMA = "contam_phase2_cruise_contrasts_field_cache_v1"
+FIELD_CACHE_SCHEMA_V2 = "contam_phase2_cruise_contrasts_field_cache_v2"
+FIELD_CACHE_V2_S3_URI = (
+    f"s3://{S3_BUCKET}/campaign/{DESIGN_ID_V2}/field_cache/field_cache.json"
+)
 PHASE1_FIELD_CACHE_SHA256 = (
     "b91665323192f95591f538aeb9badfefc1c6e7393aa7c4cafaef0748a496f5b5"
 )
