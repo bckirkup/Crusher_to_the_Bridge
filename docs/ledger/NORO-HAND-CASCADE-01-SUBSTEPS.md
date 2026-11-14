@@ -120,3 +120,7 @@ solver branch should be the continuous/event-driven contamination reference or
 a redesigned stochastic substep rule; a larger fixed M is not yet justified by
 these data. Runtime stayed ~57-100s per voyage, so runtime is not the current
 blocker.
+
+The uncontrolled-hash ratio check above is superseded for paired DS-M
+comparisons by `NORO-HAND-CASCADE-01-SUBSTEPS-FIXED`, measured after
+`CS-WINDOW-ORDER-01`.
