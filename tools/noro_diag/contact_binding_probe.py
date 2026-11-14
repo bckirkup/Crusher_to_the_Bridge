@@ -59,7 +59,7 @@ def _route_attribution(sim: Any, pathogen_id: str) -> dict[str, Any]:
         if total <= 0.0:
             continue
         hosts += 1
-        dominant = max(ledger, key=lambda route: float(ledger[route]))
+        dominant = max(ledger.items(), key=lambda item: float(item[1]))[0]
         dominant_counts[str(dominant)] += 1
         for route, dose in ledger.items():
             dose_by_route[str(route)] += float(dose)
@@ -90,15 +90,17 @@ def run_binding(
     with attr_patches() as patches:
         originals = install_wrappers(tc.TransmissionCore, cascade.wrappers())
         patches.note_all(tc.TransmissionCore, originals)
-        with materialized_picard_spec(spec, REPO_ROOT) as picard_spec:
-            with fmb.instrumented(rec):
-                sim = ShipSimulation(picard_spec, display=False)
-                sim.run()
-                tx_core = getattr(sim, "tx_core", None)
-                route = _route_attribution(sim, pathogen_id)
-                sanitary = dict(
-                    getattr(tx_core, "sanitary_telemetry", {}) or {},
-                )
+        with (
+            materialized_picard_spec(spec, REPO_ROOT) as picard_spec,
+            fmb.instrumented(rec),
+        ):
+            sim = ShipSimulation(picard_spec, display=False)
+            sim.run()
+            tx_core = getattr(sim, "tx_core", None)
+            route = _route_attribution(sim, pathogen_id)
+            sanitary = dict(
+                getattr(tx_core, "sanitary_telemetry", {}) or {},
+            )
 
     summary = fmb.summarise(rec, seed, epochs)
     summary["platform"] = str(spec["catalog"]["platform_id"])
