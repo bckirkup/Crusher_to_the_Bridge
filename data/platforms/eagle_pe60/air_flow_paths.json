@@ -88,6 +88,7 @@
       "flow_rate_m3h": 118.9,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
+      "direction": "oneway",
       "description": "Transfer air into Officers_Head; the head exhausts overboard, never back to the served space."
     },
     {
@@ -96,6 +97,7 @@
       "flow_rate_m3h": 356.7,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
+      "direction": "oneway",
       "description": "Transfer air into Crew_WC; the head exhausts overboard, never back to the served space."
     }
   ],

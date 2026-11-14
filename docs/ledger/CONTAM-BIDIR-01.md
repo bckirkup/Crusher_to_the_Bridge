@@ -5,6 +5,13 @@
 **Status:** measured
 **Measured at:** ec3036d9
 
+> **Update (2026-11-14, `CONTAM-SANITARY-DIR-01`):** the measured fleet
+> improvement and the unchanged `bidirectional` default stand, but the
+> undeclared-passive default silently reversed the authored one-way
+> guarantee on 585 `Sanitary_Makeup` links (599 flagged links / 6,131
+> reverse room paths fleet-wide in the forced-exhaust audit). D1 pins those
+> links `direction: "oneway"`; see `CONTAM-SANITARY-DIR-01.md`.
+
 Implements ranked fix #4 of `docs/contam_museum_hull_audit.md`
 (CONTAM-MUSEUM-01): directed vs bidirectional passive links.
 

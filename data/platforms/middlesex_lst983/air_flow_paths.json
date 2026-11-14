@@ -178,6 +178,7 @@
       "flow_rate_m3h": 118.9,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
+      "direction": "oneway",
       "description": "Transfer air into HD_Officers; the head exhausts overboard, never back to the served space."
     },
     {
@@ -186,6 +187,7 @@
       "flow_rate_m3h": 951.2,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
+      "direction": "oneway",
       "description": "Transfer air into Wash_WC_Stern; the head exhausts overboard, never back to the served space."
     },
     {
@@ -194,6 +196,7 @@
       "flow_rate_m3h": 356.7,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
+      "direction": "oneway",
       "description": "Transfer air into HD_Troop_Fwd; the head exhausts overboard, never back to the served space."
     },
     {
@@ -202,6 +205,7 @@
       "flow_rate_m3h": 594.5,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
+      "direction": "oneway",
       "description": "Transfer air into HD_Crew_Aft; the head exhausts overboard, never back to the served space."
     }
   ],

@@ -16,6 +16,14 @@ the flu arm.
 
 ## 1. Currently withdrawn
 
+**`CONTAM-SANITARY-DIR-01` (ledger entry): every airborne/downstream-map
+dose figure measured before this change on a hull with `Sanitary_Makeup`
+links is historical on the reverse-sanitary-edge channel.** The 585 links
+now declare `direction: "oneway"`; native `build_hvac_downstream_map` no
+longer carries sanitary head-to-served-space reverse edges. Figures not
+resting on that channel stand at their own `Measured at` SHAs; baseline
+`a4a12227`, fix `fc858d1c`.
+
 **CABIN-OCC-01 + ROOM-AIR-01 (ledger entries tagged `all`): every
 airborne-route dose figure on any hull that declares AHU rates, and every
 confined-cabinmate figure, moves at `1b9d37ca`.** Room-pool inhalation routes

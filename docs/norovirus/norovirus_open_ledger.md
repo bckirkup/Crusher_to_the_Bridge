@@ -16,6 +16,14 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`CONTAM-SANITARY-DIR-01` (ledger entry): every airborne/downstream-map
+dose figure measured before this change on a hull with `Sanitary_Makeup`
+links is historical on the reverse-sanitary-edge channel.** The 585 links
+now declare `direction: "oneway"`; native `build_hvac_downstream_map` no
+longer carries sanitary head-to-served-space reverse edges. Figures not
+resting on that channel stand at their own `Measured at` SHAs; baseline
+`a4a12227`, fix `fc858d1c`.
+
 **`ISO-QUARTERS-01` (ledger entry): every steward-side service dose
 figure on the emetic channel measured before this change is a gate
 artefact, not mechanism state.** Two legs of one defect: a host at

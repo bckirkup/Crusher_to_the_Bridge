@@ -679,6 +679,81 @@ class TestDuty0TerminalMode:
         ) == "sealed"
 
 
+# ── Sanitary makeup direction (CONTAM-SANITARY-DIR-01) ───────────────────
+
+class TestSanitaryMakeupDirection:
+    """A pulse in an exhaust-only head cannot leak back through makeup air."""
+
+    ACH = 19.2
+
+    @staticmethod
+    def _layout() -> dict:
+        return {
+            "zones": [
+                {"id": "HEAD", "volume_m3": 10.0},
+                {"id": "CABIN", "volume_m3": 100.0},
+            ],
+        }
+
+    @staticmethod
+    def _airflow() -> dict:
+        return {
+            "hvac_zones": [
+                {"id": "AHU_served", "rooms": ["CABIN"], "ach": 6.0,
+                 "oa_fraction": 0.2, "hvac_duty": 1.0},
+                {"id": "AHU_HD_HEAD", "rooms": ["HEAD"], "ach": 19.2,
+                 "oa_fraction": 1.0, "hvac_duty": 0.0},
+            ],
+            "cross_zone_links": [{
+                "from": "AHU_served",
+                "to": "AHU_HD_HEAD",
+                "flow_rate_m3h": 100.0,
+                "is_hvac_ducted": False,
+                "path": "Sanitary_Makeup",
+                "direction": "oneway",
+            }],
+            "adjacency": [],
+        }
+
+    @staticmethod
+    def _engine() -> ContamTransportEngine:
+        return ContamTransportEngine(
+            TestSanitaryMakeupDirection._layout(),
+            TestSanitaryMakeupDirection._airflow(),
+            natural_decay_rate=0.0,
+        )
+
+    def test_head_pulse_has_no_paths_to_other_zones(self) -> None:
+        import numpy as np
+
+        engine = self._engine()
+        operator = engine._build_decay_free_operator()
+        head_column = engine._real_zone_ids.index("HEAD")
+        off_diagonal = np.delete(operator[:, head_column], head_column)
+        assert float(np.max(np.abs(off_diagonal))) == pytest.approx(
+            0.0, abs=1e-12,
+        )
+
+    def test_head_material_time_is_reciprocal_ach(self) -> None:
+        import numpy as np
+        from scipy.linalg import expm
+
+        engine = self._engine()
+        operator = engine._build_decay_free_operator()
+        n = operator.shape[0]
+        head_index = engine._real_zone_ids.index("HEAD")
+        start = np.zeros(n)
+        start[head_index] = 1.0
+        horizon_h = 12.0
+        block = np.zeros((2 * n, 2 * n))
+        block[:n, :n] = operator
+        block[:n, n:] = np.eye(n)
+        material_time = float(
+            (expm(block * horizon_h)[:n, n:] @ start).sum(),
+        )
+        assert material_time == pytest.approx(1.0 / self.ACH, rel=1e-10)
+
+
 # ── Cross-zone-link endpoint resolution (CONTAM-XZONE-01) ────────────────
 
 class TestXzoneEndpointResolution:
