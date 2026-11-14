@@ -84,6 +84,14 @@ seeds 8046, 8047, and 8077 (the next three legacy posted rows by reported
 passenger AR after 8073/8038). Each row is again a fresh single-seed witness
 process.
 
+Determinism caveat: these rows were generated without a fixed `PYTHONHASHSEED`.
+`CS-WINDOW-ORDER-01` later found that common-source meal-token iteration
+consumed `_cs_rng` in hash-seed-dependent order when a dining zone had two meal
+tokens in one epoch; seed 8038 was confirmed hash-sensitive and the fixed engine
+now canonicalizes the order at `07106b7b`. Treat the uncontrolled-hash pilot
+rows below as suspect until re-run at or after that fix; they are retained as
+the pre-fix pilot record, not as stable paired-seed evidence.
+
 | seed | arm | infected | symptomatic | dose GEC | delivered GEC | deposited GEC | carrier surface GEC / calls |
 |---:|---|---:|---:|---:|---:|---:|---:|
 | 8046 | `carriers_ordered` | 93 | 44 | 355,616 | 15,710,148 | 8,288,760 | 8,067,270 / 5390 |

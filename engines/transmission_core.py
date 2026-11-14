@@ -13607,14 +13607,18 @@ class TransmissionCore:
         self,
         members: list[KorkinAgent] | None,
         epoch: int,
-    ) -> set[str]:
-        """Meal tokens the zone's assigned cohort is dining on this epoch."""
+    ) -> list[str]:
+        """Meal tokens the zone's assigned cohort is dining on this epoch.
+
+        Returned in sorted order: the caller consumes ``_cs_rng`` once per
+        window, so the iteration order must not depend on ``PYTHONHASHSEED``.
+        """
         tokens: set[str] = set()
         for agent in members or ():
             activity = self._scheduled_activity(agent, epoch)
             if activity.startswith(MEAL_PREFIX):
                 tokens.add(activity)
-        return tokens
+        return sorted(tokens)
 
     def _cs_open_window(
         self,
