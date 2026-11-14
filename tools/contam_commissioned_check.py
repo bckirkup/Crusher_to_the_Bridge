@@ -27,6 +27,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import os
 import re
@@ -222,14 +223,13 @@ def _declared_prescribed_paths(
         pair_flow = flow / n_pairs if n_pairs > 0 else 0.0
         if pair_flow <= 0.0:
             continue
-        for fr in from_rooms:
-            for tr in to_rooms:
-                declared.append({
-                    "kind": kind,
-                    "from_zone": fr,
-                    "to_zone": tr,
-                    "declared_flow_m3h": pair_flow,
-                })
+        for fr, tr in itertools.product(from_rooms, to_rooms):
+            declared.append({
+                "kind": kind,
+                "from_zone": fr,
+                "to_zone": tr,
+                "declared_flow_m3h": pair_flow,
+            })
     return declared
 
 
