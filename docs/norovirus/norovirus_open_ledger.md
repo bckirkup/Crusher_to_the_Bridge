@@ -51,6 +51,19 @@ frozen E-lane caches are unchanged. Figures not resting on that channel stand
 at their own `Measured at` SHAs; baseline `01a3482e`, authoring commit
 `541b9f4f`.
 
+**`CONTAM-FORCED-EXHAUST-DUCTED-01` (ledger entry): airborne/downstream-map
+dose figures measured before this change on the two hulls carrying the
+medical exhaust links authored there are historical on the medical-exhaust
+filtration channel.** The two `medical_exhaust` links now declare
+`filtered: false` as once-through independent exhaust with no
+recirculation-filter credit; the other 43 ducted relief links in the row-5
+class were reviewed and keep their declared filtration. Native exact
+material-times moved on affected endpoints (ledger
+`docs/ledger/CONTAM-FORCED-EXHAUST-DUCTED-01.md`, measured at `e56172a8`);
+frozen E-lane caches are unchanged. Figures not resting on that channel
+stand at their own `Measured at` SHAs; baseline `d038bc3c`, authoring
+commit `e56172a8`.
+
 **`ISO-QUARTERS-01` (ledger entry): every steward-side service dose
 figure on the emetic channel measured before this change is a gate
 artefact, not mechanism state.** Two legs of one defect: a host at
