@@ -248,10 +248,10 @@
       "flow_rate_m3h": 400,
       "path": "galley_exhaust_to_mess",
       "is_hvac_ducted": true,
-      "description": "Galley exhaust partially recirculated to mess decks. Hood exhaust vented topside.",
+      "description": "Declared galley-exhaust recirculation to crew habitable spaces is judged unintended by the naval analogy to CDC VSP 2025 §33.2.1 / ISO 9943:2009 §4.1; hood exhaust remains topside. The HVAC-group leg and magnitude are unchanged pending the ducted-exhaust row, and this leg carries no filtration/recirculation credit.",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": false
     },
     {
       "from": "HVAC_Galley",

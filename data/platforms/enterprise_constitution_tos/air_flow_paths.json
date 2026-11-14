@@ -341,13 +341,14 @@
       "filtered": false
     },
     {
-      "from": "Galley",
-      "to": "Mess_Hall",
+      "from": "Mess_Hall",
+      "to": "Galley",
       "flow_rate_m3h": 5000.0,
       "is_hvac_ducted": false,
       "path": "Galley_Service_Exhaust",
-      "direction": "bidirectional",
-      "mechanism": "pressure_opening",
+      "description": "One-way make-up transfer from the mess hall into the galley; the declared sense is flipped so the galley remains the lower-pressure exhaust boundary by analogy to ISO 9943:2009 A.2.3. Magnitude remains Grade C and unchanged.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
       "filtered": false
     },
     {

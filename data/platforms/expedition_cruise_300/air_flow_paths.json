@@ -211,7 +211,7 @@
       "flow_rate_m3h": 600.0,
       "is_hvac_ducted": true,
       "path": "Galley_Exhaust_Return",
-      "description": "Partial return from service areas. Galley grease-hood exhaust is 100% overboard; remaining service air partially recirculated.",
+      "description": "Partial return of non-galley service-area air from AHU_3_Service to AHU_2_Main. Galley grease-hood exhaust is 100% overboard and is not recirculated (CDC VSP 2025 §33.2.1; ISO 9943:2009 §4.1/A.2.3); the remaining service return stays a filtered prescribed-flow leg. Magnitude unchanged, Grade C.",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
       "filtered": true
