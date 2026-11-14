@@ -103,12 +103,21 @@
         },
         "is_hvac_ducted": {
           "type": "boolean",
-          "description": "Whether airflow passes through HVAC filtration"
+          "description": "Deprecated alias retained for the S1 migration. When direction, mechanism and filtered are absent it expands to oneway/prescribed_flow/filtered=true; otherwise bidirectional/pressure_opening/filtered=false. Explicit fields win; do not delete until direction becomes required."
         },
         "direction": {
           "type": "string",
           "enum": ["oneway", "bidirectional"],
-          "description": "Declared direction (CONTAM-BIDIR-01). Absent: ducted links are one-way fan legs, passive links are bidirectional like the ContamX orifice they export as. Pin \"oneway\" on a genuinely directed link."
+          "description": "Declared direction (CONTAM-BIDIR-01). It stays optional during S1; absent resolves through the is_hvac_ducted alias expansion, where ducted links are one-way fan legs and passive links are bidirectional like the ContamX orifice they export as. Pin \"oneway\" on a genuinely directed link."
+        },
+        "mechanism": {
+          "type": "string",
+          "enum": ["prescribed_flow", "pressure_opening"],
+          "description": "Declared cross-zone transport mechanism. Optional during S1; absent resolves through the is_hvac_ducted alias expansion (true -> prescribed_flow, false -> pressure_opening), with explicit fields winning. direction stays optional until the later required-direction migration."
+        },
+        "filtered": {
+          "type": "boolean",
+          "description": "Whether the recirculation filter efficiency applies to mass crossing this link. Optional during S1; absent resolves through the is_hvac_ducted alias expansion (true -> true, false -> false), with explicit fields winning."
         },
         "path": {"type": "string"},
         "description": {"type": "string"}

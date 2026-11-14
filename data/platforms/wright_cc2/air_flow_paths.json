@@ -205,7 +205,10 @@
       "flow_rate_m3h": 200.0,
       "path": "hangar_door",
       "is_hvac_ducted": false,
-      "description": "hangar side openings + elevator"
+      "description": "hangar side openings + elevator",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Hangar_Bay_Aft",
@@ -213,7 +216,10 @@
       "flow_rate_m3h": 60.0,
       "path": "ladder_well",
       "is_hvac_ducted": false,
-      "description": "hangar to shops"
+      "description": "hangar to shops",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Aft_Berthing_Main",
@@ -221,7 +227,10 @@
       "flow_rate_m3h": 60.0,
       "path": "ladder_well",
       "is_hvac_ducted": false,
-      "description": "main->2nd aft berthing ladders"
+      "description": "main->2nd aft berthing ladders",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Crew_Berthing_Aft_2nd",
@@ -229,7 +238,10 @@
       "flow_rate_m3h": 60.0,
       "path": "ladder_well",
       "is_hvac_ducted": false,
-      "description": "2nd->3rd aft berthing ladders"
+      "description": "2nd->3rd aft berthing ladders",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Crew_Berthing_Fwd_3rd",
@@ -237,7 +249,10 @@
       "flow_rate_m3h": 40.0,
       "path": "ladder_well",
       "is_hvac_ducted": false,
-      "description": "fwd trunk"
+      "description": "fwd trunk",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "COC_Hangar",
@@ -245,7 +260,10 @@
       "flow_rate_m3h": 80.0,
       "path": "ladder_well",
       "is_hvac_ducted": false,
-      "description": "command spine trunk"
+      "description": "command spine trunk",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Officers_Main",
@@ -253,7 +271,10 @@
       "flow_rate_m3h": 60.0,
       "path": "ladder_well",
       "is_hvac_ducted": false,
-      "description": "officer country ladder"
+      "description": "officer country ladder",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Machinery_2P",
@@ -261,7 +282,10 @@
       "flow_rate_m3h": 50.0,
       "path": "ladder_well",
       "is_hvac_ducted": false,
-      "description": "machinery hatches"
+      "description": "machinery hatches",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Shaft_Alley_2P",
@@ -269,7 +293,10 @@
       "flow_rate_m3h": 30.0,
       "path": "ladder_well",
       "is_hvac_ducted": false,
-      "description": "aft passage"
+      "description": "aft passage",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Island_Gal",
@@ -277,7 +304,10 @@
       "flow_rate_m3h": 60.0,
       "path": "internal_door",
       "is_hvac_ducted": false,
-      "description": "island to deck edge"
+      "description": "island to deck edge",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Accom",
@@ -286,7 +316,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Aft_2nd; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_Aft_2nd; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -295,7 +327,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Mid_2nd; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_Mid_2nd; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -304,7 +338,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Fwd_2nd; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_Fwd_2nd; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -313,7 +349,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Aft_3rd; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_Aft_3rd; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -322,7 +360,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Fwd_3rd; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_Crew_Fwd_3rd; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     }
   ],
   "adjacency": [

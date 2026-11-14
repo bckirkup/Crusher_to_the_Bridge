@@ -76,7 +76,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into Wash_Room_Aft; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into Wash_Room_Aft; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Hangar",
@@ -85,7 +87,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into UHD_Head_Aft; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into UHD_Head_Aft; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Hangar",
@@ -94,7 +98,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into UHD_Head_Fwd; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into UHD_Head_Fwd; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Hangar",
@@ -103,7 +109,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into Firemens_Washroom; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into Firemens_Washroom; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "VENT_Hangar",
@@ -112,7 +120,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into Head_2D; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into Head_2D; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     }
   ],
   "adjacency": [

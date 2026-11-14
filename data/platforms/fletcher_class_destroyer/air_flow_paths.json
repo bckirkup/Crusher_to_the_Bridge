@@ -232,7 +232,10 @@
       "flow_rate_m3h": 120,
       "path": "ladder_well_bridge",
       "is_hvac_ducted": false,
-      "description": "Passive airflow down from superstructure through bridge access ladder. Frequently open during normal operations."
+      "description": "Passive airflow down from superstructure through bridge access ladder. Frequently open during normal operations.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main_Deck_Fwd",
@@ -240,7 +243,10 @@
       "flow_rate_m3h": 200,
       "path": "ladder_well_fwd",
       "is_hvac_ducted": false,
-      "description": "Forward ladder well connecting main deck to second deck berthing. Major cross-contamination pathway."
+      "description": "Forward ladder well connecting main deck to second deck berthing. Major cross-contamination pathway.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main_Deck_Mid",
@@ -248,7 +254,10 @@
       "flow_rate_m3h": 250,
       "path": "ladder_well_midships",
       "is_hvac_ducted": false,
-      "description": "Midships ladder well. High traffic route between mess/galley and berthing. Significant bidirectional airflow."
+      "description": "Midships ladder well. High traffic route between mess/galley and berthing. Significant bidirectional airflow.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main_Deck_Mid",
@@ -256,7 +265,10 @@
       "flow_rate_m3h": 100,
       "path": "main_deck_passageway",
       "is_hvac_ducted": false,
-      "description": "Fore-aft airflow through main deck passageway. Narrow corridor acts as duct."
+      "description": "Fore-aft airflow through main deck passageway. Narrow corridor acts as duct.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -264,7 +276,10 @@
       "flow_rate_m3h": 150,
       "path": "access_trunk_boilers",
       "is_hvac_ducted": false,
-      "description": "Access trunk from second deck to boiler rooms. Boiler room positive pressure normally pushes air upward."
+      "description": "Access trunk from second deck to boiler rooms. Boiler room positive pressure normally pushes air upward.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -272,7 +287,10 @@
       "flow_rate_m3h": 100,
       "path": "access_trunk_engines",
       "is_hvac_ducted": false,
-      "description": "Access trunk from berthing level to engine rooms."
+      "description": "Access trunk from berthing level to engine rooms.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Boiler_Rooms",
@@ -280,7 +298,10 @@
       "flow_rate_m3h": 80,
       "path": "engineering_passageway",
       "is_hvac_ducted": false,
-      "description": "Cross-connection between boiler and engine rooms through watertight doors (normally open at sea)."
+      "description": "Cross-connection between boiler and engine rooms through watertight doors (normally open at sea).",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main_Deck_Fwd",
@@ -288,7 +309,10 @@
       "flow_rate_m3h": 40,
       "path": "magazine_access_trunk_fwd",
       "is_hvac_ducted": true,
-      "description": "Forward magazine ventilation trunk. Ducted supply for ordnance temperature control."
+      "description": "Forward magazine ventilation trunk. Ducted supply for ordnance temperature control.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "HVAC_Berthing",
@@ -296,7 +320,10 @@
       "flow_rate_m3h": 30,
       "path": "magazine_access_trunk_aft",
       "is_hvac_ducted": true,
-      "description": "Aft magazine ventilation trunk."
+      "description": "Aft magazine ventilation trunk.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "HVAC_Superstructure",
@@ -305,7 +332,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_01L_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_01L_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Superstructure",
@@ -314,7 +343,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_01L_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_01L_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Superstructure",
@@ -323,7 +354,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_02L_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_02L_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Superstructure",
@@ -332,7 +365,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_02L_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_02L_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Superstructure",
@@ -341,7 +376,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_03L_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_03L_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Magazines",
@@ -350,7 +387,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_HOLD_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_HOLD_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Magazines",
@@ -359,7 +398,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_HOLD_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_HOLD_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Boiler_Rooms",
@@ -368,7 +409,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_LOWERDE_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_LOWERDE_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Boiler_Rooms",
@@ -377,7 +420,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_LOWERDE_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_LOWERDE_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main_Deck_Mid",
@@ -386,7 +431,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_MAINDEC_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_MAINDEC_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Main_Deck_Mid",
@@ -395,7 +442,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_MAINDEC_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_MAINDEC_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -404,7 +453,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_SECONDD_M; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_SECONDD_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "HVAC_Berthing",
@@ -413,7 +464,9 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_SECONDD_F; the head exhausts overboard, never back to the served space."
+      "description": "Transfer air into HD_SECONDD_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
     }
   ],
   "adjacency": [
