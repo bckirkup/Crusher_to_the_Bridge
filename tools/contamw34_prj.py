@@ -861,7 +861,14 @@ class _NetworkBuilder:
                     elem = self._backdraft_elem_for_flow(pair_flow)
                 else:
                     elem = self._orifice_elem_for_flow(pair_flow)
-            filter_nr = self._cross_zone_filter_nr() if filtered else 0
+            # PRJ filter refs are only added when the declared filtered bit
+            # differs from the deprecated ducted alias; alias-equivalent
+            # links keep the historical path_map filtration channel so the
+            # S1-migrated tree stays export-identical (X2 proof).
+            filter_nr = (
+                self._cross_zone_filter_nr()
+                if filtered and filtered != ducted else 0
+            )
             for fr, tr in itertools.product(from_rooms, to_rooms):
                 self._add_path(
                     self.zone_name_to_nr[fr], self.zone_name_to_nr[tr], elem,

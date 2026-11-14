@@ -80,7 +80,7 @@ def test_element_type_is_function_of_direction_mechanism_filtered() -> None:
             "from": "Galley", "to": "MedBay", "flow_rate_m3h": 60.0,
             "path": "x1x2_prescribed", "direction": "oneway",
             "mechanism": "prescribed_flow", "filtered": True,
-            "is_hvac_ducted": True,
+            "is_hvac_ducted": False,
         },
     ]
     text, path_map = _export(links, hobbyist=True)

@@ -17,7 +17,10 @@ by pressure-drop direction with greatly reduced or zero flow in one direction.
 X1 exports declared `direction: oneway` + `mechanism: pressure_opening` links as
 `plr_bdq` with a zero negative branch; bidirectional pressure openings remain
 `plr_orfc`. `mechanism: prescribed_flow` exports as `fan_cvf` regardless of
-`filtered`; `filtered` selects the PRJ filter element in hobbyist exports.
+`filtered`. PRJ filter refs are emitted only when the declared `filtered` bit
+differs from the deprecated `is_hvac_ducted` alias; alias-equivalent links keep
+the historical path-map filtration channel, so the S1-migrated tree stays
+export-identical for X2.
 
 ## Cache convention
 
@@ -38,3 +41,6 @@ flow changed element. Totals: `plr_orfc->plr_bdq` = 3+13+5+5+13+17+63+28+11+5
 passive links stay `plr_orfc`. The two byte-pinned committed PRJs
 (`destroyer_baseline`, `expedition_cruise_450`) were regenerated for the
 change-detector; other committed P-lane PRJs were not regenerated.
+`tools/contam_commissioned_check.py` solved both regenerated hulls with local
+ContamX 3.4.0.3 inside the 5% terminal tolerance and reported no reversed
+prescribed cross-zone leg.
