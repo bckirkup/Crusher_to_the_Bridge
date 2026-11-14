@@ -27,10 +27,12 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import os
 import re
 import sys
+from typing import Any
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
@@ -42,6 +44,7 @@ from engines.contamx_runner import (  # noqa: E402
     find_contamx,
     run_contamx,
 )
+from engines.py_contam_bridge import cross_zone_link_semantics  # noqa: E402
 from tools.contam_prj_bridge import export_platform_to_prj  # noqa: E402
 
 DEFAULT_PLATFORMS = ("destroyer_baseline", "expedition_cruise_450")
@@ -188,6 +191,85 @@ def _check_solved(
     return errors, rows
 
 
+def _endpoint_rooms(spatial: dict, airflow: dict, token: str) -> list[str]:
+    """Mirror contamw34_prj._NetworkBuilder._endpoint_rooms for link joins."""
+    hvac_by_id = {hz.get("id"): hz for hz in airflow.get("hvac_zones", [])}
+    if token in hvac_by_id:
+        return [str(room) for room in hvac_by_id[token].get("rooms", [])]
+    real_ids = {str(zone.get("id")) for zone in spatial.get("zones", [])}
+    if token in real_ids:
+        return [str(token)]
+    return []
+
+
+def _declared_prescribed_paths(
+    spatial: dict, airflow: dict,
+) -> list[dict[str, Any]]:
+    """Expanded declared prescribed-flow cross-zone legs (positive sense)."""
+    declared: list[dict[str, Any]] = []
+    for link in airflow.get("cross_zone_links", []):
+        semantics = cross_zone_link_semantics(link)
+        if semantics.get("mechanism") != "prescribed_flow":
+            continue
+        if semantics.get("direction") != "oneway":
+            continue
+        from_rooms = _endpoint_rooms(spatial, airflow, str(link.get("from")))
+        to_rooms = _endpoint_rooms(spatial, airflow, str(link.get("to")))
+        if not from_rooms or not to_rooms:
+            continue
+        kind = str(link.get("path", "cross_zone"))
+        flow = float(link.get("flow_rate_m3h", 50.0))
+        n_pairs = len(from_rooms) * len(to_rooms)
+        pair_flow = flow / n_pairs if n_pairs > 0 else 0.0
+        if pair_flow <= 0.0:
+            continue
+        for fr, tr in itertools.product(from_rooms, to_rooms):
+            declared.append({
+                "kind": kind,
+                "from_zone": fr,
+                "to_zone": tr,
+                "declared_flow_m3h": pair_flow,
+            })
+    return declared
+
+
+def _check_cross_zone_sign(
+    path_map: list[dict],
+    spatial: dict,
+    airflow: dict,
+    flows_m3h: dict[int, float],
+) -> list[str]:
+    """Report prescribed cross-zone legs whose solved sign reversed."""
+    errors: list[str] = []
+    by_key: dict[tuple[str, str, str], list[dict]] = {}
+    for entry in path_map:
+        key = (
+            str(entry.get("kind")),
+            str(entry.get("from_zone")),
+            str(entry.get("to_zone")),
+        )
+        by_key.setdefault(key, []).append(entry)
+    for leg in _declared_prescribed_paths(spatial, airflow):
+        key = (leg["kind"], leg["from_zone"], leg["to_zone"])
+        entries = by_key.get(key, [])
+        if not entries:
+            errors.append(
+                f"missing prescribed cross-zone path {leg['kind']} "
+                f"{leg['from_zone']}->{leg['to_zone']}"
+            )
+            continue
+        want = float(leg["declared_flow_m3h"])
+        for entry in entries:
+            solved = float(flows_m3h.get(int(entry["path_nr"]), 0.0))
+            if solved < -_ABS_EPS_M3H:
+                errors.append(
+                    f"cross-zone p{entry['path_nr']} {leg['kind']} "
+                    f"{leg['from_zone']}->{leg['to_zone']}: solved {solved:.2f} "
+                    f"reversed vs declared prescribed flow {want:.2f}"
+                )
+    return errors
+
+
 def check_platform(
     platform: str,
     workdir: str,
@@ -225,6 +307,9 @@ def check_platform(
         sim_path, allowed_roots=(REPO_ROOT,),
     ).path_volumetric_flow_m3h()
     solved_errors, rows = _check_solved(path_map, declared, flows, tolerance)
+    solved_errors.extend(
+        _check_cross_zone_sign(path_map, spatial, airflow, flows)
+    )
     print(f"[{platform}] solved {sim_path}:")
     for row in rows:
         print(row)

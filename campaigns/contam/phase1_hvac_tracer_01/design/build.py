@@ -42,6 +42,13 @@ FIELD_CACHE_S3_URI = (
     "campaign/contam_phase1_hvac_tracer_01/field_cache/field_cache.json"
 )
 FIELD_CACHE_SCHEMA = "contam_phase1_hvac_tracer_field_cache_v1"
+# X1/X2 change solved airflow fields; a rerun must use a new schema + design id.
+FIELD_CACHE_SCHEMA_V2 = "contam_phase1_hvac_tracer_field_cache_v2"
+FIELD_CACHE_V2_DESIGN_ID = "contam_phase1_hvac_tracer_02"
+FIELD_CACHE_V2_S3_URI = (
+    "s3://crusherbucket-994254241749-us-east-1-an/"
+    "campaign/contam_phase1_hvac_tracer_02/field_cache/field_cache.json"
+)
 FIELD_CACHE_FIELD_COUNT = 11
 CONTAMX_VERSION = "3.4.0.3 64 bit"
 CONTAMX_BINARY = "third_party/contamx/contamx3"
