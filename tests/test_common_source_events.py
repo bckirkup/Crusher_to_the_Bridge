@@ -327,9 +327,9 @@ def test_effective_supply_dose_shares_like_the_route_split() -> None:
     assert core._effective_supply_dose(
         7, PATHOGEN, 2.0,
     ) == pytest.approx(0.75)
-    assert core._effective_supply_dose(9, PATHOGEN, 2.0) == 0.0
+    assert core._effective_supply_dose(9, PATHOGEN, 2.0) == pytest.approx(0.0)
     core._last_pathogen_route_doses = {}
-    assert core._effective_supply_dose(7, PATHOGEN, 2.0) == 0.0
+    assert core._effective_supply_dose(7, PATHOGEN, 2.0) == pytest.approx(0.0)
 
 
 # ── Gate 6: the delivered dose lands on the declared pathway ──────────
@@ -440,3 +440,19 @@ def test_posture_changes_event_frequency_not_dose_mass() -> None:
     )
     for event in events_high:
         assert event["food_safety_posture"] == pytest.approx(5.0)
+
+
+def test_cs_window_tokens_are_sorted_for_rng_order() -> None:
+    """Meal windows are consumed in canonical order, not set order."""
+    core = _core()
+    members = [
+        _diner(1, activity="Meal:Dinner"),
+        _diner(2, activity="Meal:Breakfast"),
+        _diner(3, activity="Meal:Lunch"),
+        _diner(4, activity="Meal:Lunch"),
+    ]
+
+    tokens = core._cs_window_tokens(members, epoch=9)
+
+    assert isinstance(tokens, list)
+    assert tokens == ["Meal:Breakfast", "Meal:Dinner", "Meal:Lunch"]
