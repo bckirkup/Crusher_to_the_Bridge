@@ -295,15 +295,25 @@ class TestExhaustTerminalLinkDirection:
         assert not report.passed
         assert any("AHU_HD_HEAD" in f.message for f in report.errors)
 
-    def test_link_from_exhaust_terminal_requires_oneway(self) -> None:
+    def test_link_from_exhaust_terminal_is_rejected(self) -> None:
         airflow = self._airflow(CrossZoneLink(
             **{"from": "AHU_HD_HEAD", "to": "AHU_served",
+               "flow_rate_m3h": 100.0, "direction": "oneway"},
+        ))
+        report = Report()
+        _check_exhaust_terminal_link_directions(airflow, report)
+        assert not report.passed
+        assert any("cannot be link sources" in f.message for f in report.errors)
+
+    def test_room_endpoint_on_exhaust_terminal_requires_oneway(self) -> None:
+        airflow = self._airflow(CrossZoneLink(
+            **{"from": "AHU_served", "to": "HEAD",
                "flow_rate_m3h": 100.0},
         ))
         report = Report()
         _check_exhaust_terminal_link_directions(airflow, report)
         assert not report.passed
-        assert any("AHU_HD_HEAD" in f.message for f in report.errors)
+        assert any("HEAD" in f.message for f in report.errors)
 
     def test_declared_oneway_passes(self) -> None:
         airflow = self._airflow(CrossZoneLink(

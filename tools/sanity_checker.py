@@ -1596,7 +1596,7 @@ def _check_hvac_zone_rooms(
 
 
 def _exhaust_only_terminal_ids(airflow: AirFlowPaths) -> set[str]:
-    """HVAC groups the native lane treats as duty-0, oa-1 exhaust terminals."""
+    """HVAC groups and room endpoints treated as exhaust-only terminals."""
     default_oa = airflow.oa_fraction if airflow.oa_fraction is not None else 0.2
     default_duty = airflow.hvac_duty if airflow.hvac_duty is not None else 1.0
     terminals: set[str] = set()
@@ -1605,6 +1605,7 @@ def _exhaust_only_terminal_ids(airflow: AirFlowPaths) -> set[str]:
         oa = zone.oa_fraction if zone.oa_fraction is not None else default_oa
         if float(duty) <= 0.0 and float(oa) >= 1.0:
             terminals.add(zone.id)
+            terminals.update(zone.rooms)
     return terminals
 
 
@@ -1612,19 +1613,31 @@ def _check_exhaust_terminal_link_directions(
     airflow: AirFlowPaths,
     report: Report,
 ) -> None:
-    """An exhaust-only terminal may never be a link's air source or sink."""
+    """Exhaust terminals may be one-way sinks only, never sources."""
     terminals = _exhaust_only_terminal_ids(airflow)
     for link in airflow.cross_zone_links:
         endpoints = (("from", link.from_zone), ("to", link.to_zone))
         for endpoint_name, endpoint in endpoints:
-            if endpoint not in terminals or link.direction == "oneway":
+            if endpoint not in terminals:
+                continue
+            if endpoint_name == "from":
+                report.error(
+                    _AIR_FLOW_PATHS_JSON,
+                    "AIRFLOW_DIRECTION",
+                    f"Cross-zone link '{link.from_zone}' -> '{link.to_zone}' has "
+                    f"from '{endpoint}' on an exhaust-only terminal "
+                    "(hvac_duty <= 0, oa_fraction >= 1.0); exhaust terminals "
+                    "cannot be link sources",
+                )
+                continue
+            if link.direction == "oneway":
                 continue
             declared = link.direction or "undeclared"
             report.error(
                 _AIR_FLOW_PATHS_JSON,
                 "AIRFLOW_DIRECTION",
                 f"Cross-zone link '{link.from_zone}' -> '{link.to_zone}' has "
-                f"{endpoint_name} '{endpoint}' on an exhaust-only terminal "
+                f"to '{endpoint}' on an exhaust-only terminal "
                 f"(hvac_duty <= 0, oa_fraction >= 1.0) with direction "
                 f"{declared}; pin \"direction\": \"oneway\"",
             )

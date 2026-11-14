@@ -19,9 +19,10 @@ change is `CONTAM-BIDIR-01` (`899e4ca0`); that entry is annotated, not rewritten
   rate changed.
 - `scripts/derive_sanitary_provisioning.py` emits the same key, so future hulls
   are born with the direction the generator's docstring already states.
-- `tools/sanity_checker.py` rejects any cross-zone link whose `from` or `to` is
-  an exhaust-only terminal (`hvac_duty <= 0`, `oa_fraction >= 1.0`, with the
-  native top-level defaults 1.0 / 0.2) unless `direction == "oneway"`.
+- `tools/sanity_checker.py` rejects any cross-zone link sourced from an
+  exhaust-only terminal (`hvac_duty <= 0`, `oa_fraction >= 1.0`, with the
+  native top-level defaults 1.0 / 0.2), and any link into one unless
+  `direction == "oneway"`; HVAC group ids and their room endpoints both count.
 - `DEFAULT_PASSIVE_LINK_MODE` is unchanged: undeclared passive openings remain
   bidirectional, preserving the unreachable-zone repair `CONTAM-BIDIR-01`
   measured.
