@@ -4,7 +4,8 @@ The migration makes ``direction`` / ``mechanism`` / ``filtered`` explicit on
 every ``cross_zone_links`` entry while keeping ``is_hvac_ducted`` as a
 deprecated alias. These tests pin the operator-identical property: resolving
 the migrated fields must give the same triple the legacy alias gave, and the
-native decay-free transport operator must not move.
+native decay-free transport operator must not move, except for links later
+authored under the forced-exhaust fix plan.
 """
 
 from __future__ import annotations
@@ -26,6 +27,22 @@ from engines.sim_clock import SimClock
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLATFORM_ROOT = REPO_ROOT / "data" / "platforms"
 FILTER_EFFICIENCY = 0.37
+
+# Post-S1 galley authoring (CONTAM-FORCED-EXHAUST-GALLEY-01) intentionally moves
+# these links away from the alias expansion; every other link remains pinned.
+POST_S1_GALLEY_LINKS = {
+    ("classic_cruise_1900", "Dining_Galley_Exhaust"),
+    ("diamond_princess", "Dining_Galley_Exhaust"),
+    ("expedition_cruise_450", "Dining_Galley_Exhaust"),
+    ("greg_mortimer", "Dining_Galley_Exhaust"),
+    ("spirit_cruise_3000", "Dining_Galley_Exhaust"),
+    ("enterprise_constitution_tos", "Galley_Service_Exhaust"),
+    ("enterprise_galaxy_tng", "Galley_Service_Exhaust"),
+    ("san_antonio_class_lpd", "galley_exhaust_to_mess"),
+}
+POST_S1_GALLEY_OPERATOR_PLATFORMS = {
+    platform for platform, _ in POST_S1_GALLEY_LINKS
+}
 
 
 def _platform_files() -> list[Path]:
@@ -149,22 +166,29 @@ class TestS1MigrationInvariants:
     def test_resolved_semantics_match_pre_migration_alias(
         self, platforms: dict[str, dict[str, Any]],
     ) -> None:
+        skipped = 0
         for name, bundle in platforms.items():
             for index, link in enumerate(
                 bundle["airflow"].get("cross_zone_links", []),
             ):
+                if (name, link.get("path")) in POST_S1_GALLEY_LINKS:
+                    skipped += 1
+                    continue
                 migrated = cross_zone_link_semantics(link)
                 legacy = cross_zone_link_semantics(_legacy_link(link))
                 assert migrated == legacy, (
                     f"{name}[{index}] {link.get('path')!r}: "
                     f"migrated={migrated} legacy={legacy}"
                 )
+        assert skipped == len(POST_S1_GALLEY_LINKS)
 
     def test_decay_free_operator_is_migration_invariant(
         self, platforms: dict[str, dict[str, Any]],
     ) -> None:
         clock = SimClock(epoch_duration_hours=1.0, mode="hours")
         for name, bundle in platforms.items():
+            if name in POST_S1_GALLEY_OPERATOR_PLATFORMS:
+                continue
             spatial = bundle["spatial"]
             post = bundle["airflow"]
             pre = _legacy_airflow(post)
