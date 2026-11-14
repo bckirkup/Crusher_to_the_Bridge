@@ -37,6 +37,20 @@ frozen E-lane caches are unchanged. Figures not resting on that channel
 stand at their own `Measured at` SHAs; baseline `ac5cec46`, authoring
 commit `28f2fc68`.
 
+**`CONTAM-FORCED-EXHAUST-DOORS-01` (ledger entry): airborne/downstream-map
+dose figures measured before this change on the four hulls carrying the
+pressure-directed door/stairwell links authored there are historical on the
+door/stairwell pressure-directed channel.** The seven links now declare
+one-way `pressure_opening` semantics in the stated pressure-regime sense:
+medical/MedBay leakage is inward to negative-pressure medical spaces,
+crew-to-engine stairwells draw crew accommodation toward engine negative
+pressure, and the destroyer boiler trunk runs boiler rooms → second-deck
+berthing. Native exact material-times moved on affected endpoints (ledger
+`docs/ledger/CONTAM-FORCED-EXHAUST-DOORS-01.md`, measured at `541b9f4f`);
+frozen E-lane caches are unchanged. Figures not resting on that channel stand
+at their own `Measured at` SHAs; baseline `01a3482e`, authoring commit
+`541b9f4f`.
+
 **`ISO-QUARTERS-01` (ledger entry): every steward-side service dose
 figure on the emetic channel measured before this change is a gate
 artefact, not mechanism state.** Two legs of one defect: a host at
