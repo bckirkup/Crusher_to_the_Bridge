@@ -7,8 +7,9 @@
 > `forced_exhaust_audit_summary.json`,
 > `forced_exhaust_exact_integral_check.json`). Measured at `origin/main`
 > `94daa3bf`. It responds to three testing corrections from Edison on the
-> frozen CONTAM transport study and must be read as a review of those
-> corrections, not as an endorsement of every figure in them (§3).
+> frozen CONTAM transport study. **Amended after merge:** Edison's figures
+> reproduce at the conditions his bundle declares; the earlier "does not
+> reproduce" verdicts compared different conditions (§3, reconciliation note).
 
 **Evidence vocabulary used throughout.** *Measured* = computed this session
 from the tree at `94daa3bf` by the committed script. *Inferred* = follows from
@@ -195,9 +196,9 @@ field cache**, which this session did not read (no AWS).
 | `Sanitary_Makeup` links lack `direction` | **Reproduces, and is fleet-wide** | 0 of 585 (0 of all 1,011 links), §2.2 |
 | 7 reverse sanitary paths on the destroyer, 53 on the expedition hull | **Reproduces** | measured 7 and 53 (`native_reverse_paths` summed over `Sanitary_Makeup` rows; the expedition hull's 54th is the galley link) |
 | Pinning `direction="oneway"` on `Sanitary_Makeup` only gives 0.052 h on both hulls | **Reproduces** | measured 0.0521 h on both = 1 / 19.2 ACH exactly, i.e. the head empties only through its own exhaust |
-| Baseline 0.200 h (destroyer) and 0.260 h (expedition) | **Does not reproduce** | measured 0.184 h (mean of 3 heads; 0.172 / 0.172 / 0.208) and 0.232 h (mean of 13; range 0.124–0.316). The direction and rough size agree; the figures do not |
-| Adjusted native matches commissioned ContamX within 0.24 % / 0.11 % | **Destroyer reproduces; expedition needs qualification** | Destroyer E lane 0.05208 h vs native one-way 0.05208 h. Expedition E lane: **mean 0.072 h, range 0.052–0.129 h** over the 13 heads — the minimum matches, the mean does not |
-| "Remote sanitary burden goes to exactly zero in both adjusted native and ContamX" | **Native reproduces; ContamX does not hold on the cruise hulls as built at `94daa3bf`** | A head that loses mass only to its own exhaust has material-time exactly 1/ACH. On the E lane that holds on `destroyer_baseline`, `fletcher_class_destroyer`, `lexington_cv2`, `saratoga_cv3`, but not on `missouri_bb63` (max 0.064 h), `expedition_cruise_450` (0.129), `greg_mortimer` (0.119), `mega_cruise_5000` (0.247), `classic_cruise_1900` (0.326) or `spirit_cruise_3000` (0.566). *Inferred:* on those hulls either some head's solved extract is below its declared rate or its `Sanitary_Makeup` orifice carries air out of the head; this session did not separate the two |
+| Baseline 0.200 h (destroyer) and 0.260 h (expedition) | **Reproduces at Edison's conditions** | measured 0.199898 h (`HD_MAIN_M`) and 0.259980 h (`HD_5P_M`) at η = 0.3, λ = 0.1 h⁻¹ — identical to his `results.csv` to six figures. At the frozen Phase 1 conditions the same two hulls give 0.184 h (mean of 3 heads; 0.172 / 0.172 / 0.208) and 0.232 h (mean of 13; 0.124–0.316) |
+| Adjusted native matches commissioned ContamX within 0.24 % / 0.11 % | **Reproduces for the heads he tested** | at his conditions native one-way is 0.051813 h on both hulls; the E lane built by `tools/contam_fleet_compare.py:384-414` gives 0.051813 h for `HD_MAIN_M` and `HD_5P_M`, his field gives 0.051687 / 0.051757 h. He attributes his residual to solved/declared terminal-flow ratios of 1.0025 / 1.0011; why the campaign's field construction shows no such residual was **not traced** |
+| "Remote sanitary burden goes to exactly zero in both adjusted native and ContamX" | **Reproduces for the heads he tested; does not generalise to every head** | Native: exact for all heads on all ten hulls. E lane: a head that loses mass only to its own exhaust has material-time exactly 1/(ACH + λ). That holds for `HD_MAIN_M` and `HD_5P_M`, and for every head on `destroyer_baseline`, `fletcher_class_destroyer`, `lexington_cv2`, `saratoga_cv3`. It does not hold for 5 of 13 heads on `expedition_cruise_450` (0.062–0.139 h at his conditions, max 0.129 h at Phase 1 conditions), nor on `missouri_bb63` (max 0.064 h), `greg_mortimer` (0.119), `mega_cruise_5000` (0.247), `classic_cruise_1900` (0.326) or `spirit_cruise_3000` (0.566) at Phase 1 conditions. These heads are outside his sample. *Inferred:* either some head's solved extract is below its declared rate or its `Sanitary_Makeup` orifice carries air out of the head; not separated here |
 
 **Two qualifications to the framing, both from the tree:**
 
@@ -247,16 +248,28 @@ to choose a magnitude (§1.2(3)).
 |---|---|---|
 | The historical statistic is an hourly endpoint sum | **Reproduces** | `campaigns/contam/phase1_hvac_tracer_01/cell.py:264-278` (each epoch is observed only *after* `transport_step`), `:252` (`auc += concentration * epoch_hours`), `:300-303` (`b_v`); the same code at `campaigns/contam/phase2_cruise_contrasts_01/cell.py:405` and `:470`; read out as `b_v_h` at `phase1_.../readout.py:97` and `phase2_.../readout.py:115` |
 | It underestimates fast-clearing pulses badly | **Reproduces, and the committed readout shows it** | a right-endpoint sum never sees the first hour. For a head at 19.2 ACH the first endpoint is e^{−19.2} = 4.587 × 10⁻⁹, and `phase1_readout.json` records exactly that as the E-lane `b_v_h` minimum (`4.58699e-09`) on `destroyer_baseline`, `fletcher_class_destroyer` and `expedition_cruise_450`, against a true 0.052 h |
-| Destroyer mess-hall pulse: exact 0.372 h, sampled 0.070 h (81 % under) | **Direction reproduces; figures do not** | measured native `Mess_Hall`: exact **0.313 h**, endpoint sum **0.040 h** (87 % under); E lane: exact 0.286 h, endpoint sum 0.024 h (92 % under) |
-| Native/ContamX ratio 1.84× sampled → 1.14× exact | **Direction reproduces; figures do not** | measured 1.67× → 1.10×. With the §5.2 sanitary pin applied to native it becomes 0.77× → 0.92× |
+| Destroyer mess-hall pulse: exact 0.372 h, sampled 0.070 h (81 % under) | **Reproduces at Edison's conditions** | measured native `Mess_Hall` at η = 0.3, λ = 0.1 h⁻¹: exact **0.372358 h**, endpoint sum **0.070272 h** — identical to his figures. At the frozen Phase 1 conditions: exact 0.313 h, endpoint sum 0.040 h (87 % under); E lane 0.286 h / 0.024 h (92 % under) |
+| Native/ContamX ratio 1.84× sampled → 1.14× exact | **Reproduces within the E-lane difference** | at his conditions: 1.81× → 1.14× against the campaign-built E lane (`Mess_Hall` E exact 0.3278 h vs his 0.3252 h; endpoint 0.0389 vs 0.0381). At Phase 1 conditions 1.67× → 1.10×; with the §5.2 sanitary pin applied to native, 0.77× → 0.92× |
 | Exact integrals are available from frozen operators without a rerun | **Reproduces** | the operator is a deterministic function of the tree (N) or of `field_cache.json` entries + flows (E, P): `cell.py:93-120`. The check above is that computation |
 
-**Why the figures may differ (hypotheses, none tested):** Edison's source set
-or averaging differs from "mean over the hull's heads"; his 0.372 / 0.070 use a
-different timing pattern (the design also has `t0_t1_split`) or lane; or the
-frozen E/P caches differ from a fresh solve. None of his baseline figures
-appears in a committed readout or ledger, so the definition cannot be pinned
-from the repository. §4 and §5 depend only on the parts that reproduce.
+**Reconciliation with Edison's reproduction bundle (added after merge of
+#1209).** The first version of this section marked the baseline, mess-hall and
+ratio figures "does not reproduce". That was an error of comparison in this
+document, not in Edison's numbers. His diagnostic declares filter efficiency
+0.3 and natural decay 0.1 h⁻¹ and reports one named source per case
+(`HD_MAIN_M`, `HD_5P_M`, `Mess_Hall`, `MainDining`), pinned at `e46742af`; this
+document had evaluated the frozen Phase 1 / Phase 2 tracer conditions (0.5 and
+0, both campaign designs) and averaged over every head. His inputs are the
+same bytes as `94daa3bf`: the SHA-256 of both hulls' `air_flow_paths.json` and
+`spatial_layout.json`, of `engines/py_contam_bridge.py` and of
+`tools/contamw34_prj.py` in his manifest equal the tree's. Re-run at his
+conditions (`forced_exhaust_exact_integral_check_eta030_decay010.json`,
+command in the appendix), every native figure matches his `results.csv` to six
+significant figures, including expedition `MainDining` (0.402164 native,
+0.398208 pinned). The E lane differs by under 1 % (`Mess_Hall` 0.3278 vs
+0.3252 h, `MainDining` 0.5229 vs 0.5218 h), untraced. Both condition sets are
+legitimate; they answer different questions, and **only the 0.5 / 0 set
+describes the frozen campaigns**. §4 and §5 do not depend on either.
 
 ## 4. Impact assessment
 
@@ -464,6 +477,16 @@ python3 tools/diag/forced_exhaust_audit.py exact-check \
   --hull expedition_cruise_450 --hull classic_cruise_1900 \
   --hull spirit_cruise_3000 --hull mega_cruise_5000 --hull greg_mortimer \
   --source Mess_Hall
+```
+
+To evaluate Edison's declared conditions instead of the frozen campaign
+conditions (writes a separate, labelled file):
+
+```bash
+python3 tools/diag/forced_exhaust_audit.py exact-check \
+  --hull destroyer_baseline --hull expedition_cruise_450 \
+  --source Mess_Hall --source HD_MAIN_M --source MainDining --source HD_5P_M \
+  --filter-efficiency 0.3 --decay-per-hour 0.1 --label eta030_decay010
 ```
 
 The first is pure file reading. The second needs ContamX for the E lane
