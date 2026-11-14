@@ -24,6 +24,19 @@ longer carries sanitary head-to-served-space reverse edges. Figures not
 resting on that channel stand at their own `Measured at` SHAs; baseline
 `a4a12227`, fix `fc858d1c`.
 
+**`CONTAM-FORCED-EXHAUST-GALLEY-01` (ledger entry): airborne/downstream-map
+dose figures measured before this change on the nine hulls carrying the
+galley links authored there are historical on the galley
+direction/filtration channel.** The links now declare one-way
+prescribed-flow make-up/return semantics; the two Enterprise
+`Galley_Service_Exhaust` senses are flipped to mess → galley, and the San
+Antonio galley return carries no filtration/recirculation credit. Native
+exact material-times moved on affected endpoints (ledger
+`docs/ledger/CONTAM-FORCED-EXHAUST-GALLEY-01.md`, measured at `28f2fc68`);
+frozen E-lane caches are unchanged. Figures not resting on that channel
+stand at their own `Measured at` SHAs; baseline `ac5cec46`, authoring
+commit `28f2fc68`.
+
 **CABIN-OCC-01 + ROOM-AIR-01 (ledger entries tagged `all`): every
 airborne-route dose figure on any hull that declares AHU rates, and every
 confined-cabinmate figure, moves at `1b9d37ca`.** Room-pool inhalation routes
