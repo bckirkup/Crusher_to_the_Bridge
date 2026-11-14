@@ -1,0 +1,2160 @@
+{
+ "fleet": {
+  "by_exporter_element": {
+   "fan_cvf": 110,
+   "plr_orfc": 901
+  },
+  "by_intent_class": {
+   "ducted_transfer": 56,
+   "forced_exhaust": 52,
+   "forced_supply": 9,
+   "passive_opening": 302,
+   "pressure_directed": 7,
+   "sanitary_makeup": 585
+  },
+  "direction_present": 0,
+  "flags": {
+   "endpoint_unresolved": 0,
+   "exporter_orifice_on_stated_prescribed_flow": 592,
+   "filtration_coupled_to_ducted_flag": 110,
+   "intent_unstated": 0,
+   "native_reverse_on_stated_oneway": 599,
+   "zero_flow_dropped_by_exporter": 0
+  },
+  "galley_related_links": 22,
+  "is_hvac_ducted_true": 110,
+  "links": 1011,
+  "native_reverse_paths_on_stated_oneway": 6131,
+  "sanitary_makeup_links": 585
+ },
+ "intent_rules": [
+  [
+   "forced_exhaust",
+   "oneway",
+   "prescribed_flow",
+   "exhaust|extract|hood|relief"
+  ],
+  [
+   "forced_supply",
+   "oneway",
+   "prescribed_flow",
+   "supply|make-?up"
+  ],
+  [
+   "pressure_directed",
+   "oneway",
+   "pressure_opening",
+   "negative|positive pressure|draws|drawn|net in"
+  ]
+ ],
+ "native_passive_link_mode": "bidirectional",
+ "passive_pattern": "ladder|stair|hatch|door|passage|corridor|shaft|trunk|well|elevator|lift|ramp|access|deck|passive|leak|transfer|curtain|lobby",
+ "platforms": {
+  "aeolus_arc3": {
+   "by_exporter_element": {
+    "plr_orfc": 10
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 10,
+   "native_reverse_paths_on_stated_oneway": 21,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "alexander_henry_cgs119": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 5,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 20,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "antietam_cvs36": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 57,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "apl_24": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 6
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 6,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 6,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 30,
+   "sanitary_makeup_links": 6,
+   "study_hull": false
+  },
+  "assistance_ar17": {
+   "by_exporter_element": {
+    "plr_orfc": 5
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 5,
+   "native_reverse_paths_on_stated_oneway": 78,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "astoria_ca34": {
+   "by_exporter_element": {
+    "plr_orfc": 13
+   },
+   "by_intent_class": {
+    "passive_opening": 9,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 13,
+   "native_reverse_paths_on_stated_oneway": 48,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "bainbridge_dd1": {
+   "by_exporter_element": {
+    "plr_orfc": 2
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 1
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 1,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 1,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 2,
+   "native_reverse_paths_on_stated_oneway": 22,
+   "sanitary_makeup_links": 1,
+   "study_hull": false
+  },
+  "battler_acv6": {
+   "by_exporter_element": {
+    "plr_orfc": 10
+   },
+   "by_intent_class": {
+    "passive_opening": 7,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 10,
+   "native_reverse_paths_on_stated_oneway": 43,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "bolster_ars38": {
+   "by_exporter_element": {
+    "plr_orfc": 2
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 1
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 1,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 1,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 2,
+   "native_reverse_paths_on_stated_oneway": 11,
+   "sanitary_makeup_links": 1,
+   "study_hull": false
+  },
+  "cannon_de701": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 1
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 1,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 1,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 5,
+   "sanitary_makeup_links": 1,
+   "study_hull": false
+  },
+  "castle_class_corvette": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 20,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "chicago_cg11": {
+   "by_exporter_element": {
+    "plr_orfc": 17
+   },
+   "by_intent_class": {
+    "passive_opening": 10,
+    "sanitary_makeup": 7
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 7,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 7,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 17,
+   "native_reverse_paths_on_stated_oneway": 83,
+   "sanitary_makeup_links": 7,
+   "study_hull": false
+  },
+  "classic_cruise_1900": {
+   "by_exporter_element": {
+    "fan_cvf": 11,
+    "plr_orfc": 20
+   },
+   "by_intent_class": {
+    "ducted_transfer": 5,
+    "forced_exhaust": 7,
+    "passive_opening": 2,
+    "sanitary_makeup": 17
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 18,
+    "filtration_coupled_to_ducted_flag": 11,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 18,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 11,
+   "links": 31,
+   "native_reverse_paths_on_stated_oneway": 64,
+   "sanitary_makeup_links": 17,
+   "study_hull": true
+  },
+  "cobalt_k124": {
+   "by_exporter_element": {
+    "plr_orfc": 4
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 4,
+   "native_reverse_paths_on_stated_oneway": 33,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "cushing_dd376": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 64,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "davison_dd618": {
+   "by_exporter_element": {
+    "plr_orfc": 4
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 4,
+   "native_reverse_paths_on_stated_oneway": 28,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "destroyer_baseline": {
+   "by_exporter_element": {
+    "fan_cvf": 1,
+    "plr_orfc": 5
+   },
+   "by_intent_class": {
+    "ducted_transfer": 1,
+    "passive_opening": 2,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 1,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 1,
+   "links": 6,
+   "native_reverse_paths_on_stated_oneway": 7,
+   "sanitary_makeup_links": 3,
+   "study_hull": true
+  },
+  "diamond_princess": {
+   "by_exporter_element": {
+    "fan_cvf": 11,
+    "plr_orfc": 42
+   },
+   "by_intent_class": {
+    "ducted_transfer": 6,
+    "forced_exhaust": 6,
+    "passive_opening": 2,
+    "sanitary_makeup": 39
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 40,
+    "filtration_coupled_to_ducted_flag": 11,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 40,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 11,
+   "links": 53,
+   "native_reverse_paths_on_stated_oneway": 401,
+   "sanitary_makeup_links": 39,
+   "study_hull": false
+  },
+  "eagle_pe60": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 46,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "enterprise_constitution_tos": {
+   "by_exporter_element": {
+    "fan_cvf": 8,
+    "plr_orfc": 21
+   },
+   "by_intent_class": {
+    "ducted_transfer": 5,
+    "forced_exhaust": 4,
+    "passive_opening": 1,
+    "sanitary_makeup": 19
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 20,
+    "filtration_coupled_to_ducted_flag": 8,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 20,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 8,
+   "links": 29,
+   "native_reverse_paths_on_stated_oneway": 94,
+   "sanitary_makeup_links": 19,
+   "study_hull": false
+  },
+  "enterprise_galaxy_tng": {
+   "by_exporter_element": {
+    "fan_cvf": 14,
+    "plr_orfc": 39
+   },
+   "by_intent_class": {
+    "ducted_transfer": 8,
+    "forced_exhaust": 7,
+    "passive_opening": 1,
+    "sanitary_makeup": 37
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 38,
+    "filtration_coupled_to_ducted_flag": 14,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 38,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 14,
+   "links": 53,
+   "native_reverse_paths_on_stated_oneway": 226,
+   "sanitary_makeup_links": 37,
+   "study_hull": false
+  },
+  "erie_pg50": {
+   "by_exporter_element": {
+    "plr_orfc": 6
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 6,
+   "native_reverse_paths_on_stated_oneway": 90,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "esteem_mso438": {
+   "by_exporter_element": {
+    "plr_orfc": 6
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 6,
+   "native_reverse_paths_on_stated_oneway": 60,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "expedition_cruise_300": {
+   "by_exporter_element": {
+    "fan_cvf": 4,
+    "plr_orfc": 17
+   },
+   "by_intent_class": {
+    "ducted_transfer": 1,
+    "forced_exhaust": 1,
+    "forced_supply": 2,
+    "passive_opening": 5,
+    "pressure_directed": 1,
+    "sanitary_makeup": 11
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 11,
+    "filtration_coupled_to_ducted_flag": 4,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 12,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 3,
+   "has_contam_bundle": false,
+   "is_hvac_ducted_true": 4,
+   "links": 21,
+   "native_reverse_paths_on_stated_oneway": 95,
+   "sanitary_makeup_links": 11,
+   "study_hull": false
+  },
+  "expedition_cruise_450": {
+   "by_exporter_element": {
+    "fan_cvf": 1,
+    "plr_orfc": 16
+   },
+   "by_intent_class": {
+    "ducted_transfer": 1,
+    "forced_exhaust": 1,
+    "passive_opening": 2,
+    "sanitary_makeup": 13
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 14,
+    "filtration_coupled_to_ducted_flag": 1,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 14,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 1,
+   "links": 17,
+   "native_reverse_paths_on_stated_oneway": 54,
+   "sanitary_makeup_links": 13,
+   "study_hull": true
+  },
+  "fletcher_class_destroyer": {
+   "by_exporter_element": {
+    "fan_cvf": 2,
+    "plr_orfc": 20
+   },
+   "by_intent_class": {
+    "ducted_transfer": 1,
+    "forced_supply": 1,
+    "passive_opening": 6,
+    "pressure_directed": 1,
+    "sanitary_makeup": 13
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 13,
+    "filtration_coupled_to_ducted_flag": 2,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 14,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": false,
+   "is_hvac_ducted_true": 2,
+   "links": 22,
+   "native_reverse_paths_on_stated_oneway": 46,
+   "sanitary_makeup_links": 13,
+   "study_hull": true
+  },
+  "fletcher_dde_dd445": {
+   "by_exporter_element": {
+    "plr_orfc": 4
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 4,
+   "native_reverse_paths_on_stated_oneway": 20,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "fort_mandan_lsd21": {
+   "by_exporter_element": {
+    "plr_orfc": 8
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 8,
+   "native_reverse_paths_on_stated_oneway": 46,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "fort_william_j311": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 22,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "gordon_gunter_r338": {
+   "by_exporter_element": {
+    "plr_orfc": 7
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 7,
+   "native_reverse_paths_on_stated_oneway": 46,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "gosper_apa170": {
+   "by_exporter_element": {
+    "plr_orfc": 8
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 6
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 6,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 6,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 8,
+   "native_reverse_paths_on_stated_oneway": 104,
+   "sanitary_makeup_links": 6,
+   "study_hull": false
+  },
+  "greg_mortimer": {
+   "by_exporter_element": {
+    "fan_cvf": 4,
+    "plr_orfc": 15
+   },
+   "by_intent_class": {
+    "ducted_transfer": 4,
+    "forced_exhaust": 1,
+    "passive_opening": 3,
+    "sanitary_makeup": 11
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 12,
+    "filtration_coupled_to_ducted_flag": 4,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 12,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 4,
+   "links": 19,
+   "native_reverse_paths_on_stated_oneway": 62,
+   "sanitary_makeup_links": 11,
+   "study_hull": true
+  },
+  "hunter_killer_dd692": {
+   "by_exporter_element": {
+    "plr_orfc": 6
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 6,
+   "native_reverse_paths_on_stated_oneway": 78,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "idaho_bb42": {
+   "by_exporter_element": {
+    "plr_orfc": 12
+   },
+   "by_intent_class": {
+    "passive_opening": 7,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 12,
+   "native_reverse_paths_on_stated_oneway": 80,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "independence_cvl26": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 33,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "jupiter_ac3": {
+   "by_exporter_element": {
+    "plr_orfc": 7
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 7,
+   "native_reverse_paths_on_stated_oneway": 60,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "keppler_dd765": {
+   "by_exporter_element": {
+    "plr_orfc": 6
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 6,
+   "native_reverse_paths_on_stated_oneway": 83,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "legend_class_nsc": {
+   "by_exporter_element": {
+    "fan_cvf": 6,
+    "plr_orfc": 12
+   },
+   "by_intent_class": {
+    "ducted_transfer": 1,
+    "forced_exhaust": 1,
+    "forced_supply": 4,
+    "passive_opening": 3,
+    "sanitary_makeup": 9
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 9,
+    "filtration_coupled_to_ducted_flag": 6,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 9,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 2,
+   "has_contam_bundle": false,
+   "is_hvac_ducted_true": 6,
+   "links": 18,
+   "native_reverse_paths_on_stated_oneway": 19,
+   "sanitary_makeup_links": 9,
+   "study_hull": false
+  },
+  "lexington_cv2": {
+   "by_exporter_element": {
+    "plr_orfc": 5
+   },
+   "by_intent_class": {
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 5,
+   "native_reverse_paths_on_stated_oneway": 15,
+   "sanitary_makeup_links": 5,
+   "study_hull": true
+  },
+  "liberty_cargo_ec2": {
+   "by_exporter_element": {
+    "plr_orfc": 12
+   },
+   "by_intent_class": {
+    "passive_opening": 7,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 12,
+   "native_reverse_paths_on_stated_oneway": 19,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "lsm_354": {
+   "by_exporter_element": {
+    "plr_orfc": 7
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 7,
+   "native_reverse_paths_on_stated_oneway": 20,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "luzon_arg2": {
+   "by_exporter_element": {
+    "plr_orfc": 6
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 6,
+   "native_reverse_paths_on_stated_oneway": 112,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "lyon_ap71": {
+   "by_exporter_element": {
+    "plr_orfc": 14
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 8
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 8,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 8,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 14,
+   "native_reverse_paths_on_stated_oneway": 48,
+   "sanitary_makeup_links": 8,
+   "study_hull": false
+  },
+  "mega_cruise_5000": {
+   "by_exporter_element": {
+    "fan_cvf": 21,
+    "plr_orfc": 67
+   },
+   "by_intent_class": {
+    "ducted_transfer": 11,
+    "forced_exhaust": 10,
+    "passive_opening": 1,
+    "pressure_directed": 3,
+    "sanitary_makeup": 63
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 63,
+    "filtration_coupled_to_ducted_flag": 21,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 66,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 21,
+   "links": 88,
+   "native_reverse_paths_on_stated_oneway": 446,
+   "sanitary_makeup_links": 63,
+   "study_hull": true
+  },
+  "mercury_aks20": {
+   "by_exporter_element": {
+    "plr_orfc": 5
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 5,
+   "native_reverse_paths_on_stated_oneway": 72,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "messy_cruise_500": {
+   "by_exporter_element": {
+    "fan_cvf": 3,
+    "plr_orfc": 66
+   },
+   "by_intent_class": {
+    "forced_exhaust": 3,
+    "passive_opening": 1,
+    "pressure_directed": 2,
+    "sanitary_makeup": 63
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 63,
+    "filtration_coupled_to_ducted_flag": 3,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 65,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": false,
+   "is_hvac_ducted_true": 3,
+   "links": 69,
+   "native_reverse_paths_on_stated_oneway": 483,
+   "sanitary_makeup_links": 63,
+   "study_hull": false
+  },
+  "miami_cl89": {
+   "by_exporter_element": {
+    "plr_orfc": 14
+   },
+   "by_intent_class": {
+    "passive_opening": 10,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 2,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 14,
+   "native_reverse_paths_on_stated_oneway": 40,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "middlesex_lst983": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 5,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 24,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "midway_cv41": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 46,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "missouri_bb63": {
+   "by_exporter_element": {
+    "plr_orfc": 10
+   },
+   "by_intent_class": {
+    "passive_opening": 5,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 10,
+   "native_reverse_paths_on_stated_oneway": 108,
+   "sanitary_makeup_links": 5,
+   "study_hull": true
+  },
+  "montana_acr13": {
+   "by_exporter_element": {
+    "plr_orfc": 16
+   },
+   "by_intent_class": {
+    "passive_opening": 5,
+    "sanitary_makeup": 11
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 11,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 11,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 16,
+   "native_reverse_paths_on_stated_oneway": 605,
+   "sanitary_makeup_links": 11,
+   "study_hull": false
+  },
+  "new_jersey_bb62": {
+   "by_exporter_element": {
+    "plr_orfc": 10
+   },
+   "by_intent_class": {
+    "passive_opening": 5,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 10,
+   "native_reverse_paths_on_stated_oneway": 108,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "new_york_bb34": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 4,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 55,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "nields_dd616": {
+   "by_exporter_element": {
+    "plr_orfc": 4
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 4,
+   "native_reverse_paths_on_stated_oneway": 28,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "olympia_c6": {
+   "by_exporter_element": {
+    "plr_orfc": 10
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 10,
+   "native_reverse_paths_on_stated_oneway": 52,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "palmer_dms5": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 64,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "passumpsic_ao106": {
+   "by_exporter_element": {
+    "plr_orfc": 4
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 1
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 1,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 1,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 4,
+   "native_reverse_paths_on_stated_oneway": 4,
+   "sanitary_makeup_links": 1,
+   "study_hull": false
+  },
+  "pce_874": {
+   "by_exporter_element": {
+    "plr_orfc": 2
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 1
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 1,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 1,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 2,
+   "native_reverse_paths_on_stated_oneway": 10,
+   "sanitary_makeup_links": 1,
+   "study_hull": false
+  },
+  "pope_ap110": {
+   "by_exporter_element": {
+    "plr_orfc": 12
+   },
+   "by_intent_class": {
+    "passive_opening": 5,
+    "sanitary_makeup": 7
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 7,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 7,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 12,
+   "native_reverse_paths_on_stated_oneway": 70,
+   "sanitary_makeup_links": 7,
+   "study_hull": false
+  },
+  "pt_564": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 1
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 1,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 1,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 3,
+   "sanitary_makeup_links": 1,
+   "study_hull": false
+  },
+  "puncher_cve53": {
+   "by_exporter_element": {
+    "plr_orfc": 12
+   },
+   "by_intent_class": {
+    "passive_opening": 7,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 12,
+   "native_reverse_paths_on_stated_oneway": 133,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "ranger_cv4": {
+   "by_exporter_element": {
+    "plr_orfc": 11
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 11,
+   "native_reverse_paths_on_stated_oneway": 126,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "raven_am55": {
+   "by_exporter_element": {
+    "plr_orfc": 2
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 1
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 1,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 1,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 2,
+   "native_reverse_paths_on_stated_oneway": 9,
+   "sanitary_makeup_links": 1,
+   "study_hull": false
+  },
+  "river_class_frigate": {
+   "by_exporter_element": {
+    "plr_orfc": 4
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 4,
+   "native_reverse_paths_on_stated_oneway": 48,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "rolla_pc483": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 42,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "ruchamkin_apd89": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 2,
+    "sanitary_makeup": 1
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 1,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 1,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 8,
+   "sanitary_makeup_links": 1,
+   "study_hull": false
+  },
+  "san_antonio_class_lpd": {
+   "by_exporter_element": {
+    "fan_cvf": 7,
+    "plr_orfc": 11
+   },
+   "by_intent_class": {
+    "ducted_transfer": 3,
+    "forced_exhaust": 2,
+    "forced_supply": 2,
+    "passive_opening": 4,
+    "sanitary_makeup": 7
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 7,
+    "filtration_coupled_to_ducted_flag": 7,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 7,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 2,
+   "has_contam_bundle": false,
+   "is_hvac_ducted_true": 7,
+   "links": 18,
+   "native_reverse_paths_on_stated_oneway": 18,
+   "sanitary_makeup_links": 7,
+   "study_hull": false
+  },
+  "saratoga_cv3": {
+   "by_exporter_element": {
+    "plr_orfc": 5
+   },
+   "by_intent_class": {
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 5,
+   "native_reverse_paths_on_stated_oneway": 15,
+   "sanitary_makeup_links": 5,
+   "study_hull": true
+  },
+  "saratoga_cv60": {
+   "by_exporter_element": {
+    "plr_orfc": 13
+   },
+   "by_intent_class": {
+    "passive_opening": 8,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 13,
+   "native_reverse_paths_on_stated_oneway": 65,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "savannah_ns": {
+   "by_exporter_element": {
+    "plr_orfc": 13
+   },
+   "by_intent_class": {
+    "passive_opening": 8,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 13,
+   "native_reverse_paths_on_stated_oneway": 27,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "sigsbee_dd502": {
+   "by_exporter_element": {
+    "plr_orfc": 5
+   },
+   "by_intent_class": {
+    "passive_opening": 3,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 5,
+   "native_reverse_paths_on_stated_oneway": 32,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "south_dakota_bb49": {
+   "by_exporter_element": {
+    "plr_orfc": 7
+   },
+   "by_intent_class": {
+    "passive_opening": 4,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 7,
+   "native_reverse_paths_on_stated_oneway": 32,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "spirit_cruise_3000": {
+   "by_exporter_element": {
+    "fan_cvf": 17,
+    "plr_orfc": 31
+   },
+   "by_intent_class": {
+    "ducted_transfer": 9,
+    "forced_exhaust": 9,
+    "passive_opening": 2,
+    "sanitary_makeup": 28
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 29,
+    "filtration_coupled_to_ducted_flag": 17,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 29,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 17,
+   "links": 48,
+   "native_reverse_paths_on_stated_oneway": 154,
+   "sanitary_makeup_links": 28,
+   "study_hull": true
+  },
+  "squier_ap130": {
+   "by_exporter_element": {
+    "plr_orfc": 7
+   },
+   "by_intent_class": {
+    "passive_opening": 4,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 7,
+   "native_reverse_paths_on_stated_oneway": 54,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "texas_bb35": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 4,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 54,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "thetis_bay_cve90": {
+   "by_exporter_element": {
+    "plr_orfc": 10
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 4
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 4,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 4,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 10,
+   "native_reverse_paths_on_stated_oneway": 72,
+   "sanitary_makeup_links": 4,
+   "study_hull": false
+  },
+  "wasp_cv7": {
+   "by_exporter_element": {
+    "plr_orfc": 9
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 3
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 3,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 3,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 9,
+   "native_reverse_paths_on_stated_oneway": 50,
+   "sanitary_makeup_links": 3,
+   "study_hull": false
+  },
+  "west_virginia_bb48": {
+   "by_exporter_element": {
+    "plr_orfc": 18
+   },
+   "by_intent_class": {
+    "passive_opening": 9,
+    "sanitary_makeup": 9
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 9,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 9,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 1,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 18,
+   "native_reverse_paths_on_stated_oneway": 118,
+   "sanitary_makeup_links": 9,
+   "study_hull": false
+  },
+  "winnipeg_j337": {
+   "by_exporter_element": {
+    "plr_orfc": 3
+   },
+   "by_intent_class": {
+    "passive_opening": 1,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 3,
+   "native_reverse_paths_on_stated_oneway": 30,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  },
+  "wisconsin_bb64": {
+   "by_exporter_element": {
+    "plr_orfc": 10
+   },
+   "by_intent_class": {
+    "passive_opening": 5,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 10,
+   "native_reverse_paths_on_stated_oneway": 108,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "wright_cc2": {
+   "by_exporter_element": {
+    "plr_orfc": 15
+   },
+   "by_intent_class": {
+    "passive_opening": 10,
+    "sanitary_makeup": 5
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 5,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 5,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 15,
+   "native_reverse_paths_on_stated_oneway": 65,
+   "sanitary_makeup_links": 5,
+   "study_hull": false
+  },
+  "yorktown_cv5": {
+   "by_exporter_element": {
+    "plr_orfc": 8
+   },
+   "by_intent_class": {
+    "passive_opening": 6,
+    "sanitary_makeup": 2
+   },
+   "direction_present": 0,
+   "flags": {
+    "endpoint_unresolved": 0,
+    "exporter_orifice_on_stated_prescribed_flow": 2,
+    "filtration_coupled_to_ducted_flag": 0,
+    "intent_unstated": 0,
+    "native_reverse_on_stated_oneway": 2,
+    "zero_flow_dropped_by_exporter": 0
+   },
+   "galley_related_links": 0,
+   "has_contam_bundle": true,
+   "is_hvac_ducted_true": 0,
+   "links": 8,
+   "native_reverse_paths_on_stated_oneway": 40,
+   "sanitary_makeup_links": 2,
+   "study_hull": false
+  }
+ },
+ "reconciliation": {
+  "links_audited": 1011,
+  "links_direct_recount": 1011,
+  "links_sum_of_platforms": 1011,
+  "platforms_audited": 82,
+  "platforms_direct_recount": 82,
+  "reconciled": true,
+  "sum_by_intent_class": 1011,
+  "unique_link_keys": 1011
+ },
+ "schema": "forced_exhaust_audit_summary_v1"
+}

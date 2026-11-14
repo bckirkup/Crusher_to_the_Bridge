@@ -1,0 +1,912 @@
+{
+ "contamx_lane": true,
+ "definition": "unit t0 pulse in one source zone; exact_h is the integral of total retained mass fraction over the horizon; endpoint_sum_h is the sum of end-of-step retained fractions times the step",
+ "design": "campaigns/contam/phase1_hvac_tracer_01/design/phase1_hvac_tracer_design.json",
+ "filter_efficiency": 0.5,
+ "horizon_hours": 12.0,
+ "hulls": {
+  "classic_cruise_1900": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -1755.8866656878567,
+       "min_m3h": -1755.8866656878567,
+       "paths": 1,
+       "total_m3h": -1755.8866656878567
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.07335201003608881,
+      "mean": 0.03586329837816853,
+      "median": 0.059139013709432815,
+      "min": 4.586988824669224e-09,
+      "n": 17
+     },
+     "sanitary_exact_h": {
+      "max": 0.32638643037504367,
+      "mean": 0.1895184456146184,
+      "median": 0.24784901344332635,
+      "min": 0.05208321923249205,
+      "n": 17
+     },
+     "sources": {},
+     "zones": 79
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.1430920606685524,
+      "mean": 0.050005313082782624,
+      "median": 0.047849027798816064,
+      "min": 0.010091240453404584,
+      "n": 17
+     },
+     "sanitary_exact_h": {
+      "max": 0.29941761803198474,
+      "mean": 0.21386496331165106,
+      "median": 0.22589807665600817,
+      "min": 0.14595546998774792,
+      "n": 17
+     },
+     "sources": {},
+     "zones": 79
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -1755.8866656878567,
+       "min_m3h": -1755.8866656878567,
+       "paths": 1,
+       "total_m3h": -1755.8866656878567
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.07335201003608881,
+      "mean": 0.03586329837816853,
+      "median": 0.059139013709432815,
+      "min": 4.586988824669224e-09,
+      "n": 17
+     },
+     "sanitary_exact_h": {
+      "max": 0.32638643037504367,
+      "mean": 0.1895184456146184,
+      "median": 0.24784901344332635,
+      "min": 0.05208321923249205,
+      "n": 17
+     },
+     "sources": {},
+     "zones": 79
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.587181767690185e-09,
+      "mean": 4.587181767690185e-09,
+      "median": 4.587181767690185e-09,
+      "min": 4.587181767690185e-09,
+      "n": 17
+     },
+     "sanitary_exact_h": {
+      "max": 0.05208333333333333,
+      "mean": 0.05208333333333333,
+      "median": 0.05208333333333333,
+      "min": 0.05208333333333333,
+      "n": 17
+     },
+     "sources": {},
+     "zones": 79
+    }
+   },
+   "sanitary_source_zones": 17
+  },
+  "destroyer_baseline": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 4.586992115437429e-09,
+      "mean": 4.586990287233539e-09,
+      "median": 4.586992115437429e-09,
+      "min": 4.586986630825759e-09,
+      "n": 3
+     },
+     "sanitary_exact_h": {
+      "max": 0.0520832211785916,
+      "mean": 0.0520832200974252,
+      "median": 0.0520832211785916,
+      "min": 0.05208321793509242,
+      "n": 3
+     },
+     "sources": {
+      "Mess_Hall": {
+       "endpoint_sum_h": 0.02401835242696536,
+       "exact_h": 0.28560438511338565
+      }
+     },
+     "zones": 9
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.0330035706554996,
+      "mean": 0.02421502742852187,
+      "median": 0.0198213875236618,
+      "min": 0.019820124106404206,
+      "n": 3
+     },
+     "sanitary_exact_h": {
+      "max": 0.20750799385937613,
+      "mean": 0.18411934314409406,
+      "median": 0.1724292386363471,
+      "min": 0.17242079693655898,
+      "n": 3
+     },
+     "sources": {
+      "Mess_Hall": {
+       "endpoint_sum_h": 0.04008310717510325,
+       "exact_h": 0.31292247448996696
+      }
+     },
+     "zones": 9
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 4.586992115437429e-09,
+      "mean": 4.586990287233539e-09,
+      "median": 4.586992115437429e-09,
+      "min": 4.586986630825759e-09,
+      "n": 3
+     },
+     "sanitary_exact_h": {
+      "max": 0.0520832211785916,
+      "mean": 0.0520832200974252,
+      "median": 0.0520832211785916,
+      "min": 0.05208321793509242,
+      "n": 3
+     },
+     "sources": {
+      "Mess_Hall": {
+       "endpoint_sum_h": 0.02401835242696536,
+       "exact_h": 0.28560438511338565
+      }
+     },
+     "zones": 9
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.587181767690185e-09,
+      "mean": 4.587181767690185e-09,
+      "median": 4.587181767690185e-09,
+      "min": 4.587181767690185e-09,
+      "n": 3
+     },
+     "sanitary_exact_h": {
+      "max": 0.052083333333333336,
+      "mean": 0.052083333333333336,
+      "median": 0.052083333333333336,
+      "min": 0.052083333333333336,
+      "n": 3
+     },
+     "sources": {
+      "Mess_Hall": {
+       "endpoint_sum_h": 0.0185206333845055,
+       "exact_h": 0.2625592325657291
+      }
+     },
+     "zones": 9
+    }
+   },
+   "sanitary_source_zones": 3
+  },
+  "expedition_cruise_450": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -416.93330987621556,
+       "min_m3h": -416.93330987621556,
+       "paths": 1,
+       "total_m3h": -416.93330987621556
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.03334544510140969,
+      "mean": 0.005436397460777217,
+      "median": 4.586992115437429e-09,
+      "min": 4.586986630825759e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.12864932161262108,
+      "mean": 0.07201563677368346,
+      "median": 0.0520832211785916,
+      "min": 0.05208321793509243,
+      "n": 13
+     },
+     "sources": {},
+     "zones": 47
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.15173949746997473,
+      "mean": 0.07336585795538653,
+      "median": 0.04120078969022471,
+      "min": 0.008660868971649086,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.3159353707561798,
+      "mean": 0.23240723613373518,
+      "median": 0.21330469982395256,
+      "min": 0.12349417400712194,
+      "n": 13
+     },
+     "sources": {},
+     "zones": 47
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -416.93330987621556,
+       "min_m3h": -416.93330987621556,
+       "paths": 1,
+       "total_m3h": -416.93330987621556
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.03334544510140969,
+      "mean": 0.005436397460777217,
+      "median": 4.586992115437429e-09,
+      "min": 4.586986630825759e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.12864932161262108,
+      "mean": 0.07201563677368346,
+      "median": 0.0520832211785916,
+      "min": 0.05208321793509243,
+      "n": 13
+     },
+     "sources": {},
+     "zones": 47
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.587181767690185e-09,
+      "mean": 4.587181767690185e-09,
+      "median": 4.587181767690185e-09,
+      "min": 4.587181767690185e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.05208333333333333,
+      "mean": 0.05208333333333333,
+      "median": 0.05208333333333333,
+      "min": 0.05208333333333333,
+      "n": 13
+     },
+     "sources": {},
+     "zones": 47
+    }
+   },
+   "sanitary_source_zones": 13
+  },
+  "fletcher_class_destroyer": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 4.586992115437429e-09,
+      "mean": 4.5869918623014395e-09,
+      "median": 4.586992115437429e-09,
+      "min": 4.58698882466956e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.0520832211785916,
+      "mean": 0.05208322102889163,
+      "median": 0.0520832211785916,
+      "min": 0.05208321923249204,
+      "n": 13
+     },
+     "sources": {},
+     "zones": 33
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.026372371692777796,
+      "mean": 0.009437571252437018,
+      "median": 0.008649733334609555,
+      "min": 0.000762116674747631,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.197050715472099,
+      "mean": 0.13100923603550466,
+      "median": 0.13554917345592712,
+      "min": 0.06839264140396281,
+      "n": 13
+     },
+     "sources": {},
+     "zones": 33
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 4.586992115437429e-09,
+      "mean": 4.5869918623014395e-09,
+      "median": 4.586992115437429e-09,
+      "min": 4.58698882466956e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.0520832211785916,
+      "mean": 0.05208322102889163,
+      "median": 0.0520832211785916,
+      "min": 0.05208321923249204,
+      "n": 13
+     },
+     "sources": {},
+     "zones": 33
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.587181767690185e-09,
+      "mean": 4.587181767690185e-09,
+      "median": 4.587181767690185e-09,
+      "min": 4.587181767690185e-09,
+      "n": 13
+     },
+     "sanitary_exact_h": {
+      "max": 0.05208333333333333,
+      "mean": 0.05208333333333333,
+      "median": 0.05208333333333333,
+      "min": 0.05208333333333333,
+      "n": 13
+     },
+     "sources": {},
+     "zones": 33
+    }
+   },
+   "sanitary_source_zones": 13
+  },
+  "greg_mortimer": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -700.0477343107176,
+       "min_m3h": -700.0477343107176,
+       "paths": 1,
+       "total_m3h": -700.0477343107176
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.00903261698434089,
+      "mean": 0.0020892430668143286,
+      "median": 4.586992115437429e-09,
+      "min": 4.58698882466956e-09,
+      "n": 11
+     },
+     "sanitary_exact_h": {
+      "max": 0.11852209529627891,
+      "mean": 0.06721546129495407,
+      "median": 0.0520832211785916,
+      "min": 0.052083219232492046,
+      "n": 11
+     },
+     "sources": {},
+     "zones": 50
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.07937742333359164,
+      "mean": 0.049886032404802425,
+      "median": 0.06804831833629148,
+      "min": 0.011332098764677308,
+      "n": 11
+     },
+     "sanitary_exact_h": {
+      "max": 0.23754156307453175,
+      "mean": 0.1872138986680456,
+      "median": 0.18135348817094987,
+      "min": 0.14549826411817396,
+      "n": 11
+     },
+     "sources": {},
+     "zones": 50
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -700.0477343107176,
+       "min_m3h": -700.0477343107176,
+       "paths": 1,
+       "total_m3h": -700.0477343107176
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.00903261698434089,
+      "mean": 0.0020892430668143286,
+      "median": 4.586992115437429e-09,
+      "min": 4.58698882466956e-09,
+      "n": 11
+     },
+     "sanitary_exact_h": {
+      "max": 0.11852209529627891,
+      "mean": 0.06721546129495407,
+      "median": 0.0520832211785916,
+      "min": 0.052083219232492046,
+      "n": 11
+     },
+     "sources": {},
+     "zones": 50
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.587181767689757e-09,
+      "mean": 4.587181767689757e-09,
+      "median": 4.587181767689757e-09,
+      "min": 4.587181767689757e-09,
+      "n": 11
+     },
+     "sanitary_exact_h": {
+      "max": 0.05208333333333333,
+      "mean": 0.05208333333333333,
+      "median": 0.05208333333333333,
+      "min": 0.05208333333333333,
+      "n": 11
+     },
+     "sources": {},
+     "zones": 50
+    }
+   },
+   "sanitary_source_zones": 11
+  },
+  "lexington_cv2": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 5.069412612733754e-09,
+      "mean": 5.069409987081332e-09,
+      "median": 5.069410491216436e-09,
+      "min": 5.069407493787245e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.05235590886622175,
+      "mean": 0.052355907446474184,
+      "median": 0.0523559077190712,
+      "min": 0.05235590609829527,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 97
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.04396328275826357,
+      "mean": 0.04356910843432699,
+      "median": 0.04371887669779303,
+      "min": 0.042679464140565115,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.20081030339257097,
+      "mean": 0.1994183133850775,
+      "median": 0.19994657778215436,
+      "min": 0.19627807090569493,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 97
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 5.069412612733754e-09,
+      "mean": 5.069409987081332e-09,
+      "median": 5.069410491216436e-09,
+      "min": 5.069407493787245e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.05235590886622175,
+      "mean": 0.052355907446474184,
+      "median": 0.0523559077190712,
+      "min": 0.05235590609829527,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 97
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 5.069619888023804e-09,
+      "mean": 5.0696198880237644e-09,
+      "median": 5.069619888023804e-09,
+      "min": 5.069619888023703e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.052356020942408384,
+      "mean": 0.05235602094240838,
+      "median": 0.052356020942408384,
+      "min": 0.05235602094240837,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 97
+    }
+   },
+   "sanitary_source_zones": 5
+  },
+  "mega_cruise_5000": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_to_Galley_Transfer": {
+       "max_m3h": 249.99999752492425,
+       "min_m3h": 249.99999752492425,
+       "paths": 60,
+       "total_m3h": 14999.999851495464
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.06744965626707713,
+      "mean": 0.01901284933234985,
+      "median": 0.004888412433827811,
+      "min": 4.586986630825326e-09,
+      "n": 63
+     },
+     "sanitary_exact_h": {
+      "max": 0.24734502436213118,
+      "mean": 0.11162148291663469,
+      "median": 0.08065047075508347,
+      "min": 0.05208321793509243,
+      "n": 63
+     },
+     "sources": {},
+     "zones": 192
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.0823472623375483,
+      "mean": 0.030736967179821734,
+      "median": 0.019135289372529823,
+      "min": 0.006657666266594021,
+      "n": 63
+     },
+     "sanitary_exact_h": {
+      "max": 0.2733018776316285,
+      "mean": 0.1864501179439814,
+      "median": 0.16935025200741105,
+      "min": 0.1281555671556332,
+      "n": 63
+     },
+     "sources": {},
+     "zones": 192
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_to_Galley_Transfer": {
+       "max_m3h": 249.99999752492425,
+       "min_m3h": 249.99999752492425,
+       "paths": 60,
+       "total_m3h": 14999.999851495464
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.06744965626707713,
+      "mean": 0.01901284933234985,
+      "median": 0.004888412433827811,
+      "min": 4.586986630825326e-09,
+      "n": 63
+     },
+     "sanitary_exact_h": {
+      "max": 0.24734502436213118,
+      "mean": 0.11162148291663469,
+      "median": 0.08065047075508347,
+      "min": 0.05208321793509243,
+      "n": 63
+     },
+     "sources": {},
+     "zones": 192
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.587181767690185e-09,
+      "mean": 4.587181767690185e-09,
+      "median": 4.587181767690185e-09,
+      "min": 4.587181767690185e-09,
+      "n": 63
+     },
+     "sanitary_exact_h": {
+      "max": 0.05208333333333335,
+      "mean": 0.05208333333333335,
+      "median": 0.05208333333333335,
+      "min": 0.05208333333333335,
+      "n": 63
+     },
+     "sources": {},
+     "zones": 192
+    }
+   },
+   "sanitary_source_zones": 63
+  },
+  "missouri_bb63": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 0.00447284237916211,
+      "mean": 0.0016010246364572766,
+      "median": 5.069411086409353e-09,
+      "min": 5.069405890661019e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.06430534109298593,
+      "mean": 0.05663127265619135,
+      "median": 0.052355908040905015,
+      "min": 0.0523559052314493,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 103
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.0829696103446475,
+      "mean": 0.0746469992548183,
+      "median": 0.06944405377348356,
+      "min": 0.06868788916166739,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.27751550385009355,
+      "mean": 0.2650252744244506,
+      "median": 0.2577602552578798,
+      "min": 0.2553862672822477,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 103
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 0.00447284237916211,
+      "mean": 0.0016010246364572766,
+      "median": 5.069411086409353e-09,
+      "min": 5.069405890661019e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.06430534109298593,
+      "mean": 0.05663127265619135,
+      "median": 0.052355908040905015,
+      "min": 0.0523559052314493,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 103
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 5.069619888023804e-09,
+      "mean": 5.069619888023804e-09,
+      "median": 5.069619888023804e-09,
+      "min": 5.069619888023804e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.052356020942408384,
+      "mean": 0.05235602094240839,
+      "median": 0.052356020942408384,
+      "min": 0.052356020942408384,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 103
+    }
+   },
+   "sanitary_source_zones": 5
+  },
+  "saratoga_cv3": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 5.069414395627261e-09,
+      "mean": 5.069410977915725e-09,
+      "median": 5.069409993715724e-09,
+      "min": 5.069408426671292e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.052355909830270775,
+      "mean": 0.052355907982239866,
+      "median": 0.05235590745006168,
+      "min": 0.05235590660272631,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 108
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.04162416662112793,
+      "mean": 0.041293322902385944,
+      "median": 0.04132927645388012,
+      "min": 0.0410172384187454,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.19865966603353677,
+      "mean": 0.19744037919007956,
+      "median": 0.19757268716747825,
+      "min": 0.19642327869938672,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 108
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {},
+     "sanitary_endpoint_sum_h": {
+      "max": 5.069414395627261e-09,
+      "mean": 5.069410977915725e-09,
+      "median": 5.069409993715724e-09,
+      "min": 5.069408426671292e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.052355909830270775,
+      "mean": 0.052355907982239866,
+      "median": 0.05235590745006168,
+      "min": 0.05235590660272631,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 108
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 5.069619888023804e-09,
+      "mean": 5.069619888023804e-09,
+      "median": 5.069619888023804e-09,
+      "min": 5.069619888023804e-09,
+      "n": 5
+     },
+     "sanitary_exact_h": {
+      "max": 0.052356020942408384,
+      "mean": 0.05235602094240839,
+      "median": 0.052356020942408384,
+      "min": 0.052356020942408384,
+      "n": 5
+     },
+     "sources": {},
+     "zones": 108
+    }
+   },
+   "sanitary_source_zones": 5
+  },
+  "spirit_cruise_3000": {
+   "as_authored": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -765.4491802103637,
+       "min_m3h": -765.4491802103637,
+       "paths": 1,
+       "total_m3h": -765.4491802103637
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.3692221430499162,
+      "mean": 0.050916818101520656,
+      "median": 0.008898451000220855,
+      "min": 4.5869902872324e-09,
+      "n": 28
+     },
+     "sanitary_exact_h": {
+      "max": 0.5663081620438162,
+      "mean": 0.17700150136643636,
+      "median": 0.09181124532429757,
+      "min": 0.05208322009742517,
+      "n": 28
+     },
+     "sources": {},
+     "zones": 115
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 0.07969981537047136,
+      "mean": 0.0455848982982398,
+      "median": 0.046331173551203794,
+      "min": 0.010411133451512506,
+      "n": 28
+     },
+     "sanitary_exact_h": {
+      "max": 0.27030354504208554,
+      "mean": 0.21086387161642325,
+      "median": 0.2232180885424132,
+      "min": 0.1468167185583309,
+      "n": 28
+     },
+     "sources": {},
+     "zones": 115
+    }
+   },
+   "sanitary_makeup_oneway": {
+    "contamx_commissioned_export": {
+     "galley_related_solved_flows": {
+      "Dining_Galley_Exhaust": {
+       "max_m3h": -765.4491802103637,
+       "min_m3h": -765.4491802103637,
+       "paths": 1,
+       "total_m3h": -765.4491802103637
+      }
+     },
+     "sanitary_endpoint_sum_h": {
+      "max": 0.3692221430499162,
+      "mean": 0.050916818101520656,
+      "median": 0.008898451000220855,
+      "min": 4.5869902872324e-09,
+      "n": 28
+     },
+     "sanitary_exact_h": {
+      "max": 0.5663081620438162,
+      "mean": 0.17700150136643636,
+      "median": 0.09181124532429757,
+      "min": 0.05208322009742517,
+      "n": 28
+     },
+     "sources": {},
+     "zones": 115
+    },
+    "native": {
+     "sanitary_endpoint_sum_h": {
+      "max": 4.587181767690185e-09,
+      "mean": 4.587181767690184e-09,
+      "median": 4.587181767690185e-09,
+      "min": 4.587181767690185e-09,
+      "n": 28
+     },
+     "sanitary_exact_h": {
+      "max": 0.05208333333333333,
+      "mean": 0.05208333333333333,
+      "median": 0.05208333333333333,
+      "min": 0.05208333333333333,
+      "n": 28
+     },
+     "sources": {},
+     "zones": 115
+    }
+   },
+   "sanitary_source_zones": 28
+  }
+ },
+ "natural_decay_rate": 0.0,
+ "sampling_step_hours": 1.0,
+ "schema": "forced_exhaust_exact_integral_check_v1"
+}
