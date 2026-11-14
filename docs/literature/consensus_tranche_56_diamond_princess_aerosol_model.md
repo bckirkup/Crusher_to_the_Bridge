@@ -31,7 +31,7 @@
 This is a structural comparison only, factual to the two texts:
 
 - Azimi et al. collapse the connected passenger-accessible public indoor spaces into a single well-mixed compartment and represent cabins through aggregate infected/non-infected stateroom air states with assumed areas, volumes and airflow splits (Me, SI Appendix §1.1.1–1.1.2).
-- Crusher's Diamond Princess platform approach is zone-resolved geometry with a declared airflow network and ContamX-solved airflow/concentration fields. The two representations therefore differ in spatial resolution and airflow closure: Azimi's route shares are conditional on a lumped public compartment and explicitly assumed ventilation/occupancy rules, while Crusher resolves zones and solves the declared network.
+- Crusher's Diamond Princess platform approach is zone-resolved geometry with a declared airflow network; the optional ContamX transport engine supplies solver-derived inter-zone airflow fields, while Crusher's own mass-balance computes concentration transport on those flows. The two representations therefore differ in spatial resolution and airflow closure: Azimi's route shares are conditional on a lumped public compartment and explicitly assumed ventilation/occupancy rules, while Crusher resolves zones and applies its own contaminant mass balance over the declared/solved airflow network.
 - No claim is made here that either approach validates or outperforms the other; this entry records the paper and its assumptions, not a model comparison result.
 
 ## 4. Evidence grade and scope decisions
