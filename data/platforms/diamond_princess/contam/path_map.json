@@ -11717,7 +11717,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1303,
@@ -11726,7 +11727,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1304,
@@ -11735,7 +11737,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1305,
@@ -11744,7 +11747,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1306,
@@ -11753,7 +11757,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1307,
@@ -11762,7 +11767,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1308,
@@ -11771,7 +11777,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1309,
@@ -11780,7 +11787,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1310,
@@ -11789,7 +11797,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1311,
@@ -11798,7 +11807,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1312,
@@ -11807,7 +11817,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1313,
@@ -11816,7 +11827,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 1
+    "ahs_nr": 1,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1314,
@@ -11852,7 +11864,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1318,
@@ -11861,7 +11874,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1319,
@@ -11870,7 +11884,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1320,
@@ -11879,7 +11894,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1321,
@@ -11888,7 +11904,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1322,
@@ -11897,7 +11914,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1323,
@@ -11906,7 +11924,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1324,
@@ -11915,7 +11934,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1325,
@@ -11924,7 +11944,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1326,
@@ -11933,7 +11954,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1327,
@@ -11942,7 +11964,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1328,
@@ -11951,7 +11974,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 2
+    "ahs_nr": 2,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1329,
@@ -11987,7 +12011,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1333,
@@ -11996,7 +12021,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1334,
@@ -12005,7 +12031,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1335,
@@ -12014,7 +12041,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1336,
@@ -12023,7 +12051,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1337,
@@ -12032,7 +12061,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1338,
@@ -12041,7 +12071,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1339,
@@ -12050,7 +12081,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1340,
@@ -12059,7 +12091,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1341,
@@ -12068,7 +12101,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1342,
@@ -12077,7 +12111,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1343,
@@ -12086,7 +12121,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 3
+    "ahs_nr": 3,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1344,
@@ -12122,7 +12158,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1348,
@@ -12131,7 +12168,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1349,
@@ -12140,7 +12178,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1350,
@@ -12149,7 +12188,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1351,
@@ -12158,7 +12198,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1352,
@@ -12167,7 +12208,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1353,
@@ -12176,7 +12218,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1354,
@@ -12185,7 +12228,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1355,
@@ -12194,7 +12238,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1356,
@@ -12203,7 +12248,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1357,
@@ -12212,7 +12258,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1358,
@@ -12221,7 +12268,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 4
+    "ahs_nr": 4,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1359,
@@ -12257,7 +12305,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1363,
@@ -12266,7 +12315,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1364,
@@ -12275,7 +12325,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1365,
@@ -12284,7 +12335,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1366,
@@ -12293,7 +12345,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1367,
@@ -12302,7 +12355,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1368,
@@ -12311,7 +12365,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1369,
@@ -12320,7 +12375,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1370,
@@ -12329,7 +12385,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1371,
@@ -12338,7 +12395,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1372,
@@ -12347,7 +12405,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1373,
@@ -12356,7 +12415,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 5
+    "ahs_nr": 5,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1374,
@@ -12392,7 +12452,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1378,
@@ -12401,7 +12462,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1379,
@@ -12410,7 +12472,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1380,
@@ -12419,7 +12482,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1381,
@@ -12428,7 +12492,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1382,
@@ -12437,7 +12502,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1383,
@@ -12446,7 +12512,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1384,
@@ -12455,7 +12522,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1385,
@@ -12464,7 +12532,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1386,
@@ -12473,7 +12542,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1387,
@@ -12482,7 +12552,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1388,
@@ -12491,7 +12562,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 6
+    "ahs_nr": 6,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1389,
@@ -12527,7 +12599,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1393,
@@ -12536,7 +12609,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1394,
@@ -12545,7 +12619,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1395,
@@ -12554,7 +12629,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1396,
@@ -12563,7 +12639,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1397,
@@ -12572,7 +12649,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1398,
@@ -12581,7 +12659,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1399,
@@ -12590,7 +12669,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1400,
@@ -12599,7 +12679,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1401,
@@ -12608,7 +12689,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1402,
@@ -12617,7 +12699,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1403,
@@ -12626,7 +12709,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 7
+    "ahs_nr": 7,
+    "declared_flow_m3h": 2700.0
   },
   {
     "path_nr": 1404,
@@ -12662,7 +12746,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 8
+    "ahs_nr": 8,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1408,
@@ -12671,7 +12756,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 8
+    "ahs_nr": 8,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1409,
@@ -12680,7 +12766,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 8
+    "ahs_nr": 8,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1410,
@@ -12689,7 +12776,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 8
+    "ahs_nr": 8,
+    "declared_flow_m3h": 3900.0
   },
   {
     "path_nr": 1411,
@@ -12725,7 +12813,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 20800.0
   },
   {
     "path_nr": 1415,
@@ -12734,7 +12823,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 20800.0
   },
   {
     "path_nr": 1416,
@@ -12743,7 +12833,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 4400.0
   },
   {
     "path_nr": 1417,
@@ -12752,7 +12843,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 4400.0
   },
   {
     "path_nr": 1418,
@@ -12761,7 +12853,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 800.0
   },
   {
     "path_nr": 1419,
@@ -12770,7 +12863,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 800.0
   },
   {
     "path_nr": 1420,
@@ -12779,7 +12873,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 1400.0
   },
   {
     "path_nr": 1421,
@@ -12788,7 +12883,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 1400.0
   },
   {
     "path_nr": 1422,
@@ -12797,7 +12893,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 480.0
   },
   {
     "path_nr": 1423,
@@ -12806,7 +12903,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 480.0
   },
   {
     "path_nr": 1424,
@@ -12815,7 +12913,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 480.0
   },
   {
     "path_nr": 1425,
@@ -12824,7 +12923,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 480.0
   },
   {
     "path_nr": 1426,
@@ -12833,7 +12933,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 800.0
   },
   {
     "path_nr": 1427,
@@ -12842,7 +12943,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 800.0
   },
   {
     "path_nr": 1428,
@@ -12851,7 +12953,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 1200.0
   },
   {
     "path_nr": 1429,
@@ -12860,7 +12963,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 9
+    "ahs_nr": 9,
+    "declared_flow_m3h": 1200.0
   },
   {
     "path_nr": 1430,
@@ -12896,7 +13000,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 24000.0
   },
   {
     "path_nr": 1434,
@@ -12905,7 +13010,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 24000.0
   },
   {
     "path_nr": 1435,
@@ -12914,7 +13020,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 3600.0
   },
   {
     "path_nr": 1436,
@@ -12923,7 +13030,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 3600.0
   },
   {
     "path_nr": 1437,
@@ -12932,7 +13040,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 600.0
   },
   {
     "path_nr": 1438,
@@ -12941,7 +13050,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 600.0
   },
   {
     "path_nr": 1439,
@@ -12950,7 +13060,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 800.0
   },
   {
     "path_nr": 1440,
@@ -12959,7 +13070,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 800.0
   },
   {
     "path_nr": 1441,
@@ -12968,7 +13080,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 600.0
   },
   {
     "path_nr": 1442,
@@ -12977,7 +13090,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 600.0
   },
   {
     "path_nr": 1443,
@@ -12986,7 +13100,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 1400.0
   },
   {
     "path_nr": 1444,
@@ -12995,7 +13110,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 1400.0
   },
   {
     "path_nr": 1445,
@@ -13004,7 +13120,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 2800.0
   },
   {
     "path_nr": 1446,
@@ -13013,7 +13130,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 2800.0
   },
   {
     "path_nr": 1447,
@@ -13022,7 +13140,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 1000.0
   },
   {
     "path_nr": 1448,
@@ -13031,7 +13150,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 1000.0
   },
   {
     "path_nr": 1449,
@@ -13040,7 +13160,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 1000.0
   },
   {
     "path_nr": 1450,
@@ -13049,7 +13170,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 1000.0
   },
   {
     "path_nr": 1451,
@@ -13058,7 +13180,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 720.0
   },
   {
     "path_nr": 1452,
@@ -13067,7 +13190,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 720.0
   },
   {
     "path_nr": 1453,
@@ -13076,7 +13200,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 560.0
   },
   {
     "path_nr": 1454,
@@ -13085,7 +13210,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 560.0
   },
   {
     "path_nr": 1455,
@@ -13094,7 +13220,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 720.0
   },
   {
     "path_nr": 1456,
@@ -13103,7 +13230,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 720.0
   },
   {
     "path_nr": 1457,
@@ -13112,7 +13240,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 480.0
   },
   {
     "path_nr": 1458,
@@ -13121,7 +13250,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 480.0
   },
   {
     "path_nr": 1459,
@@ -13130,7 +13260,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 400.0
   },
   {
     "path_nr": 1460,
@@ -13139,7 +13270,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 10
+    "ahs_nr": 10,
+    "declared_flow_m3h": 400.0
   },
   {
     "path_nr": 1461,
@@ -13175,7 +13307,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1465,
@@ -13184,7 +13317,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1466,
@@ -13193,7 +13327,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1467,
@@ -13202,7 +13337,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1468,
@@ -13211,7 +13347,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1469,
@@ -13220,7 +13357,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1470,
@@ -13229,7 +13367,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 3500.0
   },
   {
     "path_nr": 1471,
@@ -13238,7 +13377,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 3500.0
   },
   {
     "path_nr": 1472,
@@ -13247,7 +13387,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 6000.0
   },
   {
     "path_nr": 1473,
@@ -13256,7 +13397,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 6000.0
   },
   {
     "path_nr": 1474,
@@ -13265,7 +13407,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 2000.0
   },
   {
     "path_nr": 1475,
@@ -13274,7 +13417,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 2000.0
   },
   {
     "path_nr": 1476,
@@ -13283,7 +13427,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1477,
@@ -13292,7 +13437,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1478,
@@ -13301,7 +13447,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 3500.0
   },
   {
     "path_nr": 1479,
@@ -13310,7 +13457,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 3500.0
   },
   {
     "path_nr": 1480,
@@ -13319,7 +13467,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1481,
@@ -13328,7 +13477,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 750.0
   },
   {
     "path_nr": 1482,
@@ -13337,7 +13487,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 2000.0
   },
   {
     "path_nr": 1483,
@@ -13346,7 +13497,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 2000.0
   },
   {
     "path_nr": 1484,
@@ -13355,7 +13507,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 1500.0
   },
   {
     "path_nr": 1485,
@@ -13364,7 +13517,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 1500.0
   },
   {
     "path_nr": 1486,
@@ -13373,7 +13527,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 2500.0
   },
   {
     "path_nr": 1487,
@@ -13382,7 +13537,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 11
+    "ahs_nr": 11,
+    "declared_flow_m3h": 2500.0
   },
   {
     "path_nr": 1488,
@@ -13418,7 +13574,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 12
+    "ahs_nr": 12,
+    "declared_flow_m3h": 3200.0
   },
   {
     "path_nr": 1492,
@@ -13427,7 +13584,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 12
+    "ahs_nr": 12,
+    "declared_flow_m3h": 3200.0
   },
   {
     "path_nr": 1493,
@@ -13436,7 +13594,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 12
+    "ahs_nr": 12,
+    "declared_flow_m3h": 600.0
   },
   {
     "path_nr": 1494,
@@ -13445,7 +13604,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 12
+    "ahs_nr": 12,
+    "declared_flow_m3h": 600.0
   },
   {
     "path_nr": 1495,
@@ -13454,7 +13614,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 12
+    "ahs_nr": 12,
+    "declared_flow_m3h": 2000.0
   },
   {
     "path_nr": 1496,
@@ -13463,7 +13624,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 12
+    "ahs_nr": 12,
+    "declared_flow_m3h": 2000.0
   },
   {
     "path_nr": 1497,
@@ -13499,7 +13661,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 8800.0
   },
   {
     "path_nr": 1501,
@@ -13508,7 +13671,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 8800.0
   },
   {
     "path_nr": 1502,
@@ -13517,7 +13681,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 8800.0
   },
   {
     "path_nr": 1503,
@@ -13526,7 +13691,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 8800.0
   },
   {
     "path_nr": 1504,
@@ -13535,7 +13701,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 9600.0
   },
   {
     "path_nr": 1505,
@@ -13544,7 +13711,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 9600.0
   },
   {
     "path_nr": 1506,
@@ -13553,7 +13721,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 9600.0
   },
   {
     "path_nr": 1507,
@@ -13562,7 +13731,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 9600.0
   },
   {
     "path_nr": 1508,
@@ -13571,7 +13741,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 10400.0
   },
   {
     "path_nr": 1509,
@@ -13580,7 +13751,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 10400.0
   },
   {
     "path_nr": 1510,
@@ -13589,7 +13761,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1120.0
   },
   {
     "path_nr": 1511,
@@ -13598,7 +13771,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1120.0
   },
   {
     "path_nr": 1512,
@@ -13607,7 +13781,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1280.0
   },
   {
     "path_nr": 1513,
@@ -13616,7 +13791,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1280.0
   },
   {
     "path_nr": 1514,
@@ -13625,7 +13801,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1280.0
   },
   {
     "path_nr": 1515,
@@ -13634,7 +13811,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1280.0
   },
   {
     "path_nr": 1516,
@@ -13643,7 +13821,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1280.0
   },
   {
     "path_nr": 1517,
@@ -13652,7 +13831,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1280.0
   },
   {
     "path_nr": 1518,
@@ -13661,7 +13841,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 12800.0
   },
   {
     "path_nr": 1519,
@@ -13670,7 +13851,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 12800.0
   },
   {
     "path_nr": 1520,
@@ -13679,7 +13861,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1680.0
   },
   {
     "path_nr": 1521,
@@ -13688,7 +13871,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1680.0
   },
   {
     "path_nr": 1522,
@@ -13697,7 +13881,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1680.0
   },
   {
     "path_nr": 1523,
@@ -13706,7 +13891,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1680.0
   },
   {
     "path_nr": 1524,
@@ -13715,7 +13901,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 320.0
   },
   {
     "path_nr": 1525,
@@ -13724,7 +13911,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 320.0
   },
   {
     "path_nr": 1526,
@@ -13733,7 +13921,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 3600.0
   },
   {
     "path_nr": 1527,
@@ -13742,7 +13931,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 3600.0
   },
   {
     "path_nr": 1528,
@@ -13751,7 +13941,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1120.0
   },
   {
     "path_nr": 1529,
@@ -13760,7 +13951,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 13
+    "ahs_nr": 13,
+    "declared_flow_m3h": 1120.0
   },
   {
     "path_nr": 1530,
@@ -13796,7 +13988,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 14
+    "ahs_nr": 14,
+    "declared_flow_m3h": 2100.0
   },
   {
     "path_nr": 1534,
@@ -13805,7 +13998,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 14
+    "ahs_nr": 14,
+    "declared_flow_m3h": 2100.0
   },
   {
     "path_nr": 1535,
@@ -13814,7 +14008,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 14
+    "ahs_nr": 14,
+    "declared_flow_m3h": 840.0
   },
   {
     "path_nr": 1536,
@@ -13823,7 +14018,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 14
+    "ahs_nr": 14,
+    "declared_flow_m3h": 840.0
   },
   {
     "path_nr": 1537,
@@ -13859,7 +14055,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 8250.0
   },
   {
     "path_nr": 1541,
@@ -13868,7 +14065,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 8250.0
   },
   {
     "path_nr": 1542,
@@ -13877,7 +14075,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 2250.0
   },
   {
     "path_nr": 1543,
@@ -13886,7 +14085,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 2250.0
   },
   {
     "path_nr": 1544,
@@ -13895,7 +14095,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 3000.0
   },
   {
     "path_nr": 1545,
@@ -13904,7 +14105,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 3000.0
   },
   {
     "path_nr": 1546,
@@ -13913,7 +14115,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 48750.0
   },
   {
     "path_nr": 1547,
@@ -13922,7 +14125,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 48750.0
   },
   {
     "path_nr": 1548,
@@ -13931,7 +14135,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 1125.0
   },
   {
     "path_nr": 1549,
@@ -13940,7 +14145,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 15
+    "ahs_nr": 15,
+    "declared_flow_m3h": 1125.0
   },
   {
     "path_nr": 1550,
@@ -13976,7 +14182,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 16
+    "ahs_nr": 16,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1554,
@@ -13985,7 +14192,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 16
+    "ahs_nr": 16,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1555,
@@ -13994,7 +14202,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 16
+    "ahs_nr": 16,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1556,
@@ -14003,7 +14212,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 16
+    "ahs_nr": 16,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1557,
@@ -14012,7 +14222,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 16
+    "ahs_nr": 16,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1558,
@@ -14021,7 +14232,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 16
+    "ahs_nr": 16,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1559,
@@ -14057,7 +14269,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 17
+    "ahs_nr": 17,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1563,
@@ -14066,7 +14279,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 17
+    "ahs_nr": 17,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1564,
@@ -14075,7 +14289,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 17
+    "ahs_nr": 17,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1565,
@@ -14084,7 +14299,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 17
+    "ahs_nr": 17,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1566,
@@ -14093,7 +14309,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 17
+    "ahs_nr": 17,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1567,
@@ -14102,7 +14319,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 17
+    "ahs_nr": 17,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1568,
@@ -14138,7 +14356,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 18
+    "ahs_nr": 18,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1572,
@@ -14147,7 +14366,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 18
+    "ahs_nr": 18,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1573,
@@ -14156,7 +14376,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 18
+    "ahs_nr": 18,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1574,
@@ -14165,7 +14386,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 18
+    "ahs_nr": 18,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1575,
@@ -14174,7 +14396,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 18
+    "ahs_nr": 18,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1576,
@@ -14183,7 +14406,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 18
+    "ahs_nr": 18,
+    "declared_flow_m3h": 2400.0
   },
   {
     "path_nr": 1577,
@@ -14219,7 +14443,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 19
+    "ahs_nr": 19,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1581,
@@ -14228,7 +14453,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 19
+    "ahs_nr": 19,
+    "declared_flow_m3h": 119.232
   },
   {
     "path_nr": 1582,
@@ -14264,7 +14490,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 20
+    "ahs_nr": 20,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1586,
@@ -14273,7 +14500,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 20
+    "ahs_nr": 20,
+    "declared_flow_m3h": 238.464
   },
   {
     "path_nr": 1587,
@@ -14309,7 +14537,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 21
+    "ahs_nr": 21,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1591,
@@ -14318,7 +14547,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 21
+    "ahs_nr": 21,
+    "declared_flow_m3h": 476.928
   },
   {
     "path_nr": 1592,
@@ -14354,7 +14584,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 22
+    "ahs_nr": 22,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1596,
@@ -14363,7 +14594,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 22
+    "ahs_nr": 22,
+    "declared_flow_m3h": 1073.088
   },
   {
     "path_nr": 1597,
@@ -14399,7 +14631,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 23
+    "ahs_nr": 23,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1601,
@@ -14408,7 +14641,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 23
+    "ahs_nr": 23,
+    "declared_flow_m3h": 1073.088
   },
   {
     "path_nr": 1602,
@@ -14444,7 +14678,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 24
+    "ahs_nr": 24,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1606,
@@ -14453,7 +14688,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 24
+    "ahs_nr": 24,
+    "declared_flow_m3h": 953.856
   },
   {
     "path_nr": 1607,
@@ -14489,7 +14725,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 25
+    "ahs_nr": 25,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1611,
@@ -14498,7 +14735,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 25
+    "ahs_nr": 25,
+    "declared_flow_m3h": 953.856
   },
   {
     "path_nr": 1612,
@@ -14534,7 +14772,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 26
+    "ahs_nr": 26,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1616,
@@ -14543,7 +14782,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 26
+    "ahs_nr": 26,
+    "declared_flow_m3h": 953.856
   },
   {
     "path_nr": 1617,
@@ -14579,7 +14819,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 27
+    "ahs_nr": 27,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1621,
@@ -14588,7 +14829,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 27
+    "ahs_nr": 27,
+    "declared_flow_m3h": 715.3919999999999
   },
   {
     "path_nr": 1622,
@@ -14624,7 +14866,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 28
+    "ahs_nr": 28,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1626,
@@ -14633,7 +14876,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 28
+    "ahs_nr": 28,
+    "declared_flow_m3h": 715.3919999999999
   },
   {
     "path_nr": 1627,
@@ -14669,7 +14913,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 29
+    "ahs_nr": 29,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1631,
@@ -14678,7 +14923,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 29
+    "ahs_nr": 29,
+    "declared_flow_m3h": 834.6239999999999
   },
   {
     "path_nr": 1632,
@@ -14714,7 +14960,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 30
+    "ahs_nr": 30,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1636,
@@ -14723,7 +14970,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 30
+    "ahs_nr": 30,
+    "declared_flow_m3h": 834.6239999999999
   },
   {
     "path_nr": 1637,
@@ -14759,7 +15007,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 31
+    "ahs_nr": 31,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1641,
@@ -14768,7 +15017,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 31
+    "ahs_nr": 31,
+    "declared_flow_m3h": 357.69599999999997
   },
   {
     "path_nr": 1642,
@@ -14804,7 +15054,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 32
+    "ahs_nr": 32,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1646,
@@ -14813,7 +15064,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 32
+    "ahs_nr": 32,
+    "declared_flow_m3h": 476.928
   },
   {
     "path_nr": 1647,
@@ -14849,7 +15101,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 33
+    "ahs_nr": 33,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1651,
@@ -14858,7 +15111,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 33
+    "ahs_nr": 33,
+    "declared_flow_m3h": 238.464
   },
   {
     "path_nr": 1652,
@@ -14894,7 +15148,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 34
+    "ahs_nr": 34,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1656,
@@ -14903,7 +15158,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 34
+    "ahs_nr": 34,
+    "declared_flow_m3h": 357.69599999999997
   },
   {
     "path_nr": 1657,
@@ -14939,7 +15195,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 35
+    "ahs_nr": 35,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1661,
@@ -14948,7 +15205,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 35
+    "ahs_nr": 35,
+    "declared_flow_m3h": 119.232
   },
   {
     "path_nr": 1662,
@@ -14984,7 +15242,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 36
+    "ahs_nr": 36,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1666,
@@ -14993,7 +15252,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 36
+    "ahs_nr": 36,
+    "declared_flow_m3h": 238.464
   },
   {
     "path_nr": 1667,
@@ -15029,7 +15289,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 37
+    "ahs_nr": 37,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1671,
@@ -15038,7 +15299,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 37
+    "ahs_nr": 37,
+    "declared_flow_m3h": 238.464
   },
   {
     "path_nr": 1672,
@@ -15074,7 +15336,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 38
+    "ahs_nr": 38,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1676,
@@ -15083,7 +15346,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 38
+    "ahs_nr": 38,
+    "declared_flow_m3h": 119.232
   },
   {
     "path_nr": 1677,
@@ -15119,7 +15383,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 39
+    "ahs_nr": 39,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1681,
@@ -15128,7 +15393,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 39
+    "ahs_nr": 39,
+    "declared_flow_m3h": 119.232
   },
   {
     "path_nr": 1682,
@@ -15164,7 +15430,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 40
+    "ahs_nr": 40,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1686,
@@ -15173,7 +15440,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 40
+    "ahs_nr": 40,
+    "declared_flow_m3h": 238.464
   },
   {
     "path_nr": 1687,
@@ -15209,7 +15477,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 41
+    "ahs_nr": 41,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1691,
@@ -15218,7 +15487,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 41
+    "ahs_nr": 41,
+    "declared_flow_m3h": 238.464
   },
   {
     "path_nr": 1692,
@@ -15254,7 +15524,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 42
+    "ahs_nr": 42,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1696,
@@ -15263,7 +15534,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 42
+    "ahs_nr": 42,
+    "declared_flow_m3h": 119.232
   },
   {
     "path_nr": 1697,
@@ -15299,7 +15571,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 43
+    "ahs_nr": 43,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1701,
@@ -15308,7 +15581,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 43
+    "ahs_nr": 43,
+    "declared_flow_m3h": 119.232
   },
   {
     "path_nr": 1702,
@@ -15344,7 +15618,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 44
+    "ahs_nr": 44,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1706,
@@ -15353,7 +15628,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 44
+    "ahs_nr": 44,
+    "declared_flow_m3h": 1192.32
   },
   {
     "path_nr": 1707,
@@ -15389,7 +15665,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 45
+    "ahs_nr": 45,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1711,
@@ -15398,7 +15675,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 45
+    "ahs_nr": 45,
+    "declared_flow_m3h": 1192.32
   },
   {
     "path_nr": 1712,
@@ -15434,7 +15712,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 46
+    "ahs_nr": 46,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1716,
@@ -15443,7 +15722,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 46
+    "ahs_nr": 46,
+    "declared_flow_m3h": 953.856
   },
   {
     "path_nr": 1717,
@@ -15479,7 +15759,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 47
+    "ahs_nr": 47,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1721,
@@ -15488,7 +15769,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 47
+    "ahs_nr": 47,
+    "declared_flow_m3h": 953.856
   },
   {
     "path_nr": 1722,
@@ -15524,7 +15806,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 48
+    "ahs_nr": 48,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1726,
@@ -15533,7 +15816,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 48
+    "ahs_nr": 48,
+    "declared_flow_m3h": 953.856
   },
   {
     "path_nr": 1727,
@@ -15569,7 +15853,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 49
+    "ahs_nr": 49,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1731,
@@ -15578,7 +15863,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 49
+    "ahs_nr": 49,
+    "declared_flow_m3h": 1192.32
   },
   {
     "path_nr": 1732,
@@ -15614,7 +15900,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 50
+    "ahs_nr": 50,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1736,
@@ -15623,7 +15910,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 50
+    "ahs_nr": 50,
+    "declared_flow_m3h": 1192.32
   },
   {
     "path_nr": 1737,
@@ -15659,7 +15947,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 51
+    "ahs_nr": 51,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1741,
@@ -15668,7 +15957,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 51
+    "ahs_nr": 51,
+    "declared_flow_m3h": 1073.088
   },
   {
     "path_nr": 1742,
@@ -15704,7 +15994,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 52
+    "ahs_nr": 52,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1746,
@@ -15713,7 +16004,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 52
+    "ahs_nr": 52,
+    "declared_flow_m3h": 1073.088
   },
   {
     "path_nr": 1747,
@@ -15749,7 +16041,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 53
+    "ahs_nr": 53,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1751,
@@ -15758,7 +16051,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 53
+    "ahs_nr": 53,
+    "declared_flow_m3h": 1073.088
   },
   {
     "path_nr": 1752,
@@ -15794,7 +16088,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 54
+    "ahs_nr": 54,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1756,
@@ -15803,7 +16098,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 54
+    "ahs_nr": 54,
+    "declared_flow_m3h": 715.3919999999999
   },
   {
     "path_nr": 1757,
@@ -15839,7 +16135,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 55
+    "ahs_nr": 55,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1761,
@@ -15848,7 +16145,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 55
+    "ahs_nr": 55,
+    "declared_flow_m3h": 715.3919999999999
   },
   {
     "path_nr": 1762,
@@ -15884,7 +16182,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 56
+    "ahs_nr": 56,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1766,
@@ -15893,7 +16192,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 56
+    "ahs_nr": 56,
+    "declared_flow_m3h": 834.6239999999999
   },
   {
     "path_nr": 1767,
@@ -15929,7 +16229,8 @@
     "is_hvac_ducted": true,
     "kind": "ahs_supply",
     "crusher_transfer": false,
-    "ahs_nr": 57
+    "ahs_nr": 57,
+    "declared_flow_m3h": 0.0
   },
   {
     "path_nr": 1771,
@@ -15938,6 +16239,7 @@
     "is_hvac_ducted": true,
     "kind": "ahs_return",
     "crusher_transfer": false,
-    "ahs_nr": 57
+    "ahs_nr": 57,
+    "declared_flow_m3h": 834.6239999999999
   }
 ]
