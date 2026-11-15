@@ -243,12 +243,14 @@ in `class_photo_catalog.json` (see `CLASS_PHOTO_ATTRIBUTION.md`).
 | Messy Cruise 500 (legacy) | `data/platforms/messy_cruise_500` |
 | San Antonio-class LPD | `data/platforms/san_antonio_class_lpd` |
 
-Regenerate cabin-corridor cruise layouts with
-`python3 scripts/generate_cruise_platform_layout.py --platform <id>`
+Regenerate committed cabin-corridor cruise layouts with
+`python3 scripts/generate_cruise_platform_layout.py --platform <id> --overwrite`
 (see `scripts/cruise_platform_recipes.py`). Fiction Enterprise platforms use
-`python3 scripts/generate_enterprise_platform_layout.py --platform <id>`
+`python3 scripts/generate_enterprise_platform_layout.py --platform <id> --overwrite`
 (see `scripts/enterprise_platform_recipes.py` and
-`docs/ENTERPRISE_CABIN_REVISION.md`).
+`docs/ENTERPRISE_CABIN_REVISION.md`). For a new recipe hull with no committed
+`data/platforms/<id>/` output, omit `--overwrite`; the generators refuse to
+overwrite existing platform data without it.
 
 ## Common Mistakes
 

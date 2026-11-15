@@ -9,6 +9,7 @@ import shutil
 from datetime import datetime, timezone
 from typing import Any
 
+from scripts.derive_sanitary_provisioning import sanitary_makeup_link
 from simulation_utils.paths import (
     prepare_output_directory,
     resolve_child_path,
@@ -353,17 +354,12 @@ def _head_makeup_links(
             round(head["floor_area_m2"] / SANITARY_AREA_M2_PER_WC),
         )
         links.append(
-            {
-                "from": source,
-                "to": f"AHU_HD_{zid}",
-                "flow_rate_m3h": round(wc * SANITARY_EXHAUST_M3H_PER_WC, 1),
-                "is_hvac_ducted": False,
-                "path": "Sanitary_Makeup",
-                "description": (
-                    f"Transfer air into {zid}; the head exhausts overboard, "
-                    "never back to the served space."
-                ),
-            }
+            sanitary_makeup_link(
+                source=source,
+                target_ahu_id=f"AHU_HD_{zid}",
+                head_zone_id=zid,
+                flow_rate_m3h=wc * SANITARY_EXHAUST_M3H_PER_WC,
+            )
         )
     return links
 

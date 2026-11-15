@@ -2,12 +2,14 @@
 """One-shot generator for Star Trek Enterprise example platforms (fiction-adapted)."""
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from scripts.platform_generation_guard import ensure_output_absent  # noqa: E402
 from simulation_utils.paths import REPO_ROOT as REPO  # noqa: E402
 
 DATA = os.path.join(REPO, "data")
@@ -467,7 +469,36 @@ def tng_template() -> dict:
     }
 
 
-def main() -> None:
+def _output_paths() -> list[str]:
+    tos_dir = os.path.join(DATA, "platforms", "enterprise_constitution_tos")
+    tng_dir = os.path.join(DATA, "platforms", "enterprise_galaxy_tng")
+    return [
+        os.path.join(tos_dir, "spatial_layout.json"),
+        os.path.join(tos_dir, "air_flow_paths.json"),
+        os.path.join(tng_dir, "spatial_layout.json"),
+        os.path.join(tng_dir, "air_flow_paths.json"),
+        os.path.join(DATA, "pathogens", "enterprise_tos_profiles.json"),
+        os.path.join(DATA, "pathogens", "enterprise_tng_profiles.json"),
+        os.path.join(DATA, "templates", "enterprise_constitution_tos.json"),
+        os.path.join(DATA, "templates", "enterprise_galaxy_tng.json"),
+    ]
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Allow replacing existing committed Enterprise outputs",
+    )
+    args = parser.parse_args(argv)
+    for path in _output_paths():
+        ensure_output_absent(
+            path,
+            description="legacy Enterprise platform output",
+            overwrite=args.overwrite,
+        )
+
     tos_dir = os.path.join(DATA, "platforms", "enterprise_constitution_tos")
     tng_dir = os.path.join(DATA, "platforms", "enterprise_galaxy_tng")
     _write(os.path.join(tos_dir, "spatial_layout.json"), tos_spatial())
@@ -479,7 +510,8 @@ def main() -> None:
     _write(os.path.join(DATA, "templates", "enterprise_constitution_tos.json"), tos_template())
     _write(os.path.join(DATA, "templates", "enterprise_galaxy_tng.json"), tng_template())
     print("Wrote Enterprise platforms, pathogens, and templates.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

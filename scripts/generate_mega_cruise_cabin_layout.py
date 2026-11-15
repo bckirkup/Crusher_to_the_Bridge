@@ -24,6 +24,7 @@ from derive_sanitary_provisioning import (  # noqa: E402
     sanitary_airflow_augment,
     sanitary_zone_dicts,
 )
+from platform_generation_guard import ensure_platform_output_dir  # noqa: E402
 
 LEGACY_LAYOUT = os.path.join(REPO, "data", "platforms", "messy_cruise_500", "spatial_layout.json")
 OUT_DIR = os.path.join(REPO, "data", "platforms", "mega_cruise_5000")
@@ -416,10 +417,21 @@ def build_air_flow_paths(legacy_airflow: dict[str, Any], zone_ids: set[str]) -> 
     }
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Allow replacing an existing committed platform directory",
+    )
+    args = parser.parse_args(argv)
+    ensure_platform_output_dir(
+        OUT_DIR,
+        platform_id="mega_cruise_5000",
+        overwrite=args.overwrite,
+        dry_run=args.dry_run,
+    )
 
     with open(LEGACY_LAYOUT, encoding="utf-8") as fh:
         legacy = json.load(fh)
@@ -435,7 +447,7 @@ def main() -> None:
 
     print(f"zones: {len(spatial['zones'])}")
     if args.dry_run:
-        return
+        return 0
 
     os.makedirs(OUT_DIR, exist_ok=True)
     for name, data in (("spatial_layout.json", spatial), ("air_flow_paths.json", airflow)):
@@ -444,7 +456,8 @@ def main() -> None:
             json.dump(data, fh, indent=2)
             fh.write("\n")
         print(f"Wrote {path}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

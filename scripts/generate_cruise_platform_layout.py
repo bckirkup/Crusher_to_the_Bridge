@@ -30,6 +30,7 @@ from derive_sanitary_provisioning import (  # noqa: E402
     sanitary_airflow_augment,
     sanitary_zone_dicts,
 )
+from platform_generation_guard import ensure_platform_output_dir  # noqa: E402
 
 
 def _pax_display(
@@ -367,7 +368,19 @@ def build_air_flow_paths(
     }
 
 
-def write_platform(recipe: CruisePlatformRecipe, *, dry_run: bool = False) -> None:
+def write_platform(
+    recipe: CruisePlatformRecipe,
+    *,
+    dry_run: bool = False,
+    overwrite: bool = False,
+) -> None:
+    out_dir = os.path.join(REPO, "data", "platforms", recipe.platform_id)
+    ensure_platform_output_dir(
+        out_dir,
+        platform_id=recipe.platform_id,
+        overwrite=overwrite,
+        dry_run=dry_run,
+    )
     spatial = build_spatial_layout(recipe)
     zone_ids = {z["id"] for z in spatial["zones"]}
     airflow = build_air_flow_paths(recipe, zone_ids)
@@ -383,7 +396,6 @@ def write_platform(recipe: CruisePlatformRecipe, *, dry_run: bool = False) -> No
     if dry_run:
         return
 
-    out_dir = os.path.join(REPO, "data", "platforms", recipe.platform_id)
     os.makedirs(out_dir, exist_ok=True)
     for name, data in (
         ("spatial_layout.json", spatial),
@@ -407,8 +419,17 @@ def main(argv: list[str] | None = None) -> int:
         help="Platform recipe id",
     )
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Allow replacing an existing committed platform directory",
+    )
     args = parser.parse_args(argv)
-    write_platform(RECIPES[args.platform], dry_run=args.dry_run)
+    write_platform(
+        RECIPES[args.platform],
+        dry_run=args.dry_run,
+        overwrite=args.overwrite,
+    )
     return 0
 
 

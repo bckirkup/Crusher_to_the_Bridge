@@ -22,8 +22,17 @@ def main(argv: list[str] | None = None) -> int:
         choices=sorted(RECIPES.keys()),
     )
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Allow replacing an existing committed platform directory",
+    )
     args = parser.parse_args(argv)
-    write_platform(RECIPES[args.platform], dry_run=args.dry_run)
+    write_platform(
+        RECIPES[args.platform],
+        dry_run=args.dry_run,
+        overwrite=args.overwrite,
+    )
     return 0
 
 

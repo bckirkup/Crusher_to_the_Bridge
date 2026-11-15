@@ -349,6 +349,30 @@ def _served_ahu(
     return str(sorted(branches, key=lambda g: str(g["id"]))[0]["id"])
 
 
+def sanitary_makeup_link(
+    *,
+    source: str,
+    target_ahu_id: str,
+    head_zone_id: str,
+    flow_rate_m3h: float,
+) -> dict:
+    """Return the pinned Sanitary_Makeup link emitted by every generator."""
+    return {
+        "from": source,
+        "to": target_ahu_id,
+        "flow_rate_m3h": round(flow_rate_m3h, 1),
+        "is_hvac_ducted": False,
+        "path": "Sanitary_Makeup",
+        "direction": "oneway",
+        "mechanism": "pressure_opening",
+        "filtered": False,
+        "description": (
+            f"Transfer air into {head_zone_id}; the head exhausts "
+            "overboard, never back to the served space."
+        ),
+    }
+
+
 def sanitary_airflow_augment(
     zones: list[dict],
     airflow: dict,
@@ -399,22 +423,12 @@ def sanitary_airflow_augment(
             continue
         source = _served_ahu(block, hvac, zones_by_id)
         if source is not None:
-            cross.append({
-                "from": source,
-                "to": ahu_id,
-                "flow_rate_m3h": round(
-                    block.water_closets * EXHAUST_M3H_PER_WC, 1,
-                ),
-                "is_hvac_ducted": False,
-                "path": "Sanitary_Makeup",
-                "direction": "oneway",
-                "mechanism": "pressure_opening",
-                "filtered": False,
-                "description": (
-                    f"Transfer air into {block.zone_id}; the head exhausts "
-                    f"overboard, never back to the served space."
-                ),
-            })
+            cross.append(sanitary_makeup_link(
+                source=source,
+                target_ahu_id=ahu_id,
+                head_zone_id=block.zone_id,
+                flow_rate_m3h=block.water_closets * EXHAUST_M3H_PER_WC,
+            ))
     out = dict(airflow)
     out["hvac_zones"] = hvac
     out["cross_zone_links"] = cross

@@ -6,8 +6,8 @@ higher) spatial resolution via informed fiction engineering guesses.
 Regenerate::
 
 ```bash
-python3 scripts/generate_enterprise_platform_layout.py --platform enterprise_constitution_tos
-python3 scripts/generate_enterprise_platform_layout.py --platform enterprise_galaxy_tng
+python3 scripts/generate_enterprise_platform_layout.py --platform enterprise_constitution_tos --overwrite
+python3 scripts/generate_enterprise_platform_layout.py --platform enterprise_galaxy_tng --overwrite
 python3 scripts/generate_platform_contam_prj.py --hobbyist --platform enterprise_constitution_tos
 python3 scripts/generate_platform_contam_prj.py --hobbyist --platform enterprise_galaxy_tng
 python3 scripts/precompute_deck_assets.py --platform enterprise_constitution_tos

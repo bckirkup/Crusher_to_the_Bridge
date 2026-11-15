@@ -2,7 +2,7 @@
 
 **Status:** Implemented in `data/platforms/mega_cruise_5000/` (Feb 2026). Cabin-mate
 direct-contact pairing implemented June 2026 — see `docs/SHEDDING_AND_CABINMATES.md`.
-Regenerate layout: `python3 scripts/generate_mega_cruise_cabin_layout.py`. Legacy
+Regenerate layout: `python3 scripts/generate_mega_cruise_cabin_layout.py --overwrite`. Legacy
 well-mixed model: `data/platforms/messy_cruise_500/`.
 
 **Fleet extension (Aug 2026):** Additional CDC size-class platforms use the shared
