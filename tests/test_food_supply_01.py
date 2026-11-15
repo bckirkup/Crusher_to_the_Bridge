@@ -252,6 +252,127 @@ def test_shared_receipt_witness_covers_all_venues() -> None:
     ]
 
 
+def test_single_line_receipt_honors_station_zone_pin() -> None:
+    """The receipt venue universe is the pinned served-Dining set."""
+    ps = _ps_override(
+        lot_layer_mode="single_line_receipt",
+        station_zone_pin=[MDR_ZONE],
+        q_source_by_item_line={
+            "shellfish": {"prevalence": 1.0, "implicated_share": 1.0},
+        },
+    )
+    core = _two_zone_core(_ps_cfg(0.0, provisioned_source=ps))
+    agents = [
+        *[_diner(i, dining_zone=ZONE, location=ZONE) for i in range(1, 20)],
+        *[
+            _diner(i, dining_zone=MDR_ZONE, location=MDR_ZONE)
+            for i in range(20, 40)
+        ],
+    ]
+    _plan(core, agents)
+    witness = core._cs_provisioned_source[PATHOGEN]
+    assert witness["station_zone_pin"] == [MDR_ZONE]
+    assert witness["station_zone_pin_weights"] is None
+    assert witness["actual_venues_used"] == [MDR_ZONE]
+    assert witness["n_lots"] == 1
+    shellfish = next(
+        row for row in core._cs_receipt_log
+        if row["item_line"] == "shellfish"
+    )
+    assert shellfish["venues_served"] == [MDR_ZONE]
+    obj = core._cs_objects[PATHOGEN][0]
+    assert obj["venues_served"] == [MDR_ZONE]
+    assert obj["zone"] == MDR_ZONE
+    assert core._cs_contaminated_stations[PATHOGEN] == {
+        (MDR_ZONE, "shellfish"),
+    }
+
+
+def test_receipt_pin_keeps_contamination_draws_seed_paired() -> None:
+    """Filtering venues to the pin does not consume receipt uniforms."""
+    agents = [
+        *[_diner(i, dining_zone=ZONE, location=ZONE) for i in range(1, 20)],
+        *[
+            _diner(i, dining_zone=MDR_ZONE, location=MDR_ZONE)
+            for i in range(20, 40)
+        ],
+    ]
+    base = _two_zone_core(_ps_cfg(0.0, provisioned_source=_ps_override(
+        q_source=0.5,
+        lot_layer_mode="single_line_receipt",
+    )))
+    pinned = _two_zone_core(_ps_cfg(0.0, provisioned_source=_ps_override(
+        q_source=0.5,
+        lot_layer_mode="single_line_receipt",
+        station_zone_pin=[MDR_ZONE],
+    )))
+    _plan(base, agents)
+    _plan(pinned, agents)
+
+    def draw(row: dict) -> tuple[str, int, str]:
+        return (
+            row["item_line"],
+            row["receipt_index"],
+            row["contamination"],
+        )
+
+    assert [draw(row) for row in base._cs_receipt_log] == [
+        draw(row) for row in pinned._cs_receipt_log
+    ]
+    base_witness = base._cs_provisioned_source[PATHOGEN]
+    pinned_witness = pinned._cs_provisioned_source[PATHOGEN]
+    assert base_witness["station_zone_pin"] is None
+    assert pinned_witness["station_zone_pin"] == [MDR_ZONE]
+    assert (
+        base_witness["n_contaminated"]
+        == pinned_witness["n_contaminated"]
+    )
+    assert all(
+        row["venues_served"] == [MDR_ZONE]
+        for row in pinned._cs_receipt_log
+    )
+
+
+def test_declared_receipts_partition_the_pinned_venue_set() -> None:
+    """declared receipts still partition the eligible venues; a receipt
+    whose pinned partition is empty witnesses contamination but mints no
+    lot."""
+    ps = _ps_override(
+        lot_layer_mode="declared_receipts",
+        receipts_per_item_line=2,
+        station_zone_pin=[MDR_ZONE],
+        q_source_by_item_line={
+            "shellfish": {"prevalence": 1.0, "implicated_share": 1.0},
+        },
+    )
+    core = _two_zone_core(_ps_cfg(0.0, provisioned_source=ps))
+    agents = [
+        *[_diner(i, dining_zone=ZONE, location=ZONE) for i in range(1, 20)],
+        *[
+            _diner(i, dining_zone=MDR_ZONE, location=MDR_ZONE)
+            for i in range(20, 40)
+        ],
+    ]
+    _plan(core, agents)
+    shellfish_rows = [
+        row for row in core._cs_receipt_log
+        if row["item_line"] == "shellfish"
+    ]
+    assert [row["venues_served"] for row in shellfish_rows] == [
+        [MDR_ZONE], [],
+    ]
+    assert [row["contamination"] for row in shellfish_rows] == [
+        "infectious", "infectious",
+    ]
+    assert [row["lot_id"] is not None for row in shellfish_rows] == [
+        True, False,
+    ]
+    witness = core._cs_provisioned_source[PATHOGEN]
+    assert witness["n_contaminated"] == 2
+    assert witness["n_lots"] == 1
+    assert witness["actual_venues_used"] == [MDR_ZONE]
+
+
 def test_receipt_scalar_q_source_fallback_covers_all_lines() -> None:
     """Without a per-line map, receipt mode falls back to scalar
     ``q_source`` for every item line and preparation filtering still

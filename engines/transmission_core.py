@@ -13626,8 +13626,19 @@ class TransmissionCore:
         zones: list[str],
         cells: list[tuple[str, str, int]],
     ) -> None:
-        """Mint FOOD-SUPPLY-01 receipt/lot objects once the roster exists."""
+        """Mint FOOD-SUPPLY-01 receipt/lot objects once the roster exists.
+
+        ``provisioned_source.station_zone_pin`` carries through as the
+        receipt venue universe: served Dining zones are filtered to the
+        pin set before the deterministic receipt partition, so contamination
+        draws stay seed-paired while venue allocation follows the pin.
+        """
         mode = self._cs_ps_lot_layer_mode
+        pin = self._cs_ps_station_zone_pin
+        venue_zones = zones
+        if pin:
+            pinned = set(pin)
+            venue_zones = [zone for zone in zones if zone in pinned]
         planned: list[dict[str, Any]] = []
         for pid, rates in self._cs_rates.items():
             specs, scale = self._cs_receipt_line_specs(pid, rates)
@@ -13638,7 +13649,7 @@ class TransmissionCore:
             for item in COMMON_SOURCE_LOT_ITEM_LINES:
                 line_rows, line_pending = self._cs_plan_receipt_line(
                     pid, item, specs.get(item, 0.0), mode,
-                    zones, scale,
+                    venue_zones, scale,
                 )
                 rows.extend(line_rows)
                 pending.extend(line_pending)
@@ -13662,7 +13673,7 @@ class TransmissionCore:
             pid = plan["pid"]
             for row, receipt in plan["pending"]:
                 obj = self._cs_realize_lot_object(
-                    pid, cells, zones, receipt=receipt,
+                    pid, cells, venue_zones, receipt=receipt,
                 )
                 if obj is None:
                     continue
@@ -13705,8 +13716,11 @@ class TransmissionCore:
                 "n_contaminated": sum(plan["by_item"].values()),
                 "contaminated_by_item_line": plan["by_item"],
                 "contaminated_by_preparation_class": plan["by_prep"],
-                "station_zone_pin": None,
-                "station_zone_pin_weights": None,
+                "station_zone_pin": list(pin) if pin else None,
+                "station_zone_pin_weights": (
+                    list(self._cs_ps_station_zone_weights)
+                    if self._cs_ps_station_zone_weights else None
+                ),
                 "source_venue_arm": self._cs_ps_venue_arm,
                 "actual_venues_used": sorted({
                     venue
