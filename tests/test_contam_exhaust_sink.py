@@ -1,4 +1,4 @@
-"""EXHAUST-SINK stage-3 contract tests (Path S machinery, inert until authored)."""
+"""EXHAUST-SINK contract tests for the ambient sink endpoint."""
 
 from __future__ import annotations
 
@@ -364,14 +364,36 @@ class TestExporterAndLaneSink:
             export_prj_with_path_map(_spatial(), _airflow(link))
 
 
-class TestCommittedPlatformInertness:
-    def test_committed_platforms_declare_no_ambient_links(self) -> None:
+class TestCommittedPlatformAmbientSinks:
+    _EXPECTED_SINKS = {
+        ("legend_class_nsc", "medical_exhaust", "HVAC_Medical", 100.0),
+        ("san_antonio_class_lpd", "medical_exhaust", "HVAC_Medical", 200.0),
+        (
+            "san_antonio_class_lpd",
+            "galley_exhaust_to_mess",
+            "HVAC_Galley",
+            400.0,
+        ),
+    }
+
+    def test_committed_platforms_declare_only_expected_ambient_sinks(self) -> None:
+        observed: set[tuple[str, str, str, float]] = set()
         for path in sorted(_PLATFORM_ROOT.glob("*/air_flow_paths.json")):
+            platform = path.parent.name
             airflow = json.loads(path.read_text(encoding="utf-8"))
-            for index, link in enumerate(airflow.get("cross_zone_links", [])):
+            for link in airflow.get("cross_zone_links", []):
                 assert link.get("from") != AMBIENT_ZONE_ID, (
-                    f"{path.parent.name}[{index}] uses ambient as a source"
+                    f"{platform} uses ambient as a source"
                 )
-                assert link.get("to") != AMBIENT_ZONE_ID, (
-                    f"{path.parent.name}[{index}] uses ambient as a sink"
-                )
+                if link.get("to") != AMBIENT_ZONE_ID:
+                    continue
+                observed.add((
+                    platform,
+                    str(link.get("path")),
+                    str(link.get("from")),
+                    float(link.get("flow_rate_m3h", 0.0)),
+                ))
+                assert link.get("direction") == "oneway"
+                assert link.get("mechanism") == "prescribed_flow"
+                assert link.get("filtered") is False
+        assert observed == self._EXPECTED_SINKS

@@ -244,11 +244,11 @@
     },
     {
       "from": "HVAC_Galley",
-      "to": "HVAC_Crew_Habitable",
+      "to": "ambient",
       "flow_rate_m3h": 400,
       "path": "galley_exhaust_to_mess",
       "is_hvac_ducted": true,
-      "description": "Declared galley-exhaust recirculation to crew habitable spaces is judged unintended by the naval analogy to CDC VSP 2025 §33.2.1 / ISO 9943:2009 §4.1; hood exhaust remains topside. The HVAC-group leg and magnitude are unchanged pending the ducted-exhaust row, and this leg carries no filtration/recirculation credit.",
+      "description": "Declared galley exhaust is a once-through sink to ambient (material leaves the ship/domain); the former recirculation to crew habitable spaces is judged unintended by the naval analogy to CDC VSP 2025 §33.2.1 / ISO 9943:2009 §4.1, and hood exhaust remains topside. Magnitude unchanged; this leg carries no filtration/recirculation credit.",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
       "filtered": false
@@ -266,11 +266,11 @@
     },
     {
       "from": "HVAC_Medical",
-      "to": "HVAC_Crew_Habitable",
+      "to": "ambient",
       "flow_rate_m3h": 200,
       "path": "medical_exhaust",
       "is_hvac_ducted": true,
-      "description": "Medical ward exhaust is a once-through independent exhaust stream with no recirculation-filter credit; the ward remains negative-pressure relative to surrounding spaces (CDC VSP 2025 §33.2.1 naval analogy, Grade C). Magnitude unchanged.",
+      "description": "Medical ward exhaust is a once-through independent exhaust stream to the ambient sink (material leaves the ship/domain) with no recirculation-filter credit; the ward remains negative-pressure relative to surrounding spaces (CDC VSP 2025 §33.2.1 naval analogy, Grade C). Magnitude unchanged.",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
       "filtered": false
