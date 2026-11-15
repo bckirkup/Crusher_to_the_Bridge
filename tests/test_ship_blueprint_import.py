@@ -418,6 +418,9 @@ class TestSanitaryAndComplement:
         assert len(makeup) == 1
         assert makeup[0]["path"] == "Sanitary_Makeup"
         assert makeup[0]["is_hvac_ducted"] is False
+        assert makeup[0]["direction"] == "oneway"
+        assert makeup[0]["mechanism"] == "pressure_opening"
+        assert makeup[0]["filtered"] is False
         assert makeup[0]["from"] == "zone_main"
         assert all(
             not link["from"].startswith("AHU_HD_")

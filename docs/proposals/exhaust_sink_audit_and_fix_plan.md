@@ -1,11 +1,12 @@
 # Exhaust-sink audit and fix plan (sink endpoints, `filtered` carry-through, generator protection)
 
-> **Status:** Proposed — **nothing in §3–§6 exists**. This document makes no
-> engine, schema, exporter, generator or hull-data change, and authorizes
-> none. It is a read-only audit of the tree at `origin/main` `800a1958`
-> (after the forced-exhaust bundle #1209, #1213, #1214, #1216, #1217, #1219,
-> #1220, #1221) plus a versioned fix proposal. It responds to three further
-> claims from Edison. Ledger: `docs/ledger/CONTAM-EXHAUST-SINK-01.md`.
+> **Status:** Partially implemented — the §5.4 G-min generator guards and
+> shared sanitary emitter landed as ledger
+> `docs/ledger/CONTAM-GENERATOR-PROTECT-01.md`; §3–§4 and the rest of §5–§6
+> remain proposed. The audit below is unchanged and was read-only at
+> `origin/main` `800a1958` (after the forced-exhaust bundle #1209, #1213,
+> #1214, #1216, #1217, #1219, #1220, #1221). It responds to three further
+> claims from Edison. Audit ledger: `docs/ledger/CONTAM-EXHAUST-SINK-01.md`.
 
 **Evidence vocabulary.** *Measured* = computed this session from the tree at
 `800a1958`, with the reproduction in the Appendix. *Inferred* = follows from
