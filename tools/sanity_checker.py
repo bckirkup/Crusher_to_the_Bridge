@@ -53,7 +53,6 @@ from engines.fomite_surfaces import (  # noqa: E402
 )
 from engines.illness_duration import IllnessDurationModel  # noqa: E402
 from engines.incubation import IncubationModel  # noqa: E402
-from engines.py_contam_bridge import cross_zone_link_semantics  # noqa: E402
 from engines.strain_state import (  # noqa: E402
     StrainConfigError,
     StrainEvolutionConfig,
@@ -1613,20 +1612,11 @@ def _exhaust_only_terminal_ids(airflow: AirFlowPaths) -> set[str]:
     return terminals
 
 
-def _ambient_sink_semantics(link: CrossZoneLink) -> dict[str, Any]:
-    raw: dict[str, Any] = {"is_hvac_ducted": link.is_hvac_ducted}
-    for attr in ("direction", "mechanism", "filtered"):
-        value = getattr(link, attr)
-        if value is not None:
-            raw[attr] = value
-    return cross_zone_link_semantics(raw)
-
-
 def _check_ambient_sink_links(
     airflow: AirFlowPaths,
     report: Report,
 ) -> None:
-    """Reserved ``ambient`` sink endpoints are one-way unfiltered exhaust."""
+    """Reserved ``ambient`` sink endpoints are explicit one-way exhaust."""
     for link in airflow.cross_zone_links:
         if link.from_zone == "ambient":
             report.error(
@@ -1637,20 +1627,19 @@ def _check_ambient_sink_links(
             )
         if link.to_zone != "ambient":
             continue
-        semantics = _ambient_sink_semantics(link)
         problems: list[str] = []
-        if semantics["direction"] != "oneway":
+        if link.direction != "oneway":
             problems.append(
-                f"direction {semantics['direction']!r} (required 'oneway')"
+                f"direction {link.direction!r} (required explicit 'oneway')"
             )
-        if semantics["mechanism"] != "prescribed_flow":
+        if link.mechanism != "prescribed_flow":
             problems.append(
-                f"mechanism {semantics['mechanism']!r} "
-                "(required 'prescribed_flow')"
+                f"mechanism {link.mechanism!r} "
+                "(required explicit 'prescribed_flow')"
             )
-        if semantics["filtered"] is not False:
+        if link.filtered is not False:
             problems.append(
-                f"filtered {semantics['filtered']!r} (required false)"
+                f"filtered {link.filtered!r} (required explicit false)"
             )
         if problems:
             report.error(

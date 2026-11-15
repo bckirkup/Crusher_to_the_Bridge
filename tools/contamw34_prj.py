@@ -840,21 +840,26 @@ class _NetworkBuilder:
         return int(self.week_by_id.get(sched_id, 0))
 
     def _ambient_sink_semantics(self, link: dict[str, Any]) -> dict[str, Any]:
-        semantics = cross_zone_link_semantics(link)
-        direction = str(semantics.get("direction") or "")
-        mechanism = str(semantics.get("mechanism") or "")
-        filtered = semantics.get("filtered")
+        direction = link.get("direction")
+        mechanism = link.get("mechanism")
+        filtered = link.get("filtered")
         if (
             direction != "oneway"
             or mechanism != "prescribed_flow"
             or filtered is not False
         ):
             raise ValueError(
-                "cross_zone_links endpoint 'ambient' requires direction "
-                "'oneway', mechanism 'prescribed_flow', and filtered false; "
-                f"got {semantics}"
+                "cross_zone_links endpoint 'ambient' requires explicit "
+                "direction 'oneway', mechanism 'prescribed_flow', and "
+                "filtered false; got "
+                f"direction={direction!r}, mechanism={mechanism!r}, "
+                f"filtered={filtered!r}"
             )
-        return semantics
+        return {
+            "direction": direction,
+            "mechanism": mechanism,
+            "filtered": filtered,
+        }
 
     def _add_ambient_sink_paths(
         self,

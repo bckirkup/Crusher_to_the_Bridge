@@ -175,6 +175,16 @@ class TestAmbientSinkSanity:
         assert not report.passed
         assert any("filtered" in f.message for f in report.errors)
 
+    def test_sink_requires_explicit_fields_not_ducted_alias(self) -> None:
+        values = _sink_link()
+        values.pop("direction")
+        values.pop("mechanism")
+        airflow = self._airflow_model(CrossZoneLink(**values))
+        report = Report()
+        _check_ambient_sink_links(airflow, report)
+        assert not report.passed
+        assert any(f.rule == "AIRFLOW_SINK" for f in report.errors)
+
     def test_ambient_from_is_rejected_by_endpoint_check(self) -> None:
         airflow = self._airflow_model(self._model_link(**{
             "from": "ambient", "to": "B",
@@ -343,6 +353,13 @@ class TestExporterAndLaneSink:
         ],
     )
     def test_exporter_rejects_invalid_sink_links(self, link: dict[str, Any]) -> None:
+        with pytest.raises(ValueError, match="ambient"):
+            export_prj_with_path_map(_spatial(), _airflow(link))
+
+    def test_exporter_rejects_implicit_sink_semantics(self) -> None:
+        link = _sink_link()
+        link.pop("direction")
+        link.pop("mechanism")
         with pytest.raises(ValueError, match="ambient"):
             export_prj_with_path_map(_spatial(), _airflow(link))
 
