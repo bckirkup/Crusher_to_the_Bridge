@@ -131,23 +131,10 @@ def run_seed_pan_cohort(pathogen_id, spec_dict, natural_history_clock):
     return payload, voyage, initiation
 
 
-def summarise_reach(payload, voyage):
-    pan_rows = payload.get("pan_cohort_rows") or []
-    prov_events = [
-        e for e in ((payload.get("common_source") or {}).get("events") or [])
-        if e.get("source_kind") == "provisioned_lot"
-    ]
-    cs_start = min((int(e.get("start_epoch") or 0) for e in prov_events), default=None)
-    cs_end = max((int(e.get("end_epoch") or 0) for e in prov_events), default=None)
-    _first_sym, first_q = _first_epochs(voyage)
-
-    def bucket_of(epoch):
-        return _bucket(epoch, cs_start, cs_end, first_q)
-
+def _cohort_windows(pan_rows):
     ever_cohort = set()
     ever_takers = set()
     first_cohort_epoch = {}
-    first_taker_epoch = {}
     service_windows = defaultdict(lambda: {
         "cohort": set(), "takers": set(), "events": 0, "servings": 0,
         "pan_mass": 0.0, "max_per_serving": 0.0, "end_epoch": None,
@@ -160,8 +147,6 @@ def summarise_reach(payload, voyage):
         ever_takers |= takers
         for aid in cohort:
             first_cohort_epoch[aid] = min(first_cohort_epoch.get(aid, 10**9), epoch)
-        for aid in takers:
-            first_taker_epoch[aid] = min(first_taker_epoch.get(aid, 10**9), epoch)
         key = (row.get("zone"), row.get("meal"), epoch)
         window = service_windows[key]
         window["cohort"] |= cohort
@@ -174,11 +159,11 @@ def summarise_reach(payload, voyage):
         if end_epoch is not None:
             end_i = int(end_epoch)
             window["end_epoch"] = end_i if window["end_epoch"] is None else max(window["end_epoch"], end_i)
+    return ever_cohort, ever_takers, first_cohort_epoch, service_windows
 
-    never_takers = sorted(ever_cohort - ever_takers)
 
+def _acquisition_sources(payload):
     first_cs_epoch = {}
-    acq_by_agent = defaultdict(list)
     secondary_acq_by_agent = defaultdict(list)
     for row in payload.get("acquisitions") or []:
         epoch = row.get("epoch")
@@ -188,22 +173,30 @@ def summarise_reach(payload, voyage):
         epoch_i = int(epoch)
         aid = int(agent_id)
         pathway = _pathway(row)
-        acq_by_agent[aid].append((epoch_i, pathway))
         if pathway == CS_PATHWAY:
             first_cs_epoch[aid] = min(first_cs_epoch.get(aid, 10**9), epoch_i)
-        elif pathway:
+        elif pathway and _f(row.get("delivered_src_acquired_gec")) > 0.0:
             secondary_acq_by_agent[aid].append((epoch_i, pathway))
+    return first_cs_epoch, secondary_acq_by_agent
 
+
+def _pickup_index(payload):
     pk_by_target = defaultdict(list)
     for row in payload.get("pickups") or []:
-        if not row.get("challengeable") or _f(row.get("source_acquired_share")) <= 0.0:
+        if not row.get("challengeable"):
+            continue
+        share = _f(row.get("source_acquired_share"))
+        if share <= 0.0:
             continue
         target = row.get("target", row.get("agent_id"))
         epoch = row.get("epoch")
         if target is None or epoch is None:
             continue
-        pk_by_target[int(target)].append((int(epoch), _f(row.get("dose")), _f(row.get("delivered")), row.get("unit"), row.get("channel")))
+        pk_by_target[int(target)].append((int(epoch), _f(row.get("dose")) * share))
+    return pk_by_target
 
+
+def _contact_index(payload):
     ct_by_target = defaultdict(list)
     for row in payload.get("hand_contacts") or []:
         target = row.get("target", row.get("agent_id"))
@@ -212,53 +205,74 @@ def summarise_reach(payload, voyage):
         if target is None or donor is None or epoch is None:
             continue
         ct_by_target[int(target)].append((int(epoch), _f(row.get("dose")), int(donor)))
+    return ct_by_target
 
+
+def _candidate_events(aid, start, pk_by_target, ct_by_target, first_cs_epoch, secondary_acq_by_agent, bucket_of):
+    events = []
+    for epoch, dose in pk_by_target.get(aid, []):
+        if epoch >= start:
+            events.append((epoch, "pickup", bucket_of(epoch), dose))
+    seen_contact_epochs = set()
+    for epoch, dose, donor in ct_by_target.get(aid, []):
+        donor_first = first_cs_epoch.get(donor)
+        if epoch >= start and donor_first is not None and donor_first < epoch and epoch not in seen_contact_epochs:
+            seen_contact_epochs.add(epoch)
+            events.append((epoch, "contact", bucket_of(epoch), dose))
+    for epoch, pathway in secondary_acq_by_agent.get(aid, []):
+        if epoch >= start:
+            events.append((epoch, f"acq:{pathway}", bucket_of(epoch), 0.0))
+    return events
+
+
+def _never_taker_stats(never_takers, first_cohort_epoch, pk_by_target, ct_by_target, first_cs_epoch, secondary_acq_by_agent, bucket_of):
     exposed_agents = set()
     infected_agents = set()
+    earliest = {}
     exposed_by_bucket = Counter()
     infected_by_bucket = Counter()
     secondary_by_bucket_pathway = Counter()
     pickup_dose_by_bucket = Counter()
     contact_dose_by_bucket = Counter()
-    earliest = {}
-
     for aid in never_takers:
         start = first_cohort_epoch.get(aid)
         if start is None:
             continue
-        candidates = []
-        for epoch, dose, _delivered, _unit, _channel in pk_by_target.get(aid, []):
-            if epoch >= start:
-                candidates.append((epoch, "pickup", dose))
-                pickup_dose_by_bucket[bucket_of(epoch)] += dose
-        seen_contact_epochs = set()
-        for epoch, dose, donor in ct_by_target.get(aid, []):
-            donor_first = first_cs_epoch.get(donor)
-            if epoch >= start and donor_first is not None and donor_first < epoch and epoch not in seen_contact_epochs:
-                candidates.append((epoch, "contact", dose))
-                contact_dose_by_bucket[bucket_of(epoch)] += dose
-                seen_contact_epochs.add(epoch)
-        for epoch, pathway in secondary_acq_by_agent.get(aid, []):
-            if epoch >= start:
-                candidates.append((epoch, f"acq:{pathway}", 0.0))
-                secondary_by_bucket_pathway[f"{bucket_of(epoch)}|{pathway}"] += 1
-        if candidates:
-            exposed_agents.add(aid)
-            first = min(candidates, key=lambda item: item[0])
-            earliest[aid] = {"epoch": first[0], "kind": first[1], "bucket": bucket_of(first[0])}
-            exposed_by_bucket[bucket_of(first[0])] += 1
-        if any(epoch >= start for epoch, _pathway in secondary_acq_by_agent.get(aid, [])):
-            infected_agents.add(aid)
-            for epoch, pathway in secondary_acq_by_agent.get(aid, []):
-                if epoch >= start:
-                    infected_by_bucket[bucket_of(epoch)] += 1
+        events = _candidate_events(aid, start, pk_by_target, ct_by_target, first_cs_epoch, secondary_acq_by_agent, bucket_of)
+        if not events:
+            continue
+        exposed_agents.add(aid)
+        first = min(events, key=lambda item: item[0])
+        earliest[aid] = {"epoch": first[0], "kind": first[1], "bucket": first[2]}
+        exposed_by_bucket[first[2]] += 1
+        for _epoch, kind, bucket, dose in events:
+            if kind == "pickup":
+                pickup_dose_by_bucket[bucket] += dose
+            elif kind == "contact":
+                contact_dose_by_bucket[bucket] += dose
+            elif kind.startswith("acq:"):
+                pathway = kind.split(":", 1)[1]
+                secondary_by_bucket_pathway[f"{bucket}|{pathway}"] += 1
+                infected_agents.add(aid)
+                infected_by_bucket[bucket] += 1
+    return {
+        "never_taker_exposed_any": len(exposed_agents),
+        "never_taker_infected_secondary": len(infected_agents),
+        "never_taker_exposed_by_bucket": dict(exposed_by_bucket),
+        "never_taker_infected_by_bucket": dict(infected_by_bucket),
+        "never_taker_secondary_by_bucket_pathway": dict(secondary_by_bucket_pathway),
+        "never_taker_pickup_acquired_dose_by_bucket": {k: pickup_dose_by_bucket[k] for k in sorted(pickup_dose_by_bucket)},
+        "never_taker_contact_dose_by_bucket": {k: contact_dose_by_bucket[k] for k in sorted(contact_dose_by_bucket)},
+        "never_taker_earliest": {str(k): v for k, v in sorted(earliest.items())},
+    }
 
-    window_summaries = []
+
+def _window_summaries(service_windows, first_q):
+    summaries = []
     for (zone, meal, epoch), window in sorted(service_windows.items(), key=lambda item: (item[0][2], str(item[0][0]), str(item[0][1]))):
         cohort = window["cohort"]
         takers = window["takers"]
-        nontakers = cohort - takers
-        window_summaries.append({
+        summaries.append({
             "zone": zone,
             "meal": meal,
             "start_epoch": epoch,
@@ -266,17 +280,42 @@ def summarise_reach(payload, voyage):
             "events": window["events"],
             "cohort_size": len(cohort),
             "takers": len(takers),
-            "nontakers": len(nontakers),
+            "nontakers": len(cohort - takers),
             "servings_taken": window["servings"],
             "pan_mass": window["pan_mass"],
             "max_per_serving_dose": window["max_per_serving"],
             "pre_q": first_q is None or epoch < first_q,
         })
+    return summaries
 
+
+def summarise_reach(payload, voyage):
+    pan_rows = payload.get("pan_cohort_rows") or []
+    prov_events = [
+        e for e in ((payload.get("common_source") or {}).get("events") or [])
+        if e.get("source_kind") == "provisioned_lot"
+    ]
+    cs_start = min((int(e.get("start_epoch") or 0) for e in prov_events), default=None)
+    cs_end = max((int(e.get("end_epoch") or 0) for e in prov_events), default=None)
+    first_sym, first_q = _first_epochs(voyage)
+
+    def bucket_of(epoch):
+        return _bucket(epoch, cs_start, cs_end, first_q)
+
+    ever_cohort, ever_takers, first_cohort_epoch, service_windows = _cohort_windows(pan_rows)
+    first_cs_epoch, secondary_acq_by_agent = _acquisition_sources(payload)
+    pk_by_target = _pickup_index(payload)
+    ct_by_target = _contact_index(payload)
+    never_takers = sorted(ever_cohort - ever_takers)
+    stats = _never_taker_stats(
+        never_takers, first_cohort_epoch, pk_by_target, ct_by_target,
+        first_cs_epoch, secondary_acq_by_agent, bucket_of,
+    )
+    window_summaries = _window_summaries(service_windows, first_q)
     return {
         "cs_start": cs_start,
         "cs_end": cs_end,
-        "first_sym": _first_epochs(voyage)[0],
+        "first_sym": first_sym,
         "first_q": first_q,
         "n_pan_events": len(pan_rows),
         "n_service_windows": len(service_windows),
@@ -288,14 +327,7 @@ def summarise_reach(payload, voyage):
             "takers": sum(len(w["takers"]) for w in service_windows.values()),
             "nontakers": sum(len(w["cohort"] - w["takers"]) for w in service_windows.values()),
         },
-        "never_taker_exposed_any": len(exposed_agents),
-        "never_taker_infected_secondary": len(infected_agents),
-        "never_taker_exposed_by_bucket": dict(exposed_by_bucket),
-        "never_taker_infected_by_bucket": dict(infected_by_bucket),
-        "never_taker_secondary_by_bucket_pathway": dict(secondary_by_bucket_pathway),
-        "never_taker_pickup_acquired_dose_by_bucket": {k: pickup_dose_by_bucket[k] for k in sorted(pickup_dose_by_bucket)},
-        "never_taker_contact_dose_by_bucket": {k: contact_dose_by_bucket[k] for k in sorted(contact_dose_by_bucket)},
-        "never_taker_earliest": {str(k): v for k, v in sorted(earliest.items())},
+        **stats,
         "top_service_windows": sorted(window_summaries, key=lambda w: (w["servings_taken"], w["pan_mass"]), reverse=True)[:10],
         "early_service_windows": [w for w in window_summaries if w["start_epoch"] <= 24][:20],
     }
