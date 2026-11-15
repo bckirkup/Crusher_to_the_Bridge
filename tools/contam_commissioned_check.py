@@ -233,6 +233,76 @@ def _declared_prescribed_paths(
     return declared
 
 
+def _declared_passive_oneway_paths(
+    spatial: dict,
+    airflow: dict,
+) -> list[dict]:
+    """Declared passive one-way pressure-opening legs after zone expansion."""
+    declared: list[dict] = []
+    for link in airflow.get("cross_zone_links", []):
+        semantics = cross_zone_link_semantics(link)
+        if (
+            semantics.get("direction") != "oneway"
+            or semantics.get("mechanism") != "pressure_opening"
+        ):
+            continue
+        from_rooms = _endpoint_rooms(spatial, airflow, str(link.get("from")))
+        to_rooms = _endpoint_rooms(spatial, airflow, str(link.get("to")))
+        if not from_rooms or not to_rooms:
+            continue
+        n_pairs = len(from_rooms) * len(to_rooms)
+        pair_flow = (
+            float(link.get("flow_rate_m3h", 0.0)) / n_pairs
+            if n_pairs > 0 else 0.0
+        )
+        if pair_flow <= 0.0:
+            continue
+        kind = str(link.get("path", "cross_zone"))
+        for fr, tr in itertools.product(from_rooms, to_rooms):
+            declared.append({
+                "kind": kind,
+                "from_zone": fr,
+                "to_zone": tr,
+                "declared_flow_m3h": pair_flow,
+            })
+    return declared
+
+
+def _check_passive_oneway_flows(
+    path_map: list[dict],
+    declared_paths: list[dict],
+    flows_m3h: dict[int, float],
+) -> tuple[list[str], int, int, float]:
+    """Check one-way passive openings never reverse and count forward flow."""
+    errors: list[str] = []
+    checked = 0
+    positive = 0
+    aggregate = 0.0
+    by_key: dict[tuple[str, str, str], list[dict]] = {}
+    for entry in path_map:
+        key = (
+            str(entry.get("kind")),
+            str(entry.get("from_zone")),
+            str(entry.get("to_zone")),
+        )
+        by_key.setdefault(key, []).append(entry)
+    for leg in declared_paths:
+        key = (leg["kind"], leg["from_zone"], leg["to_zone"])
+        for entry in by_key.get(key, []):
+            solved = float(flows_m3h.get(int(entry["path_nr"]), 0.0))
+            checked += 1
+            if solved < -_ABS_EPS_M3H:
+                errors.append(
+                    f"passive oneway {leg['kind']} "
+                    f"{leg['from_zone']}->{leg['to_zone']}: solved {solved:.2f} "
+                    "reversed"
+                )
+            if solved > _ABS_EPS_M3H:
+                positive += 1
+                aggregate += solved
+    return errors, checked, positive, aggregate
+
+
 def _check_cross_zone_sign(
     path_map: list[dict],
     spatial: dict,
@@ -310,6 +380,25 @@ def check_platform(
     solved_errors.extend(
         _check_cross_zone_sign(path_map, spatial, airflow, flows)
     )
+    passive_declared = _declared_passive_oneway_paths(spatial, airflow)
+    if passive_declared:
+        (
+            passive_errors,
+            passive_checked,
+            passive_positive,
+            passive_aggregate,
+        ) = _check_passive_oneway_flows(path_map, passive_declared, flows)
+        solved_errors.extend(passive_errors)
+        print(
+            f"[{platform}] passive oneway pressure openings: "
+            f"{passive_positive}/{passive_checked} forward, "
+            f"{passive_aggregate:.3f} m3/h aggregate"
+        )
+        if passive_checked and passive_positive == 0:
+            print(
+                f"[{platform}] WARNING: no forward flow on declared "
+                "one-way passive pressure openings"
+            )
     print(f"[{platform}] solved {sim_path}:")
     for row in rows:
         print(row)

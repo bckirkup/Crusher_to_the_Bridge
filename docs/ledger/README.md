@@ -42,6 +42,7 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- `CONTAM-BDQ-LAMINAR-01.md` — commissioned one-way passive `plr_bdq` openings now carry the documented NIST TN 1887r1 laminar-transition coefficient, with live two-zone and hull-level ContamX controls.
 - `CONTAM-PATHMAP-FILTERED-01.md` — PATHMAP-FILTERED stage 2: path_map `filtered` carry-through, schema, and exporter endpoint fail-loud.
 - `CONTAM-EXHAUST-SINK-02.md` — EXHAUST-SINK stage 3: explicit `ambient` sink endpoints across schema, sanity checks, native transport, exporter/path_map, and the ContamX lane; inert until stage 4.
 - `CONTAM-EXHAUST-SINK-03.md` — EXHAUST-SINK stage 4: re-point the three audited exhaust links to ambient sinks with before/after native exact-check measurements.
