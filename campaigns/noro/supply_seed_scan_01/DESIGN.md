@@ -53,6 +53,9 @@ census for later paired full-fidelity posted-AR runs; it is not an anchor fit.
 - Interpreter/hash pin: `tools/noro_diag/supply_seed_scan.py` re-execs under
   `PYTHONHASHSEED=1` before importing the engine, so local canaries and Batch
   children share the same seed-selection hash.
+- Error contract: any per-seed exception makes the worker exit nonzero after
+  writing the chunk locally, so Batch retries instead of `_already_uploaded`
+  treating error rows as a completed chunk.
 - Canary before array: one chunk per representative block inspected for
   schema, nonzero supply witnesses where expected, and error rate.
 

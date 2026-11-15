@@ -369,7 +369,9 @@ def main(argv: list[str] | None = None) -> int:
             indent=2,
         )
     )
-    return 0
+    # A nonzero exit keeps campaign_entrypoint from uploading the chunk, so
+    # Batch retries instead of _already_uploaded treating error rows as done.
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":
