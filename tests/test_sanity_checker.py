@@ -21,6 +21,7 @@ from tools.sanity_checker import (
     _check_emod_progression,
     _check_escalation_params,
     _check_exhaust_terminal_link_directions,
+    _check_food_supply_receipt_fields,
     _check_fred_behavior,
     _check_gender_distribution,
     _check_hvac_params,
@@ -800,3 +801,58 @@ def test_preboarding_check_accepts_the_shipped_shape() -> None:
         },
     ))
     assert msgs == []
+
+
+def test_food_supply_receipt_field_validation() -> None:
+    """FOOD-SUPPLY-01 sanity grammar rejects bad receipt-layer fields."""
+    def errors(ps: dict) -> list[str]:
+        report = Report()
+        _check_food_supply_receipt_fields(ps, report)
+        return [f.message for f in report.errors]
+
+    assert any(
+        "lot_layer_mode" in m for m in errors({"lot_layer_mode": "bogus"})
+    )
+    assert any(
+        "preparation_survival_mode" in m
+        for m in errors({"preparation_survival_mode": "cooked"})
+    )
+    assert any(
+        "prevalence_scale" in m
+        for m in errors({"prevalence_scale": [0.5, 0.4]})
+    )
+    assert any(
+        "receipts_per_item_line is required" in m
+        for m in errors({"lot_layer_mode": "declared_receipts"})
+    )
+    assert any(
+        "receipts_per_item_line must be" in m
+        for m in errors({
+            "lot_layer_mode": "declared_receipts",
+            "receipts_per_item_line": 0,
+        })
+    )
+    assert any(
+        "must be a mapping" in m
+        for m in errors({"q_source_by_item_line": "bad"})
+    )
+    assert any(
+        "unknown COMMON_SOURCE_LOT_ITEM_LINES" in m
+        for m in errors({
+            "q_source_by_item_line": {"spice": {"prevalence": 0.1}},
+        })
+    )
+    assert any(
+        "must be a mapping with a 'prevalence' spec" in m
+        for m in errors({
+            "q_source_by_item_line": {"shellfish": {"implicated_share": 0.5}},
+        })
+    )
+    assert any(
+        "implicated_share" in m
+        for m in errors({
+            "q_source_by_item_line": {
+                "shellfish": {"prevalence": 0.1, "implicated_share": 1.5},
+            },
+        })
+    )

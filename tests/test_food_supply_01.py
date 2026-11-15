@@ -271,3 +271,36 @@ def test_receipt_scalar_q_source_fallback_covers_all_lines() -> None:
         "raw_or_rte_no_kill": 4,
         "prepared_or_pasteurized": 3,
     }
+
+
+def test_invalid_receipt_modes_fall_back_to_defaults() -> None:
+    """Unknown receipt-layer modes resolve to the shipped defaults."""
+    ps = _ps_override(
+        lot_layer_mode="not_a_mode",
+        preparation_survival_mode="cooked",
+        q_source_by_item_line={
+            "shellfish": {"prevalence": 1.0, "implicated_share": 1.0},
+        },
+    )
+    core = _core(cfg_cs=_ps_cfg(0.0, provisioned_source=ps))
+    _plan(core, [_diner(i) for i in range(1, 40)])
+    assert core._cs_ps_lot_layer_mode == "station_lots"
+    assert core._cs_ps_preparation_survival_mode == "raw_rte_only"
+
+
+def test_receipt_spec_helpers_cover_intervals_and_bad_values() -> None:
+    """Receipt spec helpers accept interval draws and fall back on bad
+    scalar specs without contaminating the stream."""
+    core = _core(cfg_cs=_ps_cfg(0.0))
+    assert 0.2 <= core._cs_receipt_draw_spec([0.2, 0.4]) <= 0.4
+    assert core._cs_receipt_draw_spec("bad") == pytest.approx(0.0)
+    assert core._cs_receipt_count_draw([2, 3]) in {2, 3}
+    assert core._cs_receipt_count_draw("bad") == 1
+    assert core._cs_receipt_venue_sets([], 3) == [[], [], []]
+    core._cs_ps_q_by_item_line = {
+        "shellfish": {"prevalence": 1.0, "implicated_share": "bad"},
+    }
+    core._cs_ps_prevalence_scale = 1.0
+    specs, scale = core._cs_receipt_line_specs(PATHOGEN, {"q_source": 0.0})
+    assert specs["shellfish"] == pytest.approx(0.0)
+    assert scale == pytest.approx(1.0)
