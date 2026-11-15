@@ -2,8 +2,13 @@
 
 > **Status:** Partially implemented — the §5.4 G-min generator guards and
 > shared sanitary emitter landed as ledger
-> `docs/ledger/CONTAM-GENERATOR-PROTECT-01.md`; §3–§4 and the rest of §5–§6
-> remain proposed. The audit below is unchanged and was read-only at
+> `docs/ledger/CONTAM-GENERATOR-PROTECT-01.md`; the §4.2/§4.4 path_map
+> `filtered` carry-through and cache versioning landed as
+> `docs/ledger/CONTAM-PATHMAP-FILTERED-01.md`; the §3.4 Path S sink machinery
+> landed as `docs/ledger/CONTAM-EXHAUST-SINK-02.md` and is inert until stage
+> 4 authors sink links. Stage 4 link re-pointing, make-up links, stale-bundle
+> resync, and the remaining §3–§6 proposals are still proposed. The audit
+> below is unchanged and was read-only at
 > `origin/main` `800a1958` (after the forced-exhaust bundle #1209, #1213,
 > #1214, #1216, #1217, #1219, #1220, #1221). It responds to three further
 > claims from Edison. Audit ledger: `docs/ledger/CONTAM-EXHAUST-SINK-01.md`.
