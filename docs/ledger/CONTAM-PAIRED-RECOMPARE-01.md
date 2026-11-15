@@ -2,8 +2,8 @@
 **Date:** 2026-11-15
 **Commit:** 43ecb68d
 **Pathogens:** all
-**Measured at:** 43ecb68d (post-#1241 main); pre-#1241 change-detector reproduced at c19b73ef
 **Status:** open
+**Measured at:** 43ecb68d
 
 ## Scope
 
