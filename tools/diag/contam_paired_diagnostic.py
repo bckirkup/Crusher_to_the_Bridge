@@ -314,14 +314,60 @@ def _horizons_for(timings: list[str]) -> set[float]:
     return horizons
 
 
+def _contamx_binary(lanes: list[str]) -> str | None:
+    if all(lane == "native" for lane in lanes):
+        return None
+    binary = find_contamx()
+    if binary is None:
+        raise ContamXUnavailable("ContamX binary not found for commissioned/authored lanes")
+    return binary
+
+
+def _lane_bundle(
+    hull: str,
+    lane: str,
+    spatial: dict[str, Any],
+    airflow: dict[str, Any],
+    binary: str | None,
+    timings: list[str],
+    lane_cache: dict[tuple[str, str], dict[str, Any]],
+) -> dict[str, Any]:
+    key = (hull, lane)
+    if key not in lane_cache:
+        engine = _lane_engine(hull, lane, spatial, airflow, binary)
+        data = _operator_data(engine)
+        lane_cache[key] = {
+            "engine": engine,
+            "data": data,
+            "matrices": _matrices(data["operator"], _horizons_for(timings)),
+        }
+    return lane_cache[key]
+
+
+def _source_cells(
+    hull: str,
+    lane: str,
+    source: str,
+    timings: list[str],
+    lane_data: dict[str, Any],
+    airflow: dict[str, Any],
+) -> list[dict[str, Any]]:
+    if source not in lane_data["data"]["zone_index"]:
+        raise ValueError(f"{hull}/{lane} lacks source zone {source}")
+    return [
+        _trajectory_cell(
+            hull, lane, source, timing,
+            lane_data["data"], lane_data["matrices"], airflow,
+        )
+        for timing in timings
+    ]
+
+
 def _run_matrix(args: argparse.Namespace) -> dict[str, Any]:
     hulls = args.hull or list(PLATFORM_SOURCES)
     lanes = args.lane or list(LANES)
     timings = args.timing or list(TIMINGS)
-    needs_contamx = any(lane != "native" for lane in lanes)
-    binary = find_contamx() if needs_contamx else None
-    if needs_contamx and binary is None:
-        raise ContamXUnavailable("ContamX binary not found for commissioned/authored lanes")
+    binary = _contamx_binary(lanes)
 
     cells: list[dict[str, Any]] = []
     lane_cache: dict[tuple[str, str], dict[str, Any]] = {}
@@ -329,26 +375,11 @@ def _run_matrix(args: argparse.Namespace) -> dict[str, Any]:
         spatial, airflow = _load_platform(hull)
         sources = _sources_for(hull, spatial, args.source)
         for lane in lanes:
-            key = (hull, lane)
-            if key not in lane_cache:
-                engine = _lane_engine(hull, lane, spatial, airflow, binary)
-                data = _operator_data(engine)
-                lane_cache[key] = {
-                    "engine": engine,
-                    "data": data,
-                    "matrices": _matrices(data["operator"], _horizons_for(timings)),
-                }
-            lane_data = lane_cache[key]
+            lane_data = _lane_bundle(
+                hull, lane, spatial, airflow, binary, timings, lane_cache,
+            )
             for source in sources:
-                if source not in lane_data["data"]["zone_index"]:
-                    raise ValueError(f"{hull}/{lane} lacks source zone {source}")
-                for timing in timings:
-                    cells.append(
-                        _trajectory_cell(
-                            hull, lane, source, timing,
-                            lane_data["data"], lane_data["matrices"], airflow,
-                        )
-                    )
+                cells.extend(_source_cells(hull, lane, source, timings, lane_data, airflow))
     return {
         "meta": {
             "filter_efficiency": FILTER_EFFICIENCY,
