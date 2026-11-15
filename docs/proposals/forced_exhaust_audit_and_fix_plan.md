@@ -1,21 +1,17 @@
 # Forced-exhaust audit and fix plan (cross-zone link direction, mechanism, filtration)
 
-> **Status:** Proposed — **nothing in §5 exists**. No engine, schema, exporter
-> or hull-data change is made or authorized by this document. What does exist
-> is the read-only audit: `tools/diag/forced_exhaust_audit.py` and its three
-> committed outputs beside this file (`forced_exhaust_audit_links.csv`,
-> `forced_exhaust_audit_summary.json`,
-> `forced_exhaust_exact_integral_check.json`). Measured at `origin/main`
-> `94daa3bf`. It responds to three testing corrections from Edison on the
-> frozen CONTAM transport study. **Amended after merge:** Edison's figures
-> reproduce at the conditions his bundle declares; the earlier "does not
-> reproduce" verdicts compared different conditions (§3, reconciliation note).
-> **Status correction (2026-11-15, tree-checked at `800a1958`):** most of §5
-> has since landed — D1 (#1213), S1 (#1216), X1/X2 (#1217) and data rows 1–5
-> (#1219, #1220, #1221); see ledgers `CONTAM-FORCED-EXHAUST-S1-01`,
-> `-X1X2-01`, `-GALLEY-01`, `-DOORS-01`, `-DUCTED-01`. `direction` is still
-> optional in the schema. The body below is unchanged and describes the tree
-> at `94daa3bf`. Follow-up audit: `exhaust_sink_audit_and_fix_plan.md`.
+> **Status:** Mostly implemented (tree-checked at `17687e83`). Landed from
+> §5: D1 (#1213), the exact-integral addenda (#1214), S1 (#1216), X1/X2
+> (#1217) and data rows 1–5 (#1219, #1220, #1221); ledgers
+> `CONTAM-FORCED-EXHAUST-S1-01`, `-X1X2-01`, `-GALLEY-01`, `-DOORS-01`,
+> `-DUCTED-01`. Still proposed: making `direction` required in the schema.
+> The body below is the original proposal text, written against
+> `origin/main` `94daa3bf` and left unchanged, so its "does not exist"
+> statements describe that tree, not the current one. The read-only audit is
+> `tools/diag/forced_exhaust_audit.py` with its committed outputs beside
+> this file. Edison's figures reproduce at the conditions his bundle
+> declares (§3, reconciliation note). Follow-up:
+> `exhaust_sink_audit_and_fix_plan.md`.
 
 **Evidence vocabulary used throughout.** *Measured* = computed this session
 from the tree at `94daa3bf` by the committed script. *Inferred* = follows from
