@@ -399,10 +399,15 @@ def audit_q2(platform_dir: str, spatial: dict[str, Any],
         out["native"] = None
         out["native_error"] = str(exc)
 
-    _, entries = export_prj_with_path_map(
-        spatial, airflow, ahs_terminal_mode="commissioned")
-    out["contamx_export"] = _zone_classes(
-        zone_ids, _contamx_edges(entries, zone_ids), injection)
+    try:
+        _, entries = export_prj_with_path_map(
+            spatial, airflow, ahs_terminal_mode="commissioned")
+    except ValueError as exc:
+        out["contamx_export"] = None
+        out["contamx_export_error"] = str(exc)
+    else:
+        out["contamx_export"] = _zone_classes(
+            zone_ids, _contamx_edges(entries, zone_ids), injection)
 
     prj_path = os.path.join(platform_dir, PRJ_REL_PATH)
     if os.path.exists(prj_path):
@@ -420,14 +425,21 @@ def audit_q2(platform_dir: str, spatial: dict[str, Any],
         out["contamx_committed"] = None
 
     native_dead = set(out["native"]["dead"]) if out["native"] else set()
-    cx_dead = set(out["contamx_export"]["dead"])
-    out["native_only_dead"] = (
-        sorted(native_dead - cx_dead) if out["native"] else None
+    cx_dead = (
+        set(out["contamx_export"]["dead"]) if out["contamx_export"] else set()
     )
-    out["contamx_only_dead"] = sorted(cx_dead - native_dead)
+    can_compare = (
+        out["native"] is not None and out["contamx_export"] is not None
+    )
+    out["native_only_dead"] = (
+        sorted(native_dead - cx_dead) if can_compare else None
+    )
+    out["contamx_only_dead"] = (
+        sorted(cx_dead - native_dead) if out["contamx_export"] else None
+    )
     out["native_only_dead_frac"] = (
         len(native_dead - cx_dead) / len(zone_ids)
-        if out["native"] and zone_ids else None
+        if can_compare and zone_ids else None
     )
     duty0 = {
         r for g in airflow.get("hvac_zones", [])
@@ -610,12 +622,17 @@ def fleet_correlations(results: dict[str, dict[str, Any]],
     }
     corr: dict[str, Any] = {"n_hulls": len(rows), "vs_mean_l1": {}}
     for name, fn in metrics.items():
-        # Metrics needing the native graph skip hulls whose engine failed
-        # to build (dangling link endpoint — the CONTAM-XZONE-01 raise).
-        pairs = [
-            (float(fn(q)), float(l)) for _p, q, l in rows
-            if q.get("native") is not None or "native" not in name
-        ]
+        # Metrics skip hulls whose required graph failed to build (a
+        # dangling endpoint now raises in both the native and export lanes).
+        pairs = []
+        for _pid, q, l1 in rows:
+            try:
+                value = fn(q)
+            except (KeyError, TypeError):
+                continue
+            if value is None:
+                continue
+            pairs.append((float(value), float(l1)))
         corr["vs_mean_l1"][name] = (
             round(spearman([x for x, _ in pairs], [y for _, y in pairs]), 3)
             if len(pairs) >= 2 else None
@@ -631,7 +648,9 @@ def _fmt_dead(q2: dict[str, Any] | None) -> str:
         return "-"
     n, c = q2["native"], q2["contamx_export"]
     if n is None:
-        return f"ERR/{c['dead_frac']:.2f}"
+        return f"ERR/{c['dead_frac']:.2f}" if c else "ERR/ERR"
+    if c is None:
+        return f"{n['dead_frac']:.2f}/ERR"
     return (f"{n['dead_frac']:.2f}/{c['dead_frac']:.2f}"
             f" ({len(q2['native_only_dead'])} native-only)")
 
