@@ -36,7 +36,11 @@ First symptom and first quarantine epochs come from the voyage timeseries. The
 recorded rows were produced by the equivalent inline aggregation at `b3a4db7a`
 (engine `893cc54d`) under `PYTHONHASHSEED=1`; `git diff 893cc54d..08fbe720` in
 the scoped transmission/pathogen/platform/campaign paths touches only
-`engines/contamx_transport.py`.
+`engines/contamx_transport.py`. After review fixes at `3e1c19ee` — hand-contact
+dose counted once per `(epoch, target)` and agent id 0 preserved — the durable
+probe was rerun under `PYTHONHASHSEED=1`; secondary acquisition and
+`secondary_conversion` hazard counts are unchanged, and the hand-contact dose
+proxy below is the corrected value.
 
 ## Measured
 
@@ -62,7 +66,7 @@ Acquired-source exposure proxies, summed over the five seeds:
 |---|---:|---:|---:|---:|
 | challengeable pickup acquired dose, GEC | 188.2 | 96,305.6 | 3,738,562.9 | ~19,868x |
 | `unit_epochs.mass_acquired`, GEC | 23,951.2 | 359,656.2 | 31,828,697.4 | ~1,329x |
-| hand-contact dose | 4.07 | 2,365.89 | 23,065.90 | ~5,663x |
+| hand-contact dose | 4.07 | 2,342.68 | 18,650.76 | ~4,586x |
 
 Hazard rows classified as `secondary_conversion` match the acquisition counts:
 2 pre-quarantine, 14 post-quarantine-but-in-span, and 69 after-span, with summed
