@@ -228,9 +228,11 @@ def build_path_map(
     """Build the Crusher path manifest matching ContamW 3.4 export order.
 
     Path numbering is 1-based and matches ContamX ``.sim`` path indices.
-    Only entries with both endpoints as real zone ids are used by
+    Ordinary entries with both endpoints as real zone ids are used by
     ``ContamXTransportEngine``; ambient / phantom paths are still listed
-    for solvability bookkeeping (``crusher_transfer`` false).
+    for solvability bookkeeping (``crusher_transfer`` false). Exhaust-sink
+    paths to the reserved ``ambient`` endpoint are the exception: they are
+    outflow-only domain exits and carry ``sink`` true.
     """
     return _assemble_network(spatial_layout, air_flow_paths)["path_map"]
 
@@ -837,17 +839,71 @@ class _NetworkBuilder:
             sched_id = "ShaftOpenW"
         return int(self.week_by_id.get(sched_id, 0))
 
+    def _ambient_sink_semantics(self, link: dict[str, Any]) -> dict[str, Any]:
+        semantics = cross_zone_link_semantics(link)
+        direction = str(semantics.get("direction") or "")
+        mechanism = str(semantics.get("mechanism") or "")
+        filtered = semantics.get("filtered")
+        if (
+            direction != "oneway"
+            or mechanism != "prescribed_flow"
+            or filtered is not False
+        ):
+            raise ValueError(
+                "cross_zone_links endpoint 'ambient' requires direction "
+                "'oneway', mechanism 'prescribed_flow', and filtered false; "
+                f"got {semantics}"
+            )
+        return semantics
+
+    def _add_ambient_sink_paths(
+        self,
+        link: dict[str, Any],
+        from_rooms: list[str],
+        flow: float,
+        kind: str,
+    ) -> None:
+        """Emit one fan path per source room to ContamW ambient node -1."""
+        self._ambient_sink_semantics(link)
+        pair_flow = flow / len(from_rooms) if from_rooms else 0.0
+        if pair_flow <= 0.0:
+            return
+        elem = self._fan_elem(pair_flow)
+        ducted = bool(link.get("is_hvac_ducted", False))
+        path_map_extra: dict[str, Any] = {"sink": True}
+        if ducted:
+            path_map_extra["filtered"] = False
+        for fr in from_rooms:
+            self._add_path(
+                self.zone_name_to_nr[fr], -1, elem,
+                from_name=fr, to_name="ambient",
+                kind=kind,
+                is_hvac_ducted=ducted,
+                crusher_transfer=False,
+                fields=self.PathFields(),
+                path_map_extra=path_map_extra,
+            )
+
     def _add_cross_zone_paths(self) -> None:
         """Expansion to room×room pairs matches native ContamTransportEngine."""
         for link in self.cross_links:
-            from_rooms = self._endpoint_rooms(link["from"])
-            to_rooms = self._endpoint_rooms(link["to"])
+            from_token = str(link["from"])
+            to_token = str(link["to"])
+            if from_token == "ambient":
+                raise ValueError(
+                    "cross_zone_links endpoint 'ambient' cannot be a source"
+                )
+            from_rooms = self._endpoint_rooms(from_token)
             flow = float(link.get("flow_rate_m3h", 50.0))
+            kind = str(link.get("path", "cross_zone"))
+            if to_token == "ambient":
+                self._add_ambient_sink_paths(link, from_rooms, flow, kind)
+                continue
+            to_rooms = self._endpoint_rooms(to_token)
             n_pairs = len(from_rooms) * len(to_rooms)
             pair_flow = flow / n_pairs if n_pairs > 0 else 0.0
             if pair_flow <= 0.0:
                 continue
-            kind = str(link.get("path", "cross_zone"))
             semantics = cross_zone_link_semantics(link)
             direction = str(semantics.get("direction") or "")
             mechanism = str(semantics.get("mechanism") or "")
@@ -1965,6 +2021,8 @@ def _classify_path_kind(
         if to_ph and not from_ph:
             return "ahs_return"
         return "ahs_terminal"
+    if is_fan and not from_ph and to_nr < 0:
+        return "exhaust_sink"
     if from_nr < 0 or to_nr < 0:
         return "envelope_leak"
     if both_real and is_fan:
@@ -2042,14 +2100,19 @@ def path_map_from_prj(
             both_real=both_real,
             is_fan=elem_is_fan.get(elem_nr, False),
         )
+        is_sink = kind == "exhaust_sink"
         path_map.append({
             "path_nr": pnr,
             "from_zone": _endpoint_name(from_nr),
             "to_zone": _endpoint_name(to_nr),
-            "is_hvac_ducted": kind.startswith("ahs_") or kind == "cross_zone",
+            "is_hvac_ducted": (
+                kind.startswith("ahs_")
+                or kind in {"cross_zone", "exhaust_sink"}
+            ),
             "kind": kind,
             "crusher_transfer": both_real,
             "ahs_nr": ahs_field if ahs_field > 0 else ahs_path_group.get(pnr, 0),
+            **({"sink": True} if is_sink else {}),
         })
 
     return sorted(path_map, key=lambda e: int(e["path_nr"]))

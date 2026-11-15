@@ -90,11 +90,11 @@
       "properties": {
         "from": {
           "type": "string",
-          "description": "Source zone or HVAC zone ID"
+          "description": "Source zone or HVAC zone ID. The reserved sink token 'ambient' is not a valid source."
         },
         "to": {
           "type": "string",
-          "description": "Destination zone or HVAC zone ID"
+          "description": "Destination zone or HVAC zone ID, or the reserved exhaust-sink token 'ambient' (material leaves the ship/domain; requires direction=oneway, mechanism=prescribed_flow, filtered=false)."
         },
         "flow_rate_m3h": {
           "type": "number",
@@ -121,7 +121,30 @@
         },
         "path": {"type": "string"},
         "description": {"type": "string"}
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"to": {"const": "ambient"}},
+            "required": ["to"]
+          },
+          "then": {
+            "required": ["direction", "mechanism", "filtered"],
+            "properties": {
+              "direction": {"const": "oneway"},
+              "mechanism": {"const": "prescribed_flow"},
+              "filtered": {"const": false}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"from": {"const": "ambient"}},
+            "required": ["from"]
+          },
+          "then": false
+        }
+      ]
     },
     "AdjacencyEdge": {
       "type": "object",

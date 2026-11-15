@@ -49,7 +49,7 @@
         },
         "sink": {
           "type": "boolean",
-          "description": "Optional exhaust-sink marker reserved by the path S rollout; absent means an ordinary room/ambient endpoint."
+          "description": "Optional exhaust-sink marker: when true the ContamX lane treats a positive solved flow as outflow-only from from_zone; absent means an ordinary room/ambient endpoint."
         },
         "declared_flow_m3h": {
           "type": "number",

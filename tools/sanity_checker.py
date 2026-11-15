@@ -53,6 +53,7 @@ from engines.fomite_surfaces import (  # noqa: E402
 )
 from engines.illness_duration import IllnessDurationModel  # noqa: E402
 from engines.incubation import IncubationModel  # noqa: E402
+from engines.py_contam_bridge import cross_zone_link_semantics  # noqa: E402
 from engines.strain_state import (  # noqa: E402
     StrainConfigError,
     StrainEvolutionConfig,
@@ -254,6 +255,8 @@ class CrossZoneLink(BaseModel):
     flow_rate_m3h: float = 50.0
     is_hvac_ducted: bool = False
     direction: Literal["oneway", "bidirectional"] | None = None
+    mechanism: Literal["prescribed_flow", "pressure_opening"] | None = None
+    filtered: bool | None = None
     path: str | None = None
     description: str | None = None
 
@@ -1574,6 +1577,7 @@ def _check_airflow_graph_refs(
     """Ensure airflow zone, link, and adjacency references resolve."""
     _check_hvac_zone_rooms(airflow, valid_zones, report)
     _check_cross_zone_link_endpoints(airflow, valid_zones, report)
+    _check_ambient_sink_links(airflow, report)
     _check_exhaust_terminal_link_directions(airflow, report)
     _check_adjacency_endpoints(airflow, valid_zones, report)
 
@@ -1607,6 +1611,54 @@ def _exhaust_only_terminal_ids(airflow: AirFlowPaths) -> set[str]:
             terminals.add(zone.id)
             terminals.update(zone.rooms)
     return terminals
+
+
+def _ambient_sink_semantics(link: CrossZoneLink) -> dict[str, Any]:
+    raw: dict[str, Any] = {"is_hvac_ducted": link.is_hvac_ducted}
+    for attr in ("direction", "mechanism", "filtered"):
+        value = getattr(link, attr)
+        if value is not None:
+            raw[attr] = value
+    return cross_zone_link_semantics(raw)
+
+
+def _check_ambient_sink_links(
+    airflow: AirFlowPaths,
+    report: Report,
+) -> None:
+    """Reserved ``ambient`` sink endpoints are one-way unfiltered exhaust."""
+    for link in airflow.cross_zone_links:
+        if link.from_zone == "ambient":
+            report.error(
+                _AIR_FLOW_PATHS_JSON,
+                "AIRFLOW_SINK",
+                f"Cross-zone link '{link.from_zone}' -> '{link.to_zone}' "
+                "has 'from' = 'ambient'; ambient is a sink endpoint only",
+            )
+        if link.to_zone != "ambient":
+            continue
+        semantics = _ambient_sink_semantics(link)
+        problems: list[str] = []
+        if semantics["direction"] != "oneway":
+            problems.append(
+                f"direction {semantics['direction']!r} (required 'oneway')"
+            )
+        if semantics["mechanism"] != "prescribed_flow":
+            problems.append(
+                f"mechanism {semantics['mechanism']!r} "
+                "(required 'prescribed_flow')"
+            )
+        if semantics["filtered"] is not False:
+            problems.append(
+                f"filtered {semantics['filtered']!r} (required false)"
+            )
+        if problems:
+            report.error(
+                _AIR_FLOW_PATHS_JSON,
+                "AIRFLOW_SINK",
+                f"Cross-zone link '{link.from_zone}' -> 'ambient' is an "
+                "exhaust sink and requires " + "; ".join(problems),
+            )
 
 
 def _check_exhaust_terminal_link_directions(
@@ -1652,6 +1704,8 @@ def _check_cross_zone_link_endpoints(
     hvac_zone_ids = {hz.id for hz in airflow.hvac_zones}
     for link in airflow.cross_zone_links:
         for endpoint_name, endpoint_val in [("from", link.from_zone), ("to", link.to_zone)]:
+            if endpoint_name == "to" and endpoint_val == "ambient":
+                continue
             if endpoint_val not in valid_zones and endpoint_val not in hvac_zone_ids:
                 report.error(
                     _AIR_FLOW_PATHS_JSON,

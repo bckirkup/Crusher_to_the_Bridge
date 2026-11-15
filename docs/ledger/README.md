@@ -43,6 +43,7 @@ to them as ledger `<ID>`.
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
 - `CONTAM-PATHMAP-FILTERED-01.md` — PATHMAP-FILTERED stage 2: path_map `filtered` carry-through, schema, and exporter endpoint fail-loud.
+- `CONTAM-EXHAUST-SINK-02.md` — EXHAUST-SINK stage 3: explicit `ambient` sink endpoints across schema, sanity checks, native transport, exporter/path_map, and the ContamX lane; inert until stage 4.
 
 ## For drafting and analysis
 
