@@ -12,7 +12,11 @@ import math
 
 import pytest
 
-from tools.flu_rhythm_ab_probe import flu_cell_spec
+from tools.flu_rhythm_ab_probe import (
+    _arm_output_dir,
+    flu_cell_spec,
+    parse_args,
+)
 from tools.flu_rhythm_ab_readout import _confined_block, _paired_table
 from tools.noro_diag.rhythm_ab_probe import _inject_arm
 
@@ -124,6 +128,22 @@ def test_confined_block_band_is_none_without_slot_doses() -> None:
     block = _confined_block(runs)
     assert block["floor_band"] is None
     assert block["in_floor_band"] is None
+
+
+def test_arm_output_dir_confines_the_arm_segment(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr("tools.flu_rhythm_ab_probe.REPO_ROOT", tmp_path)
+    made = _arm_output_dir(str(tmp_path / "cells"), "on")
+    assert made == (tmp_path / "cells" / "on").resolve()
+    assert made.is_dir()
+    with pytest.raises(ValueError):
+        _arm_output_dir(str(tmp_path / "cells"), "..")
+    with pytest.raises(ValueError):
+        _arm_output_dir(str(tmp_path.parent), "off")
+
+
+def test_parse_args_rejects_an_arm_outside_the_choices() -> None:
+    with pytest.raises(SystemExit):
+        parse_args(["--out", "cells", "--arm", ".."])
 
 
 def test_paired_table_joins_on_run_stem() -> None:
