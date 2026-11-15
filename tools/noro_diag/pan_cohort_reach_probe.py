@@ -54,17 +54,33 @@ def _bucket(epoch, cs_start, cs_end, first_q):
     return "cs_span_pre_q" if epoch < q else "cs_span_post_q"
 
 
-def run_seed_pan_cohort(pathogen_id, spec_dict, natural_history_clock):
-    rec = gcc.CensusRecorder(pathogen_id=pathogen_id, payload_profile="full")
-    rec.occupancy = gcc.hand_occupancy.OccupancyRecorder(pathogen_id)
-    pan_rows = []
+def _pan_cohort_row(call_id, event, epoch, zone_name, token, obj, cohort_ids, window_takers):
+    return {
+        "call_id": call_id,
+        "event_id": event.get("event_id"),
+        "epoch": int(epoch),
+        "end_epoch": event.get("end_epoch"),
+        "zone": zone_name,
+        "meal": token,
+        "object_id": obj.get("object_id"),
+        "pan_serial": event.get("pan_serial"),
+        "servings_taken": int(event.get("servings_taken") or 0),
+        "per_serving_dose": _f(event.get("per_serving_dose")),
+        "pan_mass": _f(event.get("pan_mass")),
+        "cohort_size": int(event.get("cohort_size") or len(cohort_ids)),
+        "cohort_ids": cohort_ids,
+        "taker_ids": [int(x) for x in (event.get("taker_ids") or [])],
+        "window_taker_ids": window_takers,
+    }
+
+
+def _pan_cohort_wrapper(pan_rows):
     call_id = 0
-    orig = None
 
     def wrapper(self, state, obj, epoch, zone_name, token, cohort, servings_served, pan_servings, pathogen_id_, cs_block, matrix):
-        nonlocal call_id, orig
+        nonlocal call_id
         before = len(getattr(self, "_cs_event_log", []) or [])
-        orig(
+        wrapper.orig(
             self, state, obj, epoch, zone_name, token, cohort,
             servings_served, pan_servings, pathogen_id_, cs_block, matrix,
         )
@@ -77,51 +93,54 @@ def run_seed_pan_cohort(pathogen_id, spec_dict, natural_history_clock):
             int(t) for event in events for t in (event.get("taker_ids") or [])
         })
         for event in events:
-            pan_rows.append({
-                "call_id": call_id,
-                "event_id": event.get("event_id"),
-                "epoch": int(epoch),
-                "end_epoch": event.get("end_epoch"),
-                "zone": zone_name,
-                "meal": token,
-                "object_id": obj.get("object_id"),
-                "pan_serial": event.get("pan_serial"),
-                "servings_taken": int(event.get("servings_taken") or 0),
-                "per_serving_dose": _f(event.get("per_serving_dose")),
-                "pan_mass": _f(event.get("pan_mass")),
-                "cohort_size": int(event.get("cohort_size") or len(cohort_ids)),
-                "cohort_ids": cohort_ids,
-                "taker_ids": [int(x) for x in (event.get("taker_ids") or [])],
-                "window_taker_ids": window_takers,
-            })
+            pan_rows.append(_pan_cohort_row(
+                call_id, event, epoch, zone_name, token, obj, cohort_ids, window_takers,
+            ))
 
+    wrapper.orig = None
+    return wrapper
+
+
+def _record_imported_agents(sim, rec, pathogen_id):
+    for agent in sim.engine.agents:
+        inf = (getattr(agent, "infections", {}) or {}).get(pathogen_id)
+        if inf is None:
+            continue
+        aid = int(agent.agent_id)
+        rec.host_gen.setdefault(aid, 0)
+        rec.import_ids.add(aid)
+        strain = inf.get("strain_id")
+        if strain:
+            rec.strain_home.setdefault(str(strain), aid)
+        rec.host_row(agent)
+
+
+def _set_voyage_rss(rec):
+    try:
+        rec.voyage_rss_mb = gcc._proc_rss_mb()[1]
+    except Exception:  # RSS probe is best-effort; diagnostics can run without it.
+        pass
+
+
+def run_seed_pan_cohort(pathogen_id, spec_dict, natural_history_clock):
+    rec = gcc.CensusRecorder(pathogen_id=pathogen_id, payload_profile="full")
+    rec.occupancy = gcc.hand_occupancy.OccupancyRecorder(pathogen_id)
+    pan_rows = []
     num_agents = int((spec_dict.get("config_overrides") or {}).get("ship_graph", {}).get("num_agents", 0))
     with gcc.materialized_picard_spec(spec_dict, gcc.REPO_ROOT) as picard_spec:
         rec.profile = dict(picard_spec.pathogen_profiles.get(pathogen_id) or {})
         with gcc.instrumented(rec):
-            orig = gcc.tc.TransmissionCore._cs_object_emit_pans
+            wrapper = _pan_cohort_wrapper(pan_rows)
+            wrapper.orig = gcc.tc.TransmissionCore._cs_object_emit_pans
             with mock.patch.object(gcc.tc.TransmissionCore, "_cs_object_emit_pans", wrapper):
                 sim = gcc.ShipSimulation(picard_spec, display=False)
                 sim.initialize()
-                for agent in sim.engine.agents:
-                    inf = (getattr(agent, "infections", {}) or {}).get(pathogen_id)
-                    if inf is None:
-                        continue
-                    aid = int(agent.agent_id)
-                    rec.host_gen.setdefault(aid, 0)
-                    rec.import_ids.add(aid)
-                    strain = inf.get("strain_id")
-                    if strain:
-                        rec.strain_home.setdefault(str(strain), aid)
-                    rec.host_row(agent)
+                _record_imported_agents(sim, rec, pathogen_id)
                 sim.epoch_observer = gcc._census_observer(rec, pathogen_id)
                 started = time.perf_counter()
                 result = sim.run()
                 wall_clock_s = time.perf_counter() - started
-                try:
-                    rec.voyage_rss_mb = gcc._proc_rss_mb()[1]
-                except Exception:  # RSS probe is best-effort; diagnostics can run without it.
-                    pass
+                _set_voyage_rss(rec)
         rec.seed_ids = set(getattr(sim.engine, "explicit_seed_agent_ids", None) or ())
         core = sim.tx_core
         initiation = gcc._initiation_witness(sim, pathogen_id, rec.profile)
@@ -179,8 +198,7 @@ def _contact_exposed_epochs(payload, first_cs_epoch, first_cohort_epoch):
     return exposed
 
 
-def _acquisition_sources(payload, first_cohort_epoch):
-    acquisitions = payload.get("acquisitions") or []
+def _first_cs_epochs(acquisitions):
     first_cs_epoch = {}
     for row in acquisitions:
         if _pathway(row) != CS_PATHWAY:
@@ -191,7 +209,10 @@ def _acquisition_sources(payload, first_cohort_epoch):
             continue
         aid = int(agent_id)
         first_cs_epoch[aid] = min(first_cs_epoch.get(aid, 10**9), int(epoch))
-    contact_exposed = _contact_exposed_epochs(payload, first_cs_epoch, first_cohort_epoch)
+    return first_cs_epoch
+
+
+def _secondary_acquisition_index(acquisitions, contact_exposed):
     secondary_acq_by_agent = defaultdict(list)
     for row in acquisitions:
         epoch = row.get("epoch")
@@ -205,6 +226,14 @@ def _acquisition_sources(payload, first_cohort_epoch):
             continue
         if _f(row.get("delivered_src_acquired_gec")) > 0.0 or (aid, epoch_i) in contact_exposed:
             secondary_acq_by_agent[aid].append((epoch_i, pathway))
+    return secondary_acq_by_agent
+
+
+def _acquisition_sources(payload, first_cohort_epoch):
+    acquisitions = payload.get("acquisitions") or []
+    first_cs_epoch = _first_cs_epochs(acquisitions)
+    contact_exposed = _contact_exposed_epochs(payload, first_cs_epoch, first_cohort_epoch)
+    secondary_acq_by_agent = _secondary_acquisition_index(acquisitions, contact_exposed)
     return first_cs_epoch, secondary_acq_by_agent
 
 
