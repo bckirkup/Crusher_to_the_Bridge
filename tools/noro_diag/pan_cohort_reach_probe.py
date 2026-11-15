@@ -162,10 +162,38 @@ def _cohort_windows(pan_rows):
     return ever_cohort, ever_takers, first_cohort_epoch, service_windows
 
 
-def _acquisition_sources(payload):
+def _contact_exposed_epochs(payload, first_cs_epoch, first_cohort_epoch):
+    exposed = set()
+    for row in payload.get("hand_contacts") or []:
+        target = row.get("target", row.get("agent_id"))
+        donor = row.get("donor")
+        epoch = row.get("epoch")
+        if target is None or donor is None or epoch is None:
+            continue
+        aid = int(target)
+        epoch_i = int(epoch)
+        donor_first = first_cs_epoch.get(int(donor))
+        start = first_cohort_epoch.get(aid)
+        if donor_first is not None and donor_first < epoch_i and (start is None or epoch_i >= start):
+            exposed.add((aid, epoch_i))
+    return exposed
+
+
+def _acquisition_sources(payload, first_cohort_epoch):
+    acquisitions = payload.get("acquisitions") or []
     first_cs_epoch = {}
+    for row in acquisitions:
+        if _pathway(row) != CS_PATHWAY:
+            continue
+        epoch = row.get("epoch")
+        agent_id = row.get("agent_id")
+        if epoch is None or agent_id is None:
+            continue
+        aid = int(agent_id)
+        first_cs_epoch[aid] = min(first_cs_epoch.get(aid, 10**9), int(epoch))
+    contact_exposed = _contact_exposed_epochs(payload, first_cs_epoch, first_cohort_epoch)
     secondary_acq_by_agent = defaultdict(list)
-    for row in payload.get("acquisitions") or []:
+    for row in acquisitions:
         epoch = row.get("epoch")
         agent_id = row.get("agent_id")
         if epoch is None or agent_id is None:
@@ -173,9 +201,9 @@ def _acquisition_sources(payload):
         epoch_i = int(epoch)
         aid = int(agent_id)
         pathway = _pathway(row)
-        if pathway == CS_PATHWAY:
-            first_cs_epoch[aid] = min(first_cs_epoch.get(aid, 10**9), epoch_i)
-        elif pathway and _f(row.get("delivered_src_acquired_gec")) > 0.0:
+        if not pathway or pathway == CS_PATHWAY:
+            continue
+        if _f(row.get("delivered_src_acquired_gec")) > 0.0 or (aid, epoch_i) in contact_exposed:
             secondary_acq_by_agent[aid].append((epoch_i, pathway))
     return first_cs_epoch, secondary_acq_by_agent
 
@@ -303,7 +331,7 @@ def summarise_reach(payload, voyage):
         return _bucket(epoch, cs_start, cs_end, first_q)
 
     ever_cohort, ever_takers, first_cohort_epoch, service_windows = _cohort_windows(pan_rows)
-    first_cs_epoch, secondary_acq_by_agent = _acquisition_sources(payload)
+    first_cs_epoch, secondary_acq_by_agent = _acquisition_sources(payload, first_cohort_epoch)
     pk_by_target = _pickup_index(payload)
     ct_by_target = _contact_index(payload)
     never_takers = sorted(ever_cohort - ever_takers)
