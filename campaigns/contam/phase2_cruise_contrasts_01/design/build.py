@@ -5,9 +5,11 @@ The design is deterministic and anchor-free: source pools reuse the Phase 1
 selector verbatim (zone type, volume, ``max_occupancy``, HVAC service and
 duty, adjacency degree; tie-break by zone id), the seed mapping is the
 manifest's paired-seed rule, and the seven named arms are
-``tools/contam_fleet_compare.py`` op lists. Running this script rewrites
-``design/phase2_cruise_contrasts_design.json``, ``source_pools.json``, and the
-campaign-root ``campaign.json`` from the four cruise platform layouts.
+``tools/contam_fleet_compare.py`` op lists. Running this script writes the
+``_v2`` successor artifacts (``design/phase2_cruise_contrasts_design_v2.json``,
+``source_pools_v2.json``, and ``campaign_v2.json``) from the four cruise
+platform layouts. The ``_01`` design, pools, campaign spec, caches and
+readouts are frozen as-run artifacts and are not rewritten.
 """
 from __future__ import annotations
 
@@ -23,6 +25,10 @@ DESIGN_REL = f"{CAMPAIGN_REL}/design/phase2_cruise_contrasts_design.json"
 DESIGN_PATH = ROOT / DESIGN_REL
 POOLS_PATH = CAMPAIGN_DIR / "source_pools.json"
 CAMPAIGN_JSON_PATH = CAMPAIGN_DIR / "campaign.json"
+DESIGN_V2_REL = f"{CAMPAIGN_REL}/design/phase2_cruise_contrasts_design_v2.json"
+DESIGN_V2_PATH = ROOT / DESIGN_V2_REL
+POOLS_V2_PATH = CAMPAIGN_DIR / "source_pools_v2.json"
+CAMPAIGN_V2_JSON_PATH = CAMPAIGN_DIR / "campaign_v2.json"
 
 DESIGN_ID = "contam_phase2_cruise_contrasts_01"
 DESIGN_ID_V2 = "contam_phase2_cruise_contrasts_02"
@@ -59,6 +65,7 @@ FIELD_CACHE_SCHEMA_V2 = "contam_phase2_cruise_contrasts_field_cache_v2"
 FIELD_CACHE_V2_S3_URI = (
     f"s3://{S3_BUCKET}/campaign/{DESIGN_ID_V2}/field_cache/field_cache.json"
 )
+S3_PREFIX_V2 = f"campaign/{DESIGN_ID_V2}/"
 PHASE1_FIELD_CACHE_SHA256 = (
     "b91665323192f95591f538aeb9badfefc1c6e7393aa7c4cafaef0748a496f5b5"
 )
@@ -86,6 +93,7 @@ CONTAMX_LICENSE_NOTICE = (
     "tarball is redistributable with notice."
 )
 IMAGE_TAG = "contam-phase2-cruise-contrasts-01"
+IMAGE_TAG_V2 = "contam-phase2-cruise-contrasts-02"
 
 # Manifest §2.2: fleet-compare op grammar; ``baseline`` is the anchor and the
 # only P-lane arm. Gains are r = (1 - f)(1 - eta) on the supply groups.
@@ -504,13 +512,13 @@ def field_plan() -> list[dict[str, Any]]:
 def _campaign_spec() -> dict[str, Any]:
     blocks = _trajectory_blocks()
     return {
-        "name": DESIGN_ID,
+        "name": DESIGN_ID_V2,
         "pathogen": "contam",
-        "manifest": DESIGN_REL,
+        "manifest": DESIGN_V2_REL,
         "pathogen_id": None,
-        "s3_prefix": S3_PREFIX,
+        "s3_prefix": S3_PREFIX_V2,
         "queue": "picard-campaign-queue",
-        "image_tag": IMAGE_TAG,
+        "image_tag": IMAGE_TAG_V2,
         "epochs": EPOCHS,
         "epoch_hours": EPOCH_HOURS,
         "resources": {"vcpu": "1", "memory": "2048"},
@@ -526,10 +534,10 @@ def _field_cache_prestage() -> dict[str, Any]:
         "aws_submit": False,
         "producer": (
             f"python3 {CAMPAIGN_REL}/cell.py --mode field-cache --design "
-            f"{DESIGN_REL} --out <local-dir>"
+            f"{DESIGN_V2_REL} --out <local-dir>"
         ),
         "artifact": "field_cache.json",
-        "schema": FIELD_CACHE_SCHEMA,
+        "schema": FIELD_CACHE_SCHEMA_V2,
         "field_count": len(fields),
         "fresh_solve_count": len(fields),
         "phase1_reusable_fields": PHASE1_REUSABLE_FIELDS,
@@ -538,7 +546,7 @@ def _field_cache_prestage() -> dict[str, Any]:
         "phase1_byte_comparison": "report-only reproducibility control; never a selector",
         "key_rule": "<hull>:<lane>:<arm>; every field records the ops, edits, realized per-group ach/hvac_duty/oa_fraction and the filter efficiency used at export",
         "fields": fields,
-        "s3_uri": FIELD_CACHE_S3_URI,
+        "s3_uri": FIELD_CACHE_V2_S3_URI,
         "trajectory_consumer_arg": "--field-cache-uri",
         "contamx": {
             "version": CONTAMX_VERSION,
@@ -636,7 +644,8 @@ def build_design() -> dict[str, Any]:
     matrix = _matrix(blocks)
     prestage = _field_cache_prestage()
     return {
-        "design_id": DESIGN_ID,
+        "design_id": DESIGN_ID_V2,
+        "supersedes": DESIGN_ID,
         "status": "frozen_before_first_cell",
         "manifest": MANIFEST_REL,
         "manifest_pr": MANIFEST_PR,
@@ -716,7 +725,7 @@ def build_design() -> dict[str, Any]:
             "grid": _seed_grid(pool_lengths),
         },
         "execution": {
-            "submit_path": "scripts/campaign submit contam/phase2_cruise_contrasts_01 --block <block>",
+            "submit_path": "scripts/campaign submit contam/phase2_cruise_contrasts_02 --block <block>",
             "block_name_rule": "<hull>_<lane>_<arm>",
             "field_cache_prestage": prestage,
             "trajectory_blocks": len(blocks),
@@ -730,7 +739,7 @@ def build_design() -> dict[str, Any]:
             "resources": {"vcpu": 1, "memory_mib": 2048},
             "aws_profile": "picard",
             "queue": "picard-campaign-queue",
-            "image_tag": IMAGE_TAG,
+            "image_tag": IMAGE_TAG_V2,
             "image_digest_pinned": False,
             "pin_image_digest_before_submit": True,
         },
@@ -754,7 +763,7 @@ def build_design() -> dict[str, Any]:
         "report_only_diagnostics": REPORT_ONLY,
         "return": {
             "bucket": S3_BUCKET,
-            "prefix": S3_PREFIX,
+            "prefix": S3_PREFIX_V2,
             "slim_artifacts": True,
             "schema_confirmation": "Phase 4",
         },
@@ -802,12 +811,12 @@ def main(argv: list[str] | None = None) -> int:
             f"fields={design['execution']['field_cache_prestage']['field_count']}"
         )
         return 0
-    _write_json(DESIGN_PATH, design)
-    _write_json(POOLS_PATH, {"design_id": design["design_id"], "source_pools": pools})
-    _write_json(CAMPAIGN_JSON_PATH, spec)
-    print(f"WROTE {DESIGN_PATH}")
-    print(f"WROTE {POOLS_PATH}")
-    print(f"WROTE {CAMPAIGN_JSON_PATH}")
+    _write_json(DESIGN_V2_PATH, design)
+    _write_json(POOLS_V2_PATH, {"design_id": design["design_id"], "source_pools": pools})
+    _write_json(CAMPAIGN_V2_JSON_PATH, spec)
+    print(f"WROTE {DESIGN_V2_PATH}")
+    print(f"WROTE {POOLS_V2_PATH}")
+    print(f"WROTE {CAMPAIGN_V2_JSON_PATH}")
     return 0
 
 
