@@ -43,6 +43,7 @@ to them as ledger `<ID>`.
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
 - `CONTAM-PATHMAP-FILTERED-01.md` — PATHMAP-FILTERED stage 2: path_map `filtered` carry-through, schema, and exporter endpoint fail-loud.
+- `NORO-HAND-CASCADE-01-MEAL-SECONDARY.md` — posted-cell same-span secondary-transmission probe for provisioned-lot pans.
 
 ## For drafting and analysis
 
