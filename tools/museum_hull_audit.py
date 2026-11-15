@@ -179,7 +179,10 @@ def audit_q1(platform_dir: str, spatial: dict[str, Any],
             f"{link['from']}->{link['to']}"
             for link in airflow.get("cross_zone_links", [])
             if not _resolve_link_rooms(link["from"], airflow, set(zones))
-            or not _resolve_link_rooms(link["to"], airflow, set(zones))
+            or (
+                link["to"] != "ambient"
+                and not _resolve_link_rooms(link["to"], airflow, set(zones))
+            )
         ),
         # Links whose endpoints are bare room ids (not HVAC group ids).
         # Pre-CONTAM-XZONE-01 the native engine silently dropped these

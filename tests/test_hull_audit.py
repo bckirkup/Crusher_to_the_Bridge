@@ -127,6 +127,34 @@ def test_referential_integrity(tmp_path):
     assert any("berth_zone" in f.message for f in ghost)
 
 
+def test_ambient_sink_endpoint_is_resolved(tmp_path):
+    zones = [_zone("Ward", "Medical"), _zone("Berth", "Room")]
+    airflow = {
+        "hvac_zones": [
+            {"id": "HVAC_Ward", "rooms": ["Ward"], "ach": 6.0},
+            {"id": "HVAC_Berth", "rooms": ["Berth"], "ach": 6.0},
+        ],
+        "cross_zone_links": [
+            {"from": "HVAC_Ward", "to": "ambient", "flow_rate_m3h": 100.0},
+        ],
+        "adjacency": [],
+    }
+    root = _write_platform(tmp_path, "sink_ship", zones, airflow)
+    b = hull_audit.audit_platform(root)
+    endpoint_findings = [
+        f for f in b.findings
+        if f.check == "topology" and "cross_zone_links endpoint" in f.message
+    ]
+    assert endpoint_findings == []
+
+    airflow["cross_zone_links"] = [
+        {"from": "ambient", "to": "HVAC_Berth", "flow_rate_m3h": 100.0},
+    ]
+    root = _write_platform(tmp_path, "bad_sink_ship", zones, airflow)
+    b = hull_audit.audit_platform(root)
+    assert ("topology", "flag", "ambient") in _findings(b)
+
+
 def test_mode_group_mismatch(tmp_path):
     b = _mini(tmp_path)
     assert any(s == "Mess" for _, _, s in _findings(b))

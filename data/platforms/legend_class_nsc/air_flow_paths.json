@@ -273,11 +273,11 @@
     },
     {
       "from": "HVAC_Medical",
-      "to": "HVAC_Enlisted_Fwd",
+      "to": "ambient",
       "flow_rate_m3h": 100,
       "path": "medical_exhaust",
       "is_hvac_ducted": true,
-      "description": "Medical exhaust is a once-through independent exhaust stream with no recirculation-filter credit; sickbay remains negative-pressure relative to adjacent spaces (CDC VSP 2025 §33.2.1 naval analogy, Grade C). Magnitude unchanged.",
+      "description": "Medical exhaust is a once-through independent exhaust stream to the ambient sink (material leaves the ship/domain) with no recirculation-filter credit; sickbay remains negative-pressure relative to adjacent spaces (CDC VSP 2025 §33.2.1 naval analogy, Grade C). Magnitude unchanged.",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
       "filtered": false

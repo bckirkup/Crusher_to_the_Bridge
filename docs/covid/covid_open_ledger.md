@@ -65,6 +65,18 @@ frozen E-lane caches are unchanged. Figures not resting on that channel
 stand at their own `Measured at` SHAs; baseline `d038bc3c`, authoring
 commit `e56172a8`.
 
+**`CONTAM-EXHAUST-SINK-03` (ledger entry): airborne/downstream-map dose
+figures measured before this change on the two hulls carrying the
+re-pointed exhaust links are historical on the exhaust-sink channel.** The
+`legend_class_nsc` `medical_exhaust` link and the `san_antonio_class_lpd`
+`medical_exhaust` / `galley_exhaust_to_mess` links now declare
+`to: "ambient"` as once-through prescribed-flow sinks with unchanged
+magnitudes; native exact material-times moved on affected endpoints and
+former destination rooms (ledger `docs/ledger/CONTAM-EXHAUST-SINK-03.md`,
+measured at `a0dad9ec`); frozen E-lane caches are unchanged. Figures not
+resting on that channel stand at their own `Measured at` SHAs; baseline
+`0b58f78d`, authoring commit `a0dad9ec`.
+
 **PLATFORM-FIDELITY-01's DP hull-fidelity contrast is SUPERSEDED for
 hull-fidelity inference (2026-11-08).** The frozen PF-01 DP protocols file
 (`data/config/protocols_covid_pf_dp.json`) declared 11 `exempt_work_zones`,

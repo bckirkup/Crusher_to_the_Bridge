@@ -20,10 +20,10 @@ from engines.py_contam_bridge import ContamTransportEngine  # noqa: E402
 from tools.contam_prj_bridge import export_prj_with_path_map  # noqa: E402
 
 _EXPECTED = {
-    "legend_class_nsc": {"medical_exhaust": 3},
+    "legend_class_nsc": {"medical_exhaust": 1},
     "san_antonio_class_lpd": {
-        "galley_exhaust_to_mess": 3,
-        "medical_exhaust": 3,
+        "galley_exhaust_to_mess": 1,
+        "medical_exhaust": 1,
     },
 }
 _SCHEMA_PATH = REPO_ROOT / "schemas" / "contam_path_map.schema.json"
@@ -129,7 +129,7 @@ def test_path_map_filtered_absent_resolves_to_ducted_alias() -> None:
         for entry in path_map
     ]
     targets = [
-        entry for entry in legacy_entries if entry["kind"] == "medical_exhaust"
+        entry for entry in legacy_entries if entry["kind"] == "galley_supply"
     ]
     assert targets
     lane_paths = _lane_paths(spatial, legacy_entries, targets)
