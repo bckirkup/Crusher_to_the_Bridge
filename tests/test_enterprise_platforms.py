@@ -19,6 +19,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+from engines.py_contam_bridge import AMBIENT_ZONE_ID  # noqa: E402
+
 PLATFORMS = ROOT / "data" / "platforms"
 TEMPLATES = ROOT / "data" / "templates"
 ORIFICE_CATALOG = ROOT / "data" / "contam_hobbyist" / "orifice_catalog.json"
@@ -148,7 +150,7 @@ def test_cross_zone_links_reference_valid_endpoints(platform_id):
     valid = zone_ids | hvac_ids
     for link in airflow.get("cross_zone_links", []):
         assert link["from"] in valid, link
-        assert link["to"] in valid, link
+        assert link["to"] in valid or link["to"] == AMBIENT_ZONE_ID, link
 
 
 def test_orifice_catalog_has_enterprise_types():
