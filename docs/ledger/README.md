@@ -48,6 +48,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - `CONTAM-BUNDLE-RESYNC-01.md` — EXHAUST-SINK stage 5: re-sync the stale committed Contam bundles for `mega_cruise_5000` and the two Enterprise hulls from committed hull JSON.
 - `CONTAM-EXHAUST-SINK-04.md` — EXHAUST-SINK stage 6 row 1: re-point the two `Dining_to_Galley_Transfer` links to ambient sinks with before/after native exact-check measurements and the `mega_cruise_5000` bundle re-sync.
 - `CONTAM-EXHAUST-SINK-05.md` — EXHAUST-SINK stage 6 row 2: author galley hood once-through ambient sinks paired to the existing galley make-up links, with before/after native exact-check measurements and bundle/Phase-2 re-syncs.
+- `FOOD-SUPPLY-01-SMOKE.md` — bounded local smoke of the default-off provisioning receipt/lot arms on one mega p06 cell.
 - `NORO-HAND-CASCADE-01-MEAL-SECONDARY.md` — posted-cell same-span secondary-transmission probe for provisioned-lot pans.
 - `NORO-HAND-CASCADE-01-PAN-COHORT-REACH.md` — posted-cell non-taker pan-cohort reach probe for secondary hand transfers.
 
