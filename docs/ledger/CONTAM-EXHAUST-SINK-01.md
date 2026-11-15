@@ -112,6 +112,12 @@ over the committed 63 / 29 and 127 / 53.
 - `CONTAM-FORCED-EXHAUST-DOORS-01` already records the `mega_cruise_5000`
   bundle.
 
+## Priority (owner, 2026-11-14)
+
+The two Enterprise hulls are not load-bearing and are kept up to date on a
+best-effort basis. The Enterprise findings above are recorded for
+completeness and gate nothing.
+
 ## Status and blast radius
 
 Status stays `open` until the proposal's stages land or are declined. No

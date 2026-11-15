@@ -42,6 +42,13 @@ Findings beyond the three claims:
   (measured, §5.1): it rewrites both Enterprise hulls as the legacy 12- and
   16-zone layouts.
 
+**Priority note (owner, 2026-11-14).** The two Enterprise hulls are fiction
+bundles that are not load-bearing and are kept up to date on a best-effort
+basis. Every Enterprise finding below (stale bundles, recipe drift, the
+legacy builder) is recorded for completeness and does not gate any stage.
+The load-bearing findings are the three Legend / San Antonio links, the four
+cruise recipes and `mega_cruise_5000`.
+
 Counts reconcile (measured): 82 platforms, 1,011 `cross_zone_links`, 77
 `contam/path_map.json`, 5 hulls without a contam bundle
 (`expedition_cruise_300`, `fletcher_class_destroyer`, `legend_class_nsc`,
@@ -411,6 +418,9 @@ true. It does not record that the two Enterprise bundles were left carrying
 the pre-flip sense. That entry is not edited here; the forward reference
 lives in `CONTAM-EXHAUST-SINK-01`.
 
+The two Enterprise rows are best-effort (priority note, §1); only the
+`mega_cruise_5000` row touches a study hull.
+
 A path_map cannot be regenerated alone. Its endpoints define the sign
 convention of the solved flow in the PRJ beside it, so the pair must move
 together. *Inferred*: the committed pairs are internally consistent, and
@@ -552,7 +562,7 @@ Each stage is its own PR with its own ledger entry, `Pathogens: all`.
 | 2 | path_map schema, `filtered` carry-through (P-min), exporter raises on unresolved endpoints | `CONTAM-PATHMAP-FILTERED-01` | — | Lane only, on hulls with a divergent link (two, neither committed nor frozen) |
 | 3 | Sink endpoint: schema + sanity check, native, exporter + lane (S1, N1, X1) | `CONTAM-EXHAUST-SINK-02` | 2 | No — inert until authored |
 | 4 | Re-point the three links (D1), with before / after rows | `CONTAM-EXHAUST-SINK-03` | 3 | Yes — two hulls; open-ledger notes land here |
-| 5 | Re-sync the three stale bundles (PRJ + path_map together) | `CONTAM-BUNDLE-RESYNC-01` | 2 | P-lane fields for three hulls; new cache version |
+| 5 | Re-sync the stale `mega_cruise_5000` bundle (PRJ + path_map together); the two Enterprise bundles ride along best-effort | `CONTAM-BUNDLE-RESYNC-01` | 2 | P-lane field for the re-synced hulls; new cache version |
 | 6 | Optional authoring rows: `Dining_to_Galley_Transfer` ×2, galley hood sinks | per row | 3 | Yes — each needs its own standards basis |
 
 Stage 1 goes first because it is the only one that guards work already
