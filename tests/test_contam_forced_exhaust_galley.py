@@ -122,6 +122,45 @@ EXPECTED: dict[str, dict[str, Any]] = {
 }
 
 
+HOOD_SINKS: dict[str, dict[str, Any]] = {
+    "classic_cruise_1900": {
+        "from": "MainGalley",
+        "paired_path": "Dining_Galley_Exhaust",
+        "flow_rate_m3h": 12000.0,
+    },
+    "diamond_princess": {
+        "from": "MainGalley",
+        "paired_path": "Dining_Galley_Exhaust",
+        "flow_rate_m3h": 18000.0,
+    },
+    "expedition_cruise_450": {
+        "from": "MainGalley",
+        "paired_path": "Dining_Galley_Exhaust",
+        "flow_rate_m3h": 8000.0,
+    },
+    "greg_mortimer": {
+        "from": "MainGalley",
+        "paired_path": "Dining_Galley_Exhaust",
+        "flow_rate_m3h": 5000.0,
+    },
+    "spirit_cruise_3000": {
+        "from": "MainGalley",
+        "paired_path": "Dining_Galley_Exhaust",
+        "flow_rate_m3h": 15000.0,
+    },
+    "enterprise_constitution_tos": {
+        "from": "Galley",
+        "paired_path": "Galley_Service_Exhaust",
+        "flow_rate_m3h": 5000.0,
+    },
+    "enterprise_galaxy_tng": {
+        "from": "Galley",
+        "paired_path": "Galley_Service_Exhaust",
+        "flow_rate_m3h": 8000.0,
+    },
+}
+
+
 def _link(platform: str, path: str) -> dict[str, Any]:
     airflow = json.loads(
         (PLATFORM_ROOT / platform / "air_flow_paths.json").read_text(
@@ -145,4 +184,29 @@ def test_galley_rows_1_3_links_keep_declared_sense_and_decisions() -> None:
         assert float(link["flow_rate_m3h"]) > 0.0
         description = str(link.get("description", ""))
         for token in expected["description_tokens"]:
+            assert token in description, f"{platform}: missing {token!r}"
+
+
+def test_galley_hood_sinks_are_once_through_ambient_companions() -> None:
+    assert len(HOOD_SINKS) == 7
+    tokens = [
+        "once-through prescribed-flow sink",
+        "material leaves the ship/domain",
+        "CDC VSP 2025",
+        "ISO 9943:2009 §4.1/§5.2/A.2.1/A.2.3",
+        "Grade C",
+        "no invented margin",
+    ]
+    for platform, expected in HOOD_SINKS.items():
+        link = _link(platform, "Galley_Hood_Exhaust")
+        assert link["from"] == expected["from"]
+        assert link["to"] == "ambient"
+        assert link["direction"] == "oneway"
+        assert link["mechanism"] == "prescribed_flow"
+        assert link["filtered"] is False
+        assert float(link["flow_rate_m3h"]) == expected["flow_rate_m3h"]
+        makeup = _link(platform, expected["paired_path"])
+        assert float(makeup["flow_rate_m3h"]) == expected["flow_rate_m3h"]
+        description = str(link.get("description", ""))
+        for token in tokens:
             assert token in description, f"{platform}: missing {token!r}"

@@ -20,7 +20,14 @@ from engines.py_contam_bridge import ContamTransportEngine  # noqa: E402
 from tools.contam_prj_bridge import export_prj_with_path_map  # noqa: E402
 
 _EXPECTED = {
+    "classic_cruise_1900": {"Galley_Hood_Exhaust": 1},
+    "diamond_princess": {"Galley_Hood_Exhaust": 1},
+    "enterprise_constitution_tos": {"Galley_Hood_Exhaust": 1},
+    "enterprise_galaxy_tng": {"Galley_Hood_Exhaust": 1},
+    "expedition_cruise_450": {"Galley_Hood_Exhaust": 1},
+    "greg_mortimer": {"Galley_Hood_Exhaust": 1},
     "legend_class_nsc": {"medical_exhaust": 1},
+    "spirit_cruise_3000": {"Galley_Hood_Exhaust": 1},
     "mega_cruise_5000": {"Dining_to_Galley_Transfer": 10},
     "messy_cruise_500": {"Dining_to_Galley_Transfer": 10},
     "san_antonio_class_lpd": {

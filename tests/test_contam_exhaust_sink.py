@@ -374,6 +374,18 @@ class TestCommittedPlatformAmbientSinks:
             "HVAC_Galley",
             400.0,
         ),
+        ("classic_cruise_1900", "Galley_Hood_Exhaust", "MainGalley", 12000.0),
+        ("diamond_princess", "Galley_Hood_Exhaust", "MainGalley", 18000.0),
+        ("expedition_cruise_450", "Galley_Hood_Exhaust", "MainGalley", 8000.0),
+        ("greg_mortimer", "Galley_Hood_Exhaust", "MainGalley", 5000.0),
+        ("spirit_cruise_3000", "Galley_Hood_Exhaust", "MainGalley", 15000.0),
+        (
+            "enterprise_constitution_tos",
+            "Galley_Hood_Exhaust",
+            "Galley",
+            5000.0,
+        ),
+        ("enterprise_galaxy_tng", "Galley_Hood_Exhaust", "Galley", 8000.0),
         (
             "mega_cruise_5000",
             "Dining_to_Galley_Transfer",

@@ -45,6 +45,13 @@ POST_S1_DUCTED_LINKS = {
     ("san_antonio_class_lpd", "medical_exhaust"),
 }
 POST_S1_EXHAUST_SINK_LINKS = {
+    ("classic_cruise_1900", "Galley_Hood_Exhaust"),
+    ("diamond_princess", "Galley_Hood_Exhaust"),
+    ("enterprise_constitution_tos", "Galley_Hood_Exhaust"),
+    ("enterprise_galaxy_tng", "Galley_Hood_Exhaust"),
+    ("expedition_cruise_450", "Galley_Hood_Exhaust"),
+    ("greg_mortimer", "Galley_Hood_Exhaust"),
+    ("spirit_cruise_3000", "Galley_Hood_Exhaust"),
     ("mega_cruise_5000", "Dining_to_Galley_Transfer"),
     ("messy_cruise_500", "Dining_to_Galley_Transfer"),
 }
