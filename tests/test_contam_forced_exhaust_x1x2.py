@@ -26,13 +26,14 @@ def _load():
     return base, spatial, airflow
 
 
-def _export(links, *, hobbyist=False):
+def _export(links, *, hobbyist=False, ahs_terminal_mode=None):
     base, spatial, airflow = _load()
     air = json.loads(json.dumps(airflow))
     air["cross_zone_links"] = links
     overrides = load_hobbyist_overrides(str(base)) if hobbyist else None
     return export_prj_with_path_map(
         spatial, air, hobbyist=hobbyist, overrides=overrides,
+        ahs_terminal_mode=ahs_terminal_mode,
     )
 
 
@@ -52,6 +53,17 @@ def _symbols_by_path(text, path_map, kinds):
         toks = rows[str(entry["path_nr"])]
         out[entry["kind"]] = elem_symbol[int(toks[4])]
     return out
+
+
+def _bdq_params(text):
+    """Return ``(lam, Cp, xp, Cn, xn)`` tuples for emitted plr_bdq elements."""
+    return [
+        tuple(float(tok) for tok in match.group(2).split())
+        for match in re.finditer(
+            r"(?ms)^\s*(\d+)\s+24\s+plr_bdq\s+\S+\s*\n\s*\n\s*([^\n]+)",
+            text,
+        )
+    ]
 
 
 def _oneway_link(flow):
@@ -100,27 +112,54 @@ def test_element_type_is_function_of_direction_mechanism_filtered() -> None:
     assert int(row[5]) > 0  # filtered selects the PRJ filter element
 
 
-def test_oneway_flow_scaling_is_graded_and_orientation_stable() -> None:
-    low_text, low_map = _export([_oneway_link(60.0)])
-    high_text, high_map = _export([_oneway_link(120.0)])
-
-    def coefficient(text):
-        match = re.search(
-            r"(?m)^\s*\d+\s+24\s+plr_bdq\s+.*\n\s*0\s+([0-9.eE+-]+)\s+0\.5",
-            text,
-        )
-        assert match is not None
-        return float(match.group(1))
-
-    assert coefficient(high_text) == pytest.approx(
-        2.0 * coefficient(low_text), rel=1e-9,
+def test_commissioned_oneway_pressure_opening_has_documented_bdq_params() -> None:
+    text, _ = _export(
+        [_oneway_link(120.0)], ahs_terminal_mode="commissioned",
     )
+    params = _bdq_params(text)
+    assert len(params) == 1
+    lam, cp, xp, cn, xn = params[0]
+    assert lam > 0.0
+    assert cp == pytest.approx(120.0 / 3600.0, rel=1e-12)
+    assert xp == pytest.approx(0.5)
+    assert cn == pytest.approx(0.0)
+    assert xn == pytest.approx(0.5)
+
+
+def test_oneway_flow_scaling_is_graded_and_orientation_stable() -> None:
+    flows = (30.0, 60.0, 120.0)
+    exports = {
+        flow: _export(
+            [_oneway_link(flow)], ahs_terminal_mode="commissioned",
+        )
+        for flow in flows
+    }
+    params = {}
+    for flow, (text, _path_map) in exports.items():
+        bdq = _bdq_params(text)
+        assert len(bdq) == 1
+        params[flow] = bdq[0]
+
+    small, mid, large = (params[flow] for flow in flows)
+    small_lam, small_cp = small[0], small[1]
+    mid_lam, mid_cp = mid[0], mid[1]
+    large_lam, large_cp = large[0], large[1]
+    assert small_lam > 0.0
+    assert small_cp < mid_cp < large_cp
+    assert mid_cp == pytest.approx(2.0 * small_cp, rel=1e-9)
+    assert large_cp == pytest.approx(2.0 * mid_cp, rel=1e-9)
+    # NIST TN 1887r1 pp. 264-265: for n=0.5 the Re=30 transition
+    # coefficient scales as C**1.5, so doubling design flow gives 2**1.5.
+    assert mid_lam == pytest.approx((2.0**1.5) * small_lam, rel=1e-9)
+    assert large_lam == pytest.approx((2.0**1.5) * mid_lam, rel=1e-9)
     low_rows = {
-        (e["from_zone"], e["to_zone"]) for e in low_map
+        (e["from_zone"], e["to_zone"])
+        for e in exports[flows[0]][1]
         if e["kind"] == "x1x2_oneway_pressure"
     }
     high_rows = {
-        (e["from_zone"], e["to_zone"]) for e in high_map
+        (e["from_zone"], e["to_zone"])
+        for e in exports[flows[-1]][1]
         if e["kind"] == "x1x2_oneway_pressure"
     }
     assert low_rows == high_rows == {("MedBay", "Mess_Hall")}

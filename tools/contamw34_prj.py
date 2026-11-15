@@ -35,6 +35,13 @@ _SENTINEL = "-999"
 _DEFAULT_CEILING_HEIGHT_M = 3.0
 _DEFAULT_ZONE_TEMP_K = 293.15
 _DEFAULT_AIR_DENSITY = 1.2041
+# NIST TN 1887r1 §8.3.3 "Laminar Flow Coefficient Calculation" (printed
+# pp. 264-265): reference air viscosity, transition Reynolds number, and the
+# 0.6 discharge coefficient used to infer an equivalent opening area.
+# Grade A for the ContamW element calculation. Origin: Tr (non-journal doc).
+_AIR_VISCOSITY_KG_PER_M_S = 1.81625e-5
+_LAMINAR_TRANSITION_REYNOLDS = 30.0
+_POWERLAW_DISCHARGE_COEFFICIENT = 0.6
 _ZERO_CONC = "0.000e+00"
 # ContamW / ContamX symbolic names (zones, AHS, levels, elements) ≤ 15 chars.
 _CONTAM_NAME_MAX = 15
@@ -137,7 +144,7 @@ def _unique_contam_name(
 def _orifice_area_m2_for_flow_m3h(
     flow_m3h: float,
     *,
-    cd: float = 0.6,
+    cd: float = _POWERLAW_DISCHARGE_COEFFICIENT,
     density: float = _DEFAULT_AIR_DENSITY,
     dp_pa: float = 1.0,
 ) -> float:
@@ -146,6 +153,35 @@ def _orifice_area_m2_for_flow_m3h(
     if q_m3s <= 0.0 or cd <= 0.0 or density <= 0.0 or dp_pa <= 0.0:
         return 1e-6
     return q_m3s / (cd * math.sqrt(2.0 * dp_pa / density))
+
+
+def _laminar_flow_coefficient_for_volume_powerlaw(
+    turbulent_m3s: float,
+    exponent: float,
+) -> float:
+    """Contam ``lam`` for ``Q = C dP**n`` per NIST TN 1887r1 pp. 264-265.
+
+    The documented calculation evaluates the transition mass flow at
+    ``Re = 30``, backs out the transition pressure from the turbulent
+    coefficient, then returns ``Ck = mu F_trans / (rho dP_trans)``.
+    """
+    coefficient = max(float(turbulent_m3s), 0.0)
+    n = float(exponent)
+    if coefficient <= 0.0 or n <= 0.0:
+        return 0.0
+    rho = _DEFAULT_AIR_DENSITY
+    area = math.sqrt(rho / 2.0) * (
+        coefficient / _POWERLAW_DISCHARGE_COEFFICIENT
+    )
+    diameter = math.sqrt(area)
+    f_trans = (
+        _AIR_VISCOSITY_KG_PER_M_S
+        * _LAMINAR_TRANSITION_REYNOLDS
+        * area
+        / diameter
+    )
+    dp_trans = (f_trans / (coefficient * rho)) ** (1.0 / n)
+    return _AIR_VISCOSITY_KG_PER_M_S * f_trans / (rho * dp_trans)
 
 
 def _flow_m3h_to_fahs_kg_s(flow_m3h: float) -> float:
@@ -575,6 +611,11 @@ class _NetworkBuilder:
         key = round(flow_m3s, 12)
         if key in self.backdraft_elem_by_m3s:
             return self.backdraft_elem_by_m3s[key]
+        laminar = (
+            _laminar_flow_coefficient_for_volume_powerlaw(flow_m3s, 0.5)
+            if self.ahs_terminal_mode == "commissioned"
+            else 0.0
+        )
         nr = len(self.elements) + 1
         el_name = _unique_contam_name(f"XZBDQ_{nr}", self.used_contam_names)
         self.elements.append({
@@ -582,7 +623,7 @@ class _NetworkBuilder:
             "type": _ELEM_BACKDRAFT_BDQ,
             "symbol": "plr_bdq",
             "name": el_name,
-            "params": f"0 {flow_m3s:.12g} 0.5 0 0.5",
+            "params": f"{laminar:.12g} {flow_m3s:.12g} 0.5 0 0.5",
             "area_m2": area,
             "flow_m3h": flow_m3h,
         })
