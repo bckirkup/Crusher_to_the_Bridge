@@ -45,6 +45,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - `CONTAM-PATHMAP-FILTERED-01.md` — PATHMAP-FILTERED stage 2: path_map `filtered` carry-through, schema, and exporter endpoint fail-loud.
 - `CONTAM-EXHAUST-SINK-02.md` — EXHAUST-SINK stage 3: explicit `ambient` sink endpoints across schema, sanity checks, native transport, exporter/path_map, and the ContamX lane; inert until stage 4.
 - `CONTAM-EXHAUST-SINK-03.md` — EXHAUST-SINK stage 4: re-point the three audited exhaust links to ambient sinks with before/after native exact-check measurements.
+- `CONTAM-BUNDLE-RESYNC-01.md` — EXHAUST-SINK stage 5: re-sync the stale committed Contam bundles for `mega_cruise_5000` and the two Enterprise hulls from committed hull JSON.
 - `NORO-HAND-CASCADE-01-MEAL-SECONDARY.md` — posted-cell same-span secondary-transmission probe for provisioned-lot pans.
 - `NORO-HAND-CASCADE-01-PAN-COHORT-REACH.md` — posted-cell non-taker pan-cohort reach probe for secondary hand transfers.
 
