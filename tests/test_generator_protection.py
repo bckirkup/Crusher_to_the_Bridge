@@ -55,9 +55,10 @@ def test_cruise_writer_refuses_existing_platform(
     out_dir.mkdir(parents=True)
     sentinel = out_dir / "air_flow_paths.json"
     sentinel.write_text('{"sentinel": true}\n', encoding="utf-8")
+    recipe = _recipe("guarded_hull")
 
     with pytest.raises(FileExistsError, match="Refusing to overwrite"):
-        cruise.write_platform(_recipe("guarded_hull"))
+        cruise.write_platform(recipe)
 
     assert sentinel.read_text(encoding="utf-8") == '{"sentinel": true}\n'
     assert not (out_dir / "spatial_layout.json").exists()
