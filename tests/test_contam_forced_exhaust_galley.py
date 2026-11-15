@@ -109,11 +109,12 @@ EXPECTED: dict[str, dict[str, Any]] = {
     "san_antonio_class_lpd": {
         "path": "galley_exhaust_to_mess",
         "from": "HVAC_Galley",
-        "to": "HVAC_Crew_Habitable",
+        "to": "ambient",
         "direction": "oneway",
         "mechanism": "prescribed_flow",
         "filtered": False,
         "description_tokens": [
+            "once-through sink",
             "naval analogy",
             "no filtration/recirculation credit",
         ],

@@ -41,6 +41,7 @@ Fresh `tools.contam_prj_bridge.export_platform_to_prj` exports for both hulls in
 
 - `tests/test_contam_exhaust_sink.py` now pins the committed-platform contract as exactly the three authored ambient sinks (platform, path, source HVAC group, and unchanged flow), replacing the stage-3 zero-ambient inertness check.
 - `tests/test_contam_pathmap_filtered.py` expected counts move from three destination-room expansions per re-pointed link to one source-room sink expansion per link; the absent-`filtered` ducted-alias check now targets a non-sink `galley_supply` entry because sink entries intentionally carry `filtered: false`.
+- `tests/test_contam_forced_exhaust_galley.py` updates the San Antonio `galley_exhaust_to_mess` expected endpoint to `ambient` and pins the once-through-sink description token; the other eight galley row contracts are unchanged.
 - `schemas/air_flow_paths.schema.json` validation passed for both touched platform files; targeted CONTAM/path-map tests pass (39 passed).
 
 ## Status and blast radius
