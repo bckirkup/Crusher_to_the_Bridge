@@ -10,6 +10,12 @@
 > frozen CONTAM transport study. **Amended after merge:** Edison's figures
 > reproduce at the conditions his bundle declares; the earlier "does not
 > reproduce" verdicts compared different conditions (§3, reconciliation note).
+> **Status correction (2026-11-15, tree-checked at `800a1958`):** most of §5
+> has since landed — D1 (#1213), S1 (#1216), X1/X2 (#1217) and data rows 1–5
+> (#1219, #1220, #1221); see ledgers `CONTAM-FORCED-EXHAUST-S1-01`,
+> `-X1X2-01`, `-GALLEY-01`, `-DOORS-01`, `-DUCTED-01`. `direction` is still
+> optional in the schema. The body below is unchanged and describes the tree
+> at `94daa3bf`. Follow-up audit: `exhaust_sink_audit_and_fix_plan.md`.
 
 **Evidence vocabulary used throughout.** *Measured* = computed this session
 from the tree at `94daa3bf` by the committed script. *Inferred* = follows from
