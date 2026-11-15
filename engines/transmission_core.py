@@ -13516,9 +13516,9 @@ class TransmissionCore:
 
     def _cs_receipt_line_specs(
         self,
-        pid: str,
         rates: dict[str, float],
     ) -> tuple[dict[str, float], float]:
+        """Resolve per-item-line receipt probabilities for one pathogen."""
         scale = self._cs_receipt_draw_spec(self._cs_ps_prevalence_scale)
         specs: dict[str, float] = {}
         if self._cs_ps_q_by_item_line is not None:
@@ -13538,7 +13538,7 @@ class TransmissionCore:
                 )
         else:
             q = float(rates.get("q_source", 0.0)) * scale
-            specs = {item: q for item in COMMON_SOURCE_LOT_ITEM_LINES}
+            specs = dict.fromkeys(COMMON_SOURCE_LOT_ITEM_LINES, q)
         return specs, scale
 
     def _cs_plan_receipt_line(
@@ -13621,6 +13621,116 @@ class TransmissionCore:
                 pending.append((row, receipt))
         return rows, pending
 
+    def _cs_count_receipt_rows(
+        self,
+        rows: list[dict[str, Any]],
+        item: str,
+        by_item: dict[str, int],
+        by_prep: dict[str, int],
+    ) -> None:
+        for row in rows:
+            if row["contamination"] == "none":
+                continue
+            by_item[item] = by_item.get(item, 0) + 1
+            prep = row["preparation_class"]
+            by_prep[prep] = by_prep.get(prep, 0) + 1
+
+    def _cs_plan_receipt_pathogen(
+        self,
+        pid: str,
+        rates: dict[str, float],
+        zones: list[str],
+    ) -> dict[str, Any]:
+        specs, scale = self._cs_receipt_line_specs(rates)
+        rows: list[dict[str, Any]] = []
+        pending: list[tuple[dict[str, Any], dict[str, Any]]] = []
+        by_item: dict[str, int] = {}
+        by_prep: dict[str, int] = {}
+        for item in COMMON_SOURCE_LOT_ITEM_LINES:
+            line_rows, line_pending = self._cs_plan_receipt_line(
+                pid, item, specs.get(item, 0.0), self._cs_ps_lot_layer_mode,
+                zones, scale,
+            )
+            rows.extend(line_rows)
+            pending.extend(line_pending)
+            self._cs_count_receipt_rows(line_rows, item, by_item, by_prep)
+        return {
+            "pid": pid,
+            "rates": rates,
+            "specs": specs,
+            "scale": scale,
+            "rows": rows,
+            "pending": pending,
+            "by_item": by_item,
+            "by_prep": by_prep,
+            "n_lots": 0,
+        }
+
+    def _cs_bind_receipt_lot(
+        self,
+        row: dict[str, Any],
+        obj: dict[str, Any],
+    ) -> None:
+        obj["lot_id"] = obj["object_id"]
+        row["lot_id"] = obj["object_id"]
+        row["quantity_servings"] = obj.get("quantity_servings")
+        row["quantity_g"] = obj.get("quantity_g")
+
+    def _cs_realize_receipt_plan(
+        self,
+        plan: dict[str, Any],
+        cells: list[tuple[str, str, int]],
+        zones: list[str],
+    ) -> None:
+        for row, receipt in plan["pending"]:
+            obj = self._cs_realize_lot_object(
+                plan["pid"], cells, zones, receipt=receipt,
+            )
+            if obj is None:
+                continue
+            self._cs_bind_receipt_lot(row, obj)
+            plan["n_lots"] += 1
+
+    def _cs_receipt_source_witness(
+        self,
+        plan: dict[str, Any],
+        zones: list[str],
+        bound: list[dict[str, Any]],
+        mode: str,
+    ) -> dict[str, Any]:
+        specs = plan["specs"]
+        q_equiv = (
+            sum(specs.values()) / len(COMMON_SOURCE_LOT_ITEM_LINES)
+            if specs else 0.0
+        )
+        return {
+            "source_id": self._cs_ps_source_id,
+            "q_source_drawn": plan["rates"].get("q_source"),
+            "q_source_equivalent": q_equiv,
+            "lot_layer_mode": mode,
+            "preparation_survival_mode": self._cs_ps_preparation_survival_mode,
+            "prevalence_scale": plan["scale"],
+            "receipts_per_item_line": (
+                self._cs_ps_receipts_per_item_line
+                if mode == "declared_receipts" else 1
+            ),
+            "n_stations": len(zones) * len(COMMON_SOURCE_LOT_ITEM_LINES),
+            "n_receipts": len(plan["rows"]),
+            "n_lots": plan["n_lots"],
+            "n_lots_placed": plan["n_lots"],
+            "n_contaminated": sum(plan["by_item"].values()),
+            "contaminated_by_item_line": plan["by_item"],
+            "contaminated_by_preparation_class": plan["by_prep"],
+            "station_zone_pin": None,
+            "station_zone_pin_weights": None,
+            "source_venue_arm": self._cs_ps_venue_arm,
+            "actual_venues_used": sorted({
+                venue
+                for o in bound
+                for venue in (o.get("venues_served") or (o["zone"],))
+            }),
+        }
+
     def _cs_plan_receipt_objects(
         self,
         zones: list[str],
@@ -13628,49 +13738,13 @@ class TransmissionCore:
     ) -> None:
         """Mint FOOD-SUPPLY-01 receipt/lot objects once the roster exists."""
         mode = self._cs_ps_lot_layer_mode
-        planned: list[dict[str, Any]] = []
-        for pid, rates in self._cs_rates.items():
-            specs, scale = self._cs_receipt_line_specs(pid, rates)
-            rows: list[dict[str, Any]] = []
-            pending: list[tuple[dict[str, Any], dict[str, Any]]] = []
-            by_item: dict[str, int] = {}
-            by_prep: dict[str, int] = {}
-            for item in COMMON_SOURCE_LOT_ITEM_LINES:
-                line_rows, line_pending = self._cs_plan_receipt_line(
-                    pid, item, specs.get(item, 0.0), mode,
-                    zones, scale,
-                )
-                rows.extend(line_rows)
-                pending.extend(line_pending)
-                for row in line_rows:
-                    if row["contamination"] != "none":
-                        by_item[item] = by_item.get(item, 0) + 1
-                        prep = row["preparation_class"]
-                        by_prep[prep] = by_prep.get(prep, 0) + 1
-            planned.append({
-                "pid": pid,
-                "rates": rates,
-                "specs": specs,
-                "scale": scale,
-                "rows": rows,
-                "pending": pending,
-                "by_item": by_item,
-                "by_prep": by_prep,
-                "n_lots": 0,
-            })
+        planned = [
+            self._cs_plan_receipt_pathogen(pid, rates, zones)
+            for pid, rates in self._cs_rates.items()
+        ]
         for plan in planned:
             pid = plan["pid"]
-            for row, receipt in plan["pending"]:
-                obj = self._cs_realize_lot_object(
-                    pid, cells, zones, receipt=receipt,
-                )
-                if obj is None:
-                    continue
-                obj["lot_id"] = obj["object_id"]
-                row["lot_id"] = obj["object_id"]
-                row["quantity_servings"] = obj.get("quantity_servings")
-                row["quantity_g"] = obj.get("quantity_g")
-                plan["n_lots"] += 1
+            self._cs_realize_receipt_plan(plan, cells, zones)
             self._cs_receipt_log.extend(plan["rows"])
             bound = self._cs_objects.get(pid, [])
             self._cs_contaminated_stations[pid] = {
@@ -13678,42 +13752,9 @@ class TransmissionCore:
                 for o in bound
                 for venue in (o.get("venues_served") or (o["zone"],))
             }
-            specs = plan["specs"]
-            q_equiv = (
-                sum(specs.values()) / len(COMMON_SOURCE_LOT_ITEM_LINES)
-                if specs else 0.0
+            self._cs_provisioned_source[pid] = self._cs_receipt_source_witness(
+                plan, zones, bound, mode,
             )
-            self._cs_provisioned_source[pid] = {
-                "source_id": self._cs_ps_source_id,
-                "q_source_drawn": plan["rates"].get("q_source"),
-                "q_source_equivalent": q_equiv,
-                "lot_layer_mode": mode,
-                "preparation_survival_mode": (
-                    self._cs_ps_preparation_survival_mode
-                ),
-                "prevalence_scale": plan["scale"],
-                "receipts_per_item_line": (
-                    self._cs_ps_receipts_per_item_line
-                    if mode == "declared_receipts" else 1
-                ),
-                "n_stations": (
-                    len(zones) * len(COMMON_SOURCE_LOT_ITEM_LINES)
-                ),
-                "n_receipts": len(plan["rows"]),
-                "n_lots": plan["n_lots"],
-                "n_lots_placed": plan["n_lots"],
-                "n_contaminated": sum(plan["by_item"].values()),
-                "contaminated_by_item_line": plan["by_item"],
-                "contaminated_by_preparation_class": plan["by_prep"],
-                "station_zone_pin": None,
-                "station_zone_pin_weights": None,
-                "source_venue_arm": self._cs_ps_venue_arm,
-                "actual_venues_used": sorted({
-                    venue
-                    for o in bound
-                    for venue in (o.get("venues_served") or (o["zone"],))
-                }),
-            }
 
     def _cs_place_pinned_stations(
         self,
@@ -13763,6 +13804,97 @@ class TransmissionCore:
             for pick, (_zone, item) in zip(picks, contaminated)
         ]
 
+    def _cs_lot_zone_pool(
+        self,
+        zones: list[str],
+        station: tuple[str, str] | None,
+        receipt: dict[str, Any] | None,
+    ) -> tuple[str, list[str]]:
+        """Resolve the item line and candidate venues for one lot object."""
+        receipt_meta = receipt or {}
+        if receipt is not None:
+            return receipt_meta["item_label"], list(
+                receipt_meta.get("venues_served") or zones
+            )
+        if station is None:
+            # Fiat grammar — zone then item, each a uniform pick: the
+            # first two draws the v1 object consumed, positions preserved.
+            zone = zones[int(self._cs_rng.integers(len(zones)))]
+            item = COMMON_SOURCE_LOT_ITEM_LINES[
+                int(self._cs_rng.integers(len(COMMON_SOURCE_LOT_ITEM_LINES)))
+            ]
+            return item, [zone]
+        # Provisioned-source grammar — the census station carries
+        # (zone, item) directly; no zone/item uniforms are consumed.
+        zone, item = station
+        return item, [zone]
+
+    def _cs_lot_quantity_fields(
+        self,
+        servings: int,
+        pathogen_id: str,
+        cs_block: dict[str, Any],
+        receipt: dict[str, Any] | None,
+    ) -> tuple[int | None, float | None, float | None]:
+        if receipt is None:
+            return None, None, None
+        serving_mass_g = self._cs_draw(
+            "serving_mass_g", pathogen_id, cs_block,
+        )
+        return servings, servings * serving_mass_g, serving_mass_g
+
+    def _cs_lot_extent_fields(
+        self,
+        pathogen_id: str,
+        cs_block: dict[str, Any],
+        servings: int,
+    ) -> tuple[int | None, int | None]:
+        if self._cs_lot_extent_mode != "declared":
+            return None, None
+        # NORO-CS-EXTENT declared arm: mint the served-window count and
+        # distribute the lot's servings uniformly over it.
+        extent_windows = max(1, int(round(self._cs_draw(
+            "lot_extent_windows", pathogen_id, cs_block,
+        ))))
+        return extent_windows, servings // extent_windows
+
+    def _cs_lot_redraw_rng(self) -> np.random.Generator | None:
+        if self._cs_lot_state_redraw != "per_window":
+            return None
+        # NORO-CS-EXTENT redraw arm: the object's own stream partition;
+        # entropy-less parents fall back to the shared stream.
+        return (
+            np.random.default_rng(self._cs_seed_seq.spawn(1)[0])
+            if self._cs_seed_seq is not None
+            else self._cs_rng
+        )
+
+    def _cs_lot_mix_source_location(self) -> str:
+        if self._cs_lot_mint_model == "provisioned_source":
+            return self._cs_ps_source_id
+        return SHIP_LOCATION
+
+    def _cs_lot_provisioned_source_id(
+        self,
+        station: tuple[str, str] | None,
+        receipt: dict[str, Any] | None,
+    ) -> str | None:
+        if station is None and receipt is None:
+            return None
+        return self._cs_ps_source_id
+
+    @staticmethod
+    def _cs_lot_venues_served(
+        receipt: dict[str, Any] | None,
+    ) -> list[str] | None:
+        if receipt is None:
+            return None
+        return list(receipt.get("venues_served") or ())
+
+    @staticmethod
+    def _cs_lot_strain_id(mix: Any) -> Any:
+        return mix.contributors[0][0] if mix is not None else None
+
     def _cs_realize_lot_object(
         self,
         pathogen_id: str,
@@ -13781,24 +13913,7 @@ class TransmissionCore:
             pathogen_id, {},
         ).get("common_source_events", {})
         receipt_meta = receipt or {}
-        if receipt is not None:
-            item = receipt_meta["item_label"]
-            zone_pool = list(receipt_meta.get("venues_served") or zones)
-        elif station is None:
-            # Fiat grammar — zone then item, each a uniform pick: the
-            # first two draws the v1 object consumed, positions
-            # preserved verbatim.
-            zone = zones[int(self._cs_rng.integers(len(zones)))]
-            item = COMMON_SOURCE_LOT_ITEM_LINES[
-                int(self._cs_rng.integers(len(COMMON_SOURCE_LOT_ITEM_LINES)))
-            ]
-            zone_pool = [zone]
-        else:
-            # Provisioned-source grammar — the station bound at the
-            # census draw carries (zone, item) directly; no zone/item
-            # uniforms are consumed.
-            zone, item = station
-            zone_pool = [zone]
+        item, zone_pool = self._cs_lot_zone_pool(zones, station, receipt)
         days = int(round(self._cs_draw(
             "embarkation_lot_window_days", pathogen_id,
         )))
@@ -13816,48 +13931,18 @@ class TransmissionCore:
         servings = max(1, int(round(self._cs_draw(
             "lot_servings", pathogen_id, cs_block,
         ))))
-        quantity_servings = servings if receipt is not None else None
-        quantity_g = None
-        serving_mass_g = None
-        if receipt is not None:
-            serving_mass_g = self._cs_draw(
-                "serving_mass_g", pathogen_id, cs_block,
+        quantity_servings, quantity_g, serving_mass_g = (
+            self._cs_lot_quantity_fields(
+                servings, pathogen_id, cs_block, receipt,
             )
-            quantity_g = servings * serving_mass_g
-        extent_windows: int | None = None
-        window_serving_cap: int | None = None
-        if self._cs_lot_extent_mode == "declared":
-            # NORO-CS-EXTENT declared arm: the served-window count is
-            # minted from a declared interval and the minted servings
-            # are distributed uniformly over it — a per-window serving
-            # cap, the integer-division leftover folded into the last
-            # window's allotment. Titre and take-share mint exactly as
-            # emergent, so expected titre x servings dose is unchanged.
-            extent_windows = max(1, int(round(self._cs_draw(
-                "lot_extent_windows", pathogen_id, cs_block,
-            ))))
-            window_serving_cap = servings // extent_windows
-        redraw_rng: np.random.Generator | None = None
-        if self._cs_lot_state_redraw == "per_window":
-            # NORO-CS-EXTENT redraw arm: the object's own stream
-            # partition — per-window re-mints draw here, never on the
-            # shared stream, so ``"per_object"`` stays bit-identical at
-            # shared seeds and the re-mint cadence is the object's, not
-            # the interleaving's. With no seed sequence to spawn from
-            # (entropy-less parent rng) it falls back to the shared
-            # stream — bit-identity is already unavailable there.
-            redraw_rng = (
-                np.random.default_rng(self._cs_seed_seq.spawn(1)[0])
-                if self._cs_seed_seq is not None
-                else self._cs_rng
-            )
+        )
+        extent_windows, window_serving_cap = self._cs_lot_extent_fields(
+            pathogen_id, cs_block, servings,
+        )
+        redraw_rng = self._cs_lot_redraw_rng()
         mix = self._cs_lot_mix(
             pathogen_id,
-            source_location=(
-                self._cs_ps_source_id
-                if self._cs_lot_mint_model == "provisioned_source"
-                else SHIP_LOCATION
-            ),
+            source_location=self._cs_lot_mix_source_location(),
         )
         self._cs_object_counter += 1
         self._cs_objects.setdefault(pathogen_id, []).append({
@@ -13867,10 +13952,8 @@ class TransmissionCore:
             # PROVISIONED-SOURCE-01 object witness (contract §3): the
             # provisioning-source id the station minted under; None on
             # fiat-minted and agent objects.
-            "provisioned_source_id": (
-                self._cs_ps_source_id
-                if station is not None or receipt is not None
-                else None
+            "provisioned_source_id": self._cs_lot_provisioned_source_id(
+                station, receipt,
             ),
             "zone": zone,
             "item_label": item,
@@ -13882,10 +13965,7 @@ class TransmissionCore:
             "quantity_servings": quantity_servings,
             "quantity_g": quantity_g,
             "serving_mass_g": serving_mass_g,
-            "venues_served": (
-                list(receipt_meta.get("venues_served") or ())
-                if receipt is not None else None
-            ),
+            "venues_served": self._cs_lot_venues_served(receipt),
             "preparation_survival_mode": receipt_meta.get(
                 "preparation_survival_mode",
             ),
@@ -13908,9 +13988,7 @@ class TransmissionCore:
                 "lot_shelf_life_days", pathogen_id, cs_block,
             ))),
             "mix": mix,
-            "strain_id": (
-                mix.contributors[0][0] if mix is not None else None
-            ),
+            "strain_id": self._cs_lot_strain_id(mix),
             "extent_mode": self._cs_lot_extent_mode,
             "redraw": self._cs_lot_state_redraw,
             "extent_windows": extent_windows,

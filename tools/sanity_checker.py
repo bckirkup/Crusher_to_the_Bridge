@@ -2536,27 +2536,7 @@ def _check_source_entry_genotypes(sources, report: Report) -> None:
             )
 
 
-def _check_food_supply_receipt_fields(
-    ps: dict[str, Any], report: Report,
-) -> None:
-    """FOOD-SUPPLY-01 receipt-layer grammar; ``station_lots`` is default."""
-    layer = str(ps.get("lot_layer_mode", "station_lots")).strip().lower()
-    if layer not in {
-        "station_lots", "single_line_receipt", "declared_receipts",
-    }:
-        report.error(
-            _CONFIG_YAML, "CONFIG",
-            "provisioned_source.lot_layer_mode must be one of "
-            "['station_lots', 'single_line_receipt', 'declared_receipts']",
-        )
-    prep = str(ps.get("preparation_survival_mode", "raw_rte_only"))
-    prep = prep.strip().lower()
-    if prep != "raw_rte_only":
-        report.error(
-            _CONFIG_YAML, "CONFIG",
-            "provisioned_source.preparation_survival_mode currently "
-            "supports only 'raw_rte_only'",
-        )
+def _check_food_supply_scale(ps: dict[str, Any], report: Report) -> None:
     scale = ps.get("prevalence_scale", 1.0)
     scale_vals = (
         list(scale)
@@ -2579,39 +2559,48 @@ def _check_food_supply_receipt_fields(
             "provisioned_source.prevalence_scale must be a non-negative "
             "scalar or ordered [lo, hi] pair",
         )
-    if layer == "declared_receipts":
-        count = ps.get("receipts_per_item_line")
-        if count is None:
-            report.error(
-                _CONFIG_YAML, "CONFIG",
-                "provisioned_source.receipts_per_item_line is required "
-                "for lot_layer_mode 'declared_receipts'",
-            )
-        else:
-            count_vals = (
-                list(count)
-                if isinstance(count, (list, tuple)) and len(count) == 2
-                else [count]
-            )
-            count_bad = (
-                not all(
-                    isinstance(v, (int, float))
-                    and not isinstance(v, bool)
-                    and math.isfinite(float(v))
-                    and float(v) >= 1.0
-                    for v in count_vals
-                )
-                or (
-                    len(count_vals) == 2
-                    and float(count_vals[0]) > float(count_vals[1])
-                )
-            )
-            if count_bad:
-                report.error(
-                    _CONFIG_YAML, "CONFIG",
-                    "provisioned_source.receipts_per_item_line must be a "
-                    "positive integer scalar or ordered [lo, hi] pair",
-                )
+
+
+def _check_food_supply_receipt_count(
+    ps: dict[str, Any], report: Report,
+) -> None:
+    count = ps.get("receipts_per_item_line")
+    if count is None:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "provisioned_source.receipts_per_item_line is required "
+            "for lot_layer_mode 'declared_receipts'",
+        )
+        return
+    count_vals = (
+        list(count)
+        if isinstance(count, (list, tuple)) and len(count) == 2
+        else [count]
+    )
+    count_bad = (
+        not all(
+            isinstance(v, (int, float))
+            and not isinstance(v, bool)
+            and math.isfinite(float(v))
+            and float(v) >= 1.0
+            for v in count_vals
+        )
+        or (
+            len(count_vals) == 2
+            and float(count_vals[0]) > float(count_vals[1])
+        )
+    )
+    if count_bad:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "provisioned_source.receipts_per_item_line must be a "
+            "positive integer scalar or ordered [lo, hi] pair",
+        )
+
+
+def _check_food_supply_q_source_by_item_line(
+    ps: dict[str, Any], report: Report,
+) -> None:
     q_by_line = ps.get("q_source_by_item_line")
     if q_by_line is None:
         return
@@ -2637,7 +2626,9 @@ def _check_food_supply_receipt_fields(
                 f"{field} must be a mapping with a 'prevalence' spec",
             )
             continue
-        _check_q_source_spec(entry.get("prevalence"), f"{field}.prevalence", report)
+        _check_q_source_spec(
+            entry.get("prevalence"), f"{field}.prevalence", report,
+        )
         share = entry.get("implicated_share", 1.0)
         if (
             not isinstance(share, (int, float))
@@ -2650,6 +2641,33 @@ def _check_food_supply_receipt_fields(
                 _CONFIG_YAML, "CONFIG",
                 f"{field}.implicated_share must lie in [0, 1]",
             )
+
+
+def _check_food_supply_receipt_fields(
+    ps: dict[str, Any], report: Report,
+) -> None:
+    """FOOD-SUPPLY-01 receipt-layer grammar; ``station_lots`` is default."""
+    layer = str(ps.get("lot_layer_mode", "station_lots")).strip().lower()
+    if layer not in {
+        "station_lots", "single_line_receipt", "declared_receipts",
+    }:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "provisioned_source.lot_layer_mode must be one of "
+            "['station_lots', 'single_line_receipt', 'declared_receipts']",
+        )
+    prep = str(ps.get("preparation_survival_mode", "raw_rte_only"))
+    prep = prep.strip().lower()
+    if prep != "raw_rte_only":
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "provisioned_source.preparation_survival_mode currently "
+            "supports only 'raw_rte_only'",
+        )
+    _check_food_supply_scale(ps, report)
+    if layer == "declared_receipts":
+        _check_food_supply_receipt_count(ps, report)
+    _check_food_supply_q_source_by_item_line(ps, report)
 
 
 def _check_common_source_provisioned_arm(

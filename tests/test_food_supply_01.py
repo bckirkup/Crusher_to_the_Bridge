@@ -301,6 +301,6 @@ def test_receipt_spec_helpers_cover_intervals_and_bad_values() -> None:
         "shellfish": {"prevalence": 1.0, "implicated_share": "bad"},
     }
     core._cs_ps_prevalence_scale = 1.0
-    specs, scale = core._cs_receipt_line_specs(PATHOGEN, {"q_source": 0.0})
+    specs, scale = core._cs_receipt_line_specs({"q_source": 0.0})
     assert specs["shellfish"] == pytest.approx(0.0)
     assert scale == pytest.approx(1.0)
