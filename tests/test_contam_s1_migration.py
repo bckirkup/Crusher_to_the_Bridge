@@ -28,8 +28,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PLATFORM_ROOT = REPO_ROOT / "data" / "platforms"
 FILTER_EFFICIENCY = 0.37
 
-# Post-S1 galley authoring (CONTAM-FORCED-EXHAUST-GALLEY-01) intentionally moves
-# these links away from the alias expansion; every other link remains pinned.
+# Post-S1 forced-exhaust authoring intentionally moves these links away from
+# the alias expansion; every other link remains pinned.
 POST_S1_GALLEY_LINKS = {
     ("classic_cruise_1900", "Dining_Galley_Exhaust"),
     ("diamond_princess", "Dining_Galley_Exhaust"),
@@ -40,8 +40,13 @@ POST_S1_GALLEY_LINKS = {
     ("enterprise_galaxy_tng", "Galley_Service_Exhaust"),
     ("san_antonio_class_lpd", "galley_exhaust_to_mess"),
 }
-POST_S1_GALLEY_OPERATOR_PLATFORMS = {
-    platform for platform, _ in POST_S1_GALLEY_LINKS
+POST_S1_DUCTED_LINKS = {
+    ("legend_class_nsc", "medical_exhaust"),
+    ("san_antonio_class_lpd", "medical_exhaust"),
+}
+POST_S1_AUTHORED_LINKS = POST_S1_GALLEY_LINKS | POST_S1_DUCTED_LINKS
+POST_S1_AUTHORED_OPERATOR_PLATFORMS = {
+    platform for platform, _path in POST_S1_AUTHORED_LINKS
 }
 
 
@@ -171,7 +176,7 @@ class TestS1MigrationInvariants:
             for index, link in enumerate(
                 bundle["airflow"].get("cross_zone_links", []),
             ):
-                if (name, link.get("path")) in POST_S1_GALLEY_LINKS:
+                if (name, link.get("path")) in POST_S1_AUTHORED_LINKS:
                     skipped += 1
                     continue
                 migrated = cross_zone_link_semantics(link)
@@ -180,14 +185,14 @@ class TestS1MigrationInvariants:
                     f"{name}[{index}] {link.get('path')!r}: "
                     f"migrated={migrated} legacy={legacy}"
                 )
-        assert skipped == len(POST_S1_GALLEY_LINKS)
+        assert skipped == len(POST_S1_AUTHORED_LINKS)
 
     def test_decay_free_operator_is_migration_invariant(
         self, platforms: dict[str, dict[str, Any]],
     ) -> None:
         clock = SimClock(epoch_duration_hours=1.0, mode="hours")
         for name, bundle in platforms.items():
-            if name in POST_S1_GALLEY_OPERATOR_PLATFORMS:
+            if name in POST_S1_AUTHORED_OPERATOR_PLATFORMS:
                 continue
             spatial = bundle["spatial"]
             post = bundle["airflow"]
