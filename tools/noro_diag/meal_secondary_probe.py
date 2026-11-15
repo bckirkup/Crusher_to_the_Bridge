@@ -48,6 +48,13 @@ def _pathway(row: dict[str, Any]) -> str:
     return str(row.get("dominant_pathway") or row.get("pathway") or "").split(":", 1)[0]
 
 
+def _first_id(*values: Any) -> int:
+    for value in values:
+        if value is not None:
+            return int(value)
+    return -1
+
+
 def _first_epochs(voyage: dict[str, Any] | None) -> tuple[int | None, int | None]:
     series = (voyage or {}).get("timeseries") or []
     first_sym = next(
@@ -89,7 +96,7 @@ def _hazard_summary(
         epoch = row.get("epoch")
         epoch = int(epoch) if epoch is not None else None
         bucket = bucket_of(epoch)
-        agent_id = int(row.get("agent_id") or -1)
+        agent_id = _first_id(row.get("agent_id"))
         paths = acq_by_ep_agent.get((epoch, agent_id), []) if epoch is not None else []
         if CS_PATHWAY in paths:
             cls = "cs_conversion"
@@ -124,7 +131,7 @@ def _pickup_summary(payload: dict[str, Any], bucket_of: Any) -> tuple[dict[str, 
         bucket = bucket_of(epoch)
         kind = "acquired" if _f(row.get("source_acquired_share")) > 0.0 else "other"
         key = (bucket, kind)
-        target = int(row.get("target") or row.get("agent_id") or -1)
+        target = _first_id(row.get("target"), row.get("agent_id"))
         pk[key] += 1
         pk_dose[key] += _f(row.get("dose"))
         pk_delivered[key] += _f(row.get("delivered"))
@@ -152,13 +159,17 @@ def _contact_summary(payload: dict[str, Any], first_cs_epoch: dict[int, int], bu
     ct_dose: Counter = Counter()
     ct_targets: dict[str, set[int]] = defaultdict(set)
     ct_donor_cs: Counter = Counter()
+    ct_dose_seen: set[tuple[int, int]] = set()
     for row in payload.get("hand_contacts") or []:
         epoch = int(row.get("epoch") or 0)
         bucket = bucket_of(epoch)
-        donor = int(row.get("donor") or -1)
-        target = int(row.get("target") or -1)
+        donor = _first_id(row.get("donor"))
+        target = _first_id(row.get("target"))
         ct[bucket] += 1
-        ct_dose[bucket] += _f(row.get("dose"))
+        dose_key = (epoch, target)
+        if dose_key not in ct_dose_seen:
+            ct_dose[bucket] += _f(row.get("dose"))
+            ct_dose_seen.add(dose_key)
         ct_targets[bucket].add(target)
         if donor in first_cs_epoch and first_cs_epoch[donor] < epoch:
             ct_donor_cs[bucket] += 1
