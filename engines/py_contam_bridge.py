@@ -54,6 +54,7 @@ PLENUM_PREFIX = "_plenum_"
 PLENUM_VOLUME_M3 = 0.001
 PATH_TYPE_HVAC_RETURN = "hvac_return"
 PATH_TYPE_HVAC_SUPPLY = "hvac_supply"
+AMBIENT_ZONE_ID = "ambient"
 
 # η for a caller that supplies no filter at all.  UNSOURCED: its old config
 # comment called it MERV-13, but the Healthy Sail Panel reports MERV 8 at 30%
@@ -306,7 +307,7 @@ class ContamAirflowPath:
 
     __slots__ = (
         "path_id", "from_zone", "to_zone",
-        "flow_rate_m3h", "path_type", "is_hvac_ducted", "filtered",
+        "flow_rate_m3h", "path_type", "is_hvac_ducted", "filtered", "sink",
     )
 
     def __init__(
@@ -318,6 +319,7 @@ class ContamAirflowPath:
         path_type: str = "hvac_duct",
         is_hvac_ducted: bool = True,
         filtered: bool | None = None,
+        sink: bool = False,
     ) -> None:
         self.path_id = path_id
         self.from_zone = from_zone
@@ -326,6 +328,7 @@ class ContamAirflowPath:
         self.path_type = path_type
         self.is_hvac_ducted = is_hvac_ducted
         self.filtered = is_hvac_ducted if filtered is None else filtered
+        self.sink = sink
 
 
 class ContamTransportEngine:
@@ -585,13 +588,33 @@ class ContamTransportEngine:
     def _build_cross_zone_paths(self, airflow: dict[str, Any]) -> None:
         for link in airflow.get("cross_zone_links", []):
             from_rooms = self._get_zone_rooms(link["from"], airflow)
-            to_rooms = self._get_zone_rooms(link["to"], airflow)
-            if not from_rooms or not to_rooms:
+            to_token = str(link["to"])
+            is_sink = to_token == AMBIENT_ZONE_ID
+            to_rooms = (
+                [] if is_sink else self._get_zone_rooms(to_token, airflow)
+            )
+            if not from_rooms or (not is_sink and not to_rooms):
                 continue
             flow = link.get("flow_rate_m3h", 0)
             path_name = link.get("path", f"{link['from']}_to_{link['to']}")
             is_ducted = link.get("is_hvac_ducted", False)
             filtered = cross_zone_link_filtered(link)
+            if is_sink:
+                pair_flow = flow / len(from_rooms) if from_rooms else 0
+                for fr in from_rooms:
+                    self.airflow_paths.append(ContamAirflowPath(
+                        path_id=(
+                            f"xzone_{path_name}_{fr}_{AMBIENT_ZONE_ID}"
+                        ),
+                        from_zone=fr,
+                        to_zone=AMBIENT_ZONE_ID,
+                        flow_rate_m3h=pair_flow,
+                        path_type="cross_zone",
+                        is_hvac_ducted=is_ducted,
+                        filtered=filtered,
+                        sink=True,
+                    ))
+                continue
             n_pairs = len(from_rooms) * len(to_rooms)
             pair_flow = flow / n_pairs if n_pairs > 0 else 0
             bidirectional = cross_zone_link_bidirectional(
@@ -677,15 +700,18 @@ class ContamTransportEngine:
         """Add one non-star path into aggregate source and removal rates."""
         src = path.from_zone
         dst = path.to_zone
-        if src not in concentrations or dst not in source_rate:
+        if src not in concentrations:
+            return
+        if not path.sink and dst not in source_rate:
             return
 
         q = path.flow_rate_m3h
-        c_src = concentrations.get(src, 0.0)
-        arriving = q * c_src
-        if path.filtered:
-            arriving *= (1.0 - self.filter_efficiency)
-        source_rate[dst] += arriving
+        if not path.sink:
+            c_src = concentrations.get(src, 0.0)
+            arriving = q * c_src
+            if path.filtered:
+                arriving *= (1.0 - self.filter_efficiency)
+            source_rate[dst] += arriving
 
         node = self.zone_nodes.get(src)
         if node is not None and node.volume_m3 > 0:

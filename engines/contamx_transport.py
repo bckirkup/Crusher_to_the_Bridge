@@ -147,11 +147,26 @@ class ContamXTransportEngine(ContamTransportEngine):
             is_ducted = bool(entry.get("is_hvac_ducted", False))
             filtered = bool(entry.get("filtered", is_ducted))
             kind = str(entry.get("kind", ""))
+            is_sink = bool(entry.get("sink")) or kind == "exhaust_sink"
             # AHS phantom / ambient paths are bridged separately
-            if kind.startswith("ahs_") or kind == "envelope_leak":
+            if not is_sink and (kind.startswith("ahs_") or kind == "envelope_leak"):
                 continue
             flow = path_flows_m3h.get(path_nr, 0.0)
             if abs(flow) < _FLOW_EPSILON_M3H:
+                continue
+            if is_sink:
+                if flow <= 0.0 or from_zone not in known:
+                    continue
+                paths.append(ContamAirflowPath(
+                    path_id=f"contamx_{path_nr}_{from_zone}_{to_zone}",
+                    from_zone=from_zone,
+                    to_zone=to_zone,
+                    flow_rate_m3h=flow,
+                    path_type="contamx_path",
+                    is_hvac_ducted=is_ducted,
+                    filtered=False,
+                    sink=True,
+                ))
                 continue
             src, dst = (from_zone, to_zone) if flow > 0 else (to_zone, from_zone)
             if src not in known or dst not in known:
