@@ -50,6 +50,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - `CONTAM-EXHAUST-SINK-05.md` — EXHAUST-SINK stage 6 row 2: author galley hood once-through ambient sinks paired to the existing galley make-up links, with before/after native exact-check measurements and bundle/Phase-2 re-syncs.
 - `FOOD-SUPPLY-01-SMOKE.md` — bounded local smoke of the default-off provisioning receipt/lot arms on one mega p06 cell.
 - `FOOD-SUPPLY-01-RECEIPT-PIN.md` — receipt/lot `station_zone_pin` carry-through fix and seed-pairing contract.
+- `FOOD-SUPPLY-01-PIN-RESMOKE.md` — pinned seed-8118 re-smoke of the FOOD-SUPPLY-01 receipt arms after the carry-through fix.
 - `NORO-HAND-CASCADE-01-MEAL-SECONDARY.md` — posted-cell same-span secondary-transmission probe for provisioned-lot pans.
 - `NORO-HAND-CASCADE-01-PAN-COHORT-REACH.md` — posted-cell non-taker pan-cohort reach probe for secondary hand transfers.
 
