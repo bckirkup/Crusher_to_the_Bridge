@@ -30,7 +30,18 @@ def ensure_platform_output_dir(
     overwrite: bool = False,
     dry_run: bool = False,
 ) -> str:
-    """Return a platform output directory after the committed-data guard."""
+    """Return a platform output directory after the committed-data guard.
+
+    An empty directory is bootstrap scaffolding, not committed platform data.
+    """
+    resolved = os.fspath(platform_dir)
+    if (
+        not dry_run
+        and not overwrite
+        and os.path.isdir(resolved)
+        and not os.listdir(resolved)
+    ):
+        return resolved
     return ensure_output_absent(
         platform_dir,
         description=f"platform directory for {platform_id!r}",

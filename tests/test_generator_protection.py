@@ -79,6 +79,21 @@ def test_cruise_writer_creates_new_platform(
     assert _oneway_sanitary_makeup_links(airflow["cross_zone_links"])
 
 
+def test_cruise_writer_allows_empty_platform_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import generate_cruise_platform_layout as cruise
+
+    monkeypatch.setattr(cruise, "REPO", str(tmp_path))
+    out_dir = tmp_path / "data" / "platforms" / "empty_bootstrap_hull"
+    out_dir.mkdir(parents=True)
+
+    cruise.write_platform(_recipe("empty_bootstrap_hull"))
+
+    assert (out_dir / "spatial_layout.json").is_file()
+    assert (out_dir / "air_flow_paths.json").is_file()
+
+
 def test_cruise_writer_overwrite_flag_replaces_existing(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
