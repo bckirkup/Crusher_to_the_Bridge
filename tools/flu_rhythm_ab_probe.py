@@ -39,6 +39,8 @@ if str(REPO_ROOT) not in sys.path:
 from engines import transmission_core as tc  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    resolve_child_path,
     resolve_repo_path,
     validated_open,
 )
@@ -301,15 +303,27 @@ def _emit_spec(args: argparse.Namespace) -> None:
     print(f"wrote {out}")
 
 
+def _arm_output_dir(out: str, arm: str) -> Path:
+    """``<out>/<arm>`` with the arm segment confined under the repository.
+
+    ``resolve_repo_path`` only covers ``--out``. Joining ``--arm`` afterwards
+    and creating that directory reopens the path (Sonar S8707), so the arm
+    is a checked child and the directory is the path that check returned.
+    """
+    parent = resolve_repo_path(str(REPO_ROOT), out)
+    contained = prepare_output_directory(
+        resolve_child_path(parent, arm),
+        allowed_roots=(str(REPO_ROOT),),
+    )
+    return Path(contained)
+
+
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     if args.emit_spec is not None:
         _emit_spec(args)
         return
-    out_dir = Path(
-        resolve_repo_path(str(REPO_ROOT), str(args.out)),
-    ) / args.arm
-    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = _arm_output_dir(str(args.out), args.arm)
     run_id = args.out_name or f"s{args.seed}"
     summary = run_cell(
         seed=args.seed, platform=args.platform, epochs=args.epochs,
