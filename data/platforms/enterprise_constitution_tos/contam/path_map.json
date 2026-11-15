@@ -1549,8 +1549,8 @@
   },
   {
     "path_nr": 173,
-    "from_zone": "Galley",
-    "to_zone": "Mess_Hall",
+    "from_zone": "Mess_Hall",
+    "to_zone": "Galley",
     "is_hvac_ducted": false,
     "kind": "Galley_Service_Exhaust",
     "crusher_transfer": true,

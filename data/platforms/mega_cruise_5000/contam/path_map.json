@@ -4303,8 +4303,8 @@
   },
   {
     "path_nr": 479,
-    "from_zone": "Medical_Center",
-    "to_zone": "Crew_Mess_Main",
+    "from_zone": "Crew_Mess_Main",
+    "to_zone": "Medical_Center",
     "is_hvac_ducted": false,
     "kind": "Medical_Door_Leakage",
     "crusher_transfer": true,
@@ -4312,8 +4312,8 @@
   },
   {
     "path_nr": 480,
-    "from_zone": "Medical_Center",
-    "to_zone": "CrewMess_Fwd",
+    "from_zone": "Crew_Mess_Main",
+    "to_zone": "Isolation_Ward",
     "is_hvac_ducted": false,
     "kind": "Medical_Door_Leakage",
     "crusher_transfer": true,
@@ -4321,8 +4321,8 @@
   },
   {
     "path_nr": 481,
-    "from_zone": "Isolation_Ward",
-    "to_zone": "Crew_Mess_Main",
+    "from_zone": "CrewMess_Fwd",
+    "to_zone": "Medical_Center",
     "is_hvac_ducted": false,
     "kind": "Medical_Door_Leakage",
     "crusher_transfer": true,
@@ -4330,8 +4330,8 @@
   },
   {
     "path_nr": 482,
-    "from_zone": "Isolation_Ward",
-    "to_zone": "CrewMess_Fwd",
+    "from_zone": "CrewMess_Fwd",
+    "to_zone": "Isolation_Ward",
     "is_hvac_ducted": false,
     "kind": "Medical_Door_Leakage",
     "crusher_transfer": true,
