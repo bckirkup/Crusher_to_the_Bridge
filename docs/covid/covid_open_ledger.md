@@ -89,6 +89,17 @@ frozen E-lane caches are unchanged. Figures not resting on that channel
 stand at their own `Measured at` SHAs; baseline `c5640031`, authoring
 commit `2ef624db`.
 
+**`CONTAM-EXHAUST-SINK-05` (ledger entry): airborne/downstream-map dose
+figures measured before this change on the seven hulls carrying the new
+galley hood sinks are historical on the galley-exhaust channel.** The
+`Galley_Hood_Exhaust` links now declare `to: "ambient"` as once-through
+prescribed-flow sinks with unchanged Grade C magnitudes paired to the
+existing galley make-up links; native exact material-times moved in the
+galley boundary rooms (ledger `docs/ledger/CONTAM-EXHAUST-SINK-05.md`,
+measured at `ecb7616d`); frozen E-lane caches are unchanged. Figures not
+resting on that channel stand at their own `Measured at` SHAs; baseline
+`42e07abc`, authoring commit `ecb7616d`.
+
 **PLATFORM-FIDELITY-01's DP hull-fidelity contrast is SUPERSEDED for
 hull-fidelity inference (2026-11-08).** The frozen PF-01 DP protocols file
 (`data/config/protocols_covid_pf_dp.json`) declared 11 `exempt_work_zones`,
