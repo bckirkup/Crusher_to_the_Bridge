@@ -6,6 +6,20 @@
         0.00086,
         0.0047
       ],
+      "q_source_by_item_line": {
+        "shellfish": {
+          "prevalence": [0.039, 0.144],
+          "implicated_share": 0.141
+        },
+        "salad_leaf": {
+          "prevalence": [0.0, 0.053],
+          "implicated_share": 0.141
+        },
+        "fresh_produce": {
+          "prevalence": [0.0036, 0.036],
+          "implicated_share": 0.141
+        }
+      },
       "platform_types": [
         "cruise"
       ],

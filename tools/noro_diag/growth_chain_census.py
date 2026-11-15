@@ -1600,6 +1600,10 @@ def _common_source_block(core: Any) -> dict[str, Any]:
             o["object_id"],
         ),
     )
+    receipts = sorted(
+        getattr(core, "_cs_receipt_log", None) or (),
+        key=lambda r: (r["pathogen_id"], r["receipt_id"]),
+    )
     return {
         "telemetry": dict(
             getattr(core, "common_source_telemetry", {}) or {},
@@ -1610,6 +1614,7 @@ def _common_source_block(core: Any) -> dict[str, Any]:
         "provisioned_source": dict(
             getattr(core, "_cs_provisioned_source", None) or {},
         ),
+        "receipts": receipts,
         "events": events,
         "objects": objects,
     }

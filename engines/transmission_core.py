@@ -1604,6 +1604,60 @@ COMMON_SOURCE_LOT_ITEM_LINES = (
     "garnish",
 )
 
+# FOOD-SUPPLY-01 — categorical supply-class metadata (docs/food_supply_01_design.md).
+# These labels stratify witnesses and gate the raw/RTE preparation filter; they
+# are not rates and carry no fitted value. Grade C declared classification.
+_COMMON_SOURCE_ITEM_LINE_META = {
+    "shellfish": {
+        "supply_stratum": "shellfish",
+        "preparation_class": "raw_or_rte_no_kill",
+        "scale_class": "bulk_raw",
+    },
+    "salad_leaf": {
+        "supply_stratum": "raw_produce",
+        "preparation_class": "raw_or_rte_no_kill",
+        "scale_class": "bulk_raw",
+    },
+    "fresh_produce": {
+        "supply_stratum": "raw_produce",
+        "preparation_class": "raw_or_rte_no_kill",
+        "scale_class": "bulk_raw",
+    },
+    "garnish": {
+        "supply_stratum": "garnish_unit",
+        "preparation_class": "raw_or_rte_no_kill",
+        "scale_class": "garnish_unit",
+    },
+    "deli": {
+        "supply_stratum": "prepared_rte",
+        "preparation_class": "prepared_or_pasteurized",
+        "scale_class": "prepared_rte",
+    },
+    "bakery": {
+        "supply_stratum": "prepared_rte",
+        "preparation_class": "prepared_or_pasteurized",
+        "scale_class": "prepared_rte",
+    },
+    "dairy": {
+        "supply_stratum": "prepared_rte",
+        "preparation_class": "prepared_or_pasteurized",
+        "scale_class": "prepared_rte",
+    },
+}
+# Receipt-count layer above the station census. ``station_lots`` is the
+# PROVISIONED-SOURCE-01 baseline and stays bit-identical; the receipt modes
+# are the FOOD-SUPPLY-01 labelled arms.
+COMMON_SOURCE_LOT_LAYER_MODES = frozenset({
+    "station_lots",
+    "single_line_receipt",
+    "declared_receipts",
+})
+COMMON_SOURCE_LOT_LAYER_MODE_ABSENT = "station_lots"
+# Only the conservative raw/RTE-no-kill filter is implemented; a sourced
+# preparation-survival factor is a later arm (FOOD-SUPPLY-01 §4).
+COMMON_SOURCE_PREPARATION_SURVIVAL_MODES = frozenset({"raw_rte_only"})
+COMMON_SOURCE_PREPARATION_SURVIVAL_MODE_ABSENT = "raw_rte_only"
+
 # ── FOOD-COMMON-SOURCE-02 leg 2: handler/diner contamination objects ──
 # One seeding draw per contamination-relevant span of the agent's
 # infectious course replaces the per-window iid Bernoulli (spec §Leg 2):
@@ -3479,6 +3533,13 @@ class TransmissionCore:
         self._cs_lot_posture_coupling = bool(
             cs.get("lot_posture_coupling", False),
         )
+        self._cs_ps_lot_layer_mode = COMMON_SOURCE_LOT_LAYER_MODE_ABSENT
+        self._cs_ps_preparation_survival_mode = (
+            COMMON_SOURCE_PREPARATION_SURVIVAL_MODE_ABSENT
+        )
+        self._cs_ps_q_by_item_line = None
+        self._cs_ps_prevalence_scale = 1.0
+        self._cs_ps_receipts_per_item_line = None
 
     def _resolve_provisioned_source_block(
         self,
@@ -3549,6 +3610,33 @@ class TransmissionCore:
         arm = ps.get("source_venue_arm")
         if arm is not None and str(arm).strip():
             self._cs_ps_venue_arm = str(arm).strip()
+        layer = ps.get("lot_layer_mode")
+        self._cs_ps_lot_layer_mode = str(
+            layer or COMMON_SOURCE_LOT_LAYER_MODE_ABSENT,
+        ).strip().lower()
+        if self._cs_ps_lot_layer_mode not in COMMON_SOURCE_LOT_LAYER_MODES:
+            self._cs_ps_lot_layer_mode = COMMON_SOURCE_LOT_LAYER_MODE_ABSENT
+        prep = ps.get("preparation_survival_mode")
+        self._cs_ps_preparation_survival_mode = str(
+            prep or COMMON_SOURCE_PREPARATION_SURVIVAL_MODE_ABSENT,
+        ).strip().lower()
+        if (
+            self._cs_ps_preparation_survival_mode
+            not in COMMON_SOURCE_PREPARATION_SURVIVAL_MODES
+        ):
+            self._cs_ps_preparation_survival_mode = (
+                COMMON_SOURCE_PREPARATION_SURVIVAL_MODE_ABSENT
+            )
+        q_by_line = ps.get("q_source_by_item_line")
+        if q_by_line is None:
+            q_by_line = entry.get("q_source_by_item_line")
+        self._cs_ps_q_by_item_line = (
+            q_by_line if isinstance(q_by_line, dict) else None
+        )
+        self._cs_ps_prevalence_scale = ps.get("prevalence_scale", 1.0)
+        self._cs_ps_receipts_per_item_line = ps.get(
+            "receipts_per_item_line",
+        )
         return ps_q
 
     def _init_common_source_state_buckets(self) -> None:
@@ -3584,6 +3672,8 @@ class TransmissionCore:
         self._cs_objects = {}
         self._cs_object_log = []
         self._cs_object_counter = 0
+        self._cs_receipt_log = []
+        self._cs_receipt_counter = 0
         self._cs_voyage_closed = False
         self._cs_spans = {}
         self._cs_venue_selfserve = {}
@@ -13286,7 +13376,13 @@ class TransmissionCore:
             # fiat gate — each (zone, item-line) station mints its lot
             # iff its Bernoulli lands under q_source, so objects per
             # voyage are Binomial(N_lots, q_source) by construction.
-            self._cs_plan_provisioned_objects(zones, cells)
+            if self._cs_ps_lot_layer_mode in {
+                "single_line_receipt",
+                "declared_receipts",
+            }:
+                self._cs_plan_receipt_objects(zones, cells)
+            else:
+                self._cs_plan_provisioned_objects(zones, cells)
             return
         lot_factor = (
             self._cs_posture if self._cs_lot_posture_coupling else 1.0
@@ -13384,6 +13480,241 @@ class TransmissionCore:
                 "actual_venues_used": sorted({o["zone"] for o in bound}),
             }
 
+    def _cs_receipt_draw_spec(self, spec: Any) -> float:
+        """Draw a scalar|[lo,hi] supply spec on the shared stream."""
+        if isinstance(spec, (list, tuple)) and len(spec) == 2:
+            lo, hi = float(spec[0]), float(spec[1])
+            lo = max(0.0, lo)
+            hi = max(lo, hi)
+            return float(self._cs_rng.uniform(lo, hi))
+        try:
+            return max(0.0, float(spec))
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _cs_receipt_count_draw(self, spec: Any) -> int:
+        """Draw a positive receipt count (scalar or inclusive interval)."""
+        if isinstance(spec, (list, tuple)) and len(spec) == 2:
+            lo, hi = int(float(spec[0])), int(float(spec[1]))
+            lo, hi = max(1, lo), max(lo, hi)
+            return int(self._cs_rng.integers(lo, hi + 1))
+        try:
+            return max(1, int(float(spec)))
+        except (TypeError, ValueError):
+            return 1
+
+    def _cs_receipt_venue_sets(
+        self,
+        zones: list[str],
+        count: int,
+    ) -> list[list[str]]:
+        zones = list(zones)
+        count = max(1, int(count))
+        if not zones:
+            return [[] for _ in range(count)]
+        return [zones[i::count] for i in range(count)]
+
+    def _cs_receipt_line_specs(
+        self,
+        pid: str,
+        rates: dict[str, float],
+    ) -> tuple[dict[str, float], float]:
+        scale = self._cs_receipt_draw_spec(self._cs_ps_prevalence_scale)
+        specs: dict[str, float] = {}
+        if self._cs_ps_q_by_item_line is not None:
+            for item in COMMON_SOURCE_LOT_ITEM_LINES:
+                entry = self._cs_ps_q_by_item_line.get(item)
+                if not isinstance(entry, dict):
+                    continue
+                prevalence = entry.get("prevalence")
+                try:
+                    share = max(
+                        0.0, float(entry.get("implicated_share", 1.0)),
+                    )
+                except (TypeError, ValueError):
+                    share = 0.0
+                specs[item] = (
+                    self._cs_receipt_draw_spec(prevalence) * share * scale
+                )
+        else:
+            q = float(rates.get("q_source", 0.0)) * scale
+            specs = {item: q for item in COMMON_SOURCE_LOT_ITEM_LINES}
+        return specs, scale
+
+    def _cs_plan_receipt_line(
+        self,
+        pid: str,
+        item: str,
+        q: float,
+        mode: str,
+        zones: list[str],
+        scale: float,
+    ) -> tuple[
+        list[dict[str, Any]],
+        list[tuple[dict[str, Any], dict[str, Any]]],
+    ]:
+        """Draw one item line's receipt uniforms before any lot realization.
+
+        FOOD-SUPPLY-01 keeps every receipt Bernoulli ahead of object draws
+        so ``prevalence_scale`` sweeps nest contaminated receipts at a
+        seed instead of re-rolling later uniforms.
+        """
+        meta = _COMMON_SOURCE_ITEM_LINE_META[item]
+        service_eligible = (
+            meta["preparation_class"] == "raw_or_rte_no_kill"
+        )
+        count = (
+            1
+            if mode == "single_line_receipt"
+            else self._cs_receipt_count_draw(
+                self._cs_ps_receipts_per_item_line,
+            )
+        )
+        rows: list[dict[str, Any]] = []
+        pending: list[tuple[dict[str, Any], dict[str, Any]]] = []
+        for index, venues in enumerate(
+            self._cs_receipt_venue_sets(zones, count),
+        ):
+            contaminated = self._cs_rng.random() < q
+            state = "none"
+            if contaminated:
+                state = (
+                    "infectious"
+                    if service_eligible
+                    else "rna_positive_noninfectious"
+                )
+            self._cs_receipt_counter += 1
+            receipt_id = f"csr-{pid}-{self._cs_receipt_counter}"
+            row = {
+                "receipt_id": receipt_id,
+                "pathogen_id": pid,
+                "source_id": self._cs_ps_source_id,
+                "supply_stratum": meta["supply_stratum"],
+                "item_line": item,
+                "scale_class": meta["scale_class"],
+                "preparation_class": meta["preparation_class"],
+                "quantity_servings": None,
+                "quantity_g": None,
+                "venues_served": list(venues),
+                "contamination": state,
+                "lot_id": None,
+                "q_line": q,
+                "prevalence_scale": scale,
+                "receipt_index": index,
+            }
+            rows.append(row)
+            if contaminated and service_eligible and venues:
+                receipt = {
+                    "receipt_id": receipt_id,
+                    "pathogen_id": pid,
+                    "item_label": item,
+                    "venues_served": list(venues),
+                    "supply_stratum": meta["supply_stratum"],
+                    "preparation_class": meta["preparation_class"],
+                    "scale_class": meta["scale_class"],
+                    "preparation_survival_mode": (
+                        self._cs_ps_preparation_survival_mode
+                    ),
+                    "service_eligible": True,
+                    "receipt_index": index,
+                }
+                pending.append((row, receipt))
+        return rows, pending
+
+    def _cs_plan_receipt_objects(
+        self,
+        zones: list[str],
+        cells: list[tuple[str, str, int]],
+    ) -> None:
+        """Mint FOOD-SUPPLY-01 receipt/lot objects once the roster exists."""
+        mode = self._cs_ps_lot_layer_mode
+        planned: list[dict[str, Any]] = []
+        for pid, rates in self._cs_rates.items():
+            specs, scale = self._cs_receipt_line_specs(pid, rates)
+            rows: list[dict[str, Any]] = []
+            pending: list[tuple[dict[str, Any], dict[str, Any]]] = []
+            by_item: dict[str, int] = {}
+            by_prep: dict[str, int] = {}
+            for item in COMMON_SOURCE_LOT_ITEM_LINES:
+                line_rows, line_pending = self._cs_plan_receipt_line(
+                    pid, item, specs.get(item, 0.0), mode,
+                    zones, scale,
+                )
+                rows.extend(line_rows)
+                pending.extend(line_pending)
+                for row in line_rows:
+                    if row["contamination"] != "none":
+                        by_item[item] = by_item.get(item, 0) + 1
+                        prep = row["preparation_class"]
+                        by_prep[prep] = by_prep.get(prep, 0) + 1
+            planned.append({
+                "pid": pid,
+                "rates": rates,
+                "specs": specs,
+                "scale": scale,
+                "rows": rows,
+                "pending": pending,
+                "by_item": by_item,
+                "by_prep": by_prep,
+                "n_lots": 0,
+            })
+        for plan in planned:
+            pid = plan["pid"]
+            for row, receipt in plan["pending"]:
+                obj = self._cs_realize_lot_object(
+                    pid, cells, zones, receipt=receipt,
+                )
+                if obj is None:
+                    continue
+                obj["lot_id"] = obj["object_id"]
+                row["lot_id"] = obj["object_id"]
+                row["quantity_servings"] = obj.get("quantity_servings")
+                row["quantity_g"] = obj.get("quantity_g")
+                plan["n_lots"] += 1
+            self._cs_receipt_log.extend(plan["rows"])
+            bound = self._cs_objects.get(pid, [])
+            self._cs_contaminated_stations[pid] = {
+                (venue, o["item_label"])
+                for o in bound
+                for venue in (o.get("venues_served") or (o["zone"],))
+            }
+            specs = plan["specs"]
+            q_equiv = (
+                sum(specs.values()) / len(COMMON_SOURCE_LOT_ITEM_LINES)
+                if specs else 0.0
+            )
+            self._cs_provisioned_source[pid] = {
+                "source_id": self._cs_ps_source_id,
+                "q_source_drawn": plan["rates"].get("q_source"),
+                "q_source_equivalent": q_equiv,
+                "lot_layer_mode": mode,
+                "preparation_survival_mode": (
+                    self._cs_ps_preparation_survival_mode
+                ),
+                "prevalence_scale": plan["scale"],
+                "receipts_per_item_line": (
+                    self._cs_ps_receipts_per_item_line
+                    if mode == "declared_receipts" else 1
+                ),
+                "n_stations": (
+                    len(zones) * len(COMMON_SOURCE_LOT_ITEM_LINES)
+                ),
+                "n_receipts": len(plan["rows"]),
+                "n_lots": plan["n_lots"],
+                "n_lots_placed": plan["n_lots"],
+                "n_contaminated": sum(plan["by_item"].values()),
+                "contaminated_by_item_line": plan["by_item"],
+                "contaminated_by_preparation_class": plan["by_prep"],
+                "station_zone_pin": None,
+                "station_zone_pin_weights": None,
+                "source_venue_arm": self._cs_ps_venue_arm,
+                "actual_venues_used": sorted({
+                    venue
+                    for o in bound
+                    for venue in (o.get("venues_served") or (o["zone"],))
+                }),
+            }
+
     def _cs_place_pinned_stations(
         self,
         contaminated: list[tuple[str, str]],
@@ -13438,7 +13769,8 @@ class TransmissionCore:
         cells: list[tuple[str, str, int]],
         zones: list[str],
         station: tuple[str, str] | None = None,
-    ) -> None:
+        receipt: dict[str, Any] | None = None,
+    ) -> dict[str, Any] | None:
         """Draw one lot object's single realized contamination state.
 
         Everything an object is — its (zone, item-line) station, its
@@ -13448,7 +13780,11 @@ class TransmissionCore:
         cs_block = (self.pathogen_profiles or {}).get(
             pathogen_id, {},
         ).get("common_source_events", {})
-        if station is None:
+        receipt_meta = receipt or {}
+        if receipt is not None:
+            item = receipt_meta["item_label"]
+            zone_pool = list(receipt_meta.get("venues_served") or zones)
+        elif station is None:
             # Fiat grammar — zone then item, each a uniform pick: the
             # first two draws the v1 object consumed, positions
             # preserved verbatim.
@@ -13456,28 +13792,38 @@ class TransmissionCore:
             item = COMMON_SOURCE_LOT_ITEM_LINES[
                 int(self._cs_rng.integers(len(COMMON_SOURCE_LOT_ITEM_LINES)))
             ]
+            zone_pool = [zone]
         else:
             # Provisioned-source grammar — the station bound at the
             # census draw carries (zone, item) directly; no zone/item
             # uniforms are consumed.
             zone, item = station
+            zone_pool = [zone]
         days = int(round(self._cs_draw(
             "embarkation_lot_window_days", pathogen_id,
         )))
         zone_cells = [
             cell for cell in cells
-            if cell[0] == zone and cell[2] < days
+            if cell[0] in zone_pool and cell[2] < days
         ]
         if not zone_cells:
             # The lot provisioned to a venue that never serves it inside
             # the embarkation span — it never enters service.
-            return
-        _zone, token, start_day = zone_cells[
+            return None
+        zone, token, start_day = zone_cells[
             int(self._cs_rng.integers(len(zone_cells)))
         ]
         servings = max(1, int(round(self._cs_draw(
             "lot_servings", pathogen_id, cs_block,
         ))))
+        quantity_servings = servings if receipt is not None else None
+        quantity_g = None
+        serving_mass_g = None
+        if receipt is not None:
+            serving_mass_g = self._cs_draw(
+                "serving_mass_g", pathogen_id, cs_block,
+            )
+            quantity_g = servings * serving_mass_g
         extent_windows: int | None = None
         window_serving_cap: int | None = None
         if self._cs_lot_extent_mode == "declared":
@@ -13522,10 +13868,28 @@ class TransmissionCore:
             # provisioning-source id the station minted under; None on
             # fiat-minted and agent objects.
             "provisioned_source_id": (
-                self._cs_ps_source_id if station is not None else None
+                self._cs_ps_source_id
+                if station is not None or receipt is not None
+                else None
             ),
             "zone": zone,
             "item_label": item,
+            "receipt_id": receipt_meta.get("receipt_id"),
+            "lot_id": None,
+            "supply_stratum": receipt_meta.get("supply_stratum"),
+            "preparation_class": receipt_meta.get("preparation_class"),
+            "scale_class": receipt_meta.get("scale_class"),
+            "quantity_servings": quantity_servings,
+            "quantity_g": quantity_g,
+            "serving_mass_g": serving_mass_g,
+            "venues_served": (
+                list(receipt_meta.get("venues_served") or ())
+                if receipt is not None else None
+            ),
+            "preparation_survival_mode": receipt_meta.get(
+                "preparation_survival_mode",
+            ),
+            "service_eligible": receipt_meta.get("service_eligible"),
             "start_token": token,
             "start_day": start_day,
             "seeded_epoch": None,
@@ -13559,6 +13923,7 @@ class TransmissionCore:
             "dose_credited": 0.0,
         })
         self.common_source_telemetry["objects_provisioned_lot"] += 1
+        return self._cs_objects[pathogen_id][-1]
 
     def _cs_served_windows(self) -> list[tuple[str, str, int]]:
         """(zone, meal token, day) cells a venue's cohort serves.
@@ -13707,9 +14072,10 @@ class TransmissionCore:
         window (the pan they work / the pan they take, spec §Leg 2)."""
         occupant_ids = {a.agent_id for a in occupants}
         for obj in self._cs_objects.get(pathogen_id, ()):
+            served_zones = obj.get("venues_served") or (obj["zone"],)
             if (
                 obj["closed"]
-                or obj["zone"] != zone_name
+                or zone_name not in served_zones
                 or obj["object_id"] in state["objects_served"]
             ):
                 continue
@@ -13874,9 +14240,11 @@ class TransmissionCore:
             pan_takers = takers[
                 pan_idx * pan_servings:(pan_idx + 1) * pan_servings
             ]
-            serving_mass = self._cs_draw(
-                "serving_mass_g", pathogen_id, cs_block,
-            )
+            serving_mass = obj.get("serving_mass_g")
+            if serving_mass is None:
+                serving_mass = self._cs_draw(
+                    "serving_mass_g", pathogen_id, cs_block,
+                )
             per_serving = titre * serving_mass
             obj["pan_serial"] += 1
             self._cs_event_counter += 1
@@ -13942,6 +14310,21 @@ class TransmissionCore:
             "provisioned_source_id": obj.get("provisioned_source_id"),
             "zone": obj["zone"],
             "item_label": obj["item_label"],
+            "receipt_id": obj.get("receipt_id"),
+            "lot_id": obj.get("lot_id"),
+            "supply_stratum": obj.get("supply_stratum"),
+            "preparation_class": obj.get("preparation_class"),
+            "scale_class": obj.get("scale_class"),
+            "quantity_servings": obj.get("quantity_servings"),
+            "quantity_g": (
+                round(obj["quantity_g"], 6)
+                if obj.get("quantity_g") is not None else None
+            ),
+            "venues_served": obj.get("venues_served"),
+            "preparation_survival_mode": obj.get(
+                "preparation_survival_mode",
+            ),
+            "service_eligible": obj.get("service_eligible"),
             "seeded_epoch": obj["seeded_epoch"],
             "exhausted_epoch": None if reason == "voyage_end" else epoch,
             "end_reason": reason,
