@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contam_path_map.schema.json",
+  "title": "Contam Path Map",
+  "description": "ContamX path_map.json entries: the seven-key writer contract plus optional filtered/sink/declared_flow_m3h fields.",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/PathMapEntry"
+  },
+  "$defs": {
+    "PathMapEntry": {
+      "type": "object",
+      "required": [
+        "path_nr",
+        "from_zone",
+        "to_zone",
+        "is_hvac_ducted",
+        "kind",
+        "crusher_transfer",
+        "ahs_nr"
+      ],
+      "properties": {
+        "path_nr": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "from_zone": {
+          "type": "string"
+        },
+        "to_zone": {
+          "type": "string"
+        },
+        "is_hvac_ducted": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "crusher_transfer": {
+          "type": "boolean"
+        },
+        "ahs_nr": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "filtered": {
+          "type": "boolean",
+          "description": "Optional P-min carry-through: present only when the resolved link filtration differs from the deprecated is_hvac_ducted alias. Absent resolves to is_hvac_ducted."
+        },
+        "sink": {
+          "type": "boolean",
+          "description": "Optional exhaust-sink marker reserved by the path S rollout; absent means an ordinary room/ambient endpoint."
+        },
+        "declared_flow_m3h": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional commissioned-mode declared branch flow recorded beside the solved field."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

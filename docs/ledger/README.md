@@ -38,6 +38,12 @@ cross-referenced by number. Per-pathogen "currently withdrawn" pages are
 `docs/README.md` when the arm lands. New entries never receive a number; refer
 to them as ledger `<ID>`.
 
+## Registered entries
+
+New ledger entries are registered here as they land; the filename remains the stable identifier.
+
+- `CONTAM-PATHMAP-FILTERED-01.md` — PATHMAP-FILTERED stage 2: path_map `filtered` carry-through, schema, and exporter endpoint fail-loud.
+
 ## For drafting and analysis
 
 Anyone (human or agent) drafting a manuscript, report or analysis from this repository must draw from, in this order:

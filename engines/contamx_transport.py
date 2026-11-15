@@ -145,6 +145,7 @@ class ContamXTransportEngine(ContamTransportEngine):
             from_zone = entry["from_zone"]
             to_zone = entry["to_zone"]
             is_ducted = bool(entry.get("is_hvac_ducted", False))
+            filtered = bool(entry.get("filtered", is_ducted))
             kind = str(entry.get("kind", ""))
             # AHS phantom / ambient paths are bridged separately
             if kind.startswith("ahs_") or kind == "envelope_leak":
@@ -162,6 +163,7 @@ class ContamXTransportEngine(ContamTransportEngine):
                 flow_rate_m3h=abs(flow),
                 path_type="contamx_path",
                 is_hvac_ducted=is_ducted,
+                filtered=filtered,
             ))
         return paths
 

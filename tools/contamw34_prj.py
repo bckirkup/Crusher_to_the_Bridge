@@ -820,7 +820,10 @@ class _NetworkBuilder:
             return [token]
         if token in self.zone_name_to_nr:
             return [token]
-        return []
+        raise ValueError(
+            f"cross_zone_links endpoint {token!r} is neither an HVAC "
+            "zone id nor a room in the spatial layout"
+        )
 
     def _passive_cross_zone_schedule(self, path_name: str) -> int:
         """Week-schedule nr for passive shafts/hatches (0 = always open)."""
@@ -839,8 +842,6 @@ class _NetworkBuilder:
         for link in self.cross_links:
             from_rooms = self._endpoint_rooms(link["from"])
             to_rooms = self._endpoint_rooms(link["to"])
-            if not from_rooms or not to_rooms:
-                continue
             flow = float(link.get("flow_rate_m3h", 50.0))
             n_pairs = len(from_rooms) * len(to_rooms)
             pair_flow = flow / n_pairs if n_pairs > 0 else 0.0
@@ -869,6 +870,9 @@ class _NetworkBuilder:
                 self._cross_zone_filter_nr()
                 if filtered and filtered != ducted else 0
             )
+            path_map_extra = (
+                {"filtered": filtered} if filtered != ducted else None
+            )
             for fr, tr in itertools.product(from_rooms, to_rooms):
                 self._add_path(
                     self.zone_name_to_nr[fr], self.zone_name_to_nr[tr], elem,
@@ -880,6 +884,7 @@ class _NetworkBuilder:
                         sched_nr=sched_nr,
                         filter_nr=filter_nr,
                     ),
+                    path_map_extra=path_map_extra,
                 )
 
     # ── air-handling systems ──────────────────────────────────────────────

@@ -190,14 +190,14 @@ class TestZoneClasses:
         spatial, airflow = _load("toy_broken")
         q2 = mha.audit_q2(str(REPO_ROOT / BROKEN), spatial, airflow)
         assert q2["injection_zone"] == "main"
-        # phantom_zone resolves to neither group nor room — the engine
-        # raises (CONTAM-XZONE-01 fail-loudly); the audit reports it
-        # rather than crashing.
+        # phantom_zone resolves to neither group nor room — both transport
+        # lanes now fail loudly; the audit reports them rather than crashing.
         assert q2["native"] is None
         assert "phantom_zone" in q2["native_error"]
-        # aux is unreachable in every lane; in the committed prj its
-        # drifted name (aux_prj) leaves the JSON zone an orphan.
-        assert q2["contamx_export"]["dead"] == ["aux"]
+        assert q2["contamx_export"] is None
+        assert "phantom_zone" in q2["contamx_export_error"]
+        # aux is unreachable in the committed prj; its drifted name
+        # (aux_prj) leaves the JSON zone an orphan.
         assert q2["contamx_committed"]["orphans"] == ["aux"]
 
 
