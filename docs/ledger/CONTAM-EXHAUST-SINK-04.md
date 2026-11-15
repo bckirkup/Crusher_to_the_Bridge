@@ -44,6 +44,8 @@ The mega path-map regeneration moves `mega_cruise_5000` from 2,623 to 2,573 entr
 - `tests/test_contam_forced_exhaust_ducted.py` adds both links to the `filtered: false` row-5 table and pins the ambient-sink endpoint, unchanged magnitude, and overboard/no-credit description tokens.
 - Targeted CONTAM/audit tests pass: `tests/test_contam_exhaust_sink.py`, `tests/test_contam_pathmap_filtered.py`, `tests/test_contam_forced_exhaust_ducted.py`, and `tests/test_forced_exhaust_audit.py` — 51 passed.
 - `tests/test_contam_phase2_cruise_contrasts_campaign.py` passes with the `_01` design frozen and the `_v2` successor pinned to the regenerated builder output — 57 passed.
+- `tests/test_contam_s1_migration.py` classifies both Dining links as post-S1 authored exhaust sinks, so the migration invariant no longer compares them to the `is_hvac_ducted` alias and the decay-free operator check skips the two affected hulls — 7 passed.
+- `tests/test_outbreak_response_architecture.py::test_hourly_reporting_drives_autonomous_escalation` moves its stated seed 1 → 2 with attribution: the Dining sink shifted the seeded stream, seed 1 now produces no true-positive call, and seed 2 still escalates (first suspected 54 h in the 96 h check). This is a seeded-draw scenario setting, not an epidemiological constant change.
 
 ## Status and blast radius
 
