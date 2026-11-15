@@ -902,14 +902,14 @@
   "cross_zone_links": [
     {
       "from": "AHU_Network_Aft_Dining_Rec",
-      "to": "AHU_Dedicated_Service_Exhaust",
+      "to": "ambient",
       "flow_rate_m3h": 15000.0,
       "is_hvac_ducted": true,
       "path": "Dining_to_Galley_Transfer",
-      "description": "Airflow drawn from dining rooms into galleys to maintain negative pressure in galleys, exhausting odors overboard.",
+      "description": "Airflow drawn from dining rooms to maintain negative pressure in galleys is a once-through prescribed-flow sink to ambient (material leaves the ship/domain), exhausting odors overboard; magnitude unchanged; this leg carries no filtration/recirculation credit.",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": false
     },
     {
       "from": "AHU_Network_Midship_Atrium",

@@ -24,6 +24,9 @@ DESIGN_DIR = CAMPAIGN_DIR / "design"
 DESIGN_PATH = DESIGN_DIR / "phase2_cruise_contrasts_design.json"
 POOLS_PATH = CAMPAIGN_DIR / "source_pools.json"
 CAMPAIGN_PATH = CAMPAIGN_DIR / "campaign.json"
+DESIGN_V2_PATH = DESIGN_DIR / "phase2_cruise_contrasts_design_v2.json"
+POOLS_V2_PATH = CAMPAIGN_DIR / "source_pools_v2.json"
+CAMPAIGN_V2_PATH = CAMPAIGN_DIR / "campaign_v2.json"
 
 HULLS = [
     "expedition_cruise_450",
@@ -113,6 +116,21 @@ def campaign() -> dict[str, Any]:
     return json.loads(CAMPAIGN_PATH.read_text(encoding="utf-8"))
 
 
+@pytest.fixture(scope="module")
+def design_v2() -> dict[str, Any]:
+    return json.loads(DESIGN_V2_PATH.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def pools_doc_v2() -> dict[str, Any]:
+    return json.loads(POOLS_V2_PATH.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def campaign_v2() -> dict[str, Any]:
+    return json.loads(CAMPAIGN_V2_PATH.read_text(encoding="utf-8"))
+
+
 def _trajectory_cells(campaign_doc: dict[str, Any]) -> set[tuple[str, str, str, int]]:
     cells = set()
     for block in campaign_doc["blocks"].values():
@@ -125,13 +143,14 @@ def _trajectory_cells(campaign_doc: dict[str, Any]) -> set[tuple[str, str, str, 
 
 
 class TestFrozenDesign:
-    def test_generated_artifacts_match_builder(self, design, pools_doc, campaign) -> None:
-        assert build_mod.build_design() == design
-        assert build_mod._campaign_spec() == campaign
+    def test_frozen_artifacts_are_the_as_run_record(self, design, pools_doc, campaign) -> None:
+        assert design["design_id"] == "contam_phase2_cruise_contrasts_01"
         assert pools_doc["design_id"] == design["design_id"]
         assert pools_doc["source_pools"] == {
             hull: payload["pool"] for hull, payload in design["source_pools"].items()
         }
+        assert campaign["name"] == "contam_phase2_cruise_contrasts_01"
+        assert build_mod.build_design()["design_id"] == "contam_phase2_cruise_contrasts_02"
 
     def test_design_freezes_manifest_identity(self, design) -> None:
         assert design["design_id"] == "contam_phase2_cruise_contrasts_01"
@@ -332,6 +351,49 @@ class TestFrozenDesign:
         assert dc03["fixture"].startswith("tests/test_contam_analytic_fixtures.py::")
         assert (ROOT / dc03["fixture"].split("::")[0]).is_file()
         assert "DC03" not in {arm for spec in design["arms"].values() for arm in spec["serves"]}
+
+
+class TestV2SuccessorDesign:
+    def test_generated_artifacts_match_builder(self, design_v2, pools_doc_v2, campaign_v2) -> None:
+        assert build_mod.build_design() == design_v2
+        assert build_mod._campaign_spec() == campaign_v2
+        assert pools_doc_v2["design_id"] == design_v2["design_id"]
+        assert pools_doc_v2["source_pools"] == {
+            hull: payload["pool"] for hull, payload in design_v2["source_pools"].items()
+        }
+
+    def test_v2_identity_supersedes_frozen_v1(self, design_v2) -> None:
+        assert design_v2["design_id"] == "contam_phase2_cruise_contrasts_02"
+        assert design_v2["supersedes"] == "contam_phase2_cruise_contrasts_01"
+        assert design_v2["status"] == "frozen_before_first_cell"
+        assert design_v2["hulls"] == HULLS
+
+    def test_v2_hull_panel_tracks_current_platform_jsons(self, design_v2) -> None:
+        panel = design_v2["hull_panel"]
+        assert panel["mega_cruise_5000"]["path_map_entries"] == 2573
+        assert sum(row["path_map_entries"] for row in panel.values()) == 5053
+        for hull, (zones, volume, _entries, supply, duty0) in HULL_PANEL.items():
+            assert panel[hull]["zones"] == zones
+            assert panel[hull]["volume_m3"] == pytest.approx(volume, abs=0.005)
+            assert panel[hull]["supply_groups"] == supply
+            assert panel[hull]["duty0_groups"] == duty0
+
+    def test_v2_field_cache_uses_v2_schema_and_prefix(self, design_v2) -> None:
+        prestage = design_v2["execution"]["field_cache_prestage"]
+        assert prestage["schema"] == "contam_phase2_cruise_contrasts_field_cache_v2"
+        assert prestage["s3_uri"] == (
+            "s3://crusherbucket-994254241749-us-east-1-an/"
+            "campaign/contam_phase2_cruise_contrasts_02/field_cache/field_cache.json"
+        )
+        assert "phase2_cruise_contrasts_design_v2.json" in prestage["producer"]
+        assert design_v2["return"]["prefix"] == "campaign/contam_phase2_cruise_contrasts_02/"
+
+    def test_v2_campaign_registration(self, campaign_v2) -> None:
+        assert campaign_v2["name"] == "contam_phase2_cruise_contrasts_02"
+        assert campaign_v2["s3_prefix"] == "campaign/contam_phase2_cruise_contrasts_02/"
+        assert campaign_v2["manifest"].endswith("phase2_cruise_contrasts_design_v2.json")
+        assert len(campaign_v2["blocks"]) == 60
+        assert _trajectory_cells(campaign_v2) == _trajectory_cells(json.loads(CAMPAIGN_PATH.read_text(encoding="utf-8")))
 
 
 class TestCampaignRegistration:

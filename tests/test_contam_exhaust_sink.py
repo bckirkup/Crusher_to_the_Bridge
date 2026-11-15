@@ -374,6 +374,18 @@ class TestCommittedPlatformAmbientSinks:
             "HVAC_Galley",
             400.0,
         ),
+        (
+            "mega_cruise_5000",
+            "Dining_to_Galley_Transfer",
+            "AHU_Network_Aft_Dining_Rec",
+            15000.0,
+        ),
+        (
+            "messy_cruise_500",
+            "Dining_to_Galley_Transfer",
+            "AHU_Network_Aft_Dining_Rec",
+            15000.0,
+        ),
     }
 
     def test_committed_platforms_declare_only_expected_ambient_sinks(self) -> None:

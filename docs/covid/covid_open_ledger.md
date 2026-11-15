@@ -77,6 +77,18 @@ measured at `a0dad9ec`); frozen E-lane caches are unchanged. Figures not
 resting on that channel stand at their own `Measured at` SHAs; baseline
 `0b58f78d`, authoring commit `a0dad9ec`.
 
+**`CONTAM-EXHAUST-SINK-04` (ledger entry): airborne/downstream-map dose
+figures measured before this change on `mega_cruise_5000` and
+`messy_cruise_500` are historical on the dining-transfer exhaust-sink
+channel.** The `Dining_to_Galley_Transfer` links now declare
+`to: "ambient"` as once-through prescribed-flow sinks with unchanged
+15,000 m³/h magnitudes; native exact material-times moved on affected
+source rooms and former `AHU_Dedicated_Service_Exhaust` destination rooms
+(ledger `docs/ledger/CONTAM-EXHAUST-SINK-04.md`, measured at `2ef624db`);
+frozen E-lane caches are unchanged. Figures not resting on that channel
+stand at their own `Measured at` SHAs; baseline `c5640031`, authoring
+commit `2ef624db`.
+
 **PLATFORM-FIDELITY-01's DP hull-fidelity contrast is SUPERSEDED for
 hull-fidelity inference (2026-11-08).** The frozen PF-01 DP protocols file
 (`data/config/protocols_covid_pf_dp.json`) declared 11 `exempt_work_zones`,

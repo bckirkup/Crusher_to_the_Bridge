@@ -42,6 +42,8 @@ EXPECTED_PLATFORM_COUNTS = {
 }
 EXPECTED_FILTERED_FALSE = {
     ("legend_class_nsc", "medical_exhaust"),
+    ("mega_cruise_5000", "Dining_to_Galley_Transfer"),
+    ("messy_cruise_500", "Dining_to_Galley_Transfer"),
     ("san_antonio_class_lpd", "galley_exhaust_to_mess"),
     ("san_antonio_class_lpd", "medical_exhaust"),
 }
@@ -181,6 +183,26 @@ class TestDuctedReliefClassDeclaration:
         )
         assert link["filtered"] is False
         assert "no filtration/recirculation credit" in str(link.get("description", ""))
+
+    @pytest.mark.parametrize("platform", ["mega_cruise_5000", "messy_cruise_500"])
+    def test_dining_to_galley_transfer_is_an_ambient_sink(self, platform: str) -> None:
+        link = next(
+            link
+            for _platform, _index, link in _row5_links()
+            if _platform == platform
+            and link.get("path") == "Dining_to_Galley_Transfer"
+        )
+        assert link["from"] == "AHU_Network_Aft_Dining_Rec"
+        assert link["to"] == "ambient"
+        assert link["direction"] == "oneway"
+        assert link["mechanism"] == "prescribed_flow"
+        assert link["filtered"] is False
+        assert link["is_hvac_ducted"] is True
+        assert float(link["flow_rate_m3h"]) == pytest.approx(15000.0)
+        description = str(link.get("description", ""))
+        assert "once-through prescribed-flow sink to ambient" in description
+        assert "exhausting odors overboard" in description
+        assert "no filtration/recirculation credit" in description
 
 
 class TestDuctedFiltrationResponse:

@@ -44,7 +44,13 @@ POST_S1_DUCTED_LINKS = {
     ("legend_class_nsc", "medical_exhaust"),
     ("san_antonio_class_lpd", "medical_exhaust"),
 }
-POST_S1_AUTHORED_LINKS = POST_S1_GALLEY_LINKS | POST_S1_DUCTED_LINKS
+POST_S1_EXHAUST_SINK_LINKS = {
+    ("mega_cruise_5000", "Dining_to_Galley_Transfer"),
+    ("messy_cruise_500", "Dining_to_Galley_Transfer"),
+}
+POST_S1_AUTHORED_LINKS = (
+    POST_S1_GALLEY_LINKS | POST_S1_DUCTED_LINKS | POST_S1_EXHAUST_SINK_LINKS
+)
 POST_S1_AUTHORED_OPERATOR_PLATFORMS = {
     platform for platform, _path in POST_S1_AUTHORED_LINKS
 }

@@ -21,6 +21,8 @@ from tools.contam_prj_bridge import export_prj_with_path_map  # noqa: E402
 
 _EXPECTED = {
     "legend_class_nsc": {"medical_exhaust": 1},
+    "mega_cruise_5000": {"Dining_to_Galley_Transfer": 10},
+    "messy_cruise_500": {"Dining_to_Galley_Transfer": 10},
     "san_antonio_class_lpd": {
         "galley_exhaust_to_mess": 1,
         "medical_exhaust": 1,
