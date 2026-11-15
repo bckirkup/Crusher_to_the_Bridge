@@ -58,7 +58,7 @@ path — prefer bringing a real ContamW project and simplifying it.
 | `air_flow_paths.hvac_zones` | Simple **air-handling system (AHS)** | Rooms sharing ACH + Ret/Sup phantoms. |
 | `hvac_zones.ach` | **Air change rate** | Recovered from AHS `Fahs` on simplify when possible. |
 | `air_flow_paths.cross_zone_links` | Inter-zone **fan_cvf** path | Prescribed volumetric flow. |
-| HVAC `filter_efficiency` (config) | Filter applied in Crusher mass balance | Not a Contam filter element (yet). |
+| HVAC `filter_efficiency` (config) | Filter applied in Crusher mass balance | Not a Contam filter element (yet); cross-zone path_map `filtered` carries S1 link semantics when it diverges from `is_hvac_ducted`. |
 | `natural_decay_rate` (config) | 1st-order sink / **removal** | Settling + viral inactivation per epoch. |
 | `path_map.json` | ContamX path index alignment | **Derived from the `.prj`** (`path_map_from_prj`). |
 
@@ -235,6 +235,13 @@ See [`third_party/contamx/README.md`](../third_party/contamx/README.md).
 `data/platforms/<id>/contam/platform.prj` → fiction-bootstrap temp export
 from JSON (last resort). Path map: sidecar beside PRJ, else
 `path_map_from_prj` on the PRJ text.
+
+Path-map filtration is P-min: a cross-zone entry carries `filtered` only
+when the resolved link semantics diverge from the deprecated
+`is_hvac_ducted` alias. The ContamX lane resolves an absent key as
+`is_hvac_ducted`, so old caches/path_maps are unchanged;
+`schemas/contam_path_map.schema.json` pins the seven required keys plus
+optional `filtered`, `sink`, and `declared_flow_m3h`.
 
 ContamX computes the airflow field; Crusher applies pathogen mass balance.
 ContamX is **not** in CI; paths fall back to native.

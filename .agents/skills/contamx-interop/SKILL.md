@@ -104,3 +104,5 @@ hvac:
    only for fiction ships without an authentic Contam model.
 6. Passive cross-zone (`is_hvac_ducted: false`) exports as sized `plr_orfc`; ducted stays `fan_cvf`.
    Per-AHU `oa_fraction` overrides emit dedicated `OAFr_{pct}` schedules on AHS recirc paths.
+   Path-map cross-zone entries carry `filtered` only when it diverges from `is_hvac_ducted`;
+   an absent key resolves to the ducted alias.
