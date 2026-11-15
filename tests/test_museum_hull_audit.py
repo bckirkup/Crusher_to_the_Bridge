@@ -125,6 +125,32 @@ class TestQ1:
         assert mha._resolve_link_rooms("void", airflow, zone_ids) == ["void"]
         assert mha._resolve_link_rooms("nope", airflow, zone_ids) == []
 
+    def test_ambient_sink_endpoint_is_not_dangling(self, tmp_path) -> None:
+        spatial = {
+            "zones": [
+                {"id": "ward", "volume_m3": 10.0},
+                {"id": "berth", "volume_m3": 10.0},
+            ],
+        }
+        airflow = {
+            "hvac_zones": [
+                {"id": "hvac_ward", "rooms": ["ward"]},
+                {"id": "hvac_berth", "rooms": ["berth"]},
+            ],
+            "adjacency": [],
+            "cross_zone_links": [
+                {"from": "hvac_ward", "to": "ambient", "flow_rate_m3h": 100.0},
+            ],
+        }
+        q1 = mha.audit_q1(str(tmp_path), spatial, airflow)
+        assert q1["dangling_xzone_endpoints"] == []
+
+        airflow["cross_zone_links"] = [
+            {"from": "ambient", "to": "hvac_berth", "flow_rate_m3h": 100.0},
+        ]
+        q1 = mha.audit_q1(str(tmp_path), spatial, airflow)
+        assert q1["dangling_xzone_endpoints"] == ["ambient->hvac_berth"]
+
 
 # ── Q2 zone-graph classes ───────────────────────────────────────────────
 

@@ -253,12 +253,20 @@ def _check_link_endpoints(
     b: PlatformBundle, zids: set[str], gids: set[str], links: list[dict[str, Any]]
 ) -> None:
     for link in links:
-        for end in (link.get("from"), link.get("to")):
-            if end not in zids and end not in gids:
-                _add(
-                    b, "topology", "flag", str(end),
-                    "cross_zone_links endpoint resolves to no zone or group",
-                )
+        source = link.get("from")
+        if source not in zids and source not in gids:
+            _add(
+                b, "topology", "flag", str(source),
+                "cross_zone_links endpoint resolves to no zone or group",
+            )
+        dest = link.get("to")
+        if dest == "ambient":
+            continue
+        if dest not in zids and dest not in gids:
+            _add(
+                b, "topology", "flag", str(dest),
+                "cross_zone_links endpoint resolves to no zone or group",
+            )
 
 
 def _check_adjacency_endpoints(b: PlatformBundle, zids: set[str]) -> None:

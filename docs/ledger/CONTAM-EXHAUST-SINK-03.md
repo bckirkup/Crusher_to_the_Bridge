@@ -43,6 +43,7 @@ Fresh `tools.contam_prj_bridge.export_platform_to_prj` exports for both hulls in
 - `tests/test_contam_pathmap_filtered.py` expected counts move from three destination-room expansions per re-pointed link to one source-room sink expansion per link; the absent-`filtered` ducted-alias check now targets a non-sink `galley_supply` entry because sink entries intentionally carry `filtered: false`.
 - `tests/test_contam_forced_exhaust_galley.py` updates the San Antonio `galley_exhaust_to_mess` expected endpoint to `ambient` and pins the once-through-sink description token; the other eight galley row contracts are unchanged.
 - `schemas/air_flow_paths.schema.json` validation passed for both touched platform files; targeted CONTAM/path-map tests pass (39 passed).
+- Review follow-up: `tools/hull_audit.py` and `tools/museum_hull_audit.py` endpoint classifiers predated the sink token and flagged the three valid sinks as dangling; both now treat `to: "ambient"` as resolved while `from: "ambient"` still flags, with regression tests in `tests/test_hull_audit.py` and `tests/test_museum_hull_audit.py`.
 
 ## Status and blast radius
 
