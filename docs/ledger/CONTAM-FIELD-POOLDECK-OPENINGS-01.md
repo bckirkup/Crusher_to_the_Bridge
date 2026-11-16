@@ -11,7 +11,7 @@ Class (b) only from `docs/proposals/contam_field_adjudication_audit_and_fix_plan
 Expedition pool-deck opening authoring. Class (d) is descoped from this change by
 coordinator ruling and is recorded below only as deferred evidence. No
 `flow_rate_m3h` magnitude, `Sanitary_Makeup` mechanism, `envelope_leak.area_m2`,
-exporter, schema, engine, campaign, S3, or frozen-artifact change is made.
+exporter, engine, S3, or frozen `_01`/`_v1` artifact change is made.
 
 Before/after diagnostics are local measurements on the PR working tree at base
 `5f323c05`; committed ledgers remain the durable record.
@@ -45,6 +45,28 @@ Before/after diagnostics are local measurements on the PR working tree at base
   `ObsLounge -> PoolDeck`, the duplicate `p050 doorway` is gone, and
   `CasualDining_Open_Doorway` renumbers to `p132`. Subsequent `path_nr` values
   shift by one; no other platform bundle is touched.
+
+### Campaign design succession
+
+The Expedition adjacency correction moves two source-pool metadata facts
+(`adjacency_degree` 2 → 1 for `CasualDining` and `PoolDeck`) and the Expedition
+path-map count (344 → 343). Per the `_v2` versioning pattern, frozen as-run
+artifacts are not rewritten:
+
+- `campaigns/contam/phase1_hvac_tracer_01`: `_01` design/pools/campaign/readouts
+  stay frozen. `design/build.py` now writes the `_02` successor
+  (`design/phase1_hvac_tracer_design_v2.json`, `source_pools_v2.json`,
+  `campaign_v2.json`; design id `contam_phase1_hvac_tracer_02`, field-cache
+  schema/prefix `_v2`). No `_v2` field cache is produced and nothing is uploaded
+  or submitted in this PR.
+- `campaigns/contam/phase2_cruise_contrasts_01`: the existing `_02` successor is
+  rebuilt in place under the same design id `contam_phase2_cruise_contrasts_02`.
+  `design/phase2_cruise_contrasts_design_v2.json` moves Expedition
+  `path_map_entries` 344 → 343 and the same two `adjacency_degree` values move
+  2 → 1; `source_pools_v2.json` is regenerated to match. `campaign_v2.json` is
+  byte-identical because block/seed structure is unchanged. The Phase 2 hull-panel
+  change-detector moves 344 → 343 and panel total 5,056 → 5,055 for this
+  attributed path-map removal.
 
 ## Witnesses
 
@@ -90,6 +112,12 @@ remains authored.
   touches adjacency only).
 - `tools/contam_commissioned_check.py --platform expedition_cruise_450`:
   `PASS: every commissioned terminal solved inside 5% of declared.`
+- Campaign design contracts:
+  `pytest tests/test_contam_phase1_hvac_tracer_campaign.py tests/test_contam_phase2_cruise_contrasts_campaign.py -q`
+  → 77 passed; `_01` artifacts remain the as-run record and `_02` successors
+  match the builders.
+- Full fast tier: `.venv/bin/python -m pytest tests/ -m 'not slow' -q -n auto`
+  → 8525 passed, 9 skipped.
 
 ## Deferred class-(d) evidence
 
