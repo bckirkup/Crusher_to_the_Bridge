@@ -42,6 +42,7 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- `CONTAM-FIELD-POOLDECK-OPENINGS-01.md` — class-(b) Expedition pool-deck opening authoring fix: duplicate CasualDining doorway removed, ObsLounge open-deck void corrected to a doorway, Expedition bundle re-synced, before/after witnesses recorded, and class-(d) evidence deferred to the pressure-review/envelope-makeup sequence.
 - `CONTAM-PAIRED-RECOMPARE-01.md` — paired native/commissioned/authored exact-integral diagnostic rerun after the #1241 `plr_bdq` laminar fix, with pre-fix change-detector reproduction and per-trajectory closure.
 - `CONTAM-FIELD-ADJUDICATION-01.md` — doc-only adjudication of Edison's preserved native-vs-field Contam differences at `78a023b6`: per-class verdicts, measured flow/ΔP/material-time evidence, and versioned fix stages; no transport-kernel defect proven.
 - `CONTAM-FIELD-ENVELOPE-BOUNDARY-01.md` — stage 5 (verdict (e)): owner decision that outward envelope leakage is a contaminant sink; solved-positive `envelope_leak` flow becomes a boundary sink in the ContamX lane and compare fates, with `pressure_only` baseline mode, destroyer before/after witnesses and fleet enumeration; no path_map schema or data change.

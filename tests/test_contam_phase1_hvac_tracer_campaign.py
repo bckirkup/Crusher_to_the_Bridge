@@ -22,6 +22,9 @@ DESIGN_DIR = CAMPAIGN_DIR / "design"
 DESIGN_PATH = DESIGN_DIR / "phase1_hvac_tracer_design.json"
 POOLS_PATH = CAMPAIGN_DIR / "source_pools.json"
 CAMPAIGN_PATH = CAMPAIGN_DIR / "campaign.json"
+DESIGN_V2_PATH = DESIGN_DIR / "phase1_hvac_tracer_design_v2.json"
+POOLS_V2_PATH = CAMPAIGN_DIR / "source_pools_v2.json"
+CAMPAIGN_V2_PATH = CAMPAIGN_DIR / "campaign_v2.json"
 
 HULLS = [
     "destroyer_baseline",
@@ -65,6 +68,21 @@ def campaign() -> dict[str, Any]:
     return json.loads(CAMPAIGN_PATH.read_text(encoding="utf-8"))
 
 
+@pytest.fixture(scope="module")
+def design_v2() -> dict[str, Any]:
+    return json.loads(DESIGN_V2_PATH.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def pools_doc_v2() -> dict[str, Any]:
+    return json.loads(POOLS_V2_PATH.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def campaign_v2() -> dict[str, Any]:
+    return json.loads(CAMPAIGN_V2_PATH.read_text(encoding="utf-8"))
+
+
 def _trajectory_cells(campaign_doc: dict[str, Any]) -> set[tuple[str, str, int]]:
     cells = set()
     for block in campaign_doc["blocks"].values():
@@ -77,13 +95,14 @@ def _trajectory_cells(campaign_doc: dict[str, Any]) -> set[tuple[str, str, int]]
 
 
 class TestFrozenDesign:
-    def test_generated_artifacts_match_builder(self, design, pools_doc, campaign) -> None:
-        assert build_mod.build_design() == design
-        assert build_mod._campaign_spec() == campaign
+    def test_frozen_artifacts_are_the_as_run_record(self, design, pools_doc, campaign) -> None:
+        assert design["design_id"] == "contam_phase1_hvac_tracer_01"
         assert pools_doc["design_id"] == design["design_id"]
         assert pools_doc["source_pools"] == {
             hull: payload["pool"] for hull, payload in design["source_pools"].items()
         }
+        assert campaign["name"] == "contam_phase1_hvac_tracer_01"
+        assert build_mod.build_design()["design_id"] == "contam_phase1_hvac_tracer_02"
 
     def test_design_freezes_manifest_constants(self, design) -> None:
         assert design["status"] == "frozen_before_first_cell"
@@ -153,6 +172,39 @@ class TestFrozenDesign:
                 pool_item = design["source_pools"][hull]["pool"][row["pool_index"]]
                 assert pool_item["id"]
                 assert row["timing_pattern"] in {"t0_pulse", "t0_t1_split"}
+
+
+class TestV2SuccessorDesign:
+    def test_generated_artifacts_match_builder(self, design_v2, pools_doc_v2, campaign_v2) -> None:
+        assert build_mod.build_design() == design_v2
+        assert build_mod._campaign_spec() == campaign_v2
+        assert pools_doc_v2["design_id"] == design_v2["design_id"]
+        assert pools_doc_v2["source_pools"] == {
+            hull: payload["pool"] for hull, payload in design_v2["source_pools"].items()
+        }
+
+    def test_v2_identity_supersedes_frozen_v1(self, design_v2) -> None:
+        assert design_v2["design_id"] == "contam_phase1_hvac_tracer_02"
+        assert design_v2["supersedes"] == "contam_phase1_hvac_tracer_01"
+        assert design_v2["status"] == "frozen_before_first_cell"
+        assert design_v2["hulls"] == HULLS
+
+    def test_v2_field_cache_uses_v2_schema_and_prefix(self, design_v2) -> None:
+        prestage = design_v2["execution"]["field_cache_prestage"]
+        assert prestage["schema"] == "contam_phase1_hvac_tracer_field_cache_v2"
+        assert prestage["s3_uri"] == (
+            "s3://crusherbucket-994254241749-us-east-1-an/"
+            "campaign/contam_phase1_hvac_tracer_02/field_cache/field_cache.json"
+        )
+        assert "phase1_hvac_tracer_design_v2.json" in prestage["producer"]
+        assert design_v2["return"]["prefix"] == "campaign/contam_phase1_hvac_tracer_02/"
+
+    def test_v2_campaign_registration(self, campaign_v2, campaign) -> None:
+        assert campaign_v2["name"] == "contam_phase1_hvac_tracer_02"
+        assert campaign_v2["s3_prefix"] == "campaign/contam_phase1_hvac_tracer_02/"
+        assert campaign_v2["manifest"].endswith("phase1_hvac_tracer_design_v2.json")
+        assert len(campaign_v2["blocks"]) == 17
+        assert _trajectory_cells(campaign_v2) == _trajectory_cells(campaign)
 
 
 class TestCampaignRegistration:

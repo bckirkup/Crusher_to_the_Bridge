@@ -432,17 +432,12 @@
     {
       "from": "ObsLounge",
       "to": "PoolDeck",
-      "type": "open_deck"
+      "type": "doorway"
     },
     {
       "from": "Bridge",
       "to": "ObsLounge",
       "type": "passageway"
-    },
-    {
-      "from": "CasualDining",
-      "to": "PoolDeck",
-      "type": "doorway"
     },
     {
       "from": "Gym",

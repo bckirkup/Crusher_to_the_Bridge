@@ -876,7 +876,7 @@
         1.0
       ],
       "hvac_groups": 22,
-      "path_map_entries": 344,
+      "path_map_entries": 343,
       "r_base": [
         0.4
       ],
@@ -1790,7 +1790,7 @@
           "volume_m3": 1250.0
         },
         {
-          "adjacency_degree": 2,
+          "adjacency_degree": 1,
           "category": "large_venue",
           "hvac_duty": 0.5,
           "hvac_group_id": "AHU_Public_Aft",
@@ -1845,7 +1845,7 @@
           "volume_m3": 24.84
         },
         {
-          "adjacency_degree": 2,
+          "adjacency_degree": 1,
           "category": "remote_weak",
           "hvac_duty": 0.5,
           "hvac_group_id": "",

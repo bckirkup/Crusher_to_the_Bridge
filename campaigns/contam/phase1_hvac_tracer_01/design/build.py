@@ -3,9 +3,11 @@
 
 The design is deterministic and anchor-free: source pools use only platform
 metadata (zone type, volume, HVAC service, duty, and adjacency degree), and the
-seed mapping is the manifest's paired-seed rule. Running this script rewrites
-``design/phase1_hvac_tracer_design.json``, ``source_pools.json``, and the
-campaign-root ``campaign.json`` from the six platform layouts.
+seed mapping is the manifest's paired-seed rule. Running this script writes the
+``_v2`` successor artifacts (``design/phase1_hvac_tracer_design_v2.json``,
+``source_pools_v2.json``, and ``campaign_v2.json``) from the six platform
+layouts. The ``_01`` design, pools, campaign spec, caches and readouts are
+frozen as-run artifacts and are not rewritten.
 """
 from __future__ import annotations
 
@@ -15,10 +17,16 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[4]
-CAMPAIGN_DIR = ROOT / "campaigns" / "contam" / "phase1_hvac_tracer_01"
-DESIGN_PATH = CAMPAIGN_DIR / "design" / "phase1_hvac_tracer_design.json"
+CAMPAIGN_REL = "campaigns/contam/phase1_hvac_tracer_01"
+CAMPAIGN_DIR = ROOT / CAMPAIGN_REL
+DESIGN_REL = f"{CAMPAIGN_REL}/design/phase1_hvac_tracer_design.json"
+DESIGN_PATH = ROOT / DESIGN_REL
 POOLS_PATH = CAMPAIGN_DIR / "source_pools.json"
 CAMPAIGN_JSON_PATH = CAMPAIGN_DIR / "campaign.json"
+DESIGN_V2_REL = f"{CAMPAIGN_REL}/design/phase1_hvac_tracer_design_v2.json"
+DESIGN_V2_PATH = ROOT / DESIGN_V2_REL
+POOLS_V2_PATH = CAMPAIGN_DIR / "source_pools_v2.json"
+CAMPAIGN_V2_JSON_PATH = CAMPAIGN_DIR / "campaign_v2.json"
 
 HULLS = [
     "destroyer_baseline",
@@ -49,6 +57,10 @@ FIELD_CACHE_V2_S3_URI = (
     "s3://crusherbucket-994254241749-us-east-1-an/"
     "campaign/contam_phase1_hvac_tracer_02/field_cache/field_cache.json"
 )
+DESIGN_ID = "contam_phase1_hvac_tracer_01"
+DESIGN_ID_V2 = FIELD_CACHE_V2_DESIGN_ID
+S3_PREFIX_V2 = f"campaign/{DESIGN_ID_V2}/"
+IMAGE_TAG_V2 = "contam-phase1-hvac-tracer-02"
 FIELD_CACHE_FIELD_COUNT = 11
 CONTAMX_VERSION = "3.4.0.3 64 bit"
 CONTAMX_BINARY = "third_party/contamx/contamx3"
@@ -316,16 +328,13 @@ def _trajectory_blocks() -> dict[str, Any]:
 def _campaign_spec() -> dict[str, Any]:
     blocks = _trajectory_blocks()
     return {
-        "name": "contam_phase1_hvac_tracer_01",
+        "name": DESIGN_ID_V2,
         "pathogen": "contam",
-        "manifest": "campaigns/contam/phase1_hvac_tracer_01/design/phase1_hvac_tracer_design.json",
+        "manifest": DESIGN_V2_REL,
         "pathogen_id": None,
-        "s3_prefix": "campaign/contam_phase1_hvac_tracer_01/",
+        "s3_prefix": S3_PREFIX_V2,
         "queue": "picard-campaign-queue",
-        "image_tag": (
-            "contam-phase1-hvac-tracer-01@sha256:"
-            "8956cf37e530e9ccda1f349580727f0a51e95fe052206bf7d1170827cfd4d42f"
-        ),
+        "image_tag": IMAGE_TAG_V2,
         "epochs": EPOCHS,
         "epoch_hours": EPOCH_HOURS,
         "resources": {"vcpu": "1", "memory": "2048"},
@@ -341,13 +350,12 @@ def _field_cache_prestage() -> dict[str, Any]:
         "producer": (
             "python3 campaigns/contam/phase1_hvac_tracer_01/cell.py "
             "--mode field-cache --design "
-            "campaigns/contam/phase1_hvac_tracer_01/design/"
-            "phase1_hvac_tracer_design.json --out <local-dir>"
+            f"{DESIGN_V2_REL} --out <local-dir>"
         ),
         "artifact": "field_cache.json",
-        "schema": FIELD_CACHE_SCHEMA,
+        "schema": FIELD_CACHE_SCHEMA_V2,
         "field_count": FIELD_CACHE_FIELD_COUNT,
-        "s3_uri": FIELD_CACHE_S3_URI,
+        "s3_uri": FIELD_CACHE_V2_S3_URI,
         "trajectory_consumer_arg": "--field-cache-uri",
         "contamx": {
             "version": CONTAMX_VERSION,
@@ -371,7 +379,8 @@ def build_design() -> dict[str, Any]:
         for block in _trajectory_blocks().values()
     )
     return {
-        "design_id": "contam_phase1_hvac_tracer_01",
+        "design_id": DESIGN_ID_V2,
+        "supersedes": DESIGN_ID,
         "status": "frozen_before_first_cell",
         "manifest": "docs/proposals/contam_phase1_scope_manifest.md",
         "manifest_pr": 1172,
@@ -441,7 +450,7 @@ def build_design() -> dict[str, Any]:
             "grid": _seed_grid(pool_lengths),
         },
         "execution": {
-            "submit_path": "scripts/campaign submit contam/phase1_hvac_tracer_01 --block <block>",
+            "submit_path": "scripts/campaign submit contam/phase1_hvac_tracer_02 --block <block>",
             "field_cache_prestage": _field_cache_prestage(),
             "trajectory_blocks": len(_trajectory_blocks()),
             "trajectory_array_children": trajectory_cells,
@@ -467,7 +476,7 @@ def build_design() -> dict[str, Any]:
         "report_only_diagnostics": REPORT_ONLY,
         "return": {
             "bucket": "crusherbucket-994254241749-us-east-1-an",
-            "prefix": "campaign/contam_phase1_hvac_tracer_01/",
+            "prefix": S3_PREFIX_V2,
             "slim_artifacts": True,
             "full_frames_optional_only_if_pilot_threshold_passes": True,
         },
@@ -501,12 +510,12 @@ def main(argv: list[str] | None = None) -> int:
             "array_children=340"
         )
         return 0
-    _write_json(DESIGN_PATH, design)
-    _write_json(POOLS_PATH, {"design_id": design["design_id"], "source_pools": pools})
-    _write_json(CAMPAIGN_JSON_PATH, spec)
-    print(f"WROTE {DESIGN_PATH}")
-    print(f"WROTE {POOLS_PATH}")
-    print(f"WROTE {CAMPAIGN_JSON_PATH}")
+    _write_json(DESIGN_V2_PATH, design)
+    _write_json(POOLS_V2_PATH, {"design_id": design["design_id"], "source_pools": pools})
+    _write_json(CAMPAIGN_V2_JSON_PATH, spec)
+    print(f"WROTE {DESIGN_V2_PATH}")
+    print(f"WROTE {POOLS_V2_PATH}")
+    print(f"WROTE {CAMPAIGN_V2_JSON_PATH}")
     return 0
 
 
