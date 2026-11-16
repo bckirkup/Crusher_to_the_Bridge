@@ -317,8 +317,17 @@ while inward or zero flow adds no path. `pressure_only` therefore remains an
 envelope-leak-only baseline; it does not disable ambient-opening sinks.
 `tools/contam_flow_compare.py` reports `ambient_opening` rows separately
 (`n_ambient_opening_paths`, `ambient_opening_sink_out_m3h`,
-`ambient_opening_inward_m3h`). No committed platform declares an
-`ambient_openings` record yet; ledger `CONTAM-AMBIENT-OPENING-BOUNDARY-01`.
+`ambient_opening_inward_m3h`); ledger `CONTAM-AMBIENT-OPENING-BOUNDARY-01`.
+
+The exported steady weather has no wind and no path sets the ContamX wind
+flag, so at the exported zone temperature an opening on a weather deck
+(ΔT = 0) solves no outward flow. An `ambient_openings` record may declare
+`wind_speed_m_s`: the exporter then sets the wind flag on that record's two
+legs only and imposes a constant windward / leeward `wPset`
+(`0.8 · Cp · ρU²/2`, Cp from the hull's wind profile at 0° and 180°). Declared
+records: make-up louvres on the six cruise and two fiction hulls (no wind),
+`open_deck` on 23 cruise weather decks (1 m/s); ledger
+`CONTAM-AMBIENT-WEATHER-CRUISE-01`.
 
 ### `.SIM` reader contract (critical)
 

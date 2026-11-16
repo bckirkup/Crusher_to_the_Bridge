@@ -5,8 +5,12 @@
 > (outward opening flow as a field-lane boundary sink,
 > `CONTAM-AMBIENT-OPENING-BOUNDARY-01`), and stage 3 (`makeup_louvre` records
 > on the six cruise and two fiction hulls,
-> `CONTAM-AMBIENT-MAKEUP-CRUISE-01`, `CONTAM-AMBIENT-MAKEUP-FICTION-01`).
-> Still proposed: stages 4+. The audit below was measured against
+> `CONTAM-AMBIENT-MAKEUP-CRUISE-01`, `CONTAM-AMBIENT-MAKEUP-FICTION-01`),
+> and the cruise class of stage 4 (`exposure: weather` plus `open_deck`
+> records on 23 weather decks of the six cruise hulls, with the ΔT = 0
+> problem resolved by a record-declared `wind_speed_m_s`,
+> `CONTAM-AMBIENT-WEATHER-CRUISE-01`).
+> Still proposed: stage 4 for the naval and fiction classes, and stages 5+. The audit below was measured against
 > `origin/main` `15beae6b` (post-#1250/#1251). Audit ledger:
 > [`../ledger/CONTAM-AMBIENT-EXPOSURE-01.md`](../ledger/CONTAM-AMBIENT-EXPOSURE-01.md).
 > This document lives in `docs/proposals/` because the representation it
