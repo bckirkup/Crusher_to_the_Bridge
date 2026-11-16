@@ -457,6 +457,7 @@
       "traffic": "medium",
       "volume_m3": 800.0,
       "deck": "7_Promenade",
+      "exposure": "weather",
       "max_occupancy": 150,
       "display": {
         "x": 120,
@@ -470,6 +471,7 @@
       "traffic": "high",
       "volume_m3": 1500.0,
       "deck": "12_Aloha",
+      "exposure": "weather",
       "max_occupancy": 250,
       "display": {
         "x": 180,
@@ -499,6 +501,7 @@
       "traffic": "high",
       "volume_m3": 2500.0,
       "deck": "14_Lido",
+      "exposure": "weather",
       "max_occupancy": 400,
       "display": {
         "x": 62,
@@ -525,6 +528,7 @@
       "traffic": "high",
       "volume_m3": 1800.0,
       "deck": "14_Lido",
+      "exposure": "weather",
       "max_occupancy": 300,
       "display": {
         "x": 80,
@@ -644,6 +648,7 @@
       "traffic": "medium",
       "volume_m3": 600.0,
       "deck": "14_Lido",
+      "exposure": "weather",
       "max_occupancy": 100,
       "display": {
         "x": 205,
@@ -735,6 +740,7 @@
       "traffic": "medium",
       "volume_m3": 800.0,
       "deck": "15_Sun",
+      "exposure": "weather",
       "max_occupancy": 200,
       "display": {
         "x": 155,
@@ -813,6 +819,7 @@
       "traffic": "medium",
       "volume_m3": 600.0,
       "deck": "16_Sports",
+      "exposure": "weather",
       "max_occupancy": 100,
       "display": {
         "x": 138,
@@ -839,6 +846,7 @@
       "traffic": "medium",
       "volume_m3": 400.0,
       "deck": "17_Sky",
+      "exposure": "weather",
       "max_occupancy": 80,
       "display": {
         "x": 140,

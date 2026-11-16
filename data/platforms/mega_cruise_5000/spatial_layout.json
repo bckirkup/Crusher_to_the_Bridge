@@ -48,6 +48,7 @@
       "traffic": "high",
       "volume_m3": 9000,
       "deck": "15_Pool",
+      "exposure": "weather",
       "max_occupancy": 1200,
       "display": {
         "x": 210,
@@ -61,6 +62,7 @@
       "traffic": "medium",
       "volume_m3": 1800,
       "deck": "15_Pool",
+      "exposure": "weather",
       "max_occupancy": 250,
       "display": {
         "x": 125,
@@ -74,6 +76,7 @@
       "traffic": "high",
       "volume_m3": 3600,
       "deck": "15_Pool",
+      "exposure": "weather",
       "max_occupancy": 700,
       "display": {
         "x": 80,
@@ -142,6 +145,7 @@
       "traffic": "high",
       "volume_m3": 36000,
       "deck": "8_CentralPark",
+      "exposure": "weather",
       "max_occupancy": 1800,
       "display": {
         "x": 180,
@@ -348,6 +352,7 @@
       "traffic": "high",
       "volume_m3": 18000,
       "deck": "6_Aqua",
+      "exposure": "weather",
       "max_occupancy": 1200,
       "display": {
         "x": 45,

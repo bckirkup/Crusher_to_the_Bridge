@@ -213,6 +213,7 @@ def _validate_ambient_opening(record: Any) -> None:
     _require_number(record, "area_m2", zone, minimum=0.0, exclusive=True, nullable=False)
     _require_number(record, "exchange_m3h", zone, minimum=0.0)
     _require_number(record, "azimuth_deg", zone, minimum=0.0, maximum=360.0)
+    _require_number(record, "wind_speed_m_s", zone, minimum=0.0)
 
 
 def _require_number(

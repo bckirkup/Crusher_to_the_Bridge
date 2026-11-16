@@ -103,6 +103,11 @@
           "type": "string",
           "description": "Deck or level identifier (platform-specific, e.g. main, saucer_10, 3_Marina)"
         },
+        "exposure": {
+          "type": "string",
+          "enum": ["weather", "enclosed"],
+          "description": "Authored exposure of the zone to the outside air (proposal D7(b), CONTAM-AMBIENT-WEATHER-CRUISE-01). 'weather' is an open or semi-open deck with no envelope; 'enclosed' is inside the hull envelope. A declared fact read from the zone's own description, not inferred from its id. Absent means not yet declared; tools.hull_audit then falls back to its id match."
+        },
         "display": {
           "type": "object",
           "required": ["x", "y"],

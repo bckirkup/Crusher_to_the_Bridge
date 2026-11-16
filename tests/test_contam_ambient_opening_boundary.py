@@ -192,10 +192,12 @@ def test_compare_without_sim_flows_reports_ambient_rows_as_skipped() -> None:
     } == {1: "skipped", 2: "skipped", 3: "unknown"}
 
 
-def test_committed_ambient_opening_legs_are_the_makeup_louvres() -> None:
+def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # CONTAM-AMBIENT-MAKEUP-CRUISE-01 and CONTAM-AMBIENT-MAKEUP-FICTION-01:
-    # two legs per authored make-up louvre on the eight hulls; no other
-    # committed bundle carries an opening.
+    # two legs per authored make-up louvre on the eight hulls.
+    # CONTAM-AMBIENT-WEATHER-CRUISE-01 adds two legs per authored cruise
+    # weather-deck opening (classic 1, diamond 8, expedition 1, greg 5,
+    # mega 5, spirit 3 records). No other committed bundle carries an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -205,7 +207,8 @@ def test_committed_ambient_opening_legs_are_the_makeup_louvres() -> None:
         if count:
             legs[path.parent.parent.name] = count
     assert legs == {
-        "classic_cruise_1900": 2, "diamond_princess": 2, "expedition_cruise_450": 2,
-        "greg_mortimer": 2, "mega_cruise_5000": 20, "spirit_cruise_3000": 2,
+        "classic_cruise_1900": 2 + 2, "diamond_princess": 2 + 16,
+        "expedition_cruise_450": 2 + 2, "greg_mortimer": 2 + 10,
+        "mega_cruise_5000": 20 + 10, "spirit_cruise_3000": 2 + 6,
         "enterprise_constitution_tos": 2, "enterprise_galaxy_tng": 2,
     }

@@ -81,6 +81,7 @@
       "traffic": "high",
       "volume_m3": 1050.0,
       "deck": "7_Sun",
+      "exposure": "weather",
       "max_occupancy": 120,
       "display": {
         "x": 90,

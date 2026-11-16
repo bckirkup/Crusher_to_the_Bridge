@@ -89,6 +89,23 @@ _MAKEUP_RECORDS = {
     "greg_mortimer": 1, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
 }
+# CONTAM-AMBIENT-WEATHER-CRUISE-01: one ``open_deck`` record per declared
+# weather zone on the six cruise hulls.
+_WEATHER_ZONES = {
+    "classic_cruise_1900": {"PoolDeck"},
+    "diamond_princess": {
+        "OceanFront", "TerracePool", "NeptunePool", "CalypsoPool",
+        "HorizonTerrace", "OpenAirCinema", "SportsCourt", "CenterCourt",
+    },
+    "expedition_cruise_450": {"PoolDeck"},
+    "greg_mortimer": {
+        "ZodiacPlatforms", "ActivityPlat", "ViewPlatforms", "SunDeck", "TopDeck",
+    },
+    "mega_cruise_5000": {
+        "Main_Pool_Deck", "Sports_Court", "Waterpark", "CentralPark", "Aqua_Theater",
+    },
+    "spirit_cruise_3000": {"MainPool", "AftPool", "SportsDeck"},
+}
 
 
 class TestSchema:
@@ -129,31 +146,67 @@ class TestSchema:
         {"azimuth_deg": -1.0},
         {"schedule": None},
         {"flow_rate_m3h": 10.0},
+        {"wind_speed_m_s": -1.0},
+        {"wind_speed_m_s": "fast"},
     ])
     def test_invalid_records_are_rejected(self, overrides: dict[str, Any]) -> None:
         assert self._errors(_opening(**overrides))
 
-    def test_only_makeup_louvres_are_declared(self) -> None:
-        # CONTAM-AMBIENT-MAKEUP-CRUISE-01 and
-        # CONTAM-AMBIENT-MAKEUP-FICTION-01 authored the records: make-up
-        # louvres on the six cruise hulls and two fiction hulls, native rate 0
-        # (D5). Any other declaration is a later stage and must move this
-        # guard deliberately.
+    @staticmethod
+    def _declared(opening_type: str) -> dict[str, list[dict[str, Any]]]:
         schema = json.loads(_AIR_FLOW_SCHEMA.read_text(encoding="utf-8"))
         validator = jsonschema.Draft202012Validator(schema)
         paths = sorted(_PLATFORM_ROOT.glob("*/air_flow_paths.json"))
         assert paths
-        declared: dict[str, int] = {}
+        declared: dict[str, list[dict[str, Any]]] = {}
         for path in paths:
             document = json.loads(path.read_text(encoding="utf-8"))
             assert not list(validator.iter_errors(document)), path
-            records = document.get("ambient_openings", [])
-            if records:
-                declared[path.parent.name] = len(records)
-            for record in records:
-                assert record["type"] == "makeup_louvre", path
-                assert record["exchange_m3h"] == pytest.approx(0.0), path
-        assert declared == _MAKEUP_RECORDS
+            for record in document.get("ambient_openings", []):
+                assert record["type"] in ("makeup_louvre", "open_deck"), path
+                if record["type"] == opening_type:
+                    declared.setdefault(path.parent.name, []).append(record)
+        return declared
+
+    def test_declared_makeup_louvres(self) -> None:
+        # CONTAM-AMBIENT-MAKEUP-CRUISE-01 and
+        # CONTAM-AMBIENT-MAKEUP-FICTION-01 authored the records: make-up
+        # louvres on the six cruise hulls and two fiction hulls, native rate 0
+        # (D5), no imposed wind.
+        declared = self._declared("makeup_louvre")
+        assert {hull: len(rows) for hull, rows in declared.items()} == _MAKEUP_RECORDS
+        for rows in declared.values():
+            for record in rows:
+                assert record["exchange_m3h"] == pytest.approx(0.0)
+                assert "wind_speed_m_s" not in record
+
+    def test_declared_weather_openings(self) -> None:
+        # CONTAM-AMBIENT-WEATHER-CRUISE-01 authored one ``open_deck`` record
+        # per declared weather zone on the six cruise hulls, each with a
+        # declared relative wind and a non-zero native rate (D5). Together
+        # with the louvre guard above this is every declared opening; a
+        # naval or fiction weather opening, a balcony, hatch or door is a
+        # later stage and must move these guards deliberately.
+        declared = self._declared("open_deck")
+        assert {
+            hull: {record["zone"] for record in rows} for hull, rows in declared.items()
+        } == _WEATHER_ZONES
+        for hull, rows in declared.items():
+            assert len(rows) == len(_WEATHER_ZONES[hull])
+            for record in rows:
+                assert record["wind_speed_m_s"] == pytest.approx(1.0)
+                assert record["exchange_m3h"] > 0.0
+
+    def test_weather_zones_carry_the_authored_exposure(self) -> None:
+        # D7(b): the zone an ``open_deck`` record sits on declares
+        # ``exposure: weather``; no other committed zone declares exposure.
+        declared: dict[str, set[str]] = {}
+        for path in sorted(_PLATFORM_ROOT.glob("*/spatial_layout.json")):
+            for zone in json.loads(path.read_text(encoding="utf-8"))["zones"]:
+                if "exposure" in zone:
+                    assert zone["exposure"] == "weather", (path, zone["id"])
+                    declared.setdefault(path.parent.name, set()).add(zone["id"])
+        assert declared == _WEATHER_ZONES
 
 
 class TestNativeBuilder:
@@ -342,6 +395,53 @@ class TestExporter:
         for row in rows:
             assert float(row[6]) > 0  # wind pressure profile attached
             assert "135" in row
+
+    def _opening_rows(self, record: dict[str, Any], **kwargs: Any) -> list[list[str]]:
+        kwargs.setdefault("hobbyist", True)
+        text, path_map = export_prj_with_path_map(_spatial(), _airflow(record), **kwargs)
+        nrs = {e["path_nr"] for e in path_map if e["kind"] == AMBIENT_OPENING_KIND}
+        return [
+            line.split() for line in _prj_section(text, "! flow paths")
+            if line.split() and line.split()[0].isdigit() and int(line.split()[0]) in nrs
+        ]
+
+    @pytest.mark.parametrize("speed", [None, 0.0])
+    def test_no_declared_wind_imposes_no_pressure(self, speed: float | None) -> None:
+        for row in self._opening_rows(_opening(wind_speed_m_s=speed)):
+            assert row[1] == "0"  # wind flag clear
+            assert float(row[15]) == pytest.approx(0.0)  # wPset
+
+    def test_declared_wind_imposes_windward_and_leeward_pressure(self) -> None:
+        # CONTAM-AMBIENT-WEATHER-CRUISE-01: wPmod 0.8 x Cp x rho U^2 / 2 with
+        # the ShipHull Cp of 0.7 windward and -0.25 leeward.
+        dynamic = 0.5 * 101325.0 / (287.055 * 293.15)
+        windward, leeward = self._opening_rows(_opening(wind_speed_m_s=1.0))
+        assert windward[1] == leeward[1] == "1"  # ContamX wind flag
+        assert windward[6] == leeward[6] == "0"  # no profile: wPset is constant
+        assert float(windward[15]) == pytest.approx(0.8 * 0.7 * dynamic, rel=1e-5)
+        assert float(leeward[15]) == pytest.approx(0.8 * -0.25 * dynamic, rel=1e-5)
+
+    def test_imposed_pressure_scales_with_the_square_of_the_speed(self) -> None:
+        pressures = {
+            speed: [float(row[15]) for row in self._opening_rows(
+                _opening(wind_speed_m_s=speed),
+            )]
+            for speed in (1.0, 2.0, 5.0)
+        }
+        for speed in (2.0, 5.0):
+            for slow, fast in zip(pressures[1.0], pressures[speed]):
+                assert fast == pytest.approx(slow * speed * speed, rel=1e-4)
+
+    def test_skeleton_export_imposes_the_same_pressure(self) -> None:
+        record = _opening(wind_speed_m_s=1.0)
+        hobbyist = [row[15] for row in self._opening_rows(record)]
+        skeleton = [row[15] for row in self._opening_rows(record, hobbyist=False)]
+        assert skeleton == hobbyist
+
+    def test_declared_wind_needs_the_paired_model(self) -> None:
+        record = _opening(wind_speed_m_s=1.0)
+        with pytest.raises(ValueError, match="wind_speed_m_s"):
+            self._opening_rows(record, overrides={"ambient_opening_model": "single_orifice"})
 
     def test_schedule_from_type_and_from_record(self) -> None:
         def sched_nrs(record: dict[str, Any]) -> set[str]:

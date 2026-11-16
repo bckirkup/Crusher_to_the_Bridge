@@ -188,6 +188,10 @@ def _is_occupied(zone: dict[str, Any]) -> bool:
 
 
 def _is_exterior(zone: dict[str, Any]) -> bool:
+    """Weather zone: the authored ``exposure`` when declared, else the id match."""
+    exposure = zone.get("exposure")
+    if exposure is not None:
+        return exposure == "weather"
     zid = zone["id"].lower()
     return zone.get("type") == "Free" and any(h in zid for h in _EXTERIOR_HINTS)
 
