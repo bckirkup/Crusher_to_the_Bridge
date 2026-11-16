@@ -1,0 +1,656 @@
+{
+ "campaign": "noro_provisioned_sensitivity_01",
+ "description": "NORO-PROVISIONED-SENSITIVITY-01 (Paper-1 sensitivity, Child B): 2^(5-1) Resolution-V half-fraction (E = ABCD) on q_source (A), boarding passenger prevalence (B), boarding crew prevalence (C), illness_duration.draw (D), joint route-efficiency scale (E) \u2014 16 profiles x 4 hulls x 3 venue arms = 192 cells on the venue02 spec, seed-paired with venue02 (ascending seed prefix per cell), extracted via first_paper_scalar/1.5.0 (role checkpoints days 3/7/10/12).  Tier seeds list main + reserve; campaign.json blocks carry the submitted prefix (scout = first 8 seeds).",
+ "platform": "classic_cruise_1900",
+ "default_epochs": 168,
+ "default_num_agents": 1910,
+ "embarkation_date": "2026-01-10",
+ "natural_history_clock": "hours",
+ "pathogen_configs": {
+  "norovirus": {
+   "bundle": "active_profiles",
+   "pathogen_id": "norwalk_gi",
+   "overrides": {
+    "remove": [
+     "sars_cov2_resp"
+    ]
+   }
+  }
+ },
+ "surveillance_configs": {
+  "syndromic_comp65": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "fred_behavior": {
+    "quarantine_compliance": 0.65,
+    "compliance_by_class": {
+     "crew": 0.65,
+     "passenger_elderly": 0.54,
+     "passenger_young": 0.34
+    }
+   }
+  }
+ },
+ "tiers": {
+  "fl_exp_12d_sens_p06_paxv_declared_receipts": {
+   "platform": "expedition_cruise_450",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "num_agents": 450,
+   "description": "SENSITIVITY-01 profile p06 (A+B-C+D-E+) arm passenger_venue pin ['MainDining']: q_source 0.0047, pax/crew prevalence 0.025/0.03, illness draw point, route scale x2.0 \u2014 shipped rung, nsf29, 288 epochs, comp65, dose 7.57; all else = NORO-PROVISIONED-VENUE-02.",
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment",
+     "common_source": {
+      "mode": "on",
+      "lot_mode": "object",
+      "handler_mode": "object",
+      "diner_mode": "object",
+      "lot_mint_model": "provisioned_source",
+      "provisioned_source": {
+       "source_id": "generic_cruise_port",
+       "q_source": 0.0047,
+       "station_zone_pin": [
+        "MainDining"
+       ],
+       "source_venue_arm": "passenger_venue",
+       "lot_layer_mode": "declared_receipts",
+       "receipts_per_item_line": 2
+      }
+     }
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
+    }
+   },
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "illness_duration": {
+      "draw": "point"
+     },
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   "boarding_mechanism_rungs": [
+    "shipped"
+   ],
+   "boarding_prevalence_points": [
+    {
+     "passenger": 0.025,
+     "crew": 0.03
+    }
+   ],
+   "never_symptomatic_fractions": [
+    0.29
+   ],
+   "seeds": [
+    917326
+   ],
+   "sensitivity_profile": {
+    "profile_id": "p06",
+    "signs": {
+     "A": 1,
+     "B": -1,
+     "C": 1,
+     "D": -1,
+     "E": 1
+    }
+   }
+  },
+  "fl_cls_12d_sens_p06_paxv": {
+   "platform": "classic_cruise_1900",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "num_agents": 1910,
+   "description": "SENSITIVITY-01 profile p06 (A+B-C+D-E+) arm passenger_venue pin ['MainDining_L']: q_source 0.0047, pax/crew prevalence 0.025/0.03, illness draw point, route scale x2.0 \u2014 shipped rung, nsf29, 288 epochs, comp65, dose 7.57; all else = NORO-PROVISIONED-VENUE-02.",
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment",
+     "common_source": {
+      "mode": "on",
+      "lot_mode": "object",
+      "handler_mode": "object",
+      "diner_mode": "object",
+      "lot_mint_model": "provisioned_source",
+      "provisioned_source": {
+       "source_id": "generic_cruise_port",
+       "q_source": 0.0047,
+       "station_zone_pin": [
+        "MainDining_L"
+       ],
+       "source_venue_arm": "passenger_venue"
+      }
+     }
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
+    }
+   },
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "illness_duration": {
+      "draw": "point"
+     },
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   "boarding_mechanism_rungs": [
+    "shipped"
+   ],
+   "boarding_prevalence_points": [
+    {
+     "passenger": 0.025,
+     "crew": 0.03
+    }
+   ],
+   "never_symptomatic_fractions": [
+    0.29
+   ],
+   "seeds": [
+    962793
+   ],
+   "sensitivity_profile": {
+    "profile_id": "p06",
+    "signs": {
+     "A": 1,
+     "B": -1,
+     "C": 1,
+     "D": -1,
+     "E": 1
+    }
+   }
+  },
+  "fl_spr_12d_sens_p06_paxv": {
+   "platform": "spirit_cruise_3000",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "num_agents": 3000,
+   "description": "SENSITIVITY-01 profile p06 (A+B-C+D-E+) arm passenger_venue pin ['MainDining_L']: q_source 0.0047, pax/crew prevalence 0.025/0.03, illness draw point, route scale x2.0 \u2014 shipped rung, nsf29, 288 epochs, comp65, dose 7.57; all else = NORO-PROVISIONED-VENUE-02.",
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment",
+     "common_source": {
+      "mode": "on",
+      "lot_mode": "object",
+      "handler_mode": "object",
+      "diner_mode": "object",
+      "lot_mint_model": "provisioned_source",
+      "provisioned_source": {
+       "source_id": "generic_cruise_port",
+       "q_source": 0.0047,
+       "station_zone_pin": [
+        "MainDining_L"
+       ],
+       "source_venue_arm": "passenger_venue"
+      }
+     }
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
+    }
+   },
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "illness_duration": {
+      "draw": "point"
+     },
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   "boarding_mechanism_rungs": [
+    "shipped"
+   ],
+   "boarding_prevalence_points": [
+    {
+     "passenger": 0.025,
+     "crew": 0.03
+    }
+   ],
+   "never_symptomatic_fractions": [
+    0.29
+   ],
+   "seeds": [
+    1004210
+   ],
+   "sensitivity_profile": {
+    "profile_id": "p06",
+    "signs": {
+     "A": 1,
+     "B": -1,
+     "C": 1,
+     "D": -1,
+     "E": 1
+    }
+   }
+  },
+  "fl_meg_12d_sens_p06_paxv_single_line_receipt": {
+   "platform": "mega_cruise_5000",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "num_agents": 7000,
+   "description": "SENSITIVITY-01 profile p06 (A+B-C+D-E+) arm passenger_venue pin ['MainDining_L']: q_source 0.0047, pax/crew prevalence 0.025/0.03, illness draw point, route scale x2.0 \u2014 shipped rung, nsf29, 288 epochs, comp65, dose 7.57; all else = NORO-PROVISIONED-VENUE-02.",
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment",
+     "common_source": {
+      "mode": "on",
+      "lot_mode": "object",
+      "handler_mode": "object",
+      "diner_mode": "object",
+      "lot_mint_model": "provisioned_source",
+      "provisioned_source": {
+       "source_id": "generic_cruise_port",
+       "q_source": 0.0047,
+       "station_zone_pin": [
+        "MainDining_L"
+       ],
+       "source_venue_arm": "passenger_venue",
+       "lot_layer_mode": "single_line_receipt"
+      }
+     }
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
+    }
+   },
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "illness_duration": {
+      "draw": "point"
+     },
+     "route_efficiency_multipliers": {
+      "direct_contact": 0.7,
+      "droplet": 0.2,
+      "hvac_airborne": 0.1,
+      "fomite": 0.6,
+      "food_contamination": 0.4,
+      "environmental_source": 0.0
+     }
+    }
+   },
+   "boarding_mechanism_rungs": [
+    "shipped"
+   ],
+   "boarding_prevalence_points": [
+    {
+     "passenger": 0.025,
+     "crew": 0.03
+    }
+   ],
+   "never_symptomatic_fractions": [
+    0.29
+   ],
+   "seeds": [
+    1030001
+   ],
+   "sensitivity_profile": {
+    "profile_id": "p06",
+    "signs": {
+     "A": 1,
+     "B": -1,
+     "C": 1,
+     "D": -1,
+     "E": 1
+    }
+   }
+  }
+ }
+}

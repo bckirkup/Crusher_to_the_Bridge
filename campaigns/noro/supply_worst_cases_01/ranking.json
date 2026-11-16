@@ -1,0 +1,6042 @@
+{
+ "source_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_seed_scan_01/",
+ "local_scan_root": "/home/ubuntu/supply_seed_scan_01",
+ "files": 3786,
+ "rows": 378600,
+ "candidate_cells": 24980,
+ "method": "Sum provisioned_lot burden over served contaminated lots per seed/arm/hull. Receipt arms use exact quantity_g * lot_titre_gec_per_g; station_lots uses lot_servings * lot_titre_gec_per_g * 150 g because serving_mass_g is drawn later. Venues use object venues_served/zone plus provisioned_source.actual_venues_used.",
+ "selected_for_examples": [
+  {
+   "hull": "cls",
+   "arm": "station_lots",
+   "seed": 962793
+  },
+  {
+   "hull": "exp",
+   "arm": "declared_receipts",
+   "seed": 917326
+  },
+  {
+   "hull": "meg",
+   "arm": "single_line_receipt",
+   "seed": 1030001
+  },
+  {
+   "hull": "spr",
+   "arm": "station_lots",
+   "seed": 1004210
+  }
+ ],
+ "top_by_hull": {
+  "cls": [
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 962793,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 663626268.08235,
+    "burden_max_est": 375308713.93275005,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 1146.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4557.482865,
+    "item_lines": [
+     "dairy",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": true
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 966561,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 623756489.4882876,
+    "burden_max_est": 623756489.4882876,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 522.0,
+    "quantity_g_sum": 128197.611046,
+    "titre_max_gec_per_g": 4865.585906,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 970017,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 491982845.96976393,
+    "burden_max_est": 491982845.96976393,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 461.0,
+    "quantity_g_sum": 100144.813935,
+    "titre_max_gec_per_g": 4912.714165,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 987772,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 454460704.2645,
+    "burden_max_est": 429644960.1639,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 687.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4789.798887,
+    "item_lines": [
+     "garnish",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 982557,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 426224010.0128246,
+    "burden_max_est": 426224010.0128246,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 472.0,
+    "quantity_g_sum": 97364.710719,
+    "titre_max_gec_per_g": 4377.602592,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 961033,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 426146460.59486544,
+    "burden_max_est": 426146460.59486544,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 496.0,
+    "quantity_g_sum": 96016.687301,
+    "titre_max_gec_per_g": 4438.254147,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 970267,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 420581794.03463465,
+    "burden_max_est": 420581794.03463465,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 555.0,
+    "quantity_g_sum": 86583.08141,
+    "titre_max_gec_per_g": 4857.551697,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 971842,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 412128287.0718,
+    "burden_max_est": 412128287.0718,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 596.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4609.936097,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 963538,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 412090408.656,
+    "burden_max_est": 412090408.656,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 576.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4769.564915,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 973303,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 410964375.4917,
+    "burden_max_est": 410964375.4917,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 571.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4798.183018,
+    "item_lines": [
+     "bakery"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 977306,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 406415300.78984994,
+    "burden_max_est": 406415300.78984994,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 583.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4647.401953,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 991469,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 401793270.1164,
+    "burden_max_est": 401793270.1164,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 564.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4749.329434,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 961383,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 397109465.11381185,
+    "burden_max_est": 397109465.11381185,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 339.0,
+    "quantity_g_sum": 79743.302134,
+    "titre_max_gec_per_g": 4979.847266,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 985005,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 394550947.0953,
+    "burden_max_est": 394550947.0953,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 527.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4991.156826,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 993493,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 389483154.1659,
+    "burden_max_est": 389483154.1659,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 599.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4334.815294,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 981050,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 388388196.61050004,
+    "burden_max_est": 339130332.1305,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 638.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4433.076237,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 982233,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 384857248.1376902,
+    "burden_max_est": 384857248.1376902,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 483.0,
+    "quantity_g_sum": 111899.309271,
+    "titre_max_gec_per_g": 3439.31746,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 975603,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 383649381.9822,
+    "burden_max_est": 383649381.9822,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 557.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4591.853764,
+    "item_lines": [
+     "bakery"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 986583,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 380529111.0225,
+    "burden_max_est": 380529111.0225,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 575.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4411.931722,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 982953,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 379750422.21389997,
+    "burden_max_est": 379750422.21389997,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 542.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4670.976903,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 961173,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 374825615.60879993,
+    "burden_max_est": 374825615.60879993,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 516.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4842.708212,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 983286,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 372232904.78400004,
+    "burden_max_est": 372232904.78400004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 520.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4772.216728,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 993990,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 370826489.8452,
+    "burden_max_est": 370826489.8452,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 548.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4511.271166,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 960845,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 369832207.67130935,
+    "burden_max_est": 369832207.67130935,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 394.0,
+    "quantity_g_sum": 92723.23462,
+    "titre_max_gec_per_g": 3988.560248,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 961972,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 367842656.78999996,
+    "burden_max_est": 367842656.78999996,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 568.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4317.402075,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   }
+  ],
+  "exp": [
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 917326,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 644799877.8250505,
+    "burden_max_est": 644799877.8250505,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 575.0,
+    "quantity_g_sum": 131023.279464,
+    "titre_max_gec_per_g": 4921.261935,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": true
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 926940,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 586570150.5206199,
+    "burden_max_est": 586570150.5206199,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 481.0,
+    "quantity_g_sum": 117926.73947,
+    "titre_max_gec_per_g": 4974.02161,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 955132,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 484204250.17791396,
+    "burden_max_est": 484204250.17791396,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 528.0,
+    "quantity_g_sum": 101505.477045,
+    "titre_max_gec_per_g": 4770.227817,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 939824,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 431411086.95299995,
+    "burden_max_est": 431411086.95299995,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 588.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4891.282165,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 923140,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 425611298.82067955,
+    "burden_max_est": 425611298.82067955,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 530.0,
+    "quantity_g_sum": 97843.295993,
+    "titre_max_gec_per_g": 4349.928061,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 908346,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 418653613.29330003,
+    "burden_max_est": 387298162.3614,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 633.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4720.270108,
+    "item_lines": [
+     "deli",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 905829,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 417881810.95992184,
+    "burden_max_est": 417881810.95992184,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 434.0,
+    "quantity_g_sum": 107768.207357,
+    "titre_max_gec_per_g": 3877.598238,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 939734,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 417080620.677,
+    "burden_max_est": 417080620.677,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 581.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4785.77878,
+    "item_lines": [
+     "bakery"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 911128,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 413951613.9915,
+    "burden_max_est": 413951613.9915,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 598.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4614.845195,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 948291,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 409368186.95925,
+    "burden_max_est": 409368186.95925,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 587.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4649.269585,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 909313,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 404141878.55475,
+    "burden_max_est": 404141878.55475,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 579.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4653.331935,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 912939,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 397620114.9676168,
+    "burden_max_est": 397620114.9676168,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 517.0,
+    "quantity_g_sum": 86840.241601,
+    "titre_max_gec_per_g": 4578.754131,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 917484,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 397037830.09139997,
+    "burden_max_est": 397037830.09139997,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 564.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4693.118559,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 939197,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 396264960.41714996,
+    "burden_max_est": 396264960.41714996,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 561.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4709.031021,
+    "item_lines": [
+     "bakery"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 947225,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 396239951.45280004,
+    "burden_max_est": 396239951.45280004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 544.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4855.881758,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 927867,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 393958469.33948225,
+    "burden_max_est": 393958469.33948225,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 536.0,
+    "quantity_g_sum": 119943.924828,
+    "titre_max_gec_per_g": 3284.522079,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 936155,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 393376694.11125964,
+    "burden_max_est": 393376694.11125964,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 360.0,
+    "quantity_g_sum": 80393.838429,
+    "titre_max_gec_per_g": 4893.119943,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 930097,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 389560508.933683,
+    "burden_max_est": 389560508.933683,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 461.0,
+    "quantity_g_sum": 108118.14789,
+    "titre_max_gec_per_g": 3603.100095,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 932533,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 387517874.74755,
+    "burden_max_est": 196258235.41169998,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 815.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3612.080063,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 908494,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 386318295.07366496,
+    "burden_max_est": 386318295.07366496,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 551.0,
+    "quantity_g_sum": 122414.498945,
+    "titre_max_gec_per_g": 3155.821397,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 930980,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 378182798.40510005,
+    "burden_max_est": 378182798.40510005,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 534.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4721.383251,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 949388,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 378077715.9357297,
+    "burden_max_est": 378077715.9357297,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 531.0,
+    "quantity_g_sum": 123379.148027,
+    "titre_max_gec_per_g": 3064.356676,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 947847,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 375974356.6935,
+    "burden_max_est": 375974356.6935,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 547.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4582.25907,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 901120,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 372834251.4897001,
+    "burden_max_est": 372834251.4897001,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 539.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4611.431682,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 920737,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 372683530.97325003,
+    "burden_max_est": 372683530.97325003,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 503.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4939.476885,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   }
+  ],
+  "meg": [
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1030001,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 580203309.5682616,
+    "burden_max_est": 580203309.5682616,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 524.0,
+    "quantity_g_sum": 116103.153786,
+    "titre_max_gec_per_g": 4997.308778,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": true
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1031386,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 520046935.8056209,
+    "burden_max_est": 520046935.8056209,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 505.0,
+    "quantity_g_sum": 124062.913082,
+    "titre_max_gec_per_g": 4191.800135,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1036232,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 455349796.77720004,
+    "burden_max_est": 422258327.17050004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 673.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4771.280533,
+    "item_lines": [
+     "bakery",
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1020931,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 444673387.0878001,
+    "burden_max_est": 344367064.72980005,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 3,
+    "lot_servings_sum": 1389.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3904.388489,
+    "item_lines": [
+     "dairy",
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1021334,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 430237437.0714,
+    "burden_max_est": 430237437.0714,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 588.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4877.975477,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1034274,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 425240101.95224994,
+    "burden_max_est": 425240101.95224994,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 599.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4732.777985,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1027804,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 421868176.6158,
+    "burden_max_est": 264075470.1618,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 723.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4987.261004,
+    "item_lines": [
+     "deli",
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1026685,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 421061282.92499995,
+    "burden_max_est": 421061282.92499995,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 586.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4790.23075,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1023994,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 406621341.53085005,
+    "burden_max_est": 310445990.27145004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 619.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4630.066969,
+    "item_lines": [
+     "dairy",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1032640,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 406256101.8936,
+    "burden_max_est": 406256101.8936,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 593.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4567.241168,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1023519,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 399167410.12200004,
+    "burden_max_est": 399167410.12200004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 584.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4556.705595,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1035168,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 398032467.84277487,
+    "burden_max_est": 398032467.84277487,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 550.0,
+    "quantity_g_sum": 86553.948034,
+    "titre_max_gec_per_g": 4598.663341,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1034125,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 397897917.8331358,
+    "burden_max_est": 397897917.8331358,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 525.0,
+    "quantity_g_sum": 119932.200183,
+    "titre_max_gec_per_g": 3317.690472,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1028339,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 389905350.30105,
+    "burden_max_est": 330002818.63065,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 3,
+    "lot_servings_sum": 939.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3773.617137,
+    "item_lines": [
+     "bakery",
+     "garnish",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1033759,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 380526190.6851,
+    "burden_max_est": 315150993.57060003,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 791.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3525.178899,
+    "item_lines": [
+     "deli",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1027238,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 379852774.11891174,
+    "burden_max_est": 376070113.38259304,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 2,
+    "lot_servings_sum": 498.0,
+    "quantity_g_sum": 93291.94035599999,
+    "titre_max_gec_per_g": 4851.588937,
+    "item_lines": [
+     "salad_leaf",
+     "shellfish"
+    ],
+    "supply_strata": [
+     "raw_produce",
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1023727,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 374676591.7125,
+    "burden_max_est": 374676591.7125,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 510.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4897.733225,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1026195,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 373175404.27349997,
+    "burden_max_est": 373175404.27349997,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 566.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4395.470015,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1031234,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 370431228.1461,
+    "burden_max_est": 370431228.1461,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 587.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4207.055402,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1023280,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 369237023.51175,
+    "burden_max_est": 369237023.51175,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 513.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4798.401865,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1022450,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 365719195.5648,
+    "burden_max_est": 287003854.0467,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 956.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3665.438749,
+    "item_lines": [
+     "bakery",
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1032391,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 364049522.73585,
+    "burden_max_est": 302644184.1795,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 722.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3521.16561,
+    "item_lines": [
+     "dairy",
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1023662,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 360566629.0371,
+    "burden_max_est": 360566629.0371,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 573.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4195.074218,
+    "item_lines": [
+     "bakery"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1032946,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 358023731.578693,
+    "burden_max_est": 358023731.578693,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 467.0,
+    "quantity_g_sum": 79689.010678,
+    "titre_max_gec_per_g": 4492.761656,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1022721,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 353973441.57479995,
+    "burden_max_est": 353973441.57479995,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 472.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4999.624881,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   }
+  ],
+  "spr": [
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1004210,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 563347708.7500501,
+    "burden_max_est": 361596915.68805003,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 833.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4803.590311,
+    "item_lines": [
+     "salad_leaf",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": true
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1018738,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 526781012.0948673,
+    "burden_max_est": 526781012.0948673,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 539.0,
+    "quantity_g_sum": 109370.237478,
+    "titre_max_gec_per_g": 4816.493264,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1008624,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 448118597.07995045,
+    "burden_max_est": 448118597.07995045,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 504.0,
+    "quantity_g_sum": 103222.419874,
+    "titre_max_gec_per_g": 4341.291336,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1015129,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 443659702.0695,
+    "burden_max_est": 443659702.0695,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 595.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4970.977054,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1015885,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 422186212.0436999,
+    "burden_max_est": 422186212.0436999,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 563.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4999.244666,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1006710,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 421769138.1158462,
+    "burden_max_est": 421769138.1158462,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 525.0,
+    "quantity_g_sum": 85506.807833,
+    "titre_max_gec_per_g": 4932.579625,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1015042,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 415434781.3782,
+    "burden_max_est": 404538968.835,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 1022.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4649.873205,
+    "item_lines": [
+     "bakery",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1001393,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 413328772.11044997,
+    "burden_max_est": 413328772.11044997,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 553.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4982.866451,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1004358,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 404763397.66080004,
+    "burden_max_est": 404763397.66080004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 576.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4684.761547,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1009265,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 399848412.99825,
+    "burden_max_est": 399848412.99825,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 537.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4963.977815,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1009702,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 399793461.62385,
+    "burden_max_est": 217719613.3704,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 3,
+    "lot_servings_sum": 927.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4953.802352,
+    "item_lines": [
+     "deli",
+     "fresh_produce",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1014978,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 396722888.661,
+    "burden_max_est": 396722888.661,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 545.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4852.879372,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1002502,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 391056511.77540004,
+    "burden_max_est": 391056511.77540004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 522.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4994.336038,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1011972,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 386811278.1828,
+    "burden_max_est": 386811278.1828,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 549.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4697.161848,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1004535,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 383740425.82844996,
+    "burden_max_est": 383740425.82844996,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 599.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4270.900677,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1012280,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 381713993.706,
+    "burden_max_est": 343282506.192,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 685.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4767.812586,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1006536,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 376413612.36945,
+    "burden_max_est": 229696987.76055002,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 3,
+    "lot_servings_sum": 939.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3857.212221,
+    "item_lines": [
+     "bakery",
+     "salad_leaf",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1000501,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 374491620.8397,
+    "burden_max_est": 374491620.8397,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 533.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4684.072806,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1008646,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 374413228.0510986,
+    "burden_max_est": 374413228.0510986,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 483.0,
+    "quantity_g_sum": 85215.682925,
+    "titre_max_gec_per_g": 4393.712697,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1016545,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 373158911.69090784,
+    "burden_max_est": 373158911.69090784,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 463.0,
+    "quantity_g_sum": 78689.092015,
+    "titre_max_gec_per_g": 4742.19364,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1013386,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 371759059.1118001,
+    "burden_max_est": 323759953.97400004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 3,
+    "lot_servings_sum": 916.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4692.173246,
+    "item_lines": [
+     "garnish",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1011279,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 367626354.26399994,
+    "burden_max_est": 367626354.26399994,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 520.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4713.158388,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1016989,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 364783047.13124996,
+    "burden_max_est": 364783047.13124996,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 589.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4128.840375,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1003863,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 361881074.37195003,
+    "burden_max_est": 361881074.37195003,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 497.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4854.206229,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1016451,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 358097822.72459996,
+    "burden_max_est": 358097822.72459996,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 573.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4166.350468,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   }
+  ]
+ },
+ "top_by_hull_arm": {
+  "cls/declared_receipts": [
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 970017,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 491982845.96976393,
+    "burden_max_est": 491982845.96976393,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 461.0,
+    "quantity_g_sum": 100144.813935,
+    "titre_max_gec_per_g": 4912.714165,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 982557,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 426224010.0128246,
+    "burden_max_est": 426224010.0128246,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 472.0,
+    "quantity_g_sum": 97364.710719,
+    "titre_max_gec_per_g": 4377.602592,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 961383,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 397109465.11381185,
+    "burden_max_est": 397109465.11381185,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 339.0,
+    "quantity_g_sum": 79743.302134,
+    "titre_max_gec_per_g": 4979.847266,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 982233,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 384857248.1376902,
+    "burden_max_est": 384857248.1376902,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 483.0,
+    "quantity_g_sum": 111899.309271,
+    "titre_max_gec_per_g": 3439.31746,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 968969,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 363443475.4579133,
+    "burden_max_est": 363443475.4579133,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 524.0,
+    "quantity_g_sum": 89721.626294,
+    "titre_max_gec_per_g": 4050.790099,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 978415,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 354818009.1601683,
+    "burden_max_est": 354818009.1601683,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 385.0,
+    "quantity_g_sum": 82892.614003,
+    "titre_max_gec_per_g": 4280.453855,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 973520,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 346601740.08611333,
+    "burden_max_est": 346601740.08611333,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 367.0,
+    "quantity_g_sum": 91672.811448,
+    "titre_max_gec_per_g": 3780.856446,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 979530,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 331837543.2762774,
+    "burden_max_est": 331837543.2762774,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 396.0,
+    "quantity_g_sum": 70925.262041,
+    "titre_max_gec_per_g": 4678.693229,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 983491,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 311087907.97178704,
+    "burden_max_est": 311087907.97178704,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 539.0,
+    "quantity_g_sum": 119687.523646,
+    "titre_max_gec_per_g": 2599.167386,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "declared_receipts",
+    "seed": 991264,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 310153229.98791784,
+    "burden_max_est": 310153229.98791784,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 375.0,
+    "quantity_g_sum": 71758.329004,
+    "titre_max_gec_per_g": 4322.191365,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   }
+  ],
+  "cls/single_line_receipt": [
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 966561,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 623756489.4882876,
+    "burden_max_est": 623756489.4882876,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 522.0,
+    "quantity_g_sum": 128197.611046,
+    "titre_max_gec_per_g": 4865.585906,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 961033,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 426146460.59486544,
+    "burden_max_est": 426146460.59486544,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 496.0,
+    "quantity_g_sum": 96016.687301,
+    "titre_max_gec_per_g": 4438.254147,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 970267,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 420581794.03463465,
+    "burden_max_est": 420581794.03463465,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 555.0,
+    "quantity_g_sum": 86583.08141,
+    "titre_max_gec_per_g": 4857.551697,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 960845,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 369832207.67130935,
+    "burden_max_est": 369832207.67130935,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 394.0,
+    "quantity_g_sum": 92723.23462,
+    "titre_max_gec_per_g": 3988.560248,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 992968,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 363125901.6600965,
+    "burden_max_est": 363125901.6600965,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 574.0,
+    "quantity_g_sum": 88536.766345,
+    "titre_max_gec_per_g": 4101.413646,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 978664,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 355936700.9313217,
+    "burden_max_est": 355936700.9313217,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 415.0,
+    "quantity_g_sum": 94099.763466,
+    "titre_max_gec_per_g": 3782.546181,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 985066,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 344099948.07958186,
+    "burden_max_est": 344099948.07958186,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 367.0,
+    "quantity_g_sum": 80834.236072,
+    "titre_max_gec_per_g": 4256.859034,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 979315,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 343923467.4962546,
+    "burden_max_est": 343923467.4962546,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 397.0,
+    "quantity_g_sum": 80478.222549,
+    "titre_max_gec_per_g": 4273.497309,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 961776,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 335651797.5682361,
+    "burden_max_est": 335651797.5682361,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 462.0,
+    "quantity_g_sum": 100586.665722,
+    "titre_max_gec_per_g": 3336.941285,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "single_line_receipt",
+    "seed": 960116,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 325775321.83779263,
+    "burden_max_est": 325775321.83779263,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 528.0,
+    "quantity_g_sum": 127821.276937,
+    "titre_max_gec_per_g": 2548.678355,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   }
+  ],
+  "cls/station_lots": [
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 962793,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 663626268.08235,
+    "burden_max_est": 375308713.93275005,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 1146.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4557.482865,
+    "item_lines": [
+     "dairy",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": true
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 987772,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 454460704.2645,
+    "burden_max_est": 429644960.1639,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 687.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4789.798887,
+    "item_lines": [
+     "garnish",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 971842,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 412128287.0718,
+    "burden_max_est": 412128287.0718,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 596.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4609.936097,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 963538,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 412090408.656,
+    "burden_max_est": 412090408.656,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 576.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4769.564915,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 973303,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 410964375.4917,
+    "burden_max_est": 410964375.4917,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 571.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4798.183018,
+    "item_lines": [
+     "bakery"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 977306,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 406415300.78984994,
+    "burden_max_est": 406415300.78984994,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 583.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4647.401953,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 991469,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 401793270.1164,
+    "burden_max_est": 401793270.1164,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 564.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4749.329434,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 985005,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 394550947.0953,
+    "burden_max_est": 394550947.0953,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 527.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4991.156826,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 993493,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 389483154.1659,
+    "burden_max_est": 389483154.1659,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 599.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4334.815294,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "cls",
+    "arm": "station_lots",
+    "seed": 981050,
+    "tier": "fl_cls_12d_sens_p06_paxv",
+    "platform": "classic_cruise_1900",
+    "burden_est": 388388196.61050004,
+    "burden_max_est": 339130332.1305,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 638.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4433.076237,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   }
+  ],
+  "exp/declared_receipts": [
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 917326,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 644799877.8250505,
+    "burden_max_est": 644799877.8250505,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 575.0,
+    "quantity_g_sum": 131023.279464,
+    "titre_max_gec_per_g": 4921.261935,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": true
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 926940,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 586570150.5206199,
+    "burden_max_est": 586570150.5206199,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 481.0,
+    "quantity_g_sum": 117926.73947,
+    "titre_max_gec_per_g": 4974.02161,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 955132,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 484204250.17791396,
+    "burden_max_est": 484204250.17791396,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 528.0,
+    "quantity_g_sum": 101505.477045,
+    "titre_max_gec_per_g": 4770.227817,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 905829,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 417881810.95992184,
+    "burden_max_est": 417881810.95992184,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 434.0,
+    "quantity_g_sum": 107768.207357,
+    "titre_max_gec_per_g": 3877.598238,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 927867,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 393958469.33948225,
+    "burden_max_est": 393958469.33948225,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 536.0,
+    "quantity_g_sum": 119943.924828,
+    "titre_max_gec_per_g": 3284.522079,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 936155,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 393376694.11125964,
+    "burden_max_est": 393376694.11125964,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 360.0,
+    "quantity_g_sum": 80393.838429,
+    "titre_max_gec_per_g": 4893.119943,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 930097,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 389560508.933683,
+    "burden_max_est": 389560508.933683,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 461.0,
+    "quantity_g_sum": 108118.14789,
+    "titre_max_gec_per_g": 3603.100095,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 908494,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 386318295.07366496,
+    "burden_max_est": 386318295.07366496,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 551.0,
+    "quantity_g_sum": 122414.498945,
+    "titre_max_gec_per_g": 3155.821397,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 949388,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 378077715.9357297,
+    "burden_max_est": 378077715.9357297,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 531.0,
+    "quantity_g_sum": 123379.148027,
+    "titre_max_gec_per_g": 3064.356676,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "declared_receipts",
+    "seed": 913604,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 372353455.7189551,
+    "burden_max_est": 372353455.7189551,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 585.0,
+    "quantity_g_sum": 84192.327545,
+    "titre_max_gec_per_g": 4422.653068,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   }
+  ],
+  "exp/single_line_receipt": [
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 923140,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 425611298.82067955,
+    "burden_max_est": 425611298.82067955,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 530.0,
+    "quantity_g_sum": 97843.295993,
+    "titre_max_gec_per_g": 4349.928061,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 912939,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 397620114.9676168,
+    "burden_max_est": 397620114.9676168,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 517.0,
+    "quantity_g_sum": 86840.241601,
+    "titre_max_gec_per_g": 4578.754131,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 916471,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 354846237.9594463,
+    "burden_max_est": 354846237.9594463,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 575.0,
+    "quantity_g_sum": 118658.023139,
+    "titre_max_gec_per_g": 2990.49511,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 914087,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 330255999.18797076,
+    "burden_max_est": 330255999.18797076,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 508.0,
+    "quantity_g_sum": 88542.832373,
+    "titre_max_gec_per_g": 3729.901002,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 924422,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 324903155.0725641,
+    "burden_max_est": 324903155.0725641,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 464.0,
+    "quantity_g_sum": 65049.89673,
+    "titre_max_gec_per_g": 4994.675955,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 939066,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 310318586.5448845,
+    "burden_max_est": 310318586.5448845,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 584.0,
+    "quantity_g_sum": 142338.352362,
+    "titre_max_gec_per_g": 2180.147384,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 912942,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 298970463.71871257,
+    "burden_max_est": 298970463.71871257,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 334.0,
+    "quantity_g_sum": 74798.877682,
+    "titre_max_gec_per_g": 3996.991305,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 951798,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 295684517.4127769,
+    "burden_max_est": 295684517.4127769,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 562.0,
+    "quantity_g_sum": 109044.529409,
+    "titre_max_gec_per_g": 2711.594236,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 925452,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 290494458.50121427,
+    "burden_max_est": 290494458.50121427,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 357.0,
+    "quantity_g_sum": 67550.486553,
+    "titre_max_gec_per_g": 4300.405124,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "single_line_receipt",
+    "seed": 940690,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 279332464.2549539,
+    "burden_max_est": 279332464.2549539,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 425.0,
+    "quantity_g_sum": 87249.477268,
+    "titre_max_gec_per_g": 3201.537396,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   }
+  ],
+  "exp/station_lots": [
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 939824,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 431411086.95299995,
+    "burden_max_est": 431411086.95299995,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 588.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4891.282165,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 908346,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 418653613.29330003,
+    "burden_max_est": 387298162.3614,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 633.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4720.270108,
+    "item_lines": [
+     "deli",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 939734,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 417080620.677,
+    "burden_max_est": 417080620.677,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 581.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4785.77878,
+    "item_lines": [
+     "bakery"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 911128,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 413951613.9915,
+    "burden_max_est": 413951613.9915,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 598.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4614.845195,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 948291,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 409368186.95925,
+    "burden_max_est": 409368186.95925,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 587.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4649.269585,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 909313,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 404141878.55475,
+    "burden_max_est": 404141878.55475,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 579.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4653.331935,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 917484,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 397037830.09139997,
+    "burden_max_est": 397037830.09139997,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 564.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4693.118559,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 939197,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 396264960.41714996,
+    "burden_max_est": 396264960.41714996,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 561.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4709.031021,
+    "item_lines": [
+     "bakery"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 947225,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 396239951.45280004,
+    "burden_max_est": 396239951.45280004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 544.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4855.881758,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "exp",
+    "arm": "station_lots",
+    "seed": 932533,
+    "tier": "fl_exp_12d_sens_p06_paxv",
+    "platform": "expedition_cruise_450",
+    "burden_est": 387517874.74755,
+    "burden_max_est": 196258235.41169998,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 815.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3612.080063,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   }
+  ],
+  "meg/declared_receipts": [
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1031386,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 520046935.8056209,
+    "burden_max_est": 520046935.8056209,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 505.0,
+    "quantity_g_sum": 124062.913082,
+    "titre_max_gec_per_g": 4191.800135,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1035168,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 398032467.84277487,
+    "burden_max_est": 398032467.84277487,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 550.0,
+    "quantity_g_sum": 86553.948034,
+    "titre_max_gec_per_g": 4598.663341,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1034125,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 397897917.8331358,
+    "burden_max_est": 397897917.8331358,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 525.0,
+    "quantity_g_sum": 119932.200183,
+    "titre_max_gec_per_g": 3317.690472,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1032946,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 358023731.578693,
+    "burden_max_est": 358023731.578693,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 467.0,
+    "quantity_g_sum": 79689.010678,
+    "titre_max_gec_per_g": 4492.761656,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1036729,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 338746697.51346666,
+    "burden_max_est": 338746697.51346666,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 578.0,
+    "quantity_g_sum": 127638.6826,
+    "titre_max_gec_per_g": 2653.950124,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1033314,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 336690685.2628356,
+    "burden_max_est": 336690685.2628356,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 556.0,
+    "quantity_g_sum": 78290.987374,
+    "titre_max_gec_per_g": 4300.503756,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1036995,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 330898505.21824306,
+    "burden_max_est": 330898505.21824306,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 443.0,
+    "quantity_g_sum": 85369.109213,
+    "titre_max_gec_per_g": 3876.091812,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1036579,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 324375746.84903437,
+    "burden_max_est": 324375746.84903437,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 302.0,
+    "quantity_g_sum": 65193.342454,
+    "titre_max_gec_per_g": 4975.596198,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1034558,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 284305999.56581396,
+    "burden_max_est": 284305999.56581396,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 337.0,
+    "quantity_g_sum": 74448.84252,
+    "titre_max_gec_per_g": 3818.810205,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "declared_receipts",
+    "seed": 1035105,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 276272074.8012015,
+    "burden_max_est": 276272074.8012015,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 517.0,
+    "quantity_g_sum": 113848.391559,
+    "titre_max_gec_per_g": 2426.666473,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   }
+  ],
+  "meg/single_line_receipt": [
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1030001,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 580203309.5682616,
+    "burden_max_est": 580203309.5682616,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 524.0,
+    "quantity_g_sum": 116103.153786,
+    "titre_max_gec_per_g": 4997.308778,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": true
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1027238,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 379852774.11891174,
+    "burden_max_est": 376070113.38259304,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 2,
+    "lot_servings_sum": 498.0,
+    "quantity_g_sum": 93291.94035599999,
+    "titre_max_gec_per_g": 4851.588937,
+    "item_lines": [
+     "salad_leaf",
+     "shellfish"
+    ],
+    "supply_strata": [
+     "raw_produce",
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1022332,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 315847164.26801455,
+    "burden_max_est": 315847164.26801455,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 374.0,
+    "quantity_g_sum": 81516.337498,
+    "titre_max_gec_per_g": 3874.648616,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1020073,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 311701319.16859245,
+    "burden_max_est": 311701319.16859245,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 541.0,
+    "quantity_g_sum": 111377.702239,
+    "titre_max_gec_per_g": 2798.597142,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1036488,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 279192107.6675711,
+    "burden_max_est": 279192107.6675711,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 456.0,
+    "quantity_g_sum": 58613.310769,
+    "titre_max_gec_per_g": 4763.288475,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1030555,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 275729228.3530243,
+    "burden_max_est": 275729228.3530243,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 426.0,
+    "quantity_g_sum": 97581.942135,
+    "titre_max_gec_per_g": 2825.617346,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1035676,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 271344734.0226077,
+    "burden_max_est": 271344734.0226077,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 504.0,
+    "quantity_g_sum": 123120.192304,
+    "titre_max_gec_per_g": 2203.901155,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1031295,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 267291165.6871988,
+    "burden_max_est": 267291165.6871988,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 487.0,
+    "quantity_g_sum": 99354.075498,
+    "titre_max_gec_per_g": 2690.288892,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1021122,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 230968431.60263923,
+    "burden_max_est": 230968431.60263923,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 420.0,
+    "quantity_g_sum": 70156.603476,
+    "titre_max_gec_per_g": 3292.183774,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "single_line_receipt",
+    "seed": 1030348,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 224658608.70026514,
+    "burden_max_est": 224658608.70026514,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 561.0,
+    "quantity_g_sum": 104564.782826,
+    "titre_max_gec_per_g": 2148.511216,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   }
+  ],
+  "meg/station_lots": [
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1036232,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 455349796.77720004,
+    "burden_max_est": 422258327.17050004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 673.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4771.280533,
+    "item_lines": [
+     "bakery",
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1020931,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 444673387.0878001,
+    "burden_max_est": 344367064.72980005,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 3,
+    "lot_servings_sum": 1389.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3904.388489,
+    "item_lines": [
+     "dairy",
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1021334,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 430237437.0714,
+    "burden_max_est": 430237437.0714,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 588.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4877.975477,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1034274,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 425240101.95224994,
+    "burden_max_est": 425240101.95224994,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 599.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4732.777985,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1027804,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 421868176.6158,
+    "burden_max_est": 264075470.1618,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 723.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4987.261004,
+    "item_lines": [
+     "deli",
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1026685,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 421061282.92499995,
+    "burden_max_est": 421061282.92499995,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 586.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4790.23075,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1023994,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 406621341.53085005,
+    "burden_max_est": 310445990.27145004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 619.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4630.066969,
+    "item_lines": [
+     "dairy",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1032640,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 406256101.8936,
+    "burden_max_est": 406256101.8936,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 593.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4567.241168,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1023519,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 399167410.12200004,
+    "burden_max_est": 399167410.12200004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 584.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4556.705595,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "meg",
+    "arm": "station_lots",
+    "seed": 1028339,
+    "tier": "fl_meg_12d_sens_p06_paxv",
+    "platform": "mega_cruise_5000",
+    "burden_est": 389905350.30105,
+    "burden_max_est": 330002818.63065,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 3,
+    "lot_servings_sum": 939.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 3773.617137,
+    "item_lines": [
+     "bakery",
+     "garnish",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   }
+  ],
+  "spr/declared_receipts": [
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1008624,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 448118597.07995045,
+    "burden_max_est": 448118597.07995045,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 504.0,
+    "quantity_g_sum": 103222.419874,
+    "titre_max_gec_per_g": 4341.291336,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1016545,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 373158911.69090784,
+    "burden_max_est": 373158911.69090784,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 463.0,
+    "quantity_g_sum": 78689.092015,
+    "titre_max_gec_per_g": 4742.19364,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1005625,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 327252661.2227844,
+    "burden_max_est": 327252661.2227844,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 380.0,
+    "quantity_g_sum": 94000.766109,
+    "titre_max_gec_per_g": 3481.382916,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1004089,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 263448030.40495816,
+    "burden_max_est": 263448030.40495816,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 366.0,
+    "quantity_g_sum": 85641.35804,
+    "titre_max_gec_per_g": 3076.177637,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1018915,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 256145526.78293166,
+    "burden_max_est": 256145526.78293166,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 556.0,
+    "quantity_g_sum": 106662.756659,
+    "titre_max_gec_per_g": 2401.452342,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1006595,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 242018006.897397,
+    "burden_max_est": 242018006.897397,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 517.0,
+    "quantity_g_sum": 94098.912743,
+    "titre_max_gec_per_g": 2571.953276,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1001180,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 228145636.56339982,
+    "burden_max_est": 228145636.56339982,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 508.0,
+    "quantity_g_sum": 101985.688042,
+    "titre_max_gec_per_g": 2237.035813,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1001717,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 224239574.87540305,
+    "burden_max_est": 224239574.87540305,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 201.0,
+    "quantity_g_sum": 44899.982908,
+    "titre_max_gec_per_g": 4994.201787,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1008661,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 216700380.71729034,
+    "burden_max_est": 216700380.71729034,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 472.0,
+    "quantity_g_sum": 109273.380614,
+    "titre_max_gec_per_g": 1983.103108,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "declared_receipts",
+    "seed": 1002243,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 207527901.4997088,
+    "burden_max_est": 207527901.4997088,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 500.0,
+    "quantity_g_sum": 100694.538981,
+    "titre_max_gec_per_g": 2060.964811,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   }
+  ],
+  "spr/single_line_receipt": [
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1018738,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 526781012.0948673,
+    "burden_max_est": 526781012.0948673,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 539.0,
+    "quantity_g_sum": 109370.237478,
+    "titre_max_gec_per_g": 4816.493264,
+    "item_lines": [
+     "fresh_produce"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1006710,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 421769138.1158462,
+    "burden_max_est": 421769138.1158462,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 525.0,
+    "quantity_g_sum": 85506.807833,
+    "titre_max_gec_per_g": 4932.579625,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1008646,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 374413228.0510986,
+    "burden_max_est": 374413228.0510986,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 483.0,
+    "quantity_g_sum": 85215.682925,
+    "titre_max_gec_per_g": 4393.712697,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1008507,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 322910763.56616306,
+    "burden_max_est": 322910763.56616306,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 410.0,
+    "quantity_g_sum": 79967.537374,
+    "titre_max_gec_per_g": 4038.023105,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1003917,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 262785443.08040324,
+    "burden_max_est": 262785443.08040324,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 429.0,
+    "quantity_g_sum": 78603.46336,
+    "titre_max_gec_per_g": 3343.178937,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1008625,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 247818441.9303222,
+    "burden_max_est": 247818441.9303222,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 489.0,
+    "quantity_g_sum": 113199.083065,
+    "titre_max_gec_per_g": 2189.226584,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1010227,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 247206015.34196737,
+    "burden_max_est": 247206015.34196737,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 321.0,
+    "quantity_g_sum": 58256.093956,
+    "titre_max_gec_per_g": 4243.436155,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1011289,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 247130285.30800158,
+    "burden_max_est": 247130285.30800158,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 307.0,
+    "quantity_g_sum": 58523.422402,
+    "titre_max_gec_per_g": 4222.758601,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1006526,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 239350738.33434933,
+    "burden_max_est": 239350738.33434933,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 442.0,
+    "quantity_g_sum": 61155.037055,
+    "titre_max_gec_per_g": 3913.835227,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [
+     "shellfish"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "single_line_receipt",
+    "seed": 1009926,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 224687077.96130863,
+    "burden_max_est": 224687077.96130863,
+    "burden_kind": "exact_receipt_mass",
+    "n_lots": 1,
+    "lot_servings_sum": 413.0,
+    "quantity_g_sum": 60088.430782,
+    "titre_max_gec_per_g": 3739.273518,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [
+     "raw_produce"
+    ],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [
+     "bulk_raw"
+    ],
+    "preparation_classes": [
+     "raw_or_rte_no_kill"
+    ],
+    "selected_for_examples": false
+   }
+  ],
+  "spr/station_lots": [
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1004210,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 563347708.7500501,
+    "burden_max_est": 361596915.68805003,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 833.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4803.590311,
+    "item_lines": [
+     "salad_leaf",
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": true
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1015129,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 443659702.0695,
+    "burden_max_est": 443659702.0695,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 595.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4970.977054,
+    "item_lines": [
+     "shellfish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1015885,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 422186212.0436999,
+    "burden_max_est": 422186212.0436999,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 563.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4999.244666,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1015042,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 415434781.3782,
+    "burden_max_est": 404538968.835,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 2,
+    "lot_servings_sum": 1022.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4649.873205,
+    "item_lines": [
+     "bakery",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1001393,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 413328772.11044997,
+    "burden_max_est": 413328772.11044997,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 553.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4982.866451,
+    "item_lines": [
+     "dairy"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1004358,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 404763397.66080004,
+    "burden_max_est": 404763397.66080004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 576.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4684.761547,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1009265,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 399848412.99825,
+    "burden_max_est": 399848412.99825,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 537.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4963.977815,
+    "item_lines": [
+     "garnish"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1009702,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 399793461.62385,
+    "burden_max_est": 217719613.3704,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 3,
+    "lot_servings_sum": 927.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4953.802352,
+    "item_lines": [
+     "deli",
+     "fresh_produce",
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1014978,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 396722888.661,
+    "burden_max_est": 396722888.661,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 545.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4852.879372,
+    "item_lines": [
+     "salad_leaf"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   },
+   {
+    "hull": "spr",
+    "arm": "station_lots",
+    "seed": 1002502,
+    "tier": "fl_spr_12d_sens_p06_paxv",
+    "platform": "spirit_cruise_3000",
+    "burden_est": 391056511.77540004,
+    "burden_max_est": 391056511.77540004,
+    "burden_kind": "estimated_station_servings_150g",
+    "n_lots": 1,
+    "lot_servings_sum": 522.0,
+    "quantity_g_sum": 0.0,
+    "titre_max_gec_per_g": 4994.336038,
+    "item_lines": [
+     "deli"
+    ],
+    "supply_strata": [],
+    "venues_served": [
+     "MainDining_L"
+    ],
+    "scale_classes": [],
+    "preparation_classes": [],
+    "selected_for_examples": false
+   }
+  ]
+ }
+}

@@ -1,0 +1,41 @@
+{
+ "name": "noro_supply_worst_cases_01",
+ "pathogen": "norovirus",
+ "manifest": "campaigns/noro/supply_worst_cases_01/manifest.json",
+ "pathogen_id": "norwalk_gi",
+ "epochs": 288,
+ "s3_prefix": "campaign/noro_supply_worst_cases_01/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "noro-supply-worst01@sha256:2a1cafdc5692c81a7bea2bfce9647d7a6384737090e08c99804803e50a847f68",
+ "resources": {
+  "vcpu": "1",
+  "memory": "8192",
+  "shm": 512
+ },
+ "blocks": {
+  "exp_declared_receipts_917326": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_exp_12d_sens_p06_paxv_declared_receipts",
+   "seeds": [917326],
+   "args": {"payload": "lean"}
+  },
+  "cls_station_lots_962793": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv",
+   "seeds": [962793],
+   "args": {"payload": "lean"}
+  },
+  "spr_station_lots_1004210": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv",
+   "seeds": [1004210],
+   "args": {"payload": "lean"}
+  },
+  "meg_single_line_receipt_1030001": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_single_line_receipt",
+   "seeds": [1030001],
+   "args": {"payload": "lean"}
+  }
+ }
+}
