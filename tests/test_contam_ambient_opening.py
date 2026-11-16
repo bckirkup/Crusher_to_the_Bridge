@@ -476,7 +476,7 @@ class TestExporter:
         calm = [row[15] for row in self._opening_rows(record, overrides=self._CALM)]
         skeleton = [row[15] for row in self._opening_rows(record, hobbyist=False)]
         assert skeleton == calm
-        assert all(float(value) != 0.0 for value in skeleton)
+        assert all(abs(float(value)) > 1e-6 for value in skeleton)
 
     def test_declared_wind_needs_the_paired_model(self) -> None:
         record = _opening(wind_speed_m_s=1.0)
