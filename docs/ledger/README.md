@@ -73,6 +73,8 @@ New ledger entries are registered here as they land; the filename remains the st
 - `NORO-HAND-REDEPOSIT-STREAM-01.md` — `carriers` hand-redeposit arm repair: `_replenish_hand` no longer suppresses the non-shedder maintenance stream, so the arm isolates deposit eligibility; prior FOOD-SUPPLY carriers numbers are historical for the bundled arm.
 - `NORO-HAND-REDEPOSIT-STREAM-01-WITNESS.md` — paired-seed `legacy` vs `carriers` witness on `classic_cruise_1900` seeds 8105/8106: carrier surface/food deposits fired and delivered/dose rose on both seeds, with epidemic count moving only on 8105; directional, not yet a default-flip gate.
 
+- `NORO-HAND-CASCADE-01-SUBSTEPS-CURRENT.md` — current-main (`605f9841`) fixed-M DS-M re-pilot on the five posted seeds: M=2/4/12 remain non-monotone and non-convergent through M=12, so `intra_epoch_substeps > 1` is not justified as a default.
+
 ## For drafting and analysis
 
 Anyone (human or agent) drafting a manuscript, report or analysis from this repository must draw from, in this order:
