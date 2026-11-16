@@ -1,6 +1,6 @@
 # noro_supply_seed_scan_01 ledger
 
-**Status:** Batch scan submitted; awaiting JSONL aggregation.
+**Status:** Batch scan complete; readout in `docs/ledger/FOOD-SUPPLY-01-SEED-SCAN.md`.
 
 ## Design
 
@@ -51,7 +51,22 @@ Measured with `scripts/campaign run` on this working tree, `epochs=1`,
   - `meg_single_line_receipt` `09af048f-020e-4496-a7d2-4d6d54dbdb6d` (`:12`)
   - `meg_declared_receipts` `bded5992-b2f1-42fb-9296-bfa4761aa0e4` (`:13`)
 
+## Batch readout (2026-11-16)
+
+- All 12 arrays terminal: 3,786/3,786 children SUCCEEDED, 0 child failures.
+  S3 prefix held 3,786 JSONL objects, 476,175,829 bytes.
+- Streaming aggregation parsed 378,600 rows with 0 row-level errors and 0
+  missing `provisioned_source` blocks.
+- Canonical readout: `docs/ledger/FOOD-SUPPLY-01-SEED-SCAN.md`.
+- Headline: `station_lots` contaminated-lot seed prevalence was 9.561% exp,
+  15.356% cls, 25.132% spr, 27.308% meg; receipt served-lot seed prevalence was
+  ~1.9–2.1% for both receipt arms. `declared_receipts` doubled contaminated
+  receipt draws but not served lots because the second receipt per item line is
+  venue-empty under the single pinned Dining zone.
+
 ## Next decision
 
-Aggregate the 3,786 JSONL artifacts into prevalence and lot-size tables once
-the arrays complete; no anchor fitting or default flip.
+Use the committed JSONL seed lists for stratified full-fidelity paired runs —
+`station_lots` contaminated lots first, with the smaller receipt served-lot set
+as a contrast — then measure posted AR/roles/timing. No anchor fitting or
+default flip from this initiation census.
