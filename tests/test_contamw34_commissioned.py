@@ -8,8 +8,9 @@ Offline checks for ``ahs_terminal_mode="commissioned"``: per-room
 the mode-select plumbing. No ContamX binary required — the measured
 hull→solver proof lives in ``tools/contam_commissioned_check.py``.
 
-Design-mode invariance is a labelled change-detector: the committed
-``contam/platform.prj`` + ``path_map.json`` are the emitters' baseline.
+Committed ``contam/platform.prj`` + ``path_map.json`` are now the
+commissioned-emission baseline; design mode remains the historical
+uniform-split annotation.
 """
 
 from __future__ import annotations
@@ -176,8 +177,8 @@ def test_commissioned_differs_from_design_split() -> None:
     assert len(set(ahs2_supplies.values())) == len(ahs2_supplies) > 1
 
 
-def test_design_mode_is_byte_stable() -> None:
-    """Change-detector: default emission still reproduces committed files."""
+def test_commissioned_mode_reproduces_committed_bundles() -> None:
+    """Change-detector: committed bundles are the commissioned baseline."""
     from tools.contam_hobbyist import load_hobbyist_overrides
 
     for name in ("destroyer_baseline", "expedition_cruise_450"):
@@ -186,15 +187,29 @@ def test_design_mode_is_byte_stable() -> None:
         text, path_map = export_prj_with_path_map(
             spatial, airflow, hobbyist=True,
             overrides=load_hobbyist_overrides(platform_dir),
+            ahs_terminal_mode="commissioned",
         )
         contam = REPO_ROOT / "data" / "platforms" / name / "contam"
         assert text == (contam / "platform.prj").read_text(
             encoding="utf-8"
-        ), f"{name}: design-mode .prj drifted"
+        ), f"{name}: commissioned-mode .prj drifted"
         committed = json.loads(
             (contam / "path_map.json").read_text(encoding="utf-8")
         )
-        assert path_map == committed, f"{name}: design-mode path_map drifted"
+        assert path_map == committed, (
+            f"{name}: commissioned-mode path_map drifted"
+        )
+
+
+def test_design_mode_has_no_declared_flows() -> None:
+    """Design mode stays the historical annotation: no declared_flow_m3h."""
+    _text, path_map = _export()
+    terminal_kinds = {"ahs_supply", "ahs_return"}
+    terminals = [
+        entry for entry in path_map if entry["kind"] in terminal_kinds
+    ]
+    assert terminals
+    assert all("declared_flow_m3h" not in entry for entry in terminals)
 
 
 def test_overrides_select_terminal_mode() -> None:

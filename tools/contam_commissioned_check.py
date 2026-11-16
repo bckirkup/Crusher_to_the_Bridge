@@ -11,7 +11,8 @@ declared per-branch flow.
 The check is two-layered:
 
 1. ``declared`` — recomputed here from the platform JSON (independent of
-   the emitter) and cross-checked against the emitter's own
+   the emitter), keyed by HVAC group because a room may be served by more
+   than one group, and cross-checked against the emitter's own
    ``declared_flow_m3h`` in ``path_map``.
 2. ``solved`` — ContamX ``Flow0`` volumetric for that path, required to sit
    inside ``--tolerance`` (relative, default 5%) of declared. ~0.3% is the
@@ -97,60 +98,102 @@ def _room_volume(spatial: dict, room: str) -> float:
 
 def declared_terminal_flows(
     spatial: dict, airflow: dict,
-) -> dict[str, dict[str, float]]:
+) -> dict[tuple[int, str], dict[str, float]]:
     """Independent recomputation of the declared per-branch field.
 
-    Returns ``{room: {"supply": m3h, "return": m3h}}`` for every room of
-    every hvac_zone: ``ach x V x duty`` on balanced branches; supply 0 /
-    return ``ach x V`` on exhaust-only branches (``hvac_duty`` <= 0).
+    Returns ``{(ahs_nr, room): {"supply": m3h, "return": m3h}}`` for every
+    room of every hvac_zone: ``ach x V x duty`` on balanced branches; supply
+    0 / return ``ach x V`` on exhaust-only branches (``hvac_duty`` <= 0).
+
+    Keys are ``(ahs_nr, room)`` rather than room alone because a room may be
+    served by more than one HVAC group (e.g. accommodation + weather).
     """
     default_duty = float(airflow.get("hvac_duty", 1.0) or 0.0)
-    declared: dict[str, dict[str, float]] = {}
+    zone_ids = {str(zone.get("id")) for zone in spatial.get("zones", [])}
+    declared: dict[tuple[int, str], dict[str, float]] = {}
+    ahs_nr = 0
     for hz in airflow.get("hvac_zones", []):
+        rooms = [
+            str(room) for room in hz.get("rooms", [])
+            if str(room) in zone_ids
+        ]
+        if not rooms:
+            continue
+        ahs_nr += 1
         ach = float(hz.get("ach", 6.0))
         raw_duty = hz.get("hvac_duty")
         duty = default_duty if raw_duty is None else float(raw_duty)
-        for room in hz.get("rooms", []):
+        for room in rooms:
             vol = _room_volume(spatial, room)
             if duty <= 0.0:
-                declared[room] = {"supply": 0.0, "return": ach * vol}
+                flows = {"supply": 0.0, "return": ach * vol}
             else:
-                declared[room] = {"supply": ach * vol * duty,
-                                  "return": ach * vol * duty}
+                q = ach * vol * duty
+                flows = {"supply": q, "return": q}
+            declared[(ahs_nr, room)] = flows
     return declared
 
 
+def _terminal_room_leg(entry: dict) -> tuple[str, str] | None:
+    kind = entry.get("kind")
+    if kind == "ahs_supply":
+        return str(entry["to_zone"]), "supply"
+    if kind == "ahs_return":
+        return str(entry["from_zone"]), "return"
+    return None
+
+
+def _expected_terminal_flow(
+    declared: dict[tuple[int, str], dict[str, float]],
+    entry: dict,
+) -> float | None:
+    parsed = _terminal_room_leg(entry)
+    if parsed is None:
+        return None
+    room, leg = parsed
+    flows = declared.get((int(entry.get("ahs_nr", 0)), room))
+    if flows is None:
+        return None
+    return float(flows[leg])
+
+
 def _check_emission(
-    path_map: list[dict], declared: dict[str, dict[str, float]],
+    path_map: list[dict],
+    declared: dict[tuple[int, str], dict[str, float]],
 ) -> list[str]:
     """Emitter self-consistency: path_map declared == recomputed declared."""
     errors: list[str] = []
     for entry in path_map:
-        kind = entry.get("kind")
-        if kind not in ("ahs_supply", "ahs_return"):
+        parsed = _terminal_room_leg(entry)
+        if parsed is None:
             continue
-        room = entry["to_zone"] if kind == "ahs_supply" else entry["from_zone"]
-        emitted = float(entry.get("declared_flow_m3h", -1.0))
-        expected = declared[room]["supply" if kind == "ahs_supply" else "return"]
-        if abs(emitted - expected) > _ABS_EPS_M3H:
+        room, leg = parsed
+        want = _expected_terminal_flow(declared, entry)
+        if want is None:
             errors.append(
-                f"emitter mismatch {entry['path_nr']} {kind} {room}: "
-                f"path_map declared {emitted:.2f} != recomputed {expected:.2f}"
+                f"missing declared flow {entry.get('path_nr')} "
+                f"{entry.get('kind')} {room} ahs{entry.get('ahs_nr')}"
+            )
+            continue
+        emitted = float(entry.get("declared_flow_m3h", -1.0))
+        if abs(emitted - want) > _ABS_EPS_M3H:
+            errors.append(
+                f"emitter mismatch {entry['path_nr']} {entry.get('kind')} "
+                f"{room} ahs{entry.get('ahs_nr')}: path_map declared "
+                f"{emitted:.2f} != recomputed {want:.2f}"
             )
     return errors
 
 
 def _solved_leg(
     entry: dict,
-    declared: dict[str, dict[str, float]],
+    room: str,
+    leg: str,
+    want: float,
     flows_m3h: dict[int, float],
     tolerance: float,
 ) -> tuple[str, str | None]:
     """Format one terminal row; return (row, error-or-None)."""
-    kind = entry["kind"]
-    room = entry["to_zone"] if kind == "ahs_supply" else entry["from_zone"]
-    leg = "supply" if kind == "ahs_supply" else "return"
-    want = declared[room][leg]
     got = abs(float(flows_m3h.get(int(entry["path_nr"]), 0.0)))
     if want <= _ABS_EPS_M3H:
         ok = got <= _ABS_EPS_M3H
@@ -174,7 +217,7 @@ def _solved_leg(
 
 def _check_solved(
     path_map: list[dict],
-    declared: dict[str, dict[str, float]],
+    declared: dict[tuple[int, str], dict[str, float]],
     flows_m3h: dict[int, float],
     tolerance: float,
 ) -> tuple[list[str], list[str]]:
@@ -182,9 +225,20 @@ def _check_solved(
     errors: list[str] = []
     rows: list[str] = []
     for entry in path_map:
-        if entry.get("kind") not in ("ahs_supply", "ahs_return"):
+        parsed = _terminal_room_leg(entry)
+        if parsed is None:
             continue
-        row, err = _solved_leg(entry, declared, flows_m3h, tolerance)
+        room, leg = parsed
+        want = _expected_terminal_flow(declared, entry)
+        if want is None:
+            errors.append(
+                f"terminal p{entry['path_nr']} {leg} {room} "
+                f"ahs{entry.get('ahs_nr')}: missing declared flow"
+            )
+            continue
+        row, err = _solved_leg(
+            entry, room, leg, want, flows_m3h, tolerance,
+        )
         rows.append(row)
         if err is not None:
             errors.append(err)
@@ -362,7 +416,7 @@ def check_platform(
     with open(map_path, encoding="utf-8") as fh:
         path_map = json.load(fh)
     print(f"[{platform}] emitted {prj_path} "
-          f"({len(path_map)} paths, {len(declared)} declared rooms)")
+          f"({len(path_map)} paths, {len(declared)} declared room branches)")
 
     errors.extend(_check_emission(path_map, declared))
     if not solve:
