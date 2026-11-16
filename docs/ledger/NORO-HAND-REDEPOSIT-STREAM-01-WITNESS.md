@@ -1,6 +1,7 @@
 # NORO-HAND-REDEPOSIT-STREAM-01-WITNESS
 **Date:** 2026-11-16
 **Commit:** bae0d181
+**Measured at:** bae0d181
 **Pathogens:** norwalk_gi
 **Status:** open
 
