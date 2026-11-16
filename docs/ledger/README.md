@@ -60,6 +60,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - `FOOD-SUPPLY-01-PIN-RESMOKE.md` — pinned seed-8118 re-smoke of the FOOD-SUPPLY-01 receipt arms after the carry-through fix.
 - `FOOD-SUPPLY-01-CANARY.md` — pinned 20-seed local canary of the FOOD-SUPPLY-01 receipt/lot arms on one mega p06 cell.
 - `FOOD-SUPPLY-01-SEED-SCAN.md` — AWS Batch supply-initiation census over 126,200 seeds × 3 arms: contaminated station-lot/receipt prevalence, served-lot yield, lot-size/titre, and item-line composition.
+- `FOOD-SUPPLY-01-WORST-CASES.md` — full-fidelity worst-case supply-seed examples across the four hulls: final posted AR, VSP timing, role channels, and supply witnesses.
 - `NORO-HAND-CASCADE-01-MEAL-SECONDARY.md` — posted-cell same-span secondary-transmission probe for provisioned-lot pans.
 - `NORO-HAND-CASCADE-01-PAN-COHORT-REACH.md` — posted-cell non-taker pan-cohort reach probe for secondary hand transfers.
 

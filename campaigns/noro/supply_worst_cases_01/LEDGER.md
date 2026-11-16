@@ -2,7 +2,8 @@
 
 **Date:** 2026-11-16
 **Pathogens:** norwalk_gi
-**Status:** exp canary succeeded; cls/spr/meg running
+**Status:** complete
+**Canonical readout:** `docs/ledger/FOOD-SUPPLY-01-WORST-CASES.md`
 **Parent scan:** `campaigns/noro/supply_seed_scan_01/` (`docs/ledger/FOOD-SUPPLY-01-SEED-SCAN.md`)
 
 ## Design and ranking
@@ -35,26 +36,14 @@
 | block | tier | seed | arm | job id | status |
 |---|---|---:|---|---|---|
 | `exp_declared_receipts_917326` | `fl_exp_12d_sens_p06_paxv_declared_receipts` | 917326 | `declared_receipts` | `3e6e3d48-be2d-4c31-84e3-5de58e38af8c` | SUCCEEDED |
-| `cls_station_lots_962793` | `fl_cls_12d_sens_p06_paxv` | 962793 | `station_lots` | `c34c4798-d520-4079-966a-d3479a4d4990` | RUNNING |
-| `spr_station_lots_1004210` | `fl_spr_12d_sens_p06_paxv` | 1004210 | `station_lots` | `9bb7c424-58c1-4636-9899-65afde27b3d2` | RUNNING |
-| `meg_single_line_receipt_1030001` | `fl_meg_12d_sens_p06_paxv_single_line_receipt` | 1030001 | `single_line_receipt` | `b4e5a09a-a35e-4fc0-9775-145533f135e9` | RUNNING |
+| `cls_station_lots_962793` | `fl_cls_12d_sens_p06_paxv` | 962793 | `station_lots` | `c34c4798-d520-4079-966a-d3479a4d4990` | SUCCEEDED |
+| `spr_station_lots_1004210` | `fl_spr_12d_sens_p06_paxv` | 1004210 | `station_lots` | `9bb7c424-58c1-4636-9899-65afde27b3d2` | SUCCEEDED |
+| `meg_single_line_receipt_1030001` | `fl_meg_12d_sens_p06_paxv_single_line_receipt` | 1030001 | `single_line_receipt` | `b4e5a09a-a35e-4fc0-9775-145533f135e9` | SUCCEEDED |
 
-## Canary readout (exp declared_receipts 917326)
+## Readout summary
 
-- Zip contract intact: `summary.json`, `growth_census.json.gz`,
-  `rss_samples.json`; `num_epochs=288`, `trigger_status=LOCKDOWN`.
-- Supply witness resolved as designed: `lot_layer_mode=declared_receipts`,
-  `receipts_per_item_line=2`, `n_lots=1`, `n_lots_placed=1`,
-  `n_contaminated=1`, `contaminated_by_item_line={shellfish: 1}`,
-  `actual_venues_used=[MainDining]`.
-- Measured endpoints: ever infected 129 (passenger 118, crew 11); reported
-  cases 62 (passenger 59, crew 3); passenger infection attack rate 0.3734;
-  passenger reported-case rate 0.1867; crew infection attack rate 0.0821;
-  crew reported-case rate 0.0224.
+All four seeds crossed the either-channel reported-case posting threshold. Passenger reported-case ARs were exp 18.67%, cls 8.45%, spr 6.95%, and meg 4.55%; VSP trigger epochs were 63 / 69 / 36 / 158 (days 3 / 3 / 2 / 7 at 24 epochs/day). Full tables and measured/inferred/hypothesis separation are in `docs/ledger/FOOD-SUPPLY-01-WORST-CASES.md`.
 
 ## Next decision
 
-After the remaining three jobs reach terminal states, sync the four zips,
-extract final posted AR, VSP trigger epoch/day, passenger/crew channels, peak
-epoch, and supply witnesses, then write the canonical readout. No anchor
-fitting or default flip.
+Expand to top-k seeds per hull/arm, or run paired `station_lots` vs receipt arms on the same seeds to separate supply burden from hull scale and mixing. No anchor fitting or default flip.
