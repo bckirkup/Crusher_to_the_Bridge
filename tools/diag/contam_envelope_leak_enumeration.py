@@ -46,6 +46,7 @@ from tools.contam_prj_bridge import export_prj_with_path_map  # noqa: E402
 
 LANES = ("authored", "design")
 _PLATFORMS_REL = os.path.join("data", "platforms")
+_PRJ_NAME = "platform.prj"
 
 
 def _load_json(rel_path: str) -> Any:
@@ -67,14 +68,14 @@ def bundled_hulls() -> list[str]:
         name
         for name in os.listdir(root)
         if os.path.isfile(os.path.join(root, name, "contam", "path_map.json"))
-        and os.path.isfile(os.path.join(root, name, "contam", "platform.prj"))
+        and os.path.isfile(os.path.join(root, name, "contam", _PRJ_NAME))
     )
 
 
 def _solve(prj_text: str, binary: str) -> dict[int, float]:
     with tempfile.TemporaryDirectory(prefix="contam_envelope_enum_") as tmp_dir:
         roots = (REPO_ROOT, tmp_dir)
-        prj_path = os.path.join(tmp_dir, "platform.prj")
+        prj_path = os.path.join(tmp_dir, _PRJ_NAME)
         with validated_open(prj_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
             fh.write(prj_text)
         sim_path = run_contamx(prj_path, binary, allowed_roots=roots)
@@ -85,7 +86,7 @@ def _lane_inputs(hull: str, lane: str) -> tuple[str, list[dict[str, Any]]]:
     base = os.path.join(_PLATFORMS_REL, hull)
     if lane == "authored":
         return (
-            _read_text(os.path.join(base, "contam", "platform.prj")),
+            _read_text(os.path.join(base, "contam", _PRJ_NAME)),
             _load_json(os.path.join(base, "contam", "path_map.json")),
         )
     spatial = _load_json(os.path.join(base, "spatial_layout.json"))
