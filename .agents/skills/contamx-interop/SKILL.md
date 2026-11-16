@@ -106,3 +106,7 @@ hvac:
    Per-AHU `oa_fraction` overrides emit dedicated `OAFr_{pct}` schedules on AHS recirc paths.
    Path-map cross-zone entries carry `filtered` only when it diverges from `is_hvac_ducted`;
    an absent key resolves to the ducted alias.
+7. Boundary sinks: outward `ambient_opening` `zone -> ambient` flow is always a
+   contaminant sink on positive solved `Flow0`; `envelope_leak` follows
+   `hvac.contamx.envelope_leak_mode` (`boundary_sink` default, `pressure_only`
+   baseline). Inward or zero `Flow0` adds no path for either kind.
