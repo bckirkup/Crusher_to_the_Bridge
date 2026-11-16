@@ -127,6 +127,7 @@
       "traffic": "high",
       "volume_m3": 1800.0,
       "deck": "5_Lounge",
+      "exposure": "enclosed",
       "max_occupancy": 300,
       "display": {
         "x": 90,

@@ -325,6 +325,7 @@
       "traffic": "medium",
       "volume_m3": 100.0,
       "deck": "5_Public",
+      "exposure": "enclosed",
       "max_occupancy": 60,
       "display": {
         "x": 72.0,
@@ -431,6 +432,7 @@
       "traffic": "high",
       "volume_m3": 180.0,
       "deck": "7_Public",
+      "exposure": "enclosed",
       "max_occupancy": 80,
       "display": {
         "x": 48.0,
@@ -458,6 +460,7 @@
       "traffic": "medium",
       "volume_m3": 100.0,
       "deck": "8_Top",
+      "exposure": "enclosed",
       "max_occupancy": 60,
       "display": {
         "x": 82.0,
@@ -497,6 +500,7 @@
       "traffic": "high",
       "volume_m3": 160.0,
       "deck": "8_Top",
+      "exposure": "enclosed",
       "max_occupancy": 60,
       "display": {
         "x": 55.0,
