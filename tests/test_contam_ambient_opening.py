@@ -89,8 +89,8 @@ _MAKEUP_RECORDS = {
     "greg_mortimer": 1, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
 }
-# CONTAM-AMBIENT-WEATHER-CRUISE-01: one ``open_deck`` record per declared
-# weather zone on the six cruise hulls.
+# CONTAM-AMBIENT-WEATHER-CRUISE-01 and CONTAM-EXPOSURE-TAGGING-01: one
+# ``open_deck`` record per declared weather zone on the six cruise hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -105,6 +105,15 @@ _WEATHER_ZONES = {
         "Main_Pool_Deck", "Sports_Court", "Waterpark", "CentralPark", "Aqua_Theater",
     },
     "spirit_cruise_3000": {"MainPool", "AftPool", "SportsDeck"},
+}
+# CONTAM-EXPOSURE-TAGGING-01: owner-ruled indoor spaces. They declare
+# ``exposure: enclosed`` and carry no opening.
+_ENCLOSED_ZONES = {
+    "classic_cruise_1900": {"Promenade"},
+    "diamond_princess": {"PromGalleria"},
+    "greg_mortimer": {"BarsDeck5", "ObsDeck7", "BarsDeck8", "ObsDeck8"},
+    "mega_cruise_5000": {"Royal_Promenade"},
+    "spirit_cruise_3000": {"Promenade"},
 }
 
 
@@ -199,14 +208,20 @@ class TestSchema:
 
     def test_weather_zones_carry_the_authored_exposure(self) -> None:
         # D7(b): the zone an ``open_deck`` record sits on declares
-        # ``exposure: weather``; no other committed zone declares exposure.
-        declared: dict[str, set[str]] = {}
+        # ``exposure: weather``; owner-ruled enclosed zones declare
+        # ``exposure: enclosed``; no other committed zone declares exposure.
+        weather: dict[str, set[str]] = {}
+        enclosed: dict[str, set[str]] = {}
         for path in sorted(_PLATFORM_ROOT.glob("*/spatial_layout.json")):
             for zone in json.loads(path.read_text(encoding="utf-8"))["zones"]:
-                if "exposure" in zone:
-                    assert zone["exposure"] == "weather", (path, zone["id"])
-                    declared.setdefault(path.parent.name, set()).add(zone["id"])
-        assert declared == _WEATHER_ZONES
+                exposure = zone.get("exposure")
+                if exposure is None:
+                    continue
+                assert exposure in ("weather", "enclosed"), (path, zone["id"])
+                target = weather if exposure == "weather" else enclosed
+                target.setdefault(path.parent.name, set()).add(zone["id"])
+        assert weather == _WEATHER_ZONES
+        assert enclosed == _ENCLOSED_ZONES
 
 
 class TestNativeBuilder:
