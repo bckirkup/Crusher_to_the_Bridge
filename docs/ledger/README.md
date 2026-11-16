@@ -70,6 +70,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - `NORO-HAND-CASCADE-01-MEAL-SECONDARY.md` — posted-cell same-span secondary-transmission probe for provisioned-lot pans.
 - `NORO-HAND-CASCADE-01-PAN-COHORT-REACH.md` — posted-cell non-taker pan-cohort reach probe for secondary hand transfers.
 - `NORO-HAND-REDEPOSIT-STREAM-01.md` — `carriers` hand-redeposit arm repair: `_replenish_hand` no longer suppresses the non-shedder maintenance stream, so the arm isolates deposit eligibility; prior FOOD-SUPPLY carriers numbers are historical for the bundled arm.
+- `NORO-HAND-REDEPOSIT-STREAM-01-WITNESS.md` — paired-seed `legacy` vs `carriers` witness on `classic_cruise_1900` seeds 8105/8106: carrier surface/food deposits fired and delivered/dose rose on both seeds, with epidemic count moving only on 8105; directional, not yet a default-flip gate.
 
 ## For drafting and analysis
 
