@@ -36,6 +36,13 @@
       "items": {
         "$ref": "#/$defs/AdjacencyEdge"
       }
+    },
+    "ambient_openings": {
+      "type": "array",
+      "description": "Openings between a zone and the weather (CONTAM-AMBIENT-OPENING-SCHEMA-01). Optional; absent or empty leaves both transport lanes exactly as they were. Separate from adjacency (zone-to-zone) and from cross_zone_links (whose 'ambient' endpoint stays a one-way prescribed sink).",
+      "items": {
+        "$ref": "#/$defs/AmbientOpening"
+      }
     }
   },
   "$defs": {
@@ -145,6 +152,46 @@
           "then": false
         }
       ]
+    },
+    "AmbientOpening": {
+      "type": "object",
+      "required": ["zone", "type", "area_m2"],
+      "additionalProperties": false,
+      "properties": {
+        "zone": {
+          "type": "string",
+          "minLength": 1,
+          "not": {"const": "ambient"},
+          "description": "Room ID that MUST exist in spatial_layout.json (a room, not an HVAC zone ID)."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["open_deck", "balcony_door", "weather_hatch", "weather_door", "hangar_door", "makeup_louvre"],
+          "description": "Opening catalog entry. Native path type becomes ambient_exchange_<type>; the export schedule defaults from it."
+        },
+        "area_m2": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Clear open area in m², geometry read from the drawing. Sizes the ContamX orifices; not used by the native lane."
+        },
+        "exchange_m3h": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Native-lane two-way exchange rate with clean ambient air in m³/hour. Null or absent defers to the declared per-type axis hvac.ambient_exchange_m3h; with neither, the native build raises. Not used by the ContamX lane, which solves the flow."
+        },
+        "azimuth_deg": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 360,
+          "description": "Wall azimuth of the opening for the export wind profile. Null or absent uses the zone's derived hull-wall azimuth."
+        },
+        "schedule": {
+          "type": "string",
+          "minLength": 1,
+          "description": "'always_open' or a week-schedule id of the hobbyist pack (e.g. DoorTrafficW). Absent uses the type's default schedule. Export lane only."
+        },
+        "description": {"type": "string"}
+      }
     },
     "AdjacencyEdge": {
       "type": "object",

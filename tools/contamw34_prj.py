@@ -27,7 +27,14 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from engines.py_contam_bridge import cross_zone_link_semantics, derive_volume_m3
+from engines.py_contam_bridge import (
+    AMBIENT_OPENING_ALWAYS_OPEN,
+    AMBIENT_OPENING_KIND,
+    AMBIENT_ZONE_ID,
+    ambient_opening_records,
+    cross_zone_link_semantics,
+    derive_volume_m3,
+)
 from tools import contam_hobbyist as _hobby
 
 PRJ_SIGNATURE_34 = "ContamW 3.4.0.0 0"
@@ -81,6 +88,36 @@ _ENVELOPE_ORIFICE_PARAMS = (
 # i.e. hvac_duty <= 0) on a constant schedule, so a ContamX solve of the
 # authored .prj must reproduce the declared per-branch flows — the
 # hull -> solver commissioning check.
+# ``ambient_openings`` emission (CONTAM-AMBIENT-OPENING-SCHEMA-01, decision
+# D8, witnessed by tools/diag/ambient_opening_d8_witness.py).
+# ``paired_orifices`` (default) splits the declared area into two
+# ``plr_orfc`` at 1/4 and 3/4 of the zone height: ContamX solves the
+# buoyancy-driven counter-flow as an outward and an inward path, each with
+# its own signed Flow0, which is all the field lane reads.
+# ``single_orifice`` solves only the net flow (no exchange).
+# ``two_way_door`` is the ContamX ``dor_door`` element: it solves the
+# exchange, but reports one direction in Flow0 and the other in Flow1, which
+# no transport consumer reads.  Both alternatives are witness-only.
+AMBIENT_OPENING_MODELS = ("paired_orifices", "single_orifice", "two_way_door")
+DEFAULT_AMBIENT_OPENING_MODEL = "paired_orifices"
+_AMBIENT_ELEM_PREFIX = "AmbOp"
+_AMBIENT_PAIR_REL_HEIGHTS = (0.25, 0.75)
+_ELEM_DOOR = 25
+_DOOR_DISCHARGE_COEFFICIENT = 0.78
+_DOOR_MIN_DELTA_T_K = 0.01
+# Default week schedule per opening type when the record's ``schedule`` is
+# absent; None = always open.  These reuse the interior-opening templates of
+# the hobbyist pack (doorway -> DoorTrafficW, hatch -> HatchOccasionalW) and
+# are declared defaults, not sourced duty cycles.
+_AMBIENT_OPENING_SCHEDULE_BY_TYPE: dict[str, str | None] = {
+    "open_deck": None,
+    "makeup_louvre": None,
+    "balcony_door": "DoorTrafficW",
+    "weather_door": "DoorTrafficW",
+    "weather_hatch": "HatchOccasionalW",
+    "hangar_door": "HatchOccasionalW",
+}
+
 _AHS_TERMINAL_MODES = ("design", "commissioned")
 _DEFAULT_TERMINAL_MODE = "design"
 
@@ -357,6 +394,7 @@ class _NetworkBuilder:
         self.hvac_zones = list(air_flow_paths.get("hvac_zones", []))
         self.cross_links = list(air_flow_paths.get("cross_zone_links", []))
         self.adjacency = list(air_flow_paths.get("adjacency", []))
+        self.ambient_openings = ambient_opening_records(air_flow_paths)
         self.overrides = dict(overrides or {})
         self.pack = pack or (_hobby.load_hobbyist_pack() if hobbyist else {})
         self.hobbyist = hobbyist
@@ -373,6 +411,16 @@ class _NetworkBuilder:
                 f"expected one of {_AHS_TERMINAL_MODES}"
             )
         self.ahs_terminal_mode = mode
+        opening_model = (
+            self.overrides.get("ambient_opening_model")
+            or DEFAULT_AMBIENT_OPENING_MODEL
+        )
+        if opening_model not in AMBIENT_OPENING_MODELS:
+            raise ValueError(
+                f"unknown ambient_opening_model {opening_model!r}; "
+                f"expected one of {AMBIENT_OPENING_MODELS}"
+            )
+        self.ambient_opening_model = opening_model
 
         self.levels = _build_levels(self.zones)
         self.level_index = {lvl["name"]: i + 1 for i, lvl in enumerate(self.levels)}
@@ -391,6 +439,7 @@ class _NetworkBuilder:
         self.fan_elem_by_m3s: dict[float, int] = {}
         self.orifice_elem_by_area: dict[float, int] = {}
         self.backdraft_elem_by_m3s: dict[float, int] = {}
+        self.ambient_elem_by_key: dict[tuple[str, float, float], int] = {}
 
         # Hobbyist schedules / wind / filters (indices are 1-based Contam refs)
         self.sched_oa_week = 0
@@ -433,6 +482,8 @@ class _NetworkBuilder:
         self._add_adjacency_paths()
         # 3) Cross-zone links: fan_cvf when HVAC-ducted; sized plr_orfc when passive.
         self._add_cross_zone_paths()
+        # 3b) Declared ambient openings (two-way exchange with the weather).
+        self._add_ambient_opening_paths()
         # 4) Per-AHS: Contam simple-AHS semantics (match authentic ContamW 3.4)
         self._add_ahs_paths()
         # 5) Duct leakage spines (hobbyist): passive Darcy trunks between rooms
@@ -741,6 +792,7 @@ class _NetworkBuilder:
         x: float = 0.0
         y: float = 0.0
         w_pmod: float = 0.0
+        rel_ht: float = 0.0
 
     def _add_path(
         self,
@@ -773,6 +825,7 @@ class _NetworkBuilder:
             "x": fields.x,
             "y": fields.y,
             "w_pmod": fields.w_pmod,
+            "rel_ht": fields.rel_ht,
         })
         map_entry = {
             "path_nr": pnr,
@@ -987,6 +1040,121 @@ class _NetworkBuilder:
                         filter_nr=filter_nr,
                     ),
                     path_map_extra=path_map_extra,
+                )
+
+    # ── ambient openings ──────────────────────────────────────────────────
+
+    def _ambient_opening_elem(self, area_m2: float, height_m: float) -> int:
+        """Flow element for one leg of an ambient opening of ``area_m2``."""
+        door = self.ambient_opening_model == "two_way_door"
+        symbol = "dor_door" if door else "plr_orfc"
+        key = (symbol, round(area_m2, 10), round(height_m, 6) if door else 0.0)
+        if key in self.ambient_elem_by_key:
+            return self.ambient_elem_by_key[key]
+        nr = len(self.elements) + 1
+        el_name = _unique_contam_name(
+            f"{_AMBIENT_ELEM_PREFIX}_{nr}", self.used_contam_names,
+        )
+        orifice = _hobby.orifice_params_for_area(area_m2)
+        if door:
+            lam, turb, expt = orifice.split()[:3]
+            width = area_m2 / height_m
+            params = (
+                f"{lam} {turb} {expt} {_DOOR_MIN_DELTA_T_K:g} {height_m:.8g} "
+                f"{width:.8g} {_DOOR_DISCHARGE_COEFFICIENT:g} 0 0 0"
+            )
+        else:
+            params = orifice
+        self.elements.append({
+            "nr": nr,
+            "type": _ELEM_DOOR if door else _ELEM_ORIFICE,
+            "symbol": symbol,
+            "name": el_name,
+            "params": params,
+            "area_m2": area_m2,
+        })
+        self.ambient_elem_by_key[key] = nr
+        return nr
+
+    def _ambient_opening_schedule(self, record: dict[str, Any]) -> int:
+        """Week-schedule nr for an opening (0 = always open)."""
+        if not self.hobbyist or not self.week_by_id:
+            return 0
+        sched_id = record.get("schedule")
+        if sched_id is None:
+            sched_id = _AMBIENT_OPENING_SCHEDULE_BY_TYPE.get(record["type"])
+        if sched_id in (None, AMBIENT_OPENING_ALWAYS_OPEN):
+            return 0
+        if sched_id not in self.week_by_id:
+            raise ValueError(
+                f"ambient_openings entry for {record['zone']!r} names unknown "
+                f"schedule {sched_id!r}; expected {AMBIENT_OPENING_ALWAYS_OPEN!r} "
+                f"or one of {sorted(self.week_by_id)}"
+            )
+        return int(self.week_by_id[sched_id])
+
+    def _ambient_opening_legs(
+        self, area_m2: float, height_m: float,
+    ) -> list[tuple[float, float]]:
+        """``(leg area, relative height)`` per emitted path for one opening."""
+        if self.ambient_opening_model != "paired_orifices":
+            return [(area_m2, 0.0)]
+        return [
+            (area_m2 / len(_AMBIENT_PAIR_REL_HEIGHTS), frac * height_m)
+            for frac in _AMBIENT_PAIR_REL_HEIGHTS
+        ]
+
+    def _ambient_opening_wind(self, record: dict[str, Any]) -> tuple[float, int, float]:
+        """``(wall azimuth, wind profile nr, wind pressure modifier)``."""
+        if not (self.hobbyist and self.wind_nr):
+            return -1.0, 0, 0.0
+        zone_id = record["zone"]
+        azimuth = record.get("azimuth_deg")
+        if azimuth is None:
+            azimuth = _hobby.wall_azimuth_deg(
+                zone_id, self.zone_by_id.get(zone_id, {}), self.overrides,
+                beam_m=self.beam_m,
+            )
+        return float(azimuth), self.wind_nr, 0.8
+
+    def _add_ambient_opening_paths(self) -> None:
+        """Emit each ``ambient_openings`` record as zone -> ambient (-1) paths.
+
+        Authored like the envelope leak (positive Flow0 is outward) but sized
+        from the declared ``area_m2`` and mapped as ``kind``
+        ``ambient_opening``, so the field lane can treat it as a boundary
+        path without touching ``envelope_leak``.
+        """
+        for record in self.ambient_openings:
+            zone_id = record["zone"]
+            if zone_id not in self.zone_name_to_nr or zone_id not in self.zone_by_id:
+                raise ValueError(
+                    f"ambient_openings zone {zone_id!r} is not a room in the "
+                    "spatial layout"
+                )
+            z = self.zone_records[self.zone_name_to_nr[zone_id] - 1]
+            height = float(z["height"])
+            wazm, wind_nr, wmod = self._ambient_opening_wind(record)
+            sched_nr = self._ambient_opening_schedule(record)
+            for leg_area, rel_ht in self._ambient_opening_legs(
+                float(record["area_m2"]), height,
+            ):
+                self._add_path(
+                    z["nr"], -1, self._ambient_opening_elem(leg_area, height),
+                    from_name=zone_id, to_name=AMBIENT_ZONE_ID,
+                    kind=AMBIENT_OPENING_KIND,
+                    is_hvac_ducted=False,
+                    crusher_transfer=False,
+                    fields=self.PathFields(
+                        level=int(z["level"]),
+                        wazm=wazm,
+                        wind_p=wind_nr,
+                        w_pmod=wmod,
+                        sched_nr=sched_nr,
+                        x=float(z["x"]),
+                        y=float(z["y"]),
+                        rel_ht=rel_ht,
+                    ),
                 )
 
     # ── air-handling systems ──────────────────────────────────────────────
@@ -1754,7 +1922,8 @@ def _append_ahs_zones_and_paths(lines: list[str], ctx: dict[str, Any]) -> None:
             f"{int(p.get('wind_nr', 0))}   {p['ahs_nr']}   "
             f"{int(p.get('sched_nr', 0))}   0   {p['level']}   "
             f"{float(p.get('x', 0.0)):.3f}   {float(p.get('y', 0.0)):.3f}   "
-            f"0.000 1 0 {float(p.get('w_pmod', 0.0)):g} {wazm_s} "
+            f"{float(p.get('rel_ht', 0.0)):.3f} 1 0 "
+            f"{float(p.get('w_pmod', 0.0)):g} {wazm_s} "
             f"{p['fahs']:.8g} 0 0   0  1 -1 0 0 0 0 0 0"
         )
     lines.append(_SENTINEL)
@@ -1916,6 +2085,25 @@ def _iter_flow_element_records(
     return records
 
 
+def _ambient_opening_element_nrs(body: list[str]) -> set[int]:
+    """Flow elements the exporter emitted for ``ambient_openings`` records.
+
+    They are recognised by the reserved ``AmbOp_`` element-name prefix, so a
+    path_map re-derived from an exported PRJ keeps ``kind`` ``ambient_opening``
+    instead of collapsing the opening into ``envelope_leak``.
+    """
+    nrs: set[int] = set()
+    for line in body:
+        toks = line.split()
+        if (
+            len(toks) >= 4
+            and toks[0].isdigit()
+            and toks[3].startswith(f"{_AMBIENT_ELEM_PREFIX}_")
+        ):
+            nrs.add(int(toks[0]))
+    return nrs
+
+
 def _classify_prj_zones(
     body: list[str],
 ) -> tuple[dict[int, str], set[int], set[int]]:
@@ -2054,6 +2242,7 @@ def _classify_path_kind(
     to_ph: bool,
     both_real: bool,
     is_fan: bool,
+    is_ambient_opening: bool = False,
 ) -> str:
     if flag == _PATH_AHS_OA:
         return "ahs_oa"
@@ -2069,6 +2258,8 @@ def _classify_path_kind(
         return "ahs_terminal"
     if is_fan and not from_ph and to_nr < 0:
         return "exhaust_sink"
+    if is_ambient_opening and to_nr < 0:
+        return AMBIENT_OPENING_KIND
     if from_nr < 0 or to_nr < 0:
         return "envelope_leak"
     if both_real and is_fan:
@@ -2122,6 +2313,10 @@ def path_map_from_prj(
         )
     }
 
+    ambient_elems = _ambient_opening_element_nrs(
+        sections.get("flow elements", [])
+    )
+
     def _endpoint_name(nr: int) -> str:
         if nr < 0:
             return "ambient"
@@ -2145,6 +2340,7 @@ def path_map_from_prj(
             to_ph=to_nr in phantom_nrs or to_nr < 0,
             both_real=both_real,
             is_fan=elem_is_fan.get(elem_nr, False),
+            is_ambient_opening=elem_nr in ambient_elems,
         )
         is_sink = kind == "exhaust_sink"
         path_map.append({
