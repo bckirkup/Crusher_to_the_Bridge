@@ -182,6 +182,11 @@ magnitude is more than a few tenths of a m³/h per leak.
   engine would differ slightly from the frozen readout. The frozen campaign
   directories are untouched; a re-run that must reproduce them should pass
   `envelope_leak_mode="pressure_only"`.
+- **Ruling (coordinator, 2026-11-15 19:51 EST):** no pinning. Frozen Phase 1/2
+  `_v1` caches and readouts are as-run records and are never re-run; any future
+  re-measurement goes through the `_v2` field-cache/design-id conventions with
+  the default `boundary_sink` semantics, and `pressure_only` stays available
+  for paired attribution.
 - No measurement recorded in the norovirus, covid or flu open ledgers is
   invalidated: none of them is scored on the ContamX field lane.
 
