@@ -1,6 +1,12 @@
 # Ambient exposure audit and fix plan (open decks, balconies, hatches)
 
-> **Status:** Proposed audit; no fix has landed. Measured against
+> **Status:** Partly implemented. Landed: stage 1 (`ambient_openings` schema
+> and native/export machinery, `CONTAM-AMBIENT-OPENING-SCHEMA-01`), stage 2
+> (outward opening flow as a field-lane boundary sink,
+> `CONTAM-AMBIENT-OPENING-BOUNDARY-01`), and the cruise half of stage 3
+> (`makeup_louvre` records on the six cruise hulls,
+> `CONTAM-AMBIENT-MAKEUP-CRUISE-01`). Still proposed: stage 3 for the fiction
+> hulls and stages 4+. The audit below was measured against
 > `origin/main` `15beae6b` (post-#1250/#1251). Audit ledger:
 > [`../ledger/CONTAM-AMBIENT-EXPOSURE-01.md`](../ledger/CONTAM-AMBIENT-EXPOSURE-01.md).
 > This document lives in `docs/proposals/` because the representation it
