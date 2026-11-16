@@ -107,6 +107,15 @@ def test_outward_leak_reduces_net_inward() -> None:
     assert envelope["net_inward_m3h"] == pytest.approx(45.0)
 
 
+def test_ambient_opening_is_classed_apart_from_interior_openings() -> None:
+    entries = _entries() + [_entry(9, "ambient_opening", "A", "ambient")]
+    flows = {**_FLOWS, 9: -5.0}
+    dps = {**_DPS, 9: 1.0e6}
+    dp = diag.analyze_field(entries, flows, dps, _KNOWN)["dp"]
+    assert dp["interior"]["max_abs_dp_pa"] == pytest.approx(4.0)
+    assert dp["by_class"][diag.CLASS_AMBIENT_OPENING]["max_abs_dp_pa"] == pytest.approx(1.0e6)
+
+
 def test_ahs_imbalance_per_group_and_total() -> None:
     ahs = _report()["ahs"]
     by_nr = {g["ahs_nr"]: g for g in ahs["groups"]}

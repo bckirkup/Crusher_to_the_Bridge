@@ -40,6 +40,7 @@ from engines.contamx_runner import (
     run_contamx,
 )
 from engines.py_contam_bridge import (
+    AMBIENT_OPENING_KIND,
     UNSOURCED_LEGACY_FILTER_EFFICIENCY,
     ContamAirflowPath,
     ContamTransportEngine,
@@ -63,6 +64,17 @@ ENVELOPE_LEAK_PRESSURE_ONLY = "pressure_only"
 ENVELOPE_LEAK_MODES = (ENVELOPE_LEAK_BOUNDARY_SINK, ENVELOPE_LEAK_PRESSURE_ONLY)
 
 
+def _is_outward_zone_to_ambient(
+    entry: dict[str, Any], flow_m3h: float, known_zones: set[str],
+) -> bool:
+    """True when a solved zone→ambient path carries room air out of the hull."""
+    return (
+        entry.get("from_zone") in known_zones
+        and entry.get("to_zone") not in known_zones
+        and flow_m3h >= _FLOW_EPSILON_M3H
+    )
+
+
 def is_outward_envelope_leak(
     entry: dict[str, Any], flow_m3h: float, known_zones: set[str],
 ) -> bool:
@@ -73,9 +85,21 @@ def is_outward_envelope_leak(
     """
     return (
         str(entry.get("kind", "")) == ENVELOPE_LEAK_KIND
-        and entry.get("from_zone") in known_zones
-        and entry.get("to_zone") not in known_zones
-        and flow_m3h >= _FLOW_EPSILON_M3H
+        and _is_outward_zone_to_ambient(entry, flow_m3h, known_zones)
+    )
+
+
+def is_outward_ambient_opening(
+    entry: dict[str, Any], flow_m3h: float, known_zones: set[str],
+) -> bool:
+    """True when a solved ``ambient_opening`` carries room air out of the hull.
+
+    Ambient openings are authored ``zone -> ambient``; positive Flow0 is
+    outward. Inward exchange brings clean air and adds no contaminant path.
+    """
+    return (
+        str(entry.get("kind", "")) == AMBIENT_OPENING_KIND
+        and _is_outward_zone_to_ambient(entry, flow_m3h, known_zones)
     )
 
 
@@ -146,7 +170,8 @@ class ContamXTransportEngine(ContamTransportEngine):
 
         Includes:
           - Real↔real Contam paths (adjacency, cross-zone fans) with SIM flow
-          - Outward envelope leaks as boundary sinks (``boundary_sink`` mode)
+          - Outward ambient openings, and outward envelope leaks in
+            ``boundary_sink`` mode, as contaminant sinks
           - Synthesized AHS recirculation (room↔room) from supply/return/recirc
         """
         known = set(self.zone_nodes)
@@ -186,8 +211,12 @@ class ContamXTransportEngine(ContamTransportEngine):
                 or kind == "exhaust_sink"
                 or self._is_boundary_sink(entry, flow, known)
             )
-            # AHS phantom / ambient paths are bridged separately
-            if not is_sink and (kind.startswith("ahs_") or kind == ENVELOPE_LEAK_KIND):
+            # AHS phantom paths and non-sink boundary openings are skipped
+            if not is_sink and (
+                kind.startswith("ahs_")
+                or kind == ENVELOPE_LEAK_KIND
+                or kind == AMBIENT_OPENING_KIND
+            ):
                 continue
             if abs(flow) < _FLOW_EPSILON_M3H:
                 continue
@@ -222,8 +251,12 @@ class ContamXTransportEngine(ContamTransportEngine):
     def _is_boundary_sink(
         self, entry: dict[str, Any], flow_m3h: float, known: set[str],
     ) -> bool:
-        """Outward envelope leakage removes contaminant (CONTAM-FIELD-ENVELOPE-BOUNDARY-01)."""
-        return (
+        """Outward boundary exchange removes contaminant.
+
+        ``ambient_opening`` is always direction-aware (CONTAM-AMBIENT-OPENING-BOUNDARY-01).
+        ``envelope_leak`` keeps the ``boundary_sink``/``pressure_only`` switch.
+        """
+        return is_outward_ambient_opening(entry, flow_m3h, known) or (
             self.envelope_leak_mode == ENVELOPE_LEAK_BOUNDARY_SINK
             and is_outward_envelope_leak(entry, flow_m3h, known)
         )

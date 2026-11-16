@@ -52,10 +52,11 @@ from engines.contamx_transport import (  # noqa: E402
     ENVELOPE_LEAK_KIND,
     ENVELOPE_LEAK_MODES,
     _normalize_path_map_entries,
+    is_outward_ambient_opening,
     is_outward_envelope_leak,
     resolve_envelope_leak_mode,
 )
-from engines.py_contam_bridge import ContamTransportEngine  # noqa: E402
+from engines.py_contam_bridge import AMBIENT_OPENING_KIND, ContamTransportEngine  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_repo_path,
@@ -112,6 +113,8 @@ def classify_contamx_path_fate(
         return row
     if kind == ENVELOPE_LEAK_KIND:
         return _classify_envelope_leak(row, entry, flow, known_zones, envelope_leak_mode)
+    if kind == AMBIENT_OPENING_KIND:
+        return _classify_ambient_opening(row, entry, flow, known_zones)
     if path_flows_m3h is None:
         row["fate"] = "unknown"
         row["reason"] = "no SIM flows loaded"
@@ -148,6 +151,22 @@ def _classify_envelope_leak(
         return row
     row["fate"] = "skipped"
     row["reason"] = "envelope_leak skipped by ContamX→Crusher filter"
+    return row
+
+
+def _classify_ambient_opening(
+    row: dict[str, Any],
+    entry: dict[str, Any],
+    flow: float | None,
+    known_zones: set[str],
+) -> dict[str, Any]:
+    """Outward openings are boundary sinks; inward exchange adds no path."""
+    if flow is not None and is_outward_ambient_opening(entry, flow, known_zones):
+        row["fate"] = FATE_BOUNDARY_SINK
+        row["reason"] = "outward ambient_opening — clean-air exchange sink to ambient"
+        return row
+    row["fate"] = "skipped"
+    row["reason"] = "ambient_opening skipped by ContamX→Crusher filter"
     return row
 
 
@@ -231,6 +250,7 @@ def contamx_flow_report(
         if r["fate"] == "skipped"
         and not str(r["kind"]).startswith("ahs_")
         and r["kind"] != ENVELOPE_LEAK_KIND
+        and r["kind"] != AMBIENT_OPENING_KIND
     ]
     # Directed Crusher-style edges (match ContamXTransportEngine): negative
     # SIM Flow0 reverses from→to. Classification rows keep path_map orientation
@@ -270,6 +290,7 @@ def contamx_flow_report(
         lambda: {"out_m3h": 0.0, "in_m3h": 0.0, "out_edges": 0, "in_edges": 0},
     )
     boundary_sinks = _boundary_sink_links(classified)
+    ambient_openings = [r for r in classified if r["kind"] == AMBIENT_OPENING_KIND]
     for link in kept_links + synth + boundary_sinks:
         flow = float(link["flow_m3h"])
         degree[link["from_zone"]]["out_m3h"] += flow
@@ -285,6 +306,17 @@ def contamx_flow_report(
         "n_synth_ahs_paths": len(synth),
         "n_boundary_sink_paths": len(boundary_sinks),
         "boundary_sink_out_m3h": sum(link["flow_m3h"] for link in boundary_sinks),
+        "n_ambient_opening_paths": len(ambient_openings),
+        "ambient_opening_sink_out_m3h": sum(
+            float(r["sim_flow_m3h"])
+            for r in ambient_openings
+            if r["fate"] == FATE_BOUNDARY_SINK
+        ),
+        "ambient_opening_inward_m3h": sum(
+            -float(r["sim_flow_m3h"])
+            for r in ambient_openings
+            if r.get("sim_flow_m3h") is not None and float(r["sim_flow_m3h"]) < 0.0
+        ),
         "envelope_leak_mode": resolve_envelope_leak_mode(envelope_leak_mode),
         "n_crusher_paths": len(kept_links) + len(synth) + len(boundary_sinks),
         "n_zero_flow_real_candidates": len(zero_real),
@@ -500,6 +532,12 @@ def _print_summary(report: dict[str, Any]) -> None:
         f"envelope_leak_mode: {cx['envelope_leak_mode']}  "
         f"boundary sink out: {cx['boundary_sink_out_m3h']:.4g} m3/h"
     )
+    if cx["n_ambient_opening_paths"]:
+        print(
+            f"ambient_openings: n={cx['n_ambient_opening_paths']}  "
+            f"sink_out={cx['ambient_opening_sink_out_m3h']:.4g} m3/h  "
+            f"inward={cx['ambient_opening_inward_m3h']:.4g} m3/h"
+        )
     if cx["sim_flows_loaded"]:
         print(f"zero-flow real candidates: {cx['n_zero_flow_real_candidates']}")
         zeros = cx["zero_flow_real_candidates"][:12]
