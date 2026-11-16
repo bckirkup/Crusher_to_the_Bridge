@@ -51,6 +51,7 @@ from engines.contamx_transport import (  # noqa: E402
     ENVELOPE_LEAK_KIND,
     ENVELOPE_LEAK_MODES,
 )
+from engines.py_contam_bridge import AMBIENT_OPENING_KIND  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     REPO_ROOT,
     prepare_output_directory,
@@ -78,6 +79,7 @@ _FLOW_EPS_M3H = 1.0e-9
 _RATIO_BANDS = (0.5, 2.0)
 
 CLASS_ENVELOPE = "envelope_leak"
+CLASS_AMBIENT_OPENING = "ambient_opening"
 CLASS_AHS_TERMINAL = "ahs_terminal"
 CLASS_AHS_SYSTEM = "ahs_system"
 CLASS_EXHAUST_SINK = "exhaust_sink"
@@ -122,6 +124,8 @@ def path_class(entry: dict[str, Any], prescribed: frozenset[str] = frozenset()) 
     kind = str(entry.get("kind", ""))
     if kind == ENVELOPE_LEAK_KIND:
         return CLASS_ENVELOPE
+    if kind == AMBIENT_OPENING_KIND:
+        return CLASS_AMBIENT_OPENING
     if kind in _AHS_TERMINAL_KINDS:
         return CLASS_AHS_TERMINAL
     if kind.startswith("ahs_"):
