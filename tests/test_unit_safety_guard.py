@@ -53,6 +53,7 @@ ALLOWED_EPOCH_KEYS = (
     ("data/platforms/*/voyage_config.json", "total_epochs"),  # run-length bookkeeping
     ("picard_framework/runs/*.json", "num_epochs"),  # run-length bookkeeping
     ("picard_framework/runs/mega_cruise_campaign/*.json", "default_epochs"),  # run-length bookkeeping
+    ("campaigns/*/*/manifest.json", "default_epochs"),  # campaign manifest run-length fallback
     ("picard_framework/runs/mega_cruise_campaign/*.json", "sampling_interval_epochs"),  # Sentinel wastewater consumer; defer to separate unit pass required by AGENTS.md
     ("picard_framework/runs/mega_cruise_campaign/*.json", "disembark_window_epochs"),  # Sentinel itinerary consumer; defer to separate unit pass required by AGENTS.md
     ("picard_framework/runs/mega_cruise_campaign/*.json", "embarkation_window_epochs"),  # Sentinel itinerary consumer; defer to separate unit pass required by AGENTS.md
