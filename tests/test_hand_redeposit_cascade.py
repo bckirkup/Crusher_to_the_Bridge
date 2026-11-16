@@ -236,6 +236,38 @@ def test_carrier_self_contact_reloads_without_shedder_target_cap(
     assert load + pool == pytest.approx(1100.0, rel=1e-9)
 
 
+def test_non_shedding_carrier_stool_event_queues_no_protected_mass(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "engines.transmission_core.SELF_CONTACT_TICKS_PER_DAY_RANGE",
+        (0.0, 0.0),
+    )
+    monkeypatch.setattr(
+        "engines.transmission_core.ROUTINE_WASHES_PER_DAY_RANGE",
+        (0.0, 0.0),
+    )
+    profile = _profile(
+        stool_events_per_day={"baseline": 1.0, "diarrhoeal": 1.0},
+        hand_inactivation_rate_per_hour=0.0,
+        surface_decay_log10_per_day=0.0,
+    )
+    core = _carriers_core(profile=profile, seed=5)
+    core._stool_event_occurs = lambda events_per_day: True
+    core._hand_carriage_propensity = lambda agent, pathogen_id: 1.0
+    carrier = _agent(hand_load=100.0)
+
+    core._replenish_hand(carrier, PATHOGEN, profile, ZONE)
+
+    assert carrier.hand_protected_pending_by_pathogen.get(
+        PATHOGEN, 0.0,
+    ) == pytest.approx(0.0)
+    assert carrier.hand_protected_load_by_pathogen.get(
+        PATHOGEN, 0.0,
+    ) == pytest.approx(0.0)
+    assert carrier.hand_load_by_pathogen[PATHOGEN] <= 100.0
+
+
 def test_ordered_fomite_defers_hygiene_until_food_pathway(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

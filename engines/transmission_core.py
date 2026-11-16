@@ -9488,28 +9488,28 @@ class TransmissionCore:
         if self._stool_event_occurs(events_per_day):
             if self.rng.random() < propensity:
                 accessible = max(accessible, target)
-                # A contaminating visit queues material for the protected
-                # sites at the measured post-bathroom magnitude, but it
-                # settles over days -- the post-visit wash still acts on
-                # the fresh accessible load first (NORO-HAND-CARRIAGE-01
-                # iii, McNeil 2001).
-                pending = agent.hand_protected_pending_by_pathogen.get(
-                    pathogen_id, 0.0,
+                sequestered = math.pow(
+                    10.0,
+                    self.rng.uniform(
+                        math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[0]),
+                        math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[1]),
+                    ),
                 )
-                agent.hand_protected_pending_by_pathogen[pathogen_id] = (
-                    pending
-                    + math.pow(
-                        10.0,
-                        self.rng.uniform(
-                            math.log10(
-                                HAND_PROTECTED_SEQUESTER_GEC_RANGE[0],
-                            ),
-                            math.log10(
-                                HAND_PROTECTED_SEQUESTER_GEC_RANGE[1],
-                            ),
-                        ),
+                # Only a shedding target can queue stool-linked protected
+                # mass; target <= 0 hosts consume the draw without producing
+                # copies from a stool that cannot carry this pathogen.
+                if target > 0.0:
+                    # A contaminating visit queues material for the protected
+                    # sites at the measured post-bathroom magnitude, but it
+                    # settles over days -- the post-visit wash still acts on
+                    # the fresh accessible load first (NORO-HAND-CARRIAGE-01
+                    # iii, McNeil 2001).
+                    pending = agent.hand_protected_pending_by_pathogen.get(
+                        pathogen_id, 0.0,
                     )
-                )
+                    agent.hand_protected_pending_by_pathogen[pathogen_id] = (
+                        pending + sequestered
+                    )
             if self.rng.random() < practice["wash_compliance"]:
                 efficacy, wet = self._hand_wash_act()
                 accessible *= math.pow(10.0, -efficacy)
