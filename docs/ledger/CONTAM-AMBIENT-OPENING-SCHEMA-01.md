@@ -119,7 +119,10 @@ Reading:
 Limits of this witness, for stage 2 to carry:
 
 - One hull, one zone, one area. The 18% gap to `dor_door` and the two leg
-  heights (1/4, 3/4) are a modelling choice, not a calibrated value.
+  heights (1/4, 3/4) are a modelling choice, not a calibrated value. The
+  leg heights and the `dor_door` parameters (discharge coefficient 0.78,
+  minimum ΔT 0.01 K) are Grade C declared assumptions with no source read, so
+  the 18% is a comparison between two unsourced parameterisations.
 - At ΔT = 0 every model exchanges nothing: both legs sit on the same wall with
   the same wind pressure, so steady wind alone drives no counter-flow through
   one opening. In the ContamX lane the exchange is buoyancy-driven and scales

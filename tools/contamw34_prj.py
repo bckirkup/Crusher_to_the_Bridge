@@ -101,8 +101,15 @@ _ENVELOPE_ORIFICE_PARAMS = (
 AMBIENT_OPENING_MODELS = ("paired_orifices", "single_orifice", "two_way_door")
 DEFAULT_AMBIENT_OPENING_MODEL = "paired_orifices"
 _AMBIENT_ELEM_PREFIX = "AmbOp"
+# Leg heights as fractions of the zone height. Grade C: declared assumption,
+# no source — the midpoints of the lower and upper half of the opening. The
+# solved exchange depends on the leg separation; not calibrated (ledger
+# CONTAM-AMBIENT-OPENING-SCHEMA-01, "Limits of this witness").
 _AMBIENT_PAIR_REL_HEIGHTS = (0.25, 0.75)
 _ELEM_DOOR = 25
+# ``dor_door`` discharge coefficient and minimum temperature difference for
+# two-way flow. Grade C: declared assumptions, no source read. Used only by
+# the witness-only ``two_way_door`` model, never by a default export.
 _DOOR_DISCHARGE_COEFFICIENT = 0.78
 _DOOR_MIN_DELTA_T_K = 0.01
 # Default week schedule per opening type when the record's ``schedule`` is
