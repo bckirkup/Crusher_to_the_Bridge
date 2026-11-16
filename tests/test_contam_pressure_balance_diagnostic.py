@@ -300,3 +300,16 @@ def test_blocked_openings_are_reported_apart_from_flowing_ones() -> None:
     open_ = diag.analyze_field(entries, {**_FLOWS, 9: 5.0, 10: 1.0}, dps, _KNOWN)["dp"]
     assert open_["interior_blocked"]["n"] == 0
     assert open_["interior_flowing"]["max_abs_dp_pa"] == pytest.approx(8.0e5)
+
+
+def test_terminals_without_a_declaration_report_unknown_not_zero() -> None:
+    entries = [
+        {k: v for k, v in entry.items() if k != "declared_flow_m3h"} for entry in _entries()
+    ]
+    ahs = diag.summarize_ahs(entries, _FLOWS)
+    assert ahs["declared_supply_total_m3h"] is None
+    assert ahs["declared_return_total_m3h"] is None
+    assert all(g["declared_return_minus_supply_m3h"] is None for g in ahs["groups"])
+    declared = diag.summarize_ahs(_entries(), _FLOWS)
+    assert ahs["return_minus_supply_m3h"] == pytest.approx(declared["return_minus_supply_m3h"])
+    assert declared["declared_return_total_m3h"] == pytest.approx(140.0)

@@ -255,6 +255,23 @@ _AHS_FLOW_KEYS = {
 }
 
 
+def _add_declared(group: dict[str, Any], key: str, declared: Any) -> None:
+    """Accumulate a terminal's declared flow; one undeclared terminal voids the group.
+
+    Only a ``commissioned`` export records ``declared_flow_m3h``; elsewhere the
+    declared flows are unknown (``None``), not zero.
+    """
+    if declared is None or group[key] is None:
+        group["declared_supply_m3h"] = group["declared_return_m3h"] = None
+        return
+    group[key] += float(declared)
+
+
+def _declared_total(rows: list[dict[str, Any]], key: str) -> float | None:
+    values = [g[key] for g in rows]
+    return None if any(v is None for v in values) else sum(values)
+
+
 def summarize_ahs(
     entries: list[dict[str, Any]], flows: dict[int, float],
 ) -> dict[str, Any]:
@@ -269,12 +286,13 @@ def summarize_ahs(
         group[key] += abs(float(flows.get(int(entry["path_nr"]), 0.0)))
         if entry["kind"] in _AHS_TERMINAL_KINDS:
             group["terminal_count"] += 1
-            group[f"declared_{key}"] += float(entry.get("declared_flow_m3h") or 0.0)
+            _add_declared(group, f"declared_{key}", entry.get("declared_flow_m3h"))
     rows = [groups[nr] for nr in sorted(groups)]
     for group in rows:
         group["return_minus_supply_m3h"] = group["return_m3h"] - group["supply_m3h"]
         group["declared_return_minus_supply_m3h"] = (
-            group["declared_return_m3h"] - group["declared_supply_m3h"]
+            None if group["declared_return_m3h"] is None
+            else group["declared_return_m3h"] - group["declared_supply_m3h"]
         )
     supply = sum(g["supply_m3h"] for g in rows)
     returned = sum(g["return_m3h"] for g in rows)
@@ -284,8 +302,8 @@ def summarize_ahs(
         "return_total_m3h": returned,
         "return_minus_supply_m3h": returned - supply,
         "recirc_total_m3h": sum(g["recirc_m3h"] for g in rows),
-        "declared_supply_total_m3h": sum(g["declared_supply_m3h"] for g in rows),
-        "declared_return_total_m3h": sum(g["declared_return_m3h"] for g in rows),
+        "declared_supply_total_m3h": _declared_total(rows, "declared_supply_m3h"),
+        "declared_return_total_m3h": _declared_total(rows, "declared_return_m3h"),
         "exhaust_only_group_count": sum(
             1 for g in rows if g["return_m3h"] > _FLOW_EPS_M3H >= g["supply_m3h"]
         ),
