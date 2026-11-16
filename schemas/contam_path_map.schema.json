@@ -34,7 +34,8 @@
           "type": "boolean"
         },
         "kind": {
-          "type": "string"
+          "type": "string",
+          "description": "Path class. 'ambient_opening' is a declared two-way opening authored zone -> ambient (positive solved flow is outward), distinct from the 'envelope_leak' pressure reference."
         },
         "crusher_transfer": {
           "type": "boolean"

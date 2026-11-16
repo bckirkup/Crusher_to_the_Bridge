@@ -306,6 +306,10 @@ class SimFrame:
     path_flow_kg_s: np.ndarray   # Flow0 per airflow path [kg/s]
     node_density: np.ndarray     # air density per airflow node [kg/m³]
     node_concentration: np.ndarray  # (n_contaminant_nodes, nctm) mass fraction
+    # Flow1 per airflow path [kg/s]: the counter-flow of a two-way element
+    # (``dor_door``); zero on one-way elements. Diagnostic only — no
+    # transport consumer reads it (CONTAM-AMBIENT-OPENING-SCHEMA-01, D8).
+    path_flow1_kg_s: np.ndarray | None = None
 
 
 class SimResults:
@@ -424,6 +428,7 @@ class SimResults:
 
             path_nr = np.empty(nafpt, dtype=np.int64)
             flow0 = np.empty(nafpt, dtype=np.float64)
+            flow1 = np.empty(nafpt, dtype=np.float64)
             for i in range(nafpt):
                 base = p_off + 16 * i
                 path_nr[i] = int(np.frombuffer(
@@ -431,6 +436,9 @@ class SimResults:
                 )[0])
                 flow0[i] = float(np.frombuffer(
                     self._buf, dtype="<f4", count=1, offset=base + 8,
+                )[0])
+                flow1[i] = float(np.frombuffer(
+                    self._buf, dtype="<f4", count=1, offset=base + 12,
                 )[0])
             n_off = p_off + path_sz
 
@@ -455,6 +463,7 @@ class SimResults:
                 path_flow_kg_s=flow0,
                 node_density=density,
                 node_concentration=concentration,
+                path_flow1_kg_s=flow1,
             ))
             off += record_sz
         return frames

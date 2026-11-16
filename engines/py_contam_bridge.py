@@ -56,6 +56,23 @@ PATH_TYPE_HVAC_RETURN = "hvac_return"
 PATH_TYPE_HVAC_SUPPLY = "hvac_supply"
 AMBIENT_ZONE_ID = "ambient"
 
+# ``ambient_openings`` (CONTAM-AMBIENT-OPENING-SCHEMA-01): authored openings
+# between a zone and the weather.  The catalog is the type vocabulary only;
+# no magnitude lives here (the native rate is the record's ``exchange_m3h``
+# or the declared per-type axis ``hvac.ambient_exchange_m3h``).
+AMBIENT_OPENINGS_KEY = "ambient_openings"
+AMBIENT_OPENING_KIND = "ambient_opening"
+AMBIENT_OPENING_TYPES = (
+    "open_deck",
+    "balcony_door",
+    "weather_hatch",
+    "weather_door",
+    "hangar_door",
+    "makeup_louvre",
+)
+AMBIENT_OPENING_ALWAYS_OPEN = "always_open"
+PATH_TYPE_AMBIENT_EXCHANGE_PREFIX = "ambient_exchange_"
+
 # η for a caller that supplies no filter at all.  UNSOURCED: its old config
 # comment called it MERV-13, but the Healthy Sail Panel reports MERV 8 at 30%
 # removal over 3-10 um and MERV 13 at 90% over 0.3-1 um, so 0.50 is above every
@@ -131,6 +148,97 @@ def cross_zone_link_semantics(link: dict[str, Any]) -> dict[str, Any]:
 def cross_zone_link_filtered(link: dict[str, Any]) -> bool:
     """Whether one cross-zone link applies recirculation filtration."""
     return bool(cross_zone_link_semantics(link)["filtered"])
+
+
+def parse_ambient_exchange_axis(hvac_cfg: dict[str, Any]) -> dict[str, float]:
+    """Read ``hvac.ambient_exchange_m3h``: native exchange rate per opening type.
+
+    This is the declared per-type axis (proposal D4(a)) that supplies the
+    native-lane rate for an ``ambient_openings`` record whose
+    ``exchange_m3h`` is null.  It has no default: an opening with neither a
+    record rate nor an axis entry raises at build time rather than silently
+    exchanging nothing.
+    """
+    raw = hvac_cfg.get("ambient_exchange_m3h") or {}
+    if not isinstance(raw, dict):
+        raise ValueError(
+            "hvac.ambient_exchange_m3h must map opening type -> m3/h, "
+            f"got {raw!r}"
+        )
+    axis: dict[str, float] = {}
+    for opening_type, value in raw.items():
+        if opening_type not in AMBIENT_OPENING_TYPES:
+            raise ValueError(
+                f"hvac.ambient_exchange_m3h names unknown opening type "
+                f"{opening_type!r}; expected one of {AMBIENT_OPENING_TYPES}"
+            )
+        rate = float(value)
+        if not math.isfinite(rate) or rate < 0.0:
+            raise ValueError(
+                f"hvac.ambient_exchange_m3h[{opening_type!r}] must be a "
+                f"finite rate >= 0, got {value!r}"
+            )
+        axis[str(opening_type)] = rate
+    return axis
+
+
+def ambient_opening_records(airflow: dict[str, Any]) -> list[dict[str, Any]]:
+    """Validated ``ambient_openings`` records (empty when the key is absent).
+
+    Both lanes read the list through this one function so a record the
+    native builder accepts is a record the exporter accepts.
+    """
+    records = airflow.get(AMBIENT_OPENINGS_KEY) or []
+    if not isinstance(records, list):
+        raise ValueError(f"{AMBIENT_OPENINGS_KEY} must be a list, got {records!r}")
+    for record in records:
+        _validate_ambient_opening(record)
+    return records
+
+
+def _validate_ambient_opening(record: Any) -> None:
+    if not isinstance(record, dict):
+        raise ValueError(f"{AMBIENT_OPENINGS_KEY} entry must be an object, got {record!r}")
+    zone = record.get("zone")
+    if not isinstance(zone, str) or not zone or zone == AMBIENT_ZONE_ID:
+        raise ValueError(
+            f"{AMBIENT_OPENINGS_KEY} entry needs a room id in 'zone', got {zone!r}"
+        )
+    opening_type = record.get("type")
+    if opening_type not in AMBIENT_OPENING_TYPES:
+        raise ValueError(
+            f"{AMBIENT_OPENINGS_KEY} entry for {zone!r} has unknown type "
+            f"{opening_type!r}; expected one of {AMBIENT_OPENING_TYPES}"
+        )
+    _require_number(record, "area_m2", zone, minimum=0.0, exclusive=True, nullable=False)
+    _require_number(record, "exchange_m3h", zone, minimum=0.0)
+    _require_number(record, "azimuth_deg", zone, minimum=0.0, maximum=360.0)
+
+
+def _require_number(
+    record: dict[str, Any],
+    key: str,
+    zone: str,
+    *,
+    minimum: float,
+    maximum: float = math.inf,
+    exclusive: bool = False,
+    nullable: bool = True,
+) -> None:
+    value = record.get(key)
+    if value is None and nullable:
+        return
+    valid = (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+        and minimum <= value <= maximum
+        and not (exclusive and value == minimum)
+    )
+    if not valid:
+        raise ValueError(
+            f"{AMBIENT_OPENINGS_KEY} entry for {zone!r} has invalid {key} {value!r}"
+        )
 
 
 def parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
@@ -303,11 +411,17 @@ class ContamAirflowPath:
     HVAC-ducted paths but NOT through passive openings (passageways,
     ladder wells). ``filtered`` is the per-path filtration flag; it defaults
     to ``is_hvac_ducted`` for paths constructed without S1 link fields.
+
+    ``sink`` marks a path whose mass leaves the domain.  ``exchange`` (only
+    ever set together with ``sink``) states that the sink is a bidirectional
+    exchange with clean ambient air rather than net extraction; the transport
+    operator treats both the same (``-(Q/V) * C``), air-balance audits must not.
     """
 
     __slots__ = (
         "path_id", "from_zone", "to_zone",
         "flow_rate_m3h", "path_type", "is_hvac_ducted", "filtered", "sink",
+        "exchange",
     )
 
     def __init__(
@@ -320,6 +434,7 @@ class ContamAirflowPath:
         is_hvac_ducted: bool = True,
         filtered: bool | None = None,
         sink: bool = False,
+        exchange: bool = False,
     ) -> None:
         self.path_id = path_id
         self.from_zone = from_zone
@@ -329,6 +444,11 @@ class ContamAirflowPath:
         self.is_hvac_ducted = is_hvac_ducted
         self.filtered = is_hvac_ducted if filtered is None else filtered
         self.sink = sink
+        # True on a sink that is a two-way exchange with clean ambient air
+        # (``ambient_openings``), not net extraction: ``flow_rate_m3h`` of
+        # zone air leaves and the same volume of ambient air replaces it,
+        # so the path adds nothing to the zone's net air balance.
+        self.exchange = exchange
 
 
 class ContamTransportEngine:
@@ -371,6 +491,10 @@ class ContamTransportEngine:
         of zero legs, which trapped mass in the room forever. A duty-0
         group below ``oa_fraction`` 1.0 stays sealed under either mode —
         it reads as a disabled AHU, which moves no air.
+    ambient_exchange_m3h : dict, optional
+        Declared native exchange rate [m³/h] per ``ambient_openings`` type,
+        used for a record whose own ``exchange_m3h`` is null. No default:
+        an opening with no rate from either source raises.
     """
 
     def __init__(
@@ -383,6 +507,7 @@ class ContamTransportEngine:
         duty0_terminal_mode: str = DEFAULT_DUTY0_TERMINAL_MODE,
         passive_link_mode: str = DEFAULT_PASSIVE_LINK_MODE,
         clock: SimClock | None = None,
+        ambient_exchange_m3h: dict[str, float] | None = None,
     ) -> None:
         if duty0_terminal_mode not in DUTY0_TERMINAL_MODES:
             raise ValueError(
@@ -399,6 +524,7 @@ class ContamTransportEngine:
         self.outdoor_air_fraction_override = outdoor_air_fraction_override
         self.duty0_terminal_mode = duty0_terminal_mode
         self.passive_link_mode = passive_link_mode
+        self.ambient_exchange_m3h = dict(ambient_exchange_m3h or {})
         self.clock = clock or SimClock.from_config({})
 
         self.zone_nodes: dict[str, ContamZoneNode] = {}
@@ -657,17 +783,63 @@ class ContamTransportEngine:
                     is_hvac_ducted=False,
                 ))
 
+    def _ambient_exchange_rate(self, record: dict[str, Any]) -> float:
+        """Native exchange rate of one opening: record first, then the axis."""
+        declared = record.get("exchange_m3h")
+        if declared is not None:
+            return float(declared)
+        opening_type = record["type"]
+        if opening_type not in self.ambient_exchange_m3h:
+            raise ValueError(
+                f"{AMBIENT_OPENINGS_KEY} entry for {record['zone']!r} declares "
+                f"no exchange_m3h and hvac.ambient_exchange_m3h has no rate "
+                f"for type {opening_type!r}"
+            )
+        return float(self.ambient_exchange_m3h[opening_type])
+
+    def _build_ambient_opening_paths(self, airflow: dict[str, Any]) -> None:
+        """One exchange sink per ``ambient_openings`` record.
+
+        The native operator is fixed-flow and linear with no ambient
+        concentration state, so two-way exchange at rate Q with ambient air
+        at zero concentration is ``-(Q/V) * C`` on the zone and nothing
+        else — exactly a sink path at flow Q.  ``exchange=True`` records
+        that Q of ambient air also enters, so the path is not net
+        extraction.  The equivalence holds only while ambient is clean.
+        """
+        for index, record in enumerate(ambient_opening_records(airflow)):
+            zone = record["zone"]
+            if zone not in self.zone_nodes or is_plenum_zone(zone):
+                raise ValueError(
+                    f"{AMBIENT_OPENINGS_KEY} zone {zone!r} is not a room in "
+                    "the spatial layout"
+                )
+            opening_type = record["type"]
+            self.airflow_paths.append(ContamAirflowPath(
+                path_id=f"ambopen_{index}_{zone}_{opening_type}",
+                from_zone=zone,
+                to_zone=AMBIENT_ZONE_ID,
+                flow_rate_m3h=self._ambient_exchange_rate(record),
+                path_type=f"{PATH_TYPE_AMBIENT_EXCHANGE_PREFIX}{opening_type}",
+                is_hvac_ducted=False,
+                filtered=False,
+                sink=True,
+                exchange=True,
+            ))
+
     def _build_airflow_paths(self, airflow: dict[str, Any]) -> None:
         """Build airflow paths from air_flow_paths.json.
 
-        Creates paths from three sources:
+        Creates paths from four sources:
         1. Intra-zone HVAC recirculation (within each HVAC zone)
         2. Cross-zone links (between HVAC zones)
         3. Room adjacency (passive exchange through doors/hatches)
+        4. Ambient openings (two-way exchange with clean ambient air)
         """
         self._build_hvac_recirculation_paths(airflow)
         self._build_cross_zone_paths(airflow)
         self._build_adjacency_paths(airflow)
+        self._build_ambient_opening_paths(airflow)
 
     def _get_zone_rooms(
         self, zone_id: str, airflow: dict[str, Any],
@@ -1010,6 +1182,7 @@ def _build_native_engine(
         duty0_terminal_mode=parse_duty0_terminal_mode(hvac_cfg),
         passive_link_mode=parse_passive_link_mode(hvac_cfg),
         clock=clock,
+        ambient_exchange_m3h=parse_ambient_exchange_axis(hvac_cfg),
     )
 
 
