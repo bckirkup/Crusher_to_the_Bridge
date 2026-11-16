@@ -542,6 +542,12 @@ hvac:
     prj_path: ""                    # optional ContamW 3.4 .prj override; else
                                     # data/platforms/<id>/contam/platform.prj,
                                     # else temp export from JSON.
+    envelope_leak_mode: "boundary_sink"  # boundary_sink (default): solved outward
+                                    # envelope_leak flow (zone -> ambient) is a
+                                    # contaminant sink; inward leaks stay
+                                    # pressure-only. pressure_only = labelled
+                                    # pre-change baseline (every leak skipped).
+                                    # CONTAM-FIELD-ENVELOPE-BOUNDARY-01.
 
 # ── Escalation thresholds ─────────────────────────────────────
 escalation:

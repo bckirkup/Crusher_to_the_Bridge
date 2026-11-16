@@ -295,6 +295,20 @@ injection zone with zero Crusher out-edges, the job also sets
 When ContamX is unavailable the suite still runs native-only and records
 `contamx_error` per job.
 
+### Envelope-leak boundary sinks
+
+`envelope_leak` paths are authored `zone -> ambient` and stay
+`crusher_transfer: false` in `path_map.json` (no schema change). The lane reads
+their solved direction: positive `Flow0` (room air leaving the hull) becomes a
+contaminant sink on that zone at the solved magnitude; negative `Flow0`
+(ambient air entering) adds no path. `ContamXTransportEngine` and
+`tools/contam_flow_compare.py` (fate `boundary_sink`) share one predicate,
+`is_outward_envelope_leak`. `hvac.contamx.envelope_leak_mode: pressure_only`
+(or `--envelope-leak-mode pressure_only`) is the labelled pre-change baseline
+that skips every leak. Inter-zone flows are identical in both modes. Fleet
+table: `tools/diag/contam_envelope_leak_enumeration.py`; ledger
+`CONTAM-FIELD-ENVELOPE-BOUNDARY-01`.
+
 ### `.SIM` reader contract (critical)
 
 `engines/contamx_runner.SimResults` decodes ContamX binary results:

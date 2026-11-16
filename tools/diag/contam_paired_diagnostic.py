@@ -28,7 +28,11 @@ from engines.contamx_runner import (  # noqa: E402
     find_contamx,
     run_contamx,
 )
-from engines.contamx_transport import ContamXTransportEngine  # noqa: E402
+from engines.contamx_transport import (  # noqa: E402
+    ENVELOPE_LEAK_BOUNDARY_SINK,
+    ENVELOPE_LEAK_MODES,
+    ContamXTransportEngine,
+)
 from engines.py_contam_bridge import ContamTransportEngine  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     REPO_ROOT,
@@ -49,6 +53,9 @@ PLATFORM_SOURCES = {
     "destroyer_baseline": ["Mess_Hall", "HD_MAIN_M", "Bridge"],
 }
 LANES = ("native", "commissioned", "authored")
+# Fresh ``ahs_terminal_mode="design"`` export: the pre-#1245 authoring, kept as
+# an opt-in lane because it is where outward envelope leaks solve non-zero.
+OPTIONAL_LANES = ("design",)
 TIMINGS = ("pulse_t0", "split_t0_t1")
 _TIMING_DEFINITIONS = {
     "pulse_t0": "one emitted unit at t=0h",
@@ -114,6 +121,7 @@ def _contamx_engine(
     entries: list[dict[str, Any]],
     flows: dict[int, float],
     airflow: dict[str, Any],
+    envelope_leak_mode: str,
 ) -> ContamXTransportEngine:
     return ContamXTransportEngine(
         spatial_layout=spatial,
@@ -123,6 +131,7 @@ def _contamx_engine(
         natural_decay_rate=NATURAL_DECAY_RATE,
         path_map_entries=entries,
         oa_fraction=float(airflow.get("oa_fraction", 0.2)),
+        envelope_leak_mode=envelope_leak_mode,
     )
 
 
@@ -137,8 +146,9 @@ def _native_engine(
     )
 
 
-def _fresh_commissioned_engine(
+def _fresh_export_engine(
     hull: str, spatial: dict[str, Any], airflow: dict[str, Any], binary: str,
+    ahs_terminal_mode: str, envelope_leak_mode: str,
 ) -> ContamXTransportEngine:
     platform_dir = resolve_repo_path(REPO_ROOT, f"data/platforms/{hull}")
     overrides = load_hobbyist_overrides(platform_dir)
@@ -148,15 +158,16 @@ def _fresh_commissioned_engine(
         hobbyist=True,
         overrides=overrides,
         filter_efficiency=FILTER_EFFICIENCY,
-        ahs_terminal_mode="commissioned",
+        ahs_terminal_mode=ahs_terminal_mode,
     )
-    with tempfile.TemporaryDirectory(prefix="contam_paired_commissioned_") as tmp_dir:
+    with tempfile.TemporaryDirectory(prefix="contam_paired_export_") as tmp_dir:
         flows = _solve_prj_text(prj_text, tmp_dir, binary)
-    return _contamx_engine(spatial, entries, flows, airflow)
+    return _contamx_engine(spatial, entries, flows, airflow, envelope_leak_mode)
 
 
 def _authored_engine(
     hull: str, spatial: dict[str, Any], airflow: dict[str, Any], binary: str,
+    envelope_leak_mode: str,
 ) -> ContamXTransportEngine:
     prj_full = resolve_repo_path(
         REPO_ROOT, _platform_rel(hull, "contam/platform.prj"),
@@ -170,7 +181,7 @@ def _authored_engine(
         entries = json.load(fh)
     with tempfile.TemporaryDirectory(prefix="contam_paired_authored_") as tmp_dir:
         flows = _solve_prj_text(prj_text, tmp_dir, binary)
-    return _contamx_engine(spatial, entries, flows, airflow)
+    return _contamx_engine(spatial, entries, flows, airflow, envelope_leak_mode)
 
 
 def _lane_engine(
@@ -179,15 +190,18 @@ def _lane_engine(
     spatial: dict[str, Any],
     airflow: dict[str, Any],
     binary: str | None,
+    envelope_leak_mode: str = ENVELOPE_LEAK_BOUNDARY_SINK,
 ) -> ContamTransportEngine:
     if lane == "native":
         return _native_engine(spatial, airflow)
     if binary is None:
         raise ContamXUnavailable(f"lane {lane!r} requires a ContamX binary")
-    if lane == "commissioned":
-        return _fresh_commissioned_engine(hull, spatial, airflow, binary)
+    if lane in ("commissioned", "design"):
+        return _fresh_export_engine(
+            hull, spatial, airflow, binary, lane, envelope_leak_mode,
+        )
     if lane == "authored":
-        return _authored_engine(hull, spatial, airflow, binary)
+        return _authored_engine(hull, spatial, airflow, binary, envelope_leak_mode)
     raise ValueError(f"unknown lane {lane!r}")
 
 
@@ -331,10 +345,13 @@ def _lane_bundle(
     binary: str | None,
     timings: list[str],
     lane_cache: dict[tuple[str, str], dict[str, Any]],
+    envelope_leak_mode: str = ENVELOPE_LEAK_BOUNDARY_SINK,
 ) -> dict[str, Any]:
     key = (hull, lane)
     if key not in lane_cache:
-        engine = _lane_engine(hull, lane, spatial, airflow, binary)
+        engine = _lane_engine(
+            hull, lane, spatial, airflow, binary, envelope_leak_mode,
+        )
         data = _operator_data(engine)
         lane_cache[key] = {
             "engine": engine,
@@ -377,6 +394,7 @@ def _run_matrix(args: argparse.Namespace) -> dict[str, Any]:
         for lane in lanes:
             lane_data = _lane_bundle(
                 hull, lane, spatial, airflow, binary, timings, lane_cache,
+                args.envelope_leak_mode,
             )
             for source in sources:
                 cells.extend(_source_cells(hull, lane, source, timings, lane_data, airflow))
@@ -388,6 +406,7 @@ def _run_matrix(args: argparse.Namespace) -> dict[str, Any]:
             "timing_definitions": _TIMING_DEFINITIONS,
             "reachable_epsilon_h": REACHABLE_EPSILON_H,
             "contamx_binary": binary,
+            "envelope_leak_mode": args.envelope_leak_mode,
             "hulls": hulls,
             "lanes": lanes,
             "timings": timings,
@@ -411,7 +430,13 @@ def _write_output(path: str, payload: dict[str, Any]) -> None:
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--hull", action="append", choices=sorted(PLATFORM_SOURCES))
-    parser.add_argument("--lane", action="append", choices=LANES)
+    parser.add_argument("--lane", action="append", choices=LANES + OPTIONAL_LANES)
+    parser.add_argument(
+        "--envelope-leak-mode",
+        choices=ENVELOPE_LEAK_MODES,
+        default=ENVELOPE_LEAK_BOUNDARY_SINK,
+        help="boundary_sink (default) or the labelled pressure_only baseline",
+    )
     parser.add_argument("--source", action="append")
     parser.add_argument("--timing", action="append", choices=TIMINGS)
     parser.add_argument(

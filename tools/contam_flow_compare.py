@@ -48,7 +48,12 @@ from engines.contamx_runner import (  # noqa: E402
 )
 from engines.contamx_transport import (  # noqa: E402
     _FLOW_EPSILON_M3H,
+    ENVELOPE_LEAK_BOUNDARY_SINK,
+    ENVELOPE_LEAK_KIND,
+    ENVELOPE_LEAK_MODES,
     _normalize_path_map_entries,
+    is_outward_envelope_leak,
+    resolve_envelope_leak_mode,
 )
 from engines.py_contam_bridge import ContamTransportEngine  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
@@ -57,6 +62,8 @@ from simulation_utils.paths import (  # noqa: E402
     validate_path_component,
     validated_open,
 )
+
+FATE_BOUNDARY_SINK = "boundary_sink"
 
 
 def _load_json(rel: str) -> Any:
@@ -80,6 +87,8 @@ def classify_contamx_path_fate(
     entry: dict[str, Any],
     path_flows_m3h: dict[int, float] | None,
     known_zones: set[str],
+    *,
+    envelope_leak_mode: str | None = None,
 ) -> dict[str, Any]:
     """Return keep/skip classification for one Contam path_map entry."""
     kind = str(entry.get("kind", ""))
@@ -97,14 +106,12 @@ def classify_contamx_path_fate(
         "is_hvac_ducted": bool(entry.get("is_hvac_ducted")),
         "sim_flow_m3h": flow,
     }
-    if kind.startswith("ahs_") or kind == "envelope_leak":
-        row["fate"] = "bridge_input" if kind.startswith("ahs_") else "skipped"
-        row["reason"] = (
-            "AHS bookkeeping — feeds synthesize_ahs_recirculation_paths"
-            if kind.startswith("ahs_")
-            else "envelope_leak skipped by ContamX→Crusher filter"
-        )
+    if kind.startswith("ahs_"):
+        row["fate"] = "bridge_input"
+        row["reason"] = "AHS bookkeeping — feeds synthesize_ahs_recirculation_paths"
         return row
+    if kind == ENVELOPE_LEAK_KIND:
+        return _classify_envelope_leak(row, entry, flow, known_zones, envelope_leak_mode)
     if path_flows_m3h is None:
         row["fate"] = "unknown"
         row["reason"] = "no SIM flows loaded"
@@ -120,6 +127,46 @@ def classify_contamx_path_fate(
     row["fate"] = "kept"
     row["reason"] = "real↔real Contam path with non-zero SIM flow"
     return row
+
+
+def _classify_envelope_leak(
+    row: dict[str, Any],
+    entry: dict[str, Any],
+    flow: float | None,
+    known_zones: set[str],
+    envelope_leak_mode: str | None,
+) -> dict[str, Any]:
+    """Outward leaks are boundary sinks; inward leaks stay pressure-only."""
+    mode = resolve_envelope_leak_mode(envelope_leak_mode)
+    if (
+        mode == ENVELOPE_LEAK_BOUNDARY_SINK
+        and flow is not None
+        and is_outward_envelope_leak(entry, flow, known_zones)
+    ):
+        row["fate"] = FATE_BOUNDARY_SINK
+        row["reason"] = "outward envelope_leak — contaminant sink to ambient"
+        return row
+    row["fate"] = "skipped"
+    row["reason"] = "envelope_leak skipped by ContamX→Crusher filter"
+    return row
+
+
+def _boundary_sink_links(classified: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "path_nr": row["path_nr"],
+            "kind": row["kind"],
+            "from_zone": row["from_zone"],
+            "to_zone": row["to_zone"],
+            "flow_m3h": float(row["sim_flow_m3h"]),
+            "sim_flow_m3h": float(row["sim_flow_m3h"]),
+            "path_type": "contamx_path",
+            "is_hvac_ducted": bool(row.get("is_hvac_ducted")),
+            "sink": True,
+        }
+        for row in classified
+        if row["fate"] == FATE_BOUNDARY_SINK
+    ]
 
 
 def native_links_report(
@@ -167,10 +214,14 @@ def contamx_flow_report(
     path_map: list[dict[str, Any]],
     path_flows_m3h: dict[int, float] | None,
     known_zones: set[str],
+    *,
+    envelope_leak_mode: str | None = None,
 ) -> dict[str, Any]:
     """Classify path_map fates and synthesize AHS edges when flows exist."""
     classified = [
-        classify_contamx_path_fate(e, path_flows_m3h, known_zones)
+        classify_contamx_path_fate(
+            e, path_flows_m3h, known_zones, envelope_leak_mode=envelope_leak_mode,
+        )
         for e in sorted(path_map, key=lambda e: int(e["path_nr"]))
     ]
     fate_counts = dict(Counter(r["fate"] for r in classified))
@@ -179,7 +230,7 @@ def contamx_flow_report(
         r for r in classified
         if r["fate"] == "skipped"
         and not str(r["kind"]).startswith("ahs_")
-        and r["kind"] != "envelope_leak"
+        and r["kind"] != ENVELOPE_LEAK_KIND
     ]
     # Directed Crusher-style edges (match ContamXTransportEngine): negative
     # SIM Flow0 reverses from→to. Classification rows keep path_map orientation
@@ -218,10 +269,13 @@ def contamx_flow_report(
     degree: dict[str, dict[str, float]] = defaultdict(
         lambda: {"out_m3h": 0.0, "in_m3h": 0.0, "out_edges": 0, "in_edges": 0},
     )
-    for link in kept_links + synth:
+    boundary_sinks = _boundary_sink_links(classified)
+    for link in kept_links + synth + boundary_sinks:
         flow = float(link["flow_m3h"])
         degree[link["from_zone"]]["out_m3h"] += flow
         degree[link["from_zone"]]["out_edges"] += 1
+        if link.get("sink"):
+            continue
         degree[link["to_zone"]]["in_m3h"] += flow
         degree[link["to_zone"]]["in_edges"] += 1
     return {
@@ -229,11 +283,15 @@ def contamx_flow_report(
         "fate_counts": fate_counts,
         "n_kept_real_paths": len(kept_links),
         "n_synth_ahs_paths": len(synth),
-        "n_crusher_paths": len(kept_links) + len(synth),
+        "n_boundary_sink_paths": len(boundary_sinks),
+        "boundary_sink_out_m3h": sum(link["flow_m3h"] for link in boundary_sinks),
+        "envelope_leak_mode": resolve_envelope_leak_mode(envelope_leak_mode),
+        "n_crusher_paths": len(kept_links) + len(synth) + len(boundary_sinks),
         "n_zero_flow_real_candidates": len(zero_real),
         "classified_paths": classified,
         "kept_links": kept_links,
         "synth_ahs_links": synth,
+        "boundary_sink_links": boundary_sinks,
         "zero_flow_real_candidates": zero_real,
         "zone_degree": {z: dict(v) for z, v in sorted(degree.items())},
         "sim_flows_loaded": path_flows_m3h is not None,
@@ -288,6 +346,7 @@ def build_flow_compare_report(
     inject_zones: list[str] | None = None,
     filter_efficiency: float = 0.5,
     natural_decay_rate: float = 0.1,
+    envelope_leak_mode: str | None = None,
 ) -> dict[str, Any]:
     """Assemble full native vs ContamX flow diagnostic report."""
     files = _platform_files(platform_id)
@@ -300,7 +359,9 @@ def build_flow_compare_report(
         filter_efficiency=filter_efficiency,
         natural_decay_rate=natural_decay_rate,
     )
-    contamx = contamx_flow_report(path_map, path_flows_m3h, known)
+    contamx = contamx_flow_report(
+        path_map, path_flows_m3h, known, envelope_leak_mode=envelope_leak_mode,
+    )
     focus = inject_zones or sorted(known)[:1]
     return {
         "platform": platform_id,
@@ -432,7 +493,12 @@ def _print_summary(report: dict[str, Any]) -> None:
         f"contamx path_map: {cx['n_path_map']}  "
         f"fates={cx['fate_counts']}  "
         f"crusher_paths={cx['n_crusher_paths']} "
-        f"(kept={cx['n_kept_real_paths']} + synth={cx['n_synth_ahs_paths']})"
+        f"(kept={cx['n_kept_real_paths']} + synth={cx['n_synth_ahs_paths']} "
+        f"+ boundary_sink={cx['n_boundary_sink_paths']})"
+    )
+    print(
+        f"envelope_leak_mode: {cx['envelope_leak_mode']}  "
+        f"boundary sink out: {cx['boundary_sink_out_m3h']:.4g} m3/h"
     )
     if cx["sim_flows_loaded"]:
         print(f"zero-flow real candidates: {cx['n_zero_flow_real_candidates']}")
@@ -486,6 +552,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--filter-efficiency", type=float, default=0.5)
     parser.add_argument("--natural-decay-rate", type=float, default=0.1)
+    parser.add_argument(
+        "--envelope-leak-mode",
+        choices=ENVELOPE_LEAK_MODES,
+        default=ENVELOPE_LEAK_BOUNDARY_SINK,
+        help="boundary_sink: outward envelope leaks are contaminant sinks "
+        "(default); pressure_only: labelled pre-change baseline",
+    )
     args = parser.parse_args(argv)
 
     inject_zones = []
@@ -509,6 +582,7 @@ def main(argv: list[str] | None = None) -> int:
         inject_zones=inject_zones or None,
         filter_efficiency=args.filter_efficiency,
         natural_decay_rate=args.natural_decay_rate,
+        envelope_leak_mode=args.envelope_leak_mode,
     )
     _print_summary(report)
 

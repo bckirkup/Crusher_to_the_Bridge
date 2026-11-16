@@ -67,7 +67,7 @@ def test_classify_skips_ahs_and_envelope() -> None:
             "to_zone": "ambient", "ahs_nr": 0, "crusher_transfer": False,
             "is_hvac_ducted": False,
         },
-        {1: 5.0},
+        {1: -5.0},
         known,
     )
     assert leak["fate"] == "skipped"

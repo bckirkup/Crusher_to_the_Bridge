@@ -44,6 +44,7 @@ New ledger entries are registered here as they land; the filename remains the st
 
 - `CONTAM-PAIRED-RECOMPARE-01.md` — paired native/commissioned/authored exact-integral diagnostic rerun after the #1241 `plr_bdq` laminar fix, with pre-fix change-detector reproduction and per-trajectory closure.
 - `CONTAM-FIELD-ADJUDICATION-01.md` — doc-only adjudication of Edison's preserved native-vs-field Contam differences at `78a023b6`: per-class verdicts, measured flow/ΔP/material-time evidence, and versioned fix stages; no transport-kernel defect proven.
+- `CONTAM-FIELD-ENVELOPE-BOUNDARY-01.md` — stage 5 (verdict (e)): owner decision that outward envelope leakage is a contaminant sink; solved-positive `envelope_leak` flow becomes a boundary sink in the ContamX lane and compare fates, with `pressure_only` baseline mode, destroyer before/after witnesses and fleet enumeration; no path_map schema or data change.
 - `CONTAM-FIELD-AHS-COMMISSIONED-01.md` — class-(f) stage: fleet re-export of committed authored Contam bundles to the declaration-faithful commissioned AHS terminal encoding, with byte-pinned path_map counts, paired before/after measurements, and the Phase-2 P lane marked historical design-mode.
 - `CONTAM-BDQ-LAMINAR-01.md` — commissioned one-way passive `plr_bdq` openings now carry the documented NIST TN 1887r1 laminar-transition coefficient, with live two-zone and hull-level ContamX controls.
 - `CONTAM-PATHMAP-FILTERED-01.md` — PATHMAP-FILTERED stage 2: path_map `filtered` carry-through, schema, and exporter endpoint fail-loud.
