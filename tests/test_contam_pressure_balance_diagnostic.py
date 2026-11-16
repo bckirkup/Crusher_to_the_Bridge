@@ -142,6 +142,26 @@ def test_boundary_residual_exposes_a_non_conserving_field() -> None:
     assert boundary["balance_residual_m3h"] == pytest.approx(30.0)
 
 
+def test_boundary_balance_counts_ambient_opening_makeup() -> None:
+    # A make-up louvre on A takes 45 of the 50 A's leak admitted: the hull
+    # still conserves, so the opening's inflow is boundary make-up.
+    entries = _entries() + [_entry(9, "ambient_opening", "A", "ambient")]
+    flows = {**_FLOWS, 1: -5.0, 9: -45.0}
+    boundary = diag.analyze_field(entries, flows, {**_DPS, 9: -1.0}, _KNOWN)["boundary"]
+    assert boundary["envelope_net_inward_m3h"] == pytest.approx(25.0)
+    assert boundary["ambient_opening_net_inward_m3h"] == pytest.approx(45.0)
+    assert boundary["balance_residual_m3h"] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_boundary_balance_nets_outward_ambient_opening_flow() -> None:
+    # An opening leg that exhales adds to what the leaks must admit.
+    entries = _entries() + [_entry(9, "ambient_opening", "A", "ambient")]
+    flows = {**_FLOWS, 1: -60.0, 9: 10.0}
+    boundary = diag.analyze_field(entries, flows, {**_DPS, 9: 1.0}, _KNOWN)["boundary"]
+    assert boundary["ambient_opening_net_inward_m3h"] == pytest.approx(-10.0)
+    assert boundary["balance_residual_m3h"] == pytest.approx(0.0, abs=1e-9)
+
+
 def test_outflow_rows_compare_the_two_engines() -> None:
     entries = _entries()
     slow = ContamXTransportEngine(_LAYOUT, entries, _FLOWS, natural_decay_rate=0.0)

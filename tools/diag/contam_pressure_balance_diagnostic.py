@@ -321,10 +321,18 @@ def summarize_ahs(
 def summarize_boundary(
     rows: list[dict[str, Any]], envelope: dict[str, Any], ahs: dict[str, Any],
 ) -> dict[str, Any]:
-    """Hull air balance: make-up demand against what the envelope leaks carry."""
+    """Hull air balance: make-up demand against what the boundary paths carry.
+
+    The boundary is the envelope leaks plus the authored ``ambient_opening``
+    legs; ``Flow0`` is positive out of the zone, so an opening's net inward
+    flow is the negated sum over its legs.
+    """
     sink_out = sum(
         r["flow_m3h"] for r in rows
         if r["path_class"] == CLASS_EXHAUST_SINK and r["flow_m3h"] > 0.0
+    )
+    opening_in = -sum(
+        r["flow_m3h"] for r in rows if r["path_class"] == CLASS_AMBIENT_OPENING
     )
     demand = ahs["return_minus_supply_m3h"] + sink_out
     leaks = envelope["envelope_leak_count"]
@@ -333,7 +341,8 @@ def summarize_boundary(
         "ahs_return_minus_supply_m3h": ahs["return_minus_supply_m3h"],
         "makeup_demand_m3h": demand,
         "envelope_net_inward_m3h": envelope["net_inward_m3h"],
-        "balance_residual_m3h": demand - envelope["net_inward_m3h"],
+        "ambient_opening_net_inward_m3h": opening_in,
+        "balance_residual_m3h": demand - envelope["net_inward_m3h"] - opening_in,
         "makeup_demand_per_leak_m3h": demand / leaks if leaks else 0.0,
     }
 

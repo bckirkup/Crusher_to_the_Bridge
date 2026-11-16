@@ -192,9 +192,18 @@ def test_compare_without_sim_flows_reports_ambient_rows_as_skipped() -> None:
     } == {1: "skipped", 2: "skipped", 3: "unknown"}
 
 
-def test_no_committed_path_map_declares_an_ambient_opening() -> None:
+def test_committed_ambient_opening_legs_are_the_cruise_makeup_louvres() -> None:
+    # CONTAM-AMBIENT-MAKEUP-CRUISE-01: two legs per authored make-up louvre on
+    # the six cruise hulls; no other committed bundle carries an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
+    legs: dict[str, int] = {}
     for path in paths:
         entries = json.loads(path.read_text(encoding="utf-8"))
-        assert all(e.get("kind") != AMBIENT_OPENING_KIND for e in entries), path
+        count = sum(1 for e in entries if e.get("kind") == AMBIENT_OPENING_KIND)
+        if count:
+            legs[path.parent.parent.name] = count
+    assert legs == {
+        "classic_cruise_1900": 2, "diamond_princess": 2, "expedition_cruise_450": 2,
+        "greg_mortimer": 2, "mega_cruise_5000": 20, "spirit_cruise_3000": 2,
+    }

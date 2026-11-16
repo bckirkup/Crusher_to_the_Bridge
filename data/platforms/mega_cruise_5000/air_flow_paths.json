@@ -1869,6 +1869,88 @@
       "filtered": false
     }
   ],
+  "ambient_openings": [
+    {
+      "zone": "Pool_Bar_Grill",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on Pool_Bar_Grill: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "Kids_Club",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on Kids_Club: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "Teen_Zone",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on Teen_Zone: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "MainDining_L",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on MainDining_L: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "MainDining_U",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on MainDining_U: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "Windjammer",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on Windjammer: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "SpecRest_A",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on SpecRest_A: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "SpecRest_B",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on SpecRest_B: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "CafeBakery",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on CafeBakery: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "Ice_Rink_Studio",
+      "type": "makeup_louvre",
+      "area_m2": 0.167,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Dining_to_Galley_Transfer (AHU_Network_Aft_Dining_Rec, 15000 m3/h split evenly over its 10 rooms by the exporter) 1500 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on Ice_Rink_Studio: a room of the HVAC group the sink leaves, carrying that room's 1/10 share. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (1500 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    }
+  ],
   "adjacency": [
     {
       "from": "CentralPark",
