@@ -6,7 +6,7 @@
  "epochs": 288,
  "s3_prefix": "campaign/noro_supply_worst_cases_01/",
  "queue": "picard-campaign-queue",
- "image_tag": "noro-supply-worst01",
+ "image_tag": "noro-supply-worst01@sha256:2a1cafdc5692c81a7bea2bfce9647d7a6384737090e08c99804803e50a847f68",
  "resources": {
   "vcpu": "1",
   "memory": "8192",
