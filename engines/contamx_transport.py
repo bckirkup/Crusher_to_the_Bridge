@@ -57,6 +57,36 @@ from simulation_utils.paths import (
 _FLOW_EPSILON_M3H = 1e-9
 _PATH_MAP_JSON = "path_map.json"
 _PLATFORM_PRJ = "platform.prj"
+ENVELOPE_LEAK_KIND = "envelope_leak"
+ENVELOPE_LEAK_BOUNDARY_SINK = "boundary_sink"
+ENVELOPE_LEAK_PRESSURE_ONLY = "pressure_only"
+ENVELOPE_LEAK_MODES = (ENVELOPE_LEAK_BOUNDARY_SINK, ENVELOPE_LEAK_PRESSURE_ONLY)
+
+
+def is_outward_envelope_leak(
+    entry: dict[str, Any], flow_m3h: float, known_zones: set[str],
+) -> bool:
+    """True when a solved ``envelope_leak`` carries room air out of the hull.
+
+    Envelope leaks are authored ``zone -> ambient``; positive Flow0 is outward.
+    Inward (ambient -> zone) leakage brings clean air and stays pressure-only.
+    """
+    return (
+        str(entry.get("kind", "")) == ENVELOPE_LEAK_KIND
+        and entry.get("from_zone") in known_zones
+        and entry.get("to_zone") not in known_zones
+        and flow_m3h >= _FLOW_EPSILON_M3H
+    )
+
+
+def resolve_envelope_leak_mode(value: Any) -> str:
+    """Validate ``hvac.contamx.envelope_leak_mode`` (default: boundary sink)."""
+    mode = ENVELOPE_LEAK_BOUNDARY_SINK if value in (None, "") else str(value)
+    if mode not in ENVELOPE_LEAK_MODES:
+        raise ValueError(
+            f"hvac.contamx.envelope_leak_mode must be one of {ENVELOPE_LEAK_MODES}, got {mode!r}"
+        )
+    return mode
 
 
 class ContamXTransportEngine(ContamTransportEngine):
@@ -73,6 +103,7 @@ class ContamXTransportEngine(ContamTransportEngine):
         path_map_entries: list[dict[str, Any]] | None = None,
         oa_fraction: float = 0.2,
         clock: SimClock | None = None,
+        envelope_leak_mode: str | None = None,
     ) -> None:
         super().__init__(
             spatial_layout,
@@ -86,6 +117,7 @@ class ContamXTransportEngine(ContamTransportEngine):
         self.zone_nodes = {}
         self.airflow_paths = []
         self._oa_fraction = float(oa_fraction)
+        self.envelope_leak_mode = resolve_envelope_leak_mode(envelope_leak_mode)
 
         self._build_zone_nodes(spatial_layout)
         entries = path_map_entries
@@ -114,6 +146,7 @@ class ContamXTransportEngine(ContamTransportEngine):
 
         Includes:
           - Real↔real Contam paths (adjacency, cross-zone fans) with SIM flow
+          - Outward envelope leaks as boundary sinks (``boundary_sink`` mode)
           - Synthesized AHS recirculation (room↔room) from supply/return/recirc
         """
         known = set(self.zone_nodes)
@@ -147,11 +180,15 @@ class ContamXTransportEngine(ContamTransportEngine):
             is_ducted = bool(entry.get("is_hvac_ducted", False))
             filtered = bool(entry.get("filtered", is_ducted))
             kind = str(entry.get("kind", ""))
-            is_sink = bool(entry.get("sink")) or kind == "exhaust_sink"
-            # AHS phantom / ambient paths are bridged separately
-            if not is_sink and (kind.startswith("ahs_") or kind == "envelope_leak"):
-                continue
             flow = path_flows_m3h.get(path_nr, 0.0)
+            is_sink = (
+                bool(entry.get("sink"))
+                or kind == "exhaust_sink"
+                or self._is_boundary_sink(entry, flow, known)
+            )
+            # AHS phantom / ambient paths are bridged separately
+            if not is_sink and (kind.startswith("ahs_") or kind == ENVELOPE_LEAK_KIND):
+                continue
             if abs(flow) < _FLOW_EPSILON_M3H:
                 continue
             if is_sink:
@@ -181,6 +218,15 @@ class ContamXTransportEngine(ContamTransportEngine):
                 filtered=filtered,
             ))
         return paths
+
+    def _is_boundary_sink(
+        self, entry: dict[str, Any], flow_m3h: float, known: set[str],
+    ) -> bool:
+        """Outward envelope leakage removes contaminant (CONTAM-FIELD-ENVELOPE-BOUNDARY-01)."""
+        return (
+            self.envelope_leak_mode == ENVELOPE_LEAK_BOUNDARY_SINK
+            and is_outward_envelope_leak(entry, flow_m3h, known)
+        )
 
     @classmethod
     def from_flow_field(
@@ -422,4 +468,5 @@ def build_contamx_engine(
         path_map_entries=entries,
         oa_fraction=float(airflow.get("oa_fraction", 0.2)),
         clock=clock,
+        envelope_leak_mode=(hvac_cfg.get("contamx") or {}).get("envelope_leak_mode"),
     )
