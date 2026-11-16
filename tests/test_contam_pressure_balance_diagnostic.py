@@ -286,8 +286,9 @@ def test_prescribed_links_leave_the_interior_opening_statistics() -> None:
 
 def test_a_path_the_solve_did_not_report_is_an_error() -> None:
     flows = {nr: flow for nr, flow in _FLOWS.items() if nr != 3}
+    entries = _entries()
     with pytest.raises(KeyError):
-        diag.analyze_field(_entries(), flows, _DPS, _KNOWN)
+        diag.analyze_field(entries, flows, _DPS, _KNOWN)
 
 
 def test_blocked_openings_are_reported_apart_from_flowing_ones() -> None:

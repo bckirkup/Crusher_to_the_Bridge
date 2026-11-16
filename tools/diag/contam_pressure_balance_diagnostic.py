@@ -200,8 +200,8 @@ def summarize_dp(rows: list[dict[str, Any]], top_paths: int) -> dict[str, Any]:
         "all": dp_stats([r["dp_pa"] for r in rows]),
         "interior": dp_stats([r["dp_pa"] for r in interior]),
         # A one-way opening held shut by an adverse dP carries exactly no flow.
-        "interior_flowing": dp_stats([r["dp_pa"] for r in interior if r["flow_m3h"] != 0.0]),
-        "interior_blocked": dp_stats([r["dp_pa"] for r in interior if r["flow_m3h"] == 0.0]),
+        "interior_flowing": dp_stats([r["dp_pa"] for r in interior if r["flow_m3h"]]),
+        "interior_blocked": dp_stats([r["dp_pa"] for r in interior if not r["flow_m3h"]]),
         "by_class": {name: dp_stats(vals) for name, vals in sorted(by_class.items())},
         "by_kind": {name: dp_stats(vals) for name, vals in sorted(by_kind.items())},
         "top_paths": ranked[:top_paths],
