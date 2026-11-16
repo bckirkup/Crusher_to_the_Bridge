@@ -1,0 +1,65 @@
+# FOOD-SUPPLY-01-REDEPOSIT-WORST
+**Date:** 2026-11-16
+**Commit:** #1253
+**Pathogens:** norwalk_gi
+**Status:** measured
+**Measured at:** 7a3d3d7828dd34f96c58b10a75fe040b19ffde5a
+
+Paired hand-redeposit contrast on the four highest-burden mega supply seeds. Design is frozen in `campaigns/noro/supply_worst_cases_redeposit_01/DESIGN.md`; submission/job IDs are in `campaigns/noro/supply_worst_cases_redeposit_01/LEDGER.md`. AWS Batch image `picard-campaign:noro-supply-redeposit01` digest `sha256:ae8f91c9d95b3dec6c23da17faef94e024741caf7a86b39d2e47fdc3a5b90673` (`ENGINE_GIT_SHA=7a3d3d78`). S3 artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_worst_cases_redeposit_01/`.
+
+Run contract: eight full-fidelity p06 mega cells, four seeds × `transmission.hand_redeposit_mode` `shedders_only` vs `carriers`, `epochs=288`, `payload_profile="lean"`, `PYTHONHASHSEED=1`. Held fixed: p06 route scale ×2.0, `q_source=0.0047`, passenger/crew prevalence 0.025/0.03, illness draw `point`, `syndromic_comp65`, dose adjustment 7.57, `station_zone_pin=['MainDining_L']`, `intra_epoch_causal_order=legacy`, `intra_epoch_substeps=1`, and `hand_reservoir_mode=hygiene_cycle`. This isolates the redeposit gate only; it does not test `ordered`, `carriers_ordered`, or `M>1` substeps.
+
+Integrity: all eight Batch jobs SUCCEEDED and wrote the unchanged zip contract (`summary.json`, `growth_census.json.gz`, `rss_samples.json`). `parameters.engine_git_sha` is `7a3d3d78` in all eight cells. `mechanisms.provisioned_source` resolved the intended supply arm and the pinned `MainDining_L` venue in every cell. Receipt-arm provisioned event dose (titre × serving mass × servings) matched the frozen ranking burden exactly for seeds 1030001 and 1031386. Station-lot objects kept the same `lot_servings`/`lot_titre_gec_per_g` across arms, but per-pan `serving_mass_g` draws differed for some pans, so station-lot event-row dose and `common_source_telemetry.dose_credited` are supply-object-paired rather than bit-identical. The lean summary does not echo `hand_redeposit_mode`; the mode is pinned by the manifest tier `config_overrides` and was engine-readback proven on the local smoke (`shedders_only` vs `carriers`, legacy/1/hygiene_cycle), but there is no per-run carrier-deposit witness in the artifact. Treat the carriers contrast as paired-seed directional evidence, not a stream-neutral effect size.
+
+`posted` below means `vsp_trigger_epoch is not None` (either-channel reported-case counter crossed the 3% VSP rule). `outbreak_occurred` is the incidence-acceleration takeoff/fizzle label, not the posting flag. Epochs are the summary's 0-based history indices; days use 24 epochs/day. Paired deltas are `carriers − shedders_only` on the same seed.
+
+## Selection
+
+| rank | supply arm | seed | burden_est (GEC) | burden kind | lots | venues |
+|---:|---|---:|---:|---|---:|---|
+| 1 | `single_line_receipt` | 1030001 | 580,203,309.568 | exact receipt mass | 1 | MainDining_L |
+| 2 | `declared_receipts` | 1031386 | 520,046,935.806 | exact receipt mass | 1 | MainDining_L |
+| 3 | `station_lots` | 1036232 | 455,349,796.777 | estimated station servings, 150 g | 2 | MainDining_L |
+| 4 | `station_lots` | 1020931 | 444,673,387.088 | estimated station servings, 150 g | 3 | MainDining_L |
+
+## Outcomes
+
+| seed | supply arm | mode | posted | VSP epoch/day | detect epoch | confirm epoch | peak epoch/prev | pax infection AR | pax reported AR | crew infection AR | crew reported AR | overall AR | final status |
+|---:|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 1030001 | single_line_receipt | carriers | N | — | 55 | — | 232/478 | 7.12% | 2.86% | 10.76% | 2.14% | 8.21% | SUSPECTED |
+| 1030001 | single_line_receipt | shedders_only | Y | 158/7 | 60 | 158 | 287/901 | 14.45% | 4.55% | 14.71% | 3.19% | 14.53% | CONFIRMED |
+| 1031386 | declared_receipts | carriers | N | — | 224 | — | 258/476 | 7.29% | 1.96% | 10.38% | 2.05% | 8.21% | SUSPECTED |
+| 1031386 | declared_receipts | shedders_only | Y | 150/7 | 56 | 150 | 287/892 | 13.67% | 4.31% | 15.33% | 3.81% | 14.17% | CONFIRMED |
+| 1036232 | station_lots | carriers | N | — | 77 | — | 251/480 | 7.10% | 2.90% | 10.14% | 1.52% | 8.01% | SUSPECTED |
+| 1036232 | station_lots | shedders_only | Y | 118/5 | 74 | 118 | 282/937 | 14.55% | 5.12% | 15.14% | 3.29% | 14.73% | LOCKDOWN |
+| 1020931 | station_lots | carriers | Y | 60/3 | 42 | 60 | 267/804 | 10.94% | 4.73% | 17.95% | 4.86% | 13.04% | CONFIRMED |
+| 1020931 | station_lots | shedders_only | Y | 59/3 | 42 | 58 | 210/832 | 13.69% | 5.47% | 12.14% | 3.24% | 13.23% | LOCKDOWN |
+
+## Paired contrasts (`carriers − shedders_only`)
+
+| seed | supply arm | Δposted | ΔVSP epoch | Δpax infection AR | Δpax reported AR | Δcrew infection AR | Δcrew reported AR | Δoverall AR | Δcensus acquired | ΔCS dose credited (GEC) | Δhand positive share |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1030001 | single_line_receipt | -1 | lost post | -7.33 pp | -1.69 pp | -3.95 pp | -1.05 pp | -6.32 pp | -442 | -6.64e6 | -0.0284 |
+| 1031386 | declared_receipts | -1 | lost post | -6.38 pp | -2.35 pp | -4.95 pp | -1.76 pp | -5.96 pp | -417 | -1.03e6 | -0.0148 |
+| 1036232 | station_lots | -1 | lost post | -7.45 pp | -2.22 pp | -5.00 pp | -1.77 pp | -6.72 pp | -470 | -9.03e6 | -0.0254 |
+| 1020931 | station_lots | 0 | +1 | -2.75 pp | -0.74 pp | +5.81 pp | +1.62 pp | -0.19 pp | -13 | +2.76e6 | -0.0338 |
+
+`census.n_imports` was unchanged on every pair (144/141/140/150). `census.n_acquired` fell on every pair. On the three seeds that lost posting, `infections_by_dominant_route` fomite counts fell sharply (1030001: 677→231, 1031386: 612→252, 1036232: 652→198) while `common_source_food` dominant infections stayed within about 6 of the paired value (147→141, 151→129, 170→177). Passenger reported-case channel counts show the same split: supply-chain reports stayed roughly paired while aboard reports fell (e.g. seed 1036232 passenger `supply_chain` 125→124 vs `aboard` 123→15; seed 1020931 passenger `supply_chain` 211→199 vs `aboard` 56→32, crew `aboard` 67→101).
+
+## Measured / inferred / hypothesis
+
+Measured:
+
+- `shedders_only` posted all four seeds; `carriers` posted only seed 1020931. Passenger reported-case AR fell on all four pairs by 0.74–2.35 pp, passenger infection AR by 2.75–7.45 pp, and overall AR by 0.19–6.72 pp.
+- The three non-posting `carriers` cells ended `SUSPECTED` with `vsp_trigger_epoch=null`; the receipt-arm cells still had `outbreak_occurred=true`, while station_lots seed 1036232 had `outbreak_occurred=false`. None of these are posting flags.
+- On the one remaining post (seed 1020931), `carriers` had VSP epoch 60 vs 59, confirmation epoch 60 vs 58, peak epoch 267 vs 210, passenger reported AR 4.73% vs 5.47%, crew infection AR 17.95% vs 12.14%, and overall AR 13.04% vs 13.23%.
+- The high `shedders_only` ARs are the expected tail of the selection rule: these are the top-burden contaminated mega seeds, and the two station_lots seeds carry 2–3 lots. Their passenger reported ARs (4.31–5.47%) edge above the earlier single mega receipt example (4.55% for seed 1030001) and above the earlier unselected mega posted-row median (~2.47%, max ~4.94%) that was measured from the SENSITIVITY-01 scan; the real pre-2020 VSP mega posted median remains ~6.00%.
+
+Inferred:
+
+- Carrier redeposit did not enlarge these posted supply-tail events; it reduced secondary/aboard transmission and removed the VSP post on three of four worst seeds. The reduction is concentrated in fomite/aboard secondary routes rather than in the paired provisioned supply-chain exposure.
+- This is not the same arm as the earlier expedition posted witness: that ledger used `carriers_ordered`/`ordered` arms and non-supply-enriched posted rows. Here `intra_epoch_causal_order=legacy` and `intra_epoch_substeps=1`, so ordering and substep effects are excluded.
+
+Hypothesis/next:
+
+- Four paired seeds are directional, not an effect size. `carriers` is not stream-neutral (carrier `_replenish_hand` skips shedder-practice draws), and station-lot credited dose is not bit-identical across arms, so this panel cannot attribute the move to a single mechanism. Next decision: if carrier redeposit remains a candidate repair, run a larger paired posted-seed panel with pre-declared posted-conditional endpoints and include `ordered`/substep arms separately; otherwise keep `shedders_only` as the default and treat `carriers` as scaffolding. No anchor fitting or default flip follows from this panel.
