@@ -60,7 +60,6 @@ SOURCES = {
     "mega_cruise_5000": ("MainDining_L", "Windjammer"),
     "spirit_cruise_3000": ("MainDining_L", "MainGalley"),
 }
-PAIRED_HULLS = ("expedition_cruise_450",)
 LANES = ("design", "commissioned", "authored")
 OPENING_KIND = "ambient_opening"
 _DIAG = os.path.join("tools", "diag")
@@ -172,16 +171,15 @@ def run_hull(hull: str, out_rel: str) -> dict[str, Any]:
             os.path.join(exact_dir, "forced_exhaust_exact_integral_check.json")
         )["hulls"][hull],
     }
-    if hull in PAIRED_HULLS:
-        paired = os.path.join(out_rel, f"paired_{hull}.json")
-        _run("paired", "--hull", hull, "--out", paired)
-        summary["paired_cells"] = [
-            {k: c[k] for k in (
-                "source_zone", "lane", "timing", "whole_hull_material_time_h",
-                "transport_loss", "closure_error",
-            )}
-            for c in _load(paired)["cells"]
-        ]
+    paired = os.path.join(out_rel, f"paired_{hull}.json")
+    _run("paired", "--hull", hull, "--out", paired)
+    summary["paired_cells"] = [
+        {k: c[k] for k in (
+            "source_zone", "lane", "timing", "whole_hull_material_time_h",
+            "transport_loss", "closure_error",
+        )}
+        for c in _load(paired)["cells"]
+    ]
     return summary
 
 

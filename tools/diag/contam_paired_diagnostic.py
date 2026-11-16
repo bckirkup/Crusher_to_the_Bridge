@@ -51,7 +51,16 @@ REACHABLE_EPSILON_H = 1e-12
 PLATFORM_SOURCES = {
     "expedition_cruise_450": ["MainDining", "HD_5P_M", "PoolDeck", "MainGalley"],
     "destroyer_baseline": ["Mess_Hall", "HD_MAIN_M", "Bridge"],
+    # Make-up louvre witness hulls (CONTAM-AMBIENT-MAKEUP-CRUISE-01): the room
+    # the galley transfer draws from, and the galley (mega: a second served room).
+    "classic_cruise_1900": ["MainDining_L", "MainGalley"],
+    "diamond_princess": ["International", "MainGalley"],
+    "greg_mortimer": ["DiningRoom", "MainGalley"],
+    "mega_cruise_5000": ["MainDining_L", "Windjammer"],
+    "spirit_cruise_3000": ["MainDining_L", "MainGalley"],
 }
+# Hulls a bare invocation runs; the rest are opt-in through ``--hull``.
+DEFAULT_HULLS = ("expedition_cruise_450", "destroyer_baseline")
 LANES = ("native", "commissioned", "authored")
 # Fresh ``ahs_terminal_mode="design"`` export: the pre-#1245 authoring, kept as
 # an opt-in lane because it is where outward envelope leaks solve non-zero.
@@ -381,7 +390,7 @@ def _source_cells(
 
 
 def _run_matrix(args: argparse.Namespace) -> dict[str, Any]:
-    hulls = args.hull or list(PLATFORM_SOURCES)
+    hulls = args.hull or list(DEFAULT_HULLS)
     lanes = args.lane or list(LANES)
     timings = args.timing or list(TIMINGS)
     binary = _contamx_binary(lanes)
