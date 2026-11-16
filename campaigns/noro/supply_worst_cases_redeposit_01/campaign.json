@@ -1,0 +1,65 @@
+{
+ "name": "noro_supply_worst_cases_redeposit_01",
+ "pathogen": "norovirus",
+ "manifest": "campaigns/noro/supply_worst_cases_redeposit_01/manifest.json",
+ "pathogen_id": "norwalk_gi",
+ "epochs": 288,
+ "s3_prefix": "campaign/noro_supply_worst_cases_redeposit_01/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "noro-supply-redeposit01@sha256:ae8f91c9d95b3dec6c23da17faef94e024741caf7a86b39d2e47fdc3a5b90673",
+ "resources": {
+  "vcpu": "1",
+  "memory": "8192",
+  "shm": 512
+ },
+ "blocks": {
+  "meg_single_line_receipt_1030001_shedders_only": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_single_line_receipt_shedders_only",
+   "seeds": [1030001],
+   "args": {"payload": "lean"}
+  },
+  "meg_single_line_receipt_1030001_carriers": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_single_line_receipt_carriers",
+   "seeds": [1030001],
+   "args": {"payload": "lean"}
+  },
+  "meg_declared_receipts_1031386_shedders_only": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_declared_receipts_shedders_only",
+   "seeds": [1031386],
+   "args": {"payload": "lean"}
+  },
+  "meg_declared_receipts_1031386_carriers": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_declared_receipts_carriers",
+   "seeds": [1031386],
+   "args": {"payload": "lean"}
+  },
+  "meg_station_lots_1036232_shedders_only": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_station_lots_shedders_only",
+   "seeds": [1036232],
+   "args": {"payload": "lean"}
+  },
+  "meg_station_lots_1036232_carriers": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_station_lots_carriers",
+   "seeds": [1036232],
+   "args": {"payload": "lean"}
+  },
+  "meg_station_lots_1020931_shedders_only": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_station_lots_shedders_only",
+   "seeds": [1020931],
+   "args": {"payload": "lean"}
+  },
+  "meg_station_lots_1020931_carriers": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_station_lots_carriers",
+   "seeds": [1020931],
+   "args": {"payload": "lean"}
+  }
+ }
+}
