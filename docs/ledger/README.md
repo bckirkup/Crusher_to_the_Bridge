@@ -42,6 +42,7 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- `CONTAM-FIELD-PRESSURE-REVIEW-01.md` — stage 1 pressure/balance diagnostic (no behaviour change): `tools/diag/contam_pressure_balance_diagnostic.py` and the 77-hull fleet table of per-path ΔP, envelope direction/flow, AHS return-minus-supply imbalance, blocked one-way openings and native-vs-field outflow coefficients; defines the stage-6 envelope/make-up scope by hull class.
 - `CONTAM-FIELD-POOLDECK-OPENINGS-01.md` — class-(b) Expedition pool-deck opening authoring fix: duplicate CasualDining doorway removed, ObsLounge open-deck void corrected to a doorway, Expedition bundle re-synced, before/after witnesses recorded, and class-(d) evidence deferred to the pressure-review/envelope-makeup sequence.
 - `CONTAM-PAIRED-RECOMPARE-01.md` — paired native/commissioned/authored exact-integral diagnostic rerun after the #1241 `plr_bdq` laminar fix, with pre-fix change-detector reproduction and per-trajectory closure.
 - `CONTAM-FIELD-ADJUDICATION-01.md` — doc-only adjudication of Edison's preserved native-vs-field Contam differences at `78a023b6`: per-class verdicts, measured flow/ΔP/material-time evidence, and versioned fix stages; no transport-kernel defect proven.
