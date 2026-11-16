@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Before/after witness bundle for make-up ``ambient_openings`` stages.
 
-CONTAM-AMBIENT-MAKEUP-CRUISE-01 (proposal
+CONTAM-AMBIENT-MAKEUP-*-01 stages (proposal
 ``docs/proposals/ambient_exposure_audit_and_fix_plan.md`` §6, stage 3).  Runs
 the four committed witnesses on each hull as the tree stands and writes one
 summary, so the same command on the base tree and on the changed tree gives
@@ -51,8 +51,13 @@ CRUISE_HULLS = (
     "mega_cruise_5000",
     "spirit_cruise_3000",
 )
-# Witness source zones: the dining room the galley transfer air is drawn
-# from, and the zone the prescribed exhaust sink leaves.
+FICTION_HULLS = (
+    "enterprise_constitution_tos",
+    "enterprise_galaxy_tng",
+)
+MAKEUP_HULLS = CRUISE_HULLS + FICTION_HULLS
+# Witness source zones: the room the exhaust make-up transfer draws from,
+# and the zone the prescribed exhaust sink leaves.
 SOURCES = {
     "classic_cruise_1900": ("MainDining_L", "MainGalley"),
     "diamond_princess": ("International", "MainGalley"),
@@ -60,6 +65,8 @@ SOURCES = {
     "greg_mortimer": ("DiningRoom", "MainGalley"),
     "mega_cruise_5000": ("MainDining_L", "Windjammer"),
     "spirit_cruise_3000": ("MainDining_L", "MainGalley"),
+    "enterprise_constitution_tos": ("Mess_Hall", "Galley"),
+    "enterprise_galaxy_tng": ("Mess_Hall", "Galley"),
 }
 LANES = ("design", "commissioned", "authored")
 OPENING_KIND = "ambient_opening"
@@ -288,8 +295,8 @@ def _write_compare(labels: list[str]) -> str:
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--hull", action="append", choices=CRUISE_HULLS,
-                        help="default: the six cruise hulls")
+    parser.add_argument("--hull", action="append", choices=MAKEUP_HULLS,
+                        help="default: the eight make-up hulls")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--label", help="run the witnesses into this sub-directory")
     mode.add_argument("--compare", nargs=2, metavar=("BEFORE", "AFTER"),
@@ -307,7 +314,7 @@ def main(argv: list[str] | None = None) -> None:
     prepare_output_directory(
         resolve_repo_path(REPO_ROOT, out_rel), allowed_roots=(REPO_ROOT,),
     )
-    hulls = args.hull or list(CRUISE_HULLS)
+    hulls = args.hull or list(MAKEUP_HULLS)
     report = {"label": label, "hulls": {hull: run_hull(hull, out_rel) for hull in hulls}}
     out_path = resolve_repo_path(REPO_ROOT, os.path.join(out_rel, "summary.json"))
     with validated_open(out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:

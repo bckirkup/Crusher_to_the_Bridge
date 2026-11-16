@@ -58,6 +58,8 @@ PLATFORM_SOURCES = {
     "greg_mortimer": ["DiningRoom", "MainGalley"],
     "mega_cruise_5000": ["MainDining_L", "Windjammer"],
     "spirit_cruise_3000": ["MainDining_L", "MainGalley"],
+    "enterprise_constitution_tos": ["Mess_Hall", "Galley"],
+    "enterprise_galaxy_tng": ["Mess_Hall", "Galley"],
 }
 # Hulls a bare invocation runs; the rest are opt-in through ``--hull``.
 DEFAULT_HULLS = ("expedition_cruise_450", "destroyer_baseline")
