@@ -1,15 +1,17 @@
 # CONTAM-FIELD-ENVELOPE-BOUNDARY-01
 **Date:** 2026-11-15
-**Commit:** 5f323c05
+**Commit:** dbb12dba
 **Pathogens:** all
 **Status:** open
-**Measured at:** 5f323c05 plus this change (local ContamX `third_party/contamx/contamx3`)
+**Measured at:** dbb12dba
 
 ## Scope
 
 Stage 5 of
 [`../proposals/contam_field_adjudication_audit_and_fix_plan.md`](../proposals/contam_field_adjudication_audit_and_fix_plan.md)
-(verdict (e)): lane semantics on boundary paths only. Evidence base:
+(verdict (e)): lane semantics on boundary paths only. Base `origin/main`
+`5f323c05`; measurements use local ContamX `third_party/contamx/contamx3` at
+the code commit `dbb12dba`. Evidence base:
 [`CONTAM-FIELD-ADJUDICATION-01`](CONTAM-FIELD-ADJUDICATION-01.md).
 
 ## Owner decision
