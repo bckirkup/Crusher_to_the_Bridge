@@ -188,6 +188,10 @@ def _is_occupied(zone: dict[str, Any]) -> bool:
 
 
 def _is_exterior(zone: dict[str, Any]) -> bool:
+    """Weather zone: the authored ``exposure`` when declared, else the id match."""
+    exposure = zone.get("exposure")
+    if exposure is not None:
+        return exposure == "weather"
     zid = zone["id"].lower()
     return zone.get("type") == "Free" and any(h in zid for h in _EXTERIOR_HINTS)
 
@@ -316,7 +320,10 @@ def _classify_ungrouped(
 ) -> tuple[list[str], list[str], list[str]]:
     exterior, interior, void = [], [], []
     for zone in ungrouped:
-        if _is_exterior(zone) or _zone_signature(zone) in {"weather_open", "open_other"}:
+        lexical_open = zone.get("exposure") is None and _zone_signature(zone) in {
+            "weather_open", "open_other",
+        }
+        if _is_exterior(zone) or lexical_open:
             exterior.append(zone["id"])
         elif _is_occupied(zone):
             interior.append(zone["id"])

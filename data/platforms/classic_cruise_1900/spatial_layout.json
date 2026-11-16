@@ -113,6 +113,7 @@
       "traffic": "high",
       "volume_m3": 2100.0,
       "deck": "9_Lido",
+      "exposure": "weather",
       "max_occupancy": 400,
       "display": {
         "x": 120,

@@ -185,6 +185,11 @@
           "maximum": 360,
           "description": "Wall azimuth of the opening for the export wind profile. Null or absent uses the zone's derived hull-wall azimuth."
         },
+        "wind_speed_m_s": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "Relative wind speed across the opening in m/s (CONTAM-AMBIENT-WEATHER-CRUISE-01). Export lane only: the two paired legs are held at the windward (0 deg) and leeward (180 deg) wind pressures of the hull's Cp profile at this speed, so ContamX solves a through-flow at zero temperature difference. Null, absent or 0 imposes nothing and azimuth_deg applies. A declared axis, not a measured wind."
+        },
         "schedule": {
           "type": "string",
           "minLength": 1,

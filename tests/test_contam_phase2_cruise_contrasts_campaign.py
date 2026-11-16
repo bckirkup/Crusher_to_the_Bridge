@@ -371,12 +371,14 @@ class TestV2SuccessorDesign:
     def test_v2_hull_panel_tracks_current_platform_jsons(self, design_v2) -> None:
         # CONTAM-AMBIENT-MAKEUP-CRUISE-01: +2 legs per make-up louvre record
         # (one record on three hulls, ten on mega_cruise_5000).
+        # CONTAM-AMBIENT-WEATHER-CRUISE-01: +2 legs per weather-deck opening
+        # record (expedition 1, classic 1, spirit 3, mega 5).
         panel = design_v2["hull_panel"]
-        assert panel["expedition_cruise_450"]["path_map_entries"] == 345
-        assert panel["classic_cruise_1900"]["path_map_entries"] == 838
-        assert panel["spirit_cruise_3000"]["path_map_entries"] == 1305
-        assert panel["mega_cruise_5000"]["path_map_entries"] == 2593
-        assert sum(row["path_map_entries"] for row in panel.values()) == 5081
+        assert panel["expedition_cruise_450"]["path_map_entries"] == 345 + 2
+        assert panel["classic_cruise_1900"]["path_map_entries"] == 838 + 2
+        assert panel["spirit_cruise_3000"]["path_map_entries"] == 1305 + 6
+        assert panel["mega_cruise_5000"]["path_map_entries"] == 2593 + 10
+        assert sum(row["path_map_entries"] for row in panel.values()) == 5081 + 20
         for hull, (zones, volume, _entries, supply, duty0) in HULL_PANEL.items():
             assert panel[hull]["zones"] == zones
             assert panel[hull]["volume_m3"] == pytest.approx(volume, abs=0.005)

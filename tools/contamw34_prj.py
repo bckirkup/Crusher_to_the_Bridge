@@ -106,6 +106,20 @@ _AMBIENT_ELEM_PREFIX = "AmbOp"
 # solved exchange depends on the leg separation; not calibrated (ledger
 # CONTAM-AMBIENT-OPENING-SCHEMA-01, "Limits of this witness").
 _AMBIENT_PAIR_REL_HEIGHTS = (0.25, 0.75)
+# Imposed wind pressure on a paired opening whose record declares
+# ``wind_speed_m_s`` (CONTAM-AMBIENT-WEATHER-CRUISE-01). The exported steady
+# weather has no wind and every other path leaves the ContamX wind flag clear,
+# so at the exported zone temperature (= ambient on a weather deck) the two
+# legs solve no exchange. With the flag set and no profile attached, ContamX
+# applies the path's ``wPset`` as a constant wind pressure [Pa]; the first
+# leg takes the windward and the second the leeward pressure of the hull's
+# own Cp profile, ``wPmod * Cp * rho * U**2 / 2``. Azimuths, modifier and
+# density are the exporter's existing values; the speed is the record's.
+_PATH_FLAG_WIND = 1
+_AMBIENT_WIND_AZIMUTHS_DEG = (0.0, 180.0)
+_WIND_PRESSURE_MODIFIER = 0.8
+_AMBIENT_PRESSURE_PA = 101325.0
+_DRY_AIR_GAS_CONSTANT = 287.055  # J/(kg K)
 _ELEM_DOOR = 25
 # ``dor_door`` discharge coefficient and minimum temperature difference for
 # two-way flow. Grade C: declared assumptions, no source read. Used only by
@@ -800,6 +814,7 @@ class _NetworkBuilder:
         y: float = 0.0
         w_pmod: float = 0.0
         rel_ht: float = 0.0
+        w_pset: float = 0.0
 
     def _add_path(
         self,
@@ -833,6 +848,7 @@ class _NetworkBuilder:
             "y": fields.y,
             "w_pmod": fields.w_pmod,
             "rel_ht": fields.rel_ht,
+            "w_pset": fields.w_pset,
         })
         map_entry = {
             "path_nr": pnr,
@@ -861,7 +877,7 @@ class _NetworkBuilder:
                     z["orig_id"], src, self.overrides, beam_m=self.beam_m,
                 )
                 w_nr = self.wind_nr
-                wmod = 0.8
+                wmod = _WIND_PRESSURE_MODIFIER
             self._add_path(
                 z["nr"], -1, 2,
                 from_name=z["orig_id"], to_name="ambient",
@@ -1122,7 +1138,53 @@ class _NetworkBuilder:
                 zone_id, self.zone_by_id.get(zone_id, {}), self.overrides,
                 beam_m=self.beam_m,
             )
-        return float(azimuth), self.wind_nr, 0.8
+        return float(azimuth), self.wind_nr, _WIND_PRESSURE_MODIFIER
+
+    def _ambient_opening_wind_pressures(
+        self, record: dict[str, Any], n_legs: int,
+    ) -> list[float] | None:
+        """Constant wind pressure [Pa] per leg, or None when none is declared."""
+        speed = float(record.get("wind_speed_m_s") or 0.0)
+        if speed <= 0.0:
+            return None
+        # The skeleton export carries no wind section; the imposed pressure
+        # needs only the profile's coefficients, so both exports agree.
+        pack = self.pack or _hobby.load_hobbyist_pack()
+        profile = pack["wind_profiles"]["profiles"][
+            _hobby.resolve_wind_profile_key(pack, self.overrides)
+        ]
+        coefficient = {float(azm): float(cp) for azm, cp in profile["points"]}
+        if n_legs != len(_AMBIENT_WIND_AZIMUTHS_DEG) or not all(
+            azm in coefficient for azm in _AMBIENT_WIND_AZIMUTHS_DEG
+        ):
+            raise ValueError(
+                f"ambient_openings entry for {record['zone']!r} declares "
+                "wind_speed_m_s, which needs the paired_orifices model and a "
+                "wind profile with windward (0 deg) and leeward (180 deg) points"
+            )
+        density = _AMBIENT_PRESSURE_PA / (_DRY_AIR_GAS_CONSTANT * _DEFAULT_ZONE_TEMP_K)
+        dynamic = 0.5 * density * speed * speed
+        return [
+            round(_WIND_PRESSURE_MODIFIER * coefficient[azm] * dynamic, 6)
+            for azm in _AMBIENT_WIND_AZIMUTHS_DEG
+        ]
+
+    def _ambient_opening_fields(
+        self, record: dict[str, Any], z: dict[str, Any], rel_ht: float,
+        pressure: float | None,
+    ) -> "_NetworkBuilder.PathFields":
+        """Path fields of one leg: imposed wind pressure, else the profile."""
+        common = {
+            "level": int(z["level"]),
+            "sched_nr": self._ambient_opening_schedule(record),
+            "x": float(z["x"]),
+            "y": float(z["y"]),
+            "rel_ht": rel_ht,
+        }
+        if pressure is not None:
+            return self.PathFields(flag=_PATH_FLAG_WIND, w_pset=pressure, **common)
+        wazm, wind_nr, wmod = self._ambient_opening_wind(record)
+        return self.PathFields(wazm=wazm, wind_p=wind_nr, w_pmod=wmod, **common)
 
     def _add_ambient_opening_paths(self) -> None:
         """Emit each ``ambient_openings`` record as zone -> ambient (-1) paths.
@@ -1141,26 +1203,18 @@ class _NetworkBuilder:
                 )
             z = self.zone_records[self.zone_name_to_nr[zone_id] - 1]
             height = float(z["height"])
-            wazm, wind_nr, wmod = self._ambient_opening_wind(record)
-            sched_nr = self._ambient_opening_schedule(record)
-            for leg_area, rel_ht in self._ambient_opening_legs(
-                float(record["area_m2"]), height,
-            ):
+            legs = self._ambient_opening_legs(float(record["area_m2"]), height)
+            pressures = self._ambient_opening_wind_pressures(record, len(legs))
+            for index, (leg_area, rel_ht) in enumerate(legs):
                 self._add_path(
                     z["nr"], -1, self._ambient_opening_elem(leg_area, height),
                     from_name=zone_id, to_name=AMBIENT_ZONE_ID,
                     kind=AMBIENT_OPENING_KIND,
                     is_hvac_ducted=False,
                     crusher_transfer=False,
-                    fields=self.PathFields(
-                        level=int(z["level"]),
-                        wazm=wazm,
-                        wind_p=wind_nr,
-                        w_pmod=wmod,
-                        sched_nr=sched_nr,
-                        x=float(z["x"]),
-                        y=float(z["y"]),
-                        rel_ht=rel_ht,
+                    fields=self._ambient_opening_fields(
+                        record, z, rel_ht,
+                        None if pressures is None else pressures[index],
                     ),
                 )
 
@@ -1929,7 +1983,8 @@ def _append_ahs_zones_and_paths(lines: list[str], ctx: dict[str, Any]) -> None:
             f"{int(p.get('wind_nr', 0))}   {p['ahs_nr']}   "
             f"{int(p.get('sched_nr', 0))}   0   {p['level']}   "
             f"{float(p.get('x', 0.0)):.3f}   {float(p.get('y', 0.0)):.3f}   "
-            f"{float(p.get('rel_ht', 0.0)):.3f} 1 0 "
+            f"{float(p.get('rel_ht', 0.0)):.3f} 1 "
+            f"{float(p.get('w_pset', 0.0)):g} "
             f"{float(p.get('w_pmod', 0.0)):g} {wazm_s} "
             f"{p['fahs']:.8g} 0 0   0  1 -1 0 0 0 0 0 0"
         )

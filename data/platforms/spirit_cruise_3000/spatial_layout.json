@@ -177,6 +177,7 @@
       "traffic": "high",
       "volume_m3": 2400.0,
       "deck": "10_Lido",
+      "exposure": "weather",
       "max_occupancy": 500,
       "display": {
         "x": 150,
@@ -190,6 +191,7 @@
       "traffic": "medium",
       "volume_m3": 1200.0,
       "deck": "9_Cabins",
+      "exposure": "weather",
       "max_occupancy": 200,
       "display": {
         "x": 180,
@@ -346,6 +348,7 @@
       "traffic": "medium",
       "volume_m3": 1800.0,
       "deck": "12_Sports",
+      "exposure": "weather",
       "max_occupancy": 120,
       "display": {
         "x": 100,

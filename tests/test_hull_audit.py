@@ -245,3 +245,14 @@ def test_real_fleet_loads(tmp_path):
     for d in dirs:
         b = hull_audit.audit_platform(d)
         assert b.metrics
+
+
+def test_authored_exposure_overrides_the_lexical_exterior_match():
+    def deck(**extra):
+        return {"id": "PoolDeck", "type": "Free", **extra}
+
+    assert hull_audit._classify_ungrouped([deck()])[0] == ["PoolDeck"]
+    assert hull_audit._classify_ungrouped([deck(exposure="weather")])[0] == ["PoolDeck"]
+    assert hull_audit._classify_ungrouped([deck(exposure="enclosed")])[0] == []
+    lounge = {"id": "Lounge", "type": "Room", "exposure": "weather"}
+    assert hull_audit._classify_ungrouped([lounge])[0] == ["Lounge"]
