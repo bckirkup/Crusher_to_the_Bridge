@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -10,6 +11,8 @@ from typing import Any
 
 def build_argv(args: Any, block: dict[str, Any], seed: int, out_dir: Path) -> tuple[list[str], Path]:
     cfg = block.get("args") or {}
+    # campaign_entrypoint spawns the worker with this process environment.
+    os.environ["PYTHONHASHSEED"] = "1"
     artifact_name = f"{cfg['artifact_stem']}_chunk{int(seed):06d}.jsonl"
     command = [
         sys.executable,

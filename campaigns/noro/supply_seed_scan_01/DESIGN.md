@@ -50,9 +50,10 @@ census for later paired full-fidelity posted-AR runs; it is not an anchor fit.
 - Agent-count neutrality was measured for `station_lots` seed 8114
   (`num_agents=100/1000/2000` identical provisioned plan and `lot_servings`);
   receipt arms get the same chunk-level witness check in the canary.
-- Interpreter/hash pin: `tools/noro_diag/supply_seed_scan.py` re-execs under
-  `PYTHONHASHSEED=1` before importing the engine, so local canaries and Batch
-  children share the same seed-selection hash.
+- Interpreter/hash pin: `campaigns/noro/supply_seed_scan_01/entry.py` exports
+  `PYTHONHASHSEED=1` for the worker subprocess, so local campaign canaries and
+  Batch children share the same seed-selection hash; direct worker invocations
+  must set it explicitly.
 - Error contract: any per-seed exception makes the worker exit nonzero after
   writing the chunk locally, so Batch retries instead of `_already_uploaded`
   treating error rows as a completed chunk.

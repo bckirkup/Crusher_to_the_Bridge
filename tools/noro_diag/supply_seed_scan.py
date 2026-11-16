@@ -15,18 +15,10 @@ from __future__ import annotations
 import argparse
 import copy
 import json
-import os
 import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
-
-# Seed selection must be reusable across local canaries and Batch children;
-# re-exec under a fixed hash seed before importing the engine.
-if os.environ.get("PYTHONHASHSEED") != "1":
-    _env = dict(os.environ)
-    _env["PYTHONHASHSEED"] = "1"
-    os.execve(sys.executable, [sys.executable, *sys.argv], _env)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
@@ -38,6 +30,11 @@ if str(_CAMPAIGN_DIR) not in sys.path:
 
 from campaign_runner import generate_tier_runs  # noqa: E402
 
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    resolve_child_path,
+)
+from tools.diag.json_io import validated_json_load  # noqa: E402
 from tools.noro_diag.growth_chain_census import run_seed  # noqa: E402
 
 _ARMS = ("station_lots", "single_line_receipt", "declared_receipts")
@@ -104,7 +101,10 @@ _OBJECT_KEYS = (
 
 
 def _load_manifest(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    data = validated_json_load(REPO_ROOT, path)
+    if not isinstance(data, dict):
+        raise ValueError(f"manifest {path} is not a JSON object")
+    return data
 
 
 def _natural_clock(manifest: dict[str, Any]) -> str | None:
@@ -315,9 +315,10 @@ def main(argv: list[str] | None = None) -> int:
     hull = args.hull or (
         args.tier.split("_")[1] if args.tier.startswith("fl_") else args.tier
     )
-    out_dir = Path(args.out)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    artifact = out_dir / args.artifact
+    out_dir = Path(
+        prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),))
+    )
+    artifact = Path(resolve_child_path(str(out_dir), args.artifact))
     seeds = _chunk_seeds(args)
     errors = 0
     with artifact.open("w", encoding="utf-8") as handle:
