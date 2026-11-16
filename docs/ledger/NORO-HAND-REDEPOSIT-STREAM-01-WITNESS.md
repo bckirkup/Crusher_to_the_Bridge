@@ -1,9 +1,9 @@
 # NORO-HAND-REDEPOSIT-STREAM-01-WITNESS
 **Date:** 2026-11-16
 **Commit:** bae0d181
-**Measured at:** bae0d181
 **Pathogens:** norwalk_gi
 **Status:** open
+**Measured at:** bae0d181
 
 Paired-seed witness for the stream-preserving `carriers` repair merged in PR
 #1261. Command:
