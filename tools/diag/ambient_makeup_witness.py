@@ -24,9 +24,10 @@ Diagnostic only: nothing under ``data/`` is written.
 from __future__ import annotations
 
 import argparse
+import contextlib
+import importlib
 import json
 import os
-import subprocess
 import sys
 from typing import Any
 
@@ -62,20 +63,21 @@ SOURCES = {
 }
 LANES = ("design", "commissioned", "authored")
 OPENING_KIND = "ambient_opening"
-_DIAG = os.path.join("tools", "diag")
 _TOOLS = {
-    "pressure": os.path.join(_DIAG, "contam_pressure_balance_diagnostic.py"),
-    "paired": os.path.join(_DIAG, "contam_paired_diagnostic.py"),
-    "exact": os.path.join(_DIAG, "forced_exhaust_audit.py"),
-    "compare": os.path.join("tools", "contam_flow_compare.py"),
+    "pressure": "tools.diag.contam_pressure_balance_diagnostic",
+    "paired": "tools.diag.contam_paired_diagnostic",
+    "exact": "tools.diag.forced_exhaust_audit",
+    "compare": "tools.contam_flow_compare",
 }
 
 
 def _run(tool: str, *args: str) -> None:
-    subprocess.run(
-        [sys.executable, os.path.join(REPO_ROOT, _TOOLS[tool]), *args],
-        cwd=REPO_ROOT, check=True, stdout=subprocess.DEVNULL,
-    )
+    """Run one witness tool in process, discarding what it prints."""
+    module = importlib.import_module(_TOOLS[tool])
+    with open(os.devnull, "w", encoding="utf-8") as sink, contextlib.redirect_stdout(sink):
+        status = module.main(list(args))
+    if status:
+        raise RuntimeError(f"{_TOOLS[tool]} exited with status {status}")
 
 
 def _load(rel_path: str) -> Any:
@@ -295,11 +297,11 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     if args.compare:
         print(f"wrote {_write_compare(args.compare)}")
-        return 0
+        return
     label = validate_path_component(args.label)
     out_rel = os.path.join("telemetry_buffer", "ambient_makeup_witness", label)
     prepare_output_directory(
@@ -312,8 +314,7 @@ def main(argv: list[str] | None = None) -> int:
         json.dump(report, fh, indent=2, sort_keys=True)
         fh.write("\n")
     print(f"wrote {out_path}")
-    return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
