@@ -106,15 +106,21 @@ _AMBIENT_ELEM_PREFIX = "AmbOp"
 # solved exchange depends on the leg separation; not calibrated (ledger
 # CONTAM-AMBIENT-OPENING-SCHEMA-01, "Limits of this witness").
 _AMBIENT_PAIR_REL_HEIGHTS = (0.25, 0.75)
-# Imposed wind pressure on a paired opening whose record declares
-# ``wind_speed_m_s`` (CONTAM-AMBIENT-WEATHER-CRUISE-01). The exported steady
-# weather has no wind and every other path leaves the ContamX wind flag clear,
-# so at the exported zone temperature (= ambient on a weather deck) the two
-# legs solve no exchange. With the flag set and no profile attached, ContamX
-# applies the path's ``wPset`` as a constant wind pressure [Pa]; the first
-# leg takes the windward and the second the leeward pressure of the hull's
-# own Cp profile, ``wPmod * Cp * rho * U**2 / 2``. Azimuths, modifier and
-# density are the exporter's existing values; the speed is the record's.
+# Wind on the exported paths (CONTAM-DEFAULT-WEATHER-01). The hobbyist export
+# declares one steady relative wind per hull
+# (``_hobby.resolve_relative_wind``): it is the ``Ws``/``Wd`` of the steady
+# weather line, and every path that carries the hull's Cp profile (envelope
+# leaks and ambient-opening legs) sets the ContamX wind flag, so ContamX
+# applies ``wPmod * Cp(wazm - Wd) * rho * Ws**2 / 2`` on it. A paired opening
+# whose record declares ``wind_speed_m_s`` is cross-ventilated: its first leg
+# faces the wind and its second leg faces away from it
+# (CONTAM-AMBIENT-WEATHER-CRUISE-01). The speed on those legs is the hull's:
+# the record's own ``wind_speed_m_s`` marks the record as cross-ventilated
+# and is the native lane's exchange axis, not a second ContamX wind.
+# With no wind section (skeleton export) or a hull wind of 0 (the labelled
+# calm baseline) no profile path is flagged, and such a record instead gets
+# the flag with no profile and a constant ``wPset`` at the record's speed,
+# which is the pre-CONTAM-DEFAULT-WEATHER-01 export.
 _PATH_FLAG_WIND = 1
 _AMBIENT_WIND_AZIMUTHS_DEG = (0.0, 180.0)
 _WIND_PRESSURE_MODIFIER = 0.8
@@ -466,6 +472,9 @@ class _NetworkBuilder:
         self.sched_oa_week = 0
         self.sched_duty_week = 0
         self.wind_nr = 0
+        self.wind_speed_m_s, self.wind_direction_deg = (
+            _hobby.resolve_relative_wind(self.overrides)
+        )
         self.filter_nr_by_preset: dict[str, int] = {}
         self.filter_elements: list[dict[str, Any]] = []
         self.filters: list[dict[str, Any]] = []
@@ -528,6 +537,10 @@ class _NetworkBuilder:
             "day_schedules": self.day_schedules,
             "week_schedules": self.week_schedules,
             "wind_profiles": self.wind_profiles,
+            "steady_wind": (
+                (self.wind_speed_m_s, self.wind_direction_deg)
+                if self.wind_nr else (0.0, 0.0)
+            ),
             "filter_elements": self.filter_elements,
             "filters": self.filters,
             "control_nodes": self.control_nodes,
@@ -871,7 +884,9 @@ class _NetworkBuilder:
             wazm = -1.0
             w_nr = 0
             wmod = 0.0
+            flag = 0
             if self.hobbyist and self.wind_nr:
+                flag = self._wind_flag()
                 src = self.zone_by_id.get(z["orig_id"], {})
                 wazm = _hobby.wall_azimuth_deg(
                     z["orig_id"], src, self.overrides, beam_m=self.beam_m,
@@ -886,6 +901,7 @@ class _NetworkBuilder:
                 crusher_transfer=False,
                 fields=self.PathFields(
                     level=int(z["level"]),
+                    flag=flag,
                     wazm=wazm,
                     wind_p=w_nr,
                     w_pmod=wmod,
@@ -1127,6 +1143,10 @@ class _NetworkBuilder:
             for frac in _AMBIENT_PAIR_REL_HEIGHTS
         ]
 
+    def _wind_flag(self) -> int:
+        """ContamX wind flag of a profile-carrying path under the hull wind."""
+        return _PATH_FLAG_WIND if self.wind_speed_m_s > 0.0 else 0
+
     def _ambient_opening_wind(self, record: dict[str, Any]) -> tuple[float, int, float]:
         """``(wall azimuth, wind profile nr, wind pressure modifier)``."""
         if not (self.hobbyist and self.wind_nr):
@@ -1171,9 +1191,9 @@ class _NetworkBuilder:
 
     def _ambient_opening_fields(
         self, record: dict[str, Any], z: dict[str, Any], rel_ht: float,
-        pressure: float | None,
+        leg: int, pressure: float | None,
     ) -> "_NetworkBuilder.PathFields":
-        """Path fields of one leg: imposed wind pressure, else the profile."""
+        """Path fields of leg number ``leg`` of one opening record."""
         common = {
             "level": int(z["level"]),
             "sched_nr": self._ambient_opening_schedule(record),
@@ -1181,10 +1201,21 @@ class _NetworkBuilder:
             "y": float(z["y"]),
             "rel_ht": rel_ht,
         }
-        if pressure is not None:
-            return self.PathFields(flag=_PATH_FLAG_WIND, w_pset=pressure, **common)
         wazm, wind_nr, wmod = self._ambient_opening_wind(record)
-        return self.PathFields(wazm=wazm, wind_p=wind_nr, w_pmod=wmod, **common)
+        if pressure is None:
+            flag = self._wind_flag() if wind_nr else 0
+            return self.PathFields(
+                flag=flag, wazm=wazm, wind_p=wind_nr, w_pmod=wmod, **common,
+            )
+        if not (wind_nr and self.wind_speed_m_s > 0.0):
+            return self.PathFields(flag=_PATH_FLAG_WIND, w_pset=pressure, **common)
+        return self.PathFields(
+            flag=_PATH_FLAG_WIND,
+            wazm=(self.wind_direction_deg + _AMBIENT_WIND_AZIMUTHS_DEG[leg]) % 360.0,
+            wind_p=wind_nr,
+            w_pmod=wmod,
+            **common,
+        )
 
     def _add_ambient_opening_paths(self) -> None:
         """Emit each ``ambient_openings`` record as zone -> ambient (-1) paths.
@@ -1213,7 +1244,7 @@ class _NetworkBuilder:
                     is_hvac_ducted=False,
                     crusher_transfer=False,
                     fields=self._ambient_opening_fields(
-                        record, z, rel_ht,
+                        record, z, rel_ht, index,
                         None if pressures is None else pressures[index],
                     ),
                 )
@@ -1633,6 +1664,7 @@ def _append_prj_header(lines: list[str], ctx: dict[str, Any]) -> None:
     cols = max(40, n_zones + 20)
     ctx["rows"] = rows
     ctx["cols"] = cols
+    wind_speed, wind_direction = ctx["net"].get("steady_wind") or (0.0, 0.0)
     lines.extend([
         PRJ_SIGNATURE_34,
         "",
@@ -1642,7 +1674,8 @@ def _append_prj_header(lines: list[str], ctx: dict[str, Any]) -> None:
         "!  scale     us  orgRow  orgCol  invYaxis showGeom",
         "  1.000e+00   0       1       1     0        0",
         "! Ta       Pb      Ws    Wd    rh  day u..",
-        f"{_DEFAULT_ZONE_TEMP_K:.3f} 101325.0  0.000   0.0 0.000 1 2 0 0 1 "
+        f"{_DEFAULT_ZONE_TEMP_K:.3f} 101325.0  {wind_speed:.3f} "
+        f"{wind_direction:5.1f} 0.000 1 2 0 0 1 "
         f"! steady simulation",
         f"{_DEFAULT_ZONE_TEMP_K:.3f} 101325.0  1.000 270.0 0.000 1 2 0 0 1 "
         f"! wind pressure test",
