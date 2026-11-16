@@ -1961,8 +1961,10 @@ DEFAULT_HAND_RESERVOIR_MODE = "hygiene_cycle"
 
 # NORO-HAND-CASCADE-01a: carrier redeposition and causal intra-epoch order.
 # ``carriers`` lets a non-shedder with a whole-copy hand load redeposit it;
-# ``ordered`` runs sanitary/emesis pickup before surface deposits and food
-# before end-of-epoch hygiene. The legacy arms stay the defaults until the
+# hand maintenance stays on the shared replenish stream so the arm isolates
+# deposit eligibility rather than bundled carrier-carriage effects. ``ordered``
+# runs sanitary/emesis pickup before surface deposits and food before
+# end-of-epoch hygiene. The legacy arms stay the defaults until the
 # paired-seed witnesses say the repair earns the move; substeps are deferred.
 HAND_REDEPOSIT_MODES = ("shedders_only", "carriers")
 DEFAULT_HAND_REDEPOSIT_MODE = "shedders_only"
@@ -9111,19 +9113,6 @@ class TransmissionCore:
             return
         rate = self._hand_inactivation_rate(agent, pathogen_id, profile)
         survival = math.exp(-rate * self.clock.hours_per_epoch)
-        if (
-            self.hand_redeposit_mode == "carriers"
-            and target <= 0.0
-            and current > 0.0
-        ):
-            # A carrier has no stool stream of its own: the picked-up load only
-            # decays. Running the shedding-host practice cycle here would draw
-            # stool/hygiene events for a host that cannot produce them.
-            decayed = floor_surface_residue(current * survival)
-            agent.hand_load_by_pathogen[pathogen_id] = decayed
-            if decayed <= 0.0:
-                agent.hand_strain_by_pathogen.pop(pathogen_id, None)
-            return
         events_per_day = self._stool_event_rate_per_day(
             agent, pathogen_id, profile,
         )
@@ -9381,7 +9370,12 @@ class TransmissionCore:
                 max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
             )
             gain = min(pool, pool * uptake)
-            accessible = min(target, accessible + gain)
+            if target > 0.0:
+                accessible = min(target, accessible + gain)
+            else:
+                # A non-shedding carrier has no stool-linked target ceiling;
+                # self-contact moves own-environment mass onto the hand.
+                accessible += gain
             pool -= gain
         agent.hand_self_pool_by_pathogen[pathogen_id] = pool
         return accessible, wet_seconds
@@ -9494,28 +9488,28 @@ class TransmissionCore:
         if self._stool_event_occurs(events_per_day):
             if self.rng.random() < propensity:
                 accessible = max(accessible, target)
-                # A contaminating visit queues material for the protected
-                # sites at the measured post-bathroom magnitude, but it
-                # settles over days -- the post-visit wash still acts on
-                # the fresh accessible load first (NORO-HAND-CARRIAGE-01
-                # iii, McNeil 2001).
-                pending = agent.hand_protected_pending_by_pathogen.get(
-                    pathogen_id, 0.0,
+                sequestered = math.pow(
+                    10.0,
+                    self.rng.uniform(
+                        math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[0]),
+                        math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[1]),
+                    ),
                 )
-                agent.hand_protected_pending_by_pathogen[pathogen_id] = (
-                    pending
-                    + math.pow(
-                        10.0,
-                        self.rng.uniform(
-                            math.log10(
-                                HAND_PROTECTED_SEQUESTER_GEC_RANGE[0],
-                            ),
-                            math.log10(
-                                HAND_PROTECTED_SEQUESTER_GEC_RANGE[1],
-                            ),
-                        ),
+                # Only a shedding target can queue stool-linked protected
+                # mass; target <= 0 hosts consume the draw without producing
+                # copies from a stool that cannot carry this pathogen.
+                if target > 0.0:
+                    # A contaminating visit queues material for the protected
+                    # sites at the measured post-bathroom magnitude, but it
+                    # settles over days -- the post-visit wash still acts on
+                    # the fresh accessible load first (NORO-HAND-CARRIAGE-01
+                    # iii, McNeil 2001).
+                    pending = agent.hand_protected_pending_by_pathogen.get(
+                        pathogen_id, 0.0,
                     )
-                )
+                    agent.hand_protected_pending_by_pathogen[pathogen_id] = (
+                        pending + sequestered
+                    )
             if self.rng.random() < practice["wash_compliance"]:
                 efficacy, wet = self._hand_wash_act()
                 accessible *= math.pow(10.0, -efficacy)

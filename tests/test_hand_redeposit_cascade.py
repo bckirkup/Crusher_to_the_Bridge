@@ -8,8 +8,6 @@ pin the gates and conservation law; they are not campaign readouts.
 
 from __future__ import annotations
 
-import math
-
 import numpy as np
 import pytest
 
@@ -162,17 +160,112 @@ def test_carrier_redeposit_conserves_hand_to_surface_mass() -> None:
     assert pool_after >= 0.0
 
 
-def test_carrier_hand_replenish_decays_without_shedder_practice() -> None:
-    core = _carriers_core()
-    profile = core.pathogen_profiles[PATHOGEN]
+def test_carrier_hand_replenish_matches_shedders_only_stream() -> None:
+    """``carriers`` isolates deposit eligibility, not hand maintenance."""
+    profile = _profile(
+        stool_events_per_day={"baseline": 1.0, "diarrhoeal": 1.0},
+    )
+    shedders_carrier = _agent(hand_load=100.0)
+    carriers_carrier = _agent(hand_load=100.0)
+    shedders_only = _core(profile=profile, seed=11)
+    carriers = _core(
+        tx={"hand_redeposit_mode": "carriers"},
+        profile=profile,
+        seed=11,
+    )
+
+    for _ in range(24):
+        shedders_only._replenish_hand(
+            shedders_carrier, PATHOGEN, profile, ZONE,
+        )
+        carriers._replenish_hand(
+            carriers_carrier, PATHOGEN, profile, ZONE,
+        )
+
+    assert carriers_carrier.hand_load_by_pathogen[PATHOGEN] == pytest.approx(
+        shedders_carrier.hand_load_by_pathogen[PATHOGEN], rel=0.0, abs=0.0,
+    )
+    assert carriers_carrier.hand_protected_load_by_pathogen == (
+        shedders_carrier.hand_protected_load_by_pathogen
+    )
+    assert carriers_carrier.hand_protected_pending_by_pathogen == (
+        shedders_carrier.hand_protected_pending_by_pathogen
+    )
+    assert carriers_carrier.hand_self_pool_by_pathogen == (
+        shedders_carrier.hand_self_pool_by_pathogen
+    )
+    assert carriers_carrier.hand_carriage_propensity_by_pathogen == (
+        shedders_carrier.hand_carriage_propensity_by_pathogen
+    )
+    assert carriers_carrier.hand_practice_by_pathogen == (
+        shedders_carrier.hand_practice_by_pathogen
+    )
+    assert carriers_carrier.hand_wet_transfer_by_pathogen == (
+        shedders_carrier.hand_wet_transfer_by_pathogen
+    )
+    assert carriers_carrier.hand_inactivation_rate_by_pathogen == (
+        shedders_carrier.hand_inactivation_rate_by_pathogen
+    )
+
+
+def test_carrier_self_contact_reloads_without_shedder_target_cap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "engines.transmission_core.SELF_CONTACT_TICKS_PER_DAY_RANGE",
+        (240.0, 240.0),
+    )
+    monkeypatch.setattr(
+        "engines.transmission_core.ROUTINE_WASHES_PER_DAY_RANGE",
+        (0.0, 0.0),
+    )
+    profile = _profile(
+        hand_inactivation_rate_per_hour=0.0,
+        surface_decay_log10_per_day=0.0,
+    )
+    core = _carriers_core(profile=profile, seed=3)
+    carrier = _agent(hand_load=100.0)
+    carrier.hand_self_pool_by_pathogen[PATHOGEN] = 1000.0
+
+    core._replenish_hand(carrier, PATHOGEN, profile, ZONE)
+
+    load = carrier.hand_load_by_pathogen[PATHOGEN]
+    pool = carrier.hand_self_pool_by_pathogen[PATHOGEN]
+    assert load > 100.0
+    assert pool < 1000.0
+    assert load + pool == pytest.approx(1100.0, rel=1e-9)
+
+
+def test_non_shedding_carrier_stool_event_queues_no_protected_mass(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "engines.transmission_core.SELF_CONTACT_TICKS_PER_DAY_RANGE",
+        (0.0, 0.0),
+    )
+    monkeypatch.setattr(
+        "engines.transmission_core.ROUTINE_WASHES_PER_DAY_RANGE",
+        (0.0, 0.0),
+    )
+    profile = _profile(
+        stool_events_per_day={"baseline": 1.0, "diarrhoeal": 1.0},
+        hand_inactivation_rate_per_hour=0.0,
+        surface_decay_log10_per_day=0.0,
+    )
+    core = _carriers_core(profile=profile, seed=5)
+    core._stool_event_occurs = lambda events_per_day: True
+    core._hand_carriage_propensity = lambda agent, pathogen_id: 1.0
     carrier = _agent(hand_load=100.0)
 
     core._replenish_hand(carrier, PATHOGEN, profile, ZONE)
 
-    expected = 100.0 * math.exp(-0.61 * core.clock.hours_per_epoch)
-    assert carrier.hand_load_by_pathogen[PATHOGEN] == pytest.approx(
-        expected, rel=1e-9,
-    )
+    assert carrier.hand_protected_pending_by_pathogen.get(
+        PATHOGEN, 0.0,
+    ) == pytest.approx(0.0)
+    assert carrier.hand_protected_load_by_pathogen.get(
+        PATHOGEN, 0.0,
+    ) == pytest.approx(0.0)
+    assert carrier.hand_load_by_pathogen[PATHOGEN] <= 100.0
 
 
 def test_ordered_fomite_defers_hygiene_until_food_pathway(
@@ -251,7 +344,7 @@ def test_per_partner_contact_records_donor_hand_lineage() -> None:
     assert target.hand_load_by_pathogen[PATHOGEN] >= 0.0
 
 
-def test_carrier_hand_replenish_zeros_below_residue_floor() -> None:
+def test_carrier_hand_replenish_shares_residue_floor_path() -> None:
     core = _carriers_core()
     profile = core.pathogen_profiles[PATHOGEN]
     carrier = _agent(hand_load=1e-13)
@@ -260,7 +353,7 @@ def test_carrier_hand_replenish_zeros_below_residue_floor() -> None:
     core._replenish_hand(carrier, PATHOGEN, profile, ZONE)
 
     assert carrier.hand_load_by_pathogen[PATHOGEN] == pytest.approx(0.0)
-    assert PATHOGEN not in carrier.hand_strain_by_pathogen
+    assert carrier.hand_strain_by_pathogen[PATHOGEN] == "strainC"
 
 
 def test_ordered_fomite_without_food_runs_hygiene_inline(
