@@ -347,6 +347,7 @@
       "traffic": "high",
       "volume_m3": 900.0,
       "deck": "7_Promenade",
+      "exposure": "enclosed",
       "max_occupancy": 200,
       "display": {
         "x": 82,
