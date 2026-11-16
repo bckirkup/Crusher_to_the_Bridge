@@ -185,16 +185,17 @@ def test_compare_without_sim_flows_reports_ambient_rows_as_skipped() -> None:
     entries = _ambient_entries()
     report = contamx_flow_report(entries, None, _KNOWN)
     assert report["n_ambient_opening_paths"] == 2
-    assert report["ambient_opening_sink_out_m3h"] == 0.0
-    assert report["ambient_opening_inward_m3h"] == 0.0
+    assert report["ambient_opening_sink_out_m3h"] == pytest.approx(0.0)
+    assert report["ambient_opening_inward_m3h"] == pytest.approx(0.0)
     assert {
         row["path_nr"]: row["fate"] for row in report["classified_paths"]
     } == {1: "skipped", 2: "skipped", 3: "unknown"}
 
 
-def test_committed_ambient_opening_legs_are_the_cruise_makeup_louvres() -> None:
-    # CONTAM-AMBIENT-MAKEUP-CRUISE-01: two legs per authored make-up louvre on
-    # the six cruise hulls; no other committed bundle carries an opening.
+def test_committed_ambient_opening_legs_are_the_makeup_louvres() -> None:
+    # CONTAM-AMBIENT-MAKEUP-CRUISE-01 and CONTAM-AMBIENT-MAKEUP-FICTION-01:
+    # two legs per authored make-up louvre on the eight hulls; no other
+    # committed bundle carries an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -206,4 +207,5 @@ def test_committed_ambient_opening_legs_are_the_cruise_makeup_louvres() -> None:
     assert legs == {
         "classic_cruise_1900": 2, "diamond_princess": 2, "expedition_cruise_450": 2,
         "greg_mortimer": 2, "mega_cruise_5000": 20, "spirit_cruise_3000": 2,
+        "enterprise_constitution_tos": 2, "enterprise_galaxy_tng": 2,
     }

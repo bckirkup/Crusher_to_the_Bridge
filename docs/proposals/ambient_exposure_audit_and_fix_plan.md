@@ -3,10 +3,10 @@
 > **Status:** Partly implemented. Landed: stage 1 (`ambient_openings` schema
 > and native/export machinery, `CONTAM-AMBIENT-OPENING-SCHEMA-01`), stage 2
 > (outward opening flow as a field-lane boundary sink,
-> `CONTAM-AMBIENT-OPENING-BOUNDARY-01`), and the cruise half of stage 3
-> (`makeup_louvre` records on the six cruise hulls,
-> `CONTAM-AMBIENT-MAKEUP-CRUISE-01`). Still proposed: stage 3 for the fiction
-> hulls and stages 4+. The audit below was measured against
+> `CONTAM-AMBIENT-OPENING-BOUNDARY-01`), and stage 3 (`makeup_louvre` records
+> on the six cruise and two fiction hulls,
+> `CONTAM-AMBIENT-MAKEUP-CRUISE-01`, `CONTAM-AMBIENT-MAKEUP-FICTION-01`).
+> Still proposed: stages 4+. The audit below was measured against
 > `origin/main` `15beae6b` (post-#1250/#1251). Audit ledger:
 > [`../ledger/CONTAM-AMBIENT-EXPOSURE-01.md`](../ledger/CONTAM-AMBIENT-EXPOSURE-01.md).
 > This document lives in `docs/proposals/` because the representation it
@@ -349,8 +349,8 @@ One PR per mechanism, per hull class. Each has its own ledger entry,
 | 6 | Balcony openings | `CONTAM-AMBIENT-BALCONY-01` | Six balcony hulls | Yes — only after D3 |
 
 Stage 3 here is the make-up half of stage 6 of the governing plan
-(`CONTAM-FIELD-ENVELOPE-MAKEUP-01`); the owner should say whether it keeps
-that ID (D6).
+(`CONTAM-FIELD-ENVELOPE-MAKEUP-01`); per D6(a) it keeps that ID. The cruise
+and fiction halves are landed; stages 4+ remain proposed.
 
 **Before/after witnesses for every behaviour-changing PR.**
 

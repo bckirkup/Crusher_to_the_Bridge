@@ -84,9 +84,10 @@ def _path_rows(engine: ContamTransportEngine) -> list[tuple[Any, ...]]:
     ]
 
 
-_CRUISE_MAKEUP_RECORDS = {
+_MAKEUP_RECORDS = {
     "classic_cruise_1900": 1, "diamond_princess": 1, "expedition_cruise_450": 1,
     "greg_mortimer": 1, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
+    "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
 }
 
 
@@ -132,10 +133,12 @@ class TestSchema:
     def test_invalid_records_are_rejected(self, overrides: dict[str, Any]) -> None:
         assert self._errors(_opening(**overrides))
 
-    def test_only_cruise_makeup_louvres_are_declared(self) -> None:
-        # CONTAM-AMBIENT-MAKEUP-CRUISE-01 authored the first records: make-up
-        # louvres on the six cruise hulls, native rate 0 (D5). Any other
-        # declaration is a later stage and must move this guard deliberately.
+    def test_only_makeup_louvres_are_declared(self) -> None:
+        # CONTAM-AMBIENT-MAKEUP-CRUISE-01 and
+        # CONTAM-AMBIENT-MAKEUP-FICTION-01 authored the records: make-up
+        # louvres on the six cruise hulls and two fiction hulls, native rate 0
+        # (D5). Any other declaration is a later stage and must move this
+        # guard deliberately.
         schema = json.loads(_AIR_FLOW_SCHEMA.read_text(encoding="utf-8"))
         validator = jsonschema.Draft202012Validator(schema)
         paths = sorted(_PLATFORM_ROOT.glob("*/air_flow_paths.json"))
@@ -150,7 +153,7 @@ class TestSchema:
             for record in records:
                 assert record["type"] == "makeup_louvre", path
                 assert record["exchange_m3h"] == pytest.approx(0.0), path
-        assert declared == _CRUISE_MAKEUP_RECORDS
+        assert declared == _MAKEUP_RECORDS
 
 
 class TestNativeBuilder:
