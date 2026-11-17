@@ -75,6 +75,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - `NORO-HAND-REDEPOSIT-STREAM-01-WITNESS.md` — paired-seed `legacy` vs `carriers` witness on `classic_cruise_1900` seeds 8105/8106: carrier surface/food deposits fired and delivered/dose rose on both seeds, with epidemic count moving only on 8105; directional, not yet a default-flip gate.
 
 - `NORO-HAND-CASCADE-01-SUBSTEPS-CURRENT.md` — current-main (`605f9841`) fixed-M DS-M re-pilot on the five posted seeds: M=2/4/12 remain non-monotone and non-convergent through M=12, so `intra_epoch_substeps > 1` is not justified as a default.
+- `NORO-HAND-CASCADE-01-SUBSTEPS-M60.md` — completes the posted-cell fixed-M DS-M sweep through M=60: no consecutive refinement is within the 10% deposited/delivered/dose tolerance, M=60 costs ~2.9–4.8× the M=1 voyage runtime, mass balance closes to ~1e-15 relative, and the solver branch is the CE contamination-loop comparator rather than a shipped `intra_epoch_substeps > 1` default.
 
 ## For drafting and analysis
 
