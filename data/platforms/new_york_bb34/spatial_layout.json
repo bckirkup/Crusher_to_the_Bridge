@@ -25,7 +25,8 @@
         "x": 5.57,
         "y": 6.47
       },
-      "description": "sister-derived: fantail open deck w/ AA mounts"
+      "description": "sister-derived: fantail open deck w/ AA mounts",
+      "exposure": "weather"
     },
     {
       "id": "Weather_Deck_Aft",
@@ -40,7 +41,8 @@
         "x": 23.92,
         "y": 6.47
       },
-      "description": "sister-derived: open main deck aft, boats + 40mm quads"
+      "description": "sister-derived: open main deck aft, boats + 40mm quads",
+      "exposure": "weather"
     },
     {
       "id": "Catapult_Mid",
@@ -55,7 +57,8 @@
         "x": 47.85,
         "y": 6.47
       },
-      "description": "sister-derived: aircraft catapult amidships"
+      "description": "sister-derived: aircraft catapult amidships",
+      "exposure": "weather"
     },
     {
       "id": "Shipfitter_Foundry",
@@ -182,7 +185,8 @@
         "x": 154.26,
         "y": 6.47
       },
-      "description": "sister-derived: forecastle, anchor gear, 3in AA"
+      "description": "sister-derived: forecastle, anchor gear, 3in AA",
+      "exposure": "weather"
     },
     {
       "id": "Super_Deck_Open",
@@ -197,7 +201,8 @@
         "x": 13.42,
         "y": 7.88
       },
-      "description": "boat stowage + gun tubs + clipping rooms"
+      "description": "boat stowage + gun tubs + clipping rooms",
+      "exposure": "weather"
     },
     {
       "id": "Captains_Cabin_Super",
@@ -290,7 +295,8 @@
         "x": 22.2,
         "y": 13.09
       },
-      "description": "AA control platform + top of pilot house, directorscopes"
+      "description": "AA control platform + top of pilot house, directorscopes",
+      "exposure": "weather"
     },
     {
       "id": "Crew_Space_2DF_a",

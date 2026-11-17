@@ -199,7 +199,9 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # weather-deck opening; CONTAM-AMBIENT-WEATHER-DESTROYER-01 adds two legs
     # per destroyer roster weather opening; CONTAM-AMBIENT-WEATHER-CARRIER-01
     # adds two legs on each ungrouped carrier flight deck (lexington_cv2,
-    # saratoga_cv3). No other committed bundle carries an opening.
+    # saratoga_cv3); CONTAM-AMBIENT-WEATHER-BATTLESHIP-01 adds two legs per
+    # ungrouped battleship weather opening. No other committed bundle carries
+    # an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -218,4 +220,6 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "keppler_dd765": 14, "nields_dd616": 10, "palmer_dms5": 2,
         "sigsbee_dd502": 8,
         "lexington_cv2": 2, "saratoga_cv3": 2,
+        "new_york_bb34": 12, "south_dakota_bb49": 8, "texas_bb35": 10,
+        "west_virginia_bb48": 10,
     }

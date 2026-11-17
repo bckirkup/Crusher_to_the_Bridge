@@ -55,7 +55,8 @@
         "x": 14.62,
         "y": 8.94
       },
-      "description": "open superstructure deck: boats, 40mm mounts, radar I"
+      "description": "open superstructure deck: boats, 40mm mounts, radar I",
+      "exposure": "weather"
     },
     {
       "id": "Qtrm_Crew_Super",
@@ -164,7 +165,8 @@
         "x": 6.07,
         "y": 16.16
       },
-      "description": "fantail open deck: 40mm mounts, clipping rooms"
+      "description": "fantail open deck: 40mm mounts, clipping rooms",
+      "exposure": "weather"
     },
     {
       "id": "Weather_Deck_Aft",
@@ -179,7 +181,8 @@
         "x": 26.58,
         "y": 15.75
       },
-      "description": "open main deck aft of superstructure: boats, 40mm quads"
+      "description": "open main deck aft of superstructure: boats, 40mm quads",
+      "exposure": "weather"
     },
     {
       "id": "Catapult_Mid",
@@ -194,7 +197,8 @@
         "x": 49.74,
         "y": 16.16
       },
-      "description": "aircraft catapult deck amidships"
+      "description": "aircraft catapult deck amidships",
+      "exposure": "weather"
     },
     {
       "id": "Shipfitter_Foundry",
@@ -349,7 +353,8 @@
         "x": 154.53,
         "y": 15.75
       },
-      "description": "forecastle: anchor gear, 3in AA, jackstaff"
+      "description": "forecastle: anchor gear, 3in AA, jackstaff",
+      "exposure": "weather"
     },
     {
       "id": "Stern_Crew_2D",
