@@ -91,6 +91,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - `NORO-HAND-CASCADE-01-CONTINUOUS-FLOW.md` — shipped `transmission.contamination_solver: continuous` default: pooled RK4 hand↔surface↔food flow with epoch-once sanitary/emesis/HVAC/pathway bookkeeping outside the integrator; discrete remains the labelled baseline, per-surface falls back to discrete, no new constants, local guards green, paired-seed/campaign witness still open.
 
 - `NORO-SUPPLY-SOLVER-SCREEN-01.md` — expedition p06 paired `discrete` vs `continuous` contamination-solver screen (88 cells): posting unchanged (contaminated strata 100% on both arms, quiet controls 0/8), paired AR/VSP/role differences sign-test unresolved (all p ≥ 0.180) with overlapping ranges; the continuous default is not contradicted by this screen but is not separated from discrete on these supply seeds.
+- `NORO-SUPPLY-SOLVER-SCREEN-02.md` — classic + spirit supply contamination solver screen (176 cells): posting not saturated on larger hulls, quiet controls 0/8, paired continuous vs discrete unresolved.
 
 ## For drafting and analysis
 

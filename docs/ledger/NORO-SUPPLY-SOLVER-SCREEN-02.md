@@ -1,0 +1,14 @@
+# NORO-SUPPLY-SOLVER-SCREEN-02
+**Date:** 2026-11-17
+**Commit:** #1282
+**Pathogens:** norwalk_gi
+**Status:** measured
+**Measured at:** 455f9ff788e85580a8253438fb4137ff69e22146
+
+Classic + spirit extension of the expedition supply-contamination solver screen. Design is frozen in `campaigns/noro/supply_solver_screen_02/DESIGN.md`; the frozen seed list is `campaigns/noro/supply_solver_screen_02/seed_selection.json`; job/array IDs are in `campaigns/noro/supply_solver_screen_02/LEDGER.md` and `~/screen02_array_jobs.tsv`. AWS Batch image `picard-campaign:noro-supply-solver02` digest `sha256:0dea8f12e65108edb995f65e2ade1392c5568c7c53b9672ba4f91af33694a092` (`ENGINE_GIT_SHA=31bd92c5`); S3 artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_02/`.
+
+Run contract: 176 cells = 2 hulls (`classic_cruise_1900` n=1910, `spirit_cruise_3000` n=3000) × 2 `transmission.contamination_solver` arms (`discrete` labelled baseline vs `continuous` RK4 default) × 44 paired seeds per hull. Supply strata per solver: `station_lots` 16 contaminated + 8 quiet, `single_line_receipt` 10 contaminated, `declared_receipts` 10 contaminated (`receipts_per_item_line: 2`). All cells: 288 epochs, `natural_history_clock="hours"`, dose adjustment 7.57, `syndromic_comp65`, `station_zone_pin=['MainDining_L']`, passenger/crew prevalence 0.025/0.03, point illness draw, route scale ×2.0. Posting means `vsp_trigger_epoch is not None`; days use 24 epochs/day. Canonical readout: `docs/norovirus/supply_solver_screen_02_readout.md`; machine-readable `campaigns/noro/supply_solver_screen_02/readout.json`.
+
+Measured result: 176/176 cells SUCCEEDED, 0 failed/missing/duplicate. Posting is not saturated on the larger hulls: `station_lots` posted 9/16 discrete vs 10/16 continuous on cls and 7/16 vs 8/16 on spr; receipt strata posted 2–6/10; quiet controls posted 0/8 on both hulls and both solvers. Posted-conditional passenger reported-case AR medians are ~3.5–6.1% with overlapping ranges; paired continuous-minus-discrete sign tests are unresolved (passenger AR p ≥ 0.1797; VSP epoch p ≥ 0.5). Role partition shows no solver separation. The continuous default is not contradicted, but on these cls/spr p06 supply seeds it is not separated from discrete at posting resolution.
+
+Next decision: whether to treat posting frequency (not posted-conditional AR) as the supply-solver-sensitive endpoint for a follow-on sweep, or return to the supply contamination-rank vs posting/AR question. Do not fit constants to these anchors; do not treat quiet-control zero postings as evidence about contaminated strata.

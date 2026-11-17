@@ -27,7 +27,7 @@ Classic + spirit extension of the expedition supply solver screen: `classic_crui
 - [x] Full-length canary per hull.
 - [x] AWS canary child inspected per hull.
 - [x] ETA reported.
-- [ ] User approved array.
+- [x] User approved array ("Go for it").
 
 ## AWS Batch pins
 
@@ -45,4 +45,4 @@ ETA basis: 176 cells; canary wall times 342 s (cls) and 589 s (spr) for the cont
 
 ## Measurements
 
-Canaries only; no array measurements yet.
+Array complete: 176/176 cells SUCCEEDED, 0 failed. Readout: `docs/norovirus/supply_solver_screen_02_readout.md`; machine-readable `campaigns/noro/supply_solver_screen_02/readout.json`; ledger `docs/ledger/NORO-SUPPLY-SOLVER-SCREEN-02.md`.
