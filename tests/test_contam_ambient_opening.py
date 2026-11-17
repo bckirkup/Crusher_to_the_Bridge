@@ -228,6 +228,10 @@ _WEATHER_ZONES = {
         "SD_Boats_Fwd_Stb", "SD_Forecastle_Open", "MD_Stern_Fantail",
         "MD_Forecastle_Open",
     },
+    # CONTAM-GROUPED-WEATHER-MIDWAY-01: first grouped weather zone (G1). The
+    # opening replaces the VENT_Weather OA leg for Flight_Deck, which left the
+    # group; Island_Upper stays grouped and carries no opening.
+    "midway_cv41": {"Flight_Deck"},
 }
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
 # CONTAM-AMBIENT-WEATHER-CARRIER-01, CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01,
