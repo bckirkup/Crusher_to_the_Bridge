@@ -205,6 +205,7 @@
       "ceiling_height_m": 2.44,
       "elevation_m": 11.6,
       "deck": "deckhouse_deck",
+      "exposure": "enclosed",
       "display": {
         "x": 130.03,
         "y": 9.64

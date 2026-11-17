@@ -34,6 +34,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 14.0,
       "deck": "bridge_deck",
+      "exposure": "enclosed",
       "display": {
         "x": 89.94,
         "y": 9.16
@@ -49,6 +50,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 9.5,
       "deck": "forecastle_deck",
+      "exposure": "weather",
       "display": {
         "x": 83.78,
         "y": 9.87
@@ -80,6 +82,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 9.5,
       "deck": "forecastle_deck",
+      "exposure": "weather",
       "display": {
         "x": 150.63,
         "y": 9.79
@@ -244,6 +247,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 6.5,
       "deck": "upper_deck",
+      "exposure": "weather",
       "display": {
         "x": 117.11,
         "y": 9.94
@@ -259,6 +263,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 6.5,
       "deck": "upper_deck",
+      "exposure": "weather",
       "display": {
         "x": 2.18,
         "y": 13.91

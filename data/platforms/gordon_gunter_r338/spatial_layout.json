@@ -106,6 +106,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 8.64,
       "deck": "upper_deck",
+      "exposure": "weather",
       "display": {
         "x": 26.82,
         "y": 5.43
@@ -205,6 +206,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 6.05,
       "deck": "forecastle_deck",
+      "exposure": "weather",
       "display": {
         "x": 21.66,
         "y": 5.07
@@ -428,6 +430,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 3.35,
       "deck": "main_deck",
+      "exposure": "weather",
       "display": {
         "x": 6.33,
         "y": 4.22
@@ -443,6 +446,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 4.27,
       "deck": "mission_platform",
+      "exposure": "weather",
       "display": {
         "x": 8.45,
         "y": 5.64

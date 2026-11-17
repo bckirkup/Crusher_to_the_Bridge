@@ -71,6 +71,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 15.4,
       "deck": "boat_deck",
+      "exposure": "weather",
       "display": {
         "x": 65.67,
         "y": 3.36
@@ -86,6 +87,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 15.4,
       "deck": "boat_deck",
+      "exposure": "weather",
       "display": {
         "x": 65.67,
         "y": 16.52
@@ -132,6 +134,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 15.4,
       "deck": "boat_deck",
+      "exposure": "weather",
       "display": {
         "x": 99.0,
         "y": 8.63
@@ -179,6 +182,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 18.0,
       "deck": "bridge_deck",
+      "exposure": "weather",
       "display": {
         "x": 87.5,
         "y": 8.56
@@ -194,6 +198,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 20.2,
       "deck": "house_top",
+      "exposure": "weather",
       "display": {
         "x": 80.0,
         "y": 8.92
@@ -209,6 +214,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 12.6,
       "deck": "forecastle_deck",
+      "exposure": "weather",
       "display": {
         "x": 126.0,
         "y": 8.63
@@ -224,6 +230,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 9.8,
       "deck": "shelter_deck",
+      "exposure": "weather",
       "display": {
         "x": 6.97,
         "y": 10.18
@@ -239,6 +246,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 9.8,
       "deck": "shelter_deck",
+      "exposure": "weather",
       "display": {
         "x": 28.79,
         "y": 9.33
@@ -436,6 +444,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 9.8,
       "deck": "shelter_deck",
+      "exposure": "weather",
       "display": {
         "x": 110.61,
         "y": 14.63
@@ -451,6 +460,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 9.8,
       "deck": "shelter_deck",
+      "exposure": "weather",
       "display": {
         "x": 128.18,
         "y": 9.33
@@ -466,6 +476,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 9.8,
       "deck": "shelter_deck",
+      "exposure": "weather",
       "display": {
         "x": 144.55,
         "y": 9.89

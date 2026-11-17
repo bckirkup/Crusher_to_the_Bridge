@@ -49,6 +49,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.6,
       "deck": "forecastle_deck",
+      "exposure": "weather",
       "display": {
         "x": 49.86,
         "y": 3.93
@@ -64,6 +65,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.6,
       "deck": "forecastle_deck",
+      "exposure": "weather",
       "display": {
         "x": 14.13,
         "y": 3.73
@@ -79,6 +81,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 5.0,
       "deck": "upper_deck",
+      "exposure": "weather",
       "display": {
         "x": 13.12,
         "y": 4.19

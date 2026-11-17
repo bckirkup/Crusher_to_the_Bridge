@@ -91,10 +91,10 @@ _MAKEUP_RECORDS = {
 }
 # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
 # CONTAM-AMBIENT-WEATHER-DESTROYER-01, CONTAM-AMBIENT-WEATHER-CARRIER-01,
-# CONTAM-AMBIENT-WEATHER-BATTLESHIP-01, CONTAM-AMBIENT-WEATHER-CRUISER-01 and
-# CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01: one ``open_deck`` record per declared
-# weather zone on the cruise, destroyer, carrier, battleship, cruiser and
-# amphibious roster hulls.
+# CONTAM-AMBIENT-WEATHER-BATTLESHIP-01, CONTAM-AMBIENT-WEATHER-CRUISER-01,
+# CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01 and CONTAM-AMBIENT-WEATHER-AUXILIARY-01:
+# one ``open_deck`` record per declared weather zone on the cruise, destroyer,
+# carrier, battleship, cruiser, amphibious and auxiliary roster hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -173,10 +173,43 @@ _WEATHER_ZONES = {
     "ruchamkin_apd89": {
         "Boat_Deck_Open", "Island_Open_Aft", "Fantail", "Focsle_Deck",
     },
+    # CONTAM-AMBIENT-WEATHER-AUXILIARY-01: ungrouped auxiliary weather zones;
+    # HVAC-grouped OA>0 auxiliary weather zones stay untouched as the known
+    # grouped-zone open item. alexander_henry_cgs119 is owned by CRUISER-01.
+    "aeolus_arc3": {"Bow_Sheave_Area", "Cable_Working_Deck", "Top_Of_House"},
+    "apl_24": {"Fantail_Main", "Fantail_Upper", "Forecastle", "Gun_Platforms"},
+    "bolster_ars38": {
+        "Focsle_Deck_Open", "Focsle_Open_Aft", "Gun_Tub_Fwd", "Salvage_Deck",
+    },
+    "cobalt_k124": {"Foc_Deck_Open", "Quarterdeck", "Stern_Open"},
+    "gordon_gunter_r338": {
+        "Aft_Working_Deck", "Boat_Deck", "Mission_Deck", "Shelter_Deck",
+    },
+    "liberty_cargo_ec2": {
+        "Aft_Deck_Open", "Boat_Deck_Open", "Bridge_Wings", "Forecastle_Deck",
+        "Gun_Platform", "Top_Of_House",
+    },
+    "lyon_ap71": {
+        "Boat_Deck_Walkway", "Boat_Stowage_Port", "Boat_Stowage_Stbd",
+        "Bow_Shelter_Weather", "Bridge_Wings_Walkway", "Forecastle_Weather",
+        "Hatch_3_Weather", "Hatch_4_Weather", "House_Top_Platform",
+        "Quarter_Weather", "Stern_Weather_Shelter",
+    },
+    "passumpsic_ao106": {
+        "Aft_Open_Deck", "Focsle_Deck", "Island_Deck", "Working_Deck",
+    },
+    "savannah_ns": {
+        "Boat_Deck_Aft", "Boat_Deck_Fwd", "Bridge_Wings", "Docking_Bridge_Aft",
+        "Fantail_Aft", "Forecastle_A", "Fwd_Deck_Promenade",
+        "Promenade_Aft_Open", "Promenade_Walkway_Port", "Promenade_Walkway_Stbd",
+        "Swimming_Pool", "Top_Of_House", "Weather_Deck_Port_A",
+        "Weather_Deck_Stbd_A",
+    },
 }
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
-# CONTAM-AMBIENT-WEATHER-CARRIER-01 and CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01:
-# declared enclosed zones. They carry no opening.
+# CONTAM-AMBIENT-WEATHER-CARRIER-01, CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01 and
+# CONTAM-AMBIENT-WEATHER-AUXILIARY-01: declared enclosed zones. They carry no
+# opening.
 _ENCLOSED_ZONES = {
     "classic_cruise_1900": {"Promenade"},
     "diamond_princess": {"PromGalleria"},
@@ -192,6 +225,12 @@ _ENCLOSED_ZONES = {
     # corrections; neither carries an opening.
     "ruchamkin_apd89": {"Signal_Deck"},
     "san_antonio_class_lpd": {"Vehicle_Deck"},
+    # CONTAM-AMBIENT-WEATHER-AUXILIARY-01: lexical misses that are enclosed
+    # stores/mechanical spaces, not weather openings.
+    "gosper_apa170": {"Focsle_Stores", "Focsle_Stores_2D"},
+    "jupiter_ac3": {"Passage_Deckhouse"},
+    "passumpsic_ao106": {"Signal_Deck"},
+    "pope_ap110": {"Sup_Deck_Mech"},
 }
 
 
