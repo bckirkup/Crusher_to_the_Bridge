@@ -6,7 +6,7 @@
  "epochs": 288,
  "s3_prefix": "campaign/noro_supply_solver_screen_02/",
  "queue": "picard-campaign-queue",
- "image_tag": "noro-supply-solver02",
+ "image_tag": "noro-supply-solver02@sha256:0dea8f12e65108edb995f65e2ade1392c5568c7c53b9672ba4f91af33694a092",
  "resources": {
   "vcpu": "1",
   "memory": "8192",

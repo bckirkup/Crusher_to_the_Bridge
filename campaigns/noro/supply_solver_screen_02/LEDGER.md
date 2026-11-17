@@ -21,16 +21,17 @@ Classic + spirit extension of the expedition supply solver screen: `classic_crui
 - [x] `scripts/campaign submit --dry-run --block <all 16 blocks> --account 994254241749 --bucket crusherbucket-994254241749-us-east-1-an` OK.
 - [x] Local 24-epoch smoke, cls `station_lots_continuous` seed 960473: zip members `summary.json`, `growth_census.json.gz`, `rss_samples.json`; `parameters.tier_id=fl_cls_12d_sens_p06_paxv_station_lots_continuous`; `continuous_path_calls=15116`.
 - [x] Local 24-epoch smoke, spr `station_lots_continuous` seed 1000371: zip members `summary.json`, `growth_census.json.gz`, `rss_samples.json`; `parameters.tier_id=fl_spr_12d_sens_p06_paxv_station_lots_continuous`; `continuous_path_calls=24262`.
-- [ ] Image built and digest pinned in `campaign.json`.
-- [ ] Manifest uploaded to S3.
-- [ ] In-container build check + full-length canary per hull.
+- [x] Image built and digest pinned in `campaign.json`.
+- [x] Manifest uploaded to S3 (`manifest.json`, `seed_selection.json`).
+- [x] In-container build check: campaign manifest/seed files present, `ENGINE_GIT_SHA=31bd92c525fb3656af9450f124d54b2c6ced5a54`, cls/spr station tier seed membership verified.
+- [ ] Full-length canary per hull.
 - [ ] AWS canary child inspected per hull.
 - [ ] ETA reported; user approved array.
 
 ## AWS Batch pins
 
-- Image: pending
-- `ENGINE_GIT_SHA`: pending
+- Image: `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:noro-supply-solver02@sha256:0dea8f12e65108edb995f65e2ade1392c5568c7c53b9672ba4f91af33694a092`
+- `ENGINE_GIT_SHA`: `31bd92c525fb3656af9450f124d54b2c6ced5a54`
 - Queue: `picard-campaign-queue`
 - S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_02/`
 
