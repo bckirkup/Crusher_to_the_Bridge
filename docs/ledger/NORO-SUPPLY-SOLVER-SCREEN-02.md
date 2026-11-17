@@ -1,7 +1,9 @@
 # NORO-SUPPLY-SOLVER-SCREEN-02
-
-**Pathogens:** norovirus
-**Commit SHA:** 455f9ff788e85580a8253438fb4137ff69e22146
+**Date:** 2026-11-17
+**Commit:** #1282
+**Pathogens:** norwalk_gi
+**Status:** measured
+**Measured at:** 455f9ff788e85580a8253438fb4137ff69e22146
 
 Classic + spirit extension of the expedition supply-contamination solver screen. Design is frozen in `campaigns/noro/supply_solver_screen_02/DESIGN.md`; the frozen seed list is `campaigns/noro/supply_solver_screen_02/seed_selection.json`; job/array IDs are in `campaigns/noro/supply_solver_screen_02/LEDGER.md` and `~/screen02_array_jobs.tsv`. AWS Batch image `picard-campaign:noro-supply-solver02` digest `sha256:0dea8f12e65108edb995f65e2ade1392c5568c7c53b9672ba4f91af33694a092` (`ENGINE_GIT_SHA=31bd92c5`); S3 artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_02/`.
 
