@@ -194,7 +194,9 @@ def test_compare_without_sim_flows_reports_ambient_rows_as_skipped() -> None:
 
 def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # CONTAM-AMBIENT-MAKEUP-CRUISE-01 and CONTAM-AMBIENT-MAKEUP-FICTION-01:
-    # two legs per authored make-up louvre on the eight hulls.
+    # two legs per authored make-up louvre on the eight hulls;
+    # CONTAM-GREG-SERVICE-MAKEUP-01 adds the two legs of the greg_mortimer
+    # Engine_Room service intake.
     # CONTAM-AMBIENT-WEATHER-CRUISE-01 adds two legs per authored cruise
     # weather-deck opening; CONTAM-AMBIENT-WEATHER-DESTROYER-01 adds two legs
     # per destroyer roster weather opening; CONTAM-AMBIENT-WEATHER-CARRIER-01
@@ -218,7 +220,7 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
             legs[path.parent.parent.name] = count
     assert legs == {
         "classic_cruise_1900": 2 + 2, "diamond_princess": 2 + 16,
-        "expedition_cruise_450": 2 + 2, "greg_mortimer": 2 + 10,
+        "expedition_cruise_450": 2 + 2, "greg_mortimer": 2 + 2 + 10,
         "mega_cruise_5000": 20 + 10, "spirit_cruise_3000": 2 + 6,
         "enterprise_constitution_tos": 2, "enterprise_galaxy_tng": 2,
         "cannon_de701": 8, "cushing_dd376": 4, "davison_dd618": 10,

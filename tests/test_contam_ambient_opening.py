@@ -86,7 +86,7 @@ def _path_rows(engine: ContamTransportEngine) -> list[tuple[Any, ...]]:
 
 _MAKEUP_RECORDS = {
     "classic_cruise_1900": 1, "diamond_princess": 1, "expedition_cruise_450": 1,
-    "greg_mortimer": 1, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
+    "greg_mortimer": 2, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
 }
 # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
@@ -314,7 +314,8 @@ class TestSchema:
         # CONTAM-AMBIENT-MAKEUP-CRUISE-01 and
         # CONTAM-AMBIENT-MAKEUP-FICTION-01 authored the records: make-up
         # louvres on the six cruise hulls and two fiction hulls, native rate 0
-        # (D5), no imposed wind.
+        # (D5), no imposed wind. CONTAM-GREG-SERVICE-MAKEUP-01 adds the
+        # greg_mortimer Engine_Room service intake (second record).
         declared = self._declared("makeup_louvre")
         assert {hull: len(rows) for hull, rows in declared.items()} == _MAKEUP_RECORDS
         for rows in declared.values():
