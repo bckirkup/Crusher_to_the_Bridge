@@ -23,7 +23,8 @@
         "x": 49.82,
         "y": 4.34
       },
-      "description": "forecastle: 40mm gun tubs, chain gear, crew shelter"
+      "description": "forecastle: 40mm gun tubs, chain gear, crew shelter",
+      "exposure": "weather"
     },
     {
       "id": "Signal_Bridge",
@@ -54,7 +55,8 @@
         "x": 49.14,
         "y": 7.7
       },
-      "description": "open bridge wings weather"
+      "description": "open bridge wings weather",
+      "exposure": "weather"
     },
     {
       "id": "Wheel_House",
@@ -101,7 +103,8 @@
         "x": 7.93,
         "y": 4.39
       },
-      "description": "open deck aft: gun circles, boat skids, life rafts"
+      "description": "open deck aft: gun circles, boat skids, life rafts",
+      "exposure": "weather"
     },
     {
       "id": "Radar_Radio_Chart",
@@ -148,7 +151,8 @@
         "x": 43.98,
         "y": 4.62
       },
-      "description": "fwd weather: gun circles + bow door machinery covers"
+      "description": "fwd weather: gun circles + bow door machinery covers",
+      "exposure": "weather"
     },
     {
       "id": "Stern_Rooms_Main",
