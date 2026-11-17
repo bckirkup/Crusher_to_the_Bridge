@@ -83,6 +83,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - `NORO-HAND-CASCADE-01-SUBSTEPS-CURRENT.md` — current-main (`605f9841`) fixed-M DS-M re-pilot on the five posted seeds: M=2/4/12 remain non-monotone and non-convergent through M=12, so `intra_epoch_substeps > 1` is not justified as a default.
 - `NORO-HAND-CASCADE-01-SUBSTEPS-M60.md` — completes the posted-cell fixed-M DS-M sweep through M=60: no consecutive refinement is within the 10% deposited/delivered/dose tolerance, M=60 costs ~2.9–4.8× the M=1 voyage runtime, mass balance closes to ~1e-15 relative, and the solver branch is the CE contamination-loop comparator rather than a shipped `intra_epoch_substeps > 1` default.
 - `NORO-HAND-CASCADE-01-CE-FEASIBILITY.md` — CE comparator budget decision: staged-aggregate scheduled-event CE is implementable by reusing existing kernels; literal per-contact CE is blocked by the contact-audit geometry/behaviour gaps; owner target is the within-epoch hand-process update and a believable secondary-contamination share, not posted-tail closure.
+- `NORO-HAND-CASCADE-01-CONTINUOUS-FLOW.md` — shipped `transmission.contamination_solver: continuous` default: pooled RK4 hand↔surface↔food flow with epoch-once sanitary/emesis/HVAC/pathway bookkeeping outside the integrator; discrete remains the labelled baseline, per-surface falls back to discrete, no new constants, local guards green, paired-seed/campaign witness still open.
 
 ## For drafting and analysis
 
