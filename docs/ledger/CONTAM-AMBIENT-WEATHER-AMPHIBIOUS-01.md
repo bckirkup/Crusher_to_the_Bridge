@@ -1,9 +1,9 @@
 # CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01
 **Date:** 2026-11-17
-**Commit:** 2b44cf7f
+**Commit:** eb7d72ee
 **Pathogens:** all
 **Status:** measured
-**Measured at:** 2b44cf7f
+**Measured at:** eb7d72ee
 
 ## Scope
 
