@@ -47,6 +47,7 @@ from typing import Any
 import numpy as np
 
 from crusher_labs.clinical_presentation import resolve_phase
+from engines.contamination_flow import integrate_hand_flow
 from engines.cooperative_packet import (
     COOP_CLASSES,
     COOP_MODEL,
@@ -1976,6 +1977,14 @@ DEFAULT_INTRA_EPOCH_ORDER = "legacy"
 # against the continuous/event-driven reference.
 DEFAULT_INTRA_EPOCH_SUBSTEPS = 1
 
+# NORO-HAND-CASCADE-01 solver replacement: ``continuous`` integrates the
+# pooled hand-mediated surface/food exchange inside the epoch instead of
+# quantizing it to the legacy deposit-then-pickup order or to fixed substeps.
+# ``discrete`` keeps the shipped epoch-boundary pathway as the labelled
+# baseline for paired-seed attribution.
+CONTAMINATION_SOLVER_MODES = ("discrete", "continuous")
+DEFAULT_CONTAMINATION_SOLVER = "continuous"
+
 
 def _parse_cabin_air_mode(tx: dict[str, Any]) -> str:
     mode = str(tx.get("cabin_air_mode", DEFAULT_CABIN_AIR_MODE))
@@ -2039,6 +2048,16 @@ def _parse_intra_epoch_substeps(tx: dict[str, Any]) -> int:
             f"got {raw!r}",
         )
     return substeps
+
+
+def _parse_contamination_solver(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("contamination_solver", DEFAULT_CONTAMINATION_SOLVER))
+    if mode not in CONTAMINATION_SOLVER_MODES:
+        raise ValueError(
+            "transmission.contamination_solver must be one of "
+            f"{CONTAMINATION_SOLVER_MODES}, got {mode!r}",
+        )
+    return mode
 
 
 def _parse_flush_aerosol_fraction(tx: dict[str, Any]) -> float:
@@ -3986,6 +4005,7 @@ class TransmissionCore:
         self.hand_redeposit_mode = _parse_hand_redeposit_mode(tx)
         self.intra_epoch_order = _parse_intra_epoch_order(tx)
         self.intra_epoch_substeps = _parse_intra_epoch_substeps(tx)
+        self.contamination_solver = _parse_contamination_solver(tx)
         self._ordered_hygiene_occupants: dict[str, dict[str, list]] = {}
         self._book_epoch: int | None = None
         # Served zone id -> {"male"/"female"/"any": head zone id}, from the
@@ -7198,9 +7218,29 @@ class TransmissionCore:
             p_agent_pw, pathogen_id=pathogen_id, ledger=ledger,
         )
 
-        use_substeps = self.intra_epoch_substeps > 1 and person_to_person
+        use_flow = person_to_person and self._use_contamination_flow(
+            pathogen_id, profile,
+        )
+        use_substeps = (
+            self.intra_epoch_substeps > 1 and person_to_person and not use_flow
+        )
         if person_to_person:
-            if use_substeps:
+            if use_flow:
+                self._pathway_contamination_flow(
+                    epoch, zone_occupants, p_agent_doses, matrix,
+                    p_agent_pw, pathogen_id, profile, ledger,
+                )
+                self._pathway_emesis_aerosol(
+                    epoch, zone_occupants, p_agent_doses, matrix,
+                    p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                    ledger=ledger,
+                )
+                self._pathway_flush_aerosol(
+                    epoch, zone_occupants, p_agent_doses, matrix,
+                    p_agent_pw, pathogen_id=pathogen_id,
+                    ledger=ledger,
+                )
+            elif use_substeps:
                 self._pathway_contamination_substeps(
                     epoch, zone_occupants, p_agent_doses, matrix,
                     p_agent_pw, pathogen_id, profile, ledger,
@@ -7224,7 +7264,7 @@ class TransmissionCore:
         self._run_supplemental_pathogen_pathways(
             epoch, zone_occupants, p_agent_doses, p_agent_pw,
             matrix, pathogen_id, profile, ec, ledger,
-            run_food=not use_substeps,
+            run_food=not (use_substeps or use_flow),
         )
 
         self._apply_route_efficiencies(profile, p_agent_doses, p_agent_pw)
@@ -12491,6 +12531,500 @@ class TransmissionCore:
             self._ordered_hygiene_occupants[pathogen_id] = zone_occupants
         else:
             self._fomite_hygiene(zone_occupants, pathogen_id, profile)
+
+    def _use_contamination_flow(
+        self,
+        pathogen_id: str,
+        profile: dict[str, Any] | None,
+    ) -> bool:
+        """Whether this pathogen epoch uses the continuous flow solver."""
+        del profile  # The solver reads the same profile through helpers.
+        return (
+            self.contamination_solver == "continuous"
+            and self._per_surface is None
+            and pathogen_id != "_default"
+        )
+
+    def _flow_hand_depositors(
+        self,
+        agents: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict[str, Any] | None,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Hand depositors under the configured redeposition arm."""
+        return self._get_hand_depositors(agents, pathogen_id, profile)
+
+    def _pathway_contamination_flow(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict[str, Any],
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Epoch-once contamination events, then the continuous flow solve."""
+        pickup_units = dict(zone_occupants)
+        if self.sanitary_visit_mode != "none":
+            self._draw_sanitary_visits(epoch, pickup_units)
+        units = self._cabin_compartments(zone_occupants)
+        pickup_units.update(units)
+        for unit_name, occupants in units.items():
+            self._fomite_hand_maintenance_zone(
+                unit_name, occupants, pathogen_id, profile, epoch,
+                agent_doses, agent_pathway_doses,
+            )
+        self._isolated_quarters_deposits(
+            epoch, pathogen_id, profile, agent_doses, agent_pathway_doses,
+        )
+        if self.sanitary_visit_mode != "none":
+            self._sanitary_fomite_exposure(
+                epoch, pickup_units, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, profile, ledger,
+            )
+        self._emesis_patch_pickup(
+            epoch, pickup_units, pathogen_id, agent_doses, matrix,
+            agent_pathway_doses, ledger,
+        )
+        self._contamination_flow_epoch(
+            epoch, zone_occupants, units, pickup_units,
+            agent_doses, matrix, agent_pathway_doses,
+            pathogen_id, profile, ledger,
+        )
+        self._fomite_hygiene(units, pathogen_id, profile)
+
+    def _contamination_flow_epoch(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        units: dict[str, list[KorkinAgent]],
+        pickup_units: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict[str, Any],
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Build per-epoch flow rates, integrate, and book the result."""
+        agents_by_id: dict[int, KorkinAgent] = {}
+        primary_unit: dict[int, str] = {}
+        for unit_name, occupants in units.items():
+            for agent in occupants:
+                agents_by_id.setdefault(agent.agent_id, agent)
+                primary_unit.setdefault(agent.agent_id, unit_name)
+
+        surface_deposit = self._flow_surface_deposit_rates(
+            epoch, units, pathogen_id, profile, agents_by_id, primary_unit,
+        )
+        surface_pickup = self._flow_surface_pickup_rates(
+            epoch, pickup_units, pathogen_id, agents_by_id, primary_unit,
+        )
+        food = self._flow_food_edges(
+            epoch, zone_occupants, pathogen_id, profile,
+        )
+        primary_food_zone: dict[int, str] = {}
+        for zone_name, occupants in food["zone_occupants"].items():
+            for agent in occupants:
+                agents_by_id.setdefault(agent.agent_id, agent)
+                primary_food_zone.setdefault(agent.agent_id, zone_name)
+        for agent_id, agent in agents_by_id.items():
+            primary_unit.setdefault(agent_id, primary_food_zone.get(agent_id, ""))
+
+        mouth_rate = self._flow_mouth_rates(
+            epoch, agents_by_id, primary_unit, pathogen_id,
+        )
+        agent_ids = list(agents_by_id)
+        hand0 = {
+            agent_id: agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            for agent_id, agent in agents_by_id.items()
+        }
+        surface_units = sorted({
+            unit
+            for _agent, unit in list(surface_deposit) + list(surface_pickup)
+        })
+        path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+        surface0 = {
+            unit: (
+                path_pools.get(unit, 0.0)
+                if path_pools is not None
+                else self.surface_pools.get(unit, 0.0)
+            )
+            for unit in surface_units
+        }
+        food_zones = list(food["zones"])
+        food_pools = self.food_pools.get(pathogen_id, {})
+        food0 = {zone: float(food_pools.get(zone, 0.0)) for zone in food_zones}
+        hours = self.clock.hours_per_epoch
+        steps = max(8, min(48, int(math.ceil(24.0 * hours))))  # clock-exempt: RK4 substep density, not time conversion
+        result = integrate_hand_flow(
+            hours=hours,
+            agent_ids=agent_ids,
+            surface_units=surface_units,
+            food_zones=food_zones,
+            hand0=hand0,
+            surface0=surface0,
+            food0=food0,
+            surface_deposit=surface_deposit,
+            surface_pickup=surface_pickup,
+            food_deposit=food["deposits"],
+            mouth_rate=mouth_rate,
+            food_growth_rate=food["growth"],
+            food_removal_rate=food["removal"],
+            food_dose_rate=food["dose"],
+            food_dose_denominator=food["denominator"],
+            steps=steps,
+        )
+        self._apply_contamination_flow(
+            pathogen_id, profile, ledger, agent_doses, matrix,
+            agent_pathway_doses, result, agents_by_id, primary_unit,
+            primary_food_zone, surface0, food0, food["zone_occupants"],
+        )
+
+    def _flow_surface_deposit_rates(
+        self,
+        epoch: int,
+        units: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        profile: dict[str, Any],
+        agents_by_id: dict[int, KorkinAgent],
+        primary_unit: dict[int, str],
+    ) -> dict[tuple[int, str], float]:
+        """Hand-to-surface deposit rates (fraction of hand per hour)."""
+        rates: dict[tuple[int, str], float] = {}
+        hours = self.clock.hours_per_epoch
+        for unit_name, occupants in units.items():
+            deponents = self._flow_hand_depositors(
+                occupants, pathogen_id, profile,
+            )
+            for agent, _sv in deponents:
+                agents_by_id.setdefault(agent.agent_id, agent)
+                primary_unit.setdefault(agent.agent_id, unit_name)
+                if (
+                    self._cabin_confinement_active(agent)
+                    and not self._cabin_fomite_scoped(agent, unit_name)
+                ):
+                    continue
+                rng = self._fomite_rng(agent, unit_name)
+                used_fraction = rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
+                transfer = min(
+                    1.0,
+                    max(0.0, float(rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
+                ) * self._hand_to_surface_drying(profile)
+                transfer *= self._hand_deposit_factor(agent, pathogen_id)
+                contacts = (
+                    self._fomite_surface_contacts(unit_name, agent, epoch)
+                    * self._cabin_presence_share(agent, epoch)
+                    / hours
+                )
+                rates[(agent.agent_id, unit_name)] = (
+                    contacts * used_fraction * transfer
+                )
+        return rates
+
+    def _flow_surface_pickup_rates(
+        self,
+        epoch: int,
+        pickup_units: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        agents_by_id: dict[int, KorkinAgent],
+        primary_unit: dict[int, str],
+    ) -> dict[tuple[int, str], float]:
+        """Surface-to-hand pickup rates (fraction of pool per hour)."""
+        rates: dict[tuple[int, str], float] = {}
+        hours = self.clock.hours_per_epoch
+        for unit_name, occupants in pickup_units.items():
+            if self.hand_reservoir_mode == "wash_reuptake":
+                targets = occupants
+            else:
+                targets = self._get_susceptible(occupants, pathogen_id)
+            area = self._fomite_surface_area(unit_name)
+            if area <= 0.0:
+                continue
+            for target in targets:
+                agents_by_id.setdefault(target.agent_id, target)
+                primary_unit.setdefault(target.agent_id, unit_name)
+                if (
+                    self._cabin_confinement_active(target)
+                    and not self._cabin_fomite_scoped(target, unit_name)
+                ):
+                    continue
+                rng = self._fomite_rng(target, unit_name)
+                hand_area, used_fraction, transfer = (
+                    self._draw_surface_to_hand(rng)
+                )
+                contacts = (
+                    self._fomite_surface_contacts(unit_name, target, epoch)
+                    * self._cabin_presence_share(target, epoch)
+                    / hours
+                )
+                rates[(target.agent_id, unit_name)] = (
+                    contacts
+                    * (used_fraction * hand_area / area)
+                    * transfer
+                )
+        return rates
+
+    def _flow_food_edges(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Food-pool deposit, growth, removal, and dose-rate coefficients."""
+        fc = (profile or {}).get("food_contamination", {})
+        empty_zones: dict[str, list[KorkinAgent]] = {}
+        result: dict[str, Any] = {
+            "zones": [],
+            "zone_occupants": empty_zones,
+            "deposits": {},
+            "growth": {},
+            "removal": {},
+            "dose": {},
+            "denominator": {},
+        }
+        if not fc.get("enabled", False):
+            return result
+        food_pools = self.food_pools.get(pathogen_id, {})
+        hours = self.clock.hours_per_epoch
+        growth_factor, decay_factor = self._food_rate_factors(fc)
+        net_growth = math.log(
+            max(growth_factor * decay_factor, 1e-300),
+        ) / hours
+        for zone_name, pool in food_pools.items():
+            occupants = zone_occupants.get(zone_name, [])
+            if pool <= 0.0 and not occupants:
+                continue
+            result["zones"].append(zone_name)
+            result["zone_occupants"][zone_name] = occupants
+            result["growth"][zone_name] = net_growth
+            n_occupants = max(1, len(occupants))
+            result["denominator"][zone_name] = float(n_occupants)
+            if not occupants:
+                result["removal"][zone_name] = 0.0
+                continue
+            fraction = min(
+                0.999999,
+                self._food_ingestion_per_epoch(fc)
+                * self._food_zone_multiplier(zone_name),
+            )
+            removal = (
+                -math.log1p(-fraction) / hours if fraction > 0.0 else 0.0
+            )
+            result["removal"][zone_name] = removal
+            for agent in self._get_susceptible(occupants, pathogen_id):
+                result["dose"][(agent.agent_id, zone_name)] = removal
+            for agent, _sv in self._flow_hand_depositors(
+                occupants, pathogen_id, profile,
+            ):
+                if self._cabin_confinement_active(agent):
+                    continue
+                transfer = (
+                    self.rng.uniform(*HAND_TO_FOOD_TRANSFER_FRACTION_RANGE)
+                    * self._hand_deposit_factor(agent, pathogen_id)
+                )
+                contacts = (
+                    self._food_hand_contacts(zone_name, agent, fc, epoch)
+                    / hours
+                )
+                result["deposits"][(agent.agent_id, zone_name)] = (
+                    contacts * transfer
+                )
+        return result
+
+    def _flow_mouth_rates(
+        self,
+        epoch: int,
+        agents_by_id: dict[int, KorkinAgent],
+        primary_unit: dict[int, str],
+        pathogen_id: str,
+    ) -> dict[int, float]:
+        """Hand-to-mouth dose rates (fraction of hand per hour)."""
+        rates: dict[int, float] = {}
+        hours = self.clock.hours_per_epoch
+        wash_reuptake = self.hand_reservoir_mode == "wash_reuptake"
+        for agent_id, agent in agents_by_id.items():
+            zone_name = primary_unit.get(agent_id)
+            if not zone_name:
+                continue
+            if not wash_reuptake and agent not in self._get_susceptible(
+                [agent], pathogen_id,
+            ):
+                continue
+            if (
+                self._cabin_confinement_active(agent)
+                and not self._cabin_fomite_scoped(agent, zone_name)
+            ):
+                continue
+            rng = self._fomite_rng(agent, zone_name)
+            used_fraction = rng.uniform(*MOUTH_CONTACT_FRACTION_RANGE)
+            transfer = float(np.clip(
+                rng.normal(*HAND_TO_MOUTH_NORMAL), 0.0, 1.0,
+            ))
+            contacts = (
+                self._fomite_mouth_contacts(agent, epoch, rng) / hours
+            )
+            rates[agent_id] = contacts * used_fraction * transfer
+        return rates
+
+    def _apply_contamination_flow(
+        self,
+        pathogen_id: str,
+        profile: dict[str, Any],
+        ledger: StrainDoseLedger | None,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        result: Any,
+        agents_by_id: dict[int, KorkinAgent],
+        primary_unit: dict[int, str],
+        primary_food_zone: dict[int, str],
+        surface0: dict[str, float],
+        food0: dict[str, float],
+        food_zone_occupants: dict[str, list[KorkinAgent]],
+    ) -> None:
+        """Write integrated masses back and book mouth/food doses."""
+        del profile, food_zone_occupants
+        for agent_id, agent in agents_by_id.items():
+            self._book_flow_mouth_dose(
+                agent, agent_id, pathogen_id, result.mouth_dose.get(agent_id, 0.0),
+                primary_unit.get(agent_id), surface0, agent_doses, matrix,
+                agent_pathway_doses, ledger,
+            )
+            self._book_flow_food_dose(
+                agent, agent_id, pathogen_id, result.food_dose.get(agent_id, 0.0),
+                primary_food_zone.get(agent_id),
+                food0.get(primary_food_zone.get(agent_id, ""), 0.0),
+                agent_doses, matrix, agent_pathway_doses, ledger,
+            )
+        self._write_flow_surface(pathogen_id, result.surface, surface0)
+        self._write_flow_food(pathogen_id, result.food, food0)
+        for agent_id, agent in agents_by_id.items():
+            agent.hand_load_by_pathogen[pathogen_id] = max(
+                0.0, result.hand.get(agent_id, 0.0),
+            )
+
+    def _write_flow_surface(
+        self,
+        pathogen_id: str,
+        final: dict[str, float],
+        initial: dict[str, float],
+    ) -> None:
+        for unit_name, final_mass in final.items():
+            start = max(0.0, float(initial.get(unit_name, 0.0)))
+            end = max(0.0, float(final_mass))
+            if end <= start:
+                if start <= 0.0:
+                    continue
+                factor = end / start
+                self._scale_surface_mass(pathogen_id, unit_name, factor)
+                if self.strain_registry is not None:
+                    self._reservoir.decay(
+                        factor,
+                        ReservoirComposition.key(
+                            SURFACE_RESERVOIR, pathogen_id, unit_name,
+                        ),
+                    )
+            else:
+                delta = end - start
+                self._deposit_surface_mass(pathogen_id, unit_name, delta)
+
+    def _write_flow_food(
+        self,
+        pathogen_id: str,
+        final: dict[str, float],
+        initial: dict[str, float],
+    ) -> None:
+        food_zones = self.food_pools.setdefault(pathogen_id, {})
+        for zone_name, final_mass in final.items():
+            start = max(0.0, float(initial.get(zone_name, 0.0)))
+            end = max(0.0, float(final_mass))
+            food_zones[zone_name] = end
+            if (
+                start > 0.0
+                and end < start
+                and self.strain_registry is not None
+            ):
+                self._reservoir.decay(
+                    end / start,
+                    ReservoirComposition.key(FOOD_RESERVOIR, pathogen_id, zone_name),
+                )
+
+    def _book_flow_mouth_dose(
+        self,
+        agent: KorkinAgent,
+        agent_id: int,
+        pathogen_id: str,
+        dose: float,
+        unit_name: str | None,
+        surface0: dict[str, float],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        if dose <= 0.0:
+            return
+        if agent not in self._get_susceptible([agent], pathogen_id):
+            return
+        mix = (
+            self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, unit_name)
+            if unit_name
+            else None
+        )
+        source_attribution = attribution(ledger, mix)
+        credited = self._accumulate(
+            agent_id, "fomite", dose, agent_doses, agent_pathway_doses,
+            source_attribution,
+        )
+        matrix.fomite_trailing_exposures.append({
+            "target_id": agent_id,
+            "zone": self.compartment_parent(unit_name) if unit_name else "",
+            "unit": unit_name or "",
+            "pathogen_id": pathogen_id,
+            "surface_mass": round(
+                surface0.get(unit_name or "", 0.0), 4,
+            ),
+            "dose": round(credited, 4),
+            "is_trailing": False,
+            "prev_shedder_ids": [],
+        })
+
+    def _book_flow_food_dose(
+        self,
+        agent: KorkinAgent,
+        agent_id: int,
+        pathogen_id: str,
+        dose: float,
+        zone_name: str | None,
+        food_pool_mass: float,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        if dose <= 0.0 or zone_name is None:
+            return
+        pool_before = float(food_pool_mass)
+        food_attribution = attribution(
+            ledger,
+            self._reservoir_mix(FOOD_RESERVOIR, pathogen_id, zone_name),
+        )
+        credited = self._accumulate(
+            agent_id, "food", dose, agent_doses, agent_pathway_doses,
+            food_attribution,
+        )
+        matrix.food_contamination_exposures.append({
+            "target_id": agent_id,
+            "zone": zone_name,
+            "pathogen_id": pathogen_id,
+            "food_pool_mass": round(pool_before, 4),
+            "food_zone_multiplier": self._food_zone_multiplier(zone_name),
+            "dose": round(credited, 4),
+        })
 
     def _get_hand_depositors(
         self,
