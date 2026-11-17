@@ -876,6 +876,67 @@ class TestCrossZoneSelfPairs:
         assert all(p.flow_rate_m3h == pytest.approx(10.0) for p in paths)
 
 
+class TestNativePathIdUniqueness:
+    """Diagnostic path ids stay unique without changing emitted flows."""
+
+    @staticmethod
+    def _layout(zones: list[str]) -> dict:
+        return {"zones": [{"id": z, "volume_m3": 100.0} for z in zones]}
+
+    def test_overlapping_bidirectional_cross_zone_ids_are_unique(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(["A", "B"]),
+            {
+                "hvac_zones": [
+                    {"id": "G1", "rooms": ["A", "B"], "ach": 6.0},
+                    {"id": "G2", "rooms": ["A", "B"], "ach": 6.0},
+                ],
+                "cross_zone_links": [{
+                    "from": "G1", "to": "G2", "flow_rate_m3h": 40.0,
+                    "path": "ladder_well", "direction": "bidirectional",
+                    "mechanism": "pressure_opening", "filtered": False,
+                }],
+                "adjacency": [],
+            },
+            natural_decay_rate=0.0,
+        )
+        paths = [
+            p for p in engine.airflow_paths if p.path_type == "cross_zone"
+        ]
+        assert len(paths) == 4
+        assert len({p.path_id for p in paths}) == 4
+        assert sorted((p.from_zone, p.to_zone) for p in paths) == [
+            ("A", "B"), ("A", "B"), ("B", "A"), ("B", "A"),
+        ]
+        assert all(p.flow_rate_m3h == pytest.approx(10.0) for p in paths)
+
+    def test_distinct_adjacency_types_on_one_pair_get_unique_ids(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(["A", "B"]),
+            {
+                "hvac_zones": [],
+                "cross_zone_links": [],
+                "adjacency": [
+                    {"from": "A", "to": "B", "type": "sealed_door"},
+                    {"from": "A", "to": "B", "type": "passageway"},
+                ],
+            },
+            natural_decay_rate=0.0,
+        )
+        paths = [p for p in engine.airflow_paths if p.path_type.startswith("adjacency_")]
+        assert len(paths) == 4
+        assert len({p.path_id for p in paths}) == 4
+        assert {
+            (p.from_zone, p.to_zone, p.path_type): p.flow_rate_m3h
+            for p in paths
+        } == {
+            ("A", "B", "adjacency_sealed_door"): 2.0,
+            ("B", "A", "adjacency_sealed_door"): 2.0,
+            ("A", "B", "adjacency_passageway"): 15.0,
+            ("B", "A", "adjacency_passageway"): 15.0,
+        }
+
+
 # ── Passive cross-zone link directionality (CONTAM-BIDIR-01) ────────────
 
 class TestPassiveLinkMode:
