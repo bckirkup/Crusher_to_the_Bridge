@@ -27,6 +27,7 @@ Expedition p06 screen requested by Benjamin: stratified contaminated supply seed
 - Queue: `picard-campaign-queue`
 - S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_01/`
 - S3 manifest/seed files: `manifest.json`, `seed_selection.json` uploaded at the prefix root.
+- Canary: Batch job `287b2a2a-c6a1-4fb0-8171-40b33bf958e4`, jobdef `picard-noro-supply-solver-screen-01:1`.
 
 ## Preflight status
 
@@ -39,8 +40,8 @@ Expedition p06 screen requested by Benjamin: stratified contaminated supply seed
   - One seed only; this is plumbing/timing evidence, not solver attribution.
 - [x] Image built and digest pinned in `campaign.json`.
 - [x] Manifest uploaded to S3.
-- [x] In-container build check: required campaign/tools/manifest files present, `ENGINE_GIT_SHA=3500c205426cc49f1b4075fb5fc5f8ff0d057021`, seed 900470 resolves to index 0 / run_id `fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp25c30_n450_ep288_syndromic_comp65_s900470`.
-- [ ] AWS canary child inspected.
+- [x] In-container build check: required campaign/tools/manifest files present, `ENGINE_GIT_SHA=3500c205426cc49f1b4075fb5fc5f8ff0d057021`, seed 900470 resolves to index 0 / run_id `fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp25c30_n450_ep288_syndromic_comp65_s900470`; `campaign_entrypoint.py --local` completed the full 288-epoch voyage and produced the block zip.
+- [x] AWS canary child inspected: job `287b2a2a-c6a1-4fb0-8171-40b33bf958e4` SUCCEEDED on jobdef `picard-noro-supply-solver-screen-01:1`; S3 object `campaign/noro_supply_solver_screen_01/exp_station_lots_continuous/fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp25c30_n450_ep288_syndromic_comp65_s900470.zip` (8.7 MB). Zip members are `summary.json`, `growth_census.json.gz`, `rss_samples.json`; `parameters.tier_id=fl_exp_12d_sens_p06_paxv_station_lots_continuous`; `growth_census.json.gz` `hand_occupancy.counters.continuous_path_calls=31029`; derived attack_rate 0.2067, passenger reported-case AR 0.1108, crew reported-case AR 0.0299, `vsp_trigger_epoch=53`, matching the local continuous canary. Batch container wall time was ~78 s.
 - [ ] ETA reported; user decides on array.
 
 ## Measurements
