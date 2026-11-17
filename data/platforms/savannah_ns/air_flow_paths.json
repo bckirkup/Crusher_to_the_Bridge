@@ -358,6 +358,134 @@
       "filtered": false
     }
   ],
+  "ambient_openings": [
+    {
+      "zone": "Docking_Bridge_Aft",
+      "type": "open_deck",
+      "area_m2": 60.205,
+      "exchange_m3h": 48576.6,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Promenade_Aft_Open",
+      "type": "open_deck",
+      "area_m2": 87.809,
+      "exchange_m3h": 70848.2,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Swimming_Pool",
+      "type": "open_deck",
+      "area_m2": 51.342,
+      "exchange_m3h": 41311.5,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Promenade_Walkway_Port",
+      "type": "open_deck",
+      "area_m2": 100.742,
+      "exchange_m3h": 81183.1,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Promenade_Walkway_Stbd",
+      "type": "open_deck",
+      "area_m2": 100.742,
+      "exchange_m3h": 81287.8,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Fwd_Deck_Promenade",
+      "type": "open_deck",
+      "area_m2": 128.869,
+      "exchange_m3h": 103981.7,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Top_Of_House",
+      "type": "open_deck",
+      "area_m2": 77.031,
+      "exchange_m3h": 51772.2,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Bridge_Wings",
+      "type": "open_deck",
+      "area_m2": 45.505,
+      "exchange_m3h": 36701.8,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Boat_Deck_Fwd",
+      "type": "open_deck",
+      "area_m2": 63.197,
+      "exchange_m3h": 50846.2,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Boat_Deck_Aft",
+      "type": "open_deck",
+      "area_m2": 102.22,
+      "exchange_m3h": 82486.5,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Fantail_Aft",
+      "type": "open_deck",
+      "area_m2": 72.719,
+      "exchange_m3h": 58549.6,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Weather_Deck_Port_A",
+      "type": "open_deck",
+      "area_m2": 74.89,
+      "exchange_m3h": 60323.0,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Weather_Deck_Stbd_A",
+      "type": "open_deck",
+      "area_m2": 91.722,
+      "exchange_m3h": 73905.6,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Forecastle_A",
+      "type": "open_deck",
+      "area_m2": 43.507,
+      "exchange_m3h": 34991.3,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AUXILIARY-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    }
+  ],
   "adjacency": [
     {
       "from": "Docking_Bridge_Aft",

@@ -1,6 +1,6 @@
 {
   "platform": "gosper_apa170",
-  "description": "USS Gosper APA-170 attack transport, 1944 — maritime.org Booklet of General Plans (13 plates). Troop transport: ~534 ship's company + 1561 embarked troops; five cargo hatches/holds, landing-craft davits, large medical block with isolation ward.",
+  "description": "USS Gosper APA-170 attack transport, 1944 \u2014 maritime.org Booklet of General Plans (13 plates). Troop transport: ~534 ship's company + 1561 embarked troops; five cargo hatches/holds, landing-craft davits, large medical block with isolation ward.",
   "isolation_unit_capacity": 4,
   "deck_dimensions": {
     "length_m": 138.76,
@@ -209,6 +209,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 3.4,
       "deck": "focsle_deck",
+      "exposure": "enclosed",
       "display": {
         "x": 109.62,
         "y": 4.3
@@ -737,6 +738,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": -3.05,
       "deck": "second_deck",
+      "exposure": "enclosed",
       "display": {
         "x": 128.7,
         "y": 8.65
@@ -786,7 +788,7 @@
         "x": 29.4,
         "y": 12.91
       },
-      "description": "cargo hold No.5 lower C-304-A — tall hold space (~3 deck heights) zoned once here"
+      "description": "cargo hold No.5 lower C-304-A \u2014 tall hold space (~3 deck heights) zoned once here"
     },
     {
       "id": "Troop_Berthing_3D_Aft",
@@ -832,7 +834,7 @@
         "x": 55.6,
         "y": 9.12
       },
-      "description": "upper part of engine & boiler room B-1 — tall machinery space zoned once here (spans 3rd deck to hold)"
+      "description": "upper part of engine & boiler room B-1 \u2014 tall machinery space zoned once here (spans 3rd deck to hold)"
     },
     {
       "id": "Aux_Machinery_Flat",
@@ -985,7 +987,7 @@
         "x": 103.37,
         "y": 8.03
       },
-      "description": "troop/cargo hold A-407-A — tall fwd cargo hold (to hold level) zoned once here"
+      "description": "troop/cargo hold A-407-A \u2014 tall fwd cargo hold (to hold level) zoned once here"
     },
     {
       "id": "Fwd_Stores_1P",
@@ -1105,7 +1107,7 @@
         "x": 67.2,
         "y": 8.95
       },
-      "description": "cargo A-502-A + troop ammunition A-503-AE — tall fwd hold space zoned once here"
+      "description": "cargo A-502-A + troop ammunition A-503-AE \u2014 tall fwd hold space zoned once here"
     },
     {
       "id": "FO_Tanks_Fwd",

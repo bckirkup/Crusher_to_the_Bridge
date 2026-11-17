@@ -23,6 +23,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 0.0,
       "deck": "gun_platform",
+      "exposure": "weather",
       "display": {
         "x": 8.36,
         "y": 7.78
@@ -39,6 +40,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 2.6,
       "deck": "top_of_house",
+      "exposure": "weather",
       "display": {
         "x": 63.27,
         "y": 8.01
@@ -155,6 +157,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 5.2,
       "deck": "bridge_deck",
+      "exposure": "weather",
       "display": {
         "x": 80.58,
         "y": 10.94
@@ -255,6 +258,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "boat_deck",
+      "exposure": "weather",
       "display": {
         "x": 68.98,
         "y": 11.93
@@ -302,6 +306,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 10.4,
       "deck": "upper_deck",
+      "exposure": "weather",
       "display": {
         "x": 2.27,
         "y": 8.1
@@ -630,6 +635,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 10.4,
       "deck": "upper_deck",
+      "exposure": "weather",
       "display": {
         "x": 132.47,
         "y": 7.9

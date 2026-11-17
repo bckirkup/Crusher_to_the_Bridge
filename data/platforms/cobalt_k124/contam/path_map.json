@@ -1954,6 +1954,60 @@
   },
   {
     "path_nr": 218,
+    "from_zone": "Foc_Deck_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 219,
+    "from_zone": "Foc_Deck_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 220,
+    "from_zone": "Quarterdeck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 221,
+    "from_zone": "Quarterdeck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 222,
+    "from_zone": "Stern_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 223,
+    "from_zone": "Stern_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 224,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -1962,7 +2016,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 219,
+    "path_nr": 225,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1971,7 +2025,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 220,
+    "path_nr": 226,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -1980,7 +2034,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 221,
+    "path_nr": 227,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Galley",
     "is_hvac_ducted": true,
@@ -1990,7 +2044,7 @@
     "declared_flow_m3h": 141.125
   },
   {
-    "path_nr": 222,
+    "path_nr": 228,
     "from_zone": "Galley",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2000,7 +2054,7 @@
     "declared_flow_m3h": 141.125
   },
   {
-    "path_nr": 223,
+    "path_nr": 229,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Seamen_Mess",
     "is_hvac_ducted": true,
@@ -2010,7 +2064,7 @@
     "declared_flow_m3h": 359.85
   },
   {
-    "path_nr": 224,
+    "path_nr": 230,
     "from_zone": "Seamen_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2020,7 +2074,7 @@
     "declared_flow_m3h": 359.85
   },
   {
-    "path_nr": 225,
+    "path_nr": 231,
     "from_zone": "ahs1(Sup)",
     "to_zone": "CO_Cabin",
     "is_hvac_ducted": true,
@@ -2030,7 +2084,7 @@
     "declared_flow_m3h": 197.575
   },
   {
-    "path_nr": 226,
+    "path_nr": 232,
     "from_zone": "CO_Cabin",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2040,7 +2094,7 @@
     "declared_flow_m3h": 197.575
   },
   {
-    "path_nr": 227,
+    "path_nr": 233,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Canteen",
     "is_hvac_ducted": true,
@@ -2050,7 +2104,7 @@
     "declared_flow_m3h": 62.1
   },
   {
-    "path_nr": 228,
+    "path_nr": 234,
     "from_zone": "Canteen",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2060,7 +2114,7 @@
     "declared_flow_m3h": 62.1
   },
   {
-    "path_nr": 229,
+    "path_nr": 235,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Provision_Issue",
     "is_hvac_ducted": true,
@@ -2070,7 +2124,7 @@
     "declared_flow_m3h": 108.675
   },
   {
-    "path_nr": 230,
+    "path_nr": 236,
     "from_zone": "Provision_Issue",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2080,7 +2134,7 @@
     "declared_flow_m3h": 108.675
   },
   {
-    "path_nr": 231,
+    "path_nr": 237,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Wardroom",
     "is_hvac_ducted": true,
@@ -2090,7 +2144,7 @@
     "declared_flow_m3h": 328.725
   },
   {
-    "path_nr": 232,
+    "path_nr": 238,
     "from_zone": "Wardroom",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2100,7 +2154,7 @@
     "declared_flow_m3h": 328.725
   },
   {
-    "path_nr": 233,
+    "path_nr": 239,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Officer_Cabins",
     "is_hvac_ducted": true,
@@ -2110,7 +2164,7 @@
     "declared_flow_m3h": 369.6
   },
   {
-    "path_nr": 234,
+    "path_nr": 240,
     "from_zone": "Officer_Cabins",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2120,7 +2174,7 @@
     "declared_flow_m3h": 369.6
   },
   {
-    "path_nr": 235,
+    "path_nr": 241,
     "from_zone": "ahs1(Sup)",
     "to_zone": "CPO_PO_Mess",
     "is_hvac_ducted": true,
@@ -2130,7 +2184,7 @@
     "declared_flow_m3h": 318.9
   },
   {
-    "path_nr": 236,
+    "path_nr": 242,
     "from_zone": "CPO_PO_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2140,7 +2194,7 @@
     "declared_flow_m3h": 318.9
   },
   {
-    "path_nr": 237,
+    "path_nr": 243,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Stokers_Mess",
     "is_hvac_ducted": true,
@@ -2150,7 +2204,7 @@
     "declared_flow_m3h": 315.35
   },
   {
-    "path_nr": 238,
+    "path_nr": 244,
     "from_zone": "Stokers_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2160,7 +2214,7 @@
     "declared_flow_m3h": 315.35
   },
   {
-    "path_nr": 239,
+    "path_nr": 245,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Compass_Bridge",
     "is_hvac_ducted": true,
@@ -2170,7 +2224,7 @@
     "declared_flow_m3h": 305.3
   },
   {
-    "path_nr": 240,
+    "path_nr": 246,
     "from_zone": "Compass_Bridge",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2180,7 +2234,7 @@
     "declared_flow_m3h": 305.3
   },
   {
-    "path_nr": 241,
+    "path_nr": 247,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Bridge_House",
     "is_hvac_ducted": true,
@@ -2190,7 +2244,7 @@
     "declared_flow_m3h": 229.27499999999998
   },
   {
-    "path_nr": 242,
+    "path_nr": 248,
     "from_zone": "Bridge_House",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2200,7 +2254,7 @@
     "declared_flow_m3h": 229.27499999999998
   },
   {
-    "path_nr": 243,
+    "path_nr": 249,
     "from_zone": "ambient",
     "to_zone": "ahs2(Sup)",
     "is_hvac_ducted": true,
@@ -2209,7 +2263,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 244,
+    "path_nr": 250,
     "from_zone": "ahs2(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -2218,7 +2272,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 245,
+    "path_nr": 251,
     "from_zone": "ahs2(Ret)",
     "to_zone": "ahs2(Sup)",
     "is_hvac_ducted": true,
@@ -2227,7 +2281,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 246,
+    "path_nr": 252,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Engine_Room",
     "is_hvac_ducted": true,
@@ -2237,7 +2291,7 @@
     "declared_flow_m3h": 1400.0
   },
   {
-    "path_nr": 247,
+    "path_nr": 253,
     "from_zone": "Engine_Room",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2247,7 +2301,7 @@
     "declared_flow_m3h": 1400.0
   },
   {
-    "path_nr": 248,
+    "path_nr": 254,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Boiler_Room",
     "is_hvac_ducted": true,
@@ -2257,7 +2311,7 @@
     "declared_flow_m3h": 1500.0
   },
   {
-    "path_nr": 249,
+    "path_nr": 255,
     "from_zone": "Boiler_Room",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2267,7 +2321,7 @@
     "declared_flow_m3h": 1500.0
   },
   {
-    "path_nr": 250,
+    "path_nr": 256,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Steering_Gear",
     "is_hvac_ducted": true,
@@ -2277,7 +2331,7 @@
     "declared_flow_m3h": 414.5
   },
   {
-    "path_nr": 251,
+    "path_nr": 257,
     "from_zone": "Steering_Gear",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2287,7 +2341,7 @@
     "declared_flow_m3h": 414.5
   },
   {
-    "path_nr": 252,
+    "path_nr": 258,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Minesweeping_Store",
     "is_hvac_ducted": true,
@@ -2297,7 +2351,7 @@
     "declared_flow_m3h": 192.95000000000002
   },
   {
-    "path_nr": 253,
+    "path_nr": 259,
     "from_zone": "Minesweeping_Store",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2307,7 +2361,7 @@
     "declared_flow_m3h": 192.95000000000002
   },
   {
-    "path_nr": 254,
+    "path_nr": 260,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Provision_Room",
     "is_hvac_ducted": true,
@@ -2317,7 +2371,7 @@
     "declared_flow_m3h": 176.85
   },
   {
-    "path_nr": 255,
+    "path_nr": 261,
     "from_zone": "Provision_Room",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2327,7 +2381,7 @@
     "declared_flow_m3h": 176.85
   },
   {
-    "path_nr": 256,
+    "path_nr": 262,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Paint_Lamp_Room",
     "is_hvac_ducted": true,
@@ -2337,7 +2391,7 @@
     "declared_flow_m3h": 82.8
   },
   {
-    "path_nr": 257,
+    "path_nr": 263,
     "from_zone": "Paint_Lamp_Room",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2347,7 +2401,7 @@
     "declared_flow_m3h": 82.8
   },
   {
-    "path_nr": 258,
+    "path_nr": 264,
     "from_zone": "ahs2(Sup)",
     "to_zone": "After_Peak",
     "is_hvac_ducted": true,
@@ -2357,7 +2411,7 @@
     "declared_flow_m3h": 218.79999999999998
   },
   {
-    "path_nr": 259,
+    "path_nr": 265,
     "from_zone": "After_Peak",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2367,7 +2421,7 @@
     "declared_flow_m3h": 218.79999999999998
   },
   {
-    "path_nr": 260,
+    "path_nr": 266,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Engineers_Store",
     "is_hvac_ducted": true,
@@ -2377,7 +2431,7 @@
     "declared_flow_m3h": 455.4
   },
   {
-    "path_nr": 261,
+    "path_nr": 267,
     "from_zone": "Engineers_Store",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2387,7 +2441,7 @@
     "declared_flow_m3h": 455.4
   },
   {
-    "path_nr": 262,
+    "path_nr": 268,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Fwd_Magazines",
     "is_hvac_ducted": true,
@@ -2397,7 +2451,7 @@
     "declared_flow_m3h": 300.95
   },
   {
-    "path_nr": 263,
+    "path_nr": 269,
     "from_zone": "Fwd_Magazines",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2407,7 +2461,7 @@
     "declared_flow_m3h": 300.95
   },
   {
-    "path_nr": 264,
+    "path_nr": 270,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Asdic_Compartment",
     "is_hvac_ducted": true,
@@ -2417,7 +2471,7 @@
     "declared_flow_m3h": 231.64999999999998
   },
   {
-    "path_nr": 265,
+    "path_nr": 271,
     "from_zone": "Asdic_Compartment",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2427,7 +2481,7 @@
     "declared_flow_m3h": 231.64999999999998
   },
   {
-    "path_nr": 266,
+    "path_nr": 272,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Chain_Locker_Store",
     "is_hvac_ducted": true,
@@ -2437,7 +2491,7 @@
     "declared_flow_m3h": 370.25
   },
   {
-    "path_nr": 267,
+    "path_nr": 273,
     "from_zone": "Chain_Locker_Store",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2447,7 +2501,7 @@
     "declared_flow_m3h": 370.25
   },
   {
-    "path_nr": 268,
+    "path_nr": 274,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Fore_Peak",
     "is_hvac_ducted": true,
@@ -2457,7 +2511,7 @@
     "declared_flow_m3h": 160.79999999999998
   },
   {
-    "path_nr": 269,
+    "path_nr": 275,
     "from_zone": "Fore_Peak",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -2467,7 +2521,7 @@
     "declared_flow_m3h": 160.79999999999998
   },
   {
-    "path_nr": 270,
+    "path_nr": 276,
     "from_zone": "ambient",
     "to_zone": "ahs3(Sup)",
     "is_hvac_ducted": true,
@@ -2476,7 +2530,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 271,
+    "path_nr": 277,
     "from_zone": "ahs3(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -2485,7 +2539,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 272,
+    "path_nr": 278,
     "from_zone": "ahs3(Ret)",
     "to_zone": "ahs3(Sup)",
     "is_hvac_ducted": true,
@@ -2494,7 +2548,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 273,
+    "path_nr": 279,
     "from_zone": "ahs3(Sup)",
     "to_zone": "HD_Officers",
     "is_hvac_ducted": true,
@@ -2504,7 +2558,7 @@
     "declared_flow_m3h": 0.0
   },
   {
-    "path_nr": 274,
+    "path_nr": 280,
     "from_zone": "HD_Officers",
     "to_zone": "ahs3(Ret)",
     "is_hvac_ducted": true,
@@ -2514,7 +2568,7 @@
     "declared_flow_m3h": 244.67100000000002
   },
   {
-    "path_nr": 275,
+    "path_nr": 281,
     "from_zone": "ambient",
     "to_zone": "ahs4(Sup)",
     "is_hvac_ducted": true,
@@ -2523,7 +2577,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 276,
+    "path_nr": 282,
     "from_zone": "ahs4(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -2532,7 +2586,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 277,
+    "path_nr": 283,
     "from_zone": "ahs4(Ret)",
     "to_zone": "ahs4(Sup)",
     "is_hvac_ducted": true,
@@ -2541,7 +2595,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 278,
+    "path_nr": 284,
     "from_zone": "ahs4(Sup)",
     "to_zone": "HD_Crew",
     "is_hvac_ducted": true,
@@ -2551,7 +2605,7 @@
     "declared_flow_m3h": 0.0
   },
   {
-    "path_nr": 279,
+    "path_nr": 285,
     "from_zone": "HD_Crew",
     "to_zone": "ahs4(Ret)",
     "is_hvac_ducted": true,
@@ -2561,7 +2615,7 @@
     "declared_flow_m3h": 743.754
   },
   {
-    "path_nr": 280,
+    "path_nr": 286,
     "from_zone": "ambient",
     "to_zone": "ahs5(Sup)",
     "is_hvac_ducted": true,
@@ -2570,7 +2624,7 @@
     "ahs_nr": 5
   },
   {
-    "path_nr": 281,
+    "path_nr": 287,
     "from_zone": "ahs5(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -2579,7 +2633,7 @@
     "ahs_nr": 5
   },
   {
-    "path_nr": 282,
+    "path_nr": 288,
     "from_zone": "ahs5(Ret)",
     "to_zone": "ahs5(Sup)",
     "is_hvac_ducted": true,
@@ -2588,7 +2642,7 @@
     "ahs_nr": 5
   },
   {
-    "path_nr": 283,
+    "path_nr": 289,
     "from_zone": "ahs5(Sup)",
     "to_zone": "HD_PO",
     "is_hvac_ducted": true,
@@ -2598,7 +2652,7 @@
     "declared_flow_m3h": 0.0
   },
   {
-    "path_nr": 284,
+    "path_nr": 290,
     "from_zone": "HD_PO",
     "to_zone": "ahs5(Ret)",
     "is_hvac_ducted": true,

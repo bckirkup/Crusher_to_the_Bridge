@@ -25,6 +25,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "promenade_deck",
+      "exposure": "weather",
       "display": {
         "x": 11.46,
         "y": 11.83
@@ -41,6 +42,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "promenade_deck",
+      "exposure": "weather",
       "display": {
         "x": 32.86,
         "y": 11.17
@@ -56,6 +58,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "promenade_deck",
+      "exposure": "weather",
       "display": {
         "x": 55.79,
         "y": 11.06
@@ -157,6 +160,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "promenade_deck",
+      "exposure": "weather",
       "display": {
         "x": 81.39,
         "y": 17.58
@@ -172,6 +176,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "promenade_deck",
+      "exposure": "weather",
       "display": {
         "x": 81.39,
         "y": 4.86
@@ -187,6 +192,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "promenade_deck",
+      "exposure": "weather",
       "display": {
         "x": 150.17,
         "y": 10.72
@@ -202,6 +208,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 0.0,
       "deck": "top_of_house",
+      "exposure": "weather",
       "display": {
         "x": 109.61,
         "y": 11.16
@@ -266,6 +273,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 2.6,
       "deck": "nav_bridge",
+      "exposure": "weather",
       "display": {
         "x": 118.11,
         "y": 18.28
@@ -333,6 +341,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 5.2,
       "deck": "boat_deck",
+      "exposure": "weather",
       "display": {
         "x": 125.06,
         "y": 6.77
@@ -348,6 +357,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 5.2,
       "deck": "boat_deck",
+      "exposure": "weather",
       "display": {
         "x": 101.29,
         "y": 17.84
@@ -363,6 +373,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 10.4,
       "deck": "a_deck",
+      "exposure": "weather",
       "display": {
         "x": 6.05,
         "y": 12.29
@@ -489,6 +500,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 10.4,
       "deck": "a_deck",
+      "exposure": "weather",
       "display": {
         "x": 85.08,
         "y": 22.14
@@ -504,6 +516,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 10.4,
       "deck": "a_deck",
+      "exposure": "weather",
       "display": {
         "x": 85.08,
         "y": 2.31
@@ -570,6 +583,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 10.4,
       "deck": "a_deck",
+      "exposure": "weather",
       "display": {
         "x": 177.53,
         "y": 11.48

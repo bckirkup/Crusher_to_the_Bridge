@@ -21,6 +21,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 0.0,
       "deck": "top_of_house",
+      "exposure": "weather",
       "display": {
         "x": 28.36,
         "y": 6.28
@@ -106,6 +107,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "upper_deck",
+      "exposure": "weather",
       "display": {
         "x": 45.92,
         "y": 6.14
@@ -153,6 +155,7 @@
       "ceiling_height_m": 2.6,
       "elevation_m": 7.800000000000001,
       "deck": "upper_deck",
+      "exposure": "weather",
       "display": {
         "x": 94.69,
         "y": 6.43

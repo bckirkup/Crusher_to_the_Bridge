@@ -83,6 +83,7 @@
       "ceiling_height_m": 2.4,
       "elevation_m": 13.4,
       "deck": "superstructure_deck",
+      "exposure": "enclosed",
       "display": {
         "x": 64.04,
         "y": 12.63
