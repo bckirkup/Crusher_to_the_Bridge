@@ -38,7 +38,8 @@
         "x": 67.24,
         "y": 4.52
       },
-      "description": "signal shelter"
+      "description": "signal shelter",
+      "exposure": "enclosed"
     },
     {
       "id": "Gun_Deck_Open",
@@ -53,7 +54,8 @@
         "x": 26.47,
         "y": 4.93
       },
-      "description": "open deck: 40mm/20mm mounts + boat stowage"
+      "description": "open deck: 40mm/20mm mounts + boat stowage",
+      "exposure": "weather"
     },
     {
       "id": "Officers_Qtrs",
@@ -100,7 +102,8 @@
         "x": 61.76,
         "y": 7.61
       },
-      "description": "open deck aft of island, 20mm tubs"
+      "description": "open deck aft of island, 20mm tubs",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -115,7 +118,8 @@
         "x": 4.91,
         "y": 4.75
       },
-      "description": "stern: aft 5in mount, DC racks + projectors"
+      "description": "stern: aft 5in mount, DC racks + projectors",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Stores",
@@ -278,7 +282,8 @@
         "x": 81.32,
         "y": 4.57
       },
-      "description": "fore deck: fwd 5in mount, windlass"
+      "description": "fore deck: fwd 5in mount, windlass",
+      "exposure": "weather"
     },
     {
       "id": "Crew_Berthing_1P",

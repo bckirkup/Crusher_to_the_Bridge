@@ -39,7 +39,8 @@
         "x": 85.0,
         "y": 5.25
       },
-      "description": "open signal shelter atop pilot house"
+      "description": "open signal shelter atop pilot house",
+      "exposure": "weather"
     },
     {
       "id": "Pilot_House",
@@ -102,7 +103,8 @@
         "x": 7.34,
         "y": 4.05
       },
-      "description": "DASH helicopter platform, open deck w/ safety nets"
+      "description": "DASH helicopter platform, open deck w/ safety nets",
+      "exposure": "weather"
     },
     {
       "id": "Helo_Hangar",
@@ -132,7 +134,8 @@
         "x": 35.68,
         "y": 4.53
       },
-      "description": "open 01 weather deck: torpedo handling, torpedo tubes P&S, boat stowage"
+      "description": "open 01 weather deck: torpedo handling, torpedo tubes P&S, boat stowage",
+      "exposure": "weather"
     },
     {
       "id": "Uptake_Stacks",
@@ -210,7 +213,8 @@
         "x": 108.3,
         "y": 5.02
       },
-      "description": "open deckhouse top fwd incl. Mk15 hedgehog mount"
+      "description": "open deckhouse top fwd incl. Mk15 hedgehog mount",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -225,7 +229,8 @@
         "x": 6.22,
         "y": 4.24
       },
-      "description": "open fantail: 5\"/38 mounts No 5 & 6, towing pad, depth charge racks"
+      "description": "open fantail: 5\"/38 mounts No 5 & 6, towing pad, depth charge racks",
+      "exposure": "weather"
     },
     {
       "id": "Gun_Deck_Aft",
@@ -240,7 +245,8 @@
         "x": 21.44,
         "y": 4.32
       },
-      "description": "open weather deck around aft mounts"
+      "description": "open weather deck around aft mounts",
+      "exposure": "weather"
     },
     {
       "id": "Post_Office",
@@ -441,7 +447,8 @@
         "x": 108.97,
         "y": 4.24
       },
-      "description": "open forecastle: 5\"/38 mounts No 1 & 2, anchors, chain pipes, windlass controls"
+      "description": "open forecastle: 5\"/38 mounts No 1 & 2, anchors, chain pipes, windlass controls",
+      "exposure": "weather"
     },
     {
       "id": "Steering_Gear",
@@ -534,7 +541,7 @@
         "x": 57.3,
         "y": 4.68
       },
-      "description": "aft engine room B-4 — turbines/reduction gear; two deck heights (extends to hold), zoned once here; blower rms No 7/8 flanking"
+      "description": "aft engine room B-4 \u2014 turbines/reduction gear; two deck heights (extends to hold), zoned once here; blower rms No 7/8 flanking"
     },
     {
       "id": "Aft_Fire_Room",
@@ -580,7 +587,7 @@
         "x": 87.31,
         "y": 4.68
       },
-      "description": "fwd engine room B-2 — turbines/reduction gear; two deck heights; blower rms No 2/4"
+      "description": "fwd engine room B-2 \u2014 turbines/reduction gear; two deck heights; blower rms No 2/4"
     },
     {
       "id": "Fwd_Fire_Room",
@@ -886,7 +893,7 @@
         "x": 70.24,
         "y": 4.78
       },
-      "description": "machinery-space lower level — inside the two-deck engine/fire rooms zoned on first_platform; zone volume covers tank-top flats, reserve feed water B-14-W/B-1-W, lube oil storage/sump tanks"
+      "description": "machinery-space lower level \u2014 inside the two-deck engine/fire rooms zoned on first_platform; zone volume covers tank-top flats, reserve feed water B-14-W/B-1-W, lube oil storage/sump tanks"
     },
     {
       "id": "Emerg_Diesel_Gen",
@@ -1190,7 +1197,7 @@
         "x": 70.24,
         "y": 4.78
       },
-      "description": "inner-bottom flats under ER/FR: main condensers, bilge/ballast — part of the two-deck machinery volume; polygon fixes position only"
+      "description": "inner-bottom flats under ER/FR: main condensers, bilge/ballast \u2014 part of the two-deck machinery volume; polygon fixes position only"
     },
     {
       "id": "Water_Fuel_Hold_Fwd",

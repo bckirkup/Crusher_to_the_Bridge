@@ -55,7 +55,8 @@
         "x": 75.72,
         "y": 4.48
       },
-      "description": "5in-38 enclosed mount No.2 area + floating net + vents"
+      "description": "5in-38 enclosed mount No.2 area + floating net + vents",
+      "exposure": "weather"
     },
     {
       "id": "After_Deckhouse_Top",
@@ -70,7 +71,8 @@
         "x": 24.92,
         "y": 5.09
       },
-      "description": "top of after deckhouse: 2x40mm quad mounts, radar antenna, radar equip rm, antenna trunk"
+      "description": "top of after deckhouse: 2x40mm quad mounts, radar antenna, radar equip rm, antenna trunk",
+      "exposure": "weather"
     },
     {
       "id": "Midship_Deckhouse",
@@ -85,7 +87,8 @@
         "x": 51.67,
         "y": 5.5
       },
-      "description": "top of midship deckhouse: stacks/uptakes, floater nets, boats, life rafts, capstans"
+      "description": "top of midship deckhouse: stacks/uptakes, floater nets, boats, life rafts, capstans",
+      "exposure": "weather"
     },
     {
       "id": "Radio_Central",
@@ -132,7 +135,8 @@
         "x": 92.06,
         "y": 4.71
       },
-      "description": "open focsle: gun/40mm tubs, bos'n gear, bow"
+      "description": "open focsle: gun/40mm tubs, bos'n gear, bow",
+      "exposure": "weather"
     },
     {
       "id": "Fantail_MS",
@@ -147,7 +151,8 @@
         "x": 6.7,
         "y": 4.98
       },
-      "description": "ex-minesweeper stern: M.S. winch + cable reel, paravanes, detector winch, DC track/davits, crane"
+      "description": "ex-minesweeper stern: M.S. winch + cable reel, paravanes, detector winch, DC track/davits, crane",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Ammo",
@@ -331,7 +336,8 @@
         "x": 101.38,
         "y": 4.85
       },
-      "description": "windlass rm A-102AE, electronic repair parts stow, bosn's stores & lamp rm, hawse pipes"
+      "description": "windlass rm A-102AE, electronic repair parts stow, bosn's stores & lamp rm, hawse pipes",
+      "exposure": "enclosed"
     },
     {
       "id": "Steering_Gear",
@@ -392,7 +398,7 @@
         "x": 38.14,
         "y": 4.49
       },
-      "description": "engine rm — TALL, zoned once"
+      "description": "engine rm \u2014 TALL, zoned once"
     },
     {
       "id": "Fire_Rm_Aft",
@@ -407,7 +413,7 @@
         "x": 46.49,
         "y": 4.49
       },
-      "description": "fire rm — TALL, zoned once"
+      "description": "fire rm \u2014 TALL, zoned once"
     },
     {
       "id": "Engine_Rm_Fwd",
@@ -422,7 +428,7 @@
         "x": 55.52,
         "y": 4.49
       },
-      "description": "engine rm — TALL, zoned once"
+      "description": "engine rm \u2014 TALL, zoned once"
     },
     {
       "id": "Fire_Rm_Fwd",
@@ -437,7 +443,7 @@
         "x": 64.54,
         "y": 4.49
       },
-      "description": "fire rm — TALL, zoned once"
+      "description": "fire rm \u2014 TALL, zoned once"
     },
     {
       "id": "Crew_Qtrs_1P",

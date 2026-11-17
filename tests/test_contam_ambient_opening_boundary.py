@@ -196,8 +196,9 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # CONTAM-AMBIENT-MAKEUP-CRUISE-01 and CONTAM-AMBIENT-MAKEUP-FICTION-01:
     # two legs per authored make-up louvre on the eight hulls.
     # CONTAM-AMBIENT-WEATHER-CRUISE-01 adds two legs per authored cruise
-    # weather-deck opening (classic 1, diamond 8, expedition 1, greg 5,
-    # mega 5, spirit 3 records). No other committed bundle carries an opening.
+    # weather-deck opening; CONTAM-AMBIENT-WEATHER-DESTROYER-01 adds two legs
+    # per destroyer roster weather opening. No other committed bundle carries
+    # an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -211,4 +212,8 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "expedition_cruise_450": 2 + 2, "greg_mortimer": 2 + 10,
         "mega_cruise_5000": 20 + 10, "spirit_cruise_3000": 2 + 6,
         "enterprise_constitution_tos": 2, "enterprise_galaxy_tng": 2,
+        "cannon_de701": 8, "cushing_dd376": 4, "davison_dd618": 10,
+        "fletcher_dde_dd445": 4, "hunter_killer_dd692": 14,
+        "keppler_dd765": 14, "nields_dd616": 10, "palmer_dms5": 2,
+        "sigsbee_dd502": 8,
     }

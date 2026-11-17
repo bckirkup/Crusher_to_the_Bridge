@@ -23,7 +23,8 @@
         "x": 13.25,
         "y": 6.7
       },
-      "description": "open fantail aft w/ depth-charge & hedgehog deck (profile read, DDE ASW fit)"
+      "description": "open fantail aft w/ depth-charge & hedgehog deck (profile read, DDE ASW fit)",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Deckhouse",
@@ -101,7 +102,8 @@
         "x": 103.44,
         "y": 6.7
       },
-      "description": "open forecastle fwd (profile-est)"
+      "description": "open forecastle fwd (profile-est)",
+      "exposure": "weather"
     },
     {
       "id": "Radio_Room_01",

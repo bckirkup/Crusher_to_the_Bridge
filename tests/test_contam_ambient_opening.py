@@ -89,8 +89,9 @@ _MAKEUP_RECORDS = {
     "greg_mortimer": 1, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
 }
-# CONTAM-AMBIENT-WEATHER-CRUISE-01 and CONTAM-EXPOSURE-TAGGING-01: one
-# ``open_deck`` record per declared weather zone on the six cruise hulls.
+# CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01 and
+# CONTAM-AMBIENT-WEATHER-DESTROYER-01: one ``open_deck`` record per declared
+# weather zone on the six cruise hulls and the nine destroyer roster hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -105,15 +106,39 @@ _WEATHER_ZONES = {
         "Main_Pool_Deck", "Sports_Court", "Waterpark", "CentralPark", "Aqua_Theater",
     },
     "spirit_cruise_3000": {"MainPool", "AftPool", "SportsDeck"},
+    "cannon_de701": {"Gun_Deck_Open", "Island_Open_Aft", "Fantail", "Focsle_Deck"},
+    "cushing_dd376": {"Focsle_Open", "Fantail"},
+    "davison_dd618": {
+        "Super_Open", "After_Deckhouse_Top", "Midship_Deckhouse",
+        "Focsle_Open", "Fantail_MS",
+    },
+    "fletcher_dde_dd445": {"Fantail", "Focsle_Main"},
+    "hunter_killer_dd692": {
+        "Signal_Bridge", "Boat_Deck_01", "Launcher_Deck_01", "Fantail",
+        "Torpedo_Deck", "Fwd_Mount_Deck", "Focsle_Fwd",
+    },
+    "keppler_dd765": {
+        "Signal_Shelter", "Helo_Platform", "Weather_Deck_01",
+        "Forecastle_Top_01", "Fantail", "Gun_Deck_Aft", "Focsle_Fwd",
+    },
+    "nields_dd616": {
+        "Super_Open", "After_Deckhouse_Top", "Midship_Deckhouse",
+        "Focsle_Open", "Fantail",
+    },
+    "palmer_dms5": {"Boat_Deck_Uptakes"},
+    "sigsbee_dd502": {"Midship_Deckhouse", "Mt2_Deck", "Fantail", "Focsle_Deck"},
 }
-# CONTAM-EXPOSURE-TAGGING-01: owner-ruled indoor spaces. They declare
-# ``exposure: enclosed`` and carry no opening.
+# CONTAM-EXPOSURE-TAGGING-01 and CONTAM-AMBIENT-WEATHER-DESTROYER-01: declared
+# enclosed zones. They carry no opening.
 _ENCLOSED_ZONES = {
     "classic_cruise_1900": {"Promenade"},
     "diamond_princess": {"PromGalleria"},
     "greg_mortimer": {"BarsDeck5", "ObsDeck7", "BarsDeck8", "ObsDeck8"},
     "mega_cruise_5000": {"Royal_Promenade"},
     "spirit_cruise_3000": {"Promenade"},
+    "cannon_de701": {"Signal_Deck"},
+    "davison_dd618": {"Bow_Focsle"},
+    "nields_dd616": {"Bow_Focsle"},
 }
 
 
@@ -190,12 +215,9 @@ class TestSchema:
                 assert "wind_speed_m_s" not in record
 
     def test_declared_weather_openings(self) -> None:
-        # CONTAM-AMBIENT-WEATHER-CRUISE-01 authored one ``open_deck`` record
-        # per declared weather zone on the six cruise hulls, each with a
-        # declared relative wind and a non-zero native rate (D5). Together
-        # with the louvre guard above this is every declared opening; a
-        # naval or fiction weather opening, a balcony, hatch or door is a
-        # later stage and must move these guards deliberately.
+        # CONTAM-AMBIENT-WEATHER-CRUISE-01 and
+        # CONTAM-AMBIENT-WEATHER-DESTROYER-01 authored the weather-deck
+        # openings; the destroyer counts are two legs per record.
         declared = self._declared("open_deck")
         assert {
             hull: {record["zone"] for record in rows} for hull, rows in declared.items()
