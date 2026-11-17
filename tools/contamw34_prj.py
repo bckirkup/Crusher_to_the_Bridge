@@ -148,6 +148,20 @@ _AMBIENT_OPENING_SCHEDULE_BY_TYPE: dict[str, str | None] = {
 _AHS_TERMINAL_MODES = ("design", "commissioned")
 _DEFAULT_TERMINAL_MODE = "design"
 
+# Fiction life-support plenum (CONTAM-LIFE-SUPPORT-PLENUM-01). When a
+# hobbyist platform opts in, the export replaces the per-zone envelope leaks
+# with one dedicated plenum zone: every real zone gets a pressure-driven link
+# to the plenum and only the plenum has an ambient make-up/relief opening.
+# The link area and plenum volume are Grade C numerical-boundary assumptions;
+# the relief face velocity reuses the 2.5 m/s assumption of the authored
+# make-up louvres (CONTAM-AMBIENT-MAKEUP-FICTION-01).
+LIFE_SUPPORT_PLENUM_KEY = "life_support_plenum"
+_LIFE_SUPPORT_DEFAULT_ZONE_ID = "LS_Plenum"
+_LIFE_SUPPORT_LINK_KIND = "life_support_link"
+_LIFE_SUPPORT_LINK_AREA_M2 = 0.2
+_LIFE_SUPPORT_PLENUM_VOLUME_M3 = 1.0
+_LIFE_SUPPORT_RELIEF_FACE_VELOCITY_M_S = 2.5
+
 
 def _sanitize_name(name: str) -> str:
     return re.sub(r"\s+", "_", str(name).strip()) or "unnamed"
@@ -449,6 +463,11 @@ class _NetworkBuilder:
             )
         self.ambient_opening_model = opening_model
 
+        self.life_support_plenum: dict[str, Any] | None = None
+        self._ahs_ambient_net_outflow_m3h = 0.0
+        self._life_support_link_elem_by_area: dict[float, int] = {}
+        self._configure_life_support_plenum()
+
         self.levels = _build_levels(self.zones)
         self.level_index = {lvl["name"]: i + 1 for i, lvl in enumerate(self.levels)}
         self.deck_order = {lvl["name"]: i for i, lvl in enumerate(self.levels)}
@@ -516,13 +535,16 @@ class _NetworkBuilder:
         self._add_ambient_opening_paths()
         # 4) Per-AHS: Contam simple-AHS semantics (match authentic ContamW 3.4)
         self._add_ahs_paths()
-        # 5) Duct leakage spines (hobbyist): passive Darcy trunks between rooms
+        # 5) Fiction life-support plenum boundary (hobbyist override only)
+        if self.life_support_plenum:
+            self._add_life_support_plenum_paths()
+        # 6) Duct leakage spines (hobbyist): passive Darcy trunks between rooms
         if self.hobbyist and not self.overrides.get("skip_duct_spines"):
             self._build_duct_spines()
         return self._result()
 
     def _result(self) -> dict[str, Any]:
-        return {
+        result = {
             "levels": self.levels,
             "zone_records": self.zone_records,
             "elements": self.elements,
@@ -552,6 +574,9 @@ class _NetworkBuilder:
             "contaminant_indices": self.contaminant_indices,
             "day_by_id": self.day_by_id if self.hobbyist else {},
         }
+        if self.life_support_plenum:
+            result["life_support_plenum"] = dict(self.life_support_plenum)
+        return result
 
     # ── zones ─────────────────────────────────────────────────────────────
 
@@ -878,6 +903,8 @@ class _NetworkBuilder:
         return pnr
 
     def _add_envelope_paths(self) -> None:
+        if self.life_support_plenum:
+            return
         for z in self.zone_records:
             if z["is_phantom"]:
                 continue
@@ -1217,37 +1244,40 @@ class _NetworkBuilder:
             **common,
         )
 
-    def _add_ambient_opening_paths(self) -> None:
-        """Emit each ``ambient_openings`` record as zone -> ambient (-1) paths.
+    def _add_ambient_opening_record(self, record: dict[str, Any]) -> None:
+        """Emit one ``ambient_openings`` record as zone -> ambient (-1) paths.
 
         Authored like the envelope leak (positive Flow0 is outward) but sized
         from the declared ``area_m2`` and mapped as ``kind``
         ``ambient_opening``, so the field lane can treat it as a boundary
         path without touching ``envelope_leak``.
         """
+        zone_id = record["zone"]
+        if zone_id not in self.zone_name_to_nr or zone_id not in self.zone_by_id:
+            raise ValueError(
+                f"ambient_openings zone {zone_id!r} is not a room in the "
+                "spatial layout"
+            )
+        z = self.zone_records[self.zone_name_to_nr[zone_id] - 1]
+        height = float(z["height"])
+        legs = self._ambient_opening_legs(float(record["area_m2"]), height)
+        pressures = self._ambient_opening_wind_pressures(record, len(legs))
+        for index, (leg_area, rel_ht) in enumerate(legs):
+            self._add_path(
+                z["nr"], -1, self._ambient_opening_elem(leg_area, height),
+                from_name=zone_id, to_name=AMBIENT_ZONE_ID,
+                kind=AMBIENT_OPENING_KIND,
+                is_hvac_ducted=False,
+                crusher_transfer=False,
+                fields=self._ambient_opening_fields(
+                    record, z, rel_ht, index,
+                    None if pressures is None else pressures[index],
+                ),
+            )
+
+    def _add_ambient_opening_paths(self) -> None:
         for record in self.ambient_openings:
-            zone_id = record["zone"]
-            if zone_id not in self.zone_name_to_nr or zone_id not in self.zone_by_id:
-                raise ValueError(
-                    f"ambient_openings zone {zone_id!r} is not a room in the "
-                    "spatial layout"
-                )
-            z = self.zone_records[self.zone_name_to_nr[zone_id] - 1]
-            height = float(z["height"])
-            legs = self._ambient_opening_legs(float(record["area_m2"]), height)
-            pressures = self._ambient_opening_wind_pressures(record, len(legs))
-            for index, (leg_area, rel_ht) in enumerate(legs):
-                self._add_path(
-                    z["nr"], -1, self._ambient_opening_elem(leg_area, height),
-                    from_name=zone_id, to_name=AMBIENT_ZONE_ID,
-                    kind=AMBIENT_OPENING_KIND,
-                    is_hvac_ducted=False,
-                    crusher_transfer=False,
-                    fields=self._ambient_opening_fields(
-                        record, z, rel_ht, index,
-                        None if pressures is None else pressures[index],
-                    ),
-                )
+            self._add_ambient_opening_record(record)
 
     # ── air-handling systems ──────────────────────────────────────────────
 
@@ -1448,6 +1478,13 @@ class _NetworkBuilder:
                 }
                 terminal_sched = self.sched_duty_week if self.hobbyist else 0
             recirc_fahs = _flow_m3h_to_fahs_kg_s(recirc_flow)
+            # AHS ambient balance for the life-support plenum relief area:
+            # exhaust leaves to ambient, OA enters from ambient. Balanced
+            # service branches net to zero; exhaust-only heads do not.
+            return_total = sum(r for _s, r in terminal_flows.values())
+            self._ahs_ambient_net_outflow_m3h += (
+                max(0.0, return_total - recirc_flow) - oa_flow
+            )
             oa_sched = self._oa_week_schedule_nr(oa_frac)
             filt_nr = self._ahs_filter_nr(info["id"])
 
@@ -1501,6 +1538,126 @@ class _NetworkBuilder:
                 q = ach * vol * duty
                 flows[room] = (q, q)
         return flows, 0
+
+    # ── life-support plenum (fiction hobbyist override) ───────────────────
+
+    def _configure_life_support_plenum(self) -> None:
+        cfg = self.overrides.get(LIFE_SUPPORT_PLENUM_KEY)
+        if not self.hobbyist or cfg is None or cfg is False:
+            return
+        if cfg is True:
+            cfg = {}
+        if not isinstance(cfg, dict):
+            raise ValueError(
+                f"{LIFE_SUPPORT_PLENUM_KEY} must be a bool or object, got {cfg!r}"
+            )
+        if not cfg.get("enabled", True):
+            return
+        zone_id = _sanitize_name(str(cfg.get("zone_id") or _LIFE_SUPPORT_DEFAULT_ZONE_ID))
+        if zone_id == AMBIENT_ZONE_ID:
+            raise ValueError(f"{LIFE_SUPPORT_PLENUM_KEY} zone_id cannot be 'ambient'")
+        if len(zone_id) > _CONTAM_NAME_MAX:
+            raise ValueError(
+                f"{LIFE_SUPPORT_PLENUM_KEY} zone_id {zone_id!r} exceeds "
+                f"{_CONTAM_NAME_MAX} chars"
+            )
+        if any(str(z.get("id")) == zone_id for z in self.zones):
+            raise ValueError(f"{LIFE_SUPPORT_PLENUM_KEY} zone_id {zone_id!r} already exists")
+        link_area = float(cfg.get("link_area_m2", _LIFE_SUPPORT_LINK_AREA_M2))
+        face_velocity = float(
+            cfg.get("relief_face_velocity_m_s", _LIFE_SUPPORT_RELIEF_FACE_VELOCITY_M_S)
+        )
+        volume = float(cfg.get("volume_m3", _LIFE_SUPPORT_PLENUM_VOLUME_M3))
+        for value in (link_area, face_velocity, volume):
+            if not math.isfinite(value) or value <= 0.0:
+                raise ValueError(f"{LIFE_SUPPORT_PLENUM_KEY} areas/volume must be positive finite")
+        self.zones.append({
+            "id": zone_id,
+            "type": "Free",
+            "traffic": "none",
+            "volume_m3": volume,
+            "floor_area_m2": volume,
+            "ceiling_height_m": 1.0,
+            "elevation_m": 0.0,
+            "deck": "plenum",
+            "display": {"x": 0, "y": 0},
+            "description": "Life-support plenum pressure boundary (fiction Contam export).",
+        })
+        self.ambient_openings = []
+        self.life_support_plenum = {
+            "zone_id": zone_id,
+            "link_area_m2": link_area,
+            "relief_face_velocity_m_s": face_velocity,
+            "volume_m3": volume,
+        }
+
+    def _life_support_relief_flow_m3h(self) -> float:
+        explicit_exhaust = sum(
+            float(link.get("flow_rate_m3h", 0.0))
+            for link in self.cross_links
+            if str(link.get("to")) == AMBIENT_ZONE_ID
+        )
+        return max(0.0, explicit_exhaust + self._ahs_ambient_net_outflow_m3h)
+
+    def _life_support_link_elem(self, area_m2: float) -> int:
+        key = round(float(area_m2), 10)
+        if key in self._life_support_link_elem_by_area:
+            return self._life_support_link_elem_by_area[key]
+        nr = len(self.elements) + 1
+        self.elements.append({
+            "nr": nr,
+            "type": _ELEM_ORIFICE,
+            "symbol": "plr_orfc",
+            "name": _unique_contam_name("LifeSup", self.used_contam_names),
+            "params": _hobby.orifice_params_for_area(area_m2),
+            "area_m2": area_m2,
+        })
+        self._life_support_link_elem_by_area[key] = nr
+        return nr
+
+    def _add_life_support_plenum_paths(self) -> None:
+        cfg = self.life_support_plenum
+        if cfg is None:
+            return
+        zone_id = str(cfg["zone_id"])
+        plenum_nr = self.zone_name_to_nr[zone_id]
+        plenum_rec = self.zone_records[plenum_nr - 1]
+        link_elem = self._life_support_link_elem(float(cfg["link_area_m2"]))
+        for z in self.zone_records:
+            if z["is_phantom"] or z["orig_id"] == zone_id:
+                continue
+            self._add_path(
+                int(z["nr"]), plenum_nr, link_elem,
+                from_name=z["orig_id"], to_name=zone_id,
+                kind=_LIFE_SUPPORT_LINK_KIND,
+                is_hvac_ducted=False,
+                crusher_transfer=False,
+                fields=self.PathFields(
+                    sched_nr=0,
+                    x=0.5 * (float(z["x"]) + float(plenum_rec["x"])),
+                    y=0.5 * (float(z["y"]) + float(plenum_rec["y"])),
+                ),
+            )
+
+        relief_flow = self._life_support_relief_flow_m3h()
+        if relief_flow <= 0.0:
+            raise ValueError("life_support_plenum requires a positive ambient relief flow")
+        relief_area = (
+            relief_flow / 3600.0 / float(cfg["relief_face_velocity_m_s"])
+        )
+        cfg["relief_flow_m3h"] = relief_flow
+        cfg["relief_area_m2"] = relief_area
+        self._add_ambient_opening_record({
+            "zone": zone_id,
+            "type": "makeup_louvre",
+            "area_m2": relief_area,
+            "exchange_m3h": 0.0,
+            "schedule": AMBIENT_OPENING_ALWAYS_OPEN,
+            "description": (
+                "Life-support plenum make-up/relief opening sized from the "
+                "declared exhaust plus AHS ambient imbalance."
+            ),
+        })
 
     # ── duct leakage spines ───────────────────────────────────────────────
 

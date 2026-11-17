@@ -41,5 +41,12 @@
     "AHU_EC_D5": 0.12,
     "AHU_EC_D6": 0.12
   },
-  "night_setback": true
+  "night_setback": true,
+  "life_support_plenum": {
+    "enabled": true,
+    "zone_id": "LS_Plenum",
+    "link_area_m2": 0.2,
+    "volume_m3": 1.0,
+    "relief_face_velocity_m_s": 2.5
+  }
 }
