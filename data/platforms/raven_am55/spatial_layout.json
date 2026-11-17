@@ -160,7 +160,8 @@
         "x": 47.57,
         "y": 9.29
       },
-      "description": "open forecastle fwd: windlass, anchor gear"
+      "description": "open forecastle fwd: windlass, anchor gear",
+      "exposure": "weather"
     },
     {
       "id": "Foc_Deck_Open",
@@ -175,7 +176,8 @@
         "x": 21.76,
         "y": 17.45
       },
-      "description": "open weather deck aft w/ 40mm gun tubs"
+      "description": "open weather deck aft w/ 40mm gun tubs",
+      "exposure": "weather"
     },
     {
       "id": "Sweep_Deck",
@@ -190,7 +192,8 @@
         "x": 2.21,
         "y": 3.83
       },
-      "description": "stern working deck: depth-charge racks, sweep winch, mine track"
+      "description": "stern working deck: depth-charge racks, sweep winch, mine track",
+      "exposure": "weather"
     },
     {
       "id": "Steering_Gen",

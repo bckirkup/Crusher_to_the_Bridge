@@ -23,7 +23,8 @@
         "x": 5.24,
         "y": 4.7
       },
-      "description": "open quarterdeck boat-deck area astern"
+      "description": "open quarterdeck boat-deck area astern",
+      "exposure": "weather"
     },
     {
       "id": "SD_Aft_Barbette",
@@ -204,7 +205,8 @@
         "x": 94.32,
         "y": 5.0
       },
-      "description": "open bow over forecastle"
+      "description": "open bow over forecastle",
+      "exposure": "weather"
     },
     {
       "id": "MD_Stern_Fantail",
@@ -219,7 +221,8 @@
         "x": 4.29,
         "y": 6.88
       },
-      "description": "open fantail stern"
+      "description": "open fantail stern",
+      "exposure": "weather"
     },
     {
       "id": "MD_Aft_Barbette",
@@ -446,7 +449,8 @@
         "x": 88.6,
         "y": 7.46
       },
-      "description": "open forecastle, anchors + capstan gear at bow"
+      "description": "open forecastle, anchors + capstan gear at bow",
+      "exposure": "weather"
     },
     {
       "id": "BD_Officers_WC",

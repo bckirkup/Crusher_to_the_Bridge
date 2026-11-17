@@ -92,9 +92,10 @@ _MAKEUP_RECORDS = {
 # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
 # CONTAM-AMBIENT-WEATHER-DESTROYER-01, CONTAM-AMBIENT-WEATHER-CARRIER-01,
 # CONTAM-AMBIENT-WEATHER-BATTLESHIP-01, CONTAM-AMBIENT-WEATHER-CRUISER-01,
-# CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01 and CONTAM-AMBIENT-WEATHER-AUXILIARY-01:
-# one ``open_deck`` record per declared weather zone on the cruise, destroyer,
-# carrier, battleship, cruiser, amphibious and auxiliary roster hulls.
+# CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01, CONTAM-AMBIENT-WEATHER-AUXILIARY-01
+# and CONTAM-AMBIENT-WEATHER-MISC-01: one ``open_deck`` record per declared
+# weather zone on the cruise, destroyer, carrier, battleship, cruiser,
+# amphibious, auxiliary and misc roster hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -205,11 +206,28 @@ _WEATHER_ZONES = {
         "Swimming_Pool", "Top_Of_House", "Weather_Deck_Port_A",
         "Weather_Deck_Stbd_A",
     },
+    # CONTAM-AMBIENT-WEATHER-MISC-01: the remaining ungrouped/zero-exchange
+    # weather zones. Eagle's ungrouped gun/AA platforms and open navigating
+    # bridge are lexical misses declared as weather; grouped OA-exchange
+    # weather zones stay untouched as the known grouped-zone open item.
+    "castle_class_corvette": {"Foc_Deck_Open", "Quarterdeck"},
+    "eagle_pe60": {
+        "Open_Bridge", "Nav_Bridge", "Gun_Platform_Fwd", "After_Gun_Platform",
+        "AA_Gun_Platforms", "Fantail", "Gun_Deck_Fwd",
+    },
+    "olympia_c6": {
+        "SD_Stern_Open", "SD_Forecastle_Open", "MD_Stern_Fantail",
+        "MD_Forecastle_Open",
+    },
+    "pce_874": {"Fantail", "Focsle_Deck"},
+    "raven_am55": {"Foc_Deck_Fwd", "Foc_Deck_Open", "Sweep_Deck"},
+    "river_class_frigate": {"Quarterdeck", "Foc_Deck_Open"},
+    "rolla_pc483": {"Fantail", "Focsle_Deck"},
 }
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
-# CONTAM-AMBIENT-WEATHER-CARRIER-01, CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01 and
-# CONTAM-AMBIENT-WEATHER-AUXILIARY-01: declared enclosed zones. They carry no
-# opening.
+# CONTAM-AMBIENT-WEATHER-CARRIER-01, CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01,
+# CONTAM-AMBIENT-WEATHER-AUXILIARY-01 and CONTAM-AMBIENT-WEATHER-MISC-01:
+# declared enclosed zones. They carry no opening.
 _ENCLOSED_ZONES = {
     "classic_cruise_1900": {"Promenade"},
     "diamond_princess": {"PromGalleria"},
@@ -231,6 +249,8 @@ _ENCLOSED_ZONES = {
     "jupiter_ac3": {"Passage_Deckhouse"},
     "passumpsic_ao106": {"Signal_Deck"},
     "pope_ap110": {"Sup_Deck_Mech"},
+    # CONTAM-AMBIENT-WEATHER-MISC-01: lexical Focsle id, enclosed storerooms.
+    "esteem_mso438": {"Focsle_Store"},
 }
 
 

@@ -39,7 +39,8 @@
         "x": 32.11,
         "y": 2.77
       },
-      "description": "open bridge wing area fwd of chart house"
+      "description": "open bridge wing area fwd of chart house",
+      "exposure": "weather"
     },
     {
       "id": "Gun_Platform_Fwd",
@@ -54,7 +55,8 @@
         "x": 45.5,
         "y": 3.09
       },
-      "description": "forward 4in RF gun platform"
+      "description": "forward 4in RF gun platform",
+      "exposure": "weather"
     },
     {
       "id": "After_Gun_Platform",
@@ -70,7 +72,8 @@
         "y": 3.56
       },
       "max_occupancy": 2,
-      "description": "after 4in RF gun platform over aft deckhouse"
+      "description": "after 4in RF gun platform over aft deckhouse",
+      "exposure": "weather"
     },
     {
       "id": "Nav_Bridge",
@@ -86,7 +89,8 @@
         "y": 3.46
       },
       "max_occupancy": 6,
-      "description": "open navigating bridge, 40' above baseline"
+      "description": "open navigating bridge, 40' above baseline",
+      "exposure": "weather"
     },
     {
       "id": "AA_Gun_Platforms",
@@ -102,7 +106,8 @@
         "y": 3.26
       },
       "max_occupancy": 2,
-      "description": "paired 1-pdr AA machine-gun platforms"
+      "description": "paired 1-pdr AA machine-gun platforms",
+      "exposure": "weather"
     },
     {
       "id": "Radio_Room",
@@ -246,7 +251,8 @@
         "x": 1.95,
         "y": 3.93
       },
-      "description": "open stern deck: depth-charge racks, Y-gun"
+      "description": "open stern deck: depth-charge racks, Y-gun",
+      "exposure": "weather"
     },
     {
       "id": "Berthing_Main_1",
@@ -341,7 +347,8 @@
         "x": 49.41,
         "y": 3.37
       },
-      "description": "open forecastle: 4in gun, ammunition hoists"
+      "description": "open forecastle: 4in gun, ammunition hoists",
+      "exposure": "weather"
     },
     {
       "id": "Chain_Locker",

@@ -53,7 +53,8 @@
         "x": 16.7,
         "y": 4.33
       },
-      "description": "aft weather deck: 12pdr gun, twin oerlikon tubs, R.U. shell racks, ammo hoists, DC handling, carley floats, 27ft whaler/25ft cutter stowage"
+      "description": "aft weather deck: 12pdr gun, twin oerlikon tubs, R.U. shell racks, ammo hoists, DC handling, carley floats, 27ft whaler/25ft cutter stowage",
+      "exposure": "weather"
     },
     {
       "id": "Cabin_Block",
@@ -83,7 +84,8 @@
         "x": 75.21,
         "y": 4.33
       },
-      "description": "fwd weather deck: hedgehog, windlass, gun support, shelter, breakwater"
+      "description": "fwd weather deck: hedgehog, windlass, gun support, shelter, breakwater",
+      "exposure": "weather"
     },
     {
       "id": "DC_Flat",
