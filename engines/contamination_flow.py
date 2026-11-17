@@ -25,6 +25,7 @@ class FlowResult:
     food: dict[str, float] = field(default_factory=dict)
     mouth_dose: dict[Hashable, float] = field(default_factory=dict)
     food_dose: dict[Hashable, float] = field(default_factory=dict)
+    pickup_mass: dict[Hashable, float] = field(default_factory=dict)
 
 
 def _rk4_step(
@@ -128,7 +129,10 @@ def integrate_hand_flow(
     ]
 
     mass_count = a_count + u_count + z_count
-    n = mass_count + 2 * a_count
+    mouth_offset = mass_count
+    food_offset = mass_count + a_count
+    pickup_offset = mass_count + 2 * a_count
+    n = mass_count + 3 * a_count
     y = [0.0] * n
     for agent, value in hand0.items():
         if agent in agent_index:
@@ -156,8 +160,7 @@ def integrate_hand_flow(
         for i, edges in enumerate(pickup_by_agent):
             inflow = sum(rate * surface[u] for u, rate in edges)
             deriv[i] = inflow - hand_out[i] * hand[i]
-        mouth_offset = mass_count
-        food_offset = mass_count + a_count
+            deriv[pickup_offset + i] = inflow
         for i in range(a_count):
             deriv[mouth_offset + i] = mouth[i] * hand[i]
             dose = 0.0
@@ -189,6 +192,12 @@ def integrate_hand_flow(
         agent: max(0.0, y[mass_count + i]) for agent, i in agent_index.items()
     }
     food_dose = {
-        agent: max(0.0, y[mass_count + a_count + i]) for agent, i in agent_index.items()
+        agent: max(0.0, y[food_offset + i]) for agent, i in agent_index.items()
     }
-    return FlowResult(hand, surface, food, mouth_dose, food_dose)
+    pickup_mass = {
+        agent: max(0.0, y[pickup_offset + i])
+        for agent, i in agent_index.items()
+    }
+    return FlowResult(
+        hand, surface, food, mouth_dose, food_dose, pickup_mass,
+    )

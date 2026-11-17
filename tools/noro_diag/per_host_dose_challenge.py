@@ -687,6 +687,7 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         "_fomite_pickup_request_for_area": (
             core_cls._fomite_pickup_request_for_area
         ),
+        "_apply_contamination_flow": core_cls._apply_contamination_flow,
         # RNG-free helpers, re-called from the witness below; kept in
         # ``originals`` so the restore loop covers them uniformly even though
         # nothing replaces them.
@@ -772,6 +773,40 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
             originals, rec, self, target, zone_name, epoch, pathogen_id,
         )
 
+    def apply_flow(
+        self: Any,
+        pathogen_id: str,
+        profile: dict | None,
+        ledger: Any,
+        agent_doses: dict[int, float],
+        matrix: Any,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        result: Any,
+        agents_by_id: dict[int, Any],
+        primary_unit: dict[int, str],
+        primary_food_zone: dict[int, str],
+        surface0: dict[str, float],
+        food0: dict[str, float],
+        food_zone_occupants: dict[str, list[Any]],
+    ) -> None:
+        """Witness the continuous solver's aggregate surface->hand flux."""
+        originals["_apply_contamination_flow"](
+            self, pathogen_id, profile, ledger, agent_doses, matrix,
+            agent_pathway_doses, result, agents_by_id, primary_unit,
+            primary_food_zone, surface0, food0, food_zone_occupants,
+        )
+        if rec.current_pathogen != rec.pathogen_id:
+            return
+        delivered = float(sum(
+            float(mass) for mass in result.pickup_mass.values()
+        ))
+        if delivered <= 0.0:
+            return
+        rec.fomite["deliver_calls"] += 1
+        rec.fomite["surface_mass_offered_gec"] += float(sum(surface0.values()))
+        rec.fomite["mass_requested_gec"] += delivered
+        rec.fomite["mass_delivered_to_hands_gec"] += delivered
+
     core_cls._deliver_fomite_requests = deliver
     core_cls._deliver_fomite_requests_by_class = deliver_by_class
     core_cls._fomite_pickup_requests_by_class = pickup_requests_by_class
@@ -779,6 +814,7 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
     core_cls._deposit_surface_mass = deposit
     core_cls._replenish_hand = replenish_hand
     core_cls._fomite_pickup_request_for_area = pickup_request_for_area
+    core_cls._apply_contamination_flow = apply_flow
     return originals
 
 

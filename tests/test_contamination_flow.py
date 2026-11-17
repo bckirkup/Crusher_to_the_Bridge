@@ -70,6 +70,7 @@ def test_flow_exchange_keeps_surface_and_hand_mass_linked() -> None:
     expected_gap = 10.0 * math.exp(-1.0)
     assert surface - hand == pytest.approx(expected_gap, rel=1e-3)
     assert surface + hand == pytest.approx(10.0, rel=1e-6)
+    assert 0.0 < result.pickup_mass[1] <= 10.0
 
 
 def test_flow_food_ingestion_removes_pool_and_books_dose() -> None:
