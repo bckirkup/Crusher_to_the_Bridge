@@ -120,7 +120,7 @@ def _cell_from_zip(zip_path: Path, block: str, stratum: str, solver: str) -> dic
     vsp_epoch = derived.get("vsp_trigger_epoch")
     vsp_day = None
     if vsp_epoch is not None:
-        vsp_day = max(1, math.ceil(int(vsp_epoch) / 24))  # clock-exempt: readout day = epoch / declared 24 epochs per day
+        vsp_day = max(1, int(vsp_epoch) // 24 + 1)  # clock-exempt: readout day = SimClock.day_index(epoch)+1 on the pinned hours clock
     return {
         "block": block,
         "stratum": stratum,
@@ -161,6 +161,57 @@ def _group(cells: list[dict[str, Any]]) -> dict[tuple[str, str], dict[int, dict[
     for cell in cells:
         grouped.setdefault((cell["stratum"], cell["solver"]), {})[cell["seed"]] = cell
     return grouped
+
+
+def _expected_seed_sets(seed_selection_path: Path) -> dict[tuple[str, str], set[int]]:
+    data = json.loads(seed_selection_path.read_text(encoding="utf-8"))
+    supply = data.get("supply_arms") or {}
+    arm_to_stratum = {
+        "station_lots": "station_lots_contaminated",
+        "single_line_receipt": "single_line_receipt_contaminated",
+        "declared_receipts": "declared_receipts_contaminated",
+    }
+    expected: dict[tuple[str, str], set[int]] = {}
+    for solver in data.get("solver_arms") or SOLVERS:
+        for arm, stratum in arm_to_stratum.items():
+            seeds = (supply.get(arm) or {}).get("seeds") or []
+            expected[(stratum, solver)] = {int(seed) for seed in seeds}
+        quiet = data.get("quiet_controls") or {}
+        if quiet.get("arm") == "station_lots":
+            expected[("station_lots_quiet", solver)] = {
+                int(seed) for seed in quiet.get("seeds") or []
+            }
+    return expected
+
+
+def _cell_accounting(
+    cells: list[dict[str, Any]],
+    expected: dict[tuple[str, str], set[int]],
+) -> dict[str, Any]:
+    observed: dict[tuple[str, str], set[int]] = {}
+    duplicates = 0
+    for cell in cells:
+        key = (cell["stratum"], cell["solver"])
+        seeds = observed.setdefault(key, set())
+        if cell["seed"] in seeds:
+            duplicates += 1
+        seeds.add(cell["seed"])
+    missing_cells = []
+    missing = 0
+    for key in sorted(expected):
+        absent = sorted(expected[key] - observed.get(key, set()))
+        if absent:
+            missing += len(absent)
+            missing_cells.append(
+                {"stratum": key[0], "solver": key[1], "seeds": absent}
+            )
+    return {
+        "n_cells": len(cells),
+        "n_unique_cells": sum(len(seeds) for seeds in observed.values()),
+        "n_duplicate_cells": duplicates,
+        "n_failed": missing,
+        "missing_cells": missing_cells,
+    }
 
 
 def _arm_summary(cells: list[dict[str, Any]]) -> dict[str, Any]:
@@ -246,7 +297,7 @@ def build_markdown(payload: dict[str, Any]) -> str:
         f"**Measured at:** `{payload['measured_sha']}`",
         f"S3 prefix: `{payload['s3_prefix']}`",
         f"Image: `{payload['image']}`",
-        f"Cells: {payload['n_cells']} run zips, {payload['n_failed']} failed/missing.",
+        f"Cells: {payload['n_cells']} run zips ({payload['n_unique_cells']} unique, {payload['n_duplicate_cells']} duplicate), {payload['n_failed']} failed/missing.",
         "",
         "Posting means `vsp_trigger_epoch is not None` (either-channel reported-case VSP rule). ARs are fractions; tables show percents where labelled.",
         "",
@@ -405,10 +456,13 @@ def main() -> int:
     parser.add_argument("--sha", default="unknown")
     parser.add_argument("--s3-prefix", default="s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_01/")
     parser.add_argument("--image", default="994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:noro-supply-solver01@sha256:f25d74cd225bc4ade19a012ba801b25f91289f80f3c3778bfd6c27c343a0053a")
+    parser.add_argument("--seed-selection", type=Path, default=None)
     args = parser.parse_args()
 
     cells = load_cells(args.results)
     grouped = _group(cells)
+    seed_selection = args.seed_selection or args.results / "seed_selection.json"
+    accounting = _cell_accounting(cells, _expected_seed_sets(seed_selection))
     strata_payload: dict[str, Any] = {}
     for stratum in STRATA:
         arms = {
@@ -421,8 +475,7 @@ def main() -> int:
         "measured_sha": args.sha,
         "s3_prefix": args.s3_prefix,
         "image": args.image,
-        "n_cells": len(cells),
-        "n_failed": 88 - len(cells),
+        **accounting,
         "strata": strata_payload,
         "cells": cells,
     }

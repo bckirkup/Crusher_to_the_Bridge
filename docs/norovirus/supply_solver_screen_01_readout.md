@@ -3,7 +3,7 @@
 **Measured at:** `6742f1a456e5717cf813c57bc9b3e34bb532fda5`
 S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_01/`
 Image: `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:noro-supply-solver01@sha256:f25d74cd225bc4ade19a012ba801b25f91289f80f3c3778bfd6c27c343a0053a`
-Cells: 88 run zips, 0 failed/missing.
+Cells: 88 run zips (88 unique, 0 duplicate), 0 failed/missing.
 
 Posting means `vsp_trigger_epoch is not None` (either-channel reported-case VSP rule). ARs are fractions; tables show percents where labelled.
 

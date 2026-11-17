@@ -3,7 +3,10 @@
   "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_01/",
   "image": "994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:noro-supply-solver01@sha256:f25d74cd225bc4ade19a012ba801b25f91289f80f3c3778bfd6c27c343a0053a",
   "n_cells": 88,
+  "n_unique_cells": 88,
+  "n_duplicate_cells": 0,
   "n_failed": 0,
+  "missing_cells": [],
   "strata": {
     "station_lots_contaminated": {
       "arms": {
@@ -214,7 +217,7 @@
             "median": 4.0,
             "q1": 3.0,
             "q3": 4.0,
-            "mean": 3.6875,
+            "mean": 3.75,
             "min": 2.0,
             "max": 5.0
           },
@@ -2220,7 +2223,7 @@
       "engine_git_sha": "3500c205426cc49f1b4075fb5fc5f8ff0d057021",
       "posted": true,
       "vsp_epoch": 48,
-      "vsp_day": 2,
+      "vsp_day": 3,
       "attack_rate": 0.16,
       "peak_prevalence": 67,
       "peak_epoch": 113,
