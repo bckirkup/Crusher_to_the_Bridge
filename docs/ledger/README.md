@@ -89,6 +89,8 @@ New ledger entries are registered here as they land; the filename remains the st
 - `NORO-HAND-CASCADE-01-CE-FEASIBILITY.md` — CE comparator budget decision: staged-aggregate scheduled-event CE is implementable by reusing existing kernels; literal per-contact CE is blocked by the contact-audit geometry/behaviour gaps; owner target is the within-epoch hand-process update and a believable secondary-contamination share, not posted-tail closure.
 - `NORO-HAND-CASCADE-01-CONTINUOUS-FLOW.md` — shipped `transmission.contamination_solver: continuous` default: pooled RK4 hand↔surface↔food flow with epoch-once sanitary/emesis/HVAC/pathway bookkeeping outside the integrator; discrete remains the labelled baseline, per-surface falls back to discrete, no new constants, local guards green, paired-seed/campaign witness still open.
 
+- `NORO-SUPPLY-SOLVER-SCREEN-01.md` — expedition p06 paired `discrete` vs `continuous` contamination-solver screen (88 cells): posting unchanged (contaminated strata 100% on both arms, quiet controls 0/8), paired AR/VSP/role differences sign-test unresolved (all p ≥ 0.180) with overlapping ranges; the continuous default is not contradicted by this screen but is not separated from discrete on these supply seeds.
+
 ## For drafting and analysis
 
 Anyone (human or agent) drafting a manuscript, report or analysis from this repository must draw from, in this order:
