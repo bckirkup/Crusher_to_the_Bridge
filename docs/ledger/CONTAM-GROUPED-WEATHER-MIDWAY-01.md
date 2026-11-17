@@ -3,7 +3,7 @@
 **Commit:** 0229916a
 **Pathogens:** all
 **Status:** measured
-**Measured at:** 0229916a
+**Measured at:** 52d7733c
 
 ## Scope
 
@@ -20,7 +20,7 @@ Recipe precedent: [`CONTAM-AMBIENT-WEATHER-CRUISE-01`](CONTAM-AMBIENT-WEATHER-CR
 and [`CONTAM-AMBIENT-WEATHER-OLYMPIA-01`](CONTAM-AMBIENT-WEATHER-OLYMPIA-01.md).
 Steady ContamX solves used the local official NIST binary
 `third_party/contamx/contamx3`; no seeds, no AWS. All numbers below are
-measured on the working tree of this change on top of `origin/main`
+measured on the data committed at `52d7733c`, on top of `origin/main`
 `0229916a`; "before" is `0229916a` itself.
 
 ## Change (exactly)
