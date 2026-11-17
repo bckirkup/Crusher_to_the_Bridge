@@ -1,0 +1,337 @@
+{
+ "name": "noro_supply_solver_screen_02",
+ "pathogen": "norovirus",
+ "manifest": "campaigns/noro/supply_solver_screen_02/manifest.json",
+ "pathogen_id": "norwalk_gi",
+ "epochs": 288,
+ "s3_prefix": "campaign/noro_supply_solver_screen_02/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "noro-supply-solver02",
+ "resources": {
+  "vcpu": "1",
+  "memory": "8192",
+  "shm": 512
+ },
+ "blocks": {
+  "cls_station_lots_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv_station_lots_discrete",
+   "seeds": [
+    960473,
+    960519,
+    962638,
+    962793,
+    973908,
+    975188,
+    975568,
+    977686,
+    981245,
+    982449,
+    987772,
+    990757,
+    991166,
+    991352,
+    992573,
+    993257
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "cls_station_lots_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv_station_lots_continuous",
+   "seeds": [
+    960473,
+    960519,
+    962638,
+    962793,
+    973908,
+    975188,
+    975568,
+    977686,
+    981245,
+    982449,
+    987772,
+    990757,
+    991166,
+    991352,
+    992573,
+    993257
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "cls_single_line_receipt_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv_single_line_receipt_discrete",
+   "seeds": [
+    962698,
+    976022,
+    977844,
+    978434,
+    979876,
+    984759,
+    984908,
+    986221,
+    989601,
+    993697
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "cls_single_line_receipt_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv_single_line_receipt_continuous",
+   "seeds": [
+    962698,
+    976022,
+    977844,
+    978434,
+    979876,
+    984759,
+    984908,
+    986221,
+    989601,
+    993697
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "cls_declared_receipts_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv_declared_receipts_discrete",
+   "seeds": [
+    961251,
+    961776,
+    967234,
+    967784,
+    971179,
+    976372,
+    976577,
+    985135,
+    985544,
+    988712
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "cls_declared_receipts_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv_declared_receipts_continuous",
+   "seeds": [
+    961251,
+    961776,
+    967234,
+    967784,
+    971179,
+    976372,
+    976577,
+    985135,
+    985544,
+    988712
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "cls_quiet_station_lots_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv_station_lots_discrete",
+   "seeds": [
+    962122,
+    966376,
+    970588,
+    974846,
+    979093,
+    983364,
+    987606,
+    991850
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "cls_quiet_station_lots_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_cls_12d_sens_p06_paxv_station_lots_continuous",
+   "seeds": [
+    962122,
+    966376,
+    970588,
+    974846,
+    979093,
+    983364,
+    987606,
+    991850
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "spr_station_lots_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv_station_lots_discrete",
+   "seeds": [
+    1000371,
+    1000930,
+    1001255,
+    1004210,
+    1004460,
+    1005304,
+    1005327,
+    1006760,
+    1008138,
+    1008312,
+    1012659,
+    1013162,
+    1013705,
+    1015129,
+    1016000,
+    1016787
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "spr_station_lots_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv_station_lots_continuous",
+   "seeds": [
+    1000371,
+    1000930,
+    1001255,
+    1004210,
+    1004460,
+    1005304,
+    1005327,
+    1006760,
+    1008138,
+    1008312,
+    1012659,
+    1013162,
+    1013705,
+    1015129,
+    1016000,
+    1016787
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "spr_single_line_receipt_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv_single_line_receipt_discrete",
+   "seeds": [
+    1001571,
+    1001624,
+    1004837,
+    1006553,
+    1006796,
+    1006815,
+    1007580,
+    1007936,
+    1013950,
+    1014986
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "spr_single_line_receipt_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv_single_line_receipt_continuous",
+   "seeds": [
+    1001571,
+    1001624,
+    1004837,
+    1006553,
+    1006796,
+    1006815,
+    1007580,
+    1007936,
+    1013950,
+    1014986
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "spr_declared_receipts_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv_declared_receipts_discrete",
+   "seeds": [
+    1002220,
+    1003010,
+    1004290,
+    1007490,
+    1009452,
+    1009618,
+    1010139,
+    1010314,
+    1015382,
+    1017563
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "spr_declared_receipts_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv_declared_receipts_continuous",
+   "seeds": [
+    1002220,
+    1003010,
+    1004290,
+    1007490,
+    1009452,
+    1009618,
+    1010139,
+    1010314,
+    1015382,
+    1017563
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "spr_quiet_station_lots_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv_station_lots_discrete",
+   "seeds": [
+    1001179,
+    1003557,
+    1005933,
+    1008298,
+    1010705,
+    1013085,
+    1015452,
+    1017817
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "spr_quiet_station_lots_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_spr_12d_sens_p06_paxv_station_lots_continuous",
+   "seeds": [
+    1001179,
+    1003557,
+    1005933,
+    1008298,
+    1010705,
+    1013085,
+    1015452,
+    1017817
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  }
+ }
+}
