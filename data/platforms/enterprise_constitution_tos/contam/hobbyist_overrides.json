@@ -1,5 +1,6 @@
 {
   "description": "Hobbyist-plus Contam overrides for enterprise_constitution_tos cabin-corridor revision.",
+  "relative_wind_speed_m_s": 0,
   "orifice_type_map": {
     "corridor": "cabin_relief",
     "doorway": "doorway",

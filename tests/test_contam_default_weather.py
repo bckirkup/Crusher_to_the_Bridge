@@ -111,12 +111,14 @@ def test_committed_bundle_weather_is_internally_consistent(name: str) -> None:
     rows = _path_rows(text)
     profiled = [row for row in rows if int(row[6]) > 0]
     assert profiled, "every bundled hull has envelope leaks on a wind profile"
-    # Every path on a wind profile is wind-driven, at the one modifier, and
-    # nothing is driven by a constant pressure instead.
-    assert all(int(row[1]) & 1 == 1 for row in profiled)
+    # Profile-carrying paths keep the one modifier and no constant pressure;
+    # the wind flag is set only when the hull's resolved speed is nonzero.
     assert {float(row[16]) for row in profiled} == {0.8}
     assert all(float(row[15]) == pytest.approx(0.0) for row in rows)
-    assert all(int(row[6]) > 0 for row in rows if int(row[1]) & 1)
+    expected_wind_flag = 1 if speed > 0.0 else 0
+    assert all((int(row[1]) & 1) == expected_wind_flag for row in profiled)
+    if speed > 0.0:
+        assert all(int(row[6]) > 0 for row in rows if int(row[1]) & 1)
     # No per-record drift: a declared opening speed is the hull's speed.
     declared = {
         float(record["wind_speed_m_s"])

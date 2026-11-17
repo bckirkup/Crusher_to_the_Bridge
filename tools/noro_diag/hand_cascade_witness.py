@@ -20,6 +20,7 @@ import copy
 import gzip
 import json
 import sys
+import time
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -71,6 +72,20 @@ ARMS: dict[str, dict[str, Any]] = {
             "hand_redeposit_mode": "carriers",
             "intra_epoch_causal_order": "ordered",
             "intra_epoch_substeps": 12,
+        },
+    },
+    "carriers_ordered_sub24": {
+        "transmission": {
+            "hand_redeposit_mode": "carriers",
+            "intra_epoch_causal_order": "ordered",
+            "intra_epoch_substeps": 24,
+        },
+    },
+    "carriers_ordered_sub60": {
+        "transmission": {
+            "hand_redeposit_mode": "carriers",
+            "intra_epoch_causal_order": "ordered",
+            "intra_epoch_substeps": 60,
         },
     },
 }
@@ -334,10 +349,12 @@ def _run_spec_arm(
     epochs = int(spec["run"]["num_epochs"])
     rec = fmb.Recorder(pathogen_id=pathogen_id)
     cascade = CascadeRecorder(pathogen_id)
+    started = time.perf_counter()
     with attr_patches() as patches:
         originals = install_wrappers(tc.TransmissionCore, cascade.wrappers())
         patches.note_all(tc.TransmissionCore, originals)
         result = fmb._run_voyage(spec, rec)
+    runtime_seconds = time.perf_counter() - started
     summary = fmb.summarise(rec, seed, epochs)
     summary.pop("epoch_timeline", None)
     summary["voyage"] = fmb._voyage_fingerprint(spec, result, num_agents)
@@ -349,6 +366,7 @@ def _run_spec_arm(
     row["arm"] = arm
     row["config_overrides"] = ARMS[arm]
     row["run_id"] = spec.get("description")
+    row["runtime_seconds"] = runtime_seconds
     return row
 
 

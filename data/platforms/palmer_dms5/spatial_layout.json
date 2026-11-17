@@ -179,7 +179,8 @@
         "x": 42.52,
         "y": 3.36
       },
-      "description": "open waist: motor boat stowage over machinery casing"
+      "description": "open waist: motor boat stowage over machinery casing",
+      "exposure": "weather"
     },
     {
       "id": "Battery_Locker",

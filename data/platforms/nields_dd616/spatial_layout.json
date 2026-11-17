@@ -55,7 +55,8 @@
         "x": 71.6,
         "y": 4.39
       },
-      "description": "catwalk, splinter shields, 5in gun No.2 ring + spray shield area"
+      "description": "catwalk, splinter shields, 5in gun No.2 ring + spray shield area",
+      "exposure": "weather"
     },
     {
       "id": "After_Deckhouse_Top",
@@ -70,7 +71,8 @@
         "x": 25.14,
         "y": 5.08
       },
-      "description": "top of after deckhouse: radar antenna, gun mounts, flag bags"
+      "description": "top of after deckhouse: radar antenna, gun mounts, flag bags",
+      "exposure": "weather"
     },
     {
       "id": "Midship_Deckhouse",
@@ -85,7 +87,8 @@
         "x": 57.06,
         "y": 5.3
       },
-      "description": "top of midship deckhouse: torpedo tubes, stanchions, floater nets"
+      "description": "top of midship deckhouse: torpedo tubes, stanchions, floater nets",
+      "exposure": "weather"
     },
     {
       "id": "Radio_Central",
@@ -132,7 +135,8 @@
         "x": 92.13,
         "y": 4.77
       },
-      "description": "open focsle: 5in gun No.1 ring, bos'n stores, anchor gear, bow"
+      "description": "open focsle: 5in gun No.1 ring, bos'n stores, anchor gear, bow",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -147,7 +151,8 @@
         "x": 7.82,
         "y": 4.88
       },
-      "description": "DC tracks, smoke screen gen, propeller guard, 5in gun No.4 ring"
+      "description": "DC tracks, smoke screen gen, propeller guard, 5in gun No.4 ring",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Ammo",
@@ -331,7 +336,8 @@
         "x": 100.35,
         "y": 4.83
       },
-      "description": "windlass rm A-102AE, chain pipe, bos'n's stores & lamp rm, hawse pipes"
+      "description": "windlass rm A-102AE, chain pipe, bos'n's stores & lamp rm, hawse pipes",
+      "exposure": "enclosed"
     },
     {
       "id": "Steering_Gear",
@@ -393,7 +399,7 @@
         "x": 38.17,
         "y": 4.55
       },
-      "description": "B-4-1 engine rm — TALL (spans to hold), zoned once"
+      "description": "B-4-1 engine rm \u2014 TALL (spans to hold), zoned once"
     },
     {
       "id": "Fire_Rm_Aft",
@@ -408,7 +414,7 @@
         "x": 46.53,
         "y": 4.55
       },
-      "description": "B-3 fire rm (boilers) — TALL, zoned once"
+      "description": "B-3 fire rm (boilers) \u2014 TALL, zoned once"
     },
     {
       "id": "Engine_Rm_Fwd",
@@ -423,7 +429,7 @@
         "x": 55.56,
         "y": 4.55
       },
-      "description": "B-2-1 engine rm — TALL, zoned once"
+      "description": "B-2-1 engine rm \u2014 TALL, zoned once"
     },
     {
       "id": "Fire_Rm_Fwd",
@@ -438,7 +444,7 @@
         "x": 64.6,
         "y": 4.55
       },
-      "description": "B-1 fire rm (boilers) — TALL, zoned once"
+      "description": "B-1 fire rm (boilers) \u2014 TALL, zoned once"
     },
     {
       "id": "Crew_Qtrs_1P",

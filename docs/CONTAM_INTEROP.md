@@ -337,8 +337,11 @@ baseline, which clears the wind flag on every profile path and falls back to
 the imposed `wPset` of `CONTAM-AMBIENT-WEATHER-CRUISE-01` on declared-wind
 records. At the default the wind pressure is +0.34 / −0.12 Pa, far below the
 fan-driven pressures: it drives the weather-deck exchange and moves envelope
-leak flows by a few m³/h per hull, no more. Ledgers
-`CONTAM-AMBIENT-WEATHER-CRUISE-01`, `CONTAM-DEFAULT-WEATHER-01`.
+leak flows by a few m³/h per hull, no more. Declared-wind `open_deck` records
+now cover six cruise hulls (`CONTAM-AMBIENT-WEATHER-CRUISE-01`) and nine
+destroyer hulls (`CONTAM-AMBIENT-WEATHER-DESTROYER-01`); ledgers
+`CONTAM-AMBIENT-WEATHER-CRUISE-01`, `CONTAM-AMBIENT-WEATHER-DESTROYER-01`,
+`CONTAM-DEFAULT-WEATHER-01`.
 
 ### `.SIM` reader contract (critical)
 

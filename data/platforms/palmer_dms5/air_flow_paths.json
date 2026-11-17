@@ -116,6 +116,17 @@
       "filtered": false
     }
   ],
+  "ambient_openings": [
+    {
+      "zone": "Boat_Deck_Uptakes",
+      "type": "open_deck",
+      "area_m2": 48.88,
+      "exchange_m3h": 32184.7,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-DESTROYER-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    }
+  ],
   "adjacency": [
     {
       "from": "Pilot_House",
