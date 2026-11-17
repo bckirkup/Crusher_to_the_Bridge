@@ -23,7 +23,8 @@
         "x": 4.5,
         "y": 5.93
       },
-      "description": "40mm AA twins #4/#5 + RS houses, weather"
+      "description": "40mm AA twins #4/#5 + RS houses, weather",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Deck",
@@ -38,7 +39,8 @@
         "x": 20.03,
         "y": 1.75
       },
-      "description": "LCVP landing craft + boat winches, weather"
+      "description": "LCVP landing craft + boat winches, weather",
+      "exposure": "weather"
     },
     {
       "id": "Radio_Control",
@@ -116,7 +118,8 @@
         "x": 36.9,
         "y": 5.7
       },
-      "description": "20mm gun platforms #9/#10 fwd, weather"
+      "description": "20mm gun platforms #9/#10 fwd, weather",
+      "exposure": "weather"
     },
     {
       "id": "Fantail_Main",
@@ -131,7 +134,8 @@
         "x": 0.8,
         "y": 6.08
       },
-      "description": "weather stern, stern anchor"
+      "description": "weather stern, stern anchor",
+      "exposure": "weather"
     },
     {
       "id": "Service_Rooms_Aft",
@@ -213,7 +217,8 @@
         "x": 10.06,
         "y": 8.11
       },
-      "description": "40mm AA twin gun platforms aft + davits"
+      "description": "40mm AA twin gun platforms aft + davits",
+      "exposure": "weather"
     },
     {
       "id": "Barber_Shop",
@@ -292,7 +297,8 @@
         "x": 46.2,
         "y": 6.22
       },
-      "description": "open deck over tank deck: cargo hatch, skylight, boats"
+      "description": "open deck over tank deck: cargo hatch, skylight, boats",
+      "exposure": "weather"
     },
     {
       "id": "Forecastle_Bow",
@@ -307,7 +313,8 @@
         "x": 79.6,
         "y": 6.22
       },
-      "description": "fwd weather: 20/40mm gun circles, anchor windlass, chain"
+      "description": "fwd weather: 20/40mm gun circles, anchor windlass, chain",
+      "exposure": "weather"
     },
     {
       "id": "Wash_WC_Stern",

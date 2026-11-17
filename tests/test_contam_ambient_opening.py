@@ -91,9 +91,10 @@ _MAKEUP_RECORDS = {
 }
 # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
 # CONTAM-AMBIENT-WEATHER-DESTROYER-01, CONTAM-AMBIENT-WEATHER-CARRIER-01,
-# CONTAM-AMBIENT-WEATHER-BATTLESHIP-01 and CONTAM-AMBIENT-WEATHER-CRUISER-01:
-# one ``open_deck`` record per declared weather zone on the cruise, destroyer,
-# carrier, battleship and cruiser roster hulls.
+# CONTAM-AMBIENT-WEATHER-BATTLESHIP-01, CONTAM-AMBIENT-WEATHER-CRUISER-01 and
+# CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01: one ``open_deck`` record per declared
+# weather zone on the cruise, destroyer, carrier, battleship, cruiser and
+# amphibious roster hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -157,10 +158,25 @@ _WEATHER_ZONES = {
         "Wheelhouse_Top", "Bridge_Wings", "Boat_Stowage_Open",
         "Forecastle_Working",
     },
+    # CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01: ungrouped amphibious weather zones;
+    # HVAC-grouped amphibious weather zones stay untouched as the known
+    # grouped-zone open item.
+    "lsm_354": {
+        "Forecastle_Weather", "Bridge_Wings", "Weather_Aft_Super",
+        "Weather_Fwd_Super",
+    },
+    "middlesex_lst983": {
+        "Gun_Platform_Aft_Bridge", "Boat_Deck", "Gun_Platforms_Fwd_Bridge",
+        "Fantail_Main", "Gun_Platform_Aft_Main", "Weather_Deck_Amids",
+        "Forecastle_Bow",
+    },
+    "ruchamkin_apd89": {
+        "Boat_Deck_Open", "Island_Open_Aft", "Fantail", "Focsle_Deck",
+    },
 }
-# CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01 and
-# CONTAM-AMBIENT-WEATHER-CARRIER-01: declared enclosed zones. They carry no
-# opening.
+# CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
+# CONTAM-AMBIENT-WEATHER-CARRIER-01 and CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01:
+# declared enclosed zones. They carry no opening.
 _ENCLOSED_ZONES = {
     "classic_cruise_1900": {"Promenade"},
     "diamond_princess": {"PromGalleria"},
@@ -172,6 +188,10 @@ _ENCLOSED_ZONES = {
     "nields_dd616": {"Bow_Focsle"},
     # CONTAM-AMBIENT-WEATHER-CARRIER-01: lexical Focsle id, enclosed stores.
     "independence_cvl26": {"Focsle_Stores"},
+    # CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01: enclosed amphibious deck/shelter
+    # corrections; neither carries an opening.
+    "ruchamkin_apd89": {"Signal_Deck"},
+    "san_antonio_class_lpd": {"Vehicle_Deck"},
 }
 
 
