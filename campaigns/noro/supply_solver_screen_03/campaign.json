@@ -1,0 +1,177 @@
+{
+ "name": "noro_supply_solver_screen_03",
+ "pathogen": "norovirus",
+ "manifest": "campaigns/noro/supply_solver_screen_03/manifest.json",
+ "pathogen_id": "norwalk_gi",
+ "epochs": 288,
+ "s3_prefix": "campaign/noro_supply_solver_screen_03/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "noro-supply-solver03@sha256:203536dea284153523e1ea874ad76651efecb34d0458a08d957c8f465277452a",
+ "resources": {
+  "vcpu": "1",
+  "memory": "8192",
+  "shm": 512
+ },
+ "blocks": {
+  "meg_station_lots_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_station_lots_discrete",
+   "seeds": [
+    1020931,
+    1021461,
+    1023622,
+    1025225,
+    1025291,
+    1025603,
+    1026264,
+    1027086,
+    1027421,
+    1028368,
+    1031087,
+    1034279,
+    1035815,
+    1036168,
+    1036232,
+    1036638
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "meg_station_lots_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_station_lots_continuous",
+   "seeds": [
+    1020931,
+    1021461,
+    1023622,
+    1025225,
+    1025291,
+    1025603,
+    1026264,
+    1027086,
+    1027421,
+    1028368,
+    1031087,
+    1034279,
+    1035815,
+    1036168,
+    1036232,
+    1036638
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "meg_single_line_receipt_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_single_line_receipt_discrete",
+   "seeds": [
+    1023000,
+    1026778,
+    1028348,
+    1028358,
+    1029953,
+    1031868,
+    1031900,
+    1033356,
+    1034333,
+    1035891
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "meg_single_line_receipt_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_single_line_receipt_continuous",
+   "seeds": [
+    1023000,
+    1026778,
+    1028348,
+    1028358,
+    1029953,
+    1031868,
+    1031900,
+    1033356,
+    1034333,
+    1035891
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "meg_declared_receipts_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_declared_receipts_discrete",
+   "seeds": [
+    1025322,
+    1025915,
+    1026605,
+    1026950,
+    1028738,
+    1029127,
+    1030880,
+    1033370,
+    1034138,
+    1036200
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "meg_declared_receipts_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_declared_receipts_continuous",
+   "seeds": [
+    1025322,
+    1025915,
+    1026605,
+    1026950,
+    1028738,
+    1029127,
+    1030880,
+    1033370,
+    1034138,
+    1036200
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "meg_quiet_station_lots_discrete": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_station_lots_discrete",
+   "seeds": [
+    1021062,
+    1023251,
+    1025352,
+    1027546,
+    1029708,
+    1031859,
+    1034002,
+    1036139
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  },
+  "meg_quiet_station_lots_continuous": {
+   "worker": "tools/noro_diag/growth_chain_census.py",
+   "tier": "fl_meg_12d_sens_p06_paxv_station_lots_continuous",
+   "seeds": [
+    1021062,
+    1023251,
+    1025352,
+    1027546,
+    1029708,
+    1031859,
+    1034002,
+    1036139
+   ],
+   "args": {
+    "payload": "lean"
+   }
+  }
+ }
+}
