@@ -1,15 +1,16 @@
 # CONTAM-AMBIENT-WEATHER-CRUISER-01
 **Date:** 2026-11-17
-**Commit:** d590bf11
+**Commit:** 7e683a22
 **Pathogens:** all
 **Status:** measured
-**Measured at:** d590bf11
+**Measured at:** 7e683a22
 
 ## Scope
 
-After-witnesses measured on this branch at `d590bf11`; before-witnesses at
-`origin/main` `2a7bc166` (#1267/#1268/#1272 merged; battleship sibling #1274 was
-not present). Steady ContamX solves with the local binary
+After-witnesses measured on this branch at `7e683a22` (the cruiser data are
+unchanged by the rebase onto `origin/main` `81a57eba` after battleship #1274
+merged); before-witnesses at `origin/main` `2a7bc166` (#1267/#1268/#1272
+merged). Steady ContamX solves with the local binary
 `third_party/contamx/contamx3`; no seeds, no AWS.
 
 Stage 4 of
