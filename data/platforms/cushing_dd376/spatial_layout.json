@@ -118,7 +118,8 @@
         "x": 93.85,
         "y": 5.28
       },
-      "description": "open forecastle deck: 5in gun No.1 tub + anchor gear"
+      "description": "open forecastle deck: 5in gun No.1 tub + anchor gear",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -133,7 +134,8 @@
         "x": 4.5,
         "y": 4.76
       },
-      "description": "stern: depth-charge racks/K-guns, smoke screen generators"
+      "description": "stern: depth-charge racks/K-guns, smoke screen generators",
+      "exposure": "weather"
     },
     {
       "id": "Gun_Crew_Shelter_Aft",
@@ -616,7 +618,7 @@
         "x": 41.16,
         "y": 5.28
       },
-      "description": "engine room C-1: geared turbines, spans hold→main deck"
+      "description": "engine room C-1: geared turbines, spans hold\u2192main deck"
     },
     {
       "id": "Aft_Boiler_Room",

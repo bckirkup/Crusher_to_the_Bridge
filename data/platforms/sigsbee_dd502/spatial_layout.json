@@ -55,7 +55,8 @@
         "x": 69.75,
         "y": 5.1
       },
-      "description": "top of midship deckhouse: stack trunks, quintuple torpedo tubes, twin 40mm tubs, whaleboats, life rafts"
+      "description": "top of midship deckhouse: stack trunks, quintuple torpedo tubes, twin 40mm tubs, whaleboats, life rafts",
+      "exposure": "weather"
     },
     {
       "id": "Superstructure_Radio",
@@ -86,7 +87,8 @@
         "x": 84.6,
         "y": 8.7
       },
-      "description": "gun crew shelter + 40mm R.S./clipping + vent fans + Mt2 5in mount ring + firing arcs"
+      "description": "gun crew shelter + 40mm R.S./clipping + vent fans + Mt2 5in mount ring + firing arcs",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -101,7 +103,8 @@
         "x": 6.98,
         "y": 5.87
       },
-      "description": "depth-charge tracks + smoke screen generator + 5in gun No.4 ring"
+      "description": "depth-charge tracks + smoke screen generator + 5in gun No.4 ring",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Util",
@@ -264,7 +267,8 @@
         "x": 100.45,
         "y": 5.31
       },
-      "description": "open focsle: windlass, chain pipe, bos'n stores, gun No.1 ring, anchor gear"
+      "description": "open focsle: windlass, chain pipe, bos'n stores, gun No.1 ring, anchor gear",
+      "exposure": "weather"
     },
     {
       "id": "Steering_Gear",
@@ -326,7 +330,7 @@
         "x": 39.04,
         "y": 5.09
       },
-      "description": "B-4 aft engine room — TALL (spans 1P..hold), zoned once here"
+      "description": "B-4 aft engine room \u2014 TALL (spans 1P..hold), zoned once here"
     },
     {
       "id": "Fire_Rm_Aft",
@@ -341,7 +345,7 @@
         "x": 48.74,
         "y": 5.09
       },
-      "description": "B-3-1 aft fire room (boilers) — TALL, zoned once here"
+      "description": "B-3-1 aft fire room (boilers) \u2014 TALL, zoned once here"
     },
     {
       "id": "Engine_Rm_Fwd",
@@ -356,7 +360,7 @@
         "x": 55.96,
         "y": 5.09
       },
-      "description": "B-2 fwd engine room — TALL, zoned once here"
+      "description": "B-2 fwd engine room \u2014 TALL, zoned once here"
     },
     {
       "id": "Fire_Rm_Fwd",
@@ -371,7 +375,7 @@
         "x": 66.13,
         "y": 5.09
       },
-      "description": "B-1-1 fwd fire room (boilers) — TALL, zoned once here"
+      "description": "B-1-1 fwd fire room (boilers) \u2014 TALL, zoned once here"
     },
     {
       "id": "Crew_Berthing_Fwd",

@@ -557,7 +557,8 @@
         "x": 101.8,
         "y": 5.94
       },
-      "description": "open signal bridge / flag level with flag bags & windshield (third level)"
+      "description": "open signal bridge / flag level with flag bags & windshield (third level)",
+      "exposure": "weather"
     },
     {
       "id": "Sea_Cabin",
@@ -635,7 +636,8 @@
         "x": 47.14,
         "y": 4.89
       },
-      "description": "open 01 boat deck: motor whaleboats, searchlight platform, standard compass, vents"
+      "description": "open 01 boat deck: motor whaleboats, searchlight platform, standard compass, vents",
+      "exposure": "weather"
     },
     {
       "id": "Stack_Uptake_01",
@@ -713,7 +715,8 @@
         "x": 92.75,
         "y": 5.54
       },
-      "description": "Mk108/Mk31 rocket launcher positions + 12.75in rocket loading hatches + vents"
+      "description": "Mk108/Mk31 rocket launcher positions + 12.75in rocket loading hatches + vents",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -728,7 +731,8 @@
         "x": 7.05,
         "y": 4.46
       },
-      "description": "open fantail: Mk14 depth-charge track, towing pad, bathythermograph winch, 20mm twins 23/24, smoke generator exhaust"
+      "description": "open fantail: Mk14 depth-charge track, towing pad, bathythermograph winch, 20mm twins 23/24, smoke generator exhaust",
+      "exposure": "weather"
     },
     {
       "id": "Torpedo_Deck",
@@ -743,7 +747,8 @@
         "x": 22.9,
         "y": 4.46
       },
-      "description": "open deck with fixed Mk23 torpedo tubes P&S + portable sill"
+      "description": "open deck with fixed Mk23 torpedo tubes P&S + portable sill",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Deckhouse",
@@ -944,7 +949,8 @@
         "x": 97.18,
         "y": 4.64
       },
-      "description": "3in/70 twin mount No.31 on open deck + rocket R.S. mags + lower hoist + repair 1"
+      "description": "3in/70 twin mount No.31 on open deck + rocket R.S. mags + lower hoist + repair 1",
+      "exposure": "weather"
     },
     {
       "id": "Focsle_Fwd",
@@ -959,7 +965,8 @@
         "x": 110.68,
         "y": 4.64
       },
-      "description": "open forecastle: anchors, chain pipes, abandon-ship ladder, rifle & pistol locker"
+      "description": "open forecastle: anchors, chain pipes, abandon-ship ladder, rifle & pistol locker",
+      "exposure": "weather"
     }
   ]
 }
