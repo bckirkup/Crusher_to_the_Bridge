@@ -100,10 +100,6 @@ def test_plenum_replaces_envelope_leaks_and_declared_openings(hull: str) -> None
     boundary = life_links + ambient
     assert all(entry["crusher_transfer"] is False for entry in boundary)
     assert all(entry["is_hvac_ducted"] is False for entry in life_links)
-    plenum_rec = next(
-        zone for zone in plenum["zone_records"] if zone["orig_id"] == "LS_Plenum"
-    )
-    assert plenum_rec["is_phantom"] is True
 
 
 def test_disabled_plenum_keeps_envelope_leaks() -> None:

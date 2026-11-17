@@ -186,8 +186,15 @@ class TestFleetInvariant:
             _real_prj_names(text), canon,
             declared_aliases=ov.get("zone_aliases"),
         )
+        # life_support_plenum is an exporter-only Contam boundary node, not a
+        # spatial_layout zone.
+        plenum = ov.get("life_support_plenum") or {}
+        allowed_export_zones = set()
+        if isinstance(plenum, dict) and plenum.get("zone_id"):
+            zone_id = str(plenum["zone_id"])
+            allowed_export_zones.update({zone_id, normalize_prj_zone_name(zone_id)})
         unresolved = [
             n for n, resolved in aliases.items()
-            if resolved == n and n not in canon_set
+            if resolved == n and n not in canon_set and n not in allowed_export_zones
         ]
         assert unresolved == [], f"{pid}: {unresolved}"
