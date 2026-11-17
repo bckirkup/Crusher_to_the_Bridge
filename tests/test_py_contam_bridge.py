@@ -832,6 +832,50 @@ class TestXzoneEndpointResolution:
         assert pairs == {("R1", "R3"), ("R2", "R3")}
 
 
+class TestCrossZoneSelfPairs:
+    """Overlapping HVAC groups must not emit zone -> same-zone paths."""
+
+    @staticmethod
+    def _layout() -> dict:
+        return {
+            "zones": [
+                {"id": "A", "volume_m3": 100.0},
+                {"id": "B", "volume_m3": 100.0},
+                {"id": "C", "volume_m3": 50.0},
+            ],
+        }
+
+    @staticmethod
+    def _airflow() -> dict:
+        return {
+            "hvac_zones": [
+                {"id": "G1", "rooms": ["A", "B"], "ach": 6.0},
+                {"id": "G2", "rooms": ["B", "C"], "ach": 6.0},
+            ],
+            "cross_zone_links": [{
+                "from": "G1", "to": "G2", "flow_rate_m3h": 40.0,
+                "path": "ladder_well", "direction": "bidirectional",
+                "mechanism": "pressure_opening", "filtered": False,
+            }],
+            "adjacency": [],
+        }
+
+    def test_self_pairs_are_skipped_without_changing_pair_flow(self) -> None:
+        engine = ContamTransportEngine(
+            self._layout(), self._airflow(), natural_decay_rate=0.0,
+        )
+        paths = [
+            p for p in engine.airflow_paths if p.path_type == "cross_zone"
+        ]
+        assert all(p.from_zone != p.to_zone for p in paths)
+        assert {(p.from_zone, p.to_zone) for p in paths} == {
+            ("A", "B"), ("A", "C"), ("B", "C"),
+            ("B", "A"), ("C", "A"), ("C", "B"),
+        }
+        assert len(paths) == 6
+        assert all(p.flow_rate_m3h == pytest.approx(10.0) for p in paths)
+
+
 # ── Passive cross-zone link directionality (CONTAM-BIDIR-01) ────────────
 
 class TestPassiveLinkMode:

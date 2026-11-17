@@ -752,6 +752,8 @@ class ContamTransportEngine:
                 room_pairs += [(tr, fr) for fr in from_rooms
                                for tr in to_rooms]
             for fr, tr in room_pairs:
+                if fr == tr:
+                    continue
                 self.airflow_paths.append(ContamAirflowPath(
                     path_id=f"xzone_{path_name}_{fr}_{tr}",
                     from_zone=fr,

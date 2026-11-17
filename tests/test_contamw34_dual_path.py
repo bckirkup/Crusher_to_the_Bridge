@@ -227,6 +227,40 @@ def test_path_map_not_adjacency_only() -> None:
     assert "ahs_supply" in kinds or "ahs_oa" in kinds
 
 
+def test_cross_zone_self_pairs_are_not_emitted() -> None:
+    spatial = {
+        "platform": "toy",
+        "zones": [
+            {"id": "A", "volume_m3": 100.0},
+            {"id": "B", "volume_m3": 100.0},
+            {"id": "C", "volume_m3": 50.0},
+        ],
+    }
+    airflow = {
+        "hvac_zones": [
+            {"id": "G1", "rooms": ["A", "B"], "ach": 6.0},
+            {"id": "G2", "rooms": ["B", "C"], "ach": 6.0},
+        ],
+        "cross_zone_links": [{
+            "from": "G1", "to": "G2", "flow_rate_m3h": 40.0,
+            "path": "ladder_well", "direction": "bidirectional",
+            "mechanism": "pressure_opening", "filtered": False,
+        }],
+        "adjacency": [],
+    }
+    _text, path_map = contam_prj_bridge.export_prj_with_path_map(
+        spatial, airflow,
+    )
+    rows = [
+        entry for entry in path_map
+        if entry["kind"] == "ladder_well" and entry.get("crusher_transfer")
+    ]
+    assert all(entry["from_zone"] != entry["to_zone"] for entry in rows)
+    assert {(entry["from_zone"], entry["to_zone"]) for entry in rows} == {
+        ("A", "B"), ("A", "C"), ("B", "C"),
+    }
+
+
 _AHS_SYSTEM_FLAGS = {16, 32, 64}
 _AHS_TERMINAL_FLAG = 8
 
