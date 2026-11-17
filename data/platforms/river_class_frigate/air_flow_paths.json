@@ -294,5 +294,25 @@
       "to": "Magazine_Aft",
       "type": "passageway"
     }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Quarterdeck",
+      "type": "open_deck",
+      "area_m2": 108.652,
+      "exchange_m3h": 72379.9,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-MISC-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3; the owner accepted this Grade C deck-face area rule and the resulting large solved rates as declared assumptions on 2026-11-16. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the fleet default from ahead, CONTAM-DEFAULT-WEATHER-01), Grade C ASSUMED-RELATIVE-WIND, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Foc_Deck_Open",
+      "type": "open_deck",
+      "area_m2": 79.48,
+      "exchange_m3h": 52548.5,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-MISC-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3; the owner accepted this Grade C deck-face area rule and the resulting large solved rates as declared assumptions on 2026-11-16. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the fleet default from ahead, CONTAM-DEFAULT-WEATHER-01), Grade C ASSUMED-RELATIVE-WIND, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    }
   ]
 }

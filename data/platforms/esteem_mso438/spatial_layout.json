@@ -404,7 +404,8 @@
         "x": 48.01,
         "y": 6.8
       },
-      "description": "S.D. storerooms 1-10-1-A / 1-7-1-A + boatswain's storeroom 1-0-0-A at bow"
+      "description": "S.D. storerooms 1-10-1-A / 1-7-1-A + boatswain's storeroom 1-0-0-A at bow",
+      "exposure": "enclosed"
     },
     {
       "id": "CPO_Quarters",

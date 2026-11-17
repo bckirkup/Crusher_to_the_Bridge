@@ -39,7 +39,8 @@
         "x": 3.16,
         "y": 3.03
       },
-      "description": "open stern deck: depth charge racks + K-guns"
+      "description": "open stern deck: depth charge racks + K-guns",
+      "exposure": "weather"
     },
     {
       "id": "Eng_Casing",
@@ -182,7 +183,8 @@
         "x": 44.48,
         "y": 3.1
       },
-      "description": "open fore deck: 3in/50 gun, anchor windlass, hawses"
+      "description": "open fore deck: 3in/50 gun, anchor windlass, hawses",
+      "exposure": "weather"
     },
     {
       "id": "Steering_Gear",

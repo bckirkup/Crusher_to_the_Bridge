@@ -122,7 +122,8 @@
         "x": 67.01,
         "y": 4.62
       },
-      "description": "open forecastle/gun deck fwd incl 4in gun"
+      "description": "open forecastle/gun deck fwd incl 4in gun",
+      "exposure": "weather"
     },
     {
       "id": "Quarterdeck",
@@ -137,7 +138,8 @@
         "x": 12.02,
         "y": 4.25
       },
-      "description": "open quarterdeck aft: depth charge stowage + Squid mortar"
+      "description": "open quarterdeck aft: depth charge stowage + Squid mortar",
+      "exposure": "weather"
     },
     {
       "id": "Mess_Mid",
