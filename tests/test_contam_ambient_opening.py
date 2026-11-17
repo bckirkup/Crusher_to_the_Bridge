@@ -215,10 +215,6 @@ _WEATHER_ZONES = {
         "Open_Bridge", "Nav_Bridge", "Gun_Platform_Fwd", "After_Gun_Platform",
         "AA_Gun_Platforms", "Fantail", "Gun_Deck_Fwd",
     },
-    "olympia_c6": {
-        "SD_Stern_Open", "SD_Forecastle_Open", "MD_Stern_Fantail",
-        "MD_Forecastle_Open",
-    },
     "pce_874": {"Fantail", "Focsle_Deck"},
     "raven_am55": {"Foc_Deck_Fwd", "Foc_Deck_Open", "Sweep_Deck"},
     "river_class_frigate": {"Quarterdeck", "Foc_Deck_Open"},
