@@ -629,7 +629,8 @@
       "path": "Cabin_Relief_D4",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": true,
+      "description": "Declared cabin-corridor relief transfer to the midship public trunk; magnitude retained from the authored recipe. Operating assumption Grade C: this is a mechanical transfer leg of the relief loop; its compensating return is the matching Cabin_Return_D# link, while corridor adjacencies are adjudicated as open circulation rather than cabin undercuts."
     },
     {
       "from": "AHU_Pax_D5",
@@ -639,7 +640,8 @@
       "path": "Cabin_Relief_D5",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": true,
+      "description": "Declared cabin-corridor relief transfer to the midship public trunk; magnitude retained from the authored recipe. Operating assumption Grade C: this is a mechanical transfer leg of the relief loop; its compensating return is the matching Cabin_Return_D# link, while corridor adjacencies are adjudicated as open circulation rather than cabin undercuts."
     },
     {
       "from": "AHU_Pax_D6",
@@ -649,7 +651,8 @@
       "path": "Cabin_Relief_D6",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": true,
+      "description": "Declared cabin-corridor relief transfer to the midship public trunk; magnitude retained from the authored recipe. Operating assumption Grade C: this is a mechanical transfer leg of the relief loop; its compensating return is the matching Cabin_Return_D# link, while corridor adjacencies are adjudicated as open circulation rather than cabin undercuts."
     },
     {
       "from": "AHU_Pax_D7",
@@ -659,7 +662,8 @@
       "path": "Cabin_Relief_D7",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": true,
+      "description": "Declared cabin-corridor relief transfer to the midship public trunk; magnitude retained from the authored recipe. Operating assumption Grade C: this is a mechanical transfer leg of the relief loop; its compensating return is the matching Cabin_Return_D# link, while corridor adjacencies are adjudicated as open circulation rather than cabin undercuts."
     },
     {
       "from": "AHU_Pax_D8",
@@ -669,7 +673,8 @@
       "path": "Cabin_Relief_D8",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": true,
+      "description": "Declared cabin-corridor relief transfer to the midship public trunk; magnitude retained from the authored recipe. Operating assumption Grade C: this is a mechanical transfer leg of the relief loop; its compensating return is the matching Cabin_Return_D# link, while corridor adjacencies are adjudicated as open circulation rather than cabin undercuts."
     },
     {
       "from": "AHU_Pax_D9",
@@ -679,7 +684,8 @@
       "path": "Cabin_Relief_D9",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": true,
+      "description": "Declared cabin-corridor relief transfer to the midship public trunk; magnitude retained from the authored recipe. Operating assumption Grade C: this is a mechanical transfer leg of the relief loop; its compensating return is the matching Cabin_Return_D# link, while corridor adjacencies are adjudicated as open circulation rather than cabin undercuts."
     },
     {
       "from": "AHU_Pax_D10",
@@ -689,7 +695,8 @@
       "path": "Cabin_Relief_D10",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": true,
+      "description": "Declared cabin-corridor relief transfer to the midship public trunk; magnitude retained from the authored recipe. Operating assumption Grade C: this is a mechanical transfer leg of the relief loop; its compensating return is the matching Cabin_Return_D# link, while corridor adjacencies are adjudicated as open circulation rather than cabin undercuts."
     },
     {
       "from": "AHU_Pax_D11",
@@ -699,7 +706,8 @@
       "path": "Cabin_Relief_D11",
       "direction": "oneway",
       "mechanism": "prescribed_flow",
-      "filtered": true
+      "filtered": true,
+      "description": "Declared cabin-corridor relief transfer to the midship public trunk; magnitude retained from the authored recipe. Operating assumption Grade C: this is a mechanical transfer leg of the relief loop; its compensating return is the matching Cabin_Return_D# link, while corridor adjacencies are adjudicated as open circulation rather than cabin undercuts."
     },
     {
       "from": "AHU_Service",
@@ -1008,6 +1016,94 @@
       "description": "Transfer air into HD_9C_F; the head exhausts overboard, never back to the served space.",
       "mechanism": "pressure_opening",
       "filtered": false
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_Pax_D4",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Return_D4",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true,
+      "description": "Compensating cabin-relief return/make-up duct for the imposed cabin-to-public transfer; declared as the same 1,500 m3/h per deck branch so the relief/return loop balances. Operating assumption Grade C: the duct route is authored, not drawing-verified; the prescribed relief magnitude is unchanged."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_Pax_D5",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Return_D5",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true,
+      "description": "Compensating cabin-relief return/make-up duct for the imposed cabin-to-public transfer; declared as the same 1,500 m3/h per deck branch so the relief/return loop balances. Operating assumption Grade C: the duct route is authored, not drawing-verified; the prescribed relief magnitude is unchanged."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_Pax_D6",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Return_D6",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true,
+      "description": "Compensating cabin-relief return/make-up duct for the imposed cabin-to-public transfer; declared as the same 1,500 m3/h per deck branch so the relief/return loop balances. Operating assumption Grade C: the duct route is authored, not drawing-verified; the prescribed relief magnitude is unchanged."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_Pax_D7",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Return_D7",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true,
+      "description": "Compensating cabin-relief return/make-up duct for the imposed cabin-to-public transfer; declared as the same 1,500 m3/h per deck branch so the relief/return loop balances. Operating assumption Grade C: the duct route is authored, not drawing-verified; the prescribed relief magnitude is unchanged."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_Pax_D8",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Return_D8",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true,
+      "description": "Compensating cabin-relief return/make-up duct for the imposed cabin-to-public transfer; declared as the same 1,500 m3/h per deck branch so the relief/return loop balances. Operating assumption Grade C: the duct route is authored, not drawing-verified; the prescribed relief magnitude is unchanged."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_Pax_D9",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Return_D9",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true,
+      "description": "Compensating cabin-relief return/make-up duct for the imposed cabin-to-public transfer; declared as the same 1,500 m3/h per deck branch so the relief/return loop balances. Operating assumption Grade C: the duct route is authored, not drawing-verified; the prescribed relief magnitude is unchanged."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_Pax_D10",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Return_D10",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true,
+      "description": "Compensating cabin-relief return/make-up duct for the imposed cabin-to-public transfer; declared as the same 1,500 m3/h per deck branch so the relief/return loop balances. Operating assumption Grade C: the duct route is authored, not drawing-verified; the prescribed relief magnitude is unchanged."
+    },
+    {
+      "from": "AHU_Public_Mid",
+      "to": "AHU_Pax_D11",
+      "flow_rate_m3h": 1500.0,
+      "is_hvac_ducted": true,
+      "path": "Cabin_Return_D11",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true,
+      "description": "Compensating cabin-relief return/make-up duct for the imposed cabin-to-public transfer; declared as the same 1,500 m3/h per deck branch so the relief/return loop balances. Operating assumption Grade C: the duct route is authored, not drawing-verified; the prescribed relief magnitude is unchanged."
     }
   ],
   "ambient_openings": [

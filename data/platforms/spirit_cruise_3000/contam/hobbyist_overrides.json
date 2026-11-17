@@ -1,7 +1,7 @@
 {
   "description": "Hobbyist-plus Contam overrides for spirit_cruise_3000.",
   "orifice_type_map": {
-    "corridor": "cabin_relief",
+    "corridor": "corridor",
     "doorway": "doorway",
     "passageway": "passageway",
     "elevator_bank": "elevator_bank",
