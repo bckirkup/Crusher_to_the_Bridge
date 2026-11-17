@@ -20,8 +20,8 @@ Mega extension of the supply solver screen: `mega_cruise_5000` (`fl_meg_12d_sens
 - [x] `scripts/campaign describe noro/supply_solver_screen_03` resolves 8 blocks, array sizes 16+16+10+10+10+10+8+8 (88 total).
 - [x] `scripts/campaign submit --dry-run --block <all 8 blocks> --account 994254241749 --bucket crusherbucket-994254241749-us-east-1-an` OK.
 - [x] Local 24-epoch smoke, mega `station_lots_continuous` tier index 0 seed 1020931: zip members `summary.json`, `growth_census.json.gz`, `rss_samples.json`; `parameters.tier_id=fl_meg_12d_sens_p06_paxv_station_lots_continuous`; `num_agents=7000`; `payload_profile=lean`; `hand_occupancy.counters.continuous_path_calls=50750`; `common_source.provisioned_source.n_contaminated=3`; `common_source.telemetry.events_provisioned_lot=28`, `takers_served=2126`; derived attack_rate 0.0521, passenger reported-case AR 0.0, crew reported-case AR 0.0005, `vsp_trigger_epoch=None` (24-epoch smoke).
-- [ ] Image built and digest pinned in `campaign.json`.
-- [ ] Manifest uploaded to S3 (`manifest.json`, `seed_selection.json`).
+- [x] Image built and digest pinned in `campaign.json`.
+- [x] Manifest uploaded to S3 (`manifest.json`, `seed_selection.json`).
 - [ ] In-container build check: campaign manifest/seed files present, `ENGINE_GIT_SHA=<commit>`, mega station tier seed membership verified.
 - [ ] Full-length canary.
 - [ ] AWS canary child inspected.
@@ -30,8 +30,8 @@ Mega extension of the supply solver screen: `mega_cruise_5000` (`fl_meg_12d_sens
 
 ## AWS Batch pins
 
-- Image: pending
-- `ENGINE_GIT_SHA`: pending
+- Image: `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:noro-supply-solver03@sha256:203536dea284153523e1ea874ad76651efecb34d0458a08d957c8f465277452a`
+- `ENGINE_GIT_SHA`: `db899fd375b1c59585edab2d57864b46f4f7e60d`
 - Queue: `picard-campaign-queue`
 - S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_03/`
 
