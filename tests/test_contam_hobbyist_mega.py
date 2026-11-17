@@ -68,7 +68,8 @@ def test_mega_hobbyist_export_scale_safe() -> None:
     assert "MERV8" in text or "HEPA" in text
     assert _section_count(text, "flow paths") == len(path_map)
     assert len(path_map) >= 600
-    assert _section_count(text, "duct junctions") >= 10
+    assert _section_count(text, "duct junctions") == 0
+    assert _section_count(text, "duct segments") == 0
     assert _section_count(text, "species") == 2
     # ContamX-critical: names ≤ 15
     names = _zone_names_from_prj(text)
@@ -81,5 +82,7 @@ def test_mega_bundled_hobbyist_prj() -> None:
     entries = json.loads((_CONTAM / "path_map.json").read_text(encoding="utf-8"))
     assert "(hobbyist)" in text
     assert _section_count(text, "flow paths") == len(entries)
+    assert _section_count(text, "duct junctions") == 0
+    assert _section_count(text, "duct segments") == 0
     derived = path_map_from_prj(text)
     assert len(derived) == len(entries)

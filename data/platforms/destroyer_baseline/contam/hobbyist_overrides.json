@@ -28,5 +28,6 @@
     "Berthing": 270,
     "Engine_Room": 180
   },
+  "skip_duct_spines": true,
   "night_setback": true
 }

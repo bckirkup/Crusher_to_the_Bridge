@@ -45,5 +45,6 @@
     "ExpedLounge": "Expedition Lounge",
     "CasualDining": "Casual Dining"
   },
+  "skip_duct_spines": true,
   "night_setback": true
 }

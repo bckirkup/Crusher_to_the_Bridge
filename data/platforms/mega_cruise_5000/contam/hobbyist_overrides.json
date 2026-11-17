@@ -53,5 +53,6 @@
     "Engine_Room_Aft": "Engine Room",
     "MainDining_L": "Main Dining"
   },
+  "skip_duct_spines": true,
   "night_setback": true
 }

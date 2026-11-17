@@ -50,5 +50,6 @@
     "SunDeck": "Sun Deck",
     "TopDeck": "Top Deck"
   },
+  "skip_duct_spines": true,
   "night_setback": true
 }

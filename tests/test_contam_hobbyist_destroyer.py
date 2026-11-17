@@ -81,9 +81,9 @@ def test_destroyer_hobbyist_export_section_counts() -> None:
     assert _section_count(text, "wind pressure profiles") == 1
     assert _section_count(text, "filter elements") >= 1
     assert _section_count(text, "filters") >= 1
-    assert _section_count(text, "duct elements") == 1
-    assert _section_count(text, "duct junctions") >= 2
-    assert _section_count(text, "duct segments") >= 1
+    assert _section_count(text, "duct elements") == 0
+    assert _section_count(text, "duct junctions") == 0
+    assert _section_count(text, "duct segments") == 0
     assert _section_count(text, "control nodes") >= 2
     assert _section_count(text, "annotations") >= 2
     assert _section_count(text, "species") == 2
@@ -96,8 +96,8 @@ def test_destroyer_hobbyist_export_section_counts() -> None:
     assert _section_count(text, "initial zone concentrations") == n_zones * n_ctm
     n_jct = _section_count(text, "duct junctions")
     assert _section_count(text, "initial junction concentrations") == n_jct * n_ctm
-    # ContamX 3.4.0.3: vf_node_name present, no ContamW "T:" marker
-    assert re.search(r"\bnone 0 0 0 0 -1 0\b", text)
+    # No duct spines: no duct-terminal vf_node_name lines; no ContamW "T:" marker.
+    assert "none 0 0 0 0 -1 0" not in text
     assert " T: " not in text
     assert re.search(r"\bT:", text) is None
     # Destroyer with room×room cross-zone expansion: 69 Contam paths, up
@@ -198,7 +198,9 @@ def test_destroyer_bundled_prj_is_hobbyist() -> None:
     entries = json.loads(pmap.read_text(encoding="utf-8"))
     assert "(hobbyist)" in text
     assert _section_count(text, "flow paths") == len(entries)
-    assert _section_count(text, "duct junctions") >= 2
+    assert _section_count(text, "duct elements") == 0
+    assert _section_count(text, "duct junctions") == 0
+    assert _section_count(text, "duct segments") == 0
     assert "Virus" in text
 
 
