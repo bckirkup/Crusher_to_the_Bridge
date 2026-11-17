@@ -89,9 +89,10 @@ _MAKEUP_RECORDS = {
     "greg_mortimer": 1, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
 }
-# CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01 and
-# CONTAM-AMBIENT-WEATHER-DESTROYER-01: one ``open_deck`` record per declared
-# weather zone on the six cruise hulls and the nine destroyer roster hulls.
+# CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
+# CONTAM-AMBIENT-WEATHER-DESTROYER-01 and CONTAM-AMBIENT-WEATHER-CARRIER-01:
+# one ``open_deck`` record per declared weather zone on the cruise, destroyer
+# and carrier roster hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -127,9 +128,15 @@ _WEATHER_ZONES = {
     },
     "palmer_dms5": {"Boat_Deck_Uptakes"},
     "sigsbee_dd502": {"Midship_Deckhouse", "Mt2_Deck", "Fantail", "Focsle_Deck"},
+    # CONTAM-AMBIENT-WEATHER-CARRIER-01: the two carrier flight decks with no
+    # HVAC group (the other carrier weather zones are VENT_Weather/VENT_Hangar
+    # grouped and stay on their declared ventilation groups).
+    "lexington_cv2": {"Flight_Deck"},
+    "saratoga_cv3": {"Flight_Deck"},
 }
-# CONTAM-EXPOSURE-TAGGING-01 and CONTAM-AMBIENT-WEATHER-DESTROYER-01: declared
-# enclosed zones. They carry no opening.
+# CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01 and
+# CONTAM-AMBIENT-WEATHER-CARRIER-01: declared enclosed zones. They carry no
+# opening.
 _ENCLOSED_ZONES = {
     "classic_cruise_1900": {"Promenade"},
     "diamond_princess": {"PromGalleria"},
@@ -139,6 +146,8 @@ _ENCLOSED_ZONES = {
     "cannon_de701": {"Signal_Deck"},
     "davison_dd618": {"Bow_Focsle"},
     "nields_dd616": {"Bow_Focsle"},
+    # CONTAM-AMBIENT-WEATHER-CARRIER-01: lexical Focsle id, enclosed stores.
+    "independence_cvl26": {"Focsle_Stores"},
 }
 
 

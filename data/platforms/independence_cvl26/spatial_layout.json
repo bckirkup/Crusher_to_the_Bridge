@@ -293,7 +293,8 @@
         "x": 181.69,
         "y": 10.59
       },
-      "description": "capstan & windlass room, chain locker, boatswain's stores, sail locker, S.D. stores, paravane & spare parts, jack staff"
+      "description": "capstan & windlass room, chain locker, boatswain's stores, sail locker, S.D. stores, paravane & spare parts, jack staff",
+      "exposure": "enclosed"
     },
     {
       "id": "CPO_Berthing",
