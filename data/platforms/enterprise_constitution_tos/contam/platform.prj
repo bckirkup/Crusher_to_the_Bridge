@@ -151,9 +151,7 @@ inert pathogen tracer (Contam tracks; Crusher owns epidemic)
    1  41  75  26
    1  53  68  62
    1  53  68  63
-  11 0.000 1.000 1 0 0 plenum
-!icn col row  #
-   1   1   1  64
+  11 0.000 1.000 0 0 0 plenum
 -999
 9 ! day-schedules:
 ! # npts shap utyp ucnv name
@@ -581,7 +579,7 @@ Crusher HVAC AHU_HD_2SE_F ach=19.2
    61  3   0   0   0   9   0.000  12.42 293.15 0 HD_1SE_M -1 0 2 0 0 0 0 0
    62  3   0   0   0   10   0.000  12.42 293.15 0 HD_2SE_M -1 0 2 0 0 0 0 0
    63  3   0   0   0   10   0.000  6.21 293.15 0 HD_2SE_F -1 0 2 0 0 0 0 0
-   64  3   0   0   0   11   0.000  1 293.15 0 LS_Plenum -1 0 2 0 0 0 0 0
+   64  10   0   0   0   11   0.000  1 293.15 0 LS_Plenum -1 0 2 0 0 0 0 0
    65  10   0   0   0   1   0.000  0 293.15 0 ahs1(Ret) -1 0 2 0 0 0 0 0
    66  10   0   0   0   1   0.000  0 293.15 0 ahs1(Sup) -1 0 2 0 0 0 0 0
    67  10   0   0   0   1   0.000  0 293.15 0 ahs2(Ret) -1 0 2 0 0 0 0 0
@@ -1519,4 +1517,4 @@ Crusher HVAC AHU_HD_2SE_F ach=19.2
 -999
 * end project file.
 
-! CRUSHER_PATH_MAP_COUNT 570 zones=64 phantoms=58 hobbyist=1
+! CRUSHER_PATH_MAP_COUNT 570 zones=63 phantoms=59 hobbyist=1

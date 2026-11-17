@@ -595,7 +595,7 @@ class _NetworkBuilder:
             self.zone_name_to_nr[name] = i
             self.zone_records.append({
                 "nr": i,
-                "flag": _ZONE_NORMAL,
+                "flag": int(zone.get("flag", _ZONE_NORMAL)),
                 "level": self.level_index.get(deck, 1),
                 "rel_ht": 0.0,
                 "volume": geo["volume_m3"],
@@ -610,7 +610,7 @@ class _NetworkBuilder:
                 "deck": deck,
                 "x": float(display.get("x", 0) or 0),
                 "y": float(display.get("y", 0) or 0),
-                "is_phantom": False,
+                "is_phantom": bool(zone.get("is_phantom", False)),
             })
 
     def _build_ahs_phantoms(self) -> None:
@@ -1575,6 +1575,8 @@ class _NetworkBuilder:
             "id": zone_id,
             "type": "Free",
             "traffic": "none",
+            "flag": _ZONE_AHS,
+            "is_phantom": True,
             "volume_m3": volume,
             "floor_area_m2": volume,
             "ceiling_height_m": 1.0,
