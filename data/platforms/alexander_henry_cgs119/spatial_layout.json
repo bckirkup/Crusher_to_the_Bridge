@@ -26,7 +26,8 @@
         "y": 6.33
       },
       "max_occupancy": 4,
-      "description": "Compass platform above wheelhouse"
+      "description": "Compass platform above wheelhouse",
+      "exposure": "weather"
     },
     {
       "id": "Wheelhouse",
@@ -73,7 +74,8 @@
         "x": 44.02,
         "y": 11.67
       },
-      "description": "Open bridge wings"
+      "description": "Open bridge wings",
+      "exposure": "weather"
     },
     {
       "id": "Officer_Cabins_Boat",
@@ -124,7 +126,8 @@
         "x": 22.0,
         "y": 5.94
       },
-      "description": "Open boat deck + davits aft"
+      "description": "Open boat deck + davits aft",
+      "exposure": "weather"
     },
     {
       "id": "Funnel_Uptake",
@@ -191,7 +194,8 @@
         "x": 53.46,
         "y": 5.46
       },
-      "description": "Windlass, mooring reels, cable compressor fwd"
+      "description": "Windlass, mooring reels, cable compressor fwd",
+      "exposure": "weather"
     },
     {
       "id": "Steering_Gear",

@@ -90,9 +90,10 @@ _MAKEUP_RECORDS = {
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
 }
 # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
-# CONTAM-AMBIENT-WEATHER-DESTROYER-01, CONTAM-AMBIENT-WEATHER-CARRIER-01 and
-# CONTAM-AMBIENT-WEATHER-BATTLESHIP-01: one ``open_deck`` record per declared
-# weather zone on the cruise, destroyer, carrier and battleship roster hulls.
+# CONTAM-AMBIENT-WEATHER-DESTROYER-01, CONTAM-AMBIENT-WEATHER-CARRIER-01,
+# CONTAM-AMBIENT-WEATHER-BATTLESHIP-01 and CONTAM-AMBIENT-WEATHER-CRUISER-01:
+# one ``open_deck`` record per declared weather zone on the cruise, destroyer,
+# carrier, battleship and cruiser roster hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -148,6 +149,13 @@ _WEATHER_ZONES = {
     "west_virginia_bb48": {
         "Signal_Bridge_Open", "Landing_Platform", "Boat_Deck", "Forecastle",
         "Fantail",
+    },
+    # CONTAM-AMBIENT-WEATHER-CRUISER-01: the four zero-outdoor-exchange
+    # AHU_Weather rooms on the only cruiser roster hull in that state; the
+    # other cruiser roster hulls keep grouped VENT_Weather ventilation.
+    "alexander_henry_cgs119": {
+        "Wheelhouse_Top", "Bridge_Wings", "Boat_Stowage_Open",
+        "Forecastle_Working",
     },
 }
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01 and
