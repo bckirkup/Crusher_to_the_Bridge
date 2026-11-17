@@ -20,6 +20,14 @@ Expedition p06 screen requested by Benjamin: stratified contaminated supply seed
 - Per solver: station_lots 16 contaminated + 8 quiet, single_line_receipt 10, declared_receipts 10.
 - Campaign blocks: 8 (supply arm x solver, with station quiet split into two blocks).
 
+## AWS Batch pins
+
+- Image: `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:noro-supply-solver01@sha256:f25d74cd225bc4ade19a012ba801b25f91289f80f3c3778bfd6c27c343a0053a`
+- `ENGINE_GIT_SHA`: `3500c205426cc49f1b4075fb5fc5f8ff0d057021`
+- Queue: `picard-campaign-queue`
+- S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_01/`
+- S3 manifest/seed files: `manifest.json`, `seed_selection.json` uploaded at the prefix root.
+
 ## Preflight status
 
 - [x] Local smoke: solver override reaches engine; output contract unchanged.
@@ -29,8 +37,9 @@ Expedition p06 screen requested by Benjamin: stratified contaminated supply seed
   - discrete: attack_rate 0.2489, pax_reported 0.1329, crew_reported 0.0299, `vsp_trigger_epoch=57`, peak 110 at epoch 224, acquired 108, wall 66.4 s, RSS 385824 KB.
   - continuous: attack_rate 0.2067, pax_reported 0.1108, crew_reported 0.0299, `vsp_trigger_epoch=53`, peak 92 at epoch 119, acquired 89, wall 82.7 s, RSS 449764 KB.
   - One seed only; this is plumbing/timing evidence, not solver attribution.
-- [ ] Image built and digest pinned in `campaign.json`.
-- [ ] Manifest uploaded to S3.
+- [x] Image built and digest pinned in `campaign.json`.
+- [x] Manifest uploaded to S3.
+- [x] In-container build check: required campaign/tools/manifest files present, `ENGINE_GIT_SHA=3500c205426cc49f1b4075fb5fc5f8ff0d057021`, seed 900470 resolves to index 0 / run_id `fl_norovirus_expedition_cruise_450_dose7p57_rung-shipped_nsf29_bp25c30_n450_ep288_syndromic_comp65_s900470`.
 - [ ] AWS canary child inspected.
 - [ ] ETA reported; user decides on array.
 
