@@ -1,0 +1,9 @@
+# Olympia timeout localized
+
+At current pin `c93fa32fbe05440e797de8b551a2781b236d7e43`, the unmodified commissioned project contains four paths whose from-zone equals to-zone: 357, 362, 379, and 384, all from the Cartesian expansion of the overlapping `VENT_Machinery` → `VENT_Uptakes` group link. They refer respectively to PF_Boiler_Port, PF_Boiler_Stb, HD_Boiler_Port, and HD_Boiler_Stb. Current exporter `tools/contamw34_prj.py` lines 1097 onward emits every room pair without a self-pair guard.
+
+Official binary SHA256 d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b remains unmodified. Raw current project timed out at 35 s and was CPU-active, not awaiting input. Numerical-only reordering, linear-solver, initialization and relaxation controls each timed out at 12 s. An I/O-only diagnostic shim sampled `sa_find` called from `af_mat_set`, i.e. sparse matrix setup before steady-state initialization.
+
+A noncanonical project deleting ONLY the four self-links (and consistently renumbering retained path IDs and AHS references) completed successfully in **0.406 s**, return code 0, with 801 paths. All physical non-self paths and terminal magnitudes are unchanged. Evidence: `olympia_runs/no_self_links/{execution.json,platform.prj,platform.xlog,platform.sim}`. This localizes the timeout to invalid exported topology, not an expensive hull requiring longer timeout or a commissioning-mode regression. No canonical files changed. A minimal canonical repair should omit self-pairs in exporter and guard all generated projects; preserve denominators initially rather than redistribute flows without decision.
+
+The repaired diagnostic reveals a separate boundary-authoring issue: minimum gage pressure about −27.6 kPa. This is NOT a pressure-plausibility resolution. Boundary localization is continuing.

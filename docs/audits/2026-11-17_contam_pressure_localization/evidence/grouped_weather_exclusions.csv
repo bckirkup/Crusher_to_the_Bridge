@@ -1,0 +1,21 @@
+hull,weather_description,source_file,source_line,reason
+fort_mandan_lsd21,"`Top_House_Open`, `Well_Cover_Open`, `Well_Deck`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01.md,51,skip: grouped (outdoor ACH 4.5 / 2.0)
+idaho_bb42,`Fantail`,source/docs/ledger/CONTAM-AMBIENT-WEATHER-BATTLESHIP-01.md,56,skip: grouped
+missouri_bb63,"`Boat_Waist_Open`, `Fantail_Open`, `Focsle_Void_2D`, `Forecastle_Open`, `Signal_Deck`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-BATTLESHIP-01.md,57,skip: grouped
+new_jersey_bb62,"`Boat_Waist_Open`, `Fantail_Open`, `Focsle_Void_2D`, `Forecastle_Open`, `Signal_Deck`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-BATTLESHIP-01.md,58,skip: grouped
+wisconsin_bb64,"`Boat_Waist_Open`, `Fantail_Open`, `Focsle_Void_2D`, `Forecastle_Open`, `Signal_Deck`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-BATTLESHIP-01.md,63,skip: grouped
+yorktown_cv5,`Flight_Deck`,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,52,skip: grouped
+wasp_cv7,`Flight_Deck`,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,53,skip: grouped
+saratoga_cv60,`Flight_Deck`,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,54,skip: grouped
+ranger_cv4,"`Flight_Deck`, `Poop_Deck`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,56,skip: grouped
+midway_cv41,`Flight_Deck`,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,57,skip: grouped
+independence_cvl26,"`Flight_Deck`, `Gallery_Deck`, `Poop_Deck`, `Forecastle_Deck`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,59,skip: grouped; `Focsle_Stores` enclosed correction
+antietam_cvs36,"`Flight_Deck`, `Gallery_Deck`, `Forecastle_Deck`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,60,skip: grouped
+wright_cc2,"`Flight_Deck_Aft`, `Flight_Deck_Mid`, `Flight_Deck_Fwd`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,61,skip: grouped
+thetis_bay_cve90,`Flight_Deck`,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,62,skip: grouped
+puncher_cve53,`Flight_Deck`,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,63,skip: grouped
+battler_acv6,"`Walkways_Focsle`, `Flight_Deck`",source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md,64,"skip: borderline roster, grouped"
+astoria_ca34,5,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CRUISER-01.md,71,skip: grouped with OA exchange
+chicago_cg11,8,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CRUISER-01.md,72,skip: grouped with OA exchange
+miami_cl89,2,source/docs/ledger/CONTAM-AMBIENT-WEATHER-CRUISER-01.md,73,skip: grouped with OA exchange
+enterprise_galaxy_tng,"`Holodeck1` (`spatial_layout.json:81`), `Holodeck2` (`spatial_layout.json:94`)",source/docs/ledger/CONTAM-AMBIENT-WEATHER-FICTION-01.md,54,"skip: grouped with OA exchange; lexical `deck` match inside `Holodeck`, descriptions are ""Holodeck complex A/B"", not an authored open/semi-open deck"

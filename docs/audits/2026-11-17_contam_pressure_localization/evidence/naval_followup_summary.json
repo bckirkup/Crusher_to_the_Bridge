@@ -1,0 +1,50 @@
+[
+  {
+    "hull": "pope_ap110",
+    "mode": "commissioned",
+    "variant": "all_explicit_weather_open",
+    "project_sha256": "39e82239e7e91261b7e3a3c3af5fcff4189f1ba69d0ed48e361c4014d4124f6d",
+    "removed_self_path_ids": [],
+    "status": "solved",
+    "max_dp_pa": 806283.75,
+    "interior_flowing_dp_pa": 804135.8125,
+    "envelope_dp_pa": 806283.75,
+    "makeup_demand_m3h": 28574.92272392768,
+    "envelope_net_inward_m3h": 20489.26522679395,
+    "opening_net_inward_m3h": 8085.661858107431,
+    "balance_residual_m3h": -0.00436097369856725,
+    "elapsed_seconds": 1.2020245560001968
+  },
+  {
+    "hull": "midway_cv41",
+    "mode": "commissioned",
+    "variant": "all_explicit_weather_open",
+    "project_sha256": "08e5c3316a58fe0b61d0056c1d66f0071303d0e7143879e556e95710d0dc905a",
+    "removed_self_path_ids": [],
+    "status": "solved",
+    "max_dp_pa": 353.5849304199219,
+    "interior_flowing_dp_pa": 27.88310432434082,
+    "envelope_dp_pa": 33.038177490234375,
+    "makeup_demand_m3h": 21176.163088012137,
+    "envelope_net_inward_m3h": 75.87738201328114,
+    "opening_net_inward_m3h": 21100.28289879465,
+    "balance_residual_m3h": 0.0028072042077837978,
+    "elapsed_seconds": 0.9755070129999694
+  },
+  {
+    "hull": "aeolus_arc3",
+    "mode": "commissioned",
+    "variant": "zero_sanitary_exhaust",
+    "project_sha256": "fea56d54cdd4950578bc822bb9ca6d83b7ed3bf1bb43fd565823857c8437f445",
+    "removed_self_path_ids": [],
+    "status": "solved",
+    "max_dp_pa": 3.0995330810546875,
+    "interior_flowing_dp_pa": 0.08298812806606293,
+    "envelope_dp_pa": 3.0995330810546875,
+    "makeup_demand_m3h": 0.0,
+    "envelope_net_inward_m3h": -12.491920190245118,
+    "opening_net_inward_m3h": 12.501636745790165,
+    "balance_residual_m3h": -0.009716555545047356,
+    "elapsed_seconds": 0.8607995239999582
+  }
+]

@@ -1,0 +1,721 @@
+{
+  "dp": {
+    "all": {
+      "n": 801,
+      "max_abs_dp_pa": 27635.767578125,
+      "median_abs_dp_pa": 0.21416039764881134,
+      "n_over_pa": {
+        "10": 118,
+        "100": 96,
+        "1000": 96,
+        "10000": 96,
+        "100000": 0
+      }
+    },
+    "interior": {
+      "n": 540,
+      "max_abs_dp_pa": 7.178905487060547,
+      "median_abs_dp_pa": 0.2673322707414627,
+      "n_over_pa": {
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0,
+        "100000": 0
+      }
+    },
+    "interior_flowing": {
+      "n": 538,
+      "max_abs_dp_pa": 7.178905487060547,
+      "median_abs_dp_pa": 0.2708802819252014,
+      "n_over_pa": {
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0,
+        "100000": 0
+      }
+    },
+    "interior_blocked": {
+      "n": 2,
+      "max_abs_dp_pa": 0.0,
+      "median_abs_dp_pa": 0.0,
+      "n_over_pa": {
+        "10": 0,
+        "100": 0,
+        "1000": 0,
+        "10000": 0,
+        "100000": 0
+      }
+    },
+    "by_class": {
+      "ahs_system": {
+        "n": 33,
+        "max_abs_dp_pa": 92.051025390625,
+        "median_abs_dp_pa": 92.051025390625,
+        "n_over_pa": {
+          "10": 22,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ahs_terminal": {
+        "n": 124,
+        "max_abs_dp_pa": 0.0,
+        "median_abs_dp_pa": 0.0,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "envelope_leak": {
+        "n": 104,
+        "max_abs_dp_pa": 27635.767578125,
+        "median_abs_dp_pa": 27619.85546875,
+        "n_over_pa": {
+          "10": 96,
+          "100": 96,
+          "1000": 96,
+          "10000": 96,
+          "100000": 0
+        }
+      },
+      "passive_opening": {
+        "n": 540,
+        "max_abs_dp_pa": 7.178905487060547,
+        "median_abs_dp_pa": 0.2673322707414627,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      }
+    },
+    "by_kind": {
+      "Sanitary_Makeup": {
+        "n": 52,
+        "max_abs_dp_pa": 2.993760108947754,
+        "median_abs_dp_pa": 1.10995751619339,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ahs_exhaust": {
+        "n": 11,
+        "max_abs_dp_pa": 92.051025390625,
+        "median_abs_dp_pa": 92.051025390625,
+        "n_over_pa": {
+          "10": 11,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ahs_oa": {
+        "n": 11,
+        "max_abs_dp_pa": 92.051025390625,
+        "median_abs_dp_pa": 92.051025390625,
+        "n_over_pa": {
+          "10": 11,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ahs_recirc": {
+        "n": 11,
+        "max_abs_dp_pa": 0.0,
+        "median_abs_dp_pa": 0.0,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ahs_return": {
+        "n": 62,
+        "max_abs_dp_pa": 0.0,
+        "median_abs_dp_pa": 0.0,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ahs_supply": {
+        "n": 62,
+        "max_abs_dp_pa": 0.0,
+        "median_abs_dp_pa": 0.0,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "envelope_leak": {
+        "n": 104,
+        "max_abs_dp_pa": 27635.767578125,
+        "median_abs_dp_pa": 27619.85546875,
+        "n_over_pa": {
+          "10": 96,
+          "100": 96,
+          "1000": 96,
+          "10000": 96,
+          "100000": 0
+        }
+      },
+      "hatch": {
+        "n": 5,
+        "max_abs_dp_pa": 4.427758693695068,
+        "median_abs_dp_pa": 0.08025072515010834,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ladder": {
+        "n": 13,
+        "max_abs_dp_pa": 1.9451228380203247,
+        "median_abs_dp_pa": 0.028548216447234154,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ladder_well_1": {
+        "n": 65,
+        "max_abs_dp_pa": 4.4770917892456055,
+        "median_abs_dp_pa": 3.593790292739868,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ladder_well_2": {
+        "n": 45,
+        "max_abs_dp_pa": 7.178905487060547,
+        "median_abs_dp_pa": 5.62420129776001,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ladder_well_3": {
+        "n": 32,
+        "max_abs_dp_pa": 0.5718902349472046,
+        "median_abs_dp_pa": 0.058077771216630936,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ladder_well_4": {
+        "n": 32,
+        "max_abs_dp_pa": 0.12643468379974365,
+        "median_abs_dp_pa": 0.047092633321881294,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ladder_well_5": {
+        "n": 120,
+        "max_abs_dp_pa": 5.630882263183594,
+        "median_abs_dp_pa": 0.12305540218949318,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "ladder_well_6": {
+        "n": 60,
+        "max_abs_dp_pa": 5.455990791320801,
+        "median_abs_dp_pa": 2.6703177094459534,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      },
+      "passageway": {
+        "n": 116,
+        "max_abs_dp_pa": 4.159026622772217,
+        "median_abs_dp_pa": 0.04289224185049534,
+        "n_over_pa": {
+          "10": 0,
+          "100": 0,
+          "1000": 0,
+          "10000": 0,
+          "100000": 0
+        }
+      }
+    },
+    "top_paths": [
+      {
+        "path_nr": 102,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_6pdr_Ammo_Fwd",
+        "to_zone": "ambient",
+        "dp_pa": -27635.767578125,
+        "flow_m3h": -46.79786619545835
+      },
+      {
+        "path_nr": 100,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_5in_Ammo_Fwd",
+        "to_zone": "ambient",
+        "dp_pa": -27635.763671875,
+        "flow_m3h": -46.79786337971276
+      },
+      {
+        "path_nr": 99,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Electric_Stores",
+        "to_zone": "ambient",
+        "dp_pa": -27635.76171875,
+        "flow_m3h": -46.79786056396717
+      },
+      {
+        "path_nr": 101,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_8in_Magazine_Fwd",
+        "to_zone": "ambient",
+        "dp_pa": -27635.75390625,
+        "flow_m3h": -46.79785493247601
+      },
+      {
+        "path_nr": 103,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Hold_Fwd",
+        "to_zone": "ambient",
+        "dp_pa": -27635.7421875,
+        "flow_m3h": -46.797843669493666
+      },
+      {
+        "path_nr": 104,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Trimming_Tank_Fwd",
+        "to_zone": "ambient",
+        "dp_pa": -27635.73046875,
+        "flow_m3h": -46.79783522225691
+      },
+      {
+        "path_nr": 89,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_5in_Ammo_Aft",
+        "to_zone": "ambient",
+        "dp_pa": -27635.4453125,
+        "flow_m3h": -46.797593068136614
+      },
+      {
+        "path_nr": 91,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Engine_Port",
+        "to_zone": "ambient",
+        "dp_pa": -27635.44140625,
+        "flow_m3h": -46.79759025239104
+      },
+      {
+        "path_nr": 90,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_6pdr_Ammo_Aft",
+        "to_zone": "ambient",
+        "dp_pa": -27635.39453125,
+        "flow_m3h": -46.79755083195285
+      },
+      {
+        "path_nr": 87,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_8in_Shell_Aft",
+        "to_zone": "ambient",
+        "dp_pa": -27635.369140625,
+        "flow_m3h": -46.797528305988166
+      },
+      {
+        "path_nr": 88,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_8in_Magazine_Aft",
+        "to_zone": "ambient",
+        "dp_pa": -27635.349609375,
+        "flow_m3h": -46.797511411514655
+      },
+      {
+        "path_nr": 86,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Aft_Stores",
+        "to_zone": "ambient",
+        "dp_pa": -27635.3359375,
+        "flow_m3h": -46.797500148532315
+      },
+      {
+        "path_nr": 85,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Marine_Stores",
+        "to_zone": "ambient",
+        "dp_pa": -27635.296875,
+        "flow_m3h": -46.7974663595853
+      },
+      {
+        "path_nr": 84,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Trimming_Tank_Aft",
+        "to_zone": "ambient",
+        "dp_pa": -27635.28515625,
+        "flow_m3h": -46.79745791234855
+      },
+      {
+        "path_nr": 93,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Engineers_Stores",
+        "to_zone": "ambient",
+        "dp_pa": -27635.283203125,
+        "flow_m3h": -46.79745509660296
+      },
+      {
+        "path_nr": 92,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Engine_Stb",
+        "to_zone": "ambient",
+        "dp_pa": -27635.234375,
+        "flow_m3h": -46.79741286041919
+      },
+      {
+        "path_nr": 94,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_5in_Ammo_Mid",
+        "to_zone": "ambient",
+        "dp_pa": -27635.2265625,
+        "flow_m3h": -46.79740722892802
+      },
+      {
+        "path_nr": 97,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Coal_Port",
+        "to_zone": "ambient",
+        "dp_pa": -27635.1953125,
+        "flow_m3h": -46.79738188721776
+      },
+      {
+        "path_nr": 95,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Boiler_Port",
+        "to_zone": "ambient",
+        "dp_pa": -27635.173828125,
+        "flow_m3h": -46.79736217699866
+      },
+      {
+        "path_nr": 96,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "HD_Boiler_Stb",
+        "to_zone": "ambient",
+        "dp_pa": -27635.173828125,
+        "flow_m3h": -46.79736499274425
+      },
+      {
+        "path_nr": 70,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "PF_Passing_Room_Aft",
+        "to_zone": "ambient",
+        "dp_pa": -27632.9609375,
+        "flow_m3h": -46.79548970618478
+      },
+      {
+        "path_nr": 68,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "PF_Aft_Stores_Port",
+        "to_zone": "ambient",
+        "dp_pa": -27632.927734375,
+        "flow_m3h": -46.79546154872893
+      },
+      {
+        "path_nr": 69,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "PF_Aft_Stores_Stb",
+        "to_zone": "ambient",
+        "dp_pa": -27632.927734375,
+        "flow_m3h": -46.79546154872893
+      },
+      {
+        "path_nr": 67,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "PF_Steering_Gear",
+        "to_zone": "ambient",
+        "dp_pa": -27632.92578125,
+        "flow_m3h": -46.79545873298335
+      },
+      {
+        "path_nr": 79,
+        "kind": "envelope_leak",
+        "path_class": "envelope_leak",
+        "from_zone": "PF_Fwd_Stores",
+        "to_zone": "ambient",
+        "dp_pa": -27627.810546875,
+        "flow_m3h": -46.79112811627393
+      }
+    ]
+  },
+  "envelope": {
+    "envelope_leak_count": 104,
+    "outward_count": 2,
+    "outward_total_m3h": 0.16158879222982142,
+    "outward_max_m3h": 0.08079462434428916,
+    "inward_total_m3h": 4491.588989094568,
+    "outward": [
+      {
+        "path_nr": 1,
+        "from_zone": "SD_Stern_Open",
+        "flow_m3h": 0.08079462434428916
+      },
+      {
+        "path_nr": 2,
+        "from_zone": "SD_Aft_Barbette",
+        "flow_m3h": 0.08079416788553226
+      }
+    ],
+    "inward_count": 97,
+    "net_inward_m3h": 4491.427400302338,
+    "dp": {
+      "n": 104,
+      "max_abs_dp_pa": 27635.767578125,
+      "median_abs_dp_pa": 27619.85546875,
+      "n_over_pa": {
+        "10": 96,
+        "100": 96,
+        "1000": 96,
+        "10000": 96,
+        "100000": 0
+      }
+    }
+  },
+  "boundary": {
+    "exhaust_sink_out_m3h": 0,
+    "ahs_return_minus_supply_m3h": 4491.42740875508,
+    "makeup_demand_m3h": 4491.42740875508,
+    "envelope_net_inward_m3h": 4491.427400302338,
+    "ambient_opening_net_inward_m3h": 0,
+    "balance_residual_m3h": 8.452741894870996e-06,
+    "makeup_demand_per_leak_m3h": 43.18680200726039
+  },
+  "ahs": {
+    "group_count": 11,
+    "supply_total_m3h": 31189.003891107328,
+    "return_total_m3h": 35680.43129986241,
+    "return_minus_supply_m3h": 4491.42740875508,
+    "recirc_total_m3h": 0.0,
+    "declared_supply_total_m3h": 30842.4,
+    "declared_return_total_m3h": 35283.914,
+    "exhaust_only_group_count": 4,
+    "supply_only_group_count": 0,
+    "groups": [
+      {
+        "ahs_nr": 1,
+        "supply_m3h": 7259.282544854674,
+        "return_m3h": 7259.282544854674,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 7178.61,
+        "declared_return_m3h": 7178.61,
+        "terminal_count": 26,
+        "return_minus_supply_m3h": 0.0,
+        "declared_return_minus_supply_m3h": 0.0
+      },
+      {
+        "ahs_nr": 2,
+        "supply_m3h": 2983.4753369219657,
+        "return_m3h": 2983.4753369219657,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 2950.32,
+        "declared_return_m3h": 2950.32,
+        "terminal_count": 10,
+        "return_minus_supply_m3h": 0.0,
+        "declared_return_minus_supply_m3h": 0.0
+      },
+      {
+        "ahs_nr": 3,
+        "supply_m3h": 8331.730590552592,
+        "return_m3h": 8331.730590552592,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 8239.14,
+        "declared_return_m3h": 8239.14,
+        "terminal_count": 18,
+        "return_minus_supply_m3h": 0.0,
+        "declared_return_minus_supply_m3h": 0.0
+      },
+      {
+        "ahs_nr": 4,
+        "supply_m3h": 3093.477934527222,
+        "return_m3h": 3093.477934527222,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 3059.1,
+        "declared_return_m3h": 3059.1,
+        "terminal_count": 8,
+        "return_minus_supply_m3h": 0.0,
+        "declared_return_minus_supply_m3h": 0.0
+      },
+      {
+        "ahs_nr": 5,
+        "supply_m3h": 2062.34890542333,
+        "return_m3h": 2062.34890542333,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 2039.43,
+        "declared_return_m3h": 2039.43,
+        "terminal_count": 16,
+        "return_minus_supply_m3h": 0.0,
+        "declared_return_minus_supply_m3h": 0.0
+      },
+      {
+        "ahs_nr": 6,
+        "supply_m3h": 6303.78410426881,
+        "return_m3h": 6303.78410426881,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 6233.7300000000005,
+        "declared_return_m3h": 6233.7300000000005,
+        "terminal_count": 30,
+        "return_minus_supply_m3h": 0.0,
+        "declared_return_minus_supply_m3h": 0.0
+      },
+      {
+        "ahs_nr": 7,
+        "supply_m3h": 1154.9044745587362,
+        "return_m3h": 1154.9044745587362,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 1142.07,
+        "declared_return_m3h": 1142.07,
+        "terminal_count": 8,
+        "return_minus_supply_m3h": 0.0,
+        "declared_return_minus_supply_m3h": 0.0
+      },
+      {
+        "ahs_nr": 8,
+        "supply_m3h": 0.0,
+        "return_m3h": 1161.5827247809561,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 0.0,
+        "declared_return_m3h": 1148.6740000000002,
+        "terminal_count": 2,
+        "return_minus_supply_m3h": 1161.5827247809561,
+        "declared_return_minus_supply_m3h": 1148.6740000000002
+      },
+      {
+        "ahs_nr": 9,
+        "supply_m3h": 0.0,
+        "return_m3h": 774.3240889629436,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 0.0,
+        "declared_return_m3h": 765.7190000000002,
+        "terminal_count": 2,
+        "return_minus_supply_m3h": 774.3240889629436,
+        "declared_return_minus_supply_m3h": 765.7190000000002
+      },
+      {
+        "ahs_nr": 10,
+        "supply_m3h": 0.0,
+        "return_m3h": 1161.5827247809561,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 0.0,
+        "declared_return_m3h": 1148.6740000000002,
+        "terminal_count": 2,
+        "return_minus_supply_m3h": 1161.5827247809561,
+        "declared_return_minus_supply_m3h": 1148.6740000000002
+      },
+      {
+        "ahs_nr": 11,
+        "supply_m3h": 0.0,
+        "return_m3h": 1393.9378702302201,
+        "recirc_m3h": 0.0,
+        "oa_m3h": 0.0,
+        "exhaust_m3h": 0.0,
+        "declared_supply_m3h": 0.0,
+        "declared_return_m3h": 1378.4470000000001,
+        "terminal_count": 2,
+        "return_minus_supply_m3h": 1393.9378702302201,
+        "declared_return_minus_supply_m3h": 1378.4470000000001
+      }
+    ]
+  }
+}
