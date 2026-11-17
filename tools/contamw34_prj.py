@@ -1543,7 +1543,7 @@ class _NetworkBuilder:
 
     def _configure_life_support_plenum(self) -> None:
         cfg = self.overrides.get(LIFE_SUPPORT_PLENUM_KEY)
-        if not self.hobbyist or not cfg:
+        if not self.hobbyist or cfg is None or cfg is False:
             return
         if cfg is True:
             cfg = {}

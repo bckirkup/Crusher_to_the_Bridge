@@ -112,6 +112,16 @@ def test_disabled_plenum_keeps_envelope_leaks() -> None:
     assert "life_support_plenum" not in net
 
 
+def test_empty_plenum_config_uses_defaults() -> None:
+    overrides = _overrides("enterprise_galaxy_tng")
+    overrides["life_support_plenum"] = {}
+    net = _net("enterprise_galaxy_tng", overrides=overrides)
+
+    assert _kind(net["path_map"], "life_support_link")
+    assert not _kind(net["path_map"], "envelope_leak")
+    assert net["life_support_plenum"]["link_area_m2"] == pytest.approx(0.2)
+
+
 @pytest.mark.parametrize("hull", _HULLS)
 @pytest.mark.parametrize("lane", ("design", "commissioned"))
 def test_relief_flow_matches_declared_ambient_balance(
