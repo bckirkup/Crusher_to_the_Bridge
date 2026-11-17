@@ -219,6 +219,14 @@ _WEATHER_ZONES = {
     "raven_am55": {"Foc_Deck_Fwd", "Foc_Deck_Open", "Sweep_Deck"},
     "river_class_frigate": {"Quarterdeck", "Foc_Deck_Open"},
     "rolla_pc483": {"Fantail", "Focsle_Deck"},
+    # CONTAM-AMBIENT-WEATHER-OLYMPIA-01: final stage-4 holdout; ungrouped
+    # zero-outdoor-exchange weather and boat-stowage open zones.
+    "olympia_c6": {
+        "SD_Stern_Open", "SD_Boats_Aft_Port", "SD_Boats_Aft_Stb",
+        "SD_Boats_Mid_Port", "SD_Boats_Mid_Stb", "SD_Boats_Fwd_Port",
+        "SD_Boats_Fwd_Stb", "SD_Forecastle_Open", "MD_Stern_Fantail",
+        "MD_Forecastle_Open",
+    },
 }
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
 # CONTAM-AMBIENT-WEATHER-CARRIER-01, CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01,

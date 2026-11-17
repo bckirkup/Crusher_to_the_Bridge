@@ -23,7 +23,8 @@
         "x": 5.24,
         "y": 4.7
       },
-      "description": "open quarterdeck boat-deck area astern"
+      "description": "open quarterdeck boat-deck area astern",
+      "exposure": "weather"
     },
     {
       "id": "SD_Aft_Barbette",
@@ -53,7 +54,8 @@
         "x": 25.49,
         "y": 2.6
       },
-      "description": "24ft whale boat + cutters in davits, port"
+      "description": "24ft whale boat + cutters in davits, port",
+      "exposure": "weather"
     },
     {
       "id": "SD_Boats_Aft_Stb",
@@ -68,7 +70,8 @@
         "x": 25.49,
         "y": 7.6
       },
-      "description": "24ft whale boat + cutters in davits, starboard"
+      "description": "24ft whale boat + cutters in davits, starboard",
+      "exposure": "weather"
     },
     {
       "id": "SD_Boats_Mid_Port",
@@ -83,7 +86,8 @@
         "x": 47.64,
         "y": 2.3
       },
-      "description": "30ft cutters, barge, gigs stowed amidships port"
+      "description": "30ft cutters, barge, gigs stowed amidships port",
+      "exposure": "weather"
     },
     {
       "id": "SD_Boats_Mid_Stb",
@@ -98,7 +102,8 @@
         "x": 47.64,
         "y": 7.3
       },
-      "description": "30ft steam cutter + launches stowed amidships starboard"
+      "description": "30ft steam cutter + launches stowed amidships starboard",
+      "exposure": "weather"
     },
     {
       "id": "SD_Engine_Hatch",
@@ -159,7 +164,8 @@
         "x": 72.88,
         "y": 2.6
       },
-      "description": "26ft/28ft cutters + 33ft steam launch stowage fwd"
+      "description": "26ft/28ft cutters + 33ft steam launch stowage fwd",
+      "exposure": "weather"
     },
     {
       "id": "SD_Boats_Fwd_Stb",
@@ -174,7 +180,8 @@
         "x": 72.88,
         "y": 7.1
       },
-      "description": "sailing launch + cutter stowage fwd"
+      "description": "sailing launch + cutter stowage fwd",
+      "exposure": "weather"
     },
     {
       "id": "SD_Fwd_Barbette",
@@ -204,7 +211,8 @@
         "x": 94.32,
         "y": 5.0
       },
-      "description": "open bow over forecastle"
+      "description": "open bow over forecastle",
+      "exposure": "weather"
     },
     {
       "id": "MD_Stern_Fantail",
@@ -219,7 +227,8 @@
         "x": 4.29,
         "y": 6.88
       },
-      "description": "open fantail stern"
+      "description": "open fantail stern",
+      "exposure": "weather"
     },
     {
       "id": "MD_Aft_Barbette",
@@ -446,7 +455,8 @@
         "x": 88.6,
         "y": 7.46
       },
-      "description": "open forecastle, anchors + capstan gear at bow"
+      "description": "open forecastle, anchors + capstan gear at bow",
+      "exposure": "weather"
     },
     {
       "id": "BD_Officers_WC",
