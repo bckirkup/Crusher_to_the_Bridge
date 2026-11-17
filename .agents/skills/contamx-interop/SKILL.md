@@ -116,4 +116,6 @@ hvac:
    every Cp-profile path (envelope leaks, ambient-opening legs). Override per
    hull with `relative_wind_speed_m_s` / `relative_wind_direction_deg` in
    `contam/hobbyist_overrides.json`; speed 0 is the calm baseline. Never set a
-   per-path wind: ledger `CONTAM-DEFAULT-WEATHER-01`.
+   per-path wind: ledger `CONTAM-DEFAULT-WEATHER-01`. Declared-wind `open_deck`
+   records cover six cruise hulls and nine destroyer hulls; the destroyer roster
+   and witnesses are in `docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md`.
