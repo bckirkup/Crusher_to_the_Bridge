@@ -209,7 +209,9 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # amphibious weather opening; CONTAM-AMBIENT-WEATHER-AUXILIARY-01 adds two
     # legs per ungrouped auxiliary weather opening;
     # CONTAM-AMBIENT-WEATHER-MISC-01 adds two legs per ungrouped/zero-exchange
-    # misc weather opening. No other committed bundle carries an opening.
+    # misc weather opening; CONTAM-AMBIENT-WEATHER-OLYMPIA-01 adds two legs
+    # per olympia_c6 weather/boat-stowage opening. No other committed bundle
+    # carries an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -237,5 +239,5 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "savannah_ns": 28,
         "castle_class_corvette": 4, "eagle_pe60": 14,
         "pce_874": 4, "raven_am55": 6, "river_class_frigate": 4,
-        "rolla_pc483": 4,
+        "rolla_pc483": 4, "olympia_c6": 20,
     }
