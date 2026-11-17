@@ -1,0 +1,522 @@
+{
+ "campaign": "noro_supply_solver_screen_01",
+ "hull": "exp",
+ "tier": "fl_exp_12d_sens_p06_paxv",
+ "epochs": 288,
+ "num_agents": 450,
+ "source": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_seed_scan_01/exp_{arm}/",
+ "burden_rule": {
+  "station_lots": "lot_servings * lot_titre_gec_per_g * 150 g",
+  "single_line_receipt": "quantity_g * lot_titre_gec_per_g",
+  "declared_receipts": "quantity_g * lot_titre_gec_per_g"
+ },
+ "solver_arms": [
+  "discrete",
+  "continuous"
+ ],
+ "supply_arms": {
+  "station_lots": {
+   "seeds": [
+    900470,
+    906057,
+    908346,
+    911038,
+    916872,
+    919271,
+    920284,
+    923364,
+    927928,
+    928525,
+    928842,
+    935479,
+    938764,
+    939824,
+    942659,
+    952949
+   ],
+   "cells": [
+    {
+     "seed": 928842,
+     "arm": "station_lots",
+     "burden": 126623494.9035,
+     "n_lots": 1,
+     "items": [
+      "bakery"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 920284,
+     "arm": "station_lots",
+     "burden": 10001381.2635,
+     "n_lots": 1,
+     "items": [
+      "bakery"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 935479,
+     "arm": "station_lots",
+     "burden": 115765983.864,
+     "n_lots": 1,
+     "items": [
+      "dairy"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 928525,
+     "arm": "station_lots",
+     "burden": 9636156.6444,
+     "n_lots": 1,
+     "items": [
+      "dairy"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 938764,
+     "arm": "station_lots",
+     "burden": 118388171.811,
+     "n_lots": 1,
+     "items": [
+      "deli"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 952949,
+     "arm": "station_lots",
+     "burden": 8842099.338,
+     "n_lots": 1,
+     "items": [
+      "deli"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 900470,
+     "arm": "station_lots",
+     "burden": 115013644.71240002,
+     "n_lots": 2,
+     "items": [
+      "bakery",
+      "fresh_produce"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 942659,
+     "arm": "station_lots",
+     "burden": 9557919.597600002,
+     "n_lots": 1,
+     "items": [
+      "fresh_produce"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 906057,
+     "arm": "station_lots",
+     "burden": 120852648.6135,
+     "n_lots": 1,
+     "items": [
+      "garnish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 919271,
+     "arm": "station_lots",
+     "burden": 9307662.3423,
+     "n_lots": 2,
+     "items": [
+      "bakery",
+      "garnish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 923364,
+     "arm": "station_lots",
+     "burden": 103677895.92,
+     "n_lots": 1,
+     "items": [
+      "salad_leaf"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 911038,
+     "arm": "station_lots",
+     "burden": 7752978.5415,
+     "n_lots": 1,
+     "items": [
+      "salad_leaf"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 916872,
+     "arm": "station_lots",
+     "burden": 118479404.40599999,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 927928,
+     "arm": "station_lots",
+     "burden": 8661907.29915,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 939824,
+     "arm": "station_lots",
+     "burden": 431411086.95299995,
+     "n_lots": 1,
+     "items": [
+      "dairy"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 908346,
+     "arm": "station_lots",
+     "burden": 418653613.29330003,
+     "n_lots": 2,
+     "items": [
+      "deli",
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    }
+   ]
+  },
+  "single_line_receipt": {
+   "seeds": [
+    906403,
+    919937,
+    920693,
+    922163,
+    927090,
+    933022,
+    937838,
+    944837,
+    951508,
+    955909
+   ],
+   "cells": [
+    {
+     "seed": 906403,
+     "arm": "single_line_receipt",
+     "burden": 98926251.33418977,
+     "n_lots": 1,
+     "items": [
+      "fresh_produce"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 922163,
+     "arm": "single_line_receipt",
+     "burden": 9824969.39015375,
+     "n_lots": 1,
+     "items": [
+      "fresh_produce"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 955909,
+     "arm": "single_line_receipt",
+     "burden": 128271203.82856286,
+     "n_lots": 1,
+     "items": [
+      "salad_leaf"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 927090,
+     "arm": "single_line_receipt",
+     "burden": 12895458.357987484,
+     "n_lots": 1,
+     "items": [
+      "salad_leaf"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 933022,
+     "arm": "single_line_receipt",
+     "burden": 3526066.067238493,
+     "n_lots": 1,
+     "items": [
+      "salad_leaf"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 944837,
+     "arm": "single_line_receipt",
+     "burden": 151280457.36476392,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 937838,
+     "arm": "single_line_receipt",
+     "burden": 43524664.32513961,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 920693,
+     "arm": "single_line_receipt",
+     "burden": 15295519.038573092,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 919937,
+     "arm": "single_line_receipt",
+     "burden": 5187645.847660828,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 951508,
+     "arm": "single_line_receipt",
+     "burden": 2340562.817883667,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    }
+   ]
+  },
+  "declared_receipts": {
+   "seeds": [
+    909201,
+    909847,
+    914192,
+    922635,
+    928275,
+    931239,
+    932386,
+    935013,
+    942423,
+    943696
+   ],
+   "cells": [
+    {
+     "seed": 943696,
+     "arm": "declared_receipts",
+     "burden": 116962884.93183208,
+     "n_lots": 1,
+     "items": [
+      "fresh_produce"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 909847,
+     "arm": "declared_receipts",
+     "burden": 8084709.06565314,
+     "n_lots": 1,
+     "items": [
+      "fresh_produce"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 935013,
+     "arm": "declared_receipts",
+     "burden": 120213557.36429732,
+     "n_lots": 1,
+     "items": [
+      "salad_leaf"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 932386,
+     "arm": "declared_receipts",
+     "burden": 21022091.461648803,
+     "n_lots": 1,
+     "items": [
+      "salad_leaf"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 909201,
+     "arm": "declared_receipts",
+     "burden": 4725401.019137733,
+     "n_lots": 1,
+     "items": [
+      "salad_leaf"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 931239,
+     "arm": "declared_receipts",
+     "burden": 175997769.49862775,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 914192,
+     "arm": "declared_receipts",
+     "burden": 45610540.57658241,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 942423,
+     "arm": "declared_receipts",
+     "burden": 16349559.14922743,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 922635,
+     "arm": "declared_receipts",
+     "burden": 5258077.564524538,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    },
+    {
+     "seed": 928275,
+     "arm": "declared_receipts",
+     "burden": 2430800.061740674,
+     "n_lots": 1,
+     "items": [
+      "shellfish"
+     ],
+     "venues": [
+      "MainDining"
+     ]
+    }
+   ]
+  }
+ },
+ "quiet_controls": {
+  "arm": "station_lots",
+  "seeds": [
+   903443,
+   910407,
+   917335,
+   924316,
+   931256,
+   938185,
+   945167,
+   952110
+  ],
+  "note": "seeds with zero contaminated provisioned lots/receipts in all three expedition arms"
+ }
+}
