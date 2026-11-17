@@ -110,3 +110,10 @@ hvac:
    contaminant sink on positive solved `Flow0`; `envelope_leak` follows
    `hvac.contamx.envelope_leak_mode` (`boundary_sink` default, `pressure_only`
    baseline). Inward or zero `Flow0` adds no path for either kind.
+8. Weather: the hobbyist export declares one steady relative wind per hull
+   (default 1 m/s from ahead; `tools/contam_hobbyist.resolve_relative_wind`).
+   It is the `Ws`/`Wd` of the steady weather line and the wind flag is set on
+   every Cp-profile path (envelope leaks, ambient-opening legs). Override per
+   hull with `relative_wind_speed_m_s` / `relative_wind_direction_deg` in
+   `contam/hobbyist_overrides.json`; speed 0 is the calm baseline. Never set a
+   per-path wind: ledger `CONTAM-DEFAULT-WEATHER-01`.

@@ -319,15 +319,26 @@ envelope-leak-only baseline; it does not disable ambient-opening sinks.
 (`n_ambient_opening_paths`, `ambient_opening_sink_out_m3h`,
 `ambient_opening_inward_m3h`); ledger `CONTAM-AMBIENT-OPENING-BOUNDARY-01`.
 
-The exported steady weather has no wind and no path sets the ContamX wind
-flag, so at the exported zone temperature an opening on a weather deck
-(ΔT = 0) solves no outward flow. An `ambient_openings` record may declare
-`wind_speed_m_s`: the exporter then sets the wind flag on that record's two
-legs only and imposes a constant windward / leeward `wPset`
-(`0.8 · Cp · ρU²/2`, Cp from the hull's wind profile at 0° and 180°). Declared
-records: make-up louvres on the six cruise and two fiction hulls (no wind),
-`open_deck` on 23 cruise weather decks (1 m/s); ledger
-`CONTAM-AMBIENT-WEATHER-CRUISE-01`.
+The hobbyist export declares one steady relative wind per hull
+(`tools/contam_hobbyist.resolve_relative_wind`; default 1 m/s from ahead,
+`DEFAULT_RELATIVE_WIND_SPEED_M_S` / `DEFAULT_RELATIVE_WIND_DIRECTION_DEG`,
+Grade C declared assumption). It is the `Ws` / `Wd` of the steady weather line,
+and every path that carries the hull's Cp profile — envelope leaks and
+ambient-opening legs — sets the ContamX wind flag, so ContamX applies
+`0.8 · Cp(wazm − Wd) · ρ·Ws²/2` on it. No path carries a constant `wPset`.
+An `ambient_openings` record that declares `wind_speed_m_s` is cross-ventilated:
+its first leg faces the wind and its second faces away (`wazm = Wd`, `Wd + 180`)
+instead of both sitting on the zone's wall azimuth. The speed on those legs is
+the hull's; the record's own value is the native lane's exchange axis, so a hull
+that overrides the wind should move its `open_deck` records with it. Override
+per hull in `contam/hobbyist_overrides.json` with `relative_wind_speed_m_s`
+(≥ 0) and `relative_wind_direction_deg` ([0, 360)); speed 0 is the labelled calm
+baseline, which clears the wind flag on every profile path and falls back to
+the imposed `wPset` of `CONTAM-AMBIENT-WEATHER-CRUISE-01` on declared-wind
+records. At the default the wind pressure is +0.34 / −0.12 Pa, far below the
+fan-driven pressures: it drives the weather-deck exchange and moves envelope
+leak flows by a few m³/h per hull, no more. Ledgers
+`CONTAM-AMBIENT-WEATHER-CRUISE-01`, `CONTAM-DEFAULT-WEATHER-01`.
 
 ### `.SIM` reader contract (critical)
 

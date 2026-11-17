@@ -420,17 +420,56 @@ class TestExporter:
             if line.split() and line.split()[0].isdigit() and int(line.split()[0]) in nrs
         ]
 
-    @pytest.mark.parametrize("speed", [None, 0.0])
-    def test_no_declared_wind_imposes_no_pressure(self, speed: float | None) -> None:
-        for row in self._opening_rows(_opening(wind_speed_m_s=speed)):
-            assert row[1] == "0"  # wind flag clear
-            assert float(row[15]) == pytest.approx(0.0)  # wPset
+    _CALM = {"relative_wind_speed_m_s": 0.0}
 
-    def test_declared_wind_imposes_windward_and_leeward_pressure(self) -> None:
+    @pytest.mark.parametrize("speed", [None, 0.0])
+    def test_no_declared_wind_follows_the_hull_wind(self, speed: float | None) -> None:
+        # CONTAM-DEFAULT-WEATHER-01: an opening with no declared speed is an
+        # ordinary profile path: flagged under the hull wind, both legs on the
+        # zone's wall azimuth, no constant pressure.
+        rows = self._opening_rows(_opening(wind_speed_m_s=speed))
+        assert {row[1] for row in rows} == {"1"}
+        assert {row[6] for row in rows} == {"1"}
+        assert len({row[17] for row in rows}) == 1
+        for row in rows:
+            assert float(row[15]) == pytest.approx(0.0)  # wPset
+            assert float(row[16]) == pytest.approx(0.8)  # wPmod
+        calm = self._opening_rows(_opening(wind_speed_m_s=speed), overrides=self._CALM)
+        assert {row[1] for row in calm} == {"0"}  # labelled calm baseline
+
+    def test_declared_wind_faces_one_leg_windward_and_one_leeward(self) -> None:
+        windward, leeward = self._opening_rows(_opening(wind_speed_m_s=1.0))
+        assert windward[1] == leeward[1] == "1"  # ContamX wind flag
+        assert windward[6] == leeward[6] == "1"  # the hull's Cp profile
+        assert (float(windward[17]), float(leeward[17])) == (0.0, 180.0)
+        for row in (windward, leeward):
+            assert float(row[15]) == pytest.approx(0.0)  # no constant pressure
+            assert float(row[16]) == pytest.approx(0.8)  # record speed = hull speed
+
+    def test_cross_ventilated_legs_follow_the_wind_direction(self) -> None:
+        windward, leeward = self._opening_rows(
+            _opening(wind_speed_m_s=1.0),
+            overrides={"relative_wind_direction_deg": 270.0},
+        )
+        assert (float(windward[17]), float(leeward[17])) == (270.0, 90.0)
+
+    @pytest.mark.parametrize("hull,record", [(1.0, 2.0), (1.0, 5.0), (4.0, 2.0)])
+    def test_record_speed_is_not_a_second_contamx_wind(
+        self, hull: float, record: float,
+    ) -> None:
+        rows = self._opening_rows(
+            _opening(wind_speed_m_s=record),
+            overrides={"relative_wind_speed_m_s": hull},
+        )
+        assert [float(row[16]) for row in rows] == pytest.approx([0.8, 0.8])
+
+    def test_calm_baseline_imposes_windward_and_leeward_pressure(self) -> None:
         # CONTAM-AMBIENT-WEATHER-CRUISE-01: wPmod 0.8 x Cp x rho U^2 / 2 with
         # the ShipHull Cp of 0.7 windward and -0.25 leeward.
         dynamic = 0.5 * 101325.0 / (287.055 * 293.15)
-        windward, leeward = self._opening_rows(_opening(wind_speed_m_s=1.0))
+        windward, leeward = self._opening_rows(
+            _opening(wind_speed_m_s=1.0), overrides=self._CALM,
+        )
         assert windward[1] == leeward[1] == "1"  # ContamX wind flag
         assert windward[6] == leeward[6] == "0"  # no profile: wPset is constant
         assert float(windward[15]) == pytest.approx(0.8 * 0.7 * dynamic, rel=1e-5)
@@ -439,7 +478,7 @@ class TestExporter:
     def test_imposed_pressure_scales_with_the_square_of_the_speed(self) -> None:
         pressures = {
             speed: [float(row[15]) for row in self._opening_rows(
-                _opening(wind_speed_m_s=speed),
+                _opening(wind_speed_m_s=speed), overrides=self._CALM,
             )]
             for speed in (1.0, 2.0, 5.0)
         }
@@ -447,11 +486,12 @@ class TestExporter:
             for slow, fast in zip(pressures[1.0], pressures[speed]):
                 assert fast == pytest.approx(slow * speed * speed, rel=1e-4)
 
-    def test_skeleton_export_imposes_the_same_pressure(self) -> None:
+    def test_skeleton_export_imposes_the_calm_baseline_pressure(self) -> None:
         record = _opening(wind_speed_m_s=1.0)
-        hobbyist = [row[15] for row in self._opening_rows(record)]
+        calm = [row[15] for row in self._opening_rows(record, overrides=self._CALM)]
         skeleton = [row[15] for row in self._opening_rows(record, hobbyist=False)]
-        assert skeleton == hobbyist
+        assert skeleton == calm
+        assert all(abs(float(value)) > 1e-6 for value in skeleton)
 
     def test_declared_wind_needs_the_paired_model(self) -> None:
         record = _opening(wind_speed_m_s=1.0)

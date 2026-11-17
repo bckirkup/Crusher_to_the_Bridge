@@ -164,6 +164,39 @@ def resolve_wind_profile_key(
     return next(iter(profiles))
 
 
+# Default relative wind of the exported steady weather: one speed and one
+# direction for every wind-driven path of a hull (envelope leaks, ambient
+# openings). ASSUMED-RELATIVE-WIND, Grade C: a declared assumption, no source
+# read; Origin: none. 1 m/s is the committed point of the declared 0-10 m/s
+# axis of CONTAM-AMBIENT-WEATHER-CRUISE-01, on which the weather-deck native
+# exchange rates were derived, so the fleet default and those records are the
+# same constant (CONTAM-DEFAULT-WEATHER-01). It is not a measured wind and a
+# ship under way sees more. Direction 0 deg is wind from ahead: walls whose
+# azimuth is 0 are windward. Override per hull with ``relative_wind_speed_m_s``
+# / ``relative_wind_direction_deg`` in ``contam/hobbyist_overrides.json``;
+# speed 0 is the labelled calm baseline (no wind flag on any profile path).
+DEFAULT_RELATIVE_WIND_SPEED_M_S = 1.0
+DEFAULT_RELATIVE_WIND_DIRECTION_DEG = 0.0
+
+
+def resolve_relative_wind(overrides: dict[str, Any]) -> tuple[float, float]:
+    """``(speed m/s, direction deg)`` of the hull's steady relative wind."""
+    speed = overrides.get("relative_wind_speed_m_s")
+    direction = overrides.get("relative_wind_direction_deg")
+    speed = DEFAULT_RELATIVE_WIND_SPEED_M_S if speed is None else float(speed)
+    direction = (
+        DEFAULT_RELATIVE_WIND_DIRECTION_DEG if direction is None
+        else float(direction)
+    )
+    if not (math.isfinite(speed) and speed >= 0.0 and 0.0 <= direction < 360.0):
+        raise ValueError(
+            "relative_wind_speed_m_s must be >= 0 and "
+            "relative_wind_direction_deg in [0, 360); got "
+            f"{speed!r}, {direction!r}"
+        )
+    return speed, direction
+
+
 def deck_temp_k(
     deck: str,
     overrides: dict[str, Any],
