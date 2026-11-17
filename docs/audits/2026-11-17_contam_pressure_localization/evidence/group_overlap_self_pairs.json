@@ -1,0 +1,17 @@
+[
+  {
+    "hull": "olympia_c6",
+    "from": "VENT_Machinery",
+    "to": "VENT_Uptakes",
+    "path": "ladder_well_3",
+    "overlap_zones": [
+      "HD_Boiler_Port",
+      "HD_Boiler_Stb",
+      "PF_Boiler_Port",
+      "PF_Boiler_Stb"
+    ],
+    "self_pair_count": 4,
+    "raw_flow_m3h": 50.0,
+    "n_cartesian_pairs": 36
+  }
+]

@@ -1,0 +1,97 @@
+[
+  {
+    "module": "tools",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/tools/__init__.py",
+    "sha256": "b15cbdf40fafb5c77d9d5307251ccb2c34aff197cefde710682de8491b5d6262"
+  },
+  {
+    "module": "tools.diag",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/tools/diag/__init__.py",
+    "sha256": "22b021b8348c17a2bbfd43515f1235629dfb4a2c1eb18a1c4e1089dadf5fc44e"
+  },
+  {
+    "module": "engines.engine_paths",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/engines/engine_paths.py",
+    "sha256": "260ef5cd53e617d6d60f7415a78e31813d072af0cfef0c8cd17a92aeb6155e7f"
+  },
+  {
+    "module": "engines",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/engines/__init__.py",
+    "sha256": "684671e300ba83d62d6ea37efc59a6661ad3c31f5617d59f8ddc2b983f6b5328"
+  },
+  {
+    "module": "simulation_utils.numeric",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/simulation_utils/numeric.py",
+    "sha256": "d86db3bac176e2325c7498b2d8677308eee8db5ad39e0b68e8a6374f8612a3ad"
+  },
+  {
+    "module": "simulation_utils.paths",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/simulation_utils/paths.py",
+    "sha256": "cc9e20645fe8fb3013b1fa563158821b4c1566b3dbf56914939ade22ee665704"
+  },
+  {
+    "module": "simulation_utils",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/simulation_utils/__init__.py",
+    "sha256": "24d42eb67d0e77c9271b37edcc4c3d4257b353fbca8567092eddf6d4a37151ed"
+  },
+  {
+    "module": "engines.contamx_runner",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/engines/contamx_runner.py",
+    "sha256": "3644eae5007da040ce6eb5c8c04e61f69c5d6c2c751e68b71be837767458432c"
+  },
+  {
+    "module": "engines.sim_clock",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/engines/sim_clock.py",
+    "sha256": "24a298dbd5c930737b56167a0b4da95a41d585791bd30d344aa44d04d45bd686"
+  },
+  {
+    "module": "simulation_utils.asset_defaults",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/simulation_utils/asset_defaults.py",
+    "sha256": "c244114a815893b768741e7adc7b2a35439c546b534c080693db42588a322cb6"
+  },
+  {
+    "module": "engines.py_contam_bridge",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/engines/py_contam_bridge.py",
+    "sha256": "f09fa7b401d38763805a02086124263909fc5920ee18110fa0e4f57e69573f64"
+  },
+  {
+    "module": "engines.contamx_ahs_bridge",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/engines/contamx_ahs_bridge.py",
+    "sha256": "967d7861edd0835940b22b92fe2690f61a7190199811fb383a3776ddcbde3cfc"
+  },
+  {
+    "module": "engines.contamx_transport",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/engines/contamx_transport.py",
+    "sha256": "09ba3e10491d91a23396afda8043fdf9817d4b915d7ed4540561610732caaf9f"
+  },
+  {
+    "module": "tools.contam_hobbyist",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/tools/contam_hobbyist.py",
+    "sha256": "56ac1fed5c18b253bb04f2d95ca55df06e22330811f4511d1dddfc0b71840484"
+  },
+  {
+    "module": "tools.contamw34_prj",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/tools/contamw34_prj.py",
+    "sha256": "04628b1c0eb6346cf1cd7411a961615afe6cae17d095ef2f6bb8ce335f003f99"
+  },
+  {
+    "module": "tools.contam_prj_bridge",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/tools/contam_prj_bridge.py",
+    "sha256": "5ed36781ca57ee4a2de9480881bf0b456f54901aac7a1f0c2e7f76a29d5d84a7"
+  },
+  {
+    "module": "tools.diag.contam_paired_diagnostic",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/tools/diag/contam_paired_diagnostic.py",
+    "sha256": "c519355b10d9a0645b31dbc7635d9147df809d5442a6dabe79e617f91eb45027"
+  },
+  {
+    "module": "tools.diag.contam_envelope_leak_enumeration",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/tools/diag/contam_envelope_leak_enumeration.py",
+    "sha256": "09ceddbda3a8dcd5a8b3ec231cc716aa16cae6970854dd554019f9bc2ccf13af"
+  },
+  {
+    "module": "tools.diag.contam_pressure_balance_diagnostic",
+    "file": "/workspace/projects/c69f97eb-d07f-4d0d-9fb9-71e426d53523/research/localization_20261117/residual_inventory/compute/tools/diag/contam_pressure_balance_diagnostic.py",
+    "sha256": "020cdc91acb6b5d43f3757bde0ca60ec7faab42881a4b3266b9d1d450053b6ee"
+  }
+]

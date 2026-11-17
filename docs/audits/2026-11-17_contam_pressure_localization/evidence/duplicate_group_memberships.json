@@ -1,0 +1,14 @@
+[
+  {
+    "hull": "erie_pg50",
+    "group": "HVAC_Accom",
+    "room": "Stores_Aft_2",
+    "multiplicity": 2
+  },
+  {
+    "hull": "pope_ap110",
+    "group": "VENT_Accommodation_Aft",
+    "room": "Officers_Qtrs_Boat",
+    "multiplicity": 2
+  }
+]

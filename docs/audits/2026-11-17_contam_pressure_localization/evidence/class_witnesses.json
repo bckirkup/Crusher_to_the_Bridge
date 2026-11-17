@@ -1,0 +1,242 @@
+[
+  {
+    "hull": "lsm_354",
+    "max_dp_pa": 89.69178,
+    "lane": "commissioned",
+    "measurement_stage": "eb7d72ee",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "middlesex_lst983",
+    "max_dp_pa": 129.79135,
+    "lane": "commissioned",
+    "measurement_stage": "eb7d72ee",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "ruchamkin_apd89",
+    "max_dp_pa": 110.92294,
+    "lane": "commissioned",
+    "measurement_stage": "eb7d72ee",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "aeolus_arc3",
+    "max_dp_pa": 953.0,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "apl_24",
+    "max_dp_pa": 23.61,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "bolster_ars38",
+    "max_dp_pa": 106.2,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "cobalt_k124",
+    "max_dp_pa": 151.0,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "gordon_gunter_r338",
+    "max_dp_pa": 131.3,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "liberty_cargo_ec2",
+    "max_dp_pa": 22.21,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "lyon_ap71",
+    "max_dp_pa": 151.0,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "passumpsic_ao106",
+    "max_dp_pa": 165.2,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "savannah_ns",
+    "max_dp_pa": 92.05,
+    "lane": "commissioned",
+    "measurement_stage": "07a1ac4c",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-AUXILIARY-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "new_york_bb34",
+    "max_dp_pa": 645.28,
+    "lane": "commissioned",
+    "measurement_stage": "6f99ad17",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-BATTLESHIP-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "south_dakota_bb49",
+    "max_dp_pa": 14272.0,
+    "lane": "commissioned",
+    "measurement_stage": "6f99ad17",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-BATTLESHIP-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "texas_bb35",
+    "max_dp_pa": 129.79,
+    "lane": "commissioned",
+    "measurement_stage": "6f99ad17",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-BATTLESHIP-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "west_virginia_bb48",
+    "max_dp_pa": 311.81,
+    "lane": "commissioned",
+    "measurement_stage": "6f99ad17",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-BATTLESHIP-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "lexington_cv2",
+    "max_dp_pa": 314.8,
+    "lane": "commissioned",
+    "measurement_stage": "0efb80db",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "saratoga_cv3",
+    "max_dp_pa": 317.1,
+    "lane": "commissioned",
+    "measurement_stage": "0efb80db",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-CARRIER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "alexander_henry_cgs119",
+    "max_dp_pa": 53.9159,
+    "lane": "commissioned",
+    "measurement_stage": "3aa3c200",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-CRUISER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "cannon_de701",
+    "max_dp_pa": 110.9,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "cushing_dd376",
+    "max_dp_pa": 184.0,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "davison_dd618",
+    "max_dp_pa": 241.8,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "fletcher_dde_dd445",
+    "max_dp_pa": 77.89,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "hunter_killer_dd692",
+    "max_dp_pa": 8614.0,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "keppler_dd765",
+    "max_dp_pa": 172.2,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "nields_dd616",
+    "max_dp_pa": 158.1,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "palmer_dms5",
+    "max_dp_pa": 102.7,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "sigsbee_dd502",
+    "max_dp_pa": 141.6,
+    "lane": "commissioned",
+    "measurement_stage": "5b2cfbc1",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "enterprise_constitution_tos",
+    "max_dp_pa": 10.48,
+    "lane": "commissioned",
+    "measurement_stage": "81a57eba",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-FICTION-01.md",
+    "origin": "producer_class_ledger"
+  },
+  {
+    "hull": "enterprise_galaxy_tng",
+    "max_dp_pa": 35.54,
+    "lane": "commissioned",
+    "measurement_stage": "81a57eba",
+    "evidence_file": "source/docs/ledger/CONTAM-AMBIENT-WEATHER-FICTION-01.md",
+    "origin": "producer_class_ledger"
+  }
+]

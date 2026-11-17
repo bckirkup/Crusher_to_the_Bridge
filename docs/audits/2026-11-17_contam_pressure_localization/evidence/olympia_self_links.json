@@ -1,0 +1,38 @@
+[
+  {
+    "path_nr": 357,
+    "from_zone": "PF_Boiler_Port",
+    "to_zone": "PF_Boiler_Port",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 362,
+    "from_zone": "PF_Boiler_Stb",
+    "to_zone": "PF_Boiler_Stb",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 379,
+    "from_zone": "HD_Boiler_Port",
+    "to_zone": "HD_Boiler_Port",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 384,
+    "from_zone": "HD_Boiler_Stb",
+    "to_zone": "HD_Boiler_Stb",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_3",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  }
+]
