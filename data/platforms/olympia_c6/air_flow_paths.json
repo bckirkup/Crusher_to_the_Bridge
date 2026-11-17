@@ -1047,6 +1047,14 @@
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-OLYMPIA-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3; the owner accepted this Grade C deck-face area rule and the resulting large solved rates as declared assumptions on 2026-11-16. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the fleet default from ahead, CONTAM-DEFAULT-WEATHER-01), Grade C ASSUMED-RELATIVE-WIND, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "MD_Forecastle_Open",
+      "type": "makeup_louvre",
+      "area_m2": 0.502,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake at the open forecastle (CONTAM-OLYMPIA-MAKEUP-01). ASSUMED-FORECASTLE-MAKEUP-LOCATION is Grade C: the owner-ruled open-forecastle scenario identifies a possible route for the sanitary make-up demand, but no drawing establishes the historical opening location or dimensions. ASSUMED-MAKEUP-LOUVRE-AREA is Grade C: served demand 4518.2 m3/h (1189.0 + 713.4 + 1189.0 + 1426.8, the existing Sanitary_Makeup cross-zone link reference flows) at the 2.5 m/s free-area face-velocity convention gives 0.502022 m2, declared as 0.502 m2; it is not a measured louvre and was not chosen against a pressure target. schedule is always_open and no wind_speed_m_s is declared because this is a passive make-up route, not a weather opening. exchange_m3h follows D5 from the commissioned-lane ContamX-solved outward flow."
     }
   ]
 }
