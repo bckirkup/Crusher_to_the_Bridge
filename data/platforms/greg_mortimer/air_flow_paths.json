@@ -494,6 +494,14 @@
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Engine_Room",
+      "type": "makeup_louvre",
+      "area_m2": 0.079,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Service make-up intake for the 713.6 m3/h Sanitary_Makeup demand that AHU_Service feeds to the exhaust-only heads HD_0E_M, HD_2C_M and HD_2C_F (118.9 + 356.8 + 237.9; CONTAM-GREG-SERVICE-MAKEUP-01). The galley/laundry/machinery/crew cluster has no other pressure-responsive boundary route: the DiningRoom louvre sits behind the fixed-flow Dining_Galley_Exhaust transfer. Placed on Engine_Room as ASSUMED-SERVICE-INTAKE-LOCATION, Grade C: no Greg Mortimer drawing shows decks 0-2 or a ventilator; a machinery-space weather intake is assumed as the service group's outdoor-air route, and Engine_Room is the AHU_Service room it would serve. Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: the served demand at the assumed 2.5 m/s free-area face velocity (713.6 / 3600 / 2.5), not a machinery-ventilation sizing and not chosen against a pressure target. Passive always-open operation is ASSUMED-SERVICE-INTAKE-PASSIVE, Grade C (no supply fan is declared). exchange_m3h is 0: the commissioned-lane ContamX-solved flow through both legs is inward only (D5), so the opening is not a native sink."
     }
   ],
   "adjacency": [
