@@ -1095,6 +1095,8 @@ class _NetworkBuilder:
                 {"filtered": filtered} if filtered != ducted else None
             )
             for fr, tr in itertools.product(from_rooms, to_rooms):
+                if fr == tr:
+                    continue
                 self._add_path(
                     self.zone_name_to_nr[fr], self.zone_name_to_nr[tr], elem,
                     from_name=fr, to_name=tr,

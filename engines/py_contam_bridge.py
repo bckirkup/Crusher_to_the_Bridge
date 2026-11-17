@@ -752,6 +752,8 @@ class ContamTransportEngine:
                 room_pairs += [(tr, fr) for fr in from_rooms
                                for tr in to_rooms]
             for fr, tr in room_pairs:
+                if fr == tr:
+                    continue
                 self.airflow_paths.append(ContamAirflowPath(
                     path_id=f"xzone_{path_name}_{fr}_{tr}",
                     from_zone=fr,
@@ -841,6 +843,36 @@ class ContamTransportEngine:
         self._build_cross_zone_paths(airflow)
         self._build_adjacency_paths(airflow)
         self._build_ambient_opening_paths(airflow)
+        self._ensure_unique_path_ids()
+
+    @staticmethod
+    def _path_id_with_suffix(base: str, count: int) -> str:
+        return f"{base}_dup{count}"
+
+    def _ensure_unique_path_ids(self) -> None:
+        """Make diagnostic path ids unique without changing any path flow.
+
+        Several builders can legitimately emit more than one path with the
+        same id (overlapping bidirectional cross-zone groups, repeated
+        adjacency records, repeated HVAC rooms). The transport operator keys
+        on zones, not path ids, so only the later duplicates are renamed.
+        """
+        used: set[str] = set()
+        counts: dict[str, int] = {}
+        for path in self.airflow_paths:
+            base = path.path_id
+            if base not in used:
+                used.add(base)
+                counts[base] = 1
+                continue
+            count = counts.get(base, 1) + 1
+            candidate = self._path_id_with_suffix(base, count)
+            while candidate in used:
+                count += 1
+                candidate = self._path_id_with_suffix(base, count)
+            counts[base] = count
+            path.path_id = candidate
+            used.add(candidate)
 
     def _get_zone_rooms(
         self, zone_id: str, airflow: dict[str, Any],
