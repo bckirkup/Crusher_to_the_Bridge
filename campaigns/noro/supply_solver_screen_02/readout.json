@@ -1,0 +1,625 @@
+{
+ "measured_sha": "455f9ff788e85580a8253438fb4137ff69e22146",
+ "n_cells": 176,
+ "n_unique_cells": 176,
+ "strata": {
+  "cls_station_lots_discrete": {
+   "n": 16,
+   "posted_n": 9,
+   "posted_rate": 0.5625,
+   "ar_median_posted": 0.1052,
+   "ar_range_posted": [
+    0.0843,
+    0.1356
+   ],
+   "pax_ar_median_posted": 0.0568,
+   "pax_ar_range_posted": [
+    0.0456,
+    0.08
+   ],
+   "crew_ar_median_posted": 0.0122,
+   "crew_ar_range_posted": [
+    0.007,
+    0.0297
+   ],
+   "vsp_epoch_median_posted": 64,
+   "vsp_epoch_range_posted": [
+    52,
+    69
+   ],
+   "pax_inf_ar_median_posted": 0.1226,
+   "crew_inf_ar_median_posted": 0.0664
+  },
+  "cls_station_lots_continuous": {
+   "n": 16,
+   "posted_n": 10,
+   "posted_rate": 0.625,
+   "ar_median_posted": 0.1028,
+   "ar_range_posted": [
+    0.0691,
+    0.1492
+   ],
+   "pax_ar_median_posted": 0.0605,
+   "pax_ar_range_posted": [
+    0.0306,
+    0.0934
+   ],
+   "crew_ar_median_posted": 0.0122,
+   "crew_ar_range_posted": [
+    0.0052,
+    0.021
+   ],
+   "vsp_epoch_median_posted": 63.0,
+   "vsp_epoch_range_posted": [
+    52,
+    212
+   ],
+   "pax_inf_ar_median_posted": 0.1155,
+   "crew_inf_ar_median_posted": 0.0708
+  },
+  "cls_station_lots_quiet_discrete": {
+   "n": 8,
+   "posted_n": 0,
+   "posted_rate": 0.0,
+   "ar_median_posted": null,
+   "ar_range_posted": null,
+   "pax_ar_median_posted": null,
+   "pax_ar_range_posted": null,
+   "crew_ar_median_posted": null,
+   "crew_ar_range_posted": null,
+   "vsp_epoch_median_posted": null,
+   "vsp_epoch_range_posted": null,
+   "pax_inf_ar_median_posted": null,
+   "crew_inf_ar_median_posted": null
+  },
+  "cls_station_lots_quiet_continuous": {
+   "n": 8,
+   "posted_n": 0,
+   "posted_rate": 0.0,
+   "ar_median_posted": null,
+   "ar_range_posted": null,
+   "pax_ar_median_posted": null,
+   "pax_ar_range_posted": null,
+   "crew_ar_median_posted": null,
+   "crew_ar_range_posted": null,
+   "vsp_epoch_median_posted": null,
+   "vsp_epoch_range_posted": null,
+   "pax_inf_ar_median_posted": null,
+   "crew_inf_ar_median_posted": null
+  },
+  "cls_single_line_receipt_discrete": {
+   "n": 10,
+   "posted_n": 6,
+   "posted_rate": 0.6,
+   "ar_median_posted": 0.0832,
+   "ar_range_posted": [
+    0.0639,
+    0.1058
+   ],
+   "pax_ar_median_posted": 0.0433,
+   "pax_ar_range_posted": [
+    0.0336,
+    0.0598
+   ],
+   "crew_ar_median_posted": 0.0114,
+   "crew_ar_range_posted": [
+    0.007,
+    0.0227
+   ],
+   "vsp_epoch_median_posted": 62.5,
+   "vsp_epoch_range_posted": [
+    48,
+    80
+   ],
+   "pax_inf_ar_median_posted": 0.0912,
+   "crew_inf_ar_median_posted": 0.0507
+  },
+  "cls_single_line_receipt_continuous": {
+   "n": 10,
+   "posted_n": 5,
+   "posted_rate": 0.5,
+   "ar_median_posted": 0.0948,
+   "ar_range_posted": [
+    0.0691,
+    0.111
+   ],
+   "pax_ar_median_posted": 0.0561,
+   "pax_ar_range_posted": [
+    0.0359,
+    0.0628
+   ],
+   "crew_ar_median_posted": 0.014,
+   "crew_ar_range_posted": [
+    0.0035,
+    0.0192
+   ],
+   "vsp_epoch_median_posted": 48,
+   "vsp_epoch_range_posted": [
+    44,
+    102
+   ],
+   "pax_inf_ar_median_posted": 0.1173,
+   "crew_inf_ar_median_posted": 0.0594
+  },
+  "cls_declared_receipts_discrete": {
+   "n": 10,
+   "posted_n": 4,
+   "posted_rate": 0.4,
+   "ar_median_posted": 0.1076,
+   "ar_range_posted": [
+    0.0785,
+    0.1099
+   ],
+   "pax_ar_median_posted": 0.0612,
+   "pax_ar_range_posted": [
+    0.0381,
+    0.0688
+   ],
+   "crew_ar_median_posted": 0.0113,
+   "crew_ar_range_posted": [
+    0.0052,
+    0.0175
+   ],
+   "vsp_epoch_median_posted": 60.5,
+   "vsp_epoch_range_posted": [
+    51,
+    72
+   ],
+   "pax_inf_ar_median_posted": 0.121,
+   "crew_inf_ar_median_posted": 0.0576
+  },
+  "cls_declared_receipts_continuous": {
+   "n": 10,
+   "posted_n": 4,
+   "posted_rate": 0.4,
+   "ar_median_posted": 0.1084,
+   "ar_range_posted": [
+    0.0743,
+    0.1168
+   ],
+   "pax_ar_median_posted": 0.0602,
+   "pax_ar_range_posted": [
+    0.0396,
+    0.0732
+   ],
+   "crew_ar_median_posted": 0.007,
+   "crew_ar_range_posted": [
+    0.0052,
+    0.0262
+   ],
+   "vsp_epoch_median_posted": 59.5,
+   "vsp_epoch_range_posted": [
+    55,
+    69
+   ],
+   "pax_inf_ar_median_posted": 0.1207,
+   "crew_inf_ar_median_posted": 0.0691
+  },
+  "spr_station_lots_discrete": {
+   "n": 16,
+   "posted_n": 7,
+   "posted_rate": 0.4375,
+   "ar_median_posted": 0.0997,
+   "ar_range_posted": [
+    0.075,
+    0.116
+   ],
+   "pax_ar_median_posted": 0.0571,
+   "pax_ar_range_posted": [
+    0.0395,
+    0.0705
+   ],
+   "crew_ar_median_posted": 0.0144,
+   "crew_ar_range_posted": [
+    0.0056,
+    0.0211
+   ],
+   "vsp_epoch_median_posted": 59,
+   "vsp_epoch_range_posted": [
+    35,
+    88
+   ],
+   "pax_inf_ar_median_posted": 0.1148,
+   "crew_inf_ar_median_posted": 0.0678
+  },
+  "spr_station_lots_continuous": {
+   "n": 16,
+   "posted_n": 8,
+   "posted_rate": 0.5,
+   "ar_median_posted": 0.0917,
+   "ar_range_posted": [
+    0.0617,
+    0.1197
+   ],
+   "pax_ar_median_posted": 0.0531,
+   "pax_ar_range_posted": [
+    0.0305,
+    0.0781
+   ],
+   "crew_ar_median_posted": 0.0138,
+   "crew_ar_range_posted": [
+    0.01,
+    0.0244
+   ],
+   "vsp_epoch_median_posted": 58.0,
+   "vsp_epoch_range_posted": [
+    36,
+    174
+   ],
+   "pax_inf_ar_median_posted": 0.1031,
+   "crew_inf_ar_median_posted": 0.0683
+  },
+  "spr_station_lots_quiet_discrete": {
+   "n": 8,
+   "posted_n": 0,
+   "posted_rate": 0.0,
+   "ar_median_posted": null,
+   "ar_range_posted": null,
+   "pax_ar_median_posted": null,
+   "pax_ar_range_posted": null,
+   "crew_ar_median_posted": null,
+   "crew_ar_range_posted": null,
+   "vsp_epoch_median_posted": null,
+   "vsp_epoch_range_posted": null,
+   "pax_inf_ar_median_posted": null,
+   "crew_inf_ar_median_posted": null
+  },
+  "spr_station_lots_quiet_continuous": {
+   "n": 8,
+   "posted_n": 0,
+   "posted_rate": 0.0,
+   "ar_median_posted": null,
+   "ar_range_posted": null,
+   "pax_ar_median_posted": null,
+   "pax_ar_range_posted": null,
+   "crew_ar_median_posted": null,
+   "crew_ar_range_posted": null,
+   "vsp_epoch_median_posted": null,
+   "vsp_epoch_range_posted": null,
+   "pax_inf_ar_median_posted": null,
+   "crew_inf_ar_median_posted": null
+  },
+  "spr_single_line_receipt_discrete": {
+   "n": 10,
+   "posted_n": 3,
+   "posted_rate": 0.3,
+   "ar_median_posted": 0.077,
+   "ar_range_posted": [
+    0.063,
+    0.111
+   ],
+   "pax_ar_median_posted": 0.0352,
+   "pax_ar_range_posted": [
+    0.0324,
+    0.0552
+   ],
+   "crew_ar_median_posted": 0.0156,
+   "crew_ar_range_posted": [
+    0.0089,
+    0.0156
+   ],
+   "vsp_epoch_median_posted": 98,
+   "vsp_epoch_range_posted": [
+    90,
+    103
+   ],
+   "pax_inf_ar_median_posted": 0.0919,
+   "crew_inf_ar_median_posted": 0.0422
+  },
+  "spr_single_line_receipt_continuous": {
+   "n": 10,
+   "posted_n": 4,
+   "posted_rate": 0.4,
+   "ar_median_posted": 0.0765,
+   "ar_range_posted": [
+    0.065,
+    0.1097
+   ],
+   "pax_ar_median_posted": 0.0364,
+   "pax_ar_range_posted": [
+    0.031,
+    0.06
+   ],
+   "crew_ar_median_posted": 0.0133,
+   "crew_ar_range_posted": [
+    0.0089,
+    0.0222
+   ],
+   "vsp_epoch_median_posted": 97.0,
+   "vsp_epoch_range_posted": [
+    73,
+    160
+   ],
+   "pax_inf_ar_median_posted": 0.0848,
+   "crew_inf_ar_median_posted": 0.0689
+  },
+  "spr_declared_receipts_discrete": {
+   "n": 10,
+   "posted_n": 2,
+   "posted_rate": 0.2,
+   "ar_median_posted": 0.0746,
+   "ar_range_posted": [
+    0.0673,
+    0.082
+   ],
+   "pax_ar_median_posted": 0.0372,
+   "pax_ar_range_posted": [
+    0.0314,
+    0.0429
+   ],
+   "crew_ar_median_posted": 0.0117,
+   "crew_ar_range_posted": [
+    0.0111,
+    0.0122
+   ],
+   "vsp_epoch_median_posted": 113.5,
+   "vsp_epoch_range_posted": [
+    107,
+    120
+   ],
+   "pax_inf_ar_median_posted": 0.0807,
+   "crew_inf_ar_median_posted": 0.0606
+  },
+  "spr_declared_receipts_continuous": {
+   "n": 10,
+   "posted_n": 2,
+   "posted_rate": 0.2,
+   "ar_median_posted": 0.081,
+   "ar_range_posted": [
+    0.0653,
+    0.0967
+   ],
+   "pax_ar_median_posted": 0.0424,
+   "pax_ar_range_posted": [
+    0.0324,
+    0.0524
+   ],
+   "crew_ar_median_posted": 0.0156,
+   "crew_ar_range_posted": [
+    0.0111,
+    0.02
+   ],
+   "vsp_epoch_median_posted": 102.5,
+   "vsp_epoch_range_posted": [
+    100,
+    105
+   ],
+   "pax_inf_ar_median_posted": 0.0876,
+   "crew_inf_ar_median_posted": 0.0655
+  }
+ },
+ "paired_continuous_minus_discrete": {
+  "cls_station_lots": {
+   "n_pairs": 16,
+   "posted_both": 9,
+   "pax_ar": {
+    "n_nonzero": 9,
+    "positive": 7,
+    "negative": 2,
+    "median_diff": 0.0045,
+    "p": 0.1797
+   },
+   "crew_ar": {
+    "n_nonzero": 9,
+    "positive": 3,
+    "negative": 6,
+    "median_diff": -0.0017,
+    "p": 0.5078
+   },
+   "attack_rate": {
+    "n_nonzero": 9,
+    "positive": 6,
+    "negative": 3,
+    "median_diff": 0.0026,
+    "p": 0.5078
+   },
+   "vsp_epoch": {
+    "n_nonzero": 6,
+    "positive": 3,
+    "negative": 3,
+    "median_diff": -0.5,
+    "p": 1.0
+   }
+  },
+  "cls_station_lots_quiet": {
+   "n_pairs": 8,
+   "posted_both": 0,
+   "pax_ar": {
+    "n_nonzero": 0,
+    "p": null
+   },
+   "crew_ar": {
+    "n_nonzero": 0,
+    "p": null
+   },
+   "attack_rate": {
+    "n_nonzero": 0,
+    "p": null
+   },
+   "vsp_epoch": {
+    "n_nonzero": 0,
+    "p": null
+   }
+  },
+  "cls_single_line_receipt": {
+   "n_pairs": 10,
+   "posted_both": 5,
+   "pax_ar": {
+    "n_nonzero": 5,
+    "positive": 3,
+    "negative": 2,
+    "median_diff": 0.0038,
+    "p": 1.0
+   },
+   "crew_ar": {
+    "n_nonzero": 4,
+    "positive": 2,
+    "negative": 2,
+    "median_diff": -0.0009,
+    "p": 1.0
+   },
+   "attack_rate": {
+    "n_nonzero": 5,
+    "positive": 4,
+    "negative": 1,
+    "median_diff": 0.0052,
+    "p": 0.375
+   },
+   "vsp_epoch": {
+    "n_nonzero": 4,
+    "positive": 1,
+    "negative": 3,
+    "median_diff": -3.0,
+    "p": 0.625
+   }
+  },
+  "cls_declared_receipts": {
+   "n_pairs": 10,
+   "posted_both": 4,
+   "pax_ar": {
+    "n_nonzero": 4,
+    "positive": 3,
+    "negative": 1,
+    "median_diff": 0.003,
+    "p": 0.625
+   },
+   "crew_ar": {
+    "n_nonzero": 4,
+    "positive": 2,
+    "negative": 2,
+    "median_diff": 0.0001,
+    "p": 1.0
+   },
+   "attack_rate": {
+    "n_nonzero": 4,
+    "positive": 2,
+    "negative": 2,
+    "median_diff": 0.0014,
+    "p": 1.0
+   },
+   "vsp_epoch": {
+    "n_nonzero": 4,
+    "positive": 1,
+    "negative": 3,
+    "median_diff": -1.5,
+    "p": 0.625
+   }
+  },
+  "spr_station_lots": {
+   "n_pairs": 16,
+   "posted_both": 7,
+   "pax_ar": {
+    "n_nonzero": 6,
+    "positive": 4,
+    "negative": 2,
+    "median_diff": 0.0024,
+    "p": 0.6875
+   },
+   "crew_ar": {
+    "n_nonzero": 7,
+    "positive": 6,
+    "negative": 1,
+    "median_diff": 0.0034,
+    "p": 0.125
+   },
+   "attack_rate": {
+    "n_nonzero": 7,
+    "positive": 5,
+    "negative": 2,
+    "median_diff": 0.0017,
+    "p": 0.4531
+   },
+   "vsp_epoch": {
+    "n_nonzero": 5,
+    "positive": 3,
+    "negative": 2,
+    "median_diff": 1,
+    "p": 1.0
+   }
+  },
+  "spr_station_lots_quiet": {
+   "n_pairs": 8,
+   "posted_both": 0,
+   "pax_ar": {
+    "n_nonzero": 0,
+    "p": null
+   },
+   "crew_ar": {
+    "n_nonzero": 0,
+    "p": null
+   },
+   "attack_rate": {
+    "n_nonzero": 0,
+    "p": null
+   },
+   "vsp_epoch": {
+    "n_nonzero": 0,
+    "p": null
+   }
+  },
+  "spr_single_line_receipt": {
+   "n_pairs": 10,
+   "posted_both": 3,
+   "pax_ar": {
+    "n_nonzero": 3,
+    "positive": 3,
+    "negative": 0,
+    "median_diff": 0.0029,
+    "p": 0.25
+   },
+   "crew_ar": {
+    "n_nonzero": 3,
+    "positive": 1,
+    "negative": 2,
+    "median_diff": -0.0034,
+    "p": 1.0
+   },
+   "attack_rate": {
+    "n_nonzero": 3,
+    "positive": 2,
+    "negative": 1,
+    "median_diff": 0.002,
+    "p": 1.0
+   },
+   "vsp_epoch": {
+    "n_nonzero": 3,
+    "positive": 1,
+    "negative": 2,
+    "median_diff": -4,
+    "p": 1.0
+   }
+  },
+  "spr_declared_receipts": {
+   "n_pairs": 10,
+   "posted_both": 2,
+   "pax_ar": {
+    "n_nonzero": 2,
+    "positive": 2,
+    "negative": 0,
+    "median_diff": 0.0053,
+    "p": 0.5
+   },
+   "crew_ar": {
+    "n_nonzero": 1,
+    "positive": 1,
+    "negative": 0,
+    "median_diff": 0.0078,
+    "p": 1.0
+   },
+   "attack_rate": {
+    "n_nonzero": 2,
+    "positive": 1,
+    "negative": 1,
+    "median_diff": 0.0063,
+    "p": 1.0
+   },
+   "vsp_epoch": {
+    "n_nonzero": 2,
+    "positive": 0,
+    "negative": 2,
+    "median_diff": -11.0,
+    "p": 0.5
+   }
+  }
+ }
+}
