@@ -373,12 +373,14 @@ class TestV2SuccessorDesign:
         # (one record on three hulls, ten on mega_cruise_5000).
         # CONTAM-AMBIENT-WEATHER-CRUISE-01: +2 legs per weather-deck opening
         # record (expedition 1, classic 1, spirit 3, mega 5).
+        # CONTAM-SPIRIT-CABIN-RELIEF-01: +288 room-pair return paths for the
+        # eight Cabin_Return_D# compensating links.
         panel = design_v2["hull_panel"]
         assert panel["expedition_cruise_450"]["path_map_entries"] == 345 + 2
         assert panel["classic_cruise_1900"]["path_map_entries"] == 838 + 2
-        assert panel["spirit_cruise_3000"]["path_map_entries"] == 1305 + 6
+        assert panel["spirit_cruise_3000"]["path_map_entries"] == 1305 + 6 + 288
         assert panel["mega_cruise_5000"]["path_map_entries"] == 2593 + 10
-        assert sum(row["path_map_entries"] for row in panel.values()) == 5081 + 20
+        assert sum(row["path_map_entries"] for row in panel.values()) == 5081 + 20 + 288
         for hull, (zones, volume, _entries, supply, duty0) in HULL_PANEL.items():
             assert panel[hull]["zones"] == zones
             assert panel[hull]["volume_m3"] == pytest.approx(volume, abs=0.005)
