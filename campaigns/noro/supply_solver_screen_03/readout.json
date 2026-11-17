@@ -1,0 +1,251 @@
+{
+  "measured_sha": "c6c3c25fbabefa7ed918cba55311ceec231dbba3",
+  "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_03/",
+  "image": "994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:noro-supply-solver03@sha256:203536dea284153523e1ea874ad76651efecb34d0458a08d957c8f465277452a",
+  "n_cells": 88,
+  "n_unique_cells": 88,
+  "n_duplicate_cells": 0,
+  "n_failed": 0,
+  "missing_cells": [],
+  "unexpected_cells": [],
+  "strata": {
+    "meg_station_lots_discrete": {
+      "n": 16,
+      "posted_n": 1,
+      "posted_rate": 0.0625,
+      "ar_median_posted": 0.083,
+      "ar_range_posted": [
+        0.083,
+        0.083
+      ],
+      "pax_ar_median_posted": 0.0455,
+      "pax_ar_range_posted": [
+        0.0455,
+        0.0455
+      ],
+      "crew_ar_median_posted": 0.0238,
+      "crew_ar_range_posted": [
+        0.0238,
+        0.0238
+      ],
+      "vsp_epoch_median_posted": 56,
+      "vsp_epoch_range_posted": [
+        56,
+        56
+      ],
+      "pax_inf_ar_median_posted": 0.0882,
+      "crew_inf_ar_median_posted": 0.071
+    },
+    "meg_station_lots_continuous": {
+      "n": 16,
+      "posted_n": 1,
+      "posted_rate": 0.0625,
+      "ar_median_posted": 0.0821,
+      "ar_range_posted": [
+        0.0821,
+        0.0821
+      ],
+      "pax_ar_median_posted": 0.0445,
+      "pax_ar_range_posted": [
+        0.0445,
+        0.0445
+      ],
+      "crew_ar_median_posted": 0.0148,
+      "crew_ar_range_posted": [
+        0.0148,
+        0.0148
+      ],
+      "vsp_epoch_median_posted": 75,
+      "vsp_epoch_range_posted": [
+        75,
+        75
+      ],
+      "pax_inf_ar_median_posted": 0.088,
+      "crew_inf_ar_median_posted": 0.0686
+    },
+    "meg_station_lots_quiet_discrete": {
+      "n": 8,
+      "posted_n": 0,
+      "posted_rate": 0.0,
+      "ar_median_posted": null,
+      "ar_range_posted": null,
+      "pax_ar_median_posted": null,
+      "pax_ar_range_posted": null,
+      "crew_ar_median_posted": null,
+      "crew_ar_range_posted": null,
+      "vsp_epoch_median_posted": null,
+      "vsp_epoch_range_posted": null,
+      "pax_inf_ar_median_posted": null,
+      "crew_inf_ar_median_posted": null
+    },
+    "meg_station_lots_quiet_continuous": {
+      "n": 8,
+      "posted_n": 0,
+      "posted_rate": 0.0,
+      "ar_median_posted": null,
+      "ar_range_posted": null,
+      "pax_ar_median_posted": null,
+      "pax_ar_range_posted": null,
+      "crew_ar_median_posted": null,
+      "crew_ar_range_posted": null,
+      "vsp_epoch_median_posted": null,
+      "vsp_epoch_range_posted": null,
+      "pax_inf_ar_median_posted": null,
+      "crew_inf_ar_median_posted": null
+    },
+    "meg_single_line_receipt_discrete": {
+      "n": 10,
+      "posted_n": 0,
+      "posted_rate": 0.0,
+      "ar_median_posted": null,
+      "ar_range_posted": null,
+      "pax_ar_median_posted": null,
+      "pax_ar_range_posted": null,
+      "crew_ar_median_posted": null,
+      "crew_ar_range_posted": null,
+      "vsp_epoch_median_posted": null,
+      "vsp_epoch_range_posted": null,
+      "pax_inf_ar_median_posted": null,
+      "crew_inf_ar_median_posted": null
+    },
+    "meg_single_line_receipt_continuous": {
+      "n": 10,
+      "posted_n": 0,
+      "posted_rate": 0.0,
+      "ar_median_posted": null,
+      "ar_range_posted": null,
+      "pax_ar_median_posted": null,
+      "pax_ar_range_posted": null,
+      "crew_ar_median_posted": null,
+      "crew_ar_range_posted": null,
+      "vsp_epoch_median_posted": null,
+      "vsp_epoch_range_posted": null,
+      "pax_inf_ar_median_posted": null,
+      "crew_inf_ar_median_posted": null
+    },
+    "meg_declared_receipts_discrete": {
+      "n": 10,
+      "posted_n": 0,
+      "posted_rate": 0.0,
+      "ar_median_posted": null,
+      "ar_range_posted": null,
+      "pax_ar_median_posted": null,
+      "pax_ar_range_posted": null,
+      "crew_ar_median_posted": null,
+      "crew_ar_range_posted": null,
+      "vsp_epoch_median_posted": null,
+      "vsp_epoch_range_posted": null,
+      "pax_inf_ar_median_posted": null,
+      "crew_inf_ar_median_posted": null
+    },
+    "meg_declared_receipts_continuous": {
+      "n": 10,
+      "posted_n": 0,
+      "posted_rate": 0.0,
+      "ar_median_posted": null,
+      "ar_range_posted": null,
+      "pax_ar_median_posted": null,
+      "pax_ar_range_posted": null,
+      "crew_ar_median_posted": null,
+      "crew_ar_range_posted": null,
+      "vsp_epoch_median_posted": null,
+      "vsp_epoch_range_posted": null,
+      "pax_inf_ar_median_posted": null,
+      "crew_inf_ar_median_posted": null
+    }
+  },
+  "paired_continuous_minus_discrete": {
+    "meg_station_lots": {
+      "n_pairs": 16,
+      "posted_both": 1,
+      "pax_ar": {
+        "n_nonzero": 1,
+        "positive": 0,
+        "negative": 1,
+        "median_diff": -0.001,
+        "p": 1.0
+      },
+      "crew_ar": {
+        "n_nonzero": 1,
+        "positive": 0,
+        "negative": 1,
+        "median_diff": -0.009,
+        "p": 1.0
+      },
+      "attack_rate": {
+        "n_nonzero": 1,
+        "positive": 0,
+        "negative": 1,
+        "median_diff": -0.0009,
+        "p": 1.0
+      },
+      "vsp_epoch": {
+        "n_nonzero": 1,
+        "positive": 1,
+        "negative": 0,
+        "median_diff": 19,
+        "p": 1.0
+      }
+    },
+    "meg_station_lots_quiet": {
+      "n_pairs": 8,
+      "posted_both": 0,
+      "pax_ar": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "crew_ar": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "attack_rate": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "vsp_epoch": {
+        "n_nonzero": 0,
+        "p": null
+      }
+    },
+    "meg_single_line_receipt": {
+      "n_pairs": 10,
+      "posted_both": 0,
+      "pax_ar": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "crew_ar": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "attack_rate": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "vsp_epoch": {
+        "n_nonzero": 0,
+        "p": null
+      }
+    },
+    "meg_declared_receipts": {
+      "n_pairs": 10,
+      "posted_both": 0,
+      "pax_ar": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "crew_ar": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "attack_rate": {
+        "n_nonzero": 0,
+        "p": null
+      },
+      "vsp_epoch": {
+        "n_nonzero": 0,
+        "p": null
+      }
+    }
+  }
+}

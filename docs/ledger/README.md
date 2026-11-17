@@ -97,6 +97,7 @@ New ledger entries are registered here as they land; the filename remains the st
 
 - `NORO-SUPPLY-SOLVER-SCREEN-01.md` — expedition p06 paired `discrete` vs `continuous` contamination-solver screen (88 cells): posting unchanged (contaminated strata 100% on both arms, quiet controls 0/8), paired AR/VSP/role differences sign-test unresolved (all p ≥ 0.180) with overlapping ranges; the continuous default is not contradicted by this screen but is not separated from discrete on these supply seeds.
 - `NORO-SUPPLY-SOLVER-SCREEN-02.md` — classic + spirit supply contamination solver screen (176 cells): posting not saturated on larger hulls, quiet controls 0/8, paired continuous vs discrete unresolved.
+- `NORO-SUPPLY-SOLVER-SCREEN-03.md` — mega p06 paired `discrete` vs `continuous` contamination-solver screen (88 cells): posting rare (`station_lots` 1/16 each arm, receipts 0/10, quiet 0/8), only one both-posted pair, solver contrast uninformative; supply contamination at these burdens is a weak posting driver on the 7000-agent hull.
 
 ## For drafting and analysis
 
