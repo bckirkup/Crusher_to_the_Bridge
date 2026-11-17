@@ -24,7 +24,8 @@
         "y": 18.66
       },
       "max_occupancy": 350,
-      "description": "Open flight deck, bow right; catapult tracks + elevator wells drawn"
+      "description": "Open flight deck, bow right; catapult tracks + elevator wells drawn",
+      "exposure": "weather"
     },
     {
       "id": "Drying_Rooms",

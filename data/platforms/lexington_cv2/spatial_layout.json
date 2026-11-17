@@ -24,7 +24,8 @@
         "y": 15.31
       },
       "max_occupancy": 300,
-      "description": "Open flight deck, bow right; arresting gear + two elevator wells drawn"
+      "description": "Open flight deck, bow right; arresting gear + two elevator wells drawn",
+      "exposure": "weather"
     },
     {
       "id": "Gasoline_Room",
