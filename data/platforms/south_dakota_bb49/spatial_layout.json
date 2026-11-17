@@ -88,7 +88,8 @@
         "x": 164.33,
         "y": 6.24
       },
-      "description": "landing platform"
+      "description": "landing platform",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Deck",
@@ -103,7 +104,8 @@
         "x": 149.42,
         "y": 13.09
       },
-      "description": "boats + life rafts on superstructure deck"
+      "description": "boats + life rafts on superstructure deck",
+      "exposure": "weather"
     },
     {
       "id": "Searchlight_Block",
@@ -302,7 +304,8 @@
         "x": 183.94,
         "y": 12.77
       },
-      "description": "open forecastle + bow + anchor gear"
+      "description": "open forecastle + bow + anchor gear",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -317,7 +320,8 @@
         "x": 8.8,
         "y": 12.77
       },
-      "description": "open fantail aft"
+      "description": "open fantail aft",
+      "exposure": "weather"
     },
     {
       "id": "HD_Crews_WC_Upper",

@@ -132,7 +132,8 @@
         "x": 106.19,
         "y": 9.43
       },
-      "description": "open signal bridge wings, semaphores, searchlights, 50cal tubs"
+      "description": "open signal bridge wings, semaphores, searchlights, 50cal tubs",
+      "exposure": "weather"
     },
     {
       "id": "Observation_Platform",
@@ -176,7 +177,8 @@
         "x": 106.16,
         "y": 7.38
       },
-      "description": "boat landing platform"
+      "description": "boat landing platform",
+      "exposure": "weather"
     },
     {
       "id": "Smoke_Pipe_1",
@@ -221,7 +223,8 @@
         "x": 86.41,
         "y": 12.73
       },
-      "description": "open boat deck: 50' motor boats, 40' boats, whale boats, cranes"
+      "description": "open boat deck: 50' motor boats, 40' boats, whale boats, cranes",
+      "exposure": "weather"
     },
     {
       "id": "Radio_Direction_Finder",
@@ -532,7 +535,8 @@
         "x": 159.26,
         "y": 13.58
       },
-      "description": "windlass, hawse pipes, paravane gear, anchor telegraph"
+      "description": "windlass, hawse pipes, paravane gear, anchor telegraph",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -547,7 +551,8 @@
         "x": 11.09,
         "y": 12.99
       },
-      "description": "stern: seaplane crane + catapult + boat booms"
+      "description": "stern: seaplane crane + catapult + boat booms",
+      "exposure": "weather"
     },
     {
       "id": "Turret_IV",

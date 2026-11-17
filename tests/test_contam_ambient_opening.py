@@ -90,9 +90,9 @@ _MAKEUP_RECORDS = {
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
 }
 # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
-# CONTAM-AMBIENT-WEATHER-DESTROYER-01 and CONTAM-AMBIENT-WEATHER-CARRIER-01:
-# one ``open_deck`` record per declared weather zone on the cruise, destroyer
-# and carrier roster hulls.
+# CONTAM-AMBIENT-WEATHER-DESTROYER-01, CONTAM-AMBIENT-WEATHER-CARRIER-01 and
+# CONTAM-AMBIENT-WEATHER-BATTLESHIP-01: one ``open_deck`` record per declared
+# weather zone on the cruise, destroyer, carrier and battleship roster hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -133,6 +133,22 @@ _WEATHER_ZONES = {
     # grouped and stay on their declared ventilation groups).
     "lexington_cv2": {"Flight_Deck"},
     "saratoga_cv3": {"Flight_Deck"},
+    # CONTAM-AMBIENT-WEATHER-BATTLESHIP-01: ungrouped battleship weather zones;
+    # HVAC-grouped VENT_Weather hulls stay untouched as the known grouped-zone
+    # open item.
+    "new_york_bb34": {
+        "Fantail_Weather", "Weather_Deck_Aft", "Catapult_Mid", "Focsle_Deck",
+        "Super_Deck_Open", "AA_Control_Top",
+    },
+    "south_dakota_bb49": {"Landing_Platform", "Boat_Deck", "Forecastle", "Fantail"},
+    "texas_bb35": {
+        "Super_Deck_Open", "Fantail_Weather", "Weather_Deck_Aft", "Catapult_Mid",
+        "Focsle_Deck",
+    },
+    "west_virginia_bb48": {
+        "Signal_Bridge_Open", "Landing_Platform", "Boat_Deck", "Forecastle",
+        "Fantail",
+    },
 }
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01 and
 # CONTAM-AMBIENT-WEATHER-CARRIER-01: declared enclosed zones. They carry no
@@ -224,9 +240,10 @@ class TestSchema:
                 assert "wind_speed_m_s" not in record
 
     def test_declared_weather_openings(self) -> None:
-        # CONTAM-AMBIENT-WEATHER-CRUISE-01 and
-        # CONTAM-AMBIENT-WEATHER-DESTROYER-01 authored the weather-deck
-        # openings; the destroyer counts are two legs per record.
+        # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
+        # CONTAM-AMBIENT-WEATHER-CARRIER-01 and
+        # CONTAM-AMBIENT-WEATHER-BATTLESHIP-01 authored the weather openings;
+        # committed bundles carry two legs per record.
         declared = self._declared("open_deck")
         assert {
             hull: {record["zone"] for record in rows} for hull, rows in declared.items()
