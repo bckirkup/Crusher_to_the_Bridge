@@ -24,9 +24,10 @@ Classic + spirit extension of the expedition supply solver screen: `classic_crui
 - [x] Image built and digest pinned in `campaign.json`.
 - [x] Manifest uploaded to S3 (`manifest.json`, `seed_selection.json`).
 - [x] In-container build check: campaign manifest/seed files present, `ENGINE_GIT_SHA=31bd92c525fb3656af9450f124d54b2c6ced5a54`, cls/spr station tier seed membership verified.
-- [ ] Full-length canary per hull.
-- [ ] AWS canary child inspected per hull.
-- [ ] ETA reported; user approved array.
+- [x] Full-length canary per hull.
+- [x] AWS canary child inspected per hull.
+- [x] ETA reported.
+- [ ] User approved array.
 
 ## AWS Batch pins
 
@@ -35,6 +36,13 @@ Classic + spirit extension of the expedition supply solver screen: `classic_crui
 - Queue: `picard-campaign-queue`
 - S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_supply_solver_screen_02/`
 
+## Canaries
+
+- cls `station_lots_continuous` index 0: Batch job `79ca0b6b-0e9f-4524-84a9-feee8bfee758`, jobdef `picard-noro-supply-solver-screen-02:1`, image digest `sha256:0dea8f12e65108edb995f65e2ade1392c5568c7c53b9672ba4f91af33694a092`. Wall 342 s. Zip `cls_station_lots_continuous/fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp25c30_n1910_ep288_syndromic_comp65_s960473.zip`; members `summary.json`, `growth_census.json.gz`, `rss_samples.json`; `parameters.tier_id=fl_cls_12d_sens_p06_paxv_station_lots_continuous`; `continuous_path_calls=105806`; derived attack_rate 0.0995, passenger reported-case AR 0.0605, crew reported-case AR 0.0122, `vsp_trigger_epoch=67`.
+- spr `station_lots_continuous` index 0: Batch job `802657e3-8c1b-4430-bb05-4308426c610d`, jobdef `picard-noro-supply-solver-screen-02:2`, same image digest. Wall 589 s. Zip `spr_station_lots_continuous/fl_norovirus_spirit_cruise_3000_dose7p57_rung-shipped_nsf29_bp25c30_n3000_ep288_syndromic_comp65_s1000371.zip`; members `summary.json`, `growth_census.json.gz`, `rss_samples.json`; `parameters.tier_id=fl_spr_12d_sens_p06_paxv_station_lots_continuous`; `continuous_path_calls=173578`; derived attack_rate 0.1130, passenger reported-case AR 0.0638, crew reported-case AR 0.0133, `vsp_trigger_epoch=88`.
+
+ETA basis: 176 cells; canary wall times 342 s (cls) and 589 s (spr) for the continuous station_lots cell. Using ~22.8 vCPU-hours total and the campaign compute environment (`picard-abm-campaign-spot`, max 256 vCPU, desired 32), expect roughly 45-90 min depending on Spot concurrency; array submission is held for user approval.
+
 ## Measurements
 
-None yet.
+Canaries only; no array measurements yet.
