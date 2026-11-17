@@ -76,7 +76,7 @@ no qualifying zero-outdoor-exchange weather zones and are recorded/skipped.
   shelter/flag-plot level on the accommodation group) and
   `san_antonio_class_lpd/Vehicle_Deck` (enclosed vehicle storage above the
   well deck) carry `exposure: enclosed` and no opening.
-- **Grouped open item: 9 zones** stay untouched by the scope rule:
+- **Grouped open item: 7 zones** stay untouched by the scope rule:
   `fort_mandan_lsd21/Top_House_Open` on `VENT_Machinery_Holds`,
   `fort_mandan_lsd21/Well_Cover_Open` and `Well_Deck` on `VENT_Well_Deck`,
   `middlesex_lst983/Tank_Deck` and `Tank_Deck_Port` on `HVAC_TankDeck`,
@@ -207,7 +207,7 @@ solver roundoff (max |closure_error| 1.23e-15 after across the 72 cells).
 2. The U=10 column is the axis upper bound only; the committed record keeps
    the fleet default 1 m/s point. A per-hull wind override would move the
    ContamX lane but not the native `exchange_m3h`, the same caveat as cruise.
-3. Grouped-zone open item: 9 HVAC-grouped weather zones on `fort_mandan_lsd21`,
+3. Grouped-zone open item: 7 HVAC-grouped weather zones on `fort_mandan_lsd21`,
    `middlesex_lst983` and `san_antonio_class_lpd` remain without
    `ambient_openings` by the scope rule; the owner question on grouped zones
    stays open.
