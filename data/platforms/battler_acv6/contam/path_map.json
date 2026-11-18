@@ -676,7 +676,7 @@
   },
   {
     "path_nr": 76,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Gun_Gallery_Fwd",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -685,7 +685,7 @@
   },
   {
     "path_nr": 77,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Gun_Gallery_Fwd",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -694,7 +694,7 @@
   },
   {
     "path_nr": 78,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Gun_Gallery_Fwd",
     "to_zone": "Hangar_Shops",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -703,7 +703,7 @@
   },
   {
     "path_nr": 79,
-    "from_zone": "Walkways_Focsle",
+    "from_zone": "Island_Upper",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -712,7 +712,7 @@
   },
   {
     "path_nr": 80,
-    "from_zone": "Walkways_Focsle",
+    "from_zone": "Island_Upper",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -721,7 +721,7 @@
   },
   {
     "path_nr": 81,
-    "from_zone": "Walkways_Focsle",
+    "from_zone": "Island_Upper",
     "to_zone": "Hangar_Shops",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -730,7 +730,7 @@
   },
   {
     "path_nr": 82,
-    "from_zone": "Gun_Gallery_Fwd",
+    "from_zone": "Crew_Shelters_Gal",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -739,7 +739,7 @@
   },
   {
     "path_nr": 83,
-    "from_zone": "Gun_Gallery_Fwd",
+    "from_zone": "Crew_Shelters_Gal",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -748,7 +748,7 @@
   },
   {
     "path_nr": 84,
-    "from_zone": "Gun_Gallery_Fwd",
+    "from_zone": "Crew_Shelters_Gal",
     "to_zone": "Hangar_Shops",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -757,7 +757,7 @@
   },
   {
     "path_nr": 85,
-    "from_zone": "Island_Upper",
+    "from_zone": "Peak_Tank",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -766,7 +766,7 @@
   },
   {
     "path_nr": 86,
-    "from_zone": "Island_Upper",
+    "from_zone": "Peak_Tank",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -775,7 +775,7 @@
   },
   {
     "path_nr": 87,
-    "from_zone": "Island_Upper",
+    "from_zone": "Peak_Tank",
     "to_zone": "Hangar_Shops",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -784,7 +784,7 @@
   },
   {
     "path_nr": 88,
-    "from_zone": "Crew_Shelters_Gal",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -793,7 +793,7 @@
   },
   {
     "path_nr": 89,
-    "from_zone": "Crew_Shelters_Gal",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -802,7 +802,7 @@
   },
   {
     "path_nr": 90,
-    "from_zone": "Crew_Shelters_Gal",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Shops",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -811,7 +811,7 @@
   },
   {
     "path_nr": 91,
-    "from_zone": "Peak_Tank",
+    "from_zone": "Walkways_Focsle",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -820,7 +820,7 @@
   },
   {
     "path_nr": 92,
-    "from_zone": "Peak_Tank",
+    "from_zone": "Walkways_Focsle",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -829,7 +829,7 @@
   },
   {
     "path_nr": 93,
-    "from_zone": "Peak_Tank",
+    "from_zone": "Walkways_Focsle",
     "to_zone": "Hangar_Shops",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3412,6 +3412,42 @@
   },
   {
     "path_nr": 380,
+    "from_zone": "Walkways_Focsle",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 381,
+    "from_zone": "Walkways_Focsle",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 382,
+    "from_zone": "Flight_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 383,
+    "from_zone": "Flight_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 384,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -3420,7 +3456,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 381,
+    "path_nr": 385,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -3429,53 +3465,13 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 382,
+    "path_nr": 386,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
     "kind": "ahs_recirc",
     "crusher_transfer": false,
     "ahs_nr": 1
-  },
-  {
-    "path_nr": 383,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Flight_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 3961.705
-  },
-  {
-    "path_nr": 384,
-    "from_zone": "Flight_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 3961.705
-  },
-  {
-    "path_nr": 385,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Walkways_Focsle",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1051.265
-  },
-  {
-    "path_nr": 386,
-    "from_zone": "Walkways_Focsle",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1051.265
   },
   {
     "path_nr": 387,

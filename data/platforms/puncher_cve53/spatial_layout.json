@@ -70,7 +70,8 @@
         "x": 63.26,
         "y": 10.43
       },
-      "description": "Open flight deck; 3in wood deck, arresting gear, catapult track, two elevator platforms"
+      "description": "Open flight deck; 3in wood deck, arresting gear, catapult track, two elevator platforms",
+      "exposure": "weather"
     },
     {
       "id": "Walkways_Gal",

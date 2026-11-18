@@ -682,7 +682,8 @@
         "x": 59.47,
         "y": 4.03
       },
-      "description": "Weather walkways/catwalks along hangar top P&S + crew shelters"
+      "description": "Weather walkways/catwalks along hangar top P&S + crew shelters",
+      "exposure": "weather"
     },
     {
       "id": "Focsle_Shops",
@@ -821,7 +822,8 @@
         "x": 60.77,
         "y": 10.24
       },
-      "description": "Open flight deck; arresting gear, catapult track, two elevator platforms"
+      "description": "Open flight deck; arresting gear, catapult track, two elevator platforms",
+      "exposure": "weather"
     },
     {
       "id": "Nav_Bridge",

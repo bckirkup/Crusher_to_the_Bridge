@@ -204,7 +204,8 @@
         "x": 26.48,
         "y": 8.91
       },
-      "description": "catapult tracks + aircraft handling deck; hangar hatch below"
+      "description": "catapult tracks + aircraft handling deck; hangar hatch below",
+      "exposure": "weather"
     },
     {
       "id": "Galley_Main",
@@ -420,7 +421,8 @@
         "x": 166.19,
         "y": 9.11
       },
-      "description": "open bow tip: bits/chocks, jack staff"
+      "description": "open bow tip: bits/chocks, jack staff",
+      "exposure": "weather"
     },
     {
       "id": "Steering_Flat",

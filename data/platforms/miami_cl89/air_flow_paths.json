@@ -8,9 +8,7 @@
       "id": "VENT_Weather",
       "rooms": [
         "Stern_Aviation",
-        "Catapult_Deck",
         "Forecastle_Main",
-        "Bow_Weather",
         "Bridge_Wings",
         "Boat_Stowage_Port",
         "Boat_Stowage_Stbd",
@@ -18,7 +16,7 @@
         "Nav_Bridge"
       ],
       "ach": 1.0,
-      "description": "open weather decks, gun tubs, boat stowage",
+      "description": "open weather decks, gun tubs, boat stowage; 2 authored weather zones left this group under CONTAM-GROUPED-WEATHER-CRUISER-01: their outdoor exchange is carried by open_deck ambient_openings records, which replace the group OA leg for those zones (no double-count).",
       "oa_fraction": 1.0,
       "vent_mode": "nat_supply",
       "evidence": "era_plausible"
@@ -681,6 +679,26 @@
       "from": "Fuel_Oil_Tanks_Fwd",
       "to": "Fwd_Tanks_Hold",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Catapult_Deck",
+      "type": "open_deck",
+      "area_m2": 70.185,
+      "exchange_m3h": 44027.9,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-GROUPED-WEATHER-CRUISER-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Weather group OA leg for Catapult_Deck, so Catapult_Deck is no longer a VENT_Weather room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the fleet default from ahead, CONTAM-DEFAULT-WEATHER-01), Grade C ASSUMED-RELATIVE-WIND, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Bow_Weather",
+      "type": "open_deck",
+      "area_m2": 71.919,
+      "exchange_m3h": 46273.9,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-GROUPED-WEATHER-CRUISER-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Weather group OA leg for Bow_Weather, so Bow_Weather is no longer a VENT_Weather room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the fleet default from ahead, CONTAM-DEFAULT-WEATHER-01), Grade C ASSUMED-RELATIVE-WIND, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ]
 }
