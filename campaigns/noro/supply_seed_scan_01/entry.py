@@ -21,6 +21,7 @@ def build_argv(args: Any, block: dict[str, Any], seed: int, out_dir: Path) -> tu
         "--pathogen-id", str(args.pathogen_id),
         "--tier", str(cfg["tier"]),
         "--arm", str(cfg["arm"]),
+        "--structure", str(cfg.get("structure", "flat")),
         "--hull", str(cfg["hull"]),
         "--seed-start", str(cfg["seed_start"]),
         "--seed-count", str(cfg["seed_count"]),

@@ -38,6 +38,42 @@ from tools.diag.json_io import validated_json_load  # noqa: E402
 from tools.noro_diag.growth_chain_census import run_seed  # noqa: E402
 
 _ARMS = ("station_lots", "single_line_receipt", "declared_receipts")
+_STRUCTURE_ARMS = {
+    "flat": {},
+    "declared_null": {"mode": "declared"},
+    "source_cluster_line_shared": {
+        "mode": "declared",
+        "source_cluster": {"rung": "line_shared"},
+    },
+    "source_cluster_venue_group_shared": {
+        "mode": "declared",
+        "source_cluster": {"rung": "venue_group_shared"},
+    },
+    "source_cluster_fleet_shared": {
+        "mode": "declared",
+        "source_cluster": {"rung": "fleet_shared"},
+    },
+    "venue_menu_passenger_raw": {
+        "mode": "declared",
+        "venue_menu": {"service_class_mask": "passenger_raw"},
+    },
+    "venue_menu_buffet_specialty": {
+        "mode": "declared",
+        "venue_menu": {"service_class_mask": "buffet_specialty"},
+    },
+    "lot_scale_x2": {
+        "mode": "declared",
+        "lot_scale": {"servings_multiplier": 2.0},
+    },
+    "lot_scale_x5": {
+        "mode": "declared",
+        "lot_scale": {"servings_multiplier": 5.0},
+    },
+    "lot_scale_x10": {
+        "mode": "declared",
+        "lot_scale": {"servings_multiplier": 10.0},
+    },
+}
 _TELEMETRY_KEYS = (
     "events_provisioned_lot",
     "events_ill_handler",
@@ -90,6 +126,10 @@ _OBJECT_KEYS = (
     "provisioned_source_id",
     "source_agent_id",
     "strain_id",
+    "source_cluster_id",
+    "menu_service_type",
+    "menu_mask",
+    "servings_multiplier",
     "seeded_epoch",
     "end_reason",
     "servings_served",
@@ -145,6 +185,13 @@ def _arm_fields(arm: str) -> dict[str, Any]:
 
 def _apply_arm(spec: dict[str, Any], arm: str) -> None:
     fields = _arm_fields(arm)
+    _update_provisioned_source(spec, fields)
+
+
+def _update_provisioned_source(
+    spec: dict[str, Any],
+    fields: dict[str, Any],
+) -> None:
     cfg = (
         spec.get("config_overrides", {})
         .get("transmission", {})
@@ -159,6 +206,12 @@ def _apply_arm(spec: dict[str, Any], arm: str) -> None:
     for target in (cfg, params):
         if isinstance(target, dict):
             target.update(fields)
+
+
+def _apply_structure(spec: dict[str, Any], structure: str) -> None:
+    fields = _STRUCTURE_ARMS[structure]
+    if fields:
+        _update_provisioned_source(spec, {"supply_structure": fields})
 
 
 def _spec_for_seed(
@@ -214,6 +267,7 @@ def _scan_row(
     seed: int,
     tier: str,
     arm: str,
+    structure: str,
     hull: str,
     epochs: int,
     num_agents: int,
@@ -232,6 +286,7 @@ def _scan_row(
         "seed": int(seed),
         "tier": tier,
         "arm": arm,
+        "structure": structure,
         "hull": hull,
         "platform": meta.get("platform"),
         "epochs": int(epochs),
@@ -259,6 +314,7 @@ def _error_row(
     seed: int,
     tier: str,
     arm: str,
+    structure: str,
     hull: str,
     epochs: int,
     num_agents: int,
@@ -268,6 +324,7 @@ def _error_row(
         "seed": int(seed),
         "tier": tier,
         "arm": arm,
+        "structure": structure,
         "hull": hull,
         "epochs": int(epochs),
         "num_agents": int(num_agents),
@@ -281,6 +338,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--pathogen-id", default="norwalk_gi")
     parser.add_argument("--tier", required=True)
     parser.add_argument("--arm", choices=_ARMS, required=True)
+    parser.add_argument(
+        "--structure",
+        choices=tuple(_STRUCTURE_ARMS),
+        default="flat",
+    )
     parser.add_argument("--hull", default=None)
     parser.add_argument("--seed-start", type=int, required=True)
     parser.add_argument("--seed-count", type=int, required=True)
@@ -312,6 +374,7 @@ def main(argv: list[str] | None = None) -> int:
         manifest, args.tier, epochs=args.epochs, num_agents=args.num_agents,
     )
     _apply_arm(template, args.arm)
+    _apply_structure(template, args.structure)
     hull = args.hull or (
         args.tier.split("_")[1] if args.tier.startswith("fl_") else args.tier
     )
@@ -323,7 +386,7 @@ def main(argv: list[str] | None = None) -> int:
     errors = 0
     with artifact.open("w", encoding="utf-8") as handle:
         for seed in seeds:
-            run_id = f"{args.tier}_{args.arm}_s{seed}"
+            run_id = f"{args.tier}_{args.arm}_{args.structure}_s{seed}"
             spec = _spec_for_seed(
                 template,
                 seed=seed,
@@ -343,6 +406,7 @@ def main(argv: list[str] | None = None) -> int:
                     seed=seed,
                     tier=args.tier,
                     arm=args.arm,
+                    structure=args.structure,
                     hull=hull,
                     epochs=args.epochs,
                     num_agents=args.num_agents,
@@ -353,6 +417,7 @@ def main(argv: list[str] | None = None) -> int:
                     seed=seed,
                     tier=args.tier,
                     arm=args.arm,
+                    structure=args.structure,
                     hull=hull,
                     epochs=args.epochs,
                     num_agents=args.num_agents,
