@@ -227,8 +227,10 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # auxiliary hulls with committed bundles (legend_class_nsc has no
     # committed bundle), and CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 adds six
     # legs on fort_mandan_lsd21 and four legs on middlesex_lst983
-    # (san_antonio_class_lpd has no committed bundle). No other committed
-    # bundle carries an opening.
+    # (san_antonio_class_lpd has no committed bundle).
+    # CONTAM-AMBIENT-HATCH-01 adds two legs per ``weather_hatch`` opening on
+    # lsm_354, middlesex_lst983, lyon_ap71 and montana_acr13. No other
+    # committed bundle carries an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -256,15 +258,15 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "astoria_ca34": 10, "chicago_cg11": 16, "miami_cl89": 4,
         "idaho_bb42": 2, "missouri_bb63": 10,
         "new_jersey_bb62": 10, "wisconsin_bb64": 10,
-        "lsm_354": 8, "middlesex_lst983": 18, "fort_mandan_lsd21": 6,
+        "lsm_354": 10, "middlesex_lst983": 22, "fort_mandan_lsd21": 6,
         "ruchamkin_apd89": 8,
         "aeolus_arc3": 6, "apl_24": 8,
         "bolster_ars38": 8, "cobalt_k124": 6, "gordon_gunter_r338": 8,
-        "liberty_cargo_ec2": 12, "lyon_ap71": 22, "passumpsic_ao106": 8,
+        "liberty_cargo_ec2": 12, "lyon_ap71": 26, "passumpsic_ao106": 8,
         "savannah_ns": 28,
         "castle_class_corvette": 4 + 2, "erie_pg50": 10,
         "esteem_mso438": 10, "eagle_pe60": 14,
-        "fort_william_j311": 6, "montana_acr13": 4, "pce_874": 4,
+        "fort_william_j311": 6, "montana_acr13": 6, "pce_874": 4,
         "pt_564": 4, "raven_am55": 6, "river_class_frigate": 4 + 2,
         "rolla_pc483": 4, "winnipeg_j337": 6, "olympia_c6": 22,
         "pope_ap110": 14,

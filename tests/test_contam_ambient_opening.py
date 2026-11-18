@@ -309,6 +309,15 @@ _WEATHER_ZONES = {
         "Focsle_Void_2D",
     },
 }
+# CONTAM-AMBIENT-HATCH-01: ``weather_hatch`` records supplement the existing
+# ``open_deck`` opening on the same zone; the zone-to-zone hatch adjacency and
+# the three ``hangar_door`` edges stay unchanged (hangar_door is ruled out).
+_WEATHER_HATCH_ZONES = {
+    "lsm_354": {"Weather_Aft_Super"},
+    "middlesex_lst983": {"Tank_Deck", "Tank_Deck_Port"},
+    "lyon_ap71": {"Hatch_4_Weather", "Hatch_3_Weather"},
+    "montana_acr13": {"MD_Forecastle_Open"},
+}
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
 # CONTAM-AMBIENT-WEATHER-CARRIER-01, CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01,
 # CONTAM-AMBIENT-WEATHER-AUXILIARY-01 and CONTAM-AMBIENT-WEATHER-MISC-01:
@@ -394,7 +403,7 @@ class TestSchema:
             document = json.loads(path.read_text(encoding="utf-8"))
             assert not list(validator.iter_errors(document)), path
             for record in document.get("ambient_openings", []):
-                assert record["type"] in ("makeup_louvre", "open_deck"), path
+                assert record["type"] in ("makeup_louvre", "open_deck", "weather_hatch"), path
                 if record["type"] == opening_type:
                     declared.setdefault(path.parent.name, []).append(record)
         return declared
@@ -428,6 +437,24 @@ class TestSchema:
             assert len(rows) == len(_WEATHER_ZONES[hull])
             for record in rows:
                 assert record["wind_speed_m_s"] == pytest.approx(1.0)
+                assert record["exchange_m3h"] > 0.0
+
+    def test_declared_weather_hatches(self) -> None:
+        # CONTAM-AMBIENT-HATCH-01 authors six ``weather_hatch`` records on four
+        # naval hulls. ``hangar_door`` is ruled out and ``service_hatch`` stays
+        # a zone-to-zone pressure path.
+        declared = self._declared("weather_hatch")
+        assert {
+            hull: {record["zone"] for record in rows} for hull, rows in declared.items()
+        } == _WEATHER_HATCH_ZONES
+        assert {hull: len(rows) for hull, rows in declared.items()} == {
+            hull: len(zones) for hull, zones in _WEATHER_HATCH_ZONES.items()
+        }
+        for rows in declared.values():
+            for record in rows:
+                assert record["area_m2"] == pytest.approx(0.36)
+                assert record["wind_speed_m_s"] == pytest.approx(1.0)
+                assert record["schedule"] == "HatchOccasionalW"
                 assert record["exchange_m3h"] > 0.0
 
     def test_weather_zones_carry_the_authored_exposure(self) -> None:
