@@ -312,6 +312,24 @@
       "schedule": "always_open",
       "wind_speed_m_s": 1.0,
       "description": "Open weather Tank_Deck_Port exchange with ambient (CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01). Owner ruling 2026-11-17: this opening replaces the HVAC_TankDeck group OA leg for Tank_Deck_Port; Tank_Deck_Port is removed from HVAC_TankDeck; that group has no remaining rooms and is removed. area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: 2*sqrt(V/3)*3 with V=444.76 m3 (square-plan deck face, not a measured area); exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5). The hull relative wind is 1.0 m/s from ahead; schedule is always_open."
+    },
+    {
+      "zone": "Tank_Deck",
+      "type": "weather_hatch",
+      "area_m2": 0.36,
+      "exchange_m3h": 28.825,
+      "wind_speed_m_s": 1.0,
+      "schedule": "HatchOccasionalW",
+      "description": "Weather hatch exchange with ambient (CONTAM-AMBIENT-HATCH-01). area_m2 is 0.36, Grade C: in-repo orifice_catalog.json hatch class and the MCA MGN 628 small-vessel access-hatch analogue (0.36 m2 normal, 0.25 m2 minimum); no ship-specific clear-opening drawing supersedes it. wind_speed_m_s is the declared relative-wind axis at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. schedule is HatchOccasionalW. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Tank_Deck_Port",
+      "type": "weather_hatch",
+      "area_m2": 0.36,
+      "exchange_m3h": 28.877,
+      "wind_speed_m_s": 1.0,
+      "schedule": "HatchOccasionalW",
+      "description": "Weather hatch exchange with ambient (CONTAM-AMBIENT-HATCH-01). area_m2 is 0.36, Grade C: in-repo orifice_catalog.json hatch class and the MCA MGN 628 small-vessel access-hatch analogue (0.36 m2 normal, 0.25 m2 minimum); no ship-specific clear-opening drawing supersedes it. wind_speed_m_s is the declared relative-wind axis at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. schedule is HatchOccasionalW. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ],
   "adjacency": [
