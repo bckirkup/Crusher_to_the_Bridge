@@ -180,7 +180,8 @@
         "x": 11.74,
         "y": 7.69
       },
-      "description": "stern weather: 5in/38 + 40mm plt, boats on davits, fan room"
+      "description": "stern weather: 5in/38 + 40mm plt, boats on davits, fan room",
+      "exposure": "weather"
     },
     {
       "id": "Officers_Country_U",
@@ -263,7 +264,8 @@
         "x": 124.26,
         "y": 7.54
       },
-      "description": "bow weather on upper deck: boom stowage, searchlights"
+      "description": "bow weather on upper deck: boom stowage, searchlights",
+      "exposure": "weather"
     },
     {
       "id": "Stern_Working_Deck",
@@ -278,7 +280,8 @@
         "x": 6.8,
         "y": 7.24
       },
-      "description": "ensign staff, towing winch, towing chocks, surface lookout"
+      "description": "ensign staff, towing winch, towing chocks, surface lookout",
+      "exposure": "weather"
     },
     {
       "id": "Gun_Repair_40mm",
@@ -454,7 +457,8 @@
         "x": 90.66,
         "y": 6.63
       },
-      "description": "hatch No.2 working deck + fan rm No.5 + oxy/acetylene racks"
+      "description": "hatch No.2 working deck + fan rm No.5 + oxy/acetylene racks",
+      "exposure": "weather"
     },
     {
       "id": "Clipping_Empty_Shell",

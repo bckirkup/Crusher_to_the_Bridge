@@ -271,6 +271,25 @@ _WEATHER_ZONES = {
     # opening replaces the VENT_Weather OA leg for Flight_Deck, which left the
     # group; Island_Upper stays grouped and carries no opening.
     "midway_cv41": {"Flight_Deck"},
+    # CONTAM-GROUPED-WEATHER-AUXILIARY-01: grouped auxiliary weather zones whose
+    # open_deck openings replace the HVAC group OA leg for the opened zone
+    # (G4 auxiliary staged rollout; legend_class_nsc has no committed bundle).
+    "assistance_ar17": {
+        "Boat_Gun_Deck_Aft", "Boat_Deck_Fwd", "Stern_Working_Deck",
+        "Fwd_Working_Deck",
+    },
+    "gosper_apa170": {
+        "Boat_Deck_Open", "Boat_Deck_Open_Fwd", "Focsle_Deck_Open", "Fantail",
+        "Boat_Stowage_Deck", "Main_Deck_Open_Fwd",
+    },
+    "jupiter_ac3": {"Poop_Deck_Open", "Focsle_Deck_Open"},
+    "legend_class_nsc": {"Flight_Deck", "Boat_Deck"},
+    "luzon_arg2": {
+        "Gun_Weather_Sup", "Boat_Deck_Aft", "Stern_Weather",
+        "Chain_Locker_Focsle",
+    },
+    "mercury_aks20": {"Fantail", "Foredeck"},
+    "squier_ap130": {"Stern_Deck_Up"},
     # CONTAM-GROUPED-WEATHER-BATTLESHIP-01: G4 battleship class. Each opening
     # replaces the OA leg of the HVAC group the zone left; Catwalk_02L stays in
     # VENT_Weather on the Iowa-class hulls and carries no opening.
