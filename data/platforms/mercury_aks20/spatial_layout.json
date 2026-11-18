@@ -86,7 +86,8 @@
         "x": 15.91,
         "y": 7.98
       },
-      "description": "aft weather incl NO.4 hatch cover, capstan, amm hoist, 5in gun tub over"
+      "description": "aft weather incl NO.4 hatch cover, capstan, amm hoist, 5in gun tub over",
+      "exposure": "weather"
     },
     {
       "id": "Eng_Office",
@@ -378,7 +379,8 @@
         "x": 124.59,
         "y": 8.92
       },
-      "description": "forecastle: clipping rm, fan rm, amm trunk A-505-MT, anchor winch, windlass, 3in gun platform over"
+      "description": "forecastle: clipping rm, fan rm, amm trunk A-505-MT, anchor winch, windlass, 3in gun platform over",
+      "exposure": "weather"
     },
     {
       "id": "Storeroom_Flat",

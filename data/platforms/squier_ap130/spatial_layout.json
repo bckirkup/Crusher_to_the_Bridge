@@ -132,7 +132,8 @@
         "x": 5.11,
         "y": 9.59
       },
-      "description": "stern weather deck: 5in gun, capstans, depth-charge racks"
+      "description": "stern weather deck: 5in gun, capstans, depth-charge racks",
+      "exposure": "weather"
     },
     {
       "id": "Med_Attend_Berthing",

@@ -2728,7 +2728,7 @@
   },
   {
     "path_nr": 304,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2737,7 +2737,7 @@
   },
   {
     "path_nr": 305,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2746,7 +2746,7 @@
   },
   {
     "path_nr": 306,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2755,7 +2755,7 @@
   },
   {
     "path_nr": 307,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2764,7 +2764,7 @@
   },
   {
     "path_nr": 308,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2773,7 +2773,7 @@
   },
   {
     "path_nr": 309,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2782,7 +2782,7 @@
   },
   {
     "path_nr": 310,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2791,7 +2791,7 @@
   },
   {
     "path_nr": 311,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2800,7 +2800,7 @@
   },
   {
     "path_nr": 312,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2809,7 +2809,7 @@
   },
   {
     "path_nr": 313,
-    "from_zone": "Boat_Gun_Deck_Aft",
+    "from_zone": "Sky_Lookout",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2818,7 +2818,7 @@
   },
   {
     "path_nr": 314,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2827,7 +2827,7 @@
   },
   {
     "path_nr": 315,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2836,7 +2836,7 @@
   },
   {
     "path_nr": 316,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2845,7 +2845,7 @@
   },
   {
     "path_nr": 317,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2854,7 +2854,7 @@
   },
   {
     "path_nr": 318,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2863,7 +2863,7 @@
   },
   {
     "path_nr": 319,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2872,7 +2872,7 @@
   },
   {
     "path_nr": 320,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2881,7 +2881,7 @@
   },
   {
     "path_nr": 321,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2890,7 +2890,7 @@
   },
   {
     "path_nr": 322,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2899,7 +2899,7 @@
   },
   {
     "path_nr": 323,
-    "from_zone": "Boat_Deck_Fwd",
+    "from_zone": "Gun_Tubs_Sup",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2908,7 +2908,7 @@
   },
   {
     "path_nr": 324,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2917,7 +2917,7 @@
   },
   {
     "path_nr": 325,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2926,7 +2926,7 @@
   },
   {
     "path_nr": 326,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2935,7 +2935,7 @@
   },
   {
     "path_nr": 327,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2944,7 +2944,7 @@
   },
   {
     "path_nr": 328,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2953,7 +2953,7 @@
   },
   {
     "path_nr": 329,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2962,7 +2962,7 @@
   },
   {
     "path_nr": 330,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2971,7 +2971,7 @@
   },
   {
     "path_nr": 331,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2980,7 +2980,7 @@
   },
   {
     "path_nr": 332,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2989,7 +2989,7 @@
   },
   {
     "path_nr": 333,
-    "from_zone": "Sky_Lookout",
+    "from_zone": "Forecastle_Main",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2998,7 +2998,7 @@
   },
   {
     "path_nr": 334,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3007,7 +3007,7 @@
   },
   {
     "path_nr": 335,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3016,7 +3016,7 @@
   },
   {
     "path_nr": 336,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3025,7 +3025,7 @@
   },
   {
     "path_nr": 337,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3034,7 +3034,7 @@
   },
   {
     "path_nr": 338,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3043,7 +3043,7 @@
   },
   {
     "path_nr": 339,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3052,7 +3052,7 @@
   },
   {
     "path_nr": 340,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3061,7 +3061,7 @@
   },
   {
     "path_nr": 341,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3070,7 +3070,7 @@
   },
   {
     "path_nr": 342,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3079,7 +3079,7 @@
   },
   {
     "path_nr": 343,
-    "from_zone": "Gun_Tubs_Sup",
+    "from_zone": "Hatch_5_4_Working",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3088,7 +3088,7 @@
   },
   {
     "path_nr": 344,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3097,7 +3097,7 @@
   },
   {
     "path_nr": 345,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3106,7 +3106,7 @@
   },
   {
     "path_nr": 346,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3115,7 +3115,7 @@
   },
   {
     "path_nr": 347,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3124,7 +3124,7 @@
   },
   {
     "path_nr": 348,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3133,7 +3133,7 @@
   },
   {
     "path_nr": 349,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3142,7 +3142,7 @@
   },
   {
     "path_nr": 350,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3151,7 +3151,7 @@
   },
   {
     "path_nr": 351,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3160,7 +3160,7 @@
   },
   {
     "path_nr": 352,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3169,7 +3169,7 @@
   },
   {
     "path_nr": 353,
-    "from_zone": "Stern_Working_Deck",
+    "from_zone": "Paravane_Hatch3",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3178,7 +3178,7 @@
   },
   {
     "path_nr": 354,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3187,7 +3187,7 @@
   },
   {
     "path_nr": 355,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3196,7 +3196,7 @@
   },
   {
     "path_nr": 356,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3205,7 +3205,7 @@
   },
   {
     "path_nr": 357,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3214,7 +3214,7 @@
   },
   {
     "path_nr": 358,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3223,7 +3223,7 @@
   },
   {
     "path_nr": 359,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3232,7 +3232,7 @@
   },
   {
     "path_nr": 360,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3241,7 +3241,7 @@
   },
   {
     "path_nr": 361,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3250,7 +3250,7 @@
   },
   {
     "path_nr": 362,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3259,7 +3259,7 @@
   },
   {
     "path_nr": 363,
-    "from_zone": "Fwd_Working_Deck",
+    "from_zone": "Boat_Gun_Deck_Aft",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3268,7 +3268,7 @@
   },
   {
     "path_nr": 364,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3277,7 +3277,7 @@
   },
   {
     "path_nr": 365,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3286,7 +3286,7 @@
   },
   {
     "path_nr": 366,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3295,7 +3295,7 @@
   },
   {
     "path_nr": 367,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3304,7 +3304,7 @@
   },
   {
     "path_nr": 368,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3313,7 +3313,7 @@
   },
   {
     "path_nr": 369,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3322,7 +3322,7 @@
   },
   {
     "path_nr": 370,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3331,7 +3331,7 @@
   },
   {
     "path_nr": 371,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3340,7 +3340,7 @@
   },
   {
     "path_nr": 372,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3349,7 +3349,7 @@
   },
   {
     "path_nr": 373,
-    "from_zone": "Forecastle_Main",
+    "from_zone": "Boat_Deck_Fwd",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3358,7 +3358,7 @@
   },
   {
     "path_nr": 374,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3367,7 +3367,7 @@
   },
   {
     "path_nr": 375,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3376,7 +3376,7 @@
   },
   {
     "path_nr": 376,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3385,7 +3385,7 @@
   },
   {
     "path_nr": 377,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3394,7 +3394,7 @@
   },
   {
     "path_nr": 378,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3403,7 +3403,7 @@
   },
   {
     "path_nr": 379,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3412,7 +3412,7 @@
   },
   {
     "path_nr": 380,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3421,7 +3421,7 @@
   },
   {
     "path_nr": 381,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3430,7 +3430,7 @@
   },
   {
     "path_nr": 382,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3439,7 +3439,7 @@
   },
   {
     "path_nr": 383,
-    "from_zone": "Hatch_5_4_Working",
+    "from_zone": "Stern_Working_Deck",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3448,7 +3448,7 @@
   },
   {
     "path_nr": 384,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Stack_Space",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3457,7 +3457,7 @@
   },
   {
     "path_nr": 385,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Fan_Rm_8",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3466,7 +3466,7 @@
   },
   {
     "path_nr": 386,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Boiler_Casing_Main",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3475,7 +3475,7 @@
   },
   {
     "path_nr": 387,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Foundry_Blacksmith",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3484,7 +3484,7 @@
   },
   {
     "path_nr": 388,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Machinery_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3493,7 +3493,7 @@
   },
   {
     "path_nr": 389,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Machinery_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3502,7 +3502,7 @@
   },
   {
     "path_nr": 390,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Engine_Room_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3511,7 +3511,7 @@
   },
   {
     "path_nr": 391,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Fuel_Water_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3520,7 +3520,7 @@
   },
   {
     "path_nr": 392,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Aft_Tanks_2P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -3529,7 +3529,7 @@
   },
   {
     "path_nr": 393,
-    "from_zone": "Paravane_Hatch3",
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "Aft_Ballast_Hold",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -5311,24 +5311,6 @@
   },
   {
     "path_nr": 591,
-    "from_zone": "Boat_Gun_Deck_Aft",
-    "to_zone": "HD_Upper",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 592,
-    "from_zone": "Boat_Deck_Fwd",
-    "to_zone": "HD_Upper",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 593,
     "from_zone": "Sky_Lookout",
     "to_zone": "HD_Upper",
     "is_hvac_ducted": false,
@@ -5337,7 +5319,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 594,
+    "path_nr": 592,
     "from_zone": "Gun_Tubs_Sup",
     "to_zone": "HD_Upper",
     "is_hvac_ducted": false,
@@ -5346,25 +5328,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 595,
-    "from_zone": "Stern_Working_Deck",
-    "to_zone": "HD_Upper",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 596,
-    "from_zone": "Fwd_Working_Deck",
-    "to_zone": "HD_Upper",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 597,
+    "path_nr": 593,
     "from_zone": "Forecastle_Main",
     "to_zone": "HD_Upper",
     "is_hvac_ducted": false,
@@ -5373,7 +5337,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 598,
+    "path_nr": 594,
     "from_zone": "Hatch_5_4_Working",
     "to_zone": "HD_Upper",
     "is_hvac_ducted": false,
@@ -5382,8 +5346,44 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 599,
+    "path_nr": 595,
     "from_zone": "Paravane_Hatch3",
+    "to_zone": "HD_Upper",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 596,
+    "from_zone": "Boat_Gun_Deck_Aft",
+    "to_zone": "HD_Upper",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 597,
+    "from_zone": "Boat_Deck_Fwd",
+    "to_zone": "HD_Upper",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 598,
+    "from_zone": "Stern_Working_Deck",
+    "to_zone": "HD_Upper",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 599,
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "HD_Upper",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -5545,24 +5545,6 @@
   },
   {
     "path_nr": 617,
-    "from_zone": "Boat_Gun_Deck_Aft",
-    "to_zone": "WRSR_Main",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 618,
-    "from_zone": "Boat_Deck_Fwd",
-    "to_zone": "WRSR_Main",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 619,
     "from_zone": "Sky_Lookout",
     "to_zone": "WRSR_Main",
     "is_hvac_ducted": false,
@@ -5571,7 +5553,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 620,
+    "path_nr": 618,
     "from_zone": "Gun_Tubs_Sup",
     "to_zone": "WRSR_Main",
     "is_hvac_ducted": false,
@@ -5580,25 +5562,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 621,
-    "from_zone": "Stern_Working_Deck",
-    "to_zone": "WRSR_Main",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 622,
-    "from_zone": "Fwd_Working_Deck",
-    "to_zone": "WRSR_Main",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 623,
+    "path_nr": 619,
     "from_zone": "Forecastle_Main",
     "to_zone": "WRSR_Main",
     "is_hvac_ducted": false,
@@ -5607,7 +5571,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 624,
+    "path_nr": 620,
     "from_zone": "Hatch_5_4_Working",
     "to_zone": "WRSR_Main",
     "is_hvac_ducted": false,
@@ -5616,8 +5580,44 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 625,
+    "path_nr": 621,
     "from_zone": "Paravane_Hatch3",
+    "to_zone": "WRSR_Main",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 622,
+    "from_zone": "Boat_Gun_Deck_Aft",
+    "to_zone": "WRSR_Main",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 623,
+    "from_zone": "Boat_Deck_Fwd",
+    "to_zone": "WRSR_Main",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 624,
+    "from_zone": "Stern_Working_Deck",
+    "to_zone": "WRSR_Main",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 625,
+    "from_zone": "Fwd_Working_Deck",
     "to_zone": "WRSR_Main",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -5779,24 +5779,6 @@
   },
   {
     "path_nr": 643,
-    "from_zone": "Boat_Gun_Deck_Aft",
-    "to_zone": "HD_Crew_2nd",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 644,
-    "from_zone": "Boat_Deck_Fwd",
-    "to_zone": "HD_Crew_2nd",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 645,
     "from_zone": "Sky_Lookout",
     "to_zone": "HD_Crew_2nd",
     "is_hvac_ducted": false,
@@ -5805,7 +5787,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 646,
+    "path_nr": 644,
     "from_zone": "Gun_Tubs_Sup",
     "to_zone": "HD_Crew_2nd",
     "is_hvac_ducted": false,
@@ -5814,25 +5796,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 647,
-    "from_zone": "Stern_Working_Deck",
-    "to_zone": "HD_Crew_2nd",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 648,
-    "from_zone": "Fwd_Working_Deck",
-    "to_zone": "HD_Crew_2nd",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 649,
+    "path_nr": 645,
     "from_zone": "Forecastle_Main",
     "to_zone": "HD_Crew_2nd",
     "is_hvac_ducted": false,
@@ -5841,7 +5805,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 650,
+    "path_nr": 646,
     "from_zone": "Hatch_5_4_Working",
     "to_zone": "HD_Crew_2nd",
     "is_hvac_ducted": false,
@@ -5850,7 +5814,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 651,
+    "path_nr": 647,
     "from_zone": "Paravane_Hatch3",
     "to_zone": "HD_Crew_2nd",
     "is_hvac_ducted": false,
@@ -5859,7 +5823,115 @@
     "ahs_nr": 0
   },
   {
+    "path_nr": 648,
+    "from_zone": "Boat_Gun_Deck_Aft",
+    "to_zone": "HD_Crew_2nd",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 649,
+    "from_zone": "Boat_Deck_Fwd",
+    "to_zone": "HD_Crew_2nd",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 650,
+    "from_zone": "Stern_Working_Deck",
+    "to_zone": "HD_Crew_2nd",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 651,
+    "from_zone": "Fwd_Working_Deck",
+    "to_zone": "HD_Crew_2nd",
+    "is_hvac_ducted": false,
+    "kind": "Sanitary_Makeup",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
     "path_nr": 652,
+    "from_zone": "Boat_Gun_Deck_Aft",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 653,
+    "from_zone": "Boat_Gun_Deck_Aft",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 654,
+    "from_zone": "Boat_Deck_Fwd",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 655,
+    "from_zone": "Boat_Deck_Fwd",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 656,
+    "from_zone": "Stern_Working_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 657,
+    "from_zone": "Stern_Working_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 658,
+    "from_zone": "Fwd_Working_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 659,
+    "from_zone": "Fwd_Working_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 660,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -5868,7 +5940,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 653,
+    "path_nr": 661,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -5877,7 +5949,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 654,
+    "path_nr": 662,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -5886,7 +5958,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 655,
+    "path_nr": 663,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Pilot_House",
     "is_hvac_ducted": true,
@@ -5896,7 +5968,7 @@
     "declared_flow_m3h": 190.98
   },
   {
-    "path_nr": 656,
+    "path_nr": 664,
     "from_zone": "Pilot_House",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -5906,7 +5978,7 @@
     "declared_flow_m3h": 190.98
   },
   {
-    "path_nr": 657,
+    "path_nr": 665,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Navigators_Office",
     "is_hvac_ducted": true,
@@ -5916,7 +5988,7 @@
     "declared_flow_m3h": 169.77
   },
   {
-    "path_nr": 658,
+    "path_nr": 666,
     "from_zone": "Navigators_Office",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -5926,7 +5998,7 @@
     "declared_flow_m3h": 169.77
   },
   {
-    "path_nr": 659,
+    "path_nr": 667,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Code_Communications",
     "is_hvac_ducted": true,
@@ -5936,7 +6008,7 @@
     "declared_flow_m3h": 297.12
   },
   {
-    "path_nr": 660,
+    "path_nr": 668,
     "from_zone": "Code_Communications",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -5946,7 +6018,7 @@
     "declared_flow_m3h": 297.12
   },
   {
-    "path_nr": 661,
+    "path_nr": 669,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Radio_Receiving",
     "is_hvac_ducted": true,
@@ -5956,7 +6028,7 @@
     "declared_flow_m3h": 42.45
   },
   {
-    "path_nr": 662,
+    "path_nr": 670,
     "from_zone": "Radio_Receiving",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -5966,7 +6038,7 @@
     "declared_flow_m3h": 42.45
   },
   {
-    "path_nr": 663,
+    "path_nr": 671,
     "from_zone": "ahs1(Sup)",
     "to_zone": "House_Top_Passage",
     "is_hvac_ducted": true,
@@ -5976,7 +6048,7 @@
     "declared_flow_m3h": 318.33
   },
   {
-    "path_nr": 664,
+    "path_nr": 672,
     "from_zone": "House_Top_Passage",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -5986,7 +6058,7 @@
     "declared_flow_m3h": 318.33
   },
   {
-    "path_nr": 665,
+    "path_nr": 673,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Gun_Crew_Quarters",
     "is_hvac_ducted": true,
@@ -5996,7 +6068,7 @@
     "declared_flow_m3h": 537.09
   },
   {
-    "path_nr": 666,
+    "path_nr": 674,
     "from_zone": "Gun_Crew_Quarters",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6006,7 +6078,7 @@
     "declared_flow_m3h": 537.09
   },
   {
-    "path_nr": 667,
+    "path_nr": 675,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Emerg_Radio_Rm",
     "is_hvac_ducted": true,
@@ -6016,7 +6088,7 @@
     "declared_flow_m3h": 260.4
   },
   {
-    "path_nr": 668,
+    "path_nr": 676,
     "from_zone": "Emerg_Radio_Rm",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6026,7 +6098,7 @@
     "declared_flow_m3h": 260.4
   },
   {
-    "path_nr": 669,
+    "path_nr": 677,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Officers_Country_U",
     "is_hvac_ducted": true,
@@ -6036,7 +6108,7 @@
     "declared_flow_m3h": 2146.7400000000002
   },
   {
-    "path_nr": 670,
+    "path_nr": 678,
     "from_zone": "Officers_Country_U",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6046,7 +6118,7 @@
     "declared_flow_m3h": 2146.7400000000002
   },
   {
-    "path_nr": 671,
+    "path_nr": 679,
     "from_zone": "ahs1(Sup)",
     "to_zone": "CPO_Galley_U",
     "is_hvac_ducted": true,
@@ -6056,7 +6128,7 @@
     "declared_flow_m3h": 463.02
   },
   {
-    "path_nr": 672,
+    "path_nr": 680,
     "from_zone": "CPO_Galley_U",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6066,7 +6138,7 @@
     "declared_flow_m3h": 463.02
   },
   {
-    "path_nr": 673,
+    "path_nr": 681,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Fwd_House_Upper",
     "is_hvac_ducted": true,
@@ -6076,7 +6148,7 @@
     "declared_flow_m3h": 3367.41
   },
   {
-    "path_nr": 674,
+    "path_nr": 682,
     "from_zone": "Fwd_House_Upper",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6086,7 +6158,7 @@
     "declared_flow_m3h": 3367.41
   },
   {
-    "path_nr": 675,
+    "path_nr": 683,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Officers_Mess_Lounge",
     "is_hvac_ducted": true,
@@ -6096,7 +6168,7 @@
     "declared_flow_m3h": 749.7
   },
   {
-    "path_nr": 676,
+    "path_nr": 684,
     "from_zone": "Officers_Mess_Lounge",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6106,7 +6178,7 @@
     "declared_flow_m3h": 749.7
   },
   {
-    "path_nr": 677,
+    "path_nr": 685,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Galley_Main",
     "is_hvac_ducted": true,
@@ -6116,7 +6188,7 @@
     "declared_flow_m3h": 449.82
   },
   {
-    "path_nr": 678,
+    "path_nr": 686,
     "from_zone": "Galley_Main",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6126,7 +6198,7 @@
     "declared_flow_m3h": 449.82
   },
   {
-    "path_nr": 679,
+    "path_nr": 687,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Crew_Berthing_Main",
     "is_hvac_ducted": true,
@@ -6136,7 +6208,7 @@
     "declared_flow_m3h": 524.79
   },
   {
-    "path_nr": 680,
+    "path_nr": 688,
     "from_zone": "Crew_Berthing_Main",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6146,7 +6218,7 @@
     "declared_flow_m3h": 524.79
   },
   {
-    "path_nr": 681,
+    "path_nr": 689,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Crew_Berthing_2nd",
     "is_hvac_ducted": true,
@@ -6156,7 +6228,7 @@
     "declared_flow_m3h": 1691.25
   },
   {
-    "path_nr": 682,
+    "path_nr": 690,
     "from_zone": "Crew_Berthing_2nd",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6166,7 +6238,7 @@
     "declared_flow_m3h": 1691.25
   },
   {
-    "path_nr": 683,
+    "path_nr": 691,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Flat_Aft_Berthing",
     "is_hvac_ducted": true,
@@ -6176,7 +6248,7 @@
     "declared_flow_m3h": 1684.6499999999999
   },
   {
-    "path_nr": 684,
+    "path_nr": 692,
     "from_zone": "Flat_Aft_Berthing",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6186,7 +6258,7 @@
     "declared_flow_m3h": 1684.6499999999999
   },
   {
-    "path_nr": 685,
+    "path_nr": 693,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Crew_Mess_2nd",
     "is_hvac_ducted": true,
@@ -6196,7 +6268,7 @@
     "declared_flow_m3h": 578.0699999999999
   },
   {
-    "path_nr": 686,
+    "path_nr": 694,
     "from_zone": "Crew_Mess_2nd",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6206,7 +6278,7 @@
     "declared_flow_m3h": 578.0699999999999
   },
   {
-    "path_nr": 687,
+    "path_nr": 695,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Scullery_2nd",
     "is_hvac_ducted": true,
@@ -6216,7 +6288,7 @@
     "declared_flow_m3h": 208.11
   },
   {
-    "path_nr": 688,
+    "path_nr": 696,
     "from_zone": "Scullery_2nd",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6226,47 +6298,7 @@
     "declared_flow_m3h": 208.11
   },
   {
-    "path_nr": 689,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Boat_Gun_Deck_Aft",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 2954.91
-  },
-  {
-    "path_nr": 690,
-    "from_zone": "Boat_Gun_Deck_Aft",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 2954.91
-  },
-  {
-    "path_nr": 691,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Boat_Deck_Fwd",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1313.28
-  },
-  {
-    "path_nr": 692,
-    "from_zone": "Boat_Deck_Fwd",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1313.28
-  },
-  {
-    "path_nr": 693,
+    "path_nr": 697,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Sky_Lookout",
     "is_hvac_ducted": true,
@@ -6276,7 +6308,7 @@
     "declared_flow_m3h": 189.87
   },
   {
-    "path_nr": 694,
+    "path_nr": 698,
     "from_zone": "Sky_Lookout",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6286,7 +6318,7 @@
     "declared_flow_m3h": 189.87
   },
   {
-    "path_nr": 695,
+    "path_nr": 699,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Gun_Tubs_Sup",
     "is_hvac_ducted": true,
@@ -6296,7 +6328,7 @@
     "declared_flow_m3h": 797.52
   },
   {
-    "path_nr": 696,
+    "path_nr": 700,
     "from_zone": "Gun_Tubs_Sup",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6304,46 +6336,6 @@
     "crusher_transfer": false,
     "ahs_nr": 1,
     "declared_flow_m3h": 797.52
-  },
-  {
-    "path_nr": 697,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Stern_Working_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1899.21
-  },
-  {
-    "path_nr": 698,
-    "from_zone": "Stern_Working_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1899.21
-  },
-  {
-    "path_nr": 699,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Fwd_Working_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1416.09
-  },
-  {
-    "path_nr": 700,
-    "from_zone": "Fwd_Working_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1416.09
   },
   {
     "path_nr": 701,
