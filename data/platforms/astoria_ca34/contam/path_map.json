@@ -1459,6 +1459,96 @@
   },
   {
     "path_nr": 163,
+    "from_zone": "Fantail",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 164,
+    "from_zone": "Fantail",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 165,
+    "from_zone": "Catapult_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 166,
+    "from_zone": "Catapult_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 167,
+    "from_zone": "Boat_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 168,
+    "from_zone": "Boat_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 169,
+    "from_zone": "Focsle_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 170,
+    "from_zone": "Focsle_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 171,
+    "from_zone": "Upper_Deck_Aft",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 172,
+    "from_zone": "Upper_Deck_Aft",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 173,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -1467,7 +1557,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 164,
+    "path_nr": 174,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1476,7 +1566,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 165,
+    "path_nr": 175,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -1485,67 +1575,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 166,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Fantail",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 221.35
-  },
-  {
-    "path_nr": 167,
-    "from_zone": "Fantail",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 221.35
-  },
-  {
-    "path_nr": 168,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Catapult_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 442.7
-  },
-  {
-    "path_nr": 169,
-    "from_zone": "Catapult_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 442.7
-  },
-  {
-    "path_nr": 170,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Boat_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 710.77
-  },
-  {
-    "path_nr": 171,
-    "from_zone": "Boat_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 710.77
-  },
-  {
-    "path_nr": 172,
+    "path_nr": 176,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Gun_Gallery_01",
     "is_hvac_ducted": true,
@@ -1555,7 +1585,7 @@
     "declared_flow_m3h": 441.165
   },
   {
-    "path_nr": 173,
+    "path_nr": 177,
     "from_zone": "Gun_Gallery_01",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -1565,27 +1595,7 @@
     "declared_flow_m3h": 441.165
   },
   {
-    "path_nr": 174,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Focsle_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 371.895
-  },
-  {
-    "path_nr": 175,
-    "from_zone": "Focsle_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 371.895
-  },
-  {
-    "path_nr": 176,
+    "path_nr": 178,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Bridge_Wings",
     "is_hvac_ducted": true,
@@ -1595,7 +1605,7 @@
     "declared_flow_m3h": 56.785
   },
   {
-    "path_nr": 177,
+    "path_nr": 179,
     "from_zone": "Bridge_Wings",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -1603,26 +1613,6 @@
     "crusher_transfer": false,
     "ahs_nr": 1,
     "declared_flow_m3h": 56.785
-  },
-  {
-    "path_nr": 178,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Upper_Deck_Aft",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 204.245
-  },
-  {
-    "path_nr": 179,
-    "from_zone": "Upper_Deck_Aft",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 204.245
   },
   {
     "path_nr": 180,

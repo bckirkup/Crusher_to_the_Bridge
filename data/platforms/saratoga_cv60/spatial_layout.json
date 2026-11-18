@@ -87,7 +87,8 @@
         "y": 16.7
       },
       "max_occupancy": 300,
-      "description": "Open-air flight deck incl angled deck; explicit vol: ~18,500 m2 deck x 2.6 m"
+      "description": "Open-air flight deck incl angled deck; explicit vol: ~18,500 m2 deck x 2.6 m",
+      "exposure": "weather"
     },
     {
       "id": "Crew_Berthing_03_Aft",
