@@ -240,5 +240,6 @@ def test_receipt_layer_rejects_supply_structure_arms() -> None:
         source_cluster={"rung": "fleet_shared"},
     )
     core = _core(cfg_cs=cfg)
+    agents = [_diner(i) for i in range(1, 40)]
     with pytest.raises(ValueError, match="receipt-layer composition"):
-        _plan(core, [_diner(i) for i in range(1, 40)])
+        _plan(core, agents)
