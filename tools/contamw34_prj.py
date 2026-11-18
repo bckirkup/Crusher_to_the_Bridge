@@ -19,7 +19,6 @@ Blueprint→authentic Contam authoring is out of scope.
 
 from __future__ import annotations
 
-import itertools
 import math
 import re
 import warnings
@@ -751,9 +750,9 @@ class _NetworkBuilder:
         )
         return self._ensure_filter(preset)
 
-    def _orifice_elem_for_flow(self, flow_m3h: float) -> int:
-        """Sized plr_orfc for passive cross-zone design flow at 1 Pa."""
-        area = _orifice_area_m2_for_flow_m3h(flow_m3h)
+    def _orifice_elem_for_area(self, area_m2: float, flow_m3h: float) -> int:
+        """Plr_orfc element for an explicit opening area."""
+        area = max(float(area_m2), 1e-12)
         key = round(area, 10)
         if key in self.orifice_elem_by_area:
             return self.orifice_elem_by_area[key]
@@ -770,6 +769,28 @@ class _NetworkBuilder:
         })
         self.orifice_elem_by_area[key] = nr
         return nr
+
+    def _orifice_elem_for_flow(self, flow_m3h: float) -> int:
+        """Sized plr_orfc for passive cross-zone design flow at 1 Pa."""
+        return self._orifice_elem_for_area(
+            _orifice_area_m2_for_flow_m3h(flow_m3h), flow_m3h,
+        )
+
+    def _declared_cross_zone_orifice_area_m2(
+        self, path_name: str, n_paths: int,
+    ) -> float | None:
+        """Per-path area from a declared total link area, when overridden."""
+        declared = self.overrides.get("cross_zone_orifice_total_area_m2") or {}
+        if path_name not in declared:
+            return None
+        total = float(declared[path_name])
+        if total <= 0.0 or n_paths <= 0:
+            raise ValueError(
+                "cross_zone_orifice_total_area_m2 entries must be positive "
+                f"with emitted paths; got {path_name!r}={total!r}, "
+                f"n_paths={n_paths}"
+            )
+        return total / n_paths
 
     # ── hobbyist schedules / wind / species / controls / annotations ──────
 
@@ -1069,6 +1090,11 @@ class _NetworkBuilder:
             pair_flow = flow / n_pairs if n_pairs > 0 else 0.0
             if pair_flow <= 0.0:
                 continue
+            pairs = [
+                (fr, tr) for fr in from_rooms for tr in to_rooms if fr != tr
+            ]
+            if not pairs:
+                continue
             semantics = cross_zone_link_semantics(link)
             direction = str(semantics.get("direction") or "")
             mechanism = str(semantics.get("mechanism") or "")
@@ -1082,7 +1108,13 @@ class _NetworkBuilder:
                 if direction == "oneway":
                     elem = self._backdraft_elem_for_flow(pair_flow)
                 else:
-                    elem = self._orifice_elem_for_flow(pair_flow)
+                    area_m2 = self._declared_cross_zone_orifice_area_m2(
+                        kind, len(pairs),
+                    )
+                    if area_m2 is None:
+                        elem = self._orifice_elem_for_flow(pair_flow)
+                    else:
+                        elem = self._orifice_elem_for_area(area_m2, pair_flow)
             # PRJ filter refs are only added when the declared filtered bit
             # differs from the deprecated ducted alias; alias-equivalent
             # links keep the historical path_map filtration channel so the
@@ -1094,9 +1126,7 @@ class _NetworkBuilder:
             path_map_extra = (
                 {"filtered": filtered} if filtered != ducted else None
             )
-            for fr, tr in itertools.product(from_rooms, to_rooms):
-                if fr == tr:
-                    continue
+            for fr, tr in pairs:
                 self._add_path(
                     self.zone_name_to_nr[fr], self.zone_name_to_nr[tr], elem,
                     from_name=fr, to_name=tr,
