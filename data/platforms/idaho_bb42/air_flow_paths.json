@@ -46,7 +46,6 @@
     {
       "id": "HVAC_Main",
       "rooms": [
-        "Fantail",
         "Provision_Issue",
         "Gunnery_Offices",
         "Crew_Berth_Aft",
@@ -58,7 +57,7 @@
         "Windlass_Boatswain"
       ],
       "ach": 6.0,
-      "description": "main deck accommodation + mess",
+      "description": "main deck accommodation + mess. Fantail left this group under CONTAM-GROUPED-WEATHER-BATTLESHIP-01: their outdoor exchange is the open_deck ambient_openings record(s), which replace the group OA leg for those zones (no double-count).",
       "vent_mode": "mech_exhaust",
       "evidence": "sheet_read",
       "oa_fraction": 1.0
@@ -257,10 +256,21 @@
     {
       "from": "HVAC_Upper",
       "to": "HVAC_Main",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 45.0,
       "path": "ladder_well_2",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.5 m3/h after Fantail left HVAC_Main.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "HVAC_Upper",
+      "to": "Fantail",
+      "flow_rate_m3h": 5.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.5 m3/h after Fantail left HVAC_Main.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -268,10 +278,21 @@
     {
       "from": "HVAC_Main",
       "to": "HVAC_Second",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 45.0,
       "path": "ladder_well_3",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.3125 m3/h after Fantail left HVAC_Main.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Fantail",
+      "to": "HVAC_Second",
+      "flow_rate_m3h": 5.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.3125 m3/h after Fantail left HVAC_Main.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -323,22 +344,44 @@
     {
       "from": "HVAC_Main",
       "to": "AHU_HD_HD_Crew_Aft",
-      "flow_rate_m3h": 1426.8,
+      "flow_rate_m3h": 1284.12,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Aft; the head exhausts overboard, never back to the served space.",
+      "description": "Transfer air into HD_Crew_Aft; the head exhausts overboard, never back to the served space. CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 142.68 m3/h after Fantail left HVAC_Main.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Fantail",
+      "to": "AHU_HD_HD_Crew_Aft",
+      "flow_rate_m3h": 142.68,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_Aft; the head exhausts overboard, never back to the served space. CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 142.68 m3/h after Fantail left HVAC_Main.",
       "mechanism": "pressure_opening",
       "filtered": false
     },
     {
       "from": "HVAC_Main",
       "to": "AHU_HD_HD_Crew_Fwd",
-      "flow_rate_m3h": 951.2,
+      "flow_rate_m3h": 856.08,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Fwd; the head exhausts overboard, never back to the served space.",
+      "description": "Transfer air into HD_Crew_Fwd; the head exhausts overboard, never back to the served space. CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 95.12 m3/h after Fantail left HVAC_Main.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Fantail",
+      "to": "AHU_HD_HD_Crew_Fwd",
+      "flow_rate_m3h": 95.12,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_Fwd; the head exhausts overboard, never back to the served space. CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 95.12 m3/h after Fantail left HVAC_Main.",
       "mechanism": "pressure_opening",
       "filtered": false
     },
@@ -871,6 +914,17 @@
       "from": "FO_Cells_DB",
       "to": "FO_FW_DB_Fwd",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Fantail",
+      "type": "open_deck",
+      "area_m2": 96.281,
+      "exchange_m3h": 74166.9,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Fantail exchange with ambient (CONTAM-GROUPED-WEATHER-BATTLESHIP-01). Owner ruling 2026-11-17: the opening REPLACES the grouped HVAC zone's OA leg for this zone, so it is no longer a room of that HVAC group (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ]
 }
