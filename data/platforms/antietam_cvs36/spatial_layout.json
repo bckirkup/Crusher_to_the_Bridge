@@ -71,7 +71,8 @@
         "x": 108.84,
         "y": 15.17
       },
-      "description": "Open flight deck incl. angled deck extension and 3 elevator wells (deck-edge ~x0.58, centerline ~x0.80 + ~0.95)"
+      "description": "Open flight deck incl. angled deck extension and 3 elevator wells (deck-edge ~x0.58, centerline ~x0.80 + ~0.95)",
+      "exposure": "weather"
     },
     {
       "id": "Gallery_Deck",
@@ -86,7 +87,8 @@
         "x": 100.5,
         "y": 11.49
       },
-      "description": "Open catwalk band around hangar void (plan center marked OPEN)"
+      "description": "Open catwalk band around hangar void (plan center marked OPEN)",
+      "exposure": "weather"
     },
     {
       "id": "Squadron_Offices",
@@ -217,7 +219,8 @@
         "x": 100.5,
         "y": 5.23
       },
-      "description": "Foc'sle catwalk band over hangar; deck-edge elevator well at ~x0.60-0.78"
+      "description": "Foc'sle catwalk band over hangar; deck-edge elevator well at ~x0.60-0.78",
+      "exposure": "weather"
     },
     {
       "id": "Uptakes_Foc",

@@ -60,7 +60,8 @@
         "x": 204.45,
         "y": 15.35
       },
-      "description": "Open signal platforms + searchlight platforms"
+      "description": "Open signal platforms + searchlight platforms",
+      "exposure": "weather"
     },
     {
       "id": "Admiral_Country_02L",
@@ -207,7 +208,8 @@
         "x": 12.83,
         "y": 13.75
       },
-      "description": "Open fantail + 40mm tubs + turret-3 overhang"
+      "description": "Open fantail + 40mm tubs + turret-3 overhang",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Waist_Open",
@@ -222,7 +224,8 @@
         "x": 55.49,
         "y": 13.75
       },
-      "description": "Open waist boat stowage; turret-3 barbette face ~x.29"
+      "description": "Open waist boat stowage; turret-3 barbette face ~x.29",
+      "exposure": "weather"
     },
     {
       "id": "Accom_Aft_MD",
@@ -352,7 +355,8 @@
         "x": 224.99,
         "y": 13.75
       },
-      "description": "Breakwater, gun tubs, forecastle anchor gear, bow 20mm"
+      "description": "Breakwater, gun tubs, forecastle anchor gear, bow 20mm",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Crane_Mach",
@@ -737,7 +741,8 @@
         "x": 257.87,
         "y": 15.24
       },
-      "description": "Hawse pipes, sand locker A-201A, life jacket stowage"
+      "description": "Hawse pipes, sand locker A-201A, life jacket stowage",
+      "exposure": "weather"
     },
     {
       "id": "Magazines_Spl_Aft",

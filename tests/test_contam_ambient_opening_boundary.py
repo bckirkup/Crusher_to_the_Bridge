@@ -201,7 +201,9 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # weather-deck opening; CONTAM-AMBIENT-WEATHER-DESTROYER-01 adds two legs
     # per destroyer roster weather opening; CONTAM-AMBIENT-WEATHER-CARRIER-01
     # adds two legs on each ungrouped carrier flight deck (lexington_cv2,
-    # saratoga_cv3); CONTAM-AMBIENT-WEATHER-BATTLESHIP-01 adds two legs per
+    # saratoga_cv3); CONTAM-GROUPED-WEATHER-CARRIER-01 adds two legs per
+    # grouped carrier weather opening; CONTAM-AMBIENT-WEATHER-BATTLESHIP-01
+    # adds two legs per
     # ungrouped battleship weather opening;
     # CONTAM-AMBIENT-WEATHER-CRUISER-01 adds two legs on each
     # zero-outdoor-exchange AHU_Weather room of alexander_henry_cgs119;
@@ -214,10 +216,14 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # adds the two legs of the olympia_c6 forecastle make-up intake;
     # CONTAM-GROUPED-WEATHER-MIDWAY-01 adds the two legs of the midway_cv41
     # Flight_Deck opening (first grouped weather zone);
-    # CONTAM-GROUPED-WEATHER-AUXILIARY-01 adds two legs per grouped auxiliary
-    # weather opening on the six auxiliary hulls with committed bundles
-    # (legend_class_nsc has no committed bundle). No other committed bundle
-    # carries an opening.
+    # CONTAM-GROUPED-WEATHER-CRUISER-01 adds two legs per opening on
+    # astoria_ca34, chicago_cg11 and miami_cl89,
+    # CONTAM-GROUPED-WEATHER-BATTLESHIP-01 adds two legs per battleship
+    # grouped-weather opening, CONTAM-GROUPED-WEATHER-MISC-01 adds two
+    # legs per misc grouped weather opening, and CONTAM-GROUPED-WEATHER-AUXILIARY-01
+    # adds two legs per grouped auxiliary weather opening on the six
+    # auxiliary hulls with committed bundles (legend_class_nsc has no
+    # committed bundle). No other committed bundle carries an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -236,16 +242,25 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "keppler_dd765": 14, "nields_dd616": 10, "palmer_dms5": 2,
         "sigsbee_dd502": 8,
         "lexington_cv2": 2, "saratoga_cv3": 2,
+        "antietam_cvs36": 6, "battler_acv6": 4,
+        "independence_cvl26": 8, "puncher_cve53": 2,
+        "ranger_cv4": 4, "saratoga_cv60": 2, "thetis_bay_cve90": 2,
+        "wasp_cv7": 2, "wright_cc2": 6, "yorktown_cv5": 2,
         "new_york_bb34": 12, "south_dakota_bb49": 8, "texas_bb35": 10,
         "west_virginia_bb48": 10, "alexander_henry_cgs119": 8,
+        "astoria_ca34": 10, "chicago_cg11": 16, "miami_cl89": 4,
+        "idaho_bb42": 2, "missouri_bb63": 10,
+        "new_jersey_bb62": 10, "wisconsin_bb64": 10,
         "lsm_354": 8, "middlesex_lst983": 14, "ruchamkin_apd89": 8,
         "aeolus_arc3": 6, "apl_24": 8,
         "bolster_ars38": 8, "cobalt_k124": 6, "gordon_gunter_r338": 8,
         "liberty_cargo_ec2": 12, "lyon_ap71": 22, "passumpsic_ao106": 8,
         "savannah_ns": 28,
-        "castle_class_corvette": 4, "eagle_pe60": 14,
-        "pce_874": 4, "raven_am55": 6, "river_class_frigate": 4,
-        "rolla_pc483": 4, "olympia_c6": 22,
+        "castle_class_corvette": 4 + 2, "erie_pg50": 10,
+        "esteem_mso438": 10, "eagle_pe60": 14,
+        "fort_william_j311": 6, "montana_acr13": 4, "pce_874": 4,
+        "pt_564": 4, "raven_am55": 6, "river_class_frigate": 4 + 2,
+        "rolla_pc483": 4, "winnipeg_j337": 6, "olympia_c6": 22,
         "midway_cv41": 2,
         "assistance_ar17": 8, "gosper_apa170": 12, "jupiter_ac3": 4,
         "luzon_arg2": 8, "mercury_aks20": 4, "squier_ap130": 2,

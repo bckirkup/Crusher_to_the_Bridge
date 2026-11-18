@@ -16,28 +16,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Focsle_Deck",
-      "to": "Stores_Fwd",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "Stern_Gun_Deck",
-      "to": "Aft_Loading_House",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Engine_Rm_Aft",
       "to": "Engine_Casing_Aft_1P",
       "type": "trunk",

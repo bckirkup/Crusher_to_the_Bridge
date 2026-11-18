@@ -1,6 +1,6 @@
 {
   "platform": "river_class_frigate",
-  "description": "River-class frigate GA (NCH 7077/7078, 1941): twin screw, 301ft oa convoy escort — Hedgehog, DC racks/throwers, twin oerlikons. Zones read from maritime.org river.pdf (2 sheets).",
+  "description": "River-class frigate GA (NCH 7077/7078, 1941): twin screw, 301ft oa convoy escort \u2014 Hedgehog, DC racks/throwers, twin oerlikons. Zones read from maritime.org river.pdf (2 sheets).",
   "isolation_unit_capacity": 1,
   "deck_dimensions": {
     "length_m": 91.8,
@@ -23,7 +23,8 @@
         "x": 46.92,
         "y": 4.6
       },
-      "description": "signal deck: signal shelter, flag deck, S.B.P., B.L. offices"
+      "description": "signal deck: signal shelter, flag deck, S.B.P., B.L. offices",
+      "exposure": "weather"
     },
     {
       "id": "Bridge_House",

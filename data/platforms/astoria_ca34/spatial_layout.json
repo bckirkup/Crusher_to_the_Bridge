@@ -129,7 +129,8 @@
         "x": 21.75,
         "y": 9.03
       },
-      "description": "open 01-level deck aft, vent trunks + passages"
+      "description": "open 01-level deck aft, vent trunks + passages",
+      "exposure": "weather"
     },
     {
       "id": "HD_Crew_Upper",
@@ -165,7 +166,8 @@
         "x": 57.11,
         "y": 8.36
       },
-      "description": "boat stowage deck amidships (motor launches/whaleboats on davits); kerosene + gasoline stowage"
+      "description": "boat stowage deck amidships (motor launches/whaleboats on davits); kerosene + gasoline stowage",
+      "exposure": "weather"
     },
     {
       "id": "Gun_Gallery_01",
@@ -240,7 +242,8 @@
         "x": 164.81,
         "y": 8.78
       },
-      "description": "open forecastle: anchor windlass, chain pipes, hawse"
+      "description": "open forecastle: anchor windlass, chain pipes, hawse",
+      "exposure": "weather"
     },
     {
       "id": "Fantail",
@@ -255,7 +258,8 @@
         "x": 7.38,
         "y": 8.94
       },
-      "description": "open fantail: motor whaleboat, crane, DC teak deck"
+      "description": "open fantail: motor whaleboat, crane, DC teak deck",
+      "exposure": "weather"
     },
     {
       "id": "Catapult_Deck",
@@ -270,7 +274,8 @@
         "x": 30.64,
         "y": 8.71
       },
-      "description": "aircraft handling deck aft: catapults, spare anchor, gasoline stowage, boat stowage"
+      "description": "aircraft handling deck aft: catapults, spare anchor, gasoline stowage, boat stowage",
+      "exposure": "weather"
     },
     {
       "id": "Hangar",

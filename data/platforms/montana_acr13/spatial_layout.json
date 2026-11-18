@@ -104,7 +104,8 @@
         "y": 8.88
       },
       "max_occupancy": 30,
-      "description": "fantail open weather deck, stern"
+      "description": "fantail open weather deck, stern",
+      "exposure": "weather"
     },
     {
       "id": "MD_Ordnance_Chests",
@@ -480,7 +481,8 @@
         "y": 8.29
       },
       "max_occupancy": 40,
-      "description": "forecastle open deck: hawse pipes, capstans, kedge anchor"
+      "description": "forecastle open deck: hawse pipes, capstans, kedge anchor",
+      "exposure": "weather"
     },
     {
       "id": "GD_Captains_Quarters",
@@ -1538,7 +1540,7 @@
         "x": 139.23,
         "y": 17.14
       },
-      "description": "lamp room — overlaps sick bay bath edge, small"
+      "description": "lamp room \u2014 overlaps sick bay bath edge, small"
     },
     {
       "id": "BD_Paint_Room",

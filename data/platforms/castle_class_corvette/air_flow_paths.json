@@ -14,12 +14,11 @@
         "Seamen_Mess",
         "Sick_Bay",
         "Stokers_Mess",
-        "Upper_Deck_Aft",
         "Compass_Bridge",
         "Bridge_House"
       ],
       "ach": 5.0,
-      "description": "minimal mechanical ventilation, mostly natural",
+      "description": "minimal mechanical ventilation, mostly natural Upper_Deck_Aft left this group under CONTAM-GROUPED-WEATHER-MISC-01: each outdoor exchange is an open_deck ambient_openings record, which replaces the group OA leg for those zones (no double-count).",
       "oa_fraction": 0.3,
       "vent_mode": "nat_supply",
       "evidence": "sheet_read"
@@ -64,10 +63,21 @@
     {
       "from": "HVAC_Accom",
       "to": "VENT_Machinery",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 45.0,
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-MISC-01: split from HVAC_Accom->VENT_Machinery to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Upper_Deck_Aft",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 5.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-MISC-01: split from HVAC_Accom->VENT_Machinery to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -205,6 +215,15 @@
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-MISC-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3; the owner accepted this Grade C deck-face area rule and the resulting large solved rates as declared assumptions on 2026-11-16. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the fleet default from ahead, CONTAM-DEFAULT-WEATHER-01), Grade C ASSUMED-RELATIVE-WIND, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Upper_Deck_Aft",
+      "type": "open_deck",
+      "area_m2": 68.929,
+      "exchange_m3h": 45692.8,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open deck exchange with ambient (CONTAM-GROUPED-WEATHER-MISC-01). Owner ruling 2026-11-17: the opening REPLACES the HVAC_Accom group OA leg for this zone, so Upper_Deck_Aft is no longer a HVAC_Accom room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ]
 }

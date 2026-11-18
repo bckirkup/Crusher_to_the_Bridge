@@ -132,14 +132,32 @@ _WEATHER_ZONES = {
     },
     "palmer_dms5": {"Boat_Deck_Uptakes"},
     "sigsbee_dd502": {"Midship_Deckhouse", "Mt2_Deck", "Fantail", "Focsle_Deck"},
-    # CONTAM-AMBIENT-WEATHER-CARRIER-01: the two carrier flight decks with no
-    # HVAC group (the other carrier weather zones are VENT_Weather/VENT_Hangar
-    # grouped and stay on their declared ventilation groups).
+    # CONTAM-AMBIENT-WEATHER-CARRIER-01: carrier flight decks with no HVAC
+    # group.
+    # CONTAM-GROUPED-WEATHER-CARRIER-01: grouped carrier weather zones whose
+    # open_deck opening replaces the HVAC group OA leg; remaining group
+    # members stay grouped and carry no opening.
     "lexington_cv2": {"Flight_Deck"},
     "saratoga_cv3": {"Flight_Deck"},
+    "antietam_cvs36": {
+        "Gallery_Deck", "Flight_Deck", "Forecastle_Deck",
+    },
+    "battler_acv6": {"Walkways_Focsle", "Flight_Deck"},
+    "independence_cvl26": {
+        "Gallery_Deck", "Flight_Deck", "Poop_Deck", "Forecastle_Deck",
+    },
+    "puncher_cve53": {"Flight_Deck"},
+    "ranger_cv4": {"Flight_Deck", "Poop_Deck"},
+    "saratoga_cv60": {"Flight_Deck"},
+    "thetis_bay_cve90": {"Flight_Deck"},
+    "wasp_cv7": {"Flight_Deck"},
+    "wright_cc2": {
+        "Flight_Deck_Aft", "Flight_Deck_Mid", "Flight_Deck_Fwd",
+    },
+    "yorktown_cv5": {"Flight_Deck"},
     # CONTAM-AMBIENT-WEATHER-BATTLESHIP-01: ungrouped battleship weather zones;
-    # HVAC-grouped VENT_Weather hulls stay untouched as the known grouped-zone
-    # open item.
+    # the four all-grouped VENT_Weather/HVAC_Main hulls were the stage-4 open
+    # item and are owned by CONTAM-GROUPED-WEATHER-BATTLESHIP-01 below.
     "new_york_bb34": {
         "Fantail_Weather", "Weather_Deck_Aft", "Catapult_Mid", "Focsle_Deck",
         "Super_Deck_Open", "AA_Control_Top",
@@ -154,12 +172,22 @@ _WEATHER_ZONES = {
         "Fantail",
     },
     # CONTAM-AMBIENT-WEATHER-CRUISER-01: the four zero-outdoor-exchange
-    # AHU_Weather rooms on the only cruiser roster hull in that state; the
-    # other cruiser roster hulls keep grouped VENT_Weather ventilation.
+    # AHU_Weather rooms on the only cruiser roster hull in that state.
     "alexander_henry_cgs119": {
         "Wheelhouse_Top", "Bridge_Wings", "Boat_Stowage_Open",
         "Forecastle_Working",
     },
+    # CONTAM-GROUPED-WEATHER-CRUISER-01: grouped VENT_Weather weather zones on
+    # the three OA>0 cruiser roster hulls; each opening replaces the group OA
+    # leg for its zone.
+    "astoria_ca34": {
+        "Fantail", "Catapult_Deck", "Boat_Deck", "Focsle_Deck", "Upper_Deck_Aft",
+    },
+    "chicago_cg11": {
+        "Fantail_Weather", "Helo_Deck", "Helo_Deck_02_Aft", "Forecastle_Deck",
+        "Bow_Weather", "Terrier_Deck_02", "Launcher_Deck_01", "Open_03",
+    },
+    "miami_cl89": {"Catapult_Deck", "Bow_Weather"},
     # CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01: ungrouped amphibious weather zones;
     # HVAC-grouped amphibious weather zones stay untouched as the known
     # grouped-zone open item.
@@ -207,19 +235,30 @@ _WEATHER_ZONES = {
         "Swimming_Pool", "Top_Of_House", "Weather_Deck_Port_A",
         "Weather_Deck_Stbd_A",
     },
-    # CONTAM-AMBIENT-WEATHER-MISC-01: the remaining ungrouped/zero-exchange
-    # weather zones. Eagle's ungrouped gun/AA platforms and open navigating
-    # bridge are lexical misses declared as weather; grouped OA-exchange
-    # weather zones stay untouched as the known grouped-zone open item.
-    "castle_class_corvette": {"Foc_Deck_Open", "Quarterdeck"},
+    # CONTAM-AMBIENT-WEATHER-MISC-01 and CONTAM-GROUPED-WEATHER-MISC-01: the
+    # ungrouped/zero-exchange weather zones plus the grouped weather zones whose
+    # openings now replace the group OA leg.
+    "castle_class_corvette": {"Foc_Deck_Open", "Quarterdeck", "Upper_Deck_Aft"},
+    "erie_pg50": {
+        "Sup_Deck_Open", "Fantail_Aft", "Gun_Deck_Aft", "Focsle_Main",
+        "Focsle_Stores",
+    },
+    "esteem_mso438": {
+        "Sweep_Deck", "Reel_Deck", "Boat_Deck_Aft", "Focsle_01",
+        "Deck_House_Main",
+    },
     "eagle_pe60": {
         "Open_Bridge", "Nav_Bridge", "Gun_Platform_Fwd", "After_Gun_Platform",
         "AA_Gun_Platforms", "Fantail", "Gun_Deck_Fwd",
     },
+    "fort_william_j311": {"Signal_Deck", "Quarterdeck", "Foc_Deck_Open"},
+    "montana_acr13": {"MD_Aft_Open", "MD_Forecastle_Open"},
     "pce_874": {"Fantail", "Focsle_Deck"},
+    "pt_564": {"Torpedo_Deck", "Foredeck"},
     "raven_am55": {"Foc_Deck_Fwd", "Foc_Deck_Open", "Sweep_Deck"},
-    "river_class_frigate": {"Quarterdeck", "Foc_Deck_Open"},
+    "river_class_frigate": {"Quarterdeck", "Foc_Deck_Open", "Signal_Deck"},
     "rolla_pc483": {"Fantail", "Focsle_Deck"},
+    "winnipeg_j337": {"Signal_Deck", "Quarterdeck", "Foc_Deck_Open"},
     # CONTAM-AMBIENT-WEATHER-OLYMPIA-01: final stage-4 holdout; ungrouped
     # zero-outdoor-exchange weather and boat-stowage open zones.
     "olympia_c6": {
@@ -251,6 +290,22 @@ _WEATHER_ZONES = {
     },
     "mercury_aks20": {"Fantail", "Foredeck"},
     "squier_ap130": {"Stern_Deck_Up"},
+    # CONTAM-GROUPED-WEATHER-BATTLESHIP-01: G4 battleship class. Each opening
+    # replaces the OA leg of the HVAC group the zone left; Catwalk_02L stays in
+    # VENT_Weather on the Iowa-class hulls and carries no opening.
+    "idaho_bb42": {"Fantail"},
+    "missouri_bb63": {
+        "Signal_Deck", "Fantail_Open", "Boat_Waist_Open", "Forecastle_Open",
+        "Focsle_Void_2D",
+    },
+    "new_jersey_bb62": {
+        "Signal_Deck", "Fantail_Open", "Boat_Waist_Open", "Forecastle_Open",
+        "Focsle_Void_2D",
+    },
+    "wisconsin_bb64": {
+        "Signal_Deck", "Fantail_Open", "Boat_Waist_Open", "Forecastle_Open",
+        "Focsle_Void_2D",
+    },
 }
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
 # CONTAM-AMBIENT-WEATHER-CARRIER-01, CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01,
