@@ -156,8 +156,8 @@ _WEATHER_ZONES = {
     },
     "yorktown_cv5": {"Flight_Deck"},
     # CONTAM-AMBIENT-WEATHER-BATTLESHIP-01: ungrouped battleship weather zones;
-    # HVAC-grouped VENT_Weather hulls stay untouched as the known grouped-zone
-    # open item.
+    # the four all-grouped VENT_Weather/HVAC_Main hulls were the stage-4 open
+    # item and are owned by CONTAM-GROUPED-WEATHER-BATTLESHIP-01 below.
     "new_york_bb34": {
         "Fantail_Weather", "Weather_Deck_Aft", "Catapult_Mid", "Focsle_Deck",
         "Super_Deck_Open", "AA_Control_Top",
@@ -273,6 +273,22 @@ _WEATHER_ZONES = {
     # opening replaces the VENT_Weather OA leg for Flight_Deck, which left the
     # group; Island_Upper stays grouped and carries no opening.
     "midway_cv41": {"Flight_Deck"},
+    # CONTAM-GROUPED-WEATHER-BATTLESHIP-01: G4 battleship class. Each opening
+    # replaces the OA leg of the HVAC group the zone left; Catwalk_02L stays in
+    # VENT_Weather on the Iowa-class hulls and carries no opening.
+    "idaho_bb42": {"Fantail"},
+    "missouri_bb63": {
+        "Signal_Deck", "Fantail_Open", "Boat_Waist_Open", "Forecastle_Open",
+        "Focsle_Void_2D",
+    },
+    "new_jersey_bb62": {
+        "Signal_Deck", "Fantail_Open", "Boat_Waist_Open", "Forecastle_Open",
+        "Focsle_Void_2D",
+    },
+    "wisconsin_bb64": {
+        "Signal_Deck", "Fantail_Open", "Boat_Waist_Open", "Forecastle_Open",
+        "Focsle_Void_2D",
+    },
 }
 # CONTAM-EXPOSURE-TAGGING-01, CONTAM-AMBIENT-WEATHER-DESTROYER-01,
 # CONTAM-AMBIENT-WEATHER-CARRIER-01, CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01,

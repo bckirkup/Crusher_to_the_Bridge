@@ -1494,37 +1494,37 @@
           "volume_m3": 178.18
         },
         {
-          "adjacency_degree": 0,
+          "adjacency_degree": 1,
           "category": "remote_weak",
           "hvac_duty": 0.5,
-          "hvac_group_id": "VENT_Weather",
-          "id": "Catwalk_02L",
+          "hvac_group_id": "",
+          "id": "Focsle_Void_2D",
           "occupancy": 0.0,
-          "served": true,
+          "served": false,
           "type": "Free",
-          "volume_m3": 351.08
+          "volume_m3": 313.24
         },
         {
-          "adjacency_degree": 0,
+          "adjacency_degree": 1,
           "category": "remote_weak",
           "hvac_duty": 0.5,
-          "hvac_group_id": "VENT_Tanks_Voids",
-          "id": "Fuel_Tanks_3D_Stbd",
+          "hvac_group_id": "",
+          "id": "Signal_Deck",
           "occupancy": 0.0,
-          "served": true,
+          "served": false,
           "type": "Free",
-          "volume_m3": 448.87
+          "volume_m3": 399.28
         },
         {
-          "adjacency_degree": 0,
+          "adjacency_degree": 1,
           "category": "remote_weak",
           "hvac_duty": 0.5,
-          "hvac_group_id": "VENT_Tanks_Voids",
-          "id": "Tankage_3B",
+          "hvac_group_id": "",
+          "id": "Fantail_Open",
           "occupancy": 0.0,
-          "served": true,
+          "served": false,
           "type": "Free",
-          "volume_m3": 14439.87
+          "volume_m3": 2456.15
         }
       ],
       "zone_count": 103

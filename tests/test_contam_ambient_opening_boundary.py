@@ -216,9 +216,11 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # adds the two legs of the olympia_c6 forecastle make-up intake;
     # CONTAM-GROUPED-WEATHER-MIDWAY-01 adds the two legs of the midway_cv41
     # Flight_Deck opening (first grouped weather zone);
-    # CONTAM-GROUPED-WEATHER-MISC-01 adds two legs per misc grouped weather
-    # opening; CONTAM-GROUPED-WEATHER-CRUISER-01 adds two legs per opening on
-    # astoria_ca34, chicago_cg11 and miami_cl89;
+    # CONTAM-GROUPED-WEATHER-CRUISER-01 adds two legs per opening on
+    # astoria_ca34, chicago_cg11 and miami_cl89,
+    # CONTAM-GROUPED-WEATHER-BATTLESHIP-01 adds two legs per battleship
+    # grouped-weather opening, CONTAM-GROUPED-WEATHER-MISC-01 adds two
+    # legs per misc grouped weather opening, and
     # CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 adds six legs on fort_mandan_lsd21
     # and four legs on middlesex_lst983 (san_antonio_class_lpd has no committed
     # bundle). No other committed bundle carries an opening.
@@ -247,6 +249,8 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "new_york_bb34": 12, "south_dakota_bb49": 8, "texas_bb35": 10,
         "west_virginia_bb48": 10, "alexander_henry_cgs119": 8,
         "astoria_ca34": 10, "chicago_cg11": 16, "miami_cl89": 4,
+        "idaho_bb42": 2, "missouri_bb63": 10,
+        "new_jersey_bb62": 10, "wisconsin_bb64": 10,
         "lsm_354": 8, "middlesex_lst983": 18, "fort_mandan_lsd21": 6,
         "ruchamkin_apd89": 8,
         "aeolus_arc3": 6, "apl_24": 8,
