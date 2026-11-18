@@ -1,6 +1,6 @@
 {
   "platform": "pt_564",
-  "description": "PT-564 motor torpedo boat, Higgins Industries 1943 booklet (maritime.org ptboat.pdf). 70'8\" LOA, ~14 crew. Booklet mixes PT-564 sheets with PT-5/PT-6 76' MTB sheets — only pages 1-2 (PT-564 outboard/inboard + arrangement) are imported. MARGINAL: smallest feasible hull in the fleet.",
+  "description": "PT-564 motor torpedo boat, Higgins Industries 1943 booklet (maritime.org ptboat.pdf). 70'8\" LOA, ~14 crew. Booklet mixes PT-564 sheets with PT-5/PT-6 76' MTB sheets \u2014 only pages 1-2 (PT-564 outboard/inboard + arrangement) are imported. MARGINAL: smallest feasible hull in the fleet.",
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 21.54,
@@ -38,7 +38,8 @@
         "x": 5.74,
         "y": 2.76
       },
-      "description": "open deck with 4x22.5in torpedo tubes P&S, engine room hatch, deck lights"
+      "description": "open deck with 4x22.5in torpedo tubes P&S, engine room hatch, deck lights",
+      "exposure": "weather"
     },
     {
       "id": "Cockpit",
@@ -83,7 +84,8 @@
         "x": 18.58,
         "y": 3.08
       },
-      "description": "foredeck: anchor, jack staff, bow light, mooring cleats"
+      "description": "foredeck: anchor, jack staff, bow light, mooring cleats",
+      "exposure": "weather"
     },
     {
       "id": "Lazaret",
@@ -194,7 +196,7 @@
         "Crews_Quarters",
         "Ward_Room"
       ],
-      "description": "crew's lavatory: sink + W.C. — the only sanitary space aboard",
+      "description": "crew's lavatory: sink + W.C. \u2014 the only sanitary space aboard",
       "base_ach": 19.1,
       "max_occupancy": 1
     },

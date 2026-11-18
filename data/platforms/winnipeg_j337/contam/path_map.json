@@ -604,8 +604,8 @@
   },
   {
     "path_nr": 68,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Quarterdeck",
+    "from_zone": "Bridge_House",
+    "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -613,8 +613,8 @@
   },
   {
     "path_nr": 69,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "Bridge_House",
+    "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -622,8 +622,8 @@
   },
   {
     "path_nr": 70,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "Bridge_House",
+    "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -631,8 +631,8 @@
   },
   {
     "path_nr": 71,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "Bridge_House",
+    "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -640,8 +640,8 @@
   },
   {
     "path_nr": 72,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "Bridge_House",
+    "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -649,8 +649,8 @@
   },
   {
     "path_nr": 73,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Steering_Gear",
+    "from_zone": "Bridge_House",
+    "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -658,8 +658,8 @@
   },
   {
     "path_nr": 74,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Generator_Store",
+    "from_zone": "Bridge_House",
+    "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -667,8 +667,8 @@
   },
   {
     "path_nr": 75,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Engine_Room",
+    "from_zone": "Bridge_House",
+    "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -676,8 +676,8 @@
   },
   {
     "path_nr": 76,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Boiler_Rooms",
+    "from_zone": "Bridge_House",
+    "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -685,8 +685,8 @@
   },
   {
     "path_nr": 77,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Fwd_Stores",
+    "from_zone": "Bridge_House",
+    "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -694,8 +694,8 @@
   },
   {
     "path_nr": 78,
-    "from_zone": "Signal_Deck",
-    "to_zone": "After_Peak",
+    "from_zone": "Bridge_House",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -703,8 +703,8 @@
   },
   {
     "path_nr": 79,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Magazines_Fwd",
+    "from_zone": "Bridge_House",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -712,8 +712,8 @@
   },
   {
     "path_nr": 80,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Asdic_Fwd",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -721,8 +721,8 @@
   },
   {
     "path_nr": 81,
-    "from_zone": "Signal_Deck",
-    "to_zone": "Chain_Locker",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -730,8 +730,8 @@
   },
   {
     "path_nr": 82,
-    "from_zone": "Bridge_House",
-    "to_zone": "Quarterdeck",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -739,8 +739,8 @@
   },
   {
     "path_nr": 83,
-    "from_zone": "Bridge_House",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -748,8 +748,8 @@
   },
   {
     "path_nr": 84,
-    "from_zone": "Bridge_House",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -757,8 +757,8 @@
   },
   {
     "path_nr": 85,
-    "from_zone": "Bridge_House",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -766,8 +766,8 @@
   },
   {
     "path_nr": 86,
-    "from_zone": "Bridge_House",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -775,8 +775,8 @@
   },
   {
     "path_nr": 87,
-    "from_zone": "Bridge_House",
-    "to_zone": "Steering_Gear",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -784,8 +784,8 @@
   },
   {
     "path_nr": 88,
-    "from_zone": "Bridge_House",
-    "to_zone": "Generator_Store",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -793,8 +793,8 @@
   },
   {
     "path_nr": 89,
-    "from_zone": "Bridge_House",
-    "to_zone": "Engine_Room",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -802,8 +802,8 @@
   },
   {
     "path_nr": 90,
-    "from_zone": "Bridge_House",
-    "to_zone": "Boiler_Rooms",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -811,8 +811,8 @@
   },
   {
     "path_nr": 91,
-    "from_zone": "Bridge_House",
-    "to_zone": "Fwd_Stores",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -820,8 +820,8 @@
   },
   {
     "path_nr": 92,
-    "from_zone": "Bridge_House",
-    "to_zone": "After_Peak",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -829,8 +829,8 @@
   },
   {
     "path_nr": 93,
-    "from_zone": "Bridge_House",
-    "to_zone": "Magazines_Fwd",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -838,8 +838,8 @@
   },
   {
     "path_nr": 94,
-    "from_zone": "Bridge_House",
-    "to_zone": "Asdic_Fwd",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -847,8 +847,8 @@
   },
   {
     "path_nr": 95,
-    "from_zone": "Bridge_House",
-    "to_zone": "Chain_Locker",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -856,8 +856,8 @@
   },
   {
     "path_nr": 96,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Quarterdeck",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -865,8 +865,8 @@
   },
   {
     "path_nr": 97,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -874,8 +874,8 @@
   },
   {
     "path_nr": 98,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -883,8 +883,8 @@
   },
   {
     "path_nr": 99,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -892,8 +892,8 @@
   },
   {
     "path_nr": 100,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "ERA_Flat",
+    "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -901,8 +901,8 @@
   },
   {
     "path_nr": 101,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Steering_Gear",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -910,8 +910,8 @@
   },
   {
     "path_nr": 102,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Generator_Store",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -919,8 +919,8 @@
   },
   {
     "path_nr": 103,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Engine_Room",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -928,8 +928,8 @@
   },
   {
     "path_nr": 104,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Boiler_Rooms",
+    "from_zone": "MS_Mess",
+    "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -937,8 +937,8 @@
   },
   {
     "path_nr": 105,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Fwd_Stores",
+    "from_zone": "MS_Mess",
+    "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -946,8 +946,8 @@
   },
   {
     "path_nr": 106,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "After_Peak",
+    "from_zone": "MS_Mess",
+    "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -955,8 +955,8 @@
   },
   {
     "path_nr": 107,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Magazines_Fwd",
+    "from_zone": "MS_Mess",
+    "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -964,8 +964,8 @@
   },
   {
     "path_nr": 108,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Asdic_Fwd",
+    "from_zone": "MS_Mess",
+    "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -973,8 +973,8 @@
   },
   {
     "path_nr": 109,
-    "from_zone": "Foc_Superstructure",
-    "to_zone": "Chain_Locker",
+    "from_zone": "MS_Mess",
+    "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -982,8 +982,8 @@
   },
   {
     "path_nr": 110,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Quarterdeck",
+    "from_zone": "MS_Mess",
+    "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -991,8 +991,8 @@
   },
   {
     "path_nr": 111,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "MS_Mess",
+    "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1000,8 +1000,8 @@
   },
   {
     "path_nr": 112,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "MS_Mess",
+    "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1009,8 +1009,8 @@
   },
   {
     "path_nr": 113,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "MS_Mess",
+    "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1018,8 +1018,8 @@
   },
   {
     "path_nr": 114,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "MS_Mess",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1027,8 +1027,8 @@
   },
   {
     "path_nr": 115,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Steering_Gear",
+    "from_zone": "MS_Mess",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1036,97 +1036,7 @@
   },
   {
     "path_nr": 116,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Generator_Store",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 117,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Engine_Room",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 118,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Boiler_Rooms",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 119,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Fwd_Stores",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 120,
-    "from_zone": "ERA_Flat",
-    "to_zone": "After_Peak",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 121,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Magazines_Fwd",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 122,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Asdic_Fwd",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 123,
-    "from_zone": "ERA_Flat",
-    "to_zone": "Chain_Locker",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 124,
-    "from_zone": "MS_Mess",
-    "to_zone": "Quarterdeck",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 125,
-    "from_zone": "MS_Mess",
-    "to_zone": "Foc_Deck_Open",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 126,
-    "from_zone": "MS_Mess",
+    "from_zone": "Galley_Flat",
     "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1134,8 +1044,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 127,
-    "from_zone": "MS_Mess",
+    "path_nr": 117,
+    "from_zone": "Galley_Flat",
     "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1143,8 +1053,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 128,
-    "from_zone": "MS_Mess",
+    "path_nr": 118,
+    "from_zone": "Galley_Flat",
     "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1152,8 +1062,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 129,
-    "from_zone": "MS_Mess",
+    "path_nr": 119,
+    "from_zone": "Galley_Flat",
     "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1161,8 +1071,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 130,
-    "from_zone": "MS_Mess",
+    "path_nr": 120,
+    "from_zone": "Galley_Flat",
     "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1170,8 +1080,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 131,
-    "from_zone": "MS_Mess",
+    "path_nr": 121,
+    "from_zone": "Galley_Flat",
     "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1179,8 +1089,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 132,
-    "from_zone": "MS_Mess",
+    "path_nr": 122,
+    "from_zone": "Galley_Flat",
     "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1188,8 +1098,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 133,
-    "from_zone": "MS_Mess",
+    "path_nr": 123,
+    "from_zone": "Galley_Flat",
     "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1197,8 +1107,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 134,
-    "from_zone": "MS_Mess",
+    "path_nr": 124,
+    "from_zone": "Galley_Flat",
     "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1206,8 +1116,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 135,
-    "from_zone": "MS_Mess",
+    "path_nr": 125,
+    "from_zone": "Galley_Flat",
     "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1215,8 +1125,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 136,
-    "from_zone": "MS_Mess",
+    "path_nr": 126,
+    "from_zone": "Galley_Flat",
     "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1224,8 +1134,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 137,
-    "from_zone": "MS_Mess",
+    "path_nr": 127,
+    "from_zone": "Galley_Flat",
     "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1233,9 +1143,99 @@
     "ahs_nr": 0
   },
   {
+    "path_nr": 128,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Quarterdeck_Flat",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 129,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Machinery_Casing",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 130,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Magazine_Lobby_Up",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 131,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Steering_Gear",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 132,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Generator_Store",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 133,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Engine_Room",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 134,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Boiler_Rooms",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 135,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Fwd_Stores",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 136,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "After_Peak",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 137,
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Magazines_Fwd",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
     "path_nr": 138,
-    "from_zone": "Galley_Flat",
-    "to_zone": "Quarterdeck",
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1243,8 +1243,8 @@
   },
   {
     "path_nr": 139,
-    "from_zone": "Galley_Flat",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1252,7 +1252,7 @@
   },
   {
     "path_nr": 140,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1261,7 +1261,7 @@
   },
   {
     "path_nr": 141,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1270,7 +1270,7 @@
   },
   {
     "path_nr": 142,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1279,7 +1279,7 @@
   },
   {
     "path_nr": 143,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1288,7 +1288,7 @@
   },
   {
     "path_nr": 144,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1297,7 +1297,7 @@
   },
   {
     "path_nr": 145,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1306,7 +1306,7 @@
   },
   {
     "path_nr": 146,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1315,7 +1315,7 @@
   },
   {
     "path_nr": 147,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1324,7 +1324,7 @@
   },
   {
     "path_nr": 148,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1333,7 +1333,7 @@
   },
   {
     "path_nr": 149,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1342,7 +1342,7 @@
   },
   {
     "path_nr": 150,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1351,7 +1351,7 @@
   },
   {
     "path_nr": 151,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1360,8 +1360,8 @@
   },
   {
     "path_nr": 152,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Quarterdeck",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1369,8 +1369,8 @@
   },
   {
     "path_nr": 153,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1378,8 +1378,8 @@
   },
   {
     "path_nr": 154,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1387,8 +1387,8 @@
   },
   {
     "path_nr": 155,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1396,8 +1396,8 @@
   },
   {
     "path_nr": 156,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1405,8 +1405,8 @@
   },
   {
     "path_nr": 157,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Steering_Gear",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1414,8 +1414,8 @@
   },
   {
     "path_nr": 158,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Generator_Store",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1423,8 +1423,8 @@
   },
   {
     "path_nr": 159,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Engine_Room",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1432,8 +1432,8 @@
   },
   {
     "path_nr": 160,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Boiler_Rooms",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1441,8 +1441,8 @@
   },
   {
     "path_nr": 161,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Fwd_Stores",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1450,8 +1450,8 @@
   },
   {
     "path_nr": 162,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "After_Peak",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1459,8 +1459,8 @@
   },
   {
     "path_nr": 163,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Magazines_Fwd",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1468,8 +1468,8 @@
   },
   {
     "path_nr": 164,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Asdic_Fwd",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1477,8 +1477,8 @@
   },
   {
     "path_nr": 165,
-    "from_zone": "Wardroom_Flat",
-    "to_zone": "Chain_Locker",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1486,8 +1486,8 @@
   },
   {
     "path_nr": 166,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Quarterdeck",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1495,8 +1495,8 @@
   },
   {
     "path_nr": 167,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1504,8 +1504,8 @@
   },
   {
     "path_nr": 168,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1513,8 +1513,8 @@
   },
   {
     "path_nr": 169,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1522,8 +1522,8 @@
   },
   {
     "path_nr": 170,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1531,8 +1531,8 @@
   },
   {
     "path_nr": 171,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Steering_Gear",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1540,8 +1540,8 @@
   },
   {
     "path_nr": 172,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Generator_Store",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1549,8 +1549,8 @@
   },
   {
     "path_nr": 173,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Engine_Room",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1558,8 +1558,8 @@
   },
   {
     "path_nr": 174,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Boiler_Rooms",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1567,8 +1567,8 @@
   },
   {
     "path_nr": 175,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Fwd_Stores",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1576,8 +1576,8 @@
   },
   {
     "path_nr": 176,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "After_Peak",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1585,8 +1585,8 @@
   },
   {
     "path_nr": 177,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Magazines_Fwd",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1594,8 +1594,8 @@
   },
   {
     "path_nr": 178,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Asdic_Fwd",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1603,8 +1603,8 @@
   },
   {
     "path_nr": 179,
-    "from_zone": "Signal_Stwd_Mess",
-    "to_zone": "Chain_Locker",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1612,8 +1612,8 @@
   },
   {
     "path_nr": 180,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Quarterdeck",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1621,8 +1621,8 @@
   },
   {
     "path_nr": 181,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1630,8 +1630,8 @@
   },
   {
     "path_nr": 182,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1639,8 +1639,8 @@
   },
   {
     "path_nr": 183,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1648,8 +1648,8 @@
   },
   {
     "path_nr": 184,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "Sick_Bay",
+    "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1657,8 +1657,8 @@
   },
   {
     "path_nr": 185,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Steering_Gear",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1666,8 +1666,8 @@
   },
   {
     "path_nr": 186,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Generator_Store",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1675,8 +1675,8 @@
   },
   {
     "path_nr": 187,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Engine_Room",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1684,8 +1684,8 @@
   },
   {
     "path_nr": 188,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Boiler_Rooms",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1693,8 +1693,8 @@
   },
   {
     "path_nr": 189,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Fwd_Stores",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1702,8 +1702,8 @@
   },
   {
     "path_nr": 190,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "After_Peak",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1711,8 +1711,8 @@
   },
   {
     "path_nr": 191,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Magazines_Fwd",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1720,8 +1720,8 @@
   },
   {
     "path_nr": 192,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Asdic_Fwd",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1729,8 +1729,8 @@
   },
   {
     "path_nr": 193,
-    "from_zone": "Seamens_Mess",
-    "to_zone": "Chain_Locker",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1738,8 +1738,8 @@
   },
   {
     "path_nr": 194,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Quarterdeck",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1747,8 +1747,8 @@
   },
   {
     "path_nr": 195,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1756,8 +1756,8 @@
   },
   {
     "path_nr": 196,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "CPO_Mess",
+    "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1765,8 +1765,8 @@
   },
   {
     "path_nr": 197,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1774,8 +1774,8 @@
   },
   {
     "path_nr": 198,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1783,8 +1783,8 @@
   },
   {
     "path_nr": 199,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Steering_Gear",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1792,97 +1792,7 @@
   },
   {
     "path_nr": 200,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Generator_Store",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 201,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Engine_Room",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 202,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Boiler_Rooms",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 203,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Fwd_Stores",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 204,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "After_Peak",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 205,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Magazines_Fwd",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 206,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Asdic_Fwd",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 207,
-    "from_zone": "Stokers_Mess",
-    "to_zone": "Chain_Locker",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 208,
-    "from_zone": "Sick_Bay",
-    "to_zone": "Quarterdeck",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 209,
-    "from_zone": "Sick_Bay",
-    "to_zone": "Foc_Deck_Open",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 210,
-    "from_zone": "Sick_Bay",
+    "from_zone": "PO_Mess",
     "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1890,8 +1800,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 211,
-    "from_zone": "Sick_Bay",
+    "path_nr": 201,
+    "from_zone": "PO_Mess",
     "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1899,8 +1809,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 212,
-    "from_zone": "Sick_Bay",
+    "path_nr": 202,
+    "from_zone": "PO_Mess",
     "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1908,8 +1818,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 213,
-    "from_zone": "Sick_Bay",
+    "path_nr": 203,
+    "from_zone": "PO_Mess",
     "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1917,8 +1827,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 214,
-    "from_zone": "Sick_Bay",
+    "path_nr": 204,
+    "from_zone": "PO_Mess",
     "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1926,8 +1836,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 215,
-    "from_zone": "Sick_Bay",
+    "path_nr": 205,
+    "from_zone": "PO_Mess",
     "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1935,8 +1845,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 216,
-    "from_zone": "Sick_Bay",
+    "path_nr": 206,
+    "from_zone": "PO_Mess",
     "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1944,8 +1854,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 217,
-    "from_zone": "Sick_Bay",
+    "path_nr": 207,
+    "from_zone": "PO_Mess",
     "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1953,8 +1863,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 218,
-    "from_zone": "Sick_Bay",
+    "path_nr": 208,
+    "from_zone": "PO_Mess",
     "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1962,8 +1872,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 219,
-    "from_zone": "Sick_Bay",
+    "path_nr": 209,
+    "from_zone": "PO_Mess",
     "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1971,8 +1881,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 220,
-    "from_zone": "Sick_Bay",
+    "path_nr": 210,
+    "from_zone": "PO_Mess",
     "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1980,8 +1890,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 221,
-    "from_zone": "Sick_Bay",
+    "path_nr": 211,
+    "from_zone": "PO_Mess",
     "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1989,9 +1899,99 @@
     "ahs_nr": 0
   },
   {
+    "path_nr": 212,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Quarterdeck_Flat",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 213,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Machinery_Casing",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 214,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Magazine_Lobby_Up",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 215,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Steering_Gear",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 216,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Generator_Store",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 217,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Engine_Room",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 218,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Boiler_Rooms",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 219,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Fwd_Stores",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 220,
+    "from_zone": "Provision_Aft",
+    "to_zone": "After_Peak",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 221,
+    "from_zone": "Provision_Aft",
+    "to_zone": "Magazines_Fwd",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
     "path_nr": 222,
-    "from_zone": "CPO_Mess",
-    "to_zone": "Quarterdeck",
+    "from_zone": "Provision_Aft",
+    "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -1999,8 +1999,8 @@
   },
   {
     "path_nr": 223,
-    "from_zone": "CPO_Mess",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "Provision_Aft",
+    "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2008,7 +2008,7 @@
   },
   {
     "path_nr": 224,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2017,7 +2017,7 @@
   },
   {
     "path_nr": 225,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2026,7 +2026,7 @@
   },
   {
     "path_nr": 226,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2035,7 +2035,7 @@
   },
   {
     "path_nr": 227,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2044,7 +2044,7 @@
   },
   {
     "path_nr": 228,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2053,7 +2053,7 @@
   },
   {
     "path_nr": 229,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2062,7 +2062,7 @@
   },
   {
     "path_nr": 230,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2071,7 +2071,7 @@
   },
   {
     "path_nr": 231,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2080,7 +2080,7 @@
   },
   {
     "path_nr": 232,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2089,7 +2089,7 @@
   },
   {
     "path_nr": 233,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2098,7 +2098,7 @@
   },
   {
     "path_nr": 234,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2107,7 +2107,7 @@
   },
   {
     "path_nr": 235,
-    "from_zone": "CPO_Mess",
+    "from_zone": "Cold_Stores",
     "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2116,7 +2116,7 @@
   },
   {
     "path_nr": 236,
-    "from_zone": "PO_Mess",
+    "from_zone": "Bridge_House",
     "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2125,8 +2125,8 @@
   },
   {
     "path_nr": 237,
-    "from_zone": "PO_Mess",
-    "to_zone": "Foc_Deck_Open",
+    "from_zone": "Foc_Superstructure",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2134,8 +2134,8 @@
   },
   {
     "path_nr": 238,
-    "from_zone": "PO_Mess",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2143,8 +2143,8 @@
   },
   {
     "path_nr": 239,
-    "from_zone": "PO_Mess",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "MS_Mess",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2152,8 +2152,8 @@
   },
   {
     "path_nr": 240,
-    "from_zone": "PO_Mess",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "Galley_Flat",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2161,8 +2161,8 @@
   },
   {
     "path_nr": 241,
-    "from_zone": "PO_Mess",
-    "to_zone": "Steering_Gear",
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2170,8 +2170,8 @@
   },
   {
     "path_nr": 242,
-    "from_zone": "PO_Mess",
-    "to_zone": "Generator_Store",
+    "from_zone": "Signal_Stwd_Mess",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2179,8 +2179,8 @@
   },
   {
     "path_nr": 243,
-    "from_zone": "PO_Mess",
-    "to_zone": "Engine_Room",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2188,8 +2188,8 @@
   },
   {
     "path_nr": 244,
-    "from_zone": "PO_Mess",
-    "to_zone": "Boiler_Rooms",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2197,8 +2197,8 @@
   },
   {
     "path_nr": 245,
-    "from_zone": "PO_Mess",
-    "to_zone": "Fwd_Stores",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2206,8 +2206,8 @@
   },
   {
     "path_nr": 246,
-    "from_zone": "PO_Mess",
-    "to_zone": "After_Peak",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2216,7 +2216,7 @@
   {
     "path_nr": 247,
     "from_zone": "PO_Mess",
-    "to_zone": "Magazines_Fwd",
+    "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2224,24 +2224,6 @@
   },
   {
     "path_nr": 248,
-    "from_zone": "PO_Mess",
-    "to_zone": "Asdic_Fwd",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 249,
-    "from_zone": "PO_Mess",
-    "to_zone": "Chain_Locker",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 250,
     "from_zone": "Provision_Aft",
     "to_zone": "Quarterdeck",
     "is_hvac_ducted": false,
@@ -2250,8 +2232,26 @@
     "ahs_nr": 0
   },
   {
+    "path_nr": 249,
+    "from_zone": "Cold_Stores",
+    "to_zone": "Quarterdeck",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 250,
+    "from_zone": "Bridge_House",
+    "to_zone": "Foc_Deck_Open",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
     "path_nr": 251,
-    "from_zone": "Provision_Aft",
+    "from_zone": "Foc_Superstructure",
     "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2260,8 +2260,8 @@
   },
   {
     "path_nr": 252,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Quarterdeck_Flat",
+    "from_zone": "ERA_Flat",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2269,8 +2269,8 @@
   },
   {
     "path_nr": 253,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Machinery_Casing",
+    "from_zone": "MS_Mess",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2278,8 +2278,8 @@
   },
   {
     "path_nr": 254,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Magazine_Lobby_Up",
+    "from_zone": "Galley_Flat",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2287,8 +2287,8 @@
   },
   {
     "path_nr": 255,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Steering_Gear",
+    "from_zone": "Wardroom_Flat",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2296,8 +2296,8 @@
   },
   {
     "path_nr": 256,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Generator_Store",
+    "from_zone": "Signal_Stwd_Mess",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2305,8 +2305,8 @@
   },
   {
     "path_nr": 257,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Engine_Room",
+    "from_zone": "Seamens_Mess",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2314,8 +2314,8 @@
   },
   {
     "path_nr": 258,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Boiler_Rooms",
+    "from_zone": "Stokers_Mess",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2323,8 +2323,8 @@
   },
   {
     "path_nr": 259,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Fwd_Stores",
+    "from_zone": "Sick_Bay",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2332,8 +2332,8 @@
   },
   {
     "path_nr": 260,
-    "from_zone": "Provision_Aft",
-    "to_zone": "After_Peak",
+    "from_zone": "CPO_Mess",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2341,8 +2341,8 @@
   },
   {
     "path_nr": 261,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Magazines_Fwd",
+    "from_zone": "PO_Mess",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2351,7 +2351,7 @@
   {
     "path_nr": 262,
     "from_zone": "Provision_Aft",
-    "to_zone": "Asdic_Fwd",
+    "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
     "crusher_transfer": true,
@@ -2359,24 +2359,6 @@
   },
   {
     "path_nr": 263,
-    "from_zone": "Provision_Aft",
-    "to_zone": "Chain_Locker",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 264,
-    "from_zone": "Cold_Stores",
-    "to_zone": "Quarterdeck",
-    "is_hvac_ducted": false,
-    "kind": "ladder_well_1",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 265,
     "from_zone": "Cold_Stores",
     "to_zone": "Foc_Deck_Open",
     "is_hvac_ducted": false,
@@ -2385,8 +2367,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 266,
-    "from_zone": "Cold_Stores",
+    "path_nr": 264,
+    "from_zone": "Signal_Deck",
     "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2394,8 +2376,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 267,
-    "from_zone": "Cold_Stores",
+    "path_nr": 265,
+    "from_zone": "Signal_Deck",
     "to_zone": "Machinery_Casing",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2403,8 +2385,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 268,
-    "from_zone": "Cold_Stores",
+    "path_nr": 266,
+    "from_zone": "Signal_Deck",
     "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2412,8 +2394,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 269,
-    "from_zone": "Cold_Stores",
+    "path_nr": 267,
+    "from_zone": "Signal_Deck",
     "to_zone": "Steering_Gear",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2421,8 +2403,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 270,
-    "from_zone": "Cold_Stores",
+    "path_nr": 268,
+    "from_zone": "Signal_Deck",
     "to_zone": "Generator_Store",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2430,8 +2412,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 271,
-    "from_zone": "Cold_Stores",
+    "path_nr": 269,
+    "from_zone": "Signal_Deck",
     "to_zone": "Engine_Room",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2439,8 +2421,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 272,
-    "from_zone": "Cold_Stores",
+    "path_nr": 270,
+    "from_zone": "Signal_Deck",
     "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2448,8 +2430,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 273,
-    "from_zone": "Cold_Stores",
+    "path_nr": 271,
+    "from_zone": "Signal_Deck",
     "to_zone": "Fwd_Stores",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2457,8 +2439,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 274,
-    "from_zone": "Cold_Stores",
+    "path_nr": 272,
+    "from_zone": "Signal_Deck",
     "to_zone": "After_Peak",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2466,8 +2448,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 275,
-    "from_zone": "Cold_Stores",
+    "path_nr": 273,
+    "from_zone": "Signal_Deck",
     "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2475,8 +2457,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 276,
-    "from_zone": "Cold_Stores",
+    "path_nr": 274,
+    "from_zone": "Signal_Deck",
     "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2484,8 +2466,8 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 277,
-    "from_zone": "Cold_Stores",
+    "path_nr": 275,
+    "from_zone": "Signal_Deck",
     "to_zone": "Chain_Locker",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2493,8 +2475,26 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 278,
+    "path_nr": 276,
     "from_zone": "Signal_Deck",
+    "to_zone": "Quarterdeck",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 277,
+    "from_zone": "Signal_Deck",
+    "to_zone": "Foc_Deck_Open",
+    "is_hvac_ducted": false,
+    "kind": "ladder_well_1",
+    "crusher_transfer": true,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 278,
+    "from_zone": "Bridge_House",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2503,7 +2503,7 @@
   },
   {
     "path_nr": 279,
-    "from_zone": "Bridge_House",
+    "from_zone": "Foc_Superstructure",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2512,7 +2512,7 @@
   },
   {
     "path_nr": 280,
-    "from_zone": "Foc_Superstructure",
+    "from_zone": "ERA_Flat",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2521,7 +2521,7 @@
   },
   {
     "path_nr": 281,
-    "from_zone": "ERA_Flat",
+    "from_zone": "MS_Mess",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2530,7 +2530,7 @@
   },
   {
     "path_nr": 282,
-    "from_zone": "MS_Mess",
+    "from_zone": "Galley_Flat",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2539,7 +2539,7 @@
   },
   {
     "path_nr": 283,
-    "from_zone": "Galley_Flat",
+    "from_zone": "Wardroom_Flat",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2548,7 +2548,7 @@
   },
   {
     "path_nr": 284,
-    "from_zone": "Wardroom_Flat",
+    "from_zone": "Signal_Stwd_Mess",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2557,7 +2557,7 @@
   },
   {
     "path_nr": 285,
-    "from_zone": "Signal_Stwd_Mess",
+    "from_zone": "Seamens_Mess",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2566,7 +2566,7 @@
   },
   {
     "path_nr": 286,
-    "from_zone": "Seamens_Mess",
+    "from_zone": "Stokers_Mess",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2575,7 +2575,7 @@
   },
   {
     "path_nr": 287,
-    "from_zone": "Stokers_Mess",
+    "from_zone": "Sick_Bay",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2584,7 +2584,7 @@
   },
   {
     "path_nr": 288,
-    "from_zone": "Sick_Bay",
+    "from_zone": "CPO_Mess",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2593,7 +2593,7 @@
   },
   {
     "path_nr": 289,
-    "from_zone": "CPO_Mess",
+    "from_zone": "PO_Mess",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2602,7 +2602,7 @@
   },
   {
     "path_nr": 290,
-    "from_zone": "PO_Mess",
+    "from_zone": "Provision_Aft",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2611,7 +2611,7 @@
   },
   {
     "path_nr": 291,
-    "from_zone": "Provision_Aft",
+    "from_zone": "Cold_Stores",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": false,
     "kind": "Sanitary_Makeup",
@@ -2620,24 +2620,6 @@
   },
   {
     "path_nr": 292,
-    "from_zone": "Cold_Stores",
-    "to_zone": "HD_Aft",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 293,
-    "from_zone": "Signal_Deck",
-    "to_zone": "HD_Ups",
-    "is_hvac_ducted": false,
-    "kind": "Sanitary_Makeup",
-    "crusher_transfer": true,
-    "ahs_nr": 0
-  },
-  {
-    "path_nr": 294,
     "from_zone": "Bridge_House",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2646,7 +2628,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 295,
+    "path_nr": 293,
     "from_zone": "Foc_Superstructure",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2655,7 +2637,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 296,
+    "path_nr": 294,
     "from_zone": "ERA_Flat",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2664,7 +2646,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 297,
+    "path_nr": 295,
     "from_zone": "MS_Mess",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2673,7 +2655,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 298,
+    "path_nr": 296,
     "from_zone": "Galley_Flat",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2682,7 +2664,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 299,
+    "path_nr": 297,
     "from_zone": "Wardroom_Flat",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2691,7 +2673,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 300,
+    "path_nr": 298,
     "from_zone": "Signal_Stwd_Mess",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2700,7 +2682,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 301,
+    "path_nr": 299,
     "from_zone": "Seamens_Mess",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2709,7 +2691,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 302,
+    "path_nr": 300,
     "from_zone": "Stokers_Mess",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2718,7 +2700,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 303,
+    "path_nr": 301,
     "from_zone": "Sick_Bay",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2727,7 +2709,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 304,
+    "path_nr": 302,
     "from_zone": "CPO_Mess",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2736,7 +2718,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 305,
+    "path_nr": 303,
     "from_zone": "PO_Mess",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2745,7 +2727,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 306,
+    "path_nr": 304,
     "from_zone": "Provision_Aft",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2754,7 +2736,7 @@
     "ahs_nr": 0
   },
   {
-    "path_nr": 307,
+    "path_nr": 305,
     "from_zone": "Cold_Stores",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": false,
@@ -2763,7 +2745,61 @@
     "ahs_nr": 0
   },
   {
+    "path_nr": 306,
+    "from_zone": "Signal_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 307,
+    "from_zone": "Signal_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
     "path_nr": 308,
+    "from_zone": "Quarterdeck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 309,
+    "from_zone": "Quarterdeck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 310,
+    "from_zone": "Foc_Deck_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 311,
+    "from_zone": "Foc_Deck_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 312,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -2772,7 +2808,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 309,
+    "path_nr": 313,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -2781,7 +2817,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 310,
+    "path_nr": 314,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -2790,27 +2826,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 311,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Signal_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 620.325
-  },
-  {
-    "path_nr": 312,
-    "from_zone": "Signal_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 620.325
-  },
-  {
-    "path_nr": 313,
+    "path_nr": 315,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Bridge_House",
     "is_hvac_ducted": true,
@@ -2820,7 +2836,7 @@
     "declared_flow_m3h": 837.2
   },
   {
-    "path_nr": 314,
+    "path_nr": 316,
     "from_zone": "Bridge_House",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2830,7 +2846,7 @@
     "declared_flow_m3h": 837.2
   },
   {
-    "path_nr": 315,
+    "path_nr": 317,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Foc_Superstructure",
     "is_hvac_ducted": true,
@@ -2840,7 +2856,7 @@
     "declared_flow_m3h": 1704.025
   },
   {
-    "path_nr": 316,
+    "path_nr": 318,
     "from_zone": "Foc_Superstructure",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2850,7 +2866,7 @@
     "declared_flow_m3h": 1704.025
   },
   {
-    "path_nr": 317,
+    "path_nr": 319,
     "from_zone": "ahs1(Sup)",
     "to_zone": "ERA_Flat",
     "is_hvac_ducted": true,
@@ -2860,7 +2876,7 @@
     "declared_flow_m3h": 334.57500000000005
   },
   {
-    "path_nr": 318,
+    "path_nr": 320,
     "from_zone": "ERA_Flat",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2870,7 +2886,7 @@
     "declared_flow_m3h": 334.57500000000005
   },
   {
-    "path_nr": 319,
+    "path_nr": 321,
     "from_zone": "ahs1(Sup)",
     "to_zone": "MS_Mess",
     "is_hvac_ducted": true,
@@ -2880,7 +2896,7 @@
     "declared_flow_m3h": 228.125
   },
   {
-    "path_nr": 320,
+    "path_nr": 322,
     "from_zone": "MS_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2890,7 +2906,7 @@
     "declared_flow_m3h": 228.125
   },
   {
-    "path_nr": 321,
+    "path_nr": 323,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Galley_Flat",
     "is_hvac_ducted": true,
@@ -2900,7 +2916,7 @@
     "declared_flow_m3h": 278.8
   },
   {
-    "path_nr": 322,
+    "path_nr": 324,
     "from_zone": "Galley_Flat",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2910,7 +2926,7 @@
     "declared_flow_m3h": 278.8
   },
   {
-    "path_nr": 323,
+    "path_nr": 325,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Wardroom_Flat",
     "is_hvac_ducted": true,
@@ -2920,7 +2936,7 @@
     "declared_flow_m3h": 603.225
   },
   {
-    "path_nr": 324,
+    "path_nr": 326,
     "from_zone": "Wardroom_Flat",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2930,7 +2946,7 @@
     "declared_flow_m3h": 603.225
   },
   {
-    "path_nr": 325,
+    "path_nr": 327,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Signal_Stwd_Mess",
     "is_hvac_ducted": true,
@@ -2940,7 +2956,7 @@
     "declared_flow_m3h": 212.89999999999998
   },
   {
-    "path_nr": 326,
+    "path_nr": 328,
     "from_zone": "Signal_Stwd_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2950,7 +2966,7 @@
     "declared_flow_m3h": 212.89999999999998
   },
   {
-    "path_nr": 327,
+    "path_nr": 329,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Seamens_Mess",
     "is_hvac_ducted": true,
@@ -2960,7 +2976,7 @@
     "declared_flow_m3h": 628.575
   },
   {
-    "path_nr": 328,
+    "path_nr": 330,
     "from_zone": "Seamens_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2970,7 +2986,7 @@
     "declared_flow_m3h": 628.575
   },
   {
-    "path_nr": 329,
+    "path_nr": 331,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Stokers_Mess",
     "is_hvac_ducted": true,
@@ -2980,7 +2996,7 @@
     "declared_flow_m3h": 222.27499999999998
   },
   {
-    "path_nr": 330,
+    "path_nr": 332,
     "from_zone": "Stokers_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -2990,7 +3006,7 @@
     "declared_flow_m3h": 222.27499999999998
   },
   {
-    "path_nr": 331,
+    "path_nr": 333,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Sick_Bay",
     "is_hvac_ducted": true,
@@ -3000,7 +3016,7 @@
     "declared_flow_m3h": 108.05
   },
   {
-    "path_nr": 332,
+    "path_nr": 334,
     "from_zone": "Sick_Bay",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -3010,7 +3026,7 @@
     "declared_flow_m3h": 108.05
   },
   {
-    "path_nr": 333,
+    "path_nr": 335,
     "from_zone": "ahs1(Sup)",
     "to_zone": "CPO_Mess",
     "is_hvac_ducted": true,
@@ -3020,7 +3036,7 @@
     "declared_flow_m3h": 172.875
   },
   {
-    "path_nr": 334,
+    "path_nr": 336,
     "from_zone": "CPO_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -3030,7 +3046,7 @@
     "declared_flow_m3h": 172.875
   },
   {
-    "path_nr": 335,
+    "path_nr": 337,
     "from_zone": "ahs1(Sup)",
     "to_zone": "PO_Mess",
     "is_hvac_ducted": true,
@@ -3040,7 +3056,7 @@
     "declared_flow_m3h": 339.57500000000005
   },
   {
-    "path_nr": 336,
+    "path_nr": 338,
     "from_zone": "PO_Mess",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -3050,7 +3066,7 @@
     "declared_flow_m3h": 339.57500000000005
   },
   {
-    "path_nr": 337,
+    "path_nr": 339,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Provision_Aft",
     "is_hvac_ducted": true,
@@ -3060,7 +3076,7 @@
     "declared_flow_m3h": 505.65
   },
   {
-    "path_nr": 338,
+    "path_nr": 340,
     "from_zone": "Provision_Aft",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -3070,7 +3086,7 @@
     "declared_flow_m3h": 505.65
   },
   {
-    "path_nr": 339,
+    "path_nr": 341,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Cold_Stores",
     "is_hvac_ducted": true,
@@ -3080,7 +3096,7 @@
     "declared_flow_m3h": 96.325
   },
   {
-    "path_nr": 340,
+    "path_nr": 342,
     "from_zone": "Cold_Stores",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -3090,7 +3106,7 @@
     "declared_flow_m3h": 96.325
   },
   {
-    "path_nr": 341,
+    "path_nr": 343,
     "from_zone": "ambient",
     "to_zone": "ahs2(Sup)",
     "is_hvac_ducted": true,
@@ -3099,7 +3115,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 342,
+    "path_nr": 344,
     "from_zone": "ahs2(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -3108,7 +3124,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 343,
+    "path_nr": 345,
     "from_zone": "ahs2(Ret)",
     "to_zone": "ahs2(Sup)",
     "is_hvac_ducted": true,
@@ -3117,47 +3133,7 @@
     "ahs_nr": 2
   },
   {
-    "path_nr": 344,
-    "from_zone": "ahs2(Sup)",
-    "to_zone": "Quarterdeck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 2,
-    "declared_flow_m3h": 2943.2999999999997
-  },
-  {
-    "path_nr": 345,
-    "from_zone": "Quarterdeck",
-    "to_zone": "ahs2(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 2,
-    "declared_flow_m3h": 2943.2999999999997
-  },
-  {
     "path_nr": 346,
-    "from_zone": "ahs2(Sup)",
-    "to_zone": "Foc_Deck_Open",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 2,
-    "declared_flow_m3h": 1707.4
-  },
-  {
-    "path_nr": 347,
-    "from_zone": "Foc_Deck_Open",
-    "to_zone": "ahs2(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 2,
-    "declared_flow_m3h": 1707.4
-  },
-  {
-    "path_nr": 348,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Quarterdeck_Flat",
     "is_hvac_ducted": true,
@@ -3167,7 +3143,7 @@
     "declared_flow_m3h": 2007.4
   },
   {
-    "path_nr": 349,
+    "path_nr": 347,
     "from_zone": "Quarterdeck_Flat",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3177,7 +3153,7 @@
     "declared_flow_m3h": 2007.4
   },
   {
-    "path_nr": 350,
+    "path_nr": 348,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Machinery_Casing",
     "is_hvac_ducted": true,
@@ -3187,7 +3163,7 @@
     "declared_flow_m3h": 963.15
   },
   {
-    "path_nr": 351,
+    "path_nr": 349,
     "from_zone": "Machinery_Casing",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3197,7 +3173,7 @@
     "declared_flow_m3h": 963.15
   },
   {
-    "path_nr": 352,
+    "path_nr": 350,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Magazine_Lobby_Up",
     "is_hvac_ducted": true,
@@ -3207,7 +3183,7 @@
     "declared_flow_m3h": 101.4
   },
   {
-    "path_nr": 353,
+    "path_nr": 351,
     "from_zone": "Magazine_Lobby_Up",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3217,7 +3193,7 @@
     "declared_flow_m3h": 101.4
   },
   {
-    "path_nr": 354,
+    "path_nr": 352,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Steering_Gear",
     "is_hvac_ducted": true,
@@ -3227,7 +3203,7 @@
     "declared_flow_m3h": 691.5
   },
   {
-    "path_nr": 355,
+    "path_nr": 353,
     "from_zone": "Steering_Gear",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3237,7 +3213,7 @@
     "declared_flow_m3h": 691.5
   },
   {
-    "path_nr": 356,
+    "path_nr": 354,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Generator_Store",
     "is_hvac_ducted": true,
@@ -3247,7 +3223,7 @@
     "declared_flow_m3h": 987.8499999999999
   },
   {
-    "path_nr": 357,
+    "path_nr": 355,
     "from_zone": "Generator_Store",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3257,7 +3233,7 @@
     "declared_flow_m3h": 987.8499999999999
   },
   {
-    "path_nr": 358,
+    "path_nr": 356,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Engine_Room",
     "is_hvac_ducted": true,
@@ -3267,7 +3243,7 @@
     "declared_flow_m3h": 2500.0
   },
   {
-    "path_nr": 359,
+    "path_nr": 357,
     "from_zone": "Engine_Room",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3277,7 +3253,7 @@
     "declared_flow_m3h": 2500.0
   },
   {
-    "path_nr": 360,
+    "path_nr": 358,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Boiler_Rooms",
     "is_hvac_ducted": true,
@@ -3287,7 +3263,7 @@
     "declared_flow_m3h": 1750.0
   },
   {
-    "path_nr": 361,
+    "path_nr": 359,
     "from_zone": "Boiler_Rooms",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3297,7 +3273,7 @@
     "declared_flow_m3h": 1750.0
   },
   {
-    "path_nr": 362,
+    "path_nr": 360,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Fwd_Stores",
     "is_hvac_ducted": true,
@@ -3307,7 +3283,7 @@
     "declared_flow_m3h": 777.9000000000001
   },
   {
-    "path_nr": 363,
+    "path_nr": 361,
     "from_zone": "Fwd_Stores",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3317,7 +3293,7 @@
     "declared_flow_m3h": 777.9000000000001
   },
   {
-    "path_nr": 364,
+    "path_nr": 362,
     "from_zone": "ahs2(Sup)",
     "to_zone": "After_Peak",
     "is_hvac_ducted": true,
@@ -3327,7 +3303,7 @@
     "declared_flow_m3h": 616.4
   },
   {
-    "path_nr": 365,
+    "path_nr": 363,
     "from_zone": "After_Peak",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3337,7 +3313,7 @@
     "declared_flow_m3h": 616.4
   },
   {
-    "path_nr": 366,
+    "path_nr": 364,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Magazines_Fwd",
     "is_hvac_ducted": true,
@@ -3347,7 +3323,7 @@
     "declared_flow_m3h": 818.65
   },
   {
-    "path_nr": 367,
+    "path_nr": 365,
     "from_zone": "Magazines_Fwd",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3357,7 +3333,7 @@
     "declared_flow_m3h": 818.65
   },
   {
-    "path_nr": 368,
+    "path_nr": 366,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Asdic_Fwd",
     "is_hvac_ducted": true,
@@ -3367,7 +3343,7 @@
     "declared_flow_m3h": 332.29999999999995
   },
   {
-    "path_nr": 369,
+    "path_nr": 367,
     "from_zone": "Asdic_Fwd",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3377,7 +3353,7 @@
     "declared_flow_m3h": 332.29999999999995
   },
   {
-    "path_nr": 370,
+    "path_nr": 368,
     "from_zone": "ahs2(Sup)",
     "to_zone": "Chain_Locker",
     "is_hvac_ducted": true,
@@ -3387,7 +3363,7 @@
     "declared_flow_m3h": 235.95
   },
   {
-    "path_nr": 371,
+    "path_nr": 369,
     "from_zone": "Chain_Locker",
     "to_zone": "ahs2(Ret)",
     "is_hvac_ducted": true,
@@ -3397,7 +3373,7 @@
     "declared_flow_m3h": 235.95
   },
   {
-    "path_nr": 372,
+    "path_nr": 370,
     "from_zone": "ambient",
     "to_zone": "ahs3(Sup)",
     "is_hvac_ducted": true,
@@ -3406,7 +3382,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 373,
+    "path_nr": 371,
     "from_zone": "ahs3(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -3415,7 +3391,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 374,
+    "path_nr": 372,
     "from_zone": "ahs3(Ret)",
     "to_zone": "ahs3(Sup)",
     "is_hvac_ducted": true,
@@ -3424,7 +3400,7 @@
     "ahs_nr": 3
   },
   {
-    "path_nr": 375,
+    "path_nr": 373,
     "from_zone": "ahs3(Sup)",
     "to_zone": "HD_Aft",
     "is_hvac_ducted": true,
@@ -3434,7 +3410,7 @@
     "declared_flow_m3h": 0.0
   },
   {
-    "path_nr": 376,
+    "path_nr": 374,
     "from_zone": "HD_Aft",
     "to_zone": "ahs3(Ret)",
     "is_hvac_ducted": true,
@@ -3444,7 +3420,7 @@
     "declared_flow_m3h": 685.3080000000001
   },
   {
-    "path_nr": 377,
+    "path_nr": 375,
     "from_zone": "ambient",
     "to_zone": "ahs4(Sup)",
     "is_hvac_ducted": true,
@@ -3453,7 +3429,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 378,
+    "path_nr": 376,
     "from_zone": "ahs4(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -3462,7 +3438,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 379,
+    "path_nr": 377,
     "from_zone": "ahs4(Ret)",
     "to_zone": "ahs4(Sup)",
     "is_hvac_ducted": true,
@@ -3471,7 +3447,7 @@
     "ahs_nr": 4
   },
   {
-    "path_nr": 380,
+    "path_nr": 378,
     "from_zone": "ahs4(Sup)",
     "to_zone": "HD_Ups",
     "is_hvac_ducted": true,
@@ -3481,7 +3457,7 @@
     "declared_flow_m3h": 0.0
   },
   {
-    "path_nr": 381,
+    "path_nr": 379,
     "from_zone": "HD_Ups",
     "to_zone": "ahs4(Ret)",
     "is_hvac_ducted": true,

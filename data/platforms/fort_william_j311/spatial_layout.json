@@ -23,7 +23,8 @@
         "x": 37.51,
         "y": 3.47
       },
-      "description": "signal deck: signal lamps, semaphore, flag lockers"
+      "description": "signal deck: signal lamps, semaphore, flag lockers",
+      "exposure": "weather"
     },
     {
       "id": "Bridge_House",
@@ -53,7 +54,8 @@
         "x": 6.94,
         "y": 3.35
       },
-      "description": "aft weather deck: sweep gear handling, depth charges, 5-barrel AA gun platform above"
+      "description": "aft weather deck: sweep gear handling, depth charges, 5-barrel AA gun platform above",
+      "exposure": "weather"
     },
     {
       "id": "Foc_Superstructure",
@@ -83,7 +85,8 @@
         "x": 40.93,
         "y": 3.5
       },
-      "description": "fwd weather deck: 4in gun platform, forecastle bell, windlass gear"
+      "description": "fwd weather deck: 4in gun platform, forecastle bell, windlass gear",
+      "exposure": "weather"
     },
     {
       "id": "Sweep_Deck",

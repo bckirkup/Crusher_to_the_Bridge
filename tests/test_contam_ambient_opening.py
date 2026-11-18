@@ -237,19 +237,30 @@ _WEATHER_ZONES = {
         "Swimming_Pool", "Top_Of_House", "Weather_Deck_Port_A",
         "Weather_Deck_Stbd_A",
     },
-    # CONTAM-AMBIENT-WEATHER-MISC-01: the remaining ungrouped/zero-exchange
-    # weather zones. Eagle's ungrouped gun/AA platforms and open navigating
-    # bridge are lexical misses declared as weather; grouped OA-exchange
-    # weather zones stay untouched as the known grouped-zone open item.
-    "castle_class_corvette": {"Foc_Deck_Open", "Quarterdeck"},
+    # CONTAM-AMBIENT-WEATHER-MISC-01 and CONTAM-GROUPED-WEATHER-MISC-01: the
+    # ungrouped/zero-exchange weather zones plus the grouped weather zones whose
+    # openings now replace the group OA leg.
+    "castle_class_corvette": {"Foc_Deck_Open", "Quarterdeck", "Upper_Deck_Aft"},
+    "erie_pg50": {
+        "Sup_Deck_Open", "Fantail_Aft", "Gun_Deck_Aft", "Focsle_Main",
+        "Focsle_Stores",
+    },
+    "esteem_mso438": {
+        "Sweep_Deck", "Reel_Deck", "Boat_Deck_Aft", "Focsle_01",
+        "Deck_House_Main",
+    },
     "eagle_pe60": {
         "Open_Bridge", "Nav_Bridge", "Gun_Platform_Fwd", "After_Gun_Platform",
         "AA_Gun_Platforms", "Fantail", "Gun_Deck_Fwd",
     },
+    "fort_william_j311": {"Signal_Deck", "Quarterdeck", "Foc_Deck_Open"},
+    "montana_acr13": {"MD_Aft_Open", "MD_Forecastle_Open"},
     "pce_874": {"Fantail", "Focsle_Deck"},
+    "pt_564": {"Torpedo_Deck", "Foredeck"},
     "raven_am55": {"Foc_Deck_Fwd", "Foc_Deck_Open", "Sweep_Deck"},
-    "river_class_frigate": {"Quarterdeck", "Foc_Deck_Open"},
+    "river_class_frigate": {"Quarterdeck", "Foc_Deck_Open", "Signal_Deck"},
     "rolla_pc483": {"Fantail", "Focsle_Deck"},
+    "winnipeg_j337": {"Signal_Deck", "Quarterdeck", "Foc_Deck_Open"},
     # CONTAM-AMBIENT-WEATHER-OLYMPIA-01: final stage-4 holdout; ungrouped
     # zero-outdoor-exchange weather and boat-stowage open zones.
     "olympia_c6": {
