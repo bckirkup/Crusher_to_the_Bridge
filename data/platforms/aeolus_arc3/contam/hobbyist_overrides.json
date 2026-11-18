@@ -9,6 +9,14 @@
     "doorway": "doorway",
     "stairwell": "stairwell"
   },
+  "cross_zone_orifice_total_area_m2": {
+    "ladder_well_1": 0.8,
+    "ladder_well_2": 0.8,
+    "ladder_well_3": 0.8,
+    "ladder_well_4": 0.8,
+    "ladder_well_5": 0.8,
+    "ladder_well_6": 0.8
+  },
   "wind_profile": "ship_hull",
   "filter_preset": "MERV13",
   "hvac_filter": {
