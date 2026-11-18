@@ -10,8 +10,10 @@ def test_sanitary_makeup_links_are_oneway_with_no_native_reverse() -> None:
 
     assert summary["reconciliation"]["reconciled"] is True
     sanitary = [row for row in rows if row["path"] == "Sanitary_Makeup"]
-    assert len(sanitary) == 585
-    assert summary["fleet"]["sanitary_makeup_links"] == 585
+    # 585 -> 623: CONTAM-GROUPED-WEATHER-AUXILIARY-01 split group-addressed
+    # Sanitary_Makeup links for opened weather zones, preserving per-room-pair flow.
+    assert len(sanitary) == 623
+    assert summary["fleet"]["sanitary_makeup_links"] == 623
     assert all(row["direction_declared"] == "oneway" for row in sanitary)
     assert all(row["native_reverse_paths"] == 0 for row in sanitary)
     assert not any(

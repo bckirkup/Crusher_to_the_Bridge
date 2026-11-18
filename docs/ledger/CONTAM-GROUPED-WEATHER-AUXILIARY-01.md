@@ -102,7 +102,11 @@ Tests: `tests/test_contam_ambient_opening.py` `_WEATHER_ZONES` gained the seven
 hull zone sets; `tests/test_contam_ambient_opening_boundary.py` committed-leg
 census gained two legs per opening on the six bundled hulls
 (`legend_class_nsc` contributes no committed legs). Both moves are the opening
-legs / exposure tags of this change.
+legs / exposure tags of this change. `tests/test_forced_exhaust_audit.py`
+`Sanitary_Makeup` count moved 585 → 623 because the same group-link splits
+re-addressed 38 group-addressed `Sanitary_Makeup` records for opened weather
+zones (assistance +12, legend +4, luzon +16, mercury +6) while preserving
+per-room-pair flow; direction and native-reverse invariants are unchanged.
 
 ## Witnesses
 
