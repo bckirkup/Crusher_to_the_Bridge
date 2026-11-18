@@ -36,6 +36,7 @@ def _ps_structure(
     source_cluster: dict | None = None,
     venue_menu: dict | None = None,
     lot_scale: dict | None = None,
+    station_zone_pin: list[str] | None = None,
 ) -> dict:
     ps: dict = {"source_id": SOURCE_ID, "q_source": q_source}
     if lot_layer_mode is not None:
@@ -47,6 +48,8 @@ def _ps_structure(
         structure["venue_menu"] = venue_menu
     if lot_scale is not None:
         structure["lot_scale"] = lot_scale
+    if station_zone_pin is not None:
+        ps["station_zone_pin"] = list(station_zone_pin)
     ps["supply_structure"] = structure
     return _ps_cfg(0.0, provisioned_source=ps)
 
@@ -114,6 +117,35 @@ def test_venue_menu_masks_service_classes() -> None:
     assert (MDR_ZONE, "shellfish") not in stations
     assert (MDR_ZONE, "salad_leaf") in stations
     assert ("Crew_Mess", "fresh_produce") not in stations
+
+
+def test_venue_menu_applies_after_station_zone_pin() -> None:
+    agents = [
+        *[_diner(i, dining_zone=ZONE, location=ZONE) for i in range(1, 20)],
+        *[
+            _diner(i, dining_zone=MDR_ZONE, location=MDR_ZONE)
+            for i in range(20, 40)
+        ],
+    ]
+    core = _two_zone_core(
+        _ps_structure(
+            1.0,
+            venue_menu={"service_class_mask": "buffet_specialty"},
+            station_zone_pin=[MDR_ZONE],
+        ),
+    )
+    _plan(core, agents)
+    objects = core._cs_objects[PATHOGEN]
+    shellfish_mdr = [
+        obj for obj in objects
+        if obj["item_label"] == "shellfish" and obj["zone"] == MDR_ZONE
+    ]
+    salad_mdr = [
+        obj for obj in objects
+        if obj["item_label"] == "salad_leaf" and obj["zone"] == MDR_ZONE
+    ]
+    assert not shellfish_mdr
+    assert salad_mdr
 
 
 def test_fleet_shared_cluster_is_all_or_nothing() -> None:

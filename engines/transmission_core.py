@@ -3770,7 +3770,9 @@ class TransmissionCore:
         nondefault = (
             rung != SUPPLY_STRUCTURE_SOURCE_CLUSTER_ABSENT
             or mask != SUPPLY_STRUCTURE_VENUE_MENU_MASK_ABSENT
-            or multiplier != 1.0
+            or not math.isclose(
+                multiplier, 1.0, rel_tol=0.0, abs_tol=1e-12,
+            )
         )
         if mode == SUPPLY_STRUCTURE_MODE_ABSENT and nondefault:
             raise ValueError(
@@ -3829,7 +3831,7 @@ class TransmissionCore:
     ) -> tuple[str, ...]:
         rung = self._cs_ss_source_cluster
         if rung == "line_shared":
-            return ("line", item)
+            return ("line", "all", item)
         if rung == "venue_group_shared":
             return (
                 "venue_group",
@@ -3837,11 +3839,18 @@ class TransmissionCore:
                 item,
             )
         if rung == "fleet_shared":
-            return ("fleet",)
+            return ("fleet", "all", "all")
         return ("station", zone, item)
 
     def _cs_supply_structure_cluster_id(self, key: tuple[str, ...]) -> str:
-        return "|".join(str(part) for part in key)
+        kind = key[0]
+        if kind == "fleet":
+            return "fleet"
+        if kind == "line":
+            return f"line|{key[2]}"
+        if kind == "venue_group":
+            return f"venue_group|{key[1]}|{key[2]}"
+        return f"station|{key[1]}|{key[2]}"
 
     def _cs_supply_structure_clusters(
         self,
@@ -14260,6 +14269,11 @@ class TransmissionCore:
                 self._cs_place_pinned_stations(contaminated)
                 if pin else contaminated
             )
+            if self._cs_ss_active:
+                placed = [
+                    station for station in placed
+                    if self._cs_supply_structure_menu_allows(*station)
+                ]
             pre = len(self._cs_objects.get(pid, []))
             for station in placed:
                 self._cs_realize_lot_object(
@@ -14640,7 +14654,10 @@ class TransmissionCore:
         servings = max(1, int(round(self._cs_draw(
             "lot_servings", pathogen_id, cs_block,
         ))))
-        if self._cs_ss_lot_servings_multiplier != 1.0:
+        if not math.isclose(
+            self._cs_ss_lot_servings_multiplier, 1.0,
+            rel_tol=0.0, abs_tol=1e-12,
+        ):
             servings = max(
                 1,
                 int(round(
