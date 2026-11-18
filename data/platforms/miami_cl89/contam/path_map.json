@@ -1783,6 +1783,42 @@
   },
   {
     "path_nr": 199,
+    "from_zone": "Catapult_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 200,
+    "from_zone": "Catapult_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 201,
+    "from_zone": "Bow_Weather",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 202,
+    "from_zone": "Bow_Weather",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 203,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -1791,7 +1827,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 200,
+    "path_nr": 204,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -1800,7 +1836,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 201,
+    "path_nr": 205,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -1809,7 +1845,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 202,
+    "path_nr": 206,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Stern_Aviation",
     "is_hvac_ducted": true,
@@ -1819,7 +1855,7 @@
     "declared_flow_m3h": 230.905
   },
   {
-    "path_nr": 203,
+    "path_nr": 207,
     "from_zone": "Stern_Aviation",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -1829,27 +1865,7 @@
     "declared_flow_m3h": 230.905
   },
   {
-    "path_nr": 204,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Catapult_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 205.25
-  },
-  {
-    "path_nr": 205,
-    "from_zone": "Catapult_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 205.25
-  },
-  {
-    "path_nr": 206,
+    "path_nr": 208,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Forecastle_Main",
     "is_hvac_ducted": true,
@@ -1859,7 +1875,7 @@
     "declared_flow_m3h": 287.35
   },
   {
-    "path_nr": 207,
+    "path_nr": 209,
     "from_zone": "Forecastle_Main",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -1867,26 +1883,6 @@
     "crusher_transfer": false,
     "ahs_nr": 1,
     "declared_flow_m3h": 287.35
-  },
-  {
-    "path_nr": 208,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Bow_Weather",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 215.515
-  },
-  {
-    "path_nr": 209,
-    "from_zone": "Bow_Weather",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 215.515
   },
   {
     "path_nr": 210,
