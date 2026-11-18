@@ -454,7 +454,7 @@
       "zone": "ZodiacPlatforms",
       "type": "open_deck",
       "area_m2": 51.381,
-      "exchange_m3h": 34039.3,
+      "exchange_m3h": 34021.0,
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
@@ -463,7 +463,7 @@
       "zone": "ActivityPlat",
       "type": "open_deck",
       "area_m2": 46.476,
-      "exchange_m3h": 30893.5,
+      "exchange_m3h": 30877.9,
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
@@ -472,7 +472,7 @@
       "zone": "ViewPlatforms",
       "type": "open_deck",
       "area_m2": 43.818,
-      "exchange_m3h": 27471.5,
+      "exchange_m3h": 27441.6,
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
@@ -481,7 +481,7 @@
       "zone": "SunDeck",
       "type": "open_deck",
       "area_m2": 60.0,
-      "exchange_m3h": 39351.8,
+      "exchange_m3h": 39348.8,
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
@@ -490,7 +490,7 @@
       "zone": "TopDeck",
       "type": "open_deck",
       "area_m2": 54.772,
-      "exchange_m3h": 35887.5,
+      "exchange_m3h": 35875.1,
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."

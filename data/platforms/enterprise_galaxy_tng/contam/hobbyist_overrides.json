@@ -54,6 +54,7 @@
     "AHU_FC_D24": 0.12,
     "AHU_FC_D25": 0.12
   },
+  "skip_duct_spines": true,
   "night_setback": true,
   "life_support_plenum": {
     "enabled": true,

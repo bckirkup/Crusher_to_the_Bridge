@@ -40,6 +40,8 @@ def test_spirit_hobbyist_export() -> None:
     )
     assert "(hobbyist)" in text
     assert _section_count(text, "flow paths") == len(path_map)
+    assert _section_count(text, "duct junctions") == 0
+    assert _section_count(text, "duct segments") == 0
     assert len(path_map) >= 400
 
 
@@ -48,4 +50,6 @@ def test_spirit_bundled_hobbyist_prj() -> None:
     entries = json.loads((_CONTAM / "path_map.json").read_text(encoding="utf-8"))
     assert "(hobbyist)" in text
     assert _section_count(text, "flow paths") == len(entries)
+    assert _section_count(text, "duct junctions") == 0
+    assert _section_count(text, "duct segments") == 0
     assert len(path_map_from_prj(text)) == len(entries)
