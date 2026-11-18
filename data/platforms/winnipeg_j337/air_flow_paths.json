@@ -141,44 +141,22 @@
     {
       "from": "HVAC_Accom",
       "to": "AHU_HD_HD_Aft",
-      "flow_rate_m3h": 665.84,
+      "flow_rate_m3h": 713.4,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Aft; the head exhausts overboard, never back to the served space. CONTAM-GROUPED-WEATHER-MISC-01: split from HVAC_Accom->AHU_HD_HD_Aft to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
-      "mechanism": "pressure_opening",
-      "filtered": false
-    },
-    {
-      "from": "Signal_Deck",
-      "to": "AHU_HD_HD_Aft",
-      "flow_rate_m3h": 47.56,
-      "is_hvac_ducted": false,
-      "path": "Sanitary_Makeup",
-      "direction": "oneway",
-      "description": "Transfer air into HD_Aft; the head exhausts overboard, never back to the served space. CONTAM-GROUPED-WEATHER-MISC-01: split from HVAC_Accom->AHU_HD_HD_Aft to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
+      "description": "Transfer air into HD_Aft; the head exhausts overboard, never back to the served space.",
       "mechanism": "pressure_opening",
       "filtered": false
     },
     {
       "from": "HVAC_Accom",
       "to": "AHU_HD_HD_Ups",
-      "flow_rate_m3h": 1109.7333333333,
+      "flow_rate_m3h": 1189.0,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Ups; the head exhausts overboard, never back to the served space. CONTAM-GROUPED-WEATHER-MISC-01: split from HVAC_Accom->AHU_HD_HD_Ups to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
-      "mechanism": "pressure_opening",
-      "filtered": false
-    },
-    {
-      "from": "Signal_Deck",
-      "to": "AHU_HD_HD_Ups",
-      "flow_rate_m3h": 79.2666666667,
-      "is_hvac_ducted": false,
-      "path": "Sanitary_Makeup",
-      "direction": "oneway",
-      "description": "Transfer air into HD_Ups; the head exhausts overboard, never back to the served space. CONTAM-GROUPED-WEATHER-MISC-01: split from HVAC_Accom->AHU_HD_HD_Ups to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
+      "description": "Transfer air into HD_Ups; the head exhausts overboard, never back to the served space.",
       "mechanism": "pressure_opening",
       "filtered": false
     }
@@ -370,7 +348,7 @@
       "zone": "Signal_Deck",
       "type": "open_deck",
       "area_m2": 54.567,
-      "exchange_m3h": 36170.4,
+      "exchange_m3h": 36224.2,
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open deck exchange with ambient (CONTAM-GROUPED-WEATHER-MISC-01). Owner ruling 2026-11-17: the opening REPLACES the HVAC_Accom group OA leg for this zone, so Signal_Deck is no longer a HVAC_Accom room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
@@ -379,7 +357,7 @@
       "zone": "Quarterdeck",
       "type": "open_deck",
       "area_m2": 84.047,
-      "exchange_m3h": 56140.3,
+      "exchange_m3h": 56104.7,
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open deck exchange with ambient (CONTAM-GROUPED-WEATHER-MISC-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Machinery group OA leg for this zone, so Quarterdeck is no longer a VENT_Machinery room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
@@ -388,7 +366,7 @@
       "zone": "Foc_Deck_Open",
       "type": "open_deck",
       "area_m2": 64.014,
-      "exchange_m3h": 42842.7,
+      "exchange_m3h": 42825.3,
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open deck exchange with ambient (CONTAM-GROUPED-WEATHER-MISC-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Machinery group OA leg for this zone, so Foc_Deck_Open is no longer a VENT_Machinery room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
