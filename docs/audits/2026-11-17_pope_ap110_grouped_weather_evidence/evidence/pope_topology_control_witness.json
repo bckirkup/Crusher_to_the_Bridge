@@ -1,0 +1,301 @@
+{
+  "ambient_opening_rows_current_path_map": 0,
+  "committed_audit_controls": {
+    "current_local_solve_summary_pope_rows": [
+      {
+        "balance_residual_m3h": "0.0001572293731442187",
+        "elapsed_seconds": "1.1588990259997445",
+        "envelope_dp_pa": "1355146.75",
+        "envelope_net_inward_m3h": "28574.922566698307",
+        "hull": "pope_ap110",
+        "interior_flowing_dp_pa": "58552.33203125",
+        "makeup_demand_m3h": "28574.92272392768",
+        "max_dp_pa": "1355146.75",
+        "mode": "commissioned",
+        "opening_net_inward_m3h": "0.0",
+        "project_sha256": "6dde4ae8146221f13557610c2e5737feb52ee4dafc843a3db16f37cb490b9cce",
+        "status": "solved",
+        "variant": "baseline"
+      },
+      {
+        "balance_residual_m3h": "-0.00436097369856725",
+        "elapsed_seconds": "1.2020245560001968",
+        "envelope_dp_pa": "806283.75",
+        "envelope_net_inward_m3h": "20489.26522679395",
+        "hull": "pope_ap110",
+        "interior_flowing_dp_pa": "804135.8125",
+        "makeup_demand_m3h": "28574.92272392768",
+        "max_dp_pa": "806283.75",
+        "mode": "commissioned",
+        "opening_net_inward_m3h": "8085.661858107431",
+        "project_sha256": "39e82239e7e91261b7e3a3c3af5fcff4189f1ba69d0ed48e361c4014d4124f6d",
+        "status": "solved",
+        "variant": "all_explicit_weather_open"
+      }
+    ],
+    "group_cut_budgets_pope_rows": [
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "2144.8586980492873",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_1",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "3116.00146484375",
+        "net_flow_along_authored_direction_m3h": "2144.8586980492873",
+        "path_count": "56",
+        "project_sha256": "6dde4ae8146221f13557610c2e5737feb52ee4dafc843a3db16f37cb490b9cce",
+        "variant": "baseline"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "744.4333224606695",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_2",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "541.7892456054688",
+        "net_flow_along_authored_direction_m3h": "730.195185841564",
+        "path_count": "77",
+        "project_sha256": "6dde4ae8146221f13557610c2e5737feb52ee4dafc843a3db16f37cb490b9cce",
+        "variant": "baseline"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "899.9358653076638",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_3",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "524.24169921875",
+        "net_flow_along_authored_direction_m3h": "-899.9358653076638",
+        "path_count": "121",
+        "project_sha256": "6dde4ae8146221f13557610c2e5737feb52ee4dafc843a3db16f37cb490b9cce",
+        "variant": "baseline"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "3030.884357429637",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_4",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "40400.84375",
+        "net_flow_along_authored_direction_m3h": "-2856.6576806182093",
+        "path_count": "187",
+        "project_sha256": "6dde4ae8146221f13557610c2e5737feb52ee4dafc843a3db16f37cb490b9cce",
+        "variant": "baseline"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "7268.713302465776",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_5",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "58552.33203125",
+        "net_flow_along_authored_direction_m3h": "-5576.084309748975",
+        "path_count": "476",
+        "project_sha256": "6dde4ae8146221f13557610c2e5737feb52ee4dafc843a3db16f37cb490b9cce",
+        "variant": "baseline"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "1487.6541888171455",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_1",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "1707.4501953125",
+        "net_flow_along_authored_direction_m3h": "1487.6541888171455",
+        "path_count": "56",
+        "project_sha256": "39e82239e7e91261b7e3a3c3af5fcff4189f1ba69d0ed48e361c4014d4124f6d",
+        "variant": "all_explicit_weather_open"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "824.2988271574459",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_2",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "681.7703247070312",
+        "net_flow_along_authored_direction_m3h": "807.3180689954838",
+        "path_count": "77",
+        "project_sha256": "39e82239e7e91261b7e3a3c3af5fcff4189f1ba69d0ed48e361c4014d4124f6d",
+        "variant": "all_explicit_weather_open"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "1017.7690522928306",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_3",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "667.5567016601562",
+        "net_flow_along_authored_direction_m3h": "-1017.7690522928306",
+        "path_count": "121",
+        "project_sha256": "39e82239e7e91261b7e3a3c3af5fcff4189f1ba69d0ed48e361c4014d4124f6d",
+        "variant": "all_explicit_weather_open"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "3708.7979088283364",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_4",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "53951.1875",
+        "net_flow_along_authored_direction_m3h": "-3526.0756095127235",
+        "path_count": "187",
+        "project_sha256": "39e82239e7e91261b7e3a3c3af5fcff4189f1ba69d0ed48e361c4014d4124f6d",
+        "variant": "all_explicit_weather_open"
+      },
+      {
+        "declared_group_reference_flow_m3h": "50.0",
+        "gross_flow_m3h": "12618.746134355039",
+        "hull": "pope_ap110",
+        "kind": "ladder_well_5",
+        "lane": "commissioned",
+        "max_abs_path_dp_pa": "804135.8125",
+        "net_flow_along_authored_direction_m3h": "-10527.137814085494",
+        "path_count": "476",
+        "project_sha256": "39e82239e7e91261b7e3a3c3af5fcff4189f1ba69d0ed48e361c4014d4124f6d",
+        "variant": "all_explicit_weather_open"
+      }
+    ],
+    "source_dir": "docs/audits/2026-11-17_contam_pressure_localization/evidence"
+  },
+  "contamx_binary": "third_party/contamx/contamx3",
+  "contamx_sha256": "d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b",
+  "fresh_pressure_diagnostic": {
+    "args": "--hull pope_ap110 --lane commissioned --lane design --all-paths",
+    "commissioned": {
+      "ahs_return_minus_supply_m3h": 28574.92272392768,
+      "ambient_opening_net_inward_m3h": 0,
+      "balance_residual_m3h": 0.0001572293731442187,
+      "envelope_dp_pa": 1355146.75,
+      "envelope_net_inward_m3h": 28574.922566698307,
+      "exhaust_sink_out_m3h": 0,
+      "interior_dp_pa": 58552.33203125,
+      "interior_flowing_dp_pa": 58552.33203125,
+      "makeup_demand_m3h": 28574.92272392768,
+      "max_abs_dp_pa": 1355146.75,
+      "path_count": 1343,
+      "zone_count": 88
+    },
+    "commissioned_dp_by_kind_max": {
+      "Sanitary_Makeup": 529.5870971679688,
+      "ahs_exhaust": 214.65565490722656,
+      "ahs_oa": 214.65565490722656,
+      "ahs_recirc": 0.0,
+      "ahs_return": 0.0,
+      "ahs_supply": 0.0,
+      "envelope_leak": 1355146.75,
+      "ladder_well_1": 3116.00146484375,
+      "ladder_well_2": 541.7892456054688,
+      "ladder_well_3": 524.24169921875,
+      "ladder_well_4": 40400.84375,
+      "ladder_well_5": 58552.33203125,
+      "passageway": 308.7336120605469,
+      "trunk": 150.13104248046875
+    },
+    "design": {
+      "ahs_return_minus_supply_m3h": 0.0,
+      "ambient_opening_net_inward_m3h": 0,
+      "balance_residual_m3h": 1.2064196042160802e-07,
+      "envelope_dp_pa": 214.65565490722656,
+      "envelope_net_inward_m3h": -1.2064196042160802e-07,
+      "exhaust_sink_out_m3h": 0,
+      "interior_dp_pa": 2.207158088684082,
+      "interior_flowing_dp_pa": 0.08148563653230667,
+      "makeup_demand_m3h": 0.0,
+      "max_abs_dp_pa": 214.65565490722656,
+      "path_count": 1343,
+      "zone_count": 88
+    },
+    "ladder_well_links_commissioned": [
+      {
+        "gross_flow_m3h": 2144.858698049288,
+        "kind": "ladder_well_1",
+        "max_abs_dp_pa": 3116.00146484375,
+        "n": 56,
+        "net_flow_m3h": 2144.858698049288
+      },
+      {
+        "gross_flow_m3h": 744.4333224606696,
+        "kind": "ladder_well_2",
+        "max_abs_dp_pa": 541.7892456054688,
+        "n": 77,
+        "net_flow_m3h": 730.1951858415641
+      },
+      {
+        "gross_flow_m3h": 899.9358653076629,
+        "kind": "ladder_well_3",
+        "max_abs_dp_pa": 524.24169921875,
+        "n": 121,
+        "net_flow_m3h": -899.9358653076629
+      },
+      {
+        "gross_flow_m3h": 3030.884357429637,
+        "kind": "ladder_well_4",
+        "max_abs_dp_pa": 40400.84375,
+        "n": 187,
+        "net_flow_m3h": -2856.6576806182084
+      },
+      {
+        "gross_flow_m3h": 7268.713302465775,
+        "kind": "ladder_well_5",
+        "max_abs_dp_pa": 58552.33203125,
+        "n": 476,
+        "net_flow_m3h": -5576.084309748977
+      }
+    ],
+    "ladder_well_links_design": [
+      {
+        "gross_flow_m3h": 3.3556167398461394,
+        "kind": "ladder_well_1",
+        "max_abs_dp_pa": 0.012110949493944645,
+        "n": 56,
+        "net_flow_m3h": -3.3556167398461394
+      },
+      {
+        "gross_flow_m3h": 1.5664525767331072,
+        "kind": "ladder_well_2",
+        "max_abs_dp_pa": 0.0035783699713647366,
+        "n": 77,
+        "net_flow_m3h": -1.0874940240142486
+      },
+      {
+        "gross_flow_m3h": 1.6142373440971076,
+        "kind": "ladder_well_3",
+        "max_abs_dp_pa": 0.006371638737618923,
+        "n": 121,
+        "net_flow_m3h": -0.1032041611583792
+      },
+      {
+        "gross_flow_m3h": 1.4445330953991389,
+        "kind": "ladder_well_4",
+        "max_abs_dp_pa": 0.009860247373580933,
+        "n": 187,
+        "net_flow_m3h": -0.25101834161311953
+      },
+      {
+        "gross_flow_m3h": 6.191436673026388,
+        "kind": "ladder_well_5",
+        "max_abs_dp_pa": 0.08148563653230667,
+        "n": 476,
+        "net_flow_m3h": 2.4628136165170518
+      }
+    ],
+    "output": "telemetry_buffer/pope_g2_pressure.json (gitignored; not committed)",
+    "tool": "tools/diag/contam_pressure_balance_diagnostic.py"
+  },
+  "head_sha": "0229916a4750c4ce5b625d1616aad57bbffb3967",
+  "paired_control_status": {
+    "control_A_topology_closure_hvac_no_openings": "not_run: requires owner-frozen P0-P3 topology/closure/group change; no platform data authored in this leg",
+    "control_B_three_open_deck_openings_no_topology_change": "already witnessed by committed audit variant all_explicit_weather_open; not re-authored here",
+    "control_C_both": "blocked until control A exists"
+  },
+  "platform_id": "pope_ap110",
+  "platform_input_sha256": {
+    "air_flow_paths.json": "d50e270e9fc747ec7b19aef070714c59b93e55a0cc75477a90543cf75be15433",
+    "contam/hobbyist_overrides.json": "38e67b87c8666012883651f16ef67d748c636b6ef2bfe22109e91f65ac4ad848",
+    "contam/path_map.json": "71101f715ce8c674e0cbc9d673348da1f185419be460cd9492516ad0cc47c03d",
+    "spatial_layout.json": "47324ba4cb6375e03d364d87674c2d411f650ef301b636131fcf0b41e92ee4cf",
+    "systems_notes.json": "0ada596c72a9de07dc6cb00bb7937257816a61bd1b285ab57e38ee77aafdae12"
+  },
+  "schema_version": "1.0",
+  "stage": "G2 Pope topology/closure evidence (no authoring)"
+}
