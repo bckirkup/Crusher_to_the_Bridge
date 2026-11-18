@@ -50,6 +50,7 @@ ShipSimulation(spec).run()
 | Block | Role |
 |-------|------|
 | `transmission.contact_mode` | `per_partner_contact` (default): sampled partners' shedding, not a zone average; other modes are `density_dependent`, `heterogeneous_zone_dose`, and `legacy` — see `docs/density_contact_spec.md` |
+| `transmission.room_air_removal` | `first_order` default: room-pool inhalation uses `build_zone_air_exchange_map` ACH, including positive `ambient_openings` exchange/volume; `sealed` is the labelled baseline — see `docs/ledger/ROOM-AIR-01.md` |
 | `agent_behavior` | Dining/free rotation probabilities (default `0.0` for golden stability) — see `docs/multi_pathogen_model_changes_spec.md` |
 
 Pathogen profiles may include `transmission_route_weights`, formal `dose_adjustment`

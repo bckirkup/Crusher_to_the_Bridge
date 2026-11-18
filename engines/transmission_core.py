@@ -16062,19 +16062,77 @@ def build_hvac_downstream_map(
     return downstream
 
 
+def _ambient_opening_exchange_rate(
+    record: dict[str, Any],
+    axis: Mapping[str, float],
+) -> float:
+    """Native exchange rate of one ambient opening: record, then type axis."""
+    declared = record.get("exchange_m3h")
+    if declared is not None:
+        return float(declared)
+    opening_type = str(record["type"])
+    if opening_type not in axis:
+        raise ValueError(
+            "ambient_openings entry for "
+            f"{record['zone']!r} declares no exchange_m3h and "
+            f"hvac.ambient_exchange_m3h has no rate for type "
+            f"{opening_type!r}",
+        )
+    return float(axis[opening_type])
+
+
+def _ambient_opening_ach_contributions(
+    airflow_paths: dict[str, Any],
+    zone_volumes: Mapping[str, float] | None,
+    ambient_exchange_m3h: Mapping[str, float] | None,
+) -> dict[str, float]:
+    """Room -> ACH contributed by positive ambient-opening exchange.
+
+    ``exchange_m3h = 0.0`` records contribute nothing and never create a
+    map entry, so a zero make-up louvre cannot override the zone's declared
+    HVAC rate or its undeclared-zone fallback.
+    """
+    from engines.py_contam_bridge import ambient_opening_records
+
+    axis = dict(ambient_exchange_m3h or {})
+    exchange_by_zone: dict[str, float] = {}
+    for record in ambient_opening_records(airflow_paths):
+        rate = _ambient_opening_exchange_rate(record, axis)
+        if rate <= 0.0:
+            continue
+        zone = str(record["zone"])
+        exchange_by_zone[zone] = exchange_by_zone.get(zone, 0.0) + rate
+
+    volumes = dict(zone_volumes or {})
+    rates: dict[str, float] = {}
+    for zone, exchange in exchange_by_zone.items():
+        volume = float(volumes.get(zone, 0.0))
+        if not math.isfinite(volume) or volume <= 0.0:
+            raise ValueError(
+                "ambient_openings positive exchange needs a positive "
+                f"volume_m3 for {zone!r}, got {volumes.get(zone)!r}",
+            )
+        rates[zone] = exchange / volume
+    return rates
+
+
 def build_zone_air_exchange_map(
     airflow_paths: dict[str, Any],
+    zone_volumes: Mapping[str, float] | None = None,
+    ambient_exchange_m3h: Mapping[str, float] | None = None,
 ) -> dict[str, float]:
-    """Room -> air changes removed per hour, from air_flow_paths.json.
+    """Room -> air changes removed per hour, from platform airflow data.
 
     The declared AHU figure is ``ach`` x ``hvac_duty`` — the same ``ach *
     volume * duty`` mass flow the CONTAM bridge uses for room->plenum
     return (``_build_one_hvac_zone_paths``). A branch that declares
     ``hvac_duty: 0`` with ``oa_fraction: 1.0`` is a dedicated exhaust fan
     (the sanitary extract branches): it is not on the AHU duty cycle and
-    still removes room air at the declared ``ach``. Rooms on no declared
-    HVAC zone get no entry, and the engine reads absence as the pre-change
-    sealed-room baseline.
+    still removes room air at the declared ``ach``. Positive
+    ``ambient_openings`` exchange adds ``sum(exchange_m3h) / volume_m3``
+    on top (ROOM-AIR-01-AMBIENT-EXCHANGE-01); zero-exchange records add
+    nothing. Rooms with no HVAC entry and no positive opening get no entry,
+    and the engine reads absence as the pre-change sealed-room baseline.
     """
     default_duty = float(airflow_paths.get("hvac_duty", 1.0))
     default_oa = float(airflow_paths.get("oa_fraction", 0.2))
@@ -16089,4 +16147,10 @@ def build_zone_air_exchange_map(
             rate = ach
         for room in hvac_zone.get("rooms", []):
             rates[room] = rate
+    for zone, opening_ach in _ambient_opening_ach_contributions(
+        airflow_paths,
+        zone_volumes,
+        ambient_exchange_m3h,
+    ).items():
+        rates[zone] = rates.get(zone, 0.0) + opening_ach
     return rates

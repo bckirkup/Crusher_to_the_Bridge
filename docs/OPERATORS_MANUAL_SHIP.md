@@ -90,6 +90,7 @@ Key knobs in `crusher_labs/config.yaml` (overridable via Picard `config_override
 |------|---------|-------|
 | `transmission.contact_mode` | `per_partner_contact` | Each susceptible receives shedding from the specific partners sampled; alternates `density_dependent`, `heterogeneous_zone_dose`, `legacy` ([density_contact_spec.md](density_contact_spec.md)) |
 | `transmission.cabin_air_mode` | `cabin_compartment` | Short-range inhalation resolved per stateroom; `zone_pool` is the labelled pre-change baseline ([cabin_air_compartment_spec.md](cabin_air_compartment_spec.md)) |
+| `transmission.room_air_removal` | `first_order` | Room-pool inhalation doses the epoch-mean of a pool exchanging at the zone ACH from `build_zone_air_exchange_map`: HVAC `ach × hvac_duty` plus positive `ambient_openings.exchange_m3h / volume_m3` (zero-exchange records inert; null defers to `hvac.ambient_exchange_m3h`); `sealed` is the labelled pre-change baseline |
 | `transmission.droplet_emission_mode` | `profile_conditioned` | `shipped_uniform` restores the pre-deletion uniform droplet fraction as a selectable baseline |
 | `transmission.droplet_field_split.mode` | `partition` | Zone pool carries `far_field_share`; the rest reaches a partner-bounded proximity ring ([droplet_field_split_spec.md](droplet_field_split_spec.md)) |
 | `transmission.near_field_air.mode` | `two_box` | `off` is the labelled baseline ([near_field_air_spec.md](near_field_air_spec.md)) |

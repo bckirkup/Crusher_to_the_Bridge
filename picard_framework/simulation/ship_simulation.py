@@ -57,6 +57,7 @@ from engines.py_contam_bridge import (
     DEFAULT_PATHOGEN_POOL_TRANSPORT,
     build_transport_engine,
     load_air_flow_paths,
+    parse_ambient_exchange_axis,
     parse_outdoor_air_fraction_override,
     parse_passive_link_mode,
     parse_pathogen_pool_transport,
@@ -432,11 +433,20 @@ class ShipSimulation:
                 ),
             ) if airflow_data else {}
         )
-        # Room -> air changes per hour from the hull's declared AHU figures;
-        # the room-pool routes dilute each epoch's emission through this
-        # removal instead of an implicit sealed room.
+        # Room -> air changes per hour from the hull's declared AHU figures
+        # plus positive ambient-opening exchange; the room-pool routes
+        # dilute each epoch's emission through this removal instead of an
+        # implicit sealed room.
         zone_air_exchange = (
-            build_zone_air_exchange_map(airflow_data) if airflow_data else {}
+            build_zone_air_exchange_map(
+                airflow_data,
+                zone_volumes=self.zone_volumes,
+                ambient_exchange_m3h=parse_ambient_exchange_axis(
+                    self.cfg.get("hvac") or {},
+                ),
+            )
+            if airflow_data
+            else {}
         )
         # Served zone -> sex-keyed head block, from each head's declared
         # ``serves`` list. Head ids carry a _M/_F suffix; a single-fixture

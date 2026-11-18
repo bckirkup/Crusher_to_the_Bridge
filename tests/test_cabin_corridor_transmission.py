@@ -1013,6 +1013,96 @@ class TestRoomAirRemoval:
         assert rates["Idle"] == pytest.approx(0.0)
         assert "Undeclared" not in rates
 
+    def test_ambient_openings_add_positive_exchange_as_ach(self) -> None:
+        """ROOM-AIR-01-AMBIENT-EXCHANGE-01: sum(exchange_m3h) / volume_m3."""
+        paths = {
+            "hvac_zones": [{"ach": 6.0, "rooms": ["Dining"]}],
+            "ambient_openings": [
+                {
+                    "zone": "PoolDeck", "type": "open_deck",
+                    "area_m2": 10.0, "exchange_m3h": 200.0,
+                },
+                {
+                    "zone": "PoolDeck", "type": "balcony_door",
+                    "area_m2": 2.0, "exchange_m3h": 100.0,
+                },
+                {
+                    "zone": "MainDining", "type": "makeup_louvre",
+                    "area_m2": 1.0, "exchange_m3h": 0.0,
+                },
+            ],
+        }
+        rates = tc_mod.build_zone_air_exchange_map(
+            paths,
+            {"PoolDeck": 400.0, "Dining": 100.0},
+        )
+        assert rates["PoolDeck"] == pytest.approx(0.75)
+        assert rates["Dining"] == pytest.approx(6.0)
+        assert "MainDining" not in rates
+
+    def test_ambient_exchange_is_additive_to_hvac_rate(self) -> None:
+        paths = {
+            "hvac_zones": [{"ach": 2.0, "rooms": ["OpenDeck"]}],
+            "ambient_openings": [
+                {
+                    "zone": "OpenDeck", "type": "open_deck",
+                    "area_m2": 10.0, "exchange_m3h": 100.0,
+                },
+            ],
+        }
+        rates = tc_mod.build_zone_air_exchange_map(paths, {"OpenDeck": 100.0})
+        assert rates["OpenDeck"] == pytest.approx(3.0)
+
+    def test_zero_ambient_exchange_never_creates_or_overrides_rate(self) -> None:
+        paths = {
+            "hvac_zones": [{"ach": 4.0, "rooms": ["Lounge"]}],
+            "ambient_openings": [
+                {
+                    "zone": "Lounge", "type": "makeup_louvre",
+                    "area_m2": 1.0, "exchange_m3h": 0.0,
+                },
+                {
+                    "zone": "Absent", "type": "makeup_louvre",
+                    "area_m2": 1.0, "exchange_m3h": 0.0,
+                },
+            ],
+        }
+        rates = tc_mod.build_zone_air_exchange_map(paths, {})
+        assert rates["Lounge"] == pytest.approx(4.0)
+        assert "Absent" not in rates
+
+    def test_null_ambient_exchange_reads_type_axis(self) -> None:
+        paths = {
+            "ambient_openings": [
+                {
+                    "zone": "PoolDeck", "type": "open_deck",
+                    "area_m2": 10.0, "exchange_m3h": None,
+                },
+            ],
+        }
+        rates = tc_mod.build_zone_air_exchange_map(
+            paths,
+            {"PoolDeck": 50.0},
+            {"open_deck": 250.0},
+        )
+        assert rates["PoolDeck"] == pytest.approx(5.0)
+        with pytest.raises(ValueError, match="ambient_exchange_m3h"):
+            tc_mod.build_zone_air_exchange_map(paths, {"PoolDeck": 50.0})
+
+    def test_positive_ambient_exchange_requires_zone_volume(self) -> None:
+        paths = {
+            "ambient_openings": [
+                {
+                    "zone": "PoolDeck", "type": "open_deck",
+                    "area_m2": 10.0, "exchange_m3h": 100.0,
+                },
+            ],
+        }
+        with pytest.raises(ValueError, match="volume_m3"):
+            tc_mod.build_zone_air_exchange_map(paths, {})
+        with pytest.raises(ValueError, match="volume_m3"):
+            tc_mod.build_zone_air_exchange_map(paths)
+
     def test_undeclared_zone_keeps_sealed_dose(self) -> None:
         """No declared ACH and first_order still sealed: baseline dose."""
         zone = "Droplet_Test"
