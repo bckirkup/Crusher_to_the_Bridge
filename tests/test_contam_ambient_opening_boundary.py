@@ -201,7 +201,9 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # weather-deck opening; CONTAM-AMBIENT-WEATHER-DESTROYER-01 adds two legs
     # per destroyer roster weather opening; CONTAM-AMBIENT-WEATHER-CARRIER-01
     # adds two legs on each ungrouped carrier flight deck (lexington_cv2,
-    # saratoga_cv3); CONTAM-AMBIENT-WEATHER-BATTLESHIP-01 adds two legs per
+    # saratoga_cv3); CONTAM-GROUPED-WEATHER-CARRIER-01 adds two legs per
+    # grouped carrier weather opening; CONTAM-AMBIENT-WEATHER-BATTLESHIP-01
+    # adds two legs per
     # ungrouped battleship weather opening;
     # CONTAM-AMBIENT-WEATHER-CRUISER-01 adds two legs on each
     # zero-outdoor-exchange AHU_Weather room of alexander_henry_cgs119;
@@ -235,6 +237,10 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "keppler_dd765": 14, "nields_dd616": 10, "palmer_dms5": 2,
         "sigsbee_dd502": 8,
         "lexington_cv2": 2, "saratoga_cv3": 2,
+        "antietam_cvs36": 6, "battler_acv6": 4,
+        "independence_cvl26": 8, "puncher_cve53": 2,
+        "ranger_cv4": 4, "saratoga_cv60": 2, "thetis_bay_cve90": 2,
+        "wasp_cv7": 2, "wright_cc2": 6, "yorktown_cv5": 2,
         "new_york_bb34": 12, "south_dakota_bb49": 8, "texas_bb35": 10,
         "west_virginia_bb48": 10, "alexander_henry_cgs119": 8,
         "astoria_ca34": 10, "chicago_cg11": 16, "miami_cl89": 4,

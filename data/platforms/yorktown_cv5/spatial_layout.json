@@ -91,7 +91,8 @@
         "y": 13.0
       },
       "max_occupancy": 300,
-      "description": "Open flight deck, arresting gear + landing lights, 3 elevator cutouts, catapult tracks fwd/mid."
+      "description": "Open flight deck, arresting gear + landing lights, 3 elevator cutouts, catapult tracks fwd/mid.",
+      "exposure": "weather"
     },
     {
       "id": "Squadron_Storerooms_02",

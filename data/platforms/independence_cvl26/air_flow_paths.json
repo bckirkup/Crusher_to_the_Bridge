@@ -5,28 +5,14 @@
   "hvac_duty": 0.5,
   "hvac_zones": [
     {
-      "id": "VENT_Weather",
-      "rooms": [
-        "Flight_Deck",
-        "Forecastle_Deck",
-        "Poop_Deck"
-      ],
-      "ach": 1.0,
-      "description": "Open-air weather decks",
-      "oa_fraction": 1.0,
-      "vent_mode": "nat_supply",
-      "evidence": "era_plausible"
-    },
-    {
       "id": "VENT_Hangar",
       "rooms": [
         "Hangar_Aft",
         "Hangar_Fwd",
-        "Gallery_Deck",
         "Hangar_Trunk_Space"
       ],
       "ach": 4.0,
-      "description": "Hangar natural supply via side roller doors + intake trunks; fuel-vapor purge era-plausible",
+      "description": "Hangar natural supply via side roller doors + intake trunks; fuel-vapor purge era-plausible. CONTAM-GROUPED-WEATHER-CARRIER-01: Gallery_Deck left this group; the open_deck ambient_openings record replaces the group OA leg for those zones (no double-count), and remaining members keep the group HVAC declaration.",
       "oa_fraction": 0.8,
       "vent_mode": "nat_supply",
       "evidence": "sheet_read"
@@ -150,12 +136,67 @@
   ],
   "cross_zone_links": [
     {
-      "from": "VENT_Weather",
+      "from": "Flight_Deck",
       "to": "VENT_Hangar",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 12.5,
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches. CONTAM-GROUPED-WEATHER-CARRIER-01: split/re-addressed from VENT_Weather -> VENT_Hangar (50 m3/h); this record keeps the per-room-pair reference flow 50/12 m3/h.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Flight_Deck",
+      "to": "Gallery_Deck",
+      "flow_rate_m3h": 4.166666666666667,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches. CONTAM-GROUPED-WEATHER-CARRIER-01: split/re-addressed from VENT_Weather -> VENT_Hangar (50 m3/h); this record keeps the per-room-pair reference flow 50/12 m3/h.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Forecastle_Deck",
+      "to": "VENT_Hangar",
+      "flow_rate_m3h": 12.5,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches. CONTAM-GROUPED-WEATHER-CARRIER-01: split/re-addressed from VENT_Weather -> VENT_Hangar (50 m3/h); this record keeps the per-room-pair reference flow 50/12 m3/h.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Forecastle_Deck",
+      "to": "Gallery_Deck",
+      "flow_rate_m3h": 4.166666666666667,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches. CONTAM-GROUPED-WEATHER-CARRIER-01: split/re-addressed from VENT_Weather -> VENT_Hangar (50 m3/h); this record keeps the per-room-pair reference flow 50/12 m3/h.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Poop_Deck",
+      "to": "VENT_Hangar",
+      "flow_rate_m3h": 12.5,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches. CONTAM-GROUPED-WEATHER-CARRIER-01: split/re-addressed from VENT_Weather -> VENT_Hangar (50 m3/h); this record keeps the per-room-pair reference flow 50/12 m3/h.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Poop_Deck",
+      "to": "Gallery_Deck",
+      "flow_rate_m3h": 4.166666666666667,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches. CONTAM-GROUPED-WEATHER-CARRIER-01: split/re-addressed from VENT_Weather -> VENT_Hangar (50 m3/h); this record keeps the per-room-pair reference flow 50/12 m3/h.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -163,10 +204,21 @@
     {
       "from": "VENT_Hangar",
       "to": "HVAC_Accom",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 37.49999999999999,
       "path": "ladder_well_2",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches. CONTAM-GROUPED-WEATHER-CARRIER-01: split/re-addressed from VENT_Hangar -> HVAC_Accom (50 m3/h); this record keeps the per-room-pair reference flow 50/36 m3/h.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Gallery_Deck",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 12.5,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches. CONTAM-GROUPED-WEATHER-CARRIER-01: split/re-addressed from VENT_Hangar -> HVAC_Accom (50 m3/h); this record keeps the per-room-pair reference flow 50/36 m3/h.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -484,6 +536,44 @@
       "from": "Hold_Tanks",
       "to": "Stern_Hold",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Gallery_Deck",
+      "type": "open_deck",
+      "area_m2": 181.819,
+      "exchange_m3h": 120801.8,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-GROUPED-WEATHER-CARRIER-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Hangar group OA leg for this zone, so Gallery_Deck is no longer a VENT_Hangar room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Flight_Deck",
+      "type": "open_deck",
+      "area_m2": 345.626,
+      "exchange_m3h": 226379.6,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-GROUPED-WEATHER-CARRIER-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Weather group OA leg for this zone, so Flight_Deck is no longer a VENT_Weather room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Poop_Deck",
+      "type": "open_deck",
+      "area_m2": 92.222,
+      "exchange_m3h": 61453.7,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-GROUPED-WEATHER-CARRIER-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Weather group OA leg for this zone, so Poop_Deck is no longer a VENT_Weather room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Forecastle_Deck",
+      "type": "open_deck",
+      "area_m2": 118.182,
+      "exchange_m3h": 78583.1,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-GROUPED-WEATHER-CARRIER-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Weather group OA leg for this zone, so Forecastle_Deck is no longer a VENT_Weather room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ]
 }

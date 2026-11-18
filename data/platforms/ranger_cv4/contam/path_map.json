@@ -1135,7 +1135,7 @@
   },
   {
     "path_nr": 127,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Gallery_Walkway",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1144,7 +1144,7 @@
   },
   {
     "path_nr": 128,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Gallery_Walkway",
     "to_zone": "Hangar_Mid",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1153,7 +1153,7 @@
   },
   {
     "path_nr": 129,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Gallery_Walkway",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1162,7 +1162,7 @@
   },
   {
     "path_nr": 130,
-    "from_zone": "Gallery_Walkway",
+    "from_zone": "Gun_Platform_Aft",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1171,7 +1171,7 @@
   },
   {
     "path_nr": 131,
-    "from_zone": "Gallery_Walkway",
+    "from_zone": "Gun_Platform_Aft",
     "to_zone": "Hangar_Mid",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1180,7 +1180,7 @@
   },
   {
     "path_nr": 132,
-    "from_zone": "Gallery_Walkway",
+    "from_zone": "Gun_Platform_Aft",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1189,7 +1189,7 @@
   },
   {
     "path_nr": 133,
-    "from_zone": "Gun_Platform_Aft",
+    "from_zone": "Gun_Platform_Fwd",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1198,7 +1198,7 @@
   },
   {
     "path_nr": 134,
-    "from_zone": "Gun_Platform_Aft",
+    "from_zone": "Gun_Platform_Fwd",
     "to_zone": "Hangar_Mid",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1207,7 +1207,7 @@
   },
   {
     "path_nr": 135,
-    "from_zone": "Gun_Platform_Aft",
+    "from_zone": "Gun_Platform_Fwd",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1216,7 +1216,7 @@
   },
   {
     "path_nr": 136,
-    "from_zone": "Gun_Platform_Fwd",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Fwd",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1225,7 +1225,7 @@
   },
   {
     "path_nr": 137,
-    "from_zone": "Gun_Platform_Fwd",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Mid",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1234,7 +1234,7 @@
   },
   {
     "path_nr": 138,
-    "from_zone": "Gun_Platform_Fwd",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Aft",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -6499,6 +6499,42 @@
   },
   {
     "path_nr": 723,
+    "from_zone": "Flight_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 724,
+    "from_zone": "Flight_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 725,
+    "from_zone": "Poop_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 726,
+    "from_zone": "Poop_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 727,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -6507,7 +6543,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 724,
+    "path_nr": 728,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -6516,7 +6552,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 725,
+    "path_nr": 729,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -6525,27 +6561,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 726,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Flight_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 8260.425
-  },
-  {
-    "path_nr": 727,
-    "from_zone": "Flight_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 8260.425
-  },
-  {
-    "path_nr": 728,
+    "path_nr": 730,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Gallery_Walkway",
     "is_hvac_ducted": true,
@@ -6555,7 +6571,7 @@
     "declared_flow_m3h": 6924.595
   },
   {
-    "path_nr": 729,
+    "path_nr": 731,
     "from_zone": "Gallery_Walkway",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6565,7 +6581,7 @@
     "declared_flow_m3h": 6924.595
   },
   {
-    "path_nr": 730,
+    "path_nr": 732,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Gun_Platform_Aft",
     "is_hvac_ducted": true,
@@ -6575,7 +6591,7 @@
     "declared_flow_m3h": 643.33
   },
   {
-    "path_nr": 731,
+    "path_nr": 733,
     "from_zone": "Gun_Platform_Aft",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6585,7 +6601,7 @@
     "declared_flow_m3h": 643.33
   },
   {
-    "path_nr": 732,
+    "path_nr": 734,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Gun_Platform_Fwd",
     "is_hvac_ducted": true,
@@ -6595,7 +6611,7 @@
     "declared_flow_m3h": 1138.505
   },
   {
-    "path_nr": 733,
+    "path_nr": 735,
     "from_zone": "Gun_Platform_Fwd",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -6603,26 +6619,6 @@
     "crusher_transfer": false,
     "ahs_nr": 1,
     "declared_flow_m3h": 1138.505
-  },
-  {
-    "path_nr": 734,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Poop_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 726.315
-  },
-  {
-    "path_nr": 735,
-    "from_zone": "Poop_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 726.315
   },
   {
     "path_nr": 736,
