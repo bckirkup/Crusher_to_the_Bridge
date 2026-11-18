@@ -93,10 +93,10 @@ _MAKEUP_RECORDS = {
 # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
 # CONTAM-AMBIENT-WEATHER-DESTROYER-01, CONTAM-AMBIENT-WEATHER-CARRIER-01,
 # CONTAM-AMBIENT-WEATHER-BATTLESHIP-01, CONTAM-AMBIENT-WEATHER-CRUISER-01,
-# CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01, CONTAM-AMBIENT-WEATHER-AUXILIARY-01
-# and CONTAM-AMBIENT-WEATHER-MISC-01: one ``open_deck`` record per declared
-# weather zone on the cruise, destroyer, carrier, battleship, cruiser,
-# amphibious, auxiliary and misc roster hulls.
+# CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01, CONTAM-AMBIENT-WEATHER-AUXILIARY-01,
+# CONTAM-AMBIENT-WEATHER-MISC-01 and CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01:
+# one ``open_deck`` record per declared weather zone on the cruise, destroyer,
+# carrier, battleship, cruiser, amphibious, auxiliary and misc roster hulls.
 _WEATHER_ZONES = {
     "classic_cruise_1900": {"PoolDeck"},
     "diamond_princess": {
@@ -161,8 +161,8 @@ _WEATHER_ZONES = {
         "Forecastle_Working",
     },
     # CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01: ungrouped amphibious weather zones;
-    # HVAC-grouped amphibious weather zones stay untouched as the known
-    # grouped-zone open item.
+    # CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 adds the remaining grouped
+    # amphibious weather zones (the opening replaces the group OA leg).
     "lsm_354": {
         "Forecastle_Weather", "Bridge_Wings", "Weather_Aft_Super",
         "Weather_Fwd_Super",
@@ -170,8 +170,10 @@ _WEATHER_ZONES = {
     "middlesex_lst983": {
         "Gun_Platform_Aft_Bridge", "Boat_Deck", "Gun_Platforms_Fwd_Bridge",
         "Fantail_Main", "Gun_Platform_Aft_Main", "Weather_Deck_Amids",
-        "Forecastle_Bow",
+        "Forecastle_Bow", "Tank_Deck", "Tank_Deck_Port",
     },
+    "fort_mandan_lsd21": {"Top_House_Open", "Well_Cover_Open", "Well_Deck"},
+    "san_antonio_class_lpd": {"Flight_Deck", "Well_Deck"},
     "ruchamkin_apd89": {
         "Boat_Deck_Open", "Island_Open_Aft", "Fantail", "Focsle_Deck",
     },

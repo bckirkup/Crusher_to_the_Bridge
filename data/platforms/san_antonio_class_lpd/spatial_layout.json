@@ -201,7 +201,8 @@
         "x": 50,
         "y": 16
       },
-      "description": "Well deck (64m × 15m). Floodable for LCAC operations. Two LCAC or one LCU capacity. Partially open to sea when flooded."
+      "description": "Well deck (64m × 15m). Floodable for LCAC operations. Two LCAC or one LCU capacity. Partially open to sea when flooded.",
+      "exposure": "weather"
     },
     {
       "id": "Flight_Deck",
@@ -214,7 +215,8 @@
         "x": 35,
         "y": 16
       },
-      "description": "Flight deck with 2 MV-22/CH-53 spots. Open to weather. Aircraft handling and fueling stations."
+      "description": "Flight deck with 2 MV-22/CH-53 spots. Open to weather. Aircraft handling and fueling stations.",
+      "exposure": "weather"
     },
     {
       "id": "Hangar",

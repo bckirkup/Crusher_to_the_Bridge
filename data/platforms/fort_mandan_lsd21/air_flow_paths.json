@@ -46,13 +46,11 @@
     {
       "id": "VENT_Well_Deck",
       "rooms": [
-        "Well_Deck",
-        "Well_Cover_Open",
         "Gallery_Port",
         "Gallery_Stbd"
       ],
       "ach": 4.0,
-      "description": "well deck dock bay + open main deck cover — open-air natural ventilation",
+      "description": "well deck dock bay + open main deck cover — open-air natural ventilation Well_Deck, Well_Cover_Open left this group under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01: their outdoor exchange is the open_deck ambient_openings record, which replaces the group OA leg for those zones (no double-count).",
       "oa_fraction": 1.0,
       "vent_mode": "mech_exhaust",
       "evidence": "sheet_read"
@@ -60,7 +58,6 @@
     {
       "id": "VENT_Machinery_Holds",
       "rooms": [
-        "Top_House_Open",
         "Forecastle_MD",
         "Machine_Shop",
         "Shipfitters_Flat",
@@ -85,7 +82,7 @@
         "Ballast_Tanks_Stbd"
       ],
       "ach": 10.0,
-      "description": "machinery, shaft tunnels, stores, ammunition and tanks",
+      "description": "machinery, shaft tunnels, stores, ammunition and tanks Top_House_Open left this group under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01: their outdoor exchange is the open_deck ambient_openings record, which replaces the group OA leg for those zones (no double-count).",
       "oa_fraction": 0.9,
       "vent_mode": "mech_supply_exhaust",
       "evidence": "sheet_read"
@@ -155,11 +152,55 @@
     },
     {
       "from": "VENT_Berthing_Messing",
-      "to": "VENT_Well_Deck",
-      "flow_rate_m3h": 50.0,
+      "to": "Well_Deck",
+      "flow_rate_m3h": 12.5,
       "path": "ladder_well_2",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/32 m3/h after Well_Deck and Well_Cover_Open left VENT_Well_Deck. Segment: berthing/messing group to Well_Deck.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "VENT_Berthing_Messing",
+      "to": "Well_Cover_Open",
+      "flow_rate_m3h": 12.5,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/32 m3/h after Well_Deck and Well_Cover_Open left VENT_Well_Deck. Segment: berthing/messing group to Well_Cover_Open.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "VENT_Berthing_Messing",
+      "to": "VENT_Well_Deck",
+      "flow_rate_m3h": 25.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/32 m3/h after Well_Deck and Well_Cover_Open left VENT_Well_Deck. Segment: berthing/messing group to the remaining well-deck galleries.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Well_Deck",
+      "to": "VENT_Machinery_Holds",
+      "flow_rate_m3h": 11.956521739130434,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/92 m3/h after Well_Deck/Well_Cover_Open left VENT_Well_Deck and Top_House_Open left VENT_Machinery_Holds. Segment: Well_Deck to remaining machinery-hold rooms.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Well_Cover_Open",
+      "to": "VENT_Machinery_Holds",
+      "flow_rate_m3h": 11.956521739130434,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/92 m3/h after Well_Deck/Well_Cover_Open left VENT_Well_Deck and Top_House_Open left VENT_Machinery_Holds. Segment: Well_Cover_Open to remaining machinery-hold rooms.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -167,10 +208,43 @@
     {
       "from": "VENT_Well_Deck",
       "to": "VENT_Machinery_Holds",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 23.913043478260867,
       "path": "ladder_well_3",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/92 m3/h after Well_Deck/Well_Cover_Open left VENT_Well_Deck and Top_House_Open left VENT_Machinery_Holds. Segment: remaining well-deck galleries to remaining machinery-hold rooms.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "VENT_Well_Deck",
+      "to": "Top_House_Open",
+      "flow_rate_m3h": 1.0869565217391304,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/92 m3/h after Well_Deck/Well_Cover_Open left VENT_Well_Deck and Top_House_Open left VENT_Machinery_Holds. Segment: remaining well-deck galleries to Top_House_Open.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Well_Deck",
+      "to": "Top_House_Open",
+      "flow_rate_m3h": 0.5434782608695652,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/92 m3/h after Well_Deck/Well_Cover_Open left VENT_Well_Deck and Top_House_Open left VENT_Machinery_Holds. Segment: Well_Deck to Top_House_Open.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Well_Cover_Open",
+      "to": "Top_House_Open",
+      "flow_rate_m3h": 0.5434782608695652,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/92 m3/h after Well_Deck/Well_Cover_Open left VENT_Well_Deck and Top_House_Open left VENT_Machinery_Holds. Segment: Well_Cover_Open to Top_House_Open.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -551,6 +625,35 @@
       "from": "Ballast_FW_Tanks",
       "to": "Fore_Peak_Hold",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Top_House_Open",
+      "type": "open_deck",
+      "area_m2": 114.602,
+      "exchange_m3h": 75973.75565915921,
+      "schedule": "always_open",
+      "wind_speed_m_s": 1.0,
+      "description": "Open weather Top_House_Open exchange with ambient (CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01). Owner ruling 2026-11-17: this opening replaces the VENT_Machinery_Holds group OA leg for Top_House_Open; Top_House_Open is removed from VENT_Machinery_Holds; the group retains its other 22 rooms. area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: 2*sqrt(V/3)*3 with V=1094.47 m3 (square-plan deck face, not a measured area); exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5). The hull relative wind is 1.0 m/s from ahead; schedule is always_open."
+    },
+    {
+      "zone": "Well_Cover_Open",
+      "type": "open_deck",
+      "area_m2": 161.079,
+      "exchange_m3h": 108389.37417464565,
+      "schedule": "always_open",
+      "wind_speed_m_s": 1.0,
+      "description": "Open weather Well_Cover_Open exchange with ambient (CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01). Owner ruling 2026-11-17: this opening replaces the VENT_Well_Deck group OA leg for Well_Cover_Open; Well_Cover_Open is removed from VENT_Well_Deck; the group retains Gallery_Port and Gallery_Stbd. area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: 2*sqrt(V/3)*3 with V=2162.21 m3 (square-plan deck face, not a measured area); exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5). The hull relative wind is 1.0 m/s from ahead; schedule is always_open."
+    },
+    {
+      "zone": "Well_Deck",
+      "type": "open_deck",
+      "area_m2": 394.968,
+      "exchange_m3h": 313702.9233833213,
+      "schedule": "always_open",
+      "wind_speed_m_s": 1.0,
+      "description": "Open weather Well_Deck exchange with ambient (CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01). Owner ruling 2026-11-17: this opening replaces the VENT_Well_Deck group OA leg for Well_Deck; Well_Deck is removed from VENT_Well_Deck; the group retains Gallery_Port and Gallery_Stbd. area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: 2*sqrt(V/3)*3 with V=13000.0 m3 (square-plan deck face, not a measured area); exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5). The hull relative wind is 1.0 m/s from ahead; schedule is always_open."
     }
   ]
 }
