@@ -117,5 +117,6 @@ hvac:
    hull with `relative_wind_speed_m_s` / `relative_wind_direction_deg` in
    `contam/hobbyist_overrides.json`; speed 0 is the calm baseline. Never set a
    per-path wind: ledger `CONTAM-DEFAULT-WEATHER-01`. Declared-wind `open_deck`
-   records cover six cruise hulls and nine destroyer hulls; the destroyer roster
+   records cover the stage-4 ambient-weather class ledgers plus the grouped-weather
+   miscellaneous rollout (`CONTAM-GROUPED-WEATHER-MISC-01`); the destroyer roster
    and witnesses are in `docs/ledger/CONTAM-AMBIENT-WEATHER-DESTROYER-01.md`.

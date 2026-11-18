@@ -69,7 +69,8 @@
         "x": 19.4,
         "y": 4.43
       },
-      "description": "top of magnetic cable reel well; acoustic/magnetic cable reels on open deck"
+      "description": "top of magnetic cable reel well; acoustic/magnetic cable reels on open deck",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Deck_Aft",
@@ -84,7 +85,8 @@
         "x": 21.06,
         "y": 4.85
       },
-      "description": "open boat/sweep deck: 26' motor whale boat, reel well, boiler & uptake trunk casing, hawser reels"
+      "description": "open boat/sweep deck: 26' motor whale boat, reel well, boiler & uptake trunk casing, hawser reels",
+      "exposure": "weather"
     },
     {
       "id": "Radio_Room",
@@ -145,7 +147,8 @@
         "x": 43.35,
         "y": 4.85
       },
-      "description": "forecastle upper deck: 40mm single mount tub, windlass/capstan, chain pipes, anchors"
+      "description": "forecastle upper deck: 40mm single mount tub, windlass/capstan, chain pipes, anchors",
+      "exposure": "weather"
     },
     {
       "id": "Sweep_Deck",
@@ -160,7 +163,8 @@
         "x": 5.57,
         "y": 5.19
       },
-      "description": "open sweep deck: floats, otters, cranes, tow bow, acoustic device stow"
+      "description": "open sweep deck: floats, otters, cranes, tow bow, acoustic device stow",
+      "exposure": "weather"
     },
     {
       "id": "Deck_House_Main",
@@ -175,7 +179,8 @@
         "x": 18.39,
         "y": 1.13
       },
-      "description": "ship's office 1-57-2-Q + fan rm + signal/deck gear lkr + rain clothes lkr"
+      "description": "ship's office 1-57-2-Q + fan rm + signal/deck gear lkr + rain clothes lkr",
+      "exposure": "weather"
     },
     {
       "id": "Reel_Well",

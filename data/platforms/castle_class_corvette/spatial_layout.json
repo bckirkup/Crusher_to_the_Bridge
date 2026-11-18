@@ -223,7 +223,8 @@
         "x": 9.57,
         "y": 4.74
       },
-      "description": "aft enclosed region: provision rooms + access"
+      "description": "aft enclosed region: provision rooms + access",
+      "exposure": "weather"
     },
     {
       "id": "Steering_Gear",
