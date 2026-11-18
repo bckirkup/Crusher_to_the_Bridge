@@ -101,7 +101,8 @@
         "x": 31.17,
         "y": 7.48
       },
-      "description": "open boat deck + landing boats in davits (aft half)"
+      "description": "open boat deck + landing boats in davits (aft half)",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Deck_Open_Fwd",
@@ -116,7 +117,8 @@
         "x": 85.07,
         "y": 7.48
       },
-      "description": "open boat deck + landing boats in davits (fwd half)"
+      "description": "open boat deck + landing boats in davits (fwd half)",
+      "exposure": "weather"
     },
     {
       "id": "Officers_Qtrs_Boat",
@@ -183,7 +185,8 @@
         "x": 123.14,
         "y": 7.07
       },
-      "description": "forecastle open deck + 40mm twin tubs P/S + directors"
+      "description": "forecastle open deck + 40mm twin tubs P/S + directors",
+      "exposure": "weather"
     },
     {
       "id": "Windlass_Room",
@@ -229,7 +232,8 @@
         "x": 3.6,
         "y": 8.64
       },
-      "description": "stern open deck: 5\"/38 gun, depth-charge racks, capstan"
+      "description": "stern open deck: 5\"/38 gun, depth-charge racks, capstan",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Deckhouse",
@@ -260,7 +264,8 @@
         "x": 24.0,
         "y": 8.51
       },
-      "description": "No.5 hatch top + 2x LCM(6) tank lighters + LCVP deck stowage"
+      "description": "No.5 hatch top + 2x LCM(6) tank lighters + LCVP deck stowage",
+      "exposure": "weather"
     },
     {
       "id": "Medical_Block",
@@ -460,7 +465,8 @@
         "x": 86.8,
         "y": 8.51
       },
-      "description": "No.2 trunked hatch top + No.1 hatch + 14x LCVP boat stowage on deck"
+      "description": "No.2 trunked hatch top + No.1 hatch + 14x LCVP boat stowage on deck",
+      "exposure": "weather"
     },
     {
       "id": "Troop_Berthing_Fwd",

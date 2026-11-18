@@ -103,15 +103,13 @@
     {
       "id": "HVAC_Aviation",
       "rooms": [
-        "Helicopter_Hangar",
-        "Flight_Deck",
-        "Boat_Deck"
+        "Helicopter_Hangar"
       ],
       "ach": 8.0,
       "oa_fraction": 0.8,
       "filter_efficiency": 0.2,
       "filter_type": "MERV-8",
-      "description": "Aviation and boat deck ventilation. Hangar has fuel vapor extraction. Flight deck and boat deck largely open to weather. Outside NBC citadel boundary."
+      "description": "Aviation and boat deck ventilation. Hangar has fuel vapor extraction. Flight deck and boat deck largely open to weather. Outside NBC citadel boundary. Flight_Deck Boat_Deck left this group under CONTAM-GROUPED-WEATHER-AUXILIARY-01: their outdoor exchange is the open_deck ambient_openings records, which replace the group OA leg for those zones (no double-count)."
     },
     {
       "id": "HVAC_Engine_Room",
@@ -285,10 +283,32 @@
     {
       "from": "HVAC_Enlisted_Aft",
       "to": "HVAC_Aviation",
-      "flow_rate_m3h": 150,
+      "flow_rate_m3h": 50.0,
       "path": "aft_access_to_hangar",
       "is_hvac_ducted": false,
-      "description": "Passive airflow between aft berthing and helicopter hangar through access door. Crosses NBC citadel boundary.",
+      "description": "Passive airflow between aft berthing and helicopter hangar through access door. Crosses NBC citadel boundary. Remaining HVAC_Aviation rooms of this former 150 m3/h record (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "HVAC_Enlisted_Aft",
+      "to": "Flight_Deck",
+      "flow_rate_m3h": 50.0,
+      "path": "aft_access_to_hangar",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow between aft berthing and helicopter hangar through access door. Crosses NBC citadel boundary. Flight_Deck re-addressed by room id because it left HVAC_Aviation (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "HVAC_Enlisted_Aft",
+      "to": "Boat_Deck",
+      "flow_rate_m3h": 50.0,
+      "path": "aft_access_to_hangar",
+      "is_hvac_ducted": false,
+      "description": "Passive airflow between aft berthing and helicopter hangar through access door. Crosses NBC citadel boundary. Boat_Deck re-addressed by room id because it left HVAC_Aviation (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -395,22 +415,66 @@
     {
       "from": "HVAC_Aviation",
       "to": "AHU_HD_WEATHER_M",
-      "flow_rate_m3h": 118.9,
+      "flow_rate_m3h": 39.63333333333333,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_WEATHER_M; the head exhausts overboard, never back to the served space.",
+      "description": "Transfer air into HD_WEATHER_M; the head exhausts overboard, never back to the served space. Remaining HVAC_Aviation rooms of this former 118.9 m3/h record (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Flight_Deck",
+      "to": "AHU_HD_WEATHER_M",
+      "flow_rate_m3h": 39.63333333333333,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_WEATHER_M; the head exhausts overboard, never back to the served space. Flight_Deck re-addressed by room id because it left HVAC_Aviation (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Boat_Deck",
+      "to": "AHU_HD_WEATHER_M",
+      "flow_rate_m3h": 39.63333333333333,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_WEATHER_M; the head exhausts overboard, never back to the served space. Boat_Deck re-addressed by room id because it left HVAC_Aviation (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
       "mechanism": "pressure_opening",
       "filtered": false
     },
     {
       "from": "HVAC_Aviation",
       "to": "AHU_HD_WEATHER_F",
-      "flow_rate_m3h": 118.9,
+      "flow_rate_m3h": 39.63333333333333,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_WEATHER_F; the head exhausts overboard, never back to the served space.",
+      "description": "Transfer air into HD_WEATHER_F; the head exhausts overboard, never back to the served space. Remaining HVAC_Aviation rooms of this former 118.9 m3/h record (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Flight_Deck",
+      "to": "AHU_HD_WEATHER_F",
+      "flow_rate_m3h": 39.63333333333333,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_WEATHER_F; the head exhausts overboard, never back to the served space. Flight_Deck re-addressed by room id because it left HVAC_Aviation (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Boat_Deck",
+      "to": "AHU_HD_WEATHER_F",
+      "flow_rate_m3h": 39.63333333333333,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_WEATHER_F; the head exhausts overboard, never back to the served space. Boat_Deck re-addressed by room id because it left HVAC_Aviation (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
       "mechanism": "pressure_opening",
       "filtered": false
     }
@@ -515,6 +579,26 @@
       "from": "Galley",
       "to": "Passageway_Main",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Flight_Deck",
+      "type": "open_deck",
+      "area_m2": 48.99,
+      "exchange_m3h": 32004.8,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Flight_Deck exchange with ambient (CONTAM-GROUPED-WEATHER-AUXILIARY-01). Owner ruling 2026-11-17: the opening REPLACES the HVAC_Aviation group OA leg for this zone, so Flight_Deck is no longer a HVAC_Aviation room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Boat_Deck",
+      "type": "open_deck",
+      "area_m2": 30.984,
+      "exchange_m3h": 19990.4,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Boat_Deck exchange with ambient (CONTAM-GROUPED-WEATHER-AUXILIARY-01). Owner ruling 2026-11-17: the opening REPLACES the HVAC_Aviation group OA leg for this zone, so Boat_Deck is no longer a HVAC_Aviation room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ]
 }

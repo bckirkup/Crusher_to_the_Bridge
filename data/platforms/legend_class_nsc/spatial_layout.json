@@ -174,7 +174,8 @@
         "x": 20,
         "y": 8
       },
-      "description": "Flight deck with helicopter landing area. Open to weather. RAST system for rough-weather recovery."
+      "description": "Flight deck with helicopter landing area. Open to weather. RAST system for rough-weather recovery.",
+      "exposure": "weather"
     },
     {
       "id": "Engine_Room",
@@ -226,7 +227,8 @@
         "x": 55,
         "y": 8
       },
-      "description": "Stern boat deck with RHIB launch/recovery system. Open to weather. Small boat operations station."
+      "description": "Stern boat deck with RHIB launch/recovery system. Open to weather. Small boat operations station.",
+      "exposure": "weather"
     },
     {
       "id": "Passageway_Main",

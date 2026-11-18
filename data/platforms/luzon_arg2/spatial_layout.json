@@ -91,7 +91,8 @@
         "x": 99.27,
         "y": 7.15
       },
-      "description": "40mm/20mm tubs + director + weather"
+      "description": "40mm/20mm tubs + director + weather",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Deck_Aft",
@@ -106,7 +107,8 @@
         "x": 10.84,
         "y": 6.8
       },
-      "description": "aft weather: 40mm plt, motor launches on davits"
+      "description": "aft weather: 40mm plt, motor launches on davits",
+      "exposure": "weather"
     },
     {
       "id": "Officers_Mess_Lounge",
@@ -235,7 +237,8 @@
         "x": 5.67,
         "y": 7.63
       },
-      "description": "stern: ensign, towing gear, 40mm guns over"
+      "description": "stern: ensign, towing gear, 40mm guns over",
+      "exposure": "weather"
     },
     {
       "id": "Laundry_Rec_Rm",
@@ -488,7 +491,8 @@
         "x": 131.17,
         "y": 8.46
       },
-      "description": "chain locker + focsle bow"
+      "description": "chain locker + focsle bow",
+      "exposure": "weather"
     },
     {
       "id": "HD_Crew_Main",

@@ -225,7 +225,8 @@
         "x": 65.26,
         "y": 8.18
       },
-      "description": "open weather deck: boats, funnels, coaling hatches"
+      "description": "open weather deck: boats, funnels, coaling hatches",
+      "exposure": "weather"
     },
     {
       "id": "Focsle_Deck_Open",
@@ -240,7 +241,8 @@
         "x": 148.08,
         "y": 2.76
       },
-      "description": "forecastle weather deck fwd of deckhouse"
+      "description": "forecastle weather deck fwd of deckhouse",
+      "exposure": "weather"
     },
     {
       "id": "Lamp_Paint_Oil",

@@ -30,14 +30,10 @@
         "Crews_Berthing_2nd_A",
         "Crews_Berthing_2nd_F",
         "Bakery_2nd",
-        "Stern_Weather",
-        "Boat_Deck_Aft",
-        "Gun_Weather_Sup",
-        "Chain_Locker_Focsle",
         "Flat_Chain_Locker"
       ],
       "ach": 6.0,
-      "description": "accommodation + weather ventilation",
+      "description": "accommodation + weather ventilation Gun_Weather_Sup Boat_Deck_Aft Stern_Weather Chain_Locker_Focsle left this group under CONTAM-GROUPED-WEATHER-AUXILIARY-01: their outdoor exchange is the open_deck ambient_openings records, which replace the group OA leg for those zones (no double-count).",
       "vent_mode": "nat_supply",
       "evidence": "sheet_read",
       "oa_fraction": 1.0
@@ -144,10 +140,54 @@
     {
       "from": "HVAC_Accom",
       "to": "VENT_Machinery",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 42.857142857142854,
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches Remaining HVAC_Accom rooms of this former 50 m3/h record (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Gun_Weather_Sup",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 1.7857142857142858,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches Gun_Weather_Sup re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Boat_Deck_Aft",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 1.7857142857142858,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches Boat_Deck_Aft re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Stern_Weather",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 1.7857142857142858,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches Stern_Weather re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Chain_Locker_Focsle",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 1.7857142857142858,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches Chain_Locker_Focsle re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -166,44 +206,220 @@
     {
       "from": "HVAC_Accom",
       "to": "AHU_HD_HD_Sup",
-      "flow_rate_m3h": 2734.7,
+      "flow_rate_m3h": 2344.028571428571,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Sup; the head exhausts overboard, never back to the served space.",
+      "description": "Transfer air into HD_Sup; the head exhausts overboard, never back to the served space. Remaining HVAC_Accom rooms of this former 2734.7 m3/h record (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Gun_Weather_Sup",
+      "to": "AHU_HD_HD_Sup",
+      "flow_rate_m3h": 97.66785714285713,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Sup; the head exhausts overboard, never back to the served space. Gun_Weather_Sup re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Boat_Deck_Aft",
+      "to": "AHU_HD_HD_Sup",
+      "flow_rate_m3h": 97.66785714285713,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Sup; the head exhausts overboard, never back to the served space. Boat_Deck_Aft re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Stern_Weather",
+      "to": "AHU_HD_HD_Sup",
+      "flow_rate_m3h": 97.66785714285713,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Sup; the head exhausts overboard, never back to the served space. Stern_Weather re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Chain_Locker_Focsle",
+      "to": "AHU_HD_HD_Sup",
+      "flow_rate_m3h": 97.66785714285713,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Sup; the head exhausts overboard, never back to the served space. Chain_Locker_Focsle re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
       "mechanism": "pressure_opening",
       "filtered": false
     },
     {
       "from": "HVAC_Accom",
       "to": "AHU_HD_HD_Upper_Deck",
-      "flow_rate_m3h": 1070.1,
+      "flow_rate_m3h": 917.2285714285714,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Upper_Deck; the head exhausts overboard, never back to the served space.",
+      "description": "Transfer air into HD_Upper_Deck; the head exhausts overboard, never back to the served space. Remaining HVAC_Accom rooms of this former 1070.1 m3/h record (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Gun_Weather_Sup",
+      "to": "AHU_HD_HD_Upper_Deck",
+      "flow_rate_m3h": 38.21785714285714,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Upper_Deck; the head exhausts overboard, never back to the served space. Gun_Weather_Sup re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Boat_Deck_Aft",
+      "to": "AHU_HD_HD_Upper_Deck",
+      "flow_rate_m3h": 38.21785714285714,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Upper_Deck; the head exhausts overboard, never back to the served space. Boat_Deck_Aft re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Stern_Weather",
+      "to": "AHU_HD_HD_Upper_Deck",
+      "flow_rate_m3h": 38.21785714285714,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Upper_Deck; the head exhausts overboard, never back to the served space. Stern_Weather re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Chain_Locker_Focsle",
+      "to": "AHU_HD_HD_Upper_Deck",
+      "flow_rate_m3h": 38.21785714285714,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Upper_Deck; the head exhausts overboard, never back to the served space. Chain_Locker_Focsle re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
       "mechanism": "pressure_opening",
       "filtered": false
     },
     {
       "from": "HVAC_Accom",
       "to": "AHU_HD_HD_Crew_Main",
-      "flow_rate_m3h": 713.4,
+      "flow_rate_m3h": 611.4857142857143,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space.",
+      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space. Remaining HVAC_Accom rooms of this former 713.4 m3/h record (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Gun_Weather_Sup",
+      "to": "AHU_HD_HD_Crew_Main",
+      "flow_rate_m3h": 25.478571428571428,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space. Gun_Weather_Sup re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Boat_Deck_Aft",
+      "to": "AHU_HD_HD_Crew_Main",
+      "flow_rate_m3h": 25.478571428571428,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space. Boat_Deck_Aft re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Stern_Weather",
+      "to": "AHU_HD_HD_Crew_Main",
+      "flow_rate_m3h": 25.478571428571428,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space. Stern_Weather re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Chain_Locker_Focsle",
+      "to": "AHU_HD_HD_Crew_Main",
+      "flow_rate_m3h": 25.478571428571428,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_Main; the head exhausts overboard, never back to the served space. Chain_Locker_Focsle re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
       "mechanism": "pressure_opening",
       "filtered": false
     },
     {
       "from": "HVAC_Accom",
       "to": "AHU_HD_HD_Crew_2nd",
-      "flow_rate_m3h": 594.5,
+      "flow_rate_m3h": 509.57142857142856,
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "direction": "oneway",
-      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space.",
+      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space. Remaining HVAC_Accom rooms of this former 594.5 m3/h record (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Gun_Weather_Sup",
+      "to": "AHU_HD_HD_Crew_2nd",
+      "flow_rate_m3h": 21.232142857142858,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space. Gun_Weather_Sup re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Boat_Deck_Aft",
+      "to": "AHU_HD_HD_Crew_2nd",
+      "flow_rate_m3h": 21.232142857142858,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space. Boat_Deck_Aft re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Stern_Weather",
+      "to": "AHU_HD_HD_Crew_2nd",
+      "flow_rate_m3h": 21.232142857142858,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space. Stern_Weather re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Chain_Locker_Focsle",
+      "to": "AHU_HD_HD_Crew_2nd",
+      "flow_rate_m3h": 21.232142857142858,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "direction": "oneway",
+      "description": "Transfer air into HD_Crew_2nd; the head exhausts overboard, never back to the served space. Chain_Locker_Focsle re-addressed by room id because it left HVAC_Accom (CONTAM-GROUPED-WEATHER-AUXILIARY-01): per-room-pair reference flow unchanged.",
       "mechanism": "pressure_opening",
       "filtered": false
     }
@@ -583,6 +799,44 @@
       "from": "Cargo_DO_Hold_F",
       "to": "Deep_Tank_Hold",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Gun_Weather_Sup",
+      "type": "open_deck",
+      "area_m2": 61.779,
+      "exchange_m3h": 41310.7,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Gun_Weather_Sup exchange with ambient (CONTAM-GROUPED-WEATHER-AUXILIARY-01). Owner ruling 2026-11-17: the opening REPLACES the HVAC_Accom group OA leg for this zone, so Gun_Weather_Sup is no longer a HVAC_Accom room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Boat_Deck_Aft",
+      "type": "open_deck",
+      "area_m2": 97.285,
+      "exchange_m3h": 78309.0,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Boat_Deck_Aft exchange with ambient (CONTAM-GROUPED-WEATHER-AUXILIARY-01). Owner ruling 2026-11-17: the opening REPLACES the HVAC_Accom group OA leg for this zone, so Boat_Deck_Aft is no longer a HVAC_Accom room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Stern_Weather",
+      "type": "open_deck",
+      "area_m2": 78.299,
+      "exchange_m3h": 61993.8,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Stern_Weather exchange with ambient (CONTAM-GROUPED-WEATHER-AUXILIARY-01). Owner ruling 2026-11-17: the opening REPLACES the HVAC_Accom group OA leg for this zone, so Stern_Weather is no longer a HVAC_Accom room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Chain_Locker_Focsle",
+      "type": "open_deck",
+      "area_m2": 29.298,
+      "exchange_m3h": 22849.8,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Chain_Locker_Focsle exchange with ambient (CONTAM-GROUPED-WEATHER-AUXILIARY-01). Owner ruling 2026-11-17: the opening REPLACES the HVAC_Accom group OA leg for this zone, so Chain_Locker_Focsle is no longer a HVAC_Accom room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ]
 }
