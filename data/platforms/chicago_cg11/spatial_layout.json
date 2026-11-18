@@ -55,7 +55,8 @@
         "x": 132.91,
         "y": 8.8
       },
-      "description": "open 03-level deck + catwalks"
+      "description": "open 03-level deck + catwalks",
+      "exposure": "weather"
     },
     {
       "id": "Helo_Deck_02_Aft",
@@ -70,7 +71,8 @@
         "x": 63.22,
         "y": 9.31
       },
-      "description": "open 02-level deck aft over hangar: helicopter handling station, hangar reel, life nets"
+      "description": "open 02-level deck aft over hangar: helicopter handling station, hangar reel, life nets",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Stowage_02",
@@ -115,7 +117,8 @@
         "x": 131.61,
         "y": 9.02
       },
-      "description": "fwd deckhouse top: Terrier launcher position + director platforms + W/T trunks"
+      "description": "fwd deckhouse top: Terrier launcher position + director platforms + W/T trunks",
+      "exposure": "weather"
     },
     {
       "id": "Shelters_01_Aft",
@@ -175,7 +178,8 @@
         "x": 137.79,
         "y": 11.42
       },
-      "description": "open deck fwd of superstructure toward Terrier launcher"
+      "description": "open deck fwd of superstructure toward Terrier launcher",
+      "exposure": "weather"
     },
     {
       "id": "Fantail_Weather",
@@ -190,7 +194,8 @@
         "x": 2.36,
         "y": 10.14
       },
-      "description": "stern tip: towing chock, bathy boom, target enclosure, observation station"
+      "description": "stern tip: towing chock, bathy boom, target enclosure, observation station",
+      "exposure": "weather"
     },
     {
       "id": "Helo_Deck",
@@ -205,7 +210,8 @@
         "x": 28.37,
         "y": 9.29
       },
-      "description": "helicopter platform over Talos strikedown: elevator well, blast doors, hinged platforms, magazine doors"
+      "description": "helicopter platform over Talos strikedown: elevator well, blast doors, hinged platforms, magazine doors",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Stowage_Main",
@@ -325,7 +331,8 @@
         "x": 166.45,
         "y": 9.8
       },
-      "description": "windlass + capstan + observation station + cable trunk"
+      "description": "windlass + capstan + observation station + cable trunk",
+      "exposure": "weather"
     },
     {
       "id": "Bow_Weather",
@@ -340,7 +347,8 @@
         "x": 190.57,
         "y": 9.97
       },
-      "description": "bow tip: fwd anchor light, boresight tower, target enclosure, bow stub antenna"
+      "description": "bow tip: fwd anchor light, boresight tower, target enclosure, bow stub antenna",
+      "exposure": "weather"
     },
     {
       "id": "Helo_Service_2nd",
