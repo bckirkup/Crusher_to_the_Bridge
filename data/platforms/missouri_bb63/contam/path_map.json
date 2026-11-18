@@ -2026,7 +2026,7 @@
   },
   {
     "path_nr": 226,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Nav_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2035,7 +2035,7 @@
   },
   {
     "path_nr": 227,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Flag_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2044,7 +2044,7 @@
   },
   {
     "path_nr": 228,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Admiral_Country_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2053,7 +2053,7 @@
   },
   {
     "path_nr": 229,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Electronics_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2062,7 +2062,7 @@
   },
   {
     "path_nr": 230,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Officers_Country_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2071,7 +2071,7 @@
   },
   {
     "path_nr": 231,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Galley_Mess_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2080,7 +2080,7 @@
   },
   {
     "path_nr": 232,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Accom_Aft_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2089,7 +2089,7 @@
   },
   {
     "path_nr": 233,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Accom_Aft_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2098,7 +2098,7 @@
   },
   {
     "path_nr": 234,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Officers_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2107,7 +2107,7 @@
   },
   {
     "path_nr": 235,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Ship_Services_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2116,7 +2116,7 @@
   },
   {
     "path_nr": 236,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Offices_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2125,7 +2125,7 @@
   },
   {
     "path_nr": 237,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Officers_Qtrs_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2134,7 +2134,7 @@
   },
   {
     "path_nr": 238,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Ordnance_Stores_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2143,7 +2143,7 @@
   },
   {
     "path_nr": 239,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Ships_Service_Stores_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2152,7 +2152,7 @@
   },
   {
     "path_nr": 240,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Plotting_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2161,7 +2161,7 @@
   },
   {
     "path_nr": 241,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Central_Station_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2170,7 +2170,7 @@
   },
   {
     "path_nr": 242,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Medical_Stores_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2179,7 +2179,7 @@
   },
   {
     "path_nr": 243,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Issue_Awning_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2188,7 +2188,7 @@
   },
   {
     "path_nr": 244,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Brig_Shops_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2197,7 +2197,7 @@
   },
   {
     "path_nr": 245,
-    "from_zone": "Fantail_Open",
+    "from_zone": "Catwalk_02L",
     "to_zone": "Bosuns_Paint_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2206,7 +2206,7 @@
   },
   {
     "path_nr": 246,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Nav_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2215,7 +2215,7 @@
   },
   {
     "path_nr": 247,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Flag_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2224,7 +2224,7 @@
   },
   {
     "path_nr": 248,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Admiral_Country_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2233,7 +2233,7 @@
   },
   {
     "path_nr": 249,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Electronics_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2242,7 +2242,7 @@
   },
   {
     "path_nr": 250,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Officers_Country_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2251,7 +2251,7 @@
   },
   {
     "path_nr": 251,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Galley_Mess_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2260,7 +2260,7 @@
   },
   {
     "path_nr": 252,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Accom_Aft_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2269,7 +2269,7 @@
   },
   {
     "path_nr": 253,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Accom_Aft_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2278,7 +2278,7 @@
   },
   {
     "path_nr": 254,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Officers_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2287,7 +2287,7 @@
   },
   {
     "path_nr": 255,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Ship_Services_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2296,7 +2296,7 @@
   },
   {
     "path_nr": 256,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Offices_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2305,7 +2305,7 @@
   },
   {
     "path_nr": 257,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Officers_Qtrs_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2314,7 +2314,7 @@
   },
   {
     "path_nr": 258,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Ordnance_Stores_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2323,7 +2323,7 @@
   },
   {
     "path_nr": 259,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Ships_Service_Stores_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2332,7 +2332,7 @@
   },
   {
     "path_nr": 260,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Plotting_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2341,7 +2341,7 @@
   },
   {
     "path_nr": 261,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Central_Station_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2350,7 +2350,7 @@
   },
   {
     "path_nr": 262,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Medical_Stores_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2359,7 +2359,7 @@
   },
   {
     "path_nr": 263,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Issue_Awning_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2368,7 +2368,7 @@
   },
   {
     "path_nr": 264,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Brig_Shops_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2377,7 +2377,7 @@
   },
   {
     "path_nr": 265,
-    "from_zone": "Boat_Waist_Open",
+    "from_zone": "Signal_Deck",
     "to_zone": "Bosuns_Paint_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2386,7 +2386,7 @@
   },
   {
     "path_nr": 266,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Nav_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2395,7 +2395,7 @@
   },
   {
     "path_nr": 267,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Flag_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2404,7 +2404,7 @@
   },
   {
     "path_nr": 268,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Admiral_Country_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2413,7 +2413,7 @@
   },
   {
     "path_nr": 269,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Electronics_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2422,7 +2422,7 @@
   },
   {
     "path_nr": 270,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Officers_Country_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2431,7 +2431,7 @@
   },
   {
     "path_nr": 271,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Galley_Mess_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2440,7 +2440,7 @@
   },
   {
     "path_nr": 272,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Accom_Aft_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2449,7 +2449,7 @@
   },
   {
     "path_nr": 273,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Accom_Aft_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2458,7 +2458,7 @@
   },
   {
     "path_nr": 274,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Officers_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2467,7 +2467,7 @@
   },
   {
     "path_nr": 275,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Ship_Services_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2476,7 +2476,7 @@
   },
   {
     "path_nr": 276,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Offices_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2485,7 +2485,7 @@
   },
   {
     "path_nr": 277,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Officers_Qtrs_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2494,7 +2494,7 @@
   },
   {
     "path_nr": 278,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Ordnance_Stores_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2503,7 +2503,7 @@
   },
   {
     "path_nr": 279,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Ships_Service_Stores_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2512,7 +2512,7 @@
   },
   {
     "path_nr": 280,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Plotting_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2521,7 +2521,7 @@
   },
   {
     "path_nr": 281,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Central_Station_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2530,7 +2530,7 @@
   },
   {
     "path_nr": 282,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Medical_Stores_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2539,7 +2539,7 @@
   },
   {
     "path_nr": 283,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Issue_Awning_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2548,7 +2548,7 @@
   },
   {
     "path_nr": 284,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Brig_Shops_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2557,7 +2557,7 @@
   },
   {
     "path_nr": 285,
-    "from_zone": "Forecastle_Open",
+    "from_zone": "Fantail_Open",
     "to_zone": "Bosuns_Paint_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2566,7 +2566,7 @@
   },
   {
     "path_nr": 286,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Nav_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2575,7 +2575,7 @@
   },
   {
     "path_nr": 287,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Flag_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2584,7 +2584,7 @@
   },
   {
     "path_nr": 288,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Admiral_Country_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2593,7 +2593,7 @@
   },
   {
     "path_nr": 289,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Electronics_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2602,7 +2602,7 @@
   },
   {
     "path_nr": 290,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Officers_Country_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2611,7 +2611,7 @@
   },
   {
     "path_nr": 291,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Galley_Mess_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2620,7 +2620,7 @@
   },
   {
     "path_nr": 292,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Accom_Aft_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2629,7 +2629,7 @@
   },
   {
     "path_nr": 293,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Accom_Aft_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2638,7 +2638,7 @@
   },
   {
     "path_nr": 294,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Officers_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2647,7 +2647,7 @@
   },
   {
     "path_nr": 295,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Ship_Services_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2656,7 +2656,7 @@
   },
   {
     "path_nr": 296,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Offices_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2665,7 +2665,7 @@
   },
   {
     "path_nr": 297,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Officers_Qtrs_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2674,7 +2674,7 @@
   },
   {
     "path_nr": 298,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Ordnance_Stores_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2683,7 +2683,7 @@
   },
   {
     "path_nr": 299,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Ships_Service_Stores_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2692,7 +2692,7 @@
   },
   {
     "path_nr": 300,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Plotting_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2701,7 +2701,7 @@
   },
   {
     "path_nr": 301,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Central_Station_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2710,7 +2710,7 @@
   },
   {
     "path_nr": 302,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Medical_Stores_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2719,7 +2719,7 @@
   },
   {
     "path_nr": 303,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Issue_Awning_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2728,7 +2728,7 @@
   },
   {
     "path_nr": 304,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Brig_Shops_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2737,7 +2737,7 @@
   },
   {
     "path_nr": 305,
-    "from_zone": "Catwalk_02L",
+    "from_zone": "Boat_Waist_Open",
     "to_zone": "Bosuns_Paint_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2746,7 +2746,7 @@
   },
   {
     "path_nr": 306,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Nav_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2755,7 +2755,7 @@
   },
   {
     "path_nr": 307,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Flag_Bridge",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2764,7 +2764,7 @@
   },
   {
     "path_nr": 308,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Admiral_Country_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2773,7 +2773,7 @@
   },
   {
     "path_nr": 309,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Electronics_02L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2782,7 +2782,7 @@
   },
   {
     "path_nr": 310,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Officers_Country_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2791,7 +2791,7 @@
   },
   {
     "path_nr": 311,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Galley_Mess_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2800,7 +2800,7 @@
   },
   {
     "path_nr": 312,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Accom_Aft_01L",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2809,7 +2809,7 @@
   },
   {
     "path_nr": 313,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Accom_Aft_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2818,7 +2818,7 @@
   },
   {
     "path_nr": 314,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Officers_MD",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2827,7 +2827,7 @@
   },
   {
     "path_nr": 315,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Ship_Services_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2836,7 +2836,7 @@
   },
   {
     "path_nr": 316,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Offices_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2845,7 +2845,7 @@
   },
   {
     "path_nr": 317,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Officers_Qtrs_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2854,7 +2854,7 @@
   },
   {
     "path_nr": 318,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Ordnance_Stores_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2863,7 +2863,7 @@
   },
   {
     "path_nr": 319,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Ships_Service_Stores_1P",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2872,7 +2872,7 @@
   },
   {
     "path_nr": 320,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Plotting_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2881,7 +2881,7 @@
   },
   {
     "path_nr": 321,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Central_Station_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2890,7 +2890,7 @@
   },
   {
     "path_nr": 322,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Medical_Stores_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2899,7 +2899,7 @@
   },
   {
     "path_nr": 323,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Issue_Awning_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2908,7 +2908,7 @@
   },
   {
     "path_nr": 324,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Brig_Shops_3D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -2917,7 +2917,7 @@
   },
   {
     "path_nr": 325,
-    "from_zone": "Signal_Deck",
+    "from_zone": "Forecastle_Open",
     "to_zone": "Bosuns_Paint_2D",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -18082,6 +18082,96 @@
   },
   {
     "path_nr": 2010,
+    "from_zone": "Signal_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2011,
+    "from_zone": "Signal_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2012,
+    "from_zone": "Fantail_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2013,
+    "from_zone": "Fantail_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2014,
+    "from_zone": "Boat_Waist_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2015,
+    "from_zone": "Boat_Waist_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2016,
+    "from_zone": "Forecastle_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2017,
+    "from_zone": "Forecastle_Open",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2018,
+    "from_zone": "Focsle_Void_2D",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2019,
+    "from_zone": "Focsle_Void_2D",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 2020,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -18090,7 +18180,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 2011,
+    "path_nr": 2021,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -18099,7 +18189,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 2012,
+    "path_nr": 2022,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -18108,67 +18198,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 2013,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Fantail_Open",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1228.075
-  },
-  {
-    "path_nr": 2014,
-    "from_zone": "Fantail_Open",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 1228.075
-  },
-  {
-    "path_nr": 2015,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Boat_Waist_Open",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 2242.55
-  },
-  {
-    "path_nr": 2016,
-    "from_zone": "Boat_Waist_Open",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 2242.55
-  },
-  {
-    "path_nr": 2017,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Forecastle_Open",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 2723.105
-  },
-  {
-    "path_nr": 2018,
-    "from_zone": "Forecastle_Open",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 2723.105
-  },
-  {
-    "path_nr": 2019,
+    "path_nr": 2023,
     "from_zone": "ahs1(Sup)",
     "to_zone": "Catwalk_02L",
     "is_hvac_ducted": true,
@@ -18178,7 +18208,7 @@
     "declared_flow_m3h": 175.54
   },
   {
-    "path_nr": 2020,
+    "path_nr": 2024,
     "from_zone": "Catwalk_02L",
     "to_zone": "ahs1(Ret)",
     "is_hvac_ducted": true,
@@ -18186,46 +18216,6 @@
     "crusher_transfer": false,
     "ahs_nr": 1,
     "declared_flow_m3h": 175.54
-  },
-  {
-    "path_nr": 2021,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Signal_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 199.64
-  },
-  {
-    "path_nr": 2022,
-    "from_zone": "Signal_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 199.64
-  },
-  {
-    "path_nr": 2023,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Focsle_Void_2D",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 156.62
-  },
-  {
-    "path_nr": 2024,
-    "from_zone": "Focsle_Void_2D",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 156.62
   },
   {
     "path_nr": 2025,

@@ -7,15 +7,10 @@
     {
       "id": "VENT_Weather",
       "rooms": [
-        "Fantail_Open",
-        "Boat_Waist_Open",
-        "Forecastle_Open",
-        "Catwalk_02L",
-        "Signal_Deck",
-        "Focsle_Void_2D"
+        "Catwalk_02L"
       ],
       "ach": 1.0,
-      "description": "Open weather deck + exposed gun/catwalk areas",
+      "description": "Open weather deck + exposed gun/catwalk areas. Signal_Deck, Fantail_Open, Boat_Waist_Open, Forecastle_Open, Focsle_Void_2D left this group under CONTAM-GROUPED-WEATHER-BATTLESHIP-01: their outdoor exchange is the open_deck ambient_openings record(s), which replace the group OA leg for those zones (no double-count).",
       "oa_fraction": 1.0,
       "vent_mode": "nat_supply",
       "evidence": "era_rule"
@@ -217,10 +212,65 @@
     {
       "from": "VENT_Weather",
       "to": "HVAC_Accom",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 8.333333,
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.416667 m3/h after Signal_Deck, Fantail_Open, Boat_Waist_Open, Forecastle_Open, Focsle_Void_2D left VENT_Weather.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Signal_Deck",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 8.333333,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.416667 m3/h after Signal_Deck, Fantail_Open, Boat_Waist_Open, Forecastle_Open, Focsle_Void_2D left VENT_Weather.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Fantail_Open",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 8.333333,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.416667 m3/h after Signal_Deck, Fantail_Open, Boat_Waist_Open, Forecastle_Open, Focsle_Void_2D left VENT_Weather.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Boat_Waist_Open",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 8.333333,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.416667 m3/h after Signal_Deck, Fantail_Open, Boat_Waist_Open, Forecastle_Open, Focsle_Void_2D left VENT_Weather.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Forecastle_Open",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 8.333333,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.416667 m3/h after Signal_Deck, Fantail_Open, Boat_Waist_Open, Forecastle_Open, Focsle_Void_2D left VENT_Weather.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Focsle_Void_2D",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 8.333333,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-BATTLESHIP-01: per-room-pair reference flow preserved at 0.416667 m3/h after Signal_Deck, Fantail_Open, Boat_Waist_Open, Forecastle_Open, Focsle_Void_2D left VENT_Weather.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -935,6 +985,53 @@
       "from": "Machinery_3P",
       "to": "Magazine_3P_Fwd",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Signal_Deck",
+      "type": "open_deck",
+      "area_m2": 69.22,
+      "exchange_m3h": 45004.6,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Signal_Deck exchange with ambient (CONTAM-GROUPED-WEATHER-BATTLESHIP-01). Owner ruling 2026-11-17: the opening REPLACES the grouped HVAC zone's OA leg for this zone, so it is no longer a room of that HVAC group (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Fantail_Open",
+      "type": "open_deck",
+      "area_m2": 171.679,
+      "exchange_m3h": 138440.0,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Fantail_Open exchange with ambient (CONTAM-GROUPED-WEATHER-BATTLESHIP-01). Owner ruling 2026-11-17: the opening REPLACES the grouped HVAC zone's OA leg for this zone, so it is no longer a room of that HVAC group (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Boat_Waist_Open",
+      "type": "open_deck",
+      "area_m2": 231.994,
+      "exchange_m3h": 184190.6,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Boat_Waist_Open exchange with ambient (CONTAM-GROUPED-WEATHER-BATTLESHIP-01). Owner ruling 2026-11-17: the opening REPLACES the grouped HVAC zone's OA leg for this zone, so it is no longer a room of that HVAC group (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Forecastle_Open",
+      "type": "open_deck",
+      "area_m2": 255.645,
+      "exchange_m3h": 203642.3,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Forecastle_Open exchange with ambient (CONTAM-GROUPED-WEATHER-BATTLESHIP-01). Owner ruling 2026-11-17: the opening REPLACES the grouped HVAC zone's OA leg for this zone, so it is no longer a room of that HVAC group (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Focsle_Void_2D",
+      "type": "open_deck",
+      "area_m2": 61.31,
+      "exchange_m3h": 47981.5,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open Focsle_Void_2D exchange with ambient (CONTAM-GROUPED-WEATHER-BATTLESHIP-01). Owner ruling 2026-11-17: the opening REPLACES the grouped HVAC zone's OA leg for this zone, so it is no longer a room of that HVAC group (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ]
 }

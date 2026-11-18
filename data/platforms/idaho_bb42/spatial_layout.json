@@ -374,7 +374,8 @@
         "x": 7.22,
         "y": 13.33
       },
-      "description": "stern: airplane catapults + crane, 40mm tubs"
+      "description": "stern: airplane catapults + crane, 40mm tubs",
+      "exposure": "weather"
     },
     {
       "id": "Turret_IV",

@@ -213,8 +213,9 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # per olympia_c6 weather/boat-stowage opening; CONTAM-OLYMPIA-MAKEUP-01
     # adds the two legs of the olympia_c6 forecastle make-up intake;
     # CONTAM-GROUPED-WEATHER-MIDWAY-01 adds the two legs of the midway_cv41
-    # Flight_Deck opening (first grouped weather zone). No other committed
-    # bundle carries an opening.
+    # Flight_Deck opening (first grouped weather zone);
+    # CONTAM-GROUPED-WEATHER-BATTLESHIP-01 adds two legs per battleship
+    # grouped-weather opening. No other committed bundle carries an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -235,6 +236,8 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "lexington_cv2": 2, "saratoga_cv3": 2,
         "new_york_bb34": 12, "south_dakota_bb49": 8, "texas_bb35": 10,
         "west_virginia_bb48": 10, "alexander_henry_cgs119": 8,
+        "idaho_bb42": 2, "missouri_bb63": 10,
+        "new_jersey_bb62": 10, "wisconsin_bb64": 10,
         "lsm_354": 8, "middlesex_lst983": 14, "ruchamkin_apd89": 8,
         "aeolus_arc3": 6, "apl_24": 8,
         "bolster_ars38": 8, "cobalt_k124": 6, "gordon_gunter_r338": 8,
