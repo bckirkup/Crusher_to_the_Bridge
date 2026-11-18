@@ -41,6 +41,7 @@
     "AHU_EC_D5": 0.12,
     "AHU_EC_D6": 0.12
   },
+  "skip_duct_spines": true,
   "night_setback": true,
   "life_support_plenum": {
     "enabled": true,

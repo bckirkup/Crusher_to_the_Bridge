@@ -51,5 +51,6 @@
     "Engine_Room": "Engine Room",
     "Reception": "Reception Atrium"
   },
+  "skip_duct_spines": true,
   "night_setback": true
 }

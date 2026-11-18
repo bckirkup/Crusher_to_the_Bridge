@@ -46,7 +46,8 @@ def test_galaxy_hobbyist_export() -> None:
     assert "GalaxyACH" in text or "HEPA" in text
     assert "TenFwd" in text or "MainEng" in text
     assert "PocketDoor" in text or "PressBlk" in text
-    assert _section_count(text, "duct junctions") >= 5
+    assert _section_count(text, "duct junctions") == 0
+    assert _section_count(text, "duct segments") == 0
     assert _section_count(text, "flow paths") == len(path_map)
     assert len(path_map) >= 800
     assert _section_count(text, "species") == 2
@@ -57,5 +58,7 @@ def test_galaxy_bundled_hobbyist_prj() -> None:
     entries = json.loads((_CONTAM / "path_map.json").read_text(encoding="utf-8"))
     assert "(hobbyist)" in text
     assert _section_count(text, "flow paths") == len(entries)
+    assert _section_count(text, "duct junctions") == 0
+    assert _section_count(text, "duct segments") == 0
     assert len(entries) >= 800
     assert "Arboretum" in text or "TenFwd" in text
