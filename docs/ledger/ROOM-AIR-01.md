@@ -16,17 +16,21 @@ oa_fraction: 1.0`), and the dose path was not reading them.
 Mechanics (`transmission.room_air_removal`, default `"first_order"`;
 `"sealed"` is the labelled bit-identical baseline):
 
-- `build_zone_air_exchange_map(air_flow_paths)` computes each HVAC zone's
-  removal rate `ach × hvac_duty` (duty-0 extract-only branches take `ach`
-  directly — a sanitary exhaust fan runs on its own schedule, not the
-  AHU's duty cycle) and `ShipSimulation` passes it to `TransmissionCore`
-  as `zone_air_exchange_per_hour`.
+- `build_zone_air_exchange_map(air_flow_paths, zone_volumes=...,
+  ambient_exchange_m3h=...)` computes each HVAC zone's removal rate
+  `ach × hvac_duty` (duty-0 extract-only branches take `ach` directly — a
+  sanitary exhaust fan runs on its own schedule, not the AHU's duty cycle)
+  and adds positive `ambient_openings` exchange as
+  `sum(exchange_m3h) / volume_m3` (ROOM-AIR-01-AMBIENT-EXCHANGE-01;
+  `exchange_m3h: 0` records contribute nothing). `ShipSimulation` passes
+  the map to `TransmissionCore` as `zone_air_exchange_per_hour`.
 - Each room-pool route scales its dose by the residence factor
   `f(x) = (1 − e^{−x}) / x` at `x = rate × hours_per_epoch` — the
   pulse-average of a first-order-decaying concentration, the same form
-  the sanitary flush route already used. Zones with no declared rate
-  (rate 0) keep `f = 1.0` — the sealed pre-change value, so nothing
-  changes where the hull does not declare an exchange.
+  the sanitary flush route already used. Zones with no declared HVAC rate
+  and no positive ambient-opening exchange keep `f = 1.0` — the sealed
+  pre-change value, so nothing changes where the hull does not declare an
+  exchange.
 - Applies ship-wide at the air unit: zone droplet pool, cabin-compartment
   pool (whose rate additionally takes `max(zone rate,
   SANITARY_EXHAUST_M3H_PER_WC / compartment_volume)` — the stateroom

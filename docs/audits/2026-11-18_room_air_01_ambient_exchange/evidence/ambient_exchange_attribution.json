@@ -1,0 +1,2714 @@
+{
+  "criterion": {
+    "arms": [
+      "ambient_off",
+      "ambient_on"
+    ],
+    "effect_threshold": "opened-deck residence factor ratio matches declared exchange; stochastic move outside 5-13% stream band is unattributed",
+    "null_expectation": "zones without openings byte-identical; norwalk_gi continuous airborne feed zero",
+    "paired_seeds": [
+      20200333,
+      20200334
+    ],
+    "statistic": "paired seed-by-seed witness deltas + ACH map census"
+  },
+  "map_census": {
+    "changed_zone_rows": 283,
+    "factor_ratio_max": 585.758354755784,
+    "factor_ratio_median": 112.72413015706022,
+    "factor_ratio_min": 10.507081547431483,
+    "factor_ratio_p90": 218.11337466784764,
+    "platforms_with_ambient_openings": 74,
+    "rows": [
+      {
+        "ach_new": 181.13717303205206,
+        "ach_old": 0.0,
+        "factor_new": 0.005520677966101695,
+        "factor_old": 1.0,
+        "factor_ratio": 181.13717303205206,
+        "platform": "aeolus_arc3",
+        "zone": "Bow_Sheave_Area"
+      },
+      {
+        "ach_new": 48.06557405234405,
+        "ach_old": 0.0,
+        "factor_new": 0.02080491120133064,
+        "factor_old": 1.0,
+        "factor_ratio": 48.06557405234405,
+        "platform": "aeolus_arc3",
+        "zone": "Cable_Working_Deck"
+      },
+      {
+        "ach_new": 71.0587239644553,
+        "ach_old": 0.0,
+        "factor_new": 0.014072867400492808,
+        "factor_old": 1.0,
+        "factor_ratio": 71.0587239644553,
+        "platform": "aeolus_arc3",
+        "zone": "Top_Of_House"
+      },
+      {
+        "ach_new": 255.32512874225364,
+        "ach_old": 0.0,
+        "factor_new": 0.003916574936928683,
+        "factor_old": 1.0,
+        "factor_ratio": 255.32512874225367,
+        "platform": "alexander_henry_cgs119",
+        "zone": "Boat_Stowage_Open"
+      },
+      {
+        "ach_new": 274.5419131438465,
+        "ach_old": 0.0,
+        "factor_new": 0.003642431090206795,
+        "factor_old": 1.0,
+        "factor_ratio": 274.5419131438465,
+        "platform": "alexander_henry_cgs119",
+        "zone": "Bridge_Wings"
+      },
+      {
+        "ach_new": 111.4133370265217,
+        "ach_old": 0.0,
+        "factor_new": 0.008975586107450962,
+        "factor_old": 1.0,
+        "factor_ratio": 111.41333702652169,
+        "platform": "alexander_henry_cgs119",
+        "zone": "Forecastle_Working"
+      },
+      {
+        "ach_new": 261.5162316995544,
+        "ach_old": 0.0,
+        "factor_new": 0.00382385442578899,
+        "factor_old": 1.0,
+        "factor_ratio": 261.5162316995544,
+        "platform": "alexander_henry_cgs119",
+        "zone": "Wheelhouse_Top"
+      },
+      {
+        "ach_new": 14.652071999999999,
+        "ach_old": 0.0,
+        "factor_new": 0.06824970330492916,
+        "factor_old": 1.0,
+        "factor_ratio": 14.652078347244295,
+        "platform": "antietam_cvs36",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 33.24308571428571,
+        "ach_old": 0.0,
+        "factor_new": 0.030081443359220455,
+        "factor_old": 1.0,
+        "factor_ratio": 33.24308571428583,
+        "platform": "antietam_cvs36",
+        "zone": "Forecastle_Deck"
+      },
+      {
+        "ach_new": 17.385594285714287,
+        "ach_old": 0.0,
+        "factor_new": 0.057518883474015146,
+        "factor_old": 1.0,
+        "factor_ratio": 17.385594775179566,
+        "platform": "antietam_cvs36",
+        "zone": "Gallery_Deck"
+      },
+      {
+        "ach_new": 197.37355604121134,
+        "ach_old": 0.0,
+        "factor_new": 0.005066534849233812,
+        "factor_old": 1.0,
+        "factor_ratio": 197.37355604121134,
+        "platform": "apl_24",
+        "zone": "Fantail_Main"
+      },
+      {
+        "ach_new": 161.31297083995287,
+        "ach_old": 0.0,
+        "factor_new": 0.006199129523143882,
+        "factor_old": 1.0,
+        "factor_ratio": 161.31297083995287,
+        "platform": "apl_24",
+        "zone": "Fantail_Upper"
+      },
+      {
+        "ach_new": 111.91195172768353,
+        "ach_old": 0.0,
+        "factor_new": 0.008935596105349945,
+        "factor_old": 1.0,
+        "factor_ratio": 111.91195172768353,
+        "platform": "apl_24",
+        "zone": "Forecastle"
+      },
+      {
+        "ach_new": 42.52615171576402,
+        "ach_old": 0.0,
+        "factor_new": 0.023514942209767593,
+        "factor_old": 1.0,
+        "factor_ratio": 42.52615171576402,
+        "platform": "apl_24",
+        "zone": "Gun_Platforms"
+      },
+      {
+        "ach_new": 111.07593201754386,
+        "ach_old": 0.0,
+        "factor_new": 0.009002850409052209,
+        "factor_old": 1.0,
+        "factor_ratio": 111.07593201754385,
+        "platform": "assistance_ar17",
+        "zone": "Boat_Deck_Fwd"
+      },
+      {
+        "ach_new": 74.06662131841578,
+        "ach_old": 0.0,
+        "factor_new": 0.013501358401390478,
+        "factor_old": 1.0,
+        "factor_ratio": 74.06662131841578,
+        "platform": "assistance_ar17",
+        "zone": "Boat_Gun_Deck_Aft"
+      },
+      {
+        "ach_new": 127.37135351566639,
+        "ach_old": 0.0,
+        "factor_new": 0.007851058910801338,
+        "factor_old": 1.0,
+        "factor_ratio": 127.3713535156664,
+        "platform": "assistance_ar17",
+        "zone": "Fwd_Working_Deck"
+      },
+      {
+        "ach_new": 109.66354431579445,
+        "ach_old": 0.0,
+        "factor_new": 0.009118800657402913,
+        "factor_old": 1.0,
+        "factor_ratio": 109.66354431579445,
+        "platform": "assistance_ar17",
+        "zone": "Stern_Working_Deck"
+      },
+      {
+        "ach_new": 61.40755800047836,
+        "ach_old": 0.0,
+        "factor_new": 0.016284640401955246,
+        "factor_old": 1.0,
+        "factor_ratio": 61.40755800047836,
+        "platform": "astoria_ca34",
+        "zone": "Boat_Deck"
+      },
+      {
+        "ach_new": 77.47345832392139,
+        "ach_old": 0.0,
+        "factor_new": 0.012907646329907428,
+        "factor_old": 1.0,
+        "factor_ratio": 77.47345832392139,
+        "platform": "astoria_ca34",
+        "zone": "Catapult_Deck"
+      },
+      {
+        "ach_new": 110.02823582561554,
+        "ach_old": 0.0,
+        "factor_new": 0.009088576150442932,
+        "factor_old": 1.0,
+        "factor_ratio": 110.02823582561554,
+        "platform": "astoria_ca34",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 82.95661409806532,
+        "ach_old": 0.0,
+        "factor_new": 0.01205449391675837,
+        "factor_old": 1.0,
+        "factor_ratio": 82.95661409806532,
+        "platform": "astoria_ca34",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 114.56584004504394,
+        "ach_old": 0.0,
+        "factor_new": 0.008728605312079318,
+        "factor_old": 1.0,
+        "factor_ratio": 114.56584004504394,
+        "platform": "astoria_ca34",
+        "zone": "Upper_Deck_Aft"
+      },
+      {
+        "ach_new": 25.8954667245542,
+        "ach_old": 0.0,
+        "factor_new": 0.03861679770560472,
+        "factor_old": 1.0,
+        "factor_ratio": 25.895466724701077,
+        "platform": "battler_acv6",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 60.68607820102448,
+        "ach_old": 0.0,
+        "factor_new": 0.016478243934094236,
+        "factor_old": 1.0,
+        "factor_ratio": 60.68607820102447,
+        "platform": "battler_acv6",
+        "zone": "Walkways_Focsle"
+      },
+      {
+        "ach_new": 192.15825356380412,
+        "ach_old": 0.0,
+        "factor_new": 0.005204043966125871,
+        "factor_old": 1.0,
+        "factor_ratio": 192.15825356380412,
+        "platform": "bolster_ars38",
+        "zone": "Focsle_Deck_Open"
+      },
+      {
+        "ach_new": 100.40642295094311,
+        "ach_old": 0.0,
+        "factor_new": 0.009959522215910262,
+        "factor_old": 1.0,
+        "factor_ratio": 100.40642295094312,
+        "platform": "bolster_ars38",
+        "zone": "Focsle_Open_Aft"
+      },
+      {
+        "ach_new": 206.14912424292027,
+        "ach_old": 0.0,
+        "factor_new": 0.004850857376535,
+        "factor_old": 1.0,
+        "factor_ratio": 206.14912424292027,
+        "platform": "bolster_ars38",
+        "zone": "Gun_Tub_Fwd"
+      },
+      {
+        "ach_new": 100.0320154583515,
+        "ach_old": 0.0,
+        "factor_new": 0.009996799478826373,
+        "factor_old": 1.0,
+        "factor_ratio": 100.0320154583515,
+        "platform": "bolster_ars38",
+        "zone": "Salvage_Deck"
+      },
+      {
+        "ach_new": 157.964144922095,
+        "ach_old": 0.0,
+        "factor_new": 0.0063305505214058646,
+        "factor_old": 1.0,
+        "factor_ratio": 157.964144922095,
+        "platform": "cannon_de701",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 124.74165988608624,
+        "ach_old": 0.0,
+        "factor_new": 0.008016568008740604,
+        "factor_old": 1.0,
+        "factor_ratio": 124.74165988608624,
+        "platform": "cannon_de701",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 71.47242064813142,
+        "ach_old": 0.0,
+        "factor_new": 0.013991410825766458,
+        "factor_old": 1.0,
+        "factor_ratio": 71.47242064813142,
+        "platform": "cannon_de701",
+        "zone": "Gun_Deck_Open"
+      },
+      {
+        "ach_new": 169.74926092193147,
+        "ach_old": 0.0,
+        "factor_new": 0.0058910418494246344,
+        "factor_old": 1.0,
+        "factor_ratio": 169.74926092193147,
+        "platform": "cannon_de701",
+        "zone": "Island_Open_Aft"
+      },
+      {
+        "ach_new": 130.61428014553016,
+        "ach_old": 0.0,
+        "factor_new": 0.007656130699382963,
+        "factor_old": 1.0,
+        "factor_ratio": 130.61428014553016,
+        "platform": "castle_class_corvette",
+        "zone": "Foc_Deck_Open"
+      },
+      {
+        "ach_new": 95.34791978033437,
+        "ach_old": 0.0,
+        "factor_new": 0.010487905790748582,
+        "factor_old": 1.0,
+        "factor_ratio": 95.34791978033437,
+        "platform": "castle_class_corvette",
+        "zone": "Quarterdeck"
+      },
+      {
+        "ach_new": 115.40625868209027,
+        "ach_old": 0.0,
+        "factor_new": 0.008665041319420128,
+        "factor_old": 1.0,
+        "factor_ratio": 115.40625868209027,
+        "platform": "castle_class_corvette",
+        "zone": "Upper_Deck_Aft"
+      },
+      {
+        "ach_new": 118.98907972858355,
+        "ach_old": 0.0,
+        "factor_new": 0.008404132566459206,
+        "factor_old": 1.0,
+        "factor_ratio": 118.98907972858356,
+        "platform": "chicago_cg11",
+        "zone": "Bow_Weather"
+      },
+      {
+        "ach_new": 136.23768216516308,
+        "ach_old": 0.0,
+        "factor_new": 0.00734011313248624,
+        "factor_old": 1.0,
+        "factor_ratio": 136.23768216516308,
+        "platform": "chicago_cg11",
+        "zone": "Fantail_Weather"
+      },
+      {
+        "ach_new": 94.18702290076337,
+        "ach_old": 0.0,
+        "factor_new": 0.010617173886615065,
+        "factor_old": 1.0,
+        "factor_ratio": 94.18702290076338,
+        "platform": "chicago_cg11",
+        "zone": "Forecastle_Deck"
+      },
+      {
+        "ach_new": 47.33365139949109,
+        "ach_old": 0.0,
+        "factor_new": 0.021126618598681604,
+        "factor_old": 1.0,
+        "factor_ratio": 47.33365139949109,
+        "platform": "chicago_cg11",
+        "zone": "Helo_Deck"
+      },
+      {
+        "ach_new": 110.70545840936914,
+        "ach_old": 0.0,
+        "factor_new": 0.009032978268354008,
+        "factor_old": 1.0,
+        "factor_ratio": 110.70545840936916,
+        "platform": "chicago_cg11",
+        "zone": "Helo_Deck_02_Aft"
+      },
+      {
+        "ach_new": 110.48795767785047,
+        "ach_old": 0.0,
+        "factor_new": 0.009050760110126193,
+        "factor_old": 1.0,
+        "factor_ratio": 110.48795767785047,
+        "platform": "chicago_cg11",
+        "zone": "Launcher_Deck_01"
+      },
+      {
+        "ach_new": 137.40327141272058,
+        "ach_old": 0.0,
+        "factor_new": 0.007277847097222909,
+        "factor_old": 1.0,
+        "factor_ratio": 137.40327141272058,
+        "platform": "chicago_cg11",
+        "zone": "Open_03"
+      },
+      {
+        "ach_new": 70.86293792255687,
+        "ach_old": 0.0,
+        "factor_new": 0.014111749093621522,
+        "factor_old": 1.0,
+        "factor_ratio": 70.86293792255687,
+        "platform": "chicago_cg11",
+        "zone": "Terrier_Deck_02"
+      },
+      {
+        "ach_new": 49.32738095238095,
+        "ach_old": 0.0,
+        "factor_new": 0.020272716302642695,
+        "factor_old": 1.0,
+        "factor_ratio": 49.32738095238095,
+        "platform": "classic_cruise_1900",
+        "zone": "PoolDeck"
+      },
+      {
+        "ach_new": 117.6862273610969,
+        "ach_old": 0.0,
+        "factor_new": 0.008497171015021987,
+        "factor_old": 1.0,
+        "factor_ratio": 117.6862273610969,
+        "platform": "cobalt_k124",
+        "zone": "Foc_Deck_Open"
+      },
+      {
+        "ach_new": 84.08485599256736,
+        "ach_old": 0.0,
+        "factor_new": 0.011892747965084159,
+        "factor_old": 1.0,
+        "factor_ratio": 84.08485599256736,
+        "platform": "cobalt_k124",
+        "zone": "Quarterdeck"
+      },
+      {
+        "ach_new": 99.42834096586179,
+        "ach_old": 0.0,
+        "factor_new": 0.010057494576353685,
+        "factor_old": 1.0,
+        "factor_ratio": 99.42834096586179,
+        "platform": "cobalt_k124",
+        "zone": "Stern_Open"
+      },
+      {
+        "ach_new": 182.33835252435784,
+        "ach_old": 0.0,
+        "factor_new": 0.005484309725055863,
+        "factor_old": 1.0,
+        "factor_ratio": 182.33835252435784,
+        "platform": "cushing_dd376",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 195.3763829633379,
+        "ach_old": 0.0,
+        "factor_new": 0.005118325894013754,
+        "factor_old": 1.0,
+        "factor_ratio": 195.3763829633379,
+        "platform": "cushing_dd376",
+        "zone": "Focsle_Open"
+      },
+      {
+        "ach_new": 140.94968784428937,
+        "ach_old": 0.0,
+        "factor_new": 0.00709473015012793,
+        "factor_old": 1.0,
+        "factor_ratio": 140.94968784428937,
+        "platform": "davison_dd618",
+        "zone": "After_Deckhouse_Top"
+      },
+      {
+        "ach_new": 177.72637879435655,
+        "ach_old": 0.0,
+        "factor_new": 0.005626626766289313,
+        "factor_old": 1.0,
+        "factor_ratio": 177.72637879435655,
+        "platform": "davison_dd618",
+        "zone": "Fantail_MS"
+      },
+      {
+        "ach_new": 116.64143255954328,
+        "ach_old": 0.0,
+        "factor_new": 0.008573282906908047,
+        "factor_old": 1.0,
+        "factor_ratio": 116.64143255954326,
+        "platform": "davison_dd618",
+        "zone": "Focsle_Open"
+      },
+      {
+        "ach_new": 142.36027869343724,
+        "ach_old": 0.0,
+        "factor_new": 0.007024431317343998,
+        "factor_old": 1.0,
+        "factor_ratio": 142.36027869343724,
+        "platform": "davison_dd618",
+        "zone": "Midship_Deckhouse"
+      },
+      {
+        "ach_new": 162.2681917741543,
+        "ach_old": 0.0,
+        "factor_new": 0.00616263723078769,
+        "factor_old": 1.0,
+        "factor_ratio": 162.2681917741543,
+        "platform": "davison_dd618",
+        "zone": "Super_Open"
+      },
+      {
+        "ach_new": 53.612833333333334,
+        "ach_old": 0.0,
+        "factor_new": 0.018652250549464212,
+        "factor_old": 1.0,
+        "factor_ratio": 53.61283333333334,
+        "platform": "diamond_princess",
+        "zone": "CalypsoPool"
+      },
+      {
+        "ach_new": 113.46125,
+        "ach_old": 0.0,
+        "factor_new": 0.008813581729445075,
+        "factor_old": 1.0,
+        "factor_ratio": 113.46125,
+        "platform": "diamond_princess",
+        "zone": "CenterCourt"
+      },
+      {
+        "ach_new": 93.19383333333334,
+        "ach_old": 0.0,
+        "factor_new": 0.010730323715982638,
+        "factor_old": 1.0,
+        "factor_ratio": 93.19383333333334,
+        "platform": "diamond_princess",
+        "zone": "HorizonTerrace"
+      },
+      {
+        "ach_new": 45.36792,
+        "ach_old": 0.0,
+        "factor_new": 0.022042006774831202,
+        "factor_old": 1.0,
+        "factor_ratio": 45.36792,
+        "platform": "diamond_princess",
+        "zone": "NeptunePool"
+      },
+      {
+        "ach_new": 79.743,
+        "ach_old": 0.0,
+        "factor_new": 0.01254028566770751,
+        "factor_old": 1.0,
+        "factor_ratio": 79.743,
+        "platform": "diamond_princess",
+        "zone": "OceanFront"
+      },
+      {
+        "ach_new": 80.5685,
+        "ach_old": 0.0,
+        "factor_new": 0.012411798655802206,
+        "factor_old": 1.0,
+        "factor_ratio": 80.5685,
+        "platform": "diamond_princess",
+        "zone": "OpenAirCinema"
+      },
+      {
+        "ach_new": 93.10300000000001,
+        "ach_old": 0.0,
+        "factor_new": 0.010740792455667378,
+        "factor_old": 1.0,
+        "factor_ratio": 93.10300000000001,
+        "platform": "diamond_princess",
+        "zone": "SportsCourt"
+      },
+      {
+        "ach_new": 55.5514,
+        "ach_old": 0.0,
+        "factor_new": 0.018001346500718253,
+        "factor_old": 1.0,
+        "factor_ratio": 55.5514,
+        "platform": "diamond_princess",
+        "zone": "TerracePool"
+      },
+      {
+        "ach_new": 210.10278759970396,
+        "ach_old": 0.0,
+        "factor_new": 0.0047595751176097625,
+        "factor_old": 1.0,
+        "factor_ratio": 210.102787599704,
+        "platform": "eagle_pe60",
+        "zone": "AA_Gun_Platforms"
+      },
+      {
+        "ach_new": 207.90450928381964,
+        "ach_old": 0.0,
+        "factor_new": 0.004809900484817556,
+        "factor_old": 1.0,
+        "factor_ratio": 207.90450928381964,
+        "platform": "eagle_pe60",
+        "zone": "After_Gun_Platform"
+      },
+      {
+        "ach_new": 362.49413039552104,
+        "ach_old": 0.0,
+        "factor_new": 0.0027586653579987344,
+        "factor_old": 1.0,
+        "factor_ratio": 362.49413039552104,
+        "platform": "eagle_pe60",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 260.28461336369213,
+        "ach_old": 0.0,
+        "factor_new": 0.0038419481930832143,
+        "factor_old": 1.0,
+        "factor_ratio": 260.28461336369213,
+        "platform": "eagle_pe60",
+        "zone": "Gun_Deck_Fwd"
+      },
+      {
+        "ach_new": 298.72050515121305,
+        "ach_old": 0.0,
+        "factor_new": 0.003347610836068309,
+        "factor_old": 1.0,
+        "factor_ratio": 298.72050515121305,
+        "platform": "eagle_pe60",
+        "zone": "Gun_Platform_Fwd"
+      },
+      {
+        "ach_new": 172.42298315602838,
+        "ach_old": 0.0,
+        "factor_new": 0.005799690863108914,
+        "factor_old": 1.0,
+        "factor_ratio": 172.42298315602838,
+        "platform": "eagle_pe60",
+        "zone": "Nav_Bridge"
+      },
+      {
+        "ach_new": 360.6348437121395,
+        "ach_old": 0.0,
+        "factor_new": 0.0027728879153956763,
+        "factor_old": 1.0,
+        "factor_ratio": 360.6348437121395,
+        "platform": "eagle_pe60",
+        "zone": "Open_Bridge"
+      },
+      {
+        "ach_new": 191.28603557554695,
+        "ach_old": 0.0,
+        "factor_new": 0.005227773146069817,
+        "factor_old": 1.0,
+        "factor_ratio": 191.28603557554695,
+        "platform": "erie_pg50",
+        "zone": "Fantail_Aft"
+      },
+      {
+        "ach_new": 143.49798165137614,
+        "ach_old": 0.0,
+        "factor_new": 0.006968739131324291,
+        "factor_old": 1.0,
+        "factor_ratio": 143.49798165137614,
+        "platform": "erie_pg50",
+        "zone": "Focsle_Main"
+      },
+      {
+        "ach_new": 170.5692931541703,
+        "ach_old": 0.0,
+        "factor_new": 0.005862719962708309,
+        "factor_old": 1.0,
+        "factor_ratio": 170.5692931541703,
+        "platform": "erie_pg50",
+        "zone": "Focsle_Stores"
+      },
+      {
+        "ach_new": 119.71110337626175,
+        "ach_old": 0.0,
+        "factor_new": 0.008353444014770447,
+        "factor_old": 1.0,
+        "factor_ratio": 119.71110337626176,
+        "platform": "erie_pg50",
+        "zone": "Gun_Deck_Aft"
+      },
+      {
+        "ach_new": 116.05936305732484,
+        "ach_old": 0.0,
+        "factor_new": 0.008616280269486513,
+        "factor_old": 1.0,
+        "factor_ratio": 116.05936305732484,
+        "platform": "erie_pg50",
+        "zone": "Sup_Deck_Open"
+      },
+      {
+        "ach_new": 135.45091230713794,
+        "ach_old": 0.0,
+        "factor_new": 0.007382748354861412,
+        "factor_old": 1.0,
+        "factor_ratio": 135.45091230713794,
+        "platform": "esteem_mso438",
+        "zone": "Boat_Deck_Aft"
+      },
+      {
+        "ach_new": 449.7801906779661,
+        "ach_old": 0.0,
+        "factor_new": 0.002223308230833093,
+        "factor_old": 1.0,
+        "factor_ratio": 449.7801906779661,
+        "platform": "esteem_mso438",
+        "zone": "Deck_House_Main"
+      },
+      {
+        "ach_new": 132.98293314115372,
+        "ach_old": 0.0,
+        "factor_new": 0.007519761945230653,
+        "factor_old": 1.0,
+        "factor_ratio": 132.98293314115372,
+        "platform": "esteem_mso438",
+        "zone": "Focsle_01"
+      },
+      {
+        "ach_new": 169.19164058770488,
+        "ach_old": 0.0,
+        "factor_new": 0.005910457493800494,
+        "factor_old": 1.0,
+        "factor_ratio": 169.19164058770488,
+        "platform": "esteem_mso438",
+        "zone": "Reel_Deck"
+      },
+      {
+        "ach_new": 151.92614069891653,
+        "ach_old": 0.0,
+        "factor_new": 0.006582145741342665,
+        "factor_old": 1.0,
+        "factor_ratio": 151.92614069891653,
+        "platform": "esteem_mso438",
+        "zone": "Sweep_Deck"
+      },
+      {
+        "ach_new": 69.99371428571428,
+        "ach_old": 0.0,
+        "factor_new": 0.01428699719974855,
+        "factor_old": 1.0,
+        "factor_ratio": 69.99371428571428,
+        "platform": "expedition_cruise_450",
+        "zone": "PoolDeck"
+      },
+      {
+        "ach_new": 134.55054573185262,
+        "ach_old": 0.0,
+        "factor_new": 0.007432151200582359,
+        "factor_old": 1.0,
+        "factor_ratio": 134.55054573185262,
+        "platform": "fletcher_dde_dd445",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 180.3753431708991,
+        "ach_old": 0.0,
+        "factor_new": 0.005543994996325724,
+        "factor_old": 1.0,
+        "factor_ratio": 180.3753431708991,
+        "platform": "fletcher_dde_dd445",
+        "zone": "Focsle_Main"
+      },
+      {
+        "ach_new": 69.41602388293805,
+        "ach_old": 0.0,
+        "factor_new": 0.014405895700485269,
+        "factor_old": 1.0,
+        "factor_ratio": 69.41602388293805,
+        "platform": "fort_mandan_lsd21",
+        "zone": "Top_House_Open"
+      },
+      {
+        "ach_new": 50.12897645216961,
+        "ach_old": 0.0,
+        "factor_new": 0.019948542156134917,
+        "factor_old": 1.0,
+        "factor_ratio": 50.12897645216961,
+        "platform": "fort_mandan_lsd21",
+        "zone": "Well_Cover_Open"
+      },
+      {
+        "ach_new": 24.130994106409332,
+        "ach_old": 0.0,
+        "factor_new": 0.0414404808835156,
+        "factor_old": 1.0,
+        "factor_ratio": 24.130994107208465,
+        "platform": "fort_mandan_lsd21",
+        "zone": "Well_Deck"
+      },
+      {
+        "ach_new": 146.3962633238852,
+        "ach_old": 0.0,
+        "factor_new": 0.006830775439859506,
+        "factor_old": 1.0,
+        "factor_ratio": 146.3962633238852,
+        "platform": "fort_william_j311",
+        "zone": "Foc_Deck_Open"
+      },
+      {
+        "ach_new": 129.46114541863892,
+        "ach_old": 0.0,
+        "factor_new": 0.007724325292861397,
+        "factor_old": 1.0,
+        "factor_ratio": 129.46114541863892,
+        "platform": "fort_william_j311",
+        "zone": "Quarterdeck"
+      },
+      {
+        "ach_new": 162.28526007253217,
+        "ach_old": 0.0,
+        "factor_new": 0.006161989077461857,
+        "factor_old": 1.0,
+        "factor_ratio": 162.28526007253217,
+        "platform": "fort_william_j311",
+        "zone": "Signal_Deck"
+      },
+      {
+        "ach_new": 148.94046296574294,
+        "ach_old": 0.0,
+        "factor_new": 0.006714092195550682,
+        "factor_old": 1.0,
+        "factor_ratio": 148.94046296574294,
+        "platform": "gordon_gunter_r338",
+        "zone": "Aft_Working_Deck"
+      },
+      {
+        "ach_new": 90.14609875612514,
+        "ach_old": 0.0,
+        "factor_new": 0.011093103459810601,
+        "factor_old": 1.0,
+        "factor_ratio": 90.14609875612514,
+        "platform": "gordon_gunter_r338",
+        "zone": "Boat_Deck"
+      },
+      {
+        "ach_new": 101.30737488865863,
+        "ach_old": 0.0,
+        "factor_new": 0.009870949682577849,
+        "factor_old": 1.0,
+        "factor_ratio": 101.30737488865863,
+        "platform": "gordon_gunter_r338",
+        "zone": "Mission_Deck"
+      },
+      {
+        "ach_new": 110.79590892567991,
+        "ach_old": 0.0,
+        "factor_new": 0.009025604010981883,
+        "factor_old": 1.0,
+        "factor_ratio": 110.79590892567991,
+        "platform": "gordon_gunter_r338",
+        "zone": "Shelter_Deck"
+      },
+      {
+        "ach_new": 100.80995319565275,
+        "ach_old": 0.0,
+        "factor_new": 0.009919655433816064,
+        "factor_old": 1.0,
+        "factor_ratio": 100.80995319565277,
+        "platform": "gosper_apa170",
+        "zone": "Boat_Deck_Open"
+      },
+      {
+        "ach_new": 75.08490304101943,
+        "ach_old": 0.0,
+        "factor_new": 0.01331825652693049,
+        "factor_old": 1.0,
+        "factor_ratio": 75.08490304101943,
+        "platform": "gosper_apa170",
+        "zone": "Boat_Deck_Open_Fwd"
+      },
+      {
+        "ach_new": 140.00236636605052,
+        "ach_old": 0.0,
+        "factor_new": 0.00714273641193605,
+        "factor_old": 1.0,
+        "factor_ratio": 140.00236636605052,
+        "platform": "gosper_apa170",
+        "zone": "Boat_Stowage_Deck"
+      },
+      {
+        "ach_new": 157.42183232109,
+        "ach_old": 0.0,
+        "factor_new": 0.006352359042298028,
+        "factor_old": 1.0,
+        "factor_ratio": 157.42183232109,
+        "platform": "gosper_apa170",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 102.97112473015459,
+        "ach_old": 0.0,
+        "factor_new": 0.0097114603984427,
+        "factor_old": 1.0,
+        "factor_ratio": 102.97112473015457,
+        "platform": "gosper_apa170",
+        "zone": "Focsle_Deck_Open"
+      },
+      {
+        "ach_new": 109.00348000928003,
+        "ach_old": 0.0,
+        "factor_new": 0.009174019030537968,
+        "factor_old": 1.0,
+        "factor_ratio": 109.00348000928003,
+        "platform": "gosper_apa170",
+        "zone": "Main_Deck_Open_Fwd"
+      },
+      {
+        "ach_new": 171.5438888888889,
+        "ach_old": 0.0,
+        "factor_new": 0.005829411974259908,
+        "factor_old": 1.0,
+        "factor_ratio": 171.5438888888889,
+        "platform": "greg_mortimer",
+        "zone": "ActivityPlat"
+      },
+      {
+        "ach_new": 131.16266666666667,
+        "ach_old": 0.0,
+        "factor_new": 0.007624120684747692,
+        "factor_old": 1.0,
+        "factor_ratio": 131.16266666666667,
+        "platform": "greg_mortimer",
+        "zone": "SunDeck"
+      },
+      {
+        "ach_new": 143.50039999999998,
+        "ach_old": 0.0,
+        "factor_new": 0.006968621690253129,
+        "factor_old": 1.0,
+        "factor_ratio": 143.50039999999998,
+        "platform": "greg_mortimer",
+        "zone": "TopDeck"
+      },
+      {
+        "ach_new": 171.51,
+        "ach_old": 0.0,
+        "factor_new": 0.005830563815520961,
+        "factor_old": 1.0,
+        "factor_ratio": 171.51,
+        "platform": "greg_mortimer",
+        "zone": "ViewPlatforms"
+      },
+      {
+        "ach_new": 154.6409090909091,
+        "ach_old": 0.0,
+        "factor_new": 0.0064665941624290875,
+        "factor_old": 1.0,
+        "factor_ratio": 154.6409090909091,
+        "platform": "greg_mortimer",
+        "zone": "ZodiacPlatforms"
+      },
+      {
+        "ach_new": 105.92941211348612,
+        "ach_old": 0.0,
+        "factor_new": 0.009440248747238046,
+        "factor_old": 1.0,
+        "factor_ratio": 105.92941211348612,
+        "platform": "hunter_killer_dd692",
+        "zone": "Boat_Deck_01"
+      },
+      {
+        "ach_new": 142.022995814126,
+        "ach_old": 0.0,
+        "factor_new": 0.007041113266676616,
+        "factor_old": 1.0,
+        "factor_ratio": 142.022995814126,
+        "platform": "hunter_killer_dd692",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 130.1373913430115,
+        "ach_old": 0.0,
+        "factor_new": 0.007684186609859388,
+        "factor_old": 1.0,
+        "factor_ratio": 130.1373913430115,
+        "platform": "hunter_killer_dd692",
+        "zone": "Focsle_Fwd"
+      },
+      {
+        "ach_new": 152.58857335004433,
+        "ach_old": 0.0,
+        "factor_new": 0.006553570677313823,
+        "factor_old": 1.0,
+        "factor_ratio": 152.58857335004433,
+        "platform": "hunter_killer_dd692",
+        "zone": "Fwd_Mount_Deck"
+      },
+      {
+        "ach_new": 172.19341331830262,
+        "ach_old": 0.0,
+        "factor_new": 0.005807423064153342,
+        "factor_old": 1.0,
+        "factor_ratio": 172.19341331830262,
+        "platform": "hunter_killer_dd692",
+        "zone": "Launcher_Deck_01"
+      },
+      {
+        "ach_new": 110.15641456582634,
+        "ach_old": 0.0,
+        "factor_new": 0.00907800062249147,
+        "factor_old": 1.0,
+        "factor_ratio": 110.15641456582634,
+        "platform": "hunter_killer_dd692",
+        "zone": "Signal_Bridge"
+      },
+      {
+        "ach_new": 163.13387495584595,
+        "ach_old": 0.0,
+        "factor_new": 0.006129934694867399,
+        "factor_old": 1.0,
+        "factor_ratio": 163.13387495584595,
+        "platform": "hunter_killer_dd692",
+        "zone": "Torpedo_Deck"
+      },
+      {
+        "ach_new": 96.00893203883494,
+        "ach_old": 0.0,
+        "factor_new": 0.01041569756859192,
+        "factor_old": 1.0,
+        "factor_ratio": 96.00893203883494,
+        "platform": "idaho_bb42",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 22.740748181781655,
+        "ach_old": 0.0,
+        "factor_new": 0.04397392697343803,
+        "factor_old": 1.0,
+        "factor_ratio": 22.740748184805945,
+        "platform": "independence_cvl26",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 67.51589456320022,
+        "ach_old": 0.0,
+        "factor_new": 0.014811327117408195,
+        "factor_old": 1.0,
+        "factor_ratio": 67.51589456320022,
+        "platform": "independence_cvl26",
+        "zone": "Forecastle_Deck"
+      },
+      {
+        "ach_new": 43.85059077626731,
+        "ach_old": 0.0,
+        "factor_new": 0.022804709863594747,
+        "factor_old": 1.0,
+        "factor_ratio": 43.85059077626731,
+        "platform": "independence_cvl26",
+        "zone": "Gallery_Deck"
+      },
+      {
+        "ach_new": 86.70838389254169,
+        "ach_old": 0.0,
+        "factor_new": 0.011532910142106985,
+        "factor_old": 1.0,
+        "factor_ratio": 86.70838389254169,
+        "platform": "independence_cvl26",
+        "zone": "Poop_Deck"
+      },
+      {
+        "ach_new": 112.74714285714286,
+        "ach_old": 0.0,
+        "factor_new": 0.008869404356144596,
+        "factor_old": 1.0,
+        "factor_ratio": 112.74714285714288,
+        "platform": "jupiter_ac3",
+        "zone": "Focsle_Deck_Open"
+      },
+      {
+        "ach_new": 29.18507740787273,
+        "ach_old": 0.0,
+        "factor_new": 0.034264085923926206,
+        "factor_old": 1.0,
+        "factor_ratio": 29.185077407878897,
+        "platform": "jupiter_ac3",
+        "zone": "Poop_Deck_Open"
+      },
+      {
+        "ach_new": 164.4378781980962,
+        "ach_old": 0.0,
+        "factor_new": 0.006081323907593315,
+        "factor_old": 1.0,
+        "factor_ratio": 164.4378781980962,
+        "platform": "keppler_dd765",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 167.73262310958805,
+        "ach_old": 0.0,
+        "factor_new": 0.0059618694411441376,
+        "factor_old": 1.0,
+        "factor_ratio": 167.73262310958805,
+        "platform": "keppler_dd765",
+        "zone": "Focsle_Fwd"
+      },
+      {
+        "ach_new": 135.69171875757135,
+        "ach_old": 0.0,
+        "factor_new": 0.007369646498373371,
+        "factor_old": 1.0,
+        "factor_ratio": 135.69171875757135,
+        "platform": "keppler_dd765",
+        "zone": "Forecastle_Top_01"
+      },
+      {
+        "ach_new": 144.84620699184742,
+        "ach_old": 0.0,
+        "factor_new": 0.006903874259243008,
+        "factor_old": 1.0,
+        "factor_ratio": 144.84620699184742,
+        "platform": "keppler_dd765",
+        "zone": "Gun_Deck_Aft"
+      },
+      {
+        "ach_new": 169.69699253787596,
+        "ach_old": 0.0,
+        "factor_new": 0.005892856349689299,
+        "factor_old": 1.0,
+        "factor_ratio": 169.69699253787596,
+        "platform": "keppler_dd765",
+        "zone": "Helo_Platform"
+      },
+      {
+        "ach_new": 200.20802596636176,
+        "ach_old": 0.0,
+        "factor_new": 0.004994804754570711,
+        "factor_old": 1.0,
+        "factor_ratio": 200.20802596636176,
+        "platform": "keppler_dd765",
+        "zone": "Signal_Shelter"
+      },
+      {
+        "ach_new": 115.07349232026998,
+        "ach_old": 0.0,
+        "factor_new": 0.008690098647713083,
+        "factor_old": 1.0,
+        "factor_ratio": 115.07349232026998,
+        "platform": "keppler_dd765",
+        "zone": "Weather_Deck_01"
+      },
+      {
+        "ach_new": 249.88000000000002,
+        "ach_old": 0.0,
+        "factor_new": 0.00400192092204258,
+        "factor_old": 1.0,
+        "factor_ratio": 249.88000000000002,
+        "platform": "legend_class_nsc",
+        "zone": "Boat_Deck"
+      },
+      {
+        "ach_new": 160.024,
+        "ach_old": 0.0,
+        "factor_new": 0.006249062640603909,
+        "factor_old": 1.0,
+        "factor_ratio": 160.024,
+        "platform": "legend_class_nsc",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 22.82924231381649,
+        "ach_old": 0.0,
+        "factor_new": 0.04380346864482064,
+        "factor_old": 1.0,
+        "factor_ratio": 22.82924231659542,
+        "platform": "lexington_cv2",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 223.46284324393523,
+        "ach_old": 0.0,
+        "factor_new": 0.004475016899826992,
+        "factor_old": 1.0,
+        "factor_ratio": 223.46284324393523,
+        "platform": "liberty_cargo_ec2",
+        "zone": "Aft_Deck_Open"
+      },
+      {
+        "ach_new": 288.826202615828,
+        "ach_old": 0.0,
+        "factor_new": 0.0034622897470632705,
+        "factor_old": 1.0,
+        "factor_ratio": 288.826202615828,
+        "platform": "liberty_cargo_ec2",
+        "zone": "Boat_Deck_Open"
+      },
+      {
+        "ach_new": 439.42641509433963,
+        "ach_old": 0.0,
+        "factor_new": 0.0022756938719428414,
+        "factor_old": 1.0,
+        "factor_ratio": 439.42641509433963,
+        "platform": "liberty_cargo_ec2",
+        "zone": "Bridge_Wings"
+      },
+      {
+        "ach_new": 331.4686003942552,
+        "ach_old": 0.0,
+        "factor_new": 0.0030168770097999645,
+        "factor_old": 1.0,
+        "factor_ratio": 331.4686003942552,
+        "platform": "liberty_cargo_ec2",
+        "zone": "Forecastle_Deck"
+      },
+      {
+        "ach_new": 132.9151568569843,
+        "ach_old": 0.0,
+        "factor_new": 0.007523596432843188,
+        "factor_old": 1.0,
+        "factor_ratio": 132.9151568569843,
+        "platform": "liberty_cargo_ec2",
+        "zone": "Gun_Platform"
+      },
+      {
+        "ach_new": 131.40259077276497,
+        "ach_old": 0.0,
+        "factor_new": 0.007610200028166142,
+        "factor_old": 1.0,
+        "factor_ratio": 131.40259077276497,
+        "platform": "liberty_cargo_ec2",
+        "zone": "Top_Of_House"
+      },
+      {
+        "ach_new": 233.46289752650176,
+        "ach_old": 0.0,
+        "factor_new": 0.004283335855910398,
+        "factor_old": 1.0,
+        "factor_ratio": 233.46289752650176,
+        "platform": "lsm_354",
+        "zone": "Bridge_Wings"
+      },
+      {
+        "ach_new": 110.03746074472856,
+        "ach_old": 0.0,
+        "factor_new": 0.009087814215559367,
+        "factor_old": 1.0,
+        "factor_ratio": 110.03746074472856,
+        "platform": "lsm_354",
+        "zone": "Forecastle_Weather"
+      },
+      {
+        "ach_new": 117.93739926168564,
+        "ach_old": 0.0,
+        "factor_new": 0.008479074545141935,
+        "factor_old": 1.0,
+        "factor_ratio": 117.93739926168566,
+        "platform": "lsm_354",
+        "zone": "Weather_Aft_Super"
+      },
+      {
+        "ach_new": 92.86288128540794,
+        "ach_old": 0.0,
+        "factor_new": 0.01076856528849849,
+        "factor_old": 1.0,
+        "factor_ratio": 92.86288128540794,
+        "platform": "lsm_354",
+        "zone": "Weather_Fwd_Super"
+      },
+      {
+        "ach_new": 99.2887029288703,
+        "ach_old": 0.0,
+        "factor_new": 0.010071639275179099,
+        "factor_old": 1.0,
+        "factor_ratio": 99.2887029288703,
+        "platform": "luzon_arg2",
+        "zone": "Boat_Deck_Aft"
+      },
+      {
+        "ach_new": 319.44359010205505,
+        "ach_old": 0.0,
+        "factor_new": 0.0031304431548635,
+        "factor_old": 1.0,
+        "factor_ratio": 319.44359010205505,
+        "platform": "luzon_arg2",
+        "zone": "Chain_Locker_Focsle"
+      },
+      {
+        "ach_new": 129.88743908190534,
+        "ach_old": 0.0,
+        "factor_new": 0.007698973873596914,
+        "factor_old": 1.0,
+        "factor_ratio": 129.88743908190534,
+        "platform": "luzon_arg2",
+        "zone": "Gun_Weather_Sup"
+      },
+      {
+        "ach_new": 121.34233705226073,
+        "ach_old": 0.0,
+        "factor_new": 0.008241146695314693,
+        "factor_old": 1.0,
+        "factor_ratio": 121.34233705226072,
+        "platform": "luzon_arg2",
+        "zone": "Stern_Weather"
+      },
+      {
+        "ach_new": 106.54408815520044,
+        "ach_old": 0.0,
+        "factor_new": 0.009385785896851658,
+        "factor_old": 1.0,
+        "factor_ratio": 106.54408815520043,
+        "platform": "lyon_ap71",
+        "zone": "Boat_Deck_Walkway"
+      },
+      {
+        "ach_new": 111.94547354421962,
+        "ach_old": 0.0,
+        "factor_new": 0.00893292036149179,
+        "factor_old": 1.0,
+        "factor_ratio": 111.94547354421962,
+        "platform": "lyon_ap71",
+        "zone": "Boat_Stowage_Port"
+      },
+      {
+        "ach_new": 111.91650042747223,
+        "ach_old": 0.0,
+        "factor_new": 0.008935232929732757,
+        "factor_old": 1.0,
+        "factor_ratio": 111.91650042747222,
+        "platform": "lyon_ap71",
+        "zone": "Boat_Stowage_Stbd"
+      },
+      {
+        "ach_new": 155.6771306265404,
+        "ach_old": 0.0,
+        "factor_new": 0.006423551076355183,
+        "factor_old": 1.0,
+        "factor_ratio": 155.6771306265404,
+        "platform": "lyon_ap71",
+        "zone": "Bow_Shelter_Weather"
+      },
+      {
+        "ach_new": 98.6734951947395,
+        "ach_old": 0.0,
+        "factor_new": 0.010134433750688829,
+        "factor_old": 1.0,
+        "factor_ratio": 98.6734951947395,
+        "platform": "lyon_ap71",
+        "zone": "Bridge_Wings_Walkway"
+      },
+      {
+        "ach_new": 53.550009499482805,
+        "ach_old": 0.0,
+        "factor_new": 0.0186741330085041,
+        "factor_old": 1.0,
+        "factor_ratio": 53.55000949948281,
+        "platform": "lyon_ap71",
+        "zone": "Forecastle_Weather"
+      },
+      {
+        "ach_new": 95.43894421347771,
+        "ach_old": 0.0,
+        "factor_new": 0.010477903001139674,
+        "factor_old": 1.0,
+        "factor_ratio": 95.43894421347771,
+        "platform": "lyon_ap71",
+        "zone": "Hatch_3_Weather"
+      },
+      {
+        "ach_new": 90.22367604760025,
+        "ach_old": 0.0,
+        "factor_new": 0.011083565243699665,
+        "factor_old": 1.0,
+        "factor_ratio": 90.22367604760025,
+        "platform": "lyon_ap71",
+        "zone": "Hatch_4_Weather"
+      },
+      {
+        "ach_new": 68.77806055287407,
+        "ach_old": 0.0,
+        "factor_new": 0.014539520189453968,
+        "factor_old": 1.0,
+        "factor_ratio": 68.77806055287407,
+        "platform": "lyon_ap71",
+        "zone": "House_Top_Platform"
+      },
+      {
+        "ach_new": 97.2654894355415,
+        "ach_old": 0.0,
+        "factor_new": 0.01028113882738139,
+        "factor_old": 1.0,
+        "factor_ratio": 97.2654894355415,
+        "platform": "lyon_ap71",
+        "zone": "Quarter_Weather"
+      },
+      {
+        "ach_new": 100.17538286410144,
+        "ach_old": 0.0,
+        "factor_new": 0.009982492418887047,
+        "factor_old": 1.0,
+        "factor_ratio": 100.17538286410144,
+        "platform": "lyon_ap71",
+        "zone": "Stern_Weather_Shelter"
+      },
+      {
+        "ach_new": 17.190755555555555,
+        "ach_old": 0.0,
+        "factor_new": 0.05817079781970915,
+        "factor_old": 1.0,
+        "factor_ratio": 17.190756143646784,
+        "platform": "mega_cruise_5000",
+        "zone": "Aqua_Theater"
+      },
+      {
+        "ach_new": 11.705197222222221,
+        "ach_old": 0.0,
+        "factor_new": 0.08543143102923251,
+        "factor_old": 1.0,
+        "factor_ratio": 11.705293800566503,
+        "platform": "mega_cruise_5000",
+        "zone": "CentralPark"
+      },
+      {
+        "ach_new": 23.64067777777778,
+        "ach_old": 0.0,
+        "factor_new": 0.04229997165673168,
+        "factor_old": 1.0,
+        "factor_ratio": 23.640677779056112,
+        "platform": "mega_cruise_5000",
+        "zone": "Main_Pool_Deck"
+      },
+      {
+        "ach_new": 53.78872222222222,
+        "ach_old": 0.0,
+        "factor_new": 0.018591257770887538,
+        "factor_old": 1.0,
+        "factor_ratio": 53.78872222222222,
+        "platform": "mega_cruise_5000",
+        "zone": "Sports_Court"
+      },
+      {
+        "ach_new": 38.13333333333333,
+        "ach_old": 0.0,
+        "factor_new": 0.026223776223776224,
+        "factor_old": 1.0,
+        "factor_ratio": 38.13333333333333,
+        "platform": "mega_cruise_5000",
+        "zone": "Waterpark"
+      },
+      {
+        "ach_new": 74.00539786210658,
+        "ach_old": 0.0,
+        "factor_new": 0.013512527854566619,
+        "factor_old": 1.0,
+        "factor_ratio": 74.00539786210658,
+        "platform": "mercury_aks20",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 98.46464646464648,
+        "ach_old": 0.0,
+        "factor_new": 0.010155929421419777,
+        "factor_old": 1.0,
+        "factor_ratio": 98.46464646464648,
+        "platform": "mercury_aks20",
+        "zone": "Foredeck"
+      },
+      {
+        "ach_new": 107.35656450827089,
+        "ach_old": 0.0,
+        "factor_new": 0.00931475410544605,
+        "factor_old": 1.0,
+        "factor_ratio": 107.3565645082709,
+        "platform": "miami_cl89",
+        "zone": "Bow_Weather"
+      },
+      {
+        "ach_new": 107.25432399512789,
+        "ach_old": 0.0,
+        "factor_new": 0.009323633423352011,
+        "factor_old": 1.0,
+        "factor_ratio": 107.25432399512789,
+        "platform": "miami_cl89",
+        "zone": "Catapult_Deck"
+      },
+      {
+        "ach_new": 177.14630130542162,
+        "ach_old": 0.0,
+        "factor_new": 0.005645051534414367,
+        "factor_old": 1.0,
+        "factor_ratio": 177.14630130542162,
+        "platform": "middlesex_lst983",
+        "zone": "Boat_Deck"
+      },
+      {
+        "ach_new": 296.7004317502491,
+        "ach_old": 0.0,
+        "factor_new": 0.003370402914822049,
+        "factor_old": 1.0,
+        "factor_ratio": 296.7004317502491,
+        "platform": "middlesex_lst983",
+        "zone": "Fantail_Main"
+      },
+      {
+        "ach_new": 66.39905898610688,
+        "ach_old": 0.0,
+        "factor_new": 0.015060454399048587,
+        "factor_old": 1.0,
+        "factor_ratio": 66.39905898610688,
+        "platform": "middlesex_lst983",
+        "zone": "Forecastle_Bow"
+      },
+      {
+        "ach_new": 114.99457727384768,
+        "ach_old": 0.0,
+        "factor_new": 0.008696062229252807,
+        "factor_old": 1.0,
+        "factor_ratio": 114.99457727384768,
+        "platform": "middlesex_lst983",
+        "zone": "Gun_Platform_Aft_Bridge"
+      },
+      {
+        "ach_new": 208.25742409075744,
+        "ach_old": 0.0,
+        "factor_new": 0.004801749586435898,
+        "factor_old": 1.0,
+        "factor_ratio": 208.25742409075744,
+        "platform": "middlesex_lst983",
+        "zone": "Gun_Platform_Aft_Main"
+      },
+      {
+        "ach_new": 126.62108262108264,
+        "ach_old": 0.0,
+        "factor_new": 0.007897578975789757,
+        "factor_old": 1.0,
+        "factor_ratio": 126.62108262108264,
+        "platform": "middlesex_lst983",
+        "zone": "Gun_Platforms_Fwd_Bridge"
+      },
+      {
+        "ach_new": 42.799341847103264,
+        "ach_old": 0.0,
+        "factor_new": 0.02336484527197658,
+        "factor_old": 1.0,
+        "factor_ratio": 42.799341847103264,
+        "platform": "middlesex_lst983",
+        "zone": "Tank_Deck"
+      },
+      {
+        "ach_new": 131.75922384841428,
+        "ach_old": 0.0,
+        "factor_new": 0.007589601477544184,
+        "factor_old": 1.0,
+        "factor_ratio": 131.75922384841428,
+        "platform": "middlesex_lst983",
+        "zone": "Tank_Deck_Port"
+      },
+      {
+        "ach_new": 67.24276452392051,
+        "ach_old": 0.0,
+        "factor_new": 0.014871488510027965,
+        "factor_old": 1.0,
+        "factor_ratio": 67.24276452392051,
+        "platform": "middlesex_lst983",
+        "zone": "Weather_Deck_Amids"
+      },
+      {
+        "ach_new": 13.473000517076423,
+        "ach_old": 0.0,
+        "factor_new": 0.07422241172291583,
+        "factor_old": 1.0,
+        "factor_ratio": 13.473019493534654,
+        "platform": "midway_cv41",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 41.06722258143631,
+        "ach_old": 0.0,
+        "factor_new": 0.02435031972315634,
+        "factor_old": 1.0,
+        "factor_ratio": 41.06722258143631,
+        "platform": "missouri_bb63",
+        "zone": "Boat_Waist_Open"
+      },
+      {
+        "ach_new": 56.36463571035971,
+        "ach_old": 0.0,
+        "factor_new": 0.017741620918809594,
+        "factor_old": 1.0,
+        "factor_ratio": 56.36463571035971,
+        "platform": "missouri_bb63",
+        "zone": "Fantail_Open"
+      },
+      {
+        "ach_new": 153.1780743200102,
+        "ach_old": 0.0,
+        "factor_new": 0.006528349468024134,
+        "factor_old": 1.0,
+        "factor_ratio": 153.1780743200102,
+        "platform": "missouri_bb63",
+        "zone": "Focsle_Void_2D"
+      },
+      {
+        "ach_new": 37.39156220564392,
+        "ach_old": 0.0,
+        "factor_new": 0.026744001614595787,
+        "factor_old": 1.0,
+        "factor_ratio": 37.39156220564393,
+        "platform": "missouri_bb63",
+        "zone": "Forecastle_Open"
+      },
+      {
+        "ach_new": 112.7143858946103,
+        "ach_old": 0.0,
+        "factor_new": 0.00887198197517587,
+        "factor_old": 1.0,
+        "factor_ratio": 112.71438589461032,
+        "platform": "missouri_bb63",
+        "zone": "Signal_Deck"
+      },
+      {
+        "ach_new": 125.82978498320594,
+        "ach_old": 0.0,
+        "factor_new": 0.007947243970364143,
+        "factor_old": 1.0,
+        "factor_ratio": 125.82978498320594,
+        "platform": "montana_acr13",
+        "zone": "MD_Aft_Open"
+      },
+      {
+        "ach_new": 81.783547704186,
+        "ach_old": 0.0,
+        "factor_new": 0.01222739815123985,
+        "factor_old": 1.0,
+        "factor_ratio": 81.783547704186,
+        "platform": "montana_acr13",
+        "zone": "MD_Forecastle_Open"
+      },
+      {
+        "ach_new": 41.06338820959238,
+        "ach_old": 0.0,
+        "factor_new": 0.024352593480496103,
+        "factor_old": 1.0,
+        "factor_ratio": 41.06338820959238,
+        "platform": "new_jersey_bb62",
+        "zone": "Boat_Waist_Open"
+      },
+      {
+        "ach_new": 56.3612382146521,
+        "ach_old": 0.0,
+        "factor_new": 0.017742690396394315,
+        "factor_old": 1.0,
+        "factor_ratio": 56.3612382146521,
+        "platform": "new_jersey_bb62",
+        "zone": "Fantail_Open"
+      },
+      {
+        "ach_new": 153.21493595681477,
+        "ach_old": 0.0,
+        "factor_new": 0.006526778827110305,
+        "factor_old": 1.0,
+        "factor_ratio": 153.21493595681477,
+        "platform": "new_jersey_bb62",
+        "zone": "Focsle_Void_2D"
+      },
+      {
+        "ach_new": 37.39355587467267,
+        "ach_old": 0.0,
+        "factor_new": 0.02674257573555121,
+        "factor_old": 1.0,
+        "factor_ratio": 37.39355587467268,
+        "platform": "new_jersey_bb62",
+        "zone": "Forecastle_Open"
+      },
+      {
+        "ach_new": 112.74351585014409,
+        "ach_old": 0.0,
+        "factor_new": 0.008869689688666223,
+        "factor_old": 1.0,
+        "factor_ratio": 112.74351585014409,
+        "platform": "new_jersey_bb62",
+        "zone": "Signal_Deck"
+      },
+      {
+        "ach_new": 217.99735566328778,
+        "ach_old": 0.0,
+        "factor_new": 0.004587211606110352,
+        "factor_old": 1.0,
+        "factor_ratio": 217.99735566328778,
+        "platform": "new_york_bb34",
+        "zone": "AA_Control_Top"
+      },
+      {
+        "ach_new": 103.59785714285714,
+        "ach_old": 0.0,
+        "factor_new": 0.00965270930865917,
+        "factor_old": 1.0,
+        "factor_ratio": 103.59785714285714,
+        "platform": "new_york_bb34",
+        "zone": "Catapult_Mid"
+      },
+      {
+        "ach_new": 92.91688888888889,
+        "ach_old": 0.0,
+        "factor_new": 0.010762306099118447,
+        "factor_old": 1.0,
+        "factor_ratio": 92.91688888888889,
+        "platform": "new_york_bb34",
+        "zone": "Fantail_Weather"
+      },
+      {
+        "ach_new": 71.9444,
+        "ach_old": 0.0,
+        "factor_new": 0.013899622486253272,
+        "factor_old": 1.0,
+        "factor_ratio": 71.9444,
+        "platform": "new_york_bb34",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 85.77326801959413,
+        "ach_old": 0.0,
+        "factor_new": 0.011658644040140328,
+        "factor_old": 1.0,
+        "factor_ratio": 85.77326801959413,
+        "platform": "new_york_bb34",
+        "zone": "Super_Deck_Open"
+      },
+      {
+        "ach_new": 69.6765625,
+        "ach_old": 0.0,
+        "factor_new": 0.014352028345255981,
+        "factor_old": 1.0,
+        "factor_ratio": 69.6765625,
+        "platform": "new_york_bb34",
+        "zone": "Weather_Deck_Aft"
+      },
+      {
+        "ach_new": 130.42767295597486,
+        "ach_old": 0.0,
+        "factor_new": 0.007667084579033657,
+        "factor_old": 1.0,
+        "factor_ratio": 130.42767295597486,
+        "platform": "nields_dd616",
+        "zone": "After_Deckhouse_Top"
+      },
+      {
+        "ach_new": 188.24271752538192,
+        "ach_old": 0.0,
+        "factor_new": 0.005312290499977317,
+        "factor_old": 1.0,
+        "factor_ratio": 188.24271752538192,
+        "platform": "nields_dd616",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 115.81032174904564,
+        "ach_old": 0.0,
+        "factor_new": 0.008634808926331653,
+        "factor_old": 1.0,
+        "factor_ratio": 115.81032174904564,
+        "platform": "nields_dd616",
+        "zone": "Focsle_Open"
+      },
+      {
+        "ach_new": 159.39046724583235,
+        "ach_old": 0.0,
+        "factor_new": 0.006273900925691322,
+        "factor_old": 1.0,
+        "factor_ratio": 159.39046724583235,
+        "platform": "nields_dd616",
+        "zone": "Midship_Deckhouse"
+      },
+      {
+        "ach_new": 125.82876549094374,
+        "ach_old": 0.0,
+        "factor_new": 0.00794730836067825,
+        "factor_old": 1.0,
+        "factor_ratio": 125.82876549094374,
+        "platform": "nields_dd616",
+        "zone": "Super_Open"
+      },
+      {
+        "ach_new": 136.47341599243458,
+        "ach_old": 0.0,
+        "factor_new": 0.007327434377809046,
+        "factor_old": 1.0,
+        "factor_ratio": 136.47341599243458,
+        "platform": "olympia_c6",
+        "zone": "MD_Forecastle_Open"
+      },
+      {
+        "ach_new": 153.62182041066504,
+        "ach_old": 0.0,
+        "factor_new": 0.006509491928469401,
+        "factor_old": 1.0,
+        "factor_ratio": 153.62182041066504,
+        "platform": "olympia_c6",
+        "zone": "MD_Stern_Fantail"
+      },
+      {
+        "ach_new": 324.7880500605571,
+        "ach_old": 0.0,
+        "factor_new": 0.003078931013051585,
+        "factor_old": 1.0,
+        "factor_ratio": 324.7880500605571,
+        "platform": "olympia_c6",
+        "zone": "SD_Boats_Aft_Port"
+      },
+      {
+        "ach_new": 324.7880500605571,
+        "ach_old": 0.0,
+        "factor_new": 0.003078931013051585,
+        "factor_old": 1.0,
+        "factor_ratio": 324.7880500605571,
+        "platform": "olympia_c6",
+        "zone": "SD_Boats_Aft_Stb"
+      },
+      {
+        "ach_new": 281.33225676221235,
+        "ach_old": 0.0,
+        "factor_new": 0.003554515971644233,
+        "factor_old": 1.0,
+        "factor_ratio": 281.33225676221235,
+        "platform": "olympia_c6",
+        "zone": "SD_Boats_Fwd_Port"
+      },
+      {
+        "ach_new": 281.3221639079532,
+        "ach_old": 0.0,
+        "factor_new": 0.0035546434952320126,
+        "factor_old": 1.0,
+        "factor_ratio": 281.3221639079532,
+        "platform": "olympia_c6",
+        "zone": "SD_Boats_Fwd_Stb"
+      },
+      {
+        "ach_new": 167.72490759679908,
+        "ach_old": 0.0,
+        "factor_new": 0.005962143693075937,
+        "factor_old": 1.0,
+        "factor_ratio": 167.72490759679908,
+        "platform": "olympia_c6",
+        "zone": "SD_Boats_Mid_Port"
+      },
+      {
+        "ach_new": 167.72634298632792,
+        "ach_old": 0.0,
+        "factor_new": 0.0059620926694950605,
+        "factor_old": 1.0,
+        "factor_ratio": 167.72634298632792,
+        "platform": "olympia_c6",
+        "zone": "SD_Boats_Mid_Stb"
+      },
+      {
+        "ach_new": 199.41120938090035,
+        "ach_old": 0.0,
+        "factor_new": 0.0050147632277274595,
+        "factor_old": 1.0,
+        "factor_ratio": 199.41120938090035,
+        "platform": "olympia_c6",
+        "zone": "SD_Forecastle_Open"
+      },
+      {
+        "ach_new": 171.2470640046976,
+        "ach_old": 0.0,
+        "factor_new": 0.005839516173968205,
+        "factor_old": 1.0,
+        "factor_ratio": 171.2470640046976,
+        "platform": "olympia_c6",
+        "zone": "SD_Stern_Open"
+      },
+      {
+        "ach_new": 161.6590486714551,
+        "ach_old": 0.0,
+        "factor_new": 0.006185858497981961,
+        "factor_old": 1.0,
+        "factor_ratio": 161.6590486714551,
+        "platform": "palmer_dms5",
+        "zone": "Boat_Deck_Uptakes"
+      },
+      {
+        "ach_new": 230.74432505514835,
+        "ach_old": 0.0,
+        "factor_new": 0.004333801057776819,
+        "factor_old": 1.0,
+        "factor_ratio": 230.74432505514835,
+        "platform": "passumpsic_ao106",
+        "zone": "Aft_Open_Deck"
+      },
+      {
+        "ach_new": 67.92840855311276,
+        "ach_old": 0.0,
+        "factor_new": 0.014721381249762487,
+        "factor_old": 1.0,
+        "factor_ratio": 67.92840855311276,
+        "platform": "passumpsic_ao106",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 51.96841041815538,
+        "ach_old": 0.0,
+        "factor_new": 0.019242458869795368,
+        "factor_old": 1.0,
+        "factor_ratio": 51.96841041815538,
+        "platform": "passumpsic_ao106",
+        "zone": "Island_Deck"
+      },
+      {
+        "ach_new": 50.87992875235348,
+        "ach_old": 0.0,
+        "factor_new": 0.019654115572120264,
+        "factor_old": 1.0,
+        "factor_ratio": 50.87992875235348,
+        "platform": "passumpsic_ao106",
+        "zone": "Working_Deck"
+      },
+      {
+        "ach_new": 195.81768888434192,
+        "ach_old": 0.0,
+        "factor_new": 0.005106790942623379,
+        "factor_old": 1.0,
+        "factor_ratio": 195.81768888434192,
+        "platform": "pce_874",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 253.42229875161428,
+        "ach_old": 0.0,
+        "factor_new": 0.003945982673687787,
+        "factor_old": 1.0,
+        "factor_ratio": 253.42229875161428,
+        "platform": "pce_874",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 585.758354755784,
+        "ach_old": 0.0,
+        "factor_new": 0.0017071886245940491,
+        "factor_old": 1.0,
+        "factor_ratio": 585.758354755784,
+        "platform": "pt_564",
+        "zone": "Foredeck"
+      },
+      {
+        "ach_new": 302.5457343135579,
+        "ach_old": 0.0,
+        "factor_new": 0.003305285405093835,
+        "factor_old": 1.0,
+        "factor_ratio": 302.5457343135579,
+        "platform": "pt_564",
+        "zone": "Torpedo_Deck"
+      },
+      {
+        "ach_new": 24.70220124059944,
+        "ach_old": 0.0,
+        "factor_new": 0.04048222222146498,
+        "factor_old": 1.0,
+        "factor_ratio": 24.70220124106151,
+        "platform": "puncher_cve53",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 17.84736862812749,
+        "ach_old": 0.0,
+        "factor_new": 0.05603066777489334,
+        "factor_old": 1.0,
+        "factor_ratio": 17.847368944763634,
+        "platform": "ranger_cv4",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 60.985591651005414,
+        "ach_old": 0.0,
+        "factor_new": 0.016397315708972283,
+        "factor_old": 1.0,
+        "factor_ratio": 60.985591651005414,
+        "platform": "ranger_cv4",
+        "zone": "Poop_Deck"
+      },
+      {
+        "ach_new": 156.21479942464438,
+        "ach_old": 0.0,
+        "factor_new": 0.006401442140457279,
+        "factor_old": 1.0,
+        "factor_ratio": 156.21479942464438,
+        "platform": "raven_am55",
+        "zone": "Foc_Deck_Fwd"
+      },
+      {
+        "ach_new": 196.9839507418997,
+        "ach_old": 0.0,
+        "factor_new": 0.005076555710420595,
+        "factor_old": 1.0,
+        "factor_ratio": 196.9839507418997,
+        "platform": "raven_am55",
+        "zone": "Foc_Deck_Open"
+      },
+      {
+        "ach_new": 258.38509874326746,
+        "ach_old": 0.0,
+        "factor_new": 0.003870192224179322,
+        "factor_old": 1.0,
+        "factor_ratio": 258.38509874326746,
+        "platform": "raven_am55",
+        "zone": "Sweep_Deck"
+      },
+      {
+        "ach_new": 99.8223851677368,
+        "ach_old": 0.0,
+        "factor_new": 0.01001779308638686,
+        "factor_old": 1.0,
+        "factor_ratio": 99.82238516773681,
+        "platform": "river_class_frigate",
+        "zone": "Foc_Deck_Open"
+      },
+      {
+        "ach_new": 73.57400611931651,
+        "ach_old": 0.0,
+        "factor_new": 0.013591756827517032,
+        "factor_old": 1.0,
+        "factor_ratio": 73.57400611931651,
+        "platform": "river_class_frigate",
+        "zone": "Quarterdeck"
+      },
+      {
+        "ach_new": 100.40663980042218,
+        "ach_old": 0.0,
+        "factor_new": 0.009959500706205241,
+        "factor_old": 1.0,
+        "factor_ratio": 100.40663980042218,
+        "platform": "river_class_frigate",
+        "zone": "Signal_Deck"
+      },
+      {
+        "ach_new": 270.5672288702535,
+        "ach_old": 0.0,
+        "factor_new": 0.003695939098668654,
+        "factor_old": 1.0,
+        "factor_ratio": 270.5672288702535,
+        "platform": "rolla_pc483",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 243.37127913237447,
+        "ach_old": 0.0,
+        "factor_new": 0.004108948284962089,
+        "factor_old": 1.0,
+        "factor_ratio": 243.3712791323745,
+        "platform": "rolla_pc483",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 71.47280111858313,
+        "ach_old": 0.0,
+        "factor_new": 0.01399133634542829,
+        "factor_old": 1.0,
+        "factor_ratio": 71.47280111858313,
+        "platform": "ruchamkin_apd89",
+        "zone": "Boat_Deck_Open"
+      },
+      {
+        "ach_new": 157.78299230336023,
+        "ach_old": 0.0,
+        "factor_new": 0.0063378187053098715,
+        "factor_old": 1.0,
+        "factor_ratio": 157.78299230336023,
+        "platform": "ruchamkin_apd89",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 132.77466736925305,
+        "ach_old": 0.0,
+        "factor_new": 0.007531557184918035,
+        "factor_old": 1.0,
+        "factor_ratio": 132.77466736925305,
+        "platform": "ruchamkin_apd89",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 169.68630241979636,
+        "ach_old": 0.0,
+        "factor_new": 0.0058932275955076475,
+        "factor_old": 1.0,
+        "factor_ratio": 169.68630241979636,
+        "platform": "ruchamkin_apd89",
+        "zone": "Island_Open_Aft"
+      },
+      {
+        "ach_new": 93.10983069392906,
+        "ach_old": 0.0,
+        "factor_new": 0.010740004493050829,
+        "factor_old": 1.0,
+        "factor_ratio": 93.10983069392906,
+        "platform": "san_antonio_class_lpd",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 37.109116413123985,
+        "ach_old": 0.0,
+        "factor_new": 0.0269475561979789,
+        "factor_old": 1.0,
+        "factor_ratio": 37.10911641312399,
+        "platform": "san_antonio_class_lpd",
+        "zone": "Well_Deck"
+      },
+      {
+        "ach_new": 16.701671418724068,
+        "ach_old": 0.0,
+        "factor_new": 0.05987424366934456,
+        "factor_old": 1.0,
+        "factor_ratio": 16.701672350510158,
+        "platform": "saratoga_cv3",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 10.506794178794179,
+        "ach_old": 0.0,
+        "factor_new": 0.09517390680616311,
+        "factor_old": 1.0,
+        "factor_ratio": 10.507081547431483,
+        "platform": "saratoga_cv60",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 94.7314927532903,
+        "ach_old": 0.0,
+        "factor_new": 0.010556151612688138,
+        "factor_old": 1.0,
+        "factor_ratio": 94.7314927532903,
+        "platform": "savannah_ns",
+        "zone": "Boat_Deck_Aft"
+      },
+      {
+        "ach_new": 152.77387176251426,
+        "ach_old": 0.0,
+        "factor_new": 0.0065456218950482046,
+        "factor_old": 1.0,
+        "factor_ratio": 152.77387176251426,
+        "platform": "savannah_ns",
+        "zone": "Boat_Deck_Fwd"
+      },
+      {
+        "ach_new": 212.69007881316645,
+        "ach_old": 0.0,
+        "factor_new": 0.004701676756998294,
+        "factor_old": 1.0,
+        "factor_ratio": 212.69007881316645,
+        "platform": "savannah_ns",
+        "zone": "Bridge_Wings"
+      },
+      {
+        "ach_new": 160.8230425426254,
+        "ach_old": 0.0,
+        "factor_new": 0.006218014434933692,
+        "factor_old": 1.0,
+        "factor_ratio": 160.8230425426254,
+        "platform": "savannah_ns",
+        "zone": "Docking_Bridge_Aft"
+      },
+      {
+        "ach_new": 132.8649556357365,
+        "ach_old": 0.0,
+        "factor_new": 0.007526439121701941,
+        "factor_old": 1.0,
+        "factor_ratio": 132.8649556357365,
+        "platform": "savannah_ns",
+        "zone": "Fantail_Aft"
+      },
+      {
+        "ach_new": 221.82895904653228,
+        "ach_old": 0.0,
+        "factor_new": 0.004507977697313332,
+        "factor_old": 1.0,
+        "factor_ratio": 221.82895904653228,
+        "platform": "savannah_ns",
+        "zone": "Forecastle_A"
+      },
+      {
+        "ach_new": 75.13454340506091,
+        "ach_old": 0.0,
+        "factor_new": 0.013309457337204528,
+        "factor_old": 1.0,
+        "factor_ratio": 75.13454340506091,
+        "platform": "savannah_ns",
+        "zone": "Fwd_Deck_Promenade"
+      },
+      {
+        "ach_new": 110.26270738008529,
+        "ach_old": 0.0,
+        "factor_new": 0.009069249465759186,
+        "factor_old": 1.0,
+        "factor_ratio": 110.26270738008529,
+        "platform": "savannah_ns",
+        "zone": "Promenade_Aft_Open"
+      },
+      {
+        "ach_new": 95.99061177193937,
+        "ach_old": 0.0,
+        "factor_new": 0.010417685454238629,
+        "factor_old": 1.0,
+        "factor_ratio": 95.99061177193937,
+        "platform": "savannah_ns",
+        "zone": "Promenade_Walkway_Port"
+      },
+      {
+        "ach_new": 96.11440868351976,
+        "ach_old": 0.0,
+        "factor_new": 0.010404267307025162,
+        "factor_old": 1.0,
+        "factor_ratio": 96.11440868351976,
+        "platform": "savannah_ns",
+        "zone": "Promenade_Walkway_Stbd"
+      },
+      {
+        "ach_new": 188.0616379114126,
+        "ach_old": 0.0,
+        "factor_new": 0.00531740556503637,
+        "factor_old": 1.0,
+        "factor_ratio": 188.06163791141256,
+        "platform": "savannah_ns",
+        "zone": "Swimming_Pool"
+      },
+      {
+        "ach_new": 104.70029121501375,
+        "ach_old": 0.0,
+        "factor_new": 0.009551071810740127,
+        "factor_old": 1.0,
+        "factor_ratio": 104.70029121501375,
+        "platform": "savannah_ns",
+        "zone": "Top_Of_House"
+      },
+      {
+        "ach_new": 129.0662843938551,
+        "ach_old": 0.0,
+        "factor_new": 0.007747956832385657,
+        "factor_old": 1.0,
+        "factor_ratio": 129.0662843938551,
+        "platform": "savannah_ns",
+        "zone": "Weather_Deck_Port_A"
+      },
+      {
+        "ach_new": 105.41828918652917,
+        "ach_old": 0.0,
+        "factor_new": 0.009486020003896863,
+        "factor_old": 1.0,
+        "factor_ratio": 105.41828918652917,
+        "platform": "savannah_ns",
+        "zone": "Weather_Deck_Stbd_A"
+      },
+      {
+        "ach_new": 218.11337466784764,
+        "ach_old": 0.0,
+        "factor_new": 0.0045847715736040615,
+        "factor_old": 1.0,
+        "factor_ratio": 218.11337466784764,
+        "platform": "sigsbee_dd502",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 184.73718185171526,
+        "ach_old": 0.0,
+        "factor_new": 0.005413095457971636,
+        "factor_old": 1.0,
+        "factor_ratio": 184.73718185171526,
+        "platform": "sigsbee_dd502",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 142.2550997534185,
+        "ach_old": 0.0,
+        "factor_new": 0.007029624960605106,
+        "factor_old": 1.0,
+        "factor_ratio": 142.2550997534185,
+        "platform": "sigsbee_dd502",
+        "zone": "Midship_Deckhouse"
+      },
+      {
+        "ach_new": 144.2213927446635,
+        "ach_old": 0.0,
+        "factor_new": 0.00693378410074328,
+        "factor_old": 1.0,
+        "factor_ratio": 144.2213927446635,
+        "platform": "sigsbee_dd502",
+        "zone": "Mt2_Deck"
+      },
+      {
+        "ach_new": 42.269339113058734,
+        "ach_old": 0.0,
+        "factor_new": 0.0236578101523016,
+        "factor_old": 1.0,
+        "factor_ratio": 42.269339113058734,
+        "platform": "south_dakota_bb49",
+        "zone": "Boat_Deck"
+      },
+      {
+        "ach_new": 81.267497089054,
+        "ach_old": 0.0,
+        "factor_new": 0.012305042431713957,
+        "factor_old": 1.0,
+        "factor_ratio": 81.267497089054,
+        "platform": "south_dakota_bb49",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 53.88738629783554,
+        "ach_old": 0.0,
+        "factor_new": 0.018557218464317436,
+        "factor_old": 1.0,
+        "factor_ratio": 53.88738629783554,
+        "platform": "south_dakota_bb49",
+        "zone": "Forecastle"
+      },
+      {
+        "ach_new": 173.92522321428572,
+        "ach_old": 0.0,
+        "factor_new": 0.005749597335677663,
+        "factor_old": 1.0,
+        "factor_ratio": 173.92522321428572,
+        "platform": "south_dakota_bb49",
+        "zone": "Landing_Platform"
+      },
+      {
+        "ach_new": 65.74466666666667,
+        "ach_old": 0.0,
+        "factor_new": 0.015210359268685924,
+        "factor_old": 1.0,
+        "factor_ratio": 65.74466666666667,
+        "platform": "spirit_cruise_3000",
+        "zone": "AftPool"
+      },
+      {
+        "ach_new": 46.50491666666667,
+        "ach_old": 0.0,
+        "factor_new": 0.02150310271852976,
+        "factor_old": 1.0,
+        "factor_ratio": 46.504916666666674,
+        "platform": "spirit_cruise_3000",
+        "zone": "MainPool"
+      },
+      {
+        "ach_new": 53.905611111111114,
+        "ach_old": 0.0,
+        "factor_new": 0.01855094450072709,
+        "factor_old": 1.0,
+        "factor_ratio": 53.90561111111112,
+        "platform": "spirit_cruise_3000",
+        "zone": "SportsDeck"
+      },
+      {
+        "ach_new": 131.5174961313832,
+        "ach_old": 0.0,
+        "factor_new": 0.007603551081910965,
+        "factor_old": 1.0,
+        "factor_ratio": 131.5174961313832,
+        "platform": "squier_ap130",
+        "zone": "Stern_Deck_Up"
+      },
+      {
+        "ach_new": 108.01102862554609,
+        "ach_old": 0.0,
+        "factor_new": 0.009258313828922154,
+        "factor_old": 1.0,
+        "factor_ratio": 108.01102862554609,
+        "platform": "texas_bb35",
+        "zone": "Catapult_Mid"
+      },
+      {
+        "ach_new": 109.32193810527602,
+        "ach_old": 0.0,
+        "factor_new": 0.009147294836988796,
+        "factor_old": 1.0,
+        "factor_ratio": 109.321938105276,
+        "platform": "texas_bb35",
+        "zone": "Fantail_Weather"
+      },
+      {
+        "ach_new": 68.45312070387682,
+        "ach_old": 0.0,
+        "factor_new": 0.014608537780562652,
+        "factor_old": 1.0,
+        "factor_ratio": 68.45312070387682,
+        "platform": "texas_bb35",
+        "zone": "Focsle_Deck"
+      },
+      {
+        "ach_new": 116.75507900677201,
+        "ach_old": 0.0,
+        "factor_new": 0.008564937889699841,
+        "factor_old": 1.0,
+        "factor_ratio": 116.755079006772,
+        "platform": "texas_bb35",
+        "zone": "Super_Deck_Open"
+      },
+      {
+        "ach_new": 71.39908496050471,
+        "ach_old": 0.0,
+        "factor_new": 0.014005781734502093,
+        "factor_old": 1.0,
+        "factor_ratio": 71.39908496050471,
+        "platform": "texas_bb35",
+        "zone": "Weather_Deck_Aft"
+      },
+      {
+        "ach_new": 24.389517556509396,
+        "ach_old": 0.0,
+        "factor_new": 0.041001221022821534,
+        "factor_old": 1.0,
+        "factor_ratio": 24.389517557133086,
+        "platform": "thetis_bay_cve90",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 17.636690473532347,
+        "ach_old": 0.0,
+        "factor_new": 0.05669997892171279,
+        "factor_old": 1.0,
+        "factor_ratio": 17.636690859810148,
+        "platform": "wasp_cv7",
+        "zone": "Flight_Deck"
+      },
+      {
+        "ach_new": 40.912699876932024,
+        "ach_old": 0.0,
+        "factor_new": 0.02444228816499676,
+        "factor_old": 1.0,
+        "factor_ratio": 40.912699876932024,
+        "platform": "west_virginia_bb48",
+        "zone": "Boat_Deck"
+      },
+      {
+        "ach_new": 73.36570342521814,
+        "ach_old": 0.0,
+        "factor_new": 0.013630347060180547,
+        "factor_old": 1.0,
+        "factor_ratio": 73.36570342521814,
+        "platform": "west_virginia_bb48",
+        "zone": "Fantail"
+      },
+      {
+        "ach_new": 46.10747860631538,
+        "ach_old": 0.0,
+        "factor_new": 0.02168845554402164,
+        "factor_old": 1.0,
+        "factor_ratio": 46.10747860631538,
+        "platform": "west_virginia_bb48",
+        "zone": "Forecastle"
+      },
+      {
+        "ach_new": 71.72851718907512,
+        "ach_old": 0.0,
+        "factor_new": 0.013941456469314951,
+        "factor_old": 1.0,
+        "factor_ratio": 71.72851718907512,
+        "platform": "west_virginia_bb48",
+        "zone": "Landing_Platform"
+      },
+      {
+        "ach_new": 90.790793987658,
+        "ach_old": 0.0,
+        "factor_new": 0.01101433257799176,
+        "factor_old": 1.0,
+        "factor_ratio": 90.790793987658,
+        "platform": "west_virginia_bb48",
+        "zone": "Signal_Bridge_Open"
+      },
+      {
+        "ach_new": 125.41085861543868,
+        "ach_old": 0.0,
+        "factor_new": 0.007973791193523453,
+        "factor_old": 1.0,
+        "factor_ratio": 125.4108586154387,
+        "platform": "winnipeg_j337",
+        "zone": "Foc_Deck_Open"
+      },
+      {
+        "ach_new": 95.30917677436891,
+        "ach_old": 0.0,
+        "factor_new": 0.010492169105262126,
+        "factor_old": 1.0,
+        "factor_ratio": 95.30917677436891,
+        "platform": "winnipeg_j337",
+        "zone": "Quarterdeck"
+      },
+      {
+        "ach_new": 145.98879619554265,
+        "ach_old": 0.0,
+        "factor_new": 0.006849840714218672,
+        "factor_old": 1.0,
+        "factor_ratio": 145.98879619554265,
+        "platform": "winnipeg_j337",
+        "zone": "Signal_Deck"
+      },
+      {
+        "ach_new": 41.063500626401606,
+        "ach_old": 0.0,
+        "factor_new": 0.02435252681202377,
+        "factor_old": 1.0,
+        "factor_ratio": 41.063500626401606,
+        "platform": "wisconsin_bb64",
+        "zone": "Boat_Waist_Open"
+      },
+      {
+        "ach_new": 56.36097179704293,
+        "ach_old": 0.0,
+        "factor_new": 0.017742774265870034,
+        "factor_old": 1.0,
+        "factor_ratio": 56.36097179704293,
+        "platform": "wisconsin_bb64",
+        "zone": "Fantail_Open"
+      },
+      {
+        "ach_new": 153.20845709175688,
+        "ach_old": 0.0,
+        "factor_new": 0.0065270548309294555,
+        "factor_old": 1.0,
+        "factor_ratio": 153.20845709175688,
+        "platform": "wisconsin_bb64",
+        "zone": "Focsle_Void_2D"
+      },
+      {
+        "ach_new": 37.39330113667665,
+        "ach_old": 0.0,
+        "factor_new": 0.026742757916582153,
+        "factor_old": 1.0,
+        "factor_ratio": 37.393301136676655,
+        "platform": "wisconsin_bb64",
+        "zone": "Forecastle_Open"
+      },
+      {
+        "ach_new": 112.7241301570602,
+        "ach_old": 0.0,
+        "factor_new": 0.008871215050465992,
+        "factor_old": 1.0,
+        "factor_ratio": 112.72413015706022,
+        "platform": "wisconsin_bb64",
+        "zone": "Signal_Deck"
+      },
+      {
+        "ach_new": 34.86573491914808,
+        "ach_old": 0.0,
+        "factor_new": 0.02868145479563101,
+        "factor_old": 1.0,
+        "factor_ratio": 34.8657349191481,
+        "platform": "wright_cc2",
+        "zone": "Flight_Deck_Aft"
+      },
+      {
+        "ach_new": 30.43410350009239,
+        "ach_old": 0.0,
+        "factor_new": 0.03285787603360499,
+        "factor_old": 1.0,
+        "factor_ratio": 30.434103500094235,
+        "platform": "wright_cc2",
+        "zone": "Flight_Deck_Fwd"
+      },
+      {
+        "ach_new": 30.937468040439647,
+        "ach_old": 0.0,
+        "factor_new": 0.03232326571433777,
+        "factor_old": 1.0,
+        "factor_ratio": 30.937468040440777,
+        "platform": "wright_cc2",
+        "zone": "Flight_Deck_Mid"
+      },
+      {
+        "ach_new": 18.085847061908293,
+        "ach_old": 0.0,
+        "factor_new": 0.0552918523860064,
+        "factor_old": 1.0,
+        "factor_ratio": 18.08584731469561,
+        "platform": "yorktown_cv5",
+        "zone": "Flight_Deck"
+      }
+    ]
+  },
+  "norovirus_route_gate": {
+    "airborne_emission_mode": "emesis_conditioned",
+    "expected": "zero continuous droplet/aerosol feed; only the per-emesis bolus consumes _room_air_residence_factor",
+    "has_airborne_emission_fraction": false,
+    "pathogen_id": "norwalk_gi"
+  },
+  "paired_hull_runs": {
+    "by_seed": {
+      "20200333": {
+        "ambient_off": {
+          "campaign_asymptomatic_positives": 20,
+          "campaign_positives": 59,
+          "campaign_specimens": 217,
+          "onsets_before_split_day": 20,
+          "onsets_on_or_after_split_day": 21,
+          "recorded_onsets": 41
+        },
+        "ambient_on": {
+          "campaign_asymptomatic_positives": 20,
+          "campaign_positives": 59,
+          "campaign_specimens": 217,
+          "onsets_before_split_day": 20,
+          "onsets_on_or_after_split_day": 21,
+          "recorded_onsets": 41
+        },
+        "paired_delta_on_minus_off": {
+          "campaign_asymptomatic_positives": 0,
+          "campaign_positives": 0,
+          "campaign_specimens": 0,
+          "onsets_before_split_day": 0,
+          "onsets_on_or_after_split_day": 0,
+          "recorded_onsets": 0
+        }
+      },
+      "20200334": {
+        "ambient_off": {
+          "campaign_asymptomatic_positives": 27,
+          "campaign_positives": 96,
+          "campaign_specimens": 217,
+          "onsets_before_split_day": 40,
+          "onsets_on_or_after_split_day": 17,
+          "recorded_onsets": 57
+        },
+        "ambient_on": {
+          "campaign_asymptomatic_positives": 19,
+          "campaign_positives": 104,
+          "campaign_specimens": 217,
+          "onsets_before_split_day": 46,
+          "onsets_on_or_after_split_day": 21,
+          "recorded_onsets": 67
+        },
+        "paired_delta_on_minus_off": {
+          "campaign_asymptomatic_positives": -8,
+          "campaign_positives": 8,
+          "campaign_specimens": 0,
+          "onsets_before_split_day": 6,
+          "onsets_on_or_after_split_day": 4,
+          "recorded_onsets": 10
+        }
+      }
+    },
+    "rows": [
+      {
+        "arm": "ambient_off",
+        "asymptomatic_share": 0.3389830508474576,
+        "campaign_asymptomatic_positives": 20,
+        "campaign_positives": 59,
+        "campaign_specimens": 217,
+        "crew_onsets_after": 26,
+        "crew_onsets_before": 14,
+        "onsets_before_split_day": 20,
+        "onsets_on_or_after_split_day": 21,
+        "passenger_onsets_after": 0,
+        "passenger_onsets_before": 0,
+        "positive_share": 0.271889400921659,
+        "recorded_onsets": 41,
+        "scenario_id": "greg_mortimer_2020",
+        "seed": 20200333,
+        "theta": 10000000000.0
+      },
+      {
+        "arm": "ambient_on",
+        "asymptomatic_share": 0.3389830508474576,
+        "campaign_asymptomatic_positives": 20,
+        "campaign_positives": 59,
+        "campaign_specimens": 217,
+        "crew_onsets_after": 26,
+        "crew_onsets_before": 14,
+        "onsets_before_split_day": 20,
+        "onsets_on_or_after_split_day": 21,
+        "passenger_onsets_after": 0,
+        "passenger_onsets_before": 0,
+        "positive_share": 0.271889400921659,
+        "recorded_onsets": 41,
+        "scenario_id": "greg_mortimer_2020",
+        "seed": 20200333,
+        "theta": 10000000000.0
+      },
+      {
+        "arm": "ambient_off",
+        "asymptomatic_share": 0.28125,
+        "campaign_asymptomatic_positives": 27,
+        "campaign_positives": 96,
+        "campaign_specimens": 217,
+        "crew_onsets_after": 17,
+        "crew_onsets_before": 21,
+        "onsets_before_split_day": 40,
+        "onsets_on_or_after_split_day": 17,
+        "passenger_onsets_after": 11,
+        "passenger_onsets_before": 8,
+        "positive_share": 0.4423963133640553,
+        "recorded_onsets": 57,
+        "scenario_id": "greg_mortimer_2020",
+        "seed": 20200334,
+        "theta": 10000000000.0
+      },
+      {
+        "arm": "ambient_on",
+        "asymptomatic_share": 0.18269230769230768,
+        "campaign_asymptomatic_positives": 19,
+        "campaign_positives": 104,
+        "campaign_specimens": 217,
+        "crew_onsets_after": 26,
+        "crew_onsets_before": 20,
+        "onsets_before_split_day": 46,
+        "onsets_on_or_after_split_day": 21,
+        "passenger_onsets_after": 11,
+        "passenger_onsets_before": 10,
+        "positive_share": 0.4792626728110599,
+        "recorded_onsets": 67,
+        "scenario_id": "greg_mortimer_2020",
+        "seed": 20200334,
+        "theta": 10000000000.0
+      }
+    ],
+    "scenario_id": "greg_mortimer_2020",
+    "seeds": [
+      20200333,
+      20200334
+    ],
+    "theta": 10000000000.0
+  }
+}
