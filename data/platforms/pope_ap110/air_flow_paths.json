@@ -617,5 +617,63 @@
       "to": "Hold5_Dry_Cargo",
       "type": "passageway"
     }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "HD_Boat",
+      "type": "makeup_louvre",
+      "area_m2": 0.134220,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_Boat (CONTAM-POPE-MAKEUP-01). Grade C placement/area: per-HD-branch bound in docs/audits/2026-11-18_pope_ap110_envelope_makeup_boundary/README.md; served demand 1207.982929 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.134220. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    },
+    {
+      "zone": "HD_Main",
+      "type": "makeup_louvre",
+      "area_m2": 0.183574,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_Main (CONTAM-POPE-MAKEUP-01). Grade C placement/area: per-HD-branch bound in docs/audits/2026-11-18_pope_ap110_envelope_makeup_boundary/README.md; served demand 1652.167982 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.183574. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    },
+    {
+      "zone": "HD_Troop_Aft_2D",
+      "type": "makeup_louvre",
+      "area_m2": 0.830908,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_Troop_Aft_2D (CONTAM-POPE-MAKEUP-01). Grade C placement/area: per-HD-branch bound in docs/audits/2026-11-18_pope_ap110_envelope_makeup_boundary/README.md; served demand 7478.173193 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.830908. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    },
+    {
+      "zone": "HD_Troop_Fwd_2D",
+      "type": "makeup_louvre",
+      "area_m2": 0.571260,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_Troop_Fwd_2D (CONTAM-POPE-MAKEUP-01). Grade C placement/area: per-HD-branch bound in docs/audits/2026-11-18_pope_ap110_envelope_makeup_boundary/README.md; served demand 5141.339998 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.571260. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    },
+    {
+      "zone": "HD_Troop_Aft_3D",
+      "type": "makeup_louvre",
+      "area_m2": 0.830908,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_Troop_Aft_3D (CONTAM-POPE-MAKEUP-01). Grade C placement/area: per-HD-branch bound in docs/audits/2026-11-18_pope_ap110_envelope_makeup_boundary/README.md; served demand 7478.173193 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.830908. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    },
+    {
+      "zone": "HD_CPO_3D",
+      "type": "makeup_louvre",
+      "area_m2": 0.207748,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_CPO_3D (CONTAM-POPE-MAKEUP-01). Grade C placement/area: per-HD-branch bound in docs/audits/2026-11-18_pope_ap110_envelope_makeup_boundary/README.md; served demand 1869.735693 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.207748. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    },
+    {
+      "zone": "HD_Troop_Fwd_3D",
+      "type": "makeup_louvre",
+      "area_m2": 0.415475,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_Troop_Fwd_3D (CONTAM-POPE-MAKEUP-01). Grade C placement/area: per-HD-branch bound in docs/audits/2026-11-18_pope_ap110_envelope_makeup_boundary/README.md; served demand 3739.278811 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.415475. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    }
   ]
 }
