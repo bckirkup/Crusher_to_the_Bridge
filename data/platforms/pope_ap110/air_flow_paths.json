@@ -111,18 +111,7 @@
     {
       "id": "VENT_Stores_Holds",
       "rooms": [
-        "Sup_Gun_Tubs_Aft",
-        "Sup_Deck_Mech",
-        "Nav_Bridge",
-        "Signal_Control_Block",
-        "Top_House",
-        "Boat_Deck_Open",
-        "Stern_Gun_Deck",
-        "Aft_Loading_House",
-        "Resistor_House_Aft",
-        "Fwd_House_Mech",
         "Stores_Fwd",
-        "Focsle_Deck",
         "Stores_Aft_2D",
         "Stores_Aft_3D",
         "Provisions_3D",
@@ -141,9 +130,40 @@
         "Fwd_Peak_Tank"
       ],
       "ach": 4.0,
-      "description": "open decks, stores, holds and tank spaces (weather/nat vent)",
+      "description": "enclosed stores, holds and tankage split from the former 28-room VENT_Stores_Holds group (CONTAM-POPE-TOPOLOGY-01); ACH/OA preserved from the former aggregate pending HPAC schedule evidence",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "VENT_Superstructure",
+      "rooms": [
+        "Sup_Gun_Tubs_Aft",
+        "Sup_Deck_Mech",
+        "Nav_Bridge",
+        "Signal_Control_Block",
+        "Top_House",
+        "Aft_Loading_House",
+        "Resistor_House_Aft",
+        "Fwd_House_Mech"
+      ],
+      "ach": 4.0,
+      "description": "enclosed superstructure/deckhouse branch split from the former 28-room VENT_Stores_Holds group (CONTAM-POPE-TOPOLOGY-01); ACH/OA preserved from the former aggregate pending HPAC schedule evidence",
       "vent_mode": "mech_supply_exhaust",
       "evidence": "sheet_read",
+      "oa_fraction": 0.4
+    },
+    {
+      "id": "VENT_Open_Decks",
+      "rooms": [
+        "Boat_Deck_Open",
+        "Stern_Gun_Deck",
+        "Focsle_Deck"
+      ],
+      "ach": 4.0,
+      "description": "declared open boat/stern/forecastle decks split from the former 28-room VENT_Stores_Holds group (CONTAM-POPE-TOPOLOGY-01); ACH/OA preserved from the former aggregate pending HPAC schedule evidence",
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule",
       "oa_fraction": 0.4
     },
     {
@@ -265,10 +285,10 @@
     {
       "from": "VENT_Machinery",
       "to": "VENT_Stores_Holds",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 30.357142857,
       "path": "ladder_well_5",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches. Stores/holds subset of the former 28-room VENT_Stores_Holds record (CONTAM-POPE-TOPOLOGY-01): the per-room-pair reference flow stays 50/(17*28) m3/h.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -355,16 +375,6 @@
     {
       "from": "Nav_Bridge",
       "to": "Signal_Control_Block",
-      "type": "passageway"
-    },
-    {
-      "from": "Focsle_Deck",
-      "to": "Stores_Fwd",
-      "type": "passageway"
-    },
-    {
-      "from": "Stern_Gun_Deck",
-      "to": "Aft_Loading_House",
       "type": "passageway"
     },
     {
