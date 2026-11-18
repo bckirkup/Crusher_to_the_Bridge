@@ -251,6 +251,13 @@ def norovirus_route_gate() -> dict:
     }
 
 
+def _write_evidence(payload: dict) -> Path:
+    out = DEFAULT_OUT
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", action="append", dest="platforms")
@@ -276,9 +283,7 @@ def main(argv: list[str] | None = None) -> int:
         payload["paired_hull_runs"] = paired_hull_runs(
             args.scenario, args.theta, args.seeds, args.num_epochs,
         )
-    out = DEFAULT_OUT
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    out = _write_evidence(payload)
     print(json.dumps({
         "out": str(out),
         "changed_zone_rows": payload["map_census"]["changed_zone_rows"],
