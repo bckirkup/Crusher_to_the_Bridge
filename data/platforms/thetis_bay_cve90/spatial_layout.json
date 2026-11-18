@@ -70,7 +70,8 @@
         "x": 64.73,
         "y": 10.45
       },
-      "description": "Open flight deck; catapult track, arresting sheaves, two elevator platforms (x0.12 aft, x0.67 fwd)"
+      "description": "Open flight deck; catapult track, arresting sheaves, two elevator platforms (x0.12 aft, x0.67 fwd)",
+      "exposure": "weather"
     },
     {
       "id": "Walkway_Gal_Port",

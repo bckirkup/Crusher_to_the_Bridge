@@ -23,7 +23,8 @@
         "x": 93.01,
         "y": 14.34
       },
-      "description": "Open flight deck; two mid elevators + one aft, arresting gear, palisades fwd"
+      "description": "Open flight deck; two mid elevators + one aft, arresting gear, palisades fwd",
+      "exposure": "weather"
     },
     {
       "id": "Gallery_Walkway",
@@ -195,7 +196,8 @@
         "x": 18.27,
         "y": 6.3
       },
-      "description": "Open poop deck, aft 40mm guns + elevator pit"
+      "description": "Open poop deck, aft 40mm guns + elevator pit",
+      "exposure": "weather"
     },
     {
       "id": "Crew_Poop",

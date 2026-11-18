@@ -72,7 +72,8 @@
         "y": 15.39
       },
       "max_occupancy": 150,
-      "description": "open-air flight deck; two centerline aircraft elevators and arresting-gear/catapult sponsons drawn"
+      "description": "open-air flight deck; two centerline aircraft elevators and arresting-gear/catapult sponsons drawn",
+      "exposure": "weather"
     },
     {
       "id": "Wardroom",
@@ -119,7 +120,8 @@
         "x": 78.24,
         "y": 4.32
       },
-      "description": "side gallery/catwalk strip along hangar at flight-deck level"
+      "description": "side gallery/catwalk strip along hangar at flight-deck level",
+      "exposure": "weather"
     },
     {
       "id": "Poop_Deck",
@@ -134,7 +136,8 @@
         "x": 9.44,
         "y": 6.84
       },
-      "description": "stern weather deck: boat handling platform, pyrotechnic locker, tailor shop, emergency radio room, activity rooms under flight-deck overhang"
+      "description": "stern weather deck: boat handling platform, pyrotechnic locker, tailor shop, emergency radio room, activity rooms under flight-deck overhang",
+      "exposure": "weather"
     },
     {
       "id": "Forecastle_Deck",
@@ -149,7 +152,8 @@
         "x": 165.46,
         "y": 7.26
       },
-      "description": "bow weather deck at hangar-deck level; jack staff and anchors drawn"
+      "description": "bow weather deck at hangar-deck level; jack staff and anchors drawn",
+      "exposure": "weather"
     },
     {
       "id": "Hangar_Aft",

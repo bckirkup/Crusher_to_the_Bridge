@@ -1108,7 +1108,7 @@
   },
   {
     "path_nr": 124,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Island_Upper",
     "to_zone": "Hangar_Bay_1",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1117,7 +1117,7 @@
   },
   {
     "path_nr": 125,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Island_Upper",
     "to_zone": "Hangar_Bay_2",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1126,7 +1126,7 @@
   },
   {
     "path_nr": 126,
-    "from_zone": "Flight_Deck",
+    "from_zone": "Island_Upper",
     "to_zone": "Hangar_Bay_3",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1135,7 +1135,7 @@
   },
   {
     "path_nr": 127,
-    "from_zone": "Island_Upper",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Bay_1",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1144,7 +1144,7 @@
   },
   {
     "path_nr": 128,
-    "from_zone": "Island_Upper",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Bay_2",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -1153,7 +1153,7 @@
   },
   {
     "path_nr": 129,
-    "from_zone": "Island_Upper",
+    "from_zone": "Flight_Deck",
     "to_zone": "Hangar_Bay_3",
     "is_hvac_ducted": false,
     "kind": "ladder_well_1",
@@ -7606,6 +7606,24 @@
   },
   {
     "path_nr": 846,
+    "from_zone": "Flight_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 847,
+    "from_zone": "Flight_Deck",
+    "to_zone": "ambient",
+    "is_hvac_ducted": false,
+    "kind": "ambient_opening",
+    "crusher_transfer": false,
+    "ahs_nr": 0
+  },
+  {
+    "path_nr": 848,
     "from_zone": "ambient",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
@@ -7614,7 +7632,7 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 847,
+    "path_nr": 849,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ambient",
     "is_hvac_ducted": true,
@@ -7623,33 +7641,13 @@
     "ahs_nr": 1
   },
   {
-    "path_nr": 848,
+    "path_nr": 850,
     "from_zone": "ahs1(Ret)",
     "to_zone": "ahs1(Sup)",
     "is_hvac_ducted": true,
     "kind": "ahs_recirc",
     "crusher_transfer": false,
     "ahs_nr": 1
-  },
-  {
-    "path_nr": 849,
-    "from_zone": "ahs1(Sup)",
-    "to_zone": "Flight_Deck",
-    "is_hvac_ducted": true,
-    "kind": "ahs_supply",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 24050.0
-  },
-  {
-    "path_nr": 850,
-    "from_zone": "Flight_Deck",
-    "to_zone": "ahs1(Ret)",
-    "is_hvac_ducted": true,
-    "kind": "ahs_return",
-    "crusher_transfer": false,
-    "ahs_nr": 1,
-    "declared_flow_m3h": 24050.0
   },
   {
     "path_nr": 851,

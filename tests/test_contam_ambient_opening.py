@@ -132,11 +132,29 @@ _WEATHER_ZONES = {
     },
     "palmer_dms5": {"Boat_Deck_Uptakes"},
     "sigsbee_dd502": {"Midship_Deckhouse", "Mt2_Deck", "Fantail", "Focsle_Deck"},
-    # CONTAM-AMBIENT-WEATHER-CARRIER-01: the two carrier flight decks with no
-    # HVAC group (the other carrier weather zones are VENT_Weather/VENT_Hangar
-    # grouped and stay on their declared ventilation groups).
+    # CONTAM-AMBIENT-WEATHER-CARRIER-01: carrier flight decks with no HVAC
+    # group.
+    # CONTAM-GROUPED-WEATHER-CARRIER-01: grouped carrier weather zones whose
+    # open_deck opening replaces the HVAC group OA leg; remaining group
+    # members stay grouped and carry no opening.
     "lexington_cv2": {"Flight_Deck"},
     "saratoga_cv3": {"Flight_Deck"},
+    "antietam_cvs36": {
+        "Gallery_Deck", "Flight_Deck", "Forecastle_Deck",
+    },
+    "battler_acv6": {"Walkways_Focsle", "Flight_Deck"},
+    "independence_cvl26": {
+        "Gallery_Deck", "Flight_Deck", "Poop_Deck", "Forecastle_Deck",
+    },
+    "puncher_cve53": {"Flight_Deck"},
+    "ranger_cv4": {"Flight_Deck", "Poop_Deck"},
+    "saratoga_cv60": {"Flight_Deck"},
+    "thetis_bay_cve90": {"Flight_Deck"},
+    "wasp_cv7": {"Flight_Deck"},
+    "wright_cc2": {
+        "Flight_Deck_Aft", "Flight_Deck_Mid", "Flight_Deck_Fwd",
+    },
+    "yorktown_cv5": {"Flight_Deck"},
     # CONTAM-AMBIENT-WEATHER-BATTLESHIP-01: ungrouped battleship weather zones;
     # HVAC-grouped VENT_Weather hulls stay untouched as the known grouped-zone
     # open item.
