@@ -8,13 +8,11 @@
       "id": "VENT_Weather",
       "rooms": [
         "Gun_Tub_Aft",
-        "Torpedo_Deck",
         "Cockpit",
-        "Pilothouse",
-        "Foredeck"
+        "Pilothouse"
       ],
       "ach": 12.0,
-      "description": "open weather deck / open cockpit — untreated outside air",
+      "description": "open weather deck / open cockpit \u2014 untreated outside air Torpedo_Deck, Foredeck left this group under CONTAM-GROUPED-WEATHER-MISC-01: each outdoor exchange is an open_deck ambient_openings record, which replaces the group OA leg for those zones (no double-count).",
       "oa_fraction": 1.0,
       "vent_mode": "nat_supply",
       "evidence": "era_rule"
@@ -27,7 +25,7 @@
         "Fore_Peak"
       ],
       "ach": 6.0,
-      "description": "accommodation spaces — natural vent via skylights/ports",
+      "description": "accommodation spaces \u2014 natural vent via skylights/ports",
       "vent_mode": "nat_supply",
       "evidence": "era_plausible",
       "oa_fraction": 1.0
@@ -41,7 +39,7 @@
         "Lazaret"
       ],
       "ach": 10.0,
-      "description": "engine room and fuel compartments — forced/natural draft via vent boxes",
+      "description": "engine room and fuel compartments \u2014 forced/natural draft via vent boxes",
       "oa_fraction": 0.9,
       "vent_mode": "mech_exhaust",
       "evidence": "sheet_read"
@@ -61,10 +59,32 @@
     {
       "from": "VENT_Weather",
       "to": "HVAC_Accom",
-      "flow_rate_m3h": 50.0,
+      "flow_rate_m3h": 30.0,
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-MISC-01: split from VENT_Weather->HVAC_Accom to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Torpedo_Deck",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 10.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-MISC-01: split from VENT_Weather->HVAC_Accom to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Foredeck",
+      "to": "HVAC_Accom",
+      "flow_rate_m3h": 10.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches CONTAM-GROUPED-WEATHER-MISC-01: split from VENT_Weather->HVAC_Accom to preserve per-room-pair reference flow after grouped weather zones left the HVAC group(s).",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -142,6 +162,26 @@
       "from": "Ward_Room",
       "to": "Crews_Quarters",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Torpedo_Deck",
+      "type": "open_deck",
+      "area_m2": 26.493,
+      "exchange_m3h": 17695.9,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open deck exchange with ambient (CONTAM-GROUPED-WEATHER-MISC-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Weather group OA leg for this zone, so Torpedo_Deck is no longer a VENT_Weather room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Foredeck",
+      "type": "open_deck",
+      "area_m2": 13.665,
+      "exchange_m3h": 9114.4,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open deck exchange with ambient (CONTAM-GROUPED-WEATHER-MISC-01). Owner ruling 2026-11-17: the opening REPLACES the VENT_Weather group OA leg for this zone, so Foredeck is no longer a VENT_Weather room (no double-count). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ]
 }

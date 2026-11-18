@@ -159,7 +159,8 @@
         "x": 65.71,
         "y": 5.48
       },
-      "description": "open superstructure deck fwd: AA shield pass, clipping rooms, gun platforms"
+      "description": "open superstructure deck fwd: AA shield pass, clipping rooms, gun platforms",
+      "exposure": "weather"
     },
     {
       "id": "Clipping_Room_Aft",
@@ -234,7 +235,8 @@
         "x": 3.76,
         "y": 5.48
       },
-      "description": "open fantail: ensign staff, capstan, towing gear"
+      "description": "open fantail: ensign staff, capstan, towing gear",
+      "exposure": "weather"
     },
     {
       "id": "Gun_Deck_Aft",
@@ -249,7 +251,8 @@
         "x": 13.47,
         "y": 5.62
       },
-      "description": "No.4 6in gun platform + gun crew shelter + after winch + boats"
+      "description": "No.4 6in gun platform + gun crew shelter + after winch + boats",
+      "exposure": "weather"
     },
     {
       "id": "Boat_Skids",
@@ -465,7 +468,8 @@
         "x": 86.56,
         "y": 5.33
       },
-      "description": "forecastle: No.1 6in gun platform, anchor gear, bosun's locker, water way"
+      "description": "forecastle: No.1 6in gun platform, anchor gear, bosun's locker, water way",
+      "exposure": "weather"
     },
     {
       "id": "Stores_Aft_2",
@@ -621,7 +625,8 @@
         "x": 86.56,
         "y": 5.03
       },
-      "description": "paint locker + lamp room + bosun's stores + ship's store fwd"
+      "description": "paint locker + lamp room + bosun's stores + ship's store fwd",
+      "exposure": "weather"
     },
     {
       "id": "Aft_Oil_Tanks",

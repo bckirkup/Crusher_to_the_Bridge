@@ -23,7 +23,8 @@
         "x": 45.02,
         "y": 4.25
       },
-      "description": "signal deck plan inset: flag deck, signal offices; circular AA platform above"
+      "description": "signal deck plan inset: flag deck, signal offices; circular AA platform above",
+      "exposure": "weather"
     },
     {
       "id": "Bridge_House",
@@ -53,7 +54,8 @@
         "x": 10.73,
         "y": 4.24
       },
-      "description": "aft weather deck: sweep deck, AA gun platform octagon, depth-charge handling"
+      "description": "aft weather deck: sweep deck, AA gun platform octagon, depth-charge handling",
+      "exposure": "weather"
     },
     {
       "id": "Foc_Superstructure",
@@ -83,7 +85,8 @@
         "x": 58.87,
         "y": 4.4
       },
-      "description": "fwd weather deck: 4in gun, windlass, breakwater"
+      "description": "fwd weather deck: 4in gun, windlass, breakwater",
+      "exposure": "weather"
     },
     {
       "id": "Quarterdeck_Flat",
