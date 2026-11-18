@@ -82,6 +82,14 @@ def _read_json(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
+def _safe_output_path(path: Path) -> Path:
+    candidate = path if path.is_absolute() else REPO_ROOT / path
+    resolved = candidate.resolve()
+    if not resolved.is_relative_to(REPO_ROOT):
+        raise ValueError(f"--out must stay under the repository root: {path}")
+    return resolved
+
+
 def _platform_paths(platform_id: str) -> tuple[Path, Path, Path]:
     root = REPO_ROOT / "data" / "platforms" / platform_id
     return (
@@ -277,10 +285,11 @@ def main(argv: list[str] | None = None) -> int:
         payload["paired_hull_runs"] = paired_hull_runs(
             args.scenario, args.theta, args.seeds, args.num_epochs,
         )
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    out = _safe_output_path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     print(json.dumps({
-        "out": str(args.out),
+        "out": str(out),
         "changed_zone_rows": payload["map_census"]["changed_zone_rows"],
         "factor_ratio_min": payload["map_census"]["factor_ratio_min"],
         "factor_ratio_median": payload["map_census"]["factor_ratio_median"],
