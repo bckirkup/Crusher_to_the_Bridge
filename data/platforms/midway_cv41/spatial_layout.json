@@ -89,7 +89,8 @@
         "y": 32.08
       },
       "max_occupancy": 300,
-      "description": "Armored strength deck + canted landing lane (booklet amended post-1947); island cutout on stbd edge fr~70-125."
+      "description": "Armored strength deck + canted landing lane (booklet amended post-1947); island cutout on stbd edge fr~70-125.",
+      "exposure": "weather"
     },
     {
       "id": "Air_Ops_Rooms",
