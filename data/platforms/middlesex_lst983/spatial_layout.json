@@ -446,7 +446,8 @@
         "y": 10.11
       },
       "max_occupancy": 40,
-      "description": "open vehicle tank deck, bow ramp fwd; ~4.3m clear, explicit volume"
+      "description": "open vehicle tank deck, bow ramp fwd; ~4.3m clear, explicit volume",
+      "exposure": "weather"
     },
     {
       "id": "Troop_Messing_Fwd",
@@ -527,7 +528,8 @@
         "x": 82.55,
         "y": 10.35
       },
-      "description": "tank deck continues fwd to bow ramp"
+      "description": "tank deck continues fwd to bow ramp",
+      "exposure": "weather"
     },
     {
       "id": "HD_Crew_Aft",

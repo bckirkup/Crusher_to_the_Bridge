@@ -220,10 +220,13 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # astoria_ca34, chicago_cg11 and miami_cl89,
     # CONTAM-GROUPED-WEATHER-BATTLESHIP-01 adds two legs per battleship
     # grouped-weather opening, CONTAM-GROUPED-WEATHER-MISC-01 adds two
-    # legs per misc grouped weather opening, and CONTAM-GROUPED-WEATHER-AUXILIARY-01
+    # legs per misc grouped weather opening, CONTAM-GROUPED-WEATHER-AUXILIARY-01
     # adds two legs per grouped auxiliary weather opening on the six
     # auxiliary hulls with committed bundles (legend_class_nsc has no
-    # committed bundle). No other committed bundle carries an opening.
+    # committed bundle), and CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 adds six
+    # legs on fort_mandan_lsd21 and four legs on middlesex_lst983
+    # (san_antonio_class_lpd has no committed bundle). No other committed
+    # bundle carries an opening.
     paths = sorted(_PLATFORM_ROOT.glob("*/contam/path_map.json"))
     assert paths
     legs: dict[str, int] = {}
@@ -251,7 +254,8 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "astoria_ca34": 10, "chicago_cg11": 16, "miami_cl89": 4,
         "idaho_bb42": 2, "missouri_bb63": 10,
         "new_jersey_bb62": 10, "wisconsin_bb64": 10,
-        "lsm_354": 8, "middlesex_lst983": 14, "ruchamkin_apd89": 8,
+        "lsm_354": 8, "middlesex_lst983": 18, "fort_mandan_lsd21": 6,
+        "ruchamkin_apd89": 8,
         "aeolus_arc3": 6, "apl_24": 8,
         "bolster_ars38": 8, "cobalt_k124": 6, "gordon_gunter_r338": 8,
         "liberty_cargo_ec2": 12, "lyon_ap71": 22, "passumpsic_ao106": 8,

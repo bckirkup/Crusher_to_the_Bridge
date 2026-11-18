@@ -79,18 +79,6 @@
       "evidence": "era_rule"
     },
     {
-      "id": "HVAC_TankDeck",
-      "rooms": [
-        "Tank_Deck",
-        "Tank_Deck_Port"
-      ],
-      "ach": 4.0,
-      "description": "tank deck ventilation",
-      "oa_fraction": 0.6,
-      "vent_mode": "mech_exhaust",
-      "evidence": "sheet_read"
-    },
-    {
       "id": "AHU_HD_HD_Officers",
       "rooms": [
         "HD_Officers"
@@ -178,11 +166,22 @@
     },
     {
       "from": "HVAC_Machinery",
-      "to": "HVAC_TankDeck",
-      "flow_rate_m3h": 50.0,
+      "to": "Tank_Deck",
+      "flow_rate_m3h": 25.0,
       "path": "ladder_well_5",
       "is_hvac_ducted": false,
-      "description": "Auto ladder-well coupling between adjacent AHU branches",
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/12 m3/h after both tank-deck rooms left HVAC_TankDeck and that empty group was removed. Segment: machinery group to Tank_Deck.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "HVAC_Machinery",
+      "to": "Tank_Deck_Port",
+      "flow_rate_m3h": 25.0,
+      "path": "ladder_well_5",
+      "is_hvac_ducted": false,
+      "description": "Passive ladder-well coupling split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 50/12 m3/h after both tank-deck rooms left HVAC_TankDeck and that empty group was removed. Segment: machinery group to Tank_Deck_Port.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -295,6 +294,24 @@
       "wind_speed_m_s": 1.0,
       "schedule": "always_open",
       "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "Tank_Deck",
+      "type": "open_deck",
+      "area_m2": 224.499,
+      "exchange_m3h": 179757.2357578337,
+      "schedule": "always_open",
+      "wind_speed_m_s": 1.0,
+      "description": "Open weather Tank_Deck exchange with ambient (CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01). Owner ruling 2026-11-17: this opening replaces the HVAC_TankDeck group OA leg for Tank_Deck; Tank_Deck is removed from HVAC_TankDeck; that group has no remaining rooms and is removed. area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: 2*sqrt(V/3)*3 with V=4200.0 m3 (square-plan deck face, not a measured area); exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5). The hull relative wind is 1.0 m/s from ahead; schedule is always_open."
+    },
+    {
+      "zone": "Tank_Deck_Port",
+      "type": "open_deck",
+      "area_m2": 73.056,
+      "exchange_m3h": 58601.23239882073,
+      "schedule": "always_open",
+      "wind_speed_m_s": 1.0,
+      "description": "Open weather Tank_Deck_Port exchange with ambient (CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01). Owner ruling 2026-11-17: this opening replaces the HVAC_TankDeck group OA leg for Tank_Deck_Port; Tank_Deck_Port is removed from HVAC_TankDeck; that group has no remaining rooms and is removed. area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: 2*sqrt(V/3)*3 with V=444.76 m3 (square-plan deck face, not a measured area); exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5). The hull relative wind is 1.0 m/s from ahead; schedule is always_open."
     }
   ],
   "adjacency": [

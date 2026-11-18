@@ -94,25 +94,13 @@
     {
       "id": "HVAC_Aviation",
       "rooms": [
-        "Hangar",
-        "Flight_Deck"
+        "Hangar"
       ],
       "ach": 8.0,
       "oa_fraction": 0.8,
       "filter_efficiency": 0.2,
       "filter_type": "MERV-8",
-      "description": "Aviation spaces ventilation. Hangar has fuel vapor extraction. Flight deck largely open to weather."
-    },
-    {
-      "id": "HVAC_Well_Deck",
-      "rooms": [
-        "Well_Deck"
-      ],
-      "ach": 6.0,
-      "oa_fraction": 1.0,
-      "filter_efficiency": 0.0,
-      "filter_type": "none",
-      "description": "Well deck ventilation. Partially open to sea when stern gate lowered. Exhaust ventilation for LCAC operations."
+      "description": "Aviation spaces ventilation. Hangar has fuel vapor extraction. Flight deck largely open to weather. Flight_Deck left this group under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01: their outdoor exchange is the open_deck ambient_openings record, which replaces the group OA leg for those zones (no double-count)."
     },
     {
       "id": "HVAC_Machinery",
@@ -277,22 +265,33 @@
     },
     {
       "from": "HVAC_Vehicle_Deck",
-      "to": "HVAC_Well_Deck",
-      "flow_rate_m3h": 500,
+      "to": "Well_Deck",
+      "flow_rate_m3h": 500.0,
       "path": "vehicle_ramp",
       "is_hvac_ducted": false,
-      "description": "Passive airflow through vehicle ramp opening connecting vehicle deck to well deck.",
+      "description": "Passive vehicle-ramp opening re-addressed under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 after Well_Deck left HVAC_Well_Deck and that empty group was removed; the single Vehicle_Deck/Well_Deck pair keeps 500 m3/h.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
     },
     {
       "from": "HVAC_Aviation",
-      "to": "HVAC_Well_Deck",
-      "flow_rate_m3h": 300,
+      "to": "Well_Deck",
+      "flow_rate_m3h": 150.0,
       "path": "aft_passageway",
       "is_hvac_ducted": false,
-      "description": "Passive airflow between hangar/flight deck and well deck through aft passageways.",
+      "description": "Passive aft-passageway opening split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 300/2 m3/h after Flight_Deck left HVAC_Aviation and Well_Deck left HVAC_Well_Deck (empty group removed). Segment: Hangar to Well_Deck.",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Flight_Deck",
+      "to": "Well_Deck",
+      "flow_rate_m3h": 150.0,
+      "path": "aft_passageway",
+      "is_hvac_ducted": false,
+      "description": "Passive aft-passageway opening split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original room pair keeps 300/2 m3/h after Flight_Deck left HVAC_Aviation and Well_Deck left HVAC_Well_Deck (empty group removed). Segment: Flight_Deck to Well_Deck.",
       "direction": "bidirectional",
       "mechanism": "pressure_opening",
       "filtered": false
@@ -322,22 +321,44 @@
     {
       "from": "HVAC_Aviation",
       "to": "AHU_HD_01L_M",
-      "flow_rate_m3h": 356.8,
-      "is_hvac_ducted": false,
+      "flow_rate_m3h": 178.4,
       "path": "Sanitary_Makeup",
+      "is_hvac_ducted": false,
+      "description": "Sanitary make-up split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original HVAC_Aviation/AHU_HD_01L_M room pair keeps 356.8/2 m3/h after Flight_Deck left HVAC_Aviation. Segment: Hangar to AHU_HD_01L_M.",
       "direction": "oneway",
-      "description": "Transfer air into HD_01L_M; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Flight_Deck",
+      "to": "AHU_HD_01L_M",
+      "flow_rate_m3h": 178.4,
+      "path": "Sanitary_Makeup",
+      "is_hvac_ducted": false,
+      "description": "Sanitary make-up split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original HVAC_Aviation/AHU_HD_01L_M room pair keeps 356.8/2 m3/h after Flight_Deck left HVAC_Aviation. Segment: Flight_Deck to AHU_HD_01L_M.",
+      "direction": "oneway",
       "mechanism": "pressure_opening",
       "filtered": false
     },
     {
       "from": "HVAC_Aviation",
       "to": "AHU_HD_01L_F",
-      "flow_rate_m3h": 356.8,
-      "is_hvac_ducted": false,
+      "flow_rate_m3h": 178.4,
       "path": "Sanitary_Makeup",
+      "is_hvac_ducted": false,
+      "description": "Sanitary make-up split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original HVAC_Aviation/AHU_HD_01L_F room pair keeps 356.8/2 m3/h after Flight_Deck left HVAC_Aviation. Segment: Hangar to AHU_HD_01L_F.",
       "direction": "oneway",
-      "description": "Transfer air into HD_01L_F; the head exhausts overboard, never back to the served space.",
+      "mechanism": "pressure_opening",
+      "filtered": false
+    },
+    {
+      "from": "Flight_Deck",
+      "to": "AHU_HD_01L_F",
+      "flow_rate_m3h": 178.4,
+      "path": "Sanitary_Makeup",
+      "is_hvac_ducted": false,
+      "description": "Sanitary make-up split under CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01 so each original HVAC_Aviation/AHU_HD_01L_F room pair keeps 356.8/2 m3/h after Flight_Deck left HVAC_Aviation. Segment: Flight_Deck to AHU_HD_01L_F.",
+      "direction": "oneway",
       "mechanism": "pressure_opening",
       "filtered": false
     },
@@ -532,6 +553,26 @@
       "from": "Passageway_Main",
       "to": "Medical_Ward",
       "type": "passageway"
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "Flight_Deck",
+      "type": "open_deck",
+      "area_m2": 84.853,
+      "exchange_m3h": 55865.898416357435,
+      "schedule": "always_open",
+      "wind_speed_m_s": 1.0,
+      "description": "Open weather Flight_Deck exchange with ambient (CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01). Owner ruling 2026-11-17: this opening replaces the HVAC_Aviation group OA leg for Flight_Deck; Flight_Deck is removed from HVAC_Aviation; the group retains Hangar. area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: 2*sqrt(V/3)*3 with V=600 m3 (square-plan deck face, not a measured area); exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5). The hull relative wind is 1.0 m/s from ahead; schedule is always_open."
+    },
+    {
+      "zone": "Well_Deck",
+      "type": "open_deck",
+      "area_m2": 213.542,
+      "exchange_m3h": 141014.64236987114,
+      "schedule": "always_open",
+      "wind_speed_m_s": 1.0,
+      "description": "Open weather Well_Deck exchange with ambient (CONTAM-GROUPED-WEATHER-AMPHIBIOUS-01). Owner ruling 2026-11-17: this opening replaces the HVAC_Well_Deck group OA leg for Well_Deck; Well_Deck is removed from HVAC_Well_Deck; that group has no remaining rooms and is removed. area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: 2*sqrt(V/3)*3 with V=3800 m3 (square-plan deck face, not a measured area); exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5). The hull relative wind is 1.0 m/s from ahead; schedule is always_open."
     }
   ]
 }

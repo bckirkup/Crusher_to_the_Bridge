@@ -23,7 +23,8 @@
         "x": 27.44,
         "y": 9.42
       },
-      "description": "house top: searchlight platforms, life rafts, 5\"/38 gun director platform"
+      "description": "house top: searchlight platforms, life rafts, 5\"/38 gun director platform",
+      "exposure": "weather"
     },
     {
       "id": "Radar_House",
@@ -250,7 +251,8 @@
         "x": 31.2,
         "y": 9.6
       },
-      "description": "open main deck over well: gun tubs P/S, landing boats, life rafts, engine repair stand, hand crane"
+      "description": "open main deck over well: gun tubs P/S, landing boats, life rafts, engine repair stand, hand crane",
+      "exposure": "weather"
     },
     {
       "id": "Machine_Shop",
@@ -566,7 +568,8 @@
         "x": 42.63,
         "y": 10.03
       },
-      "description": "WELL DECK — dock bay for landing craft/vehicles, stern-gate access; tall space zoned once at floor level"
+      "description": "WELL DECK — dock bay for landing craft/vehicles, stern-gate access; tall space zoned once at floor level",
+      "exposure": "weather"
     },
     {
       "id": "Ballast_Tanks_Port",
