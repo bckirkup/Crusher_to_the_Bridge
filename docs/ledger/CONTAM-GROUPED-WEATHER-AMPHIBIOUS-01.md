@@ -96,7 +96,11 @@ re-addressings of unchanged reference flows, not magnitude fits, but they edit
 - `aft_passageway` split into `HVAC_Aviation → Well_Deck` and
   `Flight_Deck → Well_Deck` at 150.0 m³/h each.
 - `Sanitary_Makeup` `HVAC_Aviation → AHU_HD_01L_M/F` split so `Flight_Deck`
-  keeps its two 178.4 m³/h legs to the same sanitary terminals.
+  keeps its two 178.4 m³/h legs to the same sanitary terminals. This raises the
+  fleet `Sanitary_Makeup` link count in `tests/test_forced_exhaust_audit.py`
+  from 585 to 587 (two extra declared links; per-destination reference flow is
+  unchanged) while the audit invariants still hold: all oneway, no native
+  reverse, reconciled.
 
 `data/platforms/{fort_mandan_lsd21,middlesex_lst983}/contam/{platform.prj,path_map.json}`
 regenerated with `scripts/generate_platform_contam_prj.py --platform
