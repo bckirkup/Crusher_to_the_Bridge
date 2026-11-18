@@ -78,15 +78,6 @@ def test_norovirus_route_gate_reports_emesis_conditioned() -> None:
     assert gate["has_airborne_emission_fraction"] is False
 
 
-def test_safe_output_path_rejects_escape(tmp_path: Path) -> None:
-    with pytest.raises(ValueError, match="repository root"):
-        attr_mod._safe_output_path(tmp_path / "evil.json")
-    with pytest.raises(ValueError, match="repository root"):
-        attr_mod._safe_output_path(Path("../evil.json"))
-    accepted = attr_mod._safe_output_path(Path("docs/audits/x.json"))
-    assert accepted.is_relative_to(attr_mod.REPO_ROOT)
-
-
 def test_simulate_hull_with_map_mode_patches_builder(monkeypatch: pytest.MonkeyPatch) -> None:
     import picard_framework.covid_theta_fit as ctf
     import picard_framework.simulation.ship_simulation as ship_simulation
@@ -155,8 +146,9 @@ def test_paired_hull_runs_reports_seed_deltas(monkeypatch: pytest.MonkeyPatch) -
     assert result["rows"][1]["arm"] == "ambient_on"
 
 
-def test_main_writes_payload_under_repo_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setattr(attr_mod, "REPO_ROOT", tmp_path)
+def test_main_writes_payload(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    out = tmp_path / "evidence.json"
+    monkeypatch.setattr(attr_mod, "DEFAULT_OUT", out)
     monkeypatch.setattr(
         attr_mod,
         "map_census",
@@ -170,8 +162,7 @@ def test_main_writes_payload_under_repo_root(monkeypatch: pytest.MonkeyPatch, tm
         },
     )
     monkeypatch.setattr(attr_mod, "norovirus_route_gate", lambda: {"pathogen_id": "norwalk_gi"})
-    out = tmp_path / "evidence.json"
-    assert attr_mod.main(["--skip-hull", "--out", str(out)]) == 0
+    assert attr_mod.main(["--skip-hull"]) == 0
     payload = json.loads(out.read_text())
     assert payload["criterion"]["arms"] == ["ambient_off", "ambient_on"]
     assert payload["map_census"]["changed_zone_rows"] == 2

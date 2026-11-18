@@ -82,14 +82,6 @@ def _read_json(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
-def _safe_output_path(path: Path) -> Path:
-    candidate = path if path.is_absolute() else REPO_ROOT / path
-    resolved = candidate.resolve()
-    if not resolved.is_relative_to(REPO_ROOT):
-        raise ValueError(f"--out must stay under the repository root: {path}")
-    return resolved
-
-
 def _platform_paths(platform_id: str) -> tuple[Path, Path, Path]:
     root = REPO_ROOT / "data" / "platforms" / platform_id
     return (
@@ -261,7 +253,6 @@ def norovirus_route_gate() -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--platform", action="append", dest="platforms")
     parser.add_argument("--scenario", default="greg_mortimer_2020")
     parser.add_argument("--theta", type=float, default=1e10)
@@ -285,7 +276,7 @@ def main(argv: list[str] | None = None) -> int:
         payload["paired_hull_runs"] = paired_hull_runs(
             args.scenario, args.theta, args.seeds, args.num_epochs,
         )
-    out = _safe_output_path(args.out)
+    out = DEFAULT_OUT
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     print(json.dumps({
