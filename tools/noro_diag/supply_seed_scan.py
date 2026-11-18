@@ -183,15 +183,7 @@ def _arm_fields(arm: str) -> dict[str, Any]:
     raise ValueError(f"unknown arm {arm!r}")
 
 
-def _apply_arm(spec: dict[str, Any], arm: str) -> None:
-    fields = _arm_fields(arm)
-    _update_provisioned_source(spec, fields)
-
-
-def _update_provisioned_source(
-    spec: dict[str, Any],
-    fields: dict[str, Any],
-) -> None:
+def _provisioned_source_targets(spec: dict[str, Any]) -> list[dict[str, Any]]:
     cfg = (
         spec.get("config_overrides", {})
         .get("transmission", {})
@@ -203,15 +195,38 @@ def _update_provisioned_source(
         .get("common_source", {})
         .get("provisioned_source")
     )
-    for target in (cfg, params):
-        if isinstance(target, dict):
-            target.update(fields)
+    return [target for target in (cfg, params) if isinstance(target, dict)]
+
+
+def _update_provisioned_source(
+    spec: dict[str, Any],
+    fields: dict[str, Any],
+) -> int:
+    targets = _provisioned_source_targets(spec)
+    for target in targets:
+        target.update(fields)
+    return len(targets)
+
+
+def _apply_arm(spec: dict[str, Any], arm: str) -> None:
+    fields = _arm_fields(arm)
+    targets = _update_provisioned_source(spec, fields)
+    if fields and targets == 0:
+        raise ValueError(
+            f"manifest tier has no provisioned_source block for arm {arm!r}",
+        )
 
 
 def _apply_structure(spec: dict[str, Any], structure: str) -> None:
     fields = _STRUCTURE_ARMS[structure]
-    if fields:
-        _update_provisioned_source(spec, {"supply_structure": fields})
+    targets = _update_provisioned_source(
+        spec, {"supply_structure": fields} if fields else {},
+    )
+    if fields and targets == 0:
+        raise ValueError(
+            "manifest tier has no provisioned_source block for "
+            f"structure {structure!r}",
+        )
 
 
 def _spec_for_seed(
