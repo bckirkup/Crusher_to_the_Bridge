@@ -154,12 +154,22 @@ _WEATHER_ZONES = {
         "Fantail",
     },
     # CONTAM-AMBIENT-WEATHER-CRUISER-01: the four zero-outdoor-exchange
-    # AHU_Weather rooms on the only cruiser roster hull in that state; the
-    # other cruiser roster hulls keep grouped VENT_Weather ventilation.
+    # AHU_Weather rooms on the only cruiser roster hull in that state.
     "alexander_henry_cgs119": {
         "Wheelhouse_Top", "Bridge_Wings", "Boat_Stowage_Open",
         "Forecastle_Working",
     },
+    # CONTAM-GROUPED-WEATHER-CRUISER-01: grouped VENT_Weather weather zones on
+    # the three OA>0 cruiser roster hulls; each opening replaces the group OA
+    # leg for its zone.
+    "astoria_ca34": {
+        "Fantail", "Catapult_Deck", "Boat_Deck", "Focsle_Deck", "Upper_Deck_Aft",
+    },
+    "chicago_cg11": {
+        "Fantail_Weather", "Helo_Deck", "Helo_Deck_02_Aft", "Forecastle_Deck",
+        "Bow_Weather", "Terrier_Deck_02", "Launcher_Deck_01", "Open_03",
+    },
+    "miami_cl89": {"Catapult_Deck", "Bow_Weather"},
     # CONTAM-AMBIENT-WEATHER-AMPHIBIOUS-01: ungrouped amphibious weather zones;
     # HVAC-grouped amphibious weather zones stay untouched as the known
     # grouped-zone open item.
