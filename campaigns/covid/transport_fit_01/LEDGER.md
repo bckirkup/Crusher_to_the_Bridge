@@ -60,6 +60,10 @@ arm payload resolves `ContamXTransportEngine`.
 |---|---|---:|---|---|---|---|
 | 2026-11-19 | (image) | — | — | `0d70c022` (code `8de77294`) | `sha256:7023d963f3a3ede96c7f47def3bb539ecef1b9c8bc2a112697c45e82e37719a0` | built root Dockerfile + Dockerfile.campaign, pushed |
 | 2026-11-19 | dp_contamx_canary | 20 | `0a894bc5-0dca-4554-816f-0ebc853067ae` | `8de77294` | jobdef `:2` | CANARY submitted → 20/20 SUCCEEDED, all cells resolved `ContamXTransportEngine` (audit: 0 wrong_engine, 0 duplicates). Note: image predates the cell fail-closed check and the GM funnel_echo flag — canary audit used the payload's resolved-engine echo instead of the post-run assert. |
+| 2026-11-19 | (image v2) | — | — | `106a3583` (main HEAD post-merge) | `covid-transport-fit-01-v2` @ `sha256:56f860c8ebba8a128b9a308214fa2a8426b55529d770c74cfdb46f6c64b1f485` | rebuilt for fleet blocks (fail-closed cell + GM funnel_echo now in image); Docker Hub rate-limited, base FROM resolved via `public.ecr.aws` mirror |
+| 2026-11-19 | dp_native | 20 | `bec97e14-7e51-4a49-9b1c-37a2eb60ad5c` | `106a3583` | v2 digest | submitted |
+| 2026-11-19 | gm_native | 50 | `da861223-2b85-4479-80d3-21a343502fee` | `106a3583` | v2 digest | submitted |
+| 2026-11-19 | gm_contamx | 50 | `a02bd464-8cb5-4ece-b427-351c0473f70c` | `106a3583` | v2 digest | submitted |
 
 ### Canary readout — DP under ContamX (20 seeds, Θ 7.9e6)
 
