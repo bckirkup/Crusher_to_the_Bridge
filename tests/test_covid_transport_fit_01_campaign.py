@@ -243,11 +243,17 @@ class TestCellHelpers:
         )
         assert base["scheduled_protocol_id"] == "SOP-017-MESSBOX"
 
-    def test_local_binary_resolves(self, cell_mod) -> None:
-        """The repo's third_party drop wins the resolution order; the S3
-        leg is exercised on Batch, where the image lacks the binary."""
-        path = cell_mod._ensure_contamx_binary({})
-        assert path is not None and "contamx3" in path
+    def test_local_binary_resolves(
+        self, cell_mod, tmp_path: Path, monkeypatch,
+    ) -> None:
+        """A local binary wins the resolution order untouched; the S3
+        leg is exercised on Batch, where the image lacks the binary.
+        (CI has neither the solver nor AWS creds, so the test stubs.)"""
+        stub = tmp_path / "contamx3"
+        stub.write_bytes(b"#!/bin/sh\n")
+        stub.chmod(0o755)
+        monkeypatch.setenv("CONTAMX_BINARY", str(stub))
+        assert cell_mod._ensure_contamx_binary({}) == str(stub)
 
 
 # ------------------------------------------------------------------- readout
