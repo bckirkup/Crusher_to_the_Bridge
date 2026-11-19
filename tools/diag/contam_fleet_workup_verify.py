@@ -27,6 +27,14 @@ EXECUTE = "planned_execute"
 GOOD = ("ok", "unchanged")
 BLOCKS = ("solved_airflow", "downstream_mixing")
 UNRESOLVED = ("outdoor_air_total_m3h", "exhaust_total_m3h")
+# The corrected canary run (run 2). The earlier run's solve / import split was
+# mislabelled; a package carrying any other canary job is refused.
+CANARY_RECEIPT = {
+    "batch_job_id": "ac1b56e1-2080-40cc-be8f-b8473ceca793",
+    "raw_artifact_sha256": "b99690680cd30331d4af0ad9e3afba5543d4499668e19c42205cf272f5a7ac8b",
+    "image_digest": "sha256:e59acd8d426a1304387929dd9c91bb85946b28c0c2357eb7a997e7e16a28e0c3",
+    "runner_commit": "d06d685011ebc05ebe49ed35aacc43b7f6fc2706",
+}
 PHASES = {
     NATIVE: {"input_read", "native_construct", "field_reduce", "downstream", "end_to_end",
              "process_total"},
@@ -241,6 +249,9 @@ def check_cohorts(root: str, t: dict[str, Any], expected: dict[str, Any], checks
             **{f"fleet_cohort{c['cohort']}": c["hulls"] for c in selection["cohorts"]}}
     checks.add("one corrected canary cohort and eight fleet cohorts, with the frozen rosters",
                rosters == want and len(want) == 9)
+    canary = [c for c in cohorts if c["cohort"] == "canary_run2"]
+    checks.add("the canary cohort is the corrected run 2, by job, artifact, image and runner",
+               len(canary) == 1 and all(canary[0][k] == v for k, v in CANARY_RECEIPT.items()))
     checks.add("fleet cohorts ran under the packaged selection; the canary predates it", all(
         c["selection_sha256"] == ("" if c["stage"] == "canary" else selection_sha)
         for c in cohorts))
@@ -300,55 +311,90 @@ def _representative(reps: list[dict[str, str]]) -> dict[tuple[str, str], dict[st
     return {}
 
 
-def check_recompute_results(t: dict[str, Any], tol: dict[str, float], checks: Checks) -> None:
+def _by_row(t: dict[str, Any]) -> dict[str, list[dict[str, str]]]:
     by_row: dict[str, list[dict[str, str]]] = {}
     for r in t["repeat_metrics"]:
         by_row.setdefault(r["row_id"], []).append(r)
+    return by_row
+
+
+def _repeat_shape_ok(reps: list[dict[str, str]]) -> bool:
+    kinds: dict[str, set[str]] = {}
+    for r in reps:
+        kinds.setdefault(r["repeat_kind"], set()).add(r["repeat_index"])
+    return {k: len(v) for k, v in kinds.items()} == {"smoke": 1, "warmup": 1, "measured": 5}
+
+
+def _status_wrong(r: dict[str, str], metrics: dict[Any, dict[str, str]],
+                  base: dict[Any, dict[str, str]] | None, tol: float) -> bool:
+    """Whether a result's ok / unchanged status disagrees with its lane baseline."""
+    m = metrics[(r["block"], r["metric"])]
+    if m["status"] != "ok":
+        return r["observed_status"] != m["status"]
+    moved = r["setting_id"] == "baseline" or base is None or any(
+        v["value"] != "" and base[k]["value"] != ""
+        and rel_diff(float(v["value"]), float(base[k]["value"])) > tol
+        for k, v in metrics.items() if k[0] == r["block"])
+    return r["observed_status"] != ("ok" if moved else "unchanged")
+
+
+def check_recompute_results(t: dict[str, Any], tol: dict[str, float], checks: Checks) -> None:
+    by_row = _by_row(t)
     rep = {row_id: _representative(reps) for row_id, reps in by_row.items()}
-    executed = {r["row_id"]: r for r in t["coverage_observed"] if r["planned_status"] == EXECUTE}
-    checks.add("per-repeat records exist for exactly the executed rows", set(rep) == set(executed))
-    counts_ok = True
-    for row_id, reps in by_row.items():
-        kinds: dict[str, set[str]] = {}
-        for r in reps:
-            kinds.setdefault(r["repeat_kind"], set()).add(r["repeat_index"])
-        counts_ok &= {k: len(v) for k, v in kinds.items()} == {"smoke": 1, "warmup": 1, "measured": 5}
-    checks.add("each executed row has 1 smoke, 1 warm-up and 5 measured repeats", counts_ok)
+    executed = {r["row_id"] for r in t["coverage_observed"] if r["planned_status"] == EXECUTE}
+    checks.add("per-repeat records exist for exactly the executed rows", set(rep) == executed)
+    checks.add("each executed row has 1 smoke, 1 warm-up and 5 measured repeats",
+               all(_repeat_shape_ok(reps) for reps in by_row.values()))
+    have = {(r["row_id"], r["block"], r["metric"]) for r in t["results_long"]
+            if r["row_id"] in rep}
+    want = {(row_id, *key) for row_id, metrics in rep.items() for key in metrics}
+    checks.add("results_long carries every metric of every executed row, and no other",
+               have == want, f"missing={len(want - have)} extra={len(have - want)}")
+    per_lane: dict[bool, set[tuple[str, str]]] = {}
+    for r in t["results_long"]:
+        per_lane.setdefault(r["lane"] == NATIVE, set()).add((r["block"], r["metric"]))
+    rows: dict[str, set[tuple[str, str]]] = {}
+    lane_of = {}
+    for r in t["results_long"]:
+        rows.setdefault(r["row_id"], set()).add((r["block"], r["metric"]))
+        lane_of[r["row_id"]] = r["lane"] == NATIVE
+    covered = {r["row_id"] for r in t["coverage_observed"]}
+    checks.add("every matrix row, executed or not, lists its lane's full metric set",
+               set(rows) == covered and all(m == per_lane[lane_of[i]] for i, m in rows.items()))
     wrong_value = wrong_status = 0
     for r in t["results_long"]:
         metrics = rep.get(r["row_id"])
-        if metrics is None:
+        m = (metrics or {}).get((r["block"], r["metric"]))
+        if m is None:
             wrong_value += r["value"] != ""
             continue
-        m = metrics[(r["block"], r["metric"])]
         wrong_value += (r["value"] != (m["value"] if m["status"] == "ok" else "")) or r["unit"] != m["unit"]
-        if m["status"] != "ok":
-            wrong_status += r["observed_status"] != m["status"]
-            continue
         base = rep.get("|".join([*r["row_id"].split("|")[:2], "baseline"]))
-        moved = r["setting_id"] == "baseline" or base is None or any(
-            v["value"] != "" and base[k]["value"] != ""
-            and rel_diff(float(v["value"]), float(base[k]["value"])) > tol["unchanged_rel"]
-            for k, v in metrics.items() if k[0] == r["block"])
-        wrong_status += r["observed_status"] != ("ok" if moved else "unchanged")
+        wrong_status += _status_wrong(r, metrics, base, tol["unchanged_rel"])
     checks.add("results_long values are the last measured repeat of each row", wrong_value == 0,
                f"{wrong_value} differ")
     checks.add("ok / unchanged statuses recompute against each lane's own baseline",
                wrong_status == 0, f"{wrong_status} differ")
-    bad = 0
-    for c in t["repeat_consistency"]:
-        reps = by_row[c["row_id"]]
-        cells: dict[tuple[str, str], dict[tuple[str, str], dict[str, str]]] = {}
-        for r in reps:
-            cells.setdefault((r["repeat_kind"], r["repeat_index"]), {})[(r["block"], r["metric"])] = r
-        first = next(iter(cells.values()))
-        worst = max((rel_diff(float(v["value"]), float(first[k]["value"]))
-                     for cell in cells.values() for k, v in cell.items()
-                     if v["value"] != "" and first[k]["value"] != ""), default=0.0)
-        shas = {r["field_sha256"] for r in reps} - {""}
-        bad += (int(c["records"]) != len(cells) or int(c["distinct_field_sha256"]) != len(shas)
-                or not same(float(c["max_metric_rel_diff"]), worst)
-                or worst > tol["repeat_metric_rel"] or len(shas) > 1)
+    check_recompute_consistency(t, by_row, tol, checks)
+
+
+def _consistency_wrong(c: dict[str, str], reps: list[dict[str, str]], limit: float) -> bool:
+    cells: dict[tuple[str, str], dict[tuple[str, str], dict[str, str]]] = {}
+    for r in reps:
+        cells.setdefault((r["repeat_kind"], r["repeat_index"]), {})[(r["block"], r["metric"])] = r
+    first = next(iter(cells.values()))
+    worst = max((rel_diff(float(v["value"]), float(first[k]["value"]))
+                 for cell in cells.values() for k, v in cell.items()
+                 if v["value"] != "" and first[k]["value"] != ""), default=0.0)
+    shas = {r["field_sha256"] for r in reps} - {""}
+    return (int(c["records"]) != len(cells) or int(c["distinct_field_sha256"]) != len(shas)
+            or not same(float(c["max_metric_rel_diff"]), worst) or worst > limit or len(shas) > 1)
+
+
+def check_recompute_consistency(t: dict[str, Any], by_row: dict[str, list[dict[str, str]]],
+                                tol: dict[str, float], checks: Checks) -> None:
+    bad = sum(_consistency_wrong(c, by_row[c["row_id"]], tol["repeat_metric_rel"])
+              for c in t["repeat_consistency"])
     checks.add("repeat_consistency recomputes and every repeat reproduces its row's metrics",
                bad == 0 and len(t["repeat_consistency"]) == len(by_row), f"{bad} differ")
 

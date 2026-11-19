@@ -168,3 +168,22 @@ def test_columns_are_whole_hull_aggregates_only():
               "infect", "voyage", "rank")
     for name, columns in verifier.COLUMNS.items():
         assert not [c for c in columns if any(b in c for b in banned)], name
+
+
+def test_earlier_canary_run_is_refused_as_the_canary_cohort(tmp_path):
+    out = str(tmp_path / "p")
+    package.build({package.CANARY_COHORT: CANARY.replace("readout", "readout_run1")}, out)
+    assert ("the canary cohort is the corrected run 2, by job, artifact, image and runner"
+            in _failed(out))
+
+
+def test_metric_dropped_from_every_derived_table_is_caught(built, tmp_path):
+    root = _copy(built, tmp_path)
+
+    def drop(rows):
+        return [r for r in rows if r["metric"] != "interzone_gross_m3h"]
+
+    for name in ("results_long", "contrasts", "reference_baselines"):
+        _rewrite(root, f"data/{name}.csv", drop)
+    assert ("results_long carries every metric of every executed row, and no other"
+            in _failed(root))

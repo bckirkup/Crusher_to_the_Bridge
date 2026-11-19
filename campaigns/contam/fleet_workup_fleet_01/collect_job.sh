@@ -8,6 +8,8 @@ set -euo pipefail
 job="$1"; block="$2"; artifact="$3"; work="$4"
 bucket="${CAMPAIGN_BUCKET:-crusherbucket-994254241749-us-east-1-an}"
 profile="${AWS_PROFILE_NAME:-picard}"; region="${AWS_REGION:-us-east-1}"
+# A reused work directory must not carry an earlier job's blocker or gates.
+rm -rf "$work/raw"
 mkdir -p "$work/raw"
 while :; do
   status=$(aws --profile "$profile" batch describe-jobs --region "$region" --jobs "$job" \
