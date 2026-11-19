@@ -87,6 +87,7 @@ ARM_OVERRIDE_KEYS = frozenset({
     "scheduled_protocol_id",
     "scheduled_protocol_window",
     "pathogen_pool_transport",
+    "transport_engine",
     "near_field_air_mode",
     "profile_route_efficiency_multipliers",
     "infection_counters",
@@ -140,6 +141,7 @@ SEED_PATCH_KEYS = frozenset({
 })
 QUARANTINE_PROTOCOL_ID = "SOP-017"
 NEAR_FIELD_AIR_MODES = ("two_box", "off")
+TRANSPORT_ENGINES = ("native", "contamx")
 ZONE_CLASSES = ("cabin", "corridor", "crew_mess", "galley", "other")
 INTERVAL = (0.05, 0.95)
 SPLIT_DAY = 17
@@ -927,6 +929,8 @@ def _dispatch_arm_overrides(
         _apply_transmission_overrides(raw, overrides["transmission_overrides"])
     if "near_field_air_mode" in overrides:
         _apply_near_field_air_mode(raw, overrides["near_field_air_mode"])
+    if "transport_engine" in overrides:
+        _apply_transport_engine(raw, overrides["transport_engine"])
     if "profile_route_efficiency_multipliers" in overrides:
         _apply_route_efficiencies(
             raw, overrides["profile_route_efficiency_multipliers"], profile,
@@ -1030,6 +1034,26 @@ def _apply_near_field_air_mode(raw: dict[str, Any], mode: Any) -> None:
     raw["config_overrides"].setdefault("transmission", {}).setdefault(
         "near_field_air", {},
     )["mode"] = mode
+
+
+def _apply_transport_engine(raw: dict[str, Any], engine: Any) -> None:
+    """The airflow-solver arm axis: ``hvac.transport_engine``.
+
+    ``"auto"`` is deliberately excluded: it falls back silently to native
+    when ContamX is unavailable, which in a campaign is an unmeasured arm
+    divergence. A ``contamx`` cell that cannot build the solver must fail,
+    not quietly run the baseline — the readout audits the resolved engine
+    class on every payload for exactly this reason.
+    """
+    engine = str(engine)
+    if engine not in TRANSPORT_ENGINES:
+        raise ValueError(
+            f"transport_engine must be one of {TRANSPORT_ENGINES}, "
+            f"got {engine!r}",
+        )
+    raw["config_overrides"].setdefault("hvac", {})[
+        "transport_engine"
+    ] = engine
 
 
 def _apply_frailty_override(
@@ -2137,6 +2161,19 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
             profile.get("route_efficiency_multipliers") or {}
         ),
         "pathogen_pool_transport": getattr(sim, "pathogen_pool_transport", None),
+        # The declared airflow solver and the engine class that actually
+        # ran, so a transport_engine arm is auditable from the payload:
+        # a contamx arm whose resolved class is the native engine is a
+        # BLOCKED_ENGINE_FALLBACK, not a valid cell.
+        "transport_engine": (
+            raw.get("config_overrides", {}).get("hvac", {}).get(
+                "transport_engine", "native"
+            )
+        ),
+        "transport_engine_resolved": (
+            type(sim.contam_engine).__name__
+            if getattr(sim, "contam_engine", None) is not None else None
+        ),
         "exposure_cap": dict(tx_over.get("exposure_cap") or {}),
         "exposure_cap_active": bool(
             getattr(tx_core, "_exposure_cap_active", False)
