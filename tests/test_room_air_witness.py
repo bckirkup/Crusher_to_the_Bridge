@@ -27,6 +27,14 @@ from engines.transmission_core import (
 from orchestrator_record import _summary_counts
 from orchestrator_types import SimulationState
 
+WITNESS_KEYS = {
+    "changed_zone_count",
+    "susceptible_person_hours_changed_zones",
+    "airborne_dose_all_zones",
+    "airborne_dose_changed_zones",
+    "airborne_dose_share_changed_zones_upper_bound",
+}
+SHARE = "airborne_dose_share_changed_zones_upper_bound"
 OPEN, CLOSED = "Open_Deck_Test", "Closed_Room_Test"
 VOLUMES = {OPEN: 40.0, CLOSED: 40.0}
 
@@ -134,9 +142,7 @@ def test_changed_zone_count_tracks_positive_exchange(exchange: float) -> None:
 def test_witness_exposes_whole_hull_scalars_only() -> None:
     core, _ = _run()
     witness = core.room_air_witness()
-    assert set(witness) == {
-        "changed_zone_count", "susceptible_person_hours_changed_zones",
-    }
+    assert set(witness) == WITNESS_KEYS
     for value in witness.values():
         assert isinstance(value, (int, float)) and math.isfinite(value)
         assert value >= 0.0
@@ -161,12 +167,47 @@ def test_person_hours_scale_with_epoch_length_and_accumulate() -> None:
     assert one < two <= 2.0 * one
 
 
+def test_dose_share_is_a_bounded_share_of_the_airborne_dose() -> None:
+    core, records = _run(3)
+    witness = core.room_air_witness()
+    total = witness["airborne_dose_all_zones"]
+    changed = witness["airborne_dose_changed_zones"]
+    assert 0.0 < changed < total
+    assert witness[SHARE] == pytest.approx(changed / total)
+    # The hull total is the credited droplet dose the exposure records hold
+    # (records round to 4 decimals).
+    recorded = sum(entry["dose"] for entry in records[0][0])
+    assert total == pytest.approx(recorded, abs=1e-3 * len(records[0][0]))
+
+
+def test_dose_share_rises_with_hosts_in_the_changed_zone() -> None:
+    shares = [_run(n)[0].room_air_witness()[SHARE] for n in (0, 1, 3, 6)]
+    assert shares[0] == 0.0
+    assert shares == sorted(shares) and len(set(shares)) == 4
+    assert all(0.0 <= share <= 1.0 for share in shares)
+
+
+def test_changed_zone_dose_falls_as_its_exchange_rises() -> None:
+    """The zone's pooled dose responds to its rate; the closed room's does not."""
+    runs = [_run(3, exchange_m3h=q)[0].room_air_witness() for q in (1.0, 80.0, 800.0)]
+    changed = [w["airborne_dose_changed_zones"] for w in runs]
+    closed = [
+        w["airborne_dose_all_zones"] - w["airborne_dose_changed_zones"]
+        for w in runs
+    ]
+    assert changed == sorted(changed, reverse=True) and len(set(changed)) == 3
+    assert closed[0] == pytest.approx(closed[1]) == pytest.approx(closed[2])
+
+
+def test_sealed_mode_dose_does_not_depend_on_the_exchange() -> None:
+    low = _run(3, mode="sealed", exchange_m3h=1.0)[0].room_air_witness()
+    high = _run(3, mode="sealed", exchange_m3h=800.0)[0].room_air_witness()
+    assert low == high
+
+
 def test_no_changed_zone_means_no_encounter() -> None:
     core, _ = _run(exchange_m3h=0.0)
-    assert core.room_air_witness() == {
-        "changed_zone_count": 0,
-        "susceptible_person_hours_changed_zones": 0.0,
-    }
+    assert core.room_air_witness() == dict.fromkeys(WITNESS_KEYS, 0)
 
 
 @pytest.mark.parametrize("mode", ["first_order", "sealed"])
@@ -177,9 +218,7 @@ def test_witness_cannot_move_a_dose_or_a_draw(mode: str) -> None:
     assert with_records == without_records
     assert with_records[0][0]
     assert with_core.rng.random() == without_core.rng.random()
-    assert without_core.room_air_witness()[
-        "susceptible_person_hours_changed_zones"
-    ] == 0.0
+    assert without_core.room_air_witness() == dict.fromkeys(WITNESS_KEYS, 0)
 
 
 def test_witness_repeats_on_the_same_seed_and_ignores_sealed_mode() -> None:
@@ -187,9 +226,10 @@ def test_witness_repeats_on_the_same_seed_and_ignores_sealed_mode() -> None:
     assert first == _run(epochs=2)[0].room_air_witness()
     # Occupancy is read before any dose, so the first epoch's person-hours
     # do not depend on the removal mode.
+    key = "susceptible_person_hours_changed_zones"
     assert (
-        _run(mode="sealed")[0].room_air_witness()
-        == _run(mode="first_order")[0].room_air_witness()
+        _run(mode="sealed")[0].room_air_witness()[key]
+        == _run(mode="first_order")[0].room_air_witness()[key]
     )
 
 
@@ -210,10 +250,11 @@ def test_run_summary_carries_the_witness_scalars() -> None:
         SimulationState(room_air_witness=core.room_air_witness()),
         {"sick_call_count": 0},
     )
-    assert summary["room_air_witness"] == {
-        "changed_zone_count": 1,
-        "susceptible_person_hours_changed_zones": 3.0,
-    }
+    recorded = summary["room_air_witness"]
+    assert set(recorded) == WITNESS_KEYS
+    assert recorded["changed_zone_count"] == 1
+    assert recorded["susceptible_person_hours_changed_zones"] == 3.0
+    assert 0.0 < recorded[SHARE] < 1.0
     assert _summary_counts(
         agents, engine, SimulationState(), {"sick_call_count": 0},
     )["room_air_witness"] == {}

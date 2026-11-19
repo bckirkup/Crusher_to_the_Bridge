@@ -1023,6 +1023,14 @@ PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
 # Deprecated alias, kept for external readers.
 PATHWAY_WEIGHT_KEYS = PATHWAY_EFFICIENCY_KEYS
 
+# Pathway dose keys the room-air encounter witness sums as airborne
+# (ROOM-AIR-PAIRED-VALIDATION-01, W2). ``droplet`` carries the room-pool and
+# near-field terms together; the caregiver channel's air terms share a key
+# with its other terms and are left out of both sides.
+ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS = (
+    "droplet", "hvac_airborne", "emesis_aerosol", "flush_aerosol",
+)
+
 
 def route_efficiency_from_clearance_rates(
     rates_per_hour: dict[str, float],
@@ -3116,6 +3124,8 @@ class TransmissionCore:
         # only: no dose, draw or state reads these counters.
         self.room_air_changed_zones: frozenset[str] = frozenset()
         self._room_air_witness_person_hours = 0.0
+        self._room_air_witness_airborne_dose = 0.0
+        self._room_air_witness_airborne_dose_changed = 0.0
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
@@ -7021,6 +7031,8 @@ class TransmissionCore:
                 agent_coop_doses=agent_coop_doses,
             )
 
+        self._tally_room_air_witness_dose(zone_occupants, agent_pathway_doses)
+
         # ── Apply combined dose-response per pathogen ───────────────
         for agent in agents:
             if agent.has_departed(epoch):
@@ -7074,12 +7086,50 @@ class TransmissionCore:
             len(hosts) * self.clock.hours_per_epoch
         )
 
+    def _tally_room_air_witness_dose(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_pathway_doses: dict[int, dict[str, float]],
+    ) -> None:
+        """Add this epoch's airborne-pathway dose, hull-wide and in changed zones.
+
+        Read from the credited per-host pathway doses after every pathway
+        has run. The changed-zone part is every airborne-pathway dose to a
+        host located in a changed zone, near-field dose included, so its
+        share bounds the room-pool share from above. Zero RNG draws.
+        """
+        if not self.room_air_changed_zones:
+            return
+        in_changed = {
+            agent.agent_id
+            for location, occupants in zone_occupants.items()
+            if self.compartment_parent(location) in self.room_air_changed_zones
+            for agent in occupants
+        }
+        for agent_id, pathway_doses in agent_pathway_doses.items():
+            airborne = sum(
+                pathway_doses.get(pathway, 0.0)
+                for pathway in ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS
+            )
+            self._room_air_witness_airborne_dose += airborne
+            if agent_id in in_changed:
+                self._room_air_witness_airborne_dose_changed += airborne
+
     def room_air_witness(self) -> dict[str, float]:
         """Whole-hull running totals of the room-air encounter witness."""
+        total = self._room_air_witness_airborne_dose
+        changed = self._room_air_witness_airborne_dose_changed
         return {
             "changed_zone_count": len(self.room_air_changed_zones),
             "susceptible_person_hours_changed_zones": (
                 self._room_air_witness_person_hours
+            ),
+            "airborne_dose_all_zones": total,
+            "airborne_dose_changed_zones": changed,
+            # Upper bound on the design's Q, 0.0 when no airborne dose was
+            # delivered anywhere.
+            "airborne_dose_share_changed_zones_upper_bound": (
+                changed / total if total > 0.0 else 0.0
             ),
         }
 
