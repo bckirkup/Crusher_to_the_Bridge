@@ -55,11 +55,14 @@ authored `ambient_opening` route class: all six opening legs solve inward
 (path_nr 1); the largest opening-leg |ΔP| is 10.2781038284 Pa on
 `HD_UPPER_M`. Interior flowing max |ΔP| improves to 0.0003431254 Pa.
 
-Design lane does not degrade: all-path max |ΔP| and interior flowing max
-|ΔP| are unchanged at 1.0523680449 Pa and 0.0003803524 Pa, make-up demand
-stays 0, and the new openings only exchange ±0.18–2.02 m³/h with net
-0.0389417819 m³/h inward. The blocked-path interior max moves
-0.7375414371→0.7605275512 Pa on the zero-flow `Sanitary_Makeup`
+Design-lane pressure witnesses do not degrade: all-path max |ΔP| and
+interior flowing max |ΔP| are unchanged at 1.0523680449 Pa and
+0.0003803524 Pa, make-up demand stays 0, and the new openings exchange
+small bidirectional flow (±0.18–2.02 m³/h, net 0.0389417819 m³/h inward).
+The design lane is not flow-identical: positive outward opening legs
+remain ambient boundary sinks under CONTAM-AMBIENT-OPENING-BOUNDARY-01,
+while inward legs add no contaminant path. The blocked-path interior max
+moves 0.7375414371→0.7605275512 Pa on the zero-flow `Sanitary_Makeup`
 `Bridge -> HD_UPPER_M` leg; no flowing design witness moved.
 
 `tools/contam_flow_compare.py --platform destroyer_baseline --run-contamx`
