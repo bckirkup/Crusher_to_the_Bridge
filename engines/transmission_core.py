@@ -3109,6 +3109,13 @@ class TransmissionCore:
         # the pre-change standing-mass baseline. ShipSimulation populates
         # it post-construction from build_zone_air_exchange_map.
         self.zone_air_exchange_per_hour: dict[str, float] = {}
+        # ROOM-AIR-PAIRED-VALIDATION-01 encounter witness. The zones whose
+        # room-air rate differs between the ambient_on and ambient_off maps
+        # are held here only to sum over; nothing per-zone is reported.
+        # ShipSimulation populates the set post-construction. Bookkeeping
+        # only: no dose, draw or state reads these counters.
+        self.room_air_changed_zones: frozenset[str] = frozenset()
+        self._room_air_witness_person_hours = 0.0
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
@@ -7003,6 +7010,8 @@ class TransmissionCore:
         # Determine which pathogens are active this epoch
         active_pathogens = list(self.pathogen_profiles.keys()) if self.pathogen_profiles else ["_default"]
 
+        self._tally_room_air_witness_occupancy(zone_occupants, active_pathogens)
+
         for pathogen_id in active_pathogens:
             self._execute_pathogen_pathways(
                 epoch, agents, zone_occupants, zone_pathogen_mass,
@@ -7038,6 +7047,41 @@ class TransmissionCore:
         self.collect_extinct_strains(agents)
 
         return matrix, events
+
+    def _tally_room_air_witness_occupancy(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        active_pathogens: list[str],
+    ) -> None:
+        """Add this epoch's susceptible person-hours in the changed zones.
+
+        A host counts once per epoch when any active pathogen can still
+        challenge it, read before this epoch's challenges resolve. Pure
+        bookkeeping with zero RNG draws.
+        """
+        if not self.room_air_changed_zones:
+            return
+        hosts: set[int] = set()
+        for location, occupants in zone_occupants.items():
+            if self.compartment_parent(location) not in self.room_air_changed_zones:
+                continue
+            for pathogen_id in active_pathogens:
+                hosts.update(
+                    agent.agent_id
+                    for agent in self._get_susceptible(occupants, pathogen_id)
+                )
+        self._room_air_witness_person_hours += (
+            len(hosts) * self.clock.hours_per_epoch
+        )
+
+    def room_air_witness(self) -> dict[str, float]:
+        """Whole-hull running totals of the room-air encounter witness."""
+        return {
+            "changed_zone_count": len(self.room_air_changed_zones),
+            "susceptible_person_hours_changed_zones": (
+                self._room_air_witness_person_hours
+            ),
+        }
 
     def _epoch_zone_occupants(
         self,
@@ -16497,6 +16541,26 @@ def _ambient_opening_ach_contributions(
             )
         rates[zone] = exchange / volume
     return rates
+
+
+def room_air_changed_zones(
+    airflow_paths: dict[str, Any],
+    zone_volumes: Mapping[str, float] | None = None,
+    ambient_exchange_m3h: Mapping[str, float] | None = None,
+) -> frozenset[str]:
+    """Zones whose room-air rate differs between the two map arms.
+
+    The ``ambient_on`` map is the AHU-only (``ambient_off``) map plus each
+    zone's positive opening exchange, so the two differ exactly where that
+    contribution is positive. The set does not depend on which arm runs.
+    """
+    return frozenset(
+        zone
+        for zone, opening_ach in _ambient_opening_ach_contributions(
+            airflow_paths, zone_volumes, ambient_exchange_m3h,
+        ).items()
+        if opening_ach > 0.0
+    )
 
 
 def build_zone_air_exchange_map(

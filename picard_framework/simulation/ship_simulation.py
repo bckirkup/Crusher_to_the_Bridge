@@ -82,6 +82,7 @@ from engines.transmission_core import (
     TransmissionCore,
     build_hvac_downstream_map,
     build_zone_air_exchange_map,
+    room_air_changed_zones,
 )
 from engines.voyage_itinerary import agent_is_departed
 from orchestrator_chronic import (
@@ -437,16 +438,26 @@ class ShipSimulation:
         # plus positive ambient-opening exchange; the room-pool routes
         # dilute each epoch's emission through this removal instead of an
         # implicit sealed room.
+        ambient_axis = parse_ambient_exchange_axis(self.cfg.get("hvac") or {})
         zone_air_exchange = (
             build_zone_air_exchange_map(
                 airflow_data,
                 zone_volumes=self.zone_volumes,
-                ambient_exchange_m3h=parse_ambient_exchange_axis(
-                    self.cfg.get("hvac") or {},
-                ),
+                ambient_exchange_m3h=ambient_axis,
             )
             if airflow_data
             else {}
+        )
+        # Encounter-witness zone set (ROOM-AIR-PAIRED-VALIDATION-01): summed
+        # over, never reported zone by zone.
+        changed_zones = (
+            room_air_changed_zones(
+                airflow_data,
+                zone_volumes=self.zone_volumes,
+                ambient_exchange_m3h=ambient_axis,
+            )
+            if airflow_data
+            else frozenset()
         )
         # Served zone -> sex-keyed head block, from each head's declared
         # ``serves`` list. Head ids carry a _M/_F suffix; a single-fixture
@@ -461,6 +472,7 @@ class ShipSimulation:
             food_zone_multipliers=food_zone_multipliers,
         )
         self.tx_core.zone_air_exchange_per_hour = zone_air_exchange
+        self.tx_core.room_air_changed_zones = changed_zones
         # ENV-SOURCE-01 emitter model parsed from the merged hazard_sources
         # declaration (None on the labelled baseline).
         self.tx_core.hazard_model = self.hazard_model
@@ -1202,6 +1214,7 @@ class ShipSimulation:
         # Cumulative totals, not deltas: copy the core's running counters so a
         # multi-epoch run reports the same totals the core holds.
         state.sanitary_activity = dict(self.tx_core.sanitary_telemetry)
+        state.room_air_witness = self.tx_core.room_air_witness()
         self._transport_airborne_pools()
         self._transport_hazard_source_pools()
         if self.pathogen_profiles and self.enable_dual_signal:

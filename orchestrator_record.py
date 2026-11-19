@@ -249,6 +249,12 @@ def _summary_counts(
             key: round(value, 6)
             for key, value in sorted(state.sanitary_activity.items())
         },
+        # ROOM-AIR-PAIRED-VALIDATION-01 encounter witness: whole-hull
+        # scalars only, emitted unconditionally.
+        "room_air_witness": {
+            key: round(value, 6)
+            for key, value in sorted(state.room_air_witness.items())
+        },
         "cumulative_ever_ill": len(state.ever_ill_ids),
         "cumulative_ever_ill_passenger": ill_counts["passenger"],
         "cumulative_ever_ill_crew": ill_counts["crew"],
