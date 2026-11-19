@@ -58,7 +58,7 @@ arm payload resolves `ContamXTransportEngine`.
 
 | Date | Block | Cells | Job | SHA | Digest | Result |
 |---|---|---:|---|---|---|---|
-| (pending) | | | | | | |
+| 2026-11-19 | (image) | — | — | `0d70c022` (code `8de77294`) | `sha256:7023d963f3a3ede96c7f47def3bb539ecef1b9c8bc2a112697c45e82e37719a0` | built root Dockerfile + Dockerfile.campaign, pushed |
 
 ## 6. Scoring
 
