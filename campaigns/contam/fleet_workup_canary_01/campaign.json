@@ -1,0 +1,36 @@
+{
+  "name": "contam_fleet_workup_canary_01",
+  "pathogen": "contam",
+  "pathogen_id": null,
+  "manifest": "campaigns/contam/fleet_workup_canary_01/design/canary_criteria.json",
+  "s3_prefix": "campaign/contam_fleet_workup_canary_01/",
+  "queue": "picard-campaign-queue",
+  "image_tag": "contam-fleet-workup-canary-01-rerun1@sha256:e59acd8d426a1304387929dd9c91bb85946b28c0c2357eb7a997e7e16a28e0c3",
+  "resources": {
+    "vcpu": "1",
+    "memory": "4096"
+  },
+  "blocks": {
+    "canary": {
+      "worker": "tools/diag/contam_fleet_workup_run.py",
+      "artifact": "canary_raw.tar.gz",
+      "seeds": [
+        0
+      ],
+      "args": {
+        "mode": "canary"
+      }
+    },
+    "canary_rerun1": {
+      "worker": "tools/diag/contam_fleet_workup_run.py",
+      "artifact": "canary_raw_rerun1.tar.gz",
+      "seeds": [
+        0
+      ],
+      "args": {
+        "mode": "canary"
+      }
+    }
+  },
+  "readout": "tools/diag/contam_fleet_workup_reduce.py"
+}

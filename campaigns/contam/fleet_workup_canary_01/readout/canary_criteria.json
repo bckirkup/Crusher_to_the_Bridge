@@ -1,0 +1,140 @@
+{
+ "amends": "CONTAM-FLEET-WORKUP-PROTOCOL-01",
+ "authored_prj_sha256": {
+  "destroyer_baseline": "028aa2ba3275269c7401b9f7f9e035200c87d11720b1685852bb811ab150763a",
+  "enterprise_constitution_tos": "caecebe9bd2c79cb574fa767f15e6ecab6432ca81ed0ff0ec5ce341aecf43d84",
+  "expedition_cruise_450": "34510e3de0e4072593210ea4e277a7b51448867903abc300448cd940292d829e",
+  "west_virginia_bb48": "ca186a0de6ac651a9ae2441fe3d5416d371b0bcd33ad37a3f3253551d6fbe27c"
+ },
+ "blocks": {
+  "downstream_mixing": "the shared mass-balance operator built on that field, by one function for every lane. Derived. On a ContamX lane it is not an independent ContamX result: recirculated legs come from declared outdoor-air fraction applied to solved terminal flow.",
+  "solved_airflow": "sums over the lane's own airflow field: ContamX solved Flow0 and dP; on the native lane the prescribed flows (labelled prescribed, not solved). outdoor_air_total_m3h and exhaust_total_m3h are blank with status unimplemented on a ContamX lane whenever every AHS system path reports Flow0 = 0; a solver-path zero is not a physical zero."
+ },
+ "canary": {
+  "contamx_solver_invocations": 318,
+  "hulls": [
+   "destroyer_baseline",
+   "enterprise_constitution_tos",
+   "expedition_cruise_450",
+   "west_virginia_bb48"
+  ],
+  "note": "row IDs, hulls, lanes, settings and repetitions are the frozen matrix, unchanged. The in-job configuration smoke adds one untimed solve per executed ContamX row (53); these are reported separately and are not among the 318 planned timed invocations.",
+  "rows_planned_execute": 77,
+  "rows_total": 112,
+  "smoke_solver_invocations_untimed": 53
+ },
+ "contamx": {
+  "archive_member": "contam-x-3.4.0.3-Linux-64bit/contamx3",
+  "archive_sha256": "3612798dff9a4f1ea4f0279c4c7b526b244b88875dea425fafd868f3570df4fa",
+  "binary_sha256": "d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b",
+  "license": "NIST software, 17 U.S.C. 105: not subject to copyright, public domain; NIST states it can be redistributed freely (https://www.nist.gov/services-resources/software/contam, read 2026-11-19). Staged only in the private campaign bucket; not committed and not published.",
+  "source_url": "https://www.nist.gov/document/contam-x-3403-linux-64bittargz",
+  "version": "3.4.0.3 64 bit"
+ },
+ "design_commit": "fb6a0bd5b7109dff288dd7fbf5d4681805016db3",
+ "filter_efficiency": 0.3,
+ "frozen_design_sha256": {
+  "SHA256SUMS": "126887ee52da656677291b6481fb9495f6e742e07f4b933d885258274470288e",
+  "coverage.csv": "85001f85f3fb1a469e737ee580b4ea83d6773011d5c8c678fca554979cfbf56a",
+  "dry_run_summary.json": "f53d86fb2b632a5a9ba8899ca5695e2f26629f795252dc4f074809c5871f752d",
+  "input_manifest.json": "6fcf13ef380db632cd96a7726bab752da0973c2e62bb9d4d043c54ef52dd61dd",
+  "protocol.json": "4113c7ed1ec09798ce16141377bba9103f0b673455e923079d476cf8b5db42b7",
+  "run_matrix.csv": "05ba7af15fa9f20d9318f74fb583257430ce933fbeef05c78990d3a71232757c"
+ },
+ "gates": {
+  "ahs_group_count_matches": "AHS group count equals hvac_zones count",
+  "authored_reference_solved_as_committed": "the authored lane solves the committed platform.prj bytes (SHA-256 equal to the input manifest)",
+  "cell_completed": "every executed row's smoke cell finishes",
+  "design_and_solver_pinned": "frozen design files, criteria and ContamX executable match their SHA-256 pins (runner, fatal)",
+  "duty_ach_exported": "exported declared terminal supply over baseline equals the factor within export_factor_rel",
+  "duty_ach_realized": "realized supply_total over lane baseline equals the factor (native_factor_rel; ContamX solved terminals solved_factor_rel)",
+  "effective_oa_realized": "on native and harmonized ContamX rows, effective_outdoor_air_fraction_of_supply read from the operator's legs equals the declared fraction weighted by declared supply, within native_oa_abs or contamx_oa_abs",
+  "failure": "any failed gate stops the stage before timing; nothing is fixed by editing hull files, the matrix or the canary set",
+  "inputs_unchanged": "every canary hull input and shared input matches the manifest before and after the run (runner, fatal)",
+  "oa_change_is_the_only_operator_change": "change in clean_air_equivalent_with_filter equals -(1 - filter efficiency) x change in recirculated legs within operator_tie_rel",
+  "oa_only_terminal_flow_unchanged": "on outdoor-air rows, realized supply_total and return_total equal the lane baseline within unchanged_rel",
+  "oa_setting_reaches_mixing": "on outdoor-air rows, effective_outdoor_air_fraction_of_supply moves by more than oa_response_abs from baseline",
+  "operator_sum_of_parts": "|operator_parts_residual| <= parts_rel x max(1, clean_air_equivalent_with_filter)",
+  "path_map_matches_solved_paths": "path-map entry count equals solved path count",
+  "pressure_solved_on_every_path": "pressure_rows_unsolved = 0",
+  "tracer_closure": "closure error <= tracer_closure_abs",
+  "unsupported_is_blank_not_zero": "a metric has a number if and only if its status is ok",
+  "values_finite": "every number is finite",
+  "weather_applied_in_solver": "at wind_speed_10 the solved field digest differs from baseline and some solved_airflow aggregate moves by more than unchanged_rel",
+  "weather_record_exported": "Ws/Wd of the exported steady weather record equal the level",
+  "wind_profile_paths_present": "the path map has at least one envelope or ambient-opening path on a weather row",
+  "zones_equal_across_lanes": "zone count equal and total volume within volume_rel of the hull's native baseline"
+ },
+ "id": "CONTAM-FLEET-WORKUP-CANARY-01",
+ "input_commit": "d5d50d3a7bc30d50231e6f27b5083925f26c9c23",
+ "metric_definitions": {
+  "downstream_mixing": {
+   "boundary_sink_total_m3h": "sum of operator sink paths",
+   "clean_air_equivalent_no_filter_m3h": "tracer leaving the hull per unit uniform concentration with no filter credit: return legs minus recirculated legs plus sinks",
+   "clean_air_equivalent_with_filter_m3h": "the same read from the operator itself (-1'AV), lane filter efficiency 0.3 included",
+   "effective_outdoor_air_fraction_of_supply": "outdoor_air_derived over delivered supply; the realized effective mixing",
+   "nonrecirculated_return_m3h": "return legs minus recirculated legs (derived exhaust equivalent)",
+   "operator_parts_residual_m3h": "operator value minus the sum of its parts",
+   "outdoor_air_derived_m3h": "delivered supply minus recirculated legs",
+   "return_leg_total_m3h, recirculated_supply_leg_total_m3h": "sums of the operator's room-to-plenum and plenum-to-room legs",
+   "uniform_tracer_closure_error": "|initial - final - integrated loss| / initial",
+   "uniform_tracer_material_time_h": "time integral of whole-hull tracer mass over 12 h divided by initial mass; uniform start, no decay",
+   "whole_hull_air_change_1_per_h": "clean_air_equivalent_no_filter over total zone volume",
+   "zone_count, total_zone_volume_m3": "structural"
+  },
+  "solved_airflow": {
+   "ahs_system_path_count, ahs_system_path_nonzero_count": "count of AHS outdoor-air, exhaust and recirculation paths, and how many carry nonzero solved flow",
+   "ambient_inward_total_m3h / ambient_outward_total_m3h": "sums over non-AHS paths between a zone and ambient, by solved direction (native: declared exchange counts in both)",
+   "hull_balance_residual_m3h": "sum over zones of net volumetric inflow: boundary inward minus outward plus supply minus return terminals. Redefined from the protocol's boundary-only wording because the AHS ambient paths are unresolved; near 0 for a converged ContamX field",
+   "interzone_gross_m3h": "sum of absolute zone-to-zone flow",
+   "max_abs_zone_balance_residual_m3h": "largest absolute zone net inflow; value only",
+   "pressure_abs_dp_*_pa, pressure_rows_unsolved": "over every mapped path; ContamX lanes only",
+   "return_total_m3h": "sum of AHS return terminal flow, exhaust-only branches included",
+   "supply_total_m3h": "sum of AHS supply terminal flow (native: delivered flow of positive-duty groups)"
+  }
+ },
+ "observed_status_rules": {
+  "no_prior_claims": "whether the solved field coincides across outdoor-air settings, and whether the tracer metric moves, is read from the run",
+  "not_executed": "structural_nonresponse and not_applicable rows keep their planned status and reason; every value is empty",
+  "per_block": "each row gets one status per block. ok: completed and some metric differs from the lane baseline by more than unchanged_rel (baseline rows are ok). unchanged: completed and every numeric metric of that block is within unchanged_rel of the lane baseline; measured, never assumed."
+ },
+ "reported_not_gated": [
+  "supply_ach_x1p5 against supply_duty_x1p5 per lane; a difference beyond unchanged_rel is a finding",
+  "harmonized against as-committed and authored baselines, shown separately and never pooled",
+  "max_abs_zone_balance_residual_m3h and hull_balance_residual_m3h of each field",
+  "identity of metrics and field digest across warm-up and measured repeats (repeat_metric_rel)",
+  "host load average per cell; timings from one Batch attempt on one host"
+ ],
+ "scope": "non-biological aggregate engineering and timing only; one value per hull x lane x setting x metric; no zone, path or opening identifier; no ranking; no fleet run",
+ "smoke_finding": {
+  "consequence": "In the ContamX lane outdoor-air fraction is realized only in the import-side recirculation synthesis, which is shared model code. The frozen outdoor-air check (exported AHS outdoor-air flow equals declared) is a configuration echo and is replaced below.",
+  "measured": "On all four canary hulls, harmonized commissioned export, halving the outdoor-air fraction changes the exported PRJ text and no solved path flow (max |dFlow0| = 0 exactly). ContamX reports Flow0 = 0 on every simple-AHS outdoor-air, exhaust and recirculation path; terminals carry the flow.",
+  "ruling": "Benjamin, 2026-11-19: 'Separate solved airflow from downstream mixing, then benchmark both'."
+ },
+ "solver_timeout_s": 300.0,
+ "status": "frozen before any timed execution; written after the outdoor-air smoke finding and an untimed single-hull mechanics check, before any canary metric table or timing existed",
+ "timing": {
+  "added_phases": "input_read (hull documents from disk), field_reduce (solved_airflow sums) and process_total (interpreter start to exit, measured by the driver) are recorded as extra phases; downstream is the downstream_mixing computation",
+  "host": "one AWS Batch job, not an array; vCPU 1; host, instance type, image and job identifiers recorded in environment.json",
+  "unchanged": "warm-up 1, measured 5 cold repeats each a fresh interpreter, cached 5 downstream-only repeats in the last measured interpreter; order, clocks, thread settings and summaries as in protocol.json"
+ },
+ "tolerances": {
+  "contamx_oa_abs": 0.001,
+  "export_factor_rel": 1e-09,
+  "native_factor_rel": 1e-09,
+  "native_oa_abs": 1e-09,
+  "note": "1e-9 values are the protocol's. solved_factor_rel and contamx_oa_abs are new: the solver works in mass flow and the import converts with mean node density, so a solved volumetric ratio is not exact. They were set at 1e-3 before any duty or outdoor-air ratio was measured.",
+  "oa_response_abs": 1e-06,
+  "operator_tie_rel": 1e-09,
+  "parts_rel": 1e-09,
+  "repeat_metric_rel": 1e-09,
+  "solved_factor_rel": 0.001,
+  "tracer_closure_abs": 1e-09,
+  "unchanged_rel": 1e-09,
+  "volume_rel": 1e-12,
+  "wind_direction_abs_deg": 0.05,
+  "wind_speed_abs_m_s": 0.0005
+ },
+ "tracer_horizon_h": 12.0,
+ "tracer_keep_rule": "the uniform inert tracer metric is kept for later stages if tracer_closure passes on every executed canary row; decided from closure only"
+}

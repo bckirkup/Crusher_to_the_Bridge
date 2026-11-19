@@ -1,0 +1,16 @@
+{
+ "contamx": {
+  "archive": {
+   "sha256": "3612798dff9a4f1ea4f0279c4c7b526b244b88875dea425fafd868f3570df4fa",
+   "size_bytes": 1049727,
+   "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_fleet_workup_canary_01/external/contam-x-3.4.0.3-Linux-64bit.tar.gz"
+  },
+  "binary": {
+   "sha256": "d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b",
+   "size_bytes": 1823056,
+   "version": "3.4.0.3 64 bit"
+  },
+  "license": "NIST software, 17 U.S.C. 105: not subject to copyright, public domain; NIST states it can be redistributed freely (https://www.nist.gov/services-resources/software/contam, read 2026-11-19). Staged only in the private campaign bucket; not committed and not published.",
+  "source_url": "https://www.nist.gov/document/contam-x-3403-linux-64bittargz"
+ }
+}
