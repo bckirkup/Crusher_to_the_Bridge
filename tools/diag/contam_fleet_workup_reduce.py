@@ -459,7 +459,7 @@ def _timing_tables(red: Reduction, summary: list[dict[str, Any]], hull: str) -> 
 
     def cell(row_id: str, kind: str, phase: str) -> str:
         item = index.get((row_id, kind, phase))
-        if item is None:
+        if item is None or not item["n"]:
             return "—"
         return f"{item['wall_median_ns'] / 1e6:.2f} ({item['wall_iqr_ns'] / 1e6:.2f})"
 
@@ -468,7 +468,7 @@ def _timing_tables(red: Reduction, summary: list[dict[str, Any]], hull: str) -> 
     spans = []
     for lane in (NATIVE, COMMISSIONED):
         ends = [s["wall_median_ns"] / 1e6 for s in summary
-                if s["hull"] == hull and s["lane"] == lane
+                if s["hull"] == hull and s["lane"] == lane and s["n"]
                 and s["repeat_kind"] == "measured" and s["phase"] == "end_to_end"]
         if ends:
             spans.append([lane, str(len(ends)), f"{min(ends):.2f}", f"{max(ends):.2f}"])

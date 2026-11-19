@@ -397,3 +397,14 @@ def test_timeouts_are_counted_on_every_phase_and_cached_work_leaves_the_cold_tot
     assert summary[("measured", "downstream")]["timeouts"] == 1
     assert summary[("measured", "downstream")]["n"] == 1
     assert summary[("measured", reduce_mod.PROCESS_PHASE)]["n"] == 1
+
+
+def test_timing_tables_survive_a_baseline_row_whose_repeats_all_timed_out():
+    red = _FakeReduction()
+    timed_out = _record("measured", 0, 0.0, "timeout")
+    timed_out["censored"] = 1
+    red.cells = [timed_out]
+    summary = reduce_mod.timing_summary(red, reduce_mod.timing_raw(red))
+    assert [s["n"] for s in summary] == [0]
+    text = "\n".join(reduce_mod._timing_tables(red, summary, "h"))
+    assert "| process_total | — |" in text
