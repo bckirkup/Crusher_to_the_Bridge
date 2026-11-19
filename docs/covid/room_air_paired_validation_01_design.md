@@ -233,7 +233,8 @@ and \(D_W\) the part of it received by hosts located in W1 zones, the run
 summary carries \(Q' = D_W / D\) as
 `room_air_witness.airborne_dose_share_changed_zones_proxy`, with \(D\),
 \(D_W\) and the caregiver-channel dose total \(C\) beside it. Numerator
-and denominator use the same raw credited dose.
+and denominator use the same per-host pathway dose, after route-efficiency
+and NPI factors, summed over the active pathogens.
 
 **What the bound is, and is not.** Room-pool dose on those four pathways in
 W1 zones is part of \(D_W\), so \(Q'\) is at least the room-pool share of

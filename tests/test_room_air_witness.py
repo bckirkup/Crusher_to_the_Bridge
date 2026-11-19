@@ -207,6 +207,27 @@ def test_only_airborne_pathways_enter_the_share() -> None:
     assert witness["caregiver_channel_dose_all_zones"] == 0.0
 
 
+def test_named_pathogen_doses_are_counted_like_the_default() -> None:
+    """A named pathogen's keys carry a ``:<pathogen_id>`` suffix."""
+    plain = {
+        1: {"droplet": 1.0, "caregiver": 2.0, "fomite": 9.0},
+        3: {"hvac_airborne": 3.0},
+    }
+    named = {
+        aid: {f"{key}:sars_cov2_resp": dose for key, dose in doses.items()}
+        for aid, doses in plain.items()
+    }
+    expected = _tally(_run(0, n_closed=0)[0], plain)
+    assert expected["airborne_dose_all_zones"] == pytest.approx(4.0)
+    assert expected["caregiver_channel_dose_all_zones"] == pytest.approx(2.0)
+    assert _tally(_run(0, n_closed=0)[0], named) == expected
+    # Two pathogens' doses to one host add.
+    both = {aid: {**plain[aid], **named[aid]} for aid in plain}
+    doubled = _tally(_run(0, n_closed=0)[0], both)
+    assert doubled["airborne_dose_all_zones"] == pytest.approx(8.0)
+    assert doubled[SHARE] == pytest.approx(expected[SHARE])
+
+
 def test_caregiver_channel_is_totalled_apart_from_the_share() -> None:
     """The share is a bound on the room-pool share only when this is zero."""
     core, _ = _run(0, n_closed=0)

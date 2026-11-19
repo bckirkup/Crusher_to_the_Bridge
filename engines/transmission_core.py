@@ -7097,8 +7097,9 @@ class TransmissionCore:
     ) -> None:
         """Add this epoch's airborne-pathway dose, hull-wide and in changed zones.
 
-        Read from the credited per-host pathway doses after every pathway
-        has run. The changed-zone part is every airborne-pathway dose to a
+        Read from the per-host pathway doses after every pathway has run
+        and its route-efficiency and NPI factors are applied, summed over
+        the active pathogens. The changed-zone part is every airborne-pathway dose to a
         host located in a changed zone, near-field dose included. It is a
         proxy for the room-pool share, and bounds it from above only when
         the caregiver-channel total stays zero. Zero RNG draws.
@@ -7112,15 +7113,15 @@ class TransmissionCore:
             for agent in occupants
         }
         for agent_id, pathway_doses in agent_pathway_doses.items():
-            airborne = sum(
-                pathway_doses.get(pathway, 0.0)
-                for pathway in ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS
-            )
+            # A named pathogen's keys are ``<pathway>:<pathogen_id>``.
+            airborne = 0.0
+            for key, dose in pathway_doses.items():
+                pathway = key.partition(":")[0]
+                if pathway in ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS:
+                    airborne += dose
+                elif pathway in ROOM_AIR_WITNESS_CAREGIVER_PATHWAYS:
+                    self._room_air_witness_caregiver_dose += dose
             self._room_air_witness_airborne_dose += airborne
-            self._room_air_witness_caregiver_dose += sum(
-                pathway_doses.get(pathway, 0.0)
-                for pathway in ROOM_AIR_WITNESS_CAREGIVER_PATHWAYS
-            )
             if agent_id in in_changed:
                 self._room_air_witness_airborne_dose_changed += airborne
 
