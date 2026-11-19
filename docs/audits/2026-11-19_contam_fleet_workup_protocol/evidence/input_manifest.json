@@ -1,0 +1,2814 @@
+{
+ "design_id": "CONTAM-FLEET-WORKUP-PROTOCOL-01",
+ "hash_algorithms": {
+  "git_blob_sha1": "git object id of the same bytes",
+  "sha256": "SHA-256 of the file bytes as stored in git"
+ },
+ "hobbyist_pack_tree": "ed272b6fe1798e553d39646b2bed5115fb56f7f9",
+ "hulls": {
+  "aeolus_arc3": {
+   "files": [
+    {
+     "git_blob_sha1": "8232a24fe130b9b9155b9d9480a9bad269b76d84",
+     "path": "data/platforms/aeolus_arc3/spatial_layout.json",
+     "sha256": "c9268bd88b52dc9c586c2ca1b515a12851b0b5a29304739d0c494d413ddea99a",
+     "size_bytes": 16622
+    },
+    {
+     "git_blob_sha1": "a48e4a0b033e0c1fe147c38c1d7ed81f86b55b7a",
+     "path": "data/platforms/aeolus_arc3/air_flow_paths.json",
+     "sha256": "1e08f8ad93c8f97d7f8edf7b7f2a2ed8322cbee313733973913b1965320c6d83",
+     "size_bytes": 12211
+    },
+    {
+     "git_blob_sha1": "91b6368852ac1c36dc62809fc160b5fa8004bac3",
+     "path": "data/platforms/aeolus_arc3/contam/hobbyist_overrides.json",
+     "sha256": "83cc068947d34a5ec18c94e2d3da1ef7faafdb2b61cf87700b1c6873881b74f5",
+     "size_bytes": 4836
+    },
+    {
+     "git_blob_sha1": "8d3f1cdc106c767096421c3cb426dca6e5fd9a96",
+     "path": "data/platforms/aeolus_arc3/contam/platform.prj",
+     "sha256": "6cd50ab93e408b7ec2aca4dee71ec37068001f199305a77fff655c88eacef39e",
+     "size_bytes": 60437
+    },
+    {
+     "git_blob_sha1": "724a2a0700fc64a3aeb40e981178bcc827cbeb15",
+     "path": "data/platforms/aeolus_arc3/contam/path_map.json",
+     "sha256": "c35904c78782fba99b0008d6c831a7379a21729d856bb249bd13ebe7e7ffccf0",
+     "size_bytes": 74062
+    }
+   ],
+   "platform_git_tree": "b6dba0d1c9795a1148d99dc45e10bf1bc7db4f1c"
+  },
+  "alexander_henry_cgs119": {
+   "files": [
+    {
+     "git_blob_sha1": "db601f4f3ab9f706c41093602d0b9aa525a0408d",
+     "path": "data/platforms/alexander_henry_cgs119/spatial_layout.json",
+     "sha256": "19768a47a08f561bd6eace5c6551bee9259322cc11eb07a8050ae601c27d8028",
+     "size_bytes": 11709
+    },
+    {
+     "git_blob_sha1": "08a22ca6c3da5b52dab4be3e32d5456ac02fe751",
+     "path": "data/platforms/alexander_henry_cgs119/air_flow_paths.json",
+     "sha256": "5dde9c4f35eb751a600b315dd16864b4d574d8091938ad0f8ac7d4275eb69684",
+     "size_bytes": 11738
+    },
+    {
+     "git_blob_sha1": "5b13a8f81af8480d2d7d528c30d8aeb12fd1a0f0",
+     "path": "data/platforms/alexander_henry_cgs119/contam/hobbyist_overrides.json",
+     "sha256": "fd2aaa6fffdaf04c09ae38da002e5295f97ed7539ed0ff20e34e9358744d50ae",
+     "size_bytes": 3501
+    },
+    {
+     "git_blob_sha1": "0507f6d9346b5117c6918b3fd1db96f2958976fc",
+     "path": "data/platforms/alexander_henry_cgs119/contam/platform.prj",
+     "sha256": "f0b152ecf563554271191998b022e983dbd16a7ded9a491a0f3f7bd5b388e8c5",
+     "size_bytes": 43400
+    },
+    {
+     "git_blob_sha1": "eae4ecfad4847f9aaed0fac0bce6f71d23ac4b15",
+     "path": "data/platforms/alexander_henry_cgs119/contam/path_map.json",
+     "sha256": "fb55d7f0d784dd479e805fe329e17b8f2ee4b9906aacf120e6a4e4af0a2883f2",
+     "size_bytes": 47812
+    }
+   ],
+   "platform_git_tree": "15e0b611065c6dda02a367be49ea0b3f8bb1e368"
+  },
+  "antietam_cvs36": {
+   "files": [
+    {
+     "git_blob_sha1": "f3ce1dde432e7cc1ed9a7565d74107cb5a803c2f",
+     "path": "data/platforms/antietam_cvs36/spatial_layout.json",
+     "sha256": "2822d49f19ffa0dcfa357a8f72f5cd4dfc3c3ef20871d064070e3e61997e9f6d",
+     "size_bytes": 27638
+    },
+    {
+     "git_blob_sha1": "f2f6be89b06fc26f4a6a42517bdfba6cbdca03b9",
+     "path": "data/platforms/antietam_cvs36/air_flow_paths.json",
+     "sha256": "e873a816271c011d5af16bf27517af99f3d142d07514c5e9e7cb88a1714b012e",
+     "size_bytes": 18743
+    },
+    {
+     "git_blob_sha1": "109d8db18c5ea1242747ad1a4ca4025b6b99a77b",
+     "path": "data/platforms/antietam_cvs36/contam/hobbyist_overrides.json",
+     "sha256": "21954d7a2e9cca81dfe0889a4c9c5a3ad3978cf08f10c5e779cb45b76bc7bbcd",
+     "size_bytes": 7886
+    },
+    {
+     "git_blob_sha1": "bdb5f75bf53c636b76d645f459d585237db23b7f",
+     "path": "data/platforms/antietam_cvs36/contam/platform.prj",
+     "sha256": "42e5a246d8c31e7752abd1db3008eaff399f04a176bcbb688ad4107a7a78a88d",
+     "size_bytes": 120515
+    },
+    {
+     "git_blob_sha1": "5645b45497030c0e81eb6125314081b16eef0666",
+     "path": "data/platforms/antietam_cvs36/contam/path_map.json",
+     "sha256": "6d7899d3f1d6ab1ca19c2dbbb3c94cc6e11f467f12d05a9b39e28f172a715fad",
+     "size_bytes": 172488
+    }
+   ],
+   "platform_git_tree": "988e87de3393224b0fd6981fd0cf97ecc6adfc6f"
+  },
+  "apl_24": {
+   "files": [
+    {
+     "git_blob_sha1": "5759410d9a4527936d5c33d27ec41ae115b3ede3",
+     "path": "data/platforms/apl_24/spatial_layout.json",
+     "sha256": "e1cef68b4edd7f87e8240c33a38de364fc9de12b40a0b9fff7c053c870d9ee6c",
+     "size_bytes": 14682
+    },
+    {
+     "git_blob_sha1": "f996cbcfb414aa19cd0c646ffd30131e2139986a",
+     "path": "data/platforms/apl_24/air_flow_paths.json",
+     "sha256": "643c065f66ca41c38d22980299f2749cb2840471af79b86044500e25921ad937",
+     "size_bytes": 13608
+    },
+    {
+     "git_blob_sha1": "356f87c057164d0c7bb6c401fd7ca20f0236031a",
+     "path": "data/platforms/apl_24/contam/hobbyist_overrides.json",
+     "sha256": "bad4c119dd89346c0a96c3de7402d59a891c38d957a114c51832598e91f8c73d",
+     "size_bytes": 4367
+    },
+    {
+     "git_blob_sha1": "5d09da44456fc1922b017be4a77026bfe0782160",
+     "path": "data/platforms/apl_24/contam/platform.prj",
+     "sha256": "34dd9e3ed52808b80574d1e77b23039e42425ce7323ec9aa024117c52f8dc40e",
+     "size_bytes": 53400
+    },
+    {
+     "git_blob_sha1": "9809b2c0516d0f1e473cf6b74c9e93b5cf2b60ac",
+     "path": "data/platforms/apl_24/contam/path_map.json",
+     "sha256": "3d13b232b60a134ccd7e022a86fe8a7728cfbe95ce009d95194776dec52ed653",
+     "size_bytes": 62939
+    }
+   ],
+   "platform_git_tree": "3b2a9342c345f326351a8c8239215bc70d0d9b39"
+  },
+  "assistance_ar17": {
+   "files": [
+    {
+     "git_blob_sha1": "9cffb93a2481b2649d71c9c0cd305f7401438899",
+     "path": "data/platforms/assistance_ar17/spatial_layout.json",
+     "sha256": "d74bcf5e4f048bb65c8a6b7d7b4cc9f74efd409ed2be41a517db30d3ce7a3e06",
+     "size_bytes": 23181
+    },
+    {
+     "git_blob_sha1": "2639a71d6058c20533945f9632227016141043d6",
+     "path": "data/platforms/assistance_ar17/air_flow_paths.json",
+     "sha256": "029eb73f96ef7df8766d18c5b90761006f0bac8d6b9ae62fd90cbb7135e875e9",
+     "size_bytes": 26045
+    },
+    {
+     "git_blob_sha1": "1241eece9e7d1de0a86883bca99b4e220a5d4fba",
+     "path": "data/platforms/assistance_ar17/contam/hobbyist_overrides.json",
+     "sha256": "d4f18cef5908770e48e2d41559ff32b3e61a7a4002c8e0921f43b5d513f2bd43",
+     "size_bytes": 7028
+    },
+    {
+     "git_blob_sha1": "0624cde9800f8d3a7e369df54f86851d516cd01d",
+     "path": "data/platforms/assistance_ar17/contam/platform.prj",
+     "sha256": "c1040bdf3346cadd8b8f5c4936d781e1e405dd42fd1980c5e1072a54f138d791",
+     "size_bytes": 108863
+    },
+    {
+     "git_blob_sha1": "a3ca5e156a00b319cb485433f1438840042418db",
+     "path": "data/platforms/assistance_ar17/contam/path_map.json",
+     "sha256": "78d71b11c46ea9db2099a4300f6d9e6aa6e58e65b75d03a1f0184cb6dd7aaaf7",
+     "size_bytes": 160039
+    }
+   ],
+   "platform_git_tree": "09e030ffc66b06d7348a539ce81d161902c518f9"
+  },
+  "astoria_ca34": {
+   "files": [
+    {
+     "git_blob_sha1": "98c6a937347107c4debaa7a19295fc78fe463700",
+     "path": "data/platforms/astoria_ca34/spatial_layout.json",
+     "sha256": "46e746daa47d4ad93751851f1e4ee0b81362b12ce990916c03930df10cf7e52d",
+     "size_bytes": 25794
+    },
+    {
+     "git_blob_sha1": "607dd8292fb038332414c58d0eb829eb549d17be",
+     "path": "data/platforms/astoria_ca34/air_flow_paths.json",
+     "sha256": "ab14ee7f2eff8b044146e17b7528a4e188236d7487b4a02003e97f01effff048",
+     "size_bytes": 17878
+    },
+    {
+     "git_blob_sha1": "90551003145397f1b2d6678a6109a79e61ad69a4",
+     "path": "data/platforms/astoria_ca34/contam/hobbyist_overrides.json",
+     "sha256": "0e948f1e08ca685037cbe49a8e87a7131b73c327b5a4abd3850a6145086aa436",
+     "size_bytes": 7549
+    },
+    {
+     "git_blob_sha1": "aa7bb02e3f4f764e4f64097d6f03fbd8ef55b69a",
+     "path": "data/platforms/astoria_ca34/contam/platform.prj",
+     "sha256": "28165f6c14ec52882b416dd40dbf66c08794dd20ffc7ca73b2133de98390df5c",
+     "size_bytes": 61385
+    },
+    {
+     "git_blob_sha1": "8fe8a115630fe868266cedcd8c01f97715ab4d15",
+     "path": "data/platforms/astoria_ca34/contam/path_map.json",
+     "sha256": "19c7542600e6204af26511795b41225c46705c07a4728849926fdfcfadedffd0",
+     "size_bytes": 66419
+    }
+   ],
+   "platform_git_tree": "052d0f6ebb135e581472be7d06d36de0c154212a"
+  },
+  "bainbridge_dd1": {
+   "files": [
+    {
+     "git_blob_sha1": "3e153611b37fa4997e29c58402882829e532a05d",
+     "path": "data/platforms/bainbridge_dd1/spatial_layout.json",
+     "sha256": "ac33e237c5c02987e6a0efa7186a5c2334f5cbe9e1683192ad957aadefc57752",
+     "size_bytes": 11127
+    },
+    {
+     "git_blob_sha1": "453bf6559eec864a78964f12d3c8970a3ad1e6b9",
+     "path": "data/platforms/bainbridge_dd1/air_flow_paths.json",
+     "sha256": "3a7de7d959d006fea0d87fd034cd7b4b8ada6ec99dea62d207540aa7619e226b",
+     "size_bytes": 5655
+    },
+    {
+     "git_blob_sha1": "bbd81f30c0103d3ab5a0b421d901fe62db6b790b",
+     "path": "data/platforms/bainbridge_dd1/contam/hobbyist_overrides.json",
+     "sha256": "3fec32f26b08a15670b1f1cf2295c32de20632d392f24405b18f0ff4406de83e",
+     "size_bytes": 3764
+    },
+    {
+     "git_blob_sha1": "2f50e048c976c260a1f281a60d5bda53f415226f",
+     "path": "data/platforms/bainbridge_dd1/contam/platform.prj",
+     "sha256": "1037c3c0b7fb5aa3d08a2d2dd8bfa8a7685157fe6309a1cef59e6b99a1195306",
+     "size_bytes": 40055
+    },
+    {
+     "git_blob_sha1": "f984e491d5c7b778a4145a48b2de4b2bc25174b8",
+     "path": "data/platforms/bainbridge_dd1/contam/path_map.json",
+     "sha256": "ddb565adb3440cda731cf4fc8e688e068530c9079816c4d8847470a56ae1af77",
+     "size_bytes": 47581
+    }
+   ],
+   "platform_git_tree": "7bb03a6ee3122e0d650743909cb13b025202a237"
+  },
+  "battler_acv6": {
+   "files": [
+    {
+     "git_blob_sha1": "36af681d64e2dd7f31a6579bb766083f96c68f2c",
+     "path": "data/platforms/battler_acv6/spatial_layout.json",
+     "sha256": "60c742add6d6e37f89b7d7d7a3cd28df6ed60f9001f1a34a1743ca351467a153",
+     "size_bytes": 22455
+    },
+    {
+     "git_blob_sha1": "dd271d6d2c65e6341a2f90072272e52eb420e8b0",
+     "path": "data/platforms/battler_acv6/air_flow_paths.json",
+     "sha256": "85619b75eceef7924d475cc43b09870787343baf5e0b321af65a097fe7a23e51",
+     "size_bytes": 13216
+    },
+    {
+     "git_blob_sha1": "3b45cd3c936b4f337d4e6d0c5477fce18ad45179",
+     "path": "data/platforms/battler_acv6/contam/hobbyist_overrides.json",
+     "sha256": "3cb6de8157d61457659001433657e74e8d58da21c8708a719cc6b35b66463649",
+     "size_bytes": 6388
+    },
+    {
+     "git_blob_sha1": "9ebde26b6f6249a2c97ec423e91f2d7296d98181",
+     "path": "data/platforms/battler_acv6/contam/platform.prj",
+     "sha256": "bba3f1b0475a0138ff090d7d2cf023312690705cd548d7391c230758e1a30871",
+     "size_bytes": 81588
+    },
+    {
+     "git_blob_sha1": "604b32b4e1bfef27220707eec73c71c627d10ca0",
+     "path": "data/platforms/battler_acv6/contam/path_map.json",
+     "sha256": "06f96d019fd398d91bdd96e1d18ddcc7d789b882ddb74dfe06334ce5b7ce2e61",
+     "size_bytes": 105405
+    }
+   ],
+   "platform_git_tree": "0ffce31557e6750306275f3fc050417a39c99e3b"
+  },
+  "bolster_ars38": {
+   "files": [
+    {
+     "git_blob_sha1": "0a671d4ee5c4b391e70f04cd78c60f3b97bacab9",
+     "path": "data/platforms/bolster_ars38/spatial_layout.json",
+     "sha256": "088acba73cd32b3010933b16492881a78bcd63c7424c190fcf12ee06dcb8ab61",
+     "size_bytes": 9380
+    },
+    {
+     "git_blob_sha1": "5ed9200a5b1f74d653c65a92ca1c86031ff2ad05",
+     "path": "data/platforms/bolster_ars38/air_flow_paths.json",
+     "sha256": "eb78327bc9d83c6d2b798b522a8db6f28f487a40a6f4cec35de17fdae4e1c7cc",
+     "size_bytes": 7973
+    },
+    {
+     "git_blob_sha1": "0cfc9858437d393cab2aea513a5f9e5416e4960d",
+     "path": "data/platforms/bolster_ars38/contam/hobbyist_overrides.json",
+     "sha256": "b81b7629464da4d277b1a51dbefd0320df568796e86934ed2c4fe1f57d9d66f6",
+     "size_bytes": 3004
+    },
+    {
+     "git_blob_sha1": "cfaaf7a9d7ca523420170abc1104fa6e406125e6",
+     "path": "data/platforms/bolster_ars38/contam/platform.prj",
+     "sha256": "d260693fd25b8c80b83371ee4f0f95eb3bac6fc9060e2d05829dbd03fb2ea0c3",
+     "size_bytes": 34240
+    },
+    {
+     "git_blob_sha1": "a370a73a2d016b112d1e8502ec25bc05270b099c",
+     "path": "data/platforms/bolster_ars38/contam/path_map.json",
+     "sha256": "f62346efaba8b794169e1509a06e8cae987d84f6b49b15ece7f62526bcccb2a9",
+     "size_bytes": 36318
+    }
+   ],
+   "platform_git_tree": "90925768a31baf0e897cbe2d385196e4b18e5c41"
+  },
+  "cannon_de701": {
+   "files": [
+    {
+     "git_blob_sha1": "4db87ac567b84329463015a842dbc06a9fdd18ba",
+     "path": "data/platforms/cannon_de701/spatial_layout.json",
+     "sha256": "db57ef331fbc38378bf579bf2a25f0f2cf90bfee42d360998b2a84f8a4939b53",
+     "size_bytes": 12124
+    },
+    {
+     "git_blob_sha1": "8339ecb65ed718f1c76bec740a909a4bfffe402a",
+     "path": "data/platforms/cannon_de701/air_flow_paths.json",
+     "sha256": "a377720e65f054e0af26ef1d93c9dd69c3504237d10b131514470f68770d40a3",
+     "size_bytes": 9860
+    },
+    {
+     "git_blob_sha1": "9c8d274c3b817d231867a62bb7cfc39229f91554",
+     "path": "data/platforms/cannon_de701/contam/hobbyist_overrides.json",
+     "sha256": "c335faa66695e6967a6ef6fb39004c5e59a41fd97b20e95df8dacd238aada70a",
+     "size_bytes": 3539
+    },
+    {
+     "git_blob_sha1": "89f922483bf744f8f09cb34c8197f104d38b8e93",
+     "path": "data/platforms/cannon_de701/contam/platform.prj",
+     "sha256": "1a2c0d9f9457201c7cba7981089970c06452dec607bcb46e73c8cc230095e917",
+     "size_bytes": 44922
+    },
+    {
+     "git_blob_sha1": "f47389e6194ceca4a1a1bf11785bcd08b797763b",
+     "path": "data/platforms/cannon_de701/contam/path_map.json",
+     "sha256": "30731f1835333d807db50770ace67a2e99016150c1a6a950880d90f53dd543fc",
+     "size_bytes": 52773
+    }
+   ],
+   "platform_git_tree": "3109a913f19943369a9c25600ec79fcc91e31c86"
+  },
+  "castle_class_corvette": {
+   "files": [
+    {
+     "git_blob_sha1": "1c638207f156d28813c193996352f83c5c172952",
+     "path": "data/platforms/castle_class_corvette/spatial_layout.json",
+     "sha256": "84482e69bc81f96f57c028de751c19f76d36262f738d8a3183ab5bcdc4b1142f",
+     "size_bytes": 7616
+    },
+    {
+     "git_blob_sha1": "921f3c06451f6443895ce9e8bded74ea3755b7ed",
+     "path": "data/platforms/castle_class_corvette/air_flow_paths.json",
+     "sha256": "61a144bf1563149c3f50b4c846abae3694cf20185aafcbb5dfc95f4382bc33d4",
+     "size_bytes": 8111
+    },
+    {
+     "git_blob_sha1": "758a6dcc4327c2bf11c3267fcbc51946bb7484e7",
+     "path": "data/platforms/castle_class_corvette/contam/hobbyist_overrides.json",
+     "sha256": "47c6493f72d6959ad3a2f67f16d062f06f801e4645acec835ac3b2bc305e973d",
+     "size_bytes": 2531
+    },
+    {
+     "git_blob_sha1": "9306c773405b3dcfd94b6535c306a9d666fa57a6",
+     "path": "data/platforms/castle_class_corvette/contam/platform.prj",
+     "sha256": "e621773a34529947190e3d750322b904cbc0560acc22ab84b2f16be36e0d3f39",
+     "size_bytes": 30500
+    },
+    {
+     "git_blob_sha1": "0a9d98caf9a4cc2dbdb3a84dc233da4f6bdd515d",
+     "path": "data/platforms/castle_class_corvette/contam/path_map.json",
+     "sha256": "8ffc81b9ffca2983b573cf4e0d3bdde5a62924fc32f8e3e0ddb7ddd8772f1fde",
+     "size_bytes": 30773
+    }
+   ],
+   "platform_git_tree": "bf9b25ed0d660a45085ae90820f83a0e8b345c07"
+  },
+  "chicago_cg11": {
+   "files": [
+    {
+     "git_blob_sha1": "5106310a0a604e8f26eade473ebeeb8494cd15b9",
+     "path": "data/platforms/chicago_cg11/spatial_layout.json",
+     "sha256": "d892a47e539164ea24ef5d54257a60aeb102b150a29c282eed8b239302a30462",
+     "size_bytes": 35567
+    },
+    {
+     "git_blob_sha1": "7c0e96f8a8af3c28e88b7611c491be9a2f5ea9be",
+     "path": "data/platforms/chicago_cg11/air_flow_paths.json",
+     "sha256": "694c43d92c51a46fc74907767432f75971d8e448672eb951dcbe6485df5a1a67",
+     "size_bytes": 30053
+    },
+    {
+     "git_blob_sha1": "f65cbf8484692452a9dcd9bef77b0c4dc4e5ba6d",
+     "path": "data/platforms/chicago_cg11/contam/hobbyist_overrides.json",
+     "sha256": "0b00ebd5c63ef82f68f72ff2b8a47d0933896eb57c7f94a097f89ce9a06249f8",
+     "size_bytes": 10290
+    },
+    {
+     "git_blob_sha1": "64200dbcefe08f3e821dac92c370c6e1ec02725a",
+     "path": "data/platforms/chicago_cg11/contam/platform.prj",
+     "sha256": "a54670d5091cc95ac485feeceba612947545fb87dde737a4a88c8cf0461b411f",
+     "size_bytes": 85558
+    },
+    {
+     "git_blob_sha1": "4eb9f5a101263d7c1bd765ce5767d3c78c29cb45",
+     "path": "data/platforms/chicago_cg11/contam/path_map.json",
+     "sha256": "13572f892c5f2a78c5f3d667b39df9fe12de6467021da3096d4b6a973eead16c",
+     "size_bytes": 101047
+    }
+   ],
+   "platform_git_tree": "cca494b4a158b89e3164d6d9e5e9582c1d7f8472"
+  },
+  "classic_cruise_1900": {
+   "files": [
+    {
+     "git_blob_sha1": "e5d9c02393c9ae474800947f10f4c199decc9a35",
+     "path": "data/platforms/classic_cruise_1900/spatial_layout.json",
+     "sha256": "62a6f5e2b1292c722c9da0ce5614c238250b9516d42082c6c5d99dd21610e665",
+     "size_bytes": 33665
+    },
+    {
+     "git_blob_sha1": "32c3e79186f2739fc85b93f39c38d056e47ba173",
+     "path": "data/platforms/classic_cruise_1900/air_flow_paths.json",
+     "sha256": "7e9863dff6b6ee27c672c2e4d12779326bb6c70144c7a56720f69cbd2723d933",
+     "size_bytes": 27745
+    },
+    {
+     "git_blob_sha1": "0c142bf2e14ae64bc9f5f93279fb397361ffd317",
+     "path": "data/platforms/classic_cruise_1900/contam/hobbyist_overrides.json",
+     "sha256": "89e646e651de5f1c705e04646bf87a25731321788a531148fdf9d7b655a6e778",
+     "size_bytes": 1503
+    },
+    {
+     "git_blob_sha1": "2be0ff879604048fe3d939d84c072f646cab951d",
+     "path": "data/platforms/classic_cruise_1900/contam/platform.prj",
+     "sha256": "76f1a268b8b8defdd704086bd379231d04516e0fa7c239317acaa34a98473f4a",
+     "size_bytes": 124333
+    },
+    {
+     "git_blob_sha1": "f5e78a1adfc341d96d6a1f38edd7a808686d0b49",
+     "path": "data/platforms/classic_cruise_1900/contam/path_map.json",
+     "sha256": "45038e9fa85bec9a0a12fabb424ffa026f8f9b44df12bdf4d7d40e44cac18228",
+     "size_bytes": 164714
+    }
+   ],
+   "platform_git_tree": "e55cab18098c32a9c2e8a0bef42bc1ef65bbc196"
+  },
+  "cobalt_k124": {
+   "files": [
+    {
+     "git_blob_sha1": "ad189bbf28de4b9c48b93f8c1bd685737ab44a8c",
+     "path": "data/platforms/cobalt_k124/spatial_layout.json",
+     "sha256": "d8b2762cc48bbc53d475adead7831eab467cf43ee537c3ac029e68f802e82f6b",
+     "size_bytes": 11767
+    },
+    {
+     "git_blob_sha1": "b1d8f9c390115593a66b1bdbe468f42352cd5dd7",
+     "path": "data/platforms/cobalt_k124/air_flow_paths.json",
+     "sha256": "e8bac78bb2e0fd73c37fc2d66b73c1808289deea447f130876f0b036d092ab7c",
+     "size_bytes": 8174
+    },
+    {
+     "git_blob_sha1": "8c3dc6cb55970d36c053a108416f775189401609",
+     "path": "data/platforms/cobalt_k124/contam/hobbyist_overrides.json",
+     "sha256": "16a8fa4218660168387a203dee477588f9d984ecaec5adf50fff5608d7085194",
+     "size_bytes": 3702
+    },
+    {
+     "git_blob_sha1": "208d4f7bdec912434b621495f5e1180ea558290d",
+     "path": "data/platforms/cobalt_k124/contam/platform.prj",
+     "sha256": "be158c186af13103ceb50edcc218117412d14b3cdf88576cc44b2ae1f67d4b77",
+     "size_bytes": 47944
+    },
+    {
+     "git_blob_sha1": "6689d3dc5b9955a34556a7e5801afdcea04aa7e6",
+     "path": "data/platforms/cobalt_k124/contam/path_map.json",
+     "sha256": "9be99ab9ff99cdf459928b98424b82e8536cae6e5b588f4822b1eaa60e36de13",
+     "size_bytes": 58049
+    }
+   ],
+   "platform_git_tree": "0be72848cdea3f0bd7f1288b9742b2df5b15ef0e"
+  },
+  "cushing_dd376": {
+   "files": [
+    {
+     "git_blob_sha1": "9ed47a1bb4934a0f417ae356416fdbefa60e748b",
+     "path": "data/platforms/cushing_dd376/spatial_layout.json",
+     "sha256": "222ec1edde78d9145e2662739a8b37d9295a325b07f740551257d69a1500f8d9",
+     "size_bytes": 16384
+    },
+    {
+     "git_blob_sha1": "2a364cad9bd17fa413f274e0fc921b2bb2875d07",
+     "path": "data/platforms/cushing_dd376/air_flow_paths.json",
+     "sha256": "625de18ad4b122a2b6147ce996cc736e451c57c667398f26315fdb8df16bed94",
+     "size_bytes": 8961
+    },
+    {
+     "git_blob_sha1": "312b5fe103c36229b86af216beb91e9a724c72b4",
+     "path": "data/platforms/cushing_dd376/contam/hobbyist_overrides.json",
+     "sha256": "e87894cb7ca00e21de8bbc2c4344aa6cb66c04d67c9bb6a282817c50b47a8efa",
+     "size_bytes": 4891
+    },
+    {
+     "git_blob_sha1": "70813ee10756c59a3827c5962a53355b15a32449",
+     "path": "data/platforms/cushing_dd376/contam/platform.prj",
+     "sha256": "b791da61b2e80c93011d4edcc18c64a823c7ec8ebfd89aff7ae53b6430eca17e",
+     "size_bytes": 62153
+    },
+    {
+     "git_blob_sha1": "fc65595af6ec3703e094eb459e810b77528d2878",
+     "path": "data/platforms/cushing_dd376/contam/path_map.json",
+     "sha256": "86f9be4607a799b57ee32f1633610dae8e9a408648744bdf18fa577a8dbf22b0",
+     "size_bytes": 81079
+    }
+   ],
+   "platform_git_tree": "4ea954491e93c088b9d5edeb02d600848a7f2770"
+  },
+  "davison_dd618": {
+   "files": [
+    {
+     "git_blob_sha1": "4c114229d954735224ff3d0527f3d6da357987bd",
+     "path": "data/platforms/davison_dd618/spatial_layout.json",
+     "sha256": "48f8f7e43644afc14c9c1b8810246cd7e24434fcfe2d4b7b5290f3d755aad119",
+     "size_bytes": 15673
+    },
+    {
+     "git_blob_sha1": "14b5f1977c886b89f4eb322dd7816e892ea13666",
+     "path": "data/platforms/davison_dd618/air_flow_paths.json",
+     "sha256": "b8ff00bce3253c1936cd410ab0f40feb8a1ffc208eb80c43d4d01958b4289a21",
+     "size_bytes": 10102
+    },
+    {
+     "git_blob_sha1": "9ab39d31162835bbaf6a6e538250bc7939cd7f75",
+     "path": "data/platforms/davison_dd618/contam/hobbyist_overrides.json",
+     "sha256": "c1e1507820e16e17daf9ed92b4a8e472d94c564bedc6994bda7d5c231026cab5",
+     "size_bytes": 4260
+    },
+    {
+     "git_blob_sha1": "7510d7e59e4a93be0c94b816bff290588cfea0d3",
+     "path": "data/platforms/davison_dd618/contam/platform.prj",
+     "sha256": "e5c622e81864cb4b6499f55f19ef384e87493d5e081c93e9ee26291aab69e74d",
+     "size_bytes": 47344
+    },
+    {
+     "git_blob_sha1": "d41ffb95b29146f4f2fc9a7f99d912cbb8bcaa7f",
+     "path": "data/platforms/davison_dd618/contam/path_map.json",
+     "sha256": "d6c5a008b6612abeda40d5e41a539d74ce5efe6c6cec62dedbc0ebbd7a511fab",
+     "size_bytes": 54280
+    }
+   ],
+   "platform_git_tree": "c5a9c66d7b1bc421fa038da27e60f55136f5a104"
+  },
+  "destroyer_baseline": {
+   "files": [
+    {
+     "git_blob_sha1": "3a30ac97a1f0bb20410de86030155112430d4878",
+     "path": "data/platforms/destroyer_baseline/spatial_layout.json",
+     "sha256": "515cbae0e7a4255509fc04df1695afd1b5c2ff7a7b2f2fe6bc44033adfee5fef",
+     "size_bytes": 3243
+    },
+    {
+     "git_blob_sha1": "75324b28d84d7b9e8064fb3199da24c271b0b1d5",
+     "path": "data/platforms/destroyer_baseline/air_flow_paths.json",
+     "sha256": "a41886e9efe5d0c3474fb8c0e250fd4df024b3cb6dc4ad60eaba022c55ad10c6",
+     "size_bytes": 5996
+    },
+    {
+     "git_blob_sha1": "dbac169cd1095a30d6b13e1d6a10ff0881532008",
+     "path": "data/platforms/destroyer_baseline/contam/hobbyist_overrides.json",
+     "sha256": "5ec3f01973b8e7ca45157220a011d942878ee30415cd754b072143b8687b5a54",
+     "size_bytes": 746
+    },
+    {
+     "git_blob_sha1": "740ac1843f1fa6feb7bb7a7b3d6554fbdccf2671",
+     "path": "data/platforms/destroyer_baseline/contam/platform.prj",
+     "sha256": "028aa2ba3275269c7401b9f7f9e035200c87d11720b1685852bb811ab150763a",
+     "size_bytes": 20199
+    },
+    {
+     "git_blob_sha1": "8b1e9c1494340f0861e0b9d8d282e1dc23992c20",
+     "path": "data/platforms/destroyer_baseline/contam/path_map.json",
+     "sha256": "2f8a0efc630df121a89fcd7ea28b57e216b438e13ed12f105f8bfe19fb6a9086",
+     "size_bytes": 14637
+    }
+   ],
+   "platform_git_tree": "e9afe0a744dd0fddf2c9aecc397906116fab56c3"
+  },
+  "diamond_princess": {
+   "files": [
+    {
+     "git_blob_sha1": "22d9c449b66b60a090d34bee532a22fc4c19d13a",
+     "path": "data/platforms/diamond_princess/spatial_layout.json",
+     "sha256": "1e53070aa103ae6ac2b07adb578e3f91d211f9224461738bc12f0d78b2313de3",
+     "size_bytes": 70107
+    },
+    {
+     "git_blob_sha1": "137e7c7ba37090c435b77e05ec63f085be9e633b",
+     "path": "data/platforms/diamond_princess/air_flow_paths.json",
+     "sha256": "6a00157e62ee70cbb159499fda078599bdb4e15ea5a6bc119c353c7ebeed125a",
+     "size_bytes": 54808
+    },
+    {
+     "git_blob_sha1": "4516b6757f5344cf10a17fe7423f07c3eb29dc94",
+     "path": "data/platforms/diamond_princess/contam/hobbyist_overrides.json",
+     "sha256": "20d5215b25160d35003b90fe866ce48b4424c9d650c8beb3eb6f91760d377709",
+     "size_bytes": 104
+    },
+    {
+     "git_blob_sha1": "1ade3bb3f9593d586b4e791bf6f8f595c7d53dfc",
+     "path": "data/platforms/diamond_princess/contam/platform.prj",
+     "sha256": "e32cc28d7a8f01ce483f851d2bce40e20322b324bc669a8a11916e7b42c0438b",
+     "size_bytes": 252844
+    },
+    {
+     "git_blob_sha1": "2282a966ed215542fde18301773c7da666c519de",
+     "path": "data/platforms/diamond_princess/contam/path_map.json",
+     "sha256": "b6c7dfe42238c8c29e654a77a0b1b1c59b643c4df1e40ad42a2fcecf8424aa3a",
+     "size_bytes": 354980
+    }
+   ],
+   "platform_git_tree": "9ba335be17fd2200e3da9dec15499a81eef10ba2"
+  },
+  "eagle_pe60": {
+   "files": [
+    {
+     "git_blob_sha1": "0581634c6a0cec95e2ed90a462b2810ad6094faa",
+     "path": "data/platforms/eagle_pe60/spatial_layout.json",
+     "sha256": "f701c7552bebd0bb99583f16772ea2c6b3a67fd41b2507a8cbec047c7ffd1273",
+     "size_bytes": 15807
+    },
+    {
+     "git_blob_sha1": "1185b931fc0263f8a12fb57bbbe7d09592b11504",
+     "path": "data/platforms/eagle_pe60/air_flow_paths.json",
+     "sha256": "51bd57fb4201d704cfbcd6633fe112cf81d5c4cc36ece7c747a47f7f89843381",
+     "size_bytes": 13935
+    },
+    {
+     "git_blob_sha1": "78977b7cc4da21ccc849df5723bfe9c8051a637c",
+     "path": "data/platforms/eagle_pe60/contam/hobbyist_overrides.json",
+     "sha256": "fd8d053b9e16a2f882f7a5e02a1c3457764f05cc37e32a141bd3bc0a6afd95b3",
+     "size_bytes": 4369
+    },
+    {
+     "git_blob_sha1": "9df3f942d8dae3bc6034109589e61e1c92a258c7",
+     "path": "data/platforms/eagle_pe60/contam/platform.prj",
+     "sha256": "b5cb21a66d6c76bd4f5832ba611ed4fb05169f9b8189153a6b861cfb9547d5b4",
+     "size_bytes": 54570
+    },
+    {
+     "git_blob_sha1": "92497ee9a40c30212beb56bf2d07f6bbe12bb200",
+     "path": "data/platforms/eagle_pe60/contam/path_map.json",
+     "sha256": "539aa112a7bba435a1609a7c5c38a7510516a3695947faff5a55c7860f021f80",
+     "size_bytes": 66420
+    }
+   ],
+   "platform_git_tree": "26aeef844b7da3e01197a215b4942e799e612ee0"
+  },
+  "enterprise_constitution_tos": {
+   "files": [
+    {
+     "git_blob_sha1": "fa0db1c5c7c55f805dd40218439b8583ab743878",
+     "path": "data/platforms/enterprise_constitution_tos/spatial_layout.json",
+     "sha256": "ab9fcfeeca79244425cf4d233b75855756869276715c448b451c0638b3f2cd78",
+     "size_bytes": 24553
+    },
+    {
+     "git_blob_sha1": "2c010e84199c046daff2f92d11f763ecfcc43796",
+     "path": "data/platforms/enterprise_constitution_tos/air_flow_paths.json",
+     "sha256": "6d1c810bbf8c9b2d63a647b375148beb1aa1e29a2c034475f3f1fc8f148e963f",
+     "size_bytes": 23538
+    },
+    {
+     "git_blob_sha1": "03e673f10a65d8b205b97271abdfe5a3c7bc5a19",
+     "path": "data/platforms/enterprise_constitution_tos/contam/hobbyist_overrides.json",
+     "sha256": "d6dc57d8bb5cd1a81399a94c7323abbb0818518a7e1230b0920a5b4fa6219ad1",
+     "size_bytes": 1468
+    },
+    {
+     "git_blob_sha1": "4f427aa3a951630b64596f2d9cd21182f1c0e16f",
+     "path": "data/platforms/enterprise_constitution_tos/contam/platform.prj",
+     "sha256": "caecebe9bd2c79cb574fa767f15e6ecab6432ca81ed0ff0ec5ce341aecf43d84",
+     "size_bytes": 91530
+    },
+    {
+     "git_blob_sha1": "3cee4300077a67c6f0c7f771ff50e651c501c163",
+     "path": "data/platforms/enterprise_constitution_tos/contam/path_map.json",
+     "sha256": "c51e13ea338a13bee7734ff35b2d696683120978d98894dcaa08eec9fb96c7fb",
+     "size_bytes": 112303
+    }
+   ],
+   "platform_git_tree": "36a1070331c75745cc86846763e9789762af660c"
+  },
+  "enterprise_galaxy_tng": {
+   "files": [
+    {
+     "git_blob_sha1": "391b916fb3b14129b002b2b080adeead53dcc0cd",
+     "path": "data/platforms/enterprise_galaxy_tng/spatial_layout.json",
+     "sha256": "ba2f32e2ab998ef48cbc9f3a7ec97cce810d783c861b7538fa085a54faf0b802",
+     "size_bytes": 49321
+    },
+    {
+     "git_blob_sha1": "049a767fdb0e14de7000a6d64c14d52013c444fc",
+     "path": "data/platforms/enterprise_galaxy_tng/air_flow_paths.json",
+     "sha256": "45f72293b010d59bd236468d69c4e82460ef7a704dc9f5028c1bc944858babd8",
+     "size_bytes": 42309
+    },
+    {
+     "git_blob_sha1": "30a6dea18b91d8b49ad138e65a736cede88e575f",
+     "path": "data/platforms/enterprise_galaxy_tng/contam/hobbyist_overrides.json",
+     "sha256": "abbab3a9809329e73fe6c1716167bd72787b93c7f25136aead3956077051458b",
+     "size_bytes": 1796
+    },
+    {
+     "git_blob_sha1": "744b92b54bbe82bd30352ea80685bdd00e383d91",
+     "path": "data/platforms/enterprise_galaxy_tng/contam/platform.prj",
+     "sha256": "05897d4013f3ed3341f1e10fed8bdc361d2b7659b027c34ac6c59f7306f81732",
+     "size_bytes": 206254
+    },
+    {
+     "git_blob_sha1": "d7d637a3bedb1e680614bb2eefd6d5348c04468b",
+     "path": "data/platforms/enterprise_galaxy_tng/contam/path_map.json",
+     "sha256": "8af671102b500254f791a8ef1a52ac003a949d8df7ed870e0069cc9486763d7b",
+     "size_bytes": 282317
+    }
+   ],
+   "platform_git_tree": "41abf492296d868497ec76146f02254649d1554e"
+  },
+  "erie_pg50": {
+   "files": [
+    {
+     "git_blob_sha1": "bb37e39c0dc168f364589eb3f6bde9e086c13a7f",
+     "path": "data/platforms/erie_pg50/spatial_layout.json",
+     "sha256": "084ce09f06c5817e4e78b15d80bd5c7e3dbffbe4b08155dce874e99941fe297c",
+     "size_bytes": 21565
+    },
+    {
+     "git_blob_sha1": "4948fc4f6a6fa657a12b54fbd9d95a73fd0c962f",
+     "path": "data/platforms/erie_pg50/air_flow_paths.json",
+     "sha256": "a0079497fcee22607c512cef636ced2779c89fddd4215c6f68b99c30b9970d1a",
+     "size_bytes": 21610
+    },
+    {
+     "git_blob_sha1": "ade4c87f1ace3a86d380dc33f5929001ba3e0c8d",
+     "path": "data/platforms/erie_pg50/contam/hobbyist_overrides.json",
+     "sha256": "85009c9c678c363174eeef2f3521dc1bca6ab96b1c385a099892567d0f2a0559",
+     "size_bytes": 6629
+    },
+    {
+     "git_blob_sha1": "6693151db632544f55b1dd74327cedf02ac10dbc",
+     "path": "data/platforms/erie_pg50/contam/platform.prj",
+     "sha256": "c6eff8d7f3b3dd7633b79dd69362f51cd429a4a50deb7951788ddb276f53a206",
+     "size_bytes": 121207
+    },
+    {
+     "git_blob_sha1": "11018315e0c6651f0883d9d9d064d28bd5277a9b",
+     "path": "data/platforms/erie_pg50/contam/path_map.json",
+     "sha256": "45d30d6127244e5c5a98b53e31af58e420e7ad33f9ea2f5032f02fc5c888f139",
+     "size_bytes": 181562
+    }
+   ],
+   "platform_git_tree": "935007589db61b8feb1f255ce177379b742ea8e2"
+  },
+  "esteem_mso438": {
+   "files": [
+    {
+     "git_blob_sha1": "31a13da6e9cb749ae31ba552e943be2b33342597",
+     "path": "data/platforms/esteem_mso438/spatial_layout.json",
+     "sha256": "1bc7079b1f46d60044e5c5a25a4d53fcef7102d3af517dbb496d780121e8494d",
+     "size_bytes": 16058
+    },
+    {
+     "git_blob_sha1": "23db35ba1401ab68fdebd0f6bf9f514c4f6742ce",
+     "path": "data/platforms/esteem_mso438/air_flow_paths.json",
+     "sha256": "77fbdc08632bce87d4777c7275173731852e84bb81a7f9ca7c59ac5ad5e8d0f1",
+     "size_bytes": 17583
+    },
+    {
+     "git_blob_sha1": "202689a8bf73ac731819d46e44c3fd5de4ee8c64",
+     "path": "data/platforms/esteem_mso438/contam/hobbyist_overrides.json",
+     "sha256": "7846a8463321b9d4a34aedb38e7f7c00dad15551aaf67908ec7ea5eb519312f1",
+     "size_bytes": 4970
+    },
+    {
+     "git_blob_sha1": "b2fb69fa694f3ad22895ab59ec5d77ea16821cf6",
+     "path": "data/platforms/esteem_mso438/contam/platform.prj",
+     "sha256": "19b08da7e2538c73e7c09c33da4d357fe3c174b724f5c4bcdccb931c999c56ad",
+     "size_bytes": 72881
+    },
+    {
+     "git_blob_sha1": "a6a7b9812f34561db277a506609ddb19c415d412",
+     "path": "data/platforms/esteem_mso438/contam/path_map.json",
+     "sha256": "3c6a9a97c7cd323fd086159007e4ae4cb316f09fd21e550be747c692133fe871",
+     "size_bytes": 98152
+    }
+   ],
+   "platform_git_tree": "3940b7244ddb742e5a0f644da4e6e57a51b0e060"
+  },
+  "expedition_cruise_450": {
+   "files": [
+    {
+     "git_blob_sha1": "276c3a4b1657b87c9b956d3c0af6b6fac5c46eb5",
+     "path": "data/platforms/expedition_cruise_450/spatial_layout.json",
+     "sha256": "83cb6d92d8a9bab1c01ff47f1ceea1e3f9441e915fff3db7382726d1a0bad97c",
+     "size_bytes": 19628
+    },
+    {
+     "git_blob_sha1": "012fc686afe0f2ee8d3954e27c8dc9c70cc83198",
+     "path": "data/platforms/expedition_cruise_450/air_flow_paths.json",
+     "sha256": "0eac3d4d965b9c54bd97c1f5ed6f3bb24b6e09c563907527a07da26d53b677e1",
+     "size_bytes": 18826
+    },
+    {
+     "git_blob_sha1": "39e5c11c895e4b1fd9107b3cae5221720f54925b",
+     "path": "data/platforms/expedition_cruise_450/contam/hobbyist_overrides.json",
+     "sha256": "782bfc77b1cf6bc8b200774dd90c4a6b018cda3ee0f465b87e02ac19eea5361e",
+     "size_bytes": 1371
+    },
+    {
+     "git_blob_sha1": "00b058bea1e396a6e68c5e7cef0c737400a373e6",
+     "path": "data/platforms/expedition_cruise_450/contam/platform.prj",
+     "sha256": "34510e3de0e4072593210ea4e277a7b51448867903abc300448cd940292d829e",
+     "size_bytes": 61799
+    },
+    {
+     "git_blob_sha1": "fb0a35a094908e92dfeeec2bb5f9dfae7e281567",
+     "path": "data/platforms/expedition_cruise_450/contam/path_map.json",
+     "sha256": "e0ba0480477ffa284017a72d2299b9b1cb6cc9ca6efda97732ae841e522eb888",
+     "size_bytes": 68502
+    }
+   ],
+   "platform_git_tree": "96c5249f2a5345134e7c3c19d37db7b9d4a82dd7"
+  },
+  "fletcher_dde_dd445": {
+   "files": [
+    {
+     "git_blob_sha1": "7b7da0f09600590fc4028fdf5673ad249b3e2c1f",
+     "path": "data/platforms/fletcher_dde_dd445/spatial_layout.json",
+     "sha256": "f3870146b8b21ca861f34a642eb5df2c2679ebd210228dc9a1658c8ef2941087",
+     "size_bytes": 14612
+    },
+    {
+     "git_blob_sha1": "1fa549ff009d39a4053ec58f6e0b148fa5f18bd3",
+     "path": "data/platforms/fletcher_dde_dd445/air_flow_paths.json",
+     "sha256": "a8b9b154cdb6c50b39808e35ca7d92c52d3de87455c7570ff08ff77acb6ab9df",
+     "size_bytes": 9167
+    },
+    {
+     "git_blob_sha1": "7212a636f221f94fc8e1f2da55d7c96275860aae",
+     "path": "data/platforms/fletcher_dde_dd445/contam/hobbyist_overrides.json",
+     "sha256": "70a0ea7d9e8ee9071dfe2c73fae51033dc99117a88c736bc37778330431991b6",
+     "size_bytes": 4354
+    },
+    {
+     "git_blob_sha1": "1202fdbc89107a29a618f7a84ca5ec33a933821c",
+     "path": "data/platforms/fletcher_dde_dd445/contam/platform.prj",
+     "sha256": "4a5c5e1402b3241feaa778d3e6c6a7e9d606a04cffe092cbf24f6723bb0fe922",
+     "size_bytes": 61717
+    },
+    {
+     "git_blob_sha1": "0222aa38702de21c49dd81ca061a81da41cd97cf",
+     "path": "data/platforms/fletcher_dde_dd445/contam/path_map.json",
+     "sha256": "ac76793754016b5fa99e5b9db5d66a9022a8869ffe92fb86847c25ab6ab83e87",
+     "size_bytes": 82596
+    }
+   ],
+   "platform_git_tree": "e3360877aff036caa38f943df1851010346f77d1"
+  },
+  "fort_mandan_lsd21": {
+   "files": [
+    {
+     "git_blob_sha1": "f841f1aa8f34be13164cb7dfff6e6c180d3747f6",
+     "path": "data/platforms/fort_mandan_lsd21/spatial_layout.json",
+     "sha256": "fa678c3d55c978320b3a1b96bbefbdb639986b6cda07094e9e6d405f89dfd12c",
+     "size_bytes": 21525
+    },
+    {
+     "git_blob_sha1": "058af822bc6ecc3280a9501f5c1c11b817788f3d",
+     "path": "data/platforms/fort_mandan_lsd21/air_flow_paths.json",
+     "sha256": "85bf32d01eb9b61ea828dac9d7bb665535ea0c63ebc33aa731eb2690d571e494",
+     "size_bytes": 20621
+    },
+    {
+     "git_blob_sha1": "d2d6ff080d3559af25fb66f0ff8d6be485aa7425",
+     "path": "data/platforms/fort_mandan_lsd21/contam/hobbyist_overrides.json",
+     "sha256": "74faf3494f17a9ad55795ddd72b6bd87c1c76c32ff6bd929e9ebbee05de301b8",
+     "size_bytes": 6148
+    },
+    {
+     "git_blob_sha1": "e0117ced2c43232bec2bff9b2cf06a03db234379",
+     "path": "data/platforms/fort_mandan_lsd21/contam/platform.prj",
+     "sha256": "2d242b2514e976516e09227aa9edd22114274143023161c15f03af27396c7801",
+     "size_bytes": 77837
+    },
+    {
+     "git_blob_sha1": "93f10bbf085838ee9b68a687c76eac7f5776437c",
+     "path": "data/platforms/fort_mandan_lsd21/contam/path_map.json",
+     "sha256": "29d5c2627e702f800afed3378d33d7cec1af382e16d0d346272e7ce07bafdfa8",
+     "size_bytes": 102206
+    }
+   ],
+   "platform_git_tree": "7d1f27e04dfe1a1e334fa11901ae39ae555cfaf0"
+  },
+  "fort_william_j311": {
+   "files": [
+    {
+     "git_blob_sha1": "dfa2d3d1842ec176b9f39a679fc0c3f5a0877b7d",
+     "path": "data/platforms/fort_william_j311/spatial_layout.json",
+     "sha256": "e7904da88d84719585c546d830a655cc602296e7bed27b73cc1d0b75953c1ba1",
+     "size_bytes": 10040
+    },
+    {
+     "git_blob_sha1": "420d613bdaa4270c5a165e18e0d49de4a72da3df",
+     "path": "data/platforms/fort_william_j311/air_flow_paths.json",
+     "sha256": "3706352c17418e4e5d10a4d56f9a2f762ea806fcd7fcd90d5322e385abee24e6",
+     "size_bytes": 11047
+    },
+    {
+     "git_blob_sha1": "2d558b7f804ba381a109888a64291878c2fd7f04",
+     "path": "data/platforms/fort_william_j311/contam/hobbyist_overrides.json",
+     "sha256": "fca2a8b8c40e2a8af19a8950cbb0510349a95b82f231bb3ef312c246c729c7d5",
+     "size_bytes": 3276
+    },
+    {
+     "git_blob_sha1": "266a845ae84cea58cad8e3ed2f53531714f55df3",
+     "path": "data/platforms/fort_william_j311/contam/platform.prj",
+     "sha256": "5ee1b87418c11cdf92d2b496cdbd67975c54a2d43b9a5a822556314f99b4d773",
+     "size_bytes": 43658
+    },
+    {
+     "git_blob_sha1": "4f4188a95c9ac6b208e9d2670287c3d9751982c6",
+     "path": "data/platforms/fort_william_j311/contam/path_map.json",
+     "sha256": "4f94fe4d0fdc66122127203138c9c59c7b7c5fdd30440921769642b449859efb",
+     "size_bytes": 52540
+    }
+   ],
+   "platform_git_tree": "d6c7c6d4b83cc6253e063a5e2e23f6e4d8bbddec"
+  },
+  "gordon_gunter_r338": {
+   "files": [
+    {
+     "git_blob_sha1": "a8fe74deca2724b68ea7a07183eb5842b8c23d7a",
+     "path": "data/platforms/gordon_gunter_r338/spatial_layout.json",
+     "sha256": "0ebde2ca9c90262f3b65cbacc259160bf82e940e481bbd535e8d0e197baf14c2",
+     "size_bytes": 14139
+    },
+    {
+     "git_blob_sha1": "25575fa0ea309a332cdcd497f412135f3290267a",
+     "path": "data/platforms/gordon_gunter_r338/air_flow_paths.json",
+     "sha256": "690d96ce6ace3a0e7c75e3175da6f9e39dd2e3c2cd1d10bb90646a816b573b6b",
+     "size_bytes": 12279
+    },
+    {
+     "git_blob_sha1": "540b33083eb1961a1d350bd4c2799650c254cbfc",
+     "path": "data/platforms/gordon_gunter_r338/contam/hobbyist_overrides.json",
+     "sha256": "92c52384cf98cdd6ba395749d6cbb0b979bc3e51f30c21f2b1523384cad9a5b1",
+     "size_bytes": 4040
+    },
+    {
+     "git_blob_sha1": "1e02d5c946affeb04473a946f8b452cde77e7825",
+     "path": "data/platforms/gordon_gunter_r338/contam/platform.prj",
+     "sha256": "9ecba682382e6c9aef97a372a7c203b59f50e30fba5fdae9e9a90d190bf1ab50",
+     "size_bytes": 48647
+    },
+    {
+     "git_blob_sha1": "aa4fa48f228b1b58d5086e3463e175beeda01f29",
+     "path": "data/platforms/gordon_gunter_r338/contam/path_map.json",
+     "sha256": "ef399dc771e08148368c7a77639db628102136c66b051065c7236eee9cbab4b1",
+     "size_bytes": 54869
+    }
+   ],
+   "platform_git_tree": "7553c5d78c8cb0f2cb43818b7813b12c63d1ab66"
+  },
+  "gosper_apa170": {
+   "files": [
+    {
+     "git_blob_sha1": "56075b63d7de37c4b80938e7efa11e9751b465cb",
+     "path": "data/platforms/gosper_apa170/spatial_layout.json",
+     "sha256": "b5934ca8e702d3acce32c96be43510a1399781cc40f06884f6f39ca2dc5f0456",
+     "size_bytes": 29383
+    },
+    {
+     "git_blob_sha1": "e958fd778c02d39c9bef916cbf80b855617068b6",
+     "path": "data/platforms/gosper_apa170/air_flow_paths.json",
+     "sha256": "1117318a3b10b8e16a145024a104e876e4959ee84e8e14d797e844739895cf27",
+     "size_bytes": 25461
+    },
+    {
+     "git_blob_sha1": "5a4d18033e09ca461c6553ada35123a31b947ec4",
+     "path": "data/platforms/gosper_apa170/contam/hobbyist_overrides.json",
+     "sha256": "f7652bf56db56eef153c832b32c0c06df606f90c4de02b88c74df6b8cc750f66",
+     "size_bytes": 8197
+    },
+    {
+     "git_blob_sha1": "d795da256fc8af4ea5943a33a7fdf1623c82adb5",
+     "path": "data/platforms/gosper_apa170/contam/platform.prj",
+     "sha256": "4dc8a3f5682e7c643719f8c00d6f9f6ab8cda8aa609603f55a542df1d160d534",
+     "size_bytes": 176678
+    },
+    {
+     "git_blob_sha1": "a983a1f1cd386ddd7d04e7d9ead7d16dd7d209ef",
+     "path": "data/platforms/gosper_apa170/contam/path_map.json",
+     "sha256": "0b4a75e5defee4b2069a73b56a05014654e6f80e4cfbe4db16c112005e18dc79",
+     "size_bytes": 276532
+    }
+   ],
+   "platform_git_tree": "5839dc47762a3f122f2758900585a50529856316"
+  },
+  "greg_mortimer": {
+   "files": [
+    {
+     "git_blob_sha1": "88b33313e48021be92622577a0fc37e3a13948e5",
+     "path": "data/platforms/greg_mortimer/spatial_layout.json",
+     "sha256": "3fe8073864370ee669691c3372419bd00c7a60836aa801a4a2d8eaa8845a6c8d",
+     "size_bytes": 20682
+    },
+    {
+     "git_blob_sha1": "e63338fbdba0d1695a0f0c5deb1699e0b8ea0957",
+     "path": "data/platforms/greg_mortimer/air_flow_paths.json",
+     "sha256": "a3e4b5dd13c6bc93af4a069da6c0520db2a437a4cf07f2a802bdb48a2a6583fe",
+     "size_bytes": 23682
+    },
+    {
+     "git_blob_sha1": "b660def43e5bf55210718dc9c56b2ee079759a13",
+     "path": "data/platforms/greg_mortimer/contam/hobbyist_overrides.json",
+     "sha256": "2ba0b51caca5f78208d50d9ddcf0b30070b3b48110eb1c49dddb2619e704c512",
+     "size_bytes": 1548
+    },
+    {
+     "git_blob_sha1": "5af4b501d0e5de456159e82a2d8c364d830a9ab8",
+     "path": "data/platforms/greg_mortimer/contam/platform.prj",
+     "sha256": "ac1f42f532e6a9b32beca1263ac4e2c42959afabbd83c07586deb42828f630e0",
+     "size_bytes": 65246
+    },
+    {
+     "git_blob_sha1": "4aacc21e36de7256564b9e7fbcae68db9865118e",
+     "path": "data/platforms/greg_mortimer/contam/path_map.json",
+     "sha256": "f90d21fbacb1418d5890c5d57d29b519886285607e5e0aaceb9d4341a0b56c67",
+     "size_bytes": 73002
+    }
+   ],
+   "platform_git_tree": "dacb33838aaade1835392b288e5f7ed1feaa403c"
+  },
+  "hunter_killer_dd692": {
+   "files": [
+    {
+     "git_blob_sha1": "a2c2714134297a66ff0169f430daf78f2ed3c861",
+     "path": "data/platforms/hunter_killer_dd692/spatial_layout.json",
+     "sha256": "9150cccbe110079407688b29da011f14a66b8ed14ff098605ce2f2809effcacf",
+     "size_bytes": 25242
+    },
+    {
+     "git_blob_sha1": "affb36bdd60509ffc01e87a3e7a6fb39f1fd2ac6",
+     "path": "data/platforms/hunter_killer_dd692/air_flow_paths.json",
+     "sha256": "bc46327392b4fc7d7da90ca8015def5032aca270cc6c51a6cb8fd9ce246c06e0",
+     "size_bytes": 16104
+    },
+    {
+     "git_blob_sha1": "dc9cc519d673e6eaedbb8815d72af47bd6e103b6",
+     "path": "data/platforms/hunter_killer_dd692/contam/hobbyist_overrides.json",
+     "sha256": "eb94856aab985c2c25acd9f4258499513c50570046ed6fb9e1a2efa6ccf08881",
+     "size_bytes": 6622
+    },
+    {
+     "git_blob_sha1": "c7afac73602ee6b0b034d1e379dffe715d415db4",
+     "path": "data/platforms/hunter_killer_dd692/contam/platform.prj",
+     "sha256": "e2ff47b8914e04a5eb7c83fbf31c19d2b389b4bedcbdfe800a0b641b2ec47694",
+     "size_bytes": 122889
+    },
+    {
+     "git_blob_sha1": "e5618362551f7a1d6a7635989720b823305d9699",
+     "path": "data/platforms/hunter_killer_dd692/contam/path_map.json",
+     "sha256": "8bd9e8624ed3c5967464b02b747186df34e0b319bf8be867d45fe092a8c86d5e",
+     "size_bytes": 179184
+    }
+   ],
+   "platform_git_tree": "97570d3210afc925134782caf439f6df01dacd8d"
+  },
+  "idaho_bb42": {
+   "files": [
+    {
+     "git_blob_sha1": "53d497e0942a5a344efefb0f95c47e0330f146de",
+     "path": "data/platforms/idaho_bb42/spatial_layout.json",
+     "sha256": "c45b8248ca4a8c2ef2f0f34ceaa58ff65a715fc7cb396df4fcca213a14dc75f5",
+     "size_bytes": 41785
+    },
+    {
+     "git_blob_sha1": "2a70cce50f50eb9c1c4fdd22e1b74b6e79f0a845",
+     "path": "data/platforms/idaho_bb42/air_flow_paths.json",
+     "sha256": "65bd246970cbe4dcb70df0712ab305a75f567d33da68921bd4888fbe1d690f81",
+     "size_bytes": 24236
+    },
+    {
+     "git_blob_sha1": "ad5827bcb3bec7e91f269a1747cc37d7d80cff26",
+     "path": "data/platforms/idaho_bb42/contam/hobbyist_overrides.json",
+     "sha256": "f59a56bc39b7c4d288ffa82132c849059c2bd0853c8c673ca7dbe5d0795d9806",
+     "size_bytes": 9962
+    },
+    {
+     "git_blob_sha1": "c2ceb8bf6226295bf7ebf843f7233d77d4c39bce",
+     "path": "data/platforms/idaho_bb42/contam/platform.prj",
+     "sha256": "3832a8bcd5d12cb15abdea78303689d86d47e579864a81c54a2686df6f5731e4",
+     "size_bytes": 238798
+    },
+    {
+     "git_blob_sha1": "5b25da86e2627c332d8414c601e424f35c8d41a8",
+     "path": "data/platforms/idaho_bb42/contam/path_map.json",
+     "sha256": "5c1dd5d82d0e358e2913ecbb9720a805aa70b2e6a2ad2139d4ce4d33b9c76270",
+     "size_bytes": 370052
+    }
+   ],
+   "platform_git_tree": "390de100c4752406938d7f1cbaa520222f413276"
+  },
+  "independence_cvl26": {
+   "files": [
+    {
+     "git_blob_sha1": "c7db8218f18035283b956998633d552fc7bb2473",
+     "path": "data/platforms/independence_cvl26/spatial_layout.json",
+     "sha256": "6c15c89de80811c7d5179e337db6acd9bd1f436a6c57f91c453c85b25145cf9d",
+     "size_bytes": 20324
+    },
+    {
+     "git_blob_sha1": "270442fd7b971f9cbf1dc6583968b6c8d975164a",
+     "path": "data/platforms/independence_cvl26/air_flow_paths.json",
+     "sha256": "831593c1ba70002d48e58952c9ee91e86b8cde29875240d7686209facc9b1b21",
+     "size_bytes": 18661
+    },
+    {
+     "git_blob_sha1": "85f8d28393cce4ab0c80ad2f7d0eb6d882f59b40",
+     "path": "data/platforms/independence_cvl26/contam/hobbyist_overrides.json",
+     "sha256": "a8c6bfe325bf1e790829da09129508055a06a38aec51937a156c9633a686d458",
+     "size_bytes": 6226
+    },
+    {
+     "git_blob_sha1": "bb94f2ca704f4cd70647e7af2adc539557380b14",
+     "path": "data/platforms/independence_cvl26/contam/platform.prj",
+     "sha256": "e2e9e7dc66370c05715959327c7c8a70d6021332ef87f4e74eb3f94dcf08b503",
+     "size_bytes": 73718
+    },
+    {
+     "git_blob_sha1": "28153dc030b5931953c4012458c1d7d650c3be7e",
+     "path": "data/platforms/independence_cvl26/contam/path_map.json",
+     "sha256": "3353d18bceb04859f4f75dd2888757d189f641be540744e8b91ab925b5a9d908",
+     "size_bytes": 94042
+    }
+   ],
+   "platform_git_tree": "782d221db08240c2669504cb78530b311435230a"
+  },
+  "jupiter_ac3": {
+   "files": [
+    {
+     "git_blob_sha1": "0ff853b582347fdf627b41eb03d2e11ca43e0e8b",
+     "path": "data/platforms/jupiter_ac3/spatial_layout.json",
+     "sha256": "c0e21bf1a464755fd4bb8cb9dfe0aa0c6cf4448ff1e45989ba6d49d9b7fdbdee",
+     "size_bytes": 19748
+    },
+    {
+     "git_blob_sha1": "81c2ef2da401e44607dfcd463dc516ea32e92d00",
+     "path": "data/platforms/jupiter_ac3/air_flow_paths.json",
+     "sha256": "9d9d3f6a458492a458c8db523475311726f8a0c415dfd4eef9f3a37e136e14a7",
+     "size_bytes": 13154
+    },
+    {
+     "git_blob_sha1": "1a576dd0734d9e73d29a16b722510550d6e6ea73",
+     "path": "data/platforms/jupiter_ac3/contam/hobbyist_overrides.json",
+     "sha256": "268f33ca927694830f25569aad461931224f2adeb2f04a833e2ac637089b3222",
+     "size_bytes": 5878
+    },
+    {
+     "git_blob_sha1": "8cdcb812818a7939e46c33e3eb5c67ae9b0c876b",
+     "path": "data/platforms/jupiter_ac3/contam/platform.prj",
+     "sha256": "7f690a1cad92c5e0ba131d7af4c692f142368fb93a3b163f4a38c67a953267cc",
+     "size_bytes": 80585
+    },
+    {
+     "git_blob_sha1": "a2301d6e83c7aab8b3516c469e7254490b97c77b",
+     "path": "data/platforms/jupiter_ac3/contam/path_map.json",
+     "sha256": "85e6b69010dce9f38b130619e09c754faa8557361bdb2dcc369cd653d474cb1a",
+     "size_bytes": 109539
+    }
+   ],
+   "platform_git_tree": "8ad3f7564985993c08bfeafcadd5fa6f9d36c31e"
+  },
+  "keppler_dd765": {
+   "files": [
+    {
+     "git_blob_sha1": "66e30c062f49016614bded64fd35f6cf5434fcb4",
+     "path": "data/platforms/keppler_dd765/spatial_layout.json",
+     "sha256": "a3523f733247972d555f12f0ae270308fcf3319f9b4ab4863007cbbba17487e5",
+     "size_bytes": 32450
+    },
+    {
+     "git_blob_sha1": "3cd9fd3678b8ed449ec7f81d3eee9c2be8ded50a",
+     "path": "data/platforms/keppler_dd765/air_flow_paths.json",
+     "sha256": "adfbfe5ba04b099494e87f2512bad0cbd453b7d58e094722cfe62a338d6cf637",
+     "size_bytes": 17904
+    },
+    {
+     "git_blob_sha1": "61bdca3eb633601839f87aae0e0a7fbd1372f674",
+     "path": "data/platforms/keppler_dd765/contam/hobbyist_overrides.json",
+     "sha256": "36bf2710b4a16021ed44f5efb560a21429392dd4545442c23bcfeb075b8da94d",
+     "size_bytes": 8516
+    },
+    {
+     "git_blob_sha1": "2349d1afa56e6583aa7e5055099a0bd05d25ae4e",
+     "path": "data/platforms/keppler_dd765/contam/platform.prj",
+     "sha256": "c196ca803d195746c47dd069411867ec1af42183fa4d5be439cbf0ae230f67e2",
+     "size_bytes": 192159
+    },
+    {
+     "git_blob_sha1": "51fdf7f94c6a87fa54eb66dec13e2a103a429ee8",
+     "path": "data/platforms/keppler_dd765/contam/path_map.json",
+     "sha256": "ce98de81bfc1d3ae94ea46ea4be2c33a9546401ffffce742fcf5ffbb68f2480e",
+     "size_bytes": 299349
+    }
+   ],
+   "platform_git_tree": "89812bfd9d8a84b45fafbedeaafb2ea48ab5ecb9"
+  },
+  "lexington_cv2": {
+   "files": [
+    {
+     "git_blob_sha1": "e6bcbf26e1897681c28fe4dc8e29ff89c30b9cd8",
+     "path": "data/platforms/lexington_cv2/spatial_layout.json",
+     "sha256": "5ab598c5f47c247e06b44762dd6511fb3f4001e62ca1d3ddac739670eac04662",
+     "size_bytes": 36680
+    },
+    {
+     "git_blob_sha1": "37ee6264955dd2cd4ea77b1b39f65ad7efeee168",
+     "path": "data/platforms/lexington_cv2/air_flow_paths.json",
+     "sha256": "bad3bd3d13bcf2ab33e1dab3334256c61f4a9581122efcffcad134749b15ffef",
+     "size_bytes": 20578
+    },
+    {
+     "git_blob_sha1": "8c6d21e7198c4cc04984a6efbafb28d137c4b985",
+     "path": "data/platforms/lexington_cv2/contam/hobbyist_overrides.json",
+     "sha256": "6aa17bb7f3d46badbbf60028d9444497f61483bd4b96d29a07c7cd506c9d5348",
+     "size_bytes": 9522
+    },
+    {
+     "git_blob_sha1": "057162c4f0882a20c5eccb7c409d1e9b702fa769",
+     "path": "data/platforms/lexington_cv2/contam/platform.prj",
+     "sha256": "eaf00c4ebcca410c78871d8e6db8d96b3c57b03c9ee62dc9cabbb9fdd63eaf94",
+     "size_bytes": 60999
+    },
+    {
+     "git_blob_sha1": "def6deceb4a29cee6c0eb241fe33fddc061a5787",
+     "path": "data/platforms/lexington_cv2/contam/path_map.json",
+     "sha256": "75ddb6ff35a264921671f0a1dd2e4502e1b586055b59cdd57154c9856bb4f17c",
+     "size_bytes": 59784
+    }
+   ],
+   "platform_git_tree": "7be63762f0e23eebde85ac83a7219fab24b3df6e"
+  },
+  "liberty_cargo_ec2": {
+   "files": [
+    {
+     "git_blob_sha1": "8e72fa5ac95ac9b1574a304b359603f86d8e22f8",
+     "path": "data/platforms/liberty_cargo_ec2/spatial_layout.json",
+     "sha256": "c70deceb47cd358a54ccd18e4fc994322d6920d44cf587898ecd2fd68e3ca738",
+     "size_bytes": 21586
+    },
+    {
+     "git_blob_sha1": "a0f433bf6a9e3f1c41e70f4f38f44623639dd246",
+     "path": "data/platforms/liberty_cargo_ec2/air_flow_paths.json",
+     "sha256": "663ffcc8cb8583028bebce735a78b56fa78f18453cf1af2e9617562c7aee1077",
+     "size_bytes": 17353
+    },
+    {
+     "git_blob_sha1": "4d95432435efc9bd074e1f0137674e176cb14df1",
+     "path": "data/platforms/liberty_cargo_ec2/contam/hobbyist_overrides.json",
+     "sha256": "842b16efe3caf7aaad797e2342e9bd4aea495c2fa69aff943a5693efdb292a65",
+     "size_bytes": 5608
+    },
+    {
+     "git_blob_sha1": "bce05ed833f97026098bb42892fc12eb18ca6554",
+     "path": "data/platforms/liberty_cargo_ec2/contam/platform.prj",
+     "sha256": "bb9ca8ae2a31b8b82b7f1dd6891982cb4f20a88857ebbda2f0c86c1cd759ca5d",
+     "size_bytes": 85765
+    },
+    {
+     "git_blob_sha1": "d44b8461f5185944d54be7fbc7fb19b73c860599",
+     "path": "data/platforms/liberty_cargo_ec2/contam/path_map.json",
+     "sha256": "b8225fc3bc88cbedba701a33260902cdd3c333e1e87c5a7b32e5599fb7d8e00c",
+     "size_bytes": 113804
+    }
+   ],
+   "platform_git_tree": "f940ac270a94ae21844c1aa3e58c10cf8da0d977"
+  },
+  "lsm_354": {
+   "files": [
+    {
+     "git_blob_sha1": "d649e04c88bf58cdae8fe62d14b5829836e849e7",
+     "path": "data/platforms/lsm_354/spatial_layout.json",
+     "sha256": "9fe4455999908d7bbe30bc90ed7d4b565ec0b021f9a57f543aad5da1c4b301fe",
+     "size_bytes": 15531
+    },
+    {
+     "git_blob_sha1": "5e8d440b5e7c4325958976738446ba2eaf93278b",
+     "path": "data/platforms/lsm_354/air_flow_paths.json",
+     "sha256": "2c9b6692731369c86654018910ddb4a1c1118e100dd147cf4a9a4ffa5ab8ca18",
+     "size_bytes": 13723
+    },
+    {
+     "git_blob_sha1": "c715f2cc283fe88528b54f10365b2faef60e4af9",
+     "path": "data/platforms/lsm_354/contam/hobbyist_overrides.json",
+     "sha256": "dabdbe4c8099f1f7b252ffce23ad7d9ac46853f1adc59b9ad2708cbb29d82437",
+     "size_bytes": 4526
+    },
+    {
+     "git_blob_sha1": "4735ecf9d1d0cbea886936a7d4b3bc729f6249cd",
+     "path": "data/platforms/lsm_354/contam/platform.prj",
+     "sha256": "4f5430f9f40c66cb07944e9570a65321798578f1b56ba448e092a3424548b051",
+     "size_bytes": 61881
+    },
+    {
+     "git_blob_sha1": "0c8d381dca37b06fe1294555323745160c3e11bf",
+     "path": "data/platforms/lsm_354/contam/path_map.json",
+     "sha256": "f89cb3b9d25a8b4365ae2a66b74ba82e94508eb6fa9e7f3b2e6dd701ef2e6247",
+     "size_bytes": 79452
+    }
+   ],
+   "platform_git_tree": "bb3caf59d319b647e4b000a57822b224860912e6"
+  },
+  "luzon_arg2": {
+   "files": [
+    {
+     "git_blob_sha1": "8dadee66baede480e24c1354b803ef991c2c3900",
+     "path": "data/platforms/luzon_arg2/spatial_layout.json",
+     "sha256": "ce35e9cd2fef1ea64c372599c77cace1211a3b1b56f9ce1c627674fe5fdeaf5f",
+     "size_bytes": 26704
+    },
+    {
+     "git_blob_sha1": "16a65a9e6fb30f81fcb37857b1431b9c2a8ab314",
+     "path": "data/platforms/luzon_arg2/air_flow_paths.json",
+     "sha256": "896cb16a866ae0dd208832d37aaa9fa94130267e9ca07e04ff7be73f2aa3c605",
+     "size_bytes": 29237
+    },
+    {
+     "git_blob_sha1": "33b9d41a8eadf904d3dc7ac8763318f91f42a0ee",
+     "path": "data/platforms/luzon_arg2/contam/hobbyist_overrides.json",
+     "sha256": "2767e2e5e537e9775f537c6416af999a3633af967654011dd65354bfd7bad32f",
+     "size_bytes": 7366
+    },
+    {
+     "git_blob_sha1": "fa290de5be926469f18392f84454d023dc47a04b",
+     "path": "data/platforms/luzon_arg2/contam/platform.prj",
+     "sha256": "a7e4f7276069054cde158e4cf9216c16d4a11e7f8e0c7d72693fec97e49a6737",
+     "size_bytes": 170081
+    },
+    {
+     "git_blob_sha1": "e33158fecbd52bdbc2b4296db7a9784438587a02",
+     "path": "data/platforms/luzon_arg2/contam/path_map.json",
+     "sha256": "b38ea14aa44427f73d9e7255e37a9be82c07306a36808d495627868c088c15b6",
+     "size_bytes": 269051
+    }
+   ],
+   "platform_git_tree": "2b6738727a2179bc84340e56ee58b8c8222cc522"
+  },
+  "lyon_ap71": {
+   "files": [
+    {
+     "git_blob_sha1": "b790a44bcccce85abce923a836af633a1641aa94",
+     "path": "data/platforms/lyon_ap71/spatial_layout.json",
+     "sha256": "0dee7c78ae67056f8e297e05c91f1889386bd58edcf16e95da235458368e62e2",
+     "size_bytes": 23701
+    },
+    {
+     "git_blob_sha1": "19fbe30a4f436d8da7557575c06b2c1a5091c591",
+     "path": "data/platforms/lyon_ap71/air_flow_paths.json",
+     "sha256": "105627ba7a367259ed42a3a3981ae43862e8f86dd1147ac47cb46e0b604ac340",
+     "size_bytes": 28764
+    },
+    {
+     "git_blob_sha1": "f4270e2a4fe41b9dffd44a98ff0fabb09df299fe",
+     "path": "data/platforms/lyon_ap71/contam/hobbyist_overrides.json",
+     "sha256": "ea4d32e2602ca986cd67618b9159c424e6c8ffd7e5c4f53b75dd4eef1589c835",
+     "size_bytes": 6529
+    },
+    {
+     "git_blob_sha1": "6b600b6dfbb33d5332c8476e499626c7e203eb98",
+     "path": "data/platforms/lyon_ap71/contam/platform.prj",
+     "sha256": "edfae4bebb5c71eeeb6492cd6d0422e218e4156b562b74df0d26a64a2527d0f8",
+     "size_bytes": 85650
+    },
+    {
+     "git_blob_sha1": "4f239f38762b1834f3f71c2699d5a7d46a3777bf",
+     "path": "data/platforms/lyon_ap71/contam/path_map.json",
+     "sha256": "aed8e2203cf9e5a92eccbee3bcddcb88d2f2ff92305fa07b777149ef3e991f42",
+     "size_bytes": 111030
+    }
+   ],
+   "platform_git_tree": "90eb065428f0649f712cdd4950f63ce1b2012084"
+  },
+  "mega_cruise_5000": {
+   "files": [
+    {
+     "git_blob_sha1": "21f0d936f6900a9faf19f59ed3a319443dab9f1a",
+     "path": "data/platforms/mega_cruise_5000/spatial_layout.json",
+     "sha256": "f6b200d09de55791802dfa0b2ed45dee0e3aa6b4ebc9523c58178515a7767da6",
+     "size_bytes": 83170
+    },
+    {
+     "git_blob_sha1": "d4cc7c7599849d90f3c697e72860586b74e4a452",
+     "path": "data/platforms/mega_cruise_5000/air_flow_paths.json",
+     "sha256": "2ac186e23668a7d6a43957bb6f93999a2b0212a5be8a745133c0372749af2feb",
+     "size_bytes": 89525
+    },
+    {
+     "git_blob_sha1": "46fa9258d6f9acc9111546aa004e9b63e2b44225",
+     "path": "data/platforms/mega_cruise_5000/contam/hobbyist_overrides.json",
+     "sha256": "fbf91663b84c4c750cfff70a3b5071b15dc1c136b20750f6cf6bc666ba10f241",
+     "size_bytes": 1690
+    },
+    {
+     "git_blob_sha1": "4e33123004a6538fcf652631240db89116c435a9",
+     "path": "data/platforms/mega_cruise_5000/contam/platform.prj",
+     "sha256": "abb792030ac57f562f18f1bd27c620ecfc2d468c82a9925176bf9bf5e617f4e3",
+     "size_bytes": 359949
+    },
+    {
+     "git_blob_sha1": "af97b19c260943231c805da57662d4455bf2e585",
+     "path": "data/platforms/mega_cruise_5000/contam/path_map.json",
+     "sha256": "578fe6ebcbb329674028db99265ad7a70683483a1921b681d7a02d587cc1fba4",
+     "size_bytes": 515340
+    }
+   ],
+   "platform_git_tree": "e303a8d2e9026f85d6b3fa5db5340ce57cd264f7"
+  },
+  "mercury_aks20": {
+   "files": [
+    {
+     "git_blob_sha1": "33f9508ca205f6ee859ddb21870c18f24e6f2db5",
+     "path": "data/platforms/mercury_aks20/spatial_layout.json",
+     "sha256": "6734b09519fb9c55a195ff37fe69ee72e90494920695356b50100293627b79ff",
+     "size_bytes": 24243
+    },
+    {
+     "git_blob_sha1": "99e48ad41b962b385d14c18c35e602ce660c7d15",
+     "path": "data/platforms/mercury_aks20/air_flow_paths.json",
+     "sha256": "c4ec2faa8e6ded17760a22ed4057e2e5d341a5dc1b8f1683a1b759d15b66de6e",
+     "size_bytes": 20028
+    },
+    {
+     "git_blob_sha1": "a205115b55b04bb4e4029864cc9005178afa9d38",
+     "path": "data/platforms/mercury_aks20/contam/hobbyist_overrides.json",
+     "sha256": "d3073bcedc2faef2ed8410b9bd5cc1bcf6b6c7d6640a487828ebe909496c1a4c",
+     "size_bytes": 6975
+    },
+    {
+     "git_blob_sha1": "fb6eb4d054a4a653a8516acfc87e17786e23096e",
+     "path": "data/platforms/mercury_aks20/contam/platform.prj",
+     "sha256": "1a6bb357cd318d01e7eb03e58de448fd5dabbb9deca10230a7c000bfcaa6f2d9",
+     "size_bytes": 123001
+    },
+    {
+     "git_blob_sha1": "cc78579588c99e3ad090cb855e781be3f1c26bdb",
+     "path": "data/platforms/mercury_aks20/contam/path_map.json",
+     "sha256": "62509964afaa41dca3312c766684182a76b42f4b63080d55ebab82c154c9e6cb",
+     "size_bytes": 182455
+    }
+   ],
+   "platform_git_tree": "d057332d202a780caea003816d724d53c1373772"
+  },
+  "miami_cl89": {
+   "files": [
+    {
+     "git_blob_sha1": "1bd1add31688d388717c4c06e930aeaea7ff09dd",
+     "path": "data/platforms/miami_cl89/spatial_layout.json",
+     "sha256": "80e48de066cb63c107bc24cc1acf75435d672289f6ba951489c3874123ee7939",
+     "size_bytes": 31693
+    },
+    {
+     "git_blob_sha1": "af5e82ca38c6d09707de9a96225337af01bf5673",
+     "path": "data/platforms/miami_cl89/air_flow_paths.json",
+     "sha256": "b7c569ba69fe03b1d9e1782c5636d3b1f060b6df29330933402a8ccaecee33cc",
+     "size_bytes": 18791
+    },
+    {
+     "git_blob_sha1": "a2e062963c37f2017b882e10af6986d46d219458",
+     "path": "data/platforms/miami_cl89/contam/hobbyist_overrides.json",
+     "sha256": "6005c549f68fc8b9c0010198afc339d85ee86bbba77c31ce9e9e776301e15705",
+     "size_bytes": 9338
+    },
+    {
+     "git_blob_sha1": "acc749b94058d96fec044fa57f97cd9be3e9538a",
+     "path": "data/platforms/miami_cl89/contam/platform.prj",
+     "sha256": "1db67410bb6173494fd41d1a6383aa3d84142f74b227a80771537150eb7a411a",
+     "size_bytes": 71905
+    },
+    {
+     "git_blob_sha1": "232e728e329b691a3c1e90222dafd137b13862b0",
+     "path": "data/platforms/miami_cl89/contam/path_map.json",
+     "sha256": "459366ae0b2e119f38e35f4453ec27264e4ebd57866d2b8b93086278cef00ad7",
+     "size_bytes": 80939
+    }
+   ],
+   "platform_git_tree": "30563d01a567f226d1c1483d43c21783d08a8704"
+  },
+  "middlesex_lst983": {
+   "files": [
+    {
+     "git_blob_sha1": "3cfad5fdd5acd07a716979c091f1bcbe93ee874b",
+     "path": "data/platforms/middlesex_lst983/spatial_layout.json",
+     "sha256": "b664a0969481352753cc42c221b2f70801da0dfe6340958b05efb1deaaefe337",
+     "size_bytes": 16052
+    },
+    {
+     "git_blob_sha1": "0702c33c296aef89c0687d56fcd70d0e13b4a6bd",
+     "path": "data/platforms/middlesex_lst983/air_flow_paths.json",
+     "sha256": "52ed36e00015318d03b850befc029f3f416c1b2e18277508b7145fe42423ec4e",
+     "size_bytes": 20774
+    },
+    {
+     "git_blob_sha1": "bb53913e96346cde5bbccdb5c74c0b6f1d08f6e9",
+     "path": "data/platforms/middlesex_lst983/contam/hobbyist_overrides.json",
+     "sha256": "ca30628dbfbc4383bd212409a08660e37ccab7dcbb741bb032f765879506eb97",
+     "size_bytes": 4766
+    },
+    {
+     "git_blob_sha1": "95d0260cdc5eb83a69c0e347530272f2cb81aac3",
+     "path": "data/platforms/middlesex_lst983/contam/platform.prj",
+     "sha256": "d27e87910f62613bc91838762b347f3a6644978ac50191b2d94b1432928c7e1b",
+     "size_bytes": 53874
+    },
+    {
+     "git_blob_sha1": "3f4bb25d8d8320e2de9767ee72c33a02fdeedb83",
+     "path": "data/platforms/middlesex_lst983/contam/path_map.json",
+     "sha256": "76f37c68b5ae90d470a94600290957c9d892da879b99b49afe244bd764e33dff",
+     "size_bytes": 62417
+    }
+   ],
+   "platform_git_tree": "9c3a11b0e4404f5c6230bab1f0ed5e8e73dfba6b"
+  },
+  "midway_cv41": {
+   "files": [
+    {
+     "git_blob_sha1": "7dc16357f4bf43ea699b3d66fe2b670c7f9cc887",
+     "path": "data/platforms/midway_cv41/spatial_layout.json",
+     "sha256": "3572336d56083ef572a7d7e890f04f1fbe3884eb70983257fac0cc6baea6dc7f",
+     "size_bytes": 27687
+    },
+    {
+     "git_blob_sha1": "44f2d57e9ded4d786103340ccd50e6b16f40d92b",
+     "path": "data/platforms/midway_cv41/air_flow_paths.json",
+     "sha256": "c587b903269fc59619a1d86022f47c59b186c03c83488a9666287b385cde27d1",
+     "size_bytes": 17473
+    },
+    {
+     "git_blob_sha1": "08ea733dfde6ac0b790d775f40f97aedf0e3f86e",
+     "path": "data/platforms/midway_cv41/contam/hobbyist_overrides.json",
+     "sha256": "ed33548ece05f1a8908326b247f428b7cb465fd6728cc3fe7685d49021eaf1d3",
+     "size_bytes": 7450
+    },
+    {
+     "git_blob_sha1": "79b9246326fb8cd60bd19d4e9b0fdde561f72661",
+     "path": "data/platforms/midway_cv41/contam/platform.prj",
+     "sha256": "5ce4609a614c417ee9a375a363c03b91785b510fd0fd7334ab23c957c4f5003d",
+     "size_bytes": 114421
+    },
+    {
+     "git_blob_sha1": "10dc94a215e04e7103ca7a035ff9004ea9187c47",
+     "path": "data/platforms/midway_cv41/contam/path_map.json",
+     "sha256": "adec95016662cad65639aced0a4c16df07fa0b9e9ebcc8ad701774cd4241ceac",
+     "size_bytes": 161781
+    }
+   ],
+   "platform_git_tree": "b59bde688518ae8719462beed41d8cbc221bb16c"
+  },
+  "missouri_bb63": {
+   "files": [
+    {
+     "git_blob_sha1": "d704a9fbd683c647e02dfc0b249a8e09b77695c0",
+     "path": "data/platforms/missouri_bb63/spatial_layout.json",
+     "sha256": "9bec8ed13dc5f494f74c8f7b589c7c1f7a5a0f45e5c66af5039341452e3b83ea",
+     "size_bytes": 41036
+    },
+    {
+     "git_blob_sha1": "059f6ddf34593b9b82edfdb75884ba9894ca4cc0",
+     "path": "data/platforms/missouri_bb63/air_flow_paths.json",
+     "sha256": "f1dfe79d43338b66dcd4a625516e54dba4e9a33f4305294437251ca186a519f6",
+     "size_bytes": 29852
+    },
+    {
+     "git_blob_sha1": "ee046c0e7dd5aea2795e4f689723420a84c3fcaf",
+     "path": "data/platforms/missouri_bb63/contam/hobbyist_overrides.json",
+     "sha256": "a140ed691c7e9e27b32798c852ba8e9e65c58624dbf94f6abb290c8170b96fd7",
+     "size_bytes": 11556
+    },
+    {
+     "git_blob_sha1": "4e5b7779dc9bd1e8681b283a7e389f19cb6220a3",
+     "path": "data/platforms/missouri_bb63/contam/platform.prj",
+     "sha256": "19156dc2397911e9ffc1b049bc44bc68d1a5ff2d4733e62fd896fab6aca91a1e",
+     "size_bytes": 284722
+    },
+    {
+     "git_blob_sha1": "17d27ad405ed6ab9aa606aea3f1bb2200950c044",
+     "path": "data/platforms/missouri_bb63/contam/path_map.json",
+     "sha256": "f701d5a97d931ef627e8cc0898ba9997d9cd6276764b05c7e5e63cb74cf58c46",
+     "size_bytes": 460197
+    }
+   ],
+   "platform_git_tree": "9992bf667dd982b02dbe9f1b342ebba1d61b684f"
+  },
+  "montana_acr13": {
+   "files": [
+    {
+     "git_blob_sha1": "f01068aa4a3c3e19e3390e73840b043f818bc819",
+     "path": "data/platforms/montana_acr13/spatial_layout.json",
+     "sha256": "eeceba60a2b9877f74cc6c5497fd0f0eb19ff34c0480ece32a45582c53431b72",
+     "size_bytes": 56387
+    },
+    {
+     "git_blob_sha1": "26e39fb9b5a5fcb1703148de541439838363ad0d",
+     "path": "data/platforms/montana_acr13/air_flow_paths.json",
+     "sha256": "e2cfbae2b7d1aa5118f0a2a7d69b377cb35bdcac4e45da0dbf870e63d1c407fe",
+     "size_bytes": 30087
+    },
+    {
+     "git_blob_sha1": "9c3c57c330b38df98691c399a6bd14f3579b09c9",
+     "path": "data/platforms/montana_acr13/contam/hobbyist_overrides.json",
+     "sha256": "a98c50c05d57f8448e4d8cac576de89a6c0d622f2470210ab9a385a7a599eb43",
+     "size_bytes": 14764
+    },
+    {
+     "git_blob_sha1": "e26ed58afd8d6893d9a9be36286d42b9b2067c1f",
+     "path": "data/platforms/montana_acr13/contam/platform.prj",
+     "sha256": "cdc4452338d86edfef4a37531721ceb15ce613d1c15c5953b262b70237c1a023",
+     "size_bytes": 321386
+    },
+    {
+     "git_blob_sha1": "5a844e8eb57a844477eac676d4530e03a145df13",
+     "path": "data/platforms/montana_acr13/contam/path_map.json",
+     "sha256": "9516551ad0b7173182fde6da8ecbe186c3c13426ab4ba0a7e7bd3c6a17172de7",
+     "size_bytes": 515434
+    }
+   ],
+   "platform_git_tree": "62ee3412de0d818694cb68ebbaf6a23e3890b544"
+  },
+  "new_jersey_bb62": {
+   "files": [
+    {
+     "git_blob_sha1": "26472227f8a97ab235dd3e61e5e7172d9d34f42e",
+     "path": "data/platforms/new_jersey_bb62/spatial_layout.json",
+     "sha256": "60e4ef56f99ab3f0232214ae25a69db05d2060c149010601ff6908dca1ddced1",
+     "size_bytes": 41175
+    },
+    {
+     "git_blob_sha1": "8d0457db8a8d086473d83697e2f563a07a2709a5",
+     "path": "data/platforms/new_jersey_bb62/air_flow_paths.json",
+     "sha256": "f014f18aeb623cfa699add9a52816bdd169620d9b4520f5a5b6425e510955f92",
+     "size_bytes": 29874
+    },
+    {
+     "git_blob_sha1": "6b92ad153441d4b02b7070bf4a5e4ef2e574090c",
+     "path": "data/platforms/new_jersey_bb62/contam/hobbyist_overrides.json",
+     "sha256": "e1315ed65508c5c9220d10aa92d99518f60d0e6dd9e90729bee4c843d4f0d215",
+     "size_bytes": 11558
+    },
+    {
+     "git_blob_sha1": "98241d9b1a02c7dfe712f9a364a8a37cbe21fc11",
+     "path": "data/platforms/new_jersey_bb62/contam/platform.prj",
+     "sha256": "d66987db76630df6e5bcdd818a8da78b012f9187d7a3b2b98509b4fdadd72edb",
+     "size_bytes": 284739
+    },
+    {
+     "git_blob_sha1": "1fdebef086f083cd12f28ff58bd0e3d3df54b305",
+     "path": "data/platforms/new_jersey_bb62/contam/path_map.json",
+     "sha256": "ec4c4fb538c4e4462b9dda47f68e88716a5e7c6a4ca861e68319c908747e66b4",
+     "size_bytes": 460339
+    }
+   ],
+   "platform_git_tree": "41e749de1ad1e3ee87c84c45f49d6f69b888282d"
+  },
+  "new_york_bb34": {
+   "files": [
+    {
+     "git_blob_sha1": "dde369ae76744a2e911c041a6f6bb4f7225ad5c9",
+     "path": "data/platforms/new_york_bb34/spatial_layout.json",
+     "sha256": "e97572017e2761ce51b693158831026a94f4e25ed81c0f583901adf125ac0a40",
+     "size_bytes": 32448
+    },
+    {
+     "git_blob_sha1": "4ce1426433f42915f8cf6e1a54c94832e262e01f",
+     "path": "data/platforms/new_york_bb34/air_flow_paths.json",
+     "sha256": "d49e0d9ac25325e6cd66869e43c81b718cbc24e11f261fc783422e58d577274f",
+     "size_bytes": 17781
+    },
+    {
+     "git_blob_sha1": "a47e5392d81acbca3706820c2ceccc9de933f1ad",
+     "path": "data/platforms/new_york_bb34/contam/hobbyist_overrides.json",
+     "sha256": "146959882fc9c76c28629d06f65cc7925c7e159844cdb9e63b38f17b7515bfeb",
+     "size_bytes": 8654
+    },
+    {
+     "git_blob_sha1": "28fd88bf2b4572f9f20790928235abb6cb709f6e",
+     "path": "data/platforms/new_york_bb34/contam/platform.prj",
+     "sha256": "63eaefda66d8ecdfed086e48438a492ce548a2cb166956e3077085b0561e45fb",
+     "size_bytes": 160560
+    },
+    {
+     "git_blob_sha1": "522dafb9926d518e7c157e9393fe8690dbd82351",
+     "path": "data/platforms/new_york_bb34/contam/path_map.json",
+     "sha256": "ebd80184d8a2c8e50e7d4f160fe97927cf9c43cbd9ac841a98c29413deb2a972",
+     "size_bytes": 240494
+    }
+   ],
+   "platform_git_tree": "dd257421f50c01edec814332cf5650e49a00c9cb"
+  },
+  "nields_dd616": {
+   "files": [
+    {
+     "git_blob_sha1": "60c842b76e47ecc816d6a9fccb37ad4544a9c6de",
+     "path": "data/platforms/nields_dd616/spatial_layout.json",
+     "sha256": "82adbe59049a6f0874e8d64cadc56440f3c3519dda31e6937534584b2fd65fe0",
+     "size_bytes": 15996
+    },
+    {
+     "git_blob_sha1": "1aebc7229bfec31f8e664514ff25c55654180a64",
+     "path": "data/platforms/nields_dd616/air_flow_paths.json",
+     "sha256": "e4e608ae2da042b4002b8c890eb22a4f177d62a07b22ae654e04ffad04c63917",
+     "size_bytes": 10207
+    },
+    {
+     "git_blob_sha1": "edda863ca14c467002ec5031e3ce555d6bd540ee",
+     "path": "data/platforms/nields_dd616/contam/hobbyist_overrides.json",
+     "sha256": "7ef04179f4dcb9b4c11f1418be894bc3638336f171961a2aecbecb9e2de3440e",
+     "size_bytes": 4704
+    },
+    {
+     "git_blob_sha1": "1c98142222f64e800b844721b8d45534e531e392",
+     "path": "data/platforms/nields_dd616/contam/platform.prj",
+     "sha256": "5cc1c228a0006771308e5fc42789c719de6380766919ff9aca04b97b1a6bf332",
+     "size_bytes": 47816
+    },
+    {
+     "git_blob_sha1": "47d155c2df4f3590c1dc09f98c6069367078502c",
+     "path": "data/platforms/nields_dd616/contam/path_map.json",
+     "sha256": "730658e8034c24a5c21c099806dbebc353704d7dd52ca58afe60d3145de27280",
+     "size_bytes": 54436
+    }
+   ],
+   "platform_git_tree": "3304211d02546b6df347f9826be05b74baee4230"
+  },
+  "olympia_c6": {
+   "files": [
+    {
+     "git_blob_sha1": "9063c288b1584ea0bcb4644319306f613d21a333",
+     "path": "data/platforms/olympia_c6/spatial_layout.json",
+     "sha256": "5b7508bf844208837f7b01b0265bc613086fb6eb215112825c2e3a5b624bea21",
+     "size_bytes": 39023
+    },
+    {
+     "git_blob_sha1": "dfdf459ca5e82f91b717422f9f9219bf61be8437",
+     "path": "data/platforms/olympia_c6/air_flow_paths.json",
+     "sha256": "ab593adc40886cc47bf000125480fb60df3a5fed764dbd443651576f4f89fad9",
+     "size_bytes": 33302
+    },
+    {
+     "git_blob_sha1": "60e4c1ef6126ac371f118883fc146d2d3c47ece3",
+     "path": "data/platforms/olympia_c6/contam/hobbyist_overrides.json",
+     "sha256": "2cc654f0801f60c7689a1fd573ad094f44424688ce5e9fef9d319f96741813e2",
+     "size_bytes": 10608
+    },
+    {
+     "git_blob_sha1": "ca41f56bf8fdc5af71c28c7bc0e8ab6551229757",
+     "path": "data/platforms/olympia_c6/contam/platform.prj",
+     "sha256": "703545512b6518ac8a2f132ebf117406e5d41ba4035f2f2ffb0147a3973b13d9",
+     "size_bytes": 123521
+    },
+    {
+     "git_blob_sha1": "a0345b33e7311a84712331a9dd142275e4cd545a",
+     "path": "data/platforms/olympia_c6/contam/path_map.json",
+     "sha256": "09bb52d938aad8c6f5e0ff99ebf1ff655d0c4827b53692ac03057cdbe1b3d2ce",
+     "size_bytes": 170023
+    }
+   ],
+   "platform_git_tree": "dea19b13a96250f07b90e93d90361fee92a9d24a"
+  },
+  "palmer_dms5": {
+   "files": [
+    {
+     "git_blob_sha1": "a0196f1671bf8399f7a975ccdc14f27dbc432804",
+     "path": "data/platforms/palmer_dms5/spatial_layout.json",
+     "sha256": "d918cce086986469c26a28f056fdcb9f39ef41f9926cb7ec218e1ae60f8a2fcf",
+     "size_bytes": 13965
+    },
+    {
+     "git_blob_sha1": "d340b020309b4d607bbc2c3a5da2a5e6e9b7cccc",
+     "path": "data/platforms/palmer_dms5/air_flow_paths.json",
+     "sha256": "c6b9aecc78f913a08f2ee98266c04f5c68251bb54f37e9c1e0a8e1f507b99db3",
+     "size_bytes": 7454
+    },
+    {
+     "git_blob_sha1": "2427b4f694451486f40a295357a74f5d040c6a9e",
+     "path": "data/platforms/palmer_dms5/contam/hobbyist_overrides.json",
+     "sha256": "d8d296ee86a53d3e34139479e0d63f7ffc03bf0a32ff8a04d33f2e257126e1e0",
+     "size_bytes": 3006
+    },
+    {
+     "git_blob_sha1": "462954a5b82d725ee6c7c325ed05e88b1b65b440",
+     "path": "data/platforms/palmer_dms5/contam/platform.prj",
+     "sha256": "0f59347753947a4c502ab7e49909ba8babe29b66d7bd7a1be2eaaec4431437c1",
+     "size_bytes": 55381
+    },
+    {
+     "git_blob_sha1": "861fdea050055f847990a28df7abec646455ba11",
+     "path": "data/platforms/palmer_dms5/contam/path_map.json",
+     "sha256": "88a901ac363bed8e0149ce7d19a0919c2b590e9e7c559988c9228c47a950350c",
+     "size_bytes": 72250
+    }
+   ],
+   "platform_git_tree": "3ca7e16fe599fd60b8b06cc51477268149d1bfe4"
+  },
+  "passumpsic_ao106": {
+   "files": [
+    {
+     "git_blob_sha1": "c3960bdb0ece09ea48a376ec33296a0bb65f7ef4",
+     "path": "data/platforms/passumpsic_ao106/spatial_layout.json",
+     "sha256": "f716eb034bd3c1cd4b77efc50675b6c315c3057b7530921efcd13aeb95833a5f",
+     "size_bytes": 10397
+    },
+    {
+     "git_blob_sha1": "0c9956152738e44d844c40cb7342156a57fd10cc",
+     "path": "data/platforms/passumpsic_ao106/air_flow_paths.json",
+     "sha256": "78c5851e5559f3798b1e66c35428a4ac3a9e73f499ef44c73528a345023f5403",
+     "size_bytes": 9645
+    },
+    {
+     "git_blob_sha1": "8d3d9586ada67a764c39a5a60691cae6ce8738eb",
+     "path": "data/platforms/passumpsic_ao106/contam/hobbyist_overrides.json",
+     "sha256": "8e4e99e88fa976c1e4b3822714b8a341255cf7801d868073656f69037e02189b",
+     "size_bytes": 3213
+    },
+    {
+     "git_blob_sha1": "01539a9f3a89e50cb2adf209b26ddb901fc5bfbd",
+     "path": "data/platforms/passumpsic_ao106/contam/platform.prj",
+     "sha256": "cc8351330762761c580477fc35c271f585ceec19c583bb8d0c802f4010efc425",
+     "size_bytes": 38602
+    },
+    {
+     "git_blob_sha1": "3f2c2b05808c008682d87f31b3b6b1211a9bd035",
+     "path": "data/platforms/passumpsic_ao106/contam/path_map.json",
+     "sha256": "131fc6906687876dac6cc68243910304a574e9feac1b25be6d45746ebd0ac65f",
+     "size_bytes": 41841
+    }
+   ],
+   "platform_git_tree": "24b278394f1d48223c4d7d93798f45adff9bde1d"
+  },
+  "pce_874": {
+   "files": [
+    {
+     "git_blob_sha1": "6e817cbf22cc0bc2416b1fb499c18ad54255af2e",
+     "path": "data/platforms/pce_874/spatial_layout.json",
+     "sha256": "44a1c65323583ea71ea78b9b23d05115f5977cec2a42512c54360e2c731bd744",
+     "size_bytes": 7689
+    },
+    {
+     "git_blob_sha1": "a4ec9c5cdcacfc4d045df92c1f9058c621b90ca6",
+     "path": "data/platforms/pce_874/air_flow_paths.json",
+     "sha256": "4186f744cc31e0310cc886f4bdbabc09b6b0f954cfbf05e96b0e2ab798eaf2f1",
+     "size_bytes": 6502
+    },
+    {
+     "git_blob_sha1": "58f53fa5b367dc8ee606978d6b8988322d6ff4f5",
+     "path": "data/platforms/pce_874/contam/hobbyist_overrides.json",
+     "sha256": "b74847b0ae884b0526f052be846cbb230692f4f6f664a0521fad74ddd270e684",
+     "size_bytes": 2573
+    },
+    {
+     "git_blob_sha1": "067ba1c78d19a4455fea00e64738121f2c587dc3",
+     "path": "data/platforms/pce_874/contam/platform.prj",
+     "sha256": "1ae22cc5cf03d07269aa4f1271d4840e4ffbd5175ff4eb765362df480a243f96",
+     "size_bytes": 32378
+    },
+    {
+     "git_blob_sha1": "3d51ac5ba55a228964399b7c7276f8c46b62097e",
+     "path": "data/platforms/pce_874/contam/path_map.json",
+     "sha256": "c9238f2930d06d0927df2c443d8d4cb29d5eb71e99a1ef1acb62872d9851faa1",
+     "size_bytes": 34959
+    }
+   ],
+   "platform_git_tree": "ec2eacb6d3ff4db0260caadac2076ac5c052f6e2"
+  },
+  "pope_ap110": {
+   "files": [
+    {
+     "git_blob_sha1": "19b088b02c42ef9470910c26b881f52f6c846e7b",
+     "path": "data/platforms/pope_ap110/spatial_layout.json",
+     "sha256": "47324ba4cb6375e03d364d87674c2d411f650ef301b636131fcf0b41e92ee4cf",
+     "size_bytes": 35976
+    },
+    {
+     "git_blob_sha1": "f69ae0ab89686130027343133c2b24c2a0083230",
+     "path": "data/platforms/pope_ap110/air_flow_paths.json",
+     "sha256": "f20217b13cece9818a8ff65e70324e9b2dd7bd2b7f97f225319679e848ab4403",
+     "size_bytes": 21262
+    },
+    {
+     "git_blob_sha1": "680f644da90e7812144a3e5d417fad61d14d854d",
+     "path": "data/platforms/pope_ap110/contam/hobbyist_overrides.json",
+     "sha256": "38e67b87c8666012883651f16ef67d748c636b6ef2bfe22109e91f65ac4ad848",
+     "size_bytes": 10040
+    },
+    {
+     "git_blob_sha1": "89f2c71b5cc520b502fa58e7cd695a8b61a5c706",
+     "path": "data/platforms/pope_ap110/contam/platform.prj",
+     "sha256": "128a6cb933648803e455ed6f8b5cb883cdecfe57f0d36d220a4934d1d1d43e0c",
+     "size_bytes": 162876
+    },
+    {
+     "git_blob_sha1": "1287fe6af8fab50bb0136d1c8cabbae0479723c8",
+     "path": "data/platforms/pope_ap110/contam/path_map.json",
+     "sha256": "69fd0cb214c039f2e4c72d87aa68bab12c4057298dbec9bc33ec3970fc2c986f",
+     "size_bytes": 241504
+    }
+   ],
+   "platform_git_tree": "f786de2f3579c358d7f2be17748cf1cd5efe433a"
+  },
+  "pt_564": {
+   "files": [
+    {
+     "git_blob_sha1": "aa79fb99599cb57c8cb87f179a46784aa2dd0ce9",
+     "path": "data/platforms/pt_564/spatial_layout.json",
+     "sha256": "0c16bf0de74533030cba3bd2f16157fca8ddf4ab0e07f7d658ae6d1574e29e3b",
+     "size_bytes": 5669
+    },
+    {
+     "git_blob_sha1": "afae63e79692cec48ff5dad2f8a630bef1fa0471",
+     "path": "data/platforms/pt_564/air_flow_paths.json",
+     "sha256": "b133489b608fa9066582a0a293305fd3cb63920f43f25ebc0c2241a1c4b63c75",
+     "size_bytes": 6732
+    },
+    {
+     "git_blob_sha1": "966d728c6b2ed03d79c2d8292ce9cc4b9dfd0e43",
+     "path": "data/platforms/pt_564/contam/hobbyist_overrides.json",
+     "sha256": "437b142672ab92ec4ce3bd259fe0b9d4158719697c85a0645b3068641c560f8d",
+     "size_bytes": 2385
+    },
+    {
+     "git_blob_sha1": "5bcc608b082fb2664095e4e8957161303624cde1",
+     "path": "data/platforms/pt_564/contam/platform.prj",
+     "sha256": "875e94b75f79430c26cba6252e3a4ed8586ea7e05ea012193ca8f702d8255b52",
+     "size_bytes": 22269
+    },
+    {
+     "git_blob_sha1": "09e1ece79a50b16164fa71f0bf3ba20a1fd02377",
+     "path": "data/platforms/pt_564/contam/path_map.json",
+     "sha256": "43d7e79045e564c377c21c37fa21f5943e9b318ef54d3ea3f2e73762a5e81ff3",
+     "size_bytes": 18058
+    }
+   ],
+   "platform_git_tree": "ef16d8c3201fcd2dbfa4c4899c9c6b7cfc806fb8"
+  },
+  "puncher_cve53": {
+   "files": [
+    {
+     "git_blob_sha1": "d6ce4c502d9d8f91c6f367715667b39083273543",
+     "path": "data/platforms/puncher_cve53/spatial_layout.json",
+     "sha256": "658124eb792a19f3b9c334088a37ea0bc06c1346ee10ba869f6472a08a83c91b",
+     "size_bytes": 34736
+    },
+    {
+     "git_blob_sha1": "be26d5b5bbb5999b7f2f2e13238b4efa8ee2b347",
+     "path": "data/platforms/puncher_cve53/air_flow_paths.json",
+     "sha256": "b002aa8ce282e7bfdf3a0ba133ec0150deaa9048e1541fd532ad8eeec4a1d9dc",
+     "size_bytes": 17626
+    },
+    {
+     "git_blob_sha1": "304815177605b68d20f07a9b362d2b864f81b898",
+     "path": "data/platforms/puncher_cve53/contam/hobbyist_overrides.json",
+     "sha256": "7aea2ca0c72a034d39888ed9a1d20aca0a75816c82c451f4de12358403ab3da4",
+     "size_bytes": 9530
+    },
+    {
+     "git_blob_sha1": "8d7d6973aa28a3289f899b6186b1d1f444932e07",
+     "path": "data/platforms/puncher_cve53/contam/platform.prj",
+     "sha256": "491d36676a61e73e524bc34f1815b94068d05db9bd207f7672056a94084fde36",
+     "size_bytes": 134235
+    },
+    {
+     "git_blob_sha1": "c2d07356a17d2da484226e23adcbb35c9f408a26",
+     "path": "data/platforms/puncher_cve53/contam/path_map.json",
+     "sha256": "be6a34934c67153f66024d2e8a1f91c193a674b92e48e00cbe119b223034cba4",
+     "size_bytes": 188913
+    }
+   ],
+   "platform_git_tree": "74fb897004f0fc3f3930b8622912936cf1af6c85"
+  },
+  "ranger_cv4": {
+   "files": [
+    {
+     "git_blob_sha1": "8415979228ec4ea168e4d16f6e3337369e355cc7",
+     "path": "data/platforms/ranger_cv4/spatial_layout.json",
+     "sha256": "e713ad9d228ed95a82c48d5b1aa3c6f6818e5cd11d80d4b7e490606a9b93ae36",
+     "size_bytes": 29739
+    },
+    {
+     "git_blob_sha1": "def33f4c4b7084d3eb54e695e98ecea1f8a3992a",
+     "path": "data/platforms/ranger_cv4/air_flow_paths.json",
+     "sha256": "831adc76402698bb2cece8c1a7fa8b1467c0dcf1198d1ea7b8e0a2b408e4ec79",
+     "size_bytes": 17778
+    },
+    {
+     "git_blob_sha1": "53c4f45263810b6569efd91b8b0eb9d2b164fbec",
+     "path": "data/platforms/ranger_cv4/contam/hobbyist_overrides.json",
+     "sha256": "be64253545792c859f71c417d7258164bb800c99c1f255a1439860e07413c24b",
+     "size_bytes": 8004
+    },
+    {
+     "git_blob_sha1": "b6cec11102df728b12b264b46633ff90addf2cba",
+     "path": "data/platforms/ranger_cv4/contam/platform.prj",
+     "sha256": "9c0dee114c330f6b2e1a379fe6226ae3286637fa7596d4d91a43b816ad660739",
+     "size_bytes": 128131
+    },
+    {
+     "git_blob_sha1": "886396d52cc55423fa754a28e7d1d7d1516c5bcf",
+     "path": "data/platforms/ranger_cv4/contam/path_map.json",
+     "sha256": "b2c5bcc8e601ce20ca8c0b7dd0f4f22033623261db6287ee32d2dd329d81d873",
+     "size_bytes": 183326
+    }
+   ],
+   "platform_git_tree": "dd92d1e2e4bd65698cfc2ed757ac992deb92f30c"
+  },
+  "raven_am55": {
+   "files": [
+    {
+     "git_blob_sha1": "4b44ba1ea4869d2cf1042bee40c79e1300f17aa8",
+     "path": "data/platforms/raven_am55/spatial_layout.json",
+     "sha256": "e7edf25532adf7db6fc1bbaf64b1259cbb960691295d1603015bb07354e8a00f",
+     "size_bytes": 8159
+    },
+    {
+     "git_blob_sha1": "ec32ed5e7f67efbdaa40a791e871d3d511f0ecd1",
+     "path": "data/platforms/raven_am55/air_flow_paths.json",
+     "sha256": "b144fd144e5544bbb08fbd9e847561a2dc6db48e2e82ceccda3a47e2f356e383",
+     "size_bytes": 6460
+    },
+    {
+     "git_blob_sha1": "bb8a0e3c2afbe7f08aa623e1948ae8f1c702fabe",
+     "path": "data/platforms/raven_am55/contam/hobbyist_overrides.json",
+     "sha256": "a82d29e5659374aef07bf7551319a81a9480e15e9975ee2a22246b4f5f3707c0",
+     "size_bytes": 2749
+    },
+    {
+     "git_blob_sha1": "ebd839850bc639be8ba485a241d8f976d5053a50",
+     "path": "data/platforms/raven_am55/contam/platform.prj",
+     "sha256": "04313499a03b480b9274f791826c9583c12895076b532a905fa0be0c311e1c3e",
+     "size_bytes": 29608
+    },
+    {
+     "git_blob_sha1": "990217f15aa2377d1de353f5cbe9bd710c39bf2e",
+     "path": "data/platforms/raven_am55/contam/path_map.json",
+     "sha256": "91d9fa8c14baa8c21844ac1ec2805ef89c0ba44087551d5cc36bc22e66398cfb",
+     "size_bytes": 29398
+    }
+   ],
+   "platform_git_tree": "0d051cdccc84349fbddad057d4fcf9f88c2557cc"
+  },
+  "river_class_frigate": {
+   "files": [
+    {
+     "git_blob_sha1": "dd1117b780df57479256b04bbe98126172b14792",
+     "path": "data/platforms/river_class_frigate/spatial_layout.json",
+     "sha256": "3a7e91f6c00bc3b23b05344d18ddd8b4e0599bdff82b0cba2c40fb2d497aefa0",
+     "size_bytes": 14687
+    },
+    {
+     "git_blob_sha1": "fc560da5c30a23ea7546114845ab04d35e538fdd",
+     "path": "data/platforms/river_class_frigate/air_flow_paths.json",
+     "sha256": "3de80307af2149825fe969f4dc8e430afd185917aa32bc1dd066b518dee986a6",
+     "size_bytes": 10547
+    },
+    {
+     "git_blob_sha1": "0daf4f4eff95d4cbe3e0d99962ae2b1fe6ae0d93",
+     "path": "data/platforms/river_class_frigate/contam/hobbyist_overrides.json",
+     "sha256": "683de2218c392885aed08a70567a0be8b7fcb13bd286dcc0210877eb11dd9f5b",
+     "size_bytes": 4245
+    },
+    {
+     "git_blob_sha1": "9a139a4684d631776ee2f1daef879ab975c86136",
+     "path": "data/platforms/river_class_frigate/contam/platform.prj",
+     "sha256": "a6ab5b721f1ba2eab6660743d93f533cddccc263e6b2fc37da5c2169b167efab",
+     "size_bytes": 68063
+    },
+    {
+     "git_blob_sha1": "4cdaf02f1fdd981cc703cb9a7cf64843f12da6d9",
+     "path": "data/platforms/river_class_frigate/contam/path_map.json",
+     "sha256": "5ecaf60e602b78cf8912f95bb65962001918356ade98d653de584d122814cddd",
+     "size_bytes": 91324
+    }
+   ],
+   "platform_git_tree": "b9739c51debd86e1ee682c32f3e0db7941c2c733"
+  },
+  "rolla_pc483": {
+   "files": [
+    {
+     "git_blob_sha1": "bb7511fd045537cb40ceba235ceb8d455097851f",
+     "path": "data/platforms/rolla_pc483/spatial_layout.json",
+     "sha256": "7637798ff6d45744e5ef925ca1d954b57272966b4e40173b860d0f152bfef98d",
+     "size_bytes": 11694
+    },
+    {
+     "git_blob_sha1": "bc5d5791b29193d6727a6a586b0bb945271dbd81",
+     "path": "data/platforms/rolla_pc483/air_flow_paths.json",
+     "sha256": "cf61467d66fcee3d13aaac979f0e4a8513aeeeaff1ea6d0062c9e5d6f6a5e0d1",
+     "size_bytes": 7617
+    },
+    {
+     "git_blob_sha1": "1ae7752ae34fd40037e5c8769f62b250265b5690",
+     "path": "data/platforms/rolla_pc483/contam/hobbyist_overrides.json",
+     "sha256": "17c5c1df00018dbf3d5899a1af5f7fb5815fa928bfb5f1518bd61e32407fe94c",
+     "size_bytes": 3532
+    },
+    {
+     "git_blob_sha1": "b172a60c05ccc675df0922f067798256de08fabf",
+     "path": "data/platforms/rolla_pc483/contam/platform.prj",
+     "sha256": "b090c381195fa03f16d20a51021c6d724ac93fc8620e910947d69aab365b355d",
+     "size_bytes": 38435
+    },
+    {
+     "git_blob_sha1": "a2ca7e3402d5ade6f649f1341a709462d4430730",
+     "path": "data/platforms/rolla_pc483/contam/path_map.json",
+     "sha256": "ffa5b6f9435905d5f99500944da1651e53d2c2d26a2a52a25ab008c4d79c3c58",
+     "size_bytes": 41938
+    }
+   ],
+   "platform_git_tree": "64708c1890e29100c52058d6c0f98a9f914bc758"
+  },
+  "ruchamkin_apd89": {
+   "files": [
+    {
+     "git_blob_sha1": "aaed6c6b05f9c2716a9cbde2f0df7218607eacab",
+     "path": "data/platforms/ruchamkin_apd89/spatial_layout.json",
+     "sha256": "6093703b5a45e380bdb937fe73c79d8099566e8b1a807a96d11b8d694710f747",
+     "size_bytes": 12409
+    },
+    {
+     "git_blob_sha1": "e3dcb3e698342a53dd9f3b2773c799472006b39e",
+     "path": "data/platforms/ruchamkin_apd89/air_flow_paths.json",
+     "sha256": "6da9dffb6c0590ed7b76fe23df85076d473426305ef5d85fe0d0f3cfd01ec30c",
+     "size_bytes": 10030
+    },
+    {
+     "git_blob_sha1": "c35a6055d4a1b701c8f8f6487076c92389a5d29d",
+     "path": "data/platforms/ruchamkin_apd89/contam/hobbyist_overrides.json",
+     "sha256": "486f91cdb53770a2e35e8ebe461730ae7ed7f868b8322113771eb132223473cf",
+     "size_bytes": 3704
+    },
+    {
+     "git_blob_sha1": "053c842ed649f01f05acddac866b59b3103d80ce",
+     "path": "data/platforms/ruchamkin_apd89/contam/platform.prj",
+     "sha256": "5c9546e2eb5c38e95ee04fc386f85bc994e69169bb3aace03da90ec491ce28a7",
+     "size_bytes": 50148
+    },
+    {
+     "git_blob_sha1": "d1bbee8cd9106b165ea6fcdc0290cca8b32239c3",
+     "path": "data/platforms/ruchamkin_apd89/contam/path_map.json",
+     "sha256": "d99fff71ddf1bfa1f477c3bd0bcd8eaa83de3c6fc4b5079fde8877f2a009c065",
+     "size_bytes": 62249
+    }
+   ],
+   "platform_git_tree": "17babaf5db5f51fff89224b6fc49eb0691eae1e9"
+  },
+  "saratoga_cv3": {
+   "files": [
+    {
+     "git_blob_sha1": "48fd490ca9a411ca5b3ebcbd91cdb47e1dcb7e9a",
+     "path": "data/platforms/saratoga_cv3/spatial_layout.json",
+     "sha256": "167deb6e90aaa8c94a77378f1d078896969b8afdc3ad0e04a10e1843cf9c3f2b",
+     "size_bytes": 40176
+    },
+    {
+     "git_blob_sha1": "a9b41acc8e7eb69941b10647d06c39745ea48329",
+     "path": "data/platforms/saratoga_cv3/air_flow_paths.json",
+     "sha256": "139b38fdec25aef72642fa8bfe3a43ca18610d3893d3e598d08849788e3d283c",
+     "size_bytes": 21387
+    },
+    {
+     "git_blob_sha1": "ac002a2d16825729c1a04bb684f095d79c93e324",
+     "path": "data/platforms/saratoga_cv3/contam/hobbyist_overrides.json",
+     "sha256": "39ec511073d8343c66a16256a177a6c7479594b54c9a8b7276f9079d6d68d407",
+     "size_bytes": 9909
+    },
+    {
+     "git_blob_sha1": "44386bea58a80457498d97b7e9de03f840838ebf",
+     "path": "data/platforms/saratoga_cv3/contam/platform.prj",
+     "sha256": "a8ddaf7052d704ba9f82fdac76e9af94a69e80621e0ac28600c52d57d1e44978",
+     "size_bytes": 64631
+    },
+    {
+     "git_blob_sha1": "f713d05fe55fcf05f997b5bd09459b51436d4f68",
+     "path": "data/platforms/saratoga_cv3/contam/path_map.json",
+     "sha256": "c2192a6aa0d97599636eade80151d6822e565699a7ee8a5e18bb74755ab65a31",
+     "size_bytes": 63528
+    }
+   ],
+   "platform_git_tree": "0954faa125f43db99a0ced78e67bc77babf3d0ed"
+  },
+  "saratoga_cv60": {
+   "files": [
+    {
+     "git_blob_sha1": "093aa8f01ddf5e7e02e801ded37f2d24c33c7e48",
+     "path": "data/platforms/saratoga_cv60/spatial_layout.json",
+     "sha256": "159b9ab1ac4f0467de0dc3f0fda7b35984dc534124f67ae7750c169b4ef54a90",
+     "size_bytes": 32141
+    },
+    {
+     "git_blob_sha1": "217a7ba6d41547a3042802f64c7e1e7773681106",
+     "path": "data/platforms/saratoga_cv60/air_flow_paths.json",
+     "sha256": "010197d40ef6deece2f7e0201c4ccd82d5f2862458dfd2ab04773e24c3a1e063",
+     "size_bytes": 16563
+    },
+    {
+     "git_blob_sha1": "b49320302ec2e1ab3c4475dd106f9ad862cd411a",
+     "path": "data/platforms/saratoga_cv60/contam/hobbyist_overrides.json",
+     "sha256": "cdafc11b793284500db124a5c5f2ff3d065b070f38c64421dbbb1f00c513b508",
+     "size_bytes": 9136
+    },
+    {
+     "git_blob_sha1": "3a5b1db129a4ce56fe65f33da774f6d240e6796f",
+     "path": "data/platforms/saratoga_cv60/contam/platform.prj",
+     "sha256": "43cd82a4337990bc0499cecc58aef76a0037cf1530c6473c771f2b8daa9d334d",
+     "size_bytes": 146582
+    },
+    {
+     "git_blob_sha1": "62a3e3d057f9678dbb37e3d2591f09ab25864cc4",
+     "path": "data/platforms/saratoga_cv60/contam/path_map.json",
+     "sha256": "5157613cde27f34b943c82a906f4fa47f0e1f5988506bdb78ea781313348c511",
+     "size_bytes": 216156
+    }
+   ],
+   "platform_git_tree": "c76640dec60be16fd166825953b7c52c15ac92d3"
+  },
+  "savannah_ns": {
+   "files": [
+    {
+     "git_blob_sha1": "71ffad38aab49d1457b1a48169eebd647a8399df",
+     "path": "data/platforms/savannah_ns/spatial_layout.json",
+     "sha256": "54e3d46c4409706273084d15d8bd1b40fe7fb9f2fedacbbbaaed61d5b226731f",
+     "size_bytes": 29066
+    },
+    {
+     "git_blob_sha1": "4bb5d7ddfd70c064de84491b53cbc7415db0ea75",
+     "path": "data/platforms/savannah_ns/air_flow_paths.json",
+     "sha256": "1dce011efb15ac640618c0c68743e4c980a584114c75db8c030274a8f038d430",
+     "size_bytes": 25991
+    },
+    {
+     "git_blob_sha1": "0056e307baf039c95fbfcacadd03e3fcdc1f055b",
+     "path": "data/platforms/savannah_ns/contam/hobbyist_overrides.json",
+     "sha256": "d74049405a1feb109c5305d3eaf047d6cbba685a1111cdec199c7d5282e7402a",
+     "size_bytes": 7261
+    },
+    {
+     "git_blob_sha1": "d25b41247c47f18ebf2a5fbdd9ca5eda64b5ea17",
+     "path": "data/platforms/savannah_ns/contam/platform.prj",
+     "sha256": "2e22495b0e832dd92ba29ae819d3e569ea31ecc675a3c7142907436f51063a83",
+     "size_bytes": 122579
+    },
+    {
+     "git_blob_sha1": "a229e820136ccedcdd5c2826212a633a5799a642",
+     "path": "data/platforms/savannah_ns/contam/path_map.json",
+     "sha256": "275db067f806b20b05da34da306d918344ea7e5f2dcd5b5201544518f09a8c5f",
+     "size_bytes": 173630
+    }
+   ],
+   "platform_git_tree": "2dc1842231dda6f5a6c1e7c32a8d4212c35c3cf6"
+  },
+  "sigsbee_dd502": {
+   "files": [
+    {
+     "git_blob_sha1": "42f94dfb72a4b23d58f4786f7d30f03b7346c7dc",
+     "path": "data/platforms/sigsbee_dd502/spatial_layout.json",
+     "sha256": "66f6ecc4db2e9c10fa75bd670f0f498fe416eb7f8815f96784cad90cf287abcc",
+     "size_bytes": 16805
+    },
+    {
+     "git_blob_sha1": "2407f9ae0f1deb49d66ef106ebe9e808c36d0380",
+     "path": "data/platforms/sigsbee_dd502/air_flow_paths.json",
+     "sha256": "b0bd820cdeaa2f36b15fe25942612c014d4b189ccde44ff5aaa95d0872b85965",
+     "size_bytes": 10487
+    },
+    {
+     "git_blob_sha1": "c99971d7bf7e391da02fedbcde825c2261918863",
+     "path": "data/platforms/sigsbee_dd502/contam/hobbyist_overrides.json",
+     "sha256": "28e20e39dc8181009f975d7bd3dd6e0f93d81fdee9501994c26e124c9c9294ea",
+     "size_bytes": 4913
+    },
+    {
+     "git_blob_sha1": "47b66d19a48e02263e9566571004badfba4a40a9",
+     "path": "data/platforms/sigsbee_dd502/contam/platform.prj",
+     "sha256": "65152120d6f7e9158ad59a73da4d8af730f1aef78a623c535c37a844383f7745",
+     "size_bytes": 53336
+    },
+    {
+     "git_blob_sha1": "c86a08641eb678ff77d3521fa5fe2b6248d2c417",
+     "path": "data/platforms/sigsbee_dd502/contam/path_map.json",
+     "sha256": "3e72b131ec739a7b1cf5b55b5b881248eaca663f953d2e2f899dac28a568ab70",
+     "size_bytes": 63324
+    }
+   ],
+   "platform_git_tree": "582c2c800839cee4bb7092e126f67ae70bd8f7f3"
+  },
+  "south_dakota_bb49": {
+   "files": [
+    {
+     "git_blob_sha1": "05459126629e900e8ab19b8ada87261ab75e46af",
+     "path": "data/platforms/south_dakota_bb49/spatial_layout.json",
+     "sha256": "852cf3c1d595c757541ef71149d8627e7a09a6e1245721bd32a54471f138d61c",
+     "size_bytes": 20941
+    },
+    {
+     "git_blob_sha1": "fd0d74c3419d54124b906c4055fdcf3f2e6ae305",
+     "path": "data/platforms/south_dakota_bb49/air_flow_paths.json",
+     "sha256": "b36816eccb339f6df0338f3bda6e7f825af0c49febc91cdbf76ee622ddf850d9",
+     "size_bytes": 14037
+    },
+    {
+     "git_blob_sha1": "dc4fa2fa2dae9bac580cfd67bec425b3fa45aaa1",
+     "path": "data/platforms/south_dakota_bb49/contam/hobbyist_overrides.json",
+     "sha256": "ac30591739cc15f78e83a3f17b212134e91394050af102e279278c41cb31fed2",
+     "size_bytes": 5671
+    },
+    {
+     "git_blob_sha1": "f6a7234cf537977aa6b751510d07270b77b6ea7d",
+     "path": "data/platforms/south_dakota_bb49/contam/platform.prj",
+     "sha256": "062a023228a64d13f09e7082fe25c21f546e51d8d5a696ef5dd8077bb7a57cc9",
+     "size_bytes": 74752
+    },
+    {
+     "git_blob_sha1": "d785194768c8201b6df0a3ba01a790c60b64d809",
+     "path": "data/platforms/south_dakota_bb49/contam/path_map.json",
+     "sha256": "0b09fda7a3729fd84751aa9697cd5d7c0758d6355bece55a1c6f983ce071e3d1",
+     "size_bytes": 96951
+    }
+   ],
+   "platform_git_tree": "59d1aa26346683006888893cd157f9de2ead5236"
+  },
+  "spirit_cruise_3000": {
+   "files": [
+    {
+     "git_blob_sha1": "70d9c7ec93fa8f782e0f4e45f3d1d324d0d84326",
+     "path": "data/platforms/spirit_cruise_3000/spatial_layout.json",
+     "sha256": "204e057db8c492e1676ddeb8959f76ec5aacef0162cd2fda713ea0975682d1b1",
+     "size_bytes": 48986
+    },
+    {
+     "git_blob_sha1": "615bc5eaf0ede48d605a84ebe6d8774b8da4e37f",
+     "path": "data/platforms/spirit_cruise_3000/air_flow_paths.json",
+     "sha256": "9998a3c52fccb4ff0e1ee9a731cdbb310e625d6d418e5bee10a76bc8dcfabe58",
+     "size_bytes": 49479
+    },
+    {
+     "git_blob_sha1": "ecd8e696824027e099dbd4fc81aa0f55d5fa8991",
+     "path": "data/platforms/spirit_cruise_3000/contam/hobbyist_overrides.json",
+     "sha256": "77d128d3ce227af3a608175fb46979bb95788af74c344d715000cccf8039bcea",
+     "size_bytes": 1657
+    },
+    {
+     "git_blob_sha1": "b3cba904126e8ca4ebcc829ef41ae6dc8ee84475",
+     "path": "data/platforms/spirit_cruise_3000/contam/platform.prj",
+     "sha256": "58912111871224ee79c8553b14014a8b4e19b6621a73a5191b63e91b92811df0",
+     "size_bytes": 220014
+    },
+    {
+     "git_blob_sha1": "c2c83c82a608cd98fa0d665a8a68c6f5b4f284f6",
+     "path": "data/platforms/spirit_cruise_3000/contam/path_map.json",
+     "sha256": "a42406d73f722e82944821dc3b29d7ff3b18bdff8d2176c3edda9e579944fd56",
+     "size_bytes": 313740
+    }
+   ],
+   "platform_git_tree": "0c6a0bdd484323a23c704e8bfaeae257164b9244"
+  },
+  "squier_ap130": {
+   "files": [
+    {
+     "git_blob_sha1": "1b6cf03e6aaa056c8af0d62638944449d77b12de",
+     "path": "data/platforms/squier_ap130/spatial_layout.json",
+     "sha256": "46bd5f12735b5df2c2cfd17f032ec4f1e5364eb916babf6ec44c9b32687214d1",
+     "size_bytes": 21575
+    },
+    {
+     "git_blob_sha1": "a7714e678a2623d4af5f895a2dd99678d3977eff",
+     "path": "data/platforms/squier_ap130/air_flow_paths.json",
+     "sha256": "eca0717da6316100f203552de01f0b1f8ca8c7806f40b6a97263108f02087cda",
+     "size_bytes": 13567
+    },
+    {
+     "git_blob_sha1": "aebaf17c7b0da709f942dcbadf21b9883de816d6",
+     "path": "data/platforms/squier_ap130/contam/hobbyist_overrides.json",
+     "sha256": "91572bd647f4ce2cd7abba8931b864b3c6564aaedf8b6f5bf2c49f66cce238c7",
+     "size_bytes": 6928
+    },
+    {
+     "git_blob_sha1": "0e7784044c9587be5b15de94931560ed589d5887",
+     "path": "data/platforms/squier_ap130/contam/platform.prj",
+     "sha256": "eb05b8383eb9dc6acc71a35108f7e387eba53d9d46df17765ee983da2cb01e14",
+     "size_bytes": 81002
+    },
+    {
+     "git_blob_sha1": "4c8f973591b341f7eb1b8f78cf545ffce73eaad5",
+     "path": "data/platforms/squier_ap130/contam/path_map.json",
+     "sha256": "f4b0b2d34024078590b4397c9a3930e9e6cdf611e8981a3fd784787275b45286",
+     "size_bytes": 111436
+    }
+   ],
+   "platform_git_tree": "997d1fffb2ee6af5c7005225b20f52c63599e821"
+  },
+  "texas_bb35": {
+   "files": [
+    {
+     "git_blob_sha1": "d0cfc98517394c62e1949bb8a4eefc97e9a8afec",
+     "path": "data/platforms/texas_bb35/spatial_layout.json",
+     "sha256": "9a8747d2a4ec48b479040a64c078b0587bb201960f4d19889988e9f0c33f3912",
+     "size_bytes": 35670
+    },
+    {
+     "git_blob_sha1": "d932dae6aa931e748843bde6e97796735243d560",
+     "path": "data/platforms/texas_bb35/air_flow_paths.json",
+     "sha256": "e9ec652befef023808583e2dd25e01b5b7c1f4c3752f467c68fdbc2700d17fac",
+     "size_bytes": 19929
+    },
+    {
+     "git_blob_sha1": "de309ecffbed05389a48155c180018d58a847a9c",
+     "path": "data/platforms/texas_bb35/contam/hobbyist_overrides.json",
+     "sha256": "df29489578bc022979623cfaef8f836790f745ca6822ffa1dd78f6f495e23edc",
+     "size_bytes": 9423
+    },
+    {
+     "git_blob_sha1": "c7e6626de3fc0b71e01adbb5882f52f264b37c95",
+     "path": "data/platforms/texas_bb35/contam/platform.prj",
+     "sha256": "b7e6f647249052376ae056049fb7bfcd66224d295b8f30b3fe074c80ee2da511",
+     "size_bytes": 167889
+    },
+    {
+     "git_blob_sha1": "75c6c05ad4b04f639652ec1937bb812f84512ba7",
+     "path": "data/platforms/texas_bb35/contam/path_map.json",
+     "sha256": "69009ecb43ad5c9b35e36ab4864ba6a92c1763440b2cae323f538e1567db238a",
+     "size_bytes": 253113
+    }
+   ],
+   "platform_git_tree": "0583b0082708ae1984db31b4e6eb1e06a17bd1a6"
+  },
+  "thetis_bay_cve90": {
+   "files": [
+    {
+     "git_blob_sha1": "268ac41acd528fbc9997a081f67667739cb84944",
+     "path": "data/platforms/thetis_bay_cve90/spatial_layout.json",
+     "sha256": "fd6706b9e0a39a29b40ddbbff088e0dc5316eac03e47cdd01b33cd96fdf1aa36",
+     "size_bytes": 29991
+    },
+    {
+     "git_blob_sha1": "7834af37671b3e367e6c63bfb89763e32c0dc242",
+     "path": "data/platforms/thetis_bay_cve90/air_flow_paths.json",
+     "sha256": "edc52a6c28980dbcc5f5aa684d591533903fa20bd792ed82e83ed4269b8e62b9",
+     "size_bytes": 16927
+    },
+    {
+     "git_blob_sha1": "4f1f69d81207188cb8b52dece5f5a032262766ab",
+     "path": "data/platforms/thetis_bay_cve90/contam/hobbyist_overrides.json",
+     "sha256": "53f4a3cad7b05799ba0e95f39d199c67d201b3a9308522def4d676b080aa6462",
+     "size_bytes": 8459
+    },
+    {
+     "git_blob_sha1": "9d1ce86a8194e3be016aa8ad76dbc5ccf0f438c7",
+     "path": "data/platforms/thetis_bay_cve90/contam/platform.prj",
+     "sha256": "791bb10ff861307948a3171ad4c880c18a1bf462470859793d3515a175929cd2",
+     "size_bytes": 122638
+    },
+    {
+     "git_blob_sha1": "79718d20f45bd41f9c4f85c60cbe767dea5b7a3b",
+     "path": "data/platforms/thetis_bay_cve90/contam/path_map.json",
+     "sha256": "53b6e1e22b6e31fa4851b4d0c67502e0ad9dcb1f27884072448e9eda0797dd9c",
+     "size_bytes": 175436
+    }
+   ],
+   "platform_git_tree": "058c9e1462f858e86354dfaed89f00e875a1edda"
+  },
+  "wasp_cv7": {
+   "files": [
+    {
+     "git_blob_sha1": "a541704820e1c3548394dadf9d01fdd46dea1416",
+     "path": "data/platforms/wasp_cv7/spatial_layout.json",
+     "sha256": "c2dd1c33a8f31560ceb2a991280ee3676861b3b62bb214396c8628e1ecc31bb2",
+     "size_bytes": 24279
+    },
+    {
+     "git_blob_sha1": "cc9bc96da21001decfb5d60307304e7fd2c393e2",
+     "path": "data/platforms/wasp_cv7/air_flow_paths.json",
+     "sha256": "21fb75c395a96cb992cbdb7252ffc7894179d986387b2ecc42359bfe146626a1",
+     "size_bytes": 14565
+    },
+    {
+     "git_blob_sha1": "da1cf9a766bae48f02cff97c106cfbace44e12e3",
+     "path": "data/platforms/wasp_cv7/contam/hobbyist_overrides.json",
+     "sha256": "bc4c1c8cd7a7115af0c4cd07b17fcc692024aa65ee3f7ba165e2e120c83b85c4",
+     "size_bytes": 6108
+    },
+    {
+     "git_blob_sha1": "03381c54d34a23ee027ef292db10a91f4572d154",
+     "path": "data/platforms/wasp_cv7/contam/platform.prj",
+     "sha256": "17a79432a2f5ea4d1069de2ff739d74b018abb17bd279d4fc3ab30368e926190",
+     "size_bytes": 110559
+    },
+    {
+     "git_blob_sha1": "916600d129b059b1e6f017e0fc0bc0180cc2c88b",
+     "path": "data/platforms/wasp_cv7/contam/path_map.json",
+     "sha256": "c37bb817f7cc8472b19409d6c7cbf98cbeda430a2ca7a5ece2e9731a2a22b69a",
+     "size_bytes": 157928
+    }
+   ],
+   "platform_git_tree": "b90b056f34e26fa37927d13489687bf55bea4d3a"
+  },
+  "west_virginia_bb48": {
+   "files": [
+    {
+     "git_blob_sha1": "c39cd4ba062511faa642fb11bc330c88a6804f70",
+     "path": "data/platforms/west_virginia_bb48/spatial_layout.json",
+     "sha256": "238a244c0cf0209867be3c7da864bb62c50a8db229c447db36063c542cb875a9",
+     "size_bytes": 74479
+    },
+    {
+     "git_blob_sha1": "f2451662e48aa563112f249e2f22fe5b9fcca1d4",
+     "path": "data/platforms/west_virginia_bb48/air_flow_paths.json",
+     "sha256": "afc1b2b2ec8e7f0273020f268c0c010fda7004cba5e4c7003d9a4c517ad006b4",
+     "size_bytes": 44942
+    },
+    {
+     "git_blob_sha1": "c2d0916506ef574b792c398ed8d826db5c71ef7e",
+     "path": "data/platforms/west_virginia_bb48/contam/hobbyist_overrides.json",
+     "sha256": "0440119c1f1a9bf5d882adb4355bd89497f3053d9ea3a2e59a267aef237c1416",
+     "size_bytes": 17830
+    },
+    {
+     "git_blob_sha1": "19b67dd19341f8f97ccc30e6b2c00156053d327c",
+     "path": "data/platforms/west_virginia_bb48/contam/platform.prj",
+     "sha256": "ca186a0de6ac651a9ae2441fe3d5416d371b0bcd33ad37a3f3253551d6fbe27c",
+     "size_bytes": 452614
+    },
+    {
+     "git_blob_sha1": "f1b587d7ca301dde187df0fd131029f3cb88f6f3",
+     "path": "data/platforms/west_virginia_bb48/contam/path_map.json",
+     "sha256": "515086b9789c38180bc297c2010bddbddfe63de601aafb2a4f8bb586c7419a24",
+     "size_bytes": 720802
+    }
+   ],
+   "platform_git_tree": "22447648bffbddc9c267879d1b678f6acb9826b6"
+  },
+  "winnipeg_j337": {
+   "files": [
+    {
+     "git_blob_sha1": "b18efea02876ebd463014be42b28c780154514c9",
+     "path": "data/platforms/winnipeg_j337/spatial_layout.json",
+     "sha256": "ebab506a467ae757ec9d2e936fd75d77693d5229af9e9c67baa235e663972280",
+     "size_bytes": 12229
+    },
+    {
+     "git_blob_sha1": "5112f168110f6276ec498228e411ce9ff348fee4",
+     "path": "data/platforms/winnipeg_j337/air_flow_paths.json",
+     "sha256": "39c890fbad3a3b2e932205e55d01e241d0781f7330ae7348076a19cfe4fea61a",
+     "size_bytes": 12386
+    },
+    {
+     "git_blob_sha1": "f2e0be754c4b00a042b4dc84d922bbf76db98e71",
+     "path": "data/platforms/winnipeg_j337/contam/hobbyist_overrides.json",
+     "sha256": "0328f70ab015c92f7c212e65de346104d172bdce18bbab69a41ae411beb47eb8",
+     "size_bytes": 3795
+    },
+    {
+     "git_blob_sha1": "74260ee9d36ea9529495b4baecfa60991522a61d",
+     "path": "data/platforms/winnipeg_j337/contam/platform.prj",
+     "sha256": "140346a71d30d89b3d192c9308078bcfe0fa52a583eea98c72f94d34e5d61387",
+     "size_bytes": 57740
+    },
+    {
+     "git_blob_sha1": "f589355da628a045c112bc6977d307db22bb8ab3",
+     "path": "data/platforms/winnipeg_j337/contam/path_map.json",
+     "sha256": "24071a584a98c97975494021ef8988c8ab0f9bc489bbf59184e891b31c215044",
+     "size_bytes": 75591
+    }
+   ],
+   "platform_git_tree": "ce84df623fbddc230429917be4b823706856fbf5"
+  },
+  "wisconsin_bb64": {
+   "files": [
+    {
+     "git_blob_sha1": "0e6faae1a03ff3586023bc9e3018dadd5d4eafa6",
+     "path": "data/platforms/wisconsin_bb64/spatial_layout.json",
+     "sha256": "2ecaa378598395cba7a039701a47e4763bf5c9067b88f5aa93453f6f3fd8d8f6",
+     "size_bytes": 41118
+    },
+    {
+     "git_blob_sha1": "bff305104285f32c5d009cc55b08a79a1edbb56f",
+     "path": "data/platforms/wisconsin_bb64/air_flow_paths.json",
+     "sha256": "fd82c309cb2a691f65b6569c01eb5e357a29974002b34cd9633ff61f132af02a",
+     "size_bytes": 29856
+    },
+    {
+     "git_blob_sha1": "012c393ae917752a726460ab9a2d795ced066347",
+     "path": "data/platforms/wisconsin_bb64/contam/hobbyist_overrides.json",
+     "sha256": "65e453e66c22741334e440c4a9ae14ffe082e516ae1050a514ddf77d944df30e",
+     "size_bytes": 11557
+    },
+    {
+     "git_blob_sha1": "d16252fd75e27bdb2394711cc2b340da6fcc2660",
+     "path": "data/platforms/wisconsin_bb64/contam/platform.prj",
+     "sha256": "f7fa30350c6be6fda23ccabef05360e0fd79ca6e7d281b97c5056553f9718a2a",
+     "size_bytes": 284723
+    },
+    {
+     "git_blob_sha1": "1f07142172b8e1963a6350c65eed2abb7b68cecd",
+     "path": "data/platforms/wisconsin_bb64/contam/path_map.json",
+     "sha256": "1f61f1be25e6ae434acdeb39f436155f273abfb5243858eea7d02214a0eeab1b",
+     "size_bytes": 460256
+    }
+   ],
+   "platform_git_tree": "05be58896a74b018ae1c7c93017fb2c37f5cbbaf"
+  },
+  "wright_cc2": {
+   "files": [
+    {
+     "git_blob_sha1": "eea62b3099b914306bdb5bf94465a0b8133927f6",
+     "path": "data/platforms/wright_cc2/spatial_layout.json",
+     "sha256": "a96cfeedf8d1dd157cc3c1418ed03689698d85dda7a3b053fca4db9f4b07c1b2",
+     "size_bytes": 27613
+    },
+    {
+     "git_blob_sha1": "e8038c86b560b68892a173447f9d0424b33fd54c",
+     "path": "data/platforms/wright_cc2/air_flow_paths.json",
+     "sha256": "ccd06d7706fb9fc0d1504f288a980263e0a8f92589d74ff2e8feb1bfab02314b",
+     "size_bytes": 19897
+    },
+    {
+     "git_blob_sha1": "a68d8252083634b22139664a0c6a220029986fd6",
+     "path": "data/platforms/wright_cc2/contam/hobbyist_overrides.json",
+     "sha256": "c8a5a4ac77bd6dfb8a4ff456ba898f1885c4fc1fe3479c303b5ca8016bda338a",
+     "size_bytes": 8100
+    },
+    {
+     "git_blob_sha1": "7f2d5d72828ac06e19f5d0615af90d35cfab7f5a",
+     "path": "data/platforms/wright_cc2/contam/platform.prj",
+     "sha256": "79c74088a9bdc316774f50da2120f91248eb667c503d5c2ab402de78fe6a2231",
+     "size_bytes": 69289
+    },
+    {
+     "git_blob_sha1": "067b6fcd0d45b518ae1f6c6d5ed7c76fbdcf671e",
+     "path": "data/platforms/wright_cc2/contam/path_map.json",
+     "sha256": "b41c03237ee1ac0b8e698c890b8664c66024fbc18985b96ebf3de323892bae83",
+     "size_bytes": 79209
+    }
+   ],
+   "platform_git_tree": "0226bbf321f1c679db38c75c9a3140c64b26c50a"
+  },
+  "yorktown_cv5": {
+   "files": [
+    {
+     "git_blob_sha1": "e969410bdf492876c8e39033a03658e8ba090b2b",
+     "path": "data/platforms/yorktown_cv5/spatial_layout.json",
+     "sha256": "7086700346ba2cb68902dec1249210e0f4ddf86845ea125e552a3a84eac7ae77",
+     "size_bytes": 28921
+    },
+    {
+     "git_blob_sha1": "be70427f43ee3ef436cd5cfffc1517d76a3766d7",
+     "path": "data/platforms/yorktown_cv5/air_flow_paths.json",
+     "sha256": "4cd28d9b32e926db1322beac875d7d357a890c8f72de01dbbeaa938a4e4c6c76",
+     "size_bytes": 13662
+    },
+    {
+     "git_blob_sha1": "bda9442a06c72d50492626333be570cdee4c921e",
+     "path": "data/platforms/yorktown_cv5/contam/hobbyist_overrides.json",
+     "sha256": "616050f0818c1b05ba3c51546793559d901f24201424de2f444bbfdabfa97650",
+     "size_bytes": 8152
+    },
+    {
+     "git_blob_sha1": "730280af6f7ff22bc1c979d50121a7adfec7a21e",
+     "path": "data/platforms/yorktown_cv5/contam/platform.prj",
+     "sha256": "71e3a7dff312c8d1aeaf96850f4a7dadf7139849b5dd6fb15634eae79c44ef7d",
+     "size_bytes": 135454
+    },
+    {
+     "git_blob_sha1": "e6283827a48505b93b2c0f6a6afcf634ef261d57",
+     "path": "data/platforms/yorktown_cv5/contam/path_map.json",
+     "sha256": "c642c5e67824ddd23b36fb7c2aa75055ec492a040b3675500a028d88a3cc1ab6",
+     "size_bytes": 200934
+    }
+   ],
+   "platform_git_tree": "35c7e528edd10ddda889bc85a632bda70b03ad65"
+  }
+ },
+ "input_commit": "d5d50d3a7bc30d50231e6f27b5083925f26c9c23",
+ "input_root_tree": "6b11b97b34f43615d75528c8dc723b461059a20e",
+ "platforms_tree": "a5499b23e9cbd9a82e39321022a9d1d911928c53",
+ "shared_inputs": [
+  {
+   "git_blob_sha1": "7b09f787d7c0be693e7a89a55c009c0d1d8aceaa",
+   "path": "data/contam_hobbyist/README.md",
+   "sha256": "e64bc06def59fb57513575eeaaecffc2683531b60e6a044c65859d6f818cba36",
+   "size_bytes": 959
+  },
+  {
+   "git_blob_sha1": "9c26540304c04aa416fa1ca80d8aa10648d99b3b",
+   "path": "data/contam_hobbyist/duct_defaults.json",
+   "sha256": "5408ada25831e1bb449a2c239f4876983b9b2ef3d226ba45d210925617d40f28",
+   "size_bytes": 329
+  },
+  {
+   "git_blob_sha1": "7ae876e04d1cea7621b5c7af310469aca891a729",
+   "path": "data/contam_hobbyist/filter_presets.json",
+   "sha256": "4dd4a001eee578919b6b627e1e00e57d69714975e0139589123dde4cf64cc61e",
+   "size_bytes": 1259
+  },
+  {
+   "git_blob_sha1": "b60ceb6dd880f672e016ab25cf35f0fc5dbd68e4",
+   "path": "data/contam_hobbyist/orifice_catalog.json",
+   "sha256": "c6d2802cbedead8e94e2174cd9da6f162e2d3b5e217d161c1cc2d3fa87051f00",
+   "size_bytes": 3844
+  },
+  {
+   "git_blob_sha1": "f380ecc2b491e8ac282952028731290fa0bdb998",
+   "path": "data/contam_hobbyist/schedule_templates.json",
+   "sha256": "cdb7f4fad272e21bccc2bde392fe899ca98378a4e21e01647bf7ecefb73a08bb",
+   "size_bytes": 4039
+  },
+  {
+   "git_blob_sha1": "8b6db0934b284befba2129440054d5dde4251411",
+   "path": "data/contam_hobbyist/species_pack.json",
+   "sha256": "8db06aa2a89862bb4a4d9b01ddb5bf446b8280a758b489d4b6dea98650d6b38e",
+   "size_bytes": 767
+  },
+  {
+   "git_blob_sha1": "04401483e9bdeacb5c380017d8ce239c37eb7648",
+   "path": "data/contam_hobbyist/wind_profiles.json",
+   "sha256": "fe6bae6711e4edf6d62dfefec3d14b3518fcdc3767cac606d172306be72ec01d",
+   "size_bytes": 1073
+  }
+ ],
+ "tool_path_at_input_pin": [
+  {
+   "git_blob_sha1": "1d7b0eb3134ed897dc2381d1cdb593bf3656a96f",
+   "path": "engines/contamx_runner.py",
+   "sha256": "3644eae5007da040ce6eb5c8c04e61f69c5d6c2c751e68b71be837767458432c",
+   "size_bytes": 19396
+  },
+  {
+   "git_blob_sha1": "9b30f50c9203b35389696e4c622b40611f230f52",
+   "path": "engines/contamx_transport.py",
+   "sha256": "09ba3e10491d91a23396afda8043fdf9817d4b915d7ed4540561610732caaf9f",
+   "size_bytes": 18713
+  },
+  {
+   "git_blob_sha1": "11e394508cda06bcbc8366d97c98e72e2ffccb61",
+   "path": "engines/py_contam_bridge.py",
+   "sha256": "2d6d6eeff7a5d498c837845a93562913b88a0c99a9a8bf50fbdcf577134b38b4",
+   "size_bytes": 51336
+  },
+  {
+   "git_blob_sha1": "296a690c827929e54ed967bd14ef17592f1a8f4e",
+   "path": "tools/contam_hobbyist.py",
+   "sha256": "56ac1fed5c18b253bb04f2d95ca55df06e22330811f4511d1dddfc0b71840484",
+   "size_bytes": 9023
+  },
+  {
+   "git_blob_sha1": "5c28c2fc05cc7adb3ab2e5ceb5fe979c12c473ac",
+   "path": "tools/contam_prj_bridge.py",
+   "sha256": "5ed36781ca57ee4a2de9480881bf0b456f54901aac7a1f0c2e7f76a29d5d84a7",
+   "size_bytes": 22372
+  },
+  {
+   "git_blob_sha1": "c148a76e289598de347277f6dddce588cee13cea",
+   "path": "tools/contamw34_prj.py",
+   "sha256": "e7fef0427889e1ef6a9e57e1a67fd26066448c482bae3ba64b29f097d1c18535",
+   "size_bytes": 115701
+  },
+  {
+   "git_blob_sha1": "e1fc84f9f6ce5d9ff97b1b353489e6c034987149",
+   "path": "tools/diag/contam_paired_diagnostic.py",
+   "sha256": "bd980a923bc261eb777844f804e746ab921efcd33abe09a4e3c155d366a3ed10",
+   "size_bytes": 16857
+  },
+  {
+   "git_blob_sha1": "a05e89b7941aa62d1110a63ac3d0b797ba2f198c",
+   "path": "tools/diag/contam_pressure_balance_diagnostic.py",
+   "sha256": "020cdc91acb6b5d43f3757bde0ca60ec7faab42881a4b3266b9d1d450053b6ee",
+   "size_bytes": 28570
+  },
+  {
+   "git_blob_sha1": "23ad75260b35bc5e76ef06a474d10a82eb1e4a12",
+   "path": "pyproject.toml",
+   "sha256": "852f4494a522937fb9753fdc92777c0dd5bc75fdd23780c2515bfe06a9e91580",
+   "size_bytes": 2367
+  },
+  {
+   "git_blob_sha1": "57a5ed992f4981a92c0430f086051b51d7a91d54",
+   "path": "uv.lock",
+   "sha256": "02c498d8992f9c0de4193bc44e4b8d70f9f4d1cbff32f7c12c70afd3c5d8e5c3",
+   "size_bytes": 566392
+  }
+ ]
+}
