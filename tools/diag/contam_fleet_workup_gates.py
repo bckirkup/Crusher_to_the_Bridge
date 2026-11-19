@@ -34,7 +34,7 @@ def value(cell: dict[str, Any], block: str, name: str) -> float | None:
 
 def rel_diff(a: float, b: float) -> float:
     scale = max(abs(a), abs(b))
-    return 0.0 if scale == 0.0 else abs(a - b) / scale
+    return abs(a - b) / scale if scale > 0.0 else 0.0
 
 
 def max_solved_change(cell: dict[str, Any], base: dict[str, Any]) -> float:

@@ -23,7 +23,7 @@ import io
 import json
 import os
 import platform
-import subprocess  # noqa: S404 - fixed argv, no shell
+import subprocess  # noqa: S404
 import sys
 import tarfile
 import tempfile
@@ -36,9 +36,18 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__f
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
+from simulation_utils.paths import prepare_output_directory, validated_open  # noqa: E402
 from tools.diag import contam_fleet_workup_gates as gates  # noqa: E402
 
 CAMPAIGN_DIR = os.path.join(_REPO_ROOT, "campaigns", "contam", "fleet_workup_canary_01")
+
+_ROOTS = (_REPO_ROOT, tempfile.gettempdir())
+
+
+def _open(path: str, mode: str = "r", **kwargs: Any) -> Any:
+    """Open a file confined to the repository or the temporary directory."""
+    return validated_open(path, mode, allowed_roots=_ROOTS, **kwargs)
+
 FROZEN_DIR = os.path.join(CAMPAIGN_DIR, "design", "frozen")
 CRITERIA_PATH = os.path.join(CAMPAIGN_DIR, "design", "canary_criteria.json")
 CELL = os.path.join(_REPO_ROOT, "tools", "diag", "contam_fleet_workup_cell.py")
@@ -55,14 +64,14 @@ class RunError(RuntimeError):
 
 def sha256_file(path: str) -> str:
     digest = hashlib.sha256()
-    with open(path, "rb") as fh:  # noqa: PTH123
+    with _open(path, "rb") as fh:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
 
 
 def _read_json(path: str) -> Any:
-    with open(path, encoding="utf-8") as fh:  # noqa: PTH123
+    with _open(path, encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -81,7 +90,7 @@ def verify_design(criteria: dict[str, Any]) -> dict[str, str]:
 
 def canary_rows(criteria: dict[str, Any]) -> list[dict[str, str]]:
     """The canary's matrix rows, in matrix order, with the counts checked."""
-    with open(os.path.join(FROZEN_DIR, "run_matrix.csv"), encoding="utf-8", newline="") as fh:  # noqa: PTH123
+    with _open(os.path.join(FROZEN_DIR, "run_matrix.csv"), encoding="utf-8", newline="") as fh:
         rows = [r for r in csv.DictReader(fh) if r["hull"] in criteria["canary"]["hulls"]]
     executed = [r for r in rows if r["planned_status"] == EXECUTE]
     solves = sum(int(r["contamx_solves_planned"]) for r in executed)
@@ -112,11 +121,14 @@ def _download(uri: str, dest: str) -> None:
         import boto3
 
         bucket, _, key = uri[len("s3://"):].partition("/")
-        boto3.client("s3").download_file(bucket, key, dest)
+        owner = boto3.client("sts").get_caller_identity()["Account"]
+        boto3.client("s3").download_file(
+            bucket, key, dest, ExtraArgs={"ExpectedBucketOwner": owner},
+        )
         return
     if not uri.startswith("https://"):
         raise RunError(f"unsupported ContamX archive URI {uri!r}")
-    with urllib.request.urlopen(uri, timeout=120) as response, open(dest, "wb") as fh:  # noqa: S310, PTH123
+    with urllib.request.urlopen(uri, timeout=120) as response, _open(dest, "wb") as fh:  # noqa: S310, PTH123
         fh.write(response.read())
 
 
@@ -133,10 +145,10 @@ def provision_contamx(args: argparse.Namespace, pins: dict[str, Any], work: str)
             raise RunError("ContamX archive SHA-256 does not match the pin")
         with tarfile.open(archive) as tar:
             member = tar.getmember(pins["archive_member"])
-            with tar.extractfile(member) as src, open(os.path.join(work, "contamx3"), "wb") as fh:  # noqa: PTH123
+            with tar.extractfile(member) as src, _open(os.path.join(work, "contamx3"), "wb") as fh:
                 fh.write(src.read())
         binary = os.path.join(work, "contamx3")
-        os.chmod(binary, 0o755)  # noqa: S103 - executable for the job user
+        os.chmod(binary, 0o700)
     if not binary or not os.path.isfile(binary):
         raise RunError("no ContamX executable: pass --binary or --contamx-uri")
     record["binary"] = {"sha256": sha256_file(binary), "size_bytes": os.path.getsize(binary),
@@ -153,7 +165,7 @@ def provision_contamx(args: argparse.Namespace, pins: dict[str, Any], work: str)
 def _cpu_facts() -> dict[str, Any]:
     model, physical = "", set()
     try:
-        with open("/proc/cpuinfo", encoding="utf-8") as fh:  # noqa: PTH123
+        with open("/proc/cpuinfo", encoding="utf-8") as fh:
             block: dict[str, str] = {}
             for line in fh:
                 if ":" in line:
@@ -359,15 +371,16 @@ def run_timed(
 
 
 def _write_json(path: str, payload: Any) -> None:
-    with open(path, "w", encoding="utf-8") as fh:  # noqa: PTH123
+    with _open(path, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=1, sort_keys=True)
         fh.write("\n")
 
 
 def _pack(out_dir: str, names: list[str], artifact: str) -> None:
-    with tarfile.open(artifact, "w:gz") as tar:
+    with _open(artifact, "wb") as raw, tarfile.open(fileobj=raw, mode="w:gz") as tar:
         for name in names:
-            data = open(os.path.join(out_dir, name), "rb").read()  # noqa: PTH123, SIM115
+            with _open(os.path.join(out_dir, name), "rb") as src:
+                data = src.read()
             info = tarfile.TarInfo(name)
             info.size = len(data)
             tar.addfile(info, io.BytesIO(data))
@@ -375,7 +388,7 @@ def _pack(out_dir: str, names: list[str], artifact: str) -> None:
 
 def execute(args: argparse.Namespace, work: str) -> int:
     criteria = _read_json(CRITERIA_PATH)
-    os.makedirs(args.out, exist_ok=True)
+    prepare_output_directory(args.out, allowed_roots=_ROOTS)
     for name in THREAD_VARS:
         os.environ[name] = "1"
     env = fingerprint()
@@ -387,7 +400,7 @@ def execute(args: argparse.Namespace, work: str) -> int:
     contamx = provision_contamx(args, criteria["contamx"], work)
     timeout_s = float(criteria["solver_timeout_s"])
     names = ["cells.jsonl", "smoke_gates.json", "environment.json", "external_files.json"]
-    with open(os.path.join(args.out, "cells.jsonl"), "w", encoding="utf-8") as fh:  # noqa: PTH123
+    with _open(os.path.join(args.out, "cells.jsonl"), "w", encoding="utf-8") as fh:
         smoke = run_smoke(rows, contamx["path"], timeout_s, work, fh)
         verdict = gates.evaluate(rows, smoke, criteria)
         _write_json(os.path.join(args.out, "smoke_gates.json"), verdict)
@@ -426,7 +439,7 @@ def main(argv: list[str] | None = None) -> int:
         except RunError as exc:
             # A refused run still leaves evidence: on Batch a nonzero exit is
             # retried and uploads nothing, so the blocker is the artifact.
-            os.makedirs(args.out, exist_ok=True)
+            prepare_output_directory(args.out, allowed_roots=_ROOTS)
             _write_json(os.path.join(args.out, "blocker.json"),
                         {"blocked": True, "reason": str(exc), "timed_cells": 0})
             _pack(args.out, ["blocker.json"], os.path.join(args.out, args.artifact))

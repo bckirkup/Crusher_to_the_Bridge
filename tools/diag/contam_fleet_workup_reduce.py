@@ -18,15 +18,25 @@ import os
 import shutil
 import statistics
 import sys
+import tempfile
 from typing import Any
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
+from simulation_utils.paths import prepare_output_directory, validated_open  # noqa: E402
 from tools.diag.contam_fleet_workup_gates import rel_diff  # noqa: E402
 
 CAMPAIGN_DIR = os.path.join(_REPO_ROOT, "campaigns", "contam", "fleet_workup_canary_01")
+
+_ROOTS = (_REPO_ROOT, tempfile.gettempdir())
+
+
+def _open(path: str, mode: str = "r", **kwargs: Any) -> Any:
+    """Open a file confined to the repository or the temporary directory."""
+    return validated_open(path, mode, allowed_roots=_ROOTS, **kwargs)
+
 FROZEN_DIR = os.path.join(CAMPAIGN_DIR, "design", "frozen")
 CRITERIA_PATH = os.path.join(CAMPAIGN_DIR, "design", "canary_criteria.json")
 RAW_FILES = ("cells.jsonl", "smoke_gates.json", "environment.json", "external_files.json")
@@ -59,17 +69,17 @@ CONSISTENCY_COLUMNS = ("row_id", "records", "distinct_field_sha256", "max_metric
 
 
 def _read_json(path: str) -> Any:
-    with open(path, encoding="utf-8") as fh:  # noqa: PTH123
+    with _open(path, encoding="utf-8") as fh:
         return json.load(fh)
 
 
 def load_cells(path: str) -> list[dict[str, Any]]:
-    with open(path, encoding="utf-8") as fh:  # noqa: PTH123
+    with _open(path, encoding="utf-8") as fh:
         return [json.loads(line) for line in fh if line.strip()]
 
 
 def load_matrix(hulls: list[str]) -> list[dict[str, str]]:
-    with open(os.path.join(FROZEN_DIR, "run_matrix.csv"), encoding="utf-8", newline="") as fh:  # noqa: PTH123
+    with _open(os.path.join(FROZEN_DIR, "run_matrix.csv"), encoding="utf-8", newline="") as fh:
         return [r for r in csv.DictReader(fh) if r["hull"] in hulls]
 
 
@@ -82,7 +92,7 @@ def _fmt(value: Any) -> str:
 
 
 def write_csv(path: str, columns: tuple[str, ...], rows: list[dict[str, Any]]) -> None:
-    with open(path, "w", encoding="utf-8", newline="") as fh:  # noqa: PTH123
+    with _open(path, "w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
         for row in rows:
@@ -176,7 +186,7 @@ class Reduction:
                     block: {n: m["unit"] for n, m in rep["cell"]["blocks"][block].items()}
                     for block in BLOCKS
                 }
-        return dict.fromkeys(BLOCKS, {})
+        return {block: {} for block in BLOCKS}
 
 
 # ── tables ────────────────────────────────────────────────────────────────
@@ -365,18 +375,23 @@ def reference_baselines(red: Reduction) -> list[dict[str, Any]]:
     return out
 
 
+def _cell_diff(cell: dict[str, Any], first: dict[str, Any]) -> float:
+    """Largest relative metric difference between two repeats of one row."""
+    worst = 0.0
+    for block in BLOCKS:
+        for name, metric in cell["blocks"][block].items():
+            other = first["blocks"][block][name]["value"]
+            if metric["value"] is not None and other is not None:
+                worst = max(worst, rel_diff(float(metric["value"]), float(other)))
+    return worst
+
+
 def repeat_consistency(red: Reduction) -> list[dict[str, Any]]:
     """Whether every repeat of a row reproduced the same field and metrics."""
     out = []
     for row_id, records in sorted(red.records.items()):
         done = [r["cell"] for r in records if r.get("cell")]
-        worst = 0.0
-        for cell in done[1:]:
-            for block in BLOCKS:
-                for name, metric in cell["blocks"][block].items():
-                    first = done[0]["blocks"][block][name]["value"]
-                    if metric["value"] is not None and first is not None:
-                        worst = max(worst, rel_diff(float(metric["value"]), float(first)))
+        worst = max((_cell_diff(cell, done[0]) for cell in done[1:]), default=0.0)
         shas = {c["realization"].get("field_sha256") for c in done} - {None}
         out.append({"row_id": row_id, "records": len(done),
                     "distinct_field_sha256": len(shas), "max_metric_rel_diff": worst})
@@ -555,16 +570,16 @@ def write_sums(out_dir: str) -> None:
     for name in sorted(os.listdir(out_dir)):
         if name == "SHA256SUMS":
             continue
-        with open(os.path.join(out_dir, name), "rb") as fh:  # noqa: PTH123
+        with _open(os.path.join(out_dir, name), "rb") as fh:
             lines.append(f"{hashlib.sha256(fh.read()).hexdigest()}  {name}\n")
-    with open(os.path.join(out_dir, "SHA256SUMS"), "w", encoding="utf-8") as fh:  # noqa: PTH123
+    with _open(os.path.join(out_dir, "SHA256SUMS"), "w", encoding="utf-8") as fh:
         fh.writelines(lines)
 
 
 def reduce(raw_dir: str, out_dir: str) -> dict[str, Any]:
     """Write the package for one raw directory; returns the audit."""
     red = Reduction(raw_dir)
-    os.makedirs(out_dir, exist_ok=True)
+    prepare_output_directory(out_dir, allowed_roots=_ROOTS)
     raw = timing_raw(red)
     tables = {
         "results_long.csv": (RESULT_COLUMNS, results_long(red)),
@@ -577,10 +592,10 @@ def reduce(raw_dir: str, out_dir: str) -> dict[str, Any]:
     }
     for name, (columns, rows) in tables.items():
         write_csv(os.path.join(out_dir, name), columns, rows)
-    with open(os.path.join(out_dir, "readout_tables.md"), "w", encoding="utf-8") as fh:  # noqa: PTH123
+    with _open(os.path.join(out_dir, "readout_tables.md"), "w", encoding="utf-8") as fh:
         fh.write(readout_markdown(red, tables["timing_summary.csv"][1]))
     verdict = audit(red, {name: rows for name, (_c, rows) in tables.items()})
-    with open(os.path.join(out_dir, "audit.json"), "w", encoding="utf-8") as fh:  # noqa: PTH123
+    with _open(os.path.join(out_dir, "audit.json"), "w", encoding="utf-8") as fh:
         json.dump(verdict, fh, indent=1, sort_keys=True)
         fh.write("\n")
     for name in RAW_FILES:

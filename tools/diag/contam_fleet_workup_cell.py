@@ -285,7 +285,7 @@ def read_sim(
     sim_path: str, tmp_dir: str,
 ) -> tuple[dict[int, float], dict[int, float], dict[str, Any]]:
     """Decode one SIM: flows, dP and the file digest."""
-    with open(sim_path, "rb") as fh:  # noqa: PTH123 - path returned by run_contamx
+    with validated_open(sim_path, "rb", allowed_roots=(_REPO_ROOT, tmp_dir)) as fh:
         sim_sha = hashlib.sha256(fh.read()).hexdigest()
     sim = SimResults(sim_path, allowed_roots=(_REPO_ROOT, tmp_dir))
     return sim.path_volumetric_flow_m3h(), read_path_dp(sim), {"sim_sha256": sim_sha}
@@ -599,7 +599,9 @@ def _contamx_realization(
         ),
     }
     if lane == LANE_AUTHORED:
-        with open(_platform_path(hull, "contam/platform.prj"), "rb") as fh:  # noqa: PTH123
+        with validated_open(
+            _platform_path(hull, "contam/platform.prj"), "rb", allowed_roots=(_REPO_ROOT,),
+        ) as fh:
             record["prj_file_sha256"] = hashlib.sha256(fh.read()).hexdigest()
     else:
         overrides = dict(inputs["overrides"])
@@ -721,7 +723,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.lane in CONTAMX_LANES and not args.binary:
         raise SystemExit("--binary is required on a ContamX lane")
     record = run_cell(args)
-    with open(args.out, "w", encoding="utf-8") as fh:  # noqa: PTH123
+    with validated_open(
+        args.out, "w", allowed_roots=(_REPO_ROOT, tempfile.gettempdir()), encoding="utf-8",
+    ) as fh:
         json.dump(record, fh, sort_keys=True)
     return 0
 
