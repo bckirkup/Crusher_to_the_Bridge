@@ -186,10 +186,13 @@ PROTOCOL: dict[str, Any] = {
                 "the canary hulls and once per setting family on every hull",
         "weather": "the Ws/Wd values in the exported weather record equal "
                    "the level; the count of wind-flagged paths is recorded",
-        "operational": "the summed commissioned terminal flow in the export "
-                       "and the summed native supply flow both change by the "
-                       "declared factor within 1e-9 relative; the realized "
-                       "outdoor-air share equals the declared share",
+        "duty_and_ach": "the summed commissioned terminal flow in the "
+                        "export and the summed native supply flow both "
+                        "change by the declared factor within 1e-9 relative",
+        "outdoor_air": "summed terminal and native supply flow are "
+                       "unchanged within 1e-9 relative; the exported AHS "
+                       "outdoor-air flow and the native outdoor-air share "
+                       "of the varied groups equal the declared values",
         "failure": "the row is field_not_reached and the stage stops; the "
                    "design is superseded rather than patched",
     },
