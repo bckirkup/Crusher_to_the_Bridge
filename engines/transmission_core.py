@@ -1027,8 +1027,8 @@ PATHWAY_WEIGHT_KEYS = PATHWAY_EFFICIENCY_KEYS
 # (ROOM-AIR-PAIRED-VALIDATION-01, W2). ``droplet`` carries the room-pool and
 # near-field terms together. The caregiver and cabin-service channels mix
 # air terms with others under one key, so they are left out of both sides
-# and totalled separately: the witness share is a proven upper bound on the
-# room-pool share only in a run where that total is zero.
+# and totalled separately. The witness share is therefore an unbounded
+# proxy: it is neither the design's Q nor a proven bound on it.
 ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS = (
     "droplet", "hvac_airborne", "emesis_aerosol", "flush_aerosol",
 )
@@ -7122,9 +7122,9 @@ class TransmissionCore:
         Read from the per-host pathway doses after every pathway has run
         and its route-efficiency and NPI factors are applied, summed over
         the active pathogens. The changed-zone part is every airborne-pathway dose to a
-        host located in a changed zone, near-field dose included. It is a
-        proxy for the room-pool share, and bounds it from above only when
-        the caregiver-channel total stays zero. Zero RNG draws.
+        host located in a changed zone, near-field dose included. It is an
+        unbounded proxy for the room-pool share: no bound on the design's Q
+        is established. Zero RNG draws.
         """
         if not self.room_air_changed_zones:
             return
@@ -7158,9 +7158,9 @@ class TransmissionCore:
             ),
             "airborne_dose_all_zones": total,
             "airborne_dose_changed_zones": changed,
-            # Proxy for the design's Q, 0.0 when no airborne dose was
-            # delivered anywhere; an upper bound on it only while the
-            # caregiver-channel total below is zero.
+            # Unbounded proxy for the design's Q (not a bound on it); 0.0
+            # when no airborne dose was delivered anywhere. The
+            # caregiver-channel total below is dose the proxy leaves out.
             "airborne_dose_share_changed_zones_proxy": (
                 changed / total if total > 0.0 else 0.0
             ),

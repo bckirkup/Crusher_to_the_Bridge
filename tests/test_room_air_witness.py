@@ -232,7 +232,7 @@ def test_named_pathogen_doses_are_counted_like_the_default() -> None:
 
 
 def test_caregiver_channel_is_totalled_apart_from_the_share() -> None:
-    """The share is a bound on the room-pool share only when this is zero."""
+    """Dose the proxy leaves out of both sides is reported beside it."""
     core, _ = _run(0, n_closed=0)
     airborne = {1: {"droplet": 1.0}, 3: {"droplet": 3.0}}
     without = _tally(core, airborne)
@@ -246,10 +246,11 @@ def test_caregiver_channel_is_totalled_apart_from_the_share() -> None:
     assert with_channel[SHARE] == without[SHARE] == pytest.approx(0.25)
 
 
-def test_proxy_bounds_the_room_pool_share_when_the_channel_is_silent() -> None:
-    """With no near field the synthetic droplet dose is all room-pool dose,
-    so the proxy equals that share; adding dose that is not room-pool to
-    hosts in the changed zone can only raise it."""
+def test_proxy_matches_the_room_pool_share_in_the_pool_only_fixture() -> None:
+    """In this fixture -- no near field, silent caregiver channel -- the
+    droplet dose is all room-pool dose, so the proxy equals that share, and
+    more airborne dose to a host in the changed zone raises it. That is a
+    property of the fixture, not a bound on the design's Q in general."""
     core, records = _run(3)
     witness = core.room_air_witness()
     assert witness["caregiver_channel_dose_all_zones"] == 0.0

@@ -38,16 +38,19 @@ cross-hull statements. Details: design §10.
   (`transmission.room_air_removal.map_arm`). Synthetic-fixture neutrality
   only; no voyage was run and K0/K1 remain unmeasured.
 
-## Amendment to the reported Q (owner-authorized)
+## B3 state: W1 and E closed in code, Q still blocked
 
-- **B3:** implemented and unit-tested in PR #1331 (`room_air_witness` in the
-  run summary). Synthetic fixtures only; no voyage was run.
-- **Amendment, Benjamin 2026-11-18, "Use the labelled upper-bound Q":** the
-  design's Q is not separable in the tree, so the run reports a proxy,
+- **B3, W1 count and E:** implemented and unit-tested in PR #1331
+  (`room_air_witness` in the run summary). Synthetic fixtures only; no
+  voyage was run.
+- **B3, Q: still a blocker.** The design's Q is not separable in the tree.
+  Benjamin (2026-11-18) authorized a labelled upper-bound Q ("Use the
+  labelled upper-bound Q"). No valid upper bound could be established, so
+  none is claimed: PR #1331 reports only an unbounded proxy,
   airborne-pathway dose to hosts in changed zones over all airborne-pathway
-  dose. It is an upper bound on the design's Q only in a run whose
-  caregiver-channel dose total is zero; otherwise it is a proxy. The
-  original definition stands in design §6; the amendment is design §11.
+  dose. The original definition stands in design §6; the reasons are in
+  design §11. Q is report-only in the design and the W2 gate is E > 0, but
+  a readout may not present the proxy as Q or as a bound on Q.
 
 ## Scope
 
