@@ -2,6 +2,11 @@
 
 # Phase-3 epidemiology gate decision brief
 
+**Update at `5c8f05cc`:** the [destroyer make-up repair](../ledger/CONTAM-DESTROYER-MAKEUP-01.md)
+has landed. The [two-hull transport baseline](../ledger/CONTAM-PHASE3-BASELINE-01.md)
+checks the corrected configurations. The evidence inventory in §2 remains
+historical; neither it nor the new baseline authorizes an epidemiology run.
+
 ## 1. What Phase 3 is
 
 Phase 3 is the coupled epidemiology decision gate. It is not a transport PR and not a campaign submission. Its two coupled outputs are:
@@ -57,20 +62,20 @@ Ship X is funded-later and should not be part of Phase-3 authorization. When fun
 ## 4. Open decisions for the gate
 
 - **Paper structure:** coupled epidemiology vs transport-methods. The evidence inventory supports transport claims now; epidemiology attribution is still pending.
-- **Campaign scale/cost:** scale should be set by the attribution requirement, not by the 82-platform fleet. No array should run before a frozen design, local smoke, and a canary readout; the fleet make-up census says only `destroyer_baseline` needs a make-up decision before campaign-hull transport is clean.
+- **Campaign scale/cost:** scale should be set by the attribution requirement, not by the 82-platform fleet. No full array should run before a frozen design, local smoke, and a canary readout.
 - **Attribution requirements before arms run:** paired seeds, a criterion declared before the run, enough replicates to separate rare-event stream noise in hull counts, proof that the pathway was exercised, and measured/inferred/hypothesis kept separate.
 - **Edison data-return format (Phase 4):** the return manifest/schema for arm outputs must be fixed before arms are authorized if Edison is to consume them; the [bounded return note](../contam_edison_return_01.md) records that schema confirmation was deferred to Phase 4.
-- **`destroyer_baseline` disposition:** it is the only campaign hull still showing the Pope-class envelope make-up residual (commissioned envelope max \|ΔP\| 81,561 Pa). Options are a bounded make-up opening in the Greg/Olympia/Pope style, or accept-and-document if the paper is transport-methods and the hull is not used for epidemiology arms.
+- **`destroyer_baseline` disposition (closed):** the commissioned pressure discrepancy was repaired. Use the current transport baseline, not the pre-repair census, for comparisons.
 - **Ship X go/no-go:** recommend no-go for Phase 3; revisit after paper structure and respiratory attribution are settled.
 
 ## 5. Coordinator recommendation
 
 Recommend the gate choose the **transport-methods paper structure** as the Phase-3 spine and authorize epidemiology only as a bounded validation layer:
 
-1. **First:** freeze and canary the ROOM-AIR-01 respiratory attribution design — paired `ambient_off` / `ambient_on` seeds on at least one cruise hull and one naval hull, ≥20 seeds per cell, with the attribution criterion declared before the run. Do not authorize full COVID/flu arms until that canary separates the residence-factor dose move from RNG-stream disruption.
+1. **First:** freeze a separate ROOM-AIR-01 respiratory attribution design before a canary — paired `ambient_off` / `ambient_on` comparisons, ≥20 seeds per cell as an initial diagnostic minimum (not a power guarantee), and an attribution criterion declared before the run. Verify a positive map contrast rather than assuming every naval hull has one; the destroyer at platform defaults is a no-change control. Do not authorize full COVID/flu arms until a canary is read out.
 2. **Norovirus:** hold as a pre-registered null/control arm only if the paper needs a non-airborne limited-airflow contrast; otherwise exclude it from the airborne claim because continuous airborne norovirus is null by construction.
-3. **`destroyer_baseline`:** author the bounded make-up disposition before any campaign hull set that includes it; if the transport-methods paper does not need that hull for epidemiology, accept-and-document is acceptable only with the census citation.
+3. **`destroyer_baseline`:** retain as a corrected transport reference. At platform defaults the ROOM-AIR-01 ambient exchange change is zero; it is not a second positive contrast for that intervention.
 4. **Environmental detection:** defer until the Phase-4 Edison return format is fixed; do not let it block the transport-methods paper.
 5. **Ship X:** no-go; funded-later only.
 
-If the owner instead chooses the coupled epidemiology paper, the same sequencing still applies: the respiratory attribution canary and `destroyer_baseline` disposition are prerequisites, because the current evidence supports transport claims and a bounded respiratory dose move, not outbreak-attribution claims.
+If the owner instead chooses the coupled epidemiology paper, respiratory attribution remains a prerequisite. Transport verification alone does not establish an outbreak effect.

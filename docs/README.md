@@ -144,6 +144,7 @@ python3 presidio_runner.py \
 | Doc | Status |
 |-----|--------|
 | [CONTAM_INTEROP.md](CONTAM_INTEROP.md) | Living — Path A ContamX interop, SIM reader, compare tools |
+| [Phase 3 transport baseline and handoff](audits/2026-11-19_phase3_transport_baseline/README.md) | Measured — corrected two-hull numerical verification at `5c8f05cc`; no epidemiology run or authorization |
 | [CONTAM_PRJ_AUDIT.md](CONTAM_PRJ_AUDIT.md) | Living audit — fiction PRJ realism |
 | [contam_edison_return_01.md](contam_edison_return_01.md) | Measured — bounded Edison return manifest for completed CONTAM Phase 1/Phase 2 S3 prefixes; schema confirmation deferred to Phase 4 (ledger CONTAM-EDISON-RETURN-01) |
 | [proposals/forced_exhaust_audit_and_fix_plan.md](proposals/forced_exhaust_audit_and_fix_plan.md) | Mostly implemented — fleet audit of `cross_zone_links` direction / mechanism / filtration (82 platforms, 1,011 links; `tools/diag/forced_exhaust_audit.py`), verification of Edison's three CONTAM testing corrections, and a versioned fix plan. Landed (D1, S1, X1/X2, data rows 1–5: #1213, #1216, #1217, #1219–#1221); the required-`direction` migration has not landed |
