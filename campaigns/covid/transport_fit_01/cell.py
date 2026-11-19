@@ -152,6 +152,24 @@ def run_transport_cell(
     sim = run_fit_spec(
         raw, repo_root=str(_REPO_ROOT), epoch_observer=ledger.observe,
     )
+    # build_transport_engine returns native transport with only a printed
+    # warning when an explicit "contamx" build fails — a completed voyage
+    # under the wrong solver would score as a contamx result, so the cell
+    # fails after the run rather than emit a mislabeled payload.
+    resolved = (
+        type(sim.contam_engine).__name__
+        if getattr(sim, "contam_engine", None) is not None else None
+    )
+    expected = {
+        "contamx": "ContamXTransportEngine",
+        "native": "ContamTransportEngine",
+    }[engine]
+    if resolved != expected:
+        raise SystemExit(
+            f"arm {cell.arm_id!r} declared {engine!r} but the resolved "
+            f"transport engine is {resolved!r}; refusing to emit a "
+            f"fallback result",
+        )
     payload = cell_payload(design, cell, sim, ledger, raw)
     payload["transport_engine_binary"] = binary_path
     return payload
