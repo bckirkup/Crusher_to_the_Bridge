@@ -39,6 +39,9 @@ DEFAULT_OUT = (
 )
 
 
+PRIMARY_ENDPOINT = "cumulative_ever_infected"
+
+
 def _residence_factor(ach: float, hours: float = 1.0) -> float:
     x = max(float(ach), 0.0) * float(hours)
     if x <= 0.0:
@@ -195,6 +198,10 @@ def paired_hull_runs(
             "onsets_on_or_after_split_day", "campaign_specimens",
             "campaign_positives", "campaign_asymptomatic_positives",
         ]
+        # Primary endpoint of ROOM-AIR-PAIRED-VALIDATION-01: whole-hull
+        # cumulative_ever_infected at voyage end, when the reader carries it.
+        if all(PRIMARY_ENDPOINT in row for row in (off, on)):
+            fields.append(PRIMARY_ENDPOINT)
         by_seed[str(seed)] = {
             "ambient_off": {k: off[k] for k in fields},
             "ambient_on": {k: on[k] for k in fields},
