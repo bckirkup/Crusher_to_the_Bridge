@@ -1,0 +1,61 @@
+{
+ "array": false,
+ "attempts": [
+  {
+   "container_instance_arn": "arn:aws:ecs:us-east-1:994254241749:container-instance/AWSBatch-picard-abm-campaign-spot-436e245c-6d84-3a0a-a86a-2783b1e1b314/1262623953b04c75a769cbc8ce0f98be",
+   "exit_code": 0,
+   "log_stream": "contam-fleet-workup-canary-01/default/567d0590c5a3440994c41838dd16543d",
+   "started_at_ms": 1795089673685,
+   "stopped_at_ms": 1795090285841
+  }
+ ],
+ "command": [
+  "deploy/aws/campaign_entrypoint.py",
+  "--campaign",
+  "contam/fleet_workup_canary_01",
+  "--s3-prefix",
+  "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_fleet_workup_canary_01/",
+  "--block",
+  "canary",
+  "--seeds",
+  "0",
+  "--manifest",
+  "campaigns/contam/fleet_workup_canary_01/design/canary_criteria.json",
+  "--index",
+  "0"
+ ],
+ "created_at_ms": 1795089566137,
+ "image": "994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:contam-fleet-workup-canary-01@sha256:92eaa848ab686f7149beb046293968ef2fab7e7ec9821a76ad733a154ae0a121",
+ "image_build": {
+  "base": "python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 (pulled through mirror.gcr.io; Docker Hub returned 429)",
+  "dockerfiles": [
+   "Dockerfile",
+   "deploy/aws/Dockerfile.campaign"
+  ],
+  "image_digest": "sha256:92eaa848ab686f7149beb046293968ef2fab7e7ec9821a76ad733a154ae0a121",
+  "runner_commit": "5f524b8104dc2ca09a36d822b257f015af1fd8f4"
+ },
+ "job_definition": "arn:aws:batch:us-east-1:994254241749:job-definition/picard-contam-fleet-workup-canary-01:2",
+ "job_id": "3940f345-8c40-4dcb-842b-800d44178266",
+ "job_name": "picard-contam-fleet-workup-canary-01-canary-20261119-115925-canary",
+ "job_queue": "arn:aws:batch:us-east-1:994254241749:job-queue/picard-campaign-queue",
+ "log_group": "/aws/batch/picard-campaign",
+ "raw_artifact": {
+  "sha256": "0441e19ca3db1577d08bc7225188f251181f432b7fabccd53a66e97bde8bbfb9",
+  "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_fleet_workup_canary_01/canary/canary_raw.tar.gz"
+ },
+ "resource_requirements": [
+  {
+   "type": "VCPU",
+   "value": "1"
+  },
+  {
+   "type": "MEMORY",
+   "value": "4096"
+  }
+ ],
+ "source": "aws batch describe-jobs, read after the job stopped",
+ "started_at_ms": 1795089673685,
+ "status": "SUCCEEDED",
+ "stopped_at_ms": 1795090285841
+}

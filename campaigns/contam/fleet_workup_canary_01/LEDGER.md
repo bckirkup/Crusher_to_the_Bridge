@@ -78,3 +78,27 @@ relative; outdoor-air rows move effective outdoor-air fraction by 0.075 to
 0.425 with terminal flow change exactly 0; at 10 m/s some solved aggregate
 moves by 0.93 to 1.16 relative on each weather-applicable hull. This is a
 gate result, not a benchmark; no local timing is reported.
+
+## 2026-11-19 — canary run and readout
+
+- Image `picard-campaign:contam-fleet-workup-canary-01@sha256:92eaa848ab686f7149beb046293968ef2fab7e7ec9821a76ad733a154ae0a121`,
+  built from root `Dockerfile` + `deploy/aws/Dockerfile.campaign` at
+  `5f524b81`. The in-image smoke passed every gate before the push. The
+  digest was pinned in `campaign.json` in the next commit (`campaign.json`
+  is the only file that differs from the image).
+- ContamX archive staged at
+  `s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_fleet_workup_canary_01/external/`;
+  anonymous GET and LIST return 403.
+- Job definition `picard-contam-fleet-workup-canary-01:2` (`:1` is the
+  identical `--register-only` revision). One job, not an array:
+  `3940f345-8c40-4dcb-842b-800d44178266`, 1 attempt, SUCCEEDED, about 10
+  minutes on `c7a.8xlarge` `i-03338f7ba9911b6ae`.
+- In-job gates: 993 checks, 0 failed. 462 timed cold cells, 318 timed
+  solves, 385 cached repeats, no timeout.
+- Raw artifact `canary/canary_raw.tar.gz`, SHA-256
+  `0441e19ca3db1577d08bc7225188f251181f432b7fabccd53a66e97bde8bbfb9`,
+  reduced offline into `readout/`; audit passed 14 of 14.
+- Readout: [READOUT.md](READOUT.md).
+
+**Stopped here.** No other job was submitted. Open decision: run the other
+73 hulls or not.

@@ -1,0 +1,28 @@
+{
+ "checks": {
+  "cached_repeats": true,
+  "cold_cells": true,
+  "every_row_id_once": true,
+  "inputs_unchanged": true,
+  "no_timeouts_or_failures": true,
+  "non_executed_rows_blank": true,
+  "repeats_reproduce_metrics": true,
+  "rows_executed_ok": true,
+  "rows_total": true,
+  "smoke_gates_passed": true,
+  "solver_invocations_timed": true,
+  "threads_single": true,
+  "tracer_kept": true,
+  "value_only_when_ok_or_unchanged": true
+ },
+ "counts": {
+  "cached_repeats_expected": 385,
+  "cold_cells": 462,
+  "cold_cells_expected": 462,
+  "smoke_cells": 77
+ },
+ "design_commit": "fb6a0bd5b7109dff288dd7fbf5d4681805016db3",
+ "input_commit": "d5d50d3a7bc30d50231e6f27b5083925f26c9c23",
+ "passed": true,
+ "runner_commit": "5f524b8104dc2ca09a36d822b257f015af1fd8f4"
+}

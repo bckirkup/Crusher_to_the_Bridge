@@ -369,6 +369,119 @@ def repeat_consistency(red: Reduction) -> list[dict[str, Any]]:
     return out
 
 
+# ── readout tables ────────────────────────────────────────────────────────
+
+BASELINE_METRICS = (
+    ("solved_airflow", "supply_total_m3h"), ("solved_airflow", "return_total_m3h"),
+    ("solved_airflow", "outdoor_air_total_m3h"), ("solved_airflow", "exhaust_total_m3h"),
+    ("solved_airflow", "ambient_inward_total_m3h"), ("solved_airflow", "ambient_outward_total_m3h"),
+    ("solved_airflow", "interzone_gross_m3h"), ("solved_airflow", "hull_balance_residual_m3h"),
+    ("solved_airflow", "max_abs_zone_balance_residual_m3h"),
+    ("solved_airflow", "pressure_abs_dp_median_pa"), ("solved_airflow", "pressure_abs_dp_p95_pa"),
+    ("solved_airflow", "pressure_abs_dp_max_pa"),
+    ("downstream_mixing", "outdoor_air_derived_m3h"),
+    ("downstream_mixing", "effective_outdoor_air_fraction_of_supply"),
+    ("downstream_mixing", "nonrecirculated_return_m3h"),
+    ("downstream_mixing", "boundary_sink_total_m3h"),
+    ("downstream_mixing", "clean_air_equivalent_no_filter_m3h"),
+    ("downstream_mixing", "clean_air_equivalent_with_filter_m3h"),
+    ("downstream_mixing", "whole_hull_air_change_1_per_h"),
+    ("downstream_mixing", "uniform_tracer_material_time_h"),
+    ("downstream_mixing", "uniform_tracer_closure_error"),
+)
+RESPONSE_METRICS = (
+    ("solved_airflow", "supply_total_m3h"), ("solved_airflow", "ambient_inward_total_m3h"),
+    ("solved_airflow", "interzone_gross_m3h"), ("solved_airflow", "pressure_abs_dp_p95_pa"),
+    ("downstream_mixing", "effective_outdoor_air_fraction_of_supply"),
+    ("downstream_mixing", "whole_hull_air_change_1_per_h"),
+    ("downstream_mixing", "uniform_tracer_material_time_h"),
+)
+COLD_PHASES = ("native_construct", "contamx_export", "contamx_solve", "contamx_import",
+               "field_reduce", "downstream", "end_to_end", PROCESS_PHASE)
+
+
+def _num(value: Any, status: str = "") -> str:
+    if value is None:
+        return f"blank ({status})" if status else "—"
+    return f"{float(value):.6g}"
+
+
+def _table(header: list[str], body: list[list[str]]) -> list[str]:
+    lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
+    lines += ["| " + " | ".join(row) + " |" for row in body]
+    return [*lines, ""]
+
+
+def _baseline_table(red: Reduction, hull: str) -> list[str]:
+    lanes = [r["lane"] for r in red.rows if r["hull"] == hull and r["setting_id"] == "baseline"]
+    body = []
+    for block, name in BASELINE_METRICS:
+        cells = [_num(*_value(red, f"{hull}|{lane}|baseline", block, name)) for lane in lanes]
+        body.append([block, name, *cells])
+    return _table(["block", "metric", *lanes], body)
+
+
+def _response_table(red: Reduction, hull: str) -> list[str]:
+    header = ["setting", "lane", "solved", "downstream"]
+    header += [f"{name} (level − baseline)" for _b, name in RESPONSE_METRICS]
+    body = []
+    for row in red.rows:
+        if row["hull"] != hull or row["setting_id"] == "baseline" or row["lane"] not in (NATIVE, COMMISSIONED):
+            continue
+        status = red.status[row["row_id"]]
+        deltas = []
+        for block, name in RESPONSE_METRICS:
+            value, state = _value(red, row["row_id"], block, name)
+            base, _ = _value(red, f"{hull}|{row['lane']}|baseline", block, name)
+            deltas.append(_num(_minus(value, base), state if value is None else ""))
+        body.append([row["setting_id"], row["lane"], status["solved_airflow"],
+                     status["downstream_mixing"], *deltas])
+    return _table(header, body)
+
+
+def _timing_tables(red: Reduction, summary: list[dict[str, Any]], hull: str) -> list[str]:
+    index = {(s["row_id"], s["repeat_kind"], s["phase"]): s for s in summary}
+    lanes = [r for r in red.rows if r["hull"] == hull and r["setting_id"] == "baseline"]
+
+    def cell(row_id: str, kind: str, phase: str) -> str:
+        item = index.get((row_id, kind, phase))
+        if item is None:
+            return "—"
+        return f"{item['wall_median_ns'] / 1e6:.2f} ({item['wall_iqr_ns'] / 1e6:.2f})"
+
+    cold = [[phase, *[cell(r["row_id"], "measured", phase) for r in lanes]] for phase in COLD_PHASES]
+    cached = [["downstream (cached)", *[cell(r["row_id"], "cached", "downstream") for r in lanes]]]
+    spans = []
+    for lane in (NATIVE, COMMISSIONED):
+        ends = [s["wall_median_ns"] / 1e6 for s in summary
+                if s["hull"] == hull and s["lane"] == lane
+                and s["repeat_kind"] == "measured" and s["phase"] == "end_to_end"]
+        if ends:
+            spans.append([lane, str(len(ends)), f"{min(ends):.2f}", f"{max(ends):.2f}"])
+    header = ["phase, wall ms: median (IQR), n=5", *[r["lane"] for r in lanes]]
+    return [
+        "Cold, measured repeats, baseline setting:", "", *_table(header, cold),
+        "Cached, same interpreter, engine built (never compared with cold):", "",
+        *_table(header, cached),
+        "End-to-end cold median across all executed settings:", "",
+        *_table(["lane", "rows", "min ms", "max ms"], spans),
+    ]
+
+
+def readout_markdown(red: Reduction, summary: list[dict[str, Any]]) -> str:
+    """Per-hull aggregate tables; generated, so every number traces to a CSV."""
+    lines = ["# Canary readout tables (generated)", "",
+             "Generated by `tools/diag/contam_fleet_workup_reduce.py` from `cells.jsonl`. "
+             "Hulls are listed alphabetically; nothing is ranked. `blank (status)` is a "
+             "quantity the lane does not resolve, not a zero.", ""]
+    for hull in sorted({r["hull"] for r in red.rows}):
+        lines += [f"## {hull}", "", "### Baseline, all lanes", "", *_baseline_table(red, hull),
+                  "### Setting responses (each lane against its own baseline)", "",
+                  *_response_table(red, hull), "### Run time", "",
+                  *_timing_tables(red, summary, hull)]
+    return "\n".join(lines)
+
+
 # ── audit ─────────────────────────────────────────────────────────────────
 
 
@@ -450,6 +563,8 @@ def reduce(raw_dir: str, out_dir: str) -> dict[str, Any]:
     }
     for name, (columns, rows) in tables.items():
         write_csv(os.path.join(out_dir, name), columns, rows)
+    with open(os.path.join(out_dir, "readout_tables.md"), "w", encoding="utf-8") as fh:  # noqa: PTH123
+        fh.write(readout_markdown(red, tables["timing_summary.csv"][1]))
     verdict = audit(red, {name: rows for name, (_c, rows) in tables.items()})
     with open(os.path.join(out_dir, "audit.json"), "w", encoding="utf-8") as fh:  # noqa: PTH123
         json.dump(verdict, fh, indent=1, sort_keys=True)
