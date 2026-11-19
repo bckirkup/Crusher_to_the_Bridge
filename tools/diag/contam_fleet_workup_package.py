@@ -44,6 +44,8 @@ SELECTION_PATH = os.path.join(FLEET_DIR, "design", "fleet_selection.json")
 README_TEMPLATE = os.path.join(FLEET_DIR, "package_readme.md")
 VERIFIER_PATH = os.path.join(_REPO_ROOT, "tools", "diag", "contam_fleet_workup_verify.py")
 CANARY_COHORT = "canary_run2"
+ENVIRONMENT = "environment.json"
+GATES = "smoke_gates.json"
 REDUCED_TABLES = ("results_long", "coverage_observed", "timing_raw", "timing_summary",
                   "contrasts", "reference_baselines", "repeat_consistency")
 BLOCKS = verifier.BLOCKS
@@ -126,9 +128,9 @@ def repeat_metrics(cohort: str, directory: str) -> list[dict[str, Any]]:
 
 
 def cohort_row(cohort: str, directory: str, hulls: list[str]) -> dict[str, Any]:
-    env = _read_json(os.path.join(directory, "environment.json"))
+    env = _read_json(os.path.join(directory, ENVIRONMENT))
     job = _read_json(os.path.join(directory, "job.json"))
-    gates = _read_json(os.path.join(directory, "smoke_gates.json"))
+    gates = _read_json(os.path.join(directory, GATES))
     audit = _read_json(os.path.join(directory, "audit.json"))
     external = _read_json(os.path.join(directory, "external_files.json"))["contamx"]
     attempts = job["attempts"]
@@ -158,9 +160,9 @@ def cohort_row(cohort: str, directory: str, hulls: list[str]) -> dict[str, Any]:
         "gate_checks": gates["checks"] if isinstance(gates["checks"], int) else len(gates["checks"]),
         "gate_failed": gates["failed"] if isinstance(gates["failed"], int) else len(gates["failed"]),
         "audit_passed": bool(audit["passed"]), "audit_checks": len(audit["checks"]),
-        "environment_sha256": sha256_file(os.path.join(directory, "environment.json")),
+        "environment_sha256": sha256_file(os.path.join(directory, ENVIRONMENT)),
         "job_sha256": sha256_file(os.path.join(directory, "job.json")),
-        "gates_sha256": sha256_file(os.path.join(directory, "smoke_gates.json")),
+        "gates_sha256": sha256_file(os.path.join(directory, GATES)),
         "cells_sha256": sha256_file(os.path.join(directory, "cells.jsonl")),
     }
 
@@ -247,7 +249,7 @@ def _expected(cohorts: list[dict[str, Any]], out_dir: str) -> dict[str, Any]:
 
 def build(cohort_dirs: dict[str, str], out_dir: str) -> None:
     """Write the unpacked package into ``out_dir`` (emptied first)."""
-    prepare_output_directory(out_dir, allowed_roots=_ROOTS)
+    out_dir = prepare_output_directory(out_dir, allowed_roots=_ROOTS)
     for sub in ("data", "design"):
         os.makedirs(os.path.join(out_dir, sub), exist_ok=True)
     tables: dict[str, list[dict[str, Any]]] = {name: [] for name in REDUCED_TABLES}
@@ -265,10 +267,10 @@ def build(cohort_dirs: dict[str, str], out_dir: str) -> None:
         hulls = sorted({r["hull"] for r in _read_csv(os.path.join(directory, "coverage_observed.csv"))})
         tables["repeat_metrics"] += repeat_metrics(cohort, directory)
         tables["cohorts"].append(cohort_row(cohort, directory, hulls))
-        gates = _read_json(os.path.join(directory, "smoke_gates.json"))
+        gates = _read_json(os.path.join(directory, GATES))
         tables["gates_summary"] += [{"cohort": cohort, "gate": gate, **counts}
                                     for gate, counts in sorted(gates["summary"].items())]
-        env = _read_json(os.path.join(directory, "environment.json"))
+        env = _read_json(os.path.join(directory, ENVIRONMENT))
         tables["code_sha256"] += [{"cohort": cohort, "path": path, "sha256": digest}
                                   for path, digest in sorted(env["code_sha256"].items())]
         with _open(os.path.join(directory, "readout_tables.md"), encoding="utf-8") as fh:
@@ -311,11 +313,11 @@ def archive(out_dir: str, path: str, top: str) -> str:
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w", format=tarfile.PAX_FORMAT) as tar:
         for name in _files(out_dir):
-            info = tar.gettarinfo(os.path.join(out_dir, name), arcname=f"{top}/{name}")
-            info.mtime, info.uid, info.gid, info.uname, info.gname = 0, 0, 0, "", ""
-            info.mode = 0o644
-            with _open(os.path.join(out_dir, name), "rb") as fh:
-                tar.addfile(info, fh)
+            with _open(verifier.inside(out_dir, name), "rb") as fh:
+                data = fh.read()
+            info = tarfile.TarInfo(f"{top}/{name}")
+            info.size, info.mode = len(data), 0o644
+            tar.addfile(info, io.BytesIO(data))
     with _open(path, "wb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", mtime=0, filename="") as gz:
         gz.write(buffer.getvalue())
     digest = sha256_file(path)
@@ -369,7 +371,7 @@ def main(argv: list[str] | None = None) -> int:
             json.dump(doc, fh, indent=1, sort_keys=True)
             fh.write("\n")
         return 0
-    cohorts = dict(item.split("=", 1) for item in args.cohort)
+    cohorts = {name: path for name, path in (item.split("=", 1) for item in args.cohort)}
     build(cohorts, args.out)
     top = os.path.basename(args.archive).removesuffix(".tar.gz")
     print(f"{archive(args.out, args.archive, top)}  {args.archive}")

@@ -19,6 +19,7 @@ import json
 import os
 import statistics
 import sys
+import tempfile
 from typing import Any
 
 NATIVE = "native_prescribed"
@@ -80,11 +81,49 @@ COLUMNS = {
     "data/gates_summary.csv": ("cohort", "gate", "passed", "failed"),
     "data/code_sha256.csv": ("cohort", "path", "sha256"),
 }
+
+
+EXPECTED_FILE = "EXPECTED.json"
+CRITERIA_FILE = "design/canary_criteria.json"
+SELECTION_FILE = "design/fleet_selection.json"
+SUMS_FILE = "SHA256SUMS"
+
+
+def _prefix(base: str) -> str:
+    return base if base.endswith(os.sep) else base + os.sep
+
+
+def package_root(path: str) -> str:
+    """Canonical package directory; it must sit under the working directory,
+    this script's directory or the temporary directory."""
+    resolved = os.path.realpath(path)
+    bases = (os.path.realpath(os.getcwd()), os.path.realpath(os.path.dirname(__file__)),
+             os.path.realpath(tempfile.gettempdir()))
+    for base in bases:
+        if resolved == base or resolved.startswith(_prefix(base)):
+            return resolved
+    raise SystemExit(f"{path} is outside the working, script and temporary directories")
+
+
+def inside(root: str, name: str) -> str:
+    """Canonical path of a package member; refuses anything outside ``root``."""
+    base = os.path.realpath(root)
+    resolved = os.path.realpath(os.path.join(base, name))
+    if not resolved.startswith(_prefix(base)):
+        raise ValueError(f"{name} resolves outside the package")
+    return resolved
+
+
+def read_json(root: str, name: str) -> Any:
+    with open(inside(root, name), encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 OTHER_FILES = (
-    "README.md", "EXPECTED.json", "per_hull_readout.md", "verify.py",
+    "README.md", EXPECTED_FILE, "per_hull_readout.md", "verify.py",
     "design/SHA256SUMS", "design/coverage.csv", "design/dry_run_summary.json",
     "design/input_manifest.json", "design/protocol.json", "design/run_matrix.csv",
-    "design/canary_criteria.json", "design/fleet_selection.json",
+    CRITERIA_FILE, SELECTION_FILE,
 )
 
 
@@ -103,16 +142,16 @@ class Checks:
         return 1 if failed else 0
 
 
-def sha256(path: str) -> str:
+def sha256(root: str, name: str) -> str:
     digest = hashlib.sha256()
-    with open(path, "rb") as fh:
+    with open(inside(root, name), "rb") as fh:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
 
 
 def read_csv(root: str, name: str) -> tuple[list[str], list[dict[str, str]]]:
-    with open(os.path.join(root, name), encoding="utf-8", newline="") as fh:
+    with open(inside(root, name), encoding="utf-8", newline="") as fh:
         reader = csv.DictReader(fh)
         rows = list(reader)
         return list(reader.fieldnames or []), rows
@@ -140,7 +179,7 @@ def minus(a: float | None, b: float | None) -> float | None:
 
 def check_files(root: str, checks: Checks) -> bool:
     listed = {}
-    with open(os.path.join(root, "SHA256SUMS"), encoding="utf-8") as fh:
+    with open(inside(root, SUMS_FILE), encoding="utf-8") as fh:
         for line in fh:
             digest, name = line.rstrip("\n").split("  ", 1)
             listed[name] = digest
@@ -148,22 +187,22 @@ def check_files(root: str, checks: Checks) -> bool:
     for folder, _dirs, files in os.walk(root):
         for name in files:
             present.add(os.path.relpath(os.path.join(folder, name), root).replace(os.sep, "/"))
-    present.discard("SHA256SUMS")
+    present.discard(SUMS_FILE)
     allowed = set(COLUMNS) | set(OTHER_FILES)
     checks.add("file set is exactly the documented set", present == allowed == set(listed),
                f"extra={sorted(present - allowed)} missing={sorted(allowed - present)}")
-    bad = [n for n in sorted(present & set(listed)) if sha256(os.path.join(root, n)) != listed[n]]
+    bad = [n for n in sorted(present & set(listed)) if sha256(root, n) != listed[n]]
     checks.add("every file matches SHA256SUMS", not bad, f"mismatch={bad}" if bad else "")
-    expected = json.load(open(os.path.join(root, "EXPECTED.json"), encoding="utf-8"))
+    expected = read_json(root, EXPECTED_FILE)
     design_bad = []
-    with open(os.path.join(root, "design/SHA256SUMS"), encoding="utf-8") as fh:
+    with open(inside(root, "design/SHA256SUMS"), encoding="utf-8") as fh:
         for line in fh:
             digest, name = line.split()
-            if sha256(os.path.join(root, "design", name)) != digest:
+            if sha256(root, "design/" + name) != digest:
                 design_bad.append(name)
     checks.add("frozen design files match the design's own SHA256SUMS", not design_bad)
     pins = expected["sha256"]
-    pin_bad = [n for n, d in pins.items() if sha256(os.path.join(root, n)) != d]
+    pin_bad = [n for n, d in pins.items() if sha256(root, n) != d]
     checks.add("design, criteria and selection match the pinned hashes", not pin_bad, str(pin_bad))
     return present == allowed and not bad
 
@@ -241,9 +280,9 @@ def check_coverage(root: str, t: dict[str, Any], expected: dict[str, Any], check
 
 def check_cohorts(root: str, t: dict[str, Any], expected: dict[str, Any], checks: Checks) -> None:
     cohorts = t["cohorts"]
-    criteria = json.load(open(os.path.join(root, "design/canary_criteria.json"), encoding="utf-8"))
-    selection = json.load(open(os.path.join(root, "design/fleet_selection.json"), encoding="utf-8"))
-    selection_sha = sha256(os.path.join(root, "design/fleet_selection.json"))
+    criteria = read_json(root, CRITERIA_FILE)
+    selection = read_json(root, SELECTION_FILE)
+    selection_sha = sha256(root, SELECTION_FILE)
     rosters = {c["cohort"]: c["hulls"].split(";") for c in cohorts}
     want = {"canary_run2": sorted(criteria["canary"]["hulls"]),
             **{f"fleet_cohort{c['cohort']}": c["hulls"] for c in selection["cohorts"]}}
@@ -452,30 +491,48 @@ def _spread(values: list[int]) -> dict[str, float]:
             "wall_iqr_ns": iqr, "wall_mad_ns": statistics.median([abs(v - median) for v in values])}
 
 
+def _phases(lane: str) -> set[str]:
+    return PHASES[NATIVE if lane == NATIVE else "contamx"]
+
+
+def _label_wrong(r: dict[str, str], lane: dict[str, str]) -> bool:
+    if r["repeat_kind"] == "cached":
+        return r["phase"] != "downstream"
+    return r["repeat_kind"] not in ("warmup", "measured") or r["phase"] not in _phases(lane[r["row_id"]])
+
+
+def _shape_wrong(row_id: str, lane: str, count: dict[tuple[str, str, str], int]) -> bool:
+    return count.get((row_id, "cached", "downstream")) != 5 or any(
+        count.get((row_id, "warmup", p)) != 1 or count.get((row_id, "measured", p)) != 5
+        for p in _phases(lane))
+
+
+def _summary_wrong(s: dict[str, str], items: list[dict[str, str]]) -> bool:
+    want: dict[str, Any] = {"n": len(items), **_spread([int(i["wall_ns"]) for i in items])}
+    for column, source in (("cpu_parent_median_ns", "cpu_parent_ns"),
+                           ("cpu_child_median_ns", "cpu_child_ns")):
+        values = [int(i[source]) for i in items if i[source] != ""]
+        want[column] = statistics.median(values) if values else None
+    return (not all(same(num(s[k]), None if v is None else float(v)) for k, v in want.items())
+            or len({i["cohort"] for i in items}) != 1 or s["cohort"] != items[0]["cohort"])
+
+
 def check_timing(t: dict[str, Any], checks: Checks) -> None:
     lane = {r["row_id"]: r["lane"] for r in t["coverage_observed"]}
     executed = {r["row_id"] for r in t["coverage_observed"] if r["planned_status"] == EXECUTE}
     raw = t["timing_raw"]
-    label_bad = sum(
-        (r["phase"] != "downstream") if r["repeat_kind"] == "cached"
-        else r["phase"] not in PHASES[NATIVE if lane[r["row_id"]] == NATIVE else "contamx"]
-        or r["repeat_kind"] not in ("warmup", "measured") for r in raw)
-    checks.add("timing phase labels are the documented ones for each lane", label_bad == 0)
+    checks.add("timing phase labels are the documented ones for each lane",
+               not any(_label_wrong(r, lane) for r in raw))
     count: dict[tuple[str, str, str], int] = {}
     for r in raw:
         key = (r["row_id"], r["repeat_kind"], r["phase"])
         count[key] = count.get(key, 0) + 1
-    shape_bad = 0
-    for row_id in executed:
-        phases = PHASES[NATIVE if lane[row_id] == NATIVE else "contamx"]
-        shape_bad += any(count.get((row_id, "warmup", p)) != 1
-                         or count.get((row_id, "measured", p)) != 5 for p in phases)
-        shape_bad += count.get((row_id, "cached", "downstream")) != 5
     checks.add("every executed row has 1 warm-up, 5 measured and 5 cached timings per phase",
-               shape_bad == 0 and {k[0] for k in count} == executed)
-    checks.add("native rows have no solver phase; ContamX solve is timed apart from import", all(
-        ("contamx_solve" in {k[2] for k in count if k[0] == row_id}) == (lane[row_id] != NATIVE)
-        for row_id in executed))
+               {k[0] for k in count} == executed
+               and not any(_shape_wrong(i, lane[i], count) for i in executed))
+    solved = {k[0] for k in count if k[2] == "contamx_solve"}
+    checks.add("native rows have no solver phase; ContamX solve is timed apart from import",
+               all((i in solved) == (lane[i] != NATIVE) for i in executed))
     checks.add("no timeout, no censored sample, every timed cell ok",
                all(r["censored"] == "0" and r["observed_status"] == "ok" for r in raw))
     groups: dict[tuple[str, str, str], list[dict[str, str]]] = {}
@@ -484,28 +541,20 @@ def check_timing(t: dict[str, Any], checks: Checks) -> None:
             groups.setdefault((r["row_id"], r["repeat_kind"], r["phase"]), []).append(r)
     summary = {(s["row_id"], s["repeat_kind"], s["phase"]): s for s in t["timing_summary"]}
     bad = int(set(summary) != set(groups))
-    for key, items in groups.items():
-        s = summary.get(key)
-        if s is None:
-            continue
-        want: dict[str, Any] = {"n": len(items), **_spread([int(i["wall_ns"]) for i in items])}
-        for column, source in (("cpu_parent_median_ns", "cpu_parent_ns"),
-                               ("cpu_child_median_ns", "cpu_child_ns")):
-            values = [int(i[source]) for i in items if i[source] != ""]
-            want[column] = statistics.median(values) if values else None
-        bad += not all(same(num(s[k]), None if v is None else float(v)) for k, v in want.items())
-        bad += len({i["cohort"] for i in items}) != 1 or s["cohort"] != items[0]["cohort"]
+    bad += sum(_summary_wrong(summary[key], items) for key, items in groups.items()
+               if key in summary)
     checks.add("timing_summary recomputes from timing_raw; no summary pools two cohorts",
                bad == 0, f"{bad} differ")
 
 
 def verify(root: str) -> int:
+    root = package_root(root)
     checks = Checks()
     if not check_files(root, checks):
         return checks.report()
     tables = check_columns(root, checks)
-    expected = json.load(open(os.path.join(root, "EXPECTED.json"), encoding="utf-8"))
-    criteria = json.load(open(os.path.join(root, "design/canary_criteria.json"), encoding="utf-8"))
+    expected = read_json(root, EXPECTED_FILE)
+    criteria = read_json(root, CRITERIA_FILE)
     stages = (
         ("coverage", lambda: check_coverage(root, tables, expected, checks)),
         ("cohorts", lambda: check_cohorts(root, tables, expected, checks)),
