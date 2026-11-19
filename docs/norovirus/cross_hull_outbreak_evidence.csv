@@ -1,0 +1,9 @@
+hull,cohort,n_posted,n_ship_names,pax_q1_pct,pax_median_pct,pax_q3_pct,crew_q1_pct,crew_median_pct,crew_q3_pct,pax_only,crew_only,both,neither
+expedition_cruise_450,norovirus_only,6,5,4.9491,6.9426,13.6791,0.6742,2.7276,7.5078,4,0,2,0
+expedition_cruise_450,all_posted,15,12,4.6667,6.1889,18.8034,1.0207,2.7586,6.3214,9,0,6,0
+classic_cruise_1900,norovirus_only,46,21,4.5029,5.8404,8.8489,0.8992,1.4219,2.0362,41,0,5,0
+classic_cruise_1900,all_posted,66,28,4.4647,5.7288,7.9778,0.7977,1.3844,2.0362,57,0,9,0
+spirit_cruise_3000,norovirus_only,96,53,4.6679,5.6977,7.7926,0.7624,1.1500,1.6777,89,0,5,2
+spirit_cruise_3000,all_posted,112,55,4.5583,5.5733,7.7420,0.7761,1.1500,1.6777,105,0,5,2
+mega_cruise_5000,norovirus_only,14,12,3.6548,6.0037,7.4793,0.8002,1.1338,1.5970,10,1,2,1
+mega_cruise_5000,all_posted,15,13,3.5399,5.6134,7.4702,0.6419,1.0050,1.5892,11,1,2,1
