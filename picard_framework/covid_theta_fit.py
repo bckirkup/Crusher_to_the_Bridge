@@ -37,7 +37,7 @@ import json
 import math
 import os
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from engines.py_contam_bridge import PATHOGEN_POOL_TRANSPORT_MODES
@@ -276,6 +276,9 @@ class HullObservables:
     campaign_specimens: int
     campaign_positives: int
     campaign_asymptomatic_positives: int
+    # Whole-hull ``cumulative_ever_infected`` from the voyage-end run summary.
+    # ``None`` when the reader was given no finished run to read it from.
+    cumulative_ever_infected: int | None = None
 
     @property
     def positive_share(self) -> float | None:
@@ -302,7 +305,20 @@ class HullObservables:
         }
         payload["positive_share"] = self.positive_share
         payload["asymptomatic_share"] = self.asymptomatic_share
+        if self.cumulative_ever_infected is not None:
+            payload["cumulative_ever_infected"] = self.cumulative_ever_infected
         return payload
+
+
+def voyage_end_cumulative_ever_infected(sim: Any) -> int:
+    """Whole-hull ever-infected count from a finished run's last summary."""
+    history = sim.state.simulation_history
+    if len(history) < sim.num_epochs:
+        raise ValueError(
+            "cumulative_ever_infected is a voyage-end endpoint: "
+            f"{len(history)} of {sim.num_epochs} epochs recorded",
+        )
+    return int(history[-1]["summary"]["cumulative_ever_infected"])
 
 
 def _onset_window_counts(
@@ -487,13 +503,17 @@ def simulate_hull(
         room_air_map_arm=room_air_map_arm,
     )
     sim = run_fit_spec(raw, repo_root=repo_root)
-    return observables_from_modality(
+    observed = observables_from_modality(
         sim.modalities["syndromic"],
         scenario_id=scenario_id,
         theta=theta,
         seed=seed,
         split_day=split_day,
         turn_day=turn_day,
+    )
+    return replace(
+        observed,
+        cumulative_ever_infected=voyage_end_cumulative_ever_infected(sim),
     )
 
 

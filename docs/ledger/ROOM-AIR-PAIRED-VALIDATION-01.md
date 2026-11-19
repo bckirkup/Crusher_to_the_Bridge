@@ -37,6 +37,9 @@ cross-hull statements. Details: design §10.
 - **B1:** implemented and unit-tested in PR #1329
   (`transmission.room_air_removal.map_arm`). Synthetic-fixture neutrality
   only; no voyage was run and K0/K1 remain unmeasured.
+- **B2:** implemented and unit-tested in PR #1330
+  (`HullObservables.cumulative_ever_infected`, read at voyage end). Stub
+  simulations only; no voyage was run.
 
 ## B3 state: W1 and E closed in code, Q still blocked
 
