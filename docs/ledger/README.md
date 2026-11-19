@@ -42,6 +42,8 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- [ROOM-AIR-PAIRED-VALIDATION-01](ROOM-AIR-PAIRED-VALIDATION-01.md) — declared, design only: paired `ambient_on`/`ambient_off` respiratory contrast with matched seeds, exact sign-flip rule, sealed-mode no-change control and aggregate encounter witness; three pre-execution blockers; nothing run.
+
 - [CONTAM-PHASE3-BASELINE-01](CONTAM-PHASE3-BASELINE-01.md) — corrected two-hull tracer and air-balance checks; version-sensitive transport, not as-built or epidemiological validation.
 
 - `CONTAM-PAIRED-HULL-ALLOWLIST-01.md` — paired diagnostic `--hull` choices now come from committed Contam bundles (`bundled_hulls()`) instead of the nine-hull `PLATFORM_SOURCES` map; the nine curated hulls keep default sources and the other 68 bundled hulls require `--source`; `midway_cv41` writes paired rows with `--source Flight_Deck`, non-bundled platform dirs stay rejected, and no platform/engine/schema/math changed.
