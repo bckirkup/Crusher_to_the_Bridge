@@ -33,7 +33,7 @@ model is involved; the tracer is inert and starts uniform.
 | Timeouts, failures | 0 |
 
 All 19 gates passed in the job before any timing (993 checks, 0 failed).
-The offline audit (`readout/audit.json`) passed all 14 checks.
+The offline audit (`readout_run1/audit.json`) passed all 14 checks.
 
 ## Findings
 
@@ -78,7 +78,7 @@ seeds).
    its own baseline); they say nothing about real wind.
 
 Per-hull tables for every metric and setting:
-[`readout/readout_tables.md`](readout/readout_tables.md).
+[`readout_run1/readout_tables.md`](readout_run1/readout_tables.md).
 
 ## Run time
 
@@ -150,10 +150,10 @@ apart and never compared with a cold phase, native / ContamX: destroyer 0.31
 Check it:
 
 ```bash
-cd campaigns/contam/fleet_workup_canary_01/readout && sha256sum -c SHA256SUMS
+cd campaigns/contam/fleet_workup_canary_01/readout_run1 && sha256sum -c SHA256SUMS
 cd ../design/frozen && sha256sum -c SHA256SUMS
 python3 tools/contam_fleet_workup_design.py --verify-only
-python3 tools/diag/contam_fleet_workup_reduce.py --raw campaigns/contam/fleet_workup_canary_01/readout --out out/recheck
+python3 tools/diag/contam_fleet_workup_reduce.py --raw campaigns/contam/fleet_workup_canary_01/readout_run1 --out out/recheck
 ```
 
 The last command rebuilds every table from `cells.jsonl`. Output must be\nunder the repository or a private temporary directory.
@@ -171,7 +171,7 @@ The last command rebuilds every table from `cells.jsonl`. Output must be\nunder 
 - Spot instance shared with nothing else at the time, but exclusivity is
   inferred from load average, not guaranteed.
 - The image base was pulled through a registry mirror; its digest is in
-  `readout/job.json`.
+  `readout_run1/job.json`.
 
 ## Decision
 

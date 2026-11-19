@@ -5,14 +5,31 @@
   "manifest": "campaigns/contam/fleet_workup_canary_01/design/canary_criteria.json",
   "s3_prefix": "campaign/contam_fleet_workup_canary_01/",
   "queue": "picard-campaign-queue",
-  "image_tag": "contam-fleet-workup-canary-01@sha256:92eaa848ab686f7149beb046293968ef2fab7e7ec9821a76ad733a154ae0a121",
-  "resources": {"vcpu": "1", "memory": "4096"},
+  "image_tag": "contam-fleet-workup-canary-01-rerun1",
+  "resources": {
+    "vcpu": "1",
+    "memory": "4096"
+  },
   "blocks": {
     "canary": {
       "worker": "tools/diag/contam_fleet_workup_run.py",
       "artifact": "canary_raw.tar.gz",
-      "seeds": [0],
-      "args": {"mode": "canary"}
+      "seeds": [
+        0
+      ],
+      "args": {
+        "mode": "canary"
+      }
+    },
+    "canary_rerun1": {
+      "worker": "tools/diag/contam_fleet_workup_run.py",
+      "artifact": "canary_raw_rerun1.tar.gz",
+      "seeds": [
+        0
+      ],
+      "args": {
+        "mode": "canary"
+      }
     }
   },
   "readout": "tools/diag/contam_fleet_workup_reduce.py"
