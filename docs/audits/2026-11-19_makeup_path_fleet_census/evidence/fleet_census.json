@@ -2845,11 +2845,11 @@
         }
       },
       "current_commissioned_pressure": {
-        "envelope_max_abs_dp_pa": 32.808,
-        "interior_flowing_max_abs_dp_pa": null,
-        "all_max_abs_dp_pa": 32.808,
+        "envelope_max_abs_dp_pa": null,
+        "interior_flowing_max_abs_dp_pa": 22.147014617919922,
+        "all_max_abs_dp_pa": 24.167022705078125,
         "diagnostic_makeup_demand_m3h": null,
-        "source": "docs/ledger/CONTAM-DUCT-EXCLUDE-01.md"
+        "source": "docs/ledger/CONTAM-SPIRIT-CABIN-RELIEF-01.md"
       },
       "campaign_relevance": [
         "mega_cruise_campaign"
@@ -8551,11 +8551,11 @@
         }
       },
       "current_commissioned_pressure": {
-        "envelope_max_abs_dp_pa": 3.0995330810546875,
-        "interior_flowing_max_abs_dp_pa": 0.08298812806606293,
-        "all_max_abs_dp_pa": 3.0995330810546875,
-        "diagnostic_makeup_demand_m3h": 0.0,
-        "source": "docs/audits/2026-11-17_contam_pressure_localization/evidence/current_local_solve_summary.csv"
+        "envelope_max_abs_dp_pa": 3.382359,
+        "interior_flowing_max_abs_dp_pa": 2.612933,
+        "all_max_abs_dp_pa": 3.382359,
+        "diagnostic_makeup_demand_m3h": 1066.040948,
+        "source": "docs/ledger/CONTAM-AEOLUS-LADDER-WELL-AUTHOR-01.md"
       },
       "campaign_relevance": [],
       "severity_rank_key_pa": 9640.0,

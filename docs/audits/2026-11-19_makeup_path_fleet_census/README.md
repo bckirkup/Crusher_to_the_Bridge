@@ -12,8 +12,8 @@ Static census over every committed Contam bundle: 77 of 82 `data/platforms/` dir
 
 ## Census result
 
-- All 77 committed bundles have at least one duty-0 / `oa_fraction` 1.0 exhaust-only AHS branch. Counts range from 3 (`destroyer_baseline`) to 63 (`mega_cruise_5000`); declared exhaust-only make-up demand ranges from 715.392 m³/h (`destroyer_baseline`) to 42,327.36 m³/h (`mega_cruise_5000`).
-- Every bundle already has `Sanitary_Makeup` cross-zone links/paths and envelope leaks; those are necessary topology, not a sufficient fix. Committed ledgers show the cruise/fiction `Sanitary_Makeup` legs can solve zero flow while envelope leaks carry the deficit.
+- All 77 committed bundles have at least one duty-0 / `oa_fraction` 1.0 exhaust-only AHS branch. Counts range from 1 (eight hulls, including `passumpsic_ao106`) to 63 (`mega_cruise_5000`); declared exhaust-only make-up demand ranges from 124.723 m³/h (`pt_564`) to 42,327.36 m³/h (`mega_cruise_5000`).
+- Every bundle already has `Sanitary_Makeup` cross-zone links/paths; envelope leaks are present on 75 of 77 bundles, with the two Enterprise fiction hulls using the life-support plenum boundary instead. Those are necessary topology, not a sufficient fix. Committed ledgers show the cruise/fiction `Sanitary_Makeup` legs can solve zero flow while envelope leaks carry the deficit.
 - Only 10 hulls have authored `makeup_louvre` `ambient_openings` records, 26 records total: `pope_ap110` 7, `mega_cruise_5000` 10, `diamond_princess` 1, `classic_cruise_1900` 1, `expedition_cruise_450` 1, `greg_mortimer` 2, `spirit_cruise_3000` 1, `enterprise_constitution_tos` 1, `enterprise_galaxy_tng` 1, `olympia_c6` 1.
 - Ranking by the committed fleet-review commissioned max |ΔP| is in `evidence/fleet_census.csv` / `evidence/fleet_census.json`. Those rows are the pre-weather/makeup fleet snapshot; use `current_commissioned_pressure` where a newer ledger exists before acting on a rank.
 
@@ -32,13 +32,13 @@ Phase-1 hvac-tracer bundled hulls plus mega-cruise campaign platforms (`picard_f
 | `enterprise_constitution_tos` | mega | 19 | 4,411.584 | 1 | n/a | 8.721 | `CONTAM-AMBIENT-WEATHER-FICTION-01` |
 | `enterprise_galaxy_tng` | mega | 37 | 6,557.76 | 1 | n/a | 35.54 | `CONTAM-AMBIENT-WEATHER-FICTION-01` |
 | `mega_cruise_5000` | mega | 63 | 42,327.36 | 10 | 290.365 | 284.9 | `CONTAM-DUCT-EXCLUDE-01`; `CONTAM-AMBIENT-WEATHER-CRUISE-01` |
-| `spirit_cruise_3000` | mega | 28 | 13,711.68 | 1 | 32.808 | not reported | `CONTAM-DUCT-EXCLUDE-01` |
+| `spirit_cruise_3000` | mega | 28 | 13,711.68 | 1 | not reported | 22.147 | `CONTAM-SPIRIT-CABIN-RELIEF-01` |
 
 Enterprise rows have `envelope` n/a because the committed life-support-plenum export makes the plenum the hull ambient boundary and reports envelope net inward 0; their boundary flow is the plenum opening, not envelope-leak make-up.
 
 ## Does it matter for campaign hulls?
 
-Only one campaign hull remains in the Pope-class state by the stated trigger (commissioned envelope max |ΔP| ≫ 1 kPa attributable to make-up carriage): `destroyer_baseline` at 81,561 Pa. It has only three exhaust-only groups and 715.392 m³/h declared demand, but it was skipped by the destroyer weather-opening pass (`CONTAM-AMBIENT-WEATHER-DESTROYER-01.md` records no qualifying ungrouped weather zone), so the deficit still crosses the envelope. The other campaign hulls are at 4.61–290.365 Pa envelope max, or use an authored plenum boundary; `classic_cruise_1900`’s larger `CONTAM-DUCT-EXCLUDE-01` maximum is a `prescribed_link` class, not envelope make-up carriage.
+Only one campaign hull remains in the Pope-class state by the stated trigger (commissioned envelope max |ΔP| ≫ 1 kPa attributable to make-up carriage): `destroyer_baseline` at 81,561 Pa. It has only three exhaust-only groups and 715.392 m³/h declared demand, but it was skipped by the destroyer weather-opening pass (`CONTAM-AMBIENT-WEATHER-DESTROYER-01.md` records no qualifying ungrouped weather zone), so the deficit still crosses the envelope. The other campaign hulls are at 4.61–290.365 Pa envelope max where envelope is reported (`spirit_cruise_3000` reports commissioned all-path/interior 24.167/22.147 Pa instead), or use an authored plenum boundary; `classic_cruise_1900`’s larger `CONTAM-DUCT-EXCLUDE-01` maximum is a `prescribed_link` class, not envelope make-up carriage.
 
 ## Recommendation and class boundary
 
