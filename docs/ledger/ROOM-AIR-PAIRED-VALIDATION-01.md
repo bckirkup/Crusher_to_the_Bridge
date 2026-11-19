@@ -34,6 +34,10 @@ and the encounter witness scalars (B3) do not exist at the pinned revision.
 A destroyer respiratory scenario (B4) is absent and blocks only naval or
 cross-hull statements. Details: design §10.
 
+- **B2:** implemented and unit-tested in PR #1330
+  (`HullObservables.cumulative_ever_infected`, read at voyage end). Stub
+  simulations only; no voyage was run.
+
 ## Scope
 
 A verdict describes this model at one revision, hull and profile. It is not
