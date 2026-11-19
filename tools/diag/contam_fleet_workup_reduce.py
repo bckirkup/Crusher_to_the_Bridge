@@ -153,12 +153,16 @@ def row_status(
 class Reduction:
     """Rows, records, baselines and statuses of one canary run."""
 
-    def __init__(self, raw_dir: str) -> None:
+    def __init__(self, raw_dir: str, selection: dict[str, Any] | None = None) -> None:
         self.criteria = _read_json(CRITERIA_PATH)
+        # Which hulls and how many rows; the canary's own block by default, a
+        # fleet cohort's selection metadata otherwise. Never gates or tolerances.
+        self.planned = selection["expected"] if selection else self.criteria["canary"]
+        hulls = selection["hulls"] if selection else self.criteria["canary"]["hulls"]
         self.environment = _read_json(os.path.join(raw_dir, "environment.json"))
         self.gates = _read_json(os.path.join(raw_dir, "smoke_gates.json"))
         self.manifest = _read_json(os.path.join(FROZEN_DIR, "input_manifest.json"))
-        self.rows = load_matrix(self.criteria["canary"]["hulls"])
+        self.rows = load_matrix(hulls)
         self.cells = load_cells(os.path.join(raw_dir, "cells.jsonl"))
         self.records = by_row(self.cells)
         self.tol = float(self.criteria["tolerances"]["unchanged_rel"])
@@ -519,7 +523,7 @@ def audit(red: Reduction, tables: dict[str, list[dict[str, Any]]]) -> dict[str, 
     coverage = tables["coverage_observed.csv"]
     results = tables["results_long.csv"]
     timed = [c for c in red.cells if c["repeat_kind"] in TIMED_KINDS]
-    planned = red.criteria["canary"]
+    planned = red.planned
     executed = [r for r in red.rows if r["planned_status"] == EXECUTE]
     expect_cold = sum(int(r["warmup_reps"]) + int(r["measured_reps"]) for r in executed)
     expect_cached = sum(int(r["cached_reps"]) for r in executed)
@@ -576,9 +580,9 @@ def write_sums(out_dir: str) -> None:
         fh.writelines(lines)
 
 
-def reduce(raw_dir: str, out_dir: str) -> dict[str, Any]:
+def reduce(raw_dir: str, out_dir: str, selection: dict[str, Any] | None = None) -> dict[str, Any]:
     """Write the package for one raw directory; returns the audit."""
-    red = Reduction(raw_dir)
+    red = Reduction(raw_dir, selection)
     prepare_output_directory(out_dir, allowed_roots=_ROOTS)
     raw = timing_raw(red)
     tables = {
@@ -612,8 +616,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw", required=True, help="directory with the unpacked raw artifact")
     parser.add_argument("--out", required=True)
+    parser.add_argument("--selection", default=None,
+                        help="fleet selection metadata; omitted for the canary")
+    parser.add_argument("--cohort", type=int, default=None)
     args = parser.parse_args(argv)
-    verdict = reduce(args.raw, args.out)
+    selection = None
+    if args.selection:
+        doc = _read_json(args.selection)
+        selection = doc["cohorts"][args.cohort] if args.cohort is not None else {
+            "hulls": doc["hulls"], "expected": doc["expected_fleet"]}
+    verdict = reduce(args.raw, args.out, selection)
     print(json.dumps(verdict, indent=1, sort_keys=True))
     return 0 if verdict["passed"] else 4
 

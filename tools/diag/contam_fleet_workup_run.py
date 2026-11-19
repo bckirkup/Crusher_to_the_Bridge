@@ -54,6 +54,10 @@ CELL = os.path.join(_REPO_ROOT, "tools", "diag", "contam_fleet_workup_cell.py")
 THREAD_VARS = ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")
 EXECUTE = "planned_execute"
 NATIVE = "native_prescribed"
+# ``fleet`` is ``canary`` on a selection. ``fleet_gate`` is the untimed smoke and
+# gates only, run on Batch, so it leaves its evidence and exits 0 like a timed job.
+TIMED_MODES = ("canary", "fleet")
+EVIDENCE_MODES = (*TIMED_MODES, "fleet_gate")
 _PROCESS_GRACE_S = 120.0
 _METADATA_TIMEOUT_S = 2.0
 
@@ -107,8 +111,46 @@ def canary_rows(criteria: dict[str, Any]) -> list[dict[str, str]]:
     return rows
 
 
+def load_selection(path: str, cohort: int | None, criteria: dict[str, Any]) -> dict[str, Any]:
+    """Fleet selection metadata: hulls, expected counts and authored-PRJ pins.
+
+    Selection only. It may not restate a canary hull, and its criteria pin must
+    be the criteria file in use; gates and tolerances are never read from it.
+    """
+    doc = _read_json(path)
+    if doc["criteria_sha256"] != sha256_file(CRITERIA_PATH):
+        raise RunError("fleet selection was built against a different criteria file")
+    overlap = sorted(set(doc["hulls"]) & set(criteria["canary"]["hulls"]))
+    if overlap:
+        raise RunError(f"fleet selection repeats canary hulls: {overlap}")
+    if sorted(doc["authored_prj_sha256"]) != sorted(doc["hulls"]):
+        raise RunError("fleet selection authored-PRJ pins do not cover its hulls exactly")
+    if cohort is None:
+        hulls, expected = list(doc["hulls"]), doc["expected_fleet"]
+    else:
+        entry = doc["cohorts"][cohort]
+        hulls, expected = list(entry["hulls"]), entry["expected"]
+    return {"id": doc["id"], "sha256": sha256_file(path), "cohort": cohort, "hulls": hulls,
+            "expected": expected, "all_hulls": list(doc["hulls"]),
+            "authored_prj_sha256": doc["authored_prj_sha256"]}
+
+
+def selected_rows(selection: dict[str, Any]) -> list[dict[str, str]]:
+    """The selection's matrix rows, in matrix order, with the counts checked."""
+    with _open(os.path.join(FROZEN_DIR, "run_matrix.csv"), encoding="utf-8", newline="") as fh:
+        rows = [r for r in csv.DictReader(fh) if r["hull"] in selection["hulls"]]
+    executed = [r for r in rows if r["planned_status"] == EXECUTE]
+    solves = sum(int(r["contamx_solves_planned"]) for r in executed)
+    counts = {"rows_total": len(rows), "rows_planned_execute": len(executed),
+              "contamx_solver_invocations": solves}
+    for key, value in counts.items():
+        if value != selection["expected"][key]:
+            raise RunError(f"selection {key} is {value}, expected {selection['expected'][key]}")
+    return rows
+
+
 def verify_inputs(hulls: list[str]) -> dict[str, str]:
-    """SHA-256 of every canary hull input and shared input, against the manifest."""
+    """SHA-256 of every named hull's inputs and the shared inputs, against the manifest."""
     manifest = _read_json(os.path.join(FROZEN_DIR, "input_manifest.json"))
     files = list(manifest["shared_inputs"])
     for hull in hulls:
@@ -235,7 +277,9 @@ def _git_fingerprint() -> dict[str, Any]:
 
 def code_sha256() -> dict[str, str]:
     """SHA-256 of the runner files, so image content is checkable against git."""
-    names = ("tools/diag/contam_fleet_workup_cell.py", "tools/diag/contam_fleet_workup_run.py",
+    names = ("campaigns/contam/fleet_workup_fleet_01/design/fleet_selection.json",
+             "campaigns/contam/fleet_workup_fleet_01/entry.py",
+             "tools/diag/contam_fleet_workup_cell.py", "tools/diag/contam_fleet_workup_run.py",
              "tools/diag/contam_fleet_workup_gates.py", "tools/diag/contam_fleet_workup_reduce.py",
              "campaigns/contam/fleet_workup_canary_01/design/canary_criteria.json",
              "campaigns/contam/fleet_workup_canary_01/entry.py", "uv.lock")
@@ -399,8 +443,17 @@ def execute(args: argparse.Namespace, work: str) -> int:
     env = fingerprint()
     env["criteria_sha256"] = sha256_file(CRITERIA_PATH)
     env["design_sha256"] = verify_design(criteria)
-    rows = canary_rows(criteria)
-    hulls = criteria["canary"]["hulls"]
+    if args.selection:
+        selection = load_selection(args.selection, args.cohort, criteria)
+        rows = selected_rows(selection)
+        # All 77 hulls' pinned bytes are checked, not only this cohort's.
+        hulls = sorted({*selection["all_hulls"], *criteria["canary"]["hulls"]})
+        criteria = {**criteria, "authored_prj_sha256": {
+            **criteria["authored_prj_sha256"], **selection["authored_prj_sha256"]}}
+        env["selection"] = {k: selection[k] for k in ("id", "sha256", "cohort", "hulls")}
+    else:
+        rows = canary_rows(criteria)
+        hulls = criteria["canary"]["hulls"]
     env["inputs_sha256_before"] = verify_inputs(hulls)
     contamx = provision_contamx(args, criteria["contamx"], work)
     timeout_s = float(criteria["solver_timeout_s"])
@@ -410,7 +463,7 @@ def execute(args: argparse.Namespace, work: str) -> int:
         verdict = gates.evaluate(rows, smoke, criteria)
         _write_json(os.path.join(args.out, "smoke_gates.json"), verdict)
         timed = 0
-        if verdict["passed"] and args.mode == "canary":
+        if verdict["passed"] and args.mode in TIMED_MODES:
             timed = run_timed(rows, contamx["path"], timeout_s, work, fh)
     env["inputs_sha256_after"] = verify_inputs(hulls)
     env["inputs_unchanged"] = env["inputs_sha256_after"] == env["inputs_sha256_before"]
@@ -423,12 +476,17 @@ def execute(args: argparse.Namespace, work: str) -> int:
     _pack(args.out, names, os.path.join(args.out, args.artifact))
     print(json.dumps({"gates_passed": verdict["passed"], "failed_gates": verdict["failed"],
                       "smoke_cells": len(smoke), "timed_cells": timed}))
-    return 0 if verdict["passed"] or args.mode == "canary" else 3
+    return 0 if verdict["passed"] or args.mode in EVIDENCE_MODES else 3
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("smoke", "canary"), required=True)
+    parser.add_argument("--mode", choices=("smoke", "canary", "fleet", "fleet_gate"),
+                        required=True)
+    parser.add_argument("--selection", default=None,
+                        help="fleet selection metadata; omitted for the canary")
+    parser.add_argument("--cohort", type=int, default=None,
+                        help="cohort index in the selection; omitted for every fleet hull")
     parser.add_argument("--out", required=True)
     parser.add_argument("--binary", default=None)
     parser.add_argument("--contamx-uri", default=None)
@@ -449,7 +507,7 @@ def main(argv: list[str] | None = None) -> int:
                         {"blocked": True, "reason": str(exc), "timed_cells": 0})
             _pack(args.out, ["blocker.json"], os.path.join(args.out, args.artifact))
             print(f"BLOCKED: {exc}")
-            return 0 if args.mode == "canary" else 2
+            return 0 if args.mode in EVIDENCE_MODES else 2
 
 
 if __name__ == "__main__":

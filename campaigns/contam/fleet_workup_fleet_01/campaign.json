@@ -1,0 +1,28 @@
+{
+  "name": "contam_fleet_workup_fleet_01",
+  "pathogen": "contam",
+  "pathogen_id": null,
+  "manifest": "campaigns/contam/fleet_workup_fleet_01/design/fleet_selection.json",
+  "s3_prefix": "campaign/contam_fleet_workup_fleet_01/",
+  "queue": "picard-campaign-queue",
+  "image_tag": "contam-fleet-workup-fleet-01@sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+  "resources": {
+    "vcpu": "1",
+    "memory": "4096"
+  },
+  "blocks": {
+    "gate": {
+      "worker": "tools/diag/contam_fleet_workup_run.py",
+      "artifact": "fleet_gate_raw.tar.gz",
+      "seeds": [0],
+      "args": {"mode": "fleet_gate"}
+    },
+    "fleet": {
+      "worker": "tools/diag/contam_fleet_workup_run.py",
+      "artifact": "fleet_cohort{seed}_raw.tar.gz",
+      "seeds": [0, 1, 2, 3, 4, 5, 6, 7],
+      "args": {"mode": "fleet"}
+    }
+  },
+  "readout": "tools/diag/contam_fleet_workup_reduce.py"
+}
