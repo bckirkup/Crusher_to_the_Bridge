@@ -249,3 +249,105 @@ def test_regeneration_from_pin_is_byte_identical():
     except design.DesignError:
         pytest.skip("input pin not present in this clone")
     design.verify_against_pin()
+
+
+# ── end to end on a small fixture repository ──────────────────────────────
+
+def _commit_fixture_repo(root):
+    import subprocess
+
+    def put(rel, payload):
+        path = root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        text = payload if isinstance(payload, str) else json.dumps(payload)
+        path.write_text(text, encoding="utf-8")
+
+    spatial = {"zones": [{"id": "A"}, {"id": "B"}]}
+    for hull, overrides in (
+        ("alpha", {}),
+        ("sealed", {"life_support_plenum": True,
+                    "relative_wind_speed_m_s": 0.0}),
+    ):
+        base = f"data/platforms/{hull}"
+        put(f"{base}/spatial_layout.json", spatial)
+        put(f"{base}/air_flow_paths.json", _airflow(_MIXED))
+        put(f"{base}/contam/hobbyist_overrides.json", overrides)
+        put(f"{base}/contam/platform.prj", "ContamW 3.4\n")
+        put(f"{base}/contam/path_map.json", [])
+    put("data/platforms/legacy/spatial_layout.json", spatial)
+    put("data/platforms/README.md", "roster\n")
+    put("data/contam_hobbyist/schedule_templates.json",
+        {"defaults": {"oa_fraction": 0.2}})
+    put("tool.py", "pass\n")
+    env = ["-c", "user.name=t", "-c", "user.email=t@example.invalid"]
+    for args in (["init", "-q"], ["add", "-A"],
+                 [*env, "commit", "-q", "-m", "fixture"]):
+        subprocess.run(["git", *args], cwd=root, check=True)
+    done = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root, check=True,
+        capture_output=True, text=True,
+    )
+    return done.stdout.strip()
+
+
+@pytest.fixture
+def fixture_repo(tmp_path, monkeypatch):
+    root = tmp_path / "repo"
+    root.mkdir()
+    pin = _commit_fixture_repo(root)
+    monkeypatch.setattr(design, "REPO_ROOT", str(root))
+    monkeypatch.setattr(design, "INPUT_PIN", pin)
+    monkeypatch.setattr(design, "EXPECTED_PLATFORMS", 3)
+    monkeypatch.setattr(design, "EXPECTED_BUNDLES", 2)
+    monkeypatch.setattr(design, "TOOL_PATH_FILES", ("tool.py",))
+    return root
+
+
+def test_fixture_repo_write_then_verify(fixture_repo, capsys):
+    assert design.main(["--write"]) == 0
+    assert design.main(["--verify-only"]) == 0
+    assert design.main(["--check-artifacts"]) == 0
+    capsys.readouterr()
+    assert design.main(["--dry-run"]) == 0
+    summary = json.loads(capsys.readouterr().out)
+    assert summary["platforms_excluded"] == ["legacy"]
+    assert summary["rows_total"] == 2 * (2 * len(design.SETTINGS) + 2)
+    assert summary["rows_by_planned_status"][design.NOT_APPLICABLE] == 14
+
+
+def test_fixture_repo_reads_the_pin_not_the_working_tree(fixture_repo):
+    before = design.build()
+    edited = fixture_repo / "data/platforms/alpha/air_flow_paths.json"
+    edited.write_text("{}", encoding="utf-8")
+    assert design.build() == before
+
+
+def test_fixture_repo_manifest_matches_file_bytes(fixture_repo):
+    import hashlib
+
+    manifest = json.loads(design.build()["input_manifest.json"])
+    entry = manifest["hulls"]["alpha"]["files"][0]
+    data = (fixture_repo / entry["path"]).read_bytes()
+    assert entry["sha256"] == hashlib.sha256(data).hexdigest()
+    assert entry["size_bytes"] == len(data)
+    assert manifest["tool_path_at_input_pin"][0]["path"] == "tool.py"
+
+
+def test_stale_committed_artifact_fails_verify(fixture_repo, capsys):
+    assert design.main(["--write"]) == 0
+    stale = fixture_repo / design.OUT_REL / "coverage.csv"
+    stale.write_text(stale.read_text() + "x\n", encoding="utf-8")
+    assert design.main(["--verify-only"]) == 1
+    assert "coverage.csv" in capsys.readouterr().err
+
+
+def test_roster_mismatch_stops_the_build(fixture_repo, monkeypatch):
+    monkeypatch.setattr(design, "EXPECTED_BUNDLES", 3)
+    with pytest.raises(design.DesignError, match="roster does not reconcile"):
+        design.build()
+
+
+def test_unknown_pin_is_reported(fixture_repo, monkeypatch, capsys):
+    monkeypatch.setattr(design, "INPUT_PIN", "0" * 40)
+    assert design.main(["--dry-run"]) == 1
+    assert "FAIL" in capsys.readouterr().err
