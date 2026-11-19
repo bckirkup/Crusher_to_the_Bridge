@@ -271,20 +271,24 @@ def weather_record(prj_text: str) -> dict[str, float] | None:
     return None
 
 
-def solve_prj(
-    prj_text: str, binary: str, timeout_s: float,
+def write_prj(prj_text: str, tmp_dir: str) -> str:
+    """Write the PRJ into the cell's temporary directory."""
+    prj_path = os.path.join(tmp_dir, "platform.prj")
+    with validated_open(
+        prj_path, "w", allowed_roots=(_REPO_ROOT, tmp_dir), encoding="utf-8",
+    ) as fh:
+        fh.write(prj_text)
+    return prj_path
+
+
+def read_sim(
+    sim_path: str, tmp_dir: str,
 ) -> tuple[dict[int, float], dict[int, float], dict[str, Any]]:
-    """Solve one PRJ in a new temporary directory: flows, dP, SIM facts."""
-    with tempfile.TemporaryDirectory(prefix="contam_fleet_workup_") as tmp_dir:
-        roots = (_REPO_ROOT, tmp_dir)
-        prj_path = os.path.join(tmp_dir, "platform.prj")
-        with validated_open(prj_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-            fh.write(prj_text)
-        sim_path = run_contamx(prj_path, binary, timeout_s=timeout_s, allowed_roots=roots)
-        with open(sim_path, "rb") as fh:  # noqa: PTH123 - path returned by run_contamx
-            sim_sha = hashlib.sha256(fh.read()).hexdigest()
-        sim = SimResults(sim_path, allowed_roots=roots)
-        return sim.path_volumetric_flow_m3h(), read_path_dp(sim), {"sim_sha256": sim_sha}
+    """Decode one SIM: flows, dP and the file digest."""
+    with open(sim_path, "rb") as fh:  # noqa: PTH123 - path returned by run_contamx
+        sim_sha = hashlib.sha256(fh.read()).hexdigest()
+    sim = SimResults(sim_path, allowed_roots=(_REPO_ROOT, tmp_dir))
+    return sim.path_volumetric_flow_m3h(), read_path_dp(sim), {"sim_sha256": sim_sha}
 
 
 def field_sha256(flows: dict[int, float]) -> str:
@@ -614,24 +618,49 @@ def _run_native(
     return engine, solved, {"path_count": len(engine.airflow_paths)}
 
 
+def _export_to_disk(
+    args: argparse.Namespace, inputs: dict[str, Any], airflow: dict[str, Any],
+    wind: dict[str, float], tmp_dir: str,
+) -> tuple[str, list[dict[str, Any]], str]:
+    prj_text, entries = _export(args.lane, args.hull, inputs, airflow, wind)
+    return prj_text, entries, write_prj(prj_text, tmp_dir)
+
+
+def _import_field(
+    sim_path: str, tmp_dir: str, inputs: dict[str, Any],
+    entries: list[dict[str, Any]], airflow: dict[str, Any],
+) -> tuple[ContamXTransportEngine, dict[int, float], dict[int, float], dict[str, Any]]:
+    flows, dps, sim_facts = read_sim(sim_path, tmp_dir)
+    engine = _contamx_engine(inputs["spatial"], entries, flows, airflow)
+    return engine, flows, dps, sim_facts
+
+
 def _run_contamx(
     clock: PhaseClock, args: argparse.Namespace, inputs: dict[str, Any],
     airflow: dict[str, Any], wind: dict[str, float],
 ) -> tuple[ContamTransportEngine, dict[str, Any], dict[str, Any]]:
-    prj_text, entries = clock.run(
-        "contamx_export", _export, args.lane, args.hull, inputs, airflow, wind,
-    )
-    flows, dps, sim_facts = clock.run(
-        "contamx_solve", solve_prj, prj_text, args.binary, args.timeout_s,
-    )
-    engine = clock.run(
-        "contamx_import", _contamx_engine, inputs["spatial"], entries, flows, airflow,
-    )
+    """Phases: export (PRJ and path map, written to disk), solve (the ContamX
+    subprocess call only), import (SIM read and decode, engine construction)."""
+    with tempfile.TemporaryDirectory(prefix="contam_fleet_workup_") as tmp_dir:
+        prj_text, entries, prj_path = clock.run(
+            "contamx_export", _export_to_disk, args, inputs, airflow, wind, tmp_dir,
+        )
+        sim_path = clock.run(
+            "contamx_solve",
+            lambda: run_contamx(
+                prj_path, args.binary, timeout_s=args.timeout_s,
+                allowed_roots=(_REPO_ROOT, tmp_dir),
+            ),
+        )
+        engine, flows, dps, sim_facts = clock.run(
+            "contamx_import", _import_field, sim_path, tmp_dir, inputs, entries, airflow,
+        )
     solved = clock.run(
         "field_reduce", contamx_solved_block, _real_zones(engine), entries, flows, dps,
     )
     realization = _contamx_realization(
-        args.lane, args.hull, inputs, wind, prj_text, entries, flows)
+        args.lane, args.hull, inputs, wind, prj_text, entries, flows,
+    )
     realization.update(sim_facts)
     return engine, solved, realization
 
