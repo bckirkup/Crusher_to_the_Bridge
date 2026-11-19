@@ -149,7 +149,7 @@ destroyer_baseline|contamx_authored_bundle|baseline,measured,3,downstream,532982
 destroyer_baseline|contamx_authored_bundle|baseline,measured,3,end_to_end,15589347,13327136,2498000,0,ok,1.1298828125
 destroyer_baseline|contamx_authored_bundle|baseline,measured,3,field_reduce,448332,448841,0,0,ok,1.1298828125
 destroyer_baseline|contamx_authored_bundle|baseline,measured,3,input_read,361252,359261,0,0,ok,1.1298828125
-destroyer_baseline|contamx_commissioned_export|baseline,measured,4,process_total,848551783,,,0,ok,1.1298828125
+destroyer_baseline|contamx_commissioned_export|baseline,measured,4,process_total,847259188,,,0,ok,1.1298828125
 destroyer_baseline|contamx_commissioned_export|baseline,measured,4,contamx_export,1631486,1632072,0,0,ok,1.1298828125
 destroyer_baseline|contamx_commissioned_export|baseline,measured,4,contamx_import,290361,290320,0,0,ok,1.1298828125
 destroyer_baseline|contamx_commissioned_export|baseline,measured,4,contamx_solve,13766380,11538704,2468000,0,ok,1.1298828125
@@ -162,7 +162,7 @@ destroyer_baseline|contamx_commissioned_export|baseline,cached,1,downstream,2715
 destroyer_baseline|contamx_commissioned_export|baseline,cached,2,downstream,255551,255750,0,0,ok,1.1298828125
 destroyer_baseline|contamx_commissioned_export|baseline,cached,3,downstream,244711,244890,0,0,ok,1.1298828125
 destroyer_baseline|contamx_commissioned_export|baseline,cached,4,downstream,238421,238621,0,0,ok,1.1298828125
-destroyer_baseline|contamx_commissioned_export_as_committed|baseline,measured,4,process_total,849226346,,,0,ok,1.119140625
+destroyer_baseline|contamx_commissioned_export_as_committed|baseline,measured,4,process_total,847953001,,,0,ok,1.119140625
 destroyer_baseline|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_export,1612296,1612812,0,0,ok,1.119140625
 destroyer_baseline|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_import,278421,278690,0,0,ok,1.119140625
 destroyer_baseline|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_solve,13894579,11691633,2445000,0,ok,1.119140625
@@ -175,7 +175,7 @@ destroyer_baseline|contamx_commissioned_export_as_committed|baseline,cached,1,do
 destroyer_baseline|contamx_commissioned_export_as_committed|baseline,cached,2,downstream,247381,247511,0,0,ok,1.119140625
 destroyer_baseline|contamx_commissioned_export_as_committed|baseline,cached,3,downstream,240071,240190,0,0,ok,1.119140625
 destroyer_baseline|contamx_commissioned_export_as_committed|baseline,cached,4,downstream,236591,236730,0,0,ok,1.119140625
-destroyer_baseline|contamx_authored_bundle|baseline,measured,4,process_total,847764551,,,0,ok,1.119140625
+destroyer_baseline|contamx_authored_bundle|baseline,measured,4,process_total,846491867,,,0,ok,1.119140625
 destroyer_baseline|contamx_authored_bundle|baseline,measured,4,contamx_export,189670,189840,0,0,ok,1.119140625
 destroyer_baseline|contamx_authored_bundle|baseline,measured,4,contamx_import,283951,283910,0,0,ok,1.119140625
 destroyer_baseline|contamx_authored_bundle|baseline,measured,4,contamx_solve,13875161,11580454,2529000,0,ok,1.119140625
@@ -188,7 +188,7 @@ destroyer_baseline|contamx_authored_bundle|baseline,cached,1,downstream,254531,2
 destroyer_baseline|contamx_authored_bundle|baseline,cached,2,downstream,242801,243031,0,0,ok,1.119140625
 destroyer_baseline|contamx_authored_bundle|baseline,cached,3,downstream,257461,257740,0,0,ok,1.119140625
 destroyer_baseline|contamx_authored_bundle|baseline,cached,4,downstream,238220,238430,0,0,ok,1.119140625
-destroyer_baseline|native_prescribed|baseline,measured,4,process_total,831176351,,,0,ok,1.119140625
+destroyer_baseline|native_prescribed|baseline,measured,4,process_total,829620506,,,0,ok,1.119140625
 destroyer_baseline|native_prescribed|baseline,measured,4,downstream,599392,599970,0,0,ok,1.119140625
 destroyer_baseline|native_prescribed|baseline,measured,4,end_to_end,981153,981151,0,0,ok,1.119140625
 destroyer_baseline|native_prescribed|baseline,measured,4,field_reduce,133500,133601,0,0,ok,1.119140625
@@ -239,7 +239,7 @@ destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,3,downstrea
 destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,3,end_to_end,16946251,14770647,2416000,0,ok,1.109375
 destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,3,field_reduce,430511,430941,0,0,ok,1.109375
 destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,3,input_read,386651,384500,0,0,ok,1.109375
-destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,4,process_total,854028083,,,0,ok,1.109375
+destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,4,process_total,852736618,,,0,ok,1.109375
 destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,4,contamx_export,1638736,1639482,0,0,ok,1.109375
 destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,4,contamx_import,308351,308381,0,0,ok,1.109375
 destroyer_baseline|contamx_commissioned_export|wind_speed_0,measured,4,contamx_solve,13939030,11753313,2435000,0,ok,1.109375
@@ -292,7 +292,7 @@ destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,3,downstrea
 destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,3,end_to_end,16866098,14698047,2411000,0,ok,1.1005859375
 destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,3,field_reduce,434901,435381,0,0,ok,1.1005859375
 destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,3,input_read,372922,370000,0,0,ok,1.1005859375
-destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,4,process_total,850079006,,,0,ok,1.1005859375
+destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,4,process_total,848821763,,,0,ok,1.1005859375
 destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,4,contamx_export,1637406,1637902,0,0,ok,1.1005859375
 destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,4,contamx_import,294131,294120,0,0,ok,1.1005859375
 destroyer_baseline|contamx_commissioned_export|wind_speed_5,measured,4,contamx_solve,13748667,11535454,2454000,0,ok,1.1005859375
@@ -345,7 +345,7 @@ destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,3,downstre
 destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,3,end_to_end,16992280,14743496,2479000,0,ok,1.09228515625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,3,field_reduce,444311,444710,0,0,ok,1.09228515625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,3,input_read,380921,379041,0,0,ok,1.09228515625
-destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,4,process_total,867265195,,,0,ok,1.09228515625
+destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,4,process_total,865971760,,,0,ok,1.09228515625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,4,contamx_export,1678156,1678811,0,0,ok,1.09228515625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,4,contamx_import,315171,315161,0,0,ok,1.09228515625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10,measured,4,contamx_solve,13772378,11540343,2451000,0,ok,1.09228515625
@@ -398,7 +398,7 @@ destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,3,downst
 destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,3,end_to_end,17019379,14837515,2415000,0,ok,1.08447265625
 destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,3,field_reduce,442882,443180,0,0,ok,1.08447265625
 destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,3,input_read,370152,367971,0,0,ok,1.08447265625
-destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,4,process_total,850493307,,,0,ok,1.08447265625
+destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,4,process_total,849221532,,,0,ok,1.08447265625
 destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,4,contamx_export,1666096,1666652,0,0,ok,1.08447265625
 destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,4,contamx_import,296701,296710,0,0,ok,1.08447265625
 destroyer_baseline|contamx_commissioned_export|wind_heading_90,measured,4,contamx_solve,13935887,11749963,2425000,0,ok,1.08447265625
@@ -451,7 +451,7 @@ destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,3,downs
 destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,3,end_to_end,17044841,14789588,2493000,0,ok,1.07763671875
 destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,3,field_reduce,427721,428291,0,0,ok,1.07763671875
 destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,3,input_read,367311,364781,0,0,ok,1.07763671875
-destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,4,process_total,851100659,,,0,ok,1.07763671875
+destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,4,process_total,849793295,,,0,ok,1.07763671875
 destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,4,contamx_export,1668594,1669452,0,0,ok,1.07763671875
 destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,4,contamx_import,292811,292760,0,0,ok,1.07763671875
 destroyer_baseline|contamx_commissioned_export|wind_heading_180,measured,4,contamx_solve,13970582,11715383,2499000,0,ok,1.07763671875
@@ -504,7 +504,7 @@ destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,end_to_end,16978260,14766238,2456000,0,ok,1.0712890625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,field_reduce,446551,446911,0,0,ok,1.0712890625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,input_read,373361,370801,0,0,ok,1.0712890625
-destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,process_total,851072880,,,0,ok,1.0712890625
+destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,process_total,849890667,,,0,ok,1.0712890625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_export,1670894,1671642,0,0,ok,1.0712890625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_import,290300,290370,0,0,ok,1.0712890625
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_solve,13945863,11780043,2402000,0,ok,1.0712890625
@@ -557,7 +557,7 @@ destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measure
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,end_to_end,17130640,14907878,2471000,0,ok,1.0654296875
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,field_reduce,437901,438341,0,0,ok,1.0654296875
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,input_read,367171,364511,0,0,ok,1.0654296875
-destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,process_total,852503493,,,0,ok,1.0654296875
+destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,process_total,851239540,,,0,ok,1.0654296875
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_export,1630094,1630652,0,0,ok,1.0654296875
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_import,293151,293161,0,0,ok,1.0654296875
 destroyer_baseline|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_solve,13865732,11612323,2500000,0,ok,1.0654296875
@@ -640,7 +640,7 @@ destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,3,downs
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,3,end_to_end,16909428,14638756,2508000,0,ok,1.05517578125
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,3,field_reduce,423542,423960,0,0,ok,1.05517578125
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,3,input_read,368741,366561,0,0,ok,1.05517578125
-destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,4,process_total,857892362,,,0,ok,1.05517578125
+destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,4,process_total,856585018,,,0,ok,1.05517578125
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_export,1613946,1614572,0,0,ok,1.05517578125
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_import,290971,290971,0,0,ok,1.05517578125
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_solve,13998748,11745043,2507000,0,ok,1.05517578125
@@ -653,7 +653,7 @@ destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,cached,1,downstr
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,cached,2,downstream,265551,265780,0,0,ok,1.05517578125
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,cached,3,downstream,248120,248250,0,0,ok,1.05517578125
 destroyer_baseline|contamx_commissioned_export|supply_duty_x0p5,cached,4,downstream,241411,241581,0,0,ok,1.05517578125
-destroyer_baseline|native_prescribed|supply_duty_x0p5,measured,4,process_total,840164131,,,0,ok,1.05517578125
+destroyer_baseline|native_prescribed|supply_duty_x0p5,measured,4,process_total,838609686,,,0,ok,1.05517578125
 destroyer_baseline|native_prescribed|supply_duty_x0p5,measured,4,downstream,589972,590421,0,0,ok,1.05517578125
 destroyer_baseline|native_prescribed|supply_duty_x0p5,measured,4,end_to_end,1035744,1011421,0,0,ok,1.05517578125
 destroyer_baseline|native_prescribed|supply_duty_x0p5,measured,4,field_reduce,192221,168170,0,0,ok,1.05517578125
@@ -734,7 +734,7 @@ destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,3,downs
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,3,end_to_end,17121219,14789417,2588000,0,ok,1.0458984375
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,3,field_reduce,435522,436021,0,0,ok,1.0458984375
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,3,input_read,394061,391601,0,0,ok,1.0458984375
-destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,4,process_total,851718707,,,0,ok,1.0458984375
+destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,4,process_total,850480952,,,0,ok,1.0458984375
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_export,1626106,1626642,0,0,ok,1.0458984375
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_import,289561,289570,0,0,ok,1.0458984375
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_solve,13804951,11577394,2476000,0,ok,1.0458984375
@@ -747,7 +747,7 @@ destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,cached,1,downstr
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,cached,2,downstream,240881,241070,0,0,ok,1.0458984375
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,cached,3,downstream,242061,242261,0,0,ok,1.0458984375
 destroyer_baseline|contamx_commissioned_export|supply_duty_x1p5,cached,4,downstream,232971,233190,0,0,ok,1.0458984375
-destroyer_baseline|native_prescribed|supply_duty_x1p5,measured,4,process_total,836157446,,,0,ok,1.0458984375
+destroyer_baseline|native_prescribed|supply_duty_x1p5,measured,4,process_total,834592300,,,0,ok,1.0458984375
 destroyer_baseline|native_prescribed|supply_duty_x1p5,measured,4,downstream,588832,589260,0,0,ok,1.0458984375
 destroyer_baseline|native_prescribed|supply_duty_x1p5,measured,4,end_to_end,977323,977331,0,0,ok,1.0458984375
 destroyer_baseline|native_prescribed|supply_duty_x1p5,measured,4,field_reduce,126081,126281,0,0,ok,1.0458984375
@@ -828,7 +828,7 @@ destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,3,downst
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,3,end_to_end,17065604,14791087,2510000,0,ok,1.03857421875
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,3,field_reduce,443252,443710,0,0,ok,1.03857421875
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,3,input_read,374872,372431,0,0,ok,1.03857421875
-destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,4,process_total,852155126,,,0,ok,1.03857421875
+destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,4,process_total,850863551,,,0,ok,1.03857421875
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_export,1635016,1635542,0,0,ok,1.03857421875
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_import,293652,293691,0,0,ok,1.03857421875
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_solve,13805691,11599544,2456000,0,ok,1.03857421875
@@ -841,7 +841,7 @@ destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,cached,1,downstre
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,cached,2,downstream,251751,252340,0,0,ok,1.03857421875
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,cached,3,downstream,243891,244060,0,0,ok,1.03857421875
 destroyer_baseline|contamx_commissioned_export|supply_ach_x1p5,cached,4,downstream,240581,240771,0,0,ok,1.03857421875
-destroyer_baseline|native_prescribed|supply_ach_x1p5,measured,4,process_total,836958358,,,0,ok,1.03857421875
+destroyer_baseline|native_prescribed|supply_ach_x1p5,measured,4,process_total,835396942,,,0,ok,1.03857421875
 destroyer_baseline|native_prescribed|supply_ach_x1p5,measured,4,downstream,600843,601571,0,0,ok,1.03857421875
 destroyer_baseline|native_prescribed|supply_ach_x1p5,measured,4,end_to_end,987764,987781,0,0,ok,1.03857421875
 destroyer_baseline|native_prescribed|supply_ach_x1p5,measured,4,field_reduce,130810,130860,0,0,ok,1.03857421875
@@ -922,7 +922,7 @@ destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,3,downstr
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,3,end_to_end,16987889,14731807,2493000,0,ok,1.0322265625
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,3,field_reduce,445772,446220,0,0,ok,1.0322265625
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,3,input_read,375992,373711,0,0,ok,1.0322265625
-destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,4,process_total,854341325,,,0,ok,1.0322265625
+destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,4,process_total,853031660,,,0,ok,1.0322265625
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_export,1618015,1618562,0,0,ok,1.0322265625
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_import,292371,292471,0,0,ok,1.0322265625
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_solve,13784110,11533723,2485000,0,ok,1.0322265625
@@ -935,7 +935,7 @@ destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,cached,1,downstrea
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,cached,2,downstream,253021,253190,0,0,ok,1.0322265625
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,cached,3,downstream,251471,251690,0,0,ok,1.0322265625
 destroyer_baseline|contamx_commissioned_export|supply_oa_x0p5,cached,4,downstream,247651,247880,0,0,ok,1.0322265625
-destroyer_baseline|native_prescribed|supply_oa_x0p5,measured,4,process_total,840115793,,,0,ok,1.0322265625
+destroyer_baseline|native_prescribed|supply_oa_x0p5,measured,4,process_total,838531848,,,0,ok,1.0322265625
 destroyer_baseline|native_prescribed|supply_oa_x0p5,measured,4,downstream,598063,598460,0,0,ok,1.0322265625
 destroyer_baseline|native_prescribed|supply_oa_x0p5,measured,4,end_to_end,983504,983501,0,0,ok,1.0322265625
 destroyer_baseline|native_prescribed|supply_oa_x0p5,measured,4,field_reduce,127450,127540,0,0,ok,1.0322265625
@@ -1016,7 +1016,7 @@ destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,3,dow
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,3,end_to_end,17169970,14939587,2477000,0,ok,1.02685546875
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,3,field_reduce,437201,437540,0,0,ok,1.02685546875
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,3,input_read,379191,376830,0,0,ok,1.02685546875
-destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,4,process_total,853697903,,,0,ok,1.02685546875
+destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,4,process_total,852412278,,,0,ok,1.02685546875
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_export,1648936,1649412,0,0,ok,1.02685546875
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_import,290131,290101,0,0,ok,1.02685546875
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_solve,14113451,11833983,2527000,0,ok,1.02685546875
@@ -1029,7 +1029,7 @@ destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,cached,1,downs
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,cached,2,downstream,250061,250271,0,0,ok,1.02685546875
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,cached,3,downstream,248111,248300,0,0,ok,1.02685546875
 destroyer_baseline|contamx_commissioned_export|supply_recirc_x0p5,cached,4,downstream,244521,244870,0,0,ok,1.02685546875
-destroyer_baseline|native_prescribed|supply_recirc_x0p5,measured,4,process_total,840206375,,,0,ok,1.02685546875
+destroyer_baseline|native_prescribed|supply_recirc_x0p5,measured,4,process_total,838641530,,,0,ok,1.02685546875
 destroyer_baseline|native_prescribed|supply_recirc_x0p5,measured,4,downstream,601772,602211,0,0,ok,1.02685546875
 destroyer_baseline|native_prescribed|supply_recirc_x0p5,measured,4,end_to_end,1009094,1009122,0,0,ok,1.02685546875
 destroyer_baseline|native_prescribed|supply_recirc_x0p5,measured,4,field_reduce,134581,134660,0,0,ok,1.02685546875
@@ -1190,7 +1190,7 @@ enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,3,downstre
 enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,3,end_to_end,107447143,97915313,9684000,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,3,field_reduce,954634,955041,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,3,input_read,535092,532880,0,0,ok,1.01806640625
-enterprise_constitution_tos|contamx_commissioned_export|baseline,measured,4,process_total,1007366856,,,0,ok,1.01806640625
+enterprise_constitution_tos|contamx_commissioned_export|baseline,measured,4,process_total,945680981,,,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export|baseline,measured,4,contamx_export,14743530,14724677,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export|baseline,measured,4,contamx_import,1134574,1134952,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export|baseline,measured,4,contamx_solve,82857268,73405844,9675000,0,ok,1.01806640625
@@ -1203,7 +1203,7 @@ enterprise_constitution_tos|contamx_commissioned_export|baseline,cached,1,downst
 enterprise_constitution_tos|contamx_commissioned_export|baseline,cached,2,downstream,12281622,12282124,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export|baseline,cached,3,downstream,12318834,12320064,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export|baseline,cached,4,downstream,12326453,12326944,0,0,ok,1.01806640625
-enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,measured,4,process_total,1011777391,,,0,ok,1.01806640625
+enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,measured,4,process_total,949613954,,,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_export,13740267,13741476,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_import,1150494,1150891,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_solve,82738548,73329643,9649000,0,ok,1.01806640625
@@ -1216,7 +1216,7 @@ enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,ca
 enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,cached,2,downstream,12347413,12348304,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,cached,3,downstream,12447653,12448575,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_commissioned_export_as_committed|baseline,cached,4,downstream,12417854,12418384,0,0,ok,1.01806640625
-enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,4,process_total,992989366,,,0,ok,1.01806640625
+enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,4,process_total,930968082,,,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,4,contamx_export,606982,607261,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,4,contamx_import,1951826,1952232,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_authored_bundle|baseline,measured,4,contamx_solve,81326833,71848213,9741000,0,ok,1.01806640625
@@ -1229,7 +1229,7 @@ enterprise_constitution_tos|contamx_authored_bundle|baseline,cached,1,downstream
 enterprise_constitution_tos|contamx_authored_bundle|baseline,cached,2,downstream,12370503,12370874,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_authored_bundle|baseline,cached,3,downstream,12391942,12392874,0,0,ok,1.01806640625
 enterprise_constitution_tos|contamx_authored_bundle|baseline,cached,4,downstream,12379723,12380404,0,0,ok,1.01806640625
-enterprise_constitution_tos|native_prescribed|baseline,measured,4,process_total,928972175,,,0,ok,1.0166015625
+enterprise_constitution_tos|native_prescribed|baseline,measured,4,process_total,858454919,,,0,ok,1.0166015625
 enterprise_constitution_tos|native_prescribed|baseline,measured,4,downstream,14918160,14899967,0,0,ok,1.0166015625
 enterprise_constitution_tos|native_prescribed|baseline,measured,4,end_to_end,24492684,24473508,0,0,ok,1.0166015625
 enterprise_constitution_tos|native_prescribed|baseline,measured,4,field_reduce,255711,255940,0,0,ok,1.0166015625
@@ -1310,7 +1310,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measure
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measured,3,end_to_end,113240352,103709239,9681000,0,ok,1.01513671875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measured,3,field_reduce,1078414,1078921,0,0,ok,1.01513671875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measured,3,input_read,547222,544881,0,0,ok,1.01513671875
-enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measured,4,process_total,1009676364,,,0,ok,1.013671875
+enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measured,4,process_total,946907606,,,0,ok,1.013671875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_export,13503437,13504496,0,0,ok,1.013671875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_import,1129844,1130021,0,0,ok,1.013671875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_solve,81556743,71952853,9841000,0,ok,1.013671875
@@ -1323,7 +1323,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,cached,
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,cached,2,downstream,12845625,12822205,0,0,ok,1.013671875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,cached,3,downstream,12479703,12480534,0,0,ok,1.013671875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x0p5,cached,4,downstream,12419013,12420355,0,0,ok,1.013671875
-enterprise_constitution_tos|native_prescribed|supply_duty_x0p5,measured,4,process_total,921194416,,,0,ok,1.013671875
+enterprise_constitution_tos|native_prescribed|supply_duty_x0p5,measured,4,process_total,850142191,,,0,ok,1.013671875
 enterprise_constitution_tos|native_prescribed|supply_duty_x0p5,measured,4,downstream,14726861,14727517,0,0,ok,1.013671875
 enterprise_constitution_tos|native_prescribed|supply_duty_x0p5,measured,4,end_to_end,16598988,16598950,0,0,ok,1.013671875
 enterprise_constitution_tos|native_prescribed|supply_duty_x0p5,measured,4,field_reduce,269151,269401,0,0,ok,1.013671875
@@ -1404,7 +1404,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measure
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measured,3,end_to_end,111434922,102035068,9621000,0,ok,1.0107421875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measured,3,field_reduce,988994,989481,0,0,ok,1.0107421875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measured,3,input_read,539562,537191,0,0,ok,1.0107421875
-enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measured,4,process_total,1004649668,,,0,ok,1.0107421875
+enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measured,4,process_total,943062184,,,0,ok,1.0107421875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_export,14156407,14158116,0,0,ok,1.0107421875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_import,1141724,1142311,0,0,ok,1.0107421875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_solve,81306012,71884453,9656000,0,ok,1.0107421875
@@ -1417,7 +1417,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,cached,
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,cached,2,downstream,12298148,12299344,0,0,ok,1.0107421875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,cached,3,downstream,12281079,12281784,0,0,ok,1.0107421875
 enterprise_constitution_tos|contamx_commissioned_export|supply_duty_x1p5,cached,4,downstream,12316359,12316994,0,0,ok,1.0107421875
-enterprise_constitution_tos|native_prescribed|supply_duty_x1p5,measured,4,process_total,919953842,,,0,ok,1.0107421875
+enterprise_constitution_tos|native_prescribed|supply_duty_x1p5,measured,4,process_total,849466842,,,0,ok,1.0107421875
 enterprise_constitution_tos|native_prescribed|supply_duty_x1p5,measured,4,downstream,14874489,14875627,0,0,ok,1.0107421875
 enterprise_constitution_tos|native_prescribed|supply_duty_x1p5,measured,4,end_to_end,16667426,16667379,0,0,ok,1.0107421875
 enterprise_constitution_tos|native_prescribed|supply_duty_x1p5,measured,4,field_reduce,264601,264720,0,0,ok,1.0107421875
@@ -1498,7 +1498,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured,3,end_to_end,114663220,105102802,9791000,0,ok,1.0087890625
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured,3,field_reduce,1001273,1001661,0,0,ok,1.0087890625
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured,3,input_read,534182,531860,0,0,ok,1.0087890625
-enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured,4,process_total,997361986,,,0,ok,1.0087890625
+enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured,4,process_total,935251188,,,0,ok,1.0087890625
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_export,5538060,5539096,0,0,ok,1.0087890625
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_import,1149264,1149701,0,0,ok,1.0087890625
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_solve,81594034,72113504,9734000,0,ok,1.0087890625
@@ -1511,7 +1511,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,cached,1
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,cached,2,downstream,12359073,12359825,0,0,ok,1.0087890625
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,cached,3,downstream,12435414,12436264,0,0,ok,1.0087890625
 enterprise_constitution_tos|contamx_commissioned_export|supply_ach_x1p5,cached,4,downstream,12431843,12432424,0,0,ok,1.0087890625
-enterprise_constitution_tos|native_prescribed|supply_ach_x1p5,measured,4,process_total,929645299,,,0,ok,1.0087890625
+enterprise_constitution_tos|native_prescribed|supply_ach_x1p5,measured,4,process_total,858255348,,,0,ok,1.0087890625
 enterprise_constitution_tos|native_prescribed|supply_ach_x1p5,measured,4,downstream,14920741,14921777,0,0,ok,1.0087890625
 enterprise_constitution_tos|native_prescribed|supply_ach_x1p5,measured,4,end_to_end,24488944,24488888,0,0,ok,1.0087890625
 enterprise_constitution_tos|native_prescribed|supply_ach_x1p5,measured,4,field_reduce,257981,258740,0,0,ok,1.0087890625
@@ -1592,7 +1592,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,3,end_to_end,112594094,103079609,9744000,0,ok,1.0068359375
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,3,field_reduce,993174,993601,0,0,ok,1.0068359375
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,3,input_read,626052,594751,0,0,ok,1.0068359375
-enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,4,process_total,1014737716,,,0,ok,1.0068359375
+enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,4,process_total,951359406,,,0,ok,1.0068359375
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_export,13693637,13676906,0,0,ok,1.0068359375
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_import,1159894,1160042,0,0,ok,1.0068359375
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_solve,81875437,72529403,9584000,0,ok,1.0068359375
@@ -1605,7 +1605,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,cached,1,
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,cached,2,downstream,12648914,12649825,0,0,ok,1.0068359375
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,cached,3,downstream,12598203,12598795,0,0,ok,1.0068359375
 enterprise_constitution_tos|contamx_commissioned_export|supply_oa_x0p5,cached,4,downstream,12657014,12658204,0,0,ok,1.0068359375
-enterprise_constitution_tos|native_prescribed|supply_oa_x0p5,measured,4,process_total,921582600,,,0,ok,1.0068359375
+enterprise_constitution_tos|native_prescribed|supply_oa_x0p5,measured,4,process_total,851981705,,,0,ok,1.0068359375
 enterprise_constitution_tos|native_prescribed|supply_oa_x0p5,measured,4,downstream,14552831,14553597,0,0,ok,1.0068359375
 enterprise_constitution_tos|native_prescribed|supply_oa_x0p5,measured,4,end_to_end,16318777,16318749,0,0,ok,1.0068359375
 enterprise_constitution_tos|native_prescribed|supply_oa_x0p5,measured,4,field_reduce,256750,256871,0,0,ok,1.0068359375
@@ -1686,7 +1686,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measu
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measured,3,end_to_end,110443546,100980277,9630000,0,ok,1.00537109375
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measured,3,field_reduce,969343,969801,0,0,ok,1.00537109375
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measured,3,input_read,540162,537981,0,0,ok,1.00537109375
-enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measured,4,process_total,1006193576,,,0,ok,1.00537109375
+enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measured,4,process_total,944751942,,,0,ok,1.00537109375
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_export,14103708,14093796,0,0,ok,1.00537109375
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_import,1127764,1127841,0,0,ok,1.00537109375
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_solve,83714883,74303786,9655000,0,ok,1.00537109375
@@ -1699,7 +1699,7 @@ enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,cache
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,cached,2,downstream,12296643,12297474,0,0,ok,1.00537109375
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,cached,3,downstream,12228072,12229004,0,0,ok,1.00537109375
 enterprise_constitution_tos|contamx_commissioned_export|supply_recirc_x0p5,cached,4,downstream,12325963,12326415,0,0,ok,1.00537109375
-enterprise_constitution_tos|native_prescribed|supply_recirc_x0p5,measured,4,process_total,932183548,,,0,ok,1.0048828125
+enterprise_constitution_tos|native_prescribed|supply_recirc_x0p5,measured,4,process_total,861200680,,,0,ok,1.0048828125
 enterprise_constitution_tos|native_prescribed|supply_recirc_x0p5,measured,4,downstream,15035423,15036528,0,0,ok,1.0048828125
 enterprise_constitution_tos|native_prescribed|supply_recirc_x0p5,measured,4,end_to_end,24737095,24724679,0,0,ok,1.0048828125
 enterprise_constitution_tos|native_prescribed|supply_recirc_x0p5,measured,4,field_reduce,255990,256210,0,0,ok,1.0048828125
@@ -1860,7 +1860,7 @@ expedition_cruise_450|contamx_authored_bundle|baseline,measured,3,downstream,577
 expedition_cruise_450|contamx_authored_bundle|baseline,measured,3,end_to_end,60465365,55635515,5794000,0,ok,1.00341796875
 expedition_cruise_450|contamx_authored_bundle|baseline,measured,3,field_reduce,769513,769980,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_authored_bundle|baseline,measured,3,input_read,502592,500291,0,0,ok,1.00341796875
-expedition_cruise_450|contamx_commissioned_export|baseline,measured,4,process_total,932318670,,,0,ok,1.00341796875
+expedition_cruise_450|contamx_commissioned_export|baseline,measured,4,process_total,905518379,,,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export|baseline,measured,4,contamx_export,12108372,12109384,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export|baseline,measured,4,contamx_import,810533,810650,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export|baseline,measured,4,contamx_solve,52619689,47045975,5810000,0,ok,1.00341796875
@@ -1873,7 +1873,7 @@ expedition_cruise_450|contamx_commissioned_export|baseline,cached,1,downstream,5
 expedition_cruise_450|contamx_commissioned_export|baseline,cached,2,downstream,5351639,5352336,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export|baseline,cached,3,downstream,5294078,5294486,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export|baseline,cached,4,downstream,5298458,5299566,0,0,ok,1.00341796875
-expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,measured,4,process_total,928009135,,,0,ok,1.00341796875
+expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,measured,4,process_total,901356315,,,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_export,12738303,12740044,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_import,785213,785361,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_solve,51149604,45517123,5880000,0,ok,1.00341796875
@@ -1886,7 +1886,7 @@ expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,cached,1
 expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,cached,2,downstream,5282458,5282786,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,cached,3,downstream,5413829,5344186,0,0,ok,1.00341796875
 expedition_cruise_450|contamx_commissioned_export_as_committed|baseline,cached,4,downstream,5301058,5301466,0,0,ok,1.00341796875
-expedition_cruise_450|contamx_authored_bundle|baseline,measured,4,process_total,913911578,,,0,ok,1.0029296875
+expedition_cruise_450|contamx_authored_bundle|baseline,measured,4,process_total,887542139,,,0,ok,1.0029296875
 expedition_cruise_450|contamx_authored_bundle|baseline,measured,4,contamx_export,422891,423160,0,0,ok,1.0029296875
 expedition_cruise_450|contamx_authored_bundle|baseline,measured,4,contamx_import,828743,828851,0,0,ok,1.0029296875
 expedition_cruise_450|contamx_authored_bundle|baseline,measured,4,contamx_solve,50960843,46078723,5779000,0,ok,1.0029296875
@@ -1899,7 +1899,7 @@ expedition_cruise_450|contamx_authored_bundle|baseline,cached,1,downstream,52600
 expedition_cruise_450|contamx_authored_bundle|baseline,cached,2,downstream,5351028,5281907,0,0,ok,1.0029296875
 expedition_cruise_450|contamx_authored_bundle|baseline,cached,3,downstream,5260697,5261206,0,0,ok,1.0029296875
 expedition_cruise_450|contamx_authored_bundle|baseline,cached,4,downstream,5208788,5209496,0,0,ok,1.0029296875
-expedition_cruise_450|native_prescribed|baseline,measured,4,process_total,877893667,,,0,ok,1.0029296875
+expedition_cruise_450|native_prescribed|baseline,measured,4,process_total,846675670,,,0,ok,1.0029296875
 expedition_cruise_450|native_prescribed|baseline,measured,4,downstream,15263653,15265208,0,0,ok,1.0029296875
 expedition_cruise_450|native_prescribed|baseline,measured,4,end_to_end,16114976,16114979,0,0,ok,1.0029296875
 expedition_cruise_450|native_prescribed|baseline,measured,4,field_reduce,210541,210830,0,0,ok,1.0029296875
@@ -1950,7 +1950,7 @@ expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,3,downst
 expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,3,end_to_end,71092855,65571157,5739000,0,ok,1.00244140625
 expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,3,field_reduce,731923,732361,0,0,ok,1.00244140625
 expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,3,input_read,498801,497010,0,0,ok,1.00244140625
-expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,4,process_total,927851961,,,0,ok,1.00244140625
+expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,4,process_total,901118719,,,0,ok,1.00244140625
 expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,4,contamx_export,11977670,11978814,0,0,ok,1.00244140625
 expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,4,contamx_import,807403,807731,0,0,ok,1.00244140625
 expedition_cruise_450|contamx_commissioned_export|wind_speed_0,measured,4,contamx_solve,51296397,45675472,5864000,0,ok,1.00244140625
@@ -2003,7 +2003,7 @@ expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,3,downst
 expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,3,end_to_end,72653800,66828906,6052000,0,ok,1.001953125
 expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,3,field_reduce,756852,757241,0,0,ok,1.001953125
 expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,3,input_read,490472,487771,0,0,ok,1.001953125
-expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,4,process_total,934312282,,,0,ok,1.001953125
+expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,4,process_total,908149011,,,0,ok,1.001953125
 expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,4,contamx_export,12427323,12402644,0,0,ok,1.001953125
 expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,4,contamx_import,832693,832931,0,0,ok,1.001953125
 expedition_cruise_450|contamx_commissioned_export|wind_speed_5,measured,4,contamx_solve,51209937,45433982,5997000,0,ok,1.001953125
@@ -2056,7 +2056,7 @@ expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,3,downs
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,3,end_to_end,71607077,66021125,5791000,0,ok,1.00146484375
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,3,field_reduce,739512,740021,0,0,ok,1.00146484375
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,3,input_read,492162,489471,0,0,ok,1.00146484375
-expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,4,process_total,928089299,,,0,ok,1.00146484375
+expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,4,process_total,902119510,,,0,ok,1.00146484375
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,4,contamx_export,3728374,3729035,0,0,ok,1.00146484375
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,4,contamx_import,815533,815711,0,0,ok,1.00146484375
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10,measured,4,contamx_solve,51520656,46044483,5719000,0,ok,1.00146484375
@@ -2109,7 +2109,7 @@ expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,3,dow
 expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,3,end_to_end,71249815,65615625,5862000,0,ok,1.0009765625
 expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,3,field_reduce,738072,738441,0,0,ok,1.0009765625
 expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,3,input_read,500962,498271,0,0,ok,1.0009765625
-expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,4,process_total,939737810,,,0,ok,1.0009765625
+expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,4,process_total,912569706,,,0,ok,1.0009765625
 expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,4,contamx_export,13206315,13207525,0,0,ok,1.0009765625
 expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,4,contamx_import,851463,851631,0,0,ok,1.0009765625
 expedition_cruise_450|contamx_commissioned_export|wind_heading_90,measured,4,contamx_solve,50957455,45357793,5903000,0,ok,1.0009765625
@@ -2162,7 +2162,7 @@ expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,3,do
 expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,3,end_to_end,72858940,67377988,5717000,0,ok,1.00048828125
 expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,3,field_reduce,755103,755680,0,0,ok,1.00048828125
 expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,3,input_read,493712,491171,0,0,ok,1.00048828125
-expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,4,process_total,936752890,,,0,ok,1.00048828125
+expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,4,process_total,909621838,,,0,ok,1.00048828125
 expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,4,contamx_export,12234562,12235304,0,0,ok,1.00048828125
 expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,4,contamx_import,809202,809351,0,0,ok,1.00048828125
 expedition_cruise_450|contamx_commissioned_export|wind_heading_180,measured,4,contamx_solve,51033056,45551843,5722000,0,ok,1.00048828125
@@ -2215,7 +2215,7 @@ expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measu
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,end_to_end,72588600,66881778,5904000,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,field_reduce,744253,744561,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,input_read,498232,495771,0,0,ok,1.0
-expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,process_total,939069398,,,0,ok,1.0
+expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,process_total,910359847,,,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_export,13055946,13057045,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_import,896913,897221,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_solve,51618671,45974303,5882000,0,ok,1.0
@@ -2268,7 +2268,7 @@ expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,meas
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,end_to_end,71969932,66319987,5876000,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,field_reduce,743643,744101,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,input_read,488832,486671,0,0,ok,1.0
-expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,process_total,928091960,,,0,ok,1.0
+expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,process_total,900998505,,,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_export,12304953,12305964,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_import,810883,810981,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_solve,51137689,45557983,5808000,0,ok,1.0
@@ -2351,7 +2351,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,3,do
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,3,end_to_end,72431584,66823768,5808000,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,3,field_reduce,753172,753671,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,3,input_read,502012,499900,0,0,ok,1.0
-expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,4,process_total,934271761,,,0,ok,1.0
+expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,4,process_total,906832965,,,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_export,12305303,12306524,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_import,828233,828291,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_solve,51687851,46034673,5838000,0,ok,1.0
@@ -2364,7 +2364,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,cached,1,down
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,cached,2,downstream,5471929,5472246,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,cached,3,downstream,5455929,5456877,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x0p5,cached,4,downstream,5445959,5446806,0,0,ok,1.0
-expedition_cruise_450|native_prescribed|supply_duty_x0p5,measured,4,process_total,877963315,,,0,ok,1.0
+expedition_cruise_450|native_prescribed|supply_duty_x0p5,measured,4,process_total,846655927,,,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_duty_x0p5,measured,4,downstream,15286624,15287838,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_duty_x0p5,measured,4,end_to_end,16137387,16137349,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_duty_x0p5,measured,4,field_reduce,207011,207250,0,0,ok,1.0
@@ -2445,7 +2445,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,3,do
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,3,end_to_end,63874054,58369518,5717000,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,3,field_reduce,736473,737000,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,3,input_read,494962,492191,0,0,ok,1.0
-expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,4,process_total,929054433,,,0,ok,1.0
+expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,4,process_total,902656160,,,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_export,12891764,12876925,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_import,841083,841141,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_solve,50801188,45257602,5776000,0,ok,1.0
@@ -2458,7 +2458,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,cached,1,down
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,cached,2,downstream,5296739,5297556,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,cached,3,downstream,5238948,5239876,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_duty_x1p5,cached,4,downstream,5230699,5231136,0,0,ok,1.0
-expedition_cruise_450|native_prescribed|supply_duty_x1p5,measured,4,process_total,876384960,,,0,ok,1.0
+expedition_cruise_450|native_prescribed|supply_duty_x1p5,measured,4,process_total,845716583,,,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_duty_x1p5,measured,4,downstream,7087915,7088579,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_duty_x1p5,measured,4,end_to_end,7932908,7932959,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_duty_x1p5,measured,4,field_reduce,194471,194690,0,0,ok,1.0
@@ -2539,7 +2539,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,3,dow
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,3,end_to_end,71496761,65992486,5756000,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,3,field_reduce,731442,731801,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,3,input_read,498402,496350,0,0,ok,1.0
-expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,4,process_total,931862265,,,0,ok,1.0
+expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,4,process_total,905160811,,,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_export,3721003,3721554,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_import,836093,836341,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_solve,51413290,45867492,5765000,0,ok,1.0
@@ -2552,7 +2552,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,cached,1,downs
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,cached,2,downstream,5336529,5337246,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,cached,3,downstream,5267718,5268286,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_ach_x1p5,cached,4,downstream,5302249,5302766,0,0,ok,1.0
-expedition_cruise_450|native_prescribed|supply_ach_x1p5,measured,4,process_total,879974997,,,0,ok,1.0
+expedition_cruise_450|native_prescribed|supply_ach_x1p5,measured,4,process_total,848726467,,,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_ach_x1p5,measured,4,downstream,15221463,15170587,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_ach_x1p5,measured,4,end_to_end,16071456,16019718,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_ach_x1p5,measured,4,field_reduce,199841,200091,0,0,ok,1.0
@@ -2633,7 +2633,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,3,down
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,3,end_to_end,72517483,66972267,5784000,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,3,field_reduce,754813,755341,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,3,input_read,490171,487751,0,0,ok,1.0
-expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,4,process_total,935963591,,,0,ok,1.0
+expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,4,process_total,909427337,,,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_export,12905365,12906405,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_import,882513,882661,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_solve,50906516,45325342,5831000,0,ok,1.0
@@ -2646,7 +2646,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,cached,1,downst
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,cached,2,downstream,5317019,5317716,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,cached,3,downstream,5230838,5231216,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_oa_x0p5,cached,4,downstream,5260419,5260836,0,0,ok,1.0
-expedition_cruise_450|native_prescribed|supply_oa_x0p5,measured,4,process_total,876134041,,,0,ok,1.0
+expedition_cruise_450|native_prescribed|supply_oa_x0p5,measured,4,process_total,843912240,,,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_oa_x0p5,measured,4,downstream,7465097,7465789,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_oa_x0p5,measured,4,end_to_end,8331970,8331960,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_oa_x0p5,measured,4,field_reduce,207340,207580,0,0,ok,1.0
@@ -2727,7 +2727,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,3,
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,3,end_to_end,71167841,65572606,5834000,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,3,field_reduce,744063,744441,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,3,input_read,502631,500301,0,0,ok,1.0
-expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,4,process_total,931300035,,,0,ok,1.0
+expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,4,process_total,904501061,,,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_export,12310823,12312535,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_import,821453,821641,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_solve,50840110,45349142,5723000,0,ok,1.0
@@ -2740,7 +2740,7 @@ expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,cached,1,do
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,cached,2,downstream,5339069,5339956,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,cached,3,downstream,5320929,5321936,0,0,ok,1.0
 expedition_cruise_450|contamx_commissioned_export|supply_recirc_x0p5,cached,4,downstream,5276818,5277026,0,0,ok,1.0
-expedition_cruise_450|native_prescribed|supply_recirc_x0p5,measured,4,process_total,877768658,,,0,ok,1.0
+expedition_cruise_450|native_prescribed|supply_recirc_x0p5,measured,4,process_total,846851859,,,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_recirc_x0p5,measured,4,downstream,14767561,14768427,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_recirc_x0p5,measured,4,end_to_end,15628424,15628418,0,0,ok,1.0
 expedition_cruise_450|native_prescribed|supply_recirc_x0p5,measured,4,field_reduce,199901,200020,0,0,ok,1.0
@@ -2901,7 +2901,7 @@ west_virginia_bb48|contamx_authored_bundle|baseline,measured,3,downstream,287456
 west_virginia_bb48|contamx_authored_bundle|baseline,measured,3,end_to_end,798288041,738311712,60146000,0,ok,1.0
 west_virginia_bb48|contamx_authored_bundle|baseline,measured,3,field_reduce,4467037,4467875,0,0,ok,1.0
 west_virginia_bb48|contamx_authored_bundle|baseline,measured,3,input_read,977224,974791,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|baseline,measured,4,process_total,3049639663,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|baseline,measured,4,process_total,1636535813,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|baseline,measured,4,contamx_export,31412778,31393296,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|baseline,measured,4,contamx_import,5674522,5674736,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|baseline,measured,4,contamx_solve,471826710,413125337,58989000,0,ok,1.0
@@ -2914,7 +2914,7 @@ west_virginia_bb48|contamx_commissioned_export|baseline,cached,1,downstream,2825
 west_virginia_bb48|contamx_commissioned_export|baseline,cached,2,downstream,282662927,282646156,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|baseline,cached,3,downstream,283466669,283469137,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|baseline,cached,4,downstream,282826136,282828736,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,measured,4,process_total,3102786654,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,measured,4,process_total,1641102891,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_export,31230008,31213376,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_import,5467460,5467617,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,measured,4,contamx_solve,468821689,410542594,58572000,0,ok,1.0
@@ -2927,7 +2927,7 @@ west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,cached,1,do
 west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,cached,2,downstream,290306165,290280815,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,cached,3,downstream,290732987,290735525,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export_as_committed|baseline,cached,4,downstream,301416786,301419388,0,0,ok,1.0
-west_virginia_bb48|contamx_authored_bundle|baseline,measured,4,process_total,3051869232,,,0,ok,1.0
+west_virginia_bb48|contamx_authored_bundle|baseline,measured,4,process_total,1628052753,,,0,ok,1.0
 west_virginia_bb48|contamx_authored_bundle|baseline,measured,4,contamx_export,14462750,14463536,0,0,ok,1.0
 west_virginia_bb48|contamx_authored_bundle|baseline,measured,4,contamx_import,6265892,6266237,0,0,ok,1.0
 west_virginia_bb48|contamx_authored_bundle|baseline,measured,4,contamx_solve,480725523,422489178,58510000,0,ok,1.0
@@ -2940,7 +2940,7 @@ west_virginia_bb48|contamx_authored_bundle|baseline,cached,1,downstream,28562502
 west_virginia_bb48|contamx_authored_bundle|baseline,cached,2,downstream,284681871,284672708,0,0,ok,1.0
 west_virginia_bb48|contamx_authored_bundle|baseline,cached,3,downstream,284641862,284624549,0,0,ok,1.0
 west_virginia_bb48|contamx_authored_bundle|baseline,cached,4,downstream,285451943,285454399,0,0,ok,1.0
-west_virginia_bb48|native_prescribed|baseline,measured,4,process_total,3743849641,,,0,ok,1.0
+west_virginia_bb48|native_prescribed|baseline,measured,4,process_total,1337938668,,,0,ok,1.0
 west_virginia_bb48|native_prescribed|baseline,measured,4,downstream,481717895,481719966,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|baseline,measured,4,end_to_end,497862652,497842284,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|baseline,measured,4,field_reduce,1892657,1892872,0,0,ok,1.0
@@ -2991,7 +2991,7 @@ west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,3,downstrea
 west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,3,end_to_end,785420552,725867787,59700000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,3,field_reduce,4286955,4287355,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,3,input_read,1047103,1044951,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,4,process_total,3058194152,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,4,process_total,1636419255,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,4,contamx_export,30827960,30813825,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,4,contamx_import,5405579,5406166,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_0,measured,4,contamx_solve,471832590,412266666,59838000,0,ok,1.0
@@ -3044,7 +3044,7 @@ west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,3,downstrea
 west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,3,end_to_end,802229709,741441666,60968000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,3,field_reduce,4252565,4253194,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,3,input_read,960723,958331,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,4,process_total,3076361661,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,4,process_total,1641494468,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,4,contamx_export,30891418,30892336,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,4,contamx_import,5476089,5476317,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_5,measured,4,contamx_solve,483082668,421646485,61690000,0,ok,1.0
@@ -3097,7 +3097,7 @@ west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,3,downstre
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,3,end_to_end,806572241,745300099,61439000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,3,field_reduce,4292225,4292935,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,3,input_read,950784,948831,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,4,process_total,3123910704,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,4,process_total,1653768355,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,4,contamx_export,22570109,22571656,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,4,contamx_import,5724830,5725177,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10,measured,4,contamx_solve,479810591,417668821,62434000,0,ok,1.0
@@ -3150,7 +3150,7 @@ west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,3,downst
 west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,3,end_to_end,820522841,758822115,61843000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,3,field_reduce,4252075,4252585,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,3,input_read,960814,959001,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,4,process_total,3050672053,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,4,process_total,1634132836,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,4,contamx_export,22718261,22688726,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,4,contamx_import,5574290,5574656,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_90,measured,4,contamx_solve,469622163,409029721,60884000,0,ok,1.0
@@ -3203,7 +3203,7 @@ west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,3,downs
 west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,3,end_to_end,795768098,735798240,60140000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,3,field_reduce,4253975,4254694,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,3,input_read,1002574,1000031,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,4,process_total,3051165867,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,4,process_total,1630400285,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,4,contamx_export,22445920,22445766,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,4,contamx_import,5482839,5483446,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_heading_180,measured,4,contamx_solve,470655137,409963602,60973000,0,ok,1.0
@@ -3256,7 +3256,7 @@ west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,end_to_end,800120046,740979976,59334000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,field_reduce,4218145,4219155,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured,3,input_read,1079863,1071362,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,process_total,3107529656,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,process_total,1652740308,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_export,32374585,32376038,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_import,5514959,5515527,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_90,measured,4,contamx_solve,478860137,419244123,59908000,0,ok,1.0
@@ -3309,7 +3309,7 @@ west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measure
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,end_to_end,811874019,749675164,62380000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,field_reduce,4213145,4213585,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measured,3,input_read,977694,975081,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,process_total,3106900545,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,process_total,1649543382,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_export,30997854,30998685,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_import,5423410,5423726,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|wind_speed_10_heading_180,measured,4,contamx_solve,480352794,418564553,62084000,0,ok,1.0
@@ -3392,7 +3392,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,3,downs
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,3,end_to_end,794448567,735610469,58982000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,3,field_reduce,4458146,4459385,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,3,input_read,957503,955181,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,4,process_total,3080534361,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,4,process_total,1645039086,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_export,22577640,22554386,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_import,5454099,5454726,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,measured,4,contamx_solve,476245291,417684761,58846000,0,ok,1.0
@@ -3405,7 +3405,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,cached,1,downstr
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,cached,2,downstream,288129119,288113493,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,cached,3,downstream,286600723,286603390,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x0p5,cached,4,downstream,287834428,287837232,0,0,ok,1.0
-west_virginia_bb48|native_prescribed|supply_duty_x0p5,measured,4,process_total,3714121414,,,0,ok,1.0
+west_virginia_bb48|native_prescribed|supply_duty_x0p5,measured,4,process_total,1328921417,,,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_duty_x0p5,measured,4,downstream,478270598,478212982,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_duty_x0p5,measured,4,end_to_end,494342635,494281690,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_duty_x0p5,measured,4,field_reduce,1914996,1915462,0,0,ok,1.0
@@ -3486,7 +3486,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,3,downs
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,3,end_to_end,796969931,738918134,58247000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,3,field_reduce,4264626,4265265,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,3,input_read,972933,970791,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,4,process_total,3048401842,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,4,process_total,1631488749,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_export,31377815,31367946,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_import,5388420,5388887,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,measured,4,contamx_solve,468486276,410910783,57874000,0,ok,1.0
@@ -3499,7 +3499,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,cached,1,downstr
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,cached,2,downstream,283833050,283836097,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,cached,3,downstream,283574410,283578018,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_duty_x1p5,cached,4,downstream,284153071,284133757,0,0,ok,1.0
-west_virginia_bb48|native_prescribed|supply_duty_x1p5,measured,4,process_total,3725526584,,,0,ok,1.0
+west_virginia_bb48|native_prescribed|supply_duty_x1p5,measured,4,process_total,1336379988,,,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_duty_x1p5,measured,4,downstream,481019892,480939425,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_duty_x1p5,measured,4,end_to_end,497832683,497748815,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_duty_x1p5,measured,4,field_reduce,1909917,1910153,0,0,ok,1.0
@@ -3580,7 +3580,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,3,downst
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,3,end_to_end,796445971,738241052,58409000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,3,field_reduce,4250136,4250925,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,3,input_read,950754,949031,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,4,process_total,3066248992,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,4,process_total,1665432428,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_export,31859627,31860487,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_import,5497040,5497776,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,measured,4,contamx_solve,499825996,441364920,58717000,0,ok,1.0
@@ -3593,7 +3593,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,cached,1,downstre
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,cached,2,downstream,280209944,280201324,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,cached,3,downstream,280830008,280826454,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_ach_x1p5,cached,4,downstream,280599306,280582384,0,0,ok,1.0
-west_virginia_bb48|native_prescribed|supply_ach_x1p5,measured,4,process_total,3738167783,,,0,ok,1.0
+west_virginia_bb48|native_prescribed|supply_ach_x1p5,measured,4,process_total,1338903884,,,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_ach_x1p5,measured,4,downstream,482285070,482237676,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_ach_x1p5,measured,4,end_to_end,498905971,498855375,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_ach_x1p5,measured,4,field_reduce,1941058,1941422,0,0,ok,1.0
@@ -3674,7 +3674,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,3,downstr
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,3,end_to_end,802674209,744255669,58544000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,3,field_reduce,4342456,4342955,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,3,input_read,961804,959261,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,4,process_total,3043966651,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,4,process_total,1636128361,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_export,31648674,31010587,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_import,5459000,5459406,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,measured,4,contamx_solve,470475074,412028196,58723000,0,ok,1.0
@@ -3687,7 +3687,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,cached,1,downstrea
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,cached,2,downstream,281568323,281543745,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,cached,3,downstream,281662234,281664795,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_oa_x0p5,cached,4,downstream,281491964,281476905,0,0,ok,1.0
-west_virginia_bb48|native_prescribed|supply_oa_x0p5,measured,4,process_total,3730542984,,,0,ok,1.0
+west_virginia_bb48|native_prescribed|supply_oa_x0p5,measured,4,process_total,1339453254,,,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_oa_x0p5,measured,4,downstream,479630337,479589062,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_oa_x0p5,measured,4,end_to_end,496051247,496006631,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_oa_x0p5,measured,4,field_reduce,2207038,2207203,0,0,ok,1.0
@@ -3768,7 +3768,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,3,dow
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,3,end_to_end,803798914,745262909,58711000,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,3,field_reduce,4256635,4257505,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,3,input_read,950813,948371,0,0,ok,1.0
-west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,4,process_total,3064421858,,,0,ok,1.0
+west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,4,process_total,1634926700,,,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_export,30564401,30527425,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_import,5499900,5500067,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,measured,4,contamx_solve,473455489,415561329,58176000,0,ok,1.0
@@ -3781,7 +3781,7 @@ west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,cached,1,downs
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,cached,2,downstream,285857403,285860210,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,cached,3,downstream,285943104,285945440,0,0,ok,1.0
 west_virginia_bb48|contamx_commissioned_export|supply_recirc_x0p5,cached,4,downstream,286964977,286936561,0,0,ok,1.0
-west_virginia_bb48|native_prescribed|supply_recirc_x0p5,measured,4,process_total,3733964573,,,0,ok,1.0
+west_virginia_bb48|native_prescribed|supply_recirc_x0p5,measured,4,process_total,1332008114,,,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_recirc_x0p5,measured,4,downstream,481407749,481357585,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_recirc_x0p5,measured,4,end_to_end,488899216,488846004,0,0,ok,1.0
 west_virginia_bb48|native_prescribed|supply_recirc_x0p5,measured,4,field_reduce,1901997,1902282,0,0,ok,1.0

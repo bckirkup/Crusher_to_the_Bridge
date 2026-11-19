@@ -241,8 +241,12 @@ def timing_raw(red: Reduction) -> list[dict[str, Any]]:
                   "censored": int(record.get("censored", 0)), "loadavg_1m": record["loadavg_1m"]}
         head = {**common, "repeat_kind": record["repeat_kind"],
                 "repeat_index": record["repeat_index"]}
-        out.append({**head, "phase": PROCESS_PHASE, "wall_ns": record["process_wall_ns"]})
         cell = record.get("cell")
+        # The last measured interpreter also runs the cached repeats; they are
+        # not part of a cold cell, so their wall time is taken out of its total.
+        cached_ns = sum(c["wall_ns"] for c in cell["cached"]) if cell else 0
+        out.append({**head, "phase": PROCESS_PHASE,
+                    "wall_ns": record["process_wall_ns"] - cached_ns})
         if not cell:
             continue
         for phase, clocks in sorted(cell["phases"].items()):
@@ -273,17 +277,27 @@ def timing_summary(red: Reduction, raw: list[dict[str, Any]]) -> list[dict[str, 
             groups.setdefault((item["row_id"], item["repeat_kind"], item["phase"]), []).append(item)
     lookup = {r["row_id"]: r for r in red.rows}
     out = []
+    # A timed-out cell leaves only its process_total record, so timeouts are
+    # counted there and reported on every phase of the row.
+    timeouts: dict[tuple[str, str], int] = {}
+    for item in raw:
+        if item["phase"] == PROCESS_PHASE and item["censored"]:
+            key = (item["row_id"], item["repeat_kind"])
+            timeouts[key] = timeouts.get(key, 0) + 1
     for (row_id, kind, phase), items in groups.items():
         kept = [i for i in items if not i["censored"] and i["observed_status"] == OK]
-        if not kept:
-            continue
         row = lookup[row_id]
+        if not kept:
+            out.append({"row_id": row_id, "hull": row["hull"], "lane": row["lane"],
+                        "setting_id": row["setting_id"], "repeat_kind": kind, "phase": phase,
+                        "n": 0, "timeouts": timeouts.get((row_id, kind), 0)})
+            continue
         cpu = [i["cpu_parent_ns"] for i in kept if i.get("cpu_parent_ns") is not None]
         child = [i["cpu_child_ns"] for i in kept if i.get("cpu_child_ns") is not None]
         out.append({
             "row_id": row_id, "hull": row["hull"], "lane": row["lane"],
             "setting_id": row["setting_id"], "repeat_kind": kind, "phase": phase,
-            "n": len(kept), "timeouts": sum(i["censored"] for i in items),
+            "n": len(kept), "timeouts": timeouts.get((row_id, kind), 0),
             **_spread([int(i["wall_ns"]) for i in kept]),
             "cpu_parent_median_ns": statistics.median(cpu) if cpu else None,
             "cpu_child_median_ns": statistics.median(child) if child else None,

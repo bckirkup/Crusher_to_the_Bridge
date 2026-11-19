@@ -87,12 +87,23 @@ EPYC 9R14, 32 vCPU, 61 GiB), 1-minute load average ≤ 1.17 throughout. Wall
 time in ms, median (interquartile range) over 5 measured cold repeats,
 baseline setting. Cold means a fresh interpreter per cell.
 
-| Hull (zones) | Native: construct | Native: downstream | Native: end to end | ContamX: export | ContamX: solve | ContamX: import | ContamX: downstream | ContamX: end to end |
+| Hull (zones) | Native: construct | Native: downstream | Native: end to end | ContamX: export | ContamX: solve + result read ‡ | ContamX: engine build ‡ | ContamX: downstream | ContamX: end to end |
 |---|---|---|---|---|---|---|---|---|
 | destroyer_baseline (9) | 0.15 (0.00) | 0.60 (0.01) | 0.98 (0.02) | 1.63 (0.00) | 13.87 (0.10) | 0.29 (0.00) | 0.53 (0.01) | 17.01 (0.09) |
 | enterprise_constitution_tos (63) | 1.26 (7.81) | 14.86 (0.37) | 16.80 (8.07) | 14.49 (1.31) | 82.50 (1.02) | 1.14 (0.02) | 12.94 (0.75) | 112.39 (1.39) |
 | expedition_cruise_450 (47) | 0.38 (0.00) | 15.26 (8.07) | 16.11 (8.07) | 12.19 (0.24) | 51.62 (0.92) | 0.82 (0.01) | 5.78 (0.08) | 72.04 (1.33) |
 | west_virginia_bb48 (198) | 13.30 (8.29) | 480.22 (3.48) | 496.74 (2.87) | 31.40 (0.82) | 471.83 (4.13) | 5.53 (0.18) | 280.14 (2.74) | 796.63 (2.01) |
+
+‡ **Phase-label defect in this run** (found in review, after the job). The
+phase recorded as `contamx_solve` contains the ContamX subprocess *and* the
+Python read and decode of its result file; `contamx_import` contains only
+engine construction. The solver alone is much cheaper than that column.
+Median CPU inside that phase, parent Python vs ContamX child: destroyer 11.6
+vs 2.5 ms; Enterprise 73.0 vs 9.8 ms; expedition 46.1 vs 5.7 ms; West
+Virginia 413.1 vs 58.4 ms. The export + solve + import total, end-to-end
+times and every airflow number are unaffected. The runner is fixed in this
+PR (solve is the subprocess call only; import is result read plus engine
+build); a clean wall-time split needs the same four-hull job re-run.
 
 Cached downstream only (engine already built, same interpreter), reported
 apart and never compared with a cold phase, native / ContamX: destroyer 0.31
@@ -106,13 +117,12 @@ apart and never compared with a cold phase, native / ContamX: destroyer 0.31
   the destroyer and West Virginia, and varies by up to 48 % on the Enterprise
   and expedition hulls, where an ~8 ms disturbance is half the phase (see
   below).
-- A full cold cell, interpreter start to exit, is 0.83 to 1.65 s; start-up
+- A full cold cell, interpreter start to exit, is 0.83 to 1.65 s (median;
+  cached repeats excluded); start-up
   and imports dominate everything except West Virginia.
-- The downstream phase (a dense matrix exponential) costs as much as the
-  ContamX solve on the largest hull.
-- ContamX solve wall time is several times its child CPU time (West Virginia
-  472 ms wall, 58 ms CPU). Hypothesis, untested: process start and file
-  I/O.
+- On the largest hull the downstream phase (a dense matrix exponential, 280
+  to 480 ms) and the Python result-file read (about 413 ms CPU) each cost
+  several times the ContamX solver itself (58 ms CPU).
 - Some small phases show an ~8 ms interquartile range against a ~1 ms median
   (Enterprise native construction, expedition native downstream). With five
   repeats that is one or two slow repeats; read the median with the range.
@@ -151,6 +161,8 @@ The last command rebuilds every table from `cells.jsonl`.
 ## Limits
 
 - Four hulls. The other 73 are not run.
+- The solve and import wall-time columns of this run are mislabelled as
+  described under Run time.
 - The ContamX version string is the pinned one; the executable was
   identified by SHA-256, not asked for its version.
 - The 1e-3 tolerances for solved ratios and the redefinition of

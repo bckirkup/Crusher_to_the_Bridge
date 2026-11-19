@@ -100,5 +100,14 @@ gate result, not a benchmark; no local timing is reported.
   reduced offline into `readout/`; audit passed 14 of 14.
 - Readout: [READOUT.md](READOUT.md).
 
+- Defect found in review after the job: the `contamx_solve` phase of this
+  run includes the Python result-file read, so it overstates the solver
+  (West Virginia 472 ms wall, of which 413 ms parent CPU and 58 ms ContamX
+  CPU). Totals and all airflow numbers are unaffected. Runner fixed after
+  the job; the readout's solve/import columns are labelled accordingly. The
+  fixed runner reproduces every smoke metric and field digest of `5f524b81`.
+  A re-run of the same job is needed for a clean wall-time split; not
+  submitted without Benjamin's go-ahead.
+
 **Stopped here.** No other job was submitted. Open decision: run the other
 73 hulls or not.

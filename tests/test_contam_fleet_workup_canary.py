@@ -376,3 +376,24 @@ def test_csv_writer_leaves_missing_values_empty_not_zero(tmp_path):
     path = tmp_path / "t.csv"
     reduce_mod.write_csv(str(path), ("a", "b"), [{"a": None, "b": 0.0}])
     assert path.read_text(encoding="utf-8").splitlines() == ["a,b", ",0.0"]
+
+
+class _FakeReduction:
+    rows = [{"row_id": "h|native_prescribed|baseline", "hull": "h",
+             "lane": "native_prescribed", "setting_id": "baseline"}]
+
+
+def test_timeouts_are_counted_on_every_phase_and_cached_work_leaves_the_cold_total():
+    red = _FakeReduction()
+    ok = _record("measured", 0, 1.0)
+    ok["cell"]["cached"] = [{"wall_ns": 300, "cpu_parent_ns": 1, "cpu_child_ns": 0}]
+    timed_out = _record("measured", 1, 0.0, "timeout")
+    timed_out["censored"] = 1
+    red.cells = [ok, timed_out]
+    raw = reduce_mod.timing_raw(red)
+    totals = [r["wall_ns"] for r in raw if r["phase"] == reduce_mod.PROCESS_PHASE]
+    assert totals == [700, 1001]
+    summary = {(s["repeat_kind"], s["phase"]): s for s in reduce_mod.timing_summary(red, raw)}
+    assert summary[("measured", "downstream")]["timeouts"] == 1
+    assert summary[("measured", "downstream")]["n"] == 1
+    assert summary[("measured", reduce_mod.PROCESS_PHASE)]["n"] == 1

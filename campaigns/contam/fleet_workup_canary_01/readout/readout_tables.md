@@ -72,7 +72,7 @@ Cold, measured repeats, baseline setting:
 | field_reduce | 0.13 (0.00) | 0.44 (0.01) | 0.45 (0.02) | 0.45 (0.00) |
 | downstream | 0.60 (0.01) | 0.53 (0.01) | 0.53 (0.01) | 0.54 (0.00) |
 | end_to_end | 0.98 (0.02) | 17.01 (0.09) | 16.94 (0.10) | 15.72 (0.07) |
-| process_total | 832.86 (1.77) | 849.61 (1.95) | 849.27 (0.53) | 847.76 (2.65) |
+| process_total | 832.86 (1.77) | 849.61 (3.24) | 849.27 (1.28) | 847.22 (3.39) |
 
 Cached, same interpreter, engine built (never compared with cold):
 
@@ -157,7 +157,7 @@ Cold, measured repeats, baseline setting:
 | field_reduce | 0.26 (0.02) | 0.98 (0.01) | 0.99 (0.02) | 1.00 (0.01) |
 | downstream | 14.86 (0.37) | 12.94 (0.75) | 13.00 (0.22) | 13.00 (0.15) |
 | end_to_end | 16.80 (8.07) | 112.39 (1.39) | 112.50 (2.03) | 108.33 (1.14) |
-| process_total | 851.35 (3.02) | 945.25 (1.66) | 945.76 (3.82) | 941.21 (12.01) |
+| process_total | 851.35 (3.02) | 945.25 (1.66) | 945.76 (3.82) | 938.09 (4.03) |
 
 Cached, same interpreter, engine built (never compared with cold):
 
@@ -242,7 +242,7 @@ Cold, measured repeats, baseline setting:
 | field_reduce | 0.20 (0.00) | 0.76 (0.01) | 0.75 (0.00) | 0.72 (0.03) |
 | downstream | 15.26 (8.07) | 5.78 (0.08) | 5.73 (0.10) | 5.72 (0.06) |
 | end_to_end | 16.11 (8.07) | 72.04 (1.33) | 71.49 (0.33) | 69.05 (9.03) |
-| process_total | 845.52 (4.48) | 905.59 (3.81) | 906.61 (3.45) | 897.99 (10.66) |
+| process_total | 845.52 (3.93) | 905.52 (0.26) | 906.59 (1.29) | 897.66 (3.79) |
 
 Cached, same interpreter, engine built (never compared with cold):
 
@@ -327,7 +327,7 @@ Cold, measured repeats, baseline setting:
 | field_reduce | 1.90 (0.02) | 4.24 (0.02) | 4.25 (0.03) | 4.38 (0.10) |
 | downstream | 480.22 (3.48) | 280.14 (2.74) | 287.51 (2.10) | 289.11 (1.96) |
 | end_to_end | 496.74 (2.87) | 796.63 (2.01) | 802.34 (13.15) | 791.85 (3.87) |
-| process_total | 1331.82 (15.67) | 1633.04 (15.80) | 1654.80 (11.62) | 1628.84 (12.24) |
+| process_total | 1331.82 (7.59) | 1633.04 (3.56) | 1646.60 (13.70) | 1628.05 (2.17) |
 
 Cached, same interpreter, engine built (never compared with cold):
 
