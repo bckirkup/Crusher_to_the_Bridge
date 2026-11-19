@@ -580,7 +580,7 @@ def _manifest(
 
 def build(pin: str | None = None) -> dict[str, bytes]:
     """All artifacts as bytes, derived only from git objects at *pin*."""
-    pin = pin or INPUT_PIN
+    pin = INPUT_PIN if pin is None else pin
     listing = _listing(pin, PLATFORMS)
     platforms, bundled = classify_roster(listing)
     _reconcile(pin, platforms, bundled)

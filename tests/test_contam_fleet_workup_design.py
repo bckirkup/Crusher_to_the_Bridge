@@ -351,3 +351,8 @@ def test_unknown_pin_is_reported(fixture_repo, monkeypatch, capsys):
     monkeypatch.setattr(design, "INPUT_PIN", "0" * 40)
     assert design.main(["--dry-run"]) == 1
     assert "FAIL" in capsys.readouterr().err
+
+
+def test_empty_pin_is_rejected_not_defaulted(fixture_repo):
+    with pytest.raises(design.DesignError):
+        design.build("")
