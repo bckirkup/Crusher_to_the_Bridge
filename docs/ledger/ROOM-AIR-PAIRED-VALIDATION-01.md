@@ -34,6 +34,17 @@ and the encounter witness scalars (B3) do not exist at the pinned revision.
 A destroyer respiratory scenario (B4) is absent and blocks only naval or
 cross-hull statements. Details: design §10.
 
+## Amendment to the reported Q (owner-authorized)
+
+- **B3:** implemented and unit-tested in PR #1331 (`room_air_witness` in the
+  run summary). Synthetic fixtures only; no voyage was run.
+- **Amendment, Benjamin 2026-11-18, "Use the labelled upper-bound Q":** the
+  design's Q is not separable in the tree, so the run reports a proxy,
+  airborne-pathway dose to hosts in changed zones over all airborne-pathway
+  dose. It is an upper bound on the design's Q only in a run whose
+  caregiver-channel dose total is zero; otherwise it is a proxy. The
+  original definition stands in design §6; the amendment is design §11.
+
 ## Scope
 
 A verdict describes this model at one revision, hull and profile. It is not

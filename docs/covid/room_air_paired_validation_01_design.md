@@ -204,9 +204,42 @@ Checked by reading the tree at the pin; nothing was executed.
 | `sealed` mode for K1 | Present: `transmission.room_air_removal.mode` |
 | **B1** arm selection | **Blocker.** `ambient_off` exists only as a patch inside the attribution tool. No config key selects it, so a registered campaign cannot express or record the arm |
 | **B2** primary endpoint in the paired reader | **Blocker.** `HullObservables` and the paired tool carry onset and specimen fields only, not `cumulative_ever_infected` |
-| **B3** W2 scalars \(E\) and \(Q\) | **Blocker.** No per-run aggregate of occupancy or delivered dose in the changed zones exists |
+| **B3** W2 scalars \(E\) and \(Q\) | **Implemented and unit-tested in PR #1331; not campaign-validated.** W1 count and \(E\) as defined in §6. \(Q\) is reported as a proxy under the owner-authorized amendment in §11, not as defined in §6. Shown on synthetic fixtures only; no voyage was run. At the pin: no per-run aggregate of occupancy or delivered dose in the changed zones existed |
 | **B4** second hull | **Blocker for any naval or cross-hull statement only.** No respiratory scenario exists on `destroyer_baseline`; scenarios cover `mega_cruise_5000` and `expedition_cruise_450`. K1 is the no-change control for this design |
 
 B1–B3 must be closed, each as its own reviewed change with K1-style
 neutrality shown, before the campaign-preflight sequence (smoke, dry run,
 canary) can begin. None is implemented here.
+
+## 11. Addendum: owner-authorized amendment to the reported Q (PR #1331)
+
+Added after the freeze. §6 is left as written; this section records what is
+reported in its place for \(Q\) and why. Thresholds, seeds, endpoint,
+direction, the statistical rule and the verdict rules are unchanged. \(Q\)
+is report-only in §6 and §7; the W2 gate is \(E > 0\).
+
+**Why.** §6 defines \(Q\) as room-pool airborne dose delivered in W1 zones
+as a share of all airborne-route dose. The tree has no such split: the
+`droplet` pathway key carries room-pool and near-field dose together, and
+the caregiver and cabin-service channels carry their air terms under the
+same key as their other terms. Reading the §6 quantity exactly would mean
+instrumenting about seven dose sites in the engine.
+
+**Owner decision (Benjamin, 2026-11-18):** "Use the labelled upper-bound Q".
+
+**What is reported.** With \(D\) the credited dose on the `droplet`,
+`hvac_airborne`, `emesis_aerosol` and `flush_aerosol` pathways, hull-wide,
+and \(D_W\) the part of it received by hosts located in W1 zones, the run
+summary carries \(Q' = D_W / D\) as
+`room_air_witness.airborne_dose_share_changed_zones_proxy`, with \(D\),
+\(D_W\) and the caregiver-channel dose total \(C\) beside it. Numerator
+and denominator use the same raw credited dose.
+
+**What the bound is, and is not.** Room-pool dose on those four pathways in
+W1 zones is part of \(D_W\), so \(Q'\) is at least the room-pool share of
+\(D\). It is an upper bound on the §6 \(Q\) in a run where \(C = 0\),
+reading "all airborne-route dose" as at least those four pathways. When
+\(C > 0\) the bound is not established: caregiver-channel air dose in a W1
+zone is in the §6 numerator and absent from \(D_W\). In that case \(Q'\)
+is a proxy only, and a readout must say so. The median reported under §6 is
+the median of \(Q'\), labelled as the proxy.

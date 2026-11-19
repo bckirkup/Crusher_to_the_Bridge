@@ -32,9 +32,10 @@ WITNESS_KEYS = {
     "susceptible_person_hours_changed_zones",
     "airborne_dose_all_zones",
     "airborne_dose_changed_zones",
-    "airborne_dose_share_changed_zones_upper_bound",
+    "airborne_dose_share_changed_zones_proxy",
+    "caregiver_channel_dose_all_zones",
 }
-SHARE = "airborne_dose_share_changed_zones_upper_bound"
+SHARE = "airborne_dose_share_changed_zones_proxy"
 OPEN, CLOSED = "Open_Deck_Test", "Closed_Room_Test"
 VOLUMES = {OPEN: 40.0, CLOSED: 40.0}
 
@@ -74,7 +75,7 @@ def _agent(aid: int, zone: str, infected: bool = False) -> KorkinAgent:
     return agent
 
 
-def _hull(n_open: int, n_closed: int = 2) -> list[KorkinAgent]:
+def _hull(n_open: int, n_closed: int) -> list[KorkinAgent]:
     """One shedder per room plus the stated susceptibles."""
     agents = [_agent(1, OPEN, infected=True), _agent(2, CLOSED, infected=True)]
     agents += [_agent(10 + i, OPEN) for i in range(n_open)]
@@ -85,6 +86,7 @@ def _hull(n_open: int, n_closed: int = 2) -> list[KorkinAgent]:
 def _run(
     n_open: int = 3,
     *,
+    n_closed: int = 2,
     mode: str = "first_order",
     witness: bool = True,
     epochs: int = 1,
@@ -112,7 +114,7 @@ def _run(
             airflow, zone_volumes=VOLUMES, ambient_exchange_m3h={},
         )
     core.initialize_zones([OPEN, CLOSED])
-    agents = _hull(n_open)
+    agents = _hull(n_open, n_closed)
     records = []
     for epoch in range(1, epochs + 1):
         matrix, events = core.execute_transmission(
@@ -178,6 +180,63 @@ def test_dose_share_is_a_bounded_share_of_the_airborne_dose() -> None:
     # (records round to 4 decimals).
     recorded = sum(entry["dose"] for entry in records[0][0])
     assert total == pytest.approx(recorded, abs=1e-3 * len(records[0][0]))
+
+
+def _tally(core: TransmissionCore, doses: dict[int, dict[str, float]]) -> dict:
+    occupants = {
+        OPEN: [_agent(1, OPEN), _agent(2, OPEN)],
+        CLOSED: [_agent(3, CLOSED)],
+    }
+    core._tally_room_air_witness_dose(occupants, doses)
+    return core.room_air_witness()
+
+
+def test_only_airborne_pathways_enter_the_share() -> None:
+    core, _ = _run(0, n_closed=0)
+    assert core.room_air_witness()["airborne_dose_all_zones"] == 0.0
+    witness = _tally(core, {
+        1: {"droplet": 1.0, "fomite": 50.0},
+        2: {"hvac_airborne": 2.0, "food": 50.0},
+        3: {"emesis_aerosol": 3.0, "flush_aerosol": 4.0, "direct_contact": 9.0},
+        # A host outside every zone map counts hull-wide only.
+        4: {"droplet": 10.0},
+    })
+    assert witness["airborne_dose_changed_zones"] == pytest.approx(3.0)
+    assert witness["airborne_dose_all_zones"] == pytest.approx(20.0)
+    assert witness[SHARE] == pytest.approx(3.0 / 20.0)
+    assert witness["caregiver_channel_dose_all_zones"] == 0.0
+
+
+def test_caregiver_channel_is_totalled_apart_from_the_share() -> None:
+    """The share is a bound on the room-pool share only when this is zero."""
+    core, _ = _run(0, n_closed=0)
+    airborne = {1: {"droplet": 1.0}, 3: {"droplet": 3.0}}
+    without = _tally(core, airborne)
+    assert without["caregiver_channel_dose_all_zones"] == 0.0
+    other, _ = _run(0, n_closed=0)
+    with_channel = _tally(other, {
+        1: {"droplet": 1.0, "caregiver": 5.0},
+        3: {"droplet": 3.0, "service_to_host": 2.0},
+    })
+    assert with_channel["caregiver_channel_dose_all_zones"] == pytest.approx(7.0)
+    assert with_channel[SHARE] == without[SHARE] == pytest.approx(0.25)
+
+
+def test_proxy_bounds_the_room_pool_share_when_the_channel_is_silent() -> None:
+    """With no near field the synthetic droplet dose is all room-pool dose,
+    so the proxy equals that share; adding dose that is not room-pool to
+    hosts in the changed zone can only raise it."""
+    core, records = _run(3)
+    witness = core.room_air_witness()
+    assert witness["caregiver_channel_dose_all_zones"] == 0.0
+    pool_changed = sum(
+        entry["dose"] for entry in records[0][0]
+        if entry["target_id"] in {10, 11, 12}
+    )
+    pool_share = pool_changed / sum(entry["dose"] for entry in records[0][0])
+    assert witness[SHARE] == pytest.approx(pool_share, abs=1e-3)
+    raised = _tally(core, {1: {"droplet": 1.0}})
+    assert raised[SHARE] > witness[SHARE]
 
 
 def test_dose_share_rises_with_hosts_in_the_changed_zone() -> None:

@@ -1025,11 +1025,14 @@ PATHWAY_WEIGHT_KEYS = PATHWAY_EFFICIENCY_KEYS
 
 # Pathway dose keys the room-air encounter witness sums as airborne
 # (ROOM-AIR-PAIRED-VALIDATION-01, W2). ``droplet`` carries the room-pool and
-# near-field terms together; the caregiver channel's air terms share a key
-# with its other terms and are left out of both sides.
+# near-field terms together. The caregiver and cabin-service channels mix
+# air terms with others under one key, so they are left out of both sides
+# and totalled separately: the witness share is a proven upper bound on the
+# room-pool share only in a run where that total is zero.
 ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS = (
     "droplet", "hvac_airborne", "emesis_aerosol", "flush_aerosol",
 )
+ROOM_AIR_WITNESS_CAREGIVER_PATHWAYS = ("caregiver", "service_to_host")
 
 
 def route_efficiency_from_clearance_rates(
@@ -3126,6 +3129,7 @@ class TransmissionCore:
         self._room_air_witness_person_hours = 0.0
         self._room_air_witness_airborne_dose = 0.0
         self._room_air_witness_airborne_dose_changed = 0.0
+        self._room_air_witness_caregiver_dose = 0.0
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
@@ -7095,8 +7099,9 @@ class TransmissionCore:
 
         Read from the credited per-host pathway doses after every pathway
         has run. The changed-zone part is every airborne-pathway dose to a
-        host located in a changed zone, near-field dose included, so its
-        share bounds the room-pool share from above. Zero RNG draws.
+        host located in a changed zone, near-field dose included. It is a
+        proxy for the room-pool share, and bounds it from above only when
+        the caregiver-channel total stays zero. Zero RNG draws.
         """
         if not self.room_air_changed_zones:
             return
@@ -7112,6 +7117,10 @@ class TransmissionCore:
                 for pathway in ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS
             )
             self._room_air_witness_airborne_dose += airborne
+            self._room_air_witness_caregiver_dose += sum(
+                pathway_doses.get(pathway, 0.0)
+                for pathway in ROOM_AIR_WITNESS_CAREGIVER_PATHWAYS
+            )
             if agent_id in in_changed:
                 self._room_air_witness_airborne_dose_changed += airborne
 
@@ -7126,10 +7135,14 @@ class TransmissionCore:
             ),
             "airborne_dose_all_zones": total,
             "airborne_dose_changed_zones": changed,
-            # Upper bound on the design's Q, 0.0 when no airborne dose was
-            # delivered anywhere.
-            "airborne_dose_share_changed_zones_upper_bound": (
+            # Proxy for the design's Q, 0.0 when no airborne dose was
+            # delivered anywhere; an upper bound on it only while the
+            # caregiver-channel total below is zero.
+            "airborne_dose_share_changed_zones_proxy": (
                 changed / total if total > 0.0 else 0.0
+            ),
+            "caregiver_channel_dose_all_zones": (
+                self._room_air_witness_caregiver_dose
             ),
         }
 
