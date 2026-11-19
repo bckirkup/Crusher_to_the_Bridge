@@ -1,6 +1,6 @@
 ---
 name: contamx-interop
-description: Run and debug ContamX vs native HVAC transport (SIM reader, AHS bridge, compare suite, flow diagnostics). Use when editing contamx_runner, contamx_transport, contamx_ahs_bridge, contam_engine_compare, contam_flow_compare, fiction PRJs, or investigating ContamX concentration divergence.
+description: Run and debug ContamX vs native HVAC transport (SIM reader, AHS bridge, compare suite, flow and paired material-time diagnostics). Use when editing contamx_runner, contamx_transport, contamx_ahs_bridge, contam_engine_compare, contam_flow_compare, fiction PRJs, or investigating ContamX concentration divergence.
 ---
 
 # ContamX Interop (Path A)
@@ -15,14 +15,14 @@ description: Run and debug ContamX vs native HVAC transport (SIM reader, AHS bri
 
 - ContamX vs native concentration / attack-rate divergence
 - `.SIM` Flow0 looks wrong (identical rates across fans, Bridge “600 m³/h”)
-- Editing `engines/contamx_*.py`, `tools/contam_*compare*.py`, or `data/platforms/*/contam/`
+- Editing `engines/contamx_*.py`, `tools/contam_*compare*.py`, `tools/diag/contam_paired_diagnostic.py`, or `data/platforms/*/contam/`
 - After regenerating fiction PRJs (`scripts/generate_platform_contam_prj.py`)
 
 ## Key docs
 
 | Doc | Role |
 |-----|------|
-| `docs/CONTAM_INTEROP.md` | Path A/B, `.SIM` reader contract, compare + flow_compare |
+| `docs/CONTAM_INTEROP.md` | Path A/B, `.SIM` reader contract, compare + flow/paired diagnostics |
 | `docs/CONTAM_PRJ_AUDIT.md` | Fiction PRJ realism + before/after SIM fix table |
 | `third_party/contamx/README.md` | Binary drop + Windows compare bat |
 
@@ -72,6 +72,20 @@ uses star topology with `oa_fraction=0.2` / `hvac_duty=0.5` (Contam-aligned;
 zone_lower Engine_Room return ~1000 m³/h, supply ~800 m³/h);
 `zero_flow_real_candidates` = 0. Console prints `kept_links` and flags identical
 Flow0 fingerprints in hypotheses.
+
+## Paired material-time diagnostic
+
+`python3 -m tools.diag.contam_paired_diagnostic --hull <id>` accepts any
+committed Contam bundle (`contam/platform.prj` + `contam/path_map.json`). Nine
+curated hulls have default `--source` witness zones; other bundled hulls require
+explicit `--source` zone ids. Default lanes are native/commissioned/authored;
+`--lane design` is the opt-in pre-#1245 export lane.
+
+```bash
+python3 -m tools.diag.contam_paired_diagnostic.py --hull midway_cv41 \
+  --source Flight_Deck --timing pulse_t0 \
+  --out telemetry_buffer/contam_paired_midway.json
+```
 
 ## Compare suite (results + speed)
 
