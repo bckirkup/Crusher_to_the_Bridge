@@ -153,10 +153,10 @@ Check it:
 cd campaigns/contam/fleet_workup_canary_01/readout && sha256sum -c SHA256SUMS
 cd ../design/frozen && sha256sum -c SHA256SUMS
 python3 tools/contam_fleet_workup_design.py --verify-only
-python3 tools/diag/contam_fleet_workup_reduce.py --raw campaigns/contam/fleet_workup_canary_01/readout --out /tmp/recheck
+python3 tools/diag/contam_fleet_workup_reduce.py --raw campaigns/contam/fleet_workup_canary_01/readout --out out/recheck
 ```
 
-The last command rebuilds every table from `cells.jsonl`.
+The last command rebuilds every table from `cells.jsonl`. Output must be\nunder the repository or a private temporary directory.
 
 ## Limits
 

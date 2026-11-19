@@ -62,12 +62,17 @@ class RunError(RuntimeError):
     """The canary cannot run as frozen; nothing is timed."""
 
 
-def sha256_file(path: str) -> str:
+def sha256_file(path: str, roots: tuple[str, ...] = _ROOTS) -> str:
     digest = hashlib.sha256()
-    with _open(path, "rb") as fh:
+    with validated_open(path, "rb", allowed_roots=roots) as fh:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _binary_sha256(binary: str) -> str:
+    """Hash an installed solver wherever it lives; the pin decides if it runs."""
+    return sha256_file(binary, (*_ROOTS, os.path.dirname(os.path.realpath(binary))))
 
 
 def _read_json(path: str) -> Any:
@@ -151,7 +156,7 @@ def provision_contamx(args: argparse.Namespace, pins: dict[str, Any], work: str)
         os.chmod(binary, 0o700)
     if not binary or not os.path.isfile(binary):
         raise RunError("no ContamX executable: pass --binary or --contamx-uri")
-    record["binary"] = {"sha256": sha256_file(binary), "size_bytes": os.path.getsize(binary),
+    record["binary"] = {"sha256": _binary_sha256(binary), "size_bytes": os.path.getsize(binary),
                         "version": pins["version"]}
     if record["binary"]["sha256"] != pins["binary_sha256"]:
         raise RunError("ContamX executable SHA-256 does not match the pin")
