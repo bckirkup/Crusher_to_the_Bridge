@@ -12,12 +12,14 @@ The AR and role comparisons cover public postings in 2006–2019, including sail
 |---|---:|---:|---:|---:|
 | Expedition | 6 (5) | 6.94 [4.95, 13.68] | 2.73 [0.67, 7.51] | 4 / 0 / 2 / 0 |
 | Classic | 46 (21) | 5.84 [4.50, 8.85] | 1.42 [0.90, 2.04] | 41 / 0 / 5 / 0 |
-| Spirit | 96 (53) | 5.70 [4.67, 7.79] | 1.15 [0.76, 1.68] | 89 / 0 / 5 / 2 |
+| Spirit | 96 (53) | 5.75 [4.81, 7.79] | 1.15 [0.76, 1.68] | 91 / 0 / 5 / 0 |
 | Mega | 14 (12) | 6.00 [3.65, 7.48] | 1.13 [0.80, 1.60] | 10 / 1 / 2 / 1 |
 
-On these postings, the middle half of passenger AR overlaps across all four groups. The 3% threshold in either role selects the sample. Several ships recur, expedition has six observations, and an IQR describes dispersion rather than precision of a population median. Of 162 postings, 144 ended above or at threshold in passengers alone. Final counts cannot tell which group fell ill first. CDC can publish events of public health significance below threshold.
+For two Spirit voyages the hosted index and the archived CDC outbreak pages disagree. The archived passenger counts agree with the percentages printed by CDC, so the table and CSV use 123 cases on Celebrity Millennium (2013) and 144 on Sea Princess (2011). Using the hosted counts of 23 and 14 instead puts both in the “neither” column and gives a Spirit norovirus passenger median of 5.70%. The source series preserves the hosted values. [Extraction log, count disagreements and percentage cross-check](../../telemetry_buffer/observation_model/vsp_outbreak_series_extraction_log.md)
 
-In the sensitivity analysis including **all 208 postings**, passenger medians are 6.19%, 5.73%, 5.57%, and 5.61% in hull order, with crew medians of 2.76%, 1.38%, 1.15%, and 1.01%. This preserves the broad role and hull pattern. It does not convert the all-cause surveillance denominators into norovirus-specific denominators. The [aggregate CSV](cross_hull_outbreak_evidence.csv) includes both cohorts.
+On these postings, the middle half of passenger AR overlaps across all four groups. The 3% threshold in either role selects the sample. Several ships recur, expedition has six observations, and an IQR describes dispersion rather than precision of a population median. Of 162 postings, 146 ended above or at threshold in passengers alone. Final counts cannot tell which group fell ill first. CDC can publish events of public health significance below threshold.
+
+In the sensitivity analysis including **all 208 postings**, passenger medians are 6.19%, 5.73%, 5.65%, and 5.61% in hull order, with crew medians of 2.76%, 1.38%, 1.15%, and 1.01%. This preserves the broad role and hull pattern. It does not convert the all-cause surveillance denominators into norovirus-specific denominators. The [aggregate CSV](cross_hull_outbreak_evidence.csv) includes both cohorts.
 
 ## Posting frequency and timing
 
@@ -61,6 +63,10 @@ from collections import defaultdict
 
 from telemetry_buffer.observation_model import vsp_class_era_scoring as vsp
 
+archived_pax_ill = {
+    ("Celebrity Millennium", "04/25/2013-05/10/2013"): 123,
+    ("Sea Princess", "05/30/2011-06/09/2011"): 144,
+}
 groups = defaultdict(list)
 ships = defaultdict(set)
 with vsp.SERIES.open(newline="") as source:
@@ -70,8 +76,9 @@ with vsp.SERIES.open(newline="") as source:
         assert row["counts_published"] == "full"
         pax, crew = int(row["pax_total"]), int(row["crew_total"])
         hull = next(h for edge, h in vsp.BAND_EDGES if pax < edge)
+        pax_ill = archived_pax_ill.get((row["ship"], row["voyage_dates_raw"]), int(row["pax_ill"]))
         posting = vsp.Posting(int(row["year"]), row["era"], hull, pax,
-                              int(row["pax_ill"]) / pax, int(row["crew_ill"]) / crew)
+                              pax_ill / pax, int(row["crew_ill"]) / crew)
         cohorts = ["all_posted"]
         if row["causative_agent"] == "norovirus":
             cohorts.append("norovirus_only")
