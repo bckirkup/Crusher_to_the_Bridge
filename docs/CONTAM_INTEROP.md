@@ -407,6 +407,30 @@ hobbyist ContamX steady frames (night half-duty). ContamX builds a
 paths plus AHS room↔room synthesis (`Rec≈0` → `(1−oa)·min(ΣR,ΣS)`). Calibrate
 **native toward ContamX**, not the reverse — Contam/PRJ is airflow SoT.
 
+### Paired native-vs-field material-time diagnostic
+
+`tools/diag/contam_paired_diagnostic.py` compares NATIVE with the commissioned
+and authored ContamX lanes (optional `design`) on exact linear-operator
+material-time integrals, not independent contaminant solvers. `--hull` accepts
+any platform with a committed `contam/platform.prj` beside
+`contam/path_map.json`. Nine hulls keep curated default witness sources in
+`PLATFORM_SOURCES`; every other bundled hull requires an explicit `--source`
+zone id.
+
+```bash
+# Curated hull: PLATFORM_SOURCES supplies the witness zones
+python3 -m tools.diag.contam_paired_diagnostic --hull expedition_cruise_450
+
+# Bundled hull without curated defaults: name the witness zone(s)
+python3 -m tools.diag.contam_paired_diagnostic --hull midway_cv41 \
+    --source Flight_Deck --source Island_Upper \
+    --timing pulse_t0 --timing split_t0_t1 \
+    --out telemetry_buffer/contam_paired_midway.json
+```
+
+The default output is `telemetry_buffer/contam_paired_diagnostic/results.json`;
+ledger `CONTAM-PAIRED-HULL-ALLOWLIST-01` records the bundle-based hull contract.
+
 ## 7. Related components
 
 - `engines/py_contam_bridge.py` — native prescribed-flow mass-balance engine
