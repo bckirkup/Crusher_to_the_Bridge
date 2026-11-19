@@ -6,6 +6,7 @@
   "s3_prefix": "campaign/covid_transport_fit_01/",
   "queue": "picard-analysis-fargate-queue",
   "image_tag": "covid-transport-fit-01",
+  "image_digest": "sha256:7023d963f3a3ede96c7f47def3bb539ecef1b9c8bc2a112697c45e82e37719a0",
   "resources": {
     "vcpu": "1",
     "memory": "4096"
