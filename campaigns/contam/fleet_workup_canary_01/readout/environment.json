@@ -1,0 +1,141 @@
+{
+ "batch": {
+  "AWS_BATCH_CE_NAME": "picard-abm-campaign-spot",
+  "AWS_BATCH_JOB_ATTEMPT": "1",
+  "AWS_BATCH_JOB_ID": "ac1b56e1-2080-40cc-be8f-b8473ceca793",
+  "AWS_BATCH_JQ_NAME": "picard-campaign-queue"
+ },
+ "code_sha256": {
+  "campaigns/contam/fleet_workup_canary_01/design/canary_criteria.json": "3eb085a3208797be7990ed0a00a1be511d290dc6377ba046a13801193b16b01d",
+  "campaigns/contam/fleet_workup_canary_01/entry.py": "998e9f779ca800e98887ae5f77fb3cf28115f1cbd2c50189358b3fad21e03ead",
+  "tools/diag/contam_fleet_workup_cell.py": "87f220fc9ffb157c236fd0336eb9b42d52899f3cbf9a47c2307ee56f4315967d",
+  "tools/diag/contam_fleet_workup_gates.py": "3e70c5edfbbd6f571d7478a48408beb01f69e0be8c224577c88b6b78ad8b3eec",
+  "tools/diag/contam_fleet_workup_reduce.py": "c2c2d64d988736f9f4a547e82c2e670412cfee8ef1eb1c1a5059e40c8ab05a93",
+  "tools/diag/contam_fleet_workup_run.py": "b8f0e3b00d72c30d297c8bdfbed03f7cec6d720b48c41ad9d520699e86a335b3",
+  "uv.lock": "02c498d8992f9c0de4193bc44e4b8d70f9f4d1cbff32f7c12c70afd3c5d8e5c3"
+ },
+ "cpu": {
+  "affinity": 32,
+  "logical": 32,
+  "model": "AMD EPYC 9R14",
+  "physical": 32
+ },
+ "criteria_sha256": "3eb085a3208797be7990ed0a00a1be511d290dc6377ba046a13801193b16b01d",
+ "design_sha256": {
+  "SHA256SUMS": "126887ee52da656677291b6481fb9495f6e742e07f4b933d885258274470288e",
+  "coverage.csv": "85001f85f3fb1a469e737ee580b4ea83d6773011d5c8c678fca554979cfbf56a",
+  "dry_run_summary.json": "f53d86fb2b632a5a9ba8899ca5695e2f26629f795252dc4f074809c5871f752d",
+  "input_manifest.json": "6fcf13ef380db632cd96a7726bab752da0973c2e62bb9d4d043c54ef52dd61dd",
+  "protocol.json": "4113c7ed1ec09798ce16141377bba9103f0b673455e923079d476cf8b5db42b7",
+  "run_matrix.csv": "05ba7af15fa9f20d9318f74fb583257430ce933fbeef05c78990d3a71232757c"
+ },
+ "gates_passed": true,
+ "host": {
+  "container": {
+   "DockerId": "d1228505938a915eeea972081aff41449646a0b2a8a22536fc910fafb0e70e3a",
+   "Image": "994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:contam-fleet-workup-canary-01-rerun1@sha256:e59acd8d426a1304387929dd9c91bb85946b28c0c2357eb7a997e7e16a28e0c3",
+   "ImageID": "sha256:d4512c9dc622c258440431515b95a760a96de90537ef51d64f7cd18b944a3983"
+  },
+  "hostname": "ip-172-31-91-14.ec2.internal",
+  "instance-id": "i-073002017534702f0",
+  "instance-type": "c7a.8xlarge",
+  "placement/availability-zone": "us-east-1b"
+ },
+ "inputs_sha256_after": {
+  "data/contam_hobbyist/README.md": "e64bc06def59fb57513575eeaaecffc2683531b60e6a044c65859d6f818cba36",
+  "data/contam_hobbyist/duct_defaults.json": "5408ada25831e1bb449a2c239f4876983b9b2ef3d226ba45d210925617d40f28",
+  "data/contam_hobbyist/filter_presets.json": "4dd4a001eee578919b6b627e1e00e57d69714975e0139589123dde4cf64cc61e",
+  "data/contam_hobbyist/orifice_catalog.json": "c6d2802cbedead8e94e2174cd9da6f162e2d3b5e217d161c1cc2d3fa87051f00",
+  "data/contam_hobbyist/schedule_templates.json": "cdb7f4fad272e21bccc2bde392fe899ca98378a4e21e01647bf7ecefb73a08bb",
+  "data/contam_hobbyist/species_pack.json": "8db06aa2a89862bb4a4d9b01ddb5bf446b8280a758b489d4b6dea98650d6b38e",
+  "data/contam_hobbyist/wind_profiles.json": "fe6bae6711e4edf6d62dfefec3d14b3518fcdc3767cac606d172306be72ec01d",
+  "data/platforms/destroyer_baseline/air_flow_paths.json": "a41886e9efe5d0c3474fb8c0e250fd4df024b3cb6dc4ad60eaba022c55ad10c6",
+  "data/platforms/destroyer_baseline/contam/hobbyist_overrides.json": "5ec3f01973b8e7ca45157220a011d942878ee30415cd754b072143b8687b5a54",
+  "data/platforms/destroyer_baseline/contam/path_map.json": "2f8a0efc630df121a89fcd7ea28b57e216b438e13ed12f105f8bfe19fb6a9086",
+  "data/platforms/destroyer_baseline/contam/platform.prj": "028aa2ba3275269c7401b9f7f9e035200c87d11720b1685852bb811ab150763a",
+  "data/platforms/destroyer_baseline/spatial_layout.json": "515cbae0e7a4255509fc04df1695afd1b5c2ff7a7b2f2fe6bc44033adfee5fef",
+  "data/platforms/enterprise_constitution_tos/air_flow_paths.json": "6d1c810bbf8c9b2d63a647b375148beb1aa1e29a2c034475f3f1fc8f148e963f",
+  "data/platforms/enterprise_constitution_tos/contam/hobbyist_overrides.json": "d6dc57d8bb5cd1a81399a94c7323abbb0818518a7e1230b0920a5b4fa6219ad1",
+  "data/platforms/enterprise_constitution_tos/contam/path_map.json": "c51e13ea338a13bee7734ff35b2d696683120978d98894dcaa08eec9fb96c7fb",
+  "data/platforms/enterprise_constitution_tos/contam/platform.prj": "caecebe9bd2c79cb574fa767f15e6ecab6432ca81ed0ff0ec5ce341aecf43d84",
+  "data/platforms/enterprise_constitution_tos/spatial_layout.json": "ab9fcfeeca79244425cf4d233b75855756869276715c448b451c0638b3f2cd78",
+  "data/platforms/expedition_cruise_450/air_flow_paths.json": "0eac3d4d965b9c54bd97c1f5ed6f3bb24b6e09c563907527a07da26d53b677e1",
+  "data/platforms/expedition_cruise_450/contam/hobbyist_overrides.json": "782bfc77b1cf6bc8b200774dd90c4a6b018cda3ee0f465b87e02ac19eea5361e",
+  "data/platforms/expedition_cruise_450/contam/path_map.json": "e0ba0480477ffa284017a72d2299b9b1cb6cc9ca6efda97732ae841e522eb888",
+  "data/platforms/expedition_cruise_450/contam/platform.prj": "34510e3de0e4072593210ea4e277a7b51448867903abc300448cd940292d829e",
+  "data/platforms/expedition_cruise_450/spatial_layout.json": "83cb6d92d8a9bab1c01ff47f1ceea1e3f9441e915fff3db7382726d1a0bad97c",
+  "data/platforms/west_virginia_bb48/air_flow_paths.json": "afc1b2b2ec8e7f0273020f268c0c010fda7004cba5e4c7003d9a4c517ad006b4",
+  "data/platforms/west_virginia_bb48/contam/hobbyist_overrides.json": "0440119c1f1a9bf5d882adb4355bd89497f3053d9ea3a2e59a267aef237c1416",
+  "data/platforms/west_virginia_bb48/contam/path_map.json": "515086b9789c38180bc297c2010bddbddfe63de601aafb2a4f8bb586c7419a24",
+  "data/platforms/west_virginia_bb48/contam/platform.prj": "ca186a0de6ac651a9ae2441fe3d5416d371b0bcd33ad37a3f3253551d6fbe27c",
+  "data/platforms/west_virginia_bb48/spatial_layout.json": "238a244c0cf0209867be3c7da864bb62c50a8db229c447db36063c542cb875a9"
+ },
+ "inputs_sha256_before": {
+  "data/contam_hobbyist/README.md": "e64bc06def59fb57513575eeaaecffc2683531b60e6a044c65859d6f818cba36",
+  "data/contam_hobbyist/duct_defaults.json": "5408ada25831e1bb449a2c239f4876983b9b2ef3d226ba45d210925617d40f28",
+  "data/contam_hobbyist/filter_presets.json": "4dd4a001eee578919b6b627e1e00e57d69714975e0139589123dde4cf64cc61e",
+  "data/contam_hobbyist/orifice_catalog.json": "c6d2802cbedead8e94e2174cd9da6f162e2d3b5e217d161c1cc2d3fa87051f00",
+  "data/contam_hobbyist/schedule_templates.json": "cdb7f4fad272e21bccc2bde392fe899ca98378a4e21e01647bf7ecefb73a08bb",
+  "data/contam_hobbyist/species_pack.json": "8db06aa2a89862bb4a4d9b01ddb5bf446b8280a758b489d4b6dea98650d6b38e",
+  "data/contam_hobbyist/wind_profiles.json": "fe6bae6711e4edf6d62dfefec3d14b3518fcdc3767cac606d172306be72ec01d",
+  "data/platforms/destroyer_baseline/air_flow_paths.json": "a41886e9efe5d0c3474fb8c0e250fd4df024b3cb6dc4ad60eaba022c55ad10c6",
+  "data/platforms/destroyer_baseline/contam/hobbyist_overrides.json": "5ec3f01973b8e7ca45157220a011d942878ee30415cd754b072143b8687b5a54",
+  "data/platforms/destroyer_baseline/contam/path_map.json": "2f8a0efc630df121a89fcd7ea28b57e216b438e13ed12f105f8bfe19fb6a9086",
+  "data/platforms/destroyer_baseline/contam/platform.prj": "028aa2ba3275269c7401b9f7f9e035200c87d11720b1685852bb811ab150763a",
+  "data/platforms/destroyer_baseline/spatial_layout.json": "515cbae0e7a4255509fc04df1695afd1b5c2ff7a7b2f2fe6bc44033adfee5fef",
+  "data/platforms/enterprise_constitution_tos/air_flow_paths.json": "6d1c810bbf8c9b2d63a647b375148beb1aa1e29a2c034475f3f1fc8f148e963f",
+  "data/platforms/enterprise_constitution_tos/contam/hobbyist_overrides.json": "d6dc57d8bb5cd1a81399a94c7323abbb0818518a7e1230b0920a5b4fa6219ad1",
+  "data/platforms/enterprise_constitution_tos/contam/path_map.json": "c51e13ea338a13bee7734ff35b2d696683120978d98894dcaa08eec9fb96c7fb",
+  "data/platforms/enterprise_constitution_tos/contam/platform.prj": "caecebe9bd2c79cb574fa767f15e6ecab6432ca81ed0ff0ec5ce341aecf43d84",
+  "data/platforms/enterprise_constitution_tos/spatial_layout.json": "ab9fcfeeca79244425cf4d233b75855756869276715c448b451c0638b3f2cd78",
+  "data/platforms/expedition_cruise_450/air_flow_paths.json": "0eac3d4d965b9c54bd97c1f5ed6f3bb24b6e09c563907527a07da26d53b677e1",
+  "data/platforms/expedition_cruise_450/contam/hobbyist_overrides.json": "782bfc77b1cf6bc8b200774dd90c4a6b018cda3ee0f465b87e02ac19eea5361e",
+  "data/platforms/expedition_cruise_450/contam/path_map.json": "e0ba0480477ffa284017a72d2299b9b1cb6cc9ca6efda97732ae841e522eb888",
+  "data/platforms/expedition_cruise_450/contam/platform.prj": "34510e3de0e4072593210ea4e277a7b51448867903abc300448cd940292d829e",
+  "data/platforms/expedition_cruise_450/spatial_layout.json": "83cb6d92d8a9bab1c01ff47f1ceea1e3f9441e915fff3db7382726d1a0bad97c",
+  "data/platforms/west_virginia_bb48/air_flow_paths.json": "afc1b2b2ec8e7f0273020f268c0c010fda7004cba5e4c7003d9a4c517ad006b4",
+  "data/platforms/west_virginia_bb48/contam/hobbyist_overrides.json": "0440119c1f1a9bf5d882adb4355bd89497f3053d9ea3a2e59a267aef237c1416",
+  "data/platforms/west_virginia_bb48/contam/path_map.json": "515086b9789c38180bc297c2010bddbddfe63de601aafb2a4f8bb586c7419a24",
+  "data/platforms/west_virginia_bb48/contam/platform.prj": "ca186a0de6ac651a9ae2441fe3d5416d371b0bcd33ad37a3f3253551d6fbe27c",
+  "data/platforms/west_virginia_bb48/spatial_layout.json": "238a244c0cf0209867be3c7da864bb62c50a8db229c447db36063c542cb875a9"
+ },
+ "inputs_unchanged": true,
+ "loadavg_end": [
+  1.013671875,
+  1.0,
+  0.64453125
+ ],
+ "loadavg_start": [
+  2.642578125,
+  0.71044921875,
+  0.24365234375
+ ],
+ "memory_bytes": 65976897536,
+ "mode": "canary",
+ "numpy": "2.4.6",
+ "os": {
+  "machine": "x86_64",
+  "release": "6.1.180-225.360.amzn2023.x86_64",
+  "system": "Linux",
+  "version": "#1 SMP PREEMPT_DYNAMIC Fri Aug  7 21:18:10 UTC 2026"
+ },
+ "python": {
+  "implementation": "CPython",
+  "version": "3.11.18"
+ },
+ "runner": {
+  "dirty": null,
+  "engine_git_sha_env": "d06d685011ebc05ebe49ed35aacc43b7f6fc2706",
+  "head": null
+ },
+ "scipy": "1.17.1",
+ "smoke_cells": 77,
+ "thread_env": {
+  "MKL_NUM_THREADS": "1",
+  "OMP_NUM_THREADS": "1",
+  "OPENBLAS_NUM_THREADS": "1"
+ },
+ "timed_cells": 462,
+ "utc_end": "2026-11-19T13:05:49.308490+00:00",
+ "utc_start": "2026-11-19T12:55:43.637288+00:00"
+}

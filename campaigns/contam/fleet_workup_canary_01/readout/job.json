@@ -1,0 +1,62 @@
+{
+ "array": false,
+ "attempts": [
+  {
+   "container_instance_arn": "arn:aws:ecs:us-east-1:994254241749:container-instance/AWSBatch-picard-abm-campaign-spot-436e245c-6d84-3a0a-a86a-2783b1e1b314/15231648f781440f9211bc2d95474bc0",
+   "exit_code": 0,
+   "log_stream": "contam-fleet-workup-canary-01/default/993795e369ba40e9889d38fb50f21f6b",
+   "started_at_ms": 1795092942468,
+   "stopped_at_ms": 1795093549806
+  }
+ ],
+ "command": [
+  "deploy/aws/campaign_entrypoint.py",
+  "--campaign",
+  "contam/fleet_workup_canary_01",
+  "--s3-prefix",
+  "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_fleet_workup_canary_01/",
+  "--block",
+  "canary_rerun1",
+  "--seeds",
+  "0",
+  "--manifest",
+  "campaigns/contam/fleet_workup_canary_01/design/canary_criteria.json",
+  "--index",
+  "0"
+ ],
+ "created_at_ms": 1795092829063,
+ "image": "994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:contam-fleet-workup-canary-01-rerun1@sha256:e59acd8d426a1304387929dd9c91bb85946b28c0c2357eb7a997e7e16a28e0c3",
+ "image_build": {
+  "base": "python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 (pulled through mirror.gcr.io; Docker Hub returned 429)",
+  "dockerfiles": [
+   "Dockerfile",
+   "deploy/aws/Dockerfile.campaign"
+  ],
+  "image_digest": "sha256:e59acd8d426a1304387929dd9c91bb85946b28c0c2357eb7a997e7e16a28e0c3",
+  "runner_commit": "d06d685011ebc05ebe49ed35aacc43b7f6fc2706"
+ },
+ "job_definition": "arn:aws:batch:us-east-1:994254241749:job-definition/picard-contam-fleet-workup-canary-01:3",
+ "job_id": "ac1b56e1-2080-40cc-be8f-b8473ceca793",
+ "job_name": "picard-contam-fleet-workup-canary-01-canary_rerun1-20261119-125348-canary",
+ "job_queue": "arn:aws:batch:us-east-1:994254241749:job-queue/picard-campaign-queue",
+ "log_group": "/aws/batch/picard-campaign",
+ "raw_artifact": {
+  "sha256": "b99690680cd30331d4af0ad9e3afba5543d4499668e19c42205cf272f5a7ac8b",
+  "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_fleet_workup_canary_01/canary_rerun1/canary_raw_rerun1.tar.gz"
+ },
+ "resource_requirements": [
+  {
+   "type": "VCPU",
+   "value": "1"
+  },
+  {
+   "type": "MEMORY",
+   "value": "4096"
+  }
+ ],
+ "run_label": "rerun1 (corrected phase timers); supersedes the timing of job 3940f345-8c40-4dcb-842b-800d44178266, whose records are kept in ../readout_run1",
+ "source": "aws batch describe-jobs, read after the job stopped",
+ "started_at_ms": 1795092942468,
+ "status": "SUCCEEDED",
+ "stopped_at_ms": 1795093549806
+}

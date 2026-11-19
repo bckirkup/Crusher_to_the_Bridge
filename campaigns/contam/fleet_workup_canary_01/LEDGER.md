@@ -108,6 +108,29 @@ gate result, not a benchmark; no local timing is reported.
   fixed runner reproduces every smoke metric and field digest of `5f524b81`.
   A re-run of the same job is needed for a clean wall-time split; not
   submitted without Benjamin's go-ahead.
+- Run 1's reduction now lives in `readout_run1/`, files unchanged.
+- Benjamin authorized a re-run of the same four-hull canary with the
+  corrected timers only: no change to criteria, rows, matrix or settings.
+- Before submission, in the rerun image (runner `d06d6850`): the
+  owner-checked S3 download returned the pinned archive and a wrong owner
+  account was refused; the smoke passed 993 checks; the solved block was
+  identical to run 1 on all 77 rows and downstream values agreed to
+  4.5e-16 relative (workstation CPU vs Batch CPU).
+- Run 2: job `ac1b56e1-2080-40cc-be8f-b8473ceca793`, job definition
+  `picard-contam-fleet-workup-canary-01:3`, image
+  `picard-campaign:contam-fleet-workup-canary-01-rerun1@sha256:e59acd8d426a1304387929dd9c91bb85946b28c0c2357eb7a997e7e16a28e0c3`,
+  not an array, 1 attempt, SUCCEEDED, host `i-073002017534702f0`
+  (`c7a.8xlarge`; a different instance from run 1). Raw artifact
+  `canary_rerun1/canary_raw_rerun1.tar.gz`, SHA-256
+  `b99690680cd30331d4af0ad9e3afba5543d4499668e19c42205cf272f5a7ac8b`,
+  reduced offline into `readout/`; audit 14 of 14.
+- Run 2 vs run 1: all 3,144 entries of `results_long.csv` and every
+  solved-field digest identical. No scientific change.
+- Measured split (baseline, median wall ms, solve / import): destroyer 2.75
+  / 10.46; Enterprise 10.01 / 72.20; expedition 6.04 / 44.59; West Virginia
+  58.76 / 414.17. Solve child CPU ≈ solve wall; import is all parent CPU.
+- Timing samples from the two hosts are not pooled; the readout reports
+  run 2.
 
 **Stopped here.** No other job was submitted. Open decision: run the other
 73 hulls or not.
