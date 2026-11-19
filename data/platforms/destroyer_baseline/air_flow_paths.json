@@ -161,5 +161,31 @@
       "to": "Bridge",
       "type": "ladder_well"
     }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "HD_MAIN_M",
+      "type": "makeup_louvre",
+      "area_m2": 0.039801,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_MAIN_M (CONTAM-DESTROYER-MAKEUP-01). Grade C placement/area: commissioned-lane solved AHS return-minus-supply demand 358.210624 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.039801. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    },
+    {
+      "zone": "HD_MAIN_F",
+      "type": "makeup_louvre",
+      "area_m2": 0.026534,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_MAIN_F (CONTAM-DESTROYER-MAKEUP-01). Grade C placement/area: commissioned-lane solved AHS return-minus-supply demand 238.807068 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.026534. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    },
+    {
+      "zone": "HD_UPPER_M",
+      "type": "makeup_louvre",
+      "area_m2": 0.013267,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Sanitary make-up intake for exhaust-only HD_UPPER_M (CONTAM-DESTROYER-MAKEUP-01). Grade C placement/area: commissioned-lane solved AHS return-minus-supply demand 119.403534 m3/h at the 2.5 m/s free-area face-velocity sizing bound gives area_m2 0.013267. Passive always_open; no wind_speed_m_s; exchange_m3h follows D5 from commissioned-lane solved outward flow."
+    }
   ]
 }

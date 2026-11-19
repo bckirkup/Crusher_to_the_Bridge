@@ -215,7 +215,8 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     # per olympia_c6 weather/boat-stowage opening; CONTAM-OLYMPIA-MAKEUP-01
     # adds the two legs of the olympia_c6 forecastle make-up intake;
     # CONTAM-POPE-MAKEUP-01 adds the 14 legs of seven pope_ap110 per-HD-branch
-    # make-up louvres;
+    # make-up louvres; CONTAM-DESTROYER-MAKEUP-01 adds the six legs of three
+    # destroyer_baseline per-HD-branch make-up louvres;
     # CONTAM-GROUPED-WEATHER-MIDWAY-01 adds the two legs of the midway_cv41
     # Flight_Deck opening (first grouped weather zone);
     # CONTAM-GROUPED-WEATHER-CRUISER-01 adds two legs per opening on
@@ -269,7 +270,7 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
         "fort_william_j311": 6, "montana_acr13": 6, "pce_874": 4,
         "pt_564": 4, "raven_am55": 6, "river_class_frigate": 4 + 2,
         "rolla_pc483": 4, "winnipeg_j337": 6, "olympia_c6": 22,
-        "pope_ap110": 14,
+        "pope_ap110": 14, "destroyer_baseline": 6,
         "midway_cv41": 2,
         "assistance_ar17": 8, "gosper_apa170": 12, "jupiter_ac3": 4,
         "luzon_arg2": 8, "mercury_aks20": 4, "squier_ap130": 2,
