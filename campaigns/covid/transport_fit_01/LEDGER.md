@@ -15,7 +15,7 @@ never silently pass as the baseline).
 
 | Field | Value |
 |---|---|
-| Queue | `picard-analysis-fargate-queue` |
+| Queue | `picard-analysis-queue` (EC2 CE `picard-analysis-compute-ondemand`; the shared jobdef template emits no `platformCapabilities`, i.e. EC2 capability — `picard-analysis-fargate-queue`'s FARGATE-only CE rejects it) |
 | Jobdef | `picard-covid-transport-fit-01` |
 | Image tag | `covid-transport-fit-01` |
 | S3 prefix | `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_transport_fit_01/` |
