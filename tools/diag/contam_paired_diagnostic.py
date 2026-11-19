@@ -42,12 +42,14 @@ from simulation_utils.paths import (  # noqa: E402
 )
 from tools.contam_hobbyist import load_hobbyist_overrides  # noqa: E402
 from tools.contam_prj_bridge import export_prj_with_path_map  # noqa: E402
+from tools.diag.contam_envelope_leak_enumeration import bundled_hulls  # noqa: E402
 
 FILTER_EFFICIENCY = 0.3
 NATURAL_DECAY_RATE = 0.10
 HORIZON_H = 12.0
 SPLIT_OFFSET_H = 1.0
 REACHABLE_EPSILON_H = 1e-12
+# Curated default witness sources. Other bundled hulls require ``--source``.
 PLATFORM_SOURCES = {
     "expedition_cruise_450": ["MainDining", "HD_5P_M", "PoolDeck", "MainGalley"],
     "destroyer_baseline": ["Mess_Hall", "HD_MAIN_M", "Bridge"],
@@ -99,7 +101,9 @@ def _sources_for(
     hull: str, spatial: dict[str, Any], requested: list[str] | None,
 ) -> list[str]:
     known = _zone_ids(spatial)
-    sources = requested or PLATFORM_SOURCES[hull]
+    sources = requested or PLATFORM_SOURCES.get(hull)
+    if sources is None:
+        raise ValueError(f"{hull} has no default sources; pass --source")
     missing = [s for s in sources if s not in known]
     if missing:
         raise ValueError(f"{hull} sources missing from spatial_layout: {missing}")
@@ -440,7 +444,10 @@ def _write_output(path: str, payload: dict[str, Any]) -> None:
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--hull", action="append", choices=sorted(PLATFORM_SOURCES))
+    parser.add_argument(
+        "--hull", action="append", choices=bundled_hulls(),
+        help="platform id with a committed Contam bundle",
+    )
     parser.add_argument("--lane", action="append", choices=LANES + OPTIONAL_LANES)
     parser.add_argument(
         "--envelope-leak-mode",
@@ -448,7 +455,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=ENVELOPE_LEAK_BOUNDARY_SINK,
         help="boundary_sink (default) or the labelled pressure_only baseline",
     )
-    parser.add_argument("--source", action="append")
+    parser.add_argument(
+        "--source", action="append",
+        help="source zone id; required for hulls without curated defaults",
+    )
     parser.add_argument("--timing", action="append", choices=TIMINGS)
     parser.add_argument(
         "--out",
