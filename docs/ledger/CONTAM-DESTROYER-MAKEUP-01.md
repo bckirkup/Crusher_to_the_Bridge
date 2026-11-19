@@ -90,5 +90,7 @@ three exhaust-only branches (`ahs_nr` 4/5/6 supply 0, return solved
   `path_map.json` SHA256
   `2f8a0efc630df121a89fcd7ea28b57e216b438e13ed12f105f8bfe19fb6a9086`.
 - Test pins moved only for the authored declaration: `makeup_louvre`
-  record count `destroyer_baseline: 3` and six `ambient_opening` path-map
-  legs in the opening/boundary guards.
+  record count `destroyer_baseline: 3`, six `ambient_opening` path-map
+  legs in the opening/boundary guards, native flow-compare path count
+  54→57 (`ambient_exchange_makeup_louvre` 0→3), and the destroyer hobbyist
+  path-map count 69→75.
