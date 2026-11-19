@@ -1,9 +1,12 @@
 # SUPPLY-STRUCTURE-01 — cruise food-supply structure design (frozen contract)
 
-**Status: frozen design — declared before implementation.** This is a
-mechanism contract for a later implementation leg plus the campaign
-strategy that keeps supply-structure discovery cheap. This PR contains
-no engine change, no new epidemiological constant, and no default flip.
+**Status: Stage A census support implemented; Stage B not started.** This is
+the mechanism contract plus the implemented supply-side census leg:
+`provisioned_source.supply_structure` carries the labelled
+`source_cluster` / `venue_menu` / `lot_scale` arms over the shipped station
+census, with supply-side witnesses and no posting endpoint. Flat remains
+the default and the absent block is bit-identical. The Stage B targeted
+ABM confirmation campaign has not been run.
 It extends `PROVISIONED-SOURCE-01`
 ([provisioned_source_01_design.md](../provisioned_source_01_design.md)),
 `FOOD-SUPPLY-01`
@@ -13,7 +16,28 @@ sourcing survey
 literature tranche
 [consensus_tranche_57_cruise_food_supply_chain.md](../literature/consensus_tranche_57_cruise_food_supply_chain.md)).
 
-**Branch:** off `origin/main` at `1721539b`.
+**Branches:** design off `origin/main` at `1721539b` (#1318); Stage A
+implementation off `origin/main` after #1318.
+
+## Stage A implementation status
+
+- Implemented in `engines/transmission_core.py`:
+  `provisioned_source.supply_structure` resolution, `venue_menu`
+  service-class station filtering, `source_cluster` cluster-level
+  Bernoulli draws, and `lot_scale.servings_multiplier` on provisioned
+  lots; witnesses are emitted on `provisioned_source` and closed
+  `common_source_objects` rows.
+- `tools/noro_diag/supply_seed_scan.py --structure` selects the census
+  arm (`flat` default plus the declared rungs below); the seed-scan
+  campaign argv hook passes `structure` with a flat default.
+- v1 boundary: supply-structure arms run on the `station_lots` census;
+  combining an active arm with `single_line_receipt` or
+  `declared_receipts` raises explicitly rather than mislabeling the arm.
+- Validation: `tests/test_supply_structure_01.py` pins flat identity,
+  declared-null echo, venue masks, cluster correlation/all-or-nothing,
+  lot-scale serving scaling, and the receipt-layer guard.
+- Not done: Stage B ABM cells, fleet posting census, receipt-layer
+  composition, cross-voyage correlation, and any default flip.
 
 ## 0. The question this contract answers
 

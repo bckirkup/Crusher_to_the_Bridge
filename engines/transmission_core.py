@@ -1659,6 +1659,58 @@ COMMON_SOURCE_LOT_LAYER_MODE_ABSENT = "station_lots"
 COMMON_SOURCE_PREPARATION_SURVIVAL_MODES = frozenset({"raw_rte_only"})
 COMMON_SOURCE_PREPARATION_SURVIVAL_MODE_ABSENT = "raw_rte_only"
 
+# SUPPLY-STRUCTURE-01 (docs/norovirus/supply_structure_01_design.md) — the
+# labelled supply-structure arms above the PROVISIONED-SOURCE-01 census.
+# These are structural scenario labels, not fitted epidemiological constants;
+# ``mode: "flat"`` / an absent block is the shipped baseline and consumes no
+# extra uniforms. Grade C declared arms. Origin: declared.
+SUPPLY_STRUCTURE_MODES = frozenset({"flat", "declared"})
+SUPPLY_STRUCTURE_MODE_ABSENT = "flat"
+SUPPLY_STRUCTURE_SOURCE_CLUSTER_RUNGS = frozenset({
+    "independent",
+    "line_shared",
+    "venue_group_shared",
+    "fleet_shared",
+})
+SUPPLY_STRUCTURE_SOURCE_CLUSTER_ABSENT = "independent"
+SUPPLY_STRUCTURE_VENUE_MENU_MASKS = frozenset({
+    "flat",
+    "passenger_raw",
+    "buffet_specialty",
+})
+SUPPLY_STRUCTURE_VENUE_MENU_MASK_ABSENT = "flat"
+# The venue-menu masks are declared over the three nonzero-prevalence
+# raw/RTE lines only; the remaining census lines are mask-invariant in v1.
+_SUPPLY_STRUCTURE_MENU_ITEM_LINES = frozenset({
+    "shellfish",
+    "salad_leaf",
+    "fresh_produce",
+})
+_SUPPLY_STRUCTURE_MENU_SERVICE_TYPES = (
+    "buffet",
+    "specialty",
+    "mdr",
+    "crew_mess",
+)
+_SUPPLY_STRUCTURE_MENU_MASK_ITEMS = {
+    "flat": {
+        service: frozenset(_SUPPLY_STRUCTURE_MENU_ITEM_LINES)
+        for service in _SUPPLY_STRUCTURE_MENU_SERVICE_TYPES
+    },
+    "passenger_raw": {
+        "buffet": frozenset(_SUPPLY_STRUCTURE_MENU_ITEM_LINES),
+        "specialty": frozenset(_SUPPLY_STRUCTURE_MENU_ITEM_LINES),
+        "mdr": frozenset(_SUPPLY_STRUCTURE_MENU_ITEM_LINES),
+        "crew_mess": frozenset(),
+    },
+    "buffet_specialty": {
+        "buffet": frozenset(_SUPPLY_STRUCTURE_MENU_ITEM_LINES),
+        "specialty": frozenset(_SUPPLY_STRUCTURE_MENU_ITEM_LINES),
+        "mdr": frozenset({"salad_leaf", "fresh_produce"}),
+        "crew_mess": frozenset(),
+    },
+}
+
 # ── FOOD-COMMON-SOURCE-02 leg 2: handler/diner contamination objects ──
 # One seeding draw per contamination-relevant span of the agent's
 # infectious course replaces the per-window iid Bernoulli (spec §Leg 2):
@@ -3561,6 +3613,11 @@ class TransmissionCore:
         self._cs_ps_q_by_item_line = None
         self._cs_ps_prevalence_scale = 1.0
         self._cs_ps_receipts_per_item_line = None
+        self._cs_ss_mode = SUPPLY_STRUCTURE_MODE_ABSENT
+        self._cs_ss_source_cluster = SUPPLY_STRUCTURE_SOURCE_CLUSTER_ABSENT
+        self._cs_ss_venue_menu_mask = SUPPLY_STRUCTURE_VENUE_MENU_MASK_ABSENT
+        self._cs_ss_lot_servings_multiplier = 1.0
+        self._cs_ss_active = False
 
     def _resolve_provisioned_source_block(
         self,
@@ -3658,7 +3715,218 @@ class TransmissionCore:
         self._cs_ps_receipts_per_item_line = ps.get(
             "receipts_per_item_line",
         )
+        self._resolve_supply_structure_block(ps.get("supply_structure"))
         return ps_q
+
+    @staticmethod
+    def _supply_structure_mode(ss: dict[str, Any]) -> str:
+        mode = str(ss.get("mode") or SUPPLY_STRUCTURE_MODE_ABSENT)
+        mode = mode.strip().lower()
+        if mode not in SUPPLY_STRUCTURE_MODES:
+            raise ValueError(f"unknown supply_structure.mode {mode!r}")
+        return mode
+
+    @staticmethod
+    def _supply_structure_cluster_rung(ss: dict[str, Any]) -> str:
+        cluster = ss.get("source_cluster") or {}
+        if not isinstance(cluster, dict):
+            raise ValueError("supply_structure.source_cluster must be a mapping")
+        rung = str(
+            cluster.get("rung")
+            or cluster.get("mode")
+            or SUPPLY_STRUCTURE_SOURCE_CLUSTER_ABSENT,
+        ).strip().lower()
+        if rung not in SUPPLY_STRUCTURE_SOURCE_CLUSTER_RUNGS:
+            raise ValueError(f"unknown supply_structure.source_cluster {rung!r}")
+        return rung
+
+    @staticmethod
+    def _supply_structure_menu_mask(ss: dict[str, Any]) -> str:
+        menu = ss.get("venue_menu") or {}
+        if not isinstance(menu, dict):
+            raise ValueError("supply_structure.venue_menu must be a mapping")
+        mask = str(
+            menu.get("service_class_mask")
+            or SUPPLY_STRUCTURE_VENUE_MENU_MASK_ABSENT,
+        ).strip().lower()
+        if mask not in SUPPLY_STRUCTURE_VENUE_MENU_MASKS:
+            raise ValueError(f"unknown supply_structure.venue_menu {mask!r}")
+        return mask
+
+    @staticmethod
+    def _supply_structure_lot_multiplier(ss: dict[str, Any]) -> float:
+        scale = ss.get("lot_scale") or {}
+        if not isinstance(scale, dict):
+            raise ValueError("supply_structure.lot_scale must be a mapping")
+        try:
+            multiplier = float(scale.get("servings_multiplier", 1.0))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "supply_structure.lot_scale.servings_multiplier must be numeric",
+            ) from exc
+        if not math.isfinite(multiplier) or multiplier <= 0.0:
+            raise ValueError(
+                "supply_structure.lot_scale.servings_multiplier must be > 0",
+            )
+        return multiplier
+
+    def _resolve_supply_structure_block(self, ss: Any) -> None:
+        """Resolve SUPPLY-STRUCTURE-01 arms; absent/flat is the no-op baseline."""
+        self._cs_ss_mode = SUPPLY_STRUCTURE_MODE_ABSENT
+        self._cs_ss_source_cluster = SUPPLY_STRUCTURE_SOURCE_CLUSTER_ABSENT
+        self._cs_ss_venue_menu_mask = SUPPLY_STRUCTURE_VENUE_MENU_MASK_ABSENT
+        self._cs_ss_lot_servings_multiplier = 1.0
+        self._cs_ss_active = False
+        if ss is None:
+            return
+        if not isinstance(ss, dict):
+            raise ValueError(
+                "provisioned_source.supply_structure must be a mapping",
+            )
+        mode = self._supply_structure_mode(ss)
+        rung = self._supply_structure_cluster_rung(ss)
+        mask = self._supply_structure_menu_mask(ss)
+        multiplier = self._supply_structure_lot_multiplier(ss)
+        nondefault = (
+            rung != SUPPLY_STRUCTURE_SOURCE_CLUSTER_ABSENT
+            or mask != SUPPLY_STRUCTURE_VENUE_MENU_MASK_ABSENT
+            or not math.isclose(
+                multiplier, 1.0, rel_tol=0.0, abs_tol=1e-12,
+            )
+        )
+        if mode == SUPPLY_STRUCTURE_MODE_ABSENT and nondefault:
+            raise ValueError(
+                "supply_structure.mode 'flat' requires default sub-arms; "
+                "set mode 'declared' for a labelled structure arm",
+            )
+        self._cs_ss_mode = mode
+        self._cs_ss_source_cluster = rung
+        self._cs_ss_venue_menu_mask = mask
+        self._cs_ss_lot_servings_multiplier = multiplier
+        self._cs_ss_active = mode == "declared" or nondefault
+
+    def _cs_supply_structure_echo(self) -> dict[str, Any]:
+        return {
+            "mode": self._cs_ss_mode,
+            "source_cluster": {"rung": self._cs_ss_source_cluster},
+            "venue_menu": {"service_class_mask": self._cs_ss_venue_menu_mask},
+            "lot_scale": {
+                "servings_multiplier": self._cs_ss_lot_servings_multiplier,
+            },
+        }
+
+    def _cs_supply_structure_service_type(self, zone: str) -> str:
+        return resolve_dining_service_type({"name": zone})
+
+    def _cs_supply_structure_menu_allows(self, zone: str, item: str) -> bool:
+        if (
+            not self._cs_ss_active
+            or self._cs_ss_venue_menu_mask == SUPPLY_STRUCTURE_VENUE_MENU_MASK_ABSENT
+            or item not in _SUPPLY_STRUCTURE_MENU_ITEM_LINES
+        ):
+            return True
+        service = self._cs_supply_structure_service_type(zone)
+        allowed = _SUPPLY_STRUCTURE_MENU_MASK_ITEMS[
+            self._cs_ss_venue_menu_mask
+        ].get(service, _SUPPLY_STRUCTURE_MENU_ITEM_LINES)
+        return item in allowed
+
+    def _cs_supply_structure_stations(
+        self,
+        stations: list[tuple[str, str]],
+    ) -> list[tuple[str, str]]:
+        if not self._cs_ss_active or self._cs_ss_venue_menu_mask == (
+            SUPPLY_STRUCTURE_VENUE_MENU_MASK_ABSENT
+        ):
+            return stations
+        return [
+            station for station in stations
+            if self._cs_supply_structure_menu_allows(*station)
+        ]
+
+    def _cs_supply_structure_cluster_key(
+        self,
+        zone: str,
+        item: str,
+    ) -> tuple[str, ...]:
+        rung = self._cs_ss_source_cluster
+        if rung == "line_shared":
+            return ("line", "all", item)
+        if rung == "venue_group_shared":
+            return (
+                "venue_group",
+                self._cs_supply_structure_service_type(zone),
+                item,
+            )
+        if rung == "fleet_shared":
+            return ("fleet", "all", "all")
+        return ("station", zone, item)
+
+    def _cs_supply_structure_cluster_id(self, key: tuple[str, ...]) -> str:
+        kind = key[0]
+        if kind == "fleet":
+            return "fleet"
+        if kind == "line":
+            return f"line|{key[2]}"
+        if kind == "venue_group":
+            return f"venue_group|{key[1]}|{key[2]}"
+        return f"station|{key[1]}|{key[2]}"
+
+    def _cs_supply_structure_clusters(
+        self,
+        stations: list[tuple[str, str]],
+    ) -> tuple[list[tuple[str, ...]], dict[tuple[str, ...], list[tuple[str, str]]]]:
+        clusters: dict[tuple[str, ...], list[tuple[str, str]]] = {}
+        order: list[tuple[str, ...]] = []
+        for station in stations:
+            key = self._cs_supply_structure_cluster_key(*station)
+            if key not in clusters:
+                clusters[key] = []
+                order.append(key)
+            clusters[key].append(station)
+        return order, clusters
+
+    def _cs_supply_structure_counts(
+        self,
+        objects: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        counts: dict[str, Any] = {
+            "n_lots": len(objects),
+            "n_contaminated_lots": len(objects),
+            "contaminated_by_item_line": {},
+            "contaminated_by_preparation_class": {},
+            "contaminated_by_supply_stratum": {},
+            "contaminated_by_service_type": {},
+            "contaminated_by_source_cluster": {},
+        }
+        for obj in objects:
+            item = str(obj.get("item_label") or "")
+            meta = _COMMON_SOURCE_ITEM_LINE_META.get(item, {})
+            fields = {
+                "contaminated_by_item_line": item or "unknown",
+                "contaminated_by_preparation_class": str(
+                    meta.get("preparation_class")
+                    or obj.get("preparation_class")
+                    or "unknown"
+                ),
+                "contaminated_by_supply_stratum": str(
+                    meta.get("supply_stratum")
+                    or obj.get("supply_stratum")
+                    or "unknown"
+                ),
+                "contaminated_by_service_type": (
+                    self._cs_supply_structure_service_type(
+                        str(obj.get("zone") or ""),
+                    )
+                ),
+                "contaminated_by_source_cluster": str(
+                    obj.get("source_cluster_id") or "independent"
+                ),
+            }
+            for key, value in fields.items():
+                bucket = counts[key]
+                bucket[value] = bucket.get(value, 0) + 1
+        return counts
 
     def _init_common_source_state_buckets(self) -> None:
         """Mutable per-voyage common-source witnesses and object state."""
@@ -13900,17 +14168,7 @@ class TransmissionCore:
         if not zones:
             return
         if self._cs_lot_mint_model == "provisioned_source":
-            # PROVISIONED-SOURCE-01: the derived census replaces the
-            # fiat gate — each (zone, item-line) station mints its lot
-            # iff its Bernoulli lands under q_source, so objects per
-            # voyage are Binomial(N_lots, q_source) by construction.
-            if self._cs_ps_lot_layer_mode in {
-                "single_line_receipt",
-                "declared_receipts",
-            }:
-                self._cs_plan_receipt_objects(zones, cells)
-            else:
-                self._cs_plan_provisioned_objects(zones, cells)
+            self._cs_plan_provisioned_source_objects(zones, cells)
             return
         lot_factor = (
             self._cs_posture if self._cs_lot_posture_coupling else 1.0
@@ -13953,6 +14211,101 @@ class TransmissionCore:
             for item in COMMON_SOURCE_LOT_ITEM_LINES
         ]
 
+    def _cs_plan_provisioned_source_objects(
+        self,
+        zones: list[str],
+        cells: list[tuple[str, str, int]],
+    ) -> None:
+        """Route PROVISIONED-SOURCE-01 census objects by lot layer."""
+        if (
+            self._cs_ss_active
+            and self._cs_ps_lot_layer_mode in {
+                "single_line_receipt",
+                "declared_receipts",
+            }
+        ):
+            raise ValueError(
+                "SUPPLY-STRUCTURE-01 v1 arms are defined on the station "
+                "census; receipt-layer composition is not implemented",
+            )
+        if self._cs_ps_lot_layer_mode in {
+            "single_line_receipt",
+            "declared_receipts",
+        }:
+            self._cs_plan_receipt_objects(zones, cells)
+        else:
+            self._cs_plan_provisioned_objects(zones, cells)
+
+    def _cs_provisioned_contaminated_stations(
+        self,
+        stations: list[tuple[str, str]],
+        q: float,
+        cluster_order: list[tuple[str, ...]],
+        clusters: dict[tuple[str, ...], list[tuple[str, str]]],
+    ) -> list[tuple[str, str]]:
+        if cluster_order:
+            contaminated_set = set()
+            for key in cluster_order:
+                if self._cs_rng.random() < q:
+                    contaminated_set.update(clusters[key])
+            return [
+                station for station in stations
+                if station in contaminated_set
+            ]
+        return [
+            station for station in stations
+            if self._cs_rng.random() < q
+        ]
+
+    def _cs_place_provisioned_stations(
+        self,
+        contaminated: list[tuple[str, str]],
+        pin: list[str] | None,
+    ) -> list[tuple[str, str]]:
+        placed = (
+            self._cs_place_pinned_stations(contaminated)
+            if pin else contaminated
+        )
+        if self._cs_ss_active:
+            placed = [
+                station for station in placed
+                if self._cs_supply_structure_menu_allows(*station)
+            ]
+        return placed
+
+    def _cs_provisioned_source_witness(
+        self,
+        q: float,
+        stations: list[tuple[str, str]],
+        contaminated: list[tuple[str, str]],
+        bound: list[dict[str, Any]],
+        pin: list[str] | None,
+    ) -> dict[str, Any]:
+        witness = {
+            "source_id": self._cs_ps_source_id,
+            "q_source_drawn": q,
+            "n_stations": len(stations),
+            "n_contaminated": len(contaminated),
+            "station_zone_pin": list(pin) if pin else None,
+            "station_zone_pin_weights": (
+                list(self._cs_ps_station_zone_weights)
+                if self._cs_ps_station_zone_weights else None
+            ),
+            "source_venue_arm": self._cs_ps_venue_arm,
+            "n_lots_placed": len(bound),
+            "actual_venues_used": sorted({o["zone"] for o in bound}),
+        }
+        if self._cs_ss_active:
+            witness.update({
+                "supply_structure": self._cs_supply_structure_echo(),
+                "n_service_eligible_stations": sum(
+                    1 for _zone, item in stations
+                    if item in _SUPPLY_STRUCTURE_MENU_ITEM_LINES
+                ),
+                **self._cs_supply_structure_counts(bound),
+            })
+        return witness
+
     def _cs_plan_provisioned_objects(
         self,
         zones: list[str],
@@ -13974,39 +14327,39 @@ class TransmissionCore:
         census is never restricted and no extra uniforms are drawn,
         so n_lots and the non-placement draw stream stay seed-paired
         with the unpinned baseline arm."""
-        stations = self._cs_station_census(zones)
+        stations = self._cs_supply_structure_stations(
+            self._cs_station_census(zones),
+        )
         pin = self._cs_ps_station_zone_pin
+        use_clusters = (
+            self._cs_ss_active
+            and self._cs_ss_source_cluster
+            != SUPPLY_STRUCTURE_SOURCE_CLUSTER_ABSENT
+        )
+        cluster_order: list[tuple[str, ...]] = []
+        clusters: dict[tuple[str, ...], list[tuple[str, str]]] = {}
+        if use_clusters:
+            cluster_order, clusters = self._cs_supply_structure_clusters(
+                stations,
+            )
         for pid, rates in self._cs_rates.items():
             q = rates["q_source"]
-            contaminated = [
-                station for station in stations
-                if self._cs_rng.random() < q
-            ]
-            self._cs_contaminated_stations[pid] = set(contaminated)
-            placed = (
-                self._cs_place_pinned_stations(contaminated)
-                if pin else contaminated
+            contaminated = self._cs_provisioned_contaminated_stations(
+                stations, q, cluster_order, clusters,
             )
+            self._cs_contaminated_stations[pid] = set(contaminated)
+            placed = self._cs_place_provisioned_stations(contaminated, pin)
             pre = len(self._cs_objects.get(pid, []))
             for station in placed:
                 self._cs_realize_lot_object(
                     pid, cells, zones, station=station,
                 )
             bound = self._cs_objects.get(pid, [])[pre:]
-            self._cs_provisioned_source[pid] = {
-                "source_id": self._cs_ps_source_id,
-                "q_source_drawn": q,
-                "n_stations": len(stations),
-                "n_contaminated": len(contaminated),
-                "station_zone_pin": list(pin) if pin else None,
-                "station_zone_pin_weights": (
-                    list(self._cs_ps_station_zone_weights)
-                    if self._cs_ps_station_zone_weights else None
-                ),
-                "source_venue_arm": self._cs_ps_venue_arm,
-                "n_lots_placed": len(bound),
-                "actual_venues_used": sorted({o["zone"] for o in bound}),
-            }
+            self._cs_provisioned_source[pid] = (
+                self._cs_provisioned_source_witness(
+                    q, stations, contaminated, bound, pin,
+                )
+            )
 
     def _cs_receipt_draw_spec(self, spec: Any) -> float:
         """Draw a scalar|[lo,hi] supply spec on the shared stream."""
@@ -14358,6 +14711,16 @@ class TransmissionCore:
         servings = max(1, int(round(self._cs_draw(
             "lot_servings", pathogen_id, cs_block,
         ))))
+        if not math.isclose(
+            self._cs_ss_lot_servings_multiplier, 1.0,
+            rel_tol=0.0, abs_tol=1e-12,
+        ):
+            servings = max(
+                1,
+                int(round(
+                    servings * self._cs_ss_lot_servings_multiplier,
+                )),
+            )
         quantity_servings = servings if receipt is not None else None
         quantity_g = None
         serving_mass_g = None
@@ -14464,6 +14827,19 @@ class TransmissionCore:
             "servings_served": 0,
             "dose_credited": 0.0,
         })
+        if self._cs_ss_active and (station is not None or receipt is not None):
+            row = self._cs_objects[pathogen_id][-1]
+            row["servings_multiplier"] = self._cs_ss_lot_servings_multiplier
+            row["menu_mask"] = self._cs_ss_venue_menu_mask
+            row["menu_service_type"] = self._cs_supply_structure_service_type(
+                zone,
+            )
+            row["source_cluster_id"] = (
+                self._cs_supply_structure_cluster_id(
+                    self._cs_supply_structure_cluster_key(zone, item),
+                )
+                if station is not None else "independent"
+            )
         self.common_source_telemetry["objects_provisioned_lot"] += 1
         return self._cs_objects[pathogen_id][-1]
 
@@ -14886,6 +15262,13 @@ class TransmissionCore:
             "redraw": obj.get("redraw"),
             "extent_windows": obj.get("extent_windows"),
         }
+        if self._cs_ss_active:
+            row.update({
+                "source_cluster_id": obj.get("source_cluster_id"),
+                "menu_service_type": obj.get("menu_service_type"),
+                "menu_mask": obj.get("menu_mask"),
+                "servings_multiplier": obj.get("servings_multiplier"),
+            })
         if matrix is not None:
             matrix.common_source_objects.append(row)
         self._cs_object_log.append(row)

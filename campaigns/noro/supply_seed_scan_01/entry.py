@@ -13,7 +13,11 @@ def build_argv(args: Any, block: dict[str, Any], seed: int, out_dir: Path) -> tu
     cfg = block.get("args") or {}
     # campaign_entrypoint spawns the worker with this process environment.
     os.environ["PYTHONHASHSEED"] = "1"
-    artifact_name = f"{cfg['artifact_stem']}_chunk{int(seed):06d}.jsonl"
+    structure = str(cfg.get("structure", "flat"))
+    structure_suffix = "" if structure == "flat" else f"_{structure}"
+    artifact_name = (
+        f"{cfg['artifact_stem']}{structure_suffix}_chunk{int(seed):06d}.jsonl"
+    )
     command = [
         sys.executable,
         block["worker"],
@@ -21,6 +25,7 @@ def build_argv(args: Any, block: dict[str, Any], seed: int, out_dir: Path) -> tu
         "--pathogen-id", str(args.pathogen_id),
         "--tier", str(cfg["tier"]),
         "--arm", str(cfg["arm"]),
+        "--structure", structure,
         "--hull", str(cfg["hull"]),
         "--seed-start", str(cfg["seed_start"]),
         "--seed-count", str(cfg["seed_count"]),
