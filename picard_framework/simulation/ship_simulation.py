@@ -82,6 +82,7 @@ from engines.transmission_core import (
     TransmissionCore,
     build_hvac_downstream_map,
     build_zone_air_exchange_map,
+    parse_room_air_map_arm,
 )
 from engines.voyage_itinerary import agent_is_departed
 from orchestrator_chronic import (
@@ -436,7 +437,11 @@ class ShipSimulation:
         # Room -> air changes per hour from the hull's declared AHU figures
         # plus positive ambient-opening exchange; the room-pool routes
         # dilute each epoch's emission through this removal instead of an
-        # implicit sealed room.
+        # implicit sealed room. ``room_air_removal.map_arm`` selects the
+        # shipped map or the labelled AHU-only baseline.
+        self.room_air_map_arm = parse_room_air_map_arm(
+            self.cfg.get("transmission"),
+        )
         zone_air_exchange = (
             build_zone_air_exchange_map(
                 airflow_data,
@@ -444,6 +449,7 @@ class ShipSimulation:
                 ambient_exchange_m3h=parse_ambient_exchange_axis(
                     self.cfg.get("hvac") or {},
                 ),
+                map_arm=self.room_air_map_arm,
             )
             if airflow_data
             else {}
@@ -694,6 +700,7 @@ class ShipSimulation:
             chronic_assignments=self.chronic_assignments,
             chronic_behavioral_mods=self.chronic_behavioral_mods,
             voyage_config=voyage_cfg,
+            room_air_map_arm=self.room_air_map_arm,
             # VSP 4.1.1.2 reportable AGE cases at boarding never pass the
             # sick-call ladder; the initiation draw records them, and the
             # state starts out already holding them.

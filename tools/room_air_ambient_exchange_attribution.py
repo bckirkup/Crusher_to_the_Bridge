@@ -3,7 +3,8 @@
 
 Declared before the runs (stochastic-attribution Rule A):
 
-* arms: ``ambient_off`` = labelled pre-change HVAC-only ACH map;
+* arms, selected by ``transmission.room_air_removal.map_arm``:
+  ``ambient_off`` = labelled pre-change HVAC-only ACH map;
   ``ambient_on`` = ``build_zone_air_exchange_map`` with positive
   ``ambient_openings`` exchange added as ``sum(exchange_m3h)/volume_m3``.
 * paired seeds: the same seed list on both arms, compared seed by seed.
@@ -27,7 +28,6 @@ import json
 import math
 import sys
 from pathlib import Path
-from unittest.mock import patch
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -47,38 +47,6 @@ def _residence_factor(ach: float, hours: float = 1.0) -> float:
     if x <= 0.0:
         return 1.0
     return -math.expm1(-x) / x
-
-
-def _hvac_only_zone_air_exchange_map(airflow_paths: dict) -> dict[str, float]:
-    """Labelled pre-change ROOM-AIR-01 map: HVAC ACH only, no openings."""
-    default_duty = float(airflow_paths.get("hvac_duty", 1.0))
-    default_oa = float(airflow_paths.get("oa_fraction", 0.2))
-    rates: dict[str, float] = {}
-    for hvac_zone in airflow_paths.get("hvac_zones", []):
-        ach = float(hvac_zone.get("ach", 6.0))
-        duty = max(float(hvac_zone.get("hvac_duty", default_duty)), 0.0)
-        oa = float(hvac_zone.get("oa_fraction", default_oa))
-        rate = ach * duty
-        if duty <= 0.0 and oa >= 1.0:
-            rate = ach
-        for room in hvac_zone.get("rooms", []):
-            rates[room] = rate
-    return rates
-
-
-def _map_builder(mode: str):
-    def _build(airflow_paths, zone_volumes=None, ambient_exchange_m3h=None):
-        if mode == "ambient_off":
-            return _hvac_only_zone_air_exchange_map(airflow_paths)
-        from engines.transmission_core import build_zone_air_exchange_map
-
-        return build_zone_air_exchange_map(
-            airflow_paths,
-            zone_volumes=zone_volumes,
-            ambient_exchange_m3h=ambient_exchange_m3h,
-        )
-
-    return _build
 
 
 def _read_json(path: Path) -> dict:
@@ -147,11 +115,18 @@ def map_census(platform_ids: list[str] | None = None) -> dict:
         axis = parse_ambient_exchange_axis(hvac_cfg if isinstance(hvac_cfg, dict) else {})
         from engines.transmission_core import build_zone_air_exchange_map
 
-        old = _hvac_only_zone_air_exchange_map(airflow)
+        volumes = _zone_volumes(layout)
+        old = build_zone_air_exchange_map(
+            airflow,
+            zone_volumes=volumes,
+            ambient_exchange_m3h=axis,
+            map_arm="ambient_off",
+        )
         new = build_zone_air_exchange_map(
             airflow,
-            zone_volumes=_zone_volumes(layout),
+            zone_volumes=volumes,
             ambient_exchange_m3h=axis,
+            map_arm="ambient_on",
         )
         for zone in sorted(set(old) | set(new)):
             old_ach = float(old.get(zone, 0.0))
@@ -191,16 +166,11 @@ def _simulate_hull_with_map_mode(
     num_epochs: int | None = None,
 ):
     import picard_framework.covid_theta_fit as ctf
-    import picard_framework.simulation.ship_simulation as ship_simulation
 
-    with patch.object(
-        ship_simulation,
-        "build_zone_air_exchange_map",
-        _map_builder(mode),
-    ):
-        return ctf.simulate_hull(
-            scenario_id, theta, seed, num_epochs=num_epochs,
-        )
+    return ctf.simulate_hull(
+        scenario_id, theta, seed,
+        num_epochs=num_epochs, room_air_map_arm=mode,
+    )
 
 
 def paired_hull_runs(

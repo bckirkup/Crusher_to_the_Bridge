@@ -41,7 +41,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any
 
 from engines.py_contam_bridge import PATHOGEN_POOL_TRANSPORT_MODES
-from engines.transmission_core import CABIN_AIR_MODES
+from engines.transmission_core import CABIN_AIR_MODES, ROOM_AIR_MAP_ARMS
 from picard_framework.covid_fit_targets import FitTarget, FitTargets, load_fit_targets
 from picard_framework.covid_hull_scenarios import (
     REPO_ROOT,
@@ -396,6 +396,7 @@ def build_fit_run_spec(
     repo_root: str = REPO_ROOT,
     cabin_air_mode: str | None = None,
     pathogen_pool_transport: str | None = None,
+    room_air_map_arm: str | None = None,
 ) -> dict[str, Any]:
     """The run spec one candidate is evaluated on, assumptions included."""
     raw = build_run_spec_dict(
@@ -427,11 +428,26 @@ def build_fit_run_spec(
         overrides.setdefault("hvac", {})["pathogen_pool_transport"] = (
             pathogen_pool_transport
         )
+    if room_air_map_arm is not None:
+        _declare_room_air_map_arm(overrides, room_air_map_arm)
     profile = load_covid_profile(repo_root)
     raw.setdefault("pathogen_overrides", {}).setdefault(
         PATHOGEN_ID, {},
     ).update(theta_profile_overrides(profile, theta))
     return raw
+
+
+def _declare_room_air_map_arm(overrides: dict[str, Any], arm: str) -> None:
+    """Set ``transmission.room_air_removal.map_arm``, keeping a declared mode."""
+    if arm not in ROOM_AIR_MAP_ARMS:
+        raise ValueError(
+            f"room_air_map_arm must be one of {ROOM_AIR_MAP_ARMS}, got {arm!r}",
+        )
+    tx = overrides.setdefault("transmission", {})
+    block = tx.get("room_air_removal") or {}
+    if isinstance(block, str):
+        block = {"mode": block}
+    tx["room_air_removal"] = {**block, "map_arm": arm}
 
 
 def build_fit_sim(
@@ -476,6 +492,7 @@ def simulate_hull(
     turn_day: int = 16,
     cabin_air_mode: str | None = None,
     pathogen_pool_transport: str | None = None,
+    room_air_map_arm: str | None = None,
 ) -> HullObservables:
     """Run one hull at one candidate Theta and read its observation logs."""
     raw = build_fit_run_spec(
@@ -483,6 +500,7 @@ def simulate_hull(
         num_epochs=num_epochs, repo_root=repo_root,
         cabin_air_mode=cabin_air_mode,
         pathogen_pool_transport=pathogen_pool_transport,
+        room_air_map_arm=room_air_map_arm,
     )
     sim = run_fit_spec(raw, repo_root=repo_root)
     observed = observables_from_modality(

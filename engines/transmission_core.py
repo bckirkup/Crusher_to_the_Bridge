@@ -1290,6 +1290,12 @@ _ISOLATED_DEPOSIT_STREAM_KEY = 0x150A17
 # vented head. ``sealed`` is the labelled pre-change baseline.
 DEFAULT_ROOM_AIR_REMOVAL_MODE = "first_order"
 ROOM_AIR_REMOVAL_MODES = {"first_order", "sealed"}
+# Which room-air exchange map the residence factor reads
+# (ROOM-AIR-PAIRED-VALIDATION-01, blocker B1). ``ambient_on`` is the shipped
+# map: declared AHU removal plus positive ``ambient_openings`` exchange.
+# ``ambient_off`` is the labelled pre-change baseline: the AHU-only map.
+DEFAULT_ROOM_AIR_MAP_ARM = "ambient_on"
+ROOM_AIR_MAP_ARMS = ("ambient_on", "ambient_off")
 
 # Air-change rate for a zone the hull never put on an AHU branch: zero,
 # so such a zone keeps the sealed-box baseline rather than gaining an
@@ -2619,11 +2625,14 @@ class RoomAirRemoval:
     ``(1 - e^-x)/x`` of the naive standing-mass dose, the factor the
     sanitary flush route already uses. ``sealed`` is the labelled
     pre-change baseline: the epoch's emitted mass stands at full
-    concentration all epoch.
+    concentration all epoch. ``map_arm`` selects the exchange map the
+    factor reads; it changes no dose under ``sealed``, where the factor is
+    1.0 whatever the map holds.
     """
 
     mode: str = DEFAULT_ROOM_AIR_REMOVAL_MODE
     default_ach_per_hour: float = DEFAULT_UNDECLARED_ACH_PER_HOUR
+    map_arm: str = DEFAULT_ROOM_AIR_MAP_ARM
 
     @property
     def active(self) -> bool:
@@ -2656,7 +2665,20 @@ def _parse_room_air_removal(tx: dict[str, Any]) -> RoomAirRemoval:
             "transmission.room_air_removal.default_ach_per_hour must be "
             f"finite and non-negative, got {ach_raw!r}",
         )
-    return RoomAirRemoval(mode=mode, default_ach_per_hour=ach)
+    map_arm = str(block.get("map_arm", DEFAULT_ROOM_AIR_MAP_ARM))
+    if map_arm not in ROOM_AIR_MAP_ARMS:
+        raise ValueError(
+            "transmission.room_air_removal.map_arm must be one of "
+            f"{ROOM_AIR_MAP_ARMS}, got {map_arm!r}",
+        )
+    return RoomAirRemoval(
+        mode=mode, default_ach_per_hour=ach, map_arm=map_arm,
+    )
+
+
+def parse_room_air_map_arm(tx: dict[str, Any] | None) -> str:
+    """The declared ``transmission.room_air_removal.map_arm``."""
+    return _parse_room_air_removal(tx or {}).map_arm
 
 
 def _parse_contact_class_exponent(tx: dict[str, Any]) -> float:
@@ -16503,6 +16525,8 @@ def build_zone_air_exchange_map(
     airflow_paths: dict[str, Any],
     zone_volumes: Mapping[str, float] | None = None,
     ambient_exchange_m3h: Mapping[str, float] | None = None,
+    *,
+    map_arm: str = DEFAULT_ROOM_AIR_MAP_ARM,
 ) -> dict[str, float]:
     """Room -> air changes removed per hour, from platform airflow data.
 
@@ -16516,7 +16540,15 @@ def build_zone_air_exchange_map(
     on top (ROOM-AIR-01-AMBIENT-EXCHANGE-01); zero-exchange records add
     nothing. Rooms with no HVAC entry and no positive opening get no entry,
     and the engine reads absence as the pre-change sealed-room baseline.
+
+    ``map_arm="ambient_off"`` is the labelled pre-change baseline: the
+    openings are still read and validated, so both arms accept and reject
+    the same platforms, but their exchange is not added.
     """
+    if map_arm not in ROOM_AIR_MAP_ARMS:
+        raise ValueError(
+            f"map_arm must be one of {ROOM_AIR_MAP_ARMS}, got {map_arm!r}",
+        )
     default_duty = float(airflow_paths.get("hvac_duty", 1.0))
     default_oa = float(airflow_paths.get("oa_fraction", 0.2))
     rates: dict[str, float] = {}
@@ -16530,10 +16562,13 @@ def build_zone_air_exchange_map(
             rate = ach
         for room in hvac_zone.get("rooms", []):
             rates[room] = rate
-    for zone, opening_ach in _ambient_opening_ach_contributions(
+    opening_ach_by_zone = _ambient_opening_ach_contributions(
         airflow_paths,
         zone_volumes,
         ambient_exchange_m3h,
-    ).items():
+    )
+    if map_arm == "ambient_off":
+        return rates
+    for zone, opening_ach in opening_ach_by_zone.items():
         rates[zone] = rates.get(zone, 0.0) + opening_ach
     return rates
