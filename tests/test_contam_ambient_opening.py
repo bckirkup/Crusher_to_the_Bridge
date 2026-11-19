@@ -88,7 +88,7 @@ _MAKEUP_RECORDS = {
     "classic_cruise_1900": 1, "diamond_princess": 1, "expedition_cruise_450": 1,
     "greg_mortimer": 2, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
-    "olympia_c6": 1, "pope_ap110": 7,
+    "olympia_c6": 1, "pope_ap110": 7, "destroyer_baseline": 3,
 }
 # CONTAM-AMBIENT-WEATHER-CRUISE-01, CONTAM-EXPOSURE-TAGGING-01,
 # CONTAM-AMBIENT-WEATHER-DESTROYER-01, CONTAM-AMBIENT-WEATHER-CARRIER-01,
@@ -416,7 +416,8 @@ class TestSchema:
         # greg_mortimer Engine_Room service intake (second record).
         # CONTAM-OLYMPIA-MAKEUP-01 adds the olympia_c6 forecastle make-up
         # intake. CONTAM-POPE-MAKEUP-01 adds seven pope_ap110 per-HD-branch
-        # make-up louvres.
+        # make-up louvres. CONTAM-DESTROYER-MAKEUP-01 adds three
+        # destroyer_baseline per-HD-branch make-up louvres.
         declared = self._declared("makeup_louvre")
         assert {hull: len(rows) for hull, rows in declared.items()} == _MAKEUP_RECORDS
         for rows in declared.values():

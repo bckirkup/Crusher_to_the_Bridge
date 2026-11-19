@@ -40,10 +40,13 @@ def test_native_destroyer_has_star_hvac_links() -> None:
     # removing their 7 reverse room-level legs: 61 -> 54 paths and
     # cross_zone 34 -> 27. The remaining reverse legs are the undeclared
     # passive links under CONTAM-BIDIR-01's bidirectional default.
-    assert native["n_paths"] == 54
+    # CONTAM-DESTROYER-MAKEUP-01 adds three ambient_exchange_makeup_louvre
+    # native links: 54 -> 57 paths.
+    assert native["n_paths"] == 57
     assert native["by_path_type"]["hvac_return"] == 9
     assert native["by_path_type"]["hvac_supply"] == 6
     assert native["by_path_type"]["cross_zone"] == 27
+    assert native["by_path_type"]["ambient_exchange_makeup_louvre"] == 3
     # Bridge now has single-room AHS return as well as adjacency/cross-zone
     assert native["zone_degree"]["Bridge"]["out_edges"] >= 4
     assert native["zone_degree"]["Bridge"]["out_m3h"] > 0
@@ -103,8 +106,9 @@ def test_build_report_offline_without_sim() -> None:
     # 42 since the three head blocks landed (shared_sanitary_zones), +3
     # duty-0 head exhaust legs under CONTAM-DUTY0-01's extract terminal,
     # +16 reverse legs on undeclared passive links under CONTAM-BIDIR-01,
-    # -7 reverse legs on the now-one-way Sanitary_Makeup links (D1).
-    assert report["native"]["n_paths"] == 54
+    # -7 reverse legs on the now-one-way Sanitary_Makeup links (D1),
+    # +3 ambient_exchange_makeup_louvre links under CONTAM-DESTROYER-MAKEUP-01.
+    assert report["native"]["n_paths"] == 57
     assert report["contamx"]["sim_flows_loaded"] is False
     assert report["connectivity_gap"][0]["zone"] == "Bridge"
     assert any("SIM flows not loaded" in h for h in report["hypotheses"])
