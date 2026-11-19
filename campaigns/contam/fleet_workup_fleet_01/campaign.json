@@ -5,7 +5,7 @@
   "manifest": "campaigns/contam/fleet_workup_fleet_01/design/fleet_selection.json",
   "s3_prefix": "campaign/contam_fleet_workup_fleet_01/",
   "queue": "picard-campaign-queue",
-  "image_tag": "contam-fleet-workup-fleet-01",
+  "image_tag": "contam-fleet-workup-fleet-01@sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
   "resources": {
     "vcpu": "1",
     "memory": "4096"
