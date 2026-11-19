@@ -1,6 +1,6 @@
 # Does the mega outbreak record require a food supply chain?
 
-**Edison evidence readout.** Public acute gastroenteritis (AGE) postings, 2006–2019, at repository revision `74a6eff3ec45734b377acb07afe287ca6298f02f`. The [voyage ledger](mega_voyage_source_evidence.csv) covers all 15 postings assigned to mega by passenger complement in the [cross-hull comparison](cross_hull_outbreak_evidence.md). Fourteen name norovirus alone. Norwegian Joy has unknown etiology.
+**Status:** Retrospective evidence readout for Edison. Public acute gastroenteritis (AGE) postings, 2006–2019, at repository revision `74a6eff3ec45734b377acb07afe287ca6298f02f`. The [voyage ledger](mega_voyage_source_evidence.csv) covers all 15 postings assigned to mega by passenger complement in the [cross-hull comparison](cross_hull_outbreak_evidence.md). Fourteen name norovirus alone. Norwegian Joy has unknown etiology.
 
 **The public evidence supports a shared food introduction for three Spirit voyages and a probable traveler introduction followed by onboard spread for one mega voyage.** No source retrieved for the 15 mega postings linked a food item on board to acknowledged contamination. The other 14 have weaker leads or unresolved sources. The availability and depth of public investigations vary, so these counts cannot estimate how often either route occurred.
 
