@@ -202,7 +202,7 @@ Checked by reading the tree at the pin; nothing was executed.
 | `recorded_onsets`, `campaign_positives` | Present in `HullObservables` |
 | W1 changed-zone count and ratio summary | Computable from `map_census` in `tools/room_air_ambient_exchange_attribution.py` |
 | `sealed` mode for K1 | Present: `transmission.room_air_removal.mode` |
-| **B1** arm selection | **Blocker.** `ambient_off` exists only as a patch inside the attribution tool. No config key selects it, so a registered campaign cannot express or record the arm |
+| **B1** arm selection | **Implemented and unit-tested in PR #1329; not campaign-validated.** `transmission.room_air_removal.map_arm` (`ambient_on` default, `ambient_off` baseline) is echoed as `room_air_map_arm` in the run summary. Neutrality was shown on synthetic fixtures only; K0/K1 on paired voyages are unmeasured. At the pin: `ambient_off` existed only as a patch inside the attribution tool |
 | **B2** primary endpoint in the paired reader | **Blocker.** `HullObservables` and the paired tool carry onset and specimen fields only, not `cumulative_ever_infected` |
 | **B3** W2 scalars \(E\) and \(Q\) | **Blocker.** No per-run aggregate of occupancy or delivered dose in the changed zones exists |
 | **B4** second hull | **Blocker for any naval or cross-hull statement only.** No respiratory scenario exists on `destroyer_baseline`; scenarios cover `mega_cruise_5000` and `expedition_cruise_450`. K1 is the no-change control for this design |
