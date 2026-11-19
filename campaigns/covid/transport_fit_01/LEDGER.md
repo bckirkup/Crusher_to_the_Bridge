@@ -59,7 +59,30 @@ arm payload resolves `ContamXTransportEngine`.
 | Date | Block | Cells | Job | SHA | Digest | Result |
 |---|---|---:|---|---|---|---|
 | 2026-11-19 | (image) | — | — | `0d70c022` (code `8de77294`) | `sha256:7023d963f3a3ede96c7f47def3bb539ecef1b9c8bc2a112697c45e82e37719a0` | built root Dockerfile + Dockerfile.campaign, pushed |
-| 2026-11-19 | dp_contamx_canary | 20 | `0a894bc5-0dca-4554-816f-0ebc853067ae` | `8de77294` | jobdef `:2` | CANARY submitted |
+| 2026-11-19 | dp_contamx_canary | 20 | `0a894bc5-0dca-4554-816f-0ebc853067ae` | `8de77294` | jobdef `:2` | CANARY submitted → 20/20 SUCCEEDED, all cells resolved `ContamXTransportEngine` (audit: 0 wrong_engine, 0 duplicates). Note: image predates the cell fail-closed check and the GM funnel_echo flag — canary audit used the payload's resolved-engine echo instead of the post-run assert. |
+
+### Canary readout — DP under ContamX (20 seeds, Θ 7.9e6)
+
+Median [q05–q95] vs record:
+
+| Channel | ContamX | Record |
+|---|---|---|
+| recorded_onsets | 8 [0–121] | 197 |
+| lab_confirmed | 10.5 [0–145] | 712 |
+| infections_total | 31 [0–299] | — |
+| takeoff share (≥10 onsets) | 0.45 | 1.0 |
+| dated share | 0.807 | 0.277 |
+| lab crew share (DP-scale, n=4) | 0.453 [0.39–0.89] | 0.29 |
+| asym share day-31 | 0.146 [0–0.29] | 0.505 |
+| asym share final | 0.237 [0–0.33] | 0.437 |
+| before_share | 0.062 | 0.173 |
+
+ContamX carries substantially less transmission than the record (attack
+rate under-read by ~20× at the median; takeoff in 9/20 seeds). Where a
+non-trivial outbreak does occur it is far more symptomatic and much
+more crew-loaded than the record shows. The native-arm comparison is
+the pending dp_native block — engine delta cannot be attributed until
+that lands.
 
 ## 6. Scoring
 
