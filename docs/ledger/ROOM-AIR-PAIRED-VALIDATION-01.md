@@ -18,7 +18,7 @@ nothing here may be quoted as a result.
   `20261921`–`20261960` by separate owner decision. Twenty complete pairs is
   a diagnostic floor, not a power guarantee.
 - **Rule:** exact paired sign-flip test on the summed differences with ties
-  retained; one-sided 0.0125 per stage; at least seven nonzero pairs; exact
+  retained; one-sided 0.0125 per stage and direction; at least seven nonzero pairs; exact
   sign test must agree in direction. PASS, FAIL (adverse), INCONCLUSIVE,
   INCOMPLETE and STOP are defined in the design, §7.
 - **No-change control:** the same toggle under `room_air_removal.mode: sealed`

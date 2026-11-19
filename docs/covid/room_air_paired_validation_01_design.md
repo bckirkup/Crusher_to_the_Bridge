@@ -76,7 +76,11 @@ Secondary, reported for every pair and never selected on:
 - No replacement seeds. No pair is dropped for its outcome.
 - A model exception in exactly one arm of a pair is informative missingness:
   STOP (§7).
-- Fewer than 20 complete pairs after reruns: verdict INCOMPLETE, no inference.
+- Any declared pair of the stage still incomplete after its rerun (all 20
+  at stage 1, all 60 at stage 2): verdict INCOMPLETE, no inference. The
+  test is never run on a subset.
+- A K0 or K1 control output still missing after its one rerun is likewise
+  INCOMPLETE; the primary contrast is not read.
 
 ## 5. Statistical rule
 
@@ -94,8 +98,11 @@ sample and are counted, not discarded.
 3. **Sensitivity check**: exact one-sided binomial sign test on
    \((n_-, n_+)\) with ties excluded. It must agree in direction
    (\(n_- > n_+\)) for a PASS; its p-value is reported, not thresholded.
-4. **Error budget**: one-sided 0.025 overall, split 0.0125 at stage 1
-   (20 pairs) and 0.0125 at stage 2 (all 60 pairs pooled). No other looks.
+4. **Error budget**: each direction is tested one-sided at 0.025 across
+   both looks, split 0.0125 at stage 1 (20 pairs) and 0.0125 at stage 2
+   (all 60 pairs pooled). The chance of a false PASS is bounded at 0.025
+   and of a false FAIL at 0.025; the chance of either false directional
+   verdict is bounded at 0.05, not 0.025. No other looks.
 5. **Descriptive interval**: 95% percentile bootstrap over pairs for
    \(\Delta\) and \(R\) (10,000 resamples, analysis seed `1326`). Reported
    with every verdict; it does not decide the verdict.
@@ -103,6 +110,13 @@ sample and are counted, not discarded.
 What the test separates: its null is that \(d\) is symmetric about zero,
 which is what direction-free trajectory divergence produces (§8). A rejection
 is a directional shift in the model. Failing to reject is never "no effect".
+
+The test does not by itself show \(\Delta < 0\). A skewed distribution
+(many small decreases, rare large increases) can be asymmetric with a mean
+near zero. A PASS therefore claims a directional shift only. If the
+bootstrap interval for \(\Delta\) in item 5 includes zero, the PASS is
+labelled "direction supported, mean reduction not bounded away from zero";
+the verdict itself does not change.
 
 ## 6. No-change control and contrast witness
 
@@ -136,8 +150,8 @@ Evaluated in this order at each stage.
 | Verdict | Condition | Consequence |
 |---|---|---|
 | **STOP** | K1 or K0 shows any non-identical pair; W1 count is 0; \(E = 0\) in any complete pair; provenance differs between arms or across pairs; a model exception in exactly one arm | No effect is read. Report the cause as a model or harness finding |
-| **INCOMPLETE** | fewer than 20 complete pairs | No inference |
-| **PASS** | \(p_{\text{prot}} \le 0.0125\), sign test agrees in direction, W2 holds | "Directional protective shift in the model at this cell", with \(\Delta\), \(R\), interval, \(m\), \(Q\) |
+| **INCOMPLETE** | any declared pair of the stage (20 at stage 1, 60 at stage 2) or any K0/K1 control output still missing after its rerun | No inference; the test is not run on a subset |
+| **PASS** | \(p_{\text{prot}} \le 0.0125\), sign test agrees in direction, W2 holds | "Directional protective shift in the model at this cell", with \(\Delta\), \(R\), interval, \(m\), \(Q\), and the mean-reduction label of §5 |
 | **FAIL** | \(p_{\text{adv}} \le 0.0125\) | Adverse-direction finding. Stop; no extension; investigate before any further respiratory run |
 | **INCONCLUSIVE** | anything else, including \(m < 7\) | "Not separable from random variation at n pairs." Not evidence of absence. Stage 2 only by owner decision |
 
