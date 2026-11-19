@@ -1,10 +1,13 @@
 # Campaign reduction — program home
 
-**Status:** SPECIFICATION ONLY (2026-10-22). The reducer artifact does not exist
-yet; implementation proceeds through tickets D0–D8 in `PHASED_TICKETS.json`.
-Nothing in this directory describes current behaviour.
+> **Status:** Partially implemented. The [reducer package](../../picard_framework/analysis/campaign_reducer/)
+> and [CLI](../../scripts/campaign) are in-tree. The October survey and D0–D8 tickets
+> describe the plan; the [D6 pilot](D6_MEASURED_COST_BENEFIT.md) and
+> [Phase B report](FIRST_PAPER_PHASE_B_REPORT.md) document completed work.
+> A listed command is not proof it runs: `preflight` is registered but returns
+> `NOT_YET_IMPLEMENTED` in the [CLI dispatcher](../../picard_framework/analysis/campaign_reducer/cli.py).
 
-This home carries the authoritative Edison survey + specification for the
+This home preserves the original Edison survey and specification for the
 campaign-wide AWS reduction and distribution-analysis program: extracting
 scientific distributions from the ~197 historical `campaign/` S3 prefixes
 (~447k objects, ~12.2 TB as of the dated 2026-10-19 inventory) plus the 21
@@ -17,7 +20,7 @@ registered campaign specs, without running any new simulation.
 | `SURVEY_AND_DEVIN_SPEC.md` | Main specification — decision, scope, analytic contracts, AWS admission/cost rules, acceptance |
 | `DEVIN_HANDOFF.md` | Copyable dispatch: D0–D8 tickets with acceptance evidence |
 | `PHASED_TICKETS.json` | Machine ticket source (dependency order D0→D8, `FUTURE-T1` optional producer telemetry) |
-| `ACCEPTANCE_MATRIX.json` | 26 scientific + 10 operational production fixtures (all unrun) |
+| `ACCEPTANCE_MATRIX.json` | Acceptance fixtures as proposed in the October survey; not a live test report |
 | `EXECUTIVE_SUMMARY.json` | Machine executive summary (scope counts, readiness states) |
 | `ALIAS_AND_AUTHORITY_MAP.json` | Resolves every overlap between the four original lane proposals |
 | `SOURCE_FAMILIES.json` | 11 source-schema families and their field capabilities |
@@ -41,8 +44,13 @@ registered campaign specs, without running any new simulation.
 ## Machine contracts (code-facing)
 
 The JSONs the implementation must conform to live with the code, so they ride
-into the analysis image: `picard_framework/analysis/campaign_reducer/contracts/`
-— `FIELD_CONTRACTS.json` (34 tables / 505 fields / 33 metric definitions),
+into the analysis image: [current contracts](../../picard_framework/analysis/campaign_reducer/contracts/).
+Relative links inside the checksum-listed survey, handoff and contract views
+refer to the **original delivery layout**, not this checkout. For source-lane
+artifacts not vendored here, consult the [input evidence manifest](INPUT_EVIDENCE_MANIFEST.json).
+
+The original contract inventory included `FIELD_CONTRACTS.json`
+(34 tables / 505 fields / 33 metric definitions),
 `TABLE_ROWS.schema.json`, `QUERY.schema.json`, `REQUEST.schema.json`,
 `BOOTSTRAP_REQUEST.schema.json`, `CANONICAL_INTERFACE.json`,
 `STATUS_NAMESPACES.json`, `CAMPAIGN_COVERAGE.json` (the dated 218-record cold

@@ -12,7 +12,8 @@ The ABM remains the mechanistic simulator.
 ## Install
 
 ```bash
-pip install -e '.[analysis]'
+uv sync --locked --all-extras --no-install-project --no-build
+source .venv/bin/activate
 python3 -c 'import cmdstanpy; cmdstanpy.install_cmdstan()'
 ```
 

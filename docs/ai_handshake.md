@@ -1,6 +1,8 @@
 # AI Handshake & Context Manifest
 
-**Purpose:** This document provides the complete architectural context that
+> **Status:** Living orientation. Check [root instructions](../AGENTS.md) and the [docs index](README.md) before relying on a workflow description.
+
+**Purpose:** This document provides architectural context that
 external LLMs (Edison Science, Cursor, Copilot, ChatGPT, Claude, etc.) need
 to safely generate code, configuration, and analysis for the
 Crusher-to-the-Bridge biodefense digital twin platform.
@@ -374,7 +376,7 @@ in `schemas/`:
 
 Validate with:
 ```bash
-pip install check-jsonschema
+# From the activated environment (check-jsonschema is in the dev extra).
 check-jsonschema --schemafile schemas/pathogen_profiles.schema.json data/pathogens/active_profiles.json
 ```
 

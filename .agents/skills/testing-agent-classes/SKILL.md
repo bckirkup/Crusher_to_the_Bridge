@@ -8,7 +8,7 @@ description: End-to-end test the agent class diversification system. Use after m
 ## Prerequisites
 
 - Python 3.11+ with numpy, pyyaml, pydantic installed
-- `check-jsonschema` CLI tool (`pip install check-jsonschema`)
+- `check-jsonschema` is included in the locked dev extra; use the activated environment.
 - Working directory: repo root (`Crusher_to_the_Bridge/`)
 
 ## Devin Secrets Needed
@@ -78,7 +78,7 @@ Expected: `ok -- validation done`
 ```bash
 python -m pytest tests/ -v --tb=short
 ```
-Expected: All tests pass (~875). Agent-class behavior is covered in `test_orchestrator.py`, `test_infection_counters.py`, and `test_agent_axes.py`.
+Expected: All selected tests pass. Agent-class behavior is covered in `test_orchestrator.py`, `test_infection_counters.py`, and `test_agent_axes.py`.
 
 ## Key Implementation Details
 
@@ -103,4 +103,4 @@ Expected: All tests pass (~875). Agent-class behavior is covered in `test_orches
 
 - **ModuleNotFoundError for engines**: Set `PYTHONPATH=.` or use `sys.path.insert(0, '.')` when running scripts from repo root
 - **UnicodeEncodeError on Windows**: Set `PYTHONIOENCODING=utf-8` before running orchestrator
-- **check-jsonschema not found**: Install with `pip install check-jsonschema`
+- **check-jsonschema not found**: Activate the locked environment from `AGENTS.md`.

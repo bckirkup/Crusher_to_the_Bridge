@@ -8,7 +8,7 @@ description: Validate all JSON configuration and output files against their sche
 ## Prerequisites
 
 - Python 3.11+ with pydantic installed
-- `check-jsonschema` CLI tool (`pip install check-jsonschema`)
+- `check-jsonschema` is included in the locked dev extra; use the activated environment.
 - Working directory: repo root (`Crusher_to_the_Bridge/`)
 
 ## Devin Secrets Needed

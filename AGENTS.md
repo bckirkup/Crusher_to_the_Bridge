@@ -1,6 +1,11 @@
 # Crusher-to-the-Bridge — Agent Instructions
 
+[Docs and skill index](docs/AGENTS.md) · [Human docs map](docs/README.md)
+
 ## Setup
+
+Use Python 3.11+ and uv. The `pre-commit` CLI is a separate developer tool;
+install it if it is not already on your PATH.
 
 ```bash
 uv sync --locked --all-extras --no-install-project --no-build
@@ -32,11 +37,15 @@ ceiling only ever ratchets downward.
 ## Validation
 
 ```bash
-pre-commit run --all-files
-python3 scripts/sonar_guard.py <source-files>
+# After staging changes, run hooks on those files (use --files for unstaged paths).
+pre-commit run
+# Check tracked Python sources as well as workflows and configuration:
+git ls-files -z -- '*.py' ':!tests' ':!.agents' | xargs -0 python3 scripts/sonar_guard.py
+git ls-files -z -- '*.py' ':!tests' ':!.agents' | xargs -0 python3 scripts/clock_guard.py
 python3 scripts/sonar_guard.py --workflows .github/workflows
+python3 scripts/clock_guard.py --configs
 ruff check --select E,F,W,I,C901 --ignore E501,E741 --target-version py311 \
-  engines/ crusher_labs/ picard_framework/ decision_engine/ \
+  api/ engines/ crusher_labs/ picard_framework/ decision_engine/ \
   orchestrator*.py presidio_runner.py deploy/aws/
 python3 -m pytest tests/ -m 'not slow' -v --tb=short --cov --cov-report=xml
 python3 tools/sanity_checker.py --from-config
@@ -46,15 +55,18 @@ python3 presidio_runner.py \
   --cruises 1
 ```
 
-`-m 'not slow'` is the fast tier that `.github/workflows/ci.yml` runs on every
-push, split by test module across four jobs per interpreter
-(`--ci-shard-count`/`--ci-shard-index`, defined in `tests/conftest.py`) with
+`-m 'not slow'` is the fast tier that [CI](.github/workflows/ci.yml) runs on PRs
+to `main` and pushes to `main`. It uses four shards each on Python 3.11 and 3.12
+(`--ci-shard-count`/`--ci-shard-index` in `tests/conftest.py`), with
 `pytest -n auto` inside each; add `-n auto` locally to use every core. The
 `slow` marker covers the posterior-recovery fits — all of
 `tests/test_sentinel_fleet_validation.py`, the three long wastewater fits in
 `tests/test_sentinel_wastewater.py`, plus a few reference-walker and campaign
-cases; `.github/workflows/nightly.yml` runs the whole suite on cron and on
-demand, sharded the same way. Run `python3 -m pytest tests/ -v --tb=short`
+cases. [Nightly](.github/workflows/nightly.yml) runs the full suite by default
+on cron or manual dispatch, in two shards per interpreter. The separate
+[framework workflow](.github/workflows/picard-presidio.yml) checks imports,
+schemas, sanity and the fleet smoke; it does not repeat pytest.
+Run `python3 -m pytest tests/ -v --tb=short`
 locally before changing anything under `picard_framework/analysis/stan/`.
 
 Docker campaign smoke is optional when Docker is unavailable:
@@ -85,7 +97,7 @@ docker run --rm picard-campaign --smoke
   spec the next time it is touched. A file named in a registered jobdef's
   argv[0] stays put until that campaign's array work is done.
 - Preserve the locked `uv sync` installation (`--locked --no-build`, wheels only
-  from `uv.lock`) and both CI workflows. Regenerate `uv.lock` only with
+  from `uv.lock`) and the CI workflows. Regenerate `uv.lock` only with
   `uv lock` after changing `pyproject.toml`.
 - Keep substantive Sentinel work under `picard_framework/analysis/stan/` and
   `picard_framework/runs/` separate from mechanical maintenance.

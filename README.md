@@ -15,7 +15,7 @@ maritime disease outbreaks.
 ```bash
 # Install dependencies (Python 3.11+)
 uv sync --locked --all-extras --no-install-project --no-build
-source .venv/bin/activate   # or prefix commands with `uv run`
+source .venv/bin/activate
 
 # Validate configuration (JSON + crusher_labs/config.yaml)
 python3 tools/sanity_checker.py --from-config
@@ -29,7 +29,7 @@ python3 orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 python3 -m streamlit run dashboard.py
 
-# Run the test suite (~6,400 tests; fast tier: `-m 'not slow'`)
+# Run the test suite (fast tier: `-m 'not slow'`)
 python3 -m pytest tests/ -v --tb=short
 ```
 
@@ -230,7 +230,7 @@ scripts/                     Enterprise platform builder, deck graphics, asset p
                              campaign manifest builders, sonar_guard.py, run_campaign.*
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-tests/                       ~6,400 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read,
+tests/                       pytest suite (ship, fleet, Stackelberg, OIS, behavioral, long-read,
                              TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic
                              cascade, Sentinel, boundary, transmission & campaign probes)
 docs/AGENTS.md               Cursor Cloud / agent development notes
@@ -241,7 +241,7 @@ docs/ledger/                 Repository-wide defect/measurement ledger entries
 CI and quality gates: see [Testing & code quality](#testing--code-quality).
 Workflows: `.github/workflows/ci.yml` (fast-tier suite + smokes),
 `.github/workflows/nightly.yml` (whole suite on cron / on demand), and
-`.github/workflows/picard-presidio.yml` (framework-focused + Stackelberg schema checks).
+`.github/workflows/picard-presidio.yml` (framework sanity, imports, schemas and fleet smoke).
 
 ## Configuration Reference (`crusher_labs/config.yaml`)
 
@@ -570,8 +570,8 @@ grumb_seeding:
 
 ## Platforms
 
-Eighty-one ship platforms are included, each with spatial layout and HVAC
-airflow definitions. Platforms marked `(maritime.org GA import)` were
+The [platform directory](data/platforms/) is the complete inventory of ship layouts
+and airflow definitions. The table below describes selected platforms. Platforms marked `(maritime.org GA import)` were
 converted from U.S. Navy Booklets of General Plans — museum source
 material courtesy of the [San Francisco Maritime National Park
 Association](https://maritime.org/about/), [Booklets of General Plans
@@ -774,10 +774,10 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing & code quality
 
 ```bash
-# Full suite (~6,400 tests)
+# Full suite
 python3 -m pytest tests/ -v --tb=short
 
-# Fast tier (what ci.yml runs per push, sharded by module)
+# Fast tier (what ci.yml runs on main and its PRs, sharded by module)
 python3 -m pytest tests/ -m 'not slow' -v --tb=short
 
 # Picard / Presidio / Stackelberg
@@ -809,7 +809,7 @@ python3 -m pytest tests/test_data_contracts.py         # JSON schema / referenti
 python3 -m pytest tests/test_telemetry_seams.py        # cross-module data flow
 ```
 
-Cloud agents and CI environments: see `docs/AGENTS.md` (`python3`, headless Streamlit).
+For local CI commands, see [root validation](AGENTS.md#validation); for headless Streamlit and task-specific skills, see the [agent runbook](docs/AGENTS.md).
 
 ### Quality structures
 
@@ -819,15 +819,15 @@ honest as the suite grows:
 | Layer | Where | What it enforces |
 |-------|-------|------------------|
 | **Locked installs** | `uv.lock` | CI, Docker, and agents install with `uv sync --locked --all-extras --no-install-project --no-build` so every dependency resolves to the locked, hash-verified published wheel |
-| **Pre-commit** | `.pre-commit-config.yaml` | Local Ruff autofix, `scripts/sonar_guard.py` on Python + workflow YAML, and [zizmor](https://github.com/woodruffw/zizmor) on GitHub Actions |
+| **Pre-commit** | `.pre-commit-config.yaml` | Local Ruff autofix, Sonar and clock guards, and [zizmor](https://github.com/woodruffw/zizmor) on GitHub Actions |
 | **Blocking Ruff lint** | `.github/workflows/ci.yml` (`lint`) | `F` (undefined names / unused imports) plus `E`/`W`/`I`/`C901` on production packages; line-length `E501` and ambiguous-name `E741` ignored; repository `C901` ceiling ratchets downward only |
 | **Sonar mechanical guards** | `scripts/sonar_guard.py` (CI + pre-commit) | Fast, conservative checks for Sonar-class patterns and unsafe workflow install commands without waiting on a live Sonar scan |
-| **Workflow lint** | `ci.yml` (`workflow-lint`) | zizmor on `ci.yml` and `picard-presidio.yml` |
+| **Workflow lint** | `ci.yml` (`workflow-lint`) | zizmor on the main, nightly and Picard/Presidio workflows |
 | **Config & schema contracts** | `tools/sanity_checker.py`, `schemas/`, `tests/test_json_schema_validation.py` | Pydantic + cross-refs for ship/fleet/social config; JSON Schema validation for data contracts and platforms |
-| **Full pytest + coverage** | `ci.yml` (`test`) | ~6,400 tests on Python **3.11** and **3.12** with `--cov` / XML coverage artifact |
+| **Fast pytest + coverage** | `ci.yml` (`test` and `coverage-report`) | Non-slow tests on Python 3.11 and 3.12; the 3.12 shards supply combined XML coverage. Nightly includes the slow tier by default |
 | **Import & smoke gates** | `ci.yml` | Picard/Presidio/Stackelberg import hygiene; orchestrator module split + stoplight dedup; dashboard LCARS import; Presidio 1-cruise smoke; Sentinel analysis smoke; 24-epoch orchestrator + OIS telemetry fields; campaign Docker image `--smoke` |
-| **Framework CI slice** | `.github/workflows/picard-presidio.yml` | Focused Picard/Presidio/Stackelberg/OIS/behavioral/long-read/TAT/CONTAM/campaign/outbreak/boundary pytest set, Stackelberg + all-platform schema checks, Presidio smoke (runs on `main` and `cursor/**`) |
-| **SonarQube Cloud** | `.sonarcloud.properties` + `ci.yml` (`sonar`) | Autoscan configuration (Python 3.11/3.12, `tests/` as test code); optional CI scan uploads coverage when `SONAR_TOKEN` is set |
+| **Framework CI slice** | `.github/workflows/picard-presidio.yml` | Sanity, import hygiene, schema checks and a Presidio smoke on PRs to `main` and pushes to `main` or `cursor/**`; pytest runs in main CI |
+| **SonarQube Cloud** | `sonar-project.properties` + `ci.yml` (`sonar`) | The CI scanner reads the combined coverage report when `SONAR_TOKEN` is set; `.sonarcloud.properties` is for Automatic Analysis only |
 
 Agent-oriented validation commands (pre-commit, sonar_guard, ruff, pytest,
 sanity checker, orchestrator/Presidio smokes) live in `AGENTS.md`.

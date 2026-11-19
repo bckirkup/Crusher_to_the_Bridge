@@ -5,7 +5,7 @@ description: Configure the three separated outbreak-response systems — SOP/pol
 
 # Outbreak Response Architecture
 
-Spec: [`docs/tiered_escalation_spec.md`](docs/tiered_escalation_spec.md)
+Spec: [`docs/tiered_escalation_spec.md`](../../../docs/tiered_escalation_spec.md)
 (Campaign v4 finding: SOP invocation, decision latency, and compliance were
 collapsed — early confine-all + forced compliance made surveillance knobs irrelevant.)
 

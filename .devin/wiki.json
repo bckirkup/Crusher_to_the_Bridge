@@ -1,7 +1,7 @@
 {
   "repo_notes": [
     {
-      "content": "Crusher-to-the-Bridge is a biodefense digital twin that simulates multi-pathogen outbreaks aboard naval vessels. It is a bridging package — middleware connecting five independent simulation domains (Korkin Lab ABM, four-pathway transmission core, py-contam HVAC transport, GRUMB metagenomic surveillance, and Crusher Labs observation engine) into a single orchestrated epoch loop. The codebase is Python 3.10+ with JSON data contracts validated by JSON Schema (draft 2020-12). Key directories: orchestrator*.py (main loop and helpers), engines/ (simulation bridges), crusher_labs/ (diagnostics, protocols, cost accounting), data/ (config, pathogens, platforms, microbiome profiles), schemas/ (JSON Schema definitions), tools/ (sanity checker, GIS bridge), tests/ (pytest suite).",
+      "content": "Crusher-to-the-Bridge is a biodefense digital twin that simulates multi-pathogen outbreaks aboard naval vessels. It is a bridging package — middleware connecting five independent simulation domains (Korkin Lab ABM, four-pathway transmission core, py-contam HVAC transport, GRUMB metagenomic surveillance, and Crusher Labs observation engine) into a single orchestrated epoch loop. The codebase is Python 3.11+ with JSON data contracts validated by JSON Schema (draft 2020-12). Key directories: orchestrator*.py (main loop and helpers), engines/ (simulation bridges), crusher_labs/ (diagnostics, protocols, cost accounting), data/ (config, pathogens, platforms, microbiome profiles), schemas/ (JSON Schema definitions), tools/ (sanity checker, GIS bridge), tests/ (pytest suite).",
       "author": "Maintainer"
     },
     {
@@ -13,7 +13,7 @@
       "author": "Maintainer"
     },
     {
-      "content": "The data/ directory contains six vessel platforms (destroyer_baseline, fletcher_class_destroyer, legend_class_nsc, san_antonio_class_lpd, expedition_cruise_300, mega_cruise_5000), each with spatial_layout.json and air_flow_paths.json. Pathogen profiles under data/pathogens/ define dose-response parameters, shedding curves, transmission routes, and microflora disruption. Protocols in data/config/protocols.json define SOPs triggered by instrument stoplights. All JSON files are validated against schemas in the schemas/ directory.",
+      "content": "Use data/platforms/ as the vessel inventory: platform bundles contain spatial_layout.json and air_flow_paths.json. Pathogen profiles under data/pathogens/ define dose-response parameters, shedding curves, transmission routes, and microflora disruption. Protocols in data/config/protocols.json define SOPs triggered by instrument stoplights. The schemas/ directory defines the JSON contracts; see schemas/README.md for validation commands.",
       "author": "Maintainer"
     }
   ],
@@ -83,7 +83,7 @@
     },
     {
       "title": "Protocols and SOPs",
-      "purpose": "Document data/config/protocols.json — the standing operating procedure definitions. Cover the protocol schema: protocol_id (SOP-001 through SOP-010), trigger conditions, physics/behavior modifiers (including confinement keys), per-epoch costs, activation costs, and category (intervention vs surveillance).",
+      "purpose": "Document data/config/protocols.json — the standing operating procedure definitions. Cover the protocol schema: protocol_id, trigger conditions, physics/behavior modifiers (including confinement keys), per-epoch costs, activation costs, and category (intervention vs surveillance).",
       "parent": "Configuration Reference"
     },
     {
@@ -111,7 +111,7 @@
     },
     {
       "title": "Test Suite",
-      "purpose": "Document the tests/ directory with its 10+ test modules: test_orchestrator.py, test_data_contracts.py, test_law_compliance.py, test_protocol_engine.py, test_cost_ledger.py, test_sanity_checker.py, test_schema_module.py, test_telemetry_seams.py, test_stoplight.py, and conftest.py. Cover the testing philosophy and how to run pytest."
+      "purpose": "Document the tests/ directory using representative modules such as test_orchestrator.py, test_data_contracts.py, test_law_compliance.py, test_protocol_engine.py, test_cost_ledger.py, test_sanity_checker.py, test_schema_module.py, test_telemetry_seams.py, test_stoplight.py, and conftest.py. Use AGENTS.md for fast versus nightly pytest selection and current CI gates."
     },
     {
       "title": "Strict Configuration Laws",

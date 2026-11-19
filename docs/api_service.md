@@ -9,19 +9,18 @@ checkout (issue #101).
 ## Install and run
 
 ```bash
-pip install .[api]          # or: uv sync --all-extras
+uv sync --locked --all-extras --no-install-project --no-build
+source .venv/bin/activate
 python -m api               # serves http://127.0.0.1:8000
-python -m api --host 0.0.0.0 --port 8000 --workers 4
-crusher-api --port 8000     # equivalent console script
+python -m api --port 8001 --workers 4   # alternative port and job-pool size
 ```
 
 Interactive OpenAPI docs live at `/docs`.
 
 Authentication: set `CRUSHER_API_TOKEN` to require
-`Authorization: Bearer <token>` on every endpoint except `/health`.
-Unbound by default (loopback-only `--host 127.0.0.1`), which is the
-supported posture for trusted-network use; put the service behind a real
-gateway for anything else.
+`Authorization: Bearer <token>` on `/v1` endpoints. `/health` is public.
+The server binds to loopback by default. Keep it there for local development;
+use an authenticated gateway before exposing the service, including its API docs.
 
 ## Endpoints
 

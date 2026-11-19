@@ -57,7 +57,7 @@ overridden key by key from a same-named block nested under the spec `social`.
 
 ```bash
 python3 tools/sanity_checker.py --from-config
-pip install check-jsonschema
+# From the activated environment (check-jsonschema is in the dev extra).
 check-jsonschema --schemafile schemas/information_diffusion.schema.json \
   presidio/data/social/information_diffusion_default.json
 check-jsonschema --schemafile schemas/class_interactions.schema.json \

@@ -1,6 +1,6 @@
 # Naval General-Plan → Ship Class Import
 
-> Index: [README.md](README.md). Companion Contam path: [CONTAM_INTEROP.md](CONTAM_INTEROP.md).
+> **Status:** Implemented in `tools/ship_blueprint_import/`. See the [docs index](README.md) and [Contam interop guide](CONTAM_INTEROP.md).
 
 Standalone tooling under `tools/ship_blueprint_import/` digests messy naval
 general arrangements (scanned PDFs, hand markup) into coarse simulation-scale
@@ -148,7 +148,5 @@ engineers author real ducts from HVAC drawings — those details are not on GAs.
 
 ## PDF raster extras
 
-```bash
-pip install pypdfium2
-# or: sudo apt-get install poppler-utils
-```
+The locked `blueprint` extra supplies `pypdfium2` when you follow the
+[standard setup](../AGENTS.md#setup). Poppler is an alternative system tool.

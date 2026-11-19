@@ -20,17 +20,17 @@ None — all data contract tests run locally against JSON files in the repo.
 ```bash
 python -m pytest tests/test_data_contracts.py -v --tb=short
 ```
-Expected: 25+ tests pass. Validates pathogen profiles, spatial layout, air flow paths, protocols, resource costs, long-read params, and instrument TAT.
+Validates pathogen profiles, spatial layout, air flow paths, protocols, resource costs, long-read params, and instrument TAT.
 
 ### Run sanity checker tests
 ```bash
 python -m pytest tests/test_sanity_checker.py -v --tb=short
 ```
-Expected: 40 tests pass. Runs the full sanity checker programmatically against default configs.
+Runs the full sanity checker programmatically against default configs.
 
 ### Run sanity checker directly (CLI)
 ```bash
-python tools/sanity_checker.py
+python tools/sanity_checker.py --from-config
 ```
 Or with custom paths:
 ```bash
@@ -44,7 +44,6 @@ Expected: All checks pass with no ERROR findings.
 ```bash
 python -m pytest tests/test_data_contracts.py tests/test_sanity_checker.py -v --tb=short
 ```
-Expected: 67 tests pass in ~0.5s.
 
 ## Data File Locations
 
@@ -62,22 +61,10 @@ Expected: 67 tests pass in ~0.5s.
 | Long-read params | `data/config/long_read_sequencing_params.json` | Nanopore deployment profiles & detection |
 | Microbiome | `data/microbiome_profiles/*.json` | Coastal/ocean profiles, zone type modifiers |
 
-### Available Platforms
+### Platforms
 
-- `mega_cruise_5000` — Default platform used by orchestrator (`config.yaml`)
-- `destroyer_baseline` — Gleaves-class destroyer (6 zones)
-- `enterprise_constitution_tos` — Constitution-class (fiction-adapted, 13 zones)
-- `enterprise_galaxy_tng` — Galaxy-class (fiction-adapted, 17 zones)
-- `expedition_cruise_300` (legacy)
-- `expedition_cruise_450`
-- `classic_cruise_1900`
-- `spirit_cruise_3000`
-- `mega_cruise_5000`
-- `fletcher_class_destroyer`
-- `legend_class_nsc`
-- `mega_cruise_5000`
-- `messy_cruise_500` (legacy archived berthing)
-- `san_antonio_class_lpd`
+Use the [platform directory](../../../data/platforms/) for the full inventory;
+`crusher_labs/config.yaml` selects the active layout.
 
 Enterprise scenario bundles: `data/templates/enterprise_constitution_tos.json`, `data/templates/enterprise_galaxy_tng.json`.
 Run `python3 -m pytest tests/test_enterprise_platforms.py -v` after editing Enterprise platforms or templates.

@@ -1,5 +1,7 @@
 # Crusher-to-the-Bridge — Documentation Index
 
+> **Status:** Living documentation index.
+
 **Python 3.11+.** Prefer `python3` on Linux/cloud VMs. Agent-oriented runbook:
 [AGENTS.md](AGENTS.md).
 
@@ -17,8 +19,8 @@ links to, and several heavily-linked files describe work that is finished.
 | [`flu/`](flu/) | The influenza-A thread: open ledger, readouts | Touching any `influenza_a` constant or the flu anchors |
 | [`sentinel/`](sentinel/) | Sentinel surveillance, port health, wastewater ops, shore-side, economics | Working on `picard_framework/analysis/sentinel/`, `shore/`, `economics/` |
 | [`paper3/`](paper3/) | Variant surveillance and phylodynamics | Working on strain state, mutation, lineage observables |
-| [`campaign_reduction/`](campaign_reduction/) | Campaign-wide AWS reduction program: authoritative spec, phased tickets D0–D8, coverage registers (specification only — artifact does not exist yet) | Working on `picard_framework/analysis/campaign_reducer/` or the `scripts/campaign analysis` namespace |
-| [`proposals/`](proposals/) | Documents whose primary artifact **does not exist yet** | Deciding what to build; never as a description of current behaviour |
+| [`campaign_reduction/`](campaign_reduction/) | Campaign reducer: original specification, implemented CLI and contracts, and measured pilot reports | Working on `picard_framework/analysis/campaign_reducer/` or the `scripts/campaign analysis` namespace |
+| [`proposals/`](proposals/) | Designs and open work, including partially implemented proposals | Deciding what to build; check the artifact before citing current behaviour |
 | [`history/`](history/) | Resolved audits, superseded versions, one-off task briefs, completed plans | Auditing why something is the way it is |
 | [`literature/`](literature/) | Raw literature-search output (PDFs, review notes) | Sourcing or checking a constant's provenance |
 | [`reports/`](reports/) | Manuscripts, monographs, submission artifacts | Writing or revising a paper |
@@ -57,9 +59,9 @@ line, before the first section:
 ```
 
 Add the qualifier that matters (`Implemented in <path>`, `Resolved by #327/#328`,
-`Superseded by <file>`). About a third of these files carry it today; add it when
-you touch one. **A document's own status line can be stale — prefer in-tree
-evidence.** The remaining known case is called out below.
+`Superseded by <file>`). Add a status line when touching a living document;
+preserve dated records. **Where a status line conflicts with the tree, check
+the implementation before relying on it.**
 
 **Agents:** you do not need `literature/`, `history/`, or `reports/` for
 implementation work. Read the root plus the one subject directory you are
@@ -69,11 +71,11 @@ working in.
 
 ```bash
 uv sync --locked --all-extras --no-install-project --no-build
-source .venv/bin/activate   # or prefix commands with `uv run`
+source .venv/bin/activate
 python3 tools/sanity_checker.py --from-config
 python3 orchestrator.py                          # 24 epochs
-python3 -m streamlit run dashboard.py --server.headless true
 python3 -m pytest tests/ -m 'not slow' -v --tb=short
+python3 -m streamlit run dashboard.py --server.headless true  # foreground; Ctrl-C to stop
 ```
 
 Optional Presidio smoke:
@@ -93,7 +95,7 @@ python3 presidio_runner.py \
 | [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) | Living | Fleet, Stackelberg, OIS, utility export/import |
 | [simulation_step_order.md](simulation_step_order.md) | Living | Epoch phase order |
 | [api_service.md](api_service.md) | Implemented (`api/`) | REST job API over PicardRunSpec/ShipSimulation (issue #101) |
-| [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md) | Historical reference — **but load-bearing** | The pre-split monolith. §§5–11 are the *only* documentation in the repo for SOP authoring, the GIS spatial bridge CLI, sanity-checker categories, lab-notebook fidelity tiers, the LCARS dashboard stations, console output format, and upstream-project provenance. Do not treat as a duplicate. Appendix A's test count (~875) is stale; the suite is ~6,400. |
+| [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md) | Historical reference — **but load-bearing** | The pre-split monolith. §§5–11 are the *only* documentation in the repo for SOP authoring, the GIS spatial bridge CLI, sanity-checker categories, lab-notebook fidelity tiers, the LCARS dashboard stations, console output format, and upstream-project provenance. Do not treat as a duplicate. See the [root validation guide](../AGENTS.md#validation) for current CI. |
 | [../picard_framework/runs/mega_cruise_campaign/README.md](../picard_framework/runs/mega_cruise_campaign/README.md) | Living | ~17,780-run mega cruise campaign |
 
 ## Governing specs
@@ -360,8 +362,8 @@ longer justifications.
 | Change | Update |
 |--------|--------|
 | How to run ship/fleet | Ship or game-theory operator manual, + this index if entry points change |
-| Agent/CI commands | `AGENTS.md` + matching `.agents/skills/` |
+| Agent/CI commands | [Root instructions](../AGENTS.md), [agent runbook](AGENTS.md), and the [matching skill](../.agents/skills/) |
 | JSON contracts | `schemas/README.md` + schema files |
 | ContamX / HVAC physics | `CONTAM_INTEROP.md` and [`exterior_zone_ahu_audit.md`](exterior_zone_ahu_audit.md) |
-| An epidemiological constant | The constant's provenance comment, the relevant open ledger (`norovirus/norovirus_open_ledger.md` or `covid/covid_open_ledger.md`) if it invalidates a recorded measurement, and `norovirus/norovirus_model_history.md` if it is a defect. New ledger entries are one file each under `docs/ledger/<ID>.md` (see its README) with Pathogens and Commit SHA; do not append numbered items. |
+| An epidemiological constant | The constant's provenance comment, the relevant open ledger (see the [ledger index](ledger/README.md) for pathogen homes) if it invalidates a recorded measurement, and `norovirus/norovirus_model_history.md` if it is a defect. New ledger entries are one file each under `docs/ledger/<ID>.md` (see its README) with Pathogens and Commit SHA; do not append numbered items. |
 | A document's implementation state | Its status header — and move the file if the filing rule above now puts it elsewhere |

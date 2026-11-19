@@ -183,7 +183,7 @@ Expected: No ERROR findings.
 
 ### 5. Validate against JSON schemas
 ```bash
-pip install check-jsonschema
+# From the activated environment (check-jsonschema is in the dev extra).
 check-jsonschema --schemafile schemas/spatial_layout.schema.json data/platforms/<platform_name>/spatial_layout.json
 check-jsonschema --schemafile schemas/air_flow_paths.schema.json data/platforms/<platform_name>/air_flow_paths.json
 ```

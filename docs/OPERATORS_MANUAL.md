@@ -35,8 +35,7 @@
 
 ```bash
 uv sync --locked --all-extras --no-install-project --no-build
-source .venv/bin/activate   # or prefix commands with `uv run`
-# Optional: pip install check-jsonschema
+source .venv/bin/activate
 ```
 
 ### Run a Simulation
@@ -1672,25 +1671,8 @@ python tools/sanity_checker.py --from-config
 pytest tests/ -v --tb=short
 ```
 
-The suite includes **~875 tests** across data contracts, sanity checker,
-orchestrator/quarantine logic, infection counters, orthogonal agent axes,
-wearable/detection-escalation protocol engine, enhanced wearable model
-(multi-device, confounders, detection profiles, visibility, chronic disease
-assignments), confounder-aware infection scoring, diagnostic cascade tiers,
-sequencing config wiring, long-read Nanopore verification,
-instrument turnaround (TAT), per-test cost accounting, **operational impact
-(OIS)**, **action applier**, **behavioral syndromic**, transmission pathways
-(food/environmental), dashboard helpers, law compliance, telemetry seams, and
-**Picard / Presidio / Stackelberg** framework tests. CI
-(`.github/workflows/ci.yml`) runs advisory ruff lint, sanity checks, JSON schema
-validation, full pytest with coverage (~875 tests), Picard/Presidio import
-hygiene, Presidio smoke, long-read/TAT targeted tests, wearable/cascade entry
-tests, orchestrator import hygiene, dashboard import (including LCARS theme),
-24-epoch orchestrator run, diagnostic cascade smoke, and OIS telemetry
-verification. Framework-focused checks (~90 tests), enterprise platform tests,
-and Stackelberg + platform JSON schema validation run in
-`.github/workflows/picard-presidio.yml`.
-See `AGENTS.md` for cloud agent commands.
+For current test tiers, lint gates and local commands, use the
+[root validation guide](../AGENTS.md#validation). Selected modules:
 
 | Module | Focus |
 |--------|-------|
@@ -1732,7 +1714,7 @@ All data contracts have formal JSON Schema (draft 2020-12) definitions
 in `schemas/`:
 
 ```bash
-pip install check-jsonschema
+# check-jsonschema is included in the locked dev extra.
 
 # Validate all config files
 check-jsonschema --schemafile schemas/pathogen_profiles.schema.json data/pathogens/active_profiles.json
