@@ -371,7 +371,10 @@ def main(argv: list[str] | None = None) -> int:
             json.dump(doc, fh, indent=1, sort_keys=True)
             fh.write("\n")
         return 0
-    cohorts = {name: path for name, path in (item.split("=", 1) for item in args.cohort)}
+    cohorts: dict[str, str] = {}
+    for item in args.cohort:
+        name, path = item.split("=", 1)
+        cohorts[name] = path
     build(cohorts, args.out)
     top = os.path.basename(args.archive).removesuffix(".tar.gz")
     print(f"{archive(args.out, args.archive, top)}  {args.archive}")
