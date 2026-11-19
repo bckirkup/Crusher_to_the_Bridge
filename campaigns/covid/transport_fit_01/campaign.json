@@ -1,0 +1,89 @@
+{
+  "name": "covid_transport_fit_01",
+  "pathogen": "covid",
+  "manifest": null,
+  "pathogen_id": null,
+  "s3_prefix": "campaign/covid_transport_fit_01/",
+  "queue": "picard-analysis-queue",
+  "image_tag": "covid-transport-fit-01",
+  "image_digest": "sha256:7023d963f3a3ede96c7f47def3bb539ecef1b9c8bc2a112697c45e82e37719a0",
+  "resources": {
+    "vcpu": "1",
+    "memory": "4096"
+  },
+  "readout": "campaigns/covid/transport_fit_01/readout.py",
+  "blocks": {
+    "dp_contamx_canary": {
+      "worker": "campaigns/covid/transport_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "design": "picard_framework/runs/covid_transport_fit_01_dp_design.json",
+        "theta": 7900000,
+        "arm_id": "contamx"
+      },
+      "seeds": [
+        20200205, 20200206, 20200207, 20200208, 20200209,
+        20200210, 20200211, 20200212, 20200213, 20200214,
+        20200215, 20200216, 20200217, 20200218, 20200219,
+        20200220, 20200221, 20200222, 20200223, 20200224
+      ]
+    },
+    "dp_native": {
+      "worker": "campaigns/covid/transport_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "design": "picard_framework/runs/covid_transport_fit_01_dp_design.json",
+        "theta": 7900000,
+        "arm_id": "native"
+      },
+      "seeds": [
+        20200205, 20200206, 20200207, 20200208, 20200209,
+        20200210, 20200211, 20200212, 20200213, 20200214,
+        20200215, 20200216, 20200217, 20200218, 20200219,
+        20200220, 20200221, 20200222, 20200223, 20200224
+      ]
+    },
+    "gm_native": {
+      "worker": "campaigns/covid/transport_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "design": "picard_framework/runs/covid_transport_fit_01_gm_design.json",
+        "theta": 237000000000,
+        "arm_id": "native"
+      },
+      "seeds": [
+        20200205, 20200206, 20200207, 20200208, 20200209,
+        20200210, 20200211, 20200212, 20200213, 20200214,
+        20200215, 20200216, 20200217, 20200218, 20200219,
+        20200220, 20200221, 20200222, 20200223, 20200224,
+        20200225, 20200226, 20200227, 20200228, 20200229,
+        20200230, 20200231, 20200232, 20200233, 20200234,
+        20200235, 20200236, 20200237, 20200238, 20200239,
+        20200240, 20200241, 20200242, 20200243, 20200244,
+        20200245, 20200246, 20200247, 20200248, 20200249,
+        20200250, 20200251, 20200252, 20200253, 20200254
+      ]
+    },
+    "gm_contamx": {
+      "worker": "campaigns/covid/transport_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "design": "picard_framework/runs/covid_transport_fit_01_gm_design.json",
+        "theta": 237000000000,
+        "arm_id": "contamx"
+      },
+      "seeds": [
+        20200205, 20200206, 20200207, 20200208, 20200209,
+        20200210, 20200211, 20200212, 20200213, 20200214,
+        20200215, 20200216, 20200217, 20200218, 20200219,
+        20200220, 20200221, 20200222, 20200223, 20200224,
+        20200225, 20200226, 20200227, 20200228, 20200229,
+        20200230, 20200231, 20200232, 20200233, 20200234,
+        20200235, 20200236, 20200237, 20200238, 20200239,
+        20200240, 20200241, 20200242, 20200243, 20200244,
+        20200245, 20200246, 20200247, 20200248, 20200249,
+        20200250, 20200251, 20200252, 20200253, 20200254
+      ]
+    }
+  }
+}

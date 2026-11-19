@@ -27,7 +27,7 @@
     ]
   },
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:<IMAGE_TAG>",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign<IMAGE_SEP><IMAGE_TAG>",
     "command": [
       "deploy/aws/campaign_entrypoint.py",
       "--campaign",

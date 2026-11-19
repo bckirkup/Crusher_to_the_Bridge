@@ -1,0 +1,51 @@
+{
+  "design_id": "covid_transport_fit_01_gm",
+  "task_id": "COVID-TRANSPORT-FIT-01",
+  "schema_version": "1.0.0",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "nothing — it re-scores the held-out Greg Mortimer replay's θ 2.37e11 anchor row (the COVID-GM-RESCORE-02 grammar verbatim) at one pinned revision under two airflow solvers. The parent surfaces stay measured at their own SHAs.",
+  "description": "Native vs ContamX transport on the declared Greg Mortimer replay, held-out hull. Cell shape verbatim from covid_gm_rescore_v2: scenario greg_mortimer_2020 on its declared expedition_cruise_450 substitution hull, voyage_mode declared (full 28-day event), Θ 2.37e11 (the rescore anchor row — the only lattice row this design carries, since the θ lattice is DP-side fitting machinery, not a held-out question), infection_age_days 0.0, imports 1, dwell_weighted, split_day 20 (the screen), turn_day 8 (the isolation order), 50 seeds at base 20200205 to match the rescore grammar. The only arm axis is the airflow solver: `native` — the empty-overrides baseline arm, bit-comparable in shape to the rescore's `hygiene_cycle` arm (both resolve the shipped hygiene_cycle hand reservoir) — vs `contamx` (transport_engine: contamx on the hull's committed contam/platform.prj). `auto` is not an arm: a contamx cell that cannot build ContamXTransportEngine fails closed; delivery.transport_engine_resolved audits which solver actually ran.",
+  "scenario_id": "greg_mortimer_2020",
+  "split_role": "held_out",
+  "split_role_note": "Held-out by the fixed split (docs/proposals/covid_trajectory_fit_spec.md §2). This design measures the transport-solver sensitivity of the held-out score; nothing in it may feed a parameter choice.",
+  "cell_conditioning": {
+    "note": "As-declared replay of the greg_mortimer_2020 scenario record: explicit seed is one passenger at epoch 0 with infection_age_days 0.0, scheduled SOP-017 cabin isolation voyage day 8 -> end_day 27, single ship-wide testing campaign voyage day 20, molecular_ascertainment_start_day 20, boarding channel off, platform expedition_cruise_450 declared not fitted. Scored channels are the rescore's own: campaign positives vs 128/217 (H1), asymptomatic share vs 0.8125 (H2), takeoff (>=10 recorded onsets).",
+    "theta": "2.37e11 — the COVID-GM-RESCORE-02 anchor row only. The v13 conditioning lattice (1e11|2.37e11|1e12) is not re-enumerated: this design asks how the transported-dose field moves the held-out score at the DP-conditioned operating point, not where on a Θ lattice it lands.",
+    "imports": 1,
+    "infection_age_days": 0.0,
+    "sanitary_visit_mode": "dwell_weighted",
+    "voyage_mode": "declared",
+    "split_day": 20,
+    "turn_day": 8
+  },
+  "thetas": [237000000000.0],
+  "infection_age_days": [0.0],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 50,
+  "takeoff_recorded_onsets": 10,
+  "voyage_mode": "declared",
+  "split_day": 20,
+  "turn_day": 8,
+  "seed_ring_readout": true,
+  "funnel_echo": true,
+  "arms": [
+    {
+      "arm_id": "native",
+      "role": "baseline",
+      "overrides": {},
+      "note": "First arm so empty overrides per the arm grammar — bit-shape-identical to the rescore's `hygiene_cycle` arm: both resolve the shipped hygiene_cycle hand reservoir under the current default stack. The shipped native ContamTransportEngine; auditable via delivery.transport_engine_resolved == ContamTransportEngine."
+    },
+    {
+      "arm_id": "contamx",
+      "role": "solver_swap",
+      "overrides": {
+        "transport_engine": "contamx"
+      },
+      "note": "The real NIST ContamX 3.4.0.3 solver on expedition_cruise_450's committed contam/platform.prj. Binary reaches the cell by a sha256-pinned S3 fetch; a cell that cannot build ContamXTransportEngine fails, never falls back."
+    }
+  ],
+  "cells": 100,
+  "cells_note": "2 arms x 50 seeds (20200205..20200254) = 100 cells — the rescore's seed series so each contamx cell pairs seed-for-seed with the same-revision native cell and, report-only, with the rescore row's older-revision payload."
+}

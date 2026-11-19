@@ -171,12 +171,20 @@ def cmd_run(args: argparse.Namespace) -> int:
 def _render_jobdef(spec: dict, account: str, region: str) -> dict:
     template = _JOBDEF_TEMPLATE.read_text(encoding="utf-8")
     resources = spec.get("resources") or {}
+    image_sep = ":"
+    image_ref = spec.get("image_tag", "campaign")
+    digest = spec.get("image_digest")
+    if digest:
+        if not _DIGEST_RE.match(digest):
+            raise _die("image_digest must be 'sha256:<64 hex>'")
+        image_sep, image_ref = "@", digest
     rendered = (
         template
         .replace("<JOBDEF_NAME>", _jobdef_name(spec))
         .replace("<ACCOUNT_ID>", account)
         .replace("<REGION>", region)
-        .replace("<IMAGE_TAG>", spec.get("image_tag", "campaign"))
+        .replace("<IMAGE_SEP>", image_sep)
+        .replace("<IMAGE_TAG>", image_ref)
         .replace("<VCPU>", str(resources.get("vcpu", "1")))
         .replace("<MEMORY>", str(resources.get("memory", "4096")))
         .replace("<LOG_PREFIX>", spec["name"].replace("_", "-"))

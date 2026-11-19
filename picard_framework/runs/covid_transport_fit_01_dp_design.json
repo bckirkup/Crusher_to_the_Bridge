@@ -1,0 +1,55 @@
+{
+  "design_id": "covid_transport_fit_01_dp",
+  "task_id": "COVID-TRANSPORT-FIT-01",
+  "schema_version": "1.0.0",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "nothing — it re-scores the canonical Diamond Princess record replay (the CREW-REACH-01 boxed_s1s2 configuration verbatim) at one pinned revision under two airflow solvers. The parent surfaces stay measured at their own SHAs; this design is the transport-engine sensitivity of that replay, not a repin of it.",
+  "description": "Native vs ContamX transport on the declared Diamond Princess replay. Cell shape verbatim from covid_crew_reach_01 (itself verbatim from the MEAL-SVC-02 landed configuration): scenario diamond_princess_2020 on its declared mega_cruise_5000 substitution hull, voyage_mode declared (full 35-day voyage), Θ 7.9e6, infection_age_days 6.8, imports 1, dwell_weighted, 20 seeds at base 20200205. The design-level base_overrides carries the whole boxed_s1s2 resolved configuration — SOP-017-MESSBOX + section-bound steward service with contact_factor_to_host [0.005,0.02] + the record's observation structure (retest_negative_sweeps + the 23-Feb crew_wave) — applied by the campaign worker after prepare_cell_run_spec. The only arm axis is the airflow solver: `native` (empty overrides, the shipped ContamTransportEngine) vs `contamx` (transport_engine: contamx — the committed contam/platform.prj solved by the real NIST ContamX binary). `auto` is not an arm: a contamx cell that cannot build the solver fails closed, and the payload's delivery.transport_engine_resolved echo is the audit of which solver actually ran. No constant, protocol, observation channel, seed or hull is changed between arms.",
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [7900000.0],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "funnel_echo": true,
+  "base_overrides": {
+    "scheduled_protocol_id": "SOP-017-MESSBOX",
+    "transmission_overrides": {
+      "caregiver": {
+        "service": {
+          "direction": "both",
+          "service_responder_mode": "section",
+          "service_section_cabins": [10, 15],
+          "contact_factor_to_host": [0.005, 0.02]
+        }
+      }
+    },
+    "observation_overrides": {
+      "retest_negative_sweeps": true,
+      "campaign_waves": ["crew_wave"]
+    }
+  },
+  "base_overrides_note": "The boxed_s1s2 resolved configuration of CREW-REACH-01 — the boxed crew-mess SOP (SOP-017-MESSBOX) plus section-bound steward service (direction both, service_responder_mode section, cabins [10,15], contact_factor_to_host [0.005,0.02]) plus the record's full observation structure (serial retest tiers and the day-34 crew wave) — applied once to every cell, identical across arms. Composition is order-independent against the single arm axis, which writes only config_overrides.hvac.transport_engine.",
+  "arms": [
+    {
+      "arm_id": "native",
+      "role": "baseline",
+      "overrides": {},
+      "note": "First arm so empty overrides per the arm grammar. The shipped native ContamTransportEngine — the solver every prior COVID campaign row ran under. Resolved engine is auditable via delivery.transport_engine_resolved == ContamTransportEngine."
+    },
+    {
+      "arm_id": "contamx",
+      "role": "solver_swap",
+      "overrides": {
+        "transport_engine": "contamx"
+      },
+      "note": "The real NIST ContamX 3.4.0.3 solver on the hull's committed contam/platform.prj (mega_cruise_5000: the declared substitution hull's authentic bundle). Same airflow intent as the native engine reads from air_flow_paths.json; the solved steady-state field is what changes hands (CONTAM-DIVERGENCE-01 measured the divergence on tracer dose). The binary reaches the cell by a sha256-pinned S3 fetch (campaign ledger § binary); a cell that cannot build ContamXTransportEngine fails, never falls back."
+    }
+  ],
+  "cells": 40,
+  "cells_note": "2 arms x 20 seeds (20200205..20200224) = 40 cells. Same seed series as the boxed_*/parent campaigns so each contamx cell pairs seed-for-seed with the same-revision native cell and, report-only, with the parent's older-revision payload."
+}
