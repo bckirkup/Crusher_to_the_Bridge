@@ -34,6 +34,10 @@ and the encounter witness scalars (B3) do not exist at the pinned revision.
 A destroyer respiratory scenario (B4) is absent and blocks only naval or
 cross-hull statements. Details: design §10.
 
+- **B1:** implemented and unit-tested in PR #1329
+  (`transmission.room_air_removal.map_arm`). Synthetic-fixture neutrality
+  only; no voyage was run and K0/K1 remain unmeasured.
+
 ## Scope
 
 A verdict describes this model at one revision, hull and profile. It is not
