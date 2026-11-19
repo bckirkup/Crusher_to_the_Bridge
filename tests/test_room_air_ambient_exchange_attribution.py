@@ -18,7 +18,9 @@ def test_residence_factor_boundaries() -> None:
     )
 
 
-def test_hvac_only_map_uses_duty_and_duty0_extract() -> None:
+def test_ambient_off_arm_uses_duty_and_duty0_extract() -> None:
+    from engines.transmission_core import build_zone_air_exchange_map
+
     airflow = {
         "hvac_duty": 0.5,
         "oa_fraction": 0.3,
@@ -27,13 +29,15 @@ def test_hvac_only_map_uses_duty_and_duty0_extract() -> None:
             {"ach": 8.0, "hvac_duty": 0.0, "oa_fraction": 1.0, "rooms": ["B"]},
         ],
     }
-    assert attr_mod._hvac_only_zone_air_exchange_map(airflow) == {
+    assert build_zone_air_exchange_map(airflow, map_arm="ambient_off") == {
         "A": 2.0,
         "B": 8.0,
     }
 
 
-def test_map_builder_modes_split_ambient_exchange() -> None:
+def test_map_arms_split_ambient_exchange() -> None:
+    from engines.transmission_core import build_zone_air_exchange_map
+
     airflow = {
         "hvac_zones": [{"ach": 2.0, "rooms": ["Cabin"]}],
         "ambient_openings": [
@@ -48,15 +52,17 @@ def test_map_builder_modes_split_ambient_exchange() -> None:
         ],
     }
     volumes = {"Cabin": 50.0, "Pool": 100.0}
-    off = attr_mod._map_builder("ambient_off")(
+    off = build_zone_air_exchange_map(
         airflow,
         zone_volumes=volumes,
         ambient_exchange_m3h={},
+        map_arm="ambient_off",
     )
-    on = attr_mod._map_builder("ambient_on")(
+    on = build_zone_air_exchange_map(
         airflow,
         zone_volumes=volumes,
         ambient_exchange_m3h={},
+        map_arm="ambient_on",
     )
     assert off == {"Cabin": 2.0}
     assert on == {"Cabin": 2.0, "Pool": pytest.approx(1.0)}
@@ -78,38 +84,31 @@ def test_norovirus_route_gate_reports_emesis_conditioned() -> None:
     assert gate["has_airborne_emission_fraction"] is False
 
 
-def test_simulate_hull_with_map_mode_patches_builder(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_simulate_hull_with_map_mode_declares_the_arm(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The tool selects the arm by config key and patches nothing."""
     import picard_framework.covid_theta_fit as ctf
     import picard_framework.simulation.ship_simulation as ship_simulation
 
-    seen: dict[str, object] = {}
+    builder = ship_simulation.build_zone_air_exchange_map
+    seen: list[dict[str, object]] = []
 
-    def fake_simulate_hull(scenario_id, theta, seed, num_epochs=None):
-        seen["map"] = ship_simulation.build_zone_air_exchange_map(
-            {
-                "hvac_zones": [],
-                "ambient_openings": [
-                    {
-                        "zone": "Pool",
-                        "type": "open_deck",
-                        "area_m2": 10.0,
-                        "exchange_m3h": 100.0,
-                        "azimuth_deg": 180.0,
-                        "wind_speed_m_s": 5.0,
-                    },
-                ],
-            },
-            zone_volumes={"Pool": 100.0},
-            ambient_exchange_m3h={},
-        )
+    def fake_simulate_hull(scenario_id, theta, seed, **kwargs):
+        seen.append(kwargs)
+        assert ship_simulation.build_zone_air_exchange_map is builder
         return "sentinel"
 
     monkeypatch.setattr(ctf, "simulate_hull", fake_simulate_hull)
-    result = attr_mod._simulate_hull_with_map_mode(
-        "scenario", 1.0, 7, "ambient_on", num_epochs=3,
-    )
-    assert result == "sentinel"
-    assert seen["map"] == {"Pool": pytest.approx(1.0)}
+    for arm in ("ambient_off", "ambient_on"):
+        result = attr_mod._simulate_hull_with_map_mode(
+            "scenario", 1.0, 7, arm, num_epochs=3,
+        )
+        assert result == "sentinel"
+    assert seen == [
+        {"num_epochs": 3, "room_air_map_arm": "ambient_off"},
+        {"num_epochs": 3, "room_air_map_arm": "ambient_on"},
+    ]
 
 
 def test_paired_hull_runs_reports_seed_deltas(monkeypatch: pytest.MonkeyPatch) -> None:

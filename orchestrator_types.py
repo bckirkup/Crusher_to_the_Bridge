@@ -145,6 +145,9 @@ class SimulationState:
     # Whole-hull room-air encounter witness copied from
     # TransmissionCore.room_air_witness each epoch; scalars only.
     room_air_witness: dict[str, float] = field(default_factory=dict)
+    # Declared transmission.room_air_removal.map_arm, echoed into every
+    # epoch summary so a paired run records which room-air map it read.
+    room_air_map_arm: str = "ambient_on"
     vsp_reported_case_fraction: float = 0.0
     # Pending escalation: {"to": status, "epoch_triggered": int} or None
     escalation_pending: dict[str, Any] | None = None

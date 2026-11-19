@@ -130,7 +130,10 @@ def test_changed_zones_are_where_the_two_maps_differ() -> None:
     on = build_zone_air_exchange_map(
         airflow, zone_volumes=VOLUMES, ambient_exchange_m3h={},
     )
-    hvac_only = build_zone_air_exchange_map({"hvac_zones": airflow["hvac_zones"]})
+    hvac_only = build_zone_air_exchange_map(
+        airflow, zone_volumes=VOLUMES, ambient_exchange_m3h={},
+        map_arm="ambient_off",
+    )
     differing = {z for z in on if on[z] != hvac_only.get(z, 0.0)}
     assert room_air_changed_zones(airflow, VOLUMES, {}) == differing == {OPEN}
 

@@ -255,6 +255,9 @@ def _summary_counts(
             key: round(value, 6)
             for key, value in sorted(state.room_air_witness.items())
         },
+        # Provenance echo, emitted unconditionally: which room-air exchange
+        # map the run read (ROOM-AIR-PAIRED-VALIDATION-01).
+        "room_air_map_arm": state.room_air_map_arm,
         "cumulative_ever_ill": len(state.ever_ill_ids),
         "cumulative_ever_ill_passenger": ill_counts["passenger"],
         "cumulative_ever_ill_crew": ill_counts["crew"],
