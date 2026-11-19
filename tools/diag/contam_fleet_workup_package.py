@@ -375,7 +375,7 @@ def main(argv: list[str] | None = None) -> int:
     build(cohorts, args.out)
     top = os.path.basename(args.archive).removesuffix(".tar.gz")
     print(f"{archive(args.out, args.archive, top)}  {args.archive}")
-    return verifier.verify(args.out)
+    return verifier.verify(args.out, _ROOTS)
 
 
 if __name__ == "__main__":

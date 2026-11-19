@@ -93,12 +93,12 @@ def _prefix(base: str) -> str:
     return base if base.endswith(os.sep) else base + os.sep
 
 
-def package_root(path: str) -> str:
+def package_root(path: str, extra_roots: tuple[str, ...] = ()) -> str:
     """Canonical package directory; it must sit under the working directory,
-    this script's directory or the temporary directory."""
+    this script's directory, the temporary directory or a caller's own root."""
     resolved = os.path.realpath(path)
-    bases = (os.path.realpath(os.getcwd()), os.path.realpath(os.path.dirname(__file__)),
-             os.path.realpath(tempfile.gettempdir()))
+    bases = [os.path.realpath(b) for b in (
+        os.getcwd(), os.path.dirname(__file__), tempfile.gettempdir(), *extra_roots)]
     for base in bases:
         if resolved == base or resolved.startswith(_prefix(base)):
             return resolved
@@ -547,8 +547,8 @@ def check_timing(t: dict[str, Any], checks: Checks) -> None:
                bad == 0, f"{bad} differ")
 
 
-def verify(root: str) -> int:
-    root = package_root(root)
+def verify(root: str, extra_roots: tuple[str, ...] = ()) -> int:
+    root = package_root(root, extra_roots)
     checks = Checks()
     if not check_files(root, checks):
         return checks.report()
