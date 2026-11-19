@@ -71,7 +71,7 @@ COLUMNS = {
         "status", "reason", "field_sha256"),
     "data/cohorts.csv": (
         "cohort", "stage", "hulls", "hull_count", "batch_job_id", "job_definition",
-        "image_digest", "runner_commit", "attempts", "exit_code", "started_at_ms",
+        "image_digest", "runner_commit", "attempts", "reporting_attempt", "exit_code", "started_at_ms",
         "stopped_at_ms", "instance_id", "instance_type", "cpu_model", "cpu_affinity",
         "thread_env_all_1", "loadavg_1m_max", "raw_artifact_sha256", "raw_artifact_key",
         "criteria_sha256", "selection_sha256", "contamx_binary_sha256",
@@ -294,10 +294,14 @@ def check_cohorts(root: str, t: dict[str, Any], expected: dict[str, Any], checks
     checks.add("fleet cohorts ran under the packaged selection; the canary predates it", all(
         c["selection_sha256"] == ("" if c["stage"] == "canary" else selection_sha)
         for c in cohorts))
-    checks.add("every cohort: gates passed, audit passed, inputs unchanged, one thread, one attempt",
+    checks.add("every cohort: gates passed, audit passed, inputs unchanged, one thread, exit 0",
                all(c["gate_failed"] == "0" and c["audit_passed"] == "1"
                    and c["inputs_unchanged"] == "1" and c["thread_env_all_1"] == "1"
-                   and c["attempts"] == "1" and c["exit_code"] == "0" for c in cohorts))
+                   and c["exit_code"] == "0" for c in cohorts))
+    # A Spot host can be reclaimed mid-job. The retry starts from nothing in a new
+    # container, so all of a cohort's records must come from its last attempt.
+    checks.add("every cohort's records come from its last Batch attempt alone",
+               all(c["reporting_attempt"] == c["attempts"] for c in cohorts))
     checks.add("one solver binary and one criteria file across cohorts",
                len({c["contamx_binary_sha256"] for c in cohorts}) == 1
                and len({c["criteria_sha256"] for c in cohorts}) == 1)

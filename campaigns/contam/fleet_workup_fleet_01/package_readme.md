@@ -145,6 +145,11 @@ Spread of the per-row cold medians, by cohort (hull-specific values are in
 
 <<COHORTS>>
 
+`wall min` is the reporting attempt's container time, including its untimed
+in-job smoke. `attempts` above 1 means a Spot host was reclaimed before the
+job finished; the retry started from nothing on a new host, and every record
+of that cohort comes from the last attempt (`reporting_attempt`).
+
 Raw artifacts are private objects under
 `s3://crusherbucket-994254241749-us-east-1-an/` at `raw_artifact_key`; they
 are not needed to verify this package and are not included.

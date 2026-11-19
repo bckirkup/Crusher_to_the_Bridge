@@ -142,7 +142,8 @@ def cohort_row(cohort: str, directory: str, hulls: list[str]) -> dict[str, Any]:
         "job_definition": job["job_definition"].rsplit("/", 1)[-1],
         "image_digest": job["image"].rsplit("@", 1)[-1],
         "runner_commit": env["runner"].get("engine_git_sha_env") or env["runner"].get("head"),
-        "attempts": len(attempts), "exit_code": attempts[-1]["exit_code"],
+        "attempts": len(attempts),
+        "reporting_attempt": env["batch"].get("AWS_BATCH_JOB_ATTEMPT"), "exit_code": attempts[-1]["exit_code"],
         "started_at_ms": job["started_at_ms"], "stopped_at_ms": job["stopped_at_ms"],
         "instance_id": env["host"].get("instance-id"),
         "instance_type": env["host"].get("instance-type"),
@@ -199,14 +200,16 @@ def _coverage_overview(coverage: list[dict[str, str]]) -> list[str]:
 
 def _cohort_overview(cohorts: list[dict[str, Any]]) -> list[str]:
     lines = ["| cohort | hulls | Batch job | host | CPU | runner | image digest | wall min | "
-             "max load (1 m) | gates | raw artifact SHA-256 |", "|---|---|---|---|---|---|---|---|---|---|---|"]
+             "max load (1 m) | gates | attempts | raw artifact SHA-256 |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for c in cohorts:
         wall = (int(c["stopped_at_ms"]) - int(c["started_at_ms"])) / 60000.0
         lines.append(
             f"| {c['cohort']} | {c['hull_count']} | `{c['batch_job_id']}` | {c['instance_id']} "
             f"({c['instance_type']}) | {c['cpu_model']} | `{str(c['runner_commit'])[:12]}` | "
             f"`{c['image_digest'][7:19]}…` | {wall:.1f} | {float(c['loadavg_1m_max']):.2f} | "
-            f"{c['gate_checks']} / {c['gate_failed']} failed | `{c['raw_artifact_sha256']}` |")
+            f"{c['gate_checks']} / {c['gate_failed']} failed | {c['attempts']} | "
+            f"`{c['raw_artifact_sha256']}` |")
     return lines
 
 
