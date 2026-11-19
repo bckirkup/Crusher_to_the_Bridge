@@ -1,0 +1,62 @@
+{
+ "canary": {
+  "contamx_solver_invocations": 318,
+  "hulls": [
+   "destroyer_baseline",
+   "enterprise_constitution_tos",
+   "expedition_cruise_450",
+   "west_virginia_bb48"
+  ],
+  "rows_planned_execute": 77,
+  "rows_total": 112
+ },
+ "design_id": "CONTAM-FLEET-WORKUP-PROTOCOL-01",
+ "hulls_in_scope": 77,
+ "platforms_at_pin": 82,
+ "platforms_excluded": [
+  "expedition_cruise_300",
+  "fletcher_class_destroyer",
+  "legend_class_nsc",
+  "messy_cruise_500",
+  "san_antonio_class_lpd"
+ ],
+ "rows_by_family_and_status": {
+  "baseline|planned_execute": 308,
+  "operational_redundancy_check|planned_execute": 154,
+  "operational|not_applicable": 12,
+  "operational|planned_execute": 604,
+  "weather_interaction|not_applicable": 8,
+  "weather_interaction|planned_execute": 150,
+  "weather_interaction|structural_nonresponse": 150,
+  "weather|not_applicable": 20,
+  "weather|planned_execute": 375,
+  "weather|structural_nonresponse": 375
+ },
+ "rows_by_lane_and_status": {
+  "contamx_authored_bundle|planned_execute": 77,
+  "contamx_commissioned_export_as_committed|planned_execute": 77,
+  "contamx_commissioned_export|not_applicable": 20,
+  "contamx_commissioned_export|planned_execute": 981,
+  "native_prescribed|not_applicable": 20,
+  "native_prescribed|planned_execute": 456,
+  "native_prescribed|structural_nonresponse": 525
+ },
+ "rows_by_planned_status": {
+  "not_applicable": 40,
+  "planned_execute": 1591,
+  "structural_nonresponse": 525
+ },
+ "rows_total": 2156,
+ "settings": 13,
+ "timing_workload": {
+  "cached_cell_executions": 7955,
+  "cold_cell_executions_measured": 7955,
+  "cold_cell_executions_total": 9546,
+  "cold_cell_executions_warmup": 1591,
+  "contamx_solver_invocations": 6810,
+  "native_constructions": 2736,
+  "rows_not_timed": 565,
+  "solver_time_upper_bound_h": 567.5,
+  "solver_timeout_s": 300.0
+ }
+}

@@ -146,6 +146,7 @@ python3 presidio_runner.py \
 | Doc | Status |
 |-----|--------|
 | [CONTAM_INTEROP.md](CONTAM_INTEROP.md) | Living — Path A ContamX interop, SIM reader, compare tools |
+| [Fleet native-vs-ContamX workup protocol](audits/2026-11-19_contam_fleet_workup_protocol/README.md) | Declared — pre-results design for 77 hulls at `d5d50d3a`; no solve or timing |
 | [Phase 3 transport baseline and handoff](audits/2026-11-19_phase3_transport_baseline/README.md) | Measured — corrected two-hull numerical verification at `5c8f05cc`; no epidemiology run or authorization |
 | [CONTAM_PRJ_AUDIT.md](CONTAM_PRJ_AUDIT.md) | Living audit — fiction PRJ realism |
 | [contam_edison_return_01.md](contam_edison_return_01.md) | Measured — bounded Edison return manifest for completed CONTAM Phase 1/Phase 2 S3 prefixes; schema confirmation deferred to Phase 4 (ledger CONTAM-EDISON-RETURN-01) |
