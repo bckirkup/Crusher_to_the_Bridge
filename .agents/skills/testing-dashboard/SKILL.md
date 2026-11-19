@@ -208,13 +208,13 @@ verifies the guard clause in one pass.
 
 ## CI Coverage
 
-GitHub Actions runs a lightweight dashboard import check after pytest (see `.github/workflows/ci.yml`): package import, pathway aggregation, and `apply_lcars_layout()` Plotly styling. Full Streamlit rendering is validated manually or in review.
+[Main CI](../../../.github/workflows/ci.yml) runs the dashboard import check independently of pytest: package import, pathway aggregation, and `apply_lcars_layout()` Plotly styling. Full Streamlit rendering is validated manually or in review.
 
 ## Troubleshooting
 
 - **Empty dashboard**: Run `python3 orchestrator.py` first to populate `telemetry_buffer/simulation_history.json`
 - **Missing deck photo plate**: Run `python3 scripts/precompute_deck_assets.py` for the active platform
-- **Plotly import errors**: `pip install plotly streamlit pandas`
+- **Plotly import errors**: Activate the locked environment from `AGENTS.md`; the dashboard extra supplies these packages.
 - **Wrong zone positions**: Verify `display` coordinates in `spatial_layout.json`
 - **Scroll not registering**: move cursor over the main content column first;
   scrolling over the sidebar scrolls the sidebar

@@ -20,7 +20,7 @@ Path I/O is confined to the process CWD via `simulation_utils.paths`
   `<run_id>.zip` files, while AWS Batch results are nested shard zips plus
   shard manifests (from `aws s3 sync`)
 - For Batch failure classification: AWS CLI + `AWS_PROFILE=picard` (or equivalent)
-- For Stan fits: `pip install -e '.[analysis]'` and CmdStan
+- For Stan fits: the locked `analysis` extra (included by the [standard setup](../../../AGENTS.md#setup)) and CmdStan
   (`python3 -c 'import cmdstanpy; cmdstanpy.install_cmdstan()'`)
 
 ## Sync from S3 (Batch campaigns)

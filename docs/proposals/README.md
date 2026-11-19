@@ -1,7 +1,8 @@
 # Proposals
 
-> **Status:** Proposed. **Nothing in this directory describes current
-> behaviour.**
+> **Status:** Proposed. Some parts have landed; the table distinguishes
+> the missing work from the evidence already in the tree. Use the implementation
+> and its subject guide, not the proposal, to determine current behaviour.
 
 A document lives here until the artifact it specifies exists in-tree; then it
 moves to its subject directory or to the `docs/` root. Do not cite these as

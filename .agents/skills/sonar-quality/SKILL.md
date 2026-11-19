@@ -21,10 +21,8 @@ quality fixes separate from Sentinel analysis and campaign implementation work.
 - Dedicated complexity-backlog splits are allowed when the user asks for
   them, as their own change. Do not sneak extractions into unrelated
   maintenance, Sentinel analysis, or campaign-science PRs.
-- The last documented official Sonar `S3776` count was 87 (live scan
-  28 Aug 2026). The campaign generator, `ShipSimulation.step`, and
-  action dispatch are already closed on that scan. Remaining complexity
-  backlog is listed below.
+- Use the live Sonar project for the current `S3776` count; a historical scan
+  or a local Ruff result is not a current Sonar count.
 - Split composite assertions into independently diagnosable checks.
 - Replace duplicated literals with named constants when the duplication is
   accidental; preserve repeated domain values when they are part of a
@@ -79,9 +77,7 @@ not goldens:
 
 A dedicated backlog pass already split campaign generators
 (`tier_iterators.py`), `ShipSimulation.step`, action dispatch, and Stan
-fleet column / wastewater builders. Official open `S3776` is 87 after
-those extractions scanned. Next named follow-ups (local ranking, not
-official Sonar):
+fleet column / wastewater builders. Historical follow-up from that pass (not a live Sonar ranking):
 
 - `engines/infection_dynamics_bridge.py` `step` (deferred: higher-risk dynamics path)
 
@@ -114,8 +110,8 @@ family globs over per-file rows where a convention already exists
 
 Two traps when editing `sonar-project.properties`:
 
-- It is a properties file, not a sectioned config — an edit must rewrite the
-  **whole** file. Writing back only the `sonar.coverage.exclusions=` line
+- It is a properties file, not a sectioned config — preserve unrelated keys when editing
+  an exclusion list. Replacing the file with only `sonar.coverage.exclusions=`
   drops `sonar.projectKey`/`sonar.organization` and the scan dies with
   "mandatory properties for 'Unknown'".
 - A typo'd exclusion filename silently covers nothing — the gate still fails
@@ -146,6 +142,6 @@ Two traps when editing `sonar-project.properties`:
 ## Validation
 
 Run the project validation commands from `AGENTS.md`, including both
-mechanical-guard modes, blocking Ruff lint, the full pytest suite with XML
+mechanical-guard modes, blocking Ruff lint, the fast pytest tier with XML
 coverage, the sanity checker, and the orchestrator smoke. Run the Docker smoke
 when Docker is available.

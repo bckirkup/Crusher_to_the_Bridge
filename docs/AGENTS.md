@@ -1,12 +1,11 @@
 # Crusher-to-the-Bridge — Agent Instructions
 
-> See also the human docs map: [README.md](README.md).
+> **Status:** Living. Start with the [root agent instructions](../AGENTS.md) for setup and scope; use the [docs map](README.md) to find subject guides.
 
 ## Which documents are authoritative
 
 `docs/` is sorted by **subject** into directories, and by **status** into a line
-at the top of each file. Read [README.md](README.md) first; it lists every
-document with its status.
+at the top of each file. Read [README.md](README.md) first for subject homes and indexed documents.
 
 Four rules, because getting these wrong has cost real time:
 
@@ -14,7 +13,7 @@ Four rules, because getting these wrong has cost real time:
    called `*_spec.md` may describe something that does not exist; a file with no
    inbound links may document a fully implemented subsystem. Check the status
    line, and check the artifact.
-2. **`proposals/` describes nothing that exists.** Do not cite it as
+2. **`proposals/` records designs, not proof of implementation.** Do not cite it as
    documentation of current behaviour, and do not assume a prescribed filename
    is the one that landed — at least one proposal there was satisfied in a
    different location and shape.
@@ -31,7 +30,7 @@ elsewhere.
 
 ## Cursor Cloud specific instructions
 
-Pure-Python simulation (no databases or external APIs for local dev). **Python 3.11+** required. Docker is used only to package the mega cruise campaign for AWS Batch (see `deploy/aws/`); it is not needed for local development.
+Pure-Python simulation (no databases or external APIs for local dev). **Python 3.11+** required. Docker is used for campaign images, but is not needed for the Python test suite.
 
 ### Running services
 
@@ -45,14 +44,14 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~6,400 tests. Fast tier: add `-m 'not slow'` |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | Fast tier: add `-m 'not slow'` |
 | Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
 | Mega cruise campaign | `./scripts/run_campaign.sh --smoke` or `scripts\run_campaign.bat --smoke` | Full matrix ~17,780 runs: `picard_framework/runs/mega_cruise_campaign/` |
 | Campaign (sharded) | `python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --shard-count N --shard-index i --s3-prefix s3://bucket/campaign/ --resume` | `--shard-index` defaults to `AWS_BATCH_JOB_ARRAY_INDEX`; uploads one refreshed shard zip + JSON manifest and `completed_runs.txt` to S3 (needs `boto3`) |
 | Campaign Docker image | `docker build -t picard-campaign . && docker run --rm picard-campaign --smoke` | Root `Dockerfile`; ECR + AWS Batch array-job flow in `deploy/aws/README.md` |
-| Campaign deploy (AWS) | `AWS_PROFILE=picard ./deploy/aws/submit_array_job.sh N s3://<bucket>/campaign/` | **Role-assumption creds**: a minimal `devin-bootstrap` user only `sts:AssumeRole`s `picard-deploy-role` (ExternalId, 1h sessions) via a `~/.aws/config` profile; containers use Batch execution/job roles. IAM JSON + full flow in `deploy/aws/README.md` |
+| Legacy mega-cruise deploy (AWS) | `AWS_PROFILE=picard ./deploy/aws/submit_array_job.sh N s3://<bucket>/campaign/` | **Role-assumption creds**: a minimal `devin-bootstrap` user only `sts:AssumeRole`s `picard-deploy-role` (ExternalId, 1h sessions) via a `~/.aws/config` profile; containers use Batch execution/job roles. IAM JSON + full flow in `deploy/aws/README.md` |
 
 ### Framework layout
 
@@ -67,7 +66,8 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | `telemetry_buffer/agent_axes.py` | Canonical orthogonal agent state literals |
 | `engines/` | Transmission core, CONTAM/ContamX bridges, natural history, strain, wearable, rhythm, wastewater |
 | `api/` | REST job API over PicardRunSpec (`docs/api_service.md`) |
-| `deploy/aws/` | AWS Batch jobdefs, per-campaign Dockerfiles, entrypoints, submit scripts |
+| `campaigns/` + `scripts/campaign` | Registered campaign specs and CLI (see [conventions](../campaigns/README.md)) |
+| `deploy/aws/` | Shared Batch infrastructure and frozen legacy per-campaign files |
 | `simulation_utils/` | Shared helpers (paths, numeric, epidemic labels, platform complement) |
 | `third_party/contamx/` | ContamX interop reference artifacts |
 | `docs/ledger/` | Defect/measurement ledger entries, one file per ID |
@@ -79,31 +79,17 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 - Fleet / Stackelberg: `docs/OPERATORS_MANUAL_GAME_THEORY.md`
 - Full legacy reference: `docs/OPERATORS_MANUAL.md`
 
-### CI (replicate locally)
+### CI and local validation
 
-Install from the lockfile: `uv sync --locked --all-extras --no-install-project --no-build`.
-
-**Main** (`.github/workflows/ci.yml` on `main` PRs):
-
-1. `ruff check` — **F-rules blocking**; E/W/I advisory
-2. `python3 tools/sanity_checker.py --from-config`
-3. `pytest tests/test_json_schema_validation.py -v --tb=short`
-4. `pytest tests/ -v --tb=short --cov --cov-report=term-missing`
-5. Picard/Presidio/Stackelberg import hygiene
-6. Presidio smoke (`smoke_fleet.json`, 1 cruise)
-7. Orchestrator import hygiene (stoplight deduplication)
-8. Dashboard import + `apply_lcars_layout` smoke
-9. `python3 orchestrator.py` — 24-epoch smoke
-10. OIS fields present in final `cost_accounting`
-11. Campaign Docker image smoke (`docker build` + `docker run … --smoke`) when Docker is available
-
-**Picard/Presidio** (`.github/workflows/picard-presidio.yml` on `main` and `cursor/**`):
-
-- Framework-focused pytest slice (~190+ tests: Picard, Presidio, Stackelberg, OIS, behavioral, long-read, TAT, enterprise platforms, agent axes, sequencing config, wearable scoring, cascade entry, ContamX subset, mega-cruise campaign, campaign/ship/Stan boundary tests, outbreak response, golden Picard, cabin/shedding, pathogen overrides, density contact, multi-pathogen Phase A/B)
-- Stackelberg + platform JSON schema validation (all `data/platforms/*/`)
-- Presidio smoke
+Use the [root validation commands](../AGENTS.md#validation). [Main CI](../.github/workflows/ci.yml)
+runs blocking Ruff, mechanical guards, the non-slow pytest tier with coverage,
+and smoke checks. [Nightly](../.github/workflows/nightly.yml) includes slow tests
+by default. The [framework workflow](../.github/workflows/picard-presidio.yml)
+checks sanity, imports, schemas and a fleet smoke without a second pytest run.
 
 ### Agent skills
+
+The [skill directory](../.agents/skills/) contains the instructions for each task.
 
 | Skill | Use when |
 |-------|----------|
@@ -117,7 +103,7 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 | `operational-impact-behavioral-policies` | OIS weights, action kinds, ThresholdBeliefPolicy |
 | `outbreak-response-architecture` | Escalation levels, decision latency, bimodal compliance, T11/T15/T16 |
 | `run-full-test-suite` | Any pre-PR validation |
-| `ci-test-design` | Designing golden-value + config-sensitivity tests |
+| `ci-test-design` | Designing sensitivity and bounds tests; when a golden is warranted |
 | `long-read-sequencing` | Long-read params, TAT config, escalation, `LongReadNanoporeSequencing` |
 | `orchestrator-smoke-test` | After orchestrator, engine, or `config.yaml` changes |
 | `wearable-anomaly-scoring` | `wearable_anomaly_scorer.py`, `anomaly_detection` config, cascade entry `infection_score` rules |
@@ -144,6 +130,8 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 | `session-handoff-ledger` | Retiring long sessions: handoff ledger template + stop conditions |
 | `provisioning-devin-aws-access` | Role-based AWS access setup/repair for Devin sessions |
 | `managing-github-issues` | Issue triage, batching, PR lifecycle |
+| `ship-function-capacity` | Working with the ship-function registry and capacity layer |
+| `reducer-dispatch-pins` | Checking campaign-reducer dispatch and return contracts |
 | `download-deepwiki` | Offline DeepWiki export for a public GitHub repo |
 
 ### Important caveats
@@ -155,7 +143,7 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 - **Law 1:** No hardcoded epoch SOP schedules; Stackelberg `authorize_sop_subset` filters stoplight-eligible SOPs; `activate_sop` can force protocols via `forced_protocol_ids`.
 - **OIS:** Fourth ledger dimension in `cost_accounting`; configured via `operational_impact_weights` in `resource_costs.json`.
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
-- Eighty-one ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `expedition_cruise_300`/`messy_cruise_500`); see `README.md` Platforms table.
+- The [platform directory](../data/platforms/) is the complete inventory; the [README](../README.md#platforms) describes selected platforms.
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
 - **Complexity backlog:** new functions stay at cognitive complexity ≤15. Campaign `t1`–`t16` / calibration iterators live in `tier_iterators.py`; `ShipSimulation.step` is `_begin_epoch` plus `_step_*` phases. See skill `sonar-quality`.
 - **Outbreak response architecture:** SOP policy (attack-rate escalation + `min_escalation_status`), organizational decision latency (`escalation.decision_latency` / SOP `activation_delay_hours`), and bimodal compliance (compliant/reluctant/defiant) are separate systems — see `docs/tiered_escalation_spec.md` and skill `outbreak-response-architecture`. Default `lockdown_attack_rate: never` for n=20 smokes; mega-cruise campaign injects `0.05`.
@@ -175,5 +163,3 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 - **Norovirus fit status:** `docs/norovirus/norovirus_open_ledger.md` is the live record of what is currently withdrawn — **every dose figure is void pending a refit**. `docs/norovirus/norovirus_model_history.md` is the permanent defect and revision record. Read the ledger before quoting any dose, route share, or anchor result. New entries are one file each under `docs/ledger/<ID>.md` (see its README) with Pathogens and Commit SHA; do not append numbered items.
 - **`dose_adjustment` is not a calibration constant.** It is `−log10` of the grams of stool released to the environment per epoch, and is now spelled `environmental_faecal_release_log10_g_per_epoch` (old key accepted as an alias). Historical fitted values are not validated biological constants.
 - **Multi-pathogen calibration knobs:** `route_efficiency_multipliers` (legacy `transmission_route_weights`; independent per-route dose multipliers, **not** shares summing to 1), log10 `environmental_faecal_release_log10_g_per_epoch` (legacy `dose_adjustment`), `secretor_negative_fraction` with `secretor_negative_relative_susceptibility` (legacy `innate_nonsusceptible_fraction`, which is sterile immunity in a removed fraction and is refuted for GII), continuous-arm `airborne_emission_fraction` (legacy `surface_deposition_fraction`; it feeds the airborne zone reservoir, never a surface pool), and norovirus's measured per-event `emesis_aerosol_fraction_range` under `airborne_emission_mode = emesis_conditioned`, `agent_behavior` dining/free rotation (default off), Dining `food_contamination_multiplier` / `dining_service_type`, env `source_zones` — see `docs/multi_pathogen_model_changes_spec.md`.
-- Ruff lint: **F-rules are blocking** in main CI; E/W/I remain advisory (`continue-on-error` / `|| true`). Keep unused-import and undefined-name findings clean before campaigns.
-- **SonarCloud** uses GitHub-app Automatic Analysis (Autoscan). Configure analysis via in-repo `.sonarcloud.properties` (`sonar.python.version`, `sonar.tests`, exclusions) — not `sonar-project.properties` (that file is ignored while Autoscan is on). Agents still rely on ruff, `tests/test_path_io_inviolate.py`, and pytest for local gates; do not block on live Sonar MCP/CLI unless explicitly integrating.

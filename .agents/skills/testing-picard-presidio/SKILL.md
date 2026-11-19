@@ -5,9 +5,9 @@ description: Test Picard_Framework, decision_engine, Presidio fleet runner, and 
 
 # Testing Picard & Presidio
 
-## Full framework test slice
+## Local framework test slice
 
-Mirrors `.github/workflows/picard-presidio.yml` (runs on `main` and `cursor/**`):
+For focused development runs (main CI includes these modules in its fast tier):
 
 ```bash
 python3 tools/sanity_checker.py --from-config
@@ -59,18 +59,17 @@ PYTHONPATH=. python3 presidio_runner.py \
   --cruises 1
 ```
 
-## JSON schema validation (optional)
+## JSON schema validation (from the activated locked environment)
 
 ```bash
-pip install check-jsonschema
 check-jsonschema --schemafile schemas/picard_run_spec.schema.json \
   picard_framework/runs/destroyer_baseline_default.json
 check-jsonschema --schemafile schemas/presidio_fleet_config.schema.json \
   presidio/data/config/default_fleet.json
 check-jsonschema --schemafile schemas/information_diffusion.schema.json \
   presidio/data/social/information_diffusion_default.json
-check-jsonschema --schemafile schemas/utility_observation_bundle.schema.json \
-  schemas/utility_observation_bundle.schema.json
+check-jsonschema --schemafile schemas/class_interactions.schema.json \
+  presidio/data/social/class_interactions_default.json
 ```
 
 ## Law compliance
@@ -81,8 +80,8 @@ check-jsonschema --schemafile schemas/utility_observation_bundle.schema.json \
 
 | Workflow | When |
 |----------|------|
-| `.github/workflows/ci.yml` | All `main` PRs — full pytest (~875) + Presidio smoke + import hygiene + OIS verify + Docker campaign smoke |
-| `.github/workflows/picard-presidio.yml` | `main` and `cursor/**` — framework slice (~190+ tests, incl. density contact + multi-pathogen Phase A/B + outbreak response + campaign/ship/Stan boundary tests) + Stackelberg/platform schema checks + Presidio smoke |
+| `.github/workflows/ci.yml` | All `main` PRs — non-slow pytest + Presidio smoke + import hygiene + OIS verify + Docker campaign smoke |
+| `.github/workflows/picard-presidio.yml` | PRs to `main` and pushes to `main` or `cursor/**` — sanity, imports, schemas and Presidio smoke (no pytest job) |
 
 Replicate main CI framework steps:
 

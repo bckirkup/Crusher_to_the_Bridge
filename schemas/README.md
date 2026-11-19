@@ -39,11 +39,9 @@ definitions for all data contracts used in the Crusher-to-the-Bridge platform.
 
 ## Usage
 
-Validate a config file against its schema (requires `jsonschema` or `check-jsonschema`):
+Run these from the repo root after [activating the locked environment](../AGENTS.md#setup); the dev extra includes `check-jsonschema`.
 
 ```bash
-pip install check-jsonschema
-
 # Validate pathogen profiles
 check-jsonschema --schemafile schemas/pathogen_profiles.schema.json data/pathogens/active_profiles.json
 

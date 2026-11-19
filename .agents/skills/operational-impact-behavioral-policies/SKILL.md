@@ -11,7 +11,7 @@ OIS is a **tracker-only** fourth ledger dimension (like financial budget — nev
 
 ### Configuration
 
-[`data/config/resource_costs.json`](data/config/resource_costs.json) → `operational_impact_weights`:
+[`data/config/resource_costs.json`](../../../data/config/resource_costs.json) → `operational_impact_weights`:
 
 | Key | Typical use |
 |-----|-------------|
@@ -45,7 +45,7 @@ print('OIS cumulative:', c['operational_impact_cumulative'])
 
 ## Executable action kinds
 
-Schema: [`schemas/decision_action.schema.json`](schemas/decision_action.schema.json)
+Schema: [`schemas/decision_action.schema.json`](../../../schemas/decision_action.schema.json)
 
 | Kind | Effect |
 |------|--------|
@@ -56,7 +56,7 @@ Schema: [`schemas/decision_action.schema.json`](schemas/decision_action.schema.j
 | `report_sick_call` | Force sick-call if symptomatic |
 | `refuse_quarantine` | Force **Defiant** compliance class (never complies) |
 
-Applier: [`picard_framework/simulation/action_applier.py`](picard_framework/simulation/action_applier.py)
+Applier: [`picard_framework/simulation/action_applier.py`](../../../picard_framework/simulation/action_applier.py)
 
 Quarantine compliance is a sticky bimodal mixture (compliant / reluctant /
 defiant) configured under `fred_behavior` — see skill
@@ -64,7 +64,7 @@ defiant) configured under `fred_behavior` — see skill
 
 ## Behavioral policies (Picard only)
 
-Configure in [`crusher_labs/config.yaml`](crusher_labs/config.yaml) → `decision_engine:`:
+Configure in [`crusher_labs/config.yaml`](../../../crusher_labs/config.yaml) → `decision_engine:`:
 
 ```yaml
 decision_engine:

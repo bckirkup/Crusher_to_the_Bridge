@@ -10,18 +10,19 @@ Rule 1: Documentation is a courtesy and brevity is valuable.
 
 ```bash
 uv sync --locked --all-extras --no-install-project --no-build
-source .venv/bin/activate   # or prefix commands with `uv run`
+source .venv/bin/activate
 python3 tools/sanity_checker.py --from-config
 python3 orchestrator.py
 python3 -m pytest tests/ -v --tb=short
 ```
 
-Docs map: [docs/README.md](docs/README.md). Agent runbook: [docs/AGENTS.md](docs/AGENTS.md).
+Start with the [docs map](docs/README.md). The [root agent instructions](AGENTS.md)
+cover setup and validation; the [agent runbook](docs/AGENTS.md) indexes repo skills.
 
 ## Before opening a PR
 
 1. `python3 tools/sanity_checker.py --from-config`
-2. Targeted pytest for what you touched (or full `tests/`)
+2. Run the staged pre-commit hooks and targeted pytest for what you touched. See the [validation commands](AGENTS.md#validation) for the fast and full tiers.
 3. If you changed JSON under `data/` or `telemetry_buffer/`, validate schemas (`schemas/README.md` / `schema-validation` skill)
 
 ## Where documentation lives

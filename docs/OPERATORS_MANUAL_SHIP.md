@@ -1,5 +1,7 @@
 # Crusher-to-the-Bridge — Ship Operator's Manual (Picard)
 
+> **Status:** Living ship operator's manual.
+
 **Scope:** Single-ship biodefense simulation, diagnostics, protocols, and telemetry.  
 **Fleet / Stackelberg:** see [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md).  
 **Docs index:** [README.md](README.md).
@@ -10,7 +12,7 @@
 
 ```bash
 uv sync --locked --all-extras --no-install-project --no-build
-source .venv/bin/activate   # or prefix commands with `uv run`
+source .venv/bin/activate
 python3 tools/sanity_checker.py --from-config
 python3 orchestrator.py              # 24 epochs (config.yaml default)
 python3 orchestrator.py --epochs 250

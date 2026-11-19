@@ -239,8 +239,8 @@ The repo treats "is this twin believable" as an explicit, auditable contract:
   updating it. An operator can ask "what is this number's provenance" and get
   an answer, not a shrug.
 - **Validation.** `tools/sanity_checker.py --from-config` (contract checks),
-  schema validation on every JSON in `data/`, ~6,400 tests including golden
-  orchestrator, and posterior-recovery fits in CI (`test_sentinel_fleet_validation`).
+  schema checks on platform and profile data, and fast-tier tests including the
+  orchestrator regression. Posterior-recovery fits run in the [nightly suite](../.github/workflows/nightly.yml).
 - **Calibration discipline.** Parameters enter as sourced *intervals*; anchors
   (the observed record the twin must reproduce — §4) are *scoring* targets,
   and the hard rule is: never fit a physical constant to an anchor the model is
