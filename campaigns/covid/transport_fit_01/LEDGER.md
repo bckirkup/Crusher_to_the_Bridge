@@ -59,6 +59,7 @@ arm payload resolves `ContamXTransportEngine`.
 | Date | Block | Cells | Job | SHA | Digest | Result |
 |---|---|---:|---|---|---|---|
 | 2026-11-19 | (image) | — | — | `0d70c022` (code `8de77294`) | `sha256:7023d963f3a3ede96c7f47def3bb539ecef1b9c8bc2a112697c45e82e37719a0` | built root Dockerfile + Dockerfile.campaign, pushed |
+| 2026-11-19 | dp_contamx_canary | 20 | `0a894bc5-0dca-4554-816f-0ebc853067ae` | `8de77294` | jobdef `:2` | CANARY submitted |
 
 ## 6. Scoring
 
