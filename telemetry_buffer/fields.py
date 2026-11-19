@@ -167,6 +167,7 @@ SUMMARY_REPORTED_CASE_RATE_CREW: Final = "reported_case_rate_crew"
 SUMMARY_EVER_ILL_RATE_PASSENGER: Final = "ever_ill_rate_passenger"
 SUMMARY_EVER_ILL_RATE_CREW: Final = "ever_ill_rate_crew"
 SUMMARY_SANITARY_ACTIVITY: Final = "sanitary_activity"
+SUMMARY_ROOM_AIR_WITNESS: Final = "room_air_witness"
 SUMMARY_ROOM_AIR_MAP_ARM: Final = "room_air_map_arm"
 
 # ── reactive_protocols block ─────────────────────────────────────────────

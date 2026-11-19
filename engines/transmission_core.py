@@ -1023,6 +1023,17 @@ PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
 # Deprecated alias, kept for external readers.
 PATHWAY_WEIGHT_KEYS = PATHWAY_EFFICIENCY_KEYS
 
+# Pathway dose keys the room-air encounter witness sums as airborne
+# (ROOM-AIR-PAIRED-VALIDATION-01, W2). ``droplet`` carries the room-pool and
+# near-field terms together. The caregiver and cabin-service channels mix
+# air terms with others under one key, so they are left out of both sides
+# and totalled separately. The witness share is therefore an unbounded
+# proxy: it is neither the design's Q nor a proven bound on it.
+ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS = (
+    "droplet", "hvac_airborne", "emesis_aerosol", "flush_aerosol",
+)
+ROOM_AIR_WITNESS_CAREGIVER_PATHWAYS = ("caregiver", "service_to_host")
+
 
 def route_efficiency_from_clearance_rates(
     rates_per_hour: dict[str, float],
@@ -3131,6 +3142,16 @@ class TransmissionCore:
         # the pre-change standing-mass baseline. ShipSimulation populates
         # it post-construction from build_zone_air_exchange_map.
         self.zone_air_exchange_per_hour: dict[str, float] = {}
+        # ROOM-AIR-PAIRED-VALIDATION-01 encounter witness. The zones whose
+        # room-air rate differs between the ambient_on and ambient_off maps
+        # are held here only to sum over; nothing per-zone is reported.
+        # ShipSimulation populates the set post-construction. Bookkeeping
+        # only: no dose, draw or state reads these counters.
+        self.room_air_changed_zones: frozenset[str] = frozenset()
+        self._room_air_witness_person_hours = 0.0
+        self._room_air_witness_airborne_dose = 0.0
+        self._room_air_witness_airborne_dose_changed = 0.0
+        self._room_air_witness_caregiver_dose = 0.0
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
@@ -7025,6 +7046,8 @@ class TransmissionCore:
         # Determine which pathogens are active this epoch
         active_pathogens = list(self.pathogen_profiles.keys()) if self.pathogen_profiles else ["_default"]
 
+        self._tally_room_air_witness_occupancy(zone_occupants, active_pathogens)
+
         for pathogen_id in active_pathogens:
             self._execute_pathogen_pathways(
                 epoch, agents, zone_occupants, zone_pathogen_mass,
@@ -7033,6 +7056,8 @@ class TransmissionCore:
                 matrix, events,
                 agent_coop_doses=agent_coop_doses,
             )
+
+        self._tally_room_air_witness_dose(zone_occupants, agent_pathway_doses)
 
         # ── Apply combined dose-response per pathogen ───────────────
         for agent in agents:
@@ -7060,6 +7085,89 @@ class TransmissionCore:
         self.collect_extinct_strains(agents)
 
         return matrix, events
+
+    def _tally_room_air_witness_occupancy(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        active_pathogens: list[str],
+    ) -> None:
+        """Add this epoch's susceptible person-hours in the changed zones.
+
+        A host counts once per epoch when any active pathogen can still
+        challenge it, read before this epoch's challenges resolve. Pure
+        bookkeeping with zero RNG draws.
+        """
+        if not self.room_air_changed_zones:
+            return
+        hosts: set[int] = set()
+        for location, occupants in zone_occupants.items():
+            if self.compartment_parent(location) not in self.room_air_changed_zones:
+                continue
+            for pathogen_id in active_pathogens:
+                hosts.update(
+                    agent.agent_id
+                    for agent in self._get_susceptible(occupants, pathogen_id)
+                )
+        self._room_air_witness_person_hours += (
+            len(hosts) * self.clock.hours_per_epoch
+        )
+
+    def _tally_room_air_witness_dose(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_pathway_doses: dict[int, dict[str, float]],
+    ) -> None:
+        """Add this epoch's airborne-pathway dose, hull-wide and in changed zones.
+
+        Read from the per-host pathway doses after every pathway has run
+        and its route-efficiency and NPI factors are applied, summed over
+        the active pathogens. The changed-zone part is every airborne-pathway dose to a
+        host located in a changed zone, near-field dose included. It is an
+        unbounded proxy for the room-pool share: no bound on the design's Q
+        is established. Zero RNG draws.
+        """
+        if not self.room_air_changed_zones:
+            return
+        in_changed = {
+            agent.agent_id
+            for location, occupants in zone_occupants.items()
+            if self.compartment_parent(location) in self.room_air_changed_zones
+            for agent in occupants
+        }
+        for agent_id, pathway_doses in agent_pathway_doses.items():
+            # A named pathogen's keys are ``<pathway>:<pathogen_id>``.
+            airborne = 0.0
+            for key, dose in pathway_doses.items():
+                pathway = key.partition(":")[0]
+                if pathway in ROOM_AIR_WITNESS_AIRBORNE_PATHWAYS:
+                    airborne += dose
+                elif pathway in ROOM_AIR_WITNESS_CAREGIVER_PATHWAYS:
+                    self._room_air_witness_caregiver_dose += dose
+            self._room_air_witness_airborne_dose += airborne
+            if agent_id in in_changed:
+                self._room_air_witness_airborne_dose_changed += airborne
+
+    def room_air_witness(self) -> dict[str, float]:
+        """Whole-hull running totals of the room-air encounter witness."""
+        total = self._room_air_witness_airborne_dose
+        changed = self._room_air_witness_airborne_dose_changed
+        return {
+            "changed_zone_count": len(self.room_air_changed_zones),
+            "susceptible_person_hours_changed_zones": (
+                self._room_air_witness_person_hours
+            ),
+            "airborne_dose_all_zones": total,
+            "airborne_dose_changed_zones": changed,
+            # Unbounded proxy for the design's Q (not a bound on it); 0.0
+            # when no airborne dose was delivered anywhere. The
+            # caregiver-channel total below is dose the proxy leaves out.
+            "airborne_dose_share_changed_zones_proxy": (
+                changed / total if total > 0.0 else 0.0
+            ),
+            "caregiver_channel_dose_all_zones": (
+                self._room_air_witness_caregiver_dose
+            ),
+        }
 
     def _epoch_zone_occupants(
         self,
@@ -16519,6 +16627,26 @@ def _ambient_opening_ach_contributions(
             )
         rates[zone] = exchange / volume
     return rates
+
+
+def room_air_changed_zones(
+    airflow_paths: dict[str, Any],
+    zone_volumes: Mapping[str, float] | None = None,
+    ambient_exchange_m3h: Mapping[str, float] | None = None,
+) -> frozenset[str]:
+    """Zones whose room-air rate differs between the two map arms.
+
+    The ``ambient_on`` map is the AHU-only (``ambient_off``) map plus each
+    zone's positive opening exchange, so the two differ exactly where that
+    contribution is positive. The set does not depend on which arm runs.
+    """
+    return frozenset(
+        zone
+        for zone, opening_ach in _ambient_opening_ach_contributions(
+            airflow_paths, zone_volumes, ambient_exchange_m3h,
+        ).items()
+        if opening_ach > 0.0
+    )
 
 
 def build_zone_air_exchange_map(
