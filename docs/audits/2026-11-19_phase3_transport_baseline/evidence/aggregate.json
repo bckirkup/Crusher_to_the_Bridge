@@ -1,0 +1,134 @@
+{
+  "measured_at": "5c8f05cc6f0d0e3e962ab4ff6e14c9941781976e",
+  "contamx_binary_sha256": "d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b",
+  "diagnostic": {
+    "envelope_leak_mode": "boundary_sink",
+    "filter_efficiency": 0.3,
+    "horizon_h": 12.0,
+    "lanes": [
+      "native",
+      "commissioned",
+      "authored",
+      "design"
+    ],
+    "natural_decay_rate": 0.1,
+    "timings": [
+      "pulse_t0",
+      "split_t0_t1"
+    ]
+  },
+  "hulls": {
+    "destroyer_baseline": {
+      "platform_git_tree": "e9afe0a744dd0fddf2c9aecc397906116fab56c3",
+      "tracer_cells": 24,
+      "unsolved_pressure_rows": 0,
+      "max_absolute_closure_error_units": 5.551115123125783e-16,
+      "max_absolute_material_time_partition_error_h": 1.1102230246251565e-16,
+      "authored_matches_commissioned_cells": true,
+      "pulse_mean_whole_hull_material_time_h": {
+        "native": 0.23285378851417993,
+        "commissioned": 0.40944125336162773,
+        "authored": 0.40944125336162773,
+        "design": 0.5150666487257362
+      },
+      "pressure": {
+        "authored": {
+          "all_path_max_abs_dp_pa": 10.785057067871094,
+          "flowing_interior_max_abs_dp_pa": 0.00034312542993575335,
+          "makeup_demand_m3h": 716.4212265867613,
+          "net_envelope_inward_m3h": 7.933383836218389,
+          "net_opening_inward_m3h": 708.4878345594414,
+          "balance_residual_m3h": 8.191101642296417e-06
+        },
+        "commissioned": {
+          "all_path_max_abs_dp_pa": 10.785057067871094,
+          "flowing_interior_max_abs_dp_pa": 0.00034312542993575335,
+          "makeup_demand_m3h": 716.4212265867613,
+          "net_envelope_inward_m3h": 7.933383836218389,
+          "net_opening_inward_m3h": 708.4878345594414,
+          "balance_residual_m3h": 8.191101642296417e-06
+        },
+        "design": {
+          "all_path_max_abs_dp_pa": 1.0523680448532104,
+          "flowing_interior_max_abs_dp_pa": 0.000380352430511266,
+          "makeup_demand_m3h": 0.0,
+          "net_envelope_inward_m3h": -0.03894484247843044,
+          "net_opening_inward_m3h": 0.03894178187798136,
+          "balance_residual_m3h": 3.060600449078521e-06
+        }
+      }
+    },
+    "expedition_cruise_450": {
+      "platform_git_tree": "96c5249f2a5345134e7c3c19d37db7b9d4a82dd7",
+      "tracer_cells": 32,
+      "unsolved_pressure_rows": 0,
+      "max_absolute_closure_error_units": 6.661338147750939e-16,
+      "max_absolute_material_time_partition_error_h": 5.551115123125783e-17,
+      "authored_matches_commissioned_cells": true,
+      "pulse_mean_whole_hull_material_time_h": {
+        "native": 0.08270099193020246,
+        "commissioned": 0.09858082833747817,
+        "authored": 0.09858082833747817,
+        "design": 0.13213888191865766
+      },
+      "pressure": {
+        "authored": {
+          "all_path_max_abs_dp_pa": 89.18805694580078,
+          "flowing_interior_max_abs_dp_pa": 63.8658447265625,
+          "makeup_demand_m3h": 12541.95748236319,
+          "net_envelope_inward_m3h": 77.01890114510377,
+          "net_opening_inward_m3h": 12464.93751334348,
+          "balance_residual_m3h": 0.0010678746057237731
+        },
+        "commissioned": {
+          "all_path_max_abs_dp_pa": 89.18805694580078,
+          "flowing_interior_max_abs_dp_pa": 63.8658447265625,
+          "makeup_demand_m3h": 12541.95748236319,
+          "net_envelope_inward_m3h": 77.01890114510377,
+          "net_opening_inward_m3h": 12464.93751334348,
+          "balance_residual_m3h": 0.0010678746057237731
+        },
+        "design": {
+          "all_path_max_abs_dp_pa": 9.718412399291992,
+          "flowing_interior_max_abs_dp_pa": 8.425061225891113,
+          "makeup_demand_m3h": 8007.106664707511,
+          "net_envelope_inward_m3h": 25.63131677325366,
+          "net_opening_inward_m3h": 7981.474365365924,
+          "balance_residual_m3h": 0.0009825683337112423
+        }
+      }
+    }
+  },
+  "historical_comparator": {
+    "measured_at": "7cd051da472fd88821176ed5212a12cc51ecfcec",
+    "hull": "destroyer_baseline",
+    "platform_git_tree": "20a40fb6aa9ca5198bdc2b00e2a9427584c63154",
+    "timing": "pulse_t0",
+    "tracer_cells": 9,
+    "mean_whole_hull_material_time_h": {
+      "native": 0.23285378851417993,
+      "commissioned": 0.2638684990924902,
+      "authored": 0.2638684990924902
+    }
+  },
+  "runtime": {
+    "python": "3.11.18",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1"
+  },
+  "input_sha256": {
+    "uv.lock": "02c498d8992f9c0de4193bc44e4b8d70f9f4d1cbff32f7c12c70afd3c5d8e5c3",
+    "tools/diag/contam_paired_diagnostic.py": "bd980a923bc261eb777844f804e746ab921efcd33abe09a4e3c155d366a3ed10",
+    "tools/diag/contam_pressure_balance_diagnostic.py": "020cdc91acb6b5d43f3757bde0ca60ec7faab42881a4b3266b9d1d450053b6ee",
+    "data/platforms/destroyer_baseline/spatial_layout.json": "515cbae0e7a4255509fc04df1695afd1b5c2ff7a7b2f2fe6bc44033adfee5fef",
+    "data/platforms/destroyer_baseline/air_flow_paths.json": "a41886e9efe5d0c3474fb8c0e250fd4df024b3cb6dc4ad60eaba022c55ad10c6",
+    "data/platforms/destroyer_baseline/contam/platform.prj": "028aa2ba3275269c7401b9f7f9e035200c87d11720b1685852bb811ab150763a",
+    "data/platforms/destroyer_baseline/contam/path_map.json": "2f8a0efc630df121a89fcd7ea28b57e216b438e13ed12f105f8bfe19fb6a9086",
+    "data/platforms/destroyer_baseline/contam/hobbyist_overrides.json": "5ec3f01973b8e7ca45157220a011d942878ee30415cd754b072143b8687b5a54",
+    "data/platforms/expedition_cruise_450/spatial_layout.json": "83cb6d92d8a9bab1c01ff47f1ceea1e3f9441e915fff3db7382726d1a0bad97c",
+    "data/platforms/expedition_cruise_450/air_flow_paths.json": "0eac3d4d965b9c54bd97c1f5ed6f3bb24b6e09c563907527a07da26d53b677e1",
+    "data/platforms/expedition_cruise_450/contam/platform.prj": "34510e3de0e4072593210ea4e277a7b51448867903abc300448cd940292d829e",
+    "data/platforms/expedition_cruise_450/contam/path_map.json": "e0ba0480477ffa284017a72d2299b9b1cb6cc9ca6efda97732ae841e522eb888",
+    "data/platforms/expedition_cruise_450/contam/hobbyist_overrides.json": "782bfc77b1cf6bc8b200774dd90c4a6b018cda3ee0f465b87e02ac19eea5361e"
+  }
+}
