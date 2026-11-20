@@ -1,21 +1,35 @@
 ---
 name: commissioning-contam-platform
-description: Commission a new hull's Contam bundle — the hand-authored layer the recipe generators do NOT emit (forced-exhaust declarations, galley pair, make-up louvre, open-deck ambient openings, weather tags, commissioned re-export, audit-pin moves). Use after adding a platform via cruise_platform_recipes or generate_*_layout, when a hull's committed .prj must solve in the commissioned lane, or when forced-exhaust audit tests move.
+description: Commission a new hull's Contam bundle — the layer the cruise recipe generator now emits plus the post-generation solve (forced-exhaust declarations, galley pair, make-up louvre, open-deck ambient openings, weather tags, commissioned re-export, exchange_m3h fill, audit-pin moves). Use after adding a platform via cruise_platform_recipes or generate_*_layout, when a hull's committed .prj must solve in the commissioned lane, when forced-exhaust audit tests move, or when hand-commissioning a non-recipe hull.
 ---
 
 # Commissioning a Contam Platform
 
-The recipe generators (`scripts/cruise_platform_recipes.py`,
-`scripts/generate_cruise_platform_layout.py`) emit hull data only. Every
-commissioned hull (`diamond_princess`, `mega_cruise_5000`, the four ladder
-hulls, `explorer_seas_06`) additionally carries a **hand-authored
-commissioning layer** that no generator writes. A new recipe hull without it
-bootstraps clean only because supply = return; commissioned it pulls the
-sanitary/galley exhaust through cabin leaks at hundreds of kPa.
+`scripts/generate_cruise_platform_layout.py` emits the whole commissioning
+layer for **recipe hulls** since explorer_seas_06: decorated link triples,
+the `Galley_Hood_Exhaust` pair, `makeup_louvre`, `open_deck` records, and
+`exposure: weather` tags — everything except `exchange_m3h`, which ships
+`null` because it is the ContamX-solved outward flow. The only remaining
+post-generation step is:
 
-Reference implementation: `diamond_princess` (first commissioned cruise hull)
-and `explorer_seas_06` (most recent; commit `2897df87`). Ledger IDs:
-`CONTAM-AMBIENT-WEATHER-CRUISE-01`, `CONTAM-AMBIENT-MAKEUP-CRUISE-01`.
+```bash
+.venv/bin/python3 scripts/commission_platform_contam.py --platform <id>
+```
+
+which re-exports `contam/platform.prj` + `path_map.json` in commissioned AHS
+mode, solves the field, and writes `exchange_m3h` back. Regenerating
+explorer_seas_06 plus this script reproduces the committed bundle
+byte-for-byte.
+
+**Non-recipe hulls** (`mega_cruise_5000`, blueprint imports, anything not in
+`scripts/cruise_platform_recipes.py`) still need the layer hand-authored —
+apply the six edits below, then run the same commission script.
+
+A new hull without the layer bootstraps clean only because supply = return;
+commissioned it pulls the sanitary/galley exhaust through cabin leaks at
+hundreds of kPa. Reference implementations: `diamond_princess`,
+`explorer_seas_06`. Ledger IDs: `CONTAM-AMBIENT-WEATHER-CRUISE-01`,
+`CONTAM-AMBIENT-MAKEUP-CRUISE-01`.
 
 ## Prerequisites
 
@@ -92,34 +106,21 @@ of a square-plan deck at the exporter's 3 m zone height. Solve
 `spatial_layout.json`: add `"exposure": "weather"` to each exterior zone,
 keyed after `deck` (Diamond ordering).
 
-### 6. Commissioned re-export
+### 6. Commissioned re-export + exchange fill
 
 ```bash
-.venv/bin/python3 scripts/generate_platform_contam_prj.py \
-  --platform <id> --hobbyist --ahs-terminal-mode commissioned
+.venv/bin/python3 scripts/commission_platform_contam.py --platform <id>
 ```
 
-Writes `contam/platform.prj` + `contam/path_map.json`. One declared relative
-wind (1 m/s) is emitted automatically; never set per-path wind
-(`CONTAM-DEFAULT-WEATHER-01`).
-
-## Filling exchange_m3h
-
-The `.prj` does not consume `exchange_m3h` (native-lane field only), so fill
-it after the export:
-
-```python
-from engines.contamx_runner import find_contamx, run_contamx, SimResults
-res = SimResults(run_contamx('data/platforms/<id>/contam/platform.prj',
-                           find_contamx(), allowed_roots=('.',)))
-frame = res.steady_state_frame()
-flow0 = res.path_volumetric_flow_m3h(frame)
-# per ambient_opening path_map entry: exchange_m3h = sum of positive Flow0
-# over the zone's legs (gross outward flow).
-```
-
-Values on commissioned hulls run 40k–135k m³/h — open-deck two-way exchange,
-not a bug. `makeup_louvre` stays 0.0.
+Equivalent to exporting with
+`scripts/generate_platform_contam_prj.py --hobbyist --ahs-terminal-mode commissioned`
+then filling every `open_deck` record's `exchange_m3h` with the gross
+ContamX-solved outward Flow0 across its path legs. The `.prj` does not
+consume `exchange_m3h` (native-lane field only). One declared relative wind
+(1 m/s) is emitted automatically; never set per-path wind
+(`CONTAM-DEFAULT-WEATHER-01`). Solved values on commissioned hulls run
+40k–135k m³/h — open-deck two-way exchange, not a bug. `makeup_louvre`
+stays 0.0.
 
 ## Validation gates
 
