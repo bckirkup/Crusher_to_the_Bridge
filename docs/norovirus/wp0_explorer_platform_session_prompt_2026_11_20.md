@@ -113,15 +113,15 @@ How the platform was built, beyond the prompt above:
 
 Open, not fixed (both shared with `diamond_princess`):
 
-- `generate_cruise_platform_layout.py --overwrite` on any recipe hull drops
-  its hand-authored commissioning layer. Folding that layer into the
-  generator is the parent session's work, not WP0's or WP3's. Its commits
-  `63b66a34` and `dbbb908b` were pushed to the #1346 branch after that PR
-  merged, so they are not on `main` as of this readout; until they land
-  through their own PR, the statement above holds on `main`.
+- ~~`generate_cruise_platform_layout.py --overwrite` on any recipe hull drops
+  its hand-authored commissioning layer.~~ Resolved by #1349 (merged): the
+  generator now emits the layer and `scripts/commission_platform_contam.py`
+  re-fills `exchange_m3h` after any regeneration. Non-recipe hulls still
+  follow the manual procedure in the `commissioning-contam-platform` skill.
 - SOP-007/009 `close_zones` name `mega_cruise_5000` zone ids, so closure
   orders skip Explorer's galley and crew mess. WP3 must decide whether the
   reconstruction needs per-platform closure aliases before it relies on
   those SOPs.
 
-Next decision: when WP3 starts, and whether it waits for the fold-back.
+Next decision: when WP3 starts. The generator fold-back it was waiting on
+landed in #1349.
