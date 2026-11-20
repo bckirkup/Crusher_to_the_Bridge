@@ -313,24 +313,26 @@ def commissioning_augment(
     galley_flow = 18000.0
     out: list[dict[str, Any]] = []
     for link in cross:
-        extra = _commissioned_link_fields(link)
-        if not extra:
-            out.append(link)
-            continue
-        rebuilt = {
-            key: link[key]
-            for key in ("from", "to", "flow_rate_m3h", "is_hvac_ducted", "path")
-            if key in link
-        }
-        if link.get("path") == "Dining_Galley_Exhaust":
-            rebuilt["description"] = _GALLEY_TRANSFER_DESCRIPTION
+        is_galley = link.get("path") == "Dining_Galley_Exhaust"
+        if is_galley:
             galley_source = str(link["from"])
             galley_zone = str(link["to"])
             galley_flow = float(link["flow_rate_m3h"])
-        rebuilt.update({k: v for k, v in link.items() if k not in rebuilt})
-        rebuilt.update(extra)
-        out.append(rebuilt)
-        if link.get("path") == "Dining_Galley_Exhaust" and not any(
+        extra = _commissioned_link_fields(link)
+        if not extra:
+            out.append(link)
+        else:
+            rebuilt = {
+                key: link[key]
+                for key in ("from", "to", "flow_rate_m3h", "is_hvac_ducted", "path")
+                if key in link
+            }
+            if is_galley:
+                rebuilt["description"] = _GALLEY_TRANSFER_DESCRIPTION
+            rebuilt.update({k: v for k, v in link.items() if k not in rebuilt})
+            rebuilt.update(extra)
+            out.append(rebuilt)
+        if is_galley and not any(
             cl.get("path") == "Galley_Hood_Exhaust" for cl in cross
         ):
             out.append({
