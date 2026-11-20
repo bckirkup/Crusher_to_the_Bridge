@@ -6,9 +6,12 @@ engineering comparison only: it validates no ship, and carries no room-level,
 source, organism, dose or voyage quantity. Hulls are never ranked.
 
 Everything below is measured, from the offline package
-`contam_fleet_workup_77_package_01.tar.gz`
-(SHA-256 `77366e25c6b4c388516dc0c2650b6baf207ae1b9585f820c272d1226028c5964`).
-Its `verify.py` passes 48 of 48 checks on a clean unpack with no network.
+`contam_fleet_workup_77_package_02.tar.gz`
+(SHA-256 `3bc0e40f4d7a03082bbb6caf01ff76257163d7da8daee672f55a80c406f9684d`).
+Its `verify.py` passes 51 of 51 checks on a clean unpack with no network.
+It supersedes package 01 (`77366e25…`), whose text said every job hashed
+all 392 pinned inputs; the canary job hashed 27. The data tables of the two
+packages are byte-identical.
 Sources: the corrected four-hull canary (run 2, #1335) plus 73 hulls measured
 here in eight Batch jobs. Design `fb6a0bd5`, hull inputs `d5d50d3a`, fleet
 runner `56b1a990f64edae1f95eb32588d0017a34db6d0f`.
@@ -71,15 +74,16 @@ Ratio ContamX / native, across hulls (min, median, max):
 Both untouched lanes, the committed export and the authored `platform.prj`,
 gave identical aggregates to each other on all 77 hulls. Against the
 harmonized baseline their solved airflow is the same; their outdoor-air
-inputs differ on 68 hulls: effective outdoor-air fraction lower by up to 0.8
-(median 0.42), whole-hull air change lower by up to 2.70 1/h (median 1.04),
-material time longer by up to 0.88 h (median 0.15). On 9 hulls there is no
-difference.
+inputs differ on 68 hulls: effective outdoor-air fraction lower by up to 0.8,
+whole-hull air change lower by up to 2.70 1/h, material time longer by up to
+0.88 h (medians over all 77 hulls: 0.42, 1.04 1/h, 0.15 h). On 9 hulls there
+is no difference.
 
 ## Sensitivity
 
-Operational, both lanes: supply duty ×0.5 and ×1.5 and supply air change ×1.5
-ran on all 77 hulls; outdoor-air fraction ×0.5 and recirculated fraction ×0.5
+Operational, both lanes: supply duty ×0.5 and ×1.5 ran on all 77 hulls, as
+did supply air change ×1.5, which the design carries as a redundancy check on
+duty ×1.5 rather than an independent setting; outdoor-air fraction ×0.5 and recirculated fraction ×0.5
 on 74. The two engines' responses (each minus its own baseline) agree to
 within 9.2e-9 in effective outdoor-air fraction and 0.018 1/h in air change.
 
@@ -108,8 +112,10 @@ one job on one host; cohorts are not pooled. Range of per-row medians of the
 
 - The ContamX subprocess itself is a small part of the ContamX lane; most of
   the lane's time is the Python decode of its result files (`contamx_import`).
-- Whole-process time is dominated by interpreter start-up and imports: about
-  0.83 to 1.6 s per cold cell in either lane.
+- Whole-process time per cold cell (`process_total`, per-row medians) is 0.83
+  to 1.63 s. Subtracting `end_to_end` leaves 0.82 to 0.94 s per row (median
+  0.83 s): interpreter start-up, imports, reading the hull and writing the
+  record. That split is a difference of two measured clocks, not its own timer.
 - Cached downstream repeats (engine already built) are in the package and are
   not comparable with cold cells.
 - The 1-minute load average during timing was at most 1.4 on every host.
@@ -133,7 +139,21 @@ Fleet image
 canary image `sha256:e59acd8d426a1304387929dd9c91bb85946b28c0c2357eb7a997e7e16a28e0c3`.
 ContamX binary SHA-256
 `d14dc8020bd5e9f95962af52f46b7ce85e2899b63306309d6590cec652274b2b` in every
-cohort. Every job hashed all 392 pinned input files before and after: unchanged.
+cohort.
+
+Input verification at run time, from each job's retained record
+(`readout/input_verification.csv`; the verifier recomputes the set digests
+from the frozen manifest):
+
+| job | files hashed before / after | of the 392 pinned | result |
+|---|---|---|---|
+| canary_run2 | 27 / 27 (its 4 hulls' 20 files + 7 shared) | 27 | identical to the manifest, unchanged |
+| each of fleet_cohort0 to 7 | 392 / 392 (all 77 hulls + 7 shared) | 392 | identical to the manifest, unchanged |
+| fleet gate job (untimed, not a cohort) | 392 / 392 | 392 | identical to the manifest, unchanged |
+
+So each hull's five inputs and the seven shared inputs were hashed inside the
+job that measured that hull. The canary job did not hash the other 73 hulls'
+files.
 Cohorts 4 and 7 each lost a Spot host before finishing; the retry started from
 nothing on a new host and all their records come from the second attempt.
 

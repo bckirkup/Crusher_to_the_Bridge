@@ -9,6 +9,7 @@ from __future__ import annotations
 import contextlib
 import csv
 import io
+import json
 import os
 import shutil
 
@@ -187,3 +188,58 @@ def test_metric_dropped_from_every_derived_table_is_caught(built, tmp_path):
         _rewrite(root, f"data/{name}.csv", drop)
     assert ("results_long carries every metric of every executed row, and no other"
             in _failed(root))
+
+
+# ── run-time input verification ───────────────────────────────────────────
+
+INPUT_CHECK = ("each job's hashed input set, before and after, is the pinned manifest set "
+               "of its stated scope")
+
+
+def _input_rows(root):
+    with open(os.path.join(root, "data/input_verification.csv"), encoding="utf-8", newline="") as fh:
+        return list(csv.DictReader(fh))
+
+
+def test_canary_receipt_is_what_its_retained_record_holds(built):
+    with open(os.path.join(CANARY, "environment.json"), encoding="utf-8") as fh:
+        env = json.load(fh)
+    row = _input_rows(built)[0]
+    # 4 hulls x 5 files + 7 shared: the canary job never hashed the full manifest.
+    assert len(env["inputs_sha256_before"]) == len(env["inputs_sha256_after"]) == 27
+    assert row["scope"] == verifier.SCOPE_OWN
+    assert (row["files_hashed_before"], row["files_hashed_after"]) == ("27", "27")
+    assert row["manifest_files_total"] == "392"
+    assert row["before_set_sha256"] == verifier.set_digest(env["inputs_sha256_before"])
+    assert row["after_set_sha256"] == verifier.set_digest(env["inputs_sha256_after"])
+    assert (row["own_hulls"], row["own_hulls_hashed"], row["hulls_hashed"]) == ("4", "4", "4")
+
+
+def test_claiming_the_full_manifest_for_the_canary_is_refused(built, tmp_path):
+    root = _copy(built, tmp_path)
+
+    def overclaim(rows):
+        rows[0].update(scope=verifier.SCOPE_ALL, files_hashed_before="392",
+                       files_hashed_after="392", hulls_hashed="77")
+        return rows
+
+    _rewrite(root, "data/input_verification.csv", overclaim)
+    assert INPUT_CHECK in _failed(root)
+
+
+def test_changed_input_digest_is_refused(built, tmp_path):
+    root = _copy(built, tmp_path)
+
+    def change(rows):
+        rows[0]["after_set_sha256"] = "0" * 64
+        return rows
+
+    _rewrite(root, "data/input_verification.csv", change)
+    assert INPUT_CHECK in _failed(root)
+
+
+def test_package_readme_does_not_claim_every_job_hashed_the_manifest(built):
+    with open(os.path.join(built, "README.md"), encoding="utf-8") as fh:
+        text = fh.read()
+    assert "every job re-hashed all" not in text
+    assert "| canary_run2 | `own_hulls_and_shared` | 27 / 27 | 392 |" in text

@@ -22,10 +22,12 @@ exactly 1; gross interzone flow 0.012 to 4.51; tracer material time 0.53 to
 hull and differ from the harmonized one in outdoor-air inputs on 68 hulls.
 Full readout: `campaigns/contam/fleet_workup_fleet_01/READOUT.md`.
 
-**Package.** `contam_fleet_workup_77_package_01.tar.gz`, SHA-256
-`77366e25c6b4c388516dc0c2650b6baf207ae1b9585f820c272d1226028c5964`, whole-hull
-aggregates only, with a standard-library verifier (48 of 48 checks on a
-clean unpack). Prepared only; not transferred anywhere outside the private
+**Package.** `contam_fleet_workup_77_package_02.tar.gz`, SHA-256
+`3bc0e40f4d7a03082bbb6caf01ff76257163d7da8daee672f55a80c406f9684d`, whole-hull
+aggregates only, with a standard-library verifier (51 of 51 checks on a
+clean unpack). It supersedes package 01 (`77366e25…`), which overstated
+run-time input hashing: the canary job hashed its own 27 pinned files, each
+fleet job all 392. Data tables are identical in both. Prepared only; not transferred anywhere outside the private
 campaign prefix.
 
 **Where.** Campaign `contam/fleet_workup_fleet_01`; running record in its

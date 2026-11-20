@@ -22,8 +22,9 @@ run 1 is not used anywhere in this stage.
 
 ## Preflight (nothing timed)
 
-- All 392 pinned input files match the checkout at the build commit; every
-  job re-hashes all 392 in the image before and after.
+- All 392 pinned input files match the checkout at the build commit. Every
+  fleet job (gate and cohorts) re-hashes all 392 in the image before and
+  after. The canary job, run earlier under its own runner, hashed 27.
 - Local untimed smoke, all 73 hulls: 1,514 of 1,514 cells, all gates passed.
 - In-image untimed smoke, cohort 7: 189 cells, all gates passed.
 - Image `picard-campaign:contam-fleet-workup-fleet-01@sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79`,
@@ -62,7 +63,7 @@ receipt and reduction audit (14 of 14 checks in every cohort).
   restarted from a copy of the script, picked the same job up by its saved
   ID, and submitted nothing twice.
 
-## Package
+## Package (01, superseded; see the correction below)
 
 - `contam_fleet_workup_77_package_01.tar.gz`, 4,573,577 bytes, SHA-256
   `77366e25c6b4c388516dc0c2650b6baf207ae1b9585f820c272d1226028c5964`; built with
@@ -83,6 +84,39 @@ receipt and reduction audit (14 of 14 checks in every cohort).
   extra raw file, dropped repeat. Each failed the check that names it. A
   flipped byte without re-summing fails the checksum.
 
+## Correction: package 01 superseded by package 02
+
+- Parent found that package 01's README, the readout and this ledger said
+  every job hashed all 392 pinned inputs. Checked against the retained
+  records: canary run 2's `environment.json` holds 27 entries before and 27
+  after (4 hulls × 5 files + 7 shared); the gate job and each of the eight
+  cohort jobs hold 392 and 392. In all ten records the path set equals the
+  manifest set of that scope, every digest equals the manifest's, and before
+  equals after. The claim was wrong for the canary cohort only; no
+  measurement is affected.
+- Package 02 adds `data/input_verification.csv` (per cohort: scope, counts,
+  set digests before and after, taken from the retained record) and three
+  verifier checks that recompute each scope's digest from
+  `design/input_manifest.json`. A package that claims 392 for the canary is
+  refused. README wording corrected there and in four other places found on
+  re-reading against the code and data: `end_to_end` is its own clock and
+  excludes `input_read` (it was described as a sum); `process_total` is the
+  parent's launch-to-exit time; supply air change ×1.5 is the design's
+  redundancy check on duty ×1.5; harmonization is of the outdoor-air
+  fraction, as the protocol states; lane order alternates by repeat.
+- The eleven data tables, design files and `per_hull_readout.md` are
+  byte-identical between 01 and 02. Changed: `README.md`, `EXPECTED.json`
+  (id, `supersedes`), `verify.py`, `SHA256SUMS`; added:
+  `data/input_verification.csv`.
+- `contam_fleet_workup_77_package_02.tar.gz`, 4,575,643 bytes, SHA-256
+  `3bc0e40f4d7a03082bbb6caf01ff76257163d7da8daee672f55a80c406f9684d`; verifier 51 of 51
+  on a clean offline unpack; rebuild reproduces the hash. Rejection checks
+  run on it: flipped byte, missing row, duplicate row, blank replaced by 0,
+  relabelled phase, canary claiming 392, a fleet count of 391, a dropped
+  receipt row, a changed manifest digest. All refused.
+- Package 01 stays in the private prefix untouched, and its checksum file is
+  kept under `readout/superseded/`. No job was run for this correction.
+
 ## Regenerate
 
 ```
@@ -94,11 +128,11 @@ for i in 0..7:  aws s3 cp <prefix>/fleet/fleet_cohort$i_raw.tar.gz .   # check S
 python3 tools/diag/contam_fleet_workup_package.py build \
     --cohort canary_run2=campaigns/contam/fleet_workup_canary_01/readout \
     --cohort fleet_cohort0=red0 … --cohort fleet_cohort7=red7 \
-    --out pkg/contam_fleet_workup_77_package_01 --archive pkg/contam_fleet_workup_77_package_01.tar.gz
+    --out pkg/contam_fleet_workup_77_package_02 --archive pkg/contam_fleet_workup_77_package_02.tar.gz
 ```
 
 The archive is byte-reproducible (sorted members, zero timestamps), so the
-SHA-256 above is the check.
+SHA-256 of package 02 is the check.
 
 ## Stopped here
 
