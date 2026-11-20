@@ -203,12 +203,17 @@ def _paired_delta(
         (r.get("cell") or {}).get("seed"): _channels(r).get(key)
         for r in native
     }
-    deltas = [
-        (_channels(r).get(key) or 0) - (by_seed[(r.get("cell") or {})
-                                            .get("seed")] or 0)
-        for r in contamx
-        if (r.get("cell") or {}).get("seed") in by_seed
-    ]
+    deltas = []
+    for r in contamx:
+        seed = (r.get("cell") or {}).get("seed")
+        if seed not in by_seed:
+            continue
+        a, b = _channels(r).get(key), by_seed[seed]
+        if a is None or b is None:
+            # An undefined share (zero confirmations) is not a zero — a
+            # pair needs both sides measurable to score a delta.
+            continue
+        deltas.append(a - b)
     return _row(deltas)
 
 
