@@ -1,5 +1,8 @@
 # WP1 session prompt — Paper-1 freeze design contract for Edison's pre-freeze review
 
+> **Status:** Session brief. Launched 2026-11-20; the Result section records
+> the outcome.
+
 Paste into a fresh Devin session on bckirkup/Crusher_to_the_Bridge. One deliverable,
 one session (bounded-research-sessions rule).
 
@@ -14,9 +17,11 @@ Settled inputs (do not re-derive):
   192-epoch smoke passed). The commissioning fold-back is merged (#1349):
   generate_cruise_platform_layout.py emits the Contam commissioning layer and
   scripts/commission_platform_contam.py refills exchange_m3h after
-  regeneration. #1351 records that --overwrite is a no-op only for
-  explorer_seas_06; the other four recipe hulls have small committed diffs —
-  regeneration of them is NOT part of the freeze.
+  regeneration. #1351 records that --overwrite followed by the commission
+  script is a no-op only for explorer_seas_06 (exchange_m3h is refilled by
+  commission_platform_contam.py, not by the generator); the other four
+  recipe hulls have small committed diffs — regeneration of them is NOT
+  part of the freeze.
 - The frozen-block pattern exists: NORO-GENO-02 carried a verbatim frozen
   dose_adjustments/config_overrides block on every cell. Reuse that shape.
 - The freeze needs (assessment §"One declared reference version is itself a
@@ -30,8 +35,10 @@ Settled inputs (do not re-derive):
   contact mode, duty0_terminal_mode, surface_swab_source,
   wastewater_assay_mode, VSP either-channel, shedding variance, cabin-mates —
   plus any others you find by walking config defaults vs the ledger. Each
-  pinned key must be verified against the config machinery (path resolves,
-  default value recorded next to the pinned value).
+  pinned key must be verified against the config machinery: the consumer
+  that reads the key is named (merge_config_overrides accepts unknown keys,
+  so a key that merely parses can be dead), the path resolves, and the
+  default value is recorded next to the pinned value.
 - Declared limitations cite docs/norovirus/norovirus_open_ledger.md open
   items, including: every dose figure except the refit
   environmental_faecal_release_log10_g_per_epoch (7.57 [7.14, 8.86],
@@ -43,7 +50,10 @@ Settled inputs (do not re-derive):
 - Named-commit rule from the assessment's Decision item 1: head at freeze
   time is the named reference; Edison's blocker findings gate the freeze.
   The contract proposes the current main HEAD as the candidate SHA and
-  states the rule — it does not declare the freeze.
+  states the rule — it does not declare the freeze. The contract requires
+  the frozen block's parse check to be re-run on the final named commit at
+  freeze time: head may move the config loader between Edison's review and
+  the freeze, and the final SHA must not run on a loader he never reviewed.
 - Voyage grid: retained 168/288/504 epochs only; 192 is scoped to the
   reconstruction campaign and must NOT appear in the frozen joint-eval grid.
 
