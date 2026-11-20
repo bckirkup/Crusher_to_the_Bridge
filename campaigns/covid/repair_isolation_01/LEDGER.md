@@ -104,8 +104,10 @@ pooled lab_confirmed, 9/20 takeoff) — the pairing is exact, not statistical.
   identical); CONTAM-DUTY0-01 (sealed) is a strict no-op — bit-identical
   on every channel.
 - `all_off` ≈ `nearfield_off` alone (156 vs 76): when the near-field is
-  gone, freeing the pool adds only ~80 pooled confirmations — the pool's
-  suppressed volume is mostly near-field volume.
+  gone, reverting the remaining three repairs together (pool, room-air,
+  duty-0 — not pool alone, so this does not isolate pool transport)
+  adds only ~80 pooled confirmations — consistent with, but not proof
+  of, the pool's suppressed volume being mostly near-field volume.
 
 **What this settles:** the four repairs did not remove the pre-repair
 ensemble's volume — the two that matter push in opposite directions and

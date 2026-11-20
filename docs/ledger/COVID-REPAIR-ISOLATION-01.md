@@ -44,8 +44,10 @@ Paired per-seed deltas (off-arm − baseline), all channels:
 - ROOM-AIR-01 (ambient_off map) is ~neutral (16/20 cells identical);
   CONTAM-DUTY0-01 (sealed) is bit-identical on every channel.
 - `all_off` ≈ `nearfield_off` (156 vs 76): with the near-field gone,
-  freeing the pool adds only ~80 pooled confirmations — the volume the
-  pool suppresses is mostly near-field volume.
+  reverting the remaining three repairs together (pool, room-air,
+  duty-0 — not pool alone, so this does not isolate pool transport)
+  adds only ~80 pooled confirmations — consistent with, but not proof
+  of, the pool's suppressed volume being mostly near-field volume.
 
 ## What this settles
 
