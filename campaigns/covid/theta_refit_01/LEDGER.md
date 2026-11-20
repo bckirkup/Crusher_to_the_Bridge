@@ -35,14 +35,24 @@ campaign positives, bootstrap selection frequency, `boundary_pinned` flag) →
 
 | Block | Job ID | Rev | Cells | Status |
 |---|---|---|---|---|
-| dp_theta_6p90 (canary) | 8f6ebe9a-3b5d-4493-8dea-534eb5e489cb | picard-covid-theta-refit-01:1 | 20 | SUBMITTED |
+| dp_theta_6p90 (canary) | 8f6ebe9a-3b5d-4493-8dea-534eb5e489cb | picard-covid-theta-refit-01:1 | 20 | SUCCEEDED 20/20, read out |
 
 Artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_refit_01/<block>/cell_<seed>.json`
 
 Image: `covid-theta-refit-01-v1` @ `sha256:48a6cd069ced2a897a642ae81df6bd86f1904114091e1721f32e3cd8b57fbf7a`
 (base `picard-campaign:base-c053e15f`, built at branch HEAD `c053e15f` on merged main `fdae828b`).
 
-## Canary readout — `dp_theta_6p90` ×20
+## Canary readout — `dp_theta_6p90` ×20 (measured at `8dee1ce6`, image v1 @ `c053e15f`)
 
-Pending. Expected: pooled lab_confirmed ≈ TF-01's ~1,236 (same design, same seeds, same
-shipped stack — this is the drift cross-check before trusting the rest of the sweep).
+Audit clean: 20/20 cells loaded, 0 findings — every payload carries
+`design_id=covid_theta_refit_01_dp`, `arm_id=baseline`, all four shipped toggles
+(ambient_on / two_box / airflow / extract), and `transport_engine_resolved=ContamTransportEngine`.
+
+**Drift cross-check passes exactly.** Pooled `lab_confirmed_total` = **1,236** —
+identical to TF-01/REPAIR-ISOLATION-01 baseline on the same seeds, and every per-seed
+cell is bit-identical to the RI-01 baseline arm (campaign_positives and recorded_onsets
+equal on all 20 seeds). Ensemble shape unchanged: takeoff 9/20, median
+campaign_positives 10.0, median recorded_onsets 8.0.
+
+The θ=7.9e6 anchor point reproduces the shipped stack, so the rest of the sweep is
+measuring Θ, not drift.
