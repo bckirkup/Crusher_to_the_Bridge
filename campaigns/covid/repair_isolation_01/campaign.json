@@ -6,7 +6,7 @@
  "s3_prefix": "campaign/covid_repair_isolation_01/",
  "queue": "picard-analysis-queue",
  "image_tag": "covid-repair-isolation-01-v1",
- "image_digest": "PENDING",
+ "image_digest": "sha256:3d1b676ab407661061d7d68fe968be81baf4a1bc9e644f391c189584b145f648",
  "resources": {
   "vcpu": "1",
   "memory": "4096"
