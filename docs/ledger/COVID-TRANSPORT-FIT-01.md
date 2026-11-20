@@ -16,17 +16,45 @@ engines; GM `hygiene_cycle` @ Θ2.37e11 ×50 seeds ×2 engines
 (campaign `campaigns/covid/transport_fit_01`, arm key
 `transport_engine: native|contamx`).
 
-## Solver indistinguishability
+## Provider comparison (corrected 2026-11-20)
 
-Seed-paired contamx−native deltas centre on zero on every channel: DP
-recorded_onsets Δ0 [0–4], lab_confirmed Δ0 [0–11], all share channels Δ0
-within ±0.05; GM campaign_positives Δ−0.48 mean [−11,+7]. At the
-voyage-outcome grain the HVAC transport operator choice does not matter —
-the repaired model's dose is set upstream of it.
+The first version of this section said the paired deltas "centre on
+zero on every channel", quoted "[0–4]", "[0–11]" and "[−11,+7]" as if
+they were ranges, put all DP share deltas within ±0.05, and concluded
+the operator choice "does not matter" because dose "is set upstream of
+it". A re-read of the same 140 cells does not support that wording.
 
-## DP vs record (both engines identical)
+- The bracketed pairs were the readout's nearest-rank q05–q95. Observed
+  Δ (ContamX − native) ranges: DP recorded_onsets −9 to +39, DP
+  lab_confirmed −3 to +50, GM campaign_positives −15 to +10.
+- DP: 17 of 20 pairs are identical on onsets, confirmations, positives
+  and infections; three are not — (onsets, confirmations) (−9, −3),
+  (+4, +11), (+39, +50). Mean Δ onsets +1.70 (paired-t 95% −2.54 to
+  +5.94), confirmations +2.90 (−2.43 to +8.23). One seed carries
+  three-quarters of the absolute difference, and leaving it out turns
+  the onset mean negative, so the mean is not a stable summary.
+- DP share deltas exceed ±0.05 on dated share (to −0.092) and final
+  asymptomatic share (to +0.080), over the 16 pairs where they are
+  defined.
+- GM: 37 of 50 pairs differ on at least one count, both directions;
+  campaign_positives mean Δ −0.48 (−1.83 to +0.87), recorded_onsets
+  −0.40 (−1.41 to +0.61).
+- Takeoff (≥10 onsets) agreed in all 70 pairs: DP 9 both / 11 neither,
+  GM 48 both / 2 neither. Zero observed flips bounds the flip rate only
+  loosely (one-sided 95% upper limits 0.139 and 0.058).
 
-Median recorded_onsets 8 [0–121] vs 197; lab_confirmed 10.5 [0–145] vs
+What stands: the two providers gave close voyage-wide counts and the
+same takeoff classification on these seeds. What does not: any
+equivalence claim (no margin was declared), and any statement about
+where dose is set — this campaign did not measure dose. The DP pair
+also differs in image (canary `sha256:7023d963…` vs `sha256:56f860c8…`).
+Tables, method and receipts:
+`campaigns/covid/transport_fit_01/READOUT_PAIRED.md`.
+
+## DP vs record (medians equal under both engines)
+
+Median recorded_onsets 8 [q05–q95 0–121; max 454 native, 493 ContamX]
+vs 197; lab_confirmed 10.5 [q05–q95 0–145; max 540, 590] vs
 712; **takeoff 9/20 seeds**. Pooled lab_confirmed 1,236–1,294 across
 20 cells vs CREW-REACH-01's ~1,351–1,453 on the same boxed design
 family — pooled volume is roughly preserved, so the ensemble is now a
@@ -38,21 +66,28 @@ residuals unchanged.
 
 ## GM vs record
 
-campaign_positives 110 [18–134] vs 128/217 — magnitude in the record's
+campaign_positives 110 [q05–q95 18–134; range 1–135] vs 128/217 — magnitude in the record's
 neighbourhood, takeoff 48/50. Asymptomatic-at-testing share 0.24
 [0.18–0.5] vs 0.8125 — the same symptomatic-overweight composition
 residual, now on a held-out hull.
 
 ## Verdict
 
-Native ≈ ContamX on both hulls (paired deltas ≈ 0): the transport-solver
-question is closed at this grain — use whichever is cheaper. The real
-finding is negative: after the B1–B3 airflow repairs DP takeoff is
+Native and ContamX agree on takeoff in every pair and on voyage-wide
+medians, with seed-level differences up to tens of cases (section
+above). "Use whichever is cheaper" is withdrawn: no timing was read when
+it was written, and the timing now tabulated in `READOUT_PAIRED.md`
+(Batch child medians within 1.1%; a cold ContamX build 55–385 ms slower
+in the engineering benchmark) is not a matched cost comparison. The
+other finding is negative: after the B1–B3 airflow repairs DP takeoff is
 ~45% at Θ7.9e6 where the record always took off, so every composition
-comparison sits on a mostly-fizzled ensemble. Next measurement target:
+comparison sits on a mostly-fizzled ensemble. That before/after
+contrast is against an earlier campaign, not a paired arm here, so the
+attribution to the repairs is a hypothesis. Next measurement target:
 which repair (room-air removal ambient exchange, near-field, pool
 transport, duty-0 terminal) cut realization frequency — paired-arm cell
 runs per repair flag.
 
 Full table: `campaigns/covid/transport_fit_01/LEDGER.md`; readout:
-`campaigns/covid/transport_fit_01/readout.py`.
+`campaigns/covid/transport_fit_01/readout.py`; paired readout and
+verifier: `READOUT_PAIRED.md`, `paired_readout.py` in the same directory.

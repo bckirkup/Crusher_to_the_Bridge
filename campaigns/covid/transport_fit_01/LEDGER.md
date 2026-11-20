@@ -67,6 +67,16 @@ arm payload resolves `ContamXTransportEngine`.
 
 ### Full readout — 140/140 cells, audit clean (0 wrong_engine, 0 missing, 0 duplicates)
 
+> **Corrected 2026-11-20 — read `READOUT_PAIRED.md` first.** The engine
+> verdict below overstates the agreement. Its brackets are nearest-rank
+> q05–q95, not ranges: observed Δ is −9 to +39 (DP onsets), −3 to +50
+> (DP confirmations), −15 to +10 (GM positives). "A handful of
+> infections" is wrong for DP seed 20200223 (+39 onsets, +50
+> confirmations, +59 infections). "Flip nothing" holds for the ≥10-onset
+> takeoff flag in all 70 pairs. "Set upstream of the HVAC transport
+> operator" and "indistinguishability" were not measured. The text is
+> kept as written for the record.
+
 **Engine verdict: the solver choice is immaterial at this grain.** Every
 seed-paired contamx−native delta centres on zero — DP recorded_onsets
 Δ0 [0–4], lab_confirmed Δ0 [0–11]; GM campaign_positives Δ−0.48 mean
