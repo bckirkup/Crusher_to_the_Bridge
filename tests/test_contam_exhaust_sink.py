@@ -377,6 +377,7 @@ class TestCommittedPlatformAmbientSinks:
         ("classic_cruise_1900", "Galley_Hood_Exhaust", "MainGalley", 12000.0),
         ("diamond_princess", "Galley_Hood_Exhaust", "MainGalley", 18000.0),
         ("expedition_cruise_450", "Galley_Hood_Exhaust", "MainGalley", 8000.0),
+        ("explorer_seas_06", "Galley_Hood_Exhaust", "MainGalley", 18000.0),
         ("greg_mortimer", "Galley_Hood_Exhaust", "MainGalley", 5000.0),
         ("spirit_cruise_3000", "Galley_Hood_Exhaust", "MainGalley", 15000.0),
         (

@@ -252,6 +252,11 @@ Regenerate committed cabin-corridor cruise layouts with
 `data/platforms/<id>/` output, omit `--overwrite`; the generators refuse to
 overwrite existing platform data without it.
 
+Generator output is not yet commissioned — a new hull needs the hand-authored
+Contam layer (forced-exhaust declarations, galley pair, make-up louvre,
+open-deck ambient openings, weather tags, commissioned `.prj` re-export) from
+skill `commissioning-contam-platform` before its Contam bundle is correct.
+
 ## Common Mistakes
 
 - Using `zone_id` instead of `id` — fails schema and sanity checker

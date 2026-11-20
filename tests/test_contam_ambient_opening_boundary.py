@@ -243,6 +243,7 @@ def test_committed_ambient_opening_legs_are_the_declared_records() -> None:
     assert legs == {
         "classic_cruise_1900": 2 + 2, "diamond_princess": 2 + 16,
         "expedition_cruise_450": 2 + 2, "greg_mortimer": 2 + 2 + 10,
+        "explorer_seas_06": 2 + 10,
         "mega_cruise_5000": 20 + 10, "spirit_cruise_3000": 2 + 6,
         "enterprise_constitution_tos": 2, "enterprise_galaxy_tng": 2,
         "cannon_de701": 8, "cushing_dd376": 4, "davison_dd618": 10,

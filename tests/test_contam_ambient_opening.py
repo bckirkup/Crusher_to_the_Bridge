@@ -86,6 +86,7 @@ def _path_rows(engine: ContamTransportEngine) -> list[tuple[Any, ...]]:
 
 _MAKEUP_RECORDS = {
     "classic_cruise_1900": 1, "diamond_princess": 1, "expedition_cruise_450": 1,
+    "explorer_seas_06": 1,
     "greg_mortimer": 2, "mega_cruise_5000": 10, "spirit_cruise_3000": 1,
     "enterprise_constitution_tos": 1, "enterprise_galaxy_tng": 1,
     "olympia_c6": 1, "pope_ap110": 7, "destroyer_baseline": 3,
@@ -104,6 +105,10 @@ _WEATHER_ZONES = {
         "HorizonTerrace", "OpenAirCinema", "SportsCourt", "CenterCourt",
     },
     "expedition_cruise_450": {"PoolDeck"},
+    # explorer_seas_06 (WP0 platform): the five open decks of the recipe.
+    "explorer_seas_06": {
+        "PoolDeck", "RockWall", "InLineTrack", "SportsCourt", "ExplorerDunes",
+    },
     "greg_mortimer": {
         "ZodiacPlatforms", "ActivityPlat", "ViewPlatforms", "SunDeck", "TopDeck",
     },
