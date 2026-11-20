@@ -3,11 +3,13 @@
 **Commit:** 106a3583
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 106a3583 (fleet); canary block at 8de77294
+**Measured at:** 106a3583
 
 Re-scored the Diamond Princess (training hull) and Greg Mortimer
 (held-out hull) outbreak replays after the ROOM-AIR-PAIRED-VALIDATION-01
-airflow repairs (B1–B3, PRs #1330–1332) under both transport solvers:
+airflow repairs (B1–B3, PRs #1330–1332) under both transport solvers (the 20-cell dp_contamx_canary ran at
+8de77294 — identical voyage code, predating only the fail-closed cell
+check and GM funnel_echo):
 the native ContamTransportEngine and the NIST ContamX binary. 140 cells,
 zero failures, audit clean — DP `boxed_s1s2` @ Θ7.9e6 ×20 seeds ×2
 engines; GM `hygiene_cycle` @ Θ2.37e11 ×50 seeds ×2 engines
