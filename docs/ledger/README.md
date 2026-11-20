@@ -45,6 +45,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - [ROOM-AIR-PAIRED-VALIDATION-01](ROOM-AIR-PAIRED-VALIDATION-01.md) — declared, design only: paired `ambient_on`/`ambient_off` respiratory contrast with matched seeds, exact sign-flip rule, sealed-mode no-change control and aggregate encounter witness; three pre-execution blockers; nothing run.
 
 - [CONTAM-FLEET-WORKUP-CANARY-01](CONTAM-FLEET-WORKUP-CANARY-01.md) — four-hull canary amendment: outdoor-air fraction does not reach the ContamX solved field; results split into solved airflow and derived downstream mixing; realized-field gates.
+- [CONTAM-FLEET-WORKUP-FLEET-01](CONTAM-FLEET-WORKUP-FLEET-01.md) — remaining 73 hulls measured on AWS; 77-hull readout and offline package: totals and air change agree within about 1 %, interzone flow and material time do not.
 - [CONTAM-FLEET-WORKUP-PROTOCOL-01](CONTAM-FLEET-WORKUP-PROTOCOL-01.md) — declared pre-results design for the 77-hull native-vs-ContamX workup: roster, run matrix, input SHA manifest, runtime protocol, output contract.
 - [CONTAM-PHASE3-BASELINE-01](CONTAM-PHASE3-BASELINE-01.md) — corrected two-hull tracer and air-balance checks; version-sensitive transport, not as-built or epidemiological validation.
 

@@ -1,0 +1,196 @@
+{
+ "cohort_hulls": {
+  "canary_run2": [
+   "destroyer_baseline",
+   "enterprise_constitution_tos",
+   "expedition_cruise_450",
+   "west_virginia_bb48"
+  ],
+  "fleet_cohort0": [
+   "aeolus_arc3",
+   "alexander_henry_cgs119",
+   "antietam_cvs36",
+   "apl_24",
+   "assistance_ar17",
+   "astoria_ca34",
+   "bainbridge_dd1",
+   "battler_acv6",
+   "bolster_ars38",
+   "cannon_de701"
+  ],
+  "fleet_cohort1": [
+   "castle_class_corvette",
+   "chicago_cg11",
+   "classic_cruise_1900",
+   "cobalt_k124",
+   "cushing_dd376",
+   "davison_dd618",
+   "diamond_princess",
+   "eagle_pe60",
+   "enterprise_galaxy_tng"
+  ],
+  "fleet_cohort2": [
+   "erie_pg50",
+   "esteem_mso438",
+   "fletcher_dde_dd445",
+   "fort_mandan_lsd21",
+   "fort_william_j311",
+   "gordon_gunter_r338",
+   "gosper_apa170",
+   "greg_mortimer",
+   "hunter_killer_dd692"
+  ],
+  "fleet_cohort3": [
+   "idaho_bb42",
+   "independence_cvl26",
+   "jupiter_ac3",
+   "keppler_dd765",
+   "lexington_cv2",
+   "liberty_cargo_ec2",
+   "lsm_354",
+   "luzon_arg2",
+   "lyon_ap71"
+  ],
+  "fleet_cohort4": [
+   "mega_cruise_5000",
+   "mercury_aks20",
+   "miami_cl89",
+   "middlesex_lst983",
+   "midway_cv41",
+   "missouri_bb63",
+   "montana_acr13",
+   "new_jersey_bb62",
+   "new_york_bb34"
+  ],
+  "fleet_cohort5": [
+   "nields_dd616",
+   "olympia_c6",
+   "palmer_dms5",
+   "passumpsic_ao106",
+   "pce_874",
+   "pope_ap110",
+   "pt_564",
+   "puncher_cve53",
+   "ranger_cv4"
+  ],
+  "fleet_cohort6": [
+   "raven_am55",
+   "river_class_frigate",
+   "rolla_pc483",
+   "ruchamkin_apd89",
+   "saratoga_cv3",
+   "saratoga_cv60",
+   "savannah_ns",
+   "sigsbee_dd502",
+   "south_dakota_bb49"
+  ],
+  "fleet_cohort7": [
+   "spirit_cruise_3000",
+   "squier_ap130",
+   "texas_bb35",
+   "thetis_bay_cve90",
+   "wasp_cv7",
+   "winnipeg_j337",
+   "wisconsin_bb64",
+   "wright_cc2",
+   "yorktown_cv5"
+  ]
+ },
+ "cohort_receipts": {
+  "canary_run2": [
+   "ac1b56e1-2080-40cc-be8f-b8473ceca793",
+   "sha256:e59acd8d426a1304387929dd9c91bb85946b28c0c2357eb7a997e7e16a28e0c3",
+   "b99690680cd30331d4af0ad9e3afba5543d4499668e19c42205cf272f5a7ac8b"
+  ],
+  "fleet_cohort0": [
+   "1e44ab45-ad2e-4bcf-87ca-687ff782095b",
+   "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+   "2cbde92ea0126a980c0699b4c9724c149cafe83be8c92662a9c86aec6cce2f9d"
+  ],
+  "fleet_cohort1": [
+   "bf3f4891-f2db-471b-86a2-4e3b32073b5f",
+   "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+   "493997f7b7b4d290ccb3b0eeb3e366c4f796d68925019a33be371f7a8e4433cd"
+  ],
+  "fleet_cohort2": [
+   "79be935e-98c5-4ab0-9a5e-cfbdfa7fd191",
+   "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+   "38e9f1c6fdb241eca6d0ae8a244f498b2358304ff6d5be94a2eea0297bf35106"
+  ],
+  "fleet_cohort3": [
+   "a9941ac8-47ad-46a7-a2a4-80c3e1191a81",
+   "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+   "7a6e1edf84d67c3da0910ae11e25912ab11a370c4f90d2cff702ab91b767bae8"
+  ],
+  "fleet_cohort4": [
+   "9a1564dc-06b0-44b1-81d1-ae914cd3ced0",
+   "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+   "86c863ab8f01b663b2a417cc75869a35ce94be6443cfe8c147a1639740f19821"
+  ],
+  "fleet_cohort5": [
+   "1372b774-5110-4bf1-b13d-d51cca8eaf3c",
+   "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+   "ab0800a83fe798cf42a7f2e21ee15bdb16740ac93be28fba87a1df3f86658ecd"
+  ],
+  "fleet_cohort6": [
+   "3bebb032-a5eb-44ef-aff1-843800bccff1",
+   "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+   "462e0212d19efac5d981c5d5a3dfa77df3d99eaa61556c734325c6817a0b56f7"
+  ],
+  "fleet_cohort7": [
+   "99b9d3f6-2e9f-470e-89d7-a015a4047674",
+   "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+   "3659a9ae07a3b0396a4ab5be72f2341c6d63f032620c18b776fa6b27e36696f5"
+  ]
+ },
+ "counts": {
+  "canary": {
+   "contamx_solver_invocations": 318,
+   "hulls": [
+    "destroyer_baseline",
+    "enterprise_constitution_tos",
+    "expedition_cruise_450",
+    "west_virginia_bb48"
+   ],
+   "note": "row IDs, hulls, lanes, settings and repetitions are the frozen matrix, unchanged. The in-job configuration smoke adds one untimed solve per executed ContamX row (53); these are reported separately and are not among the 318 planned timed invocations.",
+   "rows_planned_execute": 77,
+   "rows_total": 112,
+   "smoke_solver_invocations_untimed": 53
+  },
+  "fleet": {
+   "cached_cell_executions": 7570,
+   "cold_cell_executions": 9084,
+   "contamx_solver_invocations": 6492,
+   "rows_planned_execute": 1514,
+   "rows_total": 2044,
+   "smoke_cells_untimed": 1514
+  },
+  "union": {
+   "cached_cell_executions": 7955,
+   "cold_cell_executions": 9546,
+   "contamx_solver_invocations": 6810,
+   "rows_planned_execute": 1591,
+   "rows_total": 2156,
+   "smoke_cells_untimed": 1591
+  }
+ },
+ "design_commit": "fb6a0bd5b7109dff288dd7fbf5d4681805016db3",
+ "excluded_no_bundle": {
+  "expedition_cruise_300": "legacy platform; no committed Contam bundle",
+  "fletcher_class_destroyer": "no committed Contam bundle at the input pin",
+  "legend_class_nsc": "no committed Contam bundle at the input pin",
+  "messy_cruise_500": "no committed Contam bundle at the input pin",
+  "san_antonio_class_lpd": "no committed Contam bundle at the input pin"
+ },
+ "id": "CONTAM-FLEET-WORKUP-PACKAGE-01",
+ "input_commit": "d5d50d3a7bc30d50231e6f27b5083925f26c9c23",
+ "sha256": {
+  "design/SHA256SUMS": "126887ee52da656677291b6481fb9495f6e742e07f4b933d885258274470288e",
+  "design/canary_criteria.json": "3eb085a3208797be7990ed0a00a1be511d290dc6377ba046a13801193b16b01d",
+  "design/coverage.csv": "85001f85f3fb1a469e737ee580b4ea83d6773011d5c8c678fca554979cfbf56a",
+  "design/fleet_selection.json": "26112f231824a8aac217b8e7db4873fd3fbb06e41af79c4703ba6024bbdef8a7",
+  "design/input_manifest.json": "6fcf13ef380db632cd96a7726bab752da0973c2e62bb9d4d043c54ef52dd61dd",
+  "design/protocol.json": "4113c7ed1ec09798ce16141377bba9103f0b673455e923079d476cf8b5db42b7",
+  "design/run_matrix.csv": "05ba7af15fa9f20d9318f74fb583257430ce933fbeef05c78990d3a71232757c"
+ }
+}
