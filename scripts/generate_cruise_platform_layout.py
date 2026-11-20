@@ -232,15 +232,23 @@ def build_air_flow_paths(
                 "ach": recipe.pax_ahu_ach,
                 "description": f"Deck {deck} passenger cabin fan-coil branch.",
             })
+    extra_ahus: dict[str, dict[str, Any]] = {}
     for bank in recipe.extra_corridors:
-        # One AHU per extra bank deck: AHU_{prefix}_D{n}
+        # One AHU per extra bank deck: AHU_{prefix}_D{n}. Banks that share a
+        # prefix and deck share that AHU; ids must stay unique.
         for deck in bank.decks:
-            hvac.append({
-                "id": f"AHU_{bank.id_prefix}_D{deck}",
-                "rooms": _pax_ids_on_deck(bank, deck),
+            ahu_id = f"AHU_{bank.id_prefix}_D{deck}"
+            rooms = _pax_ids_on_deck(bank, deck)
+            if ahu_id in extra_ahus:
+                extra_ahus[ahu_id]["rooms"].extend(rooms)
+                continue
+            extra_ahus[ahu_id] = {
+                "id": ahu_id,
+                "rooms": rooms,
                 "ach": recipe.pax_ahu_ach,
                 "description": f"Deck {deck} {bank.id_prefix} cabin branch.",
-            })
+            }
+            hvac.append(extra_ahus[ahu_id])
 
     crew_ids = _crew_corridor_ids(recipe.crew_corridors)
     for group in recipe.public_hvac:

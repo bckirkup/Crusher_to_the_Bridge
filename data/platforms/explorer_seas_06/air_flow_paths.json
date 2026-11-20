@@ -73,14 +73,7 @@
       "id": "AHU_PC_D2",
       "rooms": [
         "PC_D2_P_F",
-        "PC_D2_S_F"
-      ],
-      "ach": 6.0,
-      "description": "Deck 2 PC cabin branch."
-    },
-    {
-      "id": "AHU_PC_D2",
-      "rooms": [
+        "PC_D2_S_F",
         "PC_D2_P_A",
         "PC_D2_S_A"
       ],
@@ -91,14 +84,7 @@
       "id": "AHU_PC_D3",
       "rooms": [
         "PC_D3_P_F",
-        "PC_D3_S_F"
-      ],
-      "ach": 6.0,
-      "description": "Deck 3 PC cabin branch."
-    },
-    {
-      "id": "AHU_PC_D3",
-      "rooms": [
+        "PC_D3_S_F",
         "PC_D3_P_M",
         "PC_D3_S_M"
       ],
