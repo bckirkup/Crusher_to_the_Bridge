@@ -113,6 +113,7 @@ The [skill directory](../.agents/skills/) contains the instructions for each tas
 | `testing-agent-classes` | Agent class, gender, duty zone, exempt_classes changes |
 | `schema-validation` | Before committing JSON in `data/` or `telemetry_buffer/` |
 | `adding-new-platform` | New vessel spatial layout + HVAC |
+| `commissioning-contam-platform` | Hand-authored Contam layer on a generated hull: forced-exhaust declarations, galley pair, ambient openings, commissioned re-export |
 | `importing-naval-blueprint` | GA PDF/image → agent-authored ShipDigest + approved SVGs → platform JSON + .prj |
 | `adding-new-pathogen` | New pathogen profile entries |
 | `contamx-interop` | ContamX SIM reader, AHS bridge, compare suite, flow diagnostics |
