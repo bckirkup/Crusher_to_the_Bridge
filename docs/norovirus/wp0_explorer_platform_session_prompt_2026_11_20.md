@@ -111,17 +111,24 @@ How the platform was built, beyond the prompt above:
   deck 6-10 corridors `balcony_partial` although they also serve inside
   cabins, decks 2-3 `interior_hvac`.
 
-Open, not fixed (both shared with `diamond_princess`):
+Open, not fixed:
 
-- `generate_cruise_platform_layout.py --overwrite` on any recipe hull drops
-  its hand-authored commissioning layer. Folding that layer into the
-  generator is the parent session's work, not WP0's or WP3's. Its commits
-  `63b66a34` and `dbbb908b` were pushed to the #1346 branch after that PR
-  merged, so they are not on `main` as of this readout; until they land
-  through their own PR, the statement above holds on `main`.
+- Regeneration (updated after #1349, measured at `8c56077c`). The generator
+  now emits the commissioning layer, and `scripts/commission_platform_contam.py`
+  fills `exchange_m3h` afterward. In-memory regeneration of `explorer_seas_06`
+  equals the committed `spatial_layout.json` and `air_flow_paths.json` apart
+  from `exchange_m3h`, so `--overwrite` followed by the commission script is
+  safe for Explorer. It is not yet a no-op for the other four recipe hulls:
+  one zone `exposure` tag differs on `classic_cruise_1900`,
+  `spirit_cruise_3000` and `diamond_princess`; `expedition_cruise_450`
+  differs in one cross-zone link and its adjacency; on `spirit_cruise_3000`
+  16 committed cross-zone link records (`Cabin_Return_*`, `Cabin_Relief_*`
+  among them) are not reproduced and 8 generated records have no committed
+  match.
+  Do not `--overwrite` those four without reviewing the diff.
 - SOP-007/009 `close_zones` name `mega_cruise_5000` zone ids, so closure
   orders skip Explorer's galley and crew mess. WP3 must decide whether the
   reconstruction needs per-platform closure aliases before it relies on
   those SOPs.
 
-Next decision: when WP3 starts, and whether it waits for the fold-back.
+Next decision: when WP3 starts.
