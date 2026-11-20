@@ -136,3 +136,12 @@ The same composite Θ absorbs: (a) the ~12× emission rescale (covid #30) and (b
 post-repair sinks — a ~40,000× upward move relative to tranche-25's 7.9e6 is what
 keeps DP confirmations at record scale. The held-out asym miss is invariant across
 Θ and engines — it is a natural-history/observation-channel defect, not a mass budget.
+
+### Operating-point landing
+
+`thetas: [3.162e11]` committed as the COVID arm's canonical replay operating
+point on the boxed_s1s2 replay spec (`covid_crew_reach_01_design.json`) and the
+frozen-operating-point replay (`covid_platform_fidelity_02_dp_design.json`);
+`docs/parameter_provenance_register.md` Θ row updated to the refit value with
+held-out reading recorded. Per-campaign designs that already ran keep their own
+θ as the record of what was measured.
