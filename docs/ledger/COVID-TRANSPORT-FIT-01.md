@@ -1,11 +1,9 @@
 # COVID-TRANSPORT-FIT-01
 **Date:** 2026-11-19
 **Commit:** 106a3583
-**Measured at:** 106a3583 (120 fleet cells); canary block `dp_contamx_canary`
-at 8de77294 — identical voyage code, predates only the fail-closed cell
-check and GM funnel_echo
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** 106a3583 (fleet); canary block at 8de77294
 
 Re-scored the Diamond Princess (training hull) and Greg Mortimer
 (held-out hull) outbreak replays after the ROOM-AIR-PAIRED-VALIDATION-01
