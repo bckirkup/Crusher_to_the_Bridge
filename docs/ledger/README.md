@@ -44,6 +44,8 @@ New ledger entries are registered here as they land; the filename remains the st
 
 - [COVID-TRANSPORT-FIT-01](COVID-TRANSPORT-FIT-01.md) — measured: native and ContamX agree on takeoff in all 70 seed pairs and have equal (DP counts) or close (GM) medians, with seed-level differences up to +39 onsets / +50 confirmations on DP (corrected 2026-11-20; no equivalence claim); under the B1–B3 airflow repairs DP takeoff is ~45% at Θ7.9e6 (pooled volume preserved, realization frequency collapsed); GM magnitude near record (110 vs 128/217) with asym share 0.24 vs 0.8125.
 
+- [COVID-REPAIR-ISOLATION-01](COVID-REPAIR-ISOLATION-01.md) — measured: per-repair paired arms on DP `boxed_s1s2` (120 cells, audit clean with resolved-toggle witnesses). The two significant repairs act in opposite directions — near-field two-box carries ~94% of confirmations (off → 76 pooled, takeoff 1/20) while pool `airflow` transport halves them (off → 2,449 pooled via a few huge cells); room-air ~neutral, duty-0 bit-identical. all_off = 156 ≠ pre-repair ~1,400: the missing pre-repair volume is outside this toggle grammar or outside B1–B3.
+
 - [ROOM-AIR-PAIRED-VALIDATION-01](ROOM-AIR-PAIRED-VALIDATION-01.md) — declared, design only: paired `ambient_on`/`ambient_off` respiratory contrast with matched seeds, exact sign-flip rule, sealed-mode no-change control and aggregate encounter witness; three pre-execution blockers; nothing run.
 
 - [CONTAM-FLEET-WORKUP-CANARY-01](CONTAM-FLEET-WORKUP-CANARY-01.md) — four-hull canary amendment: outdoor-air fraction does not reach the ContamX solved field; results split into solved airflow and derived downstream mixing; realized-field gates.
