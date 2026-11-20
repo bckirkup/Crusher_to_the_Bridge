@@ -195,13 +195,14 @@ representation — cheap relative to the ensemble.
 
 | WP | Work | Depends on |
 |---|---|---|
-| WP0 | Freeze decision: named commit + frozen config block + declared-limitations list; moratorium during evaluation | Edison review of the design contract (his pre-freeze lane) |
-| WP1 | Joint-eval campaign authored (`campaigns/noro/<name>/`); paired bridge canary over the strata; readout as go/no-go | WP0 |
-| WP2 | `explorer_*` platform build + temporal-reconstruction campaign (mega archetype alongside, paired seeds) | WP0; can parallel WP1 |
-| WP3 | SUPPLY-STRUCTURE-01 Stage A census at scale + population/composition contrasts | WP0 |
-| WP4 | Response-demonstration arm + readout | WP1 readout (pick recognition/isolation pairing on measured behaviour) |
-| WP5 | Focused Morris re-run on frozen reference | WP0 |
-| WP6 | Ensemble expansion + replication where intervals/tails require | WP1 readout |
+| WP0 | `explorer_*` platform build (new recipe in `scripts/cruise_platform_recipes.py` + generated `data/platforms/<id>/`), sanity + schema + data-contract validation, one 192-epoch smoke | —; lands **before** the freeze so the named reference SHA contains the pilot vessel (Benjamin, 2026-11-20) |
+| WP1 | Freeze decision: named commit + frozen config block + declared-limitations list; moratorium during evaluation | Edison review of the design contract (his pre-freeze lane); WP0 merged |
+| WP2 | Joint-eval campaign authored (`campaigns/noro/<name>/`); paired bridge canary over the strata; readout as go/no-go | WP1 |
+| WP3 | Temporal-reconstruction campaign (mega archetype alongside, paired seeds, 8-day = 192-epoch voyage) | WP0 + WP1 |
+| WP4 | SUPPLY-STRUCTURE-01 Stage A census at scale + population/composition contrasts | WP1 |
+| WP5 | Response-demonstration arm + readout | WP2 readout (pick recognition/isolation pairing on measured behaviour) |
+| WP6 | Focused Morris re-run on frozen reference | WP1 |
+| WP7 | Ensemble expansion + replication where intervals/tails require | WP2 readout |
 
 Edison's rare-event arithmetic is right and the stratified-allocation machinery
 it argues for is the existing tier/block pattern. The 0.005 illustrative event
@@ -264,8 +265,10 @@ No new infrastructure is needed or proposed:
    reference; his blocker findings gate the freeze as before.
 2. **Bridge gating**: confirm the paired bridge is read as a go/no-go before
    ensemble cells are committed — this is his ordering made explicit.
-3. **Temporal pilot first**: agree with his recommendation; WP2 can start in
-   parallel because its only shared dependency is the freeze.
+3. **Temporal pilot first**: agree with his recommendation; the platform
+   build itself now lands **before** the freeze so the reference SHA carries
+   the pilot vessel — the reconstruction campaign then runs on the same
+   named commit as everything else.
 4. **Response demonstration**: name the decision pair at design time —
    candidate is earlier recognition (cascade/surveillance arm) + crew duty
    exclusion vs usual recognition, all four hulls, paired seeds — unless he
