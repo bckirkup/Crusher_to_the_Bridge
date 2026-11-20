@@ -57,17 +57,21 @@ payload carries resolved `room_air_removal.map_arm=ambient_off`,
 | dated share | 0.74 | 0.277 | ~0.81 | — |
 | lab crew share (pooled) | 0.84 | 0.29 | ~0.45–0.75 | — |
 
-**The pre-repair ensemble did not come back — `all_off` carries ~8× less
-dose than the shipped model on the same seeds** (156 vs ~1,236 pooled
-lab_confirmed, takeoff 3/20 vs 9/20). Since the witnesses prove all four
-toggles resolved to their labelled baselines, either (a) the toggle
-baselines do not reconstruct the pre-repair code paths — `mode=none`/sealed
-inside machinery that exists is not the same as the machinery being absent
-(e.g. shed mass may be routed into a pool that never releases), or (b)
-another change between the pre-repair measurement and now removed dose
-outside the four toggles. The single-off arms discriminate: an arm whose
-revert alone restores takeoff names the repair; if every off-arm also
-under-carries, the regression lives outside the toggle grammar.
+**The pre-repair ensemble did not come back — `all_off` yields ~8× fewer
+pooled confirmations than the shipped model on the same seeds** (156 vs
+~1,236 pooled lab_confirmed, takeoff 3/20 vs 9/20). Confirmations are the
+funnel's output, not delivered dose; the dose ratio itself is unmeasured.
+Since the witnesses prove all four toggles resolved to their labelled
+baselines, either (a) the toggle baselines do not reconstruct the
+pre-repair code paths — `mode=none`/sealed inside machinery that exists
+is not the same as the machinery being absent (e.g. shed mass may be
+routed into a pool that never releases), or (b) another change between
+the pre-repair measurement and now removed confirmations upstream of
+the funnel. The single-off arms inform but cannot fully discriminate:
+each retains three repairs, so a revert that restores takeoff names a
+contributing repair, but if every off-arm under-carries the result is
+consistent with interacting repairs or incomplete reconstruction as
+well as a regression outside the toggle grammar.
 
 ## Image
 
