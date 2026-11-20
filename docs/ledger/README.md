@@ -42,7 +42,7 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
-- [COVID-TRANSPORT-FIT-01](COVID-TRANSPORT-FIT-01.md) — measured: native ≈ ContamX on both hulls (seed-paired Δ ≈ 0); under the B1–B3 airflow repairs DP takeoff is ~45% at Θ7.9e6 (pooled volume preserved, realization frequency collapsed); GM magnitude near record (110 vs 128/217) with asym share 0.24 vs 0.8125.
+- [COVID-TRANSPORT-FIT-01](COVID-TRANSPORT-FIT-01.md) — measured: native and ContamX agree on takeoff in all 70 seed pairs and have equal (DP counts) or close (GM) medians, with seed-level differences up to +39 onsets / +50 confirmations on DP (corrected 2026-11-20; no equivalence claim); under the B1–B3 airflow repairs DP takeoff is ~45% at Θ7.9e6 (pooled volume preserved, realization frequency collapsed); GM magnitude near record (110 vs 128/217) with asym share 0.24 vs 0.8125.
 
 - [ROOM-AIR-PAIRED-VALIDATION-01](ROOM-AIR-PAIRED-VALIDATION-01.md) — declared, design only: paired `ambient_on`/`ambient_off` respiratory contrast with matched seeds, exact sign-flip rule, sealed-mode no-change control and aggregate encounter witness; three pre-execution blockers; nothing run.
 
