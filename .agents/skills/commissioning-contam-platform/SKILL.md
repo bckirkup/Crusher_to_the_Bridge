@@ -53,6 +53,9 @@ Add the galley-pair `description` texts verbatim from `diamond_princess`
 
 Insert immediately after `Dining_Galley_Exhaust`; the galley name comes from
 the hull's own layout (`MainGalley` on all recipe hulls so far).
+`flow_rate_m3h` is the hull's own `Dining_Galley_Exhaust` transfer rate
+(18000 on Diamond and Explorer, 8000 on `expedition_cruise_450`), never a
+copied constant: a mismatch leaves the galley unbalanced.
 
 ### 3. makeup_louvre ambient opening
 
@@ -64,8 +67,9 @@ make-up pulls through — `International` on Diamond, `DaGamaDR` on Explorer):
  "exchange_m3h": 0.0, "schedule": "always_open"}
 ```
 
-Area is ASSUMED-MAKEUP-LOUVRE-AREA (Grade C): served demand 18000 m³/h ÷
-3600 ÷ 2.5 m/s face velocity = 2.0 m². `exchange_m3h` stays 0 — the solved
+Area is ASSUMED-MAKEUP-LOUVRE-AREA (Grade C): `area_m2` = the hull's hood
+exhaust flow ÷ 3600 ÷ 2.5 m/s face velocity (18000 m³/h gives 2.0 m²;
+recompute it for any other flow). `exchange_m3h` stays 0 — the solved
 flow is inward only, so it is not a native sink.
 
 ### 4. open_deck ambient openings on exterior zones
@@ -123,7 +127,14 @@ not a bug. `makeup_louvre` stays 0.0.
 .venv/bin/python3 tools/diag/contam_pressure_balance_diagnostic.py \
   --hull <id> --lane commissioned
 .venv/bin/python3 tools/contam_commissioned_check.py --platform <id>
+# After re-exporting contam/, solve the committed bundle itself:
+.venv/bin/python3 tools/diag/contam_pressure_balance_diagnostic.py \
+  --hull <id> --lane authored
 ```
+
+The first two commands re-export from JSON; only the `authored` lane reads
+the committed `platform.prj` + `path_map.json`, so it is the one that catches
+a stale bundle. Its row must match the commissioned row.
 
 Pass criteria (Diamond-class): interior max |dP| ~tens of Pa, **zero** paths
 above 100 Pa, `balance_residual_m3h` ≈ 0, every commissioned terminal within
@@ -147,4 +158,14 @@ comment naming the platform and the link count it adds:
   `POST_S1_AUTHORED_OPERATOR_PLATFORMS`, correctly skipping the
   pre-migration operator pin (there is no pre-migration operator).
 
-Then run the three files plus sanity + schemas + `test_data_contracts.py`.
+The fleet inventories also enumerate every commissioned hull; add the new
+platform to each:
+
+- `tests/test_contam_ambient_opening.py` — `_MAKEUP_RECORDS["<id>"]` (louvre
+  count) and `_WEATHER_ZONES["<id>"]` (the `exposure: weather` zone ids).
+- `tests/test_contam_ambient_opening_boundary.py` — path-map legs per hull:
+  2 per louvre + 2 per `open_deck` opening.
+- `tests/test_contam_exhaust_sink.py` — the
+  `("<id>", "Galley_Hood_Exhaust", "<galley>", <flow>)` ambient-sink row.
+
+Then run all six files plus sanity + schemas + `test_data_contracts.py`.
