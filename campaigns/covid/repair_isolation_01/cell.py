@@ -70,6 +70,38 @@ def _match_cell(
     return matches[0]
 
 
+# The shipped (repaired) resolution of each repair toggle — what an arm
+# that does not declare the key runs with.
+_TOGGLE_DEFAULTS = {
+    "room_air_map_arm": "ambient_on",
+    "near_field_air_mode": "two_box",
+    "pathogen_pool_transport": "airflow",
+    "duty0_terminal_mode": "extract",
+}
+
+
+def _expected_toggles(design: object, arm_id: str) -> dict[str, str]:
+    """The resolved repair settings the arm's run must land on."""
+    overrides = design.arm_overrides(arm_id) if design.arms else {}
+    return {
+        key: str(overrides.get(key, default))
+        for key, default in _TOGGLE_DEFAULTS.items()
+    }
+
+
+def _resolved_toggles(payload: dict) -> dict[str, str | None]:
+    """The engine-resolved repair settings echoed in the delivery block."""
+    delivery = payload.get("delivery") or {}
+    room_air = delivery.get("room_air_removal") or {}
+    near_field = delivery.get("near_field_air") or {}
+    return {
+        "room_air_map_arm": room_air.get("map_arm"),
+        "near_field_air_mode": near_field.get("mode"),
+        "pathogen_pool_transport": delivery.get("pathogen_pool_transport"),
+        "duty0_terminal_mode": delivery.get("duty0_terminal_mode"),
+    }
+
+
 def run_repair_cell(
     design: object,
     cell: object,
@@ -104,6 +136,16 @@ def run_repair_cell(
         )
     payload = cell_payload(design, cell, sim, ledger, raw)
     payload["transport_engine_binary"] = None
+    # Fail closed on the repair toggles too: a voyage where an override
+    # silently did not reach the engine would score as its arm's result.
+    expected = _expected_toggles(design, cell.arm_id)
+    resolved_toggles = _resolved_toggles(payload)
+    if resolved_toggles != expected:
+        raise SystemExit(
+            f"arm {cell.arm_id!r} declared toggles {expected} but the "
+            f"engine resolved {resolved_toggles}; refusing to emit a "
+            f"mislabeled payload",
+        )
     return payload
 
 

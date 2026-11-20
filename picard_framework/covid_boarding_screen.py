@@ -2180,6 +2180,8 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
     )
     caregiver_resolved = getattr(tx_core, "caregiver_resolved_block", None)
     droplet_split = getattr(tx_core, "droplet_field_split", None)
+    room_air = getattr(tx_core, "room_air_removal", None)
+    near_field = getattr(tx_core, "near_field_air", None)
     return {
         "airborne_half_life_hours": profile.get("airborne_half_life_hours"),
         "route_efficiency_multipliers": dict(
@@ -2209,6 +2211,33 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         # only what the arm declared).
         "exposure_cap_include_fixed_rings_engine": bool(
             getattr(tx_core, "_exposure_cap_include_fixed_rings", False)
+        ),
+        # The engine-resolved room-air and near-field arms, echoed the
+        # same way so a repair-isolation arm is auditable against what
+        # the transmission core actually parsed (REPAIR-ISOLATION-01).
+        "room_air_removal": (
+            None
+            if room_air is None
+            else {
+                "mode": room_air.mode,
+                "map_arm": room_air.map_arm,
+            }
+        ),
+        "near_field_air": (
+            None
+            if near_field is None
+            else {
+                "mode": near_field.mode,
+                "interzonal_airflow_m3_per_hour": (
+                    near_field.interzonal_airflow_m3_per_hour
+                ),
+                "neighbour_table_ratio": near_field.neighbour_table_ratio,
+            }
+        ),
+        # The resolved duty-0 terminal on the transport engine that ran
+        # (CONTAM-DUTY0-01: extract shipped, sealed the baseline).
+        "duty0_terminal_mode": getattr(
+            sim.contam_engine, "duty0_terminal_mode", None
         ),
         # The engine-resolved hand-reservoir arm, echoed so a
         # transmission_overrides hand_reservoir_mode arm is auditable from

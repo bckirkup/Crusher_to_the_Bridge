@@ -284,17 +284,69 @@ class TestCellHelpers:
 # ------------------------------------------------------------------- readout
 
 
+_RESOLVED_BY_ARM = {
+    "baseline": {
+        "room_air_map_arm": "ambient_on",
+        "near_field_air_mode": "two_box",
+        "pathogen_pool_transport": "airflow",
+        "duty0_terminal_mode": "extract",
+    },
+    "room_air_off": {
+        "room_air_map_arm": "ambient_off",
+        "near_field_air_mode": "two_box",
+        "pathogen_pool_transport": "airflow",
+        "duty0_terminal_mode": "extract",
+    },
+    "nearfield_off": {
+        "room_air_map_arm": "ambient_on",
+        "near_field_air_mode": "off",
+        "pathogen_pool_transport": "airflow",
+        "duty0_terminal_mode": "extract",
+    },
+    "pool_off": {
+        "room_air_map_arm": "ambient_on",
+        "near_field_air_mode": "two_box",
+        "pathogen_pool_transport": "none",
+        "duty0_terminal_mode": "extract",
+    },
+    "duty0_off": {
+        "room_air_map_arm": "ambient_on",
+        "near_field_air_mode": "two_box",
+        "pathogen_pool_transport": "airflow",
+        "duty0_terminal_mode": "sealed",
+    },
+    "all_off": {
+        "room_air_map_arm": "ambient_off",
+        "near_field_air_mode": "off",
+        "pathogen_pool_transport": "none",
+        "duty0_terminal_mode": "sealed",
+    },
+}
+
+
 def _payload(
     seed: int, arm: str, *, design: str = "covid_repair_isolation_01_dp",
     resolved: str = "ContamTransportEngine", recorded: int = 0,
-    lab: int = 0,
+    lab: int = 0, toggles: dict | None = None,
 ) -> dict:
+    resolved_toggles = dict(toggles or _RESOLVED_BY_ARM[arm])
     return {
         "design_id": design,
         "cell": {"arm_id": arm, "seed": seed},
         "delivery": {
             "transport_engine": "native",
             "transport_engine_resolved": resolved,
+            "room_air_removal": {
+                "mode": "first_order",
+                "map_arm": resolved_toggles["room_air_map_arm"],
+            },
+            "near_field_air": {
+                "mode": resolved_toggles["near_field_air_mode"],
+            },
+            "pathogen_pool_transport": (
+                resolved_toggles["pathogen_pool_transport"]
+            ),
+            "duty0_terminal_mode": resolved_toggles["duty0_terminal_mode"],
         },
         "observables": {
             "recorded_onsets": recorded,
@@ -332,7 +384,20 @@ class TestReadout:
         assert audit["wrong_engine"] == [
             ("covid_repair_isolation_01_dp", "all_off", 20200205),
         ]
+        assert audit["wrong_toggles"] == []
         assert audit["missing_cells"]
+
+    def test_audit_flags_wrong_toggles(self, readout_mod) -> None:
+        """A voyage whose declared toggle never reached the engine is a
+        wrong-toggles cell, the same audit class as a wrong engine."""
+        bad = _payload(
+            20200205, "all_off",
+            toggles=_RESOLVED_BY_ARM["baseline"],
+        )
+        audit = readout_mod._audit([bad])
+        assert audit["wrong_toggles"] == [
+            ("covid_repair_isolation_01_dp", "all_off", 20200205),
+        ]
 
     def test_paired_delta_against_baseline(self, readout_mod) -> None:
         baseline = [

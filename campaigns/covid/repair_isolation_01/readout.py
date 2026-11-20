@@ -161,14 +161,61 @@ def _score(rows: list[dict], keys: list[str]) -> dict:
     return {k: _row([c[k] for c in rows]) for k in keys}
 
 
+# The shipped (repaired) resolution of each repair toggle — what an arm
+# that does not declare the key runs with. Mirrors cell.py's fail-closed
+# check so the readout can audit persisted payloads the same way.
+_TOGGLE_DEFAULTS = {
+    "room_air_map_arm": "ambient_on",
+    "near_field_air_mode": "two_box",
+    "pathogen_pool_transport": "airflow",
+    "duty0_terminal_mode": "extract",
+}
+
+
+def _expected_toggles() -> dict[tuple[str, str], dict[str, str]]:
+    """(design_id, arm_id) -> resolved toggles the arm must land on."""
+    spec = json.loads(_CAMPAIGN_JSON.read_text())
+    expected: dict[tuple[str, str], dict[str, str]] = {}
+    for block in spec["blocks"].values():
+        design_path = block["args"]["design"]
+        arm_id = block["args"]["arm_id"]
+        design = json.loads(
+            (_REPO_ROOT / design_path).read_text(encoding="utf-8"),
+        )
+        overrides = next(
+            (a.get("overrides") or {} for a in design.get("arms") or []
+             if a.get("arm_id") == arm_id),
+            {},
+        )
+        expected[(_design_id_of(design_path), arm_id)] = {
+            key: str(overrides.get(key, default))
+            for key, default in _TOGGLE_DEFAULTS.items()
+        }
+    return expected
+
+
+def _resolved_toggles(payload: dict) -> dict[str, str | None]:
+    delivery = payload.get("delivery") or {}
+    room_air = delivery.get("room_air_removal") or {}
+    near_field = delivery.get("near_field_air") or {}
+    return {
+        "room_air_map_arm": room_air.get("map_arm"),
+        "near_field_air_mode": near_field.get("mode"),
+        "pathogen_pool_transport": delivery.get("pathogen_pool_transport"),
+        "duty0_terminal_mode": delivery.get("duty0_terminal_mode"),
+    }
+
+
 def _audit(cells: list[dict]) -> dict:
     audit: dict[str, object] = {
         "cells": len(cells),
         "wrong_engine": [],
+        "wrong_toggles": [],
         "unexpected_cells": [],
         "duplicate_cells": [],
         "missing_cells": [],
     }
+    expected_toggles = _expected_toggles()
     seen: Counter[tuple] = Counter()
     for p in cells:
         cell = p.get("cell") or {}
@@ -177,6 +224,9 @@ def _audit(cells: list[dict]) -> dict:
         resolved = (p.get("delivery") or {}).get("transport_engine_resolved")
         if resolved != _EXPECTED_RESOLVED:
             audit["wrong_engine"].append(key)
+        want = expected_toggles.get((key[0], key[1]))
+        if want is not None and _resolved_toggles(p) != want:
+            audit["wrong_toggles"].append(key)
     expected = _expected_cells()
     found = set(seen)
     audit["missing_cells"] = sorted(
