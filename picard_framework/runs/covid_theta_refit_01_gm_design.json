@@ -1,0 +1,60 @@
+{
+ "design_id": "covid_theta_refit_01_gm",
+ "task_id": "COVID-THETA-REFIT-01",
+ "schema_version": "1.0.0",
+ "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+ "supersedes": "covid_transport_fit_01_* \u2014 same scenario, base_overrides and observation structure verbatim; the arm axis is now Theta over a declared candidate grid instead of the transport solver.",
+ "description": "Post-airflow-repair Theta refit, held-out half: Greg Mortimer hygiene_cycle scored at the Theta the DP grid selects, plus its half-decade neighbours as sensitivity (merge_held_out semantics). Identical cell shape to TRANSPORT-FIT-01's GM design \u2014 the rescore's hygiene_cycle arm verbatim under the shipped post-B1-B3 stack; Theta is the only axis. covid.H1 (128/217 positive share), covid.H2 (0.8125 asymptomatic share), covid.H3 placement, takeoff \u2014 the same held-out report merge_held_out produces; no held-out quantity feeds back into candidate selection.",
+ "scenario_id": "greg_mortimer_2020",
+ "split_role": "held_out",
+ "split_role_note": "Held-out by the fixed split (docs/proposals/covid_trajectory_fit_spec.md \u00a72). This design measures the transport-solver sensitivity of the held-out score; nothing in it may feed a parameter choice.",
+ "cell_conditioning": {
+  "note": "As-declared replay of the greg_mortimer_2020 scenario record: explicit seed is one passenger at epoch 0 with infection_age_days 0.0, scheduled SOP-017 cabin isolation voyage day 8 -> end_day 27, single ship-wide testing campaign voyage day 20, molecular_ascertainment_start_day 20, boarding channel off, platform expedition_cruise_450 declared not fitted. Scored channels are the rescore's own: campaign positives vs 128/217 (H1), asymptomatic share vs 0.8125 (H2), takeoff (>=10 recorded onsets).",
+  "theta": "2.37e11 \u2014 the COVID-GM-RESCORE-02 anchor row only. The v13 conditioning lattice (1e11|2.37e11|1e12) is not re-enumerated: this design asks how the transported-dose field moves the held-out score at the DP-conditioned operating point, not where on a \u0398 lattice it lands.",
+  "imports": 1,
+  "infection_age_days": 0.0,
+  "sanitary_visit_mode": "dwell_weighted",
+  "voyage_mode": "declared",
+  "split_day": 20,
+  "turn_day": 8
+ },
+ "thetas": [
+  7900000.0,
+  10000000.0,
+  31622776.60168379,
+  100000000.0,
+  316227766.01683795,
+  1000000000.0,
+  3162277660.1683793,
+  10000000000.0,
+  31622776601.683792,
+  100000000000.0,
+  316227766016.83795,
+  1000000000000.0
+ ],
+ "infection_age_days": [
+  0.0
+ ],
+ "imports": [
+  1
+ ],
+ "sanitary_visit_mode": "dwell_weighted",
+ "seed_base": 20200205,
+ "seeds": 50,
+ "takeoff_recorded_onsets": 10,
+ "voyage_mode": "declared",
+ "split_day": 20,
+ "turn_day": 8,
+ "seed_ring_readout": true,
+ "funnel_echo": true,
+ "arms": [
+  {
+   "arm_id": "baseline",
+   "role": "baseline",
+   "overrides": {},
+   "note": "Single arm so empty overrides per the arm grammar \u2014 the whole shipped post-repair stack runs: near_field two_box (204 m3/h, ratio 0.43), pathogen_pool_transport airflow, room_air_removal first_order ambient_on, duty0_terminal_mode extract, ambient openings + envelope/exhaust sinks. Resolved engine auditable via delivery.transport_engine_resolved == ContamTransportEngine."
+  }
+ ],
+ "cells": 600,
+ "cells_note": "1 arm x 12 Theta candidates x 50 seeds = 600 cells. Same seed series as TF-01/RI-01 so every cell pairs seed-for-seed with the repair-isolation baseline arm. Theta grid: the currently fitted 7.9e6 plus the v5/v6 first-look half-decade surface 1e7..1e12; a winner at either end is boundary-pinned by convention."
+}
