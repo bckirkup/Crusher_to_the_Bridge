@@ -1,6 +1,6 @@
 # COVID-THETA-REFIT-01 — Θ refit on DP under the post-B1-B3 mass budget, GM held-out
 
-**Status:** canary complete — awaiting go on the 23 fleet blocks
+**Status:** fleet running — 23 blocks (820 cells) submitted, awaiting collection
 **Task:** COVID-THETA-REFIT-01
 **Designs:** `picard_framework/runs/covid_theta_refit_01_dp_design.json` (240 cells: 12 θ × 20 seeds),
 `picard_framework/runs/covid_theta_refit_01_gm_design.json` (600 cells: 12 θ × 50 seeds)
