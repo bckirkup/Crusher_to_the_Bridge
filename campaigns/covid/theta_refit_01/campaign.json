@@ -6,7 +6,7 @@
  "s3_prefix": "campaign/covid_theta_refit_01/",
  "queue": "picard-analysis-queue",
  "image_tag": "covid-theta-refit-01-v1",
- "image_digest": "TBD",
+ "image_digest": "sha256:48a6cd069ced2a897a642ae81df6bd86f1904114091e1721f32e3cd8b57fbf7a",
  "resources": {
   "vcpu": "1",
   "memory": "4096"
