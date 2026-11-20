@@ -109,8 +109,11 @@ has two pairs behind it.
 Two different measurements, not to be combined.
 
 **Batch child run time**, `stoppedAt − startedAt`, one attempt each,
-excluding queue time and including everything else in the job (image
-start, design load, ContamX binary fetch on ContamX cells, upload).
+from container `RUNNING` to exit. It excludes queue time and the image
+pull (both before `startedAt`) and includes everything else in the job
+(interpreter start, design load, ContamX binary fetch on ContamX cells,
+upload). The four parents are the ledger's original arrays, not
+resubmissions.
 
 | Block | n | Hosts | Median s | Range s |
 |---|---:|---:|---:|---|
@@ -179,7 +182,7 @@ behind it and is withdrawn; these tables do not settle it either.
 
   `--batch-dir` holds `parent_<block>.json` and `children_<block>.json`
   as returned by `aws batch describe-jobs`. `verify` uses the standard
-  library only and recomputes every statistic from the base tables (19
+  library only and recomputes every statistic from the base tables (21
   checks). Table digests from this rebuild:
 
   ```text

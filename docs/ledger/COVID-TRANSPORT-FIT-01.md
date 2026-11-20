@@ -73,7 +73,8 @@ residual, now on a held-out hull.
 
 ## Verdict
 
-Native and ContamX agree on takeoff in every pair and on voyage-wide
+Native and ContamX agree on takeoff in every pair and give equal (DP)
+or close (GM: positives 110 vs 110.5, onsets 50.5 vs 49.5) voyage-wide
 medians, with seed-level differences up to tens of cases (section
 above). "Use whichever is cheaper" is withdrawn: no timing was read when
 it was written, and the timing now tabulated in `READOUT_PAIRED.md`

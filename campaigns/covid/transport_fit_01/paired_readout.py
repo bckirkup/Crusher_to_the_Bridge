@@ -41,6 +41,21 @@ REPLAYS = {
            "scenario": "greg_mortimer_2020", "native": "gm_native",
            "contamx": "gm_contamx", "pairs": 50},
 }
+PARENT_JOBS = {  # LEDGER.md section 5
+    "dp_contamx_canary": "0a894bc5-0dca-4554-816f-0ebc853067ae",
+    "dp_native": "bec97e14-7e51-4a49-9b1c-37a2eb60ad5c",
+    "gm_native": "da861223-2b85-4479-80d3-21a343502fee",
+    "gm_contamx": "a02bd464-8cb5-4ece-b427-351c0473f70c",
+}
+BENCH_PHASES = {
+    "native": {("measured", p) for p in (
+        "input_read", "native_construct", "field_reduce", "downstream",
+        "end_to_end", "process_total")} | {("cached", "downstream")},
+    "contamx": {("measured", p) for p in (
+        "input_read", "contamx_export", "contamx_solve", "contamx_import",
+        "field_reduce", "downstream", "end_to_end", "process_total")}
+    | {("cached", "downstream")},
+}
 RESOLVED = {"native": "ContamTransportEngine", "contamx": "ContamXTransportEngine"}
 COUNTS = ["recorded_onsets", "lab_confirmed", "campaign_positives",
           "campaign_specimens", "infections_total", "aboard_total"]
@@ -216,37 +231,57 @@ def _load_cells(cells_dir: Path, spec: dict, problems: list[str]):
     return seed_rows, source_rows
 
 
-def _load_jobs(batch_dir: Path, spec: dict, problems: list[str]) -> list[dict]:
+def _job_row(k: dict, block: str, index: int, seed: int, host: str) -> dict:
+    att = k["attempts"]
+    return {
+        "block": block, "array_index": index, "seed": seed, "job_id": k["jobId"],
+        "job_definition_revision": k["jobDefinition"].rsplit(":", 1)[-1],
+        "image_digest": k["container"]["image"].rsplit("@", 1)[-1],
+        "attempts": len(att), "exit_code": att[-1]["container"]["exitCode"],
+        "started_at_ms": k["startedAt"], "stopped_at_ms": k["stoppedAt"],
+        "run_ms": k["stoppedAt"] - k["startedAt"], "host_token": host}
+
+
+def _audit_parent(parent: dict, block: str, seeds: list[int],
+                  problems: list[str]) -> None:
+    """The array that wrote the cells, not a later resubmission (whose
+    children skip existing cells and would time no voyage)."""
+    if parent["jobId"] != PARENT_JOBS[block]:
+        problems.append(f"{block}: parent job is not the ledger's run")
+    cmd = parent["container"]["command"]
+    if cmd[cmd.index("--block") + 1] != block or \
+            cmd[cmd.index("--seeds") + 1] != ",".join(map(str, seeds)):
+        problems.append(f"{block}: submitted command is not the declared block/seeds")
+
+
+def _load_block_jobs(batch_dir: Path, block: str, seeds: list[int],
+                     hosts: dict[str, str], problems: list[str]) -> list[dict]:
+    parent = json.loads((batch_dir / f"parent_{block}.json").read_text())["jobs"][0]
+    kids = json.loads((batch_dir / f"children_{block}.json").read_text())["jobs"]
+    _audit_parent(parent, block, seeds, problems)
+    by_index = {k["arrayProperties"]["index"]: k for k in kids}
+    if sorted(by_index) != list(range(len(seeds))):
+        problems.append(f"{block}: child indices are not 0..{len(seeds) - 1}")
+        return []
     rows = []
+    for index, seed in enumerate(seeds):
+        k = by_index[index]
+        if k["status"] != "SUCCEEDED" or k["jobId"] != f"{parent['jobId']}:{index}":
+            problems.append(f"{block}:{index}: not a SUCCEEDED child of the parent")
+        inst = k["attempts"][-1]["container"]["containerInstanceArn"].rsplit("/", 1)[-1]
+        hosts.setdefault(inst, f"host_{len(hosts) + 1:02d}")
+        rows.append(_job_row(k, block, index, seed, hosts[inst]))
+    return rows
+
+
+def _load_jobs(batch_dir: Path, spec: dict, problems: list[str]) -> list[dict]:
+    rows: list[dict] = []
     hosts: dict[str, str] = {}
     for replay, meta in REPLAYS.items():
         for arm in ("native", "contamx"):
             block = meta[arm]
-            seeds = spec["blocks"][block]["seeds"]
-            parent = json.loads((batch_dir / f"parent_{block}.json").read_text())["jobs"][0]
-            kids = json.loads((batch_dir / f"children_{block}.json").read_text())["jobs"]
-            cmd = parent["container"]["command"]
-            if cmd[cmd.index("--block") + 1] != block or \
-                    cmd[cmd.index("--seeds") + 1] != ",".join(map(str, seeds)):
-                problems.append(f"{block}: submitted command is not the declared block/seeds")
-            by_index = {k["arrayProperties"]["index"]: k for k in kids}
-            if sorted(by_index) != list(range(len(seeds))):
-                problems.append(f"{block}: child indices are not 0..{len(seeds) - 1}")
-            for index, seed in enumerate(seeds):
-                k = by_index[index]
-                att = k["attempts"]
-                if k["status"] != "SUCCEEDED" or k["jobId"] != f"{parent['jobId']}:{index}":
-                    problems.append(f"{block}:{index}: not a SUCCEEDED child of the parent")
-                inst = att[-1]["container"]["containerInstanceArn"].rsplit("/", 1)[-1]
-                hosts.setdefault(inst, f"host_{len(hosts) + 1:02d}")
-                rows.append({
-                    "replay": replay, "arm": arm, "block": block,
-                    "array_index": index, "seed": seed, "job_id": k["jobId"],
-                    "job_definition_revision": k["jobDefinition"].rsplit(":", 1)[-1],
-                    "image_digest": k["container"]["image"].rsplit("@", 1)[-1],
-                    "attempts": len(att), "exit_code": att[-1]["container"]["exitCode"],
-                    "started_at_ms": k["startedAt"], "stopped_at_ms": k["stoppedAt"],
-                    "run_ms": k["stoppedAt"] - k["startedAt"], "host_token": hosts[inst]})
+            rows.extend({"replay": replay, "arm": arm, **r} for r in _load_block_jobs(
+                batch_dir, block, spec["blocks"][block]["seeds"], hosts, problems))
     return rows
 
 
@@ -468,6 +503,13 @@ def verify(args: argparse.Namespace) -> int:
                    {(r["hull"], r["lane"]) for r in bench}
                    == {(h, ln) for h in BENCH_HULLS for ln in ("native", "contamx")}
                    and all(r["n"] == "5" and r["timeouts"] == "0" for r in bench)))
+    checks.append(("microbench: every hull x lane has exactly its cold and repeated phases", all(
+        {(r["repeat_kind"], r["phase"]) for r in bench
+         if (r["hull"], r["lane"]) == (h, ln)} == BENCH_PHASES[ln]
+        and sum((r["hull"], r["lane"]) == (h, ln) for r in bench) == len(BENCH_PHASES[ln])
+        for h in BENCH_HULLS for ln in BENCH_PHASES)))
+    checks.append(("jobs: parent ids are the ledger's four runs", all(
+        r["job_id"].rsplit(":", 1)[0] == PARENT_JOBS[r["block"]] for r in jobs)))
     stored = json.loads((d / "paired_summary.json").read_text(encoding="utf-8"))
     checks.append(("paired_summary.json recomputes from the base tables",
                    _close(json.loads(_dump(summarize(seed_rows, jobs))), stored)))
