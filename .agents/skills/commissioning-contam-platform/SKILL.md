@@ -125,11 +125,13 @@ not a bug. `makeup_louvre` stays 0.0.
 
 ```bash
 .venv/bin/python3 tools/diag/contam_pressure_balance_diagnostic.py \
-  --hull <id> --lane commissioned
+  --hull <id> --lane commissioned \
+  --out telemetry_buffer/<id>_pressure_commissioned.json
 .venv/bin/python3 tools/contam_commissioned_check.py --platform <id>
 # After re-exporting contam/, solve the committed bundle itself:
 .venv/bin/python3 tools/diag/contam_pressure_balance_diagnostic.py \
-  --hull <id> --lane authored
+  --hull <id> --lane authored \
+  --out telemetry_buffer/<id>_pressure_authored.json
 ```
 
 The first two commands re-export from JSON; only the `authored` lane reads
