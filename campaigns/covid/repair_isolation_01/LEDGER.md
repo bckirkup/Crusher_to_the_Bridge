@@ -1,6 +1,6 @@
 # COVID-REPAIR-ISOLATION-01 — per-repair paired-arm isolation on DP
 
-**Status:** submitted (canary pending)
+**Status:** canary running on Batch
 **Task:** COVID-REPAIR-ISOLATION-01
 **Design:** `picard_framework/runs/covid_repair_isolation_01_dp_design.json` (6 arms × 20 seeds = 120 cells)
 **Parent measurement:** TRANSPORT-FIT-01 full readout — takeoff collapsed to 9/20, median lab_confirmed 10.5 vs record 712, pooled volume preserved by a few record-scale cells; solver choice outcome-identical.
@@ -29,7 +29,7 @@ seed pairs).
 
 | Block | Job ID | Rev | Cells | Status |
 |---|---|---|---|---|
-| all_off_canary | (pending) | — | 20 | submitted |
+| all_off_canary | e684cbbf-893b-4e9a-91e3-6f49f728a744 | picard-covid-repair-isolation-01:1 | 20 | RUNNING |
 | baseline | — | — | 20 | pending owner go |
 | room_air_off | — | — | 20 | pending owner go |
 | nearfield_off | — | — | 20 | pending owner go |
@@ -41,4 +41,4 @@ Artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_repair_i
 ## Image
 
 - tag `covid-repair-isolation-01-v1`, digest pinned in `campaign.json`
-  (`image_digest`) — built at the campaign PR HEAD.
+  (`image_digest` = sha256:3d1b676a…) — built at `d4c5e8bd` (base `picard-campaign:base-d4c5e8bd` + campaign overlay).
