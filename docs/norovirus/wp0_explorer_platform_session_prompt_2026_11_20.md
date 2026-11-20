@@ -66,3 +66,59 @@ Report immediately if:
 Stop when: the platform PR is merged and this file is updated with the
 platform id, generated SHA, and smoke result (commit that update).
 ```
+
+## Result (WP0 closed 2026-11-20)
+
+Settled inputs for WP3 — do not re-derive.
+
+| Item | Value |
+|---|---|
+| Platform id | `explorer_seas_06` |
+| PR | #1346, merge commit `a175b5c9` |
+| Generated SHA | `695df1b5` (last commit touching `data/platforms/explorer_seas_06/`; first generated at `1ed28aa4`, commissioned at `2897df87`) |
+| `nominal_complement` | 3,245 passengers / 1,183 crew (4,428 agents) |
+| Zones / air handlers | 119 zones, 49 HVAC groups |
+| `voyage_config.json` | `platform_class: mega`, `total_epochs: 192` (this platform only; the 168/288/504 grid is untouched) |
+| Bin | `mega_cruise_5000` (3,245 > 3,240.37) |
+
+Measured at `695df1b5` (same platform data as the merge commit):
+
+- Smoke: `norwalk_gi`, seed 8105, 4,428 agents, 192 epochs completed, 731 s.
+  One seed; it shows the platform runs, nothing about outbreak size.
+- Native ContamX 3.4.0.3, committed (commissioned) bundle, one steady solve:
+  max |dP| 23.1 Pa, interior max 15.3 Pa, no interior path above 1 kPa,
+  18,000 m3/h exhaust sink, field/native outflow ratio 0.73-4.08. Every
+  commissioned terminal within 5% of declared. `diamond_princess` as
+  committed: 43.1 Pa max, ratio 0.60-3.62.
+- `sanity_checker --platform-dir`: 0 errors, 4 warnings (SOP-007/009, below).
+
+How the platform was built, beyond the prompt above:
+
+- Sources are Royal Caribbean's deck-plan pages archived Feb 2006 (venues and
+  names) and cruisedeckplans.com images (cabin-bank geometry). No RCI
+  accessible-route map was found; none is cited.
+- The recipe output alone is not a usable Contam hull: exported commissioned
+  it solved at ~468 kPa (34 exhaust-only sanitary branches, no make-up path).
+  The commissioning layer was hand-authored on the generated JSON, as on the
+  four existing recipe hulls. The steps are in
+  `.agents/skills/commissioning-contam-platform/SKILL.md`.
+- One generator change was made, with the owner's approval:
+  `extra_corridors` banks that share a prefix and a deck share one air
+  handler (they emitted duplicate `AHU_PC_D2` / `AHU_PC_D3` ids). Decks 2
+  and 3 therefore have one handler per deck, like decks 6-10. No HVAC
+  drawing is published, so this grouping is an assumption.
+- One ventilation label per corridor: decks 6-8 midship `atrium_view`, other
+  deck 6-10 corridors `balcony_partial` although they also serve inside
+  cabins, decks 2-3 `interior_hvac`.
+
+Open, not fixed (both shared with `diamond_princess`):
+
+- `generate_cruise_platform_layout.py --overwrite` on any recipe hull drops
+  its hand-authored commissioning layer. Folding that layer into the
+  generator is the owner's stated next step and is unstarted.
+- SOP-007/009 `close_zones` name `mega_cruise_5000` zone ids, so closure
+  orders skip Explorer's galley and crew mess. WP3 must decide whether the
+  reconstruction needs per-platform closure aliases before it relies on
+  those SOPs.
+
+Next decision: whether the generator fold-back runs before WP3.
