@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from typing import Any
@@ -150,6 +151,27 @@ def _public_zone_dicts(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
     return out
 
 
+def _weather_exposure_tags(
+    zones: list[dict[str, Any]],
+    exterior_zones: tuple[str, ...],
+) -> list[dict[str, Any]]:
+    """Tag ``exposure: weather`` on exterior zones (CONTAM-AMBIENT-WEATHER-01),
+    keyed after ``deck`` to match commissioned hull ordering."""
+    exterior = set(exterior_zones)
+    out: list[dict[str, Any]] = []
+    for z in zones:
+        if z["id"] not in exterior or "exposure" in z:
+            out.append(z)
+            continue
+        tagged: dict[str, Any] = {}
+        for key, value in z.items():
+            tagged[key] = value
+            if key == "deck":
+                tagged["exposure"] = "weather"
+        out.append(tagged)
+    return out
+
+
 def build_spatial_layout(recipe: CruisePlatformRecipe) -> dict[str, Any]:
     extra: list[dict[str, Any]] = []
     for bank in recipe.extra_corridors:
@@ -161,6 +183,7 @@ def build_spatial_layout(recipe: CruisePlatformRecipe) -> dict[str, Any]:
         + extra
     )
     zones += sanitary_zone_dicts(zones)
+    zones = _weather_exposure_tags(zones, recipe.exterior_zones)
     for z in zones:
         assert len(z["id"]) <= 15, f"Contam zone id too long: {z['id']!r}"
     out: dict[str, Any] = {
@@ -179,6 +202,168 @@ def build_spatial_layout(recipe: CruisePlatformRecipe) -> dict[str, Any]:
     if recipe.nominal_complement:
         out["nominal_complement"] = dict(recipe.nominal_complement)
     return out
+
+
+# ---------------------------------------------------------------------------
+# Commissioning layer (CONTAM-AMBIENT-WEATHER-CRUISE-01 /
+# CONTAM-AMBIENT-MAKEUP-CRUISE-01). Emitted here since explorer_seas_06; the
+# earlier commissioned hulls carry the same layer hand-authored.
+# open_deck ``exchange_m3h`` is emitted null: it is the ContamX-solved outward
+# flow, filled by ``scripts/commission_platform_contam.py`` after export.
+
+_DUCTED_EXHAUST_PREFIXES = (
+    "Pax_Trunk_",
+    "Crew_Trunk_",
+    "Cabin_Relief_",
+    "Corridor_Relief_",
+)
+_PASSIVE_OPENING_MARKERS = ("Door_Leakage", "Open_Doorway")
+
+_GALLEY_TRANSFER_DESCRIPTION = (
+    "One-way make-up transfer into the galley while galley exhaust runs "
+    "independent to atmosphere (CDC VSP 2025 §33.2.1-§33.2.2; "
+    "ISO 9943:2009 §4.1/§5.2/A.2.3). Despite the historical path name this is "
+    "transfer air, not recirculated exhaust; magnitude remains "
+    "ASSUMED-GALLEY-TRANSFER-MAGNITUDE, Grade C, unchanged."
+)
+_GALLEY_HOOD_DESCRIPTION = (
+    "Galley hood exhaust is a once-through prescribed-flow sink to ambient "
+    "(material leaves the ship/domain), separate from the recirculated HVAC "
+    "supply and carrying no filtration/recirculation credit (CDC VSP 2025 "
+    "§33.2.1-§33.2.2; ISO 9943:2009 §4.1/§5.2/A.2.1/A.2.3). Magnitude remains "
+    "Grade C: no retrieved source gives a separate galley exhaust magnitude "
+    "and ISO 9943 §5.2 gives no formula, so the declared value is the paired "
+    "make-up-transfer magnitude with no invented margin; the make-up side "
+    "remains the authored Dining_Galley_Exhaust/Galley_Service_Exhaust link."
+)
+_OPEN_DECK_DESCRIPTION = (
+    "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). "
+    "area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the "
+    "deck edge, so it is the two opposite side faces of a square-plan deck of "
+    "this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. "
+    "wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its "
+    "committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, "
+    "not a measured wind. exchange_m3h is the ContamX-solved outward flow "
+    "through the opening at that point, commissioned lane (D5)."
+)
+
+
+def _commissioned_link_fields(link: dict[str, Any]) -> dict[str, Any]:
+    """Explicit direction/mechanism/filtered for a migration-era link class."""
+    path = str(link.get("path", ""))
+    if link.get("direction") is not None:
+        return {}
+    if path == "Dining_Galley_Exhaust":
+        return {
+            "direction": "oneway",
+            "mechanism": "prescribed_flow",
+            "filtered": False,
+        }
+    if path.startswith(_DUCTED_EXHAUST_PREFIXES):
+        return {
+            "direction": "oneway",
+            "mechanism": "prescribed_flow",
+            "filtered": True,
+        }
+    if any(marker in path for marker in _PASSIVE_OPENING_MARKERS):
+        return {
+            "direction": "bidirectional",
+            "mechanism": "pressure_opening",
+            "filtered": False,
+        }
+    return {}
+
+
+def _makeup_louvre_description(source_zone: str, galley_zone: str) -> str:
+    return (
+        "Ambient make-up path for the prescribed Galley_Hood_Exhaust 18000 "
+        "m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on "
+        f"{source_zone}: the zone the paired Dining_Galley_Exhaust transfer "
+        "draws the galley make-up air from, which is where the hull's air "
+        f"deficit sits ({galley_zone} itself is balanced by that transfer). "
+        "Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a "
+        "louvre, so it is the served demand at an assumed 2.5 m/s free-area "
+        "face velocity (18000 / 3600 / 2.5). exchange_m3h is 0: the "
+        "ContamX-solved flow through both legs is inward only (clean make-up), "
+        "so the opening is not a native sink."
+    )
+
+
+def commissioning_augment(
+    recipe: CruisePlatformRecipe,
+    cross: list[dict[str, Any]],
+    zones: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Apply the hand-authored commissioning layer to generated airflow data.
+
+    Decorates migration-era cross-zone links, inserts the
+    ``Galley_Hood_Exhaust`` once-through sink when the recipe declares a
+    ``Dining_Galley_Exhaust`` transfer, and returns the ``ambient_openings``
+    records (galley make-up louvre plus one ``open_deck`` per exterior zone).
+    Call AFTER the endpoint filter so the ``to: ambient`` sink survives.
+    """
+    volumes = {z["id"]: float(z["volume_m3"]) for z in zones}
+    galley_source: str | None = None
+    galley_zone: str | None = None
+    galley_flow = 18000.0
+    out: list[dict[str, Any]] = []
+    for link in cross:
+        extra = _commissioned_link_fields(link)
+        if not extra:
+            out.append(link)
+            continue
+        rebuilt = {
+            key: link[key]
+            for key in ("from", "to", "flow_rate_m3h", "is_hvac_ducted", "path")
+            if key in link
+        }
+        if link.get("path") == "Dining_Galley_Exhaust":
+            rebuilt["description"] = _GALLEY_TRANSFER_DESCRIPTION
+            galley_source = str(link["from"])
+            galley_zone = str(link["to"])
+            galley_flow = float(link["flow_rate_m3h"])
+        rebuilt.update({k: v for k, v in link.items() if k not in rebuilt})
+        rebuilt.update(extra)
+        out.append(rebuilt)
+        if link.get("path") == "Dining_Galley_Exhaust" and not any(
+            cl.get("path") == "Galley_Hood_Exhaust" for cl in cross
+        ):
+            out.append({
+                "from": galley_zone,
+                "to": "ambient",
+                "flow_rate_m3h": galley_flow,
+                "is_hvac_ducted": True,
+                "path": "Galley_Hood_Exhaust",
+                "description": _GALLEY_HOOD_DESCRIPTION,
+                "direction": "oneway",
+                "mechanism": "prescribed_flow",
+                "filtered": False,
+            })
+
+    openings: list[dict[str, Any]] = []
+    if galley_source and galley_zone:
+        openings.append({
+            "zone": galley_source,
+            "type": "makeup_louvre",
+            "area_m2": 2.0,
+            "exchange_m3h": 0.0,
+            "schedule": "always_open",
+            "description": _makeup_louvre_description(galley_source, galley_zone),
+        })
+    for zone in recipe.exterior_zones:
+        volume = volumes.get(zone)
+        if volume is None:
+            continue
+        openings.append({
+            "zone": zone,
+            "type": "open_deck",
+            "area_m2": round(2 * math.sqrt(volume / 3) * 3, 3),
+            "exchange_m3h": None,
+            "wind_speed_m_s": 1.0,
+            "schedule": "always_open",
+            "description": _OPEN_DECK_DESCRIPTION,
+        })
+    return out, openings
 
 
 def _pax_corridor_ids(corr: CorridorRecipe) -> list[str]:
@@ -328,8 +513,9 @@ def build_air_flow_paths(
     # Sanitary head blocks: one exhaust-only HVAC group each plus a single
     # one-way makeup link from the served space's branch, added before the
     # endpoint filter so the head groups register as valid endpoints.
+    layout_zones = build_spatial_layout(recipe)["zones"]
     head_augmented = sanitary_airflow_augment(
-        build_spatial_layout(recipe)["zones"],
+        layout_zones,
         {"hvac_zones": hvac, "cross_zone_links": cross},
     )
     hvac = head_augmented["hvac_zones"]
@@ -341,6 +527,7 @@ def build_air_flow_paths(
         cl for cl in cross
         if cl["from"] in valid_endpoints and cl["to"] in valid_endpoints
     ]
+    cross, ambient_openings = commissioning_augment(recipe, cross, layout_zones)
     adjacency = [
         a for a in recipe.adjacency
         if a["from"] in zone_ids and a["to"] in zone_ids
@@ -362,7 +549,7 @@ def build_air_flow_paths(
             f"{sorted(covered_exterior)}"
         )
 
-    return {
+    out = {
         "platform": recipe.platform_id,
         "description": (
             f"HVAC for {recipe.platform_id} cabin-corridor layout. "
@@ -372,8 +559,11 @@ def build_air_flow_paths(
         "hvac_duty": recipe.hvac_duty,
         "hvac_zones": hvac,
         "cross_zone_links": cross,
-        "adjacency": adjacency,
     }
+    if ambient_openings:
+        out["ambient_openings"] = ambient_openings
+    out["adjacency"] = adjacency
+    return out
 
 
 def write_platform(
