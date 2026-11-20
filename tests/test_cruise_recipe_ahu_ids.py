@@ -41,3 +41,21 @@ def test_extra_banks_sharing_a_deck_share_one_ahu() -> None:
     assert sorted(groups["AHU_PC_D3"]) == [
         "PC_D3_P_F", "PC_D3_P_M", "PC_D3_S_F", "PC_D3_S_M",
     ]
+
+
+@pytest.mark.parametrize("platform_id", sorted(RECIPES))
+def test_committed_hvac_groups_match_the_recipe(platform_id: str) -> None:
+    import json
+
+    recipe = RECIPES[platform_id]
+    zone_ids = {zone["id"] for zone in build_spatial_layout(recipe)["zones"]}
+    generated = build_air_flow_paths(recipe, zone_ids)["hvac_zones"]
+    path = (
+        Path(__file__).resolve().parents[1]
+        / "data" / "platforms" / platform_id / "air_flow_paths.json"
+    )
+    committed = json.loads(path.read_text(encoding="utf-8"))["hvac_zones"]
+    assert {g["id"]: sorted(g["rooms"]) for g in committed} == {
+        g["id"]: sorted(g["rooms"]) for g in generated
+    }
+    assert len(committed) == len(generated)
