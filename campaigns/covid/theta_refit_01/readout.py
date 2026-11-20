@@ -52,6 +52,11 @@ _EXPECTED_TOGGLES = {
     "duty0_terminal_mode": "extract",
 }
 _EXPECTED_ENGINE = "ContamTransportEngine"
+_EXPECTED_DESIGN = {
+    DP_SCENARIO: "covid_theta_refit_01_dp",
+    GM_SCENARIO: "covid_theta_refit_01_gm",
+}
+_EXPECTED_ARM = "baseline"
 
 
 def _grid() -> tuple[float, ...]:
@@ -111,22 +116,38 @@ def _load_cells(cells_dir: Path) -> tuple[dict[str, dict], list[str]]:
         else:
             findings.append(f"{path.name}: unknown scenario {scenario!r}")
             continue
+        cell_findings: list[str] = []
+        want_design = _EXPECTED_DESIGN[scenario]
+        got_design = payload.get("design_id")
+        if got_design != want_design:
+            cell_findings.append(
+                f"{path.name}: design_id {got_design!r} (want {want_design!r})"
+            )
+        got_arm = cell.get("arm_id")
+        if got_arm != _EXPECTED_ARM:
+            cell_findings.append(
+                f"{path.name}: arm_id {got_arm!r} (want {_EXPECTED_ARM!r})"
+            )
+        resolved = _resolved_toggles(payload)
         for key, want in _EXPECTED_TOGGLES.items():
-            got = _resolved_toggles(payload)[key]
+            got = resolved[key]
             if got != want:
-                findings.append(
+                cell_findings.append(
                     f"{path.name}: wrong toggle {key}={got!r} (want {want!r})"
                 )
         engine = (payload.get("delivery") or {}).get(
             "transport_engine_resolved")
         if engine != _EXPECTED_ENGINE:
-            findings.append(
+            cell_findings.append(
                 f"{path.name}: resolved engine {engine!r} "
                 f"(want {_EXPECTED_ENGINE!r})"
             )
         key = _cell_key(phase, scenario, theta, seed)
         if key in payloads:
             findings.append(f"{path.name}: duplicate cell {key}")
+            continue
+        if cell_findings:
+            findings.extend(cell_findings)
             continue
         payloads[key] = {"observables": payload["observables"]}
     return payloads, findings
@@ -164,12 +185,18 @@ def main(argv: list[str] | None = None) -> int:
     if fit.partial:
         print(f"coverage: {fit.coverage}")
 
-    held = merge_held_out(
-        design, payloads, fit.theta,
-        allow_partial=args.allow_partial,
-    )
-    print("\n=== HELD OUT (Greg Mortimer, scored at fitted theta + neighbours) ===")
-    print(json.dumps(held, indent=2, sort_keys=True))
+    held_cells = [k for k in payloads if k.startswith(f"{HELD_OUT_PHASE}_")]
+    if held_cells:
+        held = merge_held_out(
+            design, payloads, fit.theta,
+            allow_partial=args.allow_partial,
+        )
+        print(
+            "\n=== HELD OUT (Greg Mortimer, scored at fitted theta + neighbours) ==="
+        )
+        print(json.dumps(held, indent=2, sort_keys=True))
+    else:
+        print("\n=== HELD OUT: no held-out cells present — skipped (fit-only readout)")
     return 0
 
 

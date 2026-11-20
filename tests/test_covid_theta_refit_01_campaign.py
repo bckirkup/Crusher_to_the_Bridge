@@ -161,9 +161,11 @@ class TestReadoutAudit:
                 "engine", "ContamTransportEngine"),
         }
         return {
+            "design_id": toggles.get("design_id", "covid_theta_refit_01_dp"),
             "cell": {
                 "scenario_id": "diamond_princess_2020",
                 "theta": 7.9e6, "seed": 20200205,
+                "arm_id": toggles.get("arm_id", "baseline"),
             },
             "delivery": delivery,
             "observables": {
@@ -216,3 +218,24 @@ class TestReadoutAudit:
             self._payload(engine="ContamXTransportEngine"),
         )
         assert any("engine" in f for f in findings)
+
+    def test_audit_flags_foreign_design_and_arm(
+        self, readout_mod: types.ModuleType, tmp_path: Path,
+    ) -> None:
+        findings = self._write_and_load(
+            readout_mod, tmp_path,
+            self._payload(design_id="covid_transport_fit_01_dp", arm_id="x"),
+        )
+        assert any("design_id" in f for f in findings)
+        assert any("arm_id" in f for f in findings)
+
+    def test_failing_cell_excluded_from_payloads(
+        self, readout_mod: types.ModuleType, tmp_path: Path,
+    ) -> None:
+        (tmp_path / "blk").mkdir(exist_ok=True)
+        (tmp_path / "blk" / "cell_20200205.json").write_text(
+            json.dumps(self._payload(pool="none")),
+        )
+        payloads, findings = readout_mod._load_cells(tmp_path)
+        assert payloads == {}
+        assert findings
