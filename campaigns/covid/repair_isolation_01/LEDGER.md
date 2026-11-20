@@ -30,11 +30,11 @@ seed pairs).
 | Block | Job ID | Rev | Cells | Status |
 |---|---|---|---|---|
 | all_off_canary | 14b1fa7a-1e30-4eb5-a92c-c62823f80600 | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
-| baseline | — | — | 20 | pending owner go |
-| room_air_off | — | — | 20 | pending owner go |
-| nearfield_off | — | — | 20 | pending owner go |
-| pool_off | — | — | 20 | pending owner go |
-| duty0_off | — | — | 20 | pending owner go |
+| baseline | 64121f0a-d4a5-4ad3-8009-6680104a07b5 | picard-covid-repair-isolation-01:2 | 20 | RUNNING (owner go 2026-11-20) |
+| room_air_off | 3c28d7c7-cb21-427c-898b-4c6776949bf8 | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
+| nearfield_off | 2af3c351-9aa9-47f4-8431-8447324fa7cb | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
+| pool_off | bdd20586-6239-439d-ab44-f398ed736b54 | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
+| duty0_off | 484a6cdf-8617-4fd0-8972-6dd714647896 | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
 
 Artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_repair_isolation_01/<block>/cell_<seed>.json`
 
