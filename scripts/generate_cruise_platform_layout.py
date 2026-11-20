@@ -274,18 +274,23 @@ def _commissioned_link_fields(link: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
-def _makeup_louvre_description(source_zone: str, galley_zone: str) -> str:
+def _makeup_louvre_description(
+    source_zone: str,
+    galley_zone: str,
+    demand_m3h: float,
+) -> str:
+    demand = f"{demand_m3h:g}"
     return (
-        "Ambient make-up path for the prescribed Galley_Hood_Exhaust 18000 "
-        "m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on "
-        f"{source_zone}: the zone the paired Dining_Galley_Exhaust transfer "
-        "draws the galley make-up air from, which is where the hull's air "
-        f"deficit sits ({galley_zone} itself is balanced by that transfer). "
-        "Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a "
-        "louvre, so it is the served demand at an assumed 2.5 m/s free-area "
-        "face velocity (18000 / 3600 / 2.5). exchange_m3h is 0: the "
-        "ContamX-solved flow through both legs is inward only (clean make-up), "
-        "so the opening is not a native sink."
+        "Ambient make-up path for the prescribed Galley_Hood_Exhaust "
+        f"{demand} m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). "
+        f"Placed on {source_zone}: the zone the paired Dining_Galley_Exhaust "
+        "transfer draws the galley make-up air from, which is where the "
+        f"hull's air deficit sits ({galley_zone} itself is balanced by that "
+        "transfer). Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing "
+        "gives a louvre, so it is the served demand at an assumed 2.5 m/s "
+        f"free-area face velocity ({demand} / 3600 / 2.5). exchange_m3h is "
+        "0: the ContamX-solved flow through both legs is inward only (clean "
+        "make-up), so the opening is not a native sink."
     )
 
 
@@ -345,10 +350,12 @@ def commissioning_augment(
         openings.append({
             "zone": galley_source,
             "type": "makeup_louvre",
-            "area_m2": 2.0,
+            "area_m2": round(galley_flow / 3600 / 2.5, 3),
             "exchange_m3h": 0.0,
             "schedule": "always_open",
-            "description": _makeup_louvre_description(galley_source, galley_zone),
+            "description": _makeup_louvre_description(
+                galley_source, galley_zone, galley_flow,
+            ),
         })
     for zone in recipe.exterior_zones:
         volume = volumes.get(zone)
