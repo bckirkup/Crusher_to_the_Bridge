@@ -115,8 +115,10 @@ Open, not fixed (both shared with `diamond_princess`):
 
 - `generate_cruise_platform_layout.py --overwrite` on any recipe hull drops
   its hand-authored commissioning layer. Folding that layer into the
-  generator (and the matching sanity-checker diagnostics) is unstarted; the
-  owner assigned it to the parent session, not to WP0 or WP3.
+  generator is the parent session's work, not WP0's or WP3's. Its commits
+  `63b66a34` and `dbbb908b` were pushed to the #1346 branch after that PR
+  merged, so they are not on `main` as of this readout; until they land
+  through their own PR, the statement above holds on `main`.
 - SOP-007/009 `close_zones` name `mega_cruise_5000` zone ids, so closure
   orders skip Explorer's galley and crew mess. WP3 must decide whether the
   reconstruction needs per-platform closure aliases before it relies on
