@@ -1,6 +1,6 @@
 # COVID-THETA-REFIT-01 — Θ refit on DP under the post-B1-B3 mass budget, GM held-out
 
-**Status:** canary running
+**Status:** canary complete — awaiting go on the 23 fleet blocks
 **Task:** COVID-THETA-REFIT-01
 **Designs:** `picard_framework/runs/covid_theta_refit_01_dp_design.json` (240 cells: 12 θ × 20 seeds),
 `picard_framework/runs/covid_theta_refit_01_gm_design.json` (600 cells: 12 θ × 50 seeds)
@@ -49,10 +49,10 @@ Audit clean: 20/20 cells loaded, 0 findings — every payload carries
 (ambient_on / two_box / airflow / extract), and `transport_engine_resolved=ContamTransportEngine`.
 
 **Drift cross-check passes exactly.** Pooled `lab_confirmed_total` = **1,236** —
-identical to TF-01/REPAIR-ISOLATION-01 baseline on the same seeds, and every per-seed
-cell is bit-identical to the RI-01 baseline arm (campaign_positives and recorded_onsets
-equal on all 20 seeds). Ensemble shape unchanged: takeoff 9/20, median
-campaign_positives 10.0, median recorded_onsets 8.0.
+identical to TF-01/REPAIR-ISOLATION-01 baseline on the same seeds. Per-seed
+`campaign_positives` and `recorded_onsets` are equal on all 20 seeds vs the RI-01
+baseline arm (payloads differ only in audit-echo fields). Ensemble shape unchanged:
+takeoff 9/20, median campaign_positives 10.0, median recorded_onsets 8.0.
 
 The θ=7.9e6 anchor point reproduces the shipped stack, so the rest of the sweep is
 measuring Θ, not drift.
