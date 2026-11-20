@@ -1,6 +1,6 @@
 # COVID-REPAIR-ISOLATION-01 — per-repair paired-arm isolation on DP
 
-**Status:** canary running on Batch
+**Status:** canary read out — `all_off` under-carries; STOP for owner go on the five remaining blocks
 **Task:** COVID-REPAIR-ISOLATION-01
 **Design:** `picard_framework/runs/covid_repair_isolation_01_dp_design.json` (6 arms × 20 seeds = 120 cells)
 **Parent measurement:** TRANSPORT-FIT-01 full readout — takeoff collapsed to 9/20, median lab_confirmed 10.5 vs record 712, pooled volume preserved by a few record-scale cells; solver choice outcome-identical.
@@ -29,7 +29,7 @@ seed pairs).
 
 | Block | Job ID | Rev | Cells | Status |
 |---|---|---|---|---|
-| all_off_canary | 14b1fa7a-1e30-4eb5-a92c-c62823f80600 | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
+| all_off_canary | 14b1fa7a-1e30-4eb5-a92c-c62823f80600 | picard-covid-repair-isolation-01:2 | 20 | SUCCEEDED 20/20, read out |
 | baseline | 64121f0a-d4a5-4ad3-8009-6680104a07b5 | picard-covid-repair-isolation-01:2 | 20 | RUNNING (owner go 2026-11-20) |
 | room_air_off | 3c28d7c7-cb21-427c-898b-4c6776949bf8 | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
 | nearfield_off | 2af3c351-9aa9-47f4-8431-8447324fa7cb | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
@@ -40,6 +40,38 @@ Artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_repair_i
 
 Terminated: `e684cbbf` (rev :1, v1 image) — superseded before any cell
 completed so every canary artifact carries the resolved-toggle witnesses.
+
+## Canary readout — `all_off` ×20 (measured at merge SHA on `14b1fa7a`, image v2 @ `ecdb2c9f`)
+
+Audit clean: 20/20 cells, `wrong_engine` and `wrong_toggles` empty — every
+payload carries resolved `room_air_removal.map_arm=ambient_off`,
+`near_field_air.mode=off`, `pathogen_pool_transport=none`,
+`duty0_terminal_mode=sealed`, `transport_engine_resolved=ContamTransportEngine`.
+
+| channel | all_off (n=20) | record | TF-01 shipped (same seeds) | pre-repair ensemble |
+|---|---|---|---|---|
+| recorded_onsets | median 3.0 [0–23] | 197 | — | — |
+| lab_confirmed | median 3.5 [0–31] | 712 | median 10.5 | — |
+| takeoff share (≥10 onsets) | 3/20 | always | 9/20 | — |
+| pooled lab_confirmed | **156** | — | ~1,236–1,294 | ~1,351–1,453 |
+| dated share | 0.74 | 0.277 | ~0.81 | — |
+| lab crew share (pooled) | 0.84 | 0.29 | ~0.45–0.75 | — |
+
+**The pre-repair ensemble did not come back — `all_off` yields ~8× fewer
+pooled confirmations than the shipped model on the same seeds** (156 vs
+~1,236 pooled lab_confirmed, takeoff 3/20 vs 9/20). Confirmations are the
+funnel's output, not delivered dose; the dose ratio itself is unmeasured.
+Since the witnesses prove all four toggles resolved to their labelled
+baselines, either (a) the toggle baselines do not reconstruct the
+pre-repair code paths — `mode=none`/sealed inside machinery that exists
+is not the same as the machinery being absent (e.g. shed mass may be
+routed into a pool that never releases), or (b) another change between
+the pre-repair measurement and now removed confirmations upstream of
+the funnel. The single-off arms inform but cannot fully discriminate:
+each retains three repairs, so a revert that restores takeoff names a
+contributing repair, but if every off-arm under-carries the result is
+consistent with interacting repairs or incomplete reconstruction as
+well as a regression outside the toggle grammar.
 
 ## Image
 
