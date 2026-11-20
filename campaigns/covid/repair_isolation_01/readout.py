@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+"""REPAIR-ISOLATION-01 readout: per-repair off-arms vs baseline vs record.
+
+Reads the synced cell payloads (``scripts/campaign readout
+covid/repair_isolation_01 -- --cells-dir <dir>``), audits coverage
+against the campaign spec and the resolved-engine echoes (every arm is
+native; a non-native resolution is a wrong-engine cell), and scores
+each arm against the Diamond Princess record anchors from
+``data/observation/covid_fit_targets.json``:
+
+- recorded_onsets vs 197 [197,199], before_share vs 0.173,
+  lab_confirmed vs 712, lab-confirmed crew share vs 0.29, dated share
+  (recorded/lab_confirmed) vs 0.277, asymptomatic-at-confirm share from
+  funnel_hosts vs 0.5047 (day-31 window) and 311/712 (final), and the
+  T2 onset-turn direction (passenger down, crew persists).
+
+Plus the seed-paired off-arm-minus-baseline deltas — the quantity this
+campaign exists to measure: which repair's off arm restores the
+outbreak scale the repaired ensemble lost.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import statistics
+import sys
+from collections import Counter
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+_CAMPAIGN_JSON = Path(__file__).with_name("campaign.json")
+DP_DAY31 = 31
+
+DP_RECORD = {
+    "recorded_onsets": 197,
+    "recorded_onsets_range": [197, 199],
+    "before_share": 0.173,
+    "lab_confirmed": 712,
+    "crew_share": 0.29,
+    "dated_share": 0.277,
+    "asym_share_day31": 0.5047,   # 320/634
+    "asym_share_final": 0.4368,   # 311/712
+}
+
+# The pre-repair ensemble this campaign cross-checks the all_off arm
+# against: the same boxed_s1s2 design scored before the airflow repairs
+# (TRANSPORT-FIT-01 ledger § full readout).
+PRE_REPAIR_POOL_LAB_RANGE = (1351, 1453)
+
+_EXPECTED_RESOLVED = "ContamTransportEngine"
+BASELINE_ARM = "baseline"
+
+
+def _q(values: list[float], q: float) -> float:
+    if not values:
+        return float("nan")
+    s = sorted(values)
+    i = max(0, min(len(s) - 1, int(round(q * (len(s) - 1)))))
+    return s[i]
+
+
+def _row(values: list[float | None]) -> dict[str, float]:
+    vals = [v for v in values if v is not None]
+    return {
+        "n": len(vals),
+        "median": statistics.median(vals) if vals else float("nan"),
+        "q05": _q(vals, 0.05),
+        "q95": _q(vals, 0.95),
+        "mean": statistics.fmean(vals) if vals else float("nan"),
+    }
+
+
+def _load_cells(cells_dir: Path) -> list[dict]:
+    cells = []
+    for path in sorted(cells_dir.rglob("cell_*.json")):
+        try:
+            cells.append(json.loads(path.read_text()))
+        except json.JSONDecodeError:
+            print(f"WARN unparsable {path}", file=sys.stderr)
+    return cells
+
+
+def _expected_cells() -> set[tuple[str, str, int]]:
+    """The (design_id, arm_id, seed) set the campaign spec declares."""
+    spec = json.loads(_CAMPAIGN_JSON.read_text())
+    return {
+        (_design_id_of(b["args"]["design"]), b["args"]["arm_id"], seed)
+        for b in spec["blocks"].values() for seed in b["seeds"]
+    }
+
+
+def _design_id_of(design_path: str) -> str:
+    return Path(design_path).stem.removesuffix("_design")
+
+
+def _funnel_asym(payload: dict, day_cap: int | None) -> tuple[int, int]:
+    """Confirmed hosts whose presented onset postdates the confirming
+    specimen (the ASYM-CONF-01 / crew_reach definition), optionally
+    restricted to confirmations on or before ``day_cap``."""
+    hosts = (payload.get("funnel_hosts") or {}).values()
+    confirmed = [
+        h for h in hosts
+        if h.get("confirmed_day") is not None
+        and (day_cap is None or int(h["confirmed_day"]) <= day_cap)
+    ]
+    asym = [
+        h for h in confirmed
+        if h.get("presented_day") is None
+        or int(h["presented_day"]) > int(h["confirmed_day"])
+    ]
+    return len(asym), len(confirmed)
+
+
+def _channels(p: dict) -> dict[str, float | None]:
+    obs = p.get("observables") or {}
+    recorded = obs.get("recorded_onsets") or 0
+    before = obs.get("onsets_before_split_day") or 0
+    lab = p.get("lab_confirmed_total") or 0
+    roles = p.get("lab_confirmed_by_role") or {}
+    lab_crew = roles.get("crew") or 0
+    asym, conf = _funnel_asym(p, None)
+    asym31, conf31 = _funnel_asym(p, DP_DAY31)
+    specimens = obs.get("campaign_positives") or 0
+    return {
+        "recorded_onsets": recorded,
+        "before_share": before / recorded if recorded else None,
+        "lab_confirmed": lab,
+        "lab_crew_share": lab_crew / lab if lab else None,
+        "dated_share": recorded / lab if lab else None,
+        "asym_share_final": asym / conf if conf else None,
+        "asym_share_day31": asym31 / conf31 if conf31 else None,
+        "campaign_positives": specimens,
+        "campaign_asym_share": (
+            (obs.get("campaign_asymptomatic_positives") or 0) / specimens
+            if specimens else None
+        ),
+        "pax_onset_before": obs.get("passenger_onsets_before") or 0,
+        "pax_onset_after": obs.get("passenger_onsets_after") or 0,
+        "crew_onset_before": obs.get("crew_onsets_before") or 0,
+        "crew_onset_after": obs.get("crew_onsets_after") or 0,
+        "infections_total": p.get("infections_total") or 0,
+    }
+
+
+def _onset_turn(ch: dict) -> str:
+    """T2: after the quarantine turn, passenger onsets fall while crew
+    onsets persist — the record's direction, not its magnitude."""
+    pax = "down" if ch["pax_onset_after"] < ch["pax_onset_before"] else (
+        "up" if ch["pax_onset_after"] > ch["pax_onset_before"] else "flat"
+    )
+    crew = "down" if ch["crew_onset_after"] < ch["crew_onset_before"] else (
+        "up" if ch["crew_onset_after"] > ch["crew_onset_before"] else "flat"
+    )
+    return f"pax_{pax}/crew_{crew}"
+
+
+def _score(rows: list[dict], keys: list[str]) -> dict:
+    return {k: _row([c[k] for c in rows]) for k in keys}
+
+
+# The shipped (repaired) resolution of each repair toggle — what an arm
+# that does not declare the key runs with. Mirrors cell.py's fail-closed
+# check so the readout can audit persisted payloads the same way.
+_TOGGLE_DEFAULTS = {
+    "room_air_map_arm": "ambient_on",
+    "near_field_air_mode": "two_box",
+    "pathogen_pool_transport": "airflow",
+    "duty0_terminal_mode": "extract",
+}
+
+
+def _expected_toggles() -> dict[tuple[str, str], dict[str, str]]:
+    """(design_id, arm_id) -> resolved toggles the arm must land on."""
+    spec = json.loads(_CAMPAIGN_JSON.read_text())
+    expected: dict[tuple[str, str], dict[str, str]] = {}
+    for block in spec["blocks"].values():
+        design_path = block["args"]["design"]
+        arm_id = block["args"]["arm_id"]
+        design = json.loads(
+            (_REPO_ROOT / design_path).read_text(encoding="utf-8"),
+        )
+        overrides = next(
+            (a.get("overrides") or {} for a in design.get("arms") or []
+             if a.get("arm_id") == arm_id),
+            {},
+        )
+        expected[(_design_id_of(design_path), arm_id)] = {
+            key: str(overrides.get(key, default))
+            for key, default in _TOGGLE_DEFAULTS.items()
+        }
+    return expected
+
+
+def _resolved_toggles(payload: dict) -> dict[str, str | None]:
+    delivery = payload.get("delivery") or {}
+    room_air = delivery.get("room_air_removal") or {}
+    near_field = delivery.get("near_field_air") or {}
+    return {
+        "room_air_map_arm": room_air.get("map_arm"),
+        "near_field_air_mode": near_field.get("mode"),
+        "pathogen_pool_transport": delivery.get("pathogen_pool_transport"),
+        "duty0_terminal_mode": delivery.get("duty0_terminal_mode"),
+    }
+
+
+def _audit(cells: list[dict]) -> dict:
+    audit: dict[str, object] = {
+        "cells": len(cells),
+        "wrong_engine": [],
+        "wrong_toggles": [],
+        "unexpected_cells": [],
+        "duplicate_cells": [],
+        "missing_cells": [],
+    }
+    expected_toggles = _expected_toggles()
+    seen: Counter[tuple] = Counter()
+    for p in cells:
+        cell = p.get("cell") or {}
+        key = (p.get("design_id"), cell.get("arm_id"), cell.get("seed"))
+        seen[key] += 1
+        resolved = (p.get("delivery") or {}).get("transport_engine_resolved")
+        if resolved != _EXPECTED_RESOLVED:
+            audit["wrong_engine"].append(key)
+        want = expected_toggles.get((key[0], key[1]))
+        if want is not None and _resolved_toggles(p) != want:
+            audit["wrong_toggles"].append(key)
+    expected = _expected_cells()
+    found = set(seen)
+    audit["missing_cells"] = sorted(
+        map(str, expected - found), key=str,
+    )
+    audit["unexpected_cells"] = sorted(
+        map(str, found - expected), key=str,
+    )
+    audit["duplicate_cells"] = sorted(
+        map(str, (k for k, n in seen.items() if n > 1)), key=str,
+    )
+    return audit
+
+
+def _paired_delta(
+    baseline: list[dict], arm: list[dict], key: str,
+) -> dict:
+    by_seed = {
+        (r.get("cell") or {}).get("seed"): _channels(r).get(key)
+        for r in baseline
+    }
+    deltas = []
+    for r in arm:
+        seed = (r.get("cell") or {}).get("seed")
+        if seed not in by_seed:
+            continue
+        a, b = _channels(r).get(key), by_seed[seed]
+        if a is None or b is None:
+            # An undefined share (zero confirmations) is not a zero — a
+            # pair needs both sides measurable to score a delta.
+            continue
+        deltas.append(a - b)
+    return _row(deltas)
+
+
+DP_KEYS = [
+    "recorded_onsets", "before_share", "lab_confirmed",
+    "lab_crew_share", "dated_share", "asym_share_day31",
+    "asym_share_final", "campaign_asym_share", "infections_total",
+]
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--cells-dir", required=True)
+    ap.add_argument("--out", default=None)
+    args = ap.parse_args(argv)
+
+    cells = _load_cells(Path(args.cells_dir))
+    rows: dict[tuple[str, str], list[dict]] = {}
+    for p in cells:
+        rows.setdefault(
+            (p.get("design_id"), (p.get("cell") or {}).get("arm_id")),
+            [],
+        ).append(p)
+
+    report: dict = {
+        "audit": _audit(cells),
+        "record": {"diamond_princess": DP_RECORD},
+        "pre_repair_pool_lab_range": PRE_REPAIR_POOL_LAB_RANGE,
+        "scenarios": {},
+    }
+    for (design_id, arm), group in sorted(rows.items()):
+        channels = [_channels(p) for p in group]
+        score = _score(channels, DP_KEYS)
+        score["takeoff_share"] = (
+            sum(1 for c in channels if c["recorded_onsets"] >= 10)
+            / len(channels) if channels else 0.0
+        )
+        score["onset_turn_directions"] = dict(
+            Counter(_onset_turn(c) for c in channels),
+        )
+        dp_scale = [c for c in channels if c["lab_confirmed"] >= 100]
+        score["lab_crew_share_dp_scale"] = _row(
+            [c["lab_crew_share"] for c in dp_scale],
+        )
+        score["lab_crew_share_pooled"] = (
+            sum((c["lab_confirmed"] or 0) * (c["lab_crew_share"] or 0)
+                for c in channels)
+            / max(1, sum(c["lab_confirmed"] or 0 for c in channels))
+        )
+        score["pooled_lab_confirmed"] = sum(
+            c["lab_confirmed"] or 0 for c in channels
+        )
+        report["scenarios"].setdefault(design_id, {})[arm] = score
+
+    for design_id, arms in report["scenarios"].items():
+        baseline_rows = rows.get((design_id, BASELINE_ARM), [])
+        for (d_id, arm_id), group in rows.items():
+            if (
+                arm_id == BASELINE_ARM or d_id != design_id
+                or not baseline_rows or not group
+            ):
+                continue
+            arms[f"paired_delta_{arm_id}_minus_{BASELINE_ARM}"] = {
+                k: _paired_delta(baseline_rows, group, k) for k in DP_KEYS
+            }
+
+    text = json.dumps(report, indent=2)
+    if args.out:
+        Path(args.out).write_text(text + "\n", encoding="utf-8")
+        print(f"WROTE {args.out}")
+    else:
+        print(text)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

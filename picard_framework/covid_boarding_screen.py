@@ -89,6 +89,8 @@ ARM_OVERRIDE_KEYS = frozenset({
     "pathogen_pool_transport",
     "transport_engine",
     "near_field_air_mode",
+    "room_air_map_arm",
+    "duty0_terminal_mode",
     "profile_route_efficiency_multipliers",
     "infection_counters",
     "transmission_overrides",
@@ -929,6 +931,8 @@ def _dispatch_arm_overrides(
         _apply_transmission_overrides(raw, overrides["transmission_overrides"])
     if "near_field_air_mode" in overrides:
         _apply_near_field_air_mode(raw, overrides["near_field_air_mode"])
+    if "duty0_terminal_mode" in overrides:
+        _apply_duty0_terminal_mode(raw, overrides["duty0_terminal_mode"])
     if "transport_engine" in overrides:
         _apply_transport_engine(raw, overrides["transport_engine"])
     if "profile_route_efficiency_multipliers" in overrides:
@@ -1034,6 +1038,26 @@ def _apply_near_field_air_mode(raw: dict[str, Any], mode: Any) -> None:
     raw["config_overrides"].setdefault("transmission", {}).setdefault(
         "near_field_air", {},
     )["mode"] = mode
+
+
+def _apply_duty0_terminal_mode(raw: dict[str, Any], mode: Any) -> None:
+    """The duty-0 terminal arm: ``hvac.duty0_terminal_mode``.
+
+    ``sealed`` is the labelled pre-CONTAM-DUTY0-01 baseline (exhaust-only
+    branches trapped mass); ``extract`` is the shipped repair that drains
+    the sanitary AHU_HD_* exhaust legs overboard.
+    """
+    from engines.py_contam_bridge import DUTY0_TERMINAL_MODES
+
+    mode = str(mode)
+    if mode not in DUTY0_TERMINAL_MODES:
+        raise ValueError(
+            f"duty0_terminal_mode must be one of {DUTY0_TERMINAL_MODES}, "
+            f"got {mode!r}",
+        )
+    raw["config_overrides"].setdefault("hvac", {})[
+        "duty0_terminal_mode"
+    ] = mode
 
 
 def _apply_transport_engine(raw: dict[str, Any], engine: Any) -> None:
@@ -1946,6 +1970,7 @@ def prepare_cell_run_spec(
         cell.scenario_id, cell.theta, cell.seed,
         num_epochs=num_epochs, repo_root=repo_root,
         pathogen_pool_transport=arm_overrides.get("pathogen_pool_transport"),
+        room_air_map_arm=arm_overrides.get("room_air_map_arm"),
     )
     profile = load_covid_profile(repo_root)
     apply_boarding_axis(
@@ -2155,6 +2180,8 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
     )
     caregiver_resolved = getattr(tx_core, "caregiver_resolved_block", None)
     droplet_split = getattr(tx_core, "droplet_field_split", None)
+    room_air = getattr(tx_core, "room_air_removal", None)
+    near_field = getattr(tx_core, "near_field_air", None)
     return {
         "airborne_half_life_hours": profile.get("airborne_half_life_hours"),
         "route_efficiency_multipliers": dict(
@@ -2184,6 +2211,35 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         # only what the arm declared).
         "exposure_cap_include_fixed_rings_engine": bool(
             getattr(tx_core, "_exposure_cap_include_fixed_rings", False)
+        ),
+        # The engine-resolved room-air and near-field arms, echoed the
+        # same way so a repair-isolation arm is auditable against what
+        # the transmission core actually parsed (REPAIR-ISOLATION-01).
+        "room_air_removal": (
+            None
+            if room_air is None
+            else {
+                "mode": room_air.mode,
+                "map_arm": room_air.map_arm,
+            }
+        ),
+        "near_field_air": (
+            None
+            if near_field is None
+            else {
+                "mode": near_field.mode,
+                "interzonal_airflow_m3_per_hour": (
+                    near_field.interzonal_airflow_m3_per_hour
+                ),
+                "neighbour_table_ratio": near_field.neighbour_table_ratio,
+            }
+        ),
+        # The resolved duty-0 terminal on the transport engine that ran
+        # (CONTAM-DUTY0-01: extract shipped, sealed the baseline).
+        "duty0_terminal_mode": getattr(
+            getattr(sim, "contam_engine", None),
+            "duty0_terminal_mode",
+            None,
         ),
         # The engine-resolved hand-reservoir arm, echoed so a
         # transmission_overrides hand_reservoir_mode arm is auditable from
