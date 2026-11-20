@@ -80,7 +80,7 @@ takeoff 9/20, median campaign_positives 10.0, median recorded_onsets 8.0.
 The θ=7.9e6 anchor point reproduces the shipped stack, so the rest of the sweep is
 measuring Θ, not drift.
 
-## Full readout — 840/840 cells (measured at image base `c053e15f`, readout `f7c3b480`)
+## Full readout — 840/840 cells (measured at image base `c053e15f`, readout committed at `2b3e3b9a`)
 
 Audit clean: 840 cells loaded, 0 findings (design_id, arm_id, toggles, engine all verified).
 
@@ -104,7 +104,8 @@ Audit clean: 840 cells loaded, 0 findings (design_id, arm_id, toggles, engine al
 **Selected θ = 3.162e11, boundary_pinned=False, bootstrap selection frequency 0.736**
 (runner-up 1e9 at 0.154; 3.16e8 0.061). The refit moved Θ ~4.5 decades up from 7.9e6 —
 under the post-B1-B3 mass budget with live ambient/deck sinks, Θ compensates for the
-mass thrown overboard. At the selected θ, campaign_positives median 443 vs record 712
+mass thrown overboard. At the selected θ, campaign_positives median 443 vs the
+scored covid.T3 target 634 (record lab-confirmed total 712)
 and takeoff 95% — the funnel magnitude is restored; recorded_onsets median 2,878
 overshoots the 197 record (the onset channel is what keeps the loss above zero).
 
@@ -121,7 +122,8 @@ overshoots the 197 record (the onset channel is what keeps the loss above zero).
 Sensitivity: θ=1e11 → positives med 91, share hit 20/50; θ=1e12 → med 118, hit 37/50.
 GM lands near record magnitude at the refit Θ (median positives within ~15% of 128)
 but the asymptomatic-share residual persists exactly as at Θ2.37e11 in TF-01 —
-a composition defect the mass-budget refit does not move.
+measured across all 12 GM θ points here, per-θ asym-share medians run 0.24–0.44
+vs 0.8125, so a composition defect the mass-budget refit does not move.
 
 ### Note on the anchor's reading
 

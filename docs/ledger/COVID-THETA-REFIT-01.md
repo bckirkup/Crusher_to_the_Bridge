@@ -24,24 +24,28 @@ measured channels vs REPAIR-ISOLATION-01 baseline).
 selected θ = **3.162e11**, mean_loss 13.69 (vs 50.88 at the shipped 7.9e6;
 runner-up 1e9 at 0.154 frequency). Interior minimum — the loss curve bottoms at
 3.16e11/1e12. At the selected θ: takeoff 95%, campaign_positives median 443 vs
-record 712, recorded_onsets median 2,878 vs 197 (the onset channel is the
+the scored covid.T3 target 634 (the record's lab-confirmed total is 712),
+recorded_onsets median 2,878 vs 197 (the onset channel is the
 dominant remaining residual). The ~40,000× upward move is what the composite Θ
 needs to restore record-scale confirmations against the post-repair mass
 budget: ~12× more emission (covid #30) is drained by the ambient/deck sinks,
 and Θ makes up the difference.
 
 **Held-out (GM, merge_held_out at fitted θ ± half-decade neighbours):**
-takeoff 96%, campaign_positives median 108.5 [26.5–133.2] vs 128 record —
-magnitude within ~15%. H1 positive share median 0.50 vs 0.5899 (hit 27/50;
+takeoff 96%, campaign_positives median 108.5 [26.5–133.2] vs the 128/217
+positive anchor — magnitude within ~15%. H1 positive share median 0.50 vs 0.5899 (hit 27/50;
 θ=1e12 neighbour hits 37/50). **H2 asymptomatic share median 0.272 vs 0.8125 —
-miss 49/50, invariant to Θ** (identical residual to TF-01's 0.24 at 2.37e11):
-a natural-history/observation-channel defect, not a mass-budget one.
+miss 49/50, invariant to Θ**: measured across all 12 GM θ points of this
+sweep the per-θ medians run 0.24–0.44, and TF-01 read 0.24 at 2.37e11 under
+both native and ContamX engines. A natural-history/observation-channel
+defect, not a mass-budget one.
 H3: 98% of seeds place GM above the cross-ship IQR.
 
 ## Consequences
 
 - The shipped Θ constant (7.9e6) is stale for the COVID arm: under the current
-  engine it leaves the DP funnel ~40× under the record on pooled confirmations.
+  engine it leaves the DP funnel an order of magnitude under the record
+  (per-voyage mean 61.8 pooled lab-confirmed vs 712, ≈11.5×).
   Wherever the fitted Θ is consumed (`active_profiles` / fit consumers), the
   supported value is now ~3.16e11 — landing it is a follow-up commit decision,
   not made by this entry.
