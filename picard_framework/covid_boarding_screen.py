@@ -89,6 +89,8 @@ ARM_OVERRIDE_KEYS = frozenset({
     "pathogen_pool_transport",
     "transport_engine",
     "near_field_air_mode",
+    "room_air_map_arm",
+    "duty0_terminal_mode",
     "profile_route_efficiency_multipliers",
     "infection_counters",
     "transmission_overrides",
@@ -929,6 +931,8 @@ def _dispatch_arm_overrides(
         _apply_transmission_overrides(raw, overrides["transmission_overrides"])
     if "near_field_air_mode" in overrides:
         _apply_near_field_air_mode(raw, overrides["near_field_air_mode"])
+    if "duty0_terminal_mode" in overrides:
+        _apply_duty0_terminal_mode(raw, overrides["duty0_terminal_mode"])
     if "transport_engine" in overrides:
         _apply_transport_engine(raw, overrides["transport_engine"])
     if "profile_route_efficiency_multipliers" in overrides:
@@ -1034,6 +1038,26 @@ def _apply_near_field_air_mode(raw: dict[str, Any], mode: Any) -> None:
     raw["config_overrides"].setdefault("transmission", {}).setdefault(
         "near_field_air", {},
     )["mode"] = mode
+
+
+def _apply_duty0_terminal_mode(raw: dict[str, Any], mode: Any) -> None:
+    """The duty-0 terminal arm: ``hvac.duty0_terminal_mode``.
+
+    ``sealed`` is the labelled pre-CONTAM-DUTY0-01 baseline (exhaust-only
+    branches trapped mass); ``extract`` is the shipped repair that drains
+    the sanitary AHU_HD_* exhaust legs overboard.
+    """
+    from engines.py_contam_bridge import DUTY0_TERMINAL_MODES
+
+    mode = str(mode)
+    if mode not in DUTY0_TERMINAL_MODES:
+        raise ValueError(
+            f"duty0_terminal_mode must be one of {DUTY0_TERMINAL_MODES}, "
+            f"got {mode!r}",
+        )
+    raw["config_overrides"].setdefault("hvac", {})[
+        "duty0_terminal_mode"
+    ] = mode
 
 
 def _apply_transport_engine(raw: dict[str, Any], engine: Any) -> None:
@@ -1946,6 +1970,7 @@ def prepare_cell_run_spec(
         cell.scenario_id, cell.theta, cell.seed,
         num_epochs=num_epochs, repo_root=repo_root,
         pathogen_pool_transport=arm_overrides.get("pathogen_pool_transport"),
+        room_air_map_arm=arm_overrides.get("room_air_map_arm"),
     )
     profile = load_covid_profile(repo_root)
     apply_boarding_axis(
