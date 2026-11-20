@@ -112,14 +112,38 @@ pooled lab_confirmed, 9/20 takeoff) — the pairing is exact, not statistical.
 **What this settles:** the four repairs did not remove the pre-repair
 ensemble's volume — the two that matter push in opposite directions and
 their joint revert (all_off) leaves 156 vs the pre-repair ~1,351–1,453.
-The missing pre-repair dose is therefore either not expressible in this
-toggle grammar (`mode=none` inside existing machinery ≠ the machinery
-absent) or was lost by a change outside B1–B3 between the pre-repair
-measurement and the repair branch. The single-off arms cannot
 
-discriminate between those two readings — the next leg is a code-level
-diff of what the pre-repair build actually did with shed mass vs what
-`pool_transport=none` does now.
+## Diagnosis — why `all_off` ≠ the pre-repair build (2026-11-20, code-level, not a measurement)
+
+The pre-repair ensemble is CREW-REACH-01 measured at `90b2fdae`. Between
+`90b2fdae` and the isolation SHA `ecdb2c9f` there are **147 commits** on
+engine-affecting paths — the toggle grammar was never going to
+reconstruct it. Measured config/code diffs:
+
+- **Emission rescaled UP ~12×** (covid #30, `7b7f0ea0`): the arm's
+  release normalizer changed from `dose_adjustment=3.0` to
+  `environmental_release_log10_per_day=1.93`, same consumer
+  (`infection_dynamics_bridge.environmental_release_log10_per_day`,
+  same precedence chain) — peak emission 10^(9.0−3.0)=1e6 →
+  10^(9.0−1.93)≈1.19e7 copies/day. Shed mass went up ~12× while pooled
+  confirmations stayed ≈flat (1,400→1,236): ~12× of new mass is being
+  absorbed somewhere that is not new confirmations.
+- **New contaminant sinks on the DP hull** (`34951785` + sink semantics
+  `a632cabf`/`1fd6c8e7`/`dbb12dba`/`1217c811`): mega_cruise_5000
+  `air_flow_paths.json` gained 15 `ambient_openings` — 5 `open_deck`
+  zones carrying ContamX-solved outward exchange of 96k–421k m³/h each
+  (~1.25M m³/h combined; outward openings are contaminant sinks per
+  CONTAM-AMBIENT-OPENING-BOUNDARY-01) plus 10 inward make-up louvres.
+  None existed at `90b2fdae`; no toggle covers them.
+- **Continuous hand-flow solver** (`1fb67663`) + non-shedder protected
+  hand sequestration (`bae0d181`) — new mass paths not toggled.
+
+Conclusion: pre-repair `90b2fdae` (low emission, no ambient/envelope/
+exhaust sinks, no near-field) and `all_off` `ecdb2c9f` (12× emission,
+sinks live, near-field off) are different mass budgets — the 156 vs
+~1,400 gap is not a toggle-grammar subtlety, it is the intervening
+commits. The prime suspects for a bisect arm, in order: the open_deck
+sinks (`sinks_off` arm), then the #30 emission level.
 
 ## Image
 
