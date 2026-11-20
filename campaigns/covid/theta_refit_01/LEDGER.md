@@ -36,6 +36,29 @@ campaign positives, bootstrap selection frequency, `boundary_pinned` flag) →
 | Block | Job ID | Rev | Cells | Status |
 |---|---|---|---|---|
 | dp_theta_6p90 (canary) | 8f6ebe9a-3b5d-4493-8dea-534eb5e489cb | picard-covid-theta-refit-01:1 | 20 | SUCCEEDED 20/20, read out |
+| dp_theta_7p00 | 6268b476-6fe8-40d9-a387-4aee5e52035c | :1 | 20 | SUBMITTED |
+| dp_theta_7p50 | 25547508-15d2-49a8-9442-d590ef3da383 | :1 | 20 | SUBMITTED |
+| dp_theta_8p00 | 43d10ff3-507d-49c1-933f-69056e6dc4a3 | :1 | 20 | SUBMITTED |
+| dp_theta_8p50 | 186da10f-902f-4868-ad4d-43c4ede84795 | :1 | 20 | SUBMITTED |
+| dp_theta_9p00 | 9628318a-f9be-4039-9650-c97bfd63a105 | :1 | 20 | SUBMITTED |
+| dp_theta_9p50 | ece0005a-8307-4d9c-a994-88133a1335db | :1 | 20 | SUBMITTED |
+| dp_theta_10p00 | 9ff6be8c-40e1-44ff-ba9e-eb3096672504 | :1 | 20 | SUBMITTED |
+| dp_theta_10p50 | a42241be-11e5-4cd4-8c3c-85cdceab9392 | :1 | 20 | SUBMITTED |
+| dp_theta_11p00 | 7793f6ce-855f-45ac-905d-27eb8b853262 | :1 | 20 | SUBMITTED |
+| dp_theta_11p50 | 7f6ddf32-acb4-452b-b7da-7a7c6ab3d4fb | :1 | 20 | SUBMITTED |
+| dp_theta_12p00 | 94a15beb-59a4-4802-90ff-2f0a13a86d91 | :1 | 20 | SUBMITTED |
+| gm_theta_6p90 | 3b14b2da-e912-499a-98f0-12a707beb4e5 | :1 | 50 | SUBMITTED |
+| gm_theta_7p00 | 2be88473-3484-4719-8f9a-ca3b71539c29 | :1 | 50 | SUBMITTED |
+| gm_theta_7p50 | bbda0216-0c3e-4da5-82f6-50724c688d5e | :1 | 50 | SUBMITTED |
+| gm_theta_8p00 | 83a27607-23bc-47f7-82cb-62ddcc7d6f7c | :1 | 50 | SUBMITTED |
+| gm_theta_8p50 | 7917d482-a3d2-4a47-a105-78554475383d | :1 | 50 | SUBMITTED |
+| gm_theta_9p00 | da892fb1-afd6-407b-be57-1ca4a990d887 | :1 | 50 | SUBMITTED |
+| gm_theta_9p50 | 2c194335-54bb-417a-b92e-ac4a07042811 | :1 | 50 | SUBMITTED |
+| gm_theta_10p00 | 95005bf9-6ff7-406c-aac3-8feb93d51292 | :1 | 50 | SUBMITTED |
+| gm_theta_10p50 | 397bfa4a-786c-407a-a9ac-04927e2d5c73 | :1 | 50 | SUBMITTED |
+| gm_theta_11p00 | b8a00e11-a55c-47a4-a195-9de2f7b368a5 | :1 | 50 | SUBMITTED |
+| gm_theta_11p50 | 2bac1362-08fe-430f-9e5a-42cd86a5d9f8 | :1 | 50 | SUBMITTED |
+| gm_theta_12p00 | b61e9c48-3974-4c2e-84cf-b5a58b78647e | :1 | 50 | SUBMITTED |
 
 Artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_refit_01/<block>/cell_<seed>.json`
 
