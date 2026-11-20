@@ -509,7 +509,7 @@ def verify(args: argparse.Namespace) -> int:
         and sum((r["hull"], r["lane"]) == (h, ln) for r in bench) == len(BENCH_PHASES[ln])
         for h in BENCH_HULLS for ln in BENCH_PHASES)))
     checks.append(("jobs: parent ids are the ledger's four runs", all(
-        r["job_id"].rsplit(":", 1)[0] == PARENT_JOBS[r["block"]] for r in jobs)))
+        r["job_id"].rsplit(":", 1)[0] == PARENT_JOBS.get(r["block"]) for r in jobs)))
     stored = json.loads((d / "paired_summary.json").read_text(encoding="utf-8"))
     checks.append(("paired_summary.json recomputes from the base tables",
                    _close(json.loads(_dump(summarize(seed_rows, jobs))), stored)))
