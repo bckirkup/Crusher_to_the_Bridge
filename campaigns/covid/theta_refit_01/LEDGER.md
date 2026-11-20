@@ -122,8 +122,13 @@ overshoots the 197 record (the onset channel is what keeps the loss above zero).
 Sensitivity: θ=1e11 → positives med 91, share hit 20/50; θ=1e12 → med 118, hit 37/50.
 GM lands near record magnitude at the refit Θ (median positives within ~15% of 128)
 but the asymptomatic-share residual persists exactly as at Θ2.37e11 in TF-01 —
-measured across all 12 GM θ points here, per-θ asym-share medians run 0.24–0.44
-vs 0.8125, so a composition defect the mass-budget refit does not move.
+a composition defect the mass-budget refit does not move. (The readout prints
+H2 only at the fitted point and its two neighbours; the full-grid check below
+was computed ad hoc from the cell payloads —
+`observables.asymptomatic_share_among_positives` median per θ over 50 seeds:
+7.9e6 0.44 · 1e7 0.30 · 3.16e7 0.40 · 1e8 0.38 · 3.16e8 0.40 · 1e9 0.40 ·
+3.16e9 0.37 · 1e10 0.33 · 3.16e10 0.28 · 1e11 0.25 · 3.16e11 0.27 · 1e12 0.24 —
+all under 0.45 vs the 0.8125 record.)
 
 ### Note on the anchor's reading
 
