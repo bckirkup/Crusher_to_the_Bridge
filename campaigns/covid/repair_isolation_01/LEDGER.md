@@ -29,7 +29,7 @@ seed pairs).
 
 | Block | Job ID | Rev | Cells | Status |
 |---|---|---|---|---|
-| all_off_canary | e684cbbf-893b-4e9a-91e3-6f49f728a744 | picard-covid-repair-isolation-01:1 | 20 | RUNNING |
+| all_off_canary | 14b1fa7a-1e30-4eb5-a92c-c62823f80600 | picard-covid-repair-isolation-01:2 | 20 | RUNNING |
 | baseline | — | — | 20 | pending owner go |
 | room_air_off | — | — | 20 | pending owner go |
 | nearfield_off | — | — | 20 | pending owner go |
@@ -38,7 +38,11 @@ seed pairs).
 
 Artifacts: `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_repair_isolation_01/<block>/cell_<seed>.json`
 
+Terminated: `e684cbbf` (rev :1, v1 image) — superseded before any cell
+completed so every canary artifact carries the resolved-toggle witnesses.
+
 ## Image
 
-- tag `covid-repair-isolation-01-v1`, digest pinned in `campaign.json`
-  (`image_digest` = sha256:3d1b676a…) — built at `d4c5e8bd` (base `picard-campaign:base-d4c5e8bd` + campaign overlay).
+- tag `covid-repair-isolation-01-v2`, digest pinned in `campaign.json`
+  (`image_digest` = sha256:37a33aaf…) — built at `ecdb2c9f` (base `picard-campaign:base-ec2bc9f4` + campaign overlay); adds the resolved repair-toggle witnesses to the delivery block and the cell's fail-closed toggle check.
+- superseded: v1 at `d4c5e8bd` (sha256:3d1b676a…).
