@@ -2237,7 +2237,9 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         # The resolved duty-0 terminal on the transport engine that ran
         # (CONTAM-DUTY0-01: extract shipped, sealed the baseline).
         "duty0_terminal_mode": getattr(
-            sim.contam_engine, "duty0_terminal_mode", None
+            getattr(sim, "contam_engine", None),
+            "duty0_terminal_mode",
+            None,
         ),
         # The engine-resolved hand-reservoir arm, echoed so a
         # transmission_overrides hand_reservoir_mode arm is auditable from
