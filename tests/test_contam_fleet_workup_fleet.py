@@ -137,3 +137,52 @@ def test_selection_carries_no_gate_or_tolerance():
     with open(SELECTION, encoding="utf-8") as fh:
         doc = json.load(fh)
     assert not {"tolerances", "gates", "canary"} & set(doc)
+
+
+# ── committed 77-hull readout ─────────────────────────────────────────────
+
+READOUT = os.path.join(REPO, "campaigns/contam/fleet_workup_fleet_01/readout")
+
+
+def _readout(name):
+    with open(os.path.join(READOUT, name), encoding="utf-8", newline="") as fh:
+        return list(csv.DictReader(fh))
+
+
+def test_committed_coverage_is_the_frozen_matrix_exactly_once(matrix):
+    coverage = _readout("coverage_observed.csv")
+    assert sorted(r["row_id"] for r in coverage) == sorted(r["row_id"] for r in matrix)
+    executed = [r for r in coverage if r["planned_status"] == "planned_execute"]
+    assert len(executed) == 1591
+    assert {r["observed_status"] for r in executed} == {"ok"}
+    assert all(r["observed_status"] == r["planned_status"] and r["reason"]
+               for r in coverage if r["planned_status"] != "planned_execute")
+
+
+def test_committed_cohorts_are_run_two_canary_plus_eight_fleet_jobs(criteria):
+    cohorts = {c["cohort"]: c for c in _readout("cohorts.csv")}
+    with open(SELECTION, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    assert sorted(cohorts) == ["canary_run2", *[f"fleet_cohort{i}" for i in range(8)]]
+    assert cohorts["canary_run2"]["batch_job_id"] == "ac1b56e1-2080-40cc-be8f-b8473ceca793"
+    assert cohorts["canary_run2"]["hulls"].split(";") == sorted(criteria["canary"]["hulls"])
+    for entry in doc["cohorts"]:
+        row = cohorts[f"fleet_cohort{entry['cohort']}"]
+        assert row["hulls"].split(";") == entry["hulls"]
+        assert row["gate_failed"] == "0" and row["audit_passed"] == "1"
+        assert row["reporting_attempt"] == row["attempts"]
+    assert len({c["batch_job_id"] for c in cohorts.values()}) == 9
+
+
+def test_committed_input_receipts_separate_the_canary_from_the_fleet_jobs():
+    rows = {r["cohort"]: r for r in _readout("input_verification.csv")}
+    assert sorted(rows) == ["canary_run2", *[f"fleet_cohort{i}" for i in range(8)]]
+    canary = rows.pop("canary_run2")
+    assert (canary["scope"], canary["files_hashed_before"], canary["files_hashed_after"]) == (
+        "own_hulls_and_shared", "27", "27")
+    for row in rows.values():
+        assert (row["scope"], row["files_hashed_before"], row["files_hashed_after"]) == (
+            "all_manifest_files", "392", "392")
+        assert row["hulls_hashed"] == "77" and row["own_hulls"] == row["own_hulls_hashed"]
+    assert len({r["before_set_sha256"] for r in rows.values()}) == 1
+    assert all(r["before_set_sha256"] == r["after_set_sha256"] for r in [canary, *rows.values()])

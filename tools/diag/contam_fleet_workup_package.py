@@ -46,6 +46,15 @@ VERIFIER_PATH = os.path.join(_REPO_ROOT, "tools", "diag", "contam_fleet_workup_v
 CANARY_COHORT = "canary_run2"
 ENVIRONMENT = "environment.json"
 GATES = "smoke_gates.json"
+# Package 01 stated that every job hashed all 392 pinned inputs. The canary job
+# hashed its own 27. Its data tables are unchanged here; the claim is corrected
+# and the per-job receipt (input_verification.csv) added.
+SUPERSEDES = {
+    "archive": "contam_fleet_workup_77_package_01.tar.gz",
+    "sha256": "77366e25c6b4c388516dc0c2650b6baf207ae1b9585f820c272d1226028c5964",
+    "reason": "its README overstated run-time input hashing for the canary cohort "
+              "(27 files hashed in that job, not 392); measurements are unchanged",
+}
 REDUCED_TABLES = ("results_long", "coverage_observed", "timing_raw", "timing_summary",
                   "contrasts", "reference_baselines", "repeat_consistency")
 BLOCKS = verifier.BLOCKS
@@ -142,7 +151,8 @@ def cohort_row(cohort: str, directory: str, hulls: list[str]) -> dict[str, Any]:
         "job_definition": job["job_definition"].rsplit("/", 1)[-1],
         "image_digest": job["image"].rsplit("@", 1)[-1],
         "runner_commit": env["runner"].get("engine_git_sha_env") or env["runner"].get("head"),
-        "attempts": len(attempts), "exit_code": attempts[-1]["exit_code"],
+        "attempts": len(attempts),
+        "reporting_attempt": env["batch"].get("AWS_BATCH_JOB_ATTEMPT"), "exit_code": attempts[-1]["exit_code"],
         "started_at_ms": job["started_at_ms"], "stopped_at_ms": job["stopped_at_ms"],
         "instance_id": env["host"].get("instance-id"),
         "instance_type": env["host"].get("instance-type"),
@@ -164,6 +174,38 @@ def cohort_row(cohort: str, directory: str, hulls: list[str]) -> dict[str, Any]:
         "job_sha256": sha256_file(os.path.join(directory, "job.json")),
         "gates_sha256": sha256_file(os.path.join(directory, GATES)),
         "cells_sha256": sha256_file(os.path.join(directory, "cells.jsonl")),
+    }
+
+
+def input_verification(cohort: str, directory: str, hulls: list[str]) -> dict[str, Any]:
+    """What this job hashed at run time, read from its retained environment record.
+
+    Nothing is assumed: the counts and set digests are those of the recorded
+    ``inputs_sha256_before`` / ``inputs_sha256_after`` maps, and the scope is
+    named only when the recorded path set is exactly that scope's manifest set.
+    """
+    env = _read_json(os.path.join(directory, ENVIRONMENT))
+    manifest = _read_json(os.path.join(FROZEN_DIR, "input_manifest.json"))
+    before, after = env["inputs_sha256_before"], env["inputs_sha256_after"]
+    hull_of = {f["path"]: hull for hull, entry in manifest["hulls"].items() for f in entry["files"]}
+    shared = {f["path"] for f in manifest["shared_inputs"]}
+    scope = "other"
+    for name, subset in ((verifier.SCOPE_ALL, None), (verifier.SCOPE_OWN, hulls)):
+        if set(before) == set(verifier.manifest_subset(manifest, subset)):
+            scope = name
+            break
+    hashed = {hull_of[p] for p in before if p in hull_of}
+    complete = [h for h in hulls
+                if all(f["path"] in before for f in manifest["hulls"][h]["files"])]
+    return {
+        "cohort": cohort, "scope": scope,
+        "manifest_files_total": len(verifier.manifest_subset(manifest, None)),
+        "files_hashed_before": len(before), "files_hashed_after": len(after),
+        "shared_files_hashed": len(shared & set(before)), "hulls_hashed": len(hashed),
+        "own_hulls": len(hulls), "own_hulls_hashed": len(complete),
+        "before_set_sha256": verifier.set_digest(before),
+        "after_set_sha256": verifier.set_digest(after),
+        "runner_inputs_unchanged": bool(env.get("inputs_unchanged")),
     }
 
 
@@ -197,16 +239,37 @@ def _coverage_overview(coverage: list[dict[str, str]]) -> list[str]:
     return lines
 
 
+def _receipt_holds(row: dict[str, Any]) -> bool:
+    """Recorded set is a named manifest set, identical before and after."""
+    return (row["scope"] != "other" and row["before_set_sha256"] == row["after_set_sha256"]
+            and bool(row["runner_inputs_unchanged"]))
+
+
+def _input_overview(rows: list[dict[str, Any]]) -> list[str]:
+    lines = ["| cohort | scope of run-time hashing | files hashed before / after | of manifest "
+             "| hulls hashed | own hulls hashed | set matches manifest, unchanged |",
+             "|---|---|---|---|---|---|---|"]
+    for r in rows:
+        lines.append(
+            f"| {r['cohort']} | `{r['scope']}` | {r['files_hashed_before']} / "
+            f"{r['files_hashed_after']} | {r['manifest_files_total']} | {r['hulls_hashed']} | "
+            f"{r['own_hulls_hashed']} of {r['own_hulls']} | "
+            f"{'yes' if _receipt_holds(r) else 'NO'} |")
+    return lines
+
+
 def _cohort_overview(cohorts: list[dict[str, Any]]) -> list[str]:
     lines = ["| cohort | hulls | Batch job | host | CPU | runner | image digest | wall min | "
-             "max load (1 m) | gates | raw artifact SHA-256 |", "|---|---|---|---|---|---|---|---|---|---|---|"]
+             "max load (1 m) | gates | attempts | raw artifact SHA-256 |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for c in cohorts:
         wall = (int(c["stopped_at_ms"]) - int(c["started_at_ms"])) / 60000.0
         lines.append(
             f"| {c['cohort']} | {c['hull_count']} | `{c['batch_job_id']}` | {c['instance_id']} "
             f"({c['instance_type']}) | {c['cpu_model']} | `{str(c['runner_commit'])[:12]}` | "
             f"`{c['image_digest'][7:19]}…` | {wall:.1f} | {float(c['loadavg_1m_max']):.2f} | "
-            f"{c['gate_checks']} / {c['gate_failed']} failed | `{c['raw_artifact_sha256']}` |")
+            f"{c['gate_checks']} / {c['gate_failed']} failed | {c['attempts']} | "
+            f"`{c['raw_artifact_sha256']}` |")
     return lines
 
 
@@ -217,6 +280,7 @@ def write_readme(out_dir: str, tables: dict[str, list[dict[str, Any]]]) -> None:
     coverage = _read_csv(os.path.join(out_dir, "data", "coverage_observed.csv"))
     fill = {
         "<<COHORTS>>": "\n".join(_cohort_overview(tables["cohorts"])),
+        "<<INPUTS>>": "\n".join(_input_overview(tables["input_verification"])),
         "<<COVERAGE>>": "\n".join(_coverage_overview(coverage)),
         "<<TIMING>>": "\n".join(_timing_overview(summary)),
     }
@@ -234,7 +298,8 @@ def _expected(cohorts: list[dict[str, Any]], out_dir: str) -> dict[str, Any]:
               "design/input_manifest.json", "design/protocol.json", "design/canary_criteria.json",
               "design/fleet_selection.json"]
     return {
-        "id": "CONTAM-FLEET-WORKUP-PACKAGE-01",
+        "id": "CONTAM-FLEET-WORKUP-PACKAGE-02",
+        "supersedes": SUPERSEDES,
         "design_commit": selection["design_commit"], "input_commit": selection["input_commit"],
         "counts": {"canary": _read_json(CRITERIA_PATH)["canary"],
                    "fleet": selection["expected_fleet"],
@@ -253,7 +318,8 @@ def build(cohort_dirs: dict[str, str], out_dir: str) -> None:
     for sub in ("data", "design"):
         os.makedirs(os.path.join(out_dir, sub), exist_ok=True)
     tables: dict[str, list[dict[str, Any]]] = {name: [] for name in REDUCED_TABLES}
-    tables.update({"repeat_metrics": [], "cohorts": [], "gates_summary": [], "code_sha256": []})
+    tables.update({"repeat_metrics": [], "cohorts": [], "gates_summary": [], "code_sha256": [],
+                   "input_verification": []})
     readout = ["# Per-hull readout tables (generated)", "",
                "Hulls appear by cohort, alphabetically inside a cohort; nothing is ranked. "
                "`blank (status)` is a quantity the lane does not resolve, not a zero. Timings "
@@ -267,6 +333,7 @@ def build(cohort_dirs: dict[str, str], out_dir: str) -> None:
         hulls = sorted({r["hull"] for r in _read_csv(os.path.join(directory, "coverage_observed.csv"))})
         tables["repeat_metrics"] += repeat_metrics(cohort, directory)
         tables["cohorts"].append(cohort_row(cohort, directory, hulls))
+        tables["input_verification"].append(input_verification(cohort, directory, hulls))
         gates = _read_json(os.path.join(directory, GATES))
         tables["gates_summary"] += [{"cohort": cohort, "gate": gate, **counts}
                                     for gate, counts in sorted(gates["summary"].items())]
@@ -371,11 +438,14 @@ def main(argv: list[str] | None = None) -> int:
             json.dump(doc, fh, indent=1, sort_keys=True)
             fh.write("\n")
         return 0
-    cohorts = {name: path for name, path in (item.split("=", 1) for item in args.cohort)}
+    cohorts: dict[str, str] = {}
+    for item in args.cohort:
+        name, path = item.split("=", 1)
+        cohorts[name] = path
     build(cohorts, args.out)
     top = os.path.basename(args.archive).removesuffix(".tar.gz")
     print(f"{archive(args.out, args.archive, top)}  {args.archive}")
-    return verifier.verify(args.out)
+    return verifier.verify(args.out, _ROOTS)
 
 
 if __name__ == "__main__":

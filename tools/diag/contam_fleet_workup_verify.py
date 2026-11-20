@@ -3,7 +3,8 @@
 
 Run from anywhere: ``python3 verify.py [package_dir]``. It needs no network,
 no cloud account and no repository. It checks, in order: the file set and
-every SHA-256; the column sets (aggregate fields only); that the row IDs are
+every SHA-256; the column sets (aggregate fields only); what each job hashed
+of the pinned inputs at run time, by exact set; that the row IDs are
 the frozen matrix exactly once; the planned counts; that unsupported
 quantities are blank with a reason and never a number; the timing phase
 labels and repeat counts; and it recomputes every derived table
@@ -71,7 +72,7 @@ COLUMNS = {
         "status", "reason", "field_sha256"),
     "data/cohorts.csv": (
         "cohort", "stage", "hulls", "hull_count", "batch_job_id", "job_definition",
-        "image_digest", "runner_commit", "attempts", "exit_code", "started_at_ms",
+        "image_digest", "runner_commit", "attempts", "reporting_attempt", "exit_code", "started_at_ms",
         "stopped_at_ms", "instance_id", "instance_type", "cpu_model", "cpu_affinity",
         "thread_env_all_1", "loadavg_1m_max", "raw_artifact_sha256", "raw_artifact_key",
         "criteria_sha256", "selection_sha256", "contamx_binary_sha256",
@@ -79,11 +80,19 @@ COLUMNS = {
         "gate_failed", "audit_passed", "audit_checks", "environment_sha256", "job_sha256",
         "gates_sha256", "cells_sha256"),
     "data/gates_summary.csv": ("cohort", "gate", "passed", "failed"),
+    "data/input_verification.csv": (
+        "cohort", "scope", "manifest_files_total", "files_hashed_before", "files_hashed_after",
+        "shared_files_hashed", "hulls_hashed", "own_hulls", "own_hulls_hashed",
+        "before_set_sha256", "after_set_sha256", "runner_inputs_unchanged"),
     "data/code_sha256.csv": ("cohort", "path", "sha256"),
 }
 
 
+# What one job hashed at run time, as read from its retained environment record.
+SCOPE_ALL = "all_manifest_files"
+SCOPE_OWN = "own_hulls_and_shared"
 EXPECTED_FILE = "EXPECTED.json"
+MANIFEST_FILE = "design/input_manifest.json"
 CRITERIA_FILE = "design/canary_criteria.json"
 SELECTION_FILE = "design/fleet_selection.json"
 SUMS_FILE = "SHA256SUMS"
@@ -93,12 +102,12 @@ def _prefix(base: str) -> str:
     return base if base.endswith(os.sep) else base + os.sep
 
 
-def package_root(path: str) -> str:
+def package_root(path: str, extra_roots: tuple[str, ...] = ()) -> str:
     """Canonical package directory; it must sit under the working directory,
-    this script's directory or the temporary directory."""
+    this script's directory, the temporary directory or a caller's own root."""
     resolved = os.path.realpath(path)
-    bases = (os.path.realpath(os.getcwd()), os.path.realpath(os.path.dirname(__file__)),
-             os.path.realpath(tempfile.gettempdir()))
+    bases = [os.path.realpath(b) for b in (
+        os.getcwd(), os.path.dirname(__file__), tempfile.gettempdir(), *extra_roots)]
     for base in bases:
         if resolved == base or resolved.startswith(_prefix(base)):
             return resolved
@@ -122,7 +131,7 @@ def read_json(root: str, name: str) -> Any:
 OTHER_FILES = (
     "README.md", EXPECTED_FILE, "per_hull_readout.md", "verify.py",
     "design/SHA256SUMS", "design/coverage.csv", "design/dry_run_summary.json",
-    "design/input_manifest.json", "design/protocol.json", "design/run_matrix.csv",
+    MANIFEST_FILE, "design/protocol.json", "design/run_matrix.csv",
     CRITERIA_FILE, SELECTION_FILE,
 )
 
@@ -278,6 +287,61 @@ def check_coverage(root: str, t: dict[str, Any], expected: dict[str, Any], check
         checks.add(f"{name} joins to its hull's cohort", not stray)
 
 
+def set_digest(entries: dict[str, str]) -> str:
+    """SHA-256 of a ``path -> sha256`` map in canonical form (sorted ``sha  path`` lines)."""
+    text = "".join(f"{entries[path]}  {path}\n" for path in sorted(entries))
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def manifest_subset(manifest: dict[str, Any], hulls: list[str] | None) -> dict[str, str]:
+    """Pinned ``path -> sha256`` of the shared inputs plus the named hulls (all if None)."""
+    out = {f["path"]: f["sha256"] for f in manifest["shared_inputs"]}
+    for hull in sorted(manifest["hulls"]) if hulls is None else hulls:
+        out.update({f["path"]: f["sha256"] for f in manifest["hulls"][hull]["files"]})
+    return out
+
+
+def _input_row_wrong(row: dict[str, str], own: list[str], manifest: dict[str, Any]) -> bool:
+    """Whether a cohort's run-time input receipt disagrees with the frozen manifest."""
+    if row["scope"] not in (SCOPE_ALL, SCOPE_OWN):
+        return True
+    pinned = manifest_subset(manifest, None if row["scope"] == SCOPE_ALL else own)
+    hulls = len(manifest["hulls"]) if row["scope"] == SCOPE_ALL else len(own)
+    want = {
+        "manifest_files_total": len(manifest_subset(manifest, None)),
+        "files_hashed_before": len(pinned), "files_hashed_after": len(pinned),
+        "shared_files_hashed": len(manifest["shared_inputs"]), "hulls_hashed": hulls,
+        "own_hulls": len(own), "own_hulls_hashed": len(own),
+    }
+    digest = set_digest(pinned)
+    return (any(row[k] != str(v) for k, v in want.items())
+            or row["before_set_sha256"] != digest or row["after_set_sha256"] != digest
+            or row["runner_inputs_unchanged"] != "1")
+
+
+def check_inputs(root: str, t: dict[str, Any], checks: Checks) -> None:
+    """Each job's retained input hashes, by exact set and digest, against the manifest.
+
+    The manifest pins 392 files. A job did not necessarily hash all of them:
+    ``scope`` says which set its record holds, and the set digests here must
+    equal the digest of that same set taken from the manifest.
+    """
+    manifest = read_json(root, MANIFEST_FILE)
+    own = {c["cohort"]: c["hulls"].split(";") for c in t["cohorts"]}
+    rows = {r["cohort"]: r for r in t["input_verification"]}
+    checks.add("one run-time input receipt per cohort", sorted(rows) == sorted(own)
+               and len(rows) == len(t["input_verification"]))
+    bad = [name for name, row in rows.items()
+           if name not in own or _input_row_wrong(row, own[name], manifest)]
+    checks.add("each job's hashed input set, before and after, is the pinned manifest set "
+               "of its stated scope", not bad, str(bad) if bad else "")
+    scopes = {name: row["scope"] for name, row in rows.items()}
+    checks.add("every hull's five inputs and the seven shared inputs were hashed in the job "
+               "that measured it (the canary hashed its own 27 files, not all 392)",
+               not bad and scopes.get("canary_run2") == SCOPE_OWN
+               and rows["canary_run2"]["files_hashed_before"] == "27")
+
+
 def check_cohorts(root: str, t: dict[str, Any], expected: dict[str, Any], checks: Checks) -> None:
     cohorts = t["cohorts"]
     criteria = read_json(root, CRITERIA_FILE)
@@ -294,10 +358,14 @@ def check_cohorts(root: str, t: dict[str, Any], expected: dict[str, Any], checks
     checks.add("fleet cohorts ran under the packaged selection; the canary predates it", all(
         c["selection_sha256"] == ("" if c["stage"] == "canary" else selection_sha)
         for c in cohorts))
-    checks.add("every cohort: gates passed, audit passed, inputs unchanged, one thread, one attempt",
+    checks.add("every cohort: gates passed, audit passed, inputs unchanged, one thread, exit 0",
                all(c["gate_failed"] == "0" and c["audit_passed"] == "1"
                    and c["inputs_unchanged"] == "1" and c["thread_env_all_1"] == "1"
-                   and c["attempts"] == "1" and c["exit_code"] == "0" for c in cohorts))
+                   and c["exit_code"] == "0" for c in cohorts))
+    # A Spot host can be reclaimed mid-job. The retry starts from nothing in a new
+    # container, so all of a cohort's records must come from its last attempt.
+    checks.add("every cohort's records come from its last Batch attempt alone",
+               all(c["reporting_attempt"] == c["attempts"] for c in cohorts))
     checks.add("one solver binary and one criteria file across cohorts",
                len({c["contamx_binary_sha256"] for c in cohorts}) == 1
                and len({c["criteria_sha256"] for c in cohorts}) == 1)
@@ -547,8 +615,8 @@ def check_timing(t: dict[str, Any], checks: Checks) -> None:
                bad == 0, f"{bad} differ")
 
 
-def verify(root: str) -> int:
-    root = package_root(root)
+def verify(root: str, extra_roots: tuple[str, ...] = ()) -> int:
+    root = package_root(root, extra_roots)
     checks = Checks()
     if not check_files(root, checks):
         return checks.report()
@@ -558,6 +626,7 @@ def verify(root: str) -> int:
     stages = (
         ("coverage", lambda: check_coverage(root, tables, expected, checks)),
         ("cohorts", lambda: check_cohorts(root, tables, expected, checks)),
+        ("inputs", lambda: check_inputs(root, tables, checks)),
         ("blanks", lambda: check_blanks(tables, checks)),
         ("results", lambda: check_recompute_results(tables, criteria["tolerances"], checks)),
         ("contrasts", lambda: check_recompute_contrasts(tables, checks)),

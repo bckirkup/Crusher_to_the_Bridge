@@ -1,0 +1,69 @@
+{
+ "array": false,
+ "attempts": [
+  {
+   "container_instance_arn": "arn:aws:ecs:us-east-1:994254241749:container-instance/AWSBatch-picard-abm-campaign-spot-436e245c-6d84-3a0a-a86a-2783b1e1b314/1f346b13b98b464a86701f58899f8634",
+   "exit_code": null,
+   "log_stream": "contam-fleet-workup-fleet-01/default/b5a0c87d7c6f4e3e91557c6522eb24d5",
+   "started_at_ms": 1795129128899,
+   "status_reason": "Host EC2 (instance i-04b0739c785945713) terminated.",
+   "stopped_at_ms": 1795129433926
+  },
+  {
+   "container_instance_arn": "arn:aws:ecs:us-east-1:994254241749:container-instance/AWSBatch-picard-abm-campaign-spot-436e245c-6d84-3a0a-a86a-2783b1e1b314/7b0247cd74e8466abe9896f2420177a5",
+   "exit_code": 0,
+   "log_stream": "contam-fleet-workup-fleet-01/default/eb90a73a7b964b03ae88630ddc35e6fc",
+   "started_at_ms": 1795129600992,
+   "status_reason": "Essential container in task exited",
+   "stopped_at_ms": 1795131091447
+  }
+ ],
+ "command": [
+  "deploy/aws/campaign_entrypoint.py",
+  "--campaign",
+  "contam/fleet_workup_fleet_01",
+  "--s3-prefix",
+  "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_fleet_workup_fleet_01/",
+  "--block",
+  "fleet",
+  "--seeds",
+  "0,1,2,3,4,5,6,7",
+  "--manifest",
+  "campaigns/contam/fleet_workup_fleet_01/design/fleet_selection.json",
+  "--index",
+  "4"
+ ],
+ "created_at_ms": 1795129124999,
+ "image": "994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:contam-fleet-workup-fleet-01@sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+ "image_build": {
+  "base": "python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 (pulled through mirror.gcr.io)",
+  "dockerfiles": [
+   "Dockerfile",
+   "deploy/aws/Dockerfile.campaign"
+  ],
+  "image_digest": "sha256:0a25129f30ec04c66c7c83d5e446c73889a81c188e4985d475aaf36791ae4f79",
+  "runner_commit": "56b1a990f64edae1f95eb32588d0017a34db6d0f"
+ },
+ "job_definition": "arn:aws:batch:us-east-1:994254241749:job-definition/picard-contam-fleet-workup-fleet-01:6",
+ "job_id": "9a1564dc-06b0-44b1-81d1-ae914cd3ced0",
+ "job_name": "picard-contam-fleet-workup-fleet-01-fleet-20261119-225843-canary",
+ "job_queue": "arn:aws:batch:us-east-1:994254241749:job-queue/picard-campaign-queue",
+ "raw_artifact": {
+  "sha256": "86c863ab8f01b663b2a417cc75869a35ce94be6443cfe8c147a1639740f19821",
+  "uri": "s3://crusherbucket-994254241749-us-east-1-an/campaign/contam_fleet_workup_fleet_01/fleet/fleet_cohort4_raw.tar.gz"
+ },
+ "resource_requirements": [
+  {
+   "type": "VCPU",
+   "value": "1"
+  },
+  {
+   "type": "MEMORY",
+   "value": "4096"
+  }
+ ],
+ "source": "aws batch describe-jobs, read after the job stopped",
+ "started_at_ms": 1795129600992,
+ "status": "SUCCEEDED",
+ "stopped_at_ms": 1795131091447
+}
