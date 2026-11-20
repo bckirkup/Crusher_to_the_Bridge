@@ -1841,9 +1841,619 @@ DIAMOND_PRINCESS = CruisePlatformRecipe(
 )
 
 
+def _explorer_vent(deck: int, side: str, section: str) -> str:
+    # One ventilation label per corridor zone. On decks 6-10 every corridor
+    # carries an outboard balcony bank; the midship inboard bank on decks 6-8
+    # is Promenade-view staterooms facing the Royal Promenade void, so those
+    # corridors are labelled atrium_view. Decks 2-3 are sealed oceanview and
+    # inside staterooms.
+    if deck in (2, 3):
+        return "interior_hvac"
+    if deck in (6, 7, 8) and section == "Mid":
+        return "atrium_view"
+    return "balcony_partial"
+
+
+def _explorer_public_zones() -> tuple[PublicZoneRecipe, ...]:
+    return (
+        PublicZoneRecipe(
+            "MedicalCenter", "Medical", "medium", 350.0, "1_Service", 20,
+            {"x": 110, "y": 82},
+            "Medical center. Deck 1 (not on the passenger deck plans).",
+        ),
+        PublicZoneRecipe(
+            "IsolWard", "Medical", "low", 140.0, "1_Service", 4,
+            {"x": 130, "y": 82},
+            "Isolation ward. Deck 1 (not on the passenger deck plans).",
+        ),
+        PublicZoneRecipe(
+            "PalaceTheatre", "Free", "high", 6000.0, "2_Lower", 1300,
+            {"x": 40, "y": 68},
+            "The Palace Theatre (orchestra level deck 2, rising through decks 3-4).",
+        ),
+        PublicZoneRecipe(
+            "ConferenceCtr", "Free", "low", 900.0, "2_Lower", 400,
+            {"x": 96, "y": 68},
+            "Conference Center (meeting rooms for up to 400). Deck 2.",
+        ),
+        PublicZoneRecipe(
+            "StudioB", "Free", "high", 4000.0, "3_Lower", 900,
+            {"x": 112, "y": 62},
+            "Studio B ice rink and studio complex. Deck 3 midship.",
+        ),
+        PublicZoneRecipe(
+            "PhotoArtGallery", "Free", "low", 400.0, "3_Lower", 60,
+            {"x": 80, "y": 62},
+            "Photo & Art Gallery. Deck 3.",
+        ),
+        PublicZoneRecipe(
+            "MagellanDR", "Dining", "high", 3000.0, "3_Lower", 640,
+            {"x": 190, "y": 62},
+            "Magellan Dining Room (lowest tier of the three-tier main dining "
+            "room). Deck 3 aft.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "DaGamaDR", "Dining", "high", 3000.0, "4_Public", 640,
+            {"x": 190, "y": 56},
+            "Da Gama Dining Room (middle tier of the three-tier main dining "
+            "room). Deck 4 aft.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "CasinoRoyale", "Free", "high", 1800.0, "4_Public", 450,
+            {"x": 100, "y": 56},
+            "Casino Royale. Deck 4.",
+        ),
+        PublicZoneRecipe(
+            "SchoonerBar", "Free", "medium", 350.0, "4_Public", 90,
+            {"x": 130, "y": 56},
+            "Schooner Bar. Deck 4.",
+        ),
+        PublicZoneRecipe(
+            "MainGalley", "Dining", "high", 1500.0, "4_Public", 100,
+            {"x": 212, "y": 56},
+            "Main galley (crew-only service; not on the passenger deck plans, "
+            "placed with the dining-room stack).",
+            dining_service_type="galley", food_contamination_multiplier=0.5,
+        ),
+        PublicZoneRecipe(
+            "CentrumFwd", "Free", "high", 2500.0, "5_Promenade", 300,
+            {"x": 70, "y": 50},
+            "The Centrum, forward atrium and elevator lobby at the forward "
+            "end of the Royal Promenade (multi-deck void).",
+        ),
+        PublicZoneRecipe(
+            "CentrumAft", "Free", "high", 2500.0, "5_Promenade", 300,
+            {"x": 160, "y": 50},
+            "The Centrum, aft atrium and elevator lobby at the aft end of "
+            "the Royal Promenade (multi-deck void).",
+        ),
+        PublicZoneRecipe(
+            "RoyalPromenade", "Free", "high", 12000.0, "5_Promenade", 1000,
+            {"x": 115, "y": 50},
+            "Royal Promenade, four-story interior mall lined with bars and "
+            "shops (void through decks 5-8; one zone). Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "CafePromenade", "Dining", "medium", 300.0, "5_Promenade", 80,
+            {"x": 95, "y": 50},
+            "Café Promenade (self-service coffee, snacks and ice cream). Deck 5.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "ChampagneBar", "Free", "low", 150.0, "5_Promenade", 40,
+            {"x": 140, "y": 50},
+            "Champagne Bar. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "MaharajaLounge", "Free", "medium", 900.0, "5_Promenade", 250,
+            {"x": 45, "y": 50},
+            "Maharaja's Lounge (live music and dancing). Deck 5 forward.",
+        ),
+        PublicZoneRecipe(
+            "GuestRelations", "Free", "low", 200.0, "5_Promenade", 30,
+            {"x": 150, "y": 50},
+            "Guest Relations desk. Deck 5.",
+        ),
+        PublicZoneRecipe(
+            "ColumbusDR", "Dining", "high", 3000.0, "5_Promenade", 640,
+            {"x": 190, "y": 50},
+            "Columbus Dining Room (upper tier of the three-tier main dining "
+            "room). Deck 5 aft.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "Library", "Free", "low", 150.0, "7_Public", 25,
+            {"x": 160, "y": 40},
+            "Library, at the aft Centrum lobby. Deck 7.",
+        ),
+        PublicZoneRecipe(
+            "RCOnline", "Free", "low", 150.0, "8_Public", 30,
+            {"x": 160, "y": 34},
+            "royalcaribbean online internet center, at the aft Centrum lobby. "
+            "Deck 8.",
+        ),
+        PublicZoneRecipe(
+            "Bridge", "Free", "low", 300.0, "10_Bridge", 12,
+            {"x": 30, "y": 20},
+            "Navigation bridge (not on the passenger deck plans; forward "
+            "blank of deck 10).",
+        ),
+        PublicZoneRecipe(
+            "ShipShapeSpa", "Free", "medium", 1800.0, "11_Pool", 200,
+            {"x": 40, "y": 14},
+            "ShipShape Day Spa and Fitness Center (decks 11-12 forward; one zone).",
+        ),
+        PublicZoneRecipe(
+            "PoolDeck", "Free", "high", 4000.0, "11_Pool", 700,
+            {"x": 105, "y": 14},
+            "Pool Deck (open deck pools and whirlpools). Deck 11 midship.",
+        ),
+        PublicZoneRecipe(
+            "Windjammer", "Dining", "high", 3600.0, "11_Pool", 800,
+            {"x": 170, "y": 14},
+            "Windjammer Café (buffet breakfast and lunch, casual dinner). "
+            "Deck 11 aft.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "Portofino", "Dining", "medium", 350.0, "11_Pool", 90,
+            {"x": 200, "y": 14},
+            "Portofino Italian specialty restaurant. Deck 11 aft.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "VideoArcade", "Free", "low", 200.0, "12_Sports", 40,
+            {"x": 140, "y": 10},
+            "Video Arcade. Deck 12.",
+        ),
+        PublicZoneRecipe(
+            "AdventureOcean", "Free", "medium", 600.0, "12_Sports", 120,
+            {"x": 160, "y": 10},
+            "Adventure Ocean youth facilities. Deck 12 aft.",
+        ),
+        PublicZoneRecipe(
+            "OptixTeen", "Free", "medium", 250.0, "12_Sports", 60,
+            {"x": 178, "y": 10},
+            "Optix Teen Disco. Deck 12 aft.",
+        ),
+        PublicZoneRecipe(
+            "JohnnyRockets", "Dining", "medium", 300.0, "12_Sports", 90,
+            {"x": 196, "y": 10},
+            "Johnny Rockets '50s-style diner. Deck 12 aft.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
+        ),
+        PublicZoneRecipe(
+            "RockWall", "Free", "low", 300.0, "13_Sports", 30,
+            {"x": 205, "y": 8},
+            "Rock-Climbing Wall (open deck). Deck 13 aft.",
+        ),
+        PublicZoneRecipe(
+            "InLineTrack", "Free", "low", 400.0, "13_Sports", 40,
+            {"x": 185, "y": 8},
+            "In-Line skating track (open deck). Deck 13.",
+        ),
+        PublicZoneRecipe(
+            "SportsCourt", "Free", "medium", 600.0, "13_Sports", 100,
+            {"x": 165, "y": 8},
+            "Sports Court (open deck). Deck 13.",
+        ),
+        PublicZoneRecipe(
+            "ExplorerDunes", "Free", "low", 500.0, "13_Sports", 60,
+            {"x": 145, "y": 8},
+            "Explorer Dunes 9-hole miniature golf course (open deck). Deck 13.",
+        ),
+        PublicZoneRecipe(
+            "VikingCrown", "Free", "high", 1200.0, "14_Crown", 300,
+            {"x": 110, "y": 6},
+            "Viking Crown Lounge. Deck 14.",
+        ),
+        PublicZoneRecipe(
+            "SkylightChapel", "Free", "low", 150.0, "15_Chapel", 40,
+            {"x": 110, "y": 4},
+            "Skylight Chapel (seats 40), above the Viking Crown Lounge. Deck 15.",
+        ),
+        PublicZoneRecipe(
+            "Engine_Room", "Free", "low", 7500.0, "0_Engine", 25,
+            {"x": 80, "y": 104},
+            "Engine room / machinery spaces.",
+        ),
+        PublicZoneRecipe(
+            "CrewMess", "Dining", "high", 1000.0, "1_Service", 280,
+            {"x": 70, "y": 82},
+            "Crew mess (not on the passenger deck plans). Deck 1.",
+            dining_service_type="crew_mess", food_contamination_multiplier=1.0,
+            meal_seatings=4,
+        ),
+        PublicZoneRecipe(
+            "CrewMessOff", "Dining", "medium", 280.0, "1_Service", 60,
+            {"x": 90, "y": 82},
+            "Officers mess (not on the passenger deck plans). Deck 1.",
+            dining_service_type="crew_mess", food_contamination_multiplier=1.0,
+            meal_seatings=4,
+        ),
+        PublicZoneRecipe(
+            "Laundry", "Free", "medium", 300.0, "1_Service", 15,
+            {"x": 150, "y": 82},
+            "Industrial laundry (not on the passenger deck plans). Deck 1.",
+        ),
+        PublicZoneRecipe(
+            "Stores", "Free", "low", 400.0, "1_Service", 5,
+            {"x": 170, "y": 82},
+            "Provision stores (not on the passenger deck plans). Deck 1.",
+        ),
+    )
+
+
+def _explorer_corridor_chain(
+    first: str, second: str, link_type: str,
+) -> dict[str, str]:
+    return {"from": first, "to": second, "type": link_type}
+
+
+def _explorer_main_bank_links() -> list[dict[str, str]]:
+    links: list[dict[str, str]] = []
+    for deck in (6, 7, 8, 9, 10):
+        for side in ("Port", "Stbd"):
+            fwd = pax_zone_id(deck, side, "Fwd")
+            mid = pax_zone_id(deck, side, "Mid")
+            aft = pax_zone_id(deck, side, "Aft")
+            links.append(_explorer_corridor_chain(fwd, mid, "corridor"))
+            links.append(_explorer_corridor_chain(mid, aft, "corridor"))
+        # Forward and aft elevator lobbies cross the beam at the section breaks.
+        for section in ("Fwd", "Aft"):
+            links.append(_explorer_corridor_chain(
+                pax_zone_id(deck, "Port", section),
+                pax_zone_id(deck, "Stbd", section),
+                "passageway",
+            ))
+    for lower, upper in ((6, 7), (7, 8), (8, 9), (9, 10)):
+        links.append(_explorer_corridor_chain(
+            pax_zone_id(lower, "Port", "Fwd"),
+            pax_zone_id(upper, "Port", "Fwd"),
+            "elevator_bank",
+        ))
+        links.append(_explorer_corridor_chain(
+            pax_zone_id(lower, "Stbd", "Fwd"),
+            pax_zone_id(upper, "Stbd", "Fwd"),
+            "stairwell",
+        ))
+        links.append(_explorer_corridor_chain(
+            pax_zone_id(lower, "Port", "Aft"),
+            pax_zone_id(upper, "Port", "Aft"),
+            "elevator_bank",
+        ))
+        links.append(_explorer_corridor_chain(
+            pax_zone_id(lower, "Stbd", "Aft"),
+            pax_zone_id(upper, "Stbd", "Aft"),
+            "stairwell",
+        ))
+    return links
+
+
+def _explorer_lower_bank_links() -> list[dict[str, str]]:
+    links: list[dict[str, str]] = []
+    # Deck 2 has forward and aft oceanview banks; deck 3 forward and midship.
+    for deck, sections in ((2, ("Fwd", "Aft")), (3, ("Fwd", "Mid"))):
+        for section in sections:
+            links.append(_explorer_corridor_chain(
+                pax_zone_id(deck, "Port", section),
+                pax_zone_id(deck, "Stbd", section),
+                "passageway",
+            ))
+    for side, link_type in (("Port", "elevator_bank"), ("Stbd", "stairwell")):
+        links.append(_explorer_corridor_chain(
+            pax_zone_id(2, side, "Fwd"), pax_zone_id(3, side, "Fwd"), link_type,
+        ))
+        links.append(_explorer_corridor_chain(
+            pax_zone_id(2, side, "Aft"), pax_zone_id(3, side, "Mid"), link_type,
+        ))
+    return links
+
+
+def _explorer_crew_links() -> list[dict[str, str]]:
+    links: list[dict[str, str]] = []
+    for deck in (0, 1):
+        links.append(_explorer_corridor_chain(
+            crew_zone_id(deck, "Fwd"), crew_zone_id(deck, "Mid"), "corridor",
+        ))
+        links.append(_explorer_corridor_chain(
+            crew_zone_id(deck, "Mid"), crew_zone_id(deck, "Aft"), "corridor",
+        ))
+    for section in ("Fwd", "Mid", "Aft"):
+        links.append(_explorer_corridor_chain(
+            crew_zone_id(0, section), crew_zone_id(1, section), "stairwell",
+        ))
+    return links
+
+
+def _explorer_adjacency() -> tuple[dict[str, str], ...]:
+    links: list[dict[str, str]] = [
+        # Royal Promenade spine: Centrum atria at both ends, venues along it.
+        {"from": "CentrumFwd", "to": "RoyalPromenade", "type": "open_front"},
+        {"from": "RoyalPromenade", "to": "CentrumAft", "type": "open_front"},
+        {"from": "RoyalPromenade", "to": "CafePromenade", "type": "open_front"},
+        {"from": "RoyalPromenade", "to": "ChampagneBar", "type": "passageway"},
+        {"from": "CentrumFwd", "to": "MaharajaLounge", "type": "passageway"},
+        {"from": "CentrumAft", "to": "GuestRelations", "type": "passageway"},
+        {"from": "CentrumAft", "to": "ColumbusDR", "type": "passageway"},
+        {"from": "CentrumAft", "to": "DaGamaDR", "type": "stairwell"},
+        {"from": "CentrumAft", "to": "MagellanDR", "type": "stairwell"},
+        {"from": "CentrumAft", "to": "SchoonerBar", "type": "stairwell"},
+        {"from": "CentrumAft", "to": "Library", "type": "stairwell"},
+        {"from": "CentrumAft", "to": "RCOnline", "type": "stairwell"},
+        {"from": "CentrumFwd", "to": "CasinoRoyale", "type": "stairwell"},
+        {"from": "CentrumFwd", "to": "PalaceTheatre", "type": "stairwell"},
+        {"from": "CentrumFwd", "to": "PhotoArtGallery", "type": "stairwell"},
+        {"from": "CasinoRoyale", "to": "SchoonerBar", "type": "passageway"},
+        {"from": "PhotoArtGallery", "to": "StudioB", "type": "passageway"},
+        {"from": "PalaceTheatre", "to": "ConferenceCtr", "type": "passageway"},
+        # Three-tier main dining room and galley.
+        {"from": "MagellanDR", "to": "DaGamaDR", "type": "stairwell"},
+        {"from": "DaGamaDR", "to": "ColumbusDR", "type": "stairwell"},
+        {"from": "MagellanDR", "to": "MainGalley", "type": "service_hatch"},
+        {"from": "DaGamaDR", "to": "MainGalley", "type": "service_hatch"},
+        {"from": "ColumbusDR", "to": "MainGalley", "type": "service_hatch"},
+        # Upper decks.
+        {"from": "ShipShapeSpa", "to": "PoolDeck", "type": "doorway"},
+        {"from": "PoolDeck", "to": "Windjammer", "type": "doorway"},
+        {"from": "Windjammer", "to": "Portofino", "type": "passageway"},
+        {"from": "JohnnyRockets", "to": "OptixTeen", "type": "passageway"},
+        {"from": "OptixTeen", "to": "AdventureOcean", "type": "passageway"},
+        {"from": "AdventureOcean", "to": "VideoArcade", "type": "passageway"},
+        {"from": "PoolDeck", "to": "VideoArcade", "type": "stairwell"},
+        {"from": "SportsCourt", "to": "InLineTrack", "type": "open_deck"},
+        {"from": "InLineTrack", "to": "RockWall", "type": "open_deck"},
+        {"from": "SportsCourt", "to": "ExplorerDunes", "type": "open_deck"},
+        {"from": "JohnnyRockets", "to": "SportsCourt", "type": "stairwell"},
+        {"from": "PoolDeck", "to": "VikingCrown", "type": "elevator_bank"},
+        {"from": "VikingCrown", "to": "SkylightChapel", "type": "stairwell"},
+        {"from": "Bridge", "to": pax_zone_id(10, "Port", "Fwd"), "type": "doorway"},
+        # Service decks.
+        {"from": "MedicalCenter", "to": "IsolWard", "type": "doorway"},
+        {"from": "MedicalCenter", "to": "CentrumFwd", "type": "elevator_bank"},
+        {"from": "CrewMess", "to": "MainGalley", "type": "service_stairwell"},
+        {"from": "CrewMessOff", "to": "MainGalley", "type": "service_stairwell"},
+        {"from": "Laundry", "to": "Stores", "type": "service_corridor"},
+        {"from": "Stores", "to": "Engine_Room", "type": "ladder_well"},
+        {"from": "CC_D1_F", "to": "CrewMess", "type": "corridor"},
+        {"from": "CC_D1_M", "to": "CrewMessOff", "type": "corridor"},
+        {"from": "CC_D1_A", "to": "Laundry", "type": "corridor"},
+        {"from": "CC_D0_A", "to": "Engine_Room", "type": "ladder_well"},
+        # Cabin banks reach the public decks through the two Centrum lobbies.
+        {"from": pax_zone_id(6, "Port", "Fwd"), "to": "CentrumFwd",
+         "type": "elevator_bank"},
+        {"from": pax_zone_id(6, "Stbd", "Fwd"), "to": "CentrumFwd",
+         "type": "stairwell"},
+        {"from": pax_zone_id(6, "Port", "Aft"), "to": "CentrumAft",
+         "type": "elevator_bank"},
+        {"from": pax_zone_id(6, "Stbd", "Aft"), "to": "CentrumAft",
+         "type": "stairwell"},
+        {"from": pax_zone_id(3, "Port", "Fwd"), "to": "CentrumFwd",
+         "type": "elevator_bank"},
+        {"from": pax_zone_id(3, "Stbd", "Fwd"), "to": "CentrumFwd",
+         "type": "stairwell"},
+        {"from": pax_zone_id(3, "Port", "Mid"), "to": "CentrumAft",
+         "type": "elevator_bank"},
+        {"from": pax_zone_id(3, "Stbd", "Mid"), "to": "CentrumAft",
+         "type": "stairwell"},
+        {"from": pax_zone_id(10, "Port", "Aft"), "to": "PoolDeck",
+         "type": "elevator_bank"},
+        {"from": pax_zone_id(10, "Stbd", "Aft"), "to": "Windjammer",
+         "type": "stairwell"},
+        {"from": pax_zone_id(10, "Stbd", "Fwd"), "to": "ShipShapeSpa",
+         "type": "stairwell"},
+    ]
+    links.extend(_explorer_main_bank_links())
+    links.extend(_explorer_lower_bank_links())
+    links.extend(_explorer_crew_links())
+    return tuple(links)
+
+
+def _explorer_lower_bank(
+    decks: tuple[int, ...],
+    sections: tuple[str, ...],
+    max_occupancy: int,
+    volume_m3: float,
+    note: str,
+) -> CorridorRecipe:
+    return CorridorRecipe(
+        decks=decks,
+        sides=("Port", "Stbd"),
+        sections=sections,
+        max_occupancy=max_occupancy,
+        volume_m3=volume_m3,
+        cabin_size=2,
+        traffic="low",
+        deck_label="{deck}_Cabins",
+        ventilation=_explorer_vent,
+        description_template=(
+            "Passenger cabin corridor (lower oceanview bank), "
+            "Deck {deck} {side} {section}. " + note + ", ventilation={vent}."
+        ),
+        id_prefix="PC",
+    )
+
+
+EXPLORER_SEAS_06 = CruisePlatformRecipe(
+    platform_id="explorer_seas_06",
+    nominal_complement={"passengers": 3245, "crew": 1183},
+    description=(
+        "Explorer of the Seas, Feb 26 - Mar 5 2006 voyage (3,245 passengers + "
+        "1,183 crew = 4,428; CDC VSP investigation denominators). Royal "
+        "Caribbean Voyager-class, maiden voyage 2000: ~311m LOA × 48m beam, "
+        "138,000 GT, 3,114 guests at double occupancy. Bins to mega_cruise_5000 "
+        "under the passenger-complement rule (3,245 > 3,240.37 boundary). "
+        "Staterooms on 7 decks (2-3 oceanview, 6-10 balcony / Promenade-view / "
+        "inside); decks 4-5 are all-public, with the four-story Royal Promenade "
+        "void through decks 5-8. Cabin-corridor resolution (38 pax + 6 crew "
+        "corridors). Key venues: three-tier main dining room (Magellan / "
+        "Da Gama / Columbus), Windjammer Café buffet, Royal Promenade, Palace "
+        "Theatre, Studio B. Layout follows the Royal Caribbean deck plans "
+        "(Feb 2006 configuration, valid 12-Feb-2006 to 22-Apr-2007: Portofino, "
+        "Maharaja's Lounge, ShipShape spa; later refit venues and the deck-12 "
+        "staterooms added in 2015 are not modeled) and cruisedeckplans.com "
+        "deck plans for stateroom-bank geometry. Simplifications: corridor "
+        "occupancy is the voyage complement spread evenly within each bank, "
+        "not a per-stateroom count; each corridor carries one ventilation "
+        "label (decks 6-8 midship atrium_view for the Promenade-view bank, "
+        "other deck 6-10 corridors balcony_partial although they also serve "
+        "inside staterooms); the Royal Promenade and each Centrum are single "
+        "zones; venue volumes and capacities are plan-scaled estimates; crew "
+        "decks, medical center, galley, laundry, stores and bridge are not on "
+        "the published passenger plans and are placed as in the sibling "
+        "recipes; no HVAC drawing is published, so air handlers are grouped "
+        "by longitudinal position and function."
+    ),
+    length_m=311.0,
+    beam_m=48.0,
+    population=4428,
+    graywater_zones=("Engine_Room",),
+    pax_corridors=CorridorRecipe(
+        decks=(6, 7, 8, 9, 10),
+        sides=("Port", "Stbd"),
+        sections=("Fwd", "Mid", "Aft"),
+        max_occupancy=96,
+        volume_m3=1700.0,
+        cabin_size=2,
+        traffic="low",
+        deck_label="{deck}_Cabins",
+        ventilation=_explorer_vent,
+        description_template=(
+            "Passenger cabin corridor, Deck {deck} {side} {section}. "
+            "~46 cabins, ~96 pax, ventilation={vent}."
+        ),
+        id_prefix="PC",
+    ),
+    extra_corridors=(
+        _explorer_lower_bank(
+            (2,), ("Fwd",), 32, 600.0, "~15 cabins, ~32 pax",
+        ),
+        _explorer_lower_bank(
+            (2,), ("Aft",), 86, 1500.0, "~41 cabins, ~86 pax",
+        ),
+        _explorer_lower_bank(
+            (3,), ("Fwd",), 52, 950.0, "~25 cabins incl. inside block, ~52 pax",
+        ),
+        _explorer_lower_bank(
+            (3,), ("Mid",), 32, 600.0, "~15 cabins, ~32 pax",
+        ),
+    ),
+    crew_corridors=CorridorRecipe(
+        decks=(0, 1),
+        sides=(),
+        sections=("Fwd", "Mid", "Aft"),
+        max_occupancy=200,
+        volume_m3=1300.0,
+        cabin_size=3,
+        traffic="medium",
+        deck_label="{deck}_Crew",
+        ventilation=lambda d, s, sec: "interior_hvac",
+        description_template=(
+            "Crew cabin corridor, Deck {deck} {section}. "
+            "~200 crew, interior HVAC (crew decks not on published plans)."
+        ),
+        id_prefix="CC",
+        cabin_size_by_class={"crew_engineering": 2, "crew_medical": 2},
+    ),
+    public_zones=_explorer_public_zones(),
+    exterior_zones=(
+        "PoolDeck", "RockWall", "InLineTrack", "SportsCourt", "ExplorerDunes",
+    ),
+    public_hvac=(
+        HvacGroupRecipe(
+            "AHU_Public_Fwd",
+            ("PalaceTheatre", "ConferenceCtr", "PhotoArtGallery",
+             "CasinoRoyale", "MaharajaLounge", "CentrumFwd", "Bridge"),
+            8.0,
+            "Forward / entertainment.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Public_Mid",
+            ("RoyalPromenade", "ChampagneBar", "StudioB", "SchoonerBar",
+             "CentrumAft", "GuestRelations", "Library", "RCOnline"),
+            8.0,
+            "Midship Royal Promenade / aft Centrum / Studio B.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Public_Upper",
+            ("ShipShapeSpa", "VideoArcade", "AdventureOcean", "OptixTeen",
+             "VikingCrown", "SkylightChapel"),
+            10.0,
+            "Pool-deck spa / youth facilities / Viking Crown.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Dining",
+            ("MagellanDR", "DaGamaDR", "ColumbusDR", "CafePromenade",
+             "Windjammer", "Portofino", "JohnnyRockets", "CrewMess",
+             "CrewMessOff"),
+            8.0,
+            "Dining venues including crew messes.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Medical",
+            ("MedicalCenter", "IsolWard"),
+            12.0,
+            "Medical + isolation ward.",
+        ),
+        HvacGroupRecipe(
+            "AHU_Service",
+            ("MainGalley", "Laundry", "Stores", "Engine_Room"),
+            15.0,
+            "Service / galley / engine.",
+        ),
+    ),
+    auto_pax_ahu=True,
+    auto_crew_ahu=True,
+    crew_ahu_merged=False,
+    pax_trunk_m3h=1800.0,
+    crew_trunk_m3h=900.0,
+    cabin_relief_m3h=2000.0,
+    cabin_relief_target_ahu="AHU_Public_Mid",
+    cross_zone_links=(
+        {
+            "from": "DaGamaDR",
+            "to": "MainGalley",
+            "flow_rate_m3h": 18000.0,
+            "is_hvac_ducted": False,
+            "path": "Dining_Galley_Exhaust",
+        },
+        {
+            "from": "AHU_Medical",
+            "to": "AHU_Public_Fwd",
+            "flow_rate_m3h": 100.0,
+            "is_hvac_ducted": False,
+            "path": "Medical_Door_Leakage",
+        },
+        {
+            "from": "Windjammer",
+            "to": "PoolDeck",
+            "flow_rate_m3h": 1000.0,
+            "is_hvac_ducted": False,
+            "path": "Pool_Deck_Open_Doorway",
+        },
+    ),
+    adjacency=_explorer_adjacency(),
+    pax_deck_y={
+        2: 68.0, 3: 62.0, 6: 44.0, 7: 38.0, 8: 32.0, 9: 26.0, 10: 20.0,
+    },
+    crew_deck_y={0: 95.0, 1: 86.0},
+    side_x={"Port": 200.0, "Stbd": 200.0},
+)
+
+
 RECIPES: dict[str, CruisePlatformRecipe] = {
     EXPEDITION_CRUISE_450.platform_id: EXPEDITION_CRUISE_450,
     CLASSIC_CRUISE_1900.platform_id: CLASSIC_CRUISE_1900,
     SPIRIT_CRUISE_3000.platform_id: SPIRIT_CRUISE_3000,
     DIAMOND_PRINCESS.platform_id: DIAMOND_PRINCESS,
+    EXPLORER_SEAS_06.platform_id: EXPLORER_SEAS_06,
 }
