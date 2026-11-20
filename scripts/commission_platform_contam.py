@@ -59,15 +59,29 @@ def commission(platform_id: str) -> dict[str, float]:
             outward[zone] = outward.get(zone, 0.0) + float(flow0[nr])
 
     airflow = json.loads(open(airflow_path, encoding="utf-8").read())
+    # The path map has no per-opening identity, so a zone's solved outward
+    # total can only be attributed when every opening on the zone is an
+    # open_deck (makeup_louvre legs are inward-only and contribute nothing).
+    by_zone: dict[str, list[dict]] = {}
+    for opening in airflow.get("ambient_openings", []):
+        by_zone.setdefault(opening["zone"], []).append(opening)
+    fillable = {
+        zone
+        for zone, recs in by_zone.items()
+        if all(r.get("type") in ("open_deck", "makeup_louvre") for r in recs)
+    }
     filled: dict[str, float] = {}
     for opening in airflow.get("ambient_openings", []):
         if opening.get("type") != "open_deck":
             continue
         zone = opening["zone"]
+        if zone not in fillable:
+            print(f"WARNING: {zone} mixes open_deck with other opening "
+                  "types; set its exchange_m3h per opening by hand")
+            continue
         solved = outward.get(zone, 0.0)
         if solved <= 0.0:
             print(f"WARNING: no solved outward flow for open_deck on {zone}")
-            continue
         opening["exchange_m3h"] = round(solved, 1)
         filled[zone] = opening["exchange_m3h"]
     with open(airflow_path, "w", encoding="utf-8") as fh:
