@@ -1,6 +1,9 @@
 # COVID-TRANSPORT-FIT-01
 **Date:** 2026-11-19
 **Commit:** 106a3583
+**Measured at:** 106a3583 (120 fleet cells); canary block `dp_contamx_canary`
+at 8de77294 — identical voyage code, predates only the fail-closed cell
+check and GM funnel_echo
 **Pathogens:** sars_cov2_resp
 **Status:** measured
 
@@ -24,15 +27,14 @@ the repaired model's dose is set upstream of it.
 ## DP vs record (both engines identical)
 
 Median recorded_onsets 8 [0–121] vs 197; lab_confirmed 10.5 [0–145] vs
-712; takeoff 9/20 seeds. When an outbreak lands: dated share ~0.8 vs
-0.277, asym share ~0.22 vs 0.44, DP-scale crew share ~0.44 vs 0.29.
-**The repaired airflow model under-carries DP ~30× relative to
-CREW-REACH-01's pre-repair boxed baseline** (pooled ~1,351–1,453
-lab_confirmed over 20 cells on the same design family). The takeoff
-failure is new and is attributable to the airflow repairs' delivered
-dose collapse, not solver or ascertainment. Composition residuals
-(too-symptomatic, crew-loaded, dated-heavy) are the settled
-ASC/DATING/CREW-REACH residuals unchanged.
+712; **takeoff 9/20 seeds**. Pooled lab_confirmed 1,236–1,294 across
+20 cells vs CREW-REACH-01's ~1,351–1,453 on the same boxed design
+family — pooled volume is roughly preserved, so the ensemble is now a
+few record-scale cells carrying a mostly-fizzled set: the airflow
+repairs cut outbreak *frequency*, not dose volume. When an outbreak
+lands: dated share ~0.8 vs 0.277, asym share ~0.22 vs 0.44, DP-scale
+crew share ~0.44 vs 0.29 — the settled ASC/DATING/CREW-REACH
+residuals unchanged.
 
 ## GM vs record
 
@@ -45,12 +47,12 @@ residual, now on a held-out hull.
 
 Native ≈ ContamX on both hulls (paired deltas ≈ 0): the transport-solver
 question is closed at this grain — use whichever is cheaper. The real
-finding is negative: after the B1–B3 airflow repairs the DP replay no
-longer produces a record-scale outbreak at Θ7.9e6, so every
-composition comparison sits on a mostly-fizzled ensemble. Next
-measurement target: which repair (room-air removal ambient exchange,
-near-field, pool transport, duty-0 terminal) removed the delivered dose
-— paired-arm cell runs per repair flag.
+finding is negative: after the B1–B3 airflow repairs DP takeoff is
+~45% at Θ7.9e6 where the record always took off, so every composition
+comparison sits on a mostly-fizzled ensemble. Next measurement target:
+which repair (room-air removal ambient exchange, near-field, pool
+transport, duty-0 terminal) cut realization frequency — paired-arm cell
+runs per repair flag.
 
 Full table: `campaigns/covid/transport_fit_01/LEDGER.md`; readout:
 `campaigns/covid/transport_fit_01/readout.py`.

@@ -86,11 +86,15 @@ outcome is set upstream of the HVAC transport operator on both hulls.
 | asym share final | 0.217 | 0.237 | 0.437 |
 | crew share (DP-scale) | 0.425 (n=4) | 0.453 (n=4) | 0.29 |
 
-The airflow repairs (B1–B3) took the DP fit backward: CREW-REACH-01's
-same boxed configuration pooled ~1,351–1,453 lab_confirmed over 20
-cells; the repaired model lands ~30× lower and takes off in under half
-the seeds. When an outbreak does occur it is still too symptomatic and
-still too crew-loaded — the settled ASC/DATING residuals, not new
+The airflow repairs (B1–B3) turned DP takeoff into a coin flip: 9/20
+seeds reach ≥10 recorded onsets, and the median cell records 8 onsets
+vs the record's 197. Pooled confirmations are roughly preserved
+(1,236–1,294 over 20 cells vs CREW-REACH-01's ~1,351–1,453 on the same
+boxed design family) — the ensemble is now a few record-scale cells
+carrying a mostly-fizzled set rather than a shift of the whole
+distribution, so the deficit is outbreak *frequency*, not delivered
+dose volume. When an outbreak does occur it is still too symptomatic
+and still too crew-loaded — the settled ASC/DATING residuals, not new
 structure.
 
 **GM `hygiene_cycle` @ Θ2.37e11:**
@@ -108,9 +112,9 @@ held-out hull.
 
 **Verdict:** the airflow repairs landed a transport layer whose solver
 indistinguishability is clean (the operator barely matters to outcomes),
-but the repaired model under-carries DP ~30× at Θ7.9e6 relative to the
-pre-repair boxed baseline — the dose delivered to the record's
-observation funnel collapsed. The shared residual across both hulls is
+but under the repaired model DP takeoff is ~45% at Θ7.9e6 where the
+record always took off — pooled volume is preserved while the
+realization frequency halved. The shared residual across both hulls is
 not solver or ascertainment: symptomatic-overweight composition.
 
 ### Canary readout — DP under ContamX (20 seeds, Θ 7.9e6)

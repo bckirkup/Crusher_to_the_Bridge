@@ -42,6 +42,8 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- [COVID-TRANSPORT-FIT-01](COVID-TRANSPORT-FIT-01.md) — measured: native ≈ ContamX on both hulls (seed-paired Δ ≈ 0); under the B1–B3 airflow repairs DP takeoff is ~45% at Θ7.9e6 (pooled volume preserved, realization frequency collapsed); GM magnitude near record (110 vs 128/217) with asym share 0.24 vs 0.8125.
+
 - [ROOM-AIR-PAIRED-VALIDATION-01](ROOM-AIR-PAIRED-VALIDATION-01.md) — declared, design only: paired `ambient_on`/`ambient_off` respiratory contrast with matched seeds, exact sign-flip rule, sealed-mode no-change control and aggregate encounter witness; three pre-execution blockers; nothing run.
 
 - [CONTAM-FLEET-WORKUP-CANARY-01](CONTAM-FLEET-WORKUP-CANARY-01.md) — four-hull canary amendment: outdoor-air fraction does not reach the ContamX solved field; results split into solved airflow and derived downstream mixing; realized-field gates.
