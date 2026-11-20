@@ -121,8 +121,10 @@ Open, not fixed:
   safe for Explorer. It is not yet a no-op for the other four recipe hulls:
   one zone `exposure` tag differs on `classic_cruise_1900`,
   `spirit_cruise_3000` and `diamond_princess`; `expedition_cruise_450`
-  differs in one cross-zone link and its adjacency; `spirit_cruise_3000`
-  lacks its 16 committed `Cabin_Return_*` / `Cabin_Relief_*` link records.
+  differs in one cross-zone link and its adjacency; on `spirit_cruise_3000`
+  16 committed cross-zone link records (`Cabin_Return_*`, `Cabin_Relief_*`
+  among them) are not reproduced and 8 generated records have no committed
+  match.
   Do not `--overwrite` those four without reviewing the diff.
 - SOP-007/009 `close_zones` name `mega_cruise_5000` zone ids, so closure
   orders skip Explorer's galley and crew mess. WP3 must decide whether the
