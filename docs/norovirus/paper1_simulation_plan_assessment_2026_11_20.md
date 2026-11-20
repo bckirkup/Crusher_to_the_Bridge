@@ -33,8 +33,11 @@ the bridge as an explicit go/no-go gate makes the whole sequence safe.
 used most recently by NORO-GENO-02's 4 × 3 × 4 × 3 × 20-seed mass surface
 (measured at `4f5e7fbe`, 2,880/2,880 runs).
 
-**The last four-hull measurement predates the repair train.** Since `4f5e7fbe`
-(2026-09-29) the tree landed, among others: CONTAM sanitary-direction,
+**The last joint four-hull evaluation predates the repair train.** Since
+`4f5e7fbe` (2026-09-29) the tree landed, among others: (the solver screens
+measured per-hull posting on selected seed strata later — `6742f1a4`,
+`455f9ff7`, `c6c3c25f`, October–November — but they are seed-selected
+screens, not the joint outcome evaluation item 1 calls for) CONTAM sanitary-direction,
 galley/door/ducted/exhaust-sink link repairs (each withdrawing the
 downstream-map dose figures that rested on them), ambient openings and
 weather-deck sinks on the cruise hulls, room-air removal, the FOOD-SUPPLY-01
@@ -88,14 +91,19 @@ Every outcome Edison lists is already emitted or derivable from emitted data:
 | Reaching the reporting threshold | `vsp_trigger_epoch` (either-channel since `VSP-EITHER-CHANNEL-01`) |
 | Outbreak-size distribution, tails | seed ensemble of the above; ≥1,000 seeds/cell for tail frequencies (measured precedent: NORO-OUTBREAK cells, lowposting 1,440-seed re-run) |
 | First role to threshold | per-epoch `cumulative_reported_cases_{passenger,crew}` vs the 0.03 wire |
-| Daily onset and reporting curves | `run.sentinel_line_list` — per-person `onset_epoch`, `report_epoch`, `crew`, channel (`SentinelLedger`, built for `compact` retention) |
+| Daily onset and reporting curves | `run.sentinel_line_list` — per-person `onset_epoch`, `report_epoch`, `crew`, channel (`SentinelLedger`, built for `compact` retention). Caveat: `report_epoch` is the strongest-channel detection clamped to onset (`max(channel_epoch, onset)`), not the operational report counter — the reporting curve comparable to an infirmary log comes from the per-epoch `cumulative_reported_cases_*` series, the line list supplies onsets and detection channels |
 | Environmental observables | `observation.surface_swab_source: surface_pool_density` + `wastewater_assay_mode: holding_tank` are shipped defaults (`environmental_observation_v1`) |
 
 **Missing:** a joint-evaluation campaign (`campaigns/noro/<name>/` — design +
 `build.py` + `cell.py` harvesting all six families in one run + readout), the
 paired bridge strata (quiet / near-threshold / outbreak cells spanning all four
-hulls at ~20 seeds), and the freeze described above. The voyage settings Edison
-says to retain are 168 / 288 / 504 epochs (7 / 12 / 21 days at 24 epochs/day).
+hulls), and the freeze described above. Bridge seed counts are per-stratum:
+~20 seeds prove contract cleanliness and resolve loud cells, but a quiet
+stratum at a ~0.5% event rate returns only a bound (zero postings in 20 seeds
+bounds the rate at ≲14%), so quiet cells carry more seeds or are reported as
+bounds, with the tail-resolution cells at the ≥1,000-seed scale above. The
+voyage settings Edison says to retain are 168 / 288 / 504 epochs (7 / 12 / 21
+days at 24 epochs/day).
 
 ### 2. Explorer temporal reconstruction — empirical target already extracted; one platform to build
 
@@ -122,7 +130,11 @@ fitted.
 - **The comparison archetype named**: Explorer bins to **mega_cruise_5000**
   under the repository's passenger-complement rule (3,245 > the 3,240.37
   boundary). Running mega alongside answers Edison's vessel-specificity
-  question.
+  question — with one caveat: mega differs from Explorer in geometry *and*
+  complements (~5,000/2,000 vs 3,245/1,184), so a stock-mega contrast
+  measures the bundle, not geometry alone; separating the two is what item
+  3's population/composition contrasts are for, and the reconstruction
+  readout should not attribute the whole delta to vessel fidelity.
 - **Fruit-cluster verification**: the cluster is traced to AIDAdiva/AIDAluna
   September–October 2019 (spirit-class; `mega_voyage_source_evidence.md`). The
   repo does not yet record whether Rispens et al. publish per-day onset curves
@@ -133,8 +145,10 @@ fitted.
 ### 3. Population / composition / spatial separation — two legs cheap, one leg needs build
 
 - **Total population** and **passenger–crew composition** are config-level
-  contrasts (population draw, `agent_class_fractions` — all seven classes must
-  be declared summing to 1.0). Paired-seed designs are the existing pattern.
+  contrasts (population draw, `config_overrides.ship_graph.agent_classes` —
+  all seven classes declared summing to 1.0; `agent_class_fractions` is the
+  stamped *output*, not the input key). Paired-seed designs are the existing
+  pattern.
 - **Spatial and dining organization** is not a config dial on existing
   platforms: it needs synthetic platform variants (re-zoned dining/venue
   structure). Proportionate to build only for contrasts the cheap legs show to
@@ -152,14 +166,21 @@ fitted.
   shipped; `variant_surveillance.enabled` and cascade configs are arm-level.
 - Isolation response: `crew_duty_exclusion` (`engines/crew_duty_exclusion.py`)
   implements the VSP §4.4.1.1.1 rule — food employees held 48 h symptom-free,
-  other crew 24 h, firing from the first identified crew case rather than at
-  ALERT — declared, `enabled: false` by default. SOP-008 symptom-triggered
-  removal exists at ALERT.
+  other crew 24 h — declared, `enabled: false` by default. Two wiring facts
+  shape the arm design: its trigger reads `ever_reported_ids`, which
+  syndromic sick-call reports populate but cascade detections do **not**, so
+  an earlier-recognition-via-cascade arm does not fire exclusion earlier
+  unless the trigger is widened or the pairing keys on syndromic
+  identification; and admits are added to `quarantined_ids` without a
+  `quarantine_order_epoch` write, so isolation person-days come from the
+  per-epoch `quarantined` series, not the order-epoch map. SOP-008
+  symptom-triggered removal exists at ALERT.
 - Outcome set: illness and role burden (census + reported), recognition-to-action
   time (report/trigger epochs vs action epochs), isolation person-days
-  (derivable from `quarantined_ids` + `quarantine_order_epoch`), operational
-  disruption (OIS in `cost_accounting`), reported-vs-true illness (both
-  emitted). An arm + readout design only; no engine work expected.
+  (per-epoch quarantined counts), operational disruption (OIS in
+  `cost_accounting`), reported-vs-true illness (both emitted). An arm +
+  readout design only; no engine work expected beyond a possible trigger
+  wiring decision above.
 
 ### 5. Uncertainty panel — machinery exists, screen must re-run
 
@@ -202,6 +223,12 @@ bridge returns the actual event rate per stratum.
 - **The fruit cluster's expansion is correctly conditional**; the per-day
   onset detail has not been confirmed in the source. Run the literature check
   before scoping a second dedicated hull.
+- **First-role-to-threshold is a model-side outcome**: the public posting
+  series carries final counts, not which role crossed first, and the pooled
+  classic/spirit denominators do not separate them; the empirical comparator
+  for role timing is thin — the Explorer onset curves by role (and one
+  investigation noting crew illness preceding passengers across successive
+  voyages, Crisp et al.) are it.
 - **"Baseline and sensitivity work already completed"** preserves designs,
   seeds, strata and comparators — not numbers. Almost every quantitative
   statement the paper would reuse is stamped void or predates the repair
