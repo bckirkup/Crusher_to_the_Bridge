@@ -34,6 +34,7 @@ EXPECTED_PLATFORM_COUNTS = {
     "enterprise_constitution_tos": 3,
     "enterprise_galaxy_tng": 6,
     "expedition_cruise_300": 1,
+    "explorer_seas_06": 5,
     "legend_class_nsc": 1,
     "mega_cruise_5000": 10,
     "messy_cruise_500": 3,
@@ -124,7 +125,7 @@ def _prescribed_link(
 class TestDuctedReliefClassDeclaration:
     def test_row5_class_is_the_expected_45_links(self) -> None:
         rows = _row5_links()
-        assert len(rows) == 45
+        assert len(rows) == 50
         counts: dict[str, int] = {}
         for platform, _index, link in rows:
             counts[platform] = counts.get(platform, 0) + 1

@@ -1,6 +1,6 @@
 {
   "platform": "explorer_seas_06",
-  "description": "Explorer of the Seas, Feb 26 - Mar 5 2006 voyage (3,245 passengers + 1,183 crew = 4,428; CDC VSP investigation denominators). Royal Caribbean Voyager-class, maiden voyage 2000: ~311m LOA \u00d7 48m beam, 138,000 GT, 3,114 guests at double occupancy. Bins to mega_cruise_5000 under the passenger-complement rule (3,245 > 3,240.37 boundary). Staterooms on 7 decks (2-3 oceanview, 6-10 balcony / Promenade-view / inside); decks 4-5 are all-public, with the four-story Royal Promenade void through decks 5-8. Cabin-corridor resolution (38 pax + 6 crew corridors). Key venues: three-tier main dining room (Magellan / Da Gama / Columbus), Windjammer Caf\u00e9 buffet, Royal Promenade, Palace Theatre, Studio B. Layout follows the Royal Caribbean deck plans (Feb 2006 configuration, valid 12-Feb-2006 to 22-Apr-2007: Portofino, Maharaja's Lounge, ShipShape spa; later refit venues and the deck-12 staterooms added in 2015 are not modeled) and cruisedeckplans.com deck plans for stateroom-bank geometry. Simplifications: corridor occupancy is the voyage complement spread evenly within each bank, not a per-stateroom count; each corridor carries one ventilation label (decks 6-8 midship atrium_view for the Promenade-view bank, other deck 6-10 corridors balcony_partial although they also serve inside staterooms); the Royal Promenade and each Centrum are single zones; venue volumes and capacities are plan-scaled estimates; crew decks, medical center, galley, laundry, stores and bridge are not on the published passenger plans and are placed as in the sibling recipes; no HVAC drawing is published, so air handlers are grouped by longitudinal position and function.",
+  "description": "Explorer of the Seas, Feb 26 - Mar 5 2006 voyage (3,245 passengers + 1,183 crew = 4,428; CDC VSP investigation denominators). Royal Caribbean Voyager-class, maiden voyage 2000: ~311m LOA × 48m beam, 138,000 GT, 3,114 guests at double occupancy. Bins to mega_cruise_5000 under the passenger-complement rule (3,245 > 3,240.37 boundary). Staterooms on 7 decks (2-3 oceanview, 6-10 balcony / Promenade-view / inside); decks 4-5 are all-public, with the four-story Royal Promenade void through decks 5-8. Cabin-corridor resolution (38 pax + 6 crew corridors). Key venues: three-tier main dining room (Magellan / Da Gama / Columbus), Windjammer Café buffet, Royal Promenade, Palace Theatre, Studio B. Layout follows the Royal Caribbean deck plans (Feb 2006 configuration, valid 12-Feb-2006 to 22-Apr-2007: Portofino, Maharaja's Lounge, ShipShape spa; later refit venues and the deck-12 staterooms added in 2015 are not modeled) and cruisedeckplans.com deck plans for stateroom-bank geometry. Simplifications: corridor occupancy is the voyage complement spread evenly within each bank, not a per-stateroom count; each corridor carries one ventilation label (decks 6-8 midship atrium_view for the Promenade-view bank, other deck 6-10 corridors balcony_partial although they also serve inside staterooms); the Royal Promenade and each Centrum are single zones; venue volumes and capacities are plan-scaled estimates; crew decks, medical center, galley, laundry, stores and bridge are not on the published passenger plans and are placed as in the sibling recipes; no HVAC drawing is published, so air handlers are grouped by longitudinal position and function.",
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 311.0,
@@ -213,7 +213,7 @@
         "x": 95,
         "y": 50
       },
-      "description": "Caf\u00e9 Promenade (self-service coffee, snacks and ice cream). Deck 5.",
+      "description": "Café Promenade (self-service coffee, snacks and ice cream). Deck 5.",
       "dining_service_type": "buffet",
       "food_contamination_multiplier": 3.0,
       "meal_seatings": 2
@@ -331,6 +331,7 @@
       "traffic": "high",
       "volume_m3": 4000.0,
       "deck": "11_Pool",
+      "exposure": "weather",
       "max_occupancy": 700,
       "display": {
         "x": 105,
@@ -349,7 +350,7 @@
         "x": 170,
         "y": 14
       },
-      "description": "Windjammer Caf\u00e9 (buffet breakfast and lunch, casual dinner). Deck 11 aft.",
+      "description": "Windjammer Café (buffet breakfast and lunch, casual dinner). Deck 11 aft.",
       "dining_service_type": "buffet",
       "food_contamination_multiplier": 3.0,
       "meal_seatings": 2
@@ -431,6 +432,7 @@
       "traffic": "low",
       "volume_m3": 300.0,
       "deck": "13_Sports",
+      "exposure": "weather",
       "max_occupancy": 30,
       "display": {
         "x": 205,
@@ -444,6 +446,7 @@
       "traffic": "low",
       "volume_m3": 400.0,
       "deck": "13_Sports",
+      "exposure": "weather",
       "max_occupancy": 40,
       "display": {
         "x": 185,
@@ -457,6 +460,7 @@
       "traffic": "medium",
       "volume_m3": 600.0,
       "deck": "13_Sports",
+      "exposure": "weather",
       "max_occupancy": 100,
       "display": {
         "x": 165,
@@ -470,6 +474,7 @@
       "traffic": "low",
       "volume_m3": 500.0,
       "deck": "13_Sports",
+      "exposure": "weather",
       "max_occupancy": 60,
       "display": {
         "x": 145,

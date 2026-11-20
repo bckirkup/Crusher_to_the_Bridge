@@ -550,91 +550,142 @@
       "to": "MainGalley",
       "flow_rate_m3h": 18000.0,
       "is_hvac_ducted": false,
-      "path": "Dining_Galley_Exhaust"
+      "path": "Dining_Galley_Exhaust",
+      "description": "One-way make-up transfer into the galley while galley exhaust runs independent to atmosphere (CDC VSP 2025 §33.2.1-§33.2.2; ISO 9943:2009 §4.1/§5.2/A.2.3). Despite the historical path name this is transfer air, not recirculated exhaust; magnitude remains ASSUMED-GALLEY-TRANSFER-MAGNITUDE, Grade C, unchanged.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": false
+    },
+    {
+      "from": "MainGalley",
+      "to": "ambient",
+      "flow_rate_m3h": 18000.0,
+      "is_hvac_ducted": true,
+      "path": "Galley_Hood_Exhaust",
+      "description": "Galley hood exhaust is a once-through prescribed-flow sink to ambient (material leaves the ship/domain), separate from the recirculated HVAC supply and carrying no filtration/recirculation credit (CDC VSP 2025 §33.2.1-§33.2.2; ISO 9943:2009 §4.1/§5.2/A.2.1/A.2.3). Magnitude remains Grade C: no retrieved source gives a separate galley exhaust magnitude and ISO 9943 §5.2 gives no formula, so the declared value is the paired make-up-transfer magnitude with no invented margin; the make-up side remains the authored Dining_Galley_Exhaust/Galley_Service_Exhaust link.",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": false
     },
     {
       "from": "AHU_Medical",
       "to": "AHU_Public_Fwd",
       "flow_rate_m3h": 100.0,
       "is_hvac_ducted": false,
-      "path": "Medical_Door_Leakage"
+      "path": "Medical_Door_Leakage",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "Windjammer",
       "to": "PoolDeck",
       "flow_rate_m3h": 1000.0,
       "is_hvac_ducted": false,
-      "path": "Pool_Deck_Open_Doorway"
+      "path": "Pool_Deck_Open_Doorway",
+      "direction": "bidirectional",
+      "mechanism": "pressure_opening",
+      "filtered": false
     },
     {
       "from": "AHU_Pax_D6",
       "to": "AHU_Pax_D7",
       "flow_rate_m3h": 1800.0,
       "is_hvac_ducted": true,
-      "path": "Pax_Trunk_D6_D7"
+      "path": "Pax_Trunk_D6_D7",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_D7",
       "to": "AHU_Pax_D8",
       "flow_rate_m3h": 1800.0,
       "is_hvac_ducted": true,
-      "path": "Pax_Trunk_D7_D8"
+      "path": "Pax_Trunk_D7_D8",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_D8",
       "to": "AHU_Pax_D9",
       "flow_rate_m3h": 1800.0,
       "is_hvac_ducted": true,
-      "path": "Pax_Trunk_D8_D9"
+      "path": "Pax_Trunk_D8_D9",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_D9",
       "to": "AHU_Pax_D10",
       "flow_rate_m3h": 1800.0,
       "is_hvac_ducted": true,
-      "path": "Pax_Trunk_D9_D10"
+      "path": "Pax_Trunk_D9_D10",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Crew_D0",
       "to": "AHU_Crew_D1",
       "flow_rate_m3h": 900.0,
       "is_hvac_ducted": true,
-      "path": "Crew_Trunk_D0_D1"
+      "path": "Crew_Trunk_D0_D1",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_D6",
       "to": "AHU_Public_Mid",
       "flow_rate_m3h": 2000.0,
       "is_hvac_ducted": true,
-      "path": "Cabin_Relief_D6"
+      "path": "Cabin_Relief_D6",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_D7",
       "to": "AHU_Public_Mid",
       "flow_rate_m3h": 2000.0,
       "is_hvac_ducted": true,
-      "path": "Cabin_Relief_D7"
+      "path": "Cabin_Relief_D7",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_D8",
       "to": "AHU_Public_Mid",
       "flow_rate_m3h": 2000.0,
       "is_hvac_ducted": true,
-      "path": "Cabin_Relief_D8"
+      "path": "Cabin_Relief_D8",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_D9",
       "to": "AHU_Public_Mid",
       "flow_rate_m3h": 2000.0,
       "is_hvac_ducted": true,
-      "path": "Cabin_Relief_D9"
+      "path": "Cabin_Relief_D9",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Pax_D10",
       "to": "AHU_Public_Mid",
       "flow_rate_m3h": 2000.0,
       "is_hvac_ducted": true,
-      "path": "Cabin_Relief_D10"
+      "path": "Cabin_Relief_D10",
+      "direction": "oneway",
+      "mechanism": "prescribed_flow",
+      "filtered": true
     },
     {
       "from": "AHU_Service",
@@ -1009,6 +1060,61 @@
       "mechanism": "pressure_opening",
       "filtered": false,
       "description": "Transfer air into HD_8P_F; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "ambient_openings": [
+    {
+      "zone": "DaGamaDR",
+      "type": "makeup_louvre",
+      "area_m2": 2.0,
+      "exchange_m3h": 0.0,
+      "schedule": "always_open",
+      "description": "Ambient make-up path for the prescribed Galley_Hood_Exhaust 18000 m3/h exhaust demand (CONTAM-AMBIENT-MAKEUP-CRUISE-01). Placed on DaGamaDR: the zone the paired Dining_Galley_Exhaust transfer draws the galley make-up air from, which is where the hull's air deficit sits (MainGalley itself is balanced by that transfer). Area is ASSUMED-MAKEUP-LOUVRE-AREA, Grade C: no drawing gives a louvre, so it is the served demand at an assumed 2.5 m/s free-area face velocity (18000 / 3600 / 2.5). exchange_m3h is 0: the ContamX-solved flow through both legs is inward only (clean make-up), so the opening is not a native sink."
+    },
+    {
+      "zone": "PoolDeck",
+      "type": "open_deck",
+      "area_m2": 219.089,
+      "exchange_m3h": 134167.0,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "RockWall",
+      "type": "open_deck",
+      "area_m2": 60.0,
+      "exchange_m3h": 39737.8,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "InLineTrack",
+      "type": "open_deck",
+      "area_m2": 69.282,
+      "exchange_m3h": 45837.2,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "SportsCourt",
+      "type": "open_deck",
+      "area_m2": 84.853,
+      "exchange_m3h": 55802.6,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
+    },
+    {
+      "zone": "ExplorerDunes",
+      "type": "open_deck",
+      "area_m2": 77.46,
+      "exchange_m3h": 51155.4,
+      "wind_speed_m_s": 1.0,
+      "schedule": "always_open",
+      "description": "Open weather deck exchange with ambient (CONTAM-AMBIENT-WEATHER-CRUISE-01). area_m2 is ASSUMED-OPEN-DECK-FACE-AREA, Grade C: no drawing gives the deck edge, so it is the two opposite side faces of a square-plan deck of this zone's volume at the exporter's 3 m zone height, 2 * sqrt(V / 3) * 3. wind_speed_m_s is the declared relative-wind axis [0, 10] m/s at its committed point 1 m/s (the exporter's wind-pressure-test speed), Grade C, not a measured wind. exchange_m3h is the ContamX-solved outward flow through the opening at that point, commissioned lane (D5)."
     }
   ],
   "adjacency": [
