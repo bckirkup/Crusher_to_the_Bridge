@@ -272,12 +272,15 @@ def _extract_identity(
     return cohort
 
 
-def _boarding_fields(init_manifest: dict[str, Any]) -> tuple[Any, Any]:
+def _boarding_fields(
+    init_manifest: dict[str, Any],
+    pathogen_id: str | None = None,
+) -> tuple[Any, Any]:
     boarding = init_manifest.get("boarding")
     entry: dict[str, Any] = {}
     if isinstance(boarding, dict):
-        if isinstance(boarding.get("norovirus"), dict):
-            entry = boarding["norovirus"]
+        if pathogen_id and isinstance(boarding.get(pathogen_id), dict):
+            entry = boarding[pathogen_id]
         else:
             for val in boarding.values():
                 if isinstance(val, dict):
@@ -335,7 +338,11 @@ def _extract_complements_and_initial(
 
     init_ids = summary.get("initially_infected_agent_ids")
     init_total = len(init_ids) if isinstance(init_ids, list) else census.get("n_imports")
-    init_by_role, init_states = _boarding_fields(init_manifest)
+    params = summary.get("parameters") if isinstance(summary.get("parameters"), dict) else {}
+    pathogen_id = _first_non_null(summary.get("pathogen"), params.get("pathogen_id"), params.get("pathogen"))
+    init_by_role, init_states = _boarding_fields(
+        init_manifest, pathogen_id=str(pathogen_id) if pathogen_id else None,
+    )
     if init_by_role is None and (
         je_curves.get("preboarding_declared_passenger") is not None
         or je_curves.get("preboarding_declared_crew") is not None
