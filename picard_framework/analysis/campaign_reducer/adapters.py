@@ -563,7 +563,13 @@ ADAPTER_REGISTRY: dict[str, Callable[[SourceRef, ObjectTransport, ReadBudget], A
         "growth_census_zip",
     ),
     "campaign_summary_zip": _adapter_zip_scan_rows(
-        (_SUMMARY_JSON, "timeseries.json", "ground_truth.json"),
+        (
+            _SUMMARY_JSON,
+            "timeseries.json",
+            "ground_truth.json",
+            "joint_eval.json.gz",
+            "sentinel_line_list.json",
+        ),
         "campaign_summary_zip",
     ),
     "covid_screen_json": _adapter_json("covid_screen_json"),

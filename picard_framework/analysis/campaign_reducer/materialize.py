@@ -29,7 +29,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
-from . import first_paper, observation_clock
+from . import first_paper, noro_existing_return, observation_clock
 from .adapters import reduce_source
 from .derived_store import DerivedConflict, DerivedStoreError, write_manifest
 from .identity import sha256_hex
@@ -63,6 +63,7 @@ COMMIT_NAME = "COMMIT.json"
 _PROFILES = {
     first_paper.PROFILE_ID: first_paper,
     observation_clock.PROFILE_ID: observation_clock,
+    noro_existing_return.PROFILE_ID: noro_existing_return,
 }
 CHECKPOINT_PREFIX = "checkpoints/"
 SHARD_PREFIX = "shards/"

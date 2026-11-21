@@ -1,0 +1,55 @@
+{
+  "availability_fields": [
+    {
+      "availability": "not_recorded_in_run_archive",
+      "column": "image_digest",
+      "reason": "Container image digests are recorded in campaign-level ledgers and AWS Batch job definitions, not inside per-voyage summary.json archives."
+    },
+    {
+      "availability": "not_recorded_in_summary_or_sidecar",
+      "column": "acquisition_event_timestamps",
+      "reason": "Per-event acquisition/route timestamps are not serialized in Explorer or joint-eval archives; solver_bf0 growth_census.json.gz is intentionally excluded from compact voyage extraction."
+    },
+    {
+      "availability": "not_harvested",
+      "column": "sequencing_observations",
+      "reason": "Wastewater sequencing observations were not harvested in noro_paper1_joint_eval_01 and are absent from Explorer and solver_bf0."
+    },
+    {
+      "availability": "counted_only_not_row_retained",
+      "column": "zero_recovery_swab_rows",
+      "reason": "Joint-eval environment.swab_total counts all swabs including zero-recovery swabs, while swab_rows retains only swabs with recovered copies > 0 per swab_rows_rule."
+    }
+  ],
+  "cohorts": {
+    "explorer_reconstruction": {
+      "campaign_id": "noro_explorer_reconstruction_01",
+      "expected_voyages": 600,
+      "prefix": "campaign/noro_explorer_reconstruction_01/"
+    },
+    "paper1_joint_eval": {
+      "campaign_id": "noro_paper1_joint_eval_01",
+      "expected_voyages": 896,
+      "prefix": "campaign/noro_paper1_joint_eval_01/"
+    },
+    "supply_solver_reference": {
+      "campaign_id": "noro_supply_solver_screen_01_bf0",
+      "expected_voyages": 16,
+      "prefix": "campaign/noro_supply_solver_screen_01_bf0/"
+    }
+  },
+  "definition_version": "noro_existing_return/1.0.0",
+  "emit_scalars": false,
+  "member_allowlist": [
+    "summary.json",
+    "joint_eval.json.gz"
+  ],
+  "profile_id": "noro_existing_return",
+  "scan_role": "scan_rows",
+  "suppress_tables": [
+    "run_scalars",
+    "distributions",
+    "weights"
+  ],
+  "table_name": "noro_existing_return_vectors"
+}
