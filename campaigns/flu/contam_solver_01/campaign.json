@@ -1,0 +1,158 @@
+{
+ "name": "flu_contam_solver_01",
+ "pathogen": "flu",
+ "manifest": null,
+ "pathogen_id": "influenza_a",
+ "epochs": 288,
+ "s3_prefix": "campaign/flu_contam_solver_01/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "flu-contam-solver01",
+ "resources": {
+  "vcpu": "1",
+  "memory": "4096",
+  "shm": 512
+ },
+ "blocks": {
+  "gm_native": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "greg_mortimer",
+    "bundle": "active_profiles",
+    "solver": "native"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "gm_contamx": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "greg_mortimer",
+    "bundle": "active_profiles",
+    "solver": "contamx"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "exp450_native": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "expedition_cruise_450",
+    "bundle": "active_profiles",
+    "solver": "native"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "exp450_contamx": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "expedition_cruise_450",
+    "bundle": "active_profiles",
+    "solver": "contamx"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "cls1900_native": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "classic_cruise_1900",
+    "bundle": "active_profiles",
+    "solver": "native"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "cls1900_contamx": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "classic_cruise_1900",
+    "bundle": "active_profiles",
+    "solver": "contamx"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "spr3000_native": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "spirit_cruise_3000",
+    "bundle": "active_profiles",
+    "solver": "native"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "spr3000_contamx": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "spirit_cruise_3000",
+    "bundle": "active_profiles",
+    "solver": "contamx"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "dp_native": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "diamond_princess",
+    "bundle": "active_profiles",
+    "solver": "native"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "dp_contamx": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "diamond_princess",
+    "bundle": "active_profiles",
+    "solver": "contamx"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "exp06_native": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "explorer_seas_06",
+    "bundle": "active_profiles",
+    "solver": "native"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "exp06_contamx": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "explorer_seas_06",
+    "bundle": "active_profiles",
+    "solver": "contamx"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "mega5000_native": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "mega_cruise_5000",
+    "bundle": "active_profiles",
+    "solver": "native"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  },
+  "mega5000_contamx": {
+   "worker": "campaigns/flu/contam_solver_01/cell.py",
+   "artifact": "cell_{seed}.json",
+   "args": {
+    "platform": "mega_cruise_5000",
+    "bundle": "active_profiles",
+    "solver": "contamx"
+   },
+   "seeds": [8105, 8106, 8107, 8108, 8109, 8110, 8111, 8112, 8113, 8114, 8115, 8116, 8117, 8118, 8119, 8120, 8121, 8122, 8123, 8124]
+  }
+ },
+ "readout": "campaigns/flu/contam_solver_01/readout.py"
+}
