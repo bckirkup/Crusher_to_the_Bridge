@@ -42,7 +42,9 @@
 | 20200224 | 1 | 27 | 1 | 2 | 4 | 6 | 176 | 385 | 2.0 | 2.0 | 29.3 | 86 | 2 |
 
 record-timed cells (ign<=9): n=8
-  d16 infections median 1373 (record band (712, 960))
+  d15 (pre-quarantine) infections median 1292 (record band (712, 960))
+  d34 infections range 1268-3136
+  post-16 fold range 1.1-3.5
   before-17 recorded onsets median 383 vs record 34
 late/non-igniting nonzero cells: n=30
   d34 infections median 440; post-16 fold median 6.3

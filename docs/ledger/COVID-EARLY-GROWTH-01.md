@@ -14,17 +14,20 @@ sit in early growth or the post-quarantine tail?
 ## Verdict: early growth carries the overshoot — the model's pre-quarantine
 contact field is too dense once founders exist
 
-- On the 8 record-timed cells (ignition ≤9, both arms): day-16 cumulative
-  infections median **1,373 vs the record's whole-voyage band [712,960]** —
-  the overshoot is in place before quarantine opens, not after.
+- On the 8 record-timed cells (ignition ≤9, both arms): pre-quarantine
+  (through day 15; quarantine opens day 16) cumulative infections median
+  **1,292 vs the record's whole-voyage band [712,960]** — the overshoot is
+  already in place when quarantine opens, not produced after.
   Before-day-17 recorded onsets median 383 vs the record's 34 (~11×).
-- Early igniters then saturate at ~2,700–3,100 infections by day ~20–34
-  regardless of founder count (25 founders → 3,136; 10 founders → 2,842):
-  susceptible depletion, not damping, is the ceiling.
-- The un-damped tail is a different regime: on the 30 late/non-igniting
-  nonzero cells, post-day-16 fold median 6.3 — the ~R≈1 confinement problem
-  QUAR-TAIL-01 named — but on record-timed cells post-16 growth is only
-  +23–49% (the pool is already gone).
+- The record-timed cells are not uniform post-quarantine: the hyper-early
+  igniters saturate ~2,700–3,100 on susceptible depletion regardless of
+  founder count (25 founders → 3,136; 10 founders → 2,842), while the
+  borderline ign-9 cells are still mid-exponential at day 16 and ride the
+  un-damped tail. Post-16 fold range 1.1–3.5; final mass range
+  **1,268–3,136 — every record-timed cell ends above the band top**.
+- The un-damped tail is a different regime's problem: on the 30
+  late/non-igniting nonzero cells, post-day-16 fold median 6.3 — the ~R≈1
+  confinement problem QUAR-TAIL-01 named.
 - Late igniters that land the mass (d34 median 440; band cells ~500–850)
   ignite ~10 d late. **No cell in either arm lands timing and mass together**
   — consistent with the refit surface's empty admissible set
@@ -61,10 +64,15 @@ Consequences:
 
 - Do not re-run founder-lifting arms without a voyage-stage contact
   declaration on the same campaign; founders alone cannot land the clause.
-- The trajectory clause's mass leg (q05–q95 contains 197) is unreachable at
-  right-sized θ under the current homogeneous contact field — the contract
-  question this raises (envelope scoring vs a voyage-stage declaration) is
-  an owner call, same footing as conditioned capture and FRAQMB_DUTY.
+- The scored clause's failing leg is the before_share median (0.040 vs
+  record 0.173; the q05–q95 onset interval formally contains 197 on both
+  arms). The decomposition shows why it cannot move: before-share is
+  bimodal — record-timed cells sit at ~0.26–0.49 while late igniters sit
+  ≲0.10 — so the takeoff-seed median is set by the late-igniter majority,
+  and every early-igniting cell overshoots the whole-voyage mass band
+  anyway. The contract question this raises (envelope scoring vs a
+  voyage-stage declaration) is an owner call, same footing as conditioned
+  capture and FRAQMB_DUTY.
 
 Evidence: `reports/early_growth_01/seed_ring_01_growth_table.md`;
 tool: `tools/covid_early_growth_readout.py`; ops:

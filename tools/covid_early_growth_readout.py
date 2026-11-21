@@ -80,8 +80,12 @@ def main() -> None:
 
     rows = []
     for d in args.dir:
-        for f in sorted(Path(d).glob("cell_*.json")):
-            rows.append(_row(f))
+        path = Path(d)
+        if not path.is_dir():
+            raise SystemExit(f"--dir {d} is not a directory")
+        rows.extend(_row(f) for f in sorted(path.glob("cell_*.json")))
+    if not rows:
+        raise SystemExit(f"no cell_*.json found under {args.dir}")
 
     timed = [r for r in rows if r["record_timed"]]
     late = [r for r in rows if not r["record_timed"] and r["cum"][34] > 0]
@@ -98,8 +102,15 @@ def main() -> None:
 
     print(f"\nrecord-timed cells (ign<=9): n={len(timed)}")
     if timed:
-        print(f"  d16 infections median {_median(timed,16):.0f}"
+        # day 15 is the last pre-quarantine day (quarantine opens day 16)
+        print(f"  d15 (pre-quarantine) infections median"
+              f" {_median(timed,15):.0f}"
               f" (record band {RECORD_INFECTION_BAND})")
+        print(f"  d34 infections range"
+              f" {min(r['cum'][34] for r in timed)}-"
+              f"{max(r['cum'][34] for r in timed)}")
+        post = [r["folds"]["d16-30"] for r in timed]
+        print(f"  post-16 fold range {min(post):.1f}-{max(post):.1f}")
         before = [r["before"] for r in timed if r["before"] is not None]
         print(f"  before-17 recorded onsets median"
               f" {statistics.median(before):.0f} vs record"

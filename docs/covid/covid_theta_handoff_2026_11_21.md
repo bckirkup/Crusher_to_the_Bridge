@@ -129,9 +129,10 @@ are recorded in `campaigns/covid/quar_tail_01/LEDGER.md` and
 SEED-RING-01 is resolved: **NULL-PLACEMENT** — and EARLY-GROWTH-01
 (pure readout on its cells) has sharpened the blocker past the founder
 question: on record-timed cells the overshoot is already in place by
-day 16 (d16 infections median 1,373 vs the whole-voyage band
-[712,960]; before-17 onsets 383 vs 34), so the same θ that must lift
-the founder pool also drives the growth that overshoots the mass.
+day 15 (pre-quarantine infections median 1,292 vs the whole-voyage
+band [712,960]; before-17 onsets 383 vs 34; all 8 cells end 1,268–3,136,
+above the band), so the same θ that must lift the founder pool also
+drives the growth that overshoots the mass.
 The open decision is now **whether to declare voyage-stage contact
 structure** — a dense embarkation-window field that relaxes after the
 boarding days (the surge that expires), decoupling founder yield from
