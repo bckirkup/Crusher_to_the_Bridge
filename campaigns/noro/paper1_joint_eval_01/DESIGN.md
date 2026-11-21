@@ -232,7 +232,10 @@ counts and timing, engine commits seen.
   the voyage bit-identical.
 - The role split is a declared arm difference, not part of the block; a
   cell elsewhere that carries the block alone runs the template split.
-- The census draws its 100 agents from the same re-weighted class list.
+- The census draws its 100 agents from the same re-weighted class list,
+  but at 100 agents the declared role counts cannot be placed and the
+  census worker does not assert a role split. Role counts are asserted
+  only on `cell.py` runs.
 - The census runs at 100 agents; agent-count neutrality of the provisioned
   plan was measured once in `supply_seed_scan_01` (seed 8114, an earlier
   engine) and must be re-witnessed in the census canary.
