@@ -17,10 +17,17 @@
    "confirmed_pre_onset_catch": 1,
    "dpi_at_confirmation_median": 13.0,
    "campaign_positives": 119,
-   "campaign_positive_hosts": {
-    "never_presented": 32,
-    "pre_onset": 1,
-    "post_onset": 86
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 32,
+     "pre_onset": 1,
+     "post_onset": 86
+    },
+    "hosts": {
+     "never_presented": 32,
+     "pre_onset": 1,
+     "post_onset": 86
+    }
    },
    "asymptomatic_share": 0.2773109243697479,
    "recorded_onsets": 44,
@@ -49,10 +56,17 @@
    "confirmed_pre_onset_catch": 6,
    "dpi_at_confirmation_median": 11.0,
    "campaign_positives": 107,
-   "campaign_positive_hosts": {
-    "never_presented": 24,
-    "pre_onset": 6,
-    "post_onset": 77
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 24,
+     "pre_onset": 9,
+     "post_onset": 74
+    },
+    "hosts": {
+     "never_presented": 24,
+     "pre_onset": 9,
+     "post_onset": 74
+    }
    },
    "asymptomatic_share": 0.308411214953271,
    "recorded_onsets": 70,
@@ -83,10 +97,17 @@
    "confirmed_pre_onset_catch": 4,
    "dpi_at_confirmation_median": 8.0,
    "campaign_positives": 62,
-   "campaign_positive_hosts": {
-    "never_presented": 16,
-    "pre_onset": 4,
-    "post_onset": 42
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 16,
+     "pre_onset": 6,
+     "post_onset": 40
+    },
+    "hosts": {
+     "never_presented": 16,
+     "pre_onset": 6,
+     "post_onset": 40
+    }
    },
    "asymptomatic_share": 0.3548387096774194,
    "recorded_onsets": 43,
@@ -115,10 +136,17 @@
    "confirmed_pre_onset_catch": 1,
    "dpi_at_confirmation_median": 9,
    "campaign_positives": 65,
-   "campaign_positive_hosts": {
-    "never_presented": 18,
-    "pre_onset": 1,
-    "post_onset": 46
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 18,
+     "pre_onset": 4,
+     "post_onset": 43
+    },
+    "hosts": {
+     "never_presented": 18,
+     "pre_onset": 4,
+     "post_onset": 43
+    }
    },
    "asymptomatic_share": 0.3384615384615385,
    "recorded_onsets": 42,
@@ -148,10 +176,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 12,
    "campaign_positives": 115,
-   "campaign_positive_hosts": {
-    "never_presented": 21,
-    "pre_onset": 0,
-    "post_onset": 94
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 21,
+     "pre_onset": 0,
+     "post_onset": 94
+    },
+    "hosts": {
+     "never_presented": 21,
+     "pre_onset": 0,
+     "post_onset": 94
+    }
    },
    "asymptomatic_share": 0.1826086956521739,
    "recorded_onsets": 63,
@@ -182,10 +217,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 11.0,
    "campaign_positives": 100,
-   "campaign_positive_hosts": {
-    "never_presented": 26,
-    "pre_onset": 2,
-    "post_onset": 72
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 26,
+     "pre_onset": 2,
+     "post_onset": 72
+    },
+    "hosts": {
+     "never_presented": 26,
+     "pre_onset": 2,
+     "post_onset": 72
+    }
    },
    "asymptomatic_share": 0.28,
    "recorded_onsets": 63,
@@ -214,10 +256,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 12,
    "campaign_positives": 103,
-   "campaign_positive_hosts": {
-    "never_presented": 18,
-    "pre_onset": 2,
-    "post_onset": 83
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 18,
+     "pre_onset": 2,
+     "post_onset": 83
+    },
+    "hosts": {
+     "never_presented": 18,
+     "pre_onset": 2,
+     "post_onset": 83
+    }
    },
    "asymptomatic_share": 0.1941747572815534,
    "recorded_onsets": 55,
@@ -247,10 +296,17 @@
    "confirmed_pre_onset_catch": 3,
    "dpi_at_confirmation_median": 11,
    "campaign_positives": 110,
-   "campaign_positive_hosts": {
-    "never_presented": 26,
-    "pre_onset": 3,
-    "post_onset": 81
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 26,
+     "pre_onset": 4,
+     "post_onset": 80
+    },
+    "hosts": {
+     "never_presented": 26,
+     "pre_onset": 4,
+     "post_onset": 80
+    }
    },
    "asymptomatic_share": 0.2727272727272727,
    "recorded_onsets": 61,
@@ -279,10 +335,17 @@
    "confirmed_pre_onset_catch": 4,
    "dpi_at_confirmation_median": 11.0,
    "campaign_positives": 114,
-   "campaign_positive_hosts": {
-    "never_presented": 18,
-    "pre_onset": 4,
-    "post_onset": 92
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 18,
+     "pre_onset": 4,
+     "post_onset": 92
+    },
+    "hosts": {
+     "never_presented": 18,
+     "pre_onset": 4,
+     "post_onset": 92
+    }
    },
    "asymptomatic_share": 0.19298245614035087,
    "recorded_onsets": 70,
@@ -311,10 +374,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 13.0,
    "campaign_positives": 129,
-   "campaign_positive_hosts": {
-    "never_presented": 23,
-    "pre_onset": 2,
-    "post_onset": 104
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 23,
+     "pre_onset": 3,
+     "post_onset": 103
+    },
+    "hosts": {
+     "never_presented": 23,
+     "pre_onset": 3,
+     "post_onset": 103
+    }
    },
    "asymptomatic_share": 0.20155038759689922,
    "recorded_onsets": 61,
@@ -344,10 +414,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 14,
    "campaign_positives": 141,
-   "campaign_positive_hosts": {
-    "never_presented": 40,
-    "pre_onset": 0,
-    "post_onset": 101
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 40,
+     "pre_onset": 0,
+     "post_onset": 101
+    },
+    "hosts": {
+     "never_presented": 40,
+     "pre_onset": 0,
+     "post_onset": 101
+    }
    },
    "asymptomatic_share": 0.28368794326241137,
    "recorded_onsets": 49,
@@ -376,10 +453,17 @@
    "confirmed_pre_onset_catch": 8,
    "dpi_at_confirmation_median": 5.5,
    "campaign_positives": 33,
-   "campaign_positive_hosts": {
-    "never_presented": 3,
-    "pre_onset": 8,
-    "post_onset": 22
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 3,
+     "pre_onset": 12,
+     "post_onset": 18
+    },
+    "hosts": {
+     "never_presented": 3,
+     "pre_onset": 12,
+     "post_onset": 18
+    }
    },
    "asymptomatic_share": 0.45454545454545453,
    "recorded_onsets": 31,
@@ -408,10 +492,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 11.0,
    "campaign_positives": 135,
-   "campaign_positive_hosts": {
-    "never_presented": 32,
-    "pre_onset": 0,
-    "post_onset": 103
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 32,
+     "pre_onset": 2,
+     "post_onset": 101
+    },
+    "hosts": {
+     "never_presented": 32,
+     "pre_onset": 2,
+     "post_onset": 101
+    }
    },
    "asymptomatic_share": 0.2518518518518518,
    "recorded_onsets": 58,
@@ -441,10 +532,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 14.5,
    "campaign_positives": 120,
-   "campaign_positive_hosts": {
-    "never_presented": 31,
-    "pre_onset": 0,
-    "post_onset": 89
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 31,
+     "pre_onset": 0,
+     "post_onset": 89
+    },
+    "hosts": {
+     "never_presented": 31,
+     "pre_onset": 0,
+     "post_onset": 89
+    }
    },
    "asymptomatic_share": 0.25833333333333336,
    "recorded_onsets": 29,
@@ -472,10 +570,17 @@
    "confirmed_pre_onset_catch": 4,
    "dpi_at_confirmation_median": 10,
    "campaign_positives": 72,
-   "campaign_positive_hosts": {
-    "never_presented": 20,
-    "pre_onset": 4,
-    "post_onset": 48
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 20,
+     "pre_onset": 4,
+     "post_onset": 48
+    },
+    "hosts": {
+     "never_presented": 20,
+     "pre_onset": 4,
+     "post_onset": 48
+    }
    },
    "asymptomatic_share": 0.3333333333333333,
    "recorded_onsets": 45,
@@ -506,10 +611,17 @@
    "confirmed_pre_onset_catch": 3,
    "dpi_at_confirmation_median": 10.0,
    "campaign_positives": 100,
-   "campaign_positive_hosts": {
-    "never_presented": 18,
-    "pre_onset": 3,
-    "post_onset": 79
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 18,
+     "pre_onset": 3,
+     "post_onset": 79
+    },
+    "hosts": {
+     "never_presented": 18,
+     "pre_onset": 3,
+     "post_onset": 79
+    }
    },
    "asymptomatic_share": 0.21,
    "recorded_onsets": 66,
@@ -539,10 +651,17 @@
    "confirmed_pre_onset_catch": 4,
    "dpi_at_confirmation_median": 12.0,
    "campaign_positives": 125,
-   "campaign_positive_hosts": {
-    "never_presented": 27,
-    "pre_onset": 4,
-    "post_onset": 94
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 27,
+     "pre_onset": 7,
+     "post_onset": 91
+    },
+    "hosts": {
+     "never_presented": 27,
+     "pre_onset": 7,
+     "post_onset": 91
+    }
    },
    "asymptomatic_share": 0.272,
    "recorded_onsets": 68,
@@ -573,10 +692,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 12,
    "campaign_positives": 124,
-   "campaign_positive_hosts": {
-    "never_presented": 23,
-    "pre_onset": 2,
-    "post_onset": 99
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 23,
+     "pre_onset": 2,
+     "post_onset": 99
+    },
+    "hosts": {
+     "never_presented": 23,
+     "pre_onset": 2,
+     "post_onset": 99
+    }
    },
    "asymptomatic_share": 0.20161290322580644,
    "recorded_onsets": 51,
@@ -606,10 +732,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 12,
    "campaign_positives": 130,
-   "campaign_positive_hosts": {
-    "never_presented": 33,
-    "pre_onset": 2,
-    "post_onset": 95
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 33,
+     "pre_onset": 5,
+     "post_onset": 92
+    },
+    "hosts": {
+     "never_presented": 33,
+     "pre_onset": 5,
+     "post_onset": 92
+    }
    },
    "asymptomatic_share": 0.2923076923076923,
    "recorded_onsets": 69,
@@ -639,10 +772,17 @@
    "confirmed_pre_onset_catch": 1,
    "dpi_at_confirmation_median": 14.0,
    "campaign_positives": 98,
-   "campaign_positive_hosts": {
-    "never_presented": 14,
-    "pre_onset": 1,
-    "post_onset": 83
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 14,
+     "pre_onset": 3,
+     "post_onset": 81
+    },
+    "hosts": {
+     "never_presented": 14,
+     "pre_onset": 3,
+     "post_onset": 81
+    }
    },
    "asymptomatic_share": 0.17346938775510204,
    "recorded_onsets": 45,
@@ -672,10 +812,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 20,
    "campaign_positives": 1,
-   "campaign_positive_hosts": {
-    "never_presented": 0,
-    "pre_onset": 0,
-    "post_onset": 1
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 0,
+     "pre_onset": 0,
+     "post_onset": 1
+    },
+    "hosts": {
+     "never_presented": 0,
+     "pre_onset": 0,
+     "post_onset": 1
+    }
    },
    "asymptomatic_share": 0.0,
    "recorded_onsets": 1,
@@ -704,10 +851,17 @@
    "confirmed_pre_onset_catch": 6,
    "dpi_at_confirmation_median": 10,
    "campaign_positives": 85,
-   "campaign_positive_hosts": {
-    "never_presented": 17,
-    "pre_onset": 6,
-    "post_onset": 62
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 17,
+     "pre_onset": 7,
+     "post_onset": 61
+    },
+    "hosts": {
+     "never_presented": 17,
+     "pre_onset": 7,
+     "post_onset": 61
+    }
    },
    "asymptomatic_share": 0.2823529411764706,
    "recorded_onsets": 58,
@@ -737,10 +891,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 11,
    "campaign_positives": 110,
-   "campaign_positive_hosts": {
-    "never_presented": 19,
-    "pre_onset": 2,
-    "post_onset": 89
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 19,
+     "pre_onset": 2,
+     "post_onset": 89
+    },
+    "hosts": {
+     "never_presented": 19,
+     "pre_onset": 2,
+     "post_onset": 89
+    }
    },
    "asymptomatic_share": 0.19090909090909092,
    "recorded_onsets": 69,
@@ -771,10 +932,17 @@
    "confirmed_pre_onset_catch": 1,
    "dpi_at_confirmation_median": 10.0,
    "campaign_positives": 83,
-   "campaign_positive_hosts": {
-    "never_presented": 16,
-    "pre_onset": 1,
-    "post_onset": 66
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 16,
+     "pre_onset": 3,
+     "post_onset": 64
+    },
+    "hosts": {
+     "never_presented": 16,
+     "pre_onset": 3,
+     "post_onset": 64
+    }
    },
    "asymptomatic_share": 0.2289156626506024,
    "recorded_onsets": 45,
@@ -805,10 +973,17 @@
    "confirmed_pre_onset_catch": 8,
    "dpi_at_confirmation_median": 5,
    "campaign_positives": 26,
-   "campaign_positive_hosts": {
-    "never_presented": 8,
-    "pre_onset": 8,
-    "post_onset": 10
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 8,
+     "pre_onset": 11,
+     "post_onset": 7
+    },
+    "hosts": {
+     "never_presented": 8,
+     "pre_onset": 11,
+     "post_onset": 7
+    }
    },
    "asymptomatic_share": 0.7307692307692307,
    "recorded_onsets": 18,
@@ -837,10 +1012,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 13.0,
    "campaign_positives": 130,
-   "campaign_positive_hosts": {
-    "never_presented": 25,
-    "pre_onset": 2,
-    "post_onset": 103
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 25,
+     "pre_onset": 2,
+     "post_onset": 103
+    },
+    "hosts": {
+     "never_presented": 25,
+     "pre_onset": 2,
+     "post_onset": 103
+    }
    },
    "asymptomatic_share": 0.2076923076923077,
    "recorded_onsets": 70,
@@ -869,10 +1051,17 @@
    "confirmed_pre_onset_catch": 3,
    "dpi_at_confirmation_median": 12.0,
    "campaign_positives": 107,
-   "campaign_positive_hosts": {
-    "never_presented": 18,
-    "pre_onset": 3,
-    "post_onset": 86
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 18,
+     "pre_onset": 3,
+     "post_onset": 86
+    },
+    "hosts": {
+     "never_presented": 18,
+     "pre_onset": 3,
+     "post_onset": 86
+    }
    },
    "asymptomatic_share": 0.19626168224299065,
    "recorded_onsets": 59,
@@ -901,10 +1090,17 @@
    "confirmed_pre_onset_catch": 5,
    "dpi_at_confirmation_median": 9.0,
    "campaign_positives": 80,
-   "campaign_positive_hosts": {
-    "never_presented": 22,
-    "pre_onset": 5,
-    "post_onset": 53
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 22,
+     "pre_onset": 8,
+     "post_onset": 50
+    },
+    "hosts": {
+     "never_presented": 22,
+     "pre_onset": 8,
+     "post_onset": 50
+    }
    },
    "asymptomatic_share": 0.375,
    "recorded_onsets": 50,
@@ -933,10 +1129,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 14.0,
    "campaign_positives": 122,
-   "campaign_positive_hosts": {
-    "never_presented": 20,
-    "pre_onset": 0,
-    "post_onset": 102
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 20,
+     "pre_onset": 1,
+     "post_onset": 101
+    },
+    "hosts": {
+     "never_presented": 20,
+     "pre_onset": 1,
+     "post_onset": 101
+    }
    },
    "asymptomatic_share": 0.1721311475409836,
    "recorded_onsets": 40,
@@ -965,10 +1168,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 14,
    "campaign_positives": 130,
-   "campaign_positive_hosts": {
-    "never_presented": 29,
-    "pre_onset": 0,
-    "post_onset": 101
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 29,
+     "pre_onset": 0,
+     "post_onset": 101
+    },
+    "hosts": {
+     "never_presented": 29,
+     "pre_onset": 0,
+     "post_onset": 101
+    }
    },
    "asymptomatic_share": 0.2230769230769231,
    "recorded_onsets": 37,
@@ -998,10 +1208,17 @@
    "confirmed_pre_onset_catch": 3,
    "dpi_at_confirmation_median": 12,
    "campaign_positives": 111,
-   "campaign_positive_hosts": {
-    "never_presented": 24,
-    "pre_onset": 3,
-    "post_onset": 84
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 24,
+     "pre_onset": 3,
+     "post_onset": 84
+    },
+    "hosts": {
+     "never_presented": 24,
+     "pre_onset": 3,
+     "post_onset": 84
+    }
    },
    "asymptomatic_share": 0.24324324324324326,
    "recorded_onsets": 60,
@@ -1032,10 +1249,17 @@
    "confirmed_pre_onset_catch": 4,
    "dpi_at_confirmation_median": 11,
    "campaign_positives": 81,
-   "campaign_positive_hosts": {
-    "never_presented": 24,
-    "pre_onset": 4,
-    "post_onset": 53
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 24,
+     "pre_onset": 4,
+     "post_onset": 53
+    },
+    "hosts": {
+     "never_presented": 24,
+     "pre_onset": 4,
+     "post_onset": 53
+    }
    },
    "asymptomatic_share": 0.345679012345679,
    "recorded_onsets": 42,
@@ -1064,10 +1288,17 @@
    "confirmed_pre_onset_catch": 1,
    "dpi_at_confirmation_median": 13,
    "campaign_positives": 125,
-   "campaign_positive_hosts": {
-    "never_presented": 25,
-    "pre_onset": 1,
-    "post_onset": 99
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 25,
+     "pre_onset": 2,
+     "post_onset": 98
+    },
+    "hosts": {
+     "never_presented": 25,
+     "pre_onset": 2,
+     "post_onset": 98
+    }
    },
    "asymptomatic_share": 0.216,
    "recorded_onsets": 37,
@@ -1096,10 +1327,17 @@
    "confirmed_pre_onset_catch": 6,
    "dpi_at_confirmation_median": 5,
    "campaign_positives": 27,
-   "campaign_positive_hosts": {
-    "never_presented": 5,
-    "pre_onset": 6,
-    "post_onset": 16
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 5,
+     "pre_onset": 10,
+     "post_onset": 12
+    },
+    "hosts": {
+     "never_presented": 5,
+     "pre_onset": 10,
+     "post_onset": 12
+    }
    },
    "asymptomatic_share": 0.5555555555555556,
    "recorded_onsets": 21,
@@ -1128,10 +1366,17 @@
    "confirmed_pre_onset_catch": 5,
    "dpi_at_confirmation_median": 11,
    "campaign_positives": 118,
-   "campaign_positive_hosts": {
-    "never_presented": 31,
-    "pre_onset": 5,
-    "post_onset": 82
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 31,
+     "pre_onset": 5,
+     "post_onset": 82
+    },
+    "hosts": {
+     "never_presented": 31,
+     "pre_onset": 5,
+     "post_onset": 82
+    }
    },
    "asymptomatic_share": 0.3050847457627119,
    "recorded_onsets": 62,
@@ -1161,10 +1406,17 @@
    "confirmed_pre_onset_catch": 1,
    "dpi_at_confirmation_median": 11,
    "campaign_positives": 76,
-   "campaign_positive_hosts": {
-    "never_presented": 14,
-    "pre_onset": 1,
-    "post_onset": 61
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 14,
+     "pre_onset": 1,
+     "post_onset": 61
+    },
+    "hosts": {
+     "never_presented": 14,
+     "pre_onset": 1,
+     "post_onset": 61
+    }
    },
    "asymptomatic_share": 0.19736842105263158,
    "recorded_onsets": 47,
@@ -1194,10 +1446,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 14,
    "campaign_positives": 97,
-   "campaign_positive_hosts": {
-    "never_presented": 23,
-    "pre_onset": 0,
-    "post_onset": 74
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 23,
+     "pre_onset": 0,
+     "post_onset": 74
+    },
+    "hosts": {
+     "never_presented": 23,
+     "pre_onset": 0,
+     "post_onset": 74
+    }
    },
    "asymptomatic_share": 0.23711340206185566,
    "recorded_onsets": 25,
@@ -1225,10 +1484,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 13.0,
    "campaign_positives": 110,
-   "campaign_positive_hosts": {
-    "never_presented": 20,
-    "pre_onset": 0,
-    "post_onset": 90
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 20,
+     "pre_onset": 3,
+     "post_onset": 87
+    },
+    "hosts": {
+     "never_presented": 20,
+     "pre_onset": 3,
+     "post_onset": 87
+    }
    },
    "asymptomatic_share": 0.20909090909090908,
    "recorded_onsets": 60,
@@ -1258,10 +1524,17 @@
    "confirmed_pre_onset_catch": 1,
    "dpi_at_confirmation_median": 13,
    "campaign_positives": 131,
-   "campaign_positive_hosts": {
-    "never_presented": 41,
-    "pre_onset": 1,
-    "post_onset": 89
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 41,
+     "pre_onset": 1,
+     "post_onset": 89
+    },
+    "hosts": {
+     "never_presented": 41,
+     "pre_onset": 1,
+     "post_onset": 89
+    }
    },
    "asymptomatic_share": 0.32061068702290074,
    "recorded_onsets": 46,
@@ -1290,10 +1563,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 13.0,
    "campaign_positives": 122,
-   "campaign_positive_hosts": {
-    "never_presented": 30,
-    "pre_onset": 0,
-    "post_onset": 92
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 30,
+     "pre_onset": 1,
+     "post_onset": 91
+    },
+    "hosts": {
+     "never_presented": 30,
+     "pre_onset": 1,
+     "post_onset": 91
+    }
    },
    "asymptomatic_share": 0.2540983606557377,
    "recorded_onsets": 43,
@@ -1322,10 +1602,17 @@
    "confirmed_pre_onset_catch": 1,
    "dpi_at_confirmation_median": 14.0,
    "campaign_positives": 119,
-   "campaign_positive_hosts": {
-    "never_presented": 26,
-    "pre_onset": 1,
-    "post_onset": 92
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 26,
+     "pre_onset": 1,
+     "post_onset": 92
+    },
+    "hosts": {
+     "never_presented": 26,
+     "pre_onset": 1,
+     "post_onset": 92
+    }
    },
    "asymptomatic_share": 0.226890756302521,
    "recorded_onsets": 32,
@@ -1354,10 +1641,17 @@
    "confirmed_pre_onset_catch": 3,
    "dpi_at_confirmation_median": 11.0,
    "campaign_positives": 104,
-   "campaign_positive_hosts": {
-    "never_presented": 28,
-    "pre_onset": 3,
-    "post_onset": 73
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 28,
+     "pre_onset": 4,
+     "post_onset": 72
+    },
+    "hosts": {
+     "never_presented": 28,
+     "pre_onset": 4,
+     "post_onset": 72
+    }
    },
    "asymptomatic_share": 0.3076923076923077,
    "recorded_onsets": 56,
@@ -1388,10 +1682,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 9,
    "campaign_positives": 64,
-   "campaign_positive_hosts": {
-    "never_presented": 19,
-    "pre_onset": 2,
-    "post_onset": 43
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 19,
+     "pre_onset": 3,
+     "post_onset": 42
+    },
+    "hosts": {
+     "never_presented": 19,
+     "pre_onset": 3,
+     "post_onset": 42
+    }
    },
    "asymptomatic_share": 0.34375,
    "recorded_onsets": 41,
@@ -1420,10 +1721,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 15.0,
    "campaign_positives": 114,
-   "campaign_positive_hosts": {
-    "never_presented": 25,
-    "pre_onset": 0,
-    "post_onset": 89
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 25,
+     "pre_onset": 1,
+     "post_onset": 88
+    },
+    "hosts": {
+     "never_presented": 25,
+     "pre_onset": 1,
+     "post_onset": 88
+    }
    },
    "asymptomatic_share": 0.22807017543859648,
    "recorded_onsets": 23,
@@ -1451,10 +1759,17 @@
    "confirmed_pre_onset_catch": 2,
    "dpi_at_confirmation_median": 14.0,
    "campaign_positives": 125,
-   "campaign_positive_hosts": {
-    "never_presented": 38,
-    "pre_onset": 2,
-    "post_onset": 85
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 38,
+     "pre_onset": 2,
+     "post_onset": 85
+    },
+    "hosts": {
+     "never_presented": 38,
+     "pre_onset": 2,
+     "post_onset": 85
+    }
    },
    "asymptomatic_share": 0.32,
    "recorded_onsets": 37,
@@ -1484,10 +1799,17 @@
    "confirmed_pre_onset_catch": 4,
    "dpi_at_confirmation_median": 5.0,
    "campaign_positives": 5,
-   "campaign_positive_hosts": {
-    "never_presented": 1,
-    "pre_onset": 4,
-    "post_onset": 0
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 1,
+     "pre_onset": 4,
+     "post_onset": 0
+    },
+    "hosts": {
+     "never_presented": 1,
+     "pre_onset": 4,
+     "post_onset": 0
+    }
    },
    "asymptomatic_share": 1.0,
    "recorded_onsets": 5,
@@ -1516,10 +1838,17 @@
    "confirmed_pre_onset_catch": 0,
    "dpi_at_confirmation_median": 13.0,
    "campaign_positives": 136,
-   "campaign_positive_hosts": {
-    "never_presented": 45,
-    "pre_onset": 0,
-    "post_onset": 91
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 45,
+     "pre_onset": 0,
+     "post_onset": 91
+    },
+    "hosts": {
+     "never_presented": 45,
+     "pre_onset": 0,
+     "post_onset": 91
+    }
    },
    "asymptomatic_share": 0.33088235294117646,
    "recorded_onsets": 38,
@@ -1548,10 +1877,17 @@
    "confirmed_pre_onset_catch": 6,
    "dpi_at_confirmation_median": 8,
    "campaign_positives": 62,
-   "campaign_positive_hosts": {
-    "never_presented": 15,
-    "pre_onset": 6,
-    "post_onset": 41
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 15,
+     "pre_onset": 8,
+     "post_onset": 39
+    },
+    "hosts": {
+     "never_presented": 15,
+     "pre_onset": 8,
+     "post_onset": 39
+    }
    },
    "asymptomatic_share": 0.3709677419354839,
    "recorded_onsets": 48,
@@ -1581,10 +1917,17 @@
    "confirmed_pre_onset_catch": 5,
    "dpi_at_confirmation_median": 10.0,
    "campaign_positives": 89,
-   "campaign_positive_hosts": {
-    "never_presented": 22,
-    "pre_onset": 5,
-    "post_onset": 62
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 22,
+     "pre_onset": 7,
+     "post_onset": 60
+    },
+    "hosts": {
+     "never_presented": 22,
+     "pre_onset": 7,
+     "post_onset": 60
+    }
    },
    "asymptomatic_share": 0.3258426966292135,
    "recorded_onsets": 57,
@@ -1613,10 +1956,17 @@
    "confirmed_pre_onset_catch": 6,
    "dpi_at_confirmation_median": 8,
    "campaign_positives": 60,
-   "campaign_positive_hosts": {
-    "never_presented": 13,
-    "pre_onset": 6,
-    "post_onset": 41
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 13,
+     "pre_onset": 9,
+     "post_onset": 38
+    },
+    "hosts": {
+     "never_presented": 13,
+     "pre_onset": 9,
+     "post_onset": 38
+    }
    },
    "asymptomatic_share": 0.36666666666666664,
    "recorded_onsets": 43,
@@ -1633,7 +1983,8 @@
  ],
  "pooled": {
   "cells": 50,
-  "takeoff_cells": 50,
+  "takeoff_onsets": 10,
+  "takeoff_cells": 48,
   "infections_total": 8389,
   "presented_total": 6397,
   "lab_confirmed_total": 4910,
@@ -1644,10 +1995,17 @@
   },
   "confirmed_never_presented": 1108,
   "confirmed_pre_onset_catch": 126,
-  "campaign_positive_hosts": {
-   "never_presented": 1106,
-   "pre_onset": 126,
-   "post_onset": 3620
+  "campaign_positive": {
+   "specimens": {
+    "never_presented": 1106,
+    "pre_onset": 179,
+    "post_onset": 3567
+   },
+   "hosts": {
+    "never_presented": 1106,
+    "pre_onset": 179,
+    "post_onset": 3567
+   }
   },
   "unconfirmed_infected_drains": {
    "swabbed_while_infected_negative_never_presented": 699,
@@ -1658,13 +2016,13 @@
    "never_swabbed_never_presented": 46
   },
   "medians": {
-   "infections_total": 179.5,
-   "presented_total": 141.5,
-   "lab_confirmed_total": 110.5,
-   "recorded_onsets": 46.5,
-   "campaign_positives": 108.5,
+   "infections_total": 181.0,
+   "presented_total": 144.5,
+   "lab_confirmed_total": 111.0,
+   "recorded_onsets": 47.5,
+   "campaign_positives": 110.0,
    "asymptomatic_share": 0.27236363636363636,
-   "dated_share_of_confirmed": 0.5370879120879121,
+   "dated_share_of_confirmed": 0.5333438685208597,
    "dpi_at_confirmation_median": 11.5
   }
  }

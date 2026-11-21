@@ -42,6 +42,15 @@ def _cell_payload(
     }
 
 
+def _log_row(aid: int, day: int, symptomatic: bool | None = None) -> dict:
+    return {
+        "agent_id": aid,
+        "day": day,
+        "positive": True,
+        "symptomatic_at_specimen": symptomatic,
+    }
+
+
 def test_channel_split_campaign_vs_passive(mod):
     payload = _cell_payload(
         hosts={
@@ -49,8 +58,8 @@ def test_channel_split_campaign_vs_passive(mod):
             2: {"infection_day": 4, "presented_day": 10, "confirmed_day": 8},
         },
         log=[
-            {"agent_id": 1, "day": 16, "positive": True},
-            {"agent_id": 2, "day": 16, "positive": True},
+            _log_row(1, 16, True),
+            _log_row(2, 16, True),
         ],
     )
     cell = mod._decompose_cell(payload)
@@ -61,23 +70,32 @@ def test_channel_split_campaign_vs_passive(mod):
     assert cell["confirmed_never_presented"] == 0
 
 
-def test_campaign_positive_hosts_split(mod):
+def test_campaign_positive_split_uses_symptomatic_flag(mod):
     payload = _cell_payload(
         hosts={
             1: {"infection_day": 3, "presented_day": 9},
-            2: {"infection_day": 4, "presented_day": 7},
+            2: {"infection_day": 4, "presented_day": 8},
             3: {"infection_day": 5},
+            # Host 4 presents the same day it is swabbed: the flag says the
+            # swab came first, so it is a pre-onset catch, not post.
+            4: {"infection_day": 6, "presented_day": 10},
         },
         log=[
-            {"agent_id": 1, "day": 8, "positive": True},
-            {"agent_id": 2, "day": 10, "positive": True},
-            {"agent_id": 3, "day": 10, "positive": True},
+            _log_row(1, 8, False),
+            _log_row(2, 10, True),
+            _log_row(3, 10, False),
+            _log_row(4, 10, False),
         ],
     )
     cell = mod._decompose_cell(payload)
-    assert cell["campaign_positive_hosts"] == {
+    assert cell["campaign_positive"]["specimens"] == {
         "never_presented": 1,
-        "pre_onset": 1,
+        "pre_onset": 2,
+        "post_onset": 1,
+    }
+    assert cell["campaign_positive"]["hosts"] == {
+        "never_presented": 1,
+        "pre_onset": 2,
         "post_onset": 1,
     }
 
@@ -101,7 +119,7 @@ def test_unconfirmed_drain_modes(mod):
     }
 
 
-def test_dated_share_and_pool_medians_skip_dead_cells(mod):
+def test_dated_share_and_pool_medians_use_scorer_takeoff_gate(mod):
     live = mod._decompose_cell(
         _cell_payload(
             hosts={
@@ -109,15 +127,23 @@ def test_dated_share_and_pool_medians_skip_dead_cells(mod):
                 2: {"infection_day": 2},
             },
             log=[],
-            observables={"recorded_onsets": 1, "seed": 7},
+            observables={"recorded_onsets": 15, "seed": 7},
+        )
+    )
+    # Infectious but under the scorer's recorded_onsets >= 10 takeoff gate.
+    quiet = mod._decompose_cell(
+        _cell_payload(
+            hosts={9: {"infection_day": 2, "presented_day": 3, "confirmed_day": 4}},
+            log=[],
+            observables={"recorded_onsets": 5},
         )
     )
     dead = mod._decompose_cell(
         _cell_payload(hosts={}, log=[], observables={"recorded_onsets": 0})
     )
-    assert live["dated_share_of_confirmed"] == pytest.approx(1.0)
-    pooled = mod._pool([live, dead])
-    assert pooled["cells"] == 2
+    assert live["dated_share_of_confirmed"] == pytest.approx(15.0)
+    pooled = mod._pool([live, quiet, dead], takeoff_onsets=10)
+    assert pooled["cells"] == 3
     assert pooled["takeoff_cells"] == 1
     assert pooled["medians"]["infections_total"] == 2
-    assert pooled["recorded_onsets"] == 1
+    assert pooled["recorded_onsets"] == 20
