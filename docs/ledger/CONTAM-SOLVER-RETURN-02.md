@@ -16,8 +16,9 @@ Added a fixed-output `solver_return` option to the existing protected
 `campaign-collect` workflow. It returns the engineering package and
 seed-level voyage-wide endpoint CSV in one artifact, checks sizes and
 SHA-256 digests, and uses HEAD-pinned reads. A live fetch with the Picard
-role reproduced both hashes. Protected Actions execution remains subject
-to the `aws-campaign` environment review.
+role reproduced both hashes. The protected collector subsequently
+published the return. Both hashes and the CSV row count were verified
+again from the downloaded [Actions artifact](https://github.com/bckirkup/Crusher_to_the_Bridge/actions/runs/44900142907/artifacts/14706028151).
 
 Corrected residual ledger and handoff claims about closed solver
 questions, preserved dose and historical takeoff probability. The

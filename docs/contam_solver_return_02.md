@@ -2,7 +2,9 @@
 
 > **Status** Measured existing-output reduction and verified collector fetch.
 > Authored against `b925a99cfce4514346d1659cc260de4a43522543` on 2026-11-21.
-> Protected Actions delivery still requires the `aws-campaign` reviewer.
+> The protected collector published the return on 2026-11-21. The
+> [Edison download](https://github.com/bckirkup/Crusher_to_the_Bridge/actions/runs/44900142907/artifacts/14706028151)
+> expires on 2026-12-21 at 11:54 UTC.
 
 ## Automated access
 
@@ -19,6 +21,10 @@ inventory has been awaiting review since November 9.
 | `seed_endpoints.csv` | 26,153 | `0a990ce55e71776b054c1d403ef6dac01be5c83df1fde67ddd47a9f2723cd8c8` |
 
 Both objects remain in `crusherbucket-994254241749-us-east-1-an`.
+The published ZIP matched GitHub's SHA-256 digest
+(`0342498fe21d2a8d5bbc6b725b506d72175c0569050adb41177a8a049fab7cd2`).
+Both downloaded members matched the hashes above, and the CSV contained
+140 data rows.
 Their exact keys are pinned in `scripts/campaign_collect_exact.py`.
 The seed table was recovered from the 140 original payloads, matched the
 2026-11-20 readout hash, and was stored at
