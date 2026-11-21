@@ -152,7 +152,8 @@ def test_summary_pools_routes_and_groups(mod, tmp_path):
     assert summary["growth_fold_10_15_median"] == pytest.approx(7.0)
 
 
-def test_main_writes_evidence_json(mod, tmp_path):
+def test_main_writes_evidence_json(mod, tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "_REPO_ROOT", tmp_path)
     cells_dir = tmp_path / "cells"
     cells_dir.mkdir()
     cell = _cell_payload(1, {0: 20, 5: 40}, 25, 20,
@@ -166,7 +167,8 @@ def test_main_writes_evidence_json(mod, tmp_path):
     assert evidence["gates"]["ignition_mass"] == 50
 
 
-def test_main_fails_without_cells(mod, tmp_path):
+def test_main_fails_without_cells(mod, tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "_REPO_ROOT", tmp_path)
     rc = mod.main(["--cells", str(tmp_path), "--out",
                    str(tmp_path / "e.json")])
     assert rc == 1

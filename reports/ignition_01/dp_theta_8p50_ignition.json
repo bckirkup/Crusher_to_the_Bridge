@@ -3,7 +3,7 @@
   {
    "seed": 20200205,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 354,
    "infections_before_quarantine": 107,
@@ -16,9 +16,9 @@
    "ignition_day": 13,
    "seed_spec": {
     "infection_age_days": 6.8,
-    "departure_day": 5.0,
-    "role": "passenger",
     "onset_day": -1.0,
+    "role": "passenger",
+    "departure_day": 5.0,
     "count": 1
    },
    "index_agent_id": 1826,
@@ -44,7 +44,7 @@
   {
    "seed": 20200206,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": false,
    "recorded_onsets": 7,
    "infections_before_quarantine": 1,
@@ -57,10 +57,10 @@
    "ignition_day": null,
    "seed_spec": {
     "departure_day": 5.0,
-    "count": 1,
-    "onset_day": -1.0,
     "infection_age_days": 6.8,
-    "role": "passenger"
+    "role": "passenger",
+    "count": 1,
+    "onset_day": -1.0
    },
    "index_agent_id": 1581,
    "index_role": "passenger",
@@ -85,7 +85,7 @@
   {
    "seed": 20200207,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 344,
    "infections_before_quarantine": 106,
@@ -129,7 +129,7 @@
   {
    "seed": 20200208,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 736,
    "infections_before_quarantine": 283,
@@ -141,11 +141,11 @@
    "growth_fold_10_15": 3.723684210526316,
    "ignition_day": 9,
    "seed_spec": {
+    "infection_age_days": 6.8,
     "departure_day": 5.0,
     "onset_day": -1.0,
-    "count": 1,
-    "infection_age_days": 6.8,
-    "role": "passenger"
+    "role": "passenger",
+    "count": 1
    },
    "index_agent_id": 1259,
    "index_role": "passenger",
@@ -173,7 +173,7 @@
   {
    "seed": 20200209,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": false,
    "recorded_onsets": 0,
    "infections_before_quarantine": 1,
@@ -185,10 +185,10 @@
    "growth_fold_10_15": 1.0,
    "ignition_day": null,
    "seed_spec": {
+    "count": 1,
     "infection_age_days": 6.8,
     "onset_day": -1.0,
     "departure_day": 5.0,
-    "count": 1,
     "role": "passenger"
    },
    "index_agent_id": 1139,
@@ -214,7 +214,7 @@
   {
    "seed": 20200210,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 770,
    "infections_before_quarantine": 280,
@@ -226,11 +226,11 @@
    "growth_fold_10_15": 3.7837837837837838,
    "ignition_day": 10,
    "seed_spec": {
+    "count": 1,
     "departure_day": 5.0,
-    "onset_day": -1.0,
     "role": "passenger",
     "infection_age_days": 6.8,
-    "count": 1
+    "onset_day": -1.0
    },
    "index_agent_id": 911,
    "index_role": "passenger",
@@ -255,7 +255,7 @@
   {
    "seed": 20200211,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": false,
    "recorded_onsets": 4,
    "infections_before_quarantine": 4,
@@ -268,10 +268,10 @@
    "ignition_day": null,
    "seed_spec": {
     "infection_age_days": 6.8,
+    "count": 1,
     "departure_day": 5.0,
-    "role": "passenger",
     "onset_day": -1.0,
-    "count": 1
+    "role": "passenger"
    },
    "index_agent_id": 311,
    "index_role": "passenger",
@@ -296,7 +296,7 @@
   {
    "seed": 20200212,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 2270,
    "infections_before_quarantine": 2035,
@@ -308,11 +308,11 @@
    "growth_fold_10_15": 4.472527472527473,
    "ignition_day": 6,
    "seed_spec": {
-    "onset_day": -1.0,
-    "role": "passenger",
+    "departure_day": 5.0,
     "count": 1,
-    "infection_age_days": 6.8,
-    "departure_day": 5.0
+    "role": "passenger",
+    "onset_day": -1.0,
+    "infection_age_days": 6.8
    },
    "index_agent_id": 286,
    "index_role": "passenger",
@@ -341,7 +341,7 @@
   {
    "seed": 20200213,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 161,
    "infections_before_quarantine": 14,
@@ -353,11 +353,11 @@
    "growth_fold_10_15": 2.3333333333333335,
    "ignition_day": 21,
    "seed_spec": {
+    "role": "passenger",
     "infection_age_days": 6.8,
-    "onset_day": -1.0,
-    "departure_day": 5.0,
     "count": 1,
-    "role": "passenger"
+    "departure_day": 5.0,
+    "onset_day": -1.0
    },
    "index_agent_id": 1116,
    "index_role": "passenger",
@@ -383,7 +383,7 @@
   {
    "seed": 20200214,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 208,
    "infections_before_quarantine": 47,
@@ -395,11 +395,11 @@
    "growth_fold_10_15": 11.75,
    "ignition_day": 18,
    "seed_spec": {
+    "onset_day": -1.0,
+    "departure_day": 5.0,
     "infection_age_days": 6.8,
     "role": "passenger",
-    "departure_day": 5.0,
-    "count": 1,
-    "onset_day": -1.0
+    "count": 1
    },
    "index_agent_id": 1042,
    "index_role": "passenger",
@@ -424,7 +424,7 @@
   {
    "seed": 20200215,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 218,
    "infections_before_quarantine": 60,
@@ -436,11 +436,11 @@
    "growth_fold_10_15": 12.0,
    "ignition_day": 14,
    "seed_spec": {
-    "count": 1,
-    "infection_age_days": 6.8,
-    "departure_day": 5.0,
     "onset_day": -1.0,
-    "role": "passenger"
+    "role": "passenger",
+    "infection_age_days": 6.8,
+    "count": 1,
+    "departure_day": 5.0
    },
    "index_agent_id": 2252,
    "index_role": "passenger",
@@ -466,7 +466,7 @@
   {
    "seed": 20200216,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 33,
    "infections_before_quarantine": 7,
@@ -478,10 +478,10 @@
    "growth_fold_10_15": 1.4,
    "ignition_day": 28,
    "seed_spec": {
-    "count": 1,
     "departure_day": 5.0,
-    "infection_age_days": 6.8,
     "role": "passenger",
+    "infection_age_days": 6.8,
+    "count": 1,
     "onset_day": -1.0
    },
    "index_agent_id": 457,
@@ -508,7 +508,7 @@
   {
    "seed": 20200217,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": false,
    "recorded_onsets": 0,
    "infections_before_quarantine": 0,
@@ -520,11 +520,11 @@
    "growth_fold_10_15": null,
    "ignition_day": null,
    "seed_spec": {
-    "infection_age_days": 6.8,
-    "departure_day": 5.0,
-    "onset_day": -1.0,
     "role": "passenger",
-    "count": 1
+    "onset_day": -1.0,
+    "count": 1,
+    "departure_day": 5.0,
+    "infection_age_days": 6.8
    },
    "index_agent_id": 1426,
    "index_role": "passenger",
@@ -545,7 +545,7 @@
   {
    "seed": 20200218,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 213,
    "infections_before_quarantine": 70,
@@ -557,11 +557,11 @@
    "growth_fold_10_15": 17.5,
    "ignition_day": 15,
    "seed_spec": {
+    "count": 1,
     "infection_age_days": 6.8,
     "onset_day": -1.0,
     "role": "passenger",
-    "departure_day": 5.0,
-    "count": 1
+    "departure_day": 5.0
    },
    "index_agent_id": 2218,
    "index_role": "passenger",
@@ -589,7 +589,7 @@
   {
    "seed": 20200219,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 2114,
    "infections_before_quarantine": 1651,
@@ -602,10 +602,10 @@
    "ignition_day": 8,
    "seed_spec": {
     "count": 1,
+    "infection_age_days": 6.8,
     "departure_day": 5.0,
     "onset_day": -1.0,
-    "role": "passenger",
-    "infection_age_days": 6.8
+    "role": "passenger"
    },
    "index_agent_id": 1572,
    "index_role": "passenger",
@@ -633,7 +633,7 @@
   {
    "seed": 20200220,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 328,
    "infections_before_quarantine": 89,
@@ -646,10 +646,10 @@
    "ignition_day": 13,
    "seed_spec": {
     "departure_day": 5.0,
+    "count": 1,
     "infection_age_days": 6.8,
-    "role": "passenger",
     "onset_day": -1.0,
-    "count": 1
+    "role": "passenger"
    },
    "index_agent_id": 612,
    "index_role": "passenger",
@@ -678,7 +678,7 @@
   {
    "seed": 20200221,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 174,
    "infections_before_quarantine": 7,
@@ -690,11 +690,11 @@
    "growth_fold_10_15": 1.1666666666666667,
    "ignition_day": 22,
    "seed_spec": {
-    "role": "passenger",
-    "count": 1,
+    "departure_day": 5.0,
     "infection_age_days": 6.8,
-    "onset_day": -1.0,
-    "departure_day": 5.0
+    "count": 1,
+    "role": "passenger",
+    "onset_day": -1.0
    },
    "index_agent_id": 774,
    "index_role": "passenger",
@@ -722,7 +722,7 @@
   {
    "seed": 20200222,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 2318,
    "infections_before_quarantine": 2240,
@@ -734,9 +734,9 @@
    "growth_fold_10_15": 4.666666666666667,
    "ignition_day": 6,
    "seed_spec": {
-    "departure_day": 5.0,
     "infection_age_days": 6.8,
     "role": "passenger",
+    "departure_day": 5.0,
     "onset_day": -1.0,
     "count": 1
    },
@@ -767,7 +767,7 @@
   {
    "seed": 20200223,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 35,
    "infections_before_quarantine": 7,
@@ -779,11 +779,11 @@
    "growth_fold_10_15": 1.1666666666666667,
    "ignition_day": 28,
    "seed_spec": {
-    "role": "passenger",
-    "departure_day": 5.0,
-    "infection_age_days": 6.8,
     "onset_day": -1.0,
-    "count": 1
+    "infection_age_days": 6.8,
+    "count": 1,
+    "role": "passenger",
+    "departure_day": 5.0
    },
    "index_agent_id": 1403,
    "index_role": "passenger",
@@ -810,7 +810,7 @@
   {
    "seed": 20200224,
    "theta": 316227766.01683795,
-   "arm_id": "D0_declared",
+   "arm_id": "baseline",
    "takeoff": true,
    "recorded_onsets": 390,
    "infections_before_quarantine": 91,
@@ -822,11 +822,11 @@
    "growth_fold_10_15": 10.11111111111111,
    "ignition_day": 14,
    "seed_spec": {
-    "count": 1,
-    "onset_day": -1.0,
     "departure_day": 5.0,
+    "role": "passenger",
+    "onset_day": -1.0,
     "infection_age_days": 6.8,
-    "role": "passenger"
+    "count": 1
    },
    "index_agent_id": 1594,
    "index_role": "passenger",

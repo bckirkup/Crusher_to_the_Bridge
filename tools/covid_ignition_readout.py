@@ -40,6 +40,12 @@ import statistics
 import sys
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
+
 IGNITION_MASS = 50
 RECORD_MEDIAN_DAY = 15
 TAKEOFF_MIN_ONSETS = 10
@@ -200,7 +206,8 @@ def main(argv: list[str] | None = None) -> int:
 
     paths: list[str] = []
     for root in args.cells:
-        paths.extend(sorted(glob.glob(str(Path(root) / "cell_*.json"))))
+        cells_dir = resolve_repo_path(str(_REPO_ROOT), root)
+        paths.extend(sorted(glob.glob(str(Path(cells_dir) / "cell_*.json"))))
     if not paths:
         print("no cell_*.json payloads found", file=sys.stderr)
         return 1
@@ -216,12 +223,18 @@ def main(argv: list[str] | None = None) -> int:
             "quarantine_day": QUARANTINE_DAY,
         },
     }
-    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(args.out).write_text(  # NOSONAR — operator-specified report path in a local readout tool
-        json.dumps(evidence, indent=1))
+    out_path = Path(resolve_repo_path(str(_REPO_ROOT), args.out))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with validated_open(
+        str(out_path), "w", allowed_roots=(str(_REPO_ROOT),)
+    ) as fh:
+        fh.write(json.dumps(evidence, indent=1))
     if args.out_md:
-        Path(args.out_md).write_text(  # NOSONAR — operator-specified report path in a local readout tool
-            _md(records, summary))
+        md_path = Path(resolve_repo_path(str(_REPO_ROOT), args.out_md))
+        with validated_open(
+            str(md_path), "w", allowed_roots=(str(_REPO_ROOT),)
+        ) as fh:
+            fh.write(_md(records, summary))
     print(json.dumps(summary, indent=1))
     return 0
 
