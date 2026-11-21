@@ -1,0 +1,70 @@
+{
+ "source": "docs/norovirus/mega_voyage_source_evidence.md",
+ "source_snapshot": "74a6eff3ec45734b377acb07afe287ca6298f02f",
+ "source_location": "CDC trip report Appendix C (labeled bars), pp. 1 and 7, as transcribed in the evidence readout; not re-transcribed here",
+ "voyage": "Explorer of the Seas, Feb 26 - Mar 5 2006",
+ "day_labels": [
+  "Feb 26",
+  "Feb 27",
+  "Feb 28",
+  "Mar 1",
+  "Mar 2",
+  "Mar 3",
+  "Mar 4",
+  "Mar 5"
+ ],
+ "onsets_by_day": {
+  "passenger": [
+   2,
+   53,
+   74,
+   43,
+   43,
+   21,
+   16,
+   0
+  ],
+  "crew": [
+   0,
+   1,
+   2,
+   2,
+   7,
+   5,
+   3,
+   0
+  ]
+ },
+ "investigation_finals": {
+  "passenger": {
+   "cases": 252,
+   "denominator": 3245
+  },
+  "crew": {
+   "cases": 20,
+   "denominator": 1183
+  },
+  "use": "with the onset curve"
+ },
+ "posting_figures": {
+  "passenger": {
+   "cases": 243,
+   "denominator": 3245
+  },
+  "crew": {
+   "cases": 19,
+   "denominator": 1184
+  },
+  "use": "cross-posting comparisons only"
+ },
+ "peak_day_index": {
+  "passenger": 2,
+  "crew": 4
+ },
+ "peak_day_label": {
+  "passenger": "Feb 28",
+  "crew": "Mar 2"
+ },
+ "crew_minus_passenger_peak_lag_days": 2,
+ "preboarding_ill_passenger_surveys": 5
+}
