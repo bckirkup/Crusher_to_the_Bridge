@@ -154,10 +154,27 @@ the campaign S3 prefix; bridge canary submitted —
 `fl_je_exp_7d_outbreak`, 20 children, Batch job
 `221787d3-d16d-495e-8da8-be62e1407257`.
 
-Remaining: read out the canary, then stop and report. Reference
-fingerprints for the reproduction arm resolve at readout time from the
-`noro_supply_solver_screen_01` archive (`readout.py --reference-root`).
-Owner: `campaign-preflight`.
+Remaining: stop and report. Reference fingerprints for the reproduction
+arm resolve at readout time from the `noro_supply_solver_screen_01`
+archive (`readout.py --reference-root`). Owner: `campaign-preflight`.
+
+## Bridge canary result (2026-11-21)
+
+20/20 children of `fl_je_exp_7d_outbreak` SUCCEEDED
+(`221787d3-d16d-495e-8da8-be62e1407257`, jobdef `:8`, image
+`sha256:80884d60…f149a`, ENGINE_GIT_SHA `90aa3ec2`).
+
+- [x] Audit clean: 20/20 archives read, no missing/unexpected/duplicated
+  seeds, intended inputs resolved, outcomes extractable, attempts
+  accounted; `engine_git_sha` = `90aa3ec2` on every archive;
+  `python_hash_seed` = 1; expected state resolved (rhythm
+  enabled+attached on exp).
+- [x] Measured (20-cell canary, outbreak stratum = 20 highest-burden
+  contaminated exp seeds): posting rate 1.00 [0.83, 1.00]; reported AR
+  median 0.060, max 0.091; 20/20 detected by swab and tank; first
+  reporter split 12 passenger / 8 crew. Contrast with the Explorer
+  reconstruction's ~5% take-off under `declared_five`: on exp hull at
+  the census's highest provisioned burdens, every cell takes.
 
 ## Next decision
 
