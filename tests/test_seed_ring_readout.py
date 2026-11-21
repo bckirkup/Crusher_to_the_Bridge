@@ -380,6 +380,67 @@ class TestRefitWitness:
         assert "UNVERIFIED" in lines[0]
 
 
+class TestEntryArgv:
+    def test_build_argv_shape(self, tmp_path):
+        from campaigns.covid.seed_ring_01 import entry
+
+        args = type("A", (), {"platform": "mega_cruise_5000"})()
+        block = {
+            "args": {"theta": 316227766.01683795,
+                     "arm_id": "PLACEMENT_BUFFET"},
+            "artifact": "cell_{seed}.json",
+        }
+        command, artifact = entry.build_argv(
+            args, block, 20200205, tmp_path,
+        )
+        assert command[1].endswith("cell.py")
+        assert "--arm" in command
+        assert command[command.index("--arm") + 1] == "PLACEMENT_BUFFET"
+        assert command[command.index("--seed") + 1] == "20200205"
+        assert command[command.index("--theta") + 1] == "316227766.01683795"
+        # Arm-scoped work dir keeps sibling blocks' same-seed cells apart.
+        assert artifact == (
+            tmp_path / "PLACEMENT_BUFFET" / "cell_20200205.json"
+        )
+        assert command[command.index("--out") + 1] == str(
+            tmp_path / "PLACEMENT_BUFFET"
+        )
+
+
+class TestCellHelpers:
+    def test_base_overrides_returns_boxed_block(self):
+        from campaigns.covid.seed_ring_01 import cell
+
+        base = cell.base_overrides(entry_design())
+        assert base["scheduled_protocol_id"] == "SOP-017-MESSBOX"
+        assert "transmission_overrides" in base
+
+    def test_match_cell_unique(self):
+        from campaigns.covid.seed_ring_01 import cell
+        from picard_framework.covid_boarding_screen import load_design
+
+        design = load_design(str(ro._REPO_ROOT / ro._DESIGN))
+        matched = cell._match_cell(
+            design, 316227766.01683795, "PLACEMENT_BUFFET", 20200205,
+        )
+        assert matched.arm_id == "PLACEMENT_BUFFET"
+        assert matched.seed == 20200205
+
+    def test_match_cell_missing_dies(self):
+        from campaigns.covid.seed_ring_01 import cell
+        from picard_framework.covid_boarding_screen import load_design
+
+        design = load_design(str(ro._REPO_ROOT / ro._DESIGN))
+        with pytest.raises(SystemExit):
+            cell._match_cell(
+                design, 316227766.01683795, "PLACEMENT_BUFFET", 999,
+            )
+
+
+def entry_design() -> str:
+    return "picard_framework/runs/covid_seed_ring_01_design.json"
+
+
 class TestRender:
     def test_per_cell_table_and_sections(self):
         payloads = {
