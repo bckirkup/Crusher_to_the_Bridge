@@ -67,7 +67,7 @@ Ops status, verdicts, and follow-ups are appended below as the campaign runs.
   frozen >=10 leg fails; verdict NULL-PLACEMENT, the Arm-B reading:
   dining placement is not the operative declaration; the embarkation-day
   crowd/muster geometry itself is under-declared.
-- Audit invariants clean; placement was exercised (18/20 Windjammer
+- Audit invariants clean; placement was exercised (17/20 Windjammer
   indices, plus Pool_Bar_Grill and CafeBakery buffet venues); 17/20
   takeoff; ignition median 21 on ignited cells.
 - Measured heterogeneity inside the null: seeds 20200214/20200215 did

@@ -26,7 +26,7 @@ against the committed `dp_theta_8p50` cells with recorded_onsets deltas
 nonzero on 0/20 seeds — the new image replays boxed_s1s2 bit-identically, so
 the null is a physics/declaration result, not image drift.
 
-Placement was exercised as declared: 18/20 placement-arm indices seated
+Placement was exercised as declared: 17/20 placement-arm indices seated
 Windjammer (the rest Pool_Bar_Grill / CafeBakery, all buffet service type);
 founder routes remain droplet + caregiver only; audit invariants (departure
 epoch 120, quarantine witness window + activation, propensity units_drawn > 0,
@@ -40,7 +40,7 @@ founders, 16 on day 0; 20200215: 25 founders, 0 on day 0) — the surge-buffet
 venue supports the record footprint, but realized embarkation-day surge
 participation is rare under the declared schedule rather than absent. The D0
 witness shows the same heavy tail from the opposite side: its three
-record-timed ignitions (ign 6/8/9) all came on drawn Windjammer indices
+record-timed ignitions (ign 6/8/6) all came on drawn Windjammer indices
 (20200212/19/22) with day-0 bursts 6/25/1 — i.e. the *draw* picks the surge
 participant, not the seat assignment.
 
