@@ -204,8 +204,43 @@ User approved after the canary readout. 43 arrays x 20 = 860 children on
 (Ids are the first 8 chars of each Batch job id; full ids are in the
 session record.)
 
+## Full readout (2026-11-21)
+
+All 1,696 children SUCCEEDED (~3.5 h wall for Stage B at ~50-child
+concurrency). Readout exits 0: **technically complete** — 45/45 tier
+cells, 0 audit defects, intended inputs used, outcomes extractable,
+attempts accounted, pairs meaningful. `engine_git_sha` verified:
+`bf0ec168` on Stage-A archives, `90aa3ec2` on Stage-B archives (the two
+declared commits); reference fingerprints resolved from
+`noro_supply_solver_screen_01`.
+
+Measured, posting rate (posted/20) by stratum — ordering holds
+everywhere: quiet 0/20 on all four hulls at all three lengths; near
+exp 3-4/20 and 0/20 elsewhere; outbreak exp 20/20, cls 19/20,
+spr 11-12/20, meg 7/20. Band verdicts: exp all-in at 168/288/504;
+cls quiet+outbreak in, near undetermined; spr quiet+outbreak in, near
+undetermined; meg quiet in only — hull states: exp "in", others
+"undetermined".
+
+Continuation (predeclared, inferred): **justified_defect_fix** — the
+reproduction arm does not reproduce: `fl_je_repro_exp_solver01_station_
+continuous` compared seed by seed against the
+`fl_exp_12d_sens_p06_paxv_station_lots_continuous` reference
+fingerprints, 16/16 compared, **0/16 identical**. All 16 reposted
+(AR median 0.057) so the cells ran; the joint-eval wiring produces a
+different run than the solver-screen wiring on the same seed.
+
+Pilots (measured): temporal prefix-identity — quiet 31-38/40 on
+exp/spr/cls (17/40 meg), near 0-5/40, outbreak 0/40; truncation_valid
+false on every cell. Joint-outcome estimates (288 ep, evaluation
+seeds): exp 0.0533 ± 0.0040, cls 0.0278 ± 0.0095, spr 0.0076 ± 0.0074,
+meg 0.0 (0 events); Neyman allocation puts all mass on the
+contaminated stratum. Readout committed at
+`telemetry_buffer/noro_paper1_joint_eval_01/`.
+
 ## Next decision
 
-Whether the readout verdict admits the campaign complete: technical
-completion of all 1,696 cells, the ordering diagnostic against the
-frozen bands, and the pilot reports.
+Whether to take the predeclared `justified_defect_fix` continuation:
+find why the joint-eval cell diverges from the solver-screen run on the
+same seed (16/16 seeds differ, all posted — a systematic, not
+seed-specific, divergence).

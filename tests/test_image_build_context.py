@@ -51,6 +51,7 @@ NON_INPUTS: tuple[tuple[str, str], ...] = (
     ("telemetry_buffer/info_suppress_probe_20200205.json", "probe output record"),
     ("telemetry_buffer/covid_quar_suppression_v1_readout.json", "DP-BELIEF-01-D4 campaign readout record"),
     ("telemetry_buffer/noro_explorer_reconstruction_01/**", "Explorer reconstruction campaign readout record"),
+    ("telemetry_buffer/noro_paper1_joint_eval_01/**", "Paper-1 joint-eval campaign readout record"),
     ("data/platforms/*/deck_blueprint_bg.png", "dashboard deck art"),
     ("data/platforms/*/deck_hull.png", "dashboard deck art"),
     ("data/platforms/*/deck_graphics.geojson", "dashboard deck geometry"),
