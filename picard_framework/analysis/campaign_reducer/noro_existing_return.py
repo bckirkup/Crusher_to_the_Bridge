@@ -236,24 +236,35 @@ def _extract_complements_and_initial(
     missing: list[str],
 ) -> None:
     sblock = summary.get("summary") or {}
-    je_burden = (joint_eval or {}).get("burden") or {}
+    je_scalars = summary.get("joint_eval") if isinstance(summary.get("joint_eval"), dict) else {}
+    je_burden = je_scalars.get("burden") or (joint_eval or {}).get("burden") or {}
     je_curves = (joint_eval or {}).get("curves") or {}
     intro = summary.get("introduction") or {}
     init_manifest = intro.get("initiation_manifest") or {}
     census = summary.get("census") or {}
 
     n_pax = _first_non_null(
+        sblock.get("passenger_complement"),
+        je_burden.get("passenger_complement"),
         sblock.get("total_passengers"),
         je_burden.get("total_passengers"),
         (summary.get("parameters") or {}).get("total_passengers"),
     )
     n_crew = _first_non_null(
+        sblock.get("crew_complement"),
+        je_burden.get("crew_complement"),
         sblock.get("total_crew"),
         je_burden.get("total_crew"),
         (summary.get("parameters") or {}).get("total_crew"),
     )
-    _set_field(values, prov, missing, "total_passengers", n_pax, "summary.summary.total_passengers")
-    _set_field(values, prov, missing, "total_crew", n_crew, "summary.summary.total_crew")
+    _set_field(
+        values, prov, missing, "total_passengers", n_pax,
+        "summary.summary.passenger_complement",
+    )
+    _set_field(
+        values, prov, missing, "total_crew", n_crew,
+        "summary.summary.crew_complement",
+    )
 
     init_ids = summary.get("initially_infected_agent_ids")
     init_total = len(init_ids) if isinstance(init_ids, list) else census.get("n_imports")
@@ -339,16 +350,19 @@ def _extract_burden_and_thresholds(
     sblock = summary.get("summary") or {}
     derived = summary.get("derived") or {}
     je = joint_eval or {}
-    je_burden = je.get("burden") or {}
-    je_thresh = je.get("threshold") or {}
+    je_scalars = summary.get("joint_eval") if isinstance(summary.get("joint_eval"), dict) else {}
+    je_burden = je_scalars.get("burden") or je.get("burden") or {}
+    je_thresh = je_scalars.get("threshold") or je.get("threshold") or {}
     census = summary.get("census") or {}
 
     rep_pax = _first_non_null(
         sblock.get("cumulative_reported_cases_passenger"),
+        je_burden.get("cumulative_reported_cases_passenger"),
         je_burden.get("reported_passenger"),
     )
     rep_crew = _first_non_null(
         sblock.get("cumulative_reported_cases_crew"),
+        je_burden.get("cumulative_reported_cases_crew"),
         je_burden.get("reported_crew"),
     )
     burden = {
@@ -357,21 +371,32 @@ def _extract_burden_and_thresholds(
         ),
         "ever_infected_passenger": _first_non_null(
             sblock.get("cumulative_ever_infected_passenger"),
+            je_burden.get("cumulative_ever_infected_passenger"),
             je_burden.get("ever_infected_passenger"),
         ),
         "ever_infected_crew": _first_non_null(
-            sblock.get("cumulative_ever_infected_crew"), je_burden.get("ever_infected_crew"),
+            sblock.get("cumulative_ever_infected_crew"),
+            je_burden.get("cumulative_ever_infected_crew"),
+            je_burden.get("ever_infected_crew"),
         ),
         "acquired_total": census.get("n_acquired"),
         "ever_ill_total": _first_non_null(
-            sblock.get("cumulative_ever_symptomatic"), je_burden.get("ever_ill_total"),
+            sblock.get("cumulative_ever_ill"),
+            sblock.get("cumulative_ever_symptomatic"),
+            je_burden.get("cumulative_ever_ill"),
+            je_burden.get("ever_ill_total"),
         ),
         "ever_ill_passenger": _first_non_null(
+            sblock.get("cumulative_ever_ill_passenger"),
             sblock.get("cumulative_ever_symptomatic_passenger"),
+            je_burden.get("cumulative_ever_ill_passenger"),
             je_burden.get("ever_ill_passenger"),
         ),
         "ever_ill_crew": _first_non_null(
-            sblock.get("cumulative_ever_symptomatic_crew"), je_burden.get("ever_ill_crew"),
+            sblock.get("cumulative_ever_ill_crew"),
+            sblock.get("cumulative_ever_symptomatic_crew"),
+            je_burden.get("cumulative_ever_ill_crew"),
+            je_burden.get("ever_ill_crew"),
         ),
         "reported_total": _first_non_null(
             sblock.get("cumulative_reported_cases"), je_burden.get("reported_total"),
