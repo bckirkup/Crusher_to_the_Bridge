@@ -38,14 +38,18 @@ medians:**
 | campaign asym share | 0.841 | 0.505 | over |
 
 The 14.6× recorded-onset overshoot factorizes as ~4.6× confirmed
-volume × ~3.2× dating share (4.6 × 3.19 ≈ 14.7). Presented share of
-*infected* is 0.827 ≈ the record's ~0.82 never-symptomatic complement —
-**option (a), "too many infections declared symptomatic", is rejected
-as a truth-side share**. Population caveat measured, not assumed: the
-record's share is of confirmed cases, and on the *confirmed*
-population the model's never-presented share is 0.111 < the record's
-0.179 — consistent with presenters being confirmed preferentially by
-the passive skim (below), not with over-declaration.
+volume × ~3.2× dating share (4.6 × 3.19 ≈ 14.7); the 4.6 confirmed
+factor itself decomposes into ~4.4× infections × ~1.05 ascertainment.
+Presented share of *infected* is 0.827 ≈ the record's ~0.82
+never-symptomatic complement — on the infected population the share is
+right-sized. Honest caveat: the record's share is of confirmed cases,
+so the check cannot prove the truth-side share is declared correctly —
+what it rules out is over-declaration as the residual's *explanation*:
+a share shift cannot produce a 14.6× volume overshoot, and on the
+*confirmed* population the model's never-presented share is 0.111 <
+the record's 0.179, i.e. the confirmed pool is directionally *more*
+symptomatic-heavy, consistent with presenters being confirmed
+preferentially by the passive skim (below).
 
 **Channel split (pooled, all 20 cells):** 59,726 confirmed =
 8,326 campaign (14%) + **51,400 passive (86%)** — ~2,700
