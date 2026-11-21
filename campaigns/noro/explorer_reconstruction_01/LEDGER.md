@@ -46,6 +46,8 @@ Measured at `73ad8724` plus this campaign's files (uncommitted at the time; `af0
 4. **Closure mapping.** SOP-007 and SOP-009 name mega zone ids; none exists on Explorer. Not relied on, no alias added; the worker records protocol activation.
 5. **Fruit-cluster gate closed.** Rispens et al. (MMWR 2020;69(16), DOI 10.15585/mmwr.mm6916a3) publish no per-day onset curve: the article has no figure, table or supplement (whole body text read via Europe PMC, cross-checked with Consensus full-text excerpts). No second hull is scoped.
 
+6. **Hash seed.** The contract (§2.5) places `PYTHONHASHSEED=1` in the job definition environment, but neither `deploy/aws/campaign_jobdef.json` nor the campaign image sets it. `cell.py` re-executes itself under `PYTHONHASHSEED=1` and records the value in the archive.
+
 ## Open decisions (for the reviewer, before any cell runs)
 
 1. The pre-freeze blocker: an eligibility correction for Explorer, or Explorer as a deferred exception; and what the rhythm layer should be on a hull with no day program.
