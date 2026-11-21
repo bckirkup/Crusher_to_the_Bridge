@@ -3,6 +3,7 @@
 **Commit:** b925a99cfce4514346d1659cc260de4a43522543
 **Pathogens:** all
 **Status:** measured
+**Measured at:** 53b281253c0699c82cdf20abab0d97b84f97f723
 
 Recovered the existing 4,575,643-byte whole-hull engineering package and
 rebuilt all 140 respiratory seed endpoint rows and Batch timing rows.
