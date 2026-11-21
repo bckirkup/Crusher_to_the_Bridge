@@ -63,7 +63,7 @@
   }
  },
  "tiers": {
-  "je_census_exp": {
+  "fl_je_census_exp": {
    "platform": "expedition_cruise_450",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -206,7 +206,7 @@
     "arm": "census"
    }
   },
-  "je_exp_12d_tail": {
+  "fl_je_exp_12d_tail": {
    "platform": "expedition_cruise_450",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -1348,7 +1348,7 @@
     "arm": "tail"
    }
   },
-  "je_census_cls": {
+  "fl_je_census_cls": {
    "platform": "classic_cruise_1900",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -1491,7 +1491,7 @@
     "arm": "census"
    }
   },
-  "je_cls_12d_tail": {
+  "fl_je_cls_12d_tail": {
    "platform": "classic_cruise_1900",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -2633,7 +2633,7 @@
     "arm": "tail"
    }
   },
-  "je_census_spr": {
+  "fl_je_census_spr": {
    "platform": "spirit_cruise_3000",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -2776,7 +2776,7 @@
     "arm": "census"
    }
   },
-  "je_spr_12d_tail": {
+  "fl_je_spr_12d_tail": {
    "platform": "spirit_cruise_3000",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -3918,7 +3918,7 @@
     "arm": "tail"
    }
   },
-  "je_census_meg": {
+  "fl_je_census_meg": {
    "platform": "mega_cruise_5000",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -4061,7 +4061,7 @@
     "arm": "census"
    }
   },
-  "je_meg_12d_tail": {
+  "fl_je_meg_12d_tail": {
    "platform": "mega_cruise_5000",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -5203,7 +5203,7 @@
     "arm": "tail"
    }
   },
-  "je_bl_exp_solver01_station_continuous": {
+  "fl_je_bl_exp_solver01_station_continuous": {
    "platform": "expedition_cruise_450",
    "pathogen": "norovirus",
    "dose_adjustments": [

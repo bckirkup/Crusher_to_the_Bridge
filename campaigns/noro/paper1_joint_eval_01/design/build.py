@@ -91,7 +91,7 @@ SELECTION_RULE = {
 BASELINE = {
     "manifest": "campaigns/noro/supply_solver_screen_01/manifest.json",
     "tier": "fl_exp_12d_sens_p06_paxv_station_lots_continuous",
-    "id": "je_bl_exp_solver01_station_continuous",
+    "id": "fl_je_bl_exp_solver01_station_continuous",
     "seeds_from": "campaigns/noro/supply_solver_screen_01/campaign.json",
     "block": "exp_station_lots_continuous",
 }
@@ -149,7 +149,7 @@ def bridge_tiers(
         for epochs in EPOCHS:
             for stratum in STRATA:
                 seeds = [int(s) for s in selection[hull][stratum]]
-                out[f"je_{hull}_{epochs // 24}d_{stratum}"] = tier(
+                out[f"fl_je_{hull}_{epochs // 24}d_{stratum}"] = tier(
                     hull, epochs, seeds,
                     {"arm": "bridge", "stratum": stratum}, block,
                 )
@@ -183,7 +183,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
     blocks: dict[str, dict[str, Any]] = {}
     worker = f"{REL}/cell.py"
     for hull in HULLS:
-        census_id = f"je_census_{hull}"
+        census_id = f"fl_je_census_{hull}"
         tiers[census_id] = tier(
             hull, 1, [CENSUS_START[hull]], {"arm": "census"}, block,
         )
@@ -199,7 +199,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
                 "artifact_stem": f"je_census_{hull}",
             },
         }
-        tail_id = f"je_{hull}_{TAIL_EPOCHS // 24}d_tail"
+        tail_id = f"fl_je_{hull}_{TAIL_EPOCHS // 24}d_tail"
         tail_seeds = list(range(TAIL_START[hull], TAIL_START[hull] + TAIL_SEEDS))
         tiers[tail_id] = tier(
             hull, TAIL_EPOCHS, tail_seeds, {"arm": "tail"}, block,

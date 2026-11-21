@@ -219,7 +219,7 @@
     199
    ],
    "args": {
-    "tier": "je_census_exp",
+    "tier": "fl_je_census_exp",
     "arm": "station_lots",
     "hull": "exp",
     "seed_start": 2000000,
@@ -230,9 +230,9 @@
     "artifact_stem": "je_census_exp"
    }
   },
-  "je_exp_12d_tail": {
+  "fl_je_exp_12d_tail": {
    "worker": "campaigns/noro/paper1_joint_eval_01/cell.py",
-   "tier": "je_exp_12d_tail",
+   "tier": "fl_je_exp_12d_tail",
    "seeds": [
     2400000,
     2400001,
@@ -1442,7 +1442,7 @@
     199
    ],
    "args": {
-    "tier": "je_census_cls",
+    "tier": "fl_je_census_cls",
     "arm": "station_lots",
     "hull": "cls",
     "seed_start": 2100000,
@@ -1453,9 +1453,9 @@
     "artifact_stem": "je_census_cls"
    }
   },
-  "je_cls_12d_tail": {
+  "fl_je_cls_12d_tail": {
    "worker": "campaigns/noro/paper1_joint_eval_01/cell.py",
-   "tier": "je_cls_12d_tail",
+   "tier": "fl_je_cls_12d_tail",
    "seeds": [
     2410000,
     2410001,
@@ -2665,7 +2665,7 @@
     199
    ],
    "args": {
-    "tier": "je_census_spr",
+    "tier": "fl_je_census_spr",
     "arm": "station_lots",
     "hull": "spr",
     "seed_start": 2200000,
@@ -2676,9 +2676,9 @@
     "artifact_stem": "je_census_spr"
    }
   },
-  "je_spr_12d_tail": {
+  "fl_je_spr_12d_tail": {
    "worker": "campaigns/noro/paper1_joint_eval_01/cell.py",
-   "tier": "je_spr_12d_tail",
+   "tier": "fl_je_spr_12d_tail",
    "seeds": [
     2420000,
     2420001,
@@ -3888,7 +3888,7 @@
     199
    ],
    "args": {
-    "tier": "je_census_meg",
+    "tier": "fl_je_census_meg",
     "arm": "station_lots",
     "hull": "meg",
     "seed_start": 2300000,
@@ -3899,9 +3899,9 @@
     "artifact_stem": "je_census_meg"
    }
   },
-  "je_meg_12d_tail": {
+  "fl_je_meg_12d_tail": {
    "worker": "campaigns/noro/paper1_joint_eval_01/cell.py",
-   "tier": "je_meg_12d_tail",
+   "tier": "fl_je_meg_12d_tail",
    "seeds": [
     2430000,
     2430001,
@@ -4905,9 +4905,9 @@
     2430999
    ]
   },
-  "je_bl_exp_solver01_station_continuous": {
+  "fl_je_bl_exp_solver01_station_continuous": {
    "worker": "campaigns/noro/paper1_joint_eval_01/cell.py",
-   "tier": "je_bl_exp_solver01_station_continuous",
+   "tier": "fl_je_bl_exp_solver01_station_continuous",
    "seeds": [
     900470,
     906057,
