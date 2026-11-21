@@ -29,6 +29,9 @@ Takeoff follows the scorer's gate: ``recorded_onsets >= 10``
 Usage:
     python3 tools/covid_onset_funnel_readout.py \
         --cells <dir> [--cells <dir>] --out <json>
+
+``--cells`` and ``--out`` resolve against the repository root regardless
+of the caller's working directory, so sync payloads into the checkout.
 """
 from __future__ import annotations
 
@@ -253,6 +256,11 @@ def main(argv: list[str] | None = None) -> int:
         cells_dir = resolve_repo_path(str(_REPO_ROOT), cells_arg)
         for path in sorted(glob.glob(str(Path(cells_dir) / "cell_*.json"))):
             cells.append(_decompose_cell(json.loads(Path(path).read_text())))
+    if not cells:
+        raise ValueError(
+            f"no cell_*.json found under {args.cells!r} "
+            "(paths resolve against the repository root)"
+        )
     out = {"cells": cells, "pooled": _pool(cells, args.takeoff_onsets)}
     out_path = Path(resolve_repo_path(str(_REPO_ROOT), args.out))
     out_path.parent.mkdir(parents=True, exist_ok=True)

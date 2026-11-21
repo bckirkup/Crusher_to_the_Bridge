@@ -29,7 +29,7 @@ medians:**
 
 | stage | model | record | factor |
 |---|---|---|---|
-| infections | 3,574 (96% attack) | ≤960 (serology band covid.H5 [712,960]) | **~4.4× over** |
+| infections | 3,574 (96% attack) | serology band covid.H5 [712,960] | **~4.3× vs midpoint 836 (range 3.7–5.0)** |
 | presented symptomatic | 2,955 (82.7% of infected) | ~0.82 share of cases | share matches |
 | lab_confirmed total | 3,274 | 712 | **4.6× over** |
 | recorded_onsets | 2,879 | 197 | **14.6× over** |
@@ -39,7 +39,9 @@ medians:**
 
 The 14.6× recorded-onset overshoot factorizes as ~4.6× confirmed
 volume × ~3.2× dating share (4.6 × 3.19 ≈ 14.7); the 4.6 confirmed
-factor itself decomposes into ~4.4× infections × ~1.05 ascertainment.
+factor itself decomposes into ~4.3× infections (vs the band midpoint
+836; the combined confirmed ratio is denominator-free, the split is
+not) × ~1.05 ascertainment.
 Presented share of *infected* is 0.827 ≈ the record's ~0.82
 never-symptomatic complement — on the infected population the share is
 right-sized. Honest caveat: the record's share is of confirmed cases,
@@ -83,7 +85,8 @@ timing that makes GM asym read under.
 The residual is **(b) the observation layer plus a truth-side volume
 overshoot — not (a) symptomatic declarations**:
 
-1. **Infection volume ~4.4× (DP)** — the dominant term. The fit's
+1. **Infection volume ~4.3× (DP, vs band midpoint; 3.7–5.0 across the
+   serology band)** — the dominant term. The fit's
    scored channels do not bound total attack: takeoff is binary and
    campaign_positives saturates (~440 pool after the passive channel
    skims presenters) while infections reach 96%. Θ restored record
