@@ -536,7 +536,7 @@
    "table_ring_size": 5,
    "aboard_window_acquisitions": 0,
    "aboard_window_clean_bound": 0,
-   "first_secondary_shed_day": 0.0,
+   "first_secondary_shed_day": null,
    "index_departure_day": 5.0,
    "aboard_window_by_route": {},
    "aboard_window_by_day": {},

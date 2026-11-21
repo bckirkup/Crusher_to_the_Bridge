@@ -24,12 +24,15 @@ index's 5 days aboard: `aboard_window_acquisitions` counts every
 non-seeded infection with epoch < index departure, and the clean bound
 counts only those before any secondary could shed (pure index yield).
 
-- **The founder-pool lottery is the whole story.** Founder yields split
-  cleanly on record timing with zero overlap: the 4 cells that ignite by
-  day ≤9 — matching the record's day-13-15 confinement peak — drew
-  10/10/13/28 founders. Every cell with ≤5 founders ignites ≥day 10
-  (12 takeoff cells, days 10–28) or dies below the takeoff gate (4 cells,
-  yields 0–1). Record-timed founder median 10; late median 3; dead 1.
+- **The founder-pool lottery decides ignition day, with zero overlap.**
+  The 4 cells that ignite by day ≤9 drew 10/10/13/28 founders; every
+  cell with ≤5 founders ignites ≥day 10 (12 takeoff cells, days 10–28)
+  or dies below the takeoff gate (4 cells, yields 0–1). Founders gate
+  ignition, not peak: 3 of the 4 early-igniting cells are record-timed
+  (median infection day ≤15, before-mass 1,651–2,240); the fourth
+  (20200208, 13 founders) ignites day 9 but its mass arrives late
+  (median 23, before 283) — the record's day-13-15 peak needs the
+  founder pool AND the sustained early growth that followed it.
 - **It is not dose amplitude or growth rate.** Post-founder growth is
   similar across cells (cum10→cum15 fold median 3.8, range 1.0–17.5 with
   no yield-stratified shift), and the day-0 droplet bursts of 25/11/6 on
@@ -50,9 +53,11 @@ Late ignition is a **seed-ring / boarding-window exposure lottery**, not
 intrinsic dose timing: the single declared index's yield is a draw on a
 structurally narrow channel (droplet + caregiver, bounded by which
 embarkation-day crowds its drawn itinerary visits), and the median draw
-(2.5 founders) under-delivers the ~10+ founders record timing needs.
+(2.5 founders) under-delivers the ~10+ founders early ignition needs.
 Slow post-ignition growth is falsified — the epidemic grows normally
-once the pool exists.
+once the pool exists. Record timing (the day-13-15 peak) additionally
+needs sustained early growth: 3/4 large-founder cells had it; the fourth
+shows founders alone do not guarantee the peak position.
 
 ## Declared seam — COVID-SEED-RING-01 (probe design)
 

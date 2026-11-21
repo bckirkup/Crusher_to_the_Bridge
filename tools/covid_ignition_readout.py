@@ -104,9 +104,11 @@ def _cell_record(path: str) -> dict:
             sr.get("aboard_window_acquisitions"),
         "aboard_window_clean_bound": sr.get("aboard_window_clean_bound"),
         "first_secondary_shed_day": (
-            (sr.get("first_secondary_shed_epoch") or 0) / 24.0),  # clock-exempt: epoch->day on the hourly clock
+            (sr["first_secondary_shed_epoch"] / 24.0)  # clock-exempt: epoch->day on the hourly clock
+            if sr.get("first_secondary_shed_epoch") is not None else None),
         "index_departure_day": (
-            (sr.get("index_departure_epoch") or 0) / 24.0),  # clock-exempt: epoch->day on the hourly clock
+            (sr["index_departure_epoch"] / 24.0)  # clock-exempt: epoch->day on the hourly clock
+            if sr.get("index_departure_epoch") is not None else None),
         "aboard_window_by_route": sr.get("aboard_window_by_route") or {},
         "aboard_window_by_day": sr.get("aboard_window_by_day") or {},
         "aboard_window_day0": (sr.get("aboard_window_by_day") or {})

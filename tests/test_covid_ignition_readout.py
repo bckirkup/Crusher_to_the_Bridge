@@ -118,6 +118,19 @@ def test_dead_cell_below_takeoff_gate(mod, tmp_path):
     assert r["record_timed"] is False
 
 
+def test_absent_epochs_stay_none(mod, tmp_path):
+    cell = _cell_payload(
+        seed=4, daily={0: 1}, n_ab=0, clean=0,
+        routes={}, day0=0,
+        recorded_onsets=0, inf_days=[], before=0)
+    del cell["seed_ring"]["first_secondary_shed_epoch"]
+    del cell["seed_ring"]["index_departure_epoch"]
+    (tmp_path / "cell_4.json").write_text(json.dumps(cell))
+    r = mod._cell_record(str(tmp_path / "cell_4.json"))
+    assert r["first_secondary_shed_day"] is None
+    assert r["index_departure_day"] is None
+
+
 def test_summary_pools_routes_and_groups(mod, tmp_path):
     fast = _cell_payload(1, {0: 20, 5: 40}, 25, 20,
                          {"droplet": 25}, 20, 200, [14, 14, 14], 60)
