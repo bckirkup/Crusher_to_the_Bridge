@@ -1,0 +1,123 @@
+{
+  "design_id": "covid_seed_ring_01",
+  "task_id": "COVID-SEED-RING-01",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_theta_refit_01_dp",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "design_doc": "docs/covid/covid_seed_ring_01_design.md",
+  "supersedes": "Nothing. Executes the declared seam COVID-SEED-RING-01 from COVID-IGNITION-01 (measured b4591170): at right-sized truth theta=3.162e8 the late-ignition blocker is a founder-pool lottery on a structurally narrow channel (aboard-window routes droplet+caregiver only; median yield 2.5 vs the record-implied ~10). The discriminating probe: does declaring the index's boarding-window footprint - the day-0 crowd pathway the burst cells exercise, measured as dining assignment to the embarkation surge buffet (every record-timed cell drew a Windjammer diner; non-buffet indices max yield 3) - lift the founder draw to the record's level and land the trajectory clause with theta and every constant unchanged?",
+  "description": "COVID-SEED-RING-01: seed-paired placement probe on the verbatim boxed_s1s2 replay at the one right-sized-theta DP operating point - theta 3.162e8 x 2 arms x 20 seeds = 40 declared-replay cells on the diamond_princess_2020 contract (infection_age_days 6.8, imports 1, dwell_weighted, quarantine days 16-30). Every cell runs base_overrides (the boxed_s1s2 resolved configuration) with only the arm's declared delta on top. Arms: D0_declared (boxed_s1s2 verbatim; pairing base + drift witness vs the committed dp_theta_8p50 cells AND the in-design SEAM-01 D0 row), PLACEMENT_BUFFET (boxed + seed_patch.placement.dining_service_type 'buffet' - the index drawn only from hosts assigned to the surge buffet venue, the measured high-traffic embarkation-day footprint). PLACEMENT_BUFFET is a discriminating probe, never a score; a positive result makes the placement a declared structural fact of the replay, not a fitted constant.",
+  "prerequisites": [
+    "COVID-IGNITION-01 measured (b4591170): founder yield discriminates ignition day with zero overlap - >=10 aboard-window acquisitions -> ign <=9 (4 cells, 10/10/13/28); <=5 -> ign >=10 or dead. Founder routes droplet+caregiver only in all 20 draws; post-founder growth flat (~3.8x/5d). Verdict: boarding-window exposure lottery, not intrinsic dose timing.",
+    "The discriminating footprint is measured, not hypothesized: every record-timed cell (20200212 y10, 20200219 y28, 20200222 y10) drew an index assigned to the Windjammer surge buffet; the one non-buffet outlier (20200208, y13, MainDining_U + Aqua_Theater) ignited day 9 but peaked late. Buffet-dining indices read day-0 droplet bursts 6/25/1/9 vs <=2 elsewhere.",
+    "COVID-CAPTURE-01 measured (7b34405d): conditioned capture already exceeds 0.80 on every arm including the verbatim replay - per-infection capture is a timing readout, not machinery, and stays out of this probe's verdict.",
+    "COVID-QUAR-TAIL-SEAM-01 measured (b4591170): the confined tail is crew-service-fed only jointly (FRAQMB_DUTY 257 in band; single levers 394/425 under-damped). This probe is pre-confinement machinery and runs on the D0 base - the during-window composition is unchanged and unscored here.",
+    "Placement grammar verified: initiation.explicit_seeds[].placement.dining_service_type constrains the seed pool to hosts whose dining venue resolves to the declared service type (engines/initiation.py _seed_pool, zone-catalog resolved with name-heuristic fallback); seed_patch.placement reaches the engine through apply_arm_overrides under SEED_PATCH_KEYS; seed_ring.seeded_hosts echoes each seeded host's realized dining_zone for the audit."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [
+    316227766.01683795
+  ],
+  "thetas_note": "The single right-sized operating point - verbatim the covid_theta_refit_01 dp_theta_8p50 block theta - where CAPTURE-01, QUAR-TAIL-SEAM-01 and IGNITION-01 were measured. The placement arm pairs seed-for-seed against the in-design D0 row AND the committed 8p50 cells.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "Verbatim replay contract; a null axis on explicit seeds (COVID-SEED-GEOM-01).",
+  "imports": [
+    1
+  ],
+  "imports_note": "The record declares one index; imports>1 is a falsification probe reserved by COVID-IGNITION-01, never a fit axis, and is not an arm here.",
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The matched 20-seed set 20200205-20200224 - identical to THETA-REFIT-01/CW-01/CW-02/SEAM-01 so every arm row pairs seed-for-seed against the committed dp_theta_8p50 cells (takeoff-gated to the 16 takeoff seeds for timing comparisons).",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "funnel_echo": true,
+  "base_overrides": {
+    "scheduled_protocol_id": "SOP-017-MESSBOX",
+    "transmission_overrides": {
+      "caregiver": {
+        "service": {
+          "direction": "both",
+          "service_responder_mode": "section",
+          "service_section_cabins": [
+            10,
+            15
+          ],
+          "contact_factor_to_host": [
+            0.005,
+            0.02
+          ]
+        }
+      }
+    },
+    "observation_overrides": {
+      "retest_negative_sweeps": true,
+      "campaign_waves": [
+        "crew_wave"
+      ]
+    }
+  },
+  "base_overrides_note": "The boxed_s1s2 resolved configuration - verbatim the covid_theta_refit_01 base block (SOP-017-MESSBOX: 11-zone essential exempt list + boxed crew meals; section-bound steward service cabins [10,15] contact_factor_to_host [0.005,0.02]; retest tiers + day-34 crew wave) - applied to every cell BEFORE the arm's own overrides so each arm is a single declared delta on the committed replay. The cell worker composes base under arm (arm keys win).",
+  "cells_note": "1 theta x 2 arms x 20 seeds = 40 declared-replay cells (~30 min each on the campaign image). Cell order arm x seed. Canary = PLACEMENT_BUFFET (the probe arm; reads the placement echo + realized dining_zone audit) - read out and reported before the D0 drift-witness block submits per the campaign-preflight gate.",
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "boxed_s1s2 verbatim - the drawn-placement baseline. First arm so empty overrides per the arm grammar. Doubles as the pairing base and as the drift witness against the committed dp_theta_8p50 cells and the SEAM-01 D0 row (all three must be bit-exact under the same image-family engine)."
+    },
+    {
+      "arm_id": "PLACEMENT_BUFFET",
+      "overrides": {
+        "seed_patch": {
+          "placement": {
+            "dining_service_type": "buffet"
+          }
+        }
+      },
+      "note": "boxed_s1s2 plus the declared boarding-window footprint: the index drawn only from hosts whose assigned dining venue resolves to a buffet service type - the surge venue the record-timed burst cells exercise (Windjammer on mega_cruise_5000). A structural declaration of where the record's index spent embarkation day, not a constant; the frozen prediction below decides whether the declaration carries. Canary arm. Declared Grade C; non-scoring."
+    }
+  ],
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The prediction is the COVID-IGNITION-01 seam spec verbatim: declaring the index's high-traffic embarkation-day footprint lifts the founder-pool draw to the record-implied level - founder median -> >=10 -> ign <=9 -> before_share -> ~0.173 - with theta and every constant unchanged. Positive: index boarding-window exposure joins the replay's declared structure. Null: no placement arm can lift the founder median, naming the embarkation-day crowd geometry itself under-declared (the seam's Arm-B reading). Either result lands a declaration; neither is a fit.",
+    "founder_leg": {
+      "criterion": "Takeoff-conditional median seed_ring.aboard_window_acquisitions >= 10 on PLACEMENT_BUFFET (the record-implied founder pool; committed drawn-placement median 2.5, record-timed cells 10/10/13/28).",
+      "source": "COVID-IGNITION-01 founder-yield discriminator (measured at b4591170)."
+    },
+    "ignition_leg": {
+      "criterion": "Takeoff-conditional median ignition_day <= 9 on PLACEMENT_BUFFET (first day cumulative infections reach 50; IGNITION-01's zero-overlap bound: >=10 founders -> ign <=9).",
+      "source": "COVID-IGNITION-01 (b4591170); IGNITION_MASS 50 per tools/covid_ignition_readout.py."
+    },
+    "trajectory_leg": {
+      "criterion": "Verbatim from the v11 lineage, scored on PLACEMENT_BUFFET: among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share (onsets_before_split_day / recorded_onsets) is within 0.10 of 0.173; scored only when the row has >= 5 takeoff seeds, else 'insufficient takeoff mass'.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json"
+    },
+    "verdict_grammar": {
+      "SEED-RING-LANDED": "founder median >=10 AND ignition median <=9 AND the trajectory clause passes on PLACEMENT_BUFFET - index boarding-window exposure joins the replay's declared structure; the last measured Θ blocker clears.",
+      "FOUNDERS-LIFTED-TIMING-SHORT": "founder median >=10 but ignition or trajectory short - founders decouple from trajectory; the founder->ignition->peak chain breaks at sustained early growth (20200208's measured counterexample pattern at 13 founders, ign 9, median day 23).",
+      "NULL-PLACEMENT": "founder median <10 - no placement can lift the founder pool; the embarkation-day crowd/muster contact structure itself is under-declared and the seed spec is not the carrier.",
+      "INSUFFICIENT-TAKEOFF-MASS": "fewer than 5 takeoff cells on the scored row - report, never a band verdict on mixed cohorts."
+    },
+    "audit_thresholds": {
+      "founder_yield_median_min": 10,
+      "ignition_day_median_max": 9,
+      "share_departure_abs": 0.1,
+      "min_takeoff_cells": 5,
+      "record_total_onsets": 197,
+      "record_before_share": 0.173,
+      "committed_drawn_founder_median": 2.5
+    },
+    "audit_invariants": [
+      "seed_ring.seed_spec.placement == {'dining_service_type': 'buffet'} on every PLACEMENT_BUFFET cell; the key is absent on every D0_declared cell",
+      "every PLACEMENT_BUFFET cell's seed_ring.seeded_hosts[*].dining_zone resolves to a buffet-type venue (Windjammer on mega_cruise_5000); a non-buffet dining_zone on a placement cell is a mechanism-didn't-fire witness",
+      "index_onset_day == -1.0, index_shedding_at_day0 true, and index_departure_epoch at day 5 on every cell (seed geometry untouched apart from placement)",
+      "D0_declared cells pair bit-exact against the committed dp_theta_8p50 cells (seed-paired recorded_onsets delta 0.0) - a nonzero delta is an engine-drift witness to attribute before the placement read is trusted",
+      "quarantine_witness.window_days == [16,30] and activated true on every cell",
+      "propensity_draw.units_drawn > 0; delivery.caregiver.mode resolves on; presentation_draw_mode == 'once_per_course'; hand_reservoir_mode == 'hygiene_cycle'; delivery echo droplet_field_split matches shipped values on every arm",
+      "funnel_hosts present on every cell (funnel_echo armed): the CAPTURE-01 decomposition requires host histories + specimen log; an empty funnel on a completed cell is a mechanism-didn't-fire witness"
+    ]
+  }
+}

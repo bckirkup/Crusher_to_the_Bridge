@@ -140,6 +140,7 @@ HAZARD_FRAILTY_ARM_DISTRIBUTIONS = ("gamma", "lognormal")
 # engine's draw.
 SEED_PATCH_KEYS = frozenset({
     "count", "infection_age_days", "onset_day", "departure_day", "role",
+    "placement",
 })
 QUARANTINE_PROTOCOL_ID = "SOP-017"
 NEAR_FIELD_AIR_MODES = ("two_box", "off")
@@ -700,6 +701,23 @@ def _validate_seed_patch_value(key: str, value: Any) -> None:
         if not isinstance(value, str):
             raise ValueError(
                 f"seed_patch.role must be a string, got {value!r}",
+            )
+        return
+    if key == "placement":
+        if not isinstance(value, Mapping):
+            raise ValueError(
+                f"seed_patch.placement must be a mapping, got {value!r}",
+            )
+        unknown = set(value) - {"dining_service_type"}
+        if unknown:
+            raise ValueError(
+                f"seed_patch.placement keys {sorted(unknown)} are not "
+                "placement fields; allowed: ['dining_service_type']",
+            )
+        if not isinstance(value["dining_service_type"], str):
+            raise ValueError(
+                "seed_patch.placement.dining_service_type must be a "
+                f"string, got {value['dining_service_type']!r}",
             )
         return
     if isinstance(value, bool) or not isinstance(value, (int, float)):

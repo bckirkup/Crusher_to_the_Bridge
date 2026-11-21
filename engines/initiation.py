@@ -36,7 +36,11 @@ from engines.illness_duration import (
     DRAW_EMPIRICAL_SURVIVAL,
     IllnessDurationModel,
 )
-from engines.infection_dynamics_bridge import IllnessStatus, InfectionStatus
+from engines.infection_dynamics_bridge import (
+    IllnessStatus,
+    InfectionStatus,
+    resolve_dining_service_type,
+)
 from engines.natural_history import (
     DEFAULT_RECOVERY_DAY,
     draw_symptom_severity,
@@ -219,6 +223,7 @@ class ExplicitSeed:
     strain_id: str | None
     departure_day: float | None = None
     onset_day: float | None = None
+    placement_dining_service_type: str | None = None
 
 
 @dataclass(frozen=True)
@@ -961,6 +966,9 @@ def _resolve_seed(
         strain_id=None if strain is None else str(strain),
         departure_day=_seed_departure_day(raw, location),
         onset_day=_seed_onset_day(raw, location),
+        placement_dining_service_type=_seed_placement_service_type(
+            raw, location,
+        ),
     )
 
 
@@ -1021,6 +1029,34 @@ def _seed_onset_day(raw: dict[str, Any], location: str) -> float | None:
             "before the seed's own epoch), never nan or infinite",
         )
     return onset_day
+
+
+def _seed_placement_service_type(
+    raw: dict[str, Any], location: str,
+) -> str | None:
+    placement = raw.get("placement")
+    if placement is None:
+        return None
+    if not isinstance(placement, dict):
+        raise ValueError(
+            f"{location}.placement must be a mapping, got "
+            f"{type(placement).__name__}",
+        )
+    unknown = set(placement) - {"dining_service_type"}
+    if unknown:
+        raise ValueError(
+            f"{location}.placement keys {sorted(unknown)} are not "
+            "placement fields; allowed: ['dining_service_type']",
+        )
+    service_type = placement.get("dining_service_type")
+    if service_type is None:
+        return None
+    if not isinstance(service_type, str) or not service_type:
+        raise ValueError(
+            f"{location}.placement.dining_service_type must be a "
+            f"non-empty string, got {service_type!r}",
+        )
+    return service_type
 
 
 def resolve_initiation_plan(
@@ -1765,11 +1801,27 @@ def _draw_prevalence_role(
 def _seed_pool(seed: ExplicitSeed, engine: Any) -> list[Any]:
     from orchestrator_types import LOCATION_ISOLATED
 
-    return [
+    pool = [
         agent for agent in engine.agents
         if _eligible(agent, seed.pathogen_id, seed.role)
         and getattr(agent, "current_location", "") != LOCATION_ISOLATED
     ]
+    if seed.placement_dining_service_type is not None:
+        zone_types = {
+            str(z["name"]): resolve_dining_service_type(z)
+            for z in getattr(engine, "zones", None) or ()
+            if z.get("type") == "Dining"
+        }
+
+        def placed(agent: Any) -> bool:
+            zone = str(getattr(agent, "dining_zone", "") or "")
+            service_type = zone_types.get(
+                zone, resolve_dining_service_type({"name": zone}),
+            )
+            return service_type == seed.placement_dining_service_type
+
+        pool = [agent for agent in pool if placed(agent)]
+    return pool
 
 
 def _apply_one_seed(
@@ -1782,6 +1834,13 @@ def _apply_one_seed(
 ) -> dict[str, Any]:
     """Introduce one seed's hosts and return what it actually did."""
     pool = _seed_pool(seed, engine)
+    if seed.placement_dining_service_type is not None and not pool:
+        raise ValueError(
+            f"{location}.placement.dining_service_type = "
+            f"{seed.placement_dining_service_type!r} leaves an empty seed "
+            "pool: no eligible host is assigned to a dining venue of that "
+            "service type",
+        )
     count = min(seed.count, len(pool))
     dose = 0.0 if seed.dose is None else float(seed.dose)
     time_infected = int(
@@ -1826,6 +1885,10 @@ def _apply_one_seed(
         "strain": seed.strain_id,
         "departure_day": seed.departure_day,
         "onset_day": seed.onset_day,
+        "placement": (
+            {"dining_service_type": seed.placement_dining_service_type}
+            if seed.placement_dining_service_type is not None else None
+        ),
     }
 
 
