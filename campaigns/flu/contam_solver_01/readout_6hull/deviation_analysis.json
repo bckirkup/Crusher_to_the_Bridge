@@ -1,0 +1,819 @@
+{
+  "campaign": "flu_contam_solver_01",
+  "stage": "6hull_240cells",
+  "hulls": {
+    "greg_mortimer": {
+      "complement": 243,
+      "mean_index_cases": 4.05,
+      "native_onboard": {
+        "mean": 5,
+        "median": 1.5,
+        "min": 0,
+        "max": 49,
+        "attack_rate_pct": 2.058
+      },
+      "contamx_onboard": {
+        "mean": 4.35,
+        "median": 1.5,
+        "min": 0,
+        "max": 39,
+        "attack_rate_pct": 1.79
+      },
+      "paired_diff": {
+        "mean": -0.65,
+        "median": 0.0,
+        "min": -49,
+        "max": 30,
+        "eq": 8,
+        "ctx_gt": 6,
+        "ctx_lt": 6,
+        "wilcoxon_W": 36.0,
+        "wilcoxon_p": 0.8374
+      },
+      "routes": {
+        "native_dominant_sum": {
+          "caregiver": 24,
+          "droplet": 14,
+          "hvac_airborne": 62
+        },
+        "contamx_dominant_sum": {
+          "droplet": 13,
+          "caregiver": 18,
+          "hvac_airborne": 56
+        },
+        "airborne_dom": [
+          62,
+          56
+        ],
+        "airborne_any": [
+          99,
+          87
+        ],
+        "airborne_nonzero_seeds": [
+          16,
+          14
+        ],
+        "mean_airborne_particles": [
+          2449.8134,
+          1507.866
+        ]
+      },
+      "mean_daily_new_infections": {
+        "native": [
+          4.05,
+          0.05,
+          0.2,
+          1.05,
+          1.75,
+          0.4,
+          0.3,
+          0.3,
+          0.2,
+          0.45,
+          0.15,
+          0.15
+        ],
+        "contamx": [
+          4.05,
+          0.15,
+          1.45,
+          0.5,
+          0.8,
+          0.6,
+          0.3,
+          0.2,
+          0.15,
+          0.1,
+          0.05,
+          0.05
+        ]
+      },
+      "timing": {
+        "init_wall_s": [
+          0.206,
+          0.331
+        ],
+        "total_wall_s": [
+          33.07,
+          33.42
+        ],
+        "wall_ratio": 1.0106,
+        "total_cpu_s": [
+          34.37,
+          34.94
+        ],
+        "cpu_ratio": 1.0166,
+        "contamx_child_cpu_s": 0.006,
+        "max_rss_mb": [
+          144.2,
+          170.8
+        ]
+      },
+      "top_divergent_seeds": [
+        {
+          "seed": 8120,
+          "native": 49,
+          "contamx": 0,
+          "diff": -49,
+          "native_air_dom": 39,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8118,
+          "native": 9,
+          "contamx": 39,
+          "diff": 30,
+          "native_air_dom": 3,
+          "contamx_air_dom": 34
+        },
+        {
+          "seed": 8112,
+          "native": 1,
+          "contamx": 23,
+          "diff": 22,
+          "native_air_dom": 0,
+          "contamx_air_dom": 16
+        }
+      ]
+    },
+    "expedition_cruise_450": {
+      "complement": 450,
+      "mean_index_cases": 5.2,
+      "native_onboard": {
+        "mean": 1,
+        "median": 1.0,
+        "min": 0,
+        "max": 6,
+        "attack_rate_pct": 0.222
+      },
+      "contamx_onboard": {
+        "mean": 1.6,
+        "median": 1.0,
+        "min": 0,
+        "max": 18,
+        "attack_rate_pct": 0.356
+      },
+      "paired_diff": {
+        "mean": 0.6,
+        "median": 0.0,
+        "min": -4,
+        "max": 18,
+        "eq": 14,
+        "ctx_gt": 2,
+        "ctx_lt": 4,
+        "wilcoxon_W": 8.5,
+        "wilcoxon_p": 0.7812
+      },
+      "routes": {
+        "native_dominant_sum": {
+          "droplet": 9,
+          "caregiver": 11
+        },
+        "contamx_dominant_sum": {
+          "caregiver": 12,
+          "droplet": 20
+        },
+        "airborne_dom": [
+          0,
+          0
+        ],
+        "airborne_any": [
+          0,
+          2
+        ],
+        "airborne_nonzero_seeds": [
+          0,
+          1
+        ],
+        "mean_airborne_particles": [
+          0.0,
+          0.0001
+        ]
+      },
+      "mean_daily_new_infections": {
+        "native": [
+          5.25,
+          0.0,
+          0.05,
+          0.2,
+          0.3,
+          0.3,
+          0.0,
+          0.05,
+          0.0,
+          0.05,
+          0.0,
+          0.0
+        ],
+        "contamx": [
+          5.25,
+          0.0,
+          0.1,
+          0.4,
+          0.5,
+          0.25,
+          0.05,
+          0.05,
+          0.15,
+          0.0,
+          0.0,
+          0.05
+        ]
+      },
+      "timing": {
+        "init_wall_s": [
+          0.26,
+          0.367
+        ],
+        "total_wall_s": [
+          64.73,
+          61.93
+        ],
+        "wall_ratio": 0.9566,
+        "total_cpu_s": [
+          65.46,
+          62.55
+        ],
+        "cpu_ratio": 0.9556,
+        "contamx_child_cpu_s": 0.0056,
+        "max_rss_mb": [
+          149.8,
+          176.4
+        ]
+      },
+      "top_divergent_seeds": [
+        {
+          "seed": 8123,
+          "native": 0,
+          "contamx": 18,
+          "diff": 18,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8121,
+          "native": 6,
+          "contamx": 2,
+          "diff": -4,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8105,
+          "native": 3,
+          "contamx": 2,
+          "diff": -1,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        }
+      ]
+    },
+    "classic_cruise_1900": {
+      "complement": 1910,
+      "mean_index_cases": 14.2,
+      "native_onboard": {
+        "mean": 2.25,
+        "median": 2.0,
+        "min": 0,
+        "max": 5,
+        "attack_rate_pct": 0.118
+      },
+      "contamx_onboard": {
+        "mean": 2.2,
+        "median": 1.0,
+        "min": 0,
+        "max": 7,
+        "attack_rate_pct": 0.115
+      },
+      "paired_diff": {
+        "mean": -0.05,
+        "median": 0.0,
+        "min": -2,
+        "max": 2,
+        "eq": 14,
+        "ctx_gt": 2,
+        "ctx_lt": 4,
+        "wilcoxon_W": 10.0,
+        "wilcoxon_p": 1.0
+      },
+      "routes": {
+        "native_dominant_sum": {
+          "caregiver": 26,
+          "droplet": 18,
+          "hvac_airborne": 1
+        },
+        "contamx_dominant_sum": {
+          "caregiver": 23,
+          "droplet": 20,
+          "hvac_airborne": 1
+        },
+        "airborne_dom": [
+          1,
+          1
+        ],
+        "airborne_any": [
+          2,
+          2
+        ],
+        "airborne_nonzero_seeds": [
+          2,
+          2
+        ],
+        "mean_airborne_particles": [
+          0.0094,
+          0.001
+        ]
+      },
+      "mean_daily_new_infections": {
+        "native": [
+          14.4,
+          0.15,
+          0.25,
+          0.5,
+          0.65,
+          0.35,
+          0.0,
+          0.05,
+          0.05,
+          0.0,
+          0.05,
+          0.0
+        ],
+        "contamx": [
+          14.35,
+          0.15,
+          0.35,
+          0.35,
+          0.6,
+          0.35,
+          0.05,
+          0.15,
+          0.05,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "timing": {
+        "init_wall_s": [
+          0.385,
+          0.593
+        ],
+        "total_wall_s": [
+          299.24,
+          304.9
+        ],
+        "wall_ratio": 1.0189,
+        "total_cpu_s": [
+          300.69,
+          306.22
+        ],
+        "cpu_ratio": 1.0184,
+        "contamx_child_cpu_s": 0.0114,
+        "max_rss_mb": [
+          226.8,
+          256.0
+        ]
+      },
+      "top_divergent_seeds": [
+        {
+          "seed": 8111,
+          "native": 5,
+          "contamx": 7,
+          "diff": 2,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8112,
+          "native": 3,
+          "contamx": 1,
+          "diff": -2,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8122,
+          "native": 3,
+          "contamx": 5,
+          "diff": 2,
+          "native_air_dom": 1,
+          "contamx_air_dom": 1
+        }
+      ]
+    },
+    "spirit_cruise_3000": {
+      "complement": 3000,
+      "mean_index_cases": 20.4,
+      "native_onboard": {
+        "mean": 3.05,
+        "median": 2.5,
+        "min": 0,
+        "max": 8,
+        "attack_rate_pct": 0.102
+      },
+      "contamx_onboard": {
+        "mean": 2.5,
+        "median": 2.0,
+        "min": 0,
+        "max": 9,
+        "attack_rate_pct": 0.083
+      },
+      "paired_diff": {
+        "mean": -0.55,
+        "median": 0.0,
+        "min": -4,
+        "max": 2,
+        "eq": 9,
+        "ctx_gt": 4,
+        "ctx_lt": 7,
+        "wilcoxon_W": 16.0,
+        "wilcoxon_p": 0.1475
+      },
+      "routes": {
+        "native_dominant_sum": {
+          "caregiver": 40,
+          "droplet": 21
+        },
+        "contamx_dominant_sum": {
+          "caregiver": 37,
+          "droplet": 13
+        },
+        "airborne_dom": [
+          0,
+          0
+        ],
+        "airborne_any": [
+          1,
+          2
+        ],
+        "airborne_nonzero_seeds": [
+          1,
+          2
+        ],
+        "mean_airborne_particles": [
+          0.0006,
+          0.0021
+        ]
+      },
+      "mean_daily_new_infections": {
+        "native": [
+          20.55,
+          0.05,
+          0.65,
+          0.65,
+          0.75,
+          0.4,
+          0.1,
+          0.05,
+          0.05,
+          0.2,
+          0.0,
+          0.0
+        ],
+        "contamx": [
+          20.55,
+          0.0,
+          0.45,
+          0.65,
+          0.8,
+          0.3,
+          0.05,
+          0.0,
+          0.0,
+          0.05,
+          0.0,
+          0.05
+        ]
+      },
+      "timing": {
+        "init_wall_s": [
+          0.513,
+          0.823
+        ],
+        "total_wall_s": [
+          488.09,
+          512.57
+        ],
+        "wall_ratio": 1.0501,
+        "total_cpu_s": [
+          490.86,
+          515.03
+        ],
+        "cpu_ratio": 1.0492,
+        "contamx_child_cpu_s": 0.0237,
+        "max_rss_mb": [
+          297.3,
+          326.3
+        ]
+      },
+      "top_divergent_seeds": [
+        {
+          "seed": 8124,
+          "native": 6,
+          "contamx": 2,
+          "diff": -4,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8109,
+          "native": 4,
+          "contamx": 1,
+          "diff": -3,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8114,
+          "native": 6,
+          "contamx": 3,
+          "diff": -3,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        }
+      ]
+    },
+    "diamond_princess": {
+      "complement": 3810,
+      "mean_index_cases": 25.45,
+      "native_onboard": {
+        "mean": 44.4,
+        "median": 29.5,
+        "min": 3,
+        "max": 191,
+        "attack_rate_pct": 1.165
+      },
+      "contamx_onboard": {
+        "mean": 46.6,
+        "median": 29.5,
+        "min": 2,
+        "max": 140,
+        "attack_rate_pct": 1.223
+      },
+      "paired_diff": {
+        "mean": 2.2,
+        "median": 1.0,
+        "min": -82,
+        "max": 70,
+        "eq": 0,
+        "ctx_gt": 11,
+        "ctx_lt": 9,
+        "wilcoxon_W": 90.0,
+        "wilcoxon_p": 0.5752
+      },
+      "routes": {
+        "native_dominant_sum": {
+          "hvac_airborne": 741,
+          "droplet": 82,
+          "caregiver": 65
+        },
+        "contamx_dominant_sum": {
+          "caregiver": 90,
+          "hvac_airborne": 744,
+          "droplet": 98
+        },
+        "airborne_dom": [
+          741,
+          744
+        ],
+        "airborne_any": [
+          886,
+          924
+        ],
+        "airborne_nonzero_seeds": [
+          20,
+          20
+        ],
+        "mean_airborne_particles": [
+          11869.3948,
+          6960.1482
+        ]
+      },
+      "mean_daily_new_infections": {
+        "native": [
+          35.25,
+          2.85,
+          2.65,
+          3.15,
+          3.8,
+          5.4,
+          4.75,
+          2.35,
+          1.75,
+          3.05,
+          2.8,
+          2.05
+        ],
+        "contamx": [
+          33.5,
+          3.05,
+          2.6,
+          2.5,
+          4.0,
+          5.15,
+          4.35,
+          4.3,
+          3.25,
+          3.2,
+          3.2,
+          2.95
+        ]
+      },
+      "timing": {
+        "init_wall_s": [
+          0.669,
+          1.064
+        ],
+        "total_wall_s": [
+          627.55,
+          643.46
+        ],
+        "wall_ratio": 1.0254,
+        "total_cpu_s": [
+          635.59,
+          651.65
+        ],
+        "cpu_ratio": 1.0253,
+        "contamx_child_cpu_s": 0.0502,
+        "max_rss_mb": [
+          328.5,
+          353.0
+        ]
+      },
+      "top_divergent_seeds": [
+        {
+          "seed": 8108,
+          "native": 191,
+          "contamx": 109,
+          "diff": -82,
+          "native_air_dom": 161,
+          "contamx_air_dom": 81
+        },
+        {
+          "seed": 8113,
+          "native": 70,
+          "contamx": 140,
+          "diff": 70,
+          "native_air_dom": 65,
+          "contamx_air_dom": 119
+        },
+        {
+          "seed": 8109,
+          "native": 47,
+          "contamx": 97,
+          "diff": 50,
+          "native_air_dom": 34,
+          "contamx_air_dom": 81
+        }
+      ]
+    },
+    "explorer_seas_06": {
+      "complement": 4428,
+      "mean_index_cases": 30.8,
+      "native_onboard": {
+        "mean": 2.95,
+        "median": 3.5,
+        "min": 0,
+        "max": 5,
+        "attack_rate_pct": 0.067
+      },
+      "contamx_onboard": {
+        "mean": 3.3,
+        "median": 3.0,
+        "min": 0,
+        "max": 9,
+        "attack_rate_pct": 0.075
+      },
+      "paired_diff": {
+        "mean": 0.35,
+        "median": 0.0,
+        "min": -2,
+        "max": 4,
+        "eq": 8,
+        "ctx_gt": 7,
+        "ctx_lt": 5,
+        "wilcoxon_W": 25.5,
+        "wilcoxon_p": 0.3257
+      },
+      "routes": {
+        "native_dominant_sum": {
+          "caregiver": 39,
+          "droplet": 20
+        },
+        "contamx_dominant_sum": {
+          "caregiver": 41,
+          "droplet": 25
+        },
+        "airborne_dom": [
+          0,
+          0
+        ],
+        "airborne_any": [
+          5,
+          5
+        ],
+        "airborne_nonzero_seeds": [
+          3,
+          4
+        ],
+        "mean_airborne_particles": [
+          0.0052,
+          0.0046
+        ]
+      },
+      "mean_daily_new_infections": {
+        "native": [
+          31.1,
+          0.05,
+          0.3,
+          1.05,
+          0.75,
+          0.25,
+          0.15,
+          0.05,
+          0.05,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "contamx": [
+          31.15,
+          0.05,
+          0.55,
+          0.75,
+          1.05,
+          0.15,
+          0.15,
+          0.05,
+          0.0,
+          0.1,
+          0.0,
+          0.1
+        ]
+      },
+      "timing": {
+        "init_wall_s": [
+          0.715,
+          0.989
+        ],
+        "total_wall_s": [
+          762.04,
+          790.89
+        ],
+        "wall_ratio": 1.0379,
+        "total_cpu_s": [
+          765.48,
+          793.27
+        ],
+        "cpu_ratio": 1.0363,
+        "contamx_child_cpu_s": 0.0274,
+        "max_rss_mb": [
+          359.3,
+          385.3
+        ]
+      },
+      "top_divergent_seeds": [
+        {
+          "seed": 8114,
+          "native": 5,
+          "contamx": 9,
+          "diff": 4,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8107,
+          "native": 3,
+          "contamx": 5,
+          "diff": 2,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        },
+        {
+          "seed": 8109,
+          "native": 2,
+          "contamx": 4,
+          "diff": 2,
+          "native_air_dom": 0,
+          "contamx_air_dom": 0
+        }
+      ]
+    }
+  },
+  "fleet_totals": {
+    "pairs": 120,
+    "cells": 240,
+    "pooled_mean_diff": 0.317,
+    "pooled_wilcoxon_W": 1120.0,
+    "pooled_wilcoxon_p": 0.9048,
+    "native_wall_h": 12.637,
+    "contamx_wall_h": 13.04,
+    "wall_ratio": 1.0318,
+    "native_cpu_vcpu_h": 12.736,
+    "contamx_cpu_vcpu_h": 13.131,
+    "cpu_ratio": 1.0311,
+    "contamx_child_cpu_s": 2.486,
+    "contamx_child_cpu_pct": 0.00526
+  }
+}
