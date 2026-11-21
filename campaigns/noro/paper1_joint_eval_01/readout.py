@@ -30,6 +30,7 @@ import argparse
 import hashlib
 import json
 import math
+import statistics
 import sys
 import zipfile
 from collections import Counter
@@ -75,6 +76,7 @@ def read_cell(path: Path) -> dict[str, Any]:
     return {
         "path": str(path),
         "seed": params.get("seed"),
+        "num_epochs": len(series),
         "engine_git_sha": params.get("engine_git_sha"),
         "families_missing": [
             f for f in FAMILIES
@@ -98,6 +100,7 @@ def inputs_ok(cell: dict[str, Any], tier: dict[str, Any], sha: str) -> bool:
     return bool(
         cell["arm"].get("changed_paths") == meta["changed_paths"]
         and cell["arm"].get("effective_sha256") == sha
+        and cell["num_epochs"] == meta["epochs"]
         and cell["effective"].get("mismatched") == []
         and cell["effective"].get("runner_changed_paths") == []
         and cell["roles"].get("initialised") == meta["intended_roles"]
@@ -167,7 +170,7 @@ def rate_row(
             round(zero_event_upper(n), 5) if n and posted == 0 else None
         ),
         "first_role": dict(Counter(str(c["first_role"]) for c in cells)),
-        "reported_ar_median": ars[len(ars) // 2] if ars else None,
+        "reported_ar_median": statistics.median(ars) if ars else None,
         "reported_ar_max": ars[-1] if ars else None,
         "swab_detected_voyages": sum(
             1 for c in cells if c["environment"].get("swab_detected_total")
@@ -305,26 +308,37 @@ VOYAGE_KEYS = (
 )
 
 
+FINGERPRINT_EXCLUDED_PARAMETERS = ("engine_git_sha", "tier_id")
+
+
 def archive_fingerprint(summary: dict[str, Any]) -> str:
     """``cell.fingerprint`` applied to an archived ``summary.json``."""
     body = {k: summary[k] for k in VOYAGE_KEYS if k in summary}
     body["parameters"] = {
         k: v for k, v in (body.get("parameters") or {}).items()
-        if k != "engine_git_sha"
+        if k not in FINGERPRINT_EXCLUDED_PARAMETERS
     }
     blob = json.dumps(body, sort_keys=True)
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
-def reference_fingerprints(root: Path) -> dict[str, str]:
-    """seed -> fingerprint over a prior campaign's run zips under *root*."""
-    out = {}
+def reference_fingerprints(root: Path, source_tier: str) -> dict[str, str]:
+    """seed -> fingerprint over the prior campaign's zips of *source_tier*.
+
+    The prior campaign reuses its seeds across arms, so archives of any
+    other tier are skipped; a seed archived twice for the tier is an error.
+    """
+    out: dict[str, str] = {}
     for path in sorted(root.rglob("*.zip")):
         with zipfile.ZipFile(path) as archive:
             summary = json.loads(archive.read("summary.json"))
-        seed = (summary.get("parameters") or {}).get("seed")
-        if seed is not None:
-            out[str(seed)] = archive_fingerprint(summary)
+        params = summary.get("parameters") or {}
+        if params.get("tier_id") != source_tier or params.get("seed") is None:
+            continue
+        seed = str(params["seed"])
+        if seed in out:
+            raise SystemExit(f"two reference archives for seed {seed}")
+        out[seed] = archive_fingerprint(summary)
     return out
 
 
@@ -342,6 +356,7 @@ def reproduction_rows(
         out.append({
             "tier": tier_id,
             "kind": "measured",
+            "n_expected": len(tier["seeds"]),
             "n_reference": len(want),
             "n_compared": len(compared),
             "n_identical": sum(1 for s in compared if want[s] == got[s]),
@@ -414,7 +429,7 @@ def build_readout(manifest: dict[str, Any], root: Path) -> dict[str, Any]:
         "outcomes_extractable": all(r["outcomes_extractable"] for r in completion),
         "attempts_accounted": all(r["attempts_accounted"] for r in completion),
         "pairs_meaningful": pairs_ok and all(
-            r["n_reference"] and r["n_compared"] == r["n_reference"]
+            r["n_expected"] and r["n_compared"] == r["n_expected"]
             for r in reproduction
         ),
     }
@@ -508,9 +523,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     if args.reference_root is not None:
-        reference = reference_fingerprints(args.reference_root)
         for tier in manifest["tiers"].values():
             if tier["joint_eval"]["arm"] == "reproduction":
+                reference = reference_fingerprints(
+                    args.reference_root,
+                    tier["joint_eval"]["source"].split("#", 1)[1],
+                )
                 tier["joint_eval"]["reference_fingerprints"] = {
                     str(s): reference[str(s)]
                     for s in tier["seeds"] if str(s) in reference

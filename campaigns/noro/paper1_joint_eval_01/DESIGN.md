@@ -39,7 +39,7 @@ continuation. No outcome voids the freeze. This is not an anchor fit.
   the manifest plus five tier axes (`pathogen_overrides`,
   `boarding_prevalence_points`, `boarding_mechanism_rungs`,
   `never_symptomatic_fractions`, `sensitivity_profile`). Voyage
-  fingerprints (engine commit excluded) are compared seed by seed with
+  fingerprints (engine commit and tier id excluded) are compared seed by seed with
   fingerprints computed from that campaign's archive at the gated stage.
 - **Held fixed outside the block** (contract section 2.5): dose 7.57,
   `syndromic_comp65`, bundle `active_profiles` / `norwalk_gi` minus
@@ -136,7 +136,10 @@ carries it and a `families` block with `present` or `missing` per family.
   `neither` (no role reached 3%), `missing` (no usable role series or
   complement; never folded into `neither`).
 - **Reporting curve day 0** includes pre-boarding AGE declarations and is
-  labelled; the embarkation counts are reported separately by role.
+  labelled. The declarations are counted by role from the initialised
+  engine (`preboarding_declared_*`); the series' first row
+  (`epoch0_cumulative_reported_*`) is reported beside them because it also
+  holds any sick-call report made during epoch 0.
 - **Swabs:** every swab is counted per epoch; each swab with recovered
   copies keeps a row with zone, epoch, surface class, density (copies per
   cm2), recovered copies and LOD (copies per swab), `detected` and
@@ -150,10 +153,10 @@ carries it and a `families` block with `present` or `missing` per family.
 
 | Criterion | Rule |
 |---|---|
-| intended inputs used | every archive: arm differences equal the declaration; effective config resolved with no mismatch; effective hash equals the tier's; intended role counts on agents and in the payload; one engine commit per tier |
+| intended inputs used | every archive: voyage length equals the tier's epochs; arm differences equal the declaration; effective config resolved with no mismatch; effective hash equals the tier's; intended role counts on agents and in the payload; one engine commit per tier |
 | outcomes extractable | every archive: all six families `present` |
 | independent attempts accounted | seeds read are exactly the tier's seeds, each once; a failed child is listed with its reason, retried at most once on the same seed, never replaced |
-| paired comparisons meaningful | the three lengths hold the same seed set per hull and stratum and all are read; the reproduction arm is compared seed by seed |
+| paired comparisons meaningful | the three lengths hold the same seed set per hull and stratum and all are read; the reproduction arm is compared on every one of its seeds |
 
 Complete or incomplete. A quiet stratum that posts, or a large hull with
 zero events, does not make the bridge incomplete.

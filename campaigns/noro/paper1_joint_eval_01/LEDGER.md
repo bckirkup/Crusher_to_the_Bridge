@@ -61,7 +61,7 @@ PR, `PYTHONHASHSEED=1`. Each line is measured on the one seed named.
 - [x] `cell.py --verify-draws`, `expedition_cruise_450`, 96 epochs, seed
   2000000: instrumented and control voyage fingerprints equal
   (`3cbbe820…`). One seed, one hull.
-- [x] `tests/test_paper1_joint_eval_campaign.py`: 25 passed.
+- [x] `tests/test_paper1_joint_eval_campaign.py`: 30 passed.
 
 Not exercised locally: a posted voyage, a detected swab, a crew onset, and
 any run longer than 96 epochs.

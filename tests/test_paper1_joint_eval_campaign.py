@@ -222,8 +222,11 @@ def test_first_role_is_missing_not_neither_without_a_role_series():
 
 def test_reporting_curve_day_zero_holds_the_embarkation_reports():
     series = _series([2] * 24 + [5] * 24, [0] * 48)
-    block = cell.curves(series, {"clinical_cases": []}, 24)
-    assert block["preboarding_reported_passenger"] == 2
+    block = cell.curves(
+        series, {"clinical_cases": []}, 24, {"passenger": 1, "crew": 0},
+    )
+    assert block["preboarding_declared_passenger"] == 1
+    assert block["epoch0_cumulative_reported_passenger"] == 2
     assert block["reported_daily_passenger"] == [2, 3]
     assert "pre-boarding" in block["day0_label"]
     assert block["line_list_received"] is True
@@ -280,7 +283,78 @@ def test_worker_and_readout_fingerprints_agree_and_ignore_the_commit():
     assert cell.fingerprint(voyage) == readout.archive_fingerprint(archived)
     later = copy.deepcopy(voyage)
     later["parameters"]["engine_git_sha"] = "bbb"
+    later["parameters"]["tier_id"] = "renamed"
     assert cell.fingerprint(later) == cell.fingerprint(voyage)
     moved = copy.deepcopy(voyage)
     moved["timeseries"][0]["v"] = 0.2
     assert cell.fingerprint(moved) != cell.fingerprint(voyage)
+
+
+def test_selection_refuses_a_census_that_is_not_the_declared_frame(tmp_path):
+    for hull, start in build.CENSUS_START.items():
+        seeds = list(range(start, start + build.CENSUS_SEEDS_PER_HULL))
+        if hull == "meg":
+            seeds[-1] = seeds[0]
+        (tmp_path / f"je_census_{hull}_chunk000000.jsonl").write_text(
+            "\n".join(json.dumps(_census_row(s, None)) for s in seeds),
+        )
+    with pytest.raises(SystemExit, match="meg"):
+        build.select(tmp_path)
+
+
+def test_median_of_an_even_ensemble_averages_the_middle_pair():
+    cells = [
+        {"posted_epoch": None, "first_role": "neither", "environment": {},
+         "burden": {"passenger_complement": 90, "crew_complement": 10,
+                    "rep_pax_n": n, "rep_crew_n": 0}}
+        for n in (0, 2, 4, 10)
+    ]
+    row = readout.rate_row("t", {"hull": "h", "epochs": 168}, cells)
+    assert row["reported_ar_median"] == pytest.approx(0.03)
+
+
+def _archive(root, tier_id, seed, value):
+    import zipfile
+    path = root / tier_id
+    path.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path / f"s{seed}.zip", "w") as archive:
+        archive.writestr("summary.json", json.dumps({
+            "parameters": {"seed": seed, "tier_id": tier_id},
+            "timeseries": [{"epoch": 0, "v": value}],
+        }))
+
+
+def test_reference_fingerprints_come_from_the_source_tier_only(tmp_path):
+    _archive(tmp_path, "continuous", 1, 0.1)
+    _archive(tmp_path, "discrete", 1, 0.9)
+    got = readout.reference_fingerprints(tmp_path, "continuous")
+    want = readout.archive_fingerprint({
+        "parameters": {"seed": 1, "tier_id": "anything"},
+        "timeseries": [{"epoch": 0, "v": 0.1}],
+    })
+    assert got == {"1": want}
+
+
+def test_partial_reproduction_evidence_does_not_pass_the_gate():
+    tiers = {"r": {"seeds": [1, 2], "joint_eval": {
+        "arm": "reproduction", "reference_fingerprints": {"1": "x"},
+    }}}
+    cells = {"r": [{"seed": 1, "fingerprint": "x"},
+                   {"seed": 2, "fingerprint": "y"}]}
+    row = readout.reproduction_rows(tiers, cells)[0]
+    assert (row["n_expected"], row["n_compared"]) == (2, 1)
+
+
+def test_a_shortened_voyage_is_not_an_intended_input(stage_b):
+    manifest, _ = stage_b
+    tier = manifest["tiers"]["fl_je_exp_7d_quiet"]
+    meta = tier["joint_eval"]
+    good = {
+        "num_epochs": 168, "engine_git_sha": "abc",
+        "arm": {"changed_paths": [], "effective_sha256": "h"},
+        "effective": {"mismatched": [], "runner_changed_paths": []},
+        "roles": {"initialised": meta["intended_roles"],
+                  "payload": meta["intended_roles"]},
+    }
+    assert readout.inputs_ok(good, tier, "h")
+    assert not readout.inputs_ok({**good, "num_epochs": 48}, tier, "h")

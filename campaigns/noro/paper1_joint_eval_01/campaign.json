@@ -15,7 +15,7 @@
  "blocks": {
   "census_exp": {
    "worker": "tools/noro_diag/supply_seed_scan.py",
-   "artifact": "supply_seed_scan_chunk{seed}.jsonl",
+   "artifact": "je_census_exp_chunk{seed:06d}.jsonl",
    "seeds": [
     0,
     1,
@@ -232,7 +232,7 @@
   },
   "census_cls": {
    "worker": "tools/noro_diag/supply_seed_scan.py",
-   "artifact": "supply_seed_scan_chunk{seed}.jsonl",
+   "artifact": "je_census_cls_chunk{seed:06d}.jsonl",
    "seeds": [
     0,
     1,
@@ -449,7 +449,7 @@
   },
   "census_spr": {
    "worker": "tools/noro_diag/supply_seed_scan.py",
-   "artifact": "supply_seed_scan_chunk{seed}.jsonl",
+   "artifact": "je_census_spr_chunk{seed:06d}.jsonl",
    "seeds": [
     0,
     1,
@@ -666,7 +666,7 @@
   },
   "census_meg": {
    "worker": "tools/noro_diag/supply_seed_scan.py",
-   "artifact": "supply_seed_scan_chunk{seed}.jsonl",
+   "artifact": "je_census_meg_chunk{seed:06d}.jsonl",
    "seeds": [
     0,
     1,

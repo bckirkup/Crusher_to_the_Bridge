@@ -53,6 +53,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from engines.initiation import preboarding_reportable_ids  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
@@ -82,8 +83,10 @@ THRESHOLD = 0.03
 MEMBER = "joint_eval.json.gz"
 ABSENT = "<absent>"
 DAY0_LABEL = (
-    "day 0 includes pre-boarding AGE declarations seeded at embarkation "
-    "(preboarding_reportable_ids); see preboarding_reported_*"
+    "day 0 includes pre-boarding AGE declarations seeded at embarkation; "
+    "preboarding_declared_* counts them (read from the initialised engine), "
+    "epoch0_cumulative_reported_* is the series' first row, which also "
+    "holds any sick-call report made during epoch 0"
 )
 FIRST_ROLE_CLASSES = (
     "passenger_first", "crew_first", "same_epoch", "neither", "missing",
@@ -398,9 +401,19 @@ def _daily_onsets(
     return out
 
 
+def preboarding_declared(sim: Any) -> dict[str, int]:
+    """Pre-boarding reportable AGE declarations by role, at initialise."""
+    ids = preboarding_reportable_ids(sim.engine)
+    crew = sum(
+        1 for a in sim.engine.agents
+        if int(a.agent_id) in ids and a.role == "crew"
+    )
+    return {"passenger": len(ids) - crew, "crew": crew}
+
+
 def curves(
     series: list[dict[str, Any]], line_list: dict[str, Any],
-    epochs_per_day: int,
+    epochs_per_day: int, declared: dict[str, int] | None = None,
 ) -> dict[str, Any]:
     n_days = math.ceil(len(series) / epochs_per_day) if series else 0
     first = series[0] if series else {}
@@ -417,10 +430,12 @@ def curves(
         "reporting_source": "per-epoch cumulative_reported_cases_* series",
         "onset_source": "run.sentinel_line_list clinical_cases.onset_epoch",
         "day0_label": DAY0_LABEL,
-        "preboarding_reported_passenger": int(
+        "preboarding_declared_passenger": (declared or {}).get("passenger"),
+        "preboarding_declared_crew": (declared or {}).get("crew"),
+        "epoch0_cumulative_reported_passenger": int(
             first.get("cumulative_reported_cases_passenger") or 0,
         ),
-        "preboarding_reported_crew": int(
+        "epoch0_cumulative_reported_crew": int(
             first.get("cumulative_reported_cases_crew") or 0,
         ),
         "reported_daily_passenger": _daily_increments(
@@ -493,11 +508,16 @@ VOYAGE_KEYS = (
 )
 
 
-def fingerprint(voyage: dict[str, Any]) -> str:
-    """Hash of the voyage blocks, engine commit excluded.
+FINGERPRINT_EXCLUDED_PARAMETERS = ("engine_git_sha", "tier_id")
 
-    ``parameters.engine_git_sha`` names the commit, not the draw, so a
-    reproduction arm re-run on a later commit can still be bit-identical.
+
+def fingerprint(voyage: dict[str, Any]) -> str:
+    """Hash of the voyage blocks, with run labels excluded.
+
+    ``parameters.engine_git_sha`` names the commit and
+    ``parameters.tier_id`` names the tier; neither is part of the draw, so
+    a reproduction arm re-run on a later commit under a new tier id can
+    still be bit-identical.
     Hashed after a JSON round trip so the same function applied to an
     archived ``summary.json`` (``readout.py``) gives the same digest.
     """
@@ -506,7 +526,7 @@ def fingerprint(voyage: dict[str, Any]) -> str:
     ))
     body["parameters"] = {
         k: v for k, v in (body.get("parameters") or {}).items()
-        if k != "engine_git_sha"
+        if k not in FINGERPRINT_EXCLUDED_PARAMETERS
     }
     blob = json.dumps(body, sort_keys=True)
     return hashlib.sha256(blob.encode()).hexdigest()
@@ -546,6 +566,7 @@ def run_voyage(
                     sim, tier["joint_eval"]["intended_roles"],
                     "initialised agents",
                 )
+            declared = preboarding_declared(sim)
             if instrumented:
                 sim.epoch_observer = recorder.observe
             started = time.perf_counter()
@@ -575,6 +596,7 @@ def run_voyage(
         "checks": checks,
         "recorder": recorder,
         "line_list": line_list,
+        "preboarding_declared": declared,
         "epochs_per_day": epochs_per_day,
         "wall_clock_s": round(wall, 2),
     }
@@ -630,7 +652,10 @@ def harvest(
     """(summary-side scalars, member payload) for the six families."""
     voyage = run["voyage"]
     series = voyage["timeseries"]
-    curve_block = curves(series, run["line_list"], run["epochs_per_day"])
+    curve_block = curves(
+        series, run["line_list"], run["epochs_per_day"],
+        run["preboarding_declared"],
+    )
     env_block = environment(run["recorder"])
     posted_epoch = voyage["derived"].get("vsp_trigger_epoch")
     effective = run["checks"]["effective_config"]
@@ -646,8 +671,10 @@ def harvest(
         "curves": {
             k: curve_block[k] for k in (
                 "line_list_requested", "line_list_received", "n_days",
-                "day0_label", "preboarding_reported_passenger",
-                "preboarding_reported_crew", "line_list_cases",
+                "day0_label", "preboarding_declared_passenger",
+                "preboarding_declared_crew",
+                "epoch0_cumulative_reported_passenger",
+                "epoch0_cumulative_reported_crew", "line_list_cases",
             )
         },
         "environment": {

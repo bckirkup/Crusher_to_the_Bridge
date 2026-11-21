@@ -115,7 +115,8 @@ SELECTION_RULE = {
 
 # The bridge gate is technical completion only. No outcome voids the freeze.
 TECHNICAL_COMPLETION = {
-    "intended_inputs_used": "every archive: arm changed_paths equal the "
+    "intended_inputs_used": "every archive: voyage length equals the "
+                            "tier's epochs, arm changed_paths equal the "
                             "declaration, effective config resolved with "
                             "no mismatch, effective hash equals the "
                             "manifest tier's, intended role counts on "
@@ -422,10 +423,15 @@ def select(census_dir: Path) -> dict[str, Any]:
             if line.strip()
         ]
         errors = [r for r in rows if r.get("error")]
-        if errors or len(rows) != CENSUS_SEEDS_PER_HULL:
+        frame = list(range(
+            CENSUS_START[hull], CENSUS_START[hull] + CENSUS_SEEDS_PER_HULL,
+        ))
+        if errors or sorted(int(r["seed"]) for r in rows) != frame:
             raise SystemExit(
-                f"{hull}: census incomplete ({len(rows)} rows, "
-                f"{len(errors)} errors); selection needs the full frame",
+                f"{hull}: census is not the declared frame ({len(rows)} "
+                f"rows, {len({int(r['seed']) for r in rows})} distinct "
+                f"seeds, {len(errors)} errors); selection needs every "
+                "frame seed exactly once",
             )
         hulls[hull] = select_hull(rows)
     return {"campaign": NAME, "rule": SELECTION_RULE, "hulls": hulls}
@@ -444,7 +450,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
         )
         blocks[f"census_{hull}"] = {
             "worker": "tools/noro_diag/supply_seed_scan.py",
-            "artifact": "supply_seed_scan_chunk{seed}.jsonl",
+            "artifact": f"je_census_{hull}_chunk{{seed:06d}}.jsonl",
             "seeds": list(range(CENSUS_SEEDS_PER_HULL // CENSUS_CHUNK)),
             "args": {
                 "tier": census_id, "arm": "station_lots", "hull": hull,
