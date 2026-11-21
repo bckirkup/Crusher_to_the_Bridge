@@ -735,7 +735,12 @@ def main() -> int:
                for leaf in leaves]
     print_leaf_results(results, args.markdown)
     if args.markdown:
-        return 0
+        # Table rows only; the per-hull, population and annex checks belong
+        # to the plain run, but a bad row must not exit clean here either.
+        bad = gaps + [r["path"] for r in results if not r["ok"]]
+        for item in bad:
+            print(f"FAILED: {item}", file=sys.stderr)
+        return 1 if bad else 0
 
     annex, failed, pending = check_hulls(block, leaves, population)
     failed += check_annex(annex, args.write_annex)
