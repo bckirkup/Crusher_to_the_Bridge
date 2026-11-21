@@ -210,6 +210,12 @@ def tier_summary(
             for sop in RESPONSE_SOPS
         },
         "effective_state": _states(cells),
+        "embarkation_declarations_max": {
+            role: max(
+                (c["preboarding_reportable"][role] for c in cells), default=0,
+            )
+            for role in ROLES
+        },
         "epoch_zero_reported_max": {
             role: max((c["epoch_zero_reported"][role] for c in cells), default=0)
             for role in ROLES
@@ -410,23 +416,27 @@ def build_markdown(readout: dict[str, Any]) -> str:
         "(cross-posting comparison only):",
         "",
         "| Tier | Pax reported AR | Crew reported AR | "
-        "Epoch-0 reports, max (pax / crew) | Cells with SOP-007 / SOP-009 |",
-        "|---|---|---|---|---|",
+        "Embarkation declarations, max (pax / crew) | "
+        "Reported by end of epoch 0, max (pax / crew) | "
+        "Cells with SOP-007 / SOP-009 |",
+        "|---|---|---|---|---|---|",
         "| Posting | " + " | ".join(
             _fmt(
                 target["posting_figures"][role]["cases"]
                 / target["posting_figures"][role]["denominator"], 4,
             )
             for role in ROLES
-        ) + " | | |",
+        ) + " | | | |",
     ]
     for tier, block in readout["tiers"].items():
+        declared = block["embarkation_declarations_max"]
         zero = block["epoch_zero_reported_max"]
         sop = block["response_sop_cells"]
         lines.append(
             f"| `{tier}` | "
             f"{_span(block['passenger']['reported_attack_rate_vs_posting'], 4)} | "
             f"{_span(block['crew']['reported_attack_rate_vs_posting'], 4)} | "
+            f"{declared['passenger']} / {declared['crew']} | "
             f"{zero['passenger']} / {zero['crew']} | "
             f"{sop['SOP-007']} / {sop['SOP-009']} |",
         )
@@ -461,9 +471,10 @@ def build_markdown(readout: dict[str, Any]) -> str:
         )
     lines += [
         "",
-        "Epoch-0 reports are embarkation declarations (crew only; the "
-        "VSP 4.1.1.2 reportable clause does not cover passengers), not "
-        "onboard sick-call.",
+        "Embarkation declarations are the engine's pre-boarding report "
+        "counter (crew only; the VSP 4.1.1.2 reportable clause does not "
+        "cover passengers). Reports by the end of epoch 0 add sick-call "
+        "reports made during that epoch.",
         "",
         "Explorer minus mega on shared seed labels. The two hulls differ in "
         "geometry and in complement, so a difference is attributed to the "
