@@ -8,6 +8,8 @@ name: campaign-collect
 # An optional exact_key input fetches ONE reviewed object under a byte
 # ceiling, verifies nothing beyond its own integrity, and exposes it only
 # as a workflow artifact — never inline in an issue body.
+# solver_return fetches the reviewed whole-hull archive and seed endpoint
+# table with fixed sizes and SHA-256 digests, published as one artifact.
 #
 # Reduction lane (D3): derived_key fetches ONE object under
 # campaign/_derived/reducer/v1/ at a per-kind ceiling (pages 5MiB,
@@ -20,6 +22,10 @@ name: campaign-collect
 on:
   workflow_dispatch:
     inputs:
+      solver_return:
+        description: "Return the verified whole-hull package and voyage-wide seed table for Edison"
+        type: boolean
+        default: false
       max_prefixes:
         description: "cap on campaign prefixes enumerated this pass"
         required: false
@@ -57,7 +63,8 @@ permissions:
   issues: write
 
 concurrency:
-  group: campaign-collect
+  # A weekly inventory awaiting review must not block an explicit data return.
+  group: ${{ inputs.solver_return && 'campaign-collect-solver-return' || 'campaign-collect' }}
   cancel-in-progress: false
 
 jobs:
@@ -96,6 +103,7 @@ jobs:
           fi
 
       - name: Build bounded campaign index
+        if: ${{ !inputs.solver_return }}
         env:
           MAX_PREFIXES: ${{ inputs.max_prefixes }}
           KEYS_PER_PREFIX: ${{ inputs.keys_per_prefix }}
@@ -172,54 +180,16 @@ jobs:
           print(f"indexed {len(rows)} prefixes; cap hit: {prefixes_beyond_cap}")
           PY
 
-      - name: Bounded exact-object fetch (when exact_key supplied)
-        if: ${{ inputs.exact_key != '' }}
+      - name: Bounded exact-object fetch
+        if: ${{ inputs.solver_return || inputs.exact_key != '' }}
         env:
+          SOLVER_RETURN: ${{ inputs.solver_return }}
           EXACT_KEY: ${{ inputs.exact_key }}
           MAX_FETCH_BYTES: ${{ inputs.max_fetch_bytes }}
-        run: |
-          python3 - <<'PY'
-          import json, os, subprocess
-          bucket = os.environ["BUCKET"]
-          key = os.environ["EXACT_KEY"].strip()
-          ceiling = int(os.environ.get("MAX_FETCH_BYTES") or 52428800)
-          if not key.startswith("campaign/") or ".." in key or key.endswith("/"):
-              raise SystemExit(f"refusing key outside campaign/ or malformed: {key!r}")
-          head = json.loads(subprocess.run(
-              ["aws", "s3api", "head-object", "--bucket", bucket, "--key", key,
-               "--output", "json"], capture_output=True, text=True, check=True).stdout)
-          size = head["ContentLength"]
-          sc = (head.get("StorageClass") or "STANDARD").upper()
-          if "ARCHIVE" in sc or sc == "GLACIER":
-              raise SystemExit(f"refusing archived object (class {sc}); restore first")
-          if size > ceiling:
-              raise SystemExit(f"refusing {size} B object; ceiling {ceiling} B")
-          # Pin the GET to what HEAD saw: VersionId when versioned, else ETag.
-          dest = "/tmp/fetched_object"
-          gargs = ["aws", "s3api", "get-object", "--bucket", bucket,
-                   "--key", key]
-          if head.get("VersionId"):
-              gargs += ["--version-id", head["VersionId"]]
-          elif head.get("ETag"):
-              gargs += ["--if-match", head["ETag"]]
-          gargs += [dest]
-          subprocess.run(gargs, check=True)
-          actual = os.path.getsize(dest)
-          if actual > ceiling:
-              raise SystemExit(
-                  f"downloaded {actual} B exceeds ceiling {ceiling} B — refusing")
-          sha = subprocess.run(["sha256sum", dest], capture_output=True,
-                               text=True, check=True).stdout.split()[0]
-          os.makedirs("fetched", exist_ok=True)
-          out_path = os.path.join("fetched", key.rsplit("/", 1)[-1])
-          os.rename(dest, out_path)
-          with open("fetched/SHA256SUMS", "w") as f:
-              f.write(f"{sha}  {key}\n")
-          print(f"fetched {key} ({size} B), sha256 {sha}")
-          PY
+        run: python3 scripts/campaign_collect_exact.py
 
       - name: Bounded derived-namespace listing (when derived_prefix supplied)
-        if: ${{ inputs.derived_prefix != '' }}
+        if: ${{ !inputs.solver_return && inputs.derived_prefix != '' }}
         env:
           DERIVED_PREFIX: ${{ inputs.derived_prefix }}
           KEYS_PER_PREFIX: ${{ inputs.keys_per_prefix }}
@@ -258,7 +228,7 @@ jobs:
           PY
 
       - name: Bounded derived-object fetch (when derived_key supplied)
-        if: ${{ inputs.derived_key != '' }}
+        if: ${{ !inputs.solver_return && inputs.derived_key != '' }}
         env:
           DERIVED_KEY: ${{ inputs.derived_key }}
         run: |
@@ -303,7 +273,7 @@ jobs:
           PY
 
       - name: Bounded derived-manifest fan-out (when derived_manifest supplied)
-        if: ${{ inputs.derived_manifest != '' }}
+        if: ${{ !inputs.solver_return && inputs.derived_manifest != '' }}
         env:
           DERIVED_MANIFEST: ${{ inputs.derived_manifest }}
         run: |
@@ -374,6 +344,7 @@ jobs:
           PY
 
       - name: Publish index to tracking issue
+        if: ${{ !inputs.solver_return }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -391,7 +362,7 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: campaign-index
+          name: ${{ inputs.solver_return && 'edison-solver-comparison' || 'campaign-index' }}
           path: |
             campaign_index.json
             campaign_index.md

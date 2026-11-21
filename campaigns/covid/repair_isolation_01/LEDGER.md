@@ -3,7 +3,7 @@
 **Status:** complete — 120/120 cells, full readout below
 **Task:** COVID-REPAIR-ISOLATION-01
 **Design:** `picard_framework/runs/covid_repair_isolation_01_dp_design.json` (6 arms × 20 seeds = 120 cells)
-**Parent measurement:** TRANSPORT-FIT-01 full readout — takeoff collapsed to 9/20, median lab_confirmed 10.5 vs record 712, pooled volume preserved by a few record-scale cells; solver choice outcome-identical.
+**Parent measurement:** TRANSPORT-FIT-01 recorded 9/20 takeoffs and median lab_confirmed 10.5 vs record 712. Its paired provider readout establishes low observed provider sensitivity on these cases, with individual count differences up to tens of cases. Delivered-dose preservation was unmeasured.
 
 ## Question
 
@@ -14,7 +14,7 @@ model, cross-checked against the pre-repair ensemble ~1,351–1,453 pooled
 lab_confirmed) and `baseline` (shipped, re-run at this revision for exact
 seed pairs).
 
-## Arms (native transport only — solver axis is closed)
+## Arms with native transport fixed
 
 | arm | toggle | pre-change baseline |
 |---|---|---|
