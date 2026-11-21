@@ -5,10 +5,11 @@
 > ([`edison_freeze_review_2026_11_21/REVIEW.md`](edison_freeze_review_2026_11_21/REVIEW.md),
 > reviewed at `73ad8724`). **Not a freeze declaration**; Edison reviews this
 > revision and the freeze record is a separate later document. The §2.1 block
-> is byte-identical to the reviewed one. Verified on the revision branch (base
-> `af0640d4`) by `scripts/paper1_freeze_block_check.py`: 57 declared units,
+> is byte-identical to the reviewed one. Verified on the revision branch
+> (main at `29dc0bc5`, which includes #1359) by `scripts/paper1_freeze_block_check.py`: 57 declared units,
 > 70 scalar leaves (63 resolved-state, 7 configuration-only), 0 failures,
-> 1 pending (Explorer exposure cap, §2.8); output retained at
+> 1 pending (Explorer rhythm-layer attachment, §2.8; the exposure-cap
+> divergence was closed by #1359); output retained at
 > [`paper1_freeze_block_check_output_2026_11_21.txt`](paper1_freeze_block_check_output_2026_11_21.txt).
 > No voyage epoch was stepped and no number in this document is a model
 > result. §7 maps each review correction to the section that resolves it; §8
@@ -366,6 +367,7 @@ boarding, `ship_graph.num_agents`). It steps no epoch.
 | Resolved state equals the pin | 63 leaves, **all five hulls** | any hull resolves another value, unless declared pending |
 | Flip moves resolved state | 63 leaves, Expedition | state does not move, an undeclared exception is raised, or a declared rejection does not occur |
 | Grouped dictionaries complete | 4 units, 17 leaves | a pinned leaf has no probe, or a probe has no pinned leaf |
+| Platform-gated state the block does not pin (rhythm-layer attachment) | all five hulls | a hull differs from Expedition, unless declared pending |
 | Declared role counts | all five hulls, both allocations | initialized passengers, crew or class counts differ from §2.7 |
 | Example run specifications | all five hulls | the committed annex differs from the generated cells |
 
@@ -374,7 +376,7 @@ one pin whose effect is gated on the platform is covered by the per-hull
 resolved-state probe. A `PENDING` line is a declared, known non-effective
 pin; it does not fail the check, and an entry that stops reproducing does.
 
-Result on the revision branch (base `af0640d4`): 0 failures, 1 pending, 0
+Result on the revision branch (main at `29dc0bc5`): 0 failures, 1 pending, 0
 leaves differing from the no-block default. The verbatim output is
 [`paper1_freeze_block_check_output_2026_11_21.txt`](paper1_freeze_block_check_output_2026_11_21.txt).
 `tests/test_paper1_freeze_block_check.py` covers the exception
@@ -605,34 +607,51 @@ A pin is *requested* in the block and *effective* only if the engine resolves
 it on that hull. The checker probes all 63 resolved-state leaves on every
 reference hull.
 
-**Explorer exposure cap — pending.** The block requests
-`transmission.exposure_cap.enabled: true`. The engine activates the cap only
-when the platform is in the rhythm/event catalog
-(`platform_has_rhythm_catalog`, `engines/rhythm_layer.py`). Measured at
-initialization:
+**Explorer exposure cap — resolved by WP1c.** The block requests
+`transmission.exposure_cap.enabled: true`. Until #1359 the engine activated
+the cap only for platforms in the rhythm/event catalog, which Explorer is
+not in, so the same block gave a different state on the historical vessel.
 
-| Hull | Cap requested | Cap effective |
+| Hull | Cap requested | Effective at `af0640d4` | Effective at `70e833b6` (#1359) |
+|---|---|---|---|
+| Four archetypes | true | true | true |
+| `explorer_seas_06` | true | **false** | true |
+
+#1359 gives the cap its own platform scope
+(`platform_in_exposure_cap_scope`: the catalogued classes plus
+`explorer_seas_06` by id) and leaves the rhythm catalog untouched, so no
+other ship's schedule is imported. The checker now requires the cap
+effective on all five hulls. Ledger: `NORO-EXPOCAP-EXPLORER-01`. An Explorer
+run made before `70e833b6` with the cap requested is a cap-off measurement.
+This was a configuration-state finding; it says nothing about the size of
+the cap's epidemiological effect.
+
+**Explorer rhythm layer — open, decision for Edison.** WP1c found a second
+divergence the review did not name. The four archetypes initialize with the
+SHIP-RHYTHM-02 schedule layer attached; `explorer_seas_06` initializes with
+none, because it has no catalog row. `crusher_labs/config.yaml` declares
+`rhythm.enabled: true` and the §2.1 block has no `rhythm` key, so the block
+neither requests nor records this state.
+
+| Hull | Rhythm layer attached |
+|---|---|
+| Four archetypes | yes |
+| `explorer_seas_06` | **no** |
+
+The checker asserts attachment on every hull against Expedition's state and
+carries Explorer as a declared `PENDING` entry, which fails once it stops
+reproducing. The contract does not choose; the options are:
+
+| Option | What it takes | Consequence |
 |---|---|---|
-| Four archetypes | true | true |
-| `explorer_seas_06` | true | **false** |
+| A. Explorer gets its own rhythm catalog row | A transcribed 2006 Explorer day program and venue map; mechanism-adjacent data work, separately reviewed | Same mechanism on all five hulls; no schedule imported from another ship |
+| B. Rhythm-free reference | Add `rhythm.enabled: false` to the §2.1 block for all five hulls | Same mechanism on all five hulls, but the archetypes move off the shipped default (`rhythm.enabled: true`), **and it is a §2 block change that restarts this review** |
+| C. Labelled deferred exception | Record Explorer as rhythm-free in the freeze record | Archetype reference is unchanged; Explorer's comparison with the mega archetype carries a declared mechanism difference in addition to population and geometry |
 
-So the same block gives a different mechanism state on the historical vessel
-than on its archetype. Resolution path:
-
-1. **WP1c** — the bounded, separately reviewed eligibility correction for the
-   intended cruise-platform scope, importing no other ship's activity
-   schedule. **Not merged when this revision was written**; this item is
-   pending its PR. This contract makes no mechanism change.
-2. The checker carries the case as a declared `PENDING` entry. When WP1c
-   lands, the entry stops reproducing, the check fails until the entry is
-   removed, and the check then requires the cap effective on all five hulls.
-3. Until then Explorer's same-mechanism comparison is **reserved**: no
-   Explorer cell is run as a reference cell. If WP1c is not adopted, Explorer
-   is carried as a deferred, labelled exception in the freeze record. A
-   platform-class label alone is not accepted as a fix.
-
-This is a configuration-state finding. It says nothing about the size of the
-cap's epidemiological effect.
+Until the decision is recorded, Explorer's same-mechanism comparison is
+**reserved**: no Explorer cell runs as a reference cell. Attaching an
+existing class's catalog to Explorer is not an option; it is the schedule
+import the review ruled out.
 
 **Unregistered source ids are accepted.** A `source_id` absent from the
 registry initializes without error and resolves no registry values. The
@@ -691,7 +710,8 @@ check run.
 | `resolved.source` | Source id, lot layer, prevalence scale, preparation-survival mode, registry `q_source` values |
 | `resolved.pathogen` | `norwalk_gi` dose adjustment 7.57, shedding variance, airborne emission arm |
 | `resolved.mechanism_state` | All 63 resolved-state leaves as the engine holds them |
-| `resolved.pending_effective_state` | Declared non-effective pins (Explorer only) |
+| `resolved.unpinned_platform_state` | Platform-gated state the block does not pin (rhythm-layer attachment) |
+| `resolved.pending_effective_state` | Declared divergences (Explorer only) |
 
 Conventions: archetype examples use 168 epochs (288 and 504 differ only in
 `run.num_epochs`); Explorer uses 192, whose calendar convention WP3 owns.
@@ -761,8 +781,11 @@ that records it. The count is 13.
     either-channel rule and the shedding variance are fixed by the named
     commit alone.
 
-13. **The exposure cap is not effective on `explorer_seas_06`** at this
-    revision (§2.8). Explorer's same-mechanism comparison waits on WP1c.
+13. **`explorer_seas_06` runs without the SHIP-RHYTHM-02 layer** that the
+    four archetypes run with, and the block does not pin it (§2.8,
+    `NORO-EXPOCAP-EXPLORER-01`). Explorer's same-mechanism comparison waits
+    on the decision recorded there. The exposure-cap divergence on the same
+    hull was closed by #1359.
 
 None of these forces a change to the evaluation contract in §5. Items 2 and
 5 limit what a pass can claim; item 4 is what the bridge measures.
@@ -939,7 +962,7 @@ current one (limitations 1, 3, 10).
 The freeze declaration itself; the WP2 campaign directory, seed allocation
 and numeric criteria; the WP3 reconstruction campaign, its 192-epoch length
 and date-to-epoch convention; the response-demonstration pairing (WP5); the
-WP1c eligibility correction; any mechanism change, campaign run or
+choice among the §2.8 rhythm options; any mechanism change, campaign run or
 regeneration of platform data.
 
 ## 7. Review corrections — where each is resolved
@@ -950,7 +973,7 @@ Edison's six required corrections and four affirmed decisions
 | # | Correction | Resolved in | Verified by |
 |---|---|---|---|
 | 1 | Role populations stated and asserted | §2.7 (counts, exact class counts, labelled baseline, Explorer comparison); §2.5 row; §5.3 item 1 | Checker role-count check on five hulls, both allocations |
-| 2 | Explorer exposure-cap eligibility | §2.8; limitation 13; §1 condition 5. **Pending WP1c** | Checker per-hull resolved-state probes; `PENDING` entry |
+| 2 | Explorer exposure-cap eligibility | §2.8 (closed by WP1c, #1359); §1 condition 5. A second divergence found by WP1c — rhythm-layer attachment — is **open** in §2.8 and limitation 13 | Checker per-hull resolved-state probes on all five hulls; rhythm attachment asserted; one `PENDING` entry |
 | 3 | Explicit six-family output contract | §5.1 | Annex `run.sentinel_line_list` request; fixtures required before the bridge |
 | 4 | Bridge completion split from scientific outcome | §5.3; zero-event convention §5.2 | — (design rule) |
 | 5 | Invariant baseline and declared arms | §2.9; §2.1 and §2.2 wording; annex §2.10 | Checker compares generated cells after all runner axes |

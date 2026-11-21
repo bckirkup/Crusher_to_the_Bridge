@@ -5,8 +5,9 @@
 > The bound introduces **no new magnitude constants**: it reuses the
 > CONTACT-ARCH-01 per-activity contact rates (and the POLYMOD 13.4/day control
 > when that block is undeclared), which carry their own sourcing.
-> Apply-scope: the catalogued cruise classes only (the same platform gate as
-> SHIP-RHYTHM-02); naval hulls and legacy platforms are unchanged either way.
+> Apply-scope: the cruise platform scope — the catalogued cruise classes plus
+> the reviewed uncatalogued cruise hull `explorer_seas_06`; naval hulls and
+> legacy platforms are unchanged either way.
 
 ## 1. The defect
 
@@ -50,8 +51,8 @@ contact-structure evidence selects the per-host one:
 
 ## 3. The mechanism
 
-When `transmission.exposure_cap.enabled` is true **and** the platform carries
-a rhythm catalog:
+When `transmission.exposure_cap.enabled` is true **and** the platform is in
+the cap's platform scope:
 
 - For each (epoch, pathogen, emitting shedder) a budget
   `K ~ Poisson(mean)` is drawn on a dedicated `_exposure_cap_rng` stream
@@ -94,9 +95,15 @@ the spawn is conditional, an on-vs-off contrast isolates the mechanism's
 physics rather than a shifted stream (the dedicated stream also keeps cap
 draws from perturbing the shared stream when on).
 
-Application is gated by `platform_has_rhythm_catalog(platform_id)` — the
+Application is gated by `platform_in_exposure_cap_scope(platform_id)` — the
 catalogued cruise classes (mega_cruise, contemporary_cruise,
-classic_cruise, expedition_cruise, starship_galaxy, starship_constitution).
+classic_cruise, expedition_cruise, starship_galaxy, starship_constitution)
+plus the platform ids in `_EXPOSURE_CAP_UNCATALOGUED_CRUISE_PLATFORMS`
+(`explorer_seas_06`). The second set exists because catalog membership also
+attaches a class's SHIP-RHYTHM-02 day program: a passenger-cruise hull with
+no transcribed program of its own is made cap-eligible by id, without a
+catalog row, so it inherits no other ship's schedule. The cap reads no
+catalog data, so eligibility is its only dependency on the platform.
 Naval run specs inherit this `config.yaml` via `legacy_yaml`, so the flag
 alone is not sufficient: without the platform gate a naval run would leave
 its measured baseline. Legacy hulls (e.g. `messy_cruise_500`) and

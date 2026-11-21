@@ -292,6 +292,9 @@
      "symptomatic_order_trigger": "presenting_sign"
     },
     "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": "RhythmLayer"
    }
   },
   "run_spec": {
@@ -915,6 +918,9 @@
      "symptomatic_order_trigger": "presenting_sign"
     },
     "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": "RhythmLayer"
    }
   },
   "run_spec": {
@@ -1322,7 +1328,7 @@
     "transmission.droplet_field_split.far_field_share": 0.175,
     "transmission.droplet_field_split.mode": "partition",
     "transmission.droplet_field_split.settled_share": 0.0,
-    "transmission.exposure_cap.enabled": false,
+    "transmission.exposure_cap.enabled": true,
     "transmission.exposure_cap.include_fixed_rings": false,
     "transmission.flush_aerosol_fraction": 0.0,
     "transmission.flush_cabin_emission": true,
@@ -1355,7 +1361,7 @@
     "shedding_variance_log10": 1.0
    },
    "pending_effective_state": {
-    "transmission.exposure_cap.enabled": "platform absent from the rhythm/event catalog; WP1c eligibility correction"
+    "rhythm.layer_attached": "no SHIP-RHYTHM-02 catalog row for the platform (NORO-EXPOCAP-EXPLORER-01); decision open, contract section 2.8"
    },
    "population": {
     "class_counts": {
@@ -1540,6 +1546,9 @@
      "symptomatic_order_trigger": "presenting_sign"
     },
     "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": null
    }
   },
   "run_spec": {
@@ -2163,6 +2172,9 @@
      "symptomatic_order_trigger": "presenting_sign"
     },
     "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": "RhythmLayer"
    }
   },
   "run_spec": {
@@ -2786,6 +2798,9 @@
      "symptomatic_order_trigger": "presenting_sign"
     },
     "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": "RhythmLayer"
    }
   },
   "run_spec": {

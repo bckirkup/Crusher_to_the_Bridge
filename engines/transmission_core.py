@@ -2409,13 +2409,35 @@ def _platform_id_from_cfg(cfg: dict[str, Any] | None) -> str:
     return ""
 
 
+# Passenger-cruise hulls inside EXPO-CAP-01's sourced scope (the cruise-ship
+# contact record) that carry no SHIP-RHYTHM-02 event catalog. A hull listed
+# here is eligible for the exposure cap only: no day program, venue map or
+# other catalogued schedule is attached to it. The cap reads no catalog data —
+# its budget is the contact-architecture rate — so eligibility is the whole
+# dependency. Membership is by platform id and each addition is reviewed.
+_EXPOSURE_CAP_UNCATALOGUED_CRUISE_PLATFORMS = frozenset({"explorer_seas_06"})
+
+
+def platform_in_exposure_cap_scope(platform_id: str) -> bool:
+    """Whether EXPO-CAP-01 applies on *platform_id*.
+
+    The catalogued cruise classes, plus the reviewed passenger-cruise hulls
+    that have no event catalog of their own. Naval hulls and legacy
+    platforms stay on the labelled baseline.
+    """
+    return (
+        platform_has_rhythm_catalog(platform_id)
+        or platform_id in _EXPOSURE_CAP_UNCATALOGUED_CRUISE_PLATFORMS
+    )
+
+
 def _parse_exposure_cap_enabled(tx: dict[str, Any]) -> bool:
     """Read ``transmission.exposure_cap.enabled`` (EXPO-CAP-01).
 
     Absent or true arms the cap; ``enabled: false`` is the labelled
     baseline — the pooled routes dose every susceptible in the air unit,
     byte-identical, and no cap stream is ever created. The platform gate
-    (catalogued cruise classes only) is applied by the caller.
+    (``platform_in_exposure_cap_scope``) is applied by the caller.
     """
     block = tx.get("exposure_cap")
     if block is None:
@@ -4181,13 +4203,13 @@ class TransmissionCore:
         that budget on the dedicated ``_exposure_cap_rng`` stream, which
         is spawned only while the cap is active, so the labelled
         baseline (``enabled: false``) consumes zero extra draws and
-        stays byte-identical. Application is gated to the catalogued
-        cruise classes (``platform_has_rhythm_catalog``); naval hulls and
+        stays byte-identical. Application is gated to the cruise platform
+        scope (``platform_in_exposure_cap_scope``); naval hulls and
         legacy platforms are unchanged either way.
         """
         self._exposure_cap_active = (
             _parse_exposure_cap_enabled(tx)
-            and platform_has_rhythm_catalog(_platform_id_from_cfg(cfg))
+            and platform_in_exposure_cap_scope(_platform_id_from_cfg(cfg))
         )
         if not self._exposure_cap_active:
             self._exposure_cap_rng = None

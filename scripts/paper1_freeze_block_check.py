@@ -15,7 +15,8 @@ Evidence is reported in two categories that are never added together:
 names the key; nothing to probe before an epoch runs). Grouped dictionaries
 are expanded and checked leaf by leaf. An exception during a flip fails the
 check unless that exact rejection is declared in ``EXPECTED_REJECTIONS``.
-Resolved-state probes, declared role counts and the committed example run
+Resolved-state probes, platform-gated state the block does not pin (rhythm
+layer attachment), declared role counts and the committed example run
 specifications are checked on every reference hull, on the cell the runner
 generates after all of its axes are applied.
 
@@ -246,9 +247,15 @@ GROUP_ALTERNATES: dict[str, Any] = {
 # work that resolves it. Reported, not failed; an entry that no longer
 # reproduces fails the check so it cannot outlive its fix.
 PENDING_EFFECTIVE: dict[tuple[str, str], str] = {
-    ("explorer_seas_06", "transmission.exposure_cap.enabled"):
-        "platform absent from the rhythm/event catalog; WP1c eligibility "
-        "correction",
+    ("explorer_seas_06", "rhythm.layer_attached"):
+        "no SHIP-RHYTHM-02 catalog row for the platform "
+        "(NORO-EXPOCAP-EXPLORER-01); decision open, contract section 2.8",
+}
+
+# Platform-gated state the block does not pin. It has no requested value, so
+# the requirement is that every reference hull resolves what FLIP_HULL does.
+UNPINNED_STATE: dict[str, str] = {
+    "rhythm.layer_attached": "sim.engine._rhythm?",
 }
 
 
@@ -562,6 +569,7 @@ def check_population(
 
 def check_hull_state(
     hull: str, spec: Any, sim: Any, block: dict[str, Any], leaves: list[Leaf],
+    reference: dict[str, Any],
 ) -> tuple[list[str], list[str]]:
     """Post-runner cfg and resolved state of one hull; (failures, pending)."""
     failures = [
@@ -570,19 +578,27 @@ def check_hull_state(
         if get_path(spec.legacy_cfg, path) != value
     ]
     pending: list[str] = []
-    for leaf in leaves:
-        if leaf.config_only:
-            continue
-        held = honoured(leaf, probe(sim, leaf.expr, leaf.keys))
-        reason = PENDING_EFFECTIVE.get((hull, leaf.path))
+    held_by_path = {
+        leaf.path: honoured(leaf, probe(sim, leaf.expr, leaf.keys))
+        for leaf in leaves if not leaf.config_only
+    }
+    held_by_path.update({
+        path: probe(sim, expr) == reference[path]
+        for path, expr in UNPINNED_STATE.items()
+    })
+    for path, held in held_by_path.items():
+        reason = PENDING_EFFECTIVE.get((hull, path))
         if reason and held:
-            failures.append(f"{hull}: stale PENDING entry {leaf.path}")
+            failures.append(f"{hull}: stale PENDING entry {path}")
         elif reason:
-            pending.append(f"{hull}: {leaf.path} not effective ({reason})")
+            pending.append(f"{hull}: {path} diverges ({reason})")
         elif not held:
-            failures.append(f"{hull}: resolved state is not the pin at "
-                            f"{leaf.path}")
+            failures.append(f"{hull}: resolved state diverges at {path}")
     return failures, pending
+
+
+def unpinned_state(sim: Any) -> dict[str, Any]:
+    return {path: probe(sim, expr) for path, expr in UNPINNED_STATE.items()}
 
 
 def resolved_record(
@@ -628,6 +644,7 @@ def resolved_record(
             leaf.path: probe(sim, leaf.expr, leaf.keys)
             for leaf in leaves if not leaf.config_only
         },
+        "unpinned_platform_state": unpinned_state(sim),
         "pending_effective_state": {
             path: reason for (name, path), reason in PENDING_EFFECTIVE.items()
             if name == hull
@@ -668,6 +685,7 @@ def print_leaf_results(results: list[dict[str, Any]], markdown: bool) -> None:
 
 def check_hulls(
     block: dict[str, Any], leaves: list[Leaf], population: dict[str, Any],
+    reference: dict[str, Any],
 ) -> tuple[dict[str, Any], list[str], list[str]]:
     """Every reference hull: generated cell, resolved state, role counts."""
     annex: dict[str, Any] = {}
@@ -681,7 +699,7 @@ def check_hulls(
             build_raw(block, hull, population, exact_counts=False),
         ))
         hull_failures, hull_pending = check_hull_state(
-            hull, spec, sim, block, leaves,
+            hull, spec, sim, block, leaves, reference,
         )
         hull_failures += check_population(hull, sim, baseline, population)
         counts = role_counts(sim)
@@ -742,7 +760,9 @@ def main() -> int:
             print(f"FAILED: {item}", file=sys.stderr)
         return 1 if bad else 0
 
-    annex, failed, pending = check_hulls(block, leaves, population)
+    annex, failed, pending = check_hulls(
+        block, leaves, population, unpinned_state(sims["pinned"]),
+    )
     failed += check_annex(annex, args.write_annex)
     failed += gaps
     failed += [r["path"] for r in results if not r["ok"]]
