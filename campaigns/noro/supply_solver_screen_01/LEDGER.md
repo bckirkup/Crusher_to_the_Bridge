@@ -60,3 +60,25 @@ Array parents — all children SUCCEEDED, 0 failed (jobdef revisions in submit o
 - `exp_quiet_station_lots_continuous` `dbf84398-6b5b-4bf2-95b7-59deb4fc00ab` (:9, 8)
 
 Screen result: posting preserved (contaminated strata 100% on both arms; quiet controls 0/8); paired AR/VSP/role differences sign-test unresolved (all p ≥ 0.180) with overlapping ranges. The two full-length canary rows above remain preflight witnesses only.
+
+## Re-baseline at bf0ec168 (2026-11-21)
+
+The Paper-1 joint-eval reproduction arm compares fingerprints against
+this campaign's `exp_station_lots_continuous` archives; engine drift
+between `3500c205` and freeze `bf0ec168` made the original reference
+unmatchable (NORO-JE-REPRO-01). The block re-ran on the retagged
+`bf0ec168` image `noro-supply-solver01-bf0@sha256:d88f2593be153173a3d9b0237de134f2ba0b449ccd6a93999c6e53f7be872af`
+(same build as `noro-explorer-recon01`), jobdef
+`picard-noro-supply-solver-screen-01:11`:
+
+- Canary `04483b81-d93b-46e6-a039-57990d9bed53` (index 0, s900470) —
+  SUCCEEDED; fingerprint identical to the JE repro archive.
+- Array `1ba4083f-0b13-4395-ae00-28f60b0c9b5c` — 16/16 SUCCEEDED.
+- Archives: `s3://…/campaign/noro_supply_solver_screen_01_bf0/` →
+  `out/noro/supply_solver_screen_01_bf0/`; all stamp
+  `engine_git_sha bf0ec168`; 16/16 fingerprints identical to the JE
+  reproduction arm. The original `3500c205` archives under
+  `campaign/noro_supply_solver_screen_01/` are preserved.
+
+The re-baselined set — not the original — is the reference for any
+future fingerprint comparison at the freeze commit.

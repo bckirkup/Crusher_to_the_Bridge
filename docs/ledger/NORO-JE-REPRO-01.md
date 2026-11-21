@@ -2,7 +2,7 @@
 **Date:** 2026-11-21
 **Commit:** 01156c62
 **Pathogens:** norwalk_gi
-**Status:** measured
+**Status:** closed
 **Measured at:** 90aa3ec2
 
 The Paper-1 WP2 reproduction arm
@@ -51,9 +51,20 @@ boundary — reviewed, intended work merged between the reference run and
 the freeze — not a joint-eval wiring defect and not an engine bug
 (open-deck dilution behaving as designed). The reproduction arm's
 premise — bit-identity while excluding `engine_git_sha` — cannot hold
-across path-touching commits. The fix is to re-baseline the reference:
-re-run the 16 solver-screen cells at `bf0ec168`, or close the
-continuation as attributed.
+across path-touching commits.
+
+**Resolution (2026-11-21, measured):** the reference was re-baselined.
+The 16 `exp_station_lots_continuous` cells re-ran on AWS Batch
+(job `1ba4083f`, jobdef `picard-noro-supply-solver-screen-01:11`,
+solver-screen worker `growth_chain_census.py`) on the retagged
+`bf0ec168` image (`noro-supply-solver01-bf0@sha256:d88f2593`, the
+`noro-explorer-recon01` build), archives at
+`s3://…/campaign/noro_supply_solver_screen_01_bf0/` →
+`out/noro/supply_solver_screen_01_bf0/` (the original `3500c205`
+reference is preserved). All 16 children SUCCEEDED, every archive
+stamps `engine_git_sha bf0ec168`, and **16/16 fingerprints are
+identical** to the reproduction arm's — the repro arm reproduces once
+the reference lives at the same engine commit.
 
 Readout: `telemetry_buffer/noro_paper1_joint_eval_01/`; campaign
 ledger: `campaigns/noro/paper1_joint_eval_01/LEDGER.md` "Full readout
