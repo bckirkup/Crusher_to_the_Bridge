@@ -19,8 +19,16 @@ _WORKER = "campaigns/covid/quar_tail_01/cell.py"
 def build_argv(
     args: Any, block: dict[str, Any], seed: int, out_dir: Path,
 ) -> tuple[list[str], Path]:
-    """Argv for one (theta, arm_id, seed) cell and its artifact path."""
-    artifact = Path(out_dir) / block["artifact"].format(
+    """Argv for one (theta, arm_id, seed) cell and its artifact path.
+
+    The worker writes ``cell_<seed>.json`` inside its --out directory; the
+    out dir is arm-scoped so a local multi-block run (``scripts/campaign
+    run`` shares one ``out/<campaign>`` across blocks) does not overwrite
+    a previous arm's cell at the same seed. On Batch each array child gets
+    a fresh scratch dir, so the subdir is a no-op there.
+    """
+    work_dir = Path(out_dir) / str(block["args"]["arm_id"])
+    artifact = work_dir / block["artifact"].format(
         seed=seed, platform=args.platform,
     )
     command = [
@@ -29,6 +37,6 @@ def build_argv(
         "--theta", str(block["args"]["theta"]),
         "--arm", block["args"]["arm_id"],
         "--seed", str(seed),
-        "--out", str(out_dir),
+        "--out", str(work_dir),
     ]
     return command, artifact
