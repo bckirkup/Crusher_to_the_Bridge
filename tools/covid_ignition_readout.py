@@ -56,6 +56,25 @@ def _median(values: list[float]) -> float | None:
     return statistics.median(values) if values else None
 
 
+def _epoch_day(sr: dict, key: str) -> float | None:
+    epoch = sr.get(key)
+    return (epoch / 24.0) if epoch is not None else None  # clock-exempt: epoch->day on the hourly clock
+
+
+def _trajectory(daily: dict[int, int]) -> dict:
+    def cum(day: int) -> int:
+        return sum(v for d, v in daily.items() if d <= day)
+
+    return {
+        "cum5": cum(5),
+        "cum10": cum(10),
+        "cum15": cum(15),
+        "growth_fold_10_15": (cum(15) / cum(10)) if cum(10) else None,
+        "ignition_day": next(
+            (d for d in range(0, 40) if cum(d) >= IGNITION_MASS), None),
+    }
+
+
 def _cell_record(path: str) -> dict:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     obs = payload.get("observables") or {}
@@ -68,12 +87,7 @@ def _cell_record(path: str) -> dict:
         for k, v in (payload.get("acquisition_curve") or {})
         .get("total_by_day", {}).items()
     }
-
-    def cum(day: int) -> int:
-        return sum(v for d, v in daily.items() if d <= day)
-
-    ignition = next(
-        (d for d in range(0, 40) if cum(d) >= IGNITION_MASS), None)
+    trajectory = _trajectory(daily)
     funnel = payload.get("funnel_hosts") or {}
     inf_days = [
         r["infection_day"] for r in funnel.values()
@@ -92,11 +106,7 @@ def _cell_record(path: str) -> dict:
         "median_infection_day": med_inf,
         "record_timed": takeoff and med_inf is not None
         and med_inf <= RECORD_MEDIAN_DAY,
-        "cum5": cum(5),
-        "cum10": cum(10),
-        "cum15": cum(15),
-        "growth_fold_10_15": (cum(15) / cum(10)) if cum(10) else None,
-        "ignition_day": ignition,
+        **trajectory,
         "seed_spec": spec,
         "index_agent_id": host.get("agent_id"),
         "index_role": host.get("role"),
@@ -109,12 +119,9 @@ def _cell_record(path: str) -> dict:
         "aboard_window_acquisitions":
             sr.get("aboard_window_acquisitions"),
         "aboard_window_clean_bound": sr.get("aboard_window_clean_bound"),
-        "first_secondary_shed_day": (
-            (sr["first_secondary_shed_epoch"] / 24.0)  # clock-exempt: epoch->day on the hourly clock
-            if sr.get("first_secondary_shed_epoch") is not None else None),
-        "index_departure_day": (
-            (sr["index_departure_epoch"] / 24.0)  # clock-exempt: epoch->day on the hourly clock
-            if sr.get("index_departure_epoch") is not None else None),
+        "first_secondary_shed_day": _epoch_day(
+            sr, "first_secondary_shed_epoch"),
+        "index_departure_day": _epoch_day(sr, "index_departure_epoch"),
         "aboard_window_by_route": sr.get("aboard_window_by_route") or {},
         "aboard_window_by_day": sr.get("aboard_window_by_day") or {},
         "aboard_window_day0": (sr.get("aboard_window_by_day") or {})
