@@ -145,7 +145,7 @@ def _joint_eval_zip(seed: int = 202) -> bytes:
         "role_checkpoints": {"day_3": {"passenger": 10, "crew": 2}},
         "joint_eval": {
             "arm": {"arm": "bridge", "hull": "mega_cruise_5000", "epochs": 288},
-            "effective_config": {"observation_mode": "full_env"},
+            "effective_config": {"n_resolved": 1, "n_unresolved": 0},
             "burden": {
                 "passenger_complement": 4000,
                 "crew_complement": 1500,
@@ -166,6 +166,7 @@ def _joint_eval_zip(seed: int = 202) -> bytes:
     }
     joint_eval = {
         "schema": "noro_paper1_joint_eval_01/1",
+        "effective_config_resolved": {"observation_mode": "full_env"},
         "curves": {
             "preboarding_declared_passenger": 3,
             "preboarding_declared_crew": 1,
@@ -400,6 +401,7 @@ def test_mixed_three_cohorts_materialization():
     assert jv["platform"] == "mega_cruise_5000"
     assert jv["engine_git_sha"] == "90aa3ec2"
     assert jv["design_stratum"] == "diagnostic"
+    assert jv["effective_modes"] == {"observation_mode": "full_env"}
     assert jv["first_role"]["category"] == "crew_first"
     assert jv["initial_infected_by_role"]["scope"] == "preboarding_declared_only"
     assert jv["initial_disease_states"] is None

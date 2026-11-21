@@ -235,6 +235,7 @@ def _extract_identity(
     image_digest = _first_non_null(summary.get("image_digest"), src.image_digest)
     effective_modes = _first_non_null(
         summary.get("effective_state"),
+        je.get("effective_config_resolved"),
         je_scalars.get("effective_config"),
         je.get("effective_config"),
         summary.get("effective_config"),
