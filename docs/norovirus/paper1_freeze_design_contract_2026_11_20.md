@@ -6,7 +6,7 @@
 > reviewed at `73ad8724`). **Not a freeze declaration**; Edison reviews this
 > revision and the freeze record is a separate later document. The §2.1 block
 > is byte-identical to the reviewed one. Verified on the revision branch
-> (main at `29dc0bc5`, which includes #1359) by `scripts/paper1_freeze_block_check.py`: 57 declared units,
+> (main at `fb300d71`, which includes #1359) by `scripts/paper1_freeze_block_check.py`: 57 declared units,
 > 70 scalar leaves (63 resolved-state, 7 configuration-only), 0 failures,
 > 1 pending (Explorer rhythm-layer attachment, §2.8; the exposure-cap
 > divergence was closed by #1359); output retained at
@@ -376,7 +376,7 @@ one pin whose effect is gated on the platform is covered by the per-hull
 resolved-state probe. A `PENDING` line is a declared, known non-effective
 pin; it does not fail the check, and an entry that stops reproducing does.
 
-Result on the revision branch (main at `29dc0bc5`): 0 failures, 1 pending, 0
+Result on the revision branch (main at `fb300d71`): 0 failures, 1 pending, 0
 leaves differing from the no-block default. The verbatim output is
 [`paper1_freeze_block_check_output_2026_11_21.txt`](paper1_freeze_block_check_output_2026_11_21.txt).
 `tests/test_paper1_freeze_block_check.py` covers the exception
@@ -400,7 +400,7 @@ block. The first two are named modes the WP1 brief asked to pin.
 | Introduction | `initiation.boarding` as the runner generates it for the cell's boarding rung | Recorded per cell; the rung is a declared axis (§2.9) |
 | Output requests | `run.sentinel_line_list`; compact retention plus the environmental panel (§5.1) | Set by the cell worker; not a config override |
 | Voyage grid (joint evaluation) | **168 / 288 / 504 epochs** (7 / 12 / 21 days) | Tier `epoch_durations`. 192 epochs belongs to the Explorer reconstruction (WP3) only and is not a joint-evaluation length |
-| Hash seed | `PYTHONHASHSEED=1` | Job definition environment, as in the supply-solver screens |
+| Hash seed | `PYTHONHASHSEED=1` | **Worker-side pin.** The campaign's `entry.py` `build_argv` hook sets it in the entrypoint's environment before `campaign_entrypoint` spawns the worker, as the supply-solver screens do. No shared job definition or campaign image sets it (corrected from revision 1, which said the job definition did), so a campaign without the hook runs with a random hash seed |
 
 Neither of the first two is a machinery gap that blocks the freeze, and no
 new override path is proposed. They are recorded so that nobody reads the
@@ -998,4 +998,4 @@ Edison's six required corrections and four affirmed decisions
 | Revision | Date | Change |
 |---|---|---|
 | 1 | 2026-11-20 | Proposed for Edison's review; merged #1355, reviewed at `73ad8724` |
-| 2 | 2026-11-21 | Edison's six corrections and affirmed decisions applied. §2.1 block unchanged. Added §2.7–§2.10, §5.1–§5.3, §7, §8; rewrote §2.3, §2.4, §2.6, §4; limitations 1 and 10 reworded, 13 added. Checker tightened; output and annex committed |
+| 2 | 2026-11-21 | Edison's six corrections and affirmed decisions applied. §2.1 block unchanged. Added §2.7–§2.10, §5.1–§5.3, §7, §8; rewrote §2.3, §2.4, §2.6, §4; limitations 1 and 10 reworded, 13 added. Checker tightened; output and annex committed. §2.5 hash-seed row corrected to the worker-side pin (WP3 review). §2.8 updated for #1359 and the rhythm-layer divergence |
