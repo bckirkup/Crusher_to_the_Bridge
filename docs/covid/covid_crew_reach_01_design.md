@@ -39,7 +39,7 @@ was ascertainment artifact)? Both outcomes are reportable; neither is a fail.
   campaign runs to 23 Feb). Shared by every arm — cross-arm deltas stay
   single-mechanism.
 
-## Arms (4 × 20 seeds, θ7.9e6, seeds 20200205–20200224)
+## Arms (4 × 20 seeds, θ7.9e6 at run time — operating point updated to θ3.162e11 by COVID-THETA-REFIT-01, seeds 20200205–20200224)
 
 | arm | overrides | tests |
 |---|---|---|

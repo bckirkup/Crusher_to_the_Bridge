@@ -46,9 +46,14 @@ H3: 98% of seeds place GM above the cross-ship IQR.
 - The shipped Θ constant (7.9e6) is stale for the COVID arm: under the current
   engine it leaves the DP funnel an order of magnitude under the record
   (per-voyage mean 61.8 pooled lab-confirmed vs 712, ≈11.5×).
-  Wherever the fitted Θ is consumed (`active_profiles` / fit consumers), the
-  supported value is now ~3.16e11 — landing it is a follow-up commit decision,
-  not made by this entry.
+  **Landed**: Θ is not a profile key — it is carried per-design as `thetas`
+  and injected into cells by `theta_profile_overrides`. The canonical replay
+  operating point moved to `thetas: [3.162e11]` on the boxed_s1s2 replay spec
+  (`covid_crew_reach_01_design.json`, the spec later DP campaigns copy
+  verbatim) and the frozen-operating-point replay
+  (`covid_platform_fidelity_02_dp_design.json`); the provenance-register Θ row
+  records the refit. Per-campaign designs that already ran (TF-01, RI-01,
+  GM rescore) keep their own θ values as the record of what was measured.
 - The asym-share miss is now demonstrated on two hulls across both solver
   stacks and five decades of Θ — the remaining composition defect sits in
   symptom/observation channels, not dose.
