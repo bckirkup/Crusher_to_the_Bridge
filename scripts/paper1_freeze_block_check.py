@@ -46,6 +46,7 @@ TX = "engines/transmission_core.py"
 CONTAM = "engines/py_contam_bridge.py"
 SIM = "picard_framework/simulation/ship_simulation.py"
 EPOCH_READ = "cfg-read"
+SCALARS = (str, bool, int, float)
 
 # (dotted path, alternate value, consumer file, resolved-state probe).
 # ``EPOCH_READ`` marks a key whose consumer leaves nothing to probe after
@@ -266,6 +267,11 @@ def flip_moves_state(
     return "live" if probe(sim, expr) != pinned else "DEAD"
 
 
+def flip_value(alt: Any, pinned: Any, fallback: Any) -> Any:
+    """The alternate to flip to; the no-block default when the pin is ``alt``."""
+    return fallback if alt == pinned else alt
+
+
 def default_value(default_cfg: dict[str, Any], dotted: str) -> str:
     try:
         return json.dumps(get_path(default_cfg, dotted))
@@ -291,18 +297,30 @@ def check_row(
         "reads_key": f'"{leaf}"' in source,
         "merged": get_path(cfgs["pinned"], dotted) == pinned,
     }
+    result["honoured"] = True
     if expr == EPOCH_READ:
         result.update(resolved=EPOCH_READ, default_resolved=EPOCH_READ,
                       liveness="cfg + consumer read")
     else:
         resolved = probe(sims["pinned"], expr)
+        fallback = probe(sims["default"], expr)
+        # A parser that substitutes its default for an unknown value leaves
+        # the pin unhonoured; comparable scalars must resolve to the pin.
+        comparable = isinstance(resolved, SCALARS) and isinstance(pinned, SCALARS)
+        if comparable and not expr.endswith("?"):
+            result["honoured"] = resolved == pinned
         result.update(
             resolved=repr(resolved),
-            default_resolved=repr(probe(sims["default"], expr)),
-            liveness=flip_moves_state(block, dotted, alt, expr, resolved),
+            default_resolved=repr(fallback),
+            liveness=flip_moves_state(
+                block, dotted, flip_value(alt, pinned, fallback), expr,
+                resolved,
+            ),
         )
+    if not result["honoured"]:
+        result["liveness"] = "NOT HONOURED (resolved value is not the pin)"
     result["ok"] = bool(
-        result["reads_key"] and result["merged"]
+        result["reads_key"] and result["merged"] and result["honoured"]
         and "DEAD" not in result["liveness"],
     )
     return result
