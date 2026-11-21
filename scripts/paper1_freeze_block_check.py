@@ -9,6 +9,11 @@ leaf: the path resolves in the merged config, a named consumer file reads the
 key, and - where the consumer resolves the key at ``initialize()`` - flipping
 the leaf moves the resolved engine state (so the pin is not dead).
 
+The flip probes run on one hull. Platform-gated mechanisms can resolve
+differently per hull under the same block, so the exposure cap's effective
+state is additionally resolved on every reference hull and must equal the
+block's request on each of them.
+
 No voyage epoch is stepped. Re-run on the final named commit at freeze time.
 """
 from __future__ import annotations
@@ -46,6 +51,8 @@ TX = "engines/transmission_core.py"
 CONTAM = "engines/py_contam_bridge.py"
 SIM = "picard_framework/simulation/ship_simulation.py"
 EPOCH_READ = "cfg-read"
+CAP_ENABLED = "transmission.exposure_cap.enabled"
+CAP_RINGS = "transmission.exposure_cap.include_fixed_rings"
 SCALARS = (str, bool, int, float)
 
 # (dotted path, alternate value, consumer file, resolved-state probe).
@@ -326,13 +333,44 @@ def check_row(
     return result
 
 
-def hull_parse(block: dict[str, Any], hull: str) -> str:
+def cap_state(sim: Any) -> dict[str, bool]:
+    """The exposure cap's effective state after ``initialize()``."""
+    return {
+        "active": probe(sim, "tx._exposure_cap_active"),
+        "include_fixed_rings": probe(
+            sim, "tx._exposure_cap_include_fixed_rings",
+        ),
+        "cap_stream": probe(sim, "tx._exposure_cap_rng?") is not None,
+    }
+
+
+def requested_cap_state(block: dict[str, Any]) -> dict[str, bool]:
+    """What the block asks for; the cap stream exists exactly when armed."""
+    enabled = get_path(block, CAP_ENABLED)
+    return {
+        "active": enabled,
+        "include_fixed_rings": get_path(block, CAP_RINGS),
+        "cap_stream": enabled,
+    }
+
+
+def hull_parse(block: dict[str, Any], hull: str) -> tuple[str, Any]:
+    """Parse + initialize one hull; the sim is None on a merge mismatch."""
     spec = parse_spec(build_raw(block, hull))
     for dotted in leaf_paths(block):
         if get_path(spec.legacy_cfg, dotted) != get_path(block, dotted):
-            return f"{hull}: MISMATCH at {dotted}"
-    init_sim(spec)
-    return f"{hull}: parse + initialize OK"
+            return f"{hull}: MISMATCH at {dotted}", None
+    return f"{hull}: parse + initialize OK", init_sim(spec)
+
+
+def hull_cap_line(hull: str, sim: Any, requested: dict[str, bool]) -> str:
+    """One hull's effective cap state against the block's request."""
+    if sim is None:
+        return f"{hull}: exposure cap UNRESOLVED (no initialized sim)"
+    state = cap_state(sim)
+    verdict = "ok" if state == requested else "DIVERGES"
+    return (f"{hull}: exposure cap {verdict} - effective {state}; "
+            f"requested {requested}")
 
 
 def main() -> int:
@@ -367,10 +405,16 @@ def main() -> int:
             print(f"{flag} {res['path']} = {res['pinned']} "
                   f"[default {res['default']}; resolved {res['resolved']}; "
                   f"{res['liveness']}]")
-    hull_lines = [hull_parse(block, hull) for hull in HULLS]
+    parsed = {hull: hull_parse(block, hull) for hull in HULLS}
+    hull_lines = [line for line, _sim in parsed.values()]
     print("\n".join(hull_lines))
+    requested = requested_cap_state(block)
+    cap_lines = [hull_cap_line(hull, sim, requested)
+                 for hull, (_line, sim) in parsed.items()]
+    print("\n".join(cap_lines))
     failed = [r["path"] for r in results if not r["ok"]]
     failed += [line for line in hull_lines if "MISMATCH" in line]
+    failed += [line for line in cap_lines if "exposure cap ok" not in line]
     moved = [r["path"] for r in results
              if r["resolved"] != r["default_resolved"]]
     print(f"pinned keys: {len(results)}; failures: {len(failed)}; "

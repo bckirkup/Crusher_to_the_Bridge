@@ -879,8 +879,8 @@ class RhythmLayer:
 def platform_has_rhythm_catalog(platform_id: str) -> bool:
     """Whether *platform_id* is one of the catalogued cruise classes.
 
-    Shared platform gate: mechanisms sourced to the passenger-cruise record
-    (SHIP-RHYTHM-02, EXPO-CAP-01) apply to the classes with a catalog and
-    leave naval hulls and legacy platforms on the labelled baseline.
+    SHIP-RHYTHM-02 runs only on the classes with a catalog. EXPO-CAP-01
+    takes these classes as the base of its own platform scope
+    (``transmission_core.platform_in_exposure_cap_scope``).
     """
     return RhythmLayer._catalog_for(platform_id) is not None

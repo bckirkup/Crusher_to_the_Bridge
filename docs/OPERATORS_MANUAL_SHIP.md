@@ -97,7 +97,7 @@ Key knobs in `crusher_labs/config.yaml` (overridable via Picard `config_override
 | `transmission.droplet_emission_mode` | `profile_conditioned` | `shipped_uniform` restores the pre-deletion uniform droplet fraction as a selectable baseline |
 | `transmission.droplet_field_split.mode` | `partition` | Zone pool carries `far_field_share`; the rest reaches a partner-bounded proximity ring ([droplet_field_split_spec.md](droplet_field_split_spec.md)) |
 | `transmission.near_field_air.mode` | `two_box` | `off` is the labelled baseline ([near_field_air_spec.md](near_field_air_spec.md)) |
-| `transmission.exposure_cap.enabled` | `true` | Per-shedder contact budget, catalogued cruise platforms only ([exposure_cap_spec.md](exposure_cap_spec.md)) |
+| `transmission.exposure_cap.enabled` | `true` | Per-shedder contact budget, catalogued cruise platforms plus `explorer_seas_06` only ([exposure_cap_spec.md](exposure_cap_spec.md)) |
 | `transmission.activity_contacts.enabled` | `true` | Schedule-conditioned contact draw ([contact_architecture_spec.md](contact_architecture_spec.md)) |
 | `transmission.blackwater_plumbing` | `true` | CSTR holding tank; `false` is the labelled baseline |
 | `transmission.sanitary_visit_mode` | `none` | `dwell_weighted` resolves shared-head visits ([shared_sanitary_zones.md](shared_sanitary_zones.md)) |

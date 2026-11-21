@@ -12,9 +12,12 @@ The invariants a wrong implementation cannot satisfy:
 * the labelled baseline is inert — ``transmission.exposure_cap.enabled:
   false`` leaves the cap inactive, spawns no RNG stream, and (platform
   gate aside) the pre-change code path is untouched;
-* the cap applies only where the rhythm catalog declares cruise mixing
-  structure — naval and uncatalogued platforms are inert even with the
-  flag on;
+* the cap applies only inside its cruise platform scope — the rhythm
+  catalog's classes plus the reviewed uncatalogued cruise hull — and
+  naval and legacy platforms are inert even with the flag on;
+* scope membership for an uncatalogued hull arms the cap alone: the hull
+  gains no rhythm catalog, and the same requested block resolves to the
+  same cap state on every Paper-1 reference hull;
 * a shedder's cohort is bounded by its remaining per-epoch budget, the
   budget is shared between the pooled-droplet and HVAC spends inside one
   epoch, and it resets next epoch;
@@ -40,10 +43,38 @@ from engines.transmission_core import (  # noqa: E402
     TransmissionCore,
     _parse_exposure_cap_enabled,
     _parse_exposure_cap_include_fixed_rings,
+    platform_in_exposure_cap_scope,
 )
 
 CATALOGED_LAYOUT = "data/platforms/mega_cruise_5000/spatial_layout.json"
 NAVAL_LAYOUT = "data/platforms/destroyer_baseline/spatial_layout.json"
+ARCHETYPE_HULLS = (
+    "expedition_cruise_450",
+    "classic_cruise_1900",
+    "spirit_cruise_3000",
+    "mega_cruise_5000",
+)
+UNCATALOGUED_CRUISE_HULL = "explorer_seas_06"
+REFERENCE_HULLS = (*ARCHETYPE_HULLS, UNCATALOGUED_CRUISE_HULL)
+CAP_REQUESTS = (
+    ...,
+    {"enabled": True},
+    {"enabled": False},
+    {"enabled": True, "include_fixed_rings": True},
+    {"enabled": False, "include_fixed_rings": True},
+)
+
+
+def _layout(platform_id: str) -> str:
+    return f"data/platforms/{platform_id}/spatial_layout.json"
+
+
+def _resolved_cap_state(core: TransmissionCore) -> tuple[bool, bool, bool]:
+    return (
+        core._exposure_cap_active,
+        core._exposure_cap_include_fixed_rings,
+        core._exposure_cap_rng is not None,
+    )
 
 
 def _cfg(exposure_cap: object = ..., layout: str = CATALOGED_LAYOUT) -> dict:
@@ -147,7 +178,49 @@ def test_catalog_gate_false_off_cruise_platforms(platform_id: str) -> None:
     assert not platform_has_rhythm_catalog(platform_id)
 
 
+@pytest.mark.parametrize("platform_id", REFERENCE_HULLS)
+def test_cap_scope_covers_reference_hulls(platform_id: str) -> None:
+    assert platform_in_exposure_cap_scope(platform_id)
+
+
+@pytest.mark.parametrize(
+    "platform_id", ("destroyer_baseline", "messy_cruise_500", ""),
+)
+def test_cap_scope_excludes_naval_and_legacy(platform_id: str) -> None:
+    assert not platform_in_exposure_cap_scope(platform_id)
+
+
+def test_uncatalogued_cruise_hull_gains_no_rhythm_catalog() -> None:
+    assert not platform_has_rhythm_catalog(UNCATALOGUED_CRUISE_HULL)
+
+
 # ── engine construction ─────────────────────────────────────────────
+
+
+@pytest.mark.parametrize("request_block", CAP_REQUESTS)
+def test_request_resolves_identically_on_reference_hulls(
+    request_block: object,
+) -> None:
+    states = {
+        hull: _resolved_cap_state(_core(_cfg(request_block, _layout(hull))))
+        for hull in REFERENCE_HULLS
+    }
+    assert set(states.values()) == {states[ARCHETYPE_HULLS[0]]}, states
+
+
+def test_cap_active_on_uncatalogued_cruise_hull_by_default() -> None:
+    core = _core(_cfg(layout=_layout(UNCATALOGUED_CRUISE_HULL)))
+    assert core._exposure_cap_active
+    assert core._exposure_cap_rng is not None
+
+
+def test_flag_off_is_inert_on_uncatalogued_cruise_hull() -> None:
+    core = _core(
+        _cfg({"enabled": False}, layout=_layout(UNCATALOGUED_CRUISE_HULL)),
+    )
+    assert not core._exposure_cap_active
+    assert core._exposure_cap_rng is None
+
 
 
 def test_cap_active_on_cataloged_platform_by_default() -> None:
