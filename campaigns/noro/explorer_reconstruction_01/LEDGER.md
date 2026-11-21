@@ -96,8 +96,30 @@ commit and is pinned by digest
 in `design/build.py` (`IMAGE_DIGEST`) and `campaign.json`. The manifest's
 `named_commit` now reads the declaration.
 
+## Canary submitted (2026-11-21)
+
+Twenty-child array of the first 20 seeds (8105–8124) of
+`exp_declared_five` on AWS Batch:
+
+- Array job `ce5b4e20-61b4-490a-af29-6e8b68edf271`, queue
+  `picard-campaign-queue`, jobdef
+  `picard-noro-explorer-reconstruction-01:1`.
+- Image pinned by digest:
+  `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign@sha256:354b27b62076cfad6df13de899319d0b55e594a1a1edaf5bc3982bcf4ec55d82`
+  (built at the named commit `bf0ec168`).
+- Output prefix:
+  `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_explorer_reconstruction_01/`.
+- `scripts/campaign submit` emits one job per seed (`--index` canary) or a
+  full-size array; the 20-child canary was submitted with the same
+  payload shape, `arrayProperties.size` set to 20 over the full seed
+  list, so children 0–19 map to seeds 8105–8124.
+- Measured wall clock per cell at 192 epochs: ~535 s (seed 8105 smoke,
+  above), so the canary's ETA is ~15–30 min depending on queue
+  concurrency.
+
 ## Next step
 
-Canary of the first 20 seeds of `exp_declared_five` on AWS Batch against
-the pinned image, then stop and report; the user decides whether the
+Inspect one finished canary child (expected state resolved, incident
+curve present, non-degenerate), run the readout with `--allow-partial`
+on the 20 cells, then stop and report; the user decides whether the
 remaining 580 cells run.
