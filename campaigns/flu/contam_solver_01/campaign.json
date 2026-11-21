@@ -7,6 +7,7 @@
  "s3_prefix": "campaign/flu_contam_solver_01/",
  "queue": "picard-campaign-queue",
  "image_tag": "flu-contam-solver01",
+ "image_digest": "sha256:23c5e8286e25bbcb911772e05145d7f43781667c65da9760ff57b3751c0136f2",
  "resources": {
   "vcpu": "1",
   "memory": "4096",
