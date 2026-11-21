@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """ONSET-FUNNEL-01 readout: decompose the onset -> specimen -> record funnel.
 
-Reads a directory of campaign cell payloads (a synced S3 block or a local
-dir), each carrying ``funnel_hosts`` and ``campaign_specimen_log`` echoes,
-and decomposes the recorded-onset channel end-to-end per seed and pooled:
+Reads repo-local directories of campaign cell payloads (sync an S3 block
+into the checkout first), each carrying ``funnel_hosts`` and
+``campaign_specimen_log`` echoes, and decomposes the recorded-onset
+channel end-to-end per seed and pooled:
 
     infection -> presented -> specimen -> confirmed -> dated onset
 
@@ -43,7 +44,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from simulation_utils.paths import validated_open  # noqa: E402
+from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
 
 
 def _host_map(hosts: dict[str, Any], field: str) -> dict[int, int]:
@@ -248,11 +249,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     cells: list[dict[str, Any]] = []
-    for cells_dir in args.cells:
+    for cells_arg in args.cells:
+        cells_dir = resolve_repo_path(str(_REPO_ROOT), cells_arg)
         for path in sorted(glob.glob(str(Path(cells_dir) / "cell_*.json"))):
             cells.append(_decompose_cell(json.loads(Path(path).read_text())))
     out = {"cells": cells, "pooled": _pool(cells, args.takeoff_onsets)}
-    with validated_open(args.out, "w", allowed_roots=(str(_REPO_ROOT), "/tmp")) as fh:
+    out_path = Path(resolve_repo_path(str(_REPO_ROOT), args.out))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with validated_open(
+        str(out_path), "w", allowed_roots=(str(_REPO_ROOT),)
+    ) as fh:
         fh.write(json.dumps(out, indent=1) + "\n")
     pooled = out["pooled"]
     print(json.dumps({
