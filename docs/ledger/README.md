@@ -56,6 +56,8 @@ New ledger entries are registered here as they land; the filename remains the st
 
 - [COVID-SEED-RING-01](COVID-SEED-RING-01.md) — measured: NULL-PLACEMENT (40 cells at θ=3.162e8, audit clean, D0 drift witness CLEAN with 0/20 paired deltas). Surge-buffet index placement (`dining_service_type=buffet`) leaves the founder median at 2.0 vs frozen ≥10 and drawn 2.5 — dining assignment is correlative, not the mechanism; the under-declared structure is the index's realized day-0 embarkation-surge itinerary. Placement mechanism kept in-tree; GM scoring still gated; H5 still held out.
 
+- [COVID-EARLY-GROWTH-01](COVID-EARLY-GROWTH-01.md) — measured: pure-readout growth decomposition over the SEED-RING-01 cells. Record-timed cells (ign ≤9) hold pre-quarantine (d15) infections median 1,292 vs whole-voyage band [712,960] and ~383 before-17 onsets vs 34 — early growth carries the overshoot, not the tail; all 8 end at 1,268–3,136, above the band. Θ is confounded: the same composite scales founder yield and post-founder growth; the record needs a dense embarkation-window contact field that relaxes — a voyage-stage declaration, not dose.
+
 - [ROOM-AIR-PAIRED-VALIDATION-01](ROOM-AIR-PAIRED-VALIDATION-01.md) — declared, design only: paired `ambient_on`/`ambient_off` respiratory contrast with matched seeds, exact sign-flip rule, sealed-mode no-change control and aggregate encounter witness; three pre-execution blockers; nothing run.
 
 - [CONTAM-FLEET-WORKUP-CANARY-01](CONTAM-FLEET-WORKUP-CANARY-01.md) — four-hull canary amendment: outdoor-air fraction does not reach the ContamX solved field; results split into solved airflow and derived downstream mixing; realized-field gates.
