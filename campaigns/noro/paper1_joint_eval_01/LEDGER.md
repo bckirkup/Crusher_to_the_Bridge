@@ -145,13 +145,17 @@ versus actual") records the gap for WP1b's contract revision.
 Job definition: `picard-noro-paper1-joint-eval-01` revs `:3`–`:7`; image
 `sha256:354b27b6…55d82` (built at freeze commit `bf0ec168`).
 
-## Gated (not run)
+## Gated (canary in flight)
 
-Done through the rebuild; remaining: image build with digest pin (the
-image must contain this directory's updated spec, so the pin moves to a
-new digest at this branch's commit); manifest upload; canary of 20 seeds
-at one bridge cell, then stop and report. Reference fingerprints for the
-reproduction arm resolve at readout time from the
+Done: image rebuilt at `90aa3ec2` (the in-image manifest carries Stage
+B); digest repinned to `sha256:80884d60b496c6f7dddd306390acb74f3f4b3a
+72eca2c6d6fb898dddfb3f149a` (jobdef `:8`); `manifest.json` uploaded to
+the campaign S3 prefix; bridge canary submitted —
+`fl_je_exp_7d_outbreak`, 20 children, Batch job
+`221787d3-d16d-495e-8da8-be62e1407257`.
+
+Remaining: read out the canary, then stop and report. Reference
+fingerprints for the reproduction arm resolve at readout time from the
 `noro_supply_solver_screen_01` archive (`readout.py --reference-root`).
 Owner: `campaign-preflight`.
 
