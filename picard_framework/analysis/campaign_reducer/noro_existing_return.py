@@ -271,6 +271,29 @@ def _extract_identity(
     return cohort
 
 
+def _boarding_fields(init_manifest: dict[str, Any]) -> tuple[Any, Any]:
+    boarding = init_manifest.get("boarding")
+    entry: dict[str, Any] = {}
+    if isinstance(boarding, dict):
+        if isinstance(boarding.get("norovirus"), dict):
+            entry = boarding["norovirus"]
+        else:
+            for val in boarding.values():
+                if isinstance(val, dict):
+                    entry = val
+                    break
+    by_role = _first_non_null(
+        entry.get("drawn_by_role"),
+        init_manifest.get("drawn_by_role"),
+    )
+    states = _first_non_null(
+        entry.get("composition"),
+        init_manifest.get("drawn_by_state"),
+        init_manifest.get("initial_states"),
+    )
+    return by_role, states
+
+
 def _extract_complements_and_initial(
     summary: dict[str, Any],
     joint_eval: dict[str, Any] | None,
@@ -311,7 +334,7 @@ def _extract_complements_and_initial(
 
     init_ids = summary.get("initially_infected_agent_ids")
     init_total = len(init_ids) if isinstance(init_ids, list) else census.get("n_imports")
-    init_by_role = init_manifest.get("drawn_by_role")
+    init_by_role, init_states = _boarding_fields(init_manifest)
     if init_by_role is None and (
         je_curves.get("preboarding_declared_passenger") is not None
         or je_curves.get("preboarding_declared_crew") is not None
@@ -321,7 +344,6 @@ def _extract_complements_and_initial(
             "crew_preboarding_declared": je_curves.get("preboarding_declared_crew"),
             "scope": "preboarding_declared_only",
         }
-    init_states = init_manifest.get("drawn_by_state") or init_manifest.get("initial_states")
 
     _set_field(
         values, prov, missing, "initial_infected_total", init_total,

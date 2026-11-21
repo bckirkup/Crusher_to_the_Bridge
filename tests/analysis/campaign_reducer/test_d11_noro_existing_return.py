@@ -58,8 +58,13 @@ def _explorer_zip(seed: int = 101) -> bytes:
         "introduction": {
             "declared_seed_agent_ids": ["pax-1"],
             "initiation_manifest": {
-                "drawn_by_role": {"passenger": 2, "crew": 1},
-                "drawn_by_state": {"exposed": 2, "infectious": 1},
+                "mode": "boarding+seeds",
+                "boarding": {
+                    "norovirus": {
+                        "drawn_by_role": {"passenger": 2, "crew": 1},
+                        "composition": {"exposed": 2, "infectious": 1},
+                    },
+                },
             },
         },
         "summary": {
