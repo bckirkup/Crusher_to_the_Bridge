@@ -61,6 +61,9 @@ from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
 )
 
 ROLES = ("passenger", "crew")
+# Frozen outside the block (contract section 2.5). Neither the shared job
+# definition nor the campaign image sets it, so the worker pins it itself.
+HASH_SEED = "1"
 _SERIES_KEYS = {
     role: f"cumulative_reported_cases_{role}" for role in ROLES
 }
@@ -327,8 +330,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def pin_hash_seed() -> None:
+    """Re-execute under ``PYTHONHASHSEED=1`` unless already running so."""
+    if os.environ.get("PYTHONHASHSEED") == HASH_SEED:
+        return
+    env = {**os.environ, "PYTHONHASHSEED": HASH_SEED}
+    os.execve(sys.executable, [sys.executable, *sys.argv], env)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if argv is None:
+        pin_hash_seed()
     manifest = validated_json_load(_REPO_ROOT, args.manifest)
     clock = manifest.get("natural_history_clock")
     runs = list(generate_tier_runs(
