@@ -119,16 +119,93 @@ versus actual") records the gap for WP1b's contract revision.
 - The census row keys `provisioned_source` by pathogen id; the selection
   rule reads `provisioned_source[norwalk_gi].n_contaminated`.
 
-## Gated (not run)
+## Stage A executed (2026-11-21)
 
-Declared freeze, then: census canary and array; `build.py --select` and
-rebuild; reference fingerprints for the reproduction arm from the
-`noro_supply_solver_screen_01` archive (`readout.py --reference-root`);
-image build with digest pin (the image must contain this directory);
-manifest upload; canary of 20 seeds at one bridge cell, then stop and
-report. Owner: `campaign-preflight`.
+- [x] Census arrays: 4 x 200 chunks x 100 seeds (80,000 census voyages, 1
+  epoch, 100 agents) — `census_exp` `e54512b0`, `census_cls` `0cb75ca3`,
+  `census_spr` `d0901e8b`, `census_meg` `0f104ec4` (Batch job ids, full
+  ids in the session record). All 800 children SUCCEEDED.
+- [x] Reproduction arm `fl_je_repro_exp_solver01_station_continuous`
+  `2b30c05b` — all 16 children SUCCEEDED; archives carry
+  `joint_eval` schema `paper1_joint_eval_cell/2.0.0`.
+- [x] Census contract: 20,000 rows per hull, full declared seed frame per
+  hull exactly once, 0 error rows. Contaminated-draw rate rises with hull
+  size: exp 5.92%, cls 9.26%, spr 15.26%, meg 17.29%.
+- [x] `build.py --select` applied the frozen rule:
+  `design/seed_selection.json` — per hull 20 quiet + 20 near + 20 outbreak
+  (diagnostic) and 20 + 20 evaluation seeds (hash-ranked over the
+  uncontaminated/contaminated frames).
+- [x] Rebuild emits 49 tiers / 49 blocks / 1,696 children = 816 Stage A +
+  880 Stage B (bridge 36 x 20 + pilot 8 x 20, as declared).
+- [x] `tests/test_paper1_joint_eval_campaign.py`: 39 passed (the
+  Stage-A-count test now counts the five Stage-A blocks explicitly; total
+  moved to 1,696 because the committed selection emits Stage B —
+  attributable to this diff).
+
+Job definition: `picard-noro-paper1-joint-eval-01` revs `:3`–`:7`; image
+`sha256:354b27b6…55d82` (built at freeze commit `bf0ec168`).
+
+## Gated (canary in flight)
+
+Done: image rebuilt at `90aa3ec2` (the in-image manifest carries Stage
+B); digest repinned to `sha256:80884d60b496c6f7dddd306390acb74f3f4b3a
+72eca2c6d6fb898dddfb3f149a` (jobdef `:8`); `manifest.json` uploaded to
+the campaign S3 prefix; bridge canary submitted —
+`fl_je_exp_7d_outbreak`, 20 children, Batch job
+`221787d3-d16d-495e-8da8-be62e1407257`.
+
+Remaining: stop and report. Reference fingerprints for the reproduction
+arm resolve at readout time from the `noro_supply_solver_screen_01`
+archive (`readout.py --reference-root`). Owner: `campaign-preflight`.
+
+## Bridge canary result (2026-11-21)
+
+20/20 children of `fl_je_exp_7d_outbreak` SUCCEEDED
+(`221787d3-d16d-495e-8da8-be62e1407257`, jobdef `:8`, image
+`sha256:80884d60…f149a`, ENGINE_GIT_SHA `90aa3ec2`).
+
+- [x] Audit clean: 20/20 archives read, no missing/unexpected/duplicated
+  seeds, intended inputs resolved, outcomes extractable, attempts
+  accounted; `engine_git_sha` = `90aa3ec2` on every archive;
+  `python_hash_seed` = 1; expected state resolved (rhythm
+  enabled+attached on exp).
+- [x] Measured (20-cell canary, outbreak stratum = 20 highest-burden
+  contaminated exp seeds): posting rate 1.00 [0.83, 1.00]; reported AR
+  median 0.060, max 0.091; 20/20 detected by swab and tank; first
+  reporter split 12 passenger / 8 crew. Contrast with the Explorer
+  reconstruction's ~5% take-off under `declared_five`: on exp hull at
+  the census's highest provisioned burdens, every cell takes.
+
+## Stage B submitted (2026-11-21)
+
+User approved after the canary readout. 43 arrays x 20 = 860 children on
+`picard-campaign-queue`, jobdef `picard-noro-paper1-joint-eval-01:8`
+(image `sha256:80884d60…f149a`); the canary's 20 cells of
+`fl_je_exp_7d_outbreak` complete that block. Batch job ids:
+
+- exp: `e1353fc1` 7d_quiet, `79cc438e` 7d_near, `221787d3` 7d_outbreak
+  (canary), `66d49f51` 12d_quiet, `93892a0f` 12d_near, `fb3c5386`
+  12d_outbreak, `80dae4af` 21d_quiet, `eef4a27f` 21d_near, `75e8a2c4`
+  21d_outbreak, `d1d5252e` eval_uncontaminated, `3fe432ca`
+  eval_contaminated
+- cls: `742b2691` 7d_quiet, `b0b35743` 7d_near, `f8f5f223` 7d_outbreak,
+  `898966e6` 12d_quiet, `6767c633` 12d_near, `4761bd22` 12d_outbreak,
+  `462b1a0a` 21d_quiet, `5164b082` 21d_near, `9fbe3c1f` 21d_outbreak,
+  `2e27f56b` eval_uncontaminated, `756f9c9e` eval_contaminated
+- spr: `95efbf63` 7d_quiet, `95db961c` 7d_near, `f731d4eb` 7d_outbreak,
+  `350b3b28` 12d_quiet, `daf1f1f6` 12d_near, `b02fc0c1` 12d_outbreak,
+  `d3f85843` 21d_quiet, `eae3058d` 21d_near, `25aeeeb0` 21d_outbreak,
+  `bb61a840` eval_uncontaminated, `827da078` eval_contaminated
+- meg: `a978715f` 7d_quiet, `46be5cd9` 7d_near, `46a3c17e` 7d_outbreak,
+  `3ab5ec56` 12d_quiet, `d25f3213` 12d_near, `59e648ac` 12d_outbreak,
+  `5edd38dd` 21d_quiet, `7e6b99df` 21d_near, `806ef5de` 21d_outbreak,
+  `88202e7c` eval_uncontaminated, `f6af2454` eval_contaminated
+
+(Ids are the first 8 chars of each Batch job id; full ids are in the
+session record.)
 
 ## Next decision
 
-Whether to declare the freeze. Edison should see the contract's new section
-2.5 "Role split" row first, since it changes the population every cell runs.
+Whether the readout verdict admits the campaign complete: technical
+completion of all 1,696 cells, the ordering diagnostic against the
+frozen bands, and the pilot reports.
