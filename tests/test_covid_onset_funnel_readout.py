@@ -8,6 +8,7 @@ these pin it on synthetic cells.
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -147,3 +148,43 @@ def test_dated_share_and_pool_medians_use_scorer_takeoff_gate(mod):
     assert pooled["takeoff_cells"] == 1
     assert pooled["medians"]["infections_total"] == 2
     assert pooled["recorded_onsets"] == 20
+
+
+def test_main_writes_report_and_summary(mod, tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(mod, "_REPO_ROOT", tmp_path)
+    cells_dir = tmp_path / "cells"
+    cells_dir.mkdir()
+    (cells_dir / "cell_7.json").write_text(
+        json.dumps(
+            _cell_payload(
+                hosts={
+                    1: {
+                        "infection_day": 1,
+                        "presented_day": 2,
+                        "confirmed_day": 3,
+                    },
+                    2: {"infection_day": 2},
+                },
+                log=[_log_row(1, 3, True)],
+                observables={
+                    "seed": 7,
+                    "theta": 3.162e11,
+                    "recorded_onsets": 12,
+                    "campaign_positives": 1,
+                    "asymptomatic_share": 0.5,
+                },
+            )
+        )
+    )
+    out_rel = "out/report.json"
+    assert mod.main(["--cells", "cells", "--out", out_rel]) == 0
+    written = json.loads((tmp_path / out_rel).read_text())
+    assert written["pooled"]["takeoff_cells"] == 1
+    assert json.loads(capsys.readouterr().out)["cells"] == 1
+
+
+def test_main_errors_on_empty_cells(mod, tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "_REPO_ROOT", tmp_path)
+    (tmp_path / "cells").mkdir()
+    with pytest.raises(ValueError, match=r"no cell_\*\.json"):
+        mod.main(["--cells", "cells", "--out", "out.json"])
