@@ -18,6 +18,7 @@ import math
 import os
 import resource
 import stat
+import statistics
 import sys
 import tempfile
 import time
@@ -167,9 +168,7 @@ def _dynamics_summary(rows: list[dict[str, Any]], epochs: int) -> dict[str, Any]
     peak_daily = max(daily_new) if daily_new else 0
     peak_day = daily_new.index(peak_daily) if peak_daily > 0 else None
     onboard_epochs.sort()
-    median_ep = (
-        onboard_epochs[len(onboard_epochs) // 2] if onboard_epochs else None
-    )
+    median_ep = statistics.median(onboard_epochs) if onboard_epochs else None
     return {
         "n_days": n_days,
         "daily_new_infections": daily_new,
