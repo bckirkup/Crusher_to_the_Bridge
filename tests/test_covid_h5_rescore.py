@@ -111,7 +111,7 @@ def _cell(
         "infections_total": infections_total,
         "lab_confirmed_total": lab_confirmed_total,
         "verbatim_loss": 0.0,
-        "h5_band_residual": 0.0,
+        "h5_band_residual": 0.0 if infections_total is not None else None,
     }
 
 
@@ -136,6 +136,10 @@ def test_dp_theta_block_gates_on_takeoff_and_band(mod):
     # 700 is under the band floor, so 4 of 5 takeoff cells are in band.
     assert block["h5_in_band_fraction"] == pytest.approx(4 / 5)
     assert block["h5_median_in_band"] is True
+    # Confirmations are reported both unconditionally and conditioned on
+    # the same takeoff population the infections readout conditions on.
+    assert block["lab_confirmed_total_takeoff"]["n"] == 5
+    assert block["lab_confirmed_total_takeoff"]["median"] == 700
 
 
 def test_dp_theta_block_under_floor_is_unscored(mod):
@@ -158,6 +162,86 @@ def test_dp_theta_block_missing_infections_is_unscored(mod):
     assert block["infections_total_takeoff"]["n"] == 0
     assert block["h5_in_band_fraction"] is None
     assert block["h5_median_in_band"] is False
+    # No infection truth -> no cells the anchor can score.
+    assert block["h5_scored"] is False
+    assert block["h5_band_residual_mean"] is None
+
+
+def test_dp_theta_block_floor_counts_infection_bearing_takeoff(mod):
+    # Six takeoff cells, but only four carry infection truth: the floor
+    # applies to cells the anchor can actually score.
+    cells = [
+        _cell(seed=s, recorded_onsets=20, infections_total=800)
+        for s in range(4)
+    ] + [
+        _cell(seed=s, recorded_onsets=20, infections_total=None)
+        for s in range(4, 6)
+    ]
+    block = mod._dp_theta_block(1e9, cells, takeoff_onsets=10)
+    assert block["takeoff_seeds"] == 6
+    assert block["h5_scored"] is False
+
+
+def test_selection_frequencies_empty_and_unshared(mod):
+    assert mod._selection_frequencies([]) == ({}, {})
+    # Rows sharing no seeds cannot be paired: no selection surface.
+    rows = [
+        {
+            "theta": 1e9,
+            "h5_scored": True,
+            "h5_takeoff_mean": 0.0,
+            "seeded": {1: (1.0, True, 0.0)},
+        },
+        {
+            "theta": 1e10,
+            "h5_scored": True,
+            "h5_takeoff_mean": 0.0,
+            "seeded": {2: (1.0, True, 0.0)},
+        },
+    ]
+    assert mod._selection_frequencies(rows) == ({}, {})
+
+
+def test_selection_frequencies_all_unscored_still_picks_verbatim(mod):
+    # With every row under the takeoff floor the augmented column is
+    # empty but the verbatim selection still runs.
+    rows = [
+        {
+            "theta": t,
+            "h5_scored": False,
+            "h5_takeoff_mean": 0.0,
+            "seeded": {s: (1.0, True, 1.0) for s in range(10)},
+        }
+        for t in (1e9, 1e10)
+    ]
+    verbatim, augmented = mod._selection_frequencies(rows)
+    assert verbatim["1e+09"] == 1.0
+    assert augmented == {}
+
+
+def test_selection_frequencies_nan_residual_drops_out(mod):
+    # A takeoff cell without infection truth (NaN residual) must not
+    # fabricate a penalty: row A's only scored seed is NaN, so its
+    # takeoff-set mean plug keeps it scored at 0, and B still wins on
+    # verbatim alone.
+    seeds = range(10)
+    rows = [
+        {
+            "theta": 1e9,
+            "h5_scored": True,
+            "h5_takeoff_mean": 0.0,
+            "seeded": {s: (1.0, True, None) for s in seeds},
+        },
+        {
+            "theta": 1e10,
+            "h5_scored": True,
+            "h5_takeoff_mean": 0.0,
+            "seeded": {s: (2.0, True, 0.0) for s in seeds},
+        },
+    ]
+    verbatim, augmented = mod._selection_frequencies(rows)
+    assert verbatim["1e+09"] == 1.0
+    assert augmented["1e+09"] == 1.0  # no fabricated penalty moves it
 
 
 def test_selection_frequencies_tie_breaks_to_smaller_theta(mod):

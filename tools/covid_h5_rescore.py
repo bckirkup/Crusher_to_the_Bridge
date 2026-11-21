@@ -108,7 +108,10 @@ def _decompose_cell(payload: dict[str, Any], objective: Any) -> dict[str, Any]:
         ),
         "lab_confirmed_total": payload.get("lab_confirmed_total"),
         "verbatim_loss": float(verbatim_loss),
-        "h5_band_residual": _h5_band_residual(infections or 0),
+        "h5_band_residual": (
+            _h5_band_residual(infections)
+            if infections is not None else None
+        ),
     }
 
 
@@ -136,13 +139,17 @@ def _selection_frequencies(
     column adds the H5 band residual as a third equally-weighted term,
     averaged over the drawn takeoff seeds (the anchor is takeoff-
     conditional); a resample drawing no takeoff seed plugs the row's own
-    takeoff-set mean. Rows under the takeoff-seed floor sit out the
-    augmented comparison entirely.
+    takeoff-set mean. Cells with no infection truth carry a NaN
+    residual and drop out of the takeoff mask - the anchor scores
+    infections, not missing data. Rows under the takeoff-seed floor sit
+    out the augmented comparison entirely.
     """
+    if not rows:
+        return {}, {}
     common = sorted(
         set.intersection(*(set(r["seeded"]) for r in rows)),
     )
-    if not rows or not common:
+    if not common:
         return {}, {}
     scored = [r for r in rows if r["h5_scored"]]
     thetas = np.asarray([r["theta"] for r in rows])
@@ -157,8 +164,13 @@ def _selection_frequencies(
     takeoff = np.asarray(
         [[r["seeded"][s][1] for s in common] for r in scored], dtype=bool,
     )
+    # Cells without infection truth carry NaN and fall out of the mask.
     h5 = np.asarray(
-        [[r["seeded"][s][2] for s in common] for r in scored], dtype=float,
+        [[
+            r["seeded"][s][2]
+            if r["seeded"][s][2] is not None else np.nan
+            for s in common
+        ] for r in scored], dtype=float,
     )
     h5_plug = np.asarray(
         [r["h5_takeoff_mean"] for r in scored], dtype=float,
@@ -170,11 +182,13 @@ def _selection_frequencies(
         draw = rng.integers(0, n_seeds, size=n_seeds)
         order = np.lexsort((thetas, verbatim[:, draw].mean(axis=1)))
         wins[order[0]] += 1
-        drawn_takeoff = takeoff[:, draw]
-        counts = drawn_takeoff.sum(axis=1)
+        if not scored:
+            continue
+        valid = takeoff[:, draw] & ~np.isnan(h5[:, draw])
+        counts = valid.sum(axis=1)
         drawn_h5 = np.where(
             counts > 0,
-            (h5[:, draw] * drawn_takeoff).sum(axis=1)
+            np.where(valid, np.nan_to_num(h5[:, draw]), 0.0).sum(axis=1)
             / np.maximum(counts, 1),
             h5_plug,
         )
@@ -205,7 +219,8 @@ def _dp_theta_block(
     in_band = sum(
         1 for inf in infections if H5_BAND[0] <= inf <= H5_BAND[1]
     )
-    h5_scored = len(takeoff) >= TAKEOFF_SEED_FLOOR
+    h5_cells = [c for c in takeoff if c["h5_band_residual"] is not None]
+    h5_scored = len(h5_cells) >= TAKEOFF_SEED_FLOOR
     block = {
         "theta": theta,
         "seeds": len(cells),
@@ -222,7 +237,7 @@ def _dp_theta_block(
             infections and H5_BAND[0] <= median(infections) <= H5_BAND[1],
         ),
         "h5_band_residual_mean": (
-            float(np.mean([c["h5_band_residual"] for c in takeoff]))
+            float(np.mean([c["h5_band_residual"] for c in h5_cells]))
             if h5_scored else None
         ),
         "h5_scored": h5_scored,
@@ -234,6 +249,10 @@ def _dp_theta_block(
         ),
         "lab_confirmed_total": _quantiles(
             [c["lab_confirmed_total"] for c in cells
+             if c["lab_confirmed_total"] is not None],
+        ),
+        "lab_confirmed_total_takeoff": _quantiles(
+            [c["lab_confirmed_total"] for c in takeoff
              if c["lab_confirmed_total"] is not None],
         ),
     }
