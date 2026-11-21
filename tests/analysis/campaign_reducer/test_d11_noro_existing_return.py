@@ -306,12 +306,21 @@ def test_registry_and_worker_defaults():
     assert defaults["member_allowlist"] == ("summary.json", "joint_eval.json.gz")
     assert defaults["emit_scalars"] is False
     assert noro_existing_return.definition_version() == "noro_existing_return/1.0.0"
+    assert noro_existing_return._design_stratum(
+        "paper1_joint_eval", "fl_je_exp_12d_eval_contaminated", "campaign/noro_paper1_joint_eval_01/fl_je_exp_12d_eval_contaminated/r.zip",
+    ) == "evaluation"
+    assert noro_existing_return._design_stratum(
+        "paper1_joint_eval", "fl_je_meg_7d_near", "campaign/noro_paper1_joint_eval_01/fl_je_meg_7d_near/r.zip",
+    ) == "diagnostic"
+    assert noro_existing_return._design_stratum(
+        "paper1_joint_eval", "repro_exp_12d", "campaign/noro_paper1_joint_eval_01/repro_exp_12d/r.zip", arm="reproduction",
+    ) == "reproduction"
 
 
 def test_mixed_three_cohorts_materialization():
     transport, store, ledger = _rig()
     k_exp = "campaign/noro_explorer_reconstruction_01/tier_1_baseline/run_101.zip"
-    k_je = "campaign/noro_paper1_joint_eval_01/diagnostic/arm_a/run_202.zip"
+    k_je = "campaign/noro_paper1_joint_eval_01/fl_je_meg_12d_quiet/run_202.zip"
     k_bf0 = "campaign/noro_supply_solver_screen_01_bf0/exp_station_lots_continuous/run_303.zip"
     transport.put(k_exp, _explorer_zip(101))
     transport.put(k_je, _joint_eval_zip(202))

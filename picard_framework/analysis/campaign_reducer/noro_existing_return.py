@@ -138,16 +138,38 @@ def _first_non_null(*candidates: Any) -> Any:
     return None
 
 
+_JE_ARM_STRATUM = {
+    "bridge": "diagnostic",
+    "pilot": "evaluation",
+    "reproduction": "reproduction",
+}
+_JE_DIAG_SUFFIXES = ("_quiet", "_near", "_outbreak")
+
+
+def _je_design_stratum(tier: Any, arm: Any, object_key: str) -> str | None:
+    if isinstance(arm, str) and arm in _JE_ARM_STRATUM:
+        return _JE_ARM_STRATUM[arm]
+    tier_str = str(tier) if tier is not None else ""
+    if "_eval_" in tier_str:
+        return "evaluation"
+    if tier_str.endswith(_JE_DIAG_SUFFIXES):
+        return "diagnostic"
+    if "repro" in tier_str:
+        return "reproduction"
+    for label in ("diagnostic", "evaluation", "reproduction"):
+        if tier == label or f"/{label}/" in object_key:
+            return label
+    return tier_str or None
+
+
 def _design_stratum(
     cohort: str,
     tier: Any,
     object_key: str,
+    arm: Any = None,
 ) -> str | None:
     if cohort == "paper1_joint_eval":
-        for label in ("diagnostic", "evaluation", "reproduction"):
-            if tier == label or f"/{label}/" in object_key:
-                return label
-        return str(tier) if tier is not None else None
+        return _je_design_stratum(tier, arm, object_key)
     if cohort == "explorer_reconstruction":
         return str(tier) if tier is not None else None
     if cohort == "supply_solver_reference":
@@ -227,7 +249,7 @@ def _extract_identity(
     _set_field(values, prov, missing, "platform", platform, "summary.platform")
     _set_field(
         values, prov, missing, "design_stratum",
-        _design_stratum(cohort, tier, object_key), "derived:design_stratum",
+        _design_stratum(cohort, tier, object_key, arm=arm), "derived:design_stratum",
     )
     _set_field(
         values, prov, missing, "engine_git_sha", engine_sha,
