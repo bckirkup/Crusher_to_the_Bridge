@@ -45,7 +45,9 @@
 | `explorer_seas_06` | 4428 | 2.95 / 3.5 | 3.30 / 3.0 | +0.35 / +0.0 | 8 / 7 / 5 | 0.3257 | 0 / 0 |
 | **Pooled (120 pairs)** | — | — | — | **+0.32** | **53 / 32 / 35** | **0.9048** | **804 / 801** |
 
-### Resource Comparison (Wall Time, vCPU, ContamX Child CPU, Peak RSS)
+### Resource Comparison (Worker-Measured Wall Time, vCPU, ContamX Child CPU, Peak RSS)
+
+> Note: Timings below are worker-measured (`timing.total_wall_s`, `timing.total_cpu_s`, `timing.total_cpu_children_s`) from the 240 cell artifacts on 1-vCPU / 4096-MB Batch children. Container-level AWS Batch billed wall time (`stoppedAt - startedAt`) was not separately tabulated; at 1 vCPU/child, worker wall time is a lower bound on billed vCPU-seconds (excluding container pull/startup overhead).
 
 | Hull | Init Wall (Nat / Ctx, s) | Total Wall (Nat / Ctx, s) | Wall Ratio | Total CPU (Nat / Ctx, vCPU-s) | CPU Ratio | ContamX Child CPU (mean, s) | Max RSS (Nat / Ctx, MB) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -59,7 +61,7 @@
 
 ## Outbreak Dynamics & Deviation Explanation
 
-- **No systematic directional solver bias (measured):** Across all 6 hulls individually (Wilcoxon signed-rank p = 0.148–1.000) and pooled across all 120 paired seeds (W = 1120.0, p = 0.9048, mean diff +0.32 onboard acquisitions), `ContamXTransportEngine` and `ContamTransportEngine` produce statistically indistinguishable ensemble outbreak sizes and identical or near-identical medians (diff 0.0 on 5 hulls, +1.0 on `diamond_princess`).
+- **No statistically detected directional solver bias (measured; exploratory Wilcoxon):** Across all 6 hulls individually (exploratory Wilcoxon signed-rank p = 0.148–1.000) and pooled across all 120 paired seeds (W = 1120.0, p = 0.9048, mean diff +0.32 onboard acquisitions, medians identical on 5 hulls and +1.0 on `diamond_princess`), `ContamXTransportEngine` and `ContamTransportEngine` show no statistically detected directional shift in ensemble outbreak size. Note: without a pre-declared equivalence margin and confidence interval, non-significance alone does not formally bound small residual bias.
 - **Two distinct HVAC-airborne regimes (measured):**
   - *High-HVAC-airborne hulls (`diamond_princess`, `greg_mortimer`):* `hvac_airborne` accounts for **83.4% / 79.8%** of onboard acquisitions on `diamond_princess` (741/888 native, 744/932 ContamX; active on 20/20 seeds in both arms; sustained daily incidence of 2.5–5.4/day through day 11) and **62.0% / 64.4%** on `greg_mortimer` (62/100 native, 56/87 ContamX; active on 16/20 native and 14/20 ContamX seeds; early wave peaking days 2–4). Both hulls show large **symmetric per-seed variance** (e.g. `diamond_princess` seed `8108`: 191→109; seed `8113`: 70→140; `greg_mortimer` seed `8120`: 49→0; seed `8118`: 9→39) that cancels at the ensemble level. Notably, mean airborne particle sums on infected agents are higher under native than ContamX (`11,869` vs `6,960` on `diamond_princess`, `2,450` vs `1,508` on `greg_mortimer`), yet `hvac_airborne`-dominant infection counts are nearly identical (741 vs 744; 62 vs 56).
   - *Droplet + caregiver hulls (`expedition_cruise_450`, `classic_cruise_1900`, `spirit_cruise_3000`, `explorer_seas_06`):* `hvac_airborne` is dominant in only **1 infection total per arm** across 80 paired seeds (`classic_cruise_1900` seed `8122`). Outbreaks remain small (1.0–3.3 onboard acquisitions, 0.07%–0.36% attack rate) with brief secondary bumps on days 2–5 that extinguish by days 6–8.
