@@ -314,7 +314,17 @@ def burden(voyage: dict[str, Any]) -> dict[str, Any]:
 
 
 def fingerprint(voyage: dict[str, Any]) -> str:
-    blob = json.dumps(voyage, sort_keys=True, default=str)
+    """Hash of the voyage blocks, engine commit excluded.
+
+    ``parameters.engine_git_sha`` names the commit, not the draw, so a
+    labelled baseline re-run on a later commit can still be bit-identical.
+    """
+    body = dict(voyage)
+    body["parameters"] = {
+        k: v for k, v in (voyage.get("parameters") or {}).items()
+        if k != "engine_git_sha"
+    }
+    blob = json.dumps(body, sort_keys=True, default=str)
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
