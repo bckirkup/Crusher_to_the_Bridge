@@ -3,7 +3,9 @@
 **Commit:** 87e8e3bb2f756c6698be5fe337814a955c2a40e4
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 87e8e3bb2f756c6698be5fe337814a955c2a40e4 (image digest sha256:87bc852a27f52cf476d09e417df6845a4c66aa9485490785d40b9d1a160b4773)
+**Measured at:** 87e8e3bb2f756c6698be5fe337814a955c2a40e4
+
+(Image digest sha256:87bc852a27f52cf476d09e417df6845a4c66aa9485490785d40b9d1a160b4773)
 
 Declared seam probe from COVID-IGNITION-01, run as designed: 1 θ × 2 arms ×
 20 seeds (20200205–20200224) at θ=3.162e8 (`dp_theta_8p50`) on the boxed_s1s2
