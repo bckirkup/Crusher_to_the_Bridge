@@ -137,22 +137,28 @@ def _joint_eval_zip(seed: int = 202) -> bytes:
         },
         "derived": {"vsp_trigger_epoch": 96},
         "role_checkpoints": {"day_3": {"passenger": 10, "crew": 2}},
+        "joint_eval": {
+            "effective_config": {"observation_mode": "full_env"},
+            "burden": {
+                "passenger_complement": 4000,
+                "crew_complement": 1500,
+                "cumulative_reported_cases_passenger": 30,
+                "cumulative_reported_cases_crew": 5,
+            },
+            "threshold": {
+                "vsp_trigger_epoch": 96,
+                "posted": True,
+                "trigger_status": "OUTBREAK",
+            },
+            "first_role": {
+                "category": "crew_first",
+                "first_crew_report_epoch": 18,
+                "first_passenger_report_epoch": 30,
+            },
+        },
     }
     joint_eval = {
-        "campaign": "noro_paper1_joint_eval_01",
-        "tier": "diagnostic",
-        "arm": "arm_a",
-        "seed": seed,
-        "engine_git_sha": "90aa3ec2",
-        "effective_config": {"observation_mode": "full_env"},
-        "burden": {
-            "total_passengers": 4000,
-            "total_crew": 1500,
-            "reported_passenger": 30,
-            "reported_crew": 5,
-        },
-        "threshold": {"vsp_trigger_epoch": 96, "posted": True, "trigger_status": "OUTBREAK"},
-        "first_role": {"category": "crew_first", "first_crew_report_epoch": 18, "first_passenger_report_epoch": 30},
+        "schema": "noro_paper1_joint_eval_01/1",
         "curves": {
             "preboarding_declared_passenger": 3,
             "preboarding_declared_crew": 1,

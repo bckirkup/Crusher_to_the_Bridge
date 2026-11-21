@@ -165,6 +165,7 @@ def _extract_identity(
     missing: list[str],
 ) -> str:
     je = joint_eval or {}
+    je_scalars = summary.get("joint_eval") if isinstance(summary.get("joint_eval"), dict) else {}
     cohort = _cohort_kind(summary, joint_eval, src)
     campaign = _first_non_null(summary.get("campaign"), je.get("campaign"), src.campaign_id)
     tier = _first_non_null(summary.get("tier"), je.get("tier"), src.cell_id)
@@ -193,6 +194,7 @@ def _extract_identity(
     image_digest = _first_non_null(summary.get("image_digest"), src.image_digest)
     effective_modes = _first_non_null(
         summary.get("effective_state"),
+        je_scalars.get("effective_config"),
         je.get("effective_config"),
         summary.get("effective_config"),
         (summary.get("initiation") or {}).get("resolved"),
@@ -434,12 +436,13 @@ def _extract_burden_and_thresholds(
     ts = summary.get("timeseries")
     series = ts if isinstance(ts, list) else []
     first_role = _first_non_null(
+        je_scalars.get("first_role"),
         je.get("first_role"),
         _first_role_from_timeseries(series),
     )
     _set_field(
         values, prov, missing, "first_role", first_role,
-        "joint_eval.first_role|derived:timeseries",
+        "summary.joint_eval.first_role|joint_eval.first_role|derived:timeseries",
     )
     _set_field(
         values, prov, missing, "final_role_category",
