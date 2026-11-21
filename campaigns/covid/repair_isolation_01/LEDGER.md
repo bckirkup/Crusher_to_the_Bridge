@@ -52,7 +52,7 @@ payload carries resolved `room_air_removal.map_arm=ambient_off`,
 |---|---|---|---|---|
 | recorded_onsets | median 3.0 [0–23] | 197 | — | — |
 | lab_confirmed | median 3.5 [0–31] | 712 | median 10.5 | — |
-| takeoff share (≥10 onsets) | 3/20 | always | 9/20 | — |
+| takeoff share (≥10 onsets) | 3/20 | one observed outbreak | 9/20 | — |
 | pooled lab_confirmed | **156** | — | ~1,236–1,294 | ~1,351–1,453 |
 | dated share | 0.74 | 0.277 | ~0.81 | — |
 | lab crew share (pooled) | 0.84 | 0.29 | ~0.45–0.75 | — |
