@@ -137,6 +137,7 @@ out/
 # local diagnostic scratch
 .smoke_*/
 canary_growth/
+.refit01_cells/
 growth_runs/
 growth_*.log
 work/downloads/
