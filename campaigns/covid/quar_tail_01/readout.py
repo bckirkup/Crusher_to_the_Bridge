@@ -82,6 +82,7 @@ _MESSBOX_ARMS = {"D0_declared", "MB_DUTY"}
 _ZONE_EXPECTED = {"D0_declared": 11 / 34, "MB_DUTY": 11 / 34}
 _FRAC_ARMS = {"FRAQMB", "FRAQMB_DUTY"}
 _FRAC_PROTOCOL = {arm: "SOP-017-QUARTERMB" for arm in _FRAC_ARMS}
+_FRAC_SHARE = 261 / 1045  # exact-quarter crew draw
 _DUTY_ARMS = {"MB_DUTY", "FRAQMB_DUTY"}
 _BASELINE_ARM = "D0_declared"
 _CREW_N = 1045
@@ -288,7 +289,7 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
     violations += _audit_arm_echo(payload, arm, tag)
     if int(cw.get("service_deliveries") or 0) <= 0:
         violations.append(f"{tag}: service_deliveries zero")
-    if not isinstance(payload.get("funnel_hosts"), list):
+    if not payload.get("funnel_hosts"):
         violations.append(f"{tag}: funnel_hosts missing (funnel_echo armed)")
     return violations
 
@@ -608,14 +609,29 @@ def _render(
             f"| {_fmt(duty['excluded_hosts_median'])} "
             f"| {metrics['service_deliveries_min']} | {verdict} |",
         )
-        if arm in _ZONE_EXPECTED and realized is not None:
-            expected = _ZONE_EXPECTED[arm]
-            if abs(realized - expected) > _SHARE_DEPARTURE_ABS:
-                flags.append(
-                    f"{arm}@{theta:g}: realized exempt share "
-                    f"{realized:.3f} departs lottery expectation "
-                    f"{expected:.3f} by >{_SHARE_DEPARTURE_ABS}",
-                )
+        share_expected = (
+            _ZONE_EXPECTED.get(arm)
+            or (_FRAC_SHARE if arm in _FRAC_ARMS else None)
+        )
+        if share_expected is not None:
+            for payload in seeds.values():
+                snap = _activation_snap(payload)
+                share = snap.get("realized_exempt_share")
+                seed = (payload.get("cell") or {}).get("seed")
+                tag_cell = f"{arm}@{theta:g} seed {seed}"
+                if share is None:
+                    flags.append(
+                        f"{tag_cell}: realized_exempt_share missing",
+                    )
+                elif abs(float(share) - share_expected) > (
+                    _SHARE_DEPARTURE_ABS
+                ):
+                    flags.append(
+                        f"{tag_cell}: realized exempt share "
+                        f"{float(share):.3f} departs declared draw "
+                        f"{share_expected:.3f} by "
+                        f">{_SHARE_DEPARTURE_ABS}",
+                    )
         if arm in _DUTY_ARMS and not duty["excluded_hosts_median"]:
             flags.append(
                 f"{arm}@{theta:g}: crew_duty_exclusion fired with "
