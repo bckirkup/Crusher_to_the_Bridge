@@ -126,17 +126,19 @@ are recorded in `campaigns/covid/quar_tail_01/LEDGER.md` and
 
 ## 8. The single open decision
 
-SEED-RING-01 is resolved: **NULL-PLACEMENT** — the dining-placement
-founder lever is dead, and the embarkation-day crowd/muster geometry
-is named as the under-declared structure (Arm-B reading of the frozen
-design). The open decision is now **whether to declare an
-itinerary-level embarkation-surge index-exposure arm** — placing the
-index's realized day-0 schedule through the boarding crowds (muster
-stations, boarding buffet crush, embarkation queues) rather than its
-dining assignment — as the next Θ seam probe, or to retire the
-ignition lever and accept the founder-pool lottery as declared
-physics. That remains the last measured Θ blocker; GM scoring stays
-gated on it.
+SEED-RING-01 is resolved: **NULL-PLACEMENT** — and EARLY-GROWTH-01
+(pure readout on its cells) has sharpened the blocker past the founder
+question: on record-timed cells the overshoot is already in place by
+day 16 (d16 infections median 1,373 vs the whole-voyage band
+[712,960]; before-17 onsets 383 vs 34), so the same θ that must lift
+the founder pool also drives the growth that overshoots the mass.
+The open decision is now **whether to declare voyage-stage contact
+structure** — a dense embarkation-window field that relaxes after the
+boarding days (the surge that expires), decoupling founder yield from
+settled-voyage growth — versus **re-scoping the Θ contract** to
+envelope/conditioned scoring. A founder-only arm is no longer an
+honest probe: it predicts the founder leg lands and the mass leg still
+fails. GM scoring stays gated; H5 stays held out.
 
 Standing owner calls recorded in the ledger (not session decisions):
 `confirmed / infections_reachable` as the scored capture basis, and
