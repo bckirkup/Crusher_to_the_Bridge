@@ -183,7 +183,7 @@ def _joint_eval_zip(seed: int = 202) -> bytes:
             "swab_rows_kept": 2,
             "swab_detected_total": 2,
             "swab_censored_total": 1,
-            "first_swab_detected_epoch": 36,
+            "swab_first_detected_epoch": 36,
             "swab_rows": [
                 {
                     "epoch": 36,
@@ -209,7 +209,7 @@ def _joint_eval_zip(seed: int = 202) -> bytes:
             "tank_assays": 2,
             "tank_detected_total": 2,
             "tank_censored_total": 0,
-            "first_tank_detected_epoch": 24,
+            "tank_first_detected_epoch": 24,
             "tank_rows": [
                 {
                     "epoch": 24,
@@ -409,10 +409,12 @@ def test_mixed_three_cohorts_materialization():
     assert env["swab"]["rows_kept"] == 2
     assert env["swab"]["detected_total"] == 2
     assert env["swab"]["censored_below_lod_total"] == 1
+    assert env["swab"]["first_detected_epoch"] == 36
     assert env["swab"]["zones"] == ["buffet", "railing"]
     assert env["swab"]["recovered_summary"]["max"] == 50.0
     assert env["tank"]["assays_total"] == 2
     assert env["tank"]["quantifiable_total"] == 1
+    assert env["tank"]["first_detected_epoch"] == 24
     assert env["tank"]["instruments"] == ["ddPCR"]
     assert env["tank"]["loq_values"] == [2000.0]
 

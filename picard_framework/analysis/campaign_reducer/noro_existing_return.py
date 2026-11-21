@@ -666,7 +666,10 @@ def _extract_environment(
             "rows_kept": env.get("swab_rows_kept", len(swabs)),
             "detected_total": env.get("swab_detected_total"),
             "censored_below_lod_total": env.get("swab_censored_total"),
-            "first_detected_epoch": env.get("first_swab_detected_epoch"),
+            "first_detected_epoch": _first_non_null(
+                env.get("swab_first_detected_epoch"),
+                env.get("first_swab_detected_epoch"),
+            ),
             "zones": _collect_unique(swabs, "zone"),
             "surface_classes": _collect_unique(swabs, "surface_class"),
             "epochs_with_recovery": _collect_unique(swabs, "epoch"),
@@ -681,7 +684,10 @@ def _extract_environment(
             "quantifiable_total": sum(
                 1 for r in tanks if isinstance(r, dict) and r.get("quantifiable")
             ),
-            "first_detected_epoch": env.get("first_tank_detected_epoch"),
+            "first_detected_epoch": _first_non_null(
+                env.get("tank_first_detected_epoch"),
+                env.get("first_tank_detected_epoch"),
+            ),
             "instruments": _collect_unique(tanks, "instrument"),
             "streams": _collect_unique(tanks, "stream"),
             "epochs_observed": _collect_unique(tanks, "epoch"),
