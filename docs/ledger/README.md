@@ -42,6 +42,7 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- [NORO-EXPOCAP-EXPLORER-01](NORO-EXPOCAP-EXPLORER-01.md) — measured: under the Paper-1 frozen block the exposure cap resolved inactive on `explorer_seas_06` and active on the four archetypes; corrected by a cap-only platform scope (no rhythm catalog row); the rhythm layer still differs on Explorer and stays open.
 - [COVID-TRANSPORT-FIT-01](COVID-TRANSPORT-FIT-01.md) — measured: native and ContamX agree on takeoff in all 70 seed pairs and have equal (DP counts) or close (GM) medians, with seed-level differences up to +39 onsets / +50 confirmations on DP (corrected 2026-11-20; no equivalence claim); under the B1–B3 airflow repairs DP takeoff is ~45% at Θ7.9e6 (pooled volume preserved, realization frequency collapsed); GM magnitude near record (110 vs 128/217) with asym share 0.24 vs 0.8125.
 
 - [COVID-THETA-REFIT-01](COVID-THETA-REFIT-01.md) — measured: Θ refit on DP under the post-B1-B3 mass budget (840 cells, audit clean). Selected θ=3.162e11 (+4.5 decades vs shipped 7.9e6, bootstrap freq 0.736, interior minimum): DP funnel magnitude restored (positives median 443 vs scored T3 target 634, takeoff 95%) with recorded_onsets overshooting (~2.9k vs 197); held-out GM lands near record (positives median 108.5 vs 128) but asym share 0.272 vs 0.8125 is invariant to Θ — a natural-history/observation-channel defect, not mass budget.
