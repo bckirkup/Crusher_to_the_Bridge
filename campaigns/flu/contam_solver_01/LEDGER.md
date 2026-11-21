@@ -19,12 +19,12 @@
   - 1-child ContamX smoke (`exp450_contamx`, seed `8105`): `04f18e35-24a8-464c-a793-545564750d32` — `SUCCEEDED` (64.21 s wall, 65.51 s CPU, `ContamXTransportEngine`, 8 index / 2 onboard)
   - 20-seed native canary (`exp450_native`, seeds `8105`–`8124`): `c601f929-531a-436c-b530-2ce08d5e8f4d` — `SUCCEEDED` (20/20 children, 0 failed)
   - 20-seed ContamX canary (`exp450_contamx`, seeds `8105`–`8124`): `91ae3af2-79fe-466a-b55d-5dfc1516aaf6` — `SUCCEEDED` (20/20 children, 0 failed)
-  - 5-hull paired arrays (seeds `8105`–`8124`, submitted on `picard-flu-contam-solver-01:1`):
-    - `gm_native`: `5e7f2e15-92b9-474d-8081-af9648c8e4d4` / `gm_contamx`: `8aeca8e9-135c-4b74-8a12-38792ab7a4c2`
-    - `cls1900_native`: `f3d7726a-8d03-407f-bb95-c4cb50ba9fe2` / `cls1900_contamx`: `d758a499-99b2-4528-8c56-88eda7949222`
-    - `spr3000_native`: `ff72c66d-735e-4491-ba31-a4e2a1ae67c2` / `spr3000_contamx`: `8600d4a2-a30c-41f6-bb80-367388104ce5`
-    - `dp_native`: `04dc340b-6e50-40f8-847e-423fe35503d6` / `dp_contamx`: `8ce8dee2-f791-4f7c-af92-2a0f9795aba8`
-    - `exp06_native`: `94eae26c-f495-46e4-82bd-2bbaf7403e7e` / `exp06_contamx`: `026d47eb-7541-492a-a365-113c2e057cda`
+  - 5-hull paired arrays (seeds `8105`–`8124`, `r2` resubmission on `picard-flu-contam-solver-01:1`; initial `r1` submission failed with exit code 2 due to duplicate `"python3"` ahead of image `ENTRYPOINT ["python3"]` and was terminated):
+    - `gm_native`: `1e68cfaf-4023-42fe-808e-f1312f493444` / `gm_contamx`: `26895bbc-ac95-4c31-88a2-318615202fd8`
+    - `cls1900_native`: `9c2b3cf7-0ec0-403a-bb2a-5a890585f6c3` / `cls1900_contamx`: `308cb1d4-d0d5-4b44-b416-0b5caacdd62d`
+    - `spr3000_native`: `5fd5978a-ab79-4f05-83b8-35767f61f359` / `spr3000_contamx`: `c96ef405-a445-4d15-ad8d-27ccc0d8eaa8`
+    - `dp_native`: `204e9fdd-818c-4921-baac-9b9a9d48e2eb` / `dp_contamx`: `2c538c38-eba3-4d51-9b61-81a1467381ed`
+    - `exp06_native`: `46368e11-f1ac-4518-b493-b6ca88959d3f` / `exp06_contamx`: `1637f3b3-05e0-4823-89f9-47116519169e`
   - `mega_cruise_5000` (`mega5000_native` / `mega5000_contamx`): **held** per user decision for higher memory/vCPU.
 - **Submission note:** Both canary arrays were submitted with `aws batch submit-job` against `deploy/aws/campaign_entrypoint.py` and `picard-flu-contam-solver-01:1`.
 - **Artifact audit:** 40/40 expected files present (`exp450_native`: 20, `exp450_contamx`: 20); 0 missing, 0 extra, 0 duplicates; 20/20 `ContamTransportEngine` in native, 20/20 `ContamXTransportEngine` in ContamX; 40/40 `engine_git_sha` = `77235441f62e3a87e3ec6e45164fbfbec3d82879`.
