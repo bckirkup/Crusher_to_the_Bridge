@@ -66,13 +66,40 @@ PR, `PYTHONHASHSEED=1`. Each line is measured on the one seed named.
 Not exercised locally: a posted voyage, a detected swab, a crew onset, and
 any run longer than 96 epochs.
 
+## Amendment 2026-11-20: declared role split
+
+Owner decision after the authoring PR (#1358): run each platform's declared
+`nominal_complement`. Every census, bridge and pilot tier now declares one
+difference from the block, `ship_graph.agent_classes` (`build.py`,
+`class_mix`); the block itself is unchanged. Counts are unchanged (Stage A
+816, Stage B 880). The smokes above predate this amendment; they ran the
+template split.
+
+Local gates re-run after the amendment (measured, one seed each, 24 epochs,
+synthetic selection, `PYTHONHASHSEED=1`):
+
+- [x] `design/build.py --check`: build reproduces; `describe`: 5 blocks,
+  816 children.
+- [x] Bridge-arm smoke per hull, tier `fl_je_<hull>_7d_quiet` index 0:
+  roles on initialised agents and in the payload equal the declared
+  nominal — exp 300/150 (seed 2000000), cls 1,350/560 (2100000), spr
+  2,100/900 (2200000), meg 5,000/2,000 (2300000); arm `changed_paths` is
+  `ship_graph.agent_classes` only; 0 runner-changed leaves, 0
+  engine-resolved mismatches; six families `present`.
+- [x] `ship_graph` keeps every shipped sibling key when only
+  `agent_classes` is overridden (measured at initialise on all four hulls).
+- [x] `tests/test_paper1_joint_eval_campaign.py`: 35 passed.
+
+Not re-run after the amendment: `--verify-draws`, the census worker, and the
+48- and 96-epoch smokes.
+
 ## Findings recorded during authoring
 
-- Initialised role counts differ from the platforms' declared nominal split
-  on three hulls (exp 316/134 vs 300/150; cls 1,338/572 vs 1,350/560; meg
-  4,900/2,100 vs 5,000/2,000; spr equal). Measured at initialise on two
-  seeds per hull. The campaign asserts the initialised counts; changing
-  them is a baseline-block decision for WP1.
+- With the block alone, initialised role counts differ from the platforms'
+  declared nominal split on three hulls (exp 316/134 vs 300/150; cls
+  1,338/572 vs 1,350/560; meg 4,900/2,100 vs 5,000/2,000; spr equal).
+  Measured at initialise on two seeds per hull. Resolved by the amendment
+  above.
 - Compact retention drops the swab and holding-tank results from the epoch
   record; the worker reads them through the read-only observer hook.
 - The census row keys `provisioned_source` by pathogen id; the selection
@@ -89,5 +116,5 @@ report. Owner: `campaign-preflight`.
 
 ## Next decision
 
-Whether to declare the freeze as proposed or first change the baseline
-block's class mix so role counts match declared nominal.
+Whether to declare the freeze. Edison should see the contract's new section
+2.5 "Role split" row first, since it changes the population every cell runs.

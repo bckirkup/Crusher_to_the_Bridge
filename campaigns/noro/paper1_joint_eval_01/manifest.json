@@ -234,7 +234,7 @@
     1
    ],
    "num_agents": 450,
-   "description": "Paper-1 WP2 joint evaluation: expedition_cruise_450, 1 epochs, census; baseline = freeze contract section 2 block.",
+   "description": "Paper-1 WP2 joint evaluation: expedition_cruise_450, 1 epochs, census; baseline = freeze contract section 2 block, plus the hull's declared ship_graph.agent_classes.",
    "config_overrides": {
     "transmission": {
      "contact_mode": "per_partner_contact",
@@ -353,6 +353,82 @@
      "suspect_attack_rate": 0.02,
      "confirm_attack_rate": 0.03,
      "lockdown_attack_rate": 0.05
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.47555555555555556,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.09555555555555556,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.09555555555555556,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1111111111111111,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05555555555555555,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1111111111111111,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05555555555555555,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "seeds": [
@@ -362,14 +438,93 @@
     "hull": "expedition_cruise_450",
     "epochs": 1,
     "arm": "census",
-    "changed_paths": [],
+    "changed_paths": [
+     {
+      "path": "ship_graph.agent_classes",
+      "baseline": "<absent>",
+      "arm": [
+       {
+        "class_id": "passenger_general",
+        "role_group": "passenger",
+        "fraction": 0.47555555555555556,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "passenger_family",
+        "role_group": "passenger",
+        "fraction": 0.09555555555555556,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "passenger_elderly",
+        "role_group": "passenger",
+        "fraction": 0.09555555555555556,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "crew_general",
+        "role_group": "crew",
+        "fraction": 0.1111111111111111,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "",
+        "duty_zone": "",
+        "schedule": {
+         "template": "crew_general",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_medical",
+        "role_group": "crew",
+        "fraction": 0.05555555555555555,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "Medical",
+        "duty_zone": "Medical_Center",
+        "schedule": {
+         "template": "crew_medical",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_engineering",
+        "role_group": "crew",
+        "fraction": 0.1111111111111111,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "Engine",
+        "duty_zone": "Engine",
+        "schedule": {
+         "template": "crew_engineering",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_galley",
+        "role_group": "crew",
+        "fraction": 0.05555555555555555,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "",
+        "duty_zone": "Galley",
+        "schedule": {
+         "template": "crew_galley",
+         "night_watch_fraction": 0.05
+        }
+       }
+      ]
+     }
+    ],
     "intended_roles": {
-     "passenger": 316,
-     "crew": 134
-    },
-    "nominal_roles": {
      "passenger": 300,
      "crew": 150
+    },
+    "template_roles": {
+     "passenger": 316,
+     "crew": 134
     }
    }
   },
@@ -386,7 +541,7 @@
     1
    ],
    "num_agents": 1910,
-   "description": "Paper-1 WP2 joint evaluation: classic_cruise_1900, 1 epochs, census; baseline = freeze contract section 2 block.",
+   "description": "Paper-1 WP2 joint evaluation: classic_cruise_1900, 1 epochs, census; baseline = freeze contract section 2 block, plus the hull's declared ship_graph.agent_classes.",
    "config_overrides": {
     "transmission": {
      "contact_mode": "per_partner_contact",
@@ -505,6 +660,82 @@
      "suspect_attack_rate": 0.02,
      "confirm_attack_rate": 0.03,
      "lockdown_attack_rate": 0.05
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5047120418848168,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.10104712041884817,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.10104712041884817,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.09790575916230367,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.04869109947643979,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.09790575916230367,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.04869109947643979,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "seeds": [
@@ -514,14 +745,93 @@
     "hull": "classic_cruise_1900",
     "epochs": 1,
     "arm": "census",
-    "changed_paths": [],
+    "changed_paths": [
+     {
+      "path": "ship_graph.agent_classes",
+      "baseline": "<absent>",
+      "arm": [
+       {
+        "class_id": "passenger_general",
+        "role_group": "passenger",
+        "fraction": 0.5047120418848168,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "passenger_family",
+        "role_group": "passenger",
+        "fraction": 0.10104712041884817,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "passenger_elderly",
+        "role_group": "passenger",
+        "fraction": 0.10104712041884817,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "crew_general",
+        "role_group": "crew",
+        "fraction": 0.09790575916230367,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "",
+        "duty_zone": "",
+        "schedule": {
+         "template": "crew_general",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_medical",
+        "role_group": "crew",
+        "fraction": 0.04869109947643979,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "Medical",
+        "duty_zone": "Medical_Center",
+        "schedule": {
+         "template": "crew_medical",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_engineering",
+        "role_group": "crew",
+        "fraction": 0.09790575916230367,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "Engine",
+        "duty_zone": "Engine",
+        "schedule": {
+         "template": "crew_engineering",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_galley",
+        "role_group": "crew",
+        "fraction": 0.04869109947643979,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "",
+        "duty_zone": "Galley",
+        "schedule": {
+         "template": "crew_galley",
+         "night_watch_fraction": 0.05
+        }
+       }
+      ]
+     }
+    ],
     "intended_roles": {
-     "passenger": 1338,
-     "crew": 572
-    },
-    "nominal_roles": {
      "passenger": 1350,
      "crew": 560
+    },
+    "template_roles": {
+     "passenger": 1338,
+     "crew": 572
     }
    }
   },
@@ -538,7 +848,7 @@
     1
    ],
    "num_agents": 3000,
-   "description": "Paper-1 WP2 joint evaluation: spirit_cruise_3000, 1 epochs, census; baseline = freeze contract section 2 block.",
+   "description": "Paper-1 WP2 joint evaluation: spirit_cruise_3000, 1 epochs, census; baseline = freeze contract section 2 block, plus the hull's declared ship_graph.agent_classes.",
    "config_overrides": {
     "transmission": {
      "contact_mode": "per_partner_contact",
@@ -657,6 +967,82 @@
      "suspect_attack_rate": 0.02,
      "confirm_attack_rate": 0.03,
      "lockdown_attack_rate": 0.05
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "seeds": [
@@ -666,12 +1052,91 @@
     "hull": "spirit_cruise_3000",
     "epochs": 1,
     "arm": "census",
-    "changed_paths": [],
+    "changed_paths": [
+     {
+      "path": "ship_graph.agent_classes",
+      "baseline": "<absent>",
+      "arm": [
+       {
+        "class_id": "passenger_general",
+        "role_group": "passenger",
+        "fraction": 0.5,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "passenger_family",
+        "role_group": "passenger",
+        "fraction": 0.1,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "passenger_elderly",
+        "role_group": "passenger",
+        "fraction": 0.1,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "crew_general",
+        "role_group": "crew",
+        "fraction": 0.1,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "",
+        "duty_zone": "",
+        "schedule": {
+         "template": "crew_general",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_medical",
+        "role_group": "crew",
+        "fraction": 0.05,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "Medical",
+        "duty_zone": "Medical_Center",
+        "schedule": {
+         "template": "crew_medical",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_engineering",
+        "role_group": "crew",
+        "fraction": 0.1,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "Engine",
+        "duty_zone": "Engine",
+        "schedule": {
+         "template": "crew_engineering",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_galley",
+        "role_group": "crew",
+        "fraction": 0.05,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "",
+        "duty_zone": "Galley",
+        "schedule": {
+         "template": "crew_galley",
+         "night_watch_fraction": 0.05
+        }
+       }
+      ]
+     }
+    ],
     "intended_roles": {
      "passenger": 2100,
      "crew": 900
     },
-    "nominal_roles": {
+    "template_roles": {
      "passenger": 2100,
      "crew": 900
     }
@@ -690,7 +1155,7 @@
     1
    ],
    "num_agents": 7000,
-   "description": "Paper-1 WP2 joint evaluation: mega_cruise_5000, 1 epochs, census; baseline = freeze contract section 2 block.",
+   "description": "Paper-1 WP2 joint evaluation: mega_cruise_5000, 1 epochs, census; baseline = freeze contract section 2 block, plus the hull's declared ship_graph.agent_classes.",
    "config_overrides": {
     "transmission": {
      "contact_mode": "per_partner_contact",
@@ -809,6 +1274,82 @@
      "suspect_attack_rate": 0.02,
      "confirm_attack_rate": 0.03,
      "lockdown_attack_rate": 0.05
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5102857142857142,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.102,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.102,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.09528571428571428,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.04757142857142857,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.09528571428571428,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.04757142857142857,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "seeds": [
@@ -818,14 +1359,93 @@
     "hull": "mega_cruise_5000",
     "epochs": 1,
     "arm": "census",
-    "changed_paths": [],
+    "changed_paths": [
+     {
+      "path": "ship_graph.agent_classes",
+      "baseline": "<absent>",
+      "arm": [
+       {
+        "class_id": "passenger_general",
+        "role_group": "passenger",
+        "fraction": 0.5102857142857142,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "passenger_family",
+        "role_group": "passenger",
+        "fraction": 0.102,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "passenger_elderly",
+        "role_group": "passenger",
+        "fraction": 0.102,
+        "home_zone_preference": "PC_",
+        "free_zone_preference": "",
+        "duty_zone": ""
+       },
+       {
+        "class_id": "crew_general",
+        "role_group": "crew",
+        "fraction": 0.09528571428571428,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "",
+        "duty_zone": "",
+        "schedule": {
+         "template": "crew_general",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_medical",
+        "role_group": "crew",
+        "fraction": 0.04757142857142857,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "Medical",
+        "duty_zone": "Medical_Center",
+        "schedule": {
+         "template": "crew_medical",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_engineering",
+        "role_group": "crew",
+        "fraction": 0.09528571428571428,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "Engine",
+        "duty_zone": "Engine",
+        "schedule": {
+         "template": "crew_engineering",
+         "night_watch_fraction": 0.05
+        }
+       },
+       {
+        "class_id": "crew_galley",
+        "role_group": "crew",
+        "fraction": 0.04757142857142857,
+        "home_zone_preference": "CC_",
+        "free_zone_preference": "",
+        "duty_zone": "Galley",
+        "schedule": {
+         "template": "crew_galley",
+         "night_watch_fraction": 0.05
+        }
+       }
+      ]
+     }
+    ],
     "intended_roles": {
-     "passenger": 4900,
-     "crew": 2100
-    },
-    "nominal_roles": {
      "passenger": 5000,
      "crew": 2000
+    },
+    "template_roles": {
+     "passenger": 4900,
+     "crew": 2100
     }
    }
   },
@@ -1399,9 +2019,9 @@
      "passenger": 316,
      "crew": 134
     },
-    "nominal_roles": {
-     "passenger": 300,
-     "crew": 150
+    "template_roles": {
+     "passenger": 316,
+     "crew": 134
     },
     "reference_fingerprints": {}
    }
