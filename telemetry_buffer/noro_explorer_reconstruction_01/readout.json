@@ -1,640 +1,47 @@
 {
  "campaign": "noro_explorer_reconstruction_01",
  "expected_cells": 600,
- "cells": 20,
+ "cells": 600,
  "engine_git_sha": [
   "bf0ec16825ed15176fe0362459a72a7be1667f41"
  ],
- "status": "partial",
- "incomplete_reasons": [
-  "fl_exp_8d_recon_declared_five: 80 seeds missing",
-  "fl_exp_8d_recon_background_only: 100 seeds missing",
-  "fl_meg_8d_recon_declared_five: 100 seeds missing",
-  "fl_meg_8d_recon_background_only: 100 seeds missing",
-  "fl_exp_8d_recon_declared_five_rhythm_off: 100 seeds missing",
-  "fl_meg_8d_recon_declared_five_rhythm_off: 100 seeds missing"
- ],
+ "status": "complete",
+ "incomplete_reasons": [],
  "coverage": {
   "fl_exp_8d_recon_declared_five": {
    "expected": 100,
-   "read": 20,
-   "missing": [
-    8125,
-    8126,
-    8127,
-    8128,
-    8129,
-    8130,
-    8131,
-    8132,
-    8133,
-    8134,
-    8135,
-    8136,
-    8137,
-    8138,
-    8139,
-    8140,
-    8141,
-    8142,
-    8143,
-    8144,
-    8145,
-    8146,
-    8147,
-    8148,
-    8149,
-    8150,
-    8151,
-    8152,
-    8153,
-    8154,
-    8155,
-    8156,
-    8157,
-    8158,
-    8159,
-    8160,
-    8161,
-    8162,
-    8163,
-    8164,
-    8165,
-    8166,
-    8167,
-    8168,
-    8169,
-    8170,
-    8171,
-    8172,
-    8173,
-    8174,
-    8175,
-    8176,
-    8177,
-    8178,
-    8179,
-    8180,
-    8181,
-    8182,
-    8183,
-    8184,
-    8185,
-    8186,
-    8187,
-    8188,
-    8189,
-    8190,
-    8191,
-    8192,
-    8193,
-    8194,
-    8195,
-    8196,
-    8197,
-    8198,
-    8199,
-    8200,
-    8201,
-    8202,
-    8203,
-    8204
-   ],
+   "read": 100,
+   "missing": [],
    "unexpected": []
   },
   "fl_exp_8d_recon_background_only": {
    "expected": 100,
-   "read": 0,
-   "missing": [
-    8105,
-    8106,
-    8107,
-    8108,
-    8109,
-    8110,
-    8111,
-    8112,
-    8113,
-    8114,
-    8115,
-    8116,
-    8117,
-    8118,
-    8119,
-    8120,
-    8121,
-    8122,
-    8123,
-    8124,
-    8125,
-    8126,
-    8127,
-    8128,
-    8129,
-    8130,
-    8131,
-    8132,
-    8133,
-    8134,
-    8135,
-    8136,
-    8137,
-    8138,
-    8139,
-    8140,
-    8141,
-    8142,
-    8143,
-    8144,
-    8145,
-    8146,
-    8147,
-    8148,
-    8149,
-    8150,
-    8151,
-    8152,
-    8153,
-    8154,
-    8155,
-    8156,
-    8157,
-    8158,
-    8159,
-    8160,
-    8161,
-    8162,
-    8163,
-    8164,
-    8165,
-    8166,
-    8167,
-    8168,
-    8169,
-    8170,
-    8171,
-    8172,
-    8173,
-    8174,
-    8175,
-    8176,
-    8177,
-    8178,
-    8179,
-    8180,
-    8181,
-    8182,
-    8183,
-    8184,
-    8185,
-    8186,
-    8187,
-    8188,
-    8189,
-    8190,
-    8191,
-    8192,
-    8193,
-    8194,
-    8195,
-    8196,
-    8197,
-    8198,
-    8199,
-    8200,
-    8201,
-    8202,
-    8203,
-    8204
-   ],
+   "read": 100,
+   "missing": [],
    "unexpected": []
   },
   "fl_meg_8d_recon_declared_five": {
    "expected": 100,
-   "read": 0,
-   "missing": [
-    8105,
-    8106,
-    8107,
-    8108,
-    8109,
-    8110,
-    8111,
-    8112,
-    8113,
-    8114,
-    8115,
-    8116,
-    8117,
-    8118,
-    8119,
-    8120,
-    8121,
-    8122,
-    8123,
-    8124,
-    8125,
-    8126,
-    8127,
-    8128,
-    8129,
-    8130,
-    8131,
-    8132,
-    8133,
-    8134,
-    8135,
-    8136,
-    8137,
-    8138,
-    8139,
-    8140,
-    8141,
-    8142,
-    8143,
-    8144,
-    8145,
-    8146,
-    8147,
-    8148,
-    8149,
-    8150,
-    8151,
-    8152,
-    8153,
-    8154,
-    8155,
-    8156,
-    8157,
-    8158,
-    8159,
-    8160,
-    8161,
-    8162,
-    8163,
-    8164,
-    8165,
-    8166,
-    8167,
-    8168,
-    8169,
-    8170,
-    8171,
-    8172,
-    8173,
-    8174,
-    8175,
-    8176,
-    8177,
-    8178,
-    8179,
-    8180,
-    8181,
-    8182,
-    8183,
-    8184,
-    8185,
-    8186,
-    8187,
-    8188,
-    8189,
-    8190,
-    8191,
-    8192,
-    8193,
-    8194,
-    8195,
-    8196,
-    8197,
-    8198,
-    8199,
-    8200,
-    8201,
-    8202,
-    8203,
-    8204
-   ],
+   "read": 100,
+   "missing": [],
    "unexpected": []
   },
   "fl_meg_8d_recon_background_only": {
    "expected": 100,
-   "read": 0,
-   "missing": [
-    8105,
-    8106,
-    8107,
-    8108,
-    8109,
-    8110,
-    8111,
-    8112,
-    8113,
-    8114,
-    8115,
-    8116,
-    8117,
-    8118,
-    8119,
-    8120,
-    8121,
-    8122,
-    8123,
-    8124,
-    8125,
-    8126,
-    8127,
-    8128,
-    8129,
-    8130,
-    8131,
-    8132,
-    8133,
-    8134,
-    8135,
-    8136,
-    8137,
-    8138,
-    8139,
-    8140,
-    8141,
-    8142,
-    8143,
-    8144,
-    8145,
-    8146,
-    8147,
-    8148,
-    8149,
-    8150,
-    8151,
-    8152,
-    8153,
-    8154,
-    8155,
-    8156,
-    8157,
-    8158,
-    8159,
-    8160,
-    8161,
-    8162,
-    8163,
-    8164,
-    8165,
-    8166,
-    8167,
-    8168,
-    8169,
-    8170,
-    8171,
-    8172,
-    8173,
-    8174,
-    8175,
-    8176,
-    8177,
-    8178,
-    8179,
-    8180,
-    8181,
-    8182,
-    8183,
-    8184,
-    8185,
-    8186,
-    8187,
-    8188,
-    8189,
-    8190,
-    8191,
-    8192,
-    8193,
-    8194,
-    8195,
-    8196,
-    8197,
-    8198,
-    8199,
-    8200,
-    8201,
-    8202,
-    8203,
-    8204
-   ],
+   "read": 100,
+   "missing": [],
    "unexpected": []
   },
   "fl_exp_8d_recon_declared_five_rhythm_off": {
    "expected": 100,
-   "read": 0,
-   "missing": [
-    8105,
-    8106,
-    8107,
-    8108,
-    8109,
-    8110,
-    8111,
-    8112,
-    8113,
-    8114,
-    8115,
-    8116,
-    8117,
-    8118,
-    8119,
-    8120,
-    8121,
-    8122,
-    8123,
-    8124,
-    8125,
-    8126,
-    8127,
-    8128,
-    8129,
-    8130,
-    8131,
-    8132,
-    8133,
-    8134,
-    8135,
-    8136,
-    8137,
-    8138,
-    8139,
-    8140,
-    8141,
-    8142,
-    8143,
-    8144,
-    8145,
-    8146,
-    8147,
-    8148,
-    8149,
-    8150,
-    8151,
-    8152,
-    8153,
-    8154,
-    8155,
-    8156,
-    8157,
-    8158,
-    8159,
-    8160,
-    8161,
-    8162,
-    8163,
-    8164,
-    8165,
-    8166,
-    8167,
-    8168,
-    8169,
-    8170,
-    8171,
-    8172,
-    8173,
-    8174,
-    8175,
-    8176,
-    8177,
-    8178,
-    8179,
-    8180,
-    8181,
-    8182,
-    8183,
-    8184,
-    8185,
-    8186,
-    8187,
-    8188,
-    8189,
-    8190,
-    8191,
-    8192,
-    8193,
-    8194,
-    8195,
-    8196,
-    8197,
-    8198,
-    8199,
-    8200,
-    8201,
-    8202,
-    8203,
-    8204
-   ],
+   "read": 100,
+   "missing": [],
    "unexpected": []
   },
   "fl_meg_8d_recon_declared_five_rhythm_off": {
    "expected": 100,
-   "read": 0,
-   "missing": [
-    8105,
-    8106,
-    8107,
-    8108,
-    8109,
-    8110,
-    8111,
-    8112,
-    8113,
-    8114,
-    8115,
-    8116,
-    8117,
-    8118,
-    8119,
-    8120,
-    8121,
-    8122,
-    8123,
-    8124,
-    8125,
-    8126,
-    8127,
-    8128,
-    8129,
-    8130,
-    8131,
-    8132,
-    8133,
-    8134,
-    8135,
-    8136,
-    8137,
-    8138,
-    8139,
-    8140,
-    8141,
-    8142,
-    8143,
-    8144,
-    8145,
-    8146,
-    8147,
-    8148,
-    8149,
-    8150,
-    8151,
-    8152,
-    8153,
-    8154,
-    8155,
-    8156,
-    8157,
-    8158,
-    8159,
-    8160,
-    8161,
-    8162,
-    8163,
-    8164,
-    8165,
-    8166,
-    8167,
-    8168,
-    8169,
-    8170,
-    8171,
-    8172,
-    8173,
-    8174,
-    8175,
-    8176,
-    8177,
-    8178,
-    8179,
-    8180,
-    8181,
-    8182,
-    8183,
-    8184,
-    8185,
-    8186,
-    8187,
-    8188,
-    8189,
-    8190,
-    8191,
-    8192,
-    8193,
-    8194,
-    8195,
-    8196,
-    8197,
-    8198,
-    8199,
-    8200,
-    8201,
-    8202,
-    8203,
-    8204
-   ],
+   "read": 100,
+   "missing": [],
    "unexpected": []
   }
  },
@@ -711,35 +118,35 @@
  },
  "tiers": {
   "fl_exp_8d_recon_declared_five": {
-   "cells": 20,
-   "evaluable": 0,
+   "cells": 100,
+   "evaluable": 5,
    "lag_days": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 2,
+    "q05": 1.2,
+    "q95": 3.0,
+    "p_equal_target": 0.4,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_first_seven": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 2,
+    "q05": 1.2,
+    "q95": 3.0,
+    "p_equal_target": 0.4,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_incident": {
-    "median": null,
-    "q05": null,
-    "q95": null
+    "median": 2.0,
+    "q05": 1.2,
+    "q95": 3.0
    },
    "incident_curve_approximated": false,
    "response_sop_cells": {
-    "SOP-007": 1,
-    "SOP-009": 0
+    "SOP-007": 6,
+    "SOP-009": 1
    },
    "effective_state": [
     {
@@ -752,961 +159,1001 @@
    ],
    "embarkation_declarations_max": {
     "passenger": 0,
-    "crew": 1
+    "crew": 3
    },
    "epoch_zero_reported_max": {
     "passenger": 1,
-    "crew": 1
+    "crew": 3
    },
    "passenger": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 1,
+     "q05": 1.0,
+     "q95": 2.0,
+     "p_equal_target": 0.4,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null,
+     "target_in_central_90": true,
      "tied_cells": 0
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 1,
+     "q05": 1.0,
+     "q95": 2.0,
+     "p_equal_target": 0.4,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.0,
+     "q05": 1.0,
+     "q95": 2.0
     },
     "incident_onset_total": {
      "median": 0.0,
      "q05": 0.0,
-     "q95": 2.0500000000000007
+     "q95": 29.299999999999983
     },
     "onset_attack_rate": {
-     "median": 0.002003081664098613,
+     "median": 0.0021571648690292757,
      "q05": 0.0015408320493066256,
-     "q95": 0.0030816640986132513,
+     "q95": 0.011171032357473031,
      "target": 0.07765793528505392
     },
     "reported_attack_rate_vs_posting": {
      "median": 0.0018489984591679508,
      "q05": 0.0012326656394453005,
-     "q95": 0.002788906009244992,
+     "q95": 0.008058551617873649,
      "target": 0.074884437596302
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.376984126984127,
+     "q05": 0.2536253110896772,
+     "q95": 0.5180102406554019
     },
     "onset_total_all_cells": {
-     "median": 6.5,
+     "median": 7.0,
      "q05": 5.0,
-     "q95": 10.0
+     "q95": 36.249999999999986
     },
     "onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 41.0,
+     "q05": 31.2,
+     "q95": 112.79999999999998,
      "target": 252,
-     "target_in_central_90": null
+     "target_in_central_90": false
     },
     "onset_total_first_seven_days": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 40.0,
+     "q05": 31.2,
+     "q95": 112.39999999999999
     }
    },
    "crew": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4,
+     "q05": 2.2,
+     "q95": 4.8,
+     "p_equal_target": 0.4,
+     "p_within_one_day": 0.8,
      "target": 4,
-     "target_in_central_90": null,
-     "tied_cells": 0
+     "target_in_central_90": true,
+     "tied_cells": 3
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4,
+     "q05": 2.2,
+     "q95": 4.8,
+     "p_equal_target": 0.4,
+     "p_within_one_day": 0.8,
      "target": 4,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 4.0,
+     "q05": 2.2,
+     "q95": 4.8
     },
     "incident_onset_total": {
      "median": 1.0,
      "q05": 0.0,
-     "q95": 18.350000000000005
+     "q95": 19.249999999999986
     },
     "onset_attack_rate": {
      "median": 0.0008453085376162299,
      "q05": 0.0,
-     "q95": 0.015511411665257824,
+     "q95": 0.016272189349112412,
      "target": 0.0169061707523246
     },
     "reported_attack_rate_vs_posting": {
      "median": 0.0008453085376162299,
      "q05": 0.0,
-     "q95": 0.008622147083685548,
+     "q95": 0.011876584953508029,
      "target": 0.016047297297297296
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.3342105263157895,
+     "q05": 0.25769230769230766,
+     "q95": 0.4728571428571428
     },
     "onset_total_all_cells": {
      "median": 1.0,
      "q05": 0.0,
-     "q95": 18.350000000000005
+     "q95": 19.249999999999986
     },
     "onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 7.0,
+     "q05": 5.2,
+     "q95": 17.799999999999997,
      "target": 20,
-     "target_in_central_90": null
+     "target_in_central_90": false
     },
     "onset_total_first_seven_days": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 6.0,
+     "q05": 5.0,
+     "q95": 13.6
     }
    }
   },
   "fl_exp_8d_recon_background_only": {
-   "cells": 0,
-   "evaluable": 0,
+   "cells": 100,
+   "evaluable": 4,
    "lag_days": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 3.5,
+    "q05": 2.15,
+    "q95": 5.699999999999999,
+    "p_equal_target": 0.25,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": false
    },
    "lag_days_first_seven": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 2.5,
+    "q05": 2.0,
+    "q95": 3.0,
+    "p_equal_target": 0.5,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_incident": {
-    "median": null,
-    "q05": null,
-    "q95": null
+    "median": 3.5,
+    "q05": 2.15,
+    "q95": 5.699999999999999
    },
    "incident_curve_approximated": false,
    "response_sop_cells": {
-    "SOP-007": 0,
-    "SOP-009": 0
+    "SOP-007": 5,
+    "SOP-009": 1
    },
-   "effective_state": [],
+   "effective_state": [
+    {
+     "exposure_cap_active": true,
+     "exposure_cap_requested": true,
+     "rhythm_catalog": false,
+     "rhythm_layer_active": false,
+     "rhythm_requested": true
+    }
+   ],
    "embarkation_declarations_max": {
     "passenger": 0,
-    "crew": 0
+    "crew": 3
    },
    "epoch_zero_reported_max": {
-    "passenger": 0,
-    "crew": 0
+    "passenger": 1,
+    "crew": 3
    },
    "passenger": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 2.0,
+     "q05": 1.15,
+     "q95": 2.8499999999999996,
+     "p_equal_target": 0.5,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null,
-     "tied_cells": 0
+     "target_in_central_90": true,
+     "tied_cells": 1
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 2.0,
+     "q05": 1.15,
+     "q95": 2.8499999999999996,
+     "p_equal_target": 0.5,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 2.0,
+     "q05": 1.15,
+     "q95": 2.8499999999999996
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 25.449999999999974
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0003081664098613251,
+     "q05": 0.0,
+     "q95": 0.008443759630200302,
      "target": 0.07765793528505392
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0003081664098613251,
+     "q05": 0.0,
+     "q95": 0.0056086286594761135,
      "target": 0.074884437596302
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.32076118326118325,
+     "q05": 0.2612103174603175,
+     "q95": 0.366471533516988
     },
     "onset_total_all_cells": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.0,
+     "q05": 0.0,
+     "q95": 27.399999999999977
     },
     "onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 42.0,
+     "q05": 35.75,
+     "q95": 109.44999999999997,
      "target": 252,
-     "target_in_central_90": null
+     "target_in_central_90": false
     },
     "onset_total_first_seven_days": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 41.5,
+     "q05": 33.05,
+     "q95": 108.59999999999997
     }
    },
    "crew": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 6.0,
+     "q05": 4.15,
+     "q95": 7.0,
+     "p_equal_target": 0.25,
+     "p_within_one_day": 0.5,
      "target": 4,
-     "target_in_central_90": null,
+     "target_in_central_90": false,
      "tied_cells": 0
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4.5,
+     "q05": 4.0,
+     "q95": 5.0,
+     "p_equal_target": 0.5,
+     "p_within_one_day": 1.0,
      "target": 4,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 6.0,
+     "q05": 4.15,
+     "q95": 7.0
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 19.249999999999986
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 0.016272189349112412,
      "target": 0.0169061707523246
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 0.010228233305156377,
      "target": 0.016047297297297296
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.4456349206349206,
+     "q05": 0.3911904761904762,
+     "q95": 0.7483333333333333
     },
     "onset_total_all_cells": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 19.249999999999986
     },
     "onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 7.5,
+     "q05": 5.15,
+     "q95": 13.249999999999998,
      "target": 20,
-     "target_in_central_90": null
+     "target_in_central_90": false
     },
     "onset_total_first_seven_days": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 6.0,
+     "q05": 1.75,
+     "q95": 10.249999999999998
     }
    }
   },
   "fl_meg_8d_recon_declared_five": {
-   "cells": 0,
-   "evaluable": 0,
+   "cells": 100,
+   "evaluable": 4,
    "lag_days": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 1.5,
+    "q05": -0.7,
+    "q95": 3.6999999999999993,
+    "p_equal_target": 0.25,
+    "p_crew_later": 0.75,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_first_seven": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 1.5,
+    "q05": -0.7,
+    "q95": 3.6999999999999993,
+    "p_equal_target": 0.25,
+    "p_crew_later": 0.75,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_incident": {
-    "median": null,
-    "q05": null,
-    "q95": null
+    "median": 2.0,
+    "q05": 1.15,
+    "q95": 3.6999999999999993
    },
    "incident_curve_approximated": false,
    "response_sop_cells": {
-    "SOP-007": 0,
+    "SOP-007": 3,
     "SOP-009": 0
    },
-   "effective_state": [],
+   "effective_state": [
+    {
+     "exposure_cap_active": true,
+     "exposure_cap_requested": true,
+     "rhythm_catalog": true,
+     "rhythm_layer_active": true,
+     "rhythm_requested": true
+    }
+   ],
    "embarkation_declarations_max": {
     "passenger": 0,
-    "crew": 0
+    "crew": 2
    },
    "epoch_zero_reported_max": {
-    "passenger": 0,
-    "crew": 0
+    "passenger": 2,
+    "crew": 2
    },
    "passenger": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 2.0,
+     "q05": 1.0,
+     "q95": 3.0,
+     "p_equal_target": 0.0,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null,
-     "tied_cells": 0
+     "target_in_central_90": true,
+     "tied_cells": 1
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 2.0,
+     "q05": 1.0,
+     "q95": 3.0,
+     "p_equal_target": 0.0,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 2.0,
+     "q05": 1.0,
+     "q95": 3.0
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 51.0
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0014285714285714286,
+     "q05": 0.0010204081632653062,
+     "q95": 0.01143877551020408,
      "target": 0.07765793528505392
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0012244897959183673,
+     "q05": 0.0008061224489795919,
+     "q95": 0.006438775510204076,
      "target": 0.074884437596302
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.49992470106322096,
+     "q05": 0.4271312872975277,
+     "q95": 0.5607590885816691
     }
    },
    "crew": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4.5,
+     "q05": 0.6000000000000001,
+     "q95": 5.0,
+     "p_equal_target": 0.25,
+     "p_within_one_day": 0.75,
      "target": 4,
-     "target_in_central_90": null,
-     "tied_cells": 0
+     "target_in_central_90": true,
+     "tied_cells": 2
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4.5,
+     "q05": 0.6000000000000001,
+     "q95": 5.0,
+     "p_equal_target": 0.25,
+     "p_within_one_day": 0.75,
      "target": 4,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 4.5,
+     "q05": 3.15,
+     "q95": 5.0
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.0,
+     "q05": 0.0,
+     "q95": 21.49999999999997
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0004761904761904762,
+     "q05": 0.0,
+     "q95": 0.010238095238095225,
      "target": 0.0169061707523246
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0004761904761904762,
+     "q05": 0.0,
+     "q95": 0.006761904761904757,
      "target": 0.016047297297297296
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.5583333333333333,
+     "q05": 0.39625,
+     "q95": 0.6060714285714285
     }
    }
   },
   "fl_meg_8d_recon_background_only": {
-   "cells": 0,
-   "evaluable": 0,
+   "cells": 100,
+   "evaluable": 4,
    "lag_days": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 3.0,
+    "q05": 2.15,
+    "q95": 3.8499999999999996,
+    "p_equal_target": 0.25,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": false
    },
    "lag_days_first_seven": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 3.0,
+    "q05": 2.15,
+    "q95": 3.8499999999999996,
+    "p_equal_target": 0.25,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": false
    },
    "lag_days_incident": {
-    "median": null,
-    "q05": null,
-    "q95": null
+    "median": 3.0,
+    "q05": 2.15,
+    "q95": 3.8499999999999996
    },
    "incident_curve_approximated": false,
    "response_sop_cells": {
-    "SOP-007": 0,
+    "SOP-007": 4,
     "SOP-009": 0
    },
-   "effective_state": [],
+   "effective_state": [
+    {
+     "exposure_cap_active": true,
+     "exposure_cap_requested": true,
+     "rhythm_catalog": true,
+     "rhythm_layer_active": true,
+     "rhythm_requested": true
+    }
+   ],
    "embarkation_declarations_max": {
     "passenger": 0,
-    "crew": 0
+    "crew": 2
    },
    "epoch_zero_reported_max": {
-    "passenger": 0,
-    "crew": 0
+    "passenger": 1,
+    "crew": 2
    },
    "passenger": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 1.5,
+     "q05": 1.0,
+     "q95": 2.8499999999999996,
+     "p_equal_target": 0.25,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null,
+     "target_in_central_90": true,
      "tied_cells": 0
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 1.5,
+     "q05": 1.0,
+     "q95": 2.8499999999999996,
+     "p_equal_target": 0.25,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.5,
+     "q05": 1.0,
+     "q95": 2.8499999999999996
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 49.599999999999966
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.00040816326530612246,
+     "q05": 0.0,
+     "q95": 0.010316326530612237,
      "target": 0.07765793528505392
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.00020408163265306123,
+     "q05": 0.0,
+     "q95": 0.0054285714285714215,
      "target": 0.074884437596302
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.5408494747480199,
+     "q05": 0.4621011196960564,
+     "q95": 0.5912431888178157
     }
    },
    "crew": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4.5,
+     "q05": 4.0,
+     "q95": 5.85,
+     "p_equal_target": 0.5,
+     "p_within_one_day": 0.75,
      "target": 4,
-     "target_in_central_90": null,
+     "target_in_central_90": true,
      "tied_cells": 0
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4.5,
+     "q05": 4.0,
+     "q95": 5.85,
+     "p_equal_target": 0.5,
+     "p_within_one_day": 0.75,
      "target": 4,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 4.5,
+     "q05": 4.0,
+     "q95": 5.85
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 20.599999999999966
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0004761904761904762,
+     "q05": 0.0,
+     "q95": 0.009809523809523794,
      "target": 0.0169061707523246
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0004761904761904762,
+     "q05": 0.0,
+     "q95": 0.006333333333333325,
      "target": 0.016047297297297296
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.42500000000000004,
+     "q05": 0.346875,
+     "q95": 0.4560714285714285
     }
    }
   },
   "fl_exp_8d_recon_declared_five_rhythm_off": {
-   "cells": 0,
-   "evaluable": 0,
+   "cells": 100,
+   "evaluable": 5,
    "lag_days": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 2,
+    "q05": 1.2,
+    "q95": 3.0,
+    "p_equal_target": 0.4,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_first_seven": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 2,
+    "q05": 1.2,
+    "q95": 3.0,
+    "p_equal_target": 0.4,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_incident": {
-    "median": null,
-    "q05": null,
-    "q95": null
+    "median": 2.0,
+    "q05": 1.2,
+    "q95": 3.0
    },
    "incident_curve_approximated": false,
    "response_sop_cells": {
-    "SOP-007": 0,
-    "SOP-009": 0
+    "SOP-007": 6,
+    "SOP-009": 1
    },
-   "effective_state": [],
+   "effective_state": [
+    {
+     "exposure_cap_active": true,
+     "exposure_cap_requested": true,
+     "rhythm_catalog": false,
+     "rhythm_layer_active": false,
+     "rhythm_requested": false
+    }
+   ],
    "embarkation_declarations_max": {
     "passenger": 0,
-    "crew": 0
+    "crew": 3
    },
    "epoch_zero_reported_max": {
-    "passenger": 0,
-    "crew": 0
+    "passenger": 1,
+    "crew": 3
    },
    "passenger": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 1,
+     "q05": 1.0,
+     "q95": 2.0,
+     "p_equal_target": 0.4,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null,
+     "target_in_central_90": true,
      "tied_cells": 0
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 1,
+     "q05": 1.0,
+     "q95": 2.0,
+     "p_equal_target": 0.4,
+     "p_within_one_day": 1.0,
      "target": 2,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.0,
+     "q05": 1.0,
+     "q95": 2.0
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 29.299999999999983
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0021571648690292757,
+     "q05": 0.0015408320493066256,
+     "q95": 0.011171032357473031,
      "target": 0.07765793528505392
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0018489984591679508,
+     "q05": 0.0012326656394453005,
+     "q95": 0.008058551617873649,
      "target": 0.074884437596302
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.376984126984127,
+     "q05": 0.2536253110896772,
+     "q95": 0.5180102406554019
     },
     "onset_total_all_cells": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 7.0,
+     "q05": 5.0,
+     "q95": 36.249999999999986
     },
     "onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 41.0,
+     "q05": 31.2,
+     "q95": 112.79999999999998,
      "target": 252,
-     "target_in_central_90": null
+     "target_in_central_90": false
     },
     "onset_total_first_seven_days": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 40.0,
+     "q05": 31.2,
+     "q95": 112.39999999999999
     }
    },
    "crew": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4,
+     "q05": 2.2,
+     "q95": 4.8,
+     "p_equal_target": 0.4,
+     "p_within_one_day": 0.8,
      "target": 4,
-     "target_in_central_90": null,
-     "tied_cells": 0
+     "target_in_central_90": true,
+     "tied_cells": 3
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 4,
+     "q05": 2.2,
+     "q95": 4.8,
+     "p_equal_target": 0.4,
+     "p_within_one_day": 0.8,
      "target": 4,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 4.0,
+     "q05": 2.2,
+     "q95": 4.8
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.0,
+     "q05": 0.0,
+     "q95": 19.249999999999986
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0008453085376162299,
+     "q05": 0.0,
+     "q95": 0.016272189349112412,
      "target": 0.0169061707523246
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0008453085376162299,
+     "q05": 0.0,
+     "q95": 0.011876584953508029,
      "target": 0.016047297297297296
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.3342105263157895,
+     "q05": 0.25769230769230766,
+     "q95": 0.4728571428571428
     },
     "onset_total_all_cells": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.0,
+     "q05": 0.0,
+     "q95": 19.249999999999986
     },
     "onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 7.0,
+     "q05": 5.2,
+     "q95": 17.799999999999997,
      "target": 20,
-     "target_in_central_90": null
+     "target_in_central_90": false
     },
     "onset_total_first_seven_days": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 6.0,
+     "q05": 5.0,
+     "q95": 13.6
     }
    }
   },
   "fl_meg_8d_recon_declared_five_rhythm_off": {
-   "cells": 0,
-   "evaluable": 0,
+   "cells": 100,
+   "evaluable": 6,
    "lag_days": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 3.0,
+    "q05": 1.5,
+    "q95": 3.75,
+    "p_equal_target": 0.0,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_first_seven": {
-    "median": null,
-    "q05": null,
-    "q95": null,
-    "p_equal_target": null,
-    "p_crew_later": null,
+    "median": 3.0,
+    "q05": 1.5,
+    "q95": 3.75,
+    "p_equal_target": 0.0,
+    "p_crew_later": 1.0,
     "target": 2,
-    "target_in_central_90": null
+    "target_in_central_90": true
    },
    "lag_days_incident": {
-    "median": null,
-    "q05": null,
-    "q95": null
+    "median": 3.0,
+    "q05": 1.5,
+    "q95": 3.75
    },
    "incident_curve_approximated": false,
    "response_sop_cells": {
-    "SOP-007": 0,
+    "SOP-007": 6,
     "SOP-009": 0
    },
-   "effective_state": [],
+   "effective_state": [
+    {
+     "exposure_cap_active": true,
+     "exposure_cap_requested": true,
+     "rhythm_catalog": true,
+     "rhythm_layer_active": false,
+     "rhythm_requested": false
+    }
+   ],
    "embarkation_declarations_max": {
     "passenger": 0,
-    "crew": 0
+    "crew": 2
    },
    "epoch_zero_reported_max": {
-    "passenger": 0,
-    "crew": 0
+    "passenger": 2,
+    "crew": 2
    },
    "passenger": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 1.5,
+     "q05": 1.0,
+     "q95": 3.75,
+     "p_equal_target": 0.16666666666666666,
+     "p_within_one_day": 0.8333333333333334,
      "target": 2,
-     "target_in_central_90": null,
-     "tied_cells": 0
+     "target_in_central_90": true,
+     "tied_cells": 1
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 1.5,
+     "q05": 1.0,
+     "q95": 3.75,
+     "p_equal_target": 0.16666666666666666,
+     "p_within_one_day": 0.8333333333333334,
      "target": 2,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.5,
+     "q05": 1.0,
+     "q95": 3.75
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 58.599999999999966
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0014285714285714286,
+     "q05": 0.0010204081632653062,
+     "q95": 0.012999999999999992,
      "target": 0.07765793528505392
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0012244897959183673,
+     "q05": 0.0008163265306122449,
+     "q95": 0.009234693877551018,
      "target": 0.074884437596302
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.49638159565283624,
+     "q05": 0.3415564893894296,
+     "q95": 0.598032198111312
     }
    },
    "crew": {
     "peak_day": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 5.0,
+     "q05": 4.0,
+     "q95": 5.75,
+     "p_equal_target": 0.3333333333333333,
+     "p_within_one_day": 0.8333333333333334,
      "target": 4,
-     "target_in_central_90": null,
-     "tied_cells": 0
+     "target_in_central_90": true,
+     "tied_cells": 1
     },
     "peak_day_first_seven": {
-     "median": null,
-     "q05": null,
-     "q95": null,
-     "p_equal_target": null,
-     "p_within_one_day": null,
+     "median": 5.0,
+     "q05": 4.0,
+     "q95": 5.75,
+     "p_equal_target": 0.3333333333333333,
+     "p_within_one_day": 0.8333333333333334,
      "target": 4,
-     "target_in_central_90": null
+     "target_in_central_90": true
     },
     "peak_day_incident": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 5.0,
+     "q05": 4.0,
+     "q95": 5.75
     },
     "incident_onset_total": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 1.0,
+     "q05": 0.0,
+     "q95": 19.949999999999946
     },
     "onset_attack_rate": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0009523809523809524,
+     "q05": 0.0,
+     "q95": 0.009499999999999974,
      "target": 0.0169061707523246
     },
     "reported_attack_rate_vs_posting": {
-     "median": null,
-     "q05": null,
-     "q95": null,
+     "median": 0.0004761904761904762,
+     "q05": 0.0,
+     "q95": 0.0073095238095238,
      "target": 0.016047297297297296
     },
     "curve_total_variation": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.34444444444444444,
+     "q05": 0.23194444444444443,
+     "q95": 0.7392857142857142
     }
    }
   }
  },
  "explorer_minus_mega": {
   "declared_five": {
-   "pairs": 0,
-   "pairs_both_evaluable": 0,
+   "pairs": 100,
+   "pairs_both_evaluable": 2,
    "lag_days_diff": {
-    "median": null,
-    "q05": null,
-    "q95": null
+    "median": 0.0,
+    "q05": -0.9,
+    "q95": 0.8999999999999999
    },
    "passenger": {
     "peak_day_diff": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": -2.0,
+     "q05": -2.0,
+     "q95": -2.0
     },
     "onset_attack_rate_diff": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0006245086632495835,
+     "q05": -0.000563661520077986,
+     "q95": 0.002157699443413724
     }
    },
    "crew": {
     "peak_day_diff": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": -2.0,
+     "q05": -2.9,
+     "q95": -1.1
     },
     "onset_attack_rate_diff": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0003691180614257537,
+     "q05": -0.0015356438433361513,
+     "q95": 0.006921949845026763
     }
    }
   },
   "background_only": {
-   "pairs": 0,
-   "pairs_both_evaluable": 0,
+   "pairs": 100,
+   "pairs_both_evaluable": 2,
    "lag_days_diff": {
-    "median": null,
-    "q05": null,
-    "q95": null
+    "median": 0.5,
+    "q05": -1.75,
+    "q95": 2.75
    },
    "passenger": {
     "peak_day_diff": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": -0.5,
+     "q05": -1.85,
+     "q95": 0.8499999999999996
     },
     "onset_attack_rate_diff": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 5.408634948586525e-05,
+     "q05": -0.0019175654853620942,
+     "q95": 0.003147086569604726
     }
    },
    "crew": {
     "peak_day_diff": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": -0.9,
+     "q95": 0.8999999999999999
     },
     "onset_attack_rate_diff": {
-     "median": null,
-     "q05": null,
-     "q95": null
+     "median": 0.0,
+     "q05": -0.0014285714285714286,
+     "q95": 0.004387573964497035
     }
    }
   }
@@ -1724,70 +1171,106 @@
     "fl_exp_8d_recon_declared_five_rhythm_off": {
      "reference_tier": "fl_exp_8d_recon_declared_five",
      "platform": "explorer_seas_06",
-     "pairs": 0,
-     "pairs_identical_curves": 0,
+     "pairs": 100,
+     "pairs_identical_curves": 100,
      "mean_daily_onset_diff": {
-      "passenger": null,
-      "crew": null
+      "passenger": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "crew": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
      },
      "mean_cumulative_reported_diff": {
-      "passenger": null,
-      "crew": null
+      "passenger": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "crew": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ]
      },
      "passenger": {
       "onset_attack_rate": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": 0.0,
+       "q95": 0.0
       },
       "reported_attack_rate": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": 0.0,
+       "q95": 0.0
       }
      },
      "crew": {
       "onset_attack_rate": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": 0.0,
+       "q95": 0.0
       },
       "reported_attack_rate": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": 0.0,
+       "q95": 0.0
       }
      },
      "contrast": {
-      "pairs": 0,
-      "pairs_both_evaluable": 0,
+      "pairs": 100,
+      "pairs_both_evaluable": 5,
       "lag_days_diff": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": 0.0,
+       "q95": 0.0
       },
       "passenger": {
        "peak_day_diff": {
-        "median": null,
-        "q05": null,
-        "q95": null
+        "median": 0.0,
+        "q05": 0.0,
+        "q95": 0.0
        },
        "onset_attack_rate_diff": {
-        "median": null,
-        "q05": null,
-        "q95": null
+        "median": 0.0,
+        "q05": 0.0,
+        "q95": 0.0
        }
       },
       "crew": {
        "peak_day_diff": {
-        "median": null,
-        "q05": null,
-        "q95": null
+        "median": 0.0,
+        "q05": 0.0,
+        "q95": 0.0
        },
        "onset_attack_rate_diff": {
-        "median": null,
-        "q05": null,
-        "q95": null
+        "median": 0.0,
+        "q05": 0.0,
+        "q95": 0.0
        }
       }
      }
@@ -1795,70 +1278,106 @@
     "fl_meg_8d_recon_declared_five_rhythm_off": {
      "reference_tier": "fl_meg_8d_recon_declared_five",
      "platform": "mega_cruise_5000",
-     "pairs": 0,
-     "pairs_identical_curves": 0,
+     "pairs": 100,
+     "pairs_identical_curves": 4,
      "mean_daily_onset_diff": {
-      "passenger": null,
-      "crew": null
+      "passenger": [
+       -0.02,
+       -0.77,
+       -0.58,
+       -0.51,
+       -0.18,
+       -0.07,
+       0.03,
+       -0.01
+      ],
+      "crew": [
+       0.01,
+       -0.09,
+       -0.37,
+       -0.11,
+       -0.1,
+       -0.02,
+       -0.04,
+       -0.04
+      ]
      },
      "mean_cumulative_reported_diff": {
-      "passenger": null,
-      "crew": null
+      "passenger": [
+       -0.14,
+       -0.31,
+       -0.72,
+       -1.54,
+       -1.97,
+       -2.09,
+       -2.09,
+       -2.03
+      ],
+      "crew": [
+       0.01,
+       0.0,
+       -0.18,
+       -0.72,
+       -0.79,
+       -0.86,
+       -0.86,
+       -0.92
+      ]
      },
      "passenger": {
       "onset_attack_rate": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": -0.0021122448979591854,
+       "q95": 0.00020408163265306129
       },
       "reported_attack_rate": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": -0.0020612244897959186,
+       "q95": 0.00040816326530612236
       }
      },
      "crew": {
       "onset_attack_rate": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": -0.0023809523809523803,
+       "q95": 0.0009523809523809524
       },
       "reported_attack_rate": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0,
+       "q05": -0.0019285714285714284,
+       "q95": 0.0004761904761904762
       }
      },
      "contrast": {
-      "pairs": 0,
-      "pairs_both_evaluable": 0,
+      "pairs": 100,
+      "pairs_both_evaluable": 4,
       "lag_days_diff": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": -0.5,
+       "q05": -3.55,
+       "q95": 0.8499999999999996
       },
       "passenger": {
        "peak_day_diff": {
-        "median": null,
-        "q05": null,
-        "q95": null
+        "median": 0.0,
+        "q05": -0.85,
+        "q95": 0.0
        },
        "onset_attack_rate_diff": {
-        "median": null,
-        "q05": null,
-        "q95": null
+        "median": 0.0,
+        "q05": -0.0021122448979591854,
+        "q95": 0.00020408163265306129
        }
       },
       "crew": {
        "peak_day_diff": {
-        "median": null,
-        "q05": null,
-        "q95": null
+        "median": -1.0,
+        "q05": -3.55,
+        "q95": 0.6999999999999993
        },
        "onset_attack_rate_diff": {
-        "median": null,
-        "q05": null,
-        "q95": null
+        "median": 0.0,
+        "q05": -0.0023809523809523803,
+        "q95": 0.0009523809523809524
        }
       }
      }
@@ -1866,35 +1385,35 @@
    },
    "explorer_minus_mega": {
     "declared_five": {
-     "pairs": 0,
-     "pairs_both_evaluable": 0,
+     "pairs": 100,
+     "pairs_both_evaluable": 3,
      "lag_days_diff": {
-      "median": null,
-      "q05": null,
-      "q95": null
+      "median": -1.0,
+      "q05": -1.9,
+      "q95": 0.7999999999999998
      },
      "passenger": {
       "peak_day_diff": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": -2.0,
+       "q05": -2.9,
+       "q95": -0.20000000000000018
       },
       "onset_attack_rate_diff": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0006245086632495835,
+       "q05": -0.0036403100531429817,
+       "q95": 0.0017794251753089512
       }
      },
      "crew": {
       "peak_day_diff": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": -2.0,
+       "q05": -3.8,
+       "q95": -1.1
       },
       "onset_attack_rate_diff": {
-       "median": null,
-       "q05": null,
-       "q95": null
+       "median": 0.0003691180614257537,
+       "q05": -0.0015540997464074389,
+       "q95": 0.005201042547196386
       }
      }
     }

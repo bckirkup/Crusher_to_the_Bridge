@@ -138,8 +138,52 @@ with the seed-8105 smoke (8 cases, flagged not evaluable at authoring).
 This says nothing yet about the mega hull or the background_only or
 rhythm_off cells.
 
-## Next step
+## Full campaign (2026-11-21)
 
-Stop and report; the user decides whether the remaining 580 cells run.
+User approved the remaining 580 cells after the canary report. Six
+arrays, jobdef `picard-noro-explorer-reconstruction-01:2`, same
+digest-pinned image:
+
+- `exp_declared_five` remainder (80): `c03dce45-32ed-42b2-ad3e-0b3dd4ab18b1`
+- `exp_background_only` (100): `14b9c966-7482-4178-abd8-d647a2565ccb`
+- `meg_declared_five` (100): `8397c129-f161-43c6-a6fc-44285da8b0dd`
+- `meg_background_only` (100): `174a4e06-e1e4-4953-8500-99eb6566db30`
+- `exp_declared_five_rhythm_off` (100): `7a320453-a545-40c9-ae7f-bf4abe54654c`
+- `meg_declared_five_rhythm_off` (100): `08f6899c-ecae-4fba-aec3-e63840d1696d`
+
+All 580 children SUCCEEDED; total wall ~2 h at ~50-child queue
+concurrency. Readout (`--expect-sha bf0ec168`, no `--allow-partial`):
+**complete** — 600/600 cells, 0 audit defects, engine sha verified on
+every archive.
+
+### Measured result
+
+The readout's reconstruction criterion is not met on magnitude and is
+met on conditional timing:
+
+- **Evaluable fraction: 4–6 of 100 per tier** (thresholds ≥20 pax / ≥5
+  crew onsets excluding declared seeds). The frozen engine produces an
+  Explorer-scale outbreak in ~5% of seeds under either introduction, on
+  either hull.
+- **Attack rates ~35× under target.** `exp_declared_five` pax onset AR
+  median 0.0022 [0.0015, 0.0112] vs 0.0777; crew 0.0008 vs 0.0169.
+- **Conditional timing matches.** On the 5 evaluable `exp_declared_five`
+  cells: pax peak day 1, crew 4, lag 2 — the empirical signature (2/4/2);
+  target lag in the central 90% on both `declared_five` reference tiers
+  and pax peak within one day on ~100% of evaluable cells.
+- **`rhythm_off` arm.** 100/100 identical curves on Explorer (rhythm is
+  absent there anyway — the §2.8 exception is inert as declared). On
+  mega, the arm shifts cumulative reported ≤ ~2 cases on late days;
+  median diffs ~0. Reported, never judged, per DESIGN.
+- Escalation reached SOP-007 on ≤6 cells per block and SOP-009 on ≤1.
+
+### Inference boundary
+
+The fizzle is a property of the frozen model on these introductions,
+not a transport defect: witness, SHA, expected-state and coverage
+audits are all clean. Whether the ~5% take-off rate is epidemiology or
+a model blockage is a separate investigation (paired-seed route
+attribution); this campaign measures that it exists.
+
 Readout artifacts: `telemetry_buffer/noro_explorer_reconstruction_01/`
 (readout.json, reconstruction_table.md).
