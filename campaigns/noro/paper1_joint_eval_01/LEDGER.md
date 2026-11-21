@@ -119,16 +119,43 @@ versus actual") records the gap for WP1b's contract revision.
 - The census row keys `provisioned_source` by pathogen id; the selection
   rule reads `provisioned_source[norwalk_gi].n_contaminated`.
 
+## Stage A executed (2026-11-21)
+
+- [x] Census arrays: 4 x 200 chunks x 100 seeds (80,000 census voyages, 1
+  epoch, 100 agents) — `census_exp` `e54512b0`, `census_cls` `0cb75ca3`,
+  `census_spr` `d0901e8b`, `census_meg` `0f104ec4` (Batch job ids, full
+  ids in the session record). All 800 children SUCCEEDED.
+- [x] Reproduction arm `fl_je_repro_exp_solver01_station_continuous`
+  `2b30c05b` — all 16 children SUCCEEDED; archives carry
+  `joint_eval` schema `paper1_joint_eval_cell/2.0.0`.
+- [x] Census contract: 20,000 rows per hull, full declared seed frame per
+  hull exactly once, 0 error rows. Contaminated-draw rate rises with hull
+  size: exp 5.92%, cls 9.26%, spr 15.26%, meg 17.29%.
+- [x] `build.py --select` applied the frozen rule:
+  `design/seed_selection.json` — per hull 20 quiet + 20 near + 20 outbreak
+  (diagnostic) and 20 + 20 evaluation seeds (hash-ranked over the
+  uncontaminated/contaminated frames).
+- [x] Rebuild emits 49 tiers / 49 blocks / 1,696 children = 816 Stage A +
+  880 Stage B (bridge 36 x 20 + pilot 8 x 20, as declared).
+- [x] `tests/test_paper1_joint_eval_campaign.py`: 39 passed (the
+  Stage-A-count test now counts the five Stage-A blocks explicitly; total
+  moved to 1,696 because the committed selection emits Stage B —
+  attributable to this diff).
+
+Job definition: `picard-noro-paper1-joint-eval-01` revs `:3`–`:7`; image
+`sha256:354b27b6…55d82` (built at freeze commit `bf0ec168`).
+
 ## Gated (not run)
 
-Declared freeze, then: census canary and array; `build.py --select` and
-rebuild; reference fingerprints for the reproduction arm from the
-`noro_supply_solver_screen_01` archive (`readout.py --reference-root`);
-image build with digest pin (the image must contain this directory);
-manifest upload; canary of 20 seeds at one bridge cell, then stop and
-report. Owner: `campaign-preflight`.
+Done through the rebuild; remaining: image build with digest pin (the
+image must contain this directory's updated spec, so the pin moves to a
+new digest at this branch's commit); manifest upload; canary of 20 seeds
+at one bridge cell, then stop and report. Reference fingerprints for the
+reproduction arm resolve at readout time from the
+`noro_supply_solver_screen_01` archive (`readout.py --reference-root`).
+Owner: `campaign-preflight`.
 
 ## Next decision
 
-Whether to declare the freeze. Edison should see the contract's new section
-2.5 "Role split" row first, since it changes the population every cell runs.
+Whether to run the 880 Stage-B children (bridge 720 + pilot 160) after
+the bridge canary reports clean.

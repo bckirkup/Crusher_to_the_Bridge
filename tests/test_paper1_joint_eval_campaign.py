@@ -69,7 +69,12 @@ def test_committed_files_reproduce_from_the_builder():
 
 def test_stage_a_count_matches_the_design():
     _, campaign = build.build()
-    runs = sum(len(b["seeds"]) for b in campaign["blocks"].values())
+    stage_a = {
+        name for name in campaign["blocks"]
+        if name.startswith("census_") or name == build.REPRODUCTION["id"]
+    }
+    assert len(stage_a) == 5
+    runs = sum(len(campaign["blocks"][name]["seeds"]) for name in stage_a)
     assert runs == 4 * 200 + 16
 
 
