@@ -42,12 +42,12 @@
         20200224
       ]
     },
-    "t8p50_zone_narrow": {
+    "t8p50_mb_duty": {
       "worker": "campaigns/covid/quar_tail_01/cell.py",
       "artifact": "cell_{seed}.json",
       "args": {
         "theta": 316227766.01683795,
-        "arm_id": "ZONE_NARROW"
+        "arm_id": "MB_DUTY"
       },
       "seeds": [
         20200205,
@@ -72,12 +72,12 @@
         20200224
       ]
     },
-    "t8p50_zn_duty": {
+    "t8p50_fraqmb": {
       "worker": "campaigns/covid/quar_tail_01/cell.py",
       "artifact": "cell_{seed}.json",
       "args": {
         "theta": 316227766.01683795,
-        "arm_id": "ZN_DUTY"
+        "arm_id": "FRAQMB"
       },
       "seeds": [
         20200205,
@@ -102,12 +102,12 @@
         20200224
       ]
     },
-    "t8p50_f25_duty": {
+    "t8p50_fraqmb_duty": {
       "worker": "campaigns/covid/quar_tail_01/cell.py",
       "artifact": "cell_{seed}.json",
       "args": {
         "theta": 316227766.01683795,
-        "arm_id": "F25_DUTY"
+        "arm_id": "FRAQMB_DUTY"
       },
       "seeds": [
         20200205,

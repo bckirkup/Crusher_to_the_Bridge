@@ -92,10 +92,14 @@ inert at 8p50).
 now measured handles:**
 
 1. **Confinement dose** (declared, immediate): re-run boxed_s1s2 at
-   θ=3.162e8 with the CW-02 FRAC_25 / ZONE_NARROW arm ported to this
-   operating point (realized working share ~0.16–0.23 on the arms
-   vs ~0.27–0.31 on D0, symptomatic-crew exclusion armed — measured
-   on smoke cells). Frozen dual prediction: during-window mass
+   θ=3.162e8 with reduced-exempt / symptomatic-removal compositions
+   on top of the verbatim boxed baseline — boxed_s1s2 already runs
+   SOP-017-MESSBOX (the 11-zone essential exempt list + boxed crew
+   meals), so the share lever is expressed as the exact-quarter
+   fraction (SOP-017-QUARTERMB, 261/1045 drawn) and the
+   record-warding lever is `crew_duty_exclusion` (a standing policy,
+   not a day-16 intervention). Arms: D0_declared / MB_DUTY /
+   FRAQMB / FRAQMB_DUTY. Frozen dual prediction: during-window mass
    falls into band AND confirmed-per-infection capture rises to
    ≥0.80 (fewer hosts stranded at dpi ≤4 inside the test window).
    A null/marginal response now *also* discriminates — it would

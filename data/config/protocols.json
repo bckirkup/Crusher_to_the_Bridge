@@ -819,6 +819,33 @@
       "required_cascade_tier": null
     },
     {
+      "protocol_id": "SOP-017-QUARTERMB",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Boxed Crew Meals + 25% of Crew Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for QUAR-TAIL-SEAM-01 (docs/covid/covid_quar_tail_01_design.md): verbatim SOP-017-MESSBOX with the exempt_work_zones list replaced by exempt_fraction — a sticky exact-count draw (261 of 1045 crew_general) taken once at order activation on a dedicated RNG stream; drawn agents keep working, all others confine. Keeps the boxed crew-meal declaration so the fractional arm stays on the boxed_s1s2 replay. An attribution probe, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_fraction": {
+          "crew_general": 0.25
+        },
+        "crew_meal_service": {
+          "mode": "boxed"
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
       "protocol_id": "SOP-017-MESSSTAG",
       "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Four-Sitting Crew Meals, Essential-Zone Crew Only Exempt",
       "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-MESS-01 (docs/covid/covid_crew_mess_01_design.md): verbatim SOP-017-NARROW plus crew_meal_service mode staggered seatings 4 — staggered crew meal service, each crew agent's Meal tokens spread across four sittings (agent_id % 4) at the order's rising edge and restored at the falling edge. An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",

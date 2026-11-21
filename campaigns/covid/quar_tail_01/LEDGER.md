@@ -30,9 +30,18 @@ Ops status, verdicts, and follow-ups are appended below as the campaign runs.
 - Spec registered: `campaigns/covid/quar_tail_01/`, queue
   `picard-analysis-queue`, image tag `covid-quar-tail-01`, resources
   1 vCPU / 4096 MB (matching the THETA-REFIT-01 DP jobdef).
-- Arms: D0_declared (drift witness vs committed 8p50 cells),
-  ZONE_NARROW (exempt-share lever alone), ZN_DUTY (zone + VSP duty
-  exclusion — the record-warding composition; canary), F25_DUTY
-  (fractional alternative composition).
-- Canary per the campaign-preflight gate: `t8p50_zn_duty` (20 cells)
+- Every cell runs the design's `base_overrides` (boxed_s1s2 verbatim:
+  SOP-017-MESSBOX + section steward + retest tiers + crew wave) with the
+  arm's delta composed on top; `funnel_echo` armed for the CAPTURE-01
+  decomposition.
+- Arms: D0_declared (boxed_s1s2 verbatim; drift witness vs committed
+  8p50 cells), MB_DUTY (boxed + VSP duty exclusion — the record-warding
+  single-lever arm; canary), FRAQMB (boxed, exact-quarter fraction via
+  SOP-017-QUARTERMB), FRAQMB_DUTY (fraction + duty).
+- Canary per the campaign-preflight gate: `t8p50_mb_duty` (20 cells)
   read out before the remaining 60 submit.
+- Local smoke (430-epoch cap, seed 20200205): MB_DUTY reads
+  SOP-017-MESSBOX + 11-zone exempt echo + duty exclusion resolved
+  (43 off-duty at end); FRAQMB_DUTY reads SOP-017-QUARTERMB +
+  exempt_fraction_drawn {QUARTERMB: crew_general 261} + duty resolved
+  (44 off-duty); funnel_hosts populated on both.
