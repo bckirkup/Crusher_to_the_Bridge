@@ -53,7 +53,8 @@ def test_declared_rejection_is_recorded_with_its_reason(monkeypatch):
     name, fragment = checker.EXPECTED_REJECTIONS[_REJECTED]
     verdict = _classify(monkeypatch, _REJECTED, ValueError(f"x {fragment} y"))
     assert verdict.startswith("expected rejection")
-    assert name in verdict and fragment in verdict
+    assert name in verdict
+    assert fragment in verdict
 
 
 def test_declared_rejection_that_does_not_occur_fails(monkeypatch):
