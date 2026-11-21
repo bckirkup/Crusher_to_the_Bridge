@@ -21,21 +21,25 @@ and hulls is a model defect to locate, not a fitting failure.
 ## 2. Current hypothesis
 
 The mass budget is now internally consistent and the solver question is closed
-— native ≈ ContamX on both hulls, so the delivered dose is set upstream of the
-transport operator. Under that budget the composite Θ refits to 3.162e11 (the
+on the scored channels — seed-paired native vs ContamX deltas are ≈0 on every
+record channel on both hulls, so the divergence is not in the transport leg
+(the readout scored channels and takeoff classes; it did not measure delivered
+dose directly). Under that budget the composite Θ refits to 3.162e11 (the
 ~12× emission rescale plus the ambient/deck sinks absorbed the old 7.9e6 point)
-and magnitude is restored on both hulls. **The remaining defect is in the
-natural-history / observation channel, not dose**: the asymptomatic share is
-invariant-wrong across θ, both engines, and both hulls, and DP's
+and magnitude is restored on both hulls. **The remaining defect is not moved
+by dose**: the asymptomatic-share miss is invariant across θ, both engines, and
+both hulls — consistent with the symptom/observation channel — and DP's
 recorded_onsets channel overshoots an order of magnitude at the fitted point.
 
 ## 3. Evidence for
 
-- **native ≈ ContamX** — `COVID-TRANSPORT-FIT-01` (measured at `106a3583`,
-  140 cells): seed-paired deltas ≈ 0 on every channel on both hulls (DP
-  recorded_onsets Δ0 [0–4]; GM positives Δ−0.5 mean).
-- **near-field carries the dose** — `COVID-REPAIR-ISOLATION-01` (measured at
-  `fdae828b`, 120 cells): `nearfield_off` collapses pooled lab_confirmed
+- **native ≈ ContamX on scored channels** — `COVID-TRANSPORT-FIT-01`
+  (measured at `106a3583`, 140 cells): seed-paired deltas ≈ 0 on every
+  record channel on both hulls (DP recorded_onsets Δ0 [0–4]; GM positives
+  Δ−0.5 mean); takeoff classes match. The comparison did not measure
+  delivered dose itself — equivalence of outcomes, not of internals.
+- **near-field carries the confirmations** — `COVID-REPAIR-ISOLATION-01`
+  (measured at `ecdb2c9f`, 120 cells): `nearfield_off` collapses pooled lab_confirmed
   1,236 → 76 (takeoff 9/20 → 1/20); `pool_off` doubles pooled volume to 2,449
   via a few huge cells — the pool caps the outbreak tail; room-air ~neutral;
   duty-0 a strict no-op; `all_off` ≈ `nearfield_off`.
@@ -56,10 +60,11 @@ recorded_onsets channel overshoots an order of magnitude at the fitted point.
 ## 4. Evidence against / unexplained
 
 - **Asym share invariant-miss** — GM 0.272 med vs 0.8125 record (miss 49/50),
-  invariant across the full θ grid (0.24–0.44) and both engines; DP asym
-  day-31 ~0.16 vs ~0.505 at the operating point. Demonstrated on two hulls,
-  five decades of θ, two solvers — the defect sits in symptom/observation
-  channels.
+  invariant across the full θ grid (0.24–0.44) and both engines
+  (`COVID-THETA-REFIT-01`); DP asym day-31 ~0.146 vs ~0.505 measured at the
+  superseded 7.9e6 point (`COVID-TRANSPORT-FIT-01` — the refit readout does
+  not score that endpoint on DP). Demonstrated on two hulls, five decades of
+  θ, two solvers — consistent with a symptom/observation-channel defect.
 - **DP recorded_onsets overshoot** — med ~2.9k vs 197 at θ=3.162e11
   (ledger `COVID-THETA-REFIT-01`): the onset-recording channel produces far
   more dated onsets than the record while confirmations land near target.
@@ -113,8 +118,10 @@ and the merged readouts are committed in the campaign LEDGERs and
 ## 8. The single open decision
 
 **Where is the asym-share / onset-recording defect?** It is now the only
-standing composition miss on both hulls, and it is provably not dose
-(invariant across θ and engines). The discriminating evidence is a
+standing composition miss on both hulls, and it is unmoved by every dose
+change measured (θ over five decades, both engines) — that does not prove
+the cause, but it makes a magnitude fix the wrong lever. The discriminating
+evidence is a
 channel-level trace: symptom-onset vs specimen-day vs recorded-onset paths on
 paired seeds at the fitted θ, to separate (a) too many infections declared
 symptomatic from (b) the observation layer dating/recording events the record
