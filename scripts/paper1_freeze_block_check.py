@@ -249,7 +249,8 @@ GROUP_ALTERNATES: dict[str, Any] = {
 PENDING_EFFECTIVE: dict[tuple[str, str], str] = {
     ("explorer_seas_06", "rhythm.layer_attached"):
         "no SHIP-RHYTHM-02 catalog row for the platform "
-        "(NORO-EXPOCAP-EXPLORER-01); decision open, contract section 2.8",
+        "(NORO-EXPOCAP-EXPLORER-01); declared exception, contract section "
+        "2.8: rhythm-free reference plus a declared rhythm_off paired arm",
 }
 
 # Platform-gated state the block does not pin. It has no requested value, so

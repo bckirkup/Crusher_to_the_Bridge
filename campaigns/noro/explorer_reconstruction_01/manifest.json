@@ -66,8 +66,8 @@
     "2.9"
    ],
    "named_commit": {
-    "sha": "b25cb0f22d80dc3118c8613563992f9de28e8e49",
-    "status": "contract section 1 candidate; no freeze declared"
+    "sha": "bf0ec16825ed15176fe0362459a72a7be1667f41",
+    "status": "freeze declaration paper1_freeze_declaration_2026_11_21.md"
    },
    "hulls": [
     "explorer_seas_06",

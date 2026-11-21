@@ -34,6 +34,11 @@ REPO = Path(__file__).resolve().parents[4]
 CAMPAIGN_DIR = Path(__file__).resolve().parents[1]
 CAMPAIGN_REL = "campaigns/noro/explorer_reconstruction_01"
 CAMPAIGN_NAME = "noro_explorer_reconstruction_01"
+# Image built at the freeze-declared named commit (see named_commit());
+# the submit tooling prefers this digest over the tag.
+IMAGE_DIGEST = (
+    "sha256:354b27b62076cfad6df13de899319d0b55e594a1a1edaf5bc3982bcf4ec55d82"
+)
 
 CONTRACT_REL = "docs/norovirus/paper1_freeze_design_contract_2026_11_20.md"
 EVIDENCE_REL = "docs/norovirus/mega_voyage_source_evidence.md"
@@ -533,6 +538,7 @@ def build_campaign() -> dict[str, Any]:
         "s3_prefix": f"campaign/{CAMPAIGN_NAME}/",
         "queue": "picard-campaign-queue",
         "image_tag": "noro-explorer-recon01",
+        "image_digest": IMAGE_DIGEST,
         "resources": {"vcpu": "1", "memory": "8192", "shm": 512},
         "readout": f"{CAMPAIGN_REL}/readout.py",
         "canary": {"block": "exp_declared_five", "seeds": CANARY_SEEDS},

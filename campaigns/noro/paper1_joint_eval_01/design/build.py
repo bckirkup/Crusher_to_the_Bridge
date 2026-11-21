@@ -592,6 +592,9 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
         "s3_prefix": f"campaign/{NAME}/",
         "queue": "picard-campaign-queue",
         "image_tag": "noro-paper1-joint-eval01",
+        "image_digest": (
+            "sha256:354b27b62076cfad6df13de899319d0b55e594a1a1edaf5bc3982bcf4ec55d82"
+        ),
         "resources": {"vcpu": "1", "memory": "8192", "shm": 512},
         "blocks": blocks,
         "readout": f"{REL}/readout.py",
