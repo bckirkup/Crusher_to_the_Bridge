@@ -26,7 +26,11 @@ number tuned to an anchor.
 Θ is scorable on DP once two structural facts are declared, neither of
 them a constant: (a) the index's **boarding-window exposure** — the
 late-ignition blocker is a founder-pool lottery on a droplet+caregiver
-channel, i.e., where the drawn index spends embarkation day; and
+channel, i.e., where the drawn index spends embarkation day — and
+SEED-RING-01 has now narrowed what that declaration must be: not the
+index's dining-zone assignment (`placement.dining_service_type` is
+measured NULL, founder median 2.0 vs frozen ≥10), but its realized
+embarkation-day surge itinerary (muster/boarding-crowd exposure); and
 (b) the **confined-service confinement composition** — only the joint
 quarter-exempt × symptomatic-crew-removal arm lands the during band.
 Per-infection capture is a timing readout, not machinery: on the
@@ -53,6 +57,14 @@ including the verbatim replay.
   Founder routes droplet+caregiver only; post-founder growth flat
   (~3.8×/5d). Verdict: boarding-window exposure lottery, not intrinsic
   dose timing.
+- `COVID-SEED-RING-01` (measured at `87e8e3bb`): NULL-PLACEMENT on the
+  declared buffet-placement arm (40 cells, audit clean) — founder
+  median 2.0 vs committed drawn 2.5; D0 drift witness CLEAN (0/20
+  paired deltas). Dining assignment is correlative; the surge
+  participation that produced record-class pools (19/25 founders on
+  20200214/15) rides the realized day-0 itinerary, not the seat. The
+  under-declared structure is the embarkation-day crowd/muster
+  geometry itself.
 
 ## 4. Evidence against / unexplained
 
@@ -77,10 +89,18 @@ including the verbatim replay.
 - #1378 QUAR-TAIL-SEAM-01 — full-campaign readout + ledger + close-out.
 - #1379 COVID-IGNITION-01 — ignition decomposition + declared seam
   COVID-SEED-RING-01 + `tools/covid_ignition_readout.py`.
+- #1381 COVID-SEED-RING-01 — placement seed constraint + frozen design
+  + campaign registration (merged `87e8e3bb`).
+- #1387 COVID-SEED-RING-01 — campaign close-out: 40-cell readout,
+  NULL-PLACEMENT ledger, handoff update.
 
 ## 6. Running jobs
 
-None. All four QUAR-TAIL-SEAM-01 arrays landed (80/80 cells);
+None. SEED-RING-01 arrays landed 40/40 (jobdef
+`picard-covid-seed-ring-01:4`, image digest `sha256:87bc852a`, prefix
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_seed_ring_01/`,
+array IDs in `campaigns/covid/seed_ring_01/LEDGER.md`).
+All four QUAR-TAIL-SEAM-01 arrays landed (80/80 cells);
 array job IDs, jobdef revision `picard-covid-quar-tail-01:3`, image
 `sha256:39eb3d53` and the S3 prefix
 `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_quar_tail_01/`
@@ -106,13 +126,17 @@ are recorded in `campaigns/covid/quar_tail_01/LEDGER.md` and
 
 ## 8. The single open decision
 
-**Whether to commission the declared COVID-SEED-RING-01 probe** (spec
-in `docs/ledger/COVID-IGNITION-01.md`): a θ=3.162e8 D0-base campaign
-varying the declared boarding-window index exposure (placement arm vs
-drawn baseline), frozen prediction founder median → ≥10 → ign ≤9 →
-before_share → ~0.173 with θ and every constant unchanged; a null
-result names the embarkation-day contact structure itself as
-under-declared. That is the last measured Θ blocker.
+SEED-RING-01 is resolved: **NULL-PLACEMENT** — the dining-placement
+founder lever is dead, and the embarkation-day crowd/muster geometry
+is named as the under-declared structure (Arm-B reading of the frozen
+design). The open decision is now **whether to declare an
+itinerary-level embarkation-surge index-exposure arm** — placing the
+index's realized day-0 schedule through the boarding crowds (muster
+stations, boarding buffet crush, embarkation queues) rather than its
+dining assignment — as the next Θ seam probe, or to retire the
+ignition lever and accept the founder-pool lottery as declared
+physics. That remains the last measured Θ blocker; GM scoring stays
+gated on it.
 
 Standing owner calls recorded in the ledger (not session decisions):
 `confirmed / infections_reachable` as the scored capture basis, and
@@ -127,5 +151,9 @@ whether FRAQMB_DUTY becomes the boxed_s1s2 replay default.
   one index.
 - The tail's joint-only damping (FRAQMB_DUTY) is measured — single-lever
   confinement fixes are falsified at this θ; do not re-propose them.
+- Index dining-zone placement as a founder-pool lever: measured NULL at
+  θ=3.162e8 (SEED-RING-01); do not re-run placement variants. The
+  remaining lever is itinerary-level surge exposure, not venue
+  assignment.
 - Capture must be quoted on the conditioned basis; the unconditioned
   ~0.52 is the structural post-window residual, not a defect.
