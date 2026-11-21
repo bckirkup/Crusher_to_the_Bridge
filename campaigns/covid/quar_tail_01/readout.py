@@ -562,6 +562,32 @@ def _rows(
     return rows
 
 
+def _share_flags(
+    arm: str, theta: float, payloads: list[dict[str, Any]],
+) -> list[str]:
+    """Per-cell realized-share stop rule, on every arm with a declared draw."""
+    expected = (
+        _ZONE_EXPECTED.get(arm)
+        or (_FRAC_SHARE if arm in _FRAC_ARMS else None)
+    )
+    if expected is None:
+        return []
+    flags: list[str] = []
+    for payload in payloads:
+        share = _activation_snap(payload).get("realized_exempt_share")
+        seed = (payload.get("cell") or {}).get("seed")
+        tag = f"{arm}@{theta:g} seed {seed}"
+        if share is None:
+            flags.append(f"{tag}: realized_exempt_share missing")
+        elif abs(float(share) - expected) > _SHARE_DEPARTURE_ABS:
+            flags.append(
+                f"{tag}: realized exempt share {float(share):.3f} "
+                f"departs declared draw {expected:.3f} by "
+                f">{_SHARE_DEPARTURE_ABS}",
+            )
+    return flags
+
+
 def _render(
     design: Any, payloads: dict[str, dict[str, Any]], source: str,
     refit_lines: list[str],
@@ -609,29 +635,7 @@ def _render(
             f"| {_fmt(duty['excluded_hosts_median'])} "
             f"| {metrics['service_deliveries_min']} | {verdict} |",
         )
-        share_expected = (
-            _ZONE_EXPECTED.get(arm)
-            or (_FRAC_SHARE if arm in _FRAC_ARMS else None)
-        )
-        if share_expected is not None:
-            for payload in seeds.values():
-                snap = _activation_snap(payload)
-                share = snap.get("realized_exempt_share")
-                seed = (payload.get("cell") or {}).get("seed")
-                tag_cell = f"{arm}@{theta:g} seed {seed}"
-                if share is None:
-                    flags.append(
-                        f"{tag_cell}: realized_exempt_share missing",
-                    )
-                elif abs(float(share) - share_expected) > (
-                    _SHARE_DEPARTURE_ABS
-                ):
-                    flags.append(
-                        f"{tag_cell}: realized exempt share "
-                        f"{float(share):.3f} departs declared draw "
-                        f"{share_expected:.3f} by "
-                        f">{_SHARE_DEPARTURE_ABS}",
-                    )
+        flags += _share_flags(arm, theta, list(seeds.values()))
         if arm in _DUTY_ARMS and not duty["excluded_hosts_median"]:
             flags.append(
                 f"{arm}@{theta:g}: crew_duty_exclusion fired with "
