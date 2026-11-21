@@ -91,7 +91,7 @@ including the verbatim replay.
   COVID-SEED-RING-01 + `tools/covid_ignition_readout.py`.
 - #1381 COVID-SEED-RING-01 — placement seed constraint + frozen design
   + campaign registration (merged `87e8e3bb`).
-- (this PR) COVID-SEED-RING-01 — campaign close-out: 40-cell readout,
+- #1387 COVID-SEED-RING-01 — campaign close-out: 40-cell readout,
   NULL-PLACEMENT ledger, handoff update.
 
 ## 6. Running jobs
