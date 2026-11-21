@@ -171,6 +171,14 @@
    "status": "diagnostic seeds are purposive and carry no population weight; only evaluation seeds support population estimates",
    "shortfall": "a stratum the fixed census cannot fill is run at its achieved count and reported; the census is not extended and no seed is hand-picked"
   },
+  "runner_added_allowlist": [
+   "escalation.",
+   "diagnostic_cascade.",
+   "fred_behavior.",
+   "initiation.boarding.",
+   "natural_history_clock",
+   "ship_graph.num_agents"
+  ],
   "technical_completion": {
    "intended_inputs_used": "every archive: voyage length equals the tier's epochs, PYTHONHASHSEED recorded as 1, arm changed_paths equal the declaration, effective config resolved with no mismatch, effective hash equals the manifest tier's, intended role counts on initialised agents and in the payload, engine commit recorded and single-valued per tier",
    "outcomes_extractable": "every archive: all six families 'present'",
@@ -525,6 +533,10 @@
     "template_roles": {
      "passenger": 316,
      "crew": 134
+    },
+    "expected_state": {
+     "rhythm_enabled": true,
+     "rhythm_layer_attached": true
     }
    }
   },
@@ -832,6 +844,10 @@
     "template_roles": {
      "passenger": 1338,
      "crew": 572
+    },
+    "expected_state": {
+     "rhythm_enabled": true,
+     "rhythm_layer_attached": true
     }
    }
   },
@@ -1139,6 +1155,10 @@
     "template_roles": {
      "passenger": 2100,
      "crew": 900
+    },
+    "expected_state": {
+     "rhythm_enabled": true,
+     "rhythm_layer_attached": true
     }
    }
   },
@@ -1446,6 +1466,10 @@
     "template_roles": {
      "passenger": 4900,
      "crew": 2100
+    },
+    "expected_state": {
+     "rhythm_enabled": true,
+     "rhythm_layer_attached": true
     }
    }
   },
@@ -2022,6 +2046,10 @@
     "template_roles": {
      "passenger": 316,
      "crew": 134
+    },
+    "expected_state": {
+     "rhythm_enabled": true,
+     "rhythm_layer_attached": true
     },
     "reference_fingerprints": {}
    }

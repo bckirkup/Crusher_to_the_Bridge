@@ -72,18 +72,35 @@ def quantile(values: list[float], q: float) -> float | None:
 
 
 def cell_metrics(payload: dict[str, Any]) -> dict[str, Any]:
-    """One cell's curve metrics, from its archive summary."""
+    """One cell's curve metrics, from its archive summary.
+
+    Temporal metrics are computed on both windows: the eight labelled
+    days (one model day per date, the declared approximation) and the
+    first seven elapsed days. The ``incident`` curve drops every agent
+    infected at initialize; archives written before the incident curve
+    existed fall back to the declared-seeds curve and are labelled so.
+    """
     aboard = payload["onsets_by_day"]["excluding_declared_seeds"]
     every = payload["onsets_by_day"]["all"]
+    incident = payload["onsets_by_day"].get("incident")
+    incident_is_approximation = incident is None
+    if incident is None:
+        incident = aboard
+    aboard7 = {role: aboard[role][:ELAPSED_DAYS] for role in ROLES}
     reported = payload["reporting_by_day"]["cumulative_end_of_day"]
     complement = payload["introduction"]["complement"]
     peaks = {role: peak_day(aboard[role]) for role in ROLES}
+    peaks7 = {role: peak_day(aboard7[role]) for role in ROLES}
+    peaks_incident = {role: peak_day(incident[role]) for role in ROLES}
     evaluable = all(
         sum(aboard[role]) >= MIN_ABOARD_ONSETS[role] for role in ROLES
     )
-    lag = None
-    if evaluable and None not in peaks.values():
-        lag = peaks["crew"] - peaks["passenger"]
+
+    def _lag(two_peaks: dict[str, Any]) -> int | None:
+        if not evaluable or None in two_peaks.values():
+            return None
+        return two_peaks["crew"] - two_peaks["passenger"]
+
     first_active = payload["protocols"]["first_active_epoch"]
     return {
         "seed": int(payload["seed"]),
@@ -91,8 +108,15 @@ def cell_metrics(payload: dict[str, Any]) -> dict[str, Any]:
         "evaluable": evaluable,
         "peak_day": peaks,
         "peak_tied": {role: peak_tied(aboard[role]) for role in ROLES},
-        "lag_days": lag,
+        "lag_days": _lag(peaks),
+        "peak_day_first_seven": peaks7,
+        "lag_days_first_seven": _lag(peaks7),
+        "incident_curve": incident,
+        "incident_is_approximation": incident_is_approximation,
+        "peak_day_incident": peaks_incident,
+        "lag_days_incident": _lag(peaks_incident),
         "onset_total": {role: sum(every[role]) for role in ROLES},
+        "onset_total_incident": {role: sum(incident[role]) for role in ROLES},
         "onset_total_aboard": {role: sum(aboard[role]) for role in ROLES},
         "onset_attack_rate": {
             role: sum(every[role]) / complement[role] for role in ROLES
@@ -125,7 +149,13 @@ def audit_cell(
 ) -> list[str]:
     """Design invariants; a violation is a defect, not a failed criterion."""
     problems = []
-    tier = manifest["tiers"][payload["tier"]]
+    tier = manifest["tiers"].get(payload["tier"])
+    if tier is None:
+        return [f"tier {payload['tier']} is not in the manifest"]
+    if payload["seed"] not in tier.get("seeds", []):
+        problems.append(
+            f"seed {payload['seed']} is not in the tier's declared seeds",
+        )
     if payload["frozen_block_witness"]["mismatches"]:
         problems.append("frozen block not resolved verbatim")
     if payload["num_epochs"] != tier["epoch_durations"][0]:
@@ -148,6 +178,12 @@ def audit_cell(
             f"{state['exposure_cap_requested']} but active "
             f"{state['exposure_cap_active']} on {payload['platform']}",
         )
+    for key, want in (tier.get("expected_state") or {}).items():
+        if state.get(key) != want:
+            problems.append(
+                f"effective state {key} is {state.get(key)!r}, "
+                f"tier declares {want!r}",
+            )
     if payload["introduction"]["preboarding_reportable"]["passenger"]:
         problems.append("passenger in the embarkation report counter")
     problems += audit_arm(payload, tier)
@@ -224,6 +260,17 @@ def tier_summary(
             "target": target_lag,
             "target_in_central_90": _covers(_interval(lags), target_lag),
         },
+        "lag_days_first_seven": _interval([
+            float(c["lag_days_first_seven"]) for c in evaluable
+            if c["lag_days_first_seven"] is not None
+        ]),
+        "lag_days_incident": _interval([
+            float(c["lag_days_incident"]) for c in evaluable
+            if c["lag_days_incident"] is not None
+        ]),
+        "incident_curve_approximated": any(
+            c["incident_is_approximation"] for c in cells
+        ),
         "response_sop_cells": {
             sop: sum(c["response_sop_first_epoch"][sop] is not None for c in cells)
             for sop in RESPONSE_SOPS
@@ -267,6 +314,17 @@ def tier_summary(
                 ),
                 "tied_cells": sum(c["peak_tied"][role] for c in evaluable),
             },
+            "peak_day_first_seven": _interval([
+                float(c["peak_day_first_seven"][role]) for c in evaluable
+                if c["peak_day_first_seven"][role] is not None
+            ]),
+            "peak_day_incident": _interval([
+                float(c["peak_day_incident"][role]) for c in evaluable
+                if c["peak_day_incident"][role] is not None
+            ]),
+            "incident_onset_total": _interval([
+                float(c["onset_total_incident"][role]) for c in cells
+            ]),
             "onset_attack_rate": {
                 **_interval(onset_rate),
                 "target": finals["cases"] / finals["denominator"],
@@ -421,14 +479,63 @@ def build_readout(
 ) -> dict[str, Any]:
     defects: list[dict[str, Any]] = []
     by_tier: dict[str, list[dict[str, Any]]] = {t: [] for t in manifest["tiers"]}
+    expected = {
+        tier_id: set(tier["seeds"])
+        for tier_id, tier in manifest["tiers"].items()
+    }
+    unexpected: dict[str, set[int]] = {t: set() for t in manifest["tiers"]}
+    seen: set[tuple[str, int]] = set()
     for payload in payloads:
+        key = (payload["tier"], payload["seed"])
+        if key in seen:
+            defects.append({
+                "tier": payload["tier"], "seed": payload["seed"],
+                "problems": ["duplicate cell archive; dropped before pairing"],
+            })
+            continue
+        seen.add(key)
         problems = audit_cell(payload, manifest, expect_sha)
         if problems:
             defects.append({
                 "tier": payload["tier"], "seed": payload["seed"],
                 "problems": problems,
             })
+        if payload["tier"] not in expected:
+            continue
+        if payload["seed"] not in expected[payload["tier"]]:
+            unexpected[payload["tier"]].add(payload["seed"])
+            continue
         by_tier[payload["tier"]].append(cell_metrics(payload))
+    coverage = {
+        tier_id: {
+            "expected": len(expected[tier_id]),
+            "read": len(by_tier[tier_id]),
+            "missing": sorted(
+                expected[tier_id]
+                - {cell["seed"] for cell in by_tier[tier_id]}
+            ),
+            "unexpected": sorted(unexpected[tier_id]),
+        }
+        for tier_id in manifest["tiers"]
+    }
+    shortfalls = [
+        reason
+        for tier_id, cov in coverage.items()
+        for reason in (
+            [f"{tier_id}: {len(cov['missing'])} seeds missing"]
+            if cov["missing"] else []
+        )
+        + (
+            [f"{tier_id}: {len(cov['unexpected'])} unexpected seeds"]
+            if cov["unexpected"] else []
+        )
+    ]
+    reasons = list(shortfalls)
+    if defects:
+        reasons.append(f"{len(defects)} audit defect(s)")
+    if expect_sha is None:
+        reasons.append("no expected source reference (--expect-sha)")
+    status = "complete" if not reasons else "partial"
     explorer_platform = manifest["platform"]
     tiers = {
         tier: tier_summary(
@@ -443,6 +550,9 @@ def build_readout(
         "expected_cells": sum(len(t["seeds"]) for t in manifest["tiers"].values()),
         "cells": len(payloads),
         "engine_git_sha": sorted({str(p["engine_git_sha"]) for p in payloads}),
+        "status": status,
+        "incomplete_reasons": reasons,
+        "coverage": coverage,
         "defects": defects,
         "target": target,
         "tiers": tiers,
@@ -542,6 +652,14 @@ def build_markdown(readout: dict[str, Any]) -> str:
         f"Cells read: {readout['cells']} of {readout['expected_cells']}. "
         f"Engine: {', '.join(readout['engine_git_sha']) or 'n/a'}. "
         f"Audit defects: {len(readout['defects'])}.",
+        "",
+        f"Status: **{readout['status']}**"
+        + (
+            " -- " + "; ".join(readout["incomplete_reasons"])
+            if readout["incomplete_reasons"] else ""
+        ) + ". A readout is complete only when coverage is exact, no "
+        "audit defects stand, and --expect-sha named the source "
+        "reference.",
         "",
         "Model entries are median [5th, 95th percentile] over seeds. Peak "
         "days count from 0 = embarkation day "
@@ -660,6 +778,33 @@ def build_markdown(readout: dict[str, Any]) -> str:
             f"{_span(block['passenger']['onset_attack_rate_diff'], 4)} | "
             f"{_span(block['crew']['onset_attack_rate_diff'], 4)} |",
         )
+    lines += [
+        "",
+        "Temporal comparators. The main window pairs each of the eight "
+        "date labels with a model day (the declared inclusive-day "
+        "approximation); the first block here restricts the same metrics "
+        "to the first seven elapsed days. The incident curve drops every "
+        "agent infected at initialize -- all prevalent boarders, not only "
+        "the five declared seeds -- and answers the incident-onset "
+        "question the observed-onset curve cannot:",
+        "",
+        "| Tier | Pax peak, days 0-6 | Crew peak, days 0-6 | "
+        "Lag, days 0-6 | Pax incident peak | Crew incident peak | "
+        "Incident lag | Pax incident onsets | Crew incident onsets |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for tier, block in readout["tiers"].items():
+        lines.append(
+            f"| `{tier}` | "
+            f"{_span(block['passenger']['peak_day_first_seven'], 1)} | "
+            f"{_span(block['crew']['peak_day_first_seven'], 1)} | "
+            f"{_span(block['lag_days_first_seven'], 1)} | "
+            f"{_span(block['passenger']['peak_day_incident'], 1)} | "
+            f"{_span(block['crew']['peak_day_incident'], 1)} | "
+            f"{_span(block['lag_days_incident'], 1)} | "
+            f"{_span(block['passenger']['incident_onset_total'], 0)} | "
+            f"{_span(block['crew']['incident_onset_total'], 0)} |",
+        )
     for arm, block in readout.get("arms", {}).items():
         lines += _arm_markdown(arm, block)
     if readout["defects"]:
@@ -685,6 +830,11 @@ def main(argv: list[str] | None = None) -> int:
         "--expect-sha", default=None,
         help="named reference commit; a cell from another engine is a defect",
     )
+    parser.add_argument(
+        "--allow-partial", action="store_true",
+        help="exit 0 on a partial readout with no defects (canary reads); "
+             "without it only a complete readout exits 0",
+    )
     args = parser.parse_args(argv)
     manifest = json.loads(
         (_CAMPAIGN_DIR / "manifest.json").read_text(encoding="utf-8"),
@@ -704,7 +854,9 @@ def main(argv: list[str] | None = None) -> int:
         table, encoding="utf-8",
     )
     print(table)
-    return 1 if readout["defects"] else 0
+    if readout["status"] == "complete":
+        return 0
+    return 0 if args.allow_partial and not readout["defects"] else 1
 
 
 if __name__ == "__main__":

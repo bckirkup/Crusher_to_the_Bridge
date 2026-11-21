@@ -57,11 +57,13 @@ MEGA_NUM_AGENTS = 7000
 
 # The declared introduction. ``count``/``role``/``epoch`` are the record
 # (five passenger surveys recorded illness before boarding); ``onset_day``
-# and ``infection_age_days`` are declared assumptions, because the record
-# gives no onset date for the five: onset one day before embarkation
-# (inside the VSP 4.1.1.2 three-day lookback), acquired one profile-median
-# incubation (1.2 d, norwalk_gi ``incubation.median_days``) before that.
-# Neither value is swept or fitted.
+# and ``infection_age_days`` are declared source-informed assumptions,
+# because the record gives no onset date for the five: onset one day
+# before embarkation (inside the VSP 4.1.1.2 three-day lookback),
+# acquired one profile-median incubation (1.2 d, norwalk_gi
+# ``incubation.median_days``) before that. Neither value is swept or
+# fitted. The ``evidence`` map labels every field's provenance so a
+# readout or reviewer never reads the assumptions as survey counts.
 INTRODUCTIONS: dict[str, dict[str, Any]] = {
     "declared_five": {
         "explicit_seeds": [
@@ -72,11 +74,49 @@ INTRODUCTIONS: dict[str, dict[str, Any]] = {
                 "epoch": 0,
                 "onset_day": -1.0,
                 "infection_age_days": 2.2,
+                "evidence": {
+                    "count": "record: five passenger surveys report "
+                             "pre-boarding illness",
+                    "role": "record: all five are passengers",
+                    "epoch": "record: already ill at embarkation",
+                    "onset_day": "source-informed assumption: onset one "
+                                 "day before boarding (inside the VSP "
+                                 "4.1.1.2 three-day lookback)",
+                    "infection_age_days": "source-informed assumption: "
+                                          "one profile-median incubation "
+                                          "(1.2 d) before onset",
+                },
             },
         ],
+        "evidence_labels": (
+            "count/role/epoch are the record; onset_day and "
+            "infection_age_days are source-informed assumptions"
+        ),
     },
     # Labelled baseline: the engine's own boarding draw and nothing else.
     "background_only": {"explicit_seeds": []},
+}
+
+# Requested and effective mechanism state each tier declares, checked at
+# initialize before epoch 0. The exposure cap is requested by the frozen
+# block and active on both hulls (Explorer sits in the reviewed
+# uncatalogued-cruise scope); the rhythm layer is requested and attached
+# on the mega archetype, requested but absent on Explorer (the declared
+# section-2.8 exception), and disabled and absent on the rhythm-off arms.
+REFERENCE_STATES = {
+    "exp": {
+        "exposure_cap_requested": True, "exposure_cap_active": True,
+        "rhythm_requested": True, "rhythm_layer_active": False,
+    },
+    "meg": {
+        "exposure_cap_requested": True, "exposure_cap_active": True,
+        "rhythm_requested": True, "rhythm_layer_active": True,
+    },
+}
+ARM_STATES = {
+    "rhythm_off": {
+        "rhythm_requested": False, "rhythm_layer_active": False,
+    },
 }
 
 # Declared difference arms (contract section 2.9). The reference tiers carry
@@ -128,13 +168,28 @@ def frozen_block() -> dict[str, Any]:
     return json.loads(match.group(1))
 
 
-def candidate_commit() -> str:
-    """The contract's section 1 candidate SHA (no freeze is declared yet)."""
+DECLARATION_GLOB = "paper1_freeze_declaration*.md"
+
+
+def named_commit() -> tuple[str, str]:
+    """(sha, source) the campaign pins as its engine reference.
+
+    The freeze declaration's ``**Named commit.**`` field wins once it
+    exists; before the declaration lands, the contract's section 1
+    candidate stands in and is labelled as such.
+    """
+    for path in sorted((REPO / "docs" / "norovirus").glob(DECLARATION_GLOB)):
+        match = re.search(
+            r"\*\*Named commit\.\*\* `([0-9a-f]{40})`",
+            path.read_text(encoding="utf-8"),
+        )
+        if match is not None:
+            return match.group(1), f"freeze declaration {path.name}"
     text = (REPO / CONTRACT_REL).read_text(encoding="utf-8")
     match = re.search(r"\*\*Candidate\.\*\* `([0-9a-f]{40})`", text)
     if match is None:
         raise SystemExit(f"no candidate commit in {CONTRACT_REL}")
-    return match.group(1)
+    return match.group(1), "contract section 1 candidate; no freeze declared"
 
 
 def shipped_rhythm() -> dict[str, Any]:
@@ -168,10 +223,9 @@ def arm_blocks() -> dict[str, Any]:
         RHYTHM_OFF_ARM: {
             "contract": CONTRACT_REL,
             "contract_sections": ["2.8", "2.9"],
-            "named_commit": {
-                "sha": candidate_commit(),
-                "status": "contract section 1 candidate; no freeze declared",
-            },
+            "named_commit": dict(
+                zip(("sha", "status"), named_commit()),
+            ),
             "hulls": [p["platform"] for p in PLATFORMS.values()],
             "changed_paths": [
                 {"path": RHYTHM_PATH, "baseline": True, "arm": False},
@@ -390,6 +444,7 @@ def build_manifest() -> dict[str, Any]:
     for hull, platform in PLATFORMS.items():
         for introduction in INTRODUCTIONS:
             tiers[tier_name(hull, introduction)] = {
+                "expected_state": dict(REFERENCE_STATES[hull]),
                 "platform": platform["platform"],
                 "pathogen": "norovirus",
                 "dose_adjustments": [7.57],
@@ -412,6 +467,10 @@ def build_manifest() -> dict[str, Any]:
             reference = tiers[reference_tier]
             tiers[arm_tier] = {
                 **copy.deepcopy(reference),
+                "expected_state": {
+                    **reference["expected_state"],
+                    **ARM_STATES[arm],
+                },
                 "description": (
                     f"{reference['description']} Declared arm {arm}: "
                     f"{RHYTHM_PATH} false, paired by seed with "

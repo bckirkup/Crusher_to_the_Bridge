@@ -26,23 +26,18 @@ So the same requested block is a different effective engine on Explorer. A platf
 
 The campaign encodes the blocker instead of hiding it. Every archive records the requested and effective state, and the readout treats "exposure cap requested but inactive" as an audit defect. As authored, every Explorer cell fails that audit, so no clean reconstruction table can be produced.
 
-**Update, 2026-11-21 (measured at `e8be51c7`, seed 8105, initialization only).** The exposure-cap half is resolved: after `NORO-EXPOCAP-EXPLORER-01` (#1359) the cap is requested and active on both hulls. The rhythm half is decided, not removed: Edison's §2.8 decision (contract decision commit `c50e3dd1`, PR #1365) keeps Explorer rhythm-free as a labelled deferred exception and adds the declared paired arm in "Declared arm: `rhythm_off`" below. The table and the two options that follow are the record as authored.
+**Resolved, 2026-11-21 (measured at `e8be51c7`, seed 8105, initialization only).** The exposure-cap half is resolved: after `NORO-EXPOCAP-EXPLORER-01` (#1359) the cap is requested and active on both hulls. The rhythm half is decided, not removed: Edison's §2.8 decision (contract decision commit `c50e3dd1`, PR #1365) keeps Explorer rhythm-free as a labelled deferred exception and adds the declared paired arm in "Declared arm: `rhythm_off`" below. The table above is the record as authored.
 
-Two ways out, both outside this campaign and neither taken here:
-
-1. **A reviewed eligibility correction.** Make Explorer eligible for the cap without importing an activity schedule: adding `explorer_seas_06` to the mega catalog's `platforms` list would also switch on the rhythm layer with mega's day program and a venue map naming mega zones, which is the import the review rules out. A cap-only eligibility is an engine or catalog change, so it is a moratorium-exception decision with per-hull effective-state assertions (the read-back above is that assertion).
-2. **Explorer as a deferred exception.** The freeze proceeds on the four archetypes; the reconstruction waits until eligibility is decided.
-
-The rhythm-layer difference is not covered by either option as worded and needs its own answer: there is no Explorer day program in the tree.
+Requested and effective state are asserted per hull and arm in the manifest's `expected_state`, checked at initialize before epoch 0: enabled and attached for the mega archetype, enabled but absent for Explorer's exception, and disabled and absent on both `rhythm_off` arms. A cell that resolves anything else aborts; the readout audits the same declaration.
 
 ## Timing convention
 
-February 26 – March 5 is eight calendar dates and seven elapsed days. The cells run 192 epochs, one 24-epoch model day per calendar date, with epoch 0 at the start of February 26. This is a declared inclusive-day approximation: the model ship carries its full complement for all of the embarkation date and all of the disembarkation date, which adds up to one day of onboard exposure that the voyage did not have.
+February 26 – March 5 is eight calendar dates and seven elapsed days. The cells run 192 epochs, one 24-epoch model day per calendar date, with epoch 0 at the start of February 26. This is a declared inclusive-day approximation — a defensible date-to-model-day mapping exists, but the approximation is explicitly approved instead (recorded in the freeze declaration): the model ship carries its full complement for all of the embarkation date and all of the disembarkation date, which adds up to one day of onboard exposure that the voyage did not have. The readout reports every temporal metric on both windows, so the bound is measured, not argued.
 
 Bounds on what that can move, all reported by the readout:
 
-- The lag is a difference of two peak days and does not depend on how model days are aligned to dates.
-- Peak days are reported exactly and within one day of the target, which covers a one-day alignment shift in either direction.
+- The lag is a difference of two peak days and does not depend on how model days are aligned to dates; it is computed on the eight-day window and on the first seven model days.
+- Peak days are reported exactly and within one day of the target, on both windows.
 - Onset totals on Explorer are reported over all eight model days and over the first seven; the difference is the most the extra day can add. The target has no onsets on March 5 in either role.
 
 ## Empirical target
@@ -144,7 +139,7 @@ Declared as `initiation.explicit_seeds`, additive with the boarding draw:
 ```
 
 - `count`, `role`, `epoch` are the record.
-- `onset_day: -1.0` and `infection_age_days: 2.2` are **declared assumptions**. The record gives no onset date for the five. Onset is placed one day before embarkation, inside the VSP 4.1.1.2 three-day lookback; acquisition is one profile-median incubation (1.2 days) before that. Neither is swept, and neither may be revised after a cell is read.
+- `onset_day: -1.0` and `infection_age_days: 2.2` are **declared source-informed assumptions**. The record gives no onset date for the five — five is survey evidence of pre-boarding illness, not a manifest count. Onset is placed one day before embarkation, inside the VSP 4.1.1.2 three-day lookback; acquisition is one profile-median incubation (1.2 days) before that. Neither is swept, and neither may be revised after a cell is read. The manifest's `introduction_blocks` labels every field's provenance (`record` vs `source-informed assumption`) so the two are never conflated downstream.
 - The seeds are composed onto the run spec by `cell.py` from the manifest's `introduction_blocks`, so the tier's `config_overrides` stays the frozen block.
 
 **Limitation: the embarkation report counter cannot carry the five.** `preboarding_reportable_ids` is filled only by the VSP 4.1.1.2 reportable clause, which is crew-only: `engines/initiation.py` rejects `preboarding_assessment.passenger.reportable = true` at load. Bucket zero of the reporting curve therefore holds crew embarkation declarations only. The five passengers enter the onset line list on day 0 and report, if they report, through the sick-call ladder. The readout labels bucket zero as embarkation declarations and reports onsets both with and without the declared seeds. Letting a passenger declaration count at embarkation would be an engine change; it is recorded here as a possible moratorium-exception decision and is not made.
@@ -185,14 +180,16 @@ The engine splits `num_agents` by the shipped class fractions (70/30) and does n
 | Rhythm layer | **Not controlled on the reference tiers: attached on mega, absent on Explorer (§2.8 exception).** Controlled on the `rhythm_off` arm: off on both |
 | Closure targets of SOP-007 / SOP-009 | Not controlled: valid on mega only (below) |
 
+**Accepted bundle.** The hull contrast is explicitly declared as the whole bundle — geometry, complement, class mix, the §2.8 rhythm exception, and the hull-specific response surface (SOP-007's zone-closure targets exist on mega only; SOP-009 confinement applies on both). Shared escalation and compliance settings are controlled through the frozen block and `syndromic_comp65`; the realized hull-specific activations are logged per cell (`protocols.first_active_epoch`/`active_epochs`) so the response difference is measured, not assumed. No common protocol bundle is synthesized: fabricating Explorer zone-closure targets would invent a vessel this platform does not model.
+
 ## Curve extraction
 
-- **Onsets:** `run.sentinel_line_list`, per-person `onset_epoch` and `crew`. `onset_epoch` is the first epoch the person is observed symptomatic, clamped to ≥ 1, so a host symptomatic at embarkation lands on day 0. Binned to voyage days with the run's own clock; day 0 is the embarkation day (Feb 26). Two curves per role: all onsets, and onsets excluding the declared seeds.
+- **Onsets:** `run.sentinel_line_list`, per-person `onset_epoch` and `crew`. `onset_epoch` is the first epoch the person is observed symptomatic, clamped to ≥ 1, so a host symptomatic at embarkation lands on day 0. Binned to voyage days with the run's own clock; day 0 is the embarkation day (Feb 26). Three curves per role, labelled by what they answer: `all` is **first observed symptom aboard** (the observed-onset curve the empirical table measures); `excluding_declared_seeds` drops only the five imposed seeds, so it still contains boarders already ill from the engine's boarding draw; `incident` drops **every agent infected at initialize** — all prevalent boarders — and is the incident-onset comparator. The cell records `initially_infected_agent_ids` at initialize to define the incident set.
 - **Reporting:** per-epoch `cumulative_reported_cases_{passenger,crew}`, read at the last epoch of each day. Embarkation declarations are read from the engine's own counter (`preboarding_reportable_ids`), not from the epoch-0 value of the series: sick-call reports made during epoch 0 are already in that value, so it is kept separately and labelled as such. The line list's `report_epoch` is a detection-channel epoch and is not used as the reporting curve.
 
 ## Comparison metrics
 
-Computed by `readout.py`. Peaks and the lag use onsets excluding the declared seeds.
+Computed by `readout.py`. Peaks and the lag use onsets excluding the declared seeds, on the eight-day window; the readout also reports both on the first-seven-day window and on the incident curve, all reported and never judged.
 
 | Metric | Definition | Target |
 |---|---|---|
@@ -202,6 +199,9 @@ Computed by `readout.py`. Peaks and the lag use onsets excluding the declared se
 | Onset attack rate per role | Onset total ÷ the cell's own complement | 252/3,245, 20/1,183 |
 | Reported-case attack rate per role | Final cumulative reported ÷ complement | Posting 243/3,245, 19/1,184 (cross-posting only) |
 | Curve distance (reported, never judged) | Total variation between normalized daily curves | — |
+| Window and incident comparators (reported, never judged) | Peak days and lag on the first seven model days; peak days, lag and onset totals on the incident curve | — |
+
+**Readout completeness.** The readout enforces exact coverage: every tier's declared seed list must be present exactly once, a duplicate archive is dropped before pairing and recorded as a defect, an unexpected tier or seed is excluded and recorded, and a complete readout additionally requires `--expect-sha` naming the source reference. Its `status` is `complete` or `partial`; a partial run (the canary, or a shard in flight) exits 0 only under `--allow-partial`, and the table prints the shortfall reasons first.
 
 **Evaluable cells.** A peak day is defined only where a curve exists: a cell is evaluable when it has at least 20 passenger onsets and at least 5 crew onsets, excluding the declared seeds. The thresholds are set here, before any cell runs, and are not derived from model output. The evaluable fraction is itself reported.
 

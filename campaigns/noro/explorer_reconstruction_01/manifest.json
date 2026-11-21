@@ -42,9 +42,17 @@
      "role": "passenger",
      "epoch": 0,
      "onset_day": -1.0,
-     "infection_age_days": 2.2
+     "infection_age_days": 2.2,
+     "evidence": {
+      "count": "record: five passenger surveys report pre-boarding illness",
+      "role": "record: all five are passengers",
+      "epoch": "record: already ill at embarkation",
+      "onset_day": "source-informed assumption: onset one day before boarding (inside the VSP 4.1.1.2 three-day lookback)",
+      "infection_age_days": "source-informed assumption: one profile-median incubation (1.2 d) before onset"
+     }
     }
-   ]
+   ],
+   "evidence_labels": "count/role/epoch are the record; onset_day and infection_age_days are source-informed assumptions"
   },
   "background_only": {
    "explicit_seeds": []
@@ -219,6 +227,12 @@
  },
  "tiers": {
   "fl_exp_8d_recon_declared_five": {
+   "expected_state": {
+    "exposure_cap_requested": true,
+    "exposure_cap_active": true,
+    "rhythm_requested": true,
+    "rhythm_layer_active": false
+   },
    "platform": "explorer_seas_06",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -458,6 +472,12 @@
    ]
   },
   "fl_exp_8d_recon_background_only": {
+   "expected_state": {
+    "exposure_cap_requested": true,
+    "exposure_cap_active": true,
+    "rhythm_requested": true,
+    "rhythm_layer_active": false
+   },
    "platform": "explorer_seas_06",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -697,6 +717,12 @@
    ]
   },
   "fl_meg_8d_recon_declared_five": {
+   "expected_state": {
+    "exposure_cap_requested": true,
+    "exposure_cap_active": true,
+    "rhythm_requested": true,
+    "rhythm_layer_active": true
+   },
    "platform": "mega_cruise_5000",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -936,6 +962,12 @@
    ]
   },
   "fl_meg_8d_recon_background_only": {
+   "expected_state": {
+    "exposure_cap_requested": true,
+    "exposure_cap_active": true,
+    "rhythm_requested": true,
+    "rhythm_layer_active": true
+   },
    "platform": "mega_cruise_5000",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -1175,6 +1207,12 @@
    ]
   },
   "fl_exp_8d_recon_declared_five_rhythm_off": {
+   "expected_state": {
+    "exposure_cap_requested": true,
+    "exposure_cap_active": true,
+    "rhythm_requested": false,
+    "rhythm_layer_active": false
+   },
    "platform": "explorer_seas_06",
    "pathogen": "norovirus",
    "dose_adjustments": [
@@ -1416,6 +1454,12 @@
    "paired_with": "fl_exp_8d_recon_declared_five"
   },
   "fl_meg_8d_recon_declared_five_rhythm_off": {
+   "expected_state": {
+    "exposure_cap_requested": true,
+    "exposure_cap_active": true,
+    "rhythm_requested": false,
+    "rhythm_layer_active": false
+   },
    "platform": "mega_cruise_5000",
    "pathogen": "norovirus",
    "dose_adjustments": [
