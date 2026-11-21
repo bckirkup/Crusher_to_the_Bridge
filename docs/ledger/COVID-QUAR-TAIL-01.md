@@ -40,7 +40,11 @@ passenger acquisition collapses ~10× at day 16 (pooled 1,103 → 117)
 | droplet route | 4,076 | 56% |
 | service_to_host (steward delivery into confined cabins) | 2,370 | 32% |
 | caregiver | 834 | 11% |
-| crew hosts | 4,008 | 55% (pooled crew share 0.55 vs record ~0.29) |
+| crew hosts | 4,008 | 55% of during-window infections* |
+
+*the record's ~0.29 is crew share of *whole-voyage confirmed cases* —
+a different basis (observation-funnel attribution); read this as
+direction (crew carry the confined tail), not a magnitude gap.
 
 `confined_passenger_infections_during_quarantine` ≈ all passenger
 during-infections (3,274) — confined hosts are infected *in* cabins,
@@ -100,8 +104,10 @@ footing as the H5 contract decision.
 
 - The SOP-017 activation itself works: passenger acquisition
   collapses ~10× at day 16. Not a machinery defect.
-- Crew during-share 0.55 pooled (record ~0.29) is an *incidence-
-  timing* artifact as much as a confinement one: crew carry the
-  late tail because they are the channel still open.
+- Crew carry 0.55 of during-window infections pooled — vs the
+  record's ~0.29 crew share of whole-voyage confirmed (different
+  basis: direction, not magnitude) — an *incidence-timing* artifact
+  as much as a confinement one: crew carry the late tail because
+  they are the channel still open.
 - `hvac_airborne` contributes 15 during-window infections — the
   confined tail is contact/service, not ventilation.
