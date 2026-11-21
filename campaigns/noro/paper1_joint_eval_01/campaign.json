@@ -7,7 +7,7 @@
  "s3_prefix": "campaign/noro_paper1_joint_eval_01/",
  "queue": "picard-campaign-queue",
  "image_tag": "noro-paper1-joint-eval01",
- "image_digest": "sha256:354b27b62076cfad6df13de899319d0b55e594a1a1edaf5bc3982bcf4ec55d82",
+ "image_digest": "sha256:80884d60b496c6f7dddd306390acb74f3f4b3a72eca2c6d6fb898dddfb3f149a",
  "resources": {
   "vcpu": "1",
   "memory": "8192",
