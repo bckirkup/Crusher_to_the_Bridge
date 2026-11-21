@@ -86,8 +86,8 @@ the fixed go/no-go thresholds (commit that update).
 ## Result
 
 Status: **authored and gated** (2026-11-20). The freeze was not declared
-during the session, so no census, canary or cell ran. The PR was opened,
-not merged.
+during the session, so no census, canary or cell ran. The authoring PR
+(#1358) is merged.
 
 - **Campaign:** `noro_paper1_joint_eval_01`
   (`campaigns/noro/paper1_joint_eval_01/`; design in `DESIGN.md`, record
@@ -117,9 +117,13 @@ not merged.
   justified defect fix / reconstruction / population-geometry / uncertainty
   / precision. Zero-event convention: exact one-sided 95% upper bound
   `1 - 0.05^(1/n)` (0/300 gives 0.994%), stated with its sampling frame.
-- **Finding:** initialised passenger/crew counts differ from declared
-  nominal on three hulls (expedition 316/134 vs 300/150; classic 1,338/572
-  vs 1,350/560; mega 4,900/2,100 vs 5,000/2,000). The campaign asserts the
-  initialised counts; matching nominal is a baseline-block decision.
+- **Role split (amended 2026-11-20, owner decision):** with the block
+  alone, three hulls initialise a passenger/crew split that differs from
+  declared nominal (expedition 316/134 vs 300/150; classic 1,338/572 vs
+  1,350/560; mega 4,900/2,100 vs 5,000/2,000). Every census, bridge and
+  pilot tier now declares one difference from the block,
+  `ship_graph.agent_classes`, re-weighted so the engine places the declared
+  nominal exactly; the worker asserts it. The block is unchanged; the
+  contract's section 2.5 records the decision.
 - **Local validation:** see `LEDGER.md`. Not exercised locally: a posted
   voyage, a detected swab, any run longer than 96 epochs.

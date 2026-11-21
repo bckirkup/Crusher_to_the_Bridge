@@ -93,17 +93,51 @@ def test_stage_b_is_the_small_complete_bridge_plus_pilot(stage_b):
     assert not any("explorer" in h for h, _ in cells)
 
 
-def test_every_block_arm_carries_the_contract_block_verbatim(stage_b):
+def test_every_block_arm_is_the_contract_block_plus_its_class_mix(stage_b):
     manifest, _ = stage_b
     block = build.load_block()
     assert manifest["joint_eval"]["baseline_block"] == block
     for tier_id, tier in manifest["tiers"].items():
         meta = tier["joint_eval"]
         if meta["arm"] == "reproduction":
-            assert meta["changed_paths"], tier_id
+            assert len(meta["changed_paths"]) > 1, tier_id
             continue
-        assert tier["config_overrides"] == block, tier_id
-        assert meta["changed_paths"] == [], tier_id
+        effective = dict(tier["config_overrides"])
+        assert set(effective.pop("ship_graph")) == {"agent_classes"}, tier_id
+        assert effective == block, tier_id
+        assert [c["path"] for c in meta["changed_paths"]] == [
+            build.CLASS_MIX_PATH,
+        ], tier_id
+
+
+@pytest.mark.parametrize("hull", sorted(build.HULLS))
+def test_class_mix_places_the_declared_roles_exactly(hull):
+    spec = build.HULLS[hull]
+    shipped = build.shipped_classes()
+    mix = build.class_mix(hull)
+    assert [c["class_id"] for c in mix] == [c["class_id"] for c in shipped]
+    for role, total in spec["intended_roles"].items():
+        counts = [
+            c["fraction"] * spec["num_agents"]
+            for c in mix if c["role_group"] == role
+        ]
+        assert all(abs(x - round(x)) < 1e-9 for x in counts)
+        assert round(sum(counts)) == total
+        old = [c["fraction"] for c in shipped if c["role_group"] == role]
+        for count, fraction in zip(counts, old):
+            assert abs(count - fraction / sum(old) * total) < 1.0
+    untouched = [
+        {k: v for k, v in c.items() if k != "fraction"} for c in mix
+    ]
+    assert untouched == [
+        {k: v for k, v in c.items() if k != "fraction"} for c in shipped
+    ]
+
+
+def test_class_mix_refuses_a_platform_that_disagrees_with_the_design(monkeypatch):
+    monkeypatch.setattr(build, "declared_complement", lambda _p: (350, 100))
+    with pytest.raises(SystemExit):
+        build.class_mix("exp")
 
 
 def test_bridge_seeds_are_paired_across_lengths(stage_b):
@@ -125,7 +159,7 @@ def test_intended_roles_sum_to_the_complement(stage_b):
         meta = tier["joint_eval"]
         if meta["arm"] == "census":
             continue
-        for key in ("intended_roles", "nominal_roles"):
+        for key in ("intended_roles", "template_roles"):
             assert sum(meta[key].values()) == tier["num_agents"]
 
 
@@ -148,7 +182,9 @@ def test_materialize_keeps_siblings_and_declares_exactly_what_changed():
 def test_worker_refuses_an_undeclared_arm_difference(stage_b):
     manifest, _ = stage_b
     tier_id = "fl_je_exp_7d_quiet"
-    assert cell.check_arm(manifest, tier_id)["changed_paths"] == []
+    assert [
+        c["path"] for c in cell.check_arm(manifest, tier_id)["changed_paths"]
+    ] == [build.CLASS_MIX_PATH]
     drifted = copy.deepcopy(manifest)
     drifted["tiers"][tier_id]["config_overrides"]["hvac"].pop(
         "transport_engine",
@@ -351,7 +387,8 @@ def test_a_shortened_voyage_is_not_an_intended_input(stage_b):
     meta = tier["joint_eval"]
     good = {
         "num_epochs": 168, "engine_git_sha": "abc",
-        "arm": {"changed_paths": [], "effective_sha256": "h"},
+        "arm": {"changed_paths": meta["changed_paths"],
+                "effective_sha256": "h"},
         "effective": {"mismatched": [], "runner_changed_paths": []},
         "roles": {"initialised": meta["intended_roles"],
                   "payload": meta["intended_roles"]},

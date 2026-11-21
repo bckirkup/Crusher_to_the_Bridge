@@ -89,4 +89,24 @@ Result section records the campaign name, the SOP decision taken, and the
 literature-gate verdict (commit that update).
 ```
 
-## Result
+## Result (WP3 authoring closed 2026-11-20)
+
+Settled inputs for the next session — do not re-derive. Detail and measurements are in the campaign's [`DESIGN.md`](../../campaigns/noro/explorer_reconstruction_01/DESIGN.md) and [`LEDGER.md`](../../campaigns/noro/explorer_reconstruction_01/LEDGER.md).
+
+| Item | Value |
+|---|---|
+| Campaign | `noro_explorer_reconstruction_01`, `campaigns/noro/explorer_reconstruction_01/` |
+| Cells | 400 = 2 hulls × 2 introductions × 100 seeds, 192 epochs; authored, none run beyond one local smoke |
+| State | Gated on the declared freeze and on the pre-freeze blocker below |
+| SOP-007/009 decision | Not relied on; no closure alias; `protocols.json` not edited. The worker records protocol activation and the readout counts cells where either SOP activated |
+| Literature gate | Closed. Rispens et al. (MMWR 2020;69(16), DOI 10.15585/mmwr.mm6916a3) publish no per-day onset curve: no figure, table or supplement; whole body text read. No second hull scoped |
+
+Reported during the session and carried in the design file:
+
+- **Pre-freeze blocker.** The frozen block requests the exposure cap, but the cap and the rhythm layer apply only to platform ids listed in `data/rhythm/event_catalogs.json`. `explorer_seas_06` is not listed, so both are inactive there and active on `mega_cruise_5000` (measured at initialization, seed 8105). Decision needed: an eligibility correction, or Explorer as a deferred exception.
+- **Role counts.** With no class override a 4,428-agent Explorer cell resolves to 3,102 / 1,326, not 3,245 / 1,183. The Explorer tiers declare exact class head counts and the worker asserts the initialized counts.
+- **Pre-boarding five.** Declared as `initiation.explicit_seeds`. The embarkation report counter is crew-only, so bucket zero cannot carry them. Their onset dates are not in the record; `onset_day -1.0` is a declared assumption.
+- **Timing.** Eight calendar dates, seven elapsed days; 192 epochs is a declared inclusive-day approximation with its sensitivity bounded in the readout.
+- **Closures.** A common protocol bundle can be selected per run through `catalog.protocols_path`; not exercised.
+
+Next decision: the pre-freeze blocker. After it and the freeze: image from the named commit pinned by digest, then a 20-seed canary of `exp_declared_five`, then stop and report.

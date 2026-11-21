@@ -6,7 +6,7 @@
 > reviewed at `73ad8724`). **Not a freeze declaration**; Edison reviews this
 > revision and the freeze record is a separate later document. The §2.1 block
 > is byte-identical to the reviewed one. Verified on the revision branch
-> (main at `fb300d71`, which includes #1359) by `scripts/paper1_freeze_block_check.py`: 57 declared units,
+> (main at `d9d4bf05`, which includes #1359) by `scripts/paper1_freeze_block_check.py`: 57 declared units,
 > 70 scalar leaves (63 resolved-state, 7 configuration-only), 0 failures,
 > 1 pending (Explorer rhythm-layer attachment, §2.8; the exposure-cap
 > divergence was closed by #1359); output retained at
@@ -376,7 +376,7 @@ one pin whose effect is gated on the platform is covered by the per-hull
 resolved-state probe. A `PENDING` line is a declared, known non-effective
 pin; it does not fail the check, and an entry that stops reproducing does.
 
-Result on the revision branch (main at `fb300d71`): 0 failures, 1 pending, 0
+Result on the revision branch (main at `d9d4bf05`): 0 failures, 1 pending, 0
 leaves differing from the no-block default. The verbatim output is
 [`paper1_freeze_block_check_output_2026_11_21.txt`](paper1_freeze_block_check_output_2026_11_21.txt).
 `tests/test_paper1_freeze_block_check.py` covers the exception
@@ -486,14 +486,13 @@ are the platform's `nominal_complement`, delivered as exact per-class
   same counts: `passenger_complement` / `crew_complement` in the run summary
   and `n_passengers` / `n_crew` in the Sentinel line list equal the declared
   reference counts, or the cell fails technical completion (§5.3).
-- **Open reconciliation with WP2.** The WP2 design merged while this
-  revision was in review
-  (`campaigns/noro/paper1_joint_eval_01/DESIGN.md`) declares the
-  template-fraction allocation (316 / 134, 1,338 / 572, 4,900 / 2,100) as
-  its intended counts and treats nominal as a baseline change. That is this
-  section's `archetype_template_baseline`, not its reference. One of the two
-  documents changes before the freeze is declared; which one is a decision
-  for Benjamin and Edison, and neither is run as "the reference" until then.
+- **Owner decision, and agreement with WP2.** Benjamin decided on
+  2026-11-20 that the reference runs each platform's declared
+  `nominal_complement` (#1363). WP2's campaign
+  (`campaigns/noro/paper1_joint_eval_01/`) delivers it as re-weighted class
+  fractions rather than `count` entries; on the four archetypes its tiers
+  place the same seven class counts as the block below (compared against
+  its manifest at `d9d4bf05`).
 - **Explorer against the mega archetype (WP3).** Retained differences: total
   complement, role split and vessel geometry. Controlled: within-role class
   ratios, the §2.1 block, strategy, dose and source. WP3 states this in its
