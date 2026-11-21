@@ -84,3 +84,42 @@ the fixed go/no-go thresholds (commit that update).
 ```
 
 ## Result
+
+Status: **authored and gated** (2026-11-20). The freeze was not declared
+during the session, so no census, canary or cell ran. The PR was opened,
+not merged.
+
+- **Campaign:** `noro_paper1_joint_eval_01`
+  (`campaigns/noro/paper1_joint_eval_01/`; design in `DESIGN.md`, record
+  in `LEDGER.md`).
+- **Cell count:** Stage A, emitted now: 816 array children (census 4 hulls
+  x 200 children of 100 one-epoch seeds; reproduction arm 16). Stage B,
+  emitted after the census: 880 trajectories (bridge 4 hulls x 168/288/504
+  epochs x 3 diagnostic strata x 20 paired seeds = 720; joint-outcome pilot
+  4 hulls x 288 epochs x 2 source strata x 20 evaluation seeds = 160). The
+  contract's 100 / 300 / >= 1,000 counts are replication targets allocated
+  from the pilots, not a 5,040-trajectory grid.
+- **Strata definition:** diagnostic labels from a boarding census under the
+  baseline block (20,000 seeds per hull, 1 epoch). Quiet = first 20
+  uncontaminated seeds; outbreak = 20 contaminated seeds of highest lot
+  burden; near-threshold = 20 contaminated seeds of lowest burden. Burden =
+  sum of `lot_servings * lot_titre_gec_per_g * 150 g`. Diagnostic seeds
+  carry no population weight; evaluation seeds are an equal-probability
+  sample within each source stratum with recorded inclusion probabilities
+  and source weights.
+- **Gate (changed by Edison's pre-freeze review):** technical completion
+  only — intended inputs used, outcomes extractable, independent attempts
+  accounted, paired comparisons meaningful. No outcome voids the freeze.
+- **Fixed thresholds**, now diagnostic bands that select a continuation:
+  quiet posting rate <= 0.02; outbreak >= 0.50; near-threshold strictly
+  between the two and within 0.10–0.90; Clopper-Pearson 95% intervals; a
+  cell is out only when an interval excludes its band. Continuations:
+  justified defect fix / reconstruction / population-geometry / uncertainty
+  / precision. Zero-event convention: exact one-sided 95% upper bound
+  `1 - 0.05^(1/n)` (0/300 gives 0.994%), stated with its sampling frame.
+- **Finding:** initialised passenger/crew counts differ from declared
+  nominal on three hulls (expedition 316/134 vs 300/150; classic 1,338/572
+  vs 1,350/560; mega 4,900/2,100 vs 5,000/2,000). The campaign asserts the
+  initialised counts; matching nominal is a baseline-block decision.
+- **Local validation:** see `LEDGER.md`. Not exercised locally: a posted
+  voyage, a detected swab, any run longer than 96 epochs.
