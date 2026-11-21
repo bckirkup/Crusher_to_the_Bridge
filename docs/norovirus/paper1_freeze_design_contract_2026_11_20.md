@@ -805,8 +805,10 @@ that records it. The count is 13.
 
 13. **`explorer_seas_06` runs without the SHIP-RHYTHM-02 layer** that the
     four archetypes run with, and the block does not pin it (§2.8,
-    `NORO-EXPOCAP-EXPLORER-01`). Explorer's same-mechanism comparison waits
-    on the decision recorded there. The exposure-cap divergence on the same
+    `NORO-EXPOCAP-EXPLORER-01`). Decided by Edison 2026-11-21: Explorer
+    stays rhythm-free as the declared exception, and the reconstruction adds
+    a declared rhythm-disabled Explorer×Mega paired arm measuring the
+    schedule layer's contribution. The exposure-cap divergence on the same
     hull was closed by #1359.
 
 None of these forces a change to the evaluation contract in §5. Items 2 and
@@ -985,9 +987,10 @@ current one (limitations 1, 3, 10).
 
 The freeze declaration itself; the WP2 campaign directory, seed allocation
 and numeric criteria; the WP3 reconstruction campaign, its 192-epoch length
-and date-to-epoch convention; the response-demonstration pairing (WP5); the
-choice among the §2.8 rhythm options; any mechanism change, campaign run or
-regeneration of platform data.
+and date-to-epoch convention; the response-demonstration pairing (WP5);
+any mechanism change, campaign run or
+regeneration of platform data. (The §2.8 rhythm choice is no longer open —
+Edison decided option C plus a declared paired arm, 2026-11-21.)
 
 ## 7. Review corrections — where each is resolved
 
