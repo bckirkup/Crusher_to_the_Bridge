@@ -1,0 +1,816 @@
+{
+ "cells": [
+  {
+   "seed": 20200205,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3574,
+   "presented_total": 2961,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3352,
+   "confirmed_channel": {
+    "campaign": 520,
+    "passive": 2832
+   },
+   "confirmed_never_presented": 418,
+   "confirmed_pre_onset_catch": 32,
+   "dpi_at_confirmation_median": 7.0,
+   "campaign_positives": 548,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 426,
+     "pre_onset": 37,
+     "post_onset": 85
+    },
+    "hosts": {
+     "never_presented": 399,
+     "pre_onset": 36,
+     "post_onset": 85
+    }
+   },
+   "asymptomatic_share": 0.8448905109489051,
+   "recorded_onsets": 2923,
+   "dated_share_of_confirmed": 0.872016706443914,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 195,
+    "swabbed_while_infected_negative_presented": 26,
+    "never_swabbed_presented": 1
+   }
+  },
+  {
+   "seed": 20200206,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3533,
+   "presented_total": 2966,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3428,
+   "confirmed_channel": {
+    "campaign": 579,
+    "passive": 2849
+   },
+   "confirmed_never_presented": 466,
+   "confirmed_pre_onset_catch": 29,
+   "dpi_at_confirmation_median": 7.0,
+   "campaign_positives": 627,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 488,
+     "pre_onset": 40,
+     "post_onset": 99
+    },
+    "hosts": {
+     "never_presented": 450,
+     "pre_onset": 40,
+     "post_onset": 89
+    }
+   },
+   "asymptomatic_share": 0.8421052631578947,
+   "recorded_onsets": 2958,
+   "dated_share_of_confirmed": 0.8628938156359394,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 101,
+    "never_swabbed_presented": 1,
+    "swabbed_while_infected_negative_presented": 3
+   }
+  },
+  {
+   "seed": 20200207,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3590,
+   "presented_total": 2989,
+   "sampled_total": 3708,
+   "lab_confirmed_total": 3248,
+   "confirmed_channel": {
+    "campaign": 400,
+    "passive": 2848
+   },
+   "confirmed_never_presented": 335,
+   "confirmed_pre_onset_catch": 12,
+   "dpi_at_confirmation_median": 8.0,
+   "campaign_positives": 409,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 333,
+     "pre_onset": 16,
+     "post_onset": 60
+    },
+    "hosts": {
+     "never_presented": 324,
+     "pre_onset": 16,
+     "post_onset": 60
+    }
+   },
+   "asymptomatic_share": 0.8533007334963325,
+   "recorded_onsets": 2887,
+   "dated_share_of_confirmed": 0.8888546798029556,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_presented": 75,
+    "swabbed_while_infected_negative_never_presented": 265,
+    "never_swabbed_presented": 1,
+    "never_swabbed_never_presented": 1
+   }
+  },
+  {
+   "seed": 20200208,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3592,
+   "presented_total": 2998,
+   "sampled_total": 3380,
+   "lab_confirmed_total": 2540,
+   "confirmed_channel": {
+    "campaign": 268,
+    "passive": 2272
+   },
+   "confirmed_never_presented": 158,
+   "confirmed_pre_onset_catch": 1,
+   "dpi_at_confirmation_median": 10.0,
+   "campaign_positives": 268,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 148,
+     "pre_onset": 0,
+     "post_onset": 120
+    },
+    "hosts": {
+     "never_presented": 148,
+     "pre_onset": 0,
+     "post_onset": 120
+    }
+   },
+   "asymptomatic_share": 0.5522388059701493,
+   "recorded_onsets": 2268,
+   "dated_share_of_confirmed": 0.8929133858267716,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_presented": 437,
+    "swabbed_while_infected_negative_never_presented": 315,
+    "never_swabbed_presented": 179,
+    "never_swabbed_never_presented": 121
+   }
+  },
+  {
+   "seed": 20200209,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3567,
+   "presented_total": 2953,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3441,
+   "confirmed_channel": {
+    "campaign": 639,
+    "passive": 2802
+   },
+   "confirmed_never_presented": 497,
+   "confirmed_pre_onset_catch": 40,
+   "dpi_at_confirmation_median": 7,
+   "campaign_positives": 697,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 528,
+     "pre_onset": 49,
+     "post_onset": 120
+    },
+    "hosts": {
+     "never_presented": 478,
+     "pre_onset": 49,
+     "post_onset": 112
+    }
+   },
+   "asymptomatic_share": 0.8278335724533716,
+   "recorded_onsets": 2939,
+   "dated_share_of_confirmed": 0.8541121766928218,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 116,
+    "swabbed_while_infected_negative_presented": 8,
+    "never_swabbed_presented": 1,
+    "swabbed_only_pre_infection_never_presented": 1
+   }
+  },
+  {
+   "seed": 20200210,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3558,
+   "presented_total": 2906,
+   "sampled_total": 3709,
+   "lab_confirmed_total": 3274,
+   "confirmed_channel": {
+    "campaign": 476,
+    "passive": 2798
+   },
+   "confirmed_never_presented": 385,
+   "confirmed_pre_onset_catch": 23,
+   "dpi_at_confirmation_median": 7.0,
+   "campaign_positives": 492,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 388,
+     "pre_onset": 26,
+     "post_onset": 78
+    },
+    "hosts": {
+     "never_presented": 373,
+     "pre_onset": 26,
+     "post_onset": 77
+    }
+   },
+   "asymptomatic_share": 0.8414634146341463,
+   "recorded_onsets": 2877,
+   "dated_share_of_confirmed": 0.8787416004886989,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 267,
+    "swabbed_while_infected_negative_presented": 16,
+    "never_swabbed_presented": 1
+   }
+  },
+  {
+   "seed": 20200211,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3550,
+   "presented_total": 2904,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3341,
+   "confirmed_channel": {
+    "campaign": 518,
+    "passive": 2823
+   },
+   "confirmed_never_presented": 451,
+   "confirmed_pre_onset_catch": 15,
+   "dpi_at_confirmation_median": 7,
+   "campaign_positives": 540,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 459,
+     "pre_onset": 22,
+     "post_onset": 59
+    },
+    "hosts": {
+     "never_presented": 437,
+     "pre_onset": 22,
+     "post_onset": 59
+    }
+   },
+   "asymptomatic_share": 0.8907407407407407,
+   "recorded_onsets": 2886,
+   "dated_share_of_confirmed": 0.8638132295719845,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 195,
+    "never_swabbed_presented": 1,
+    "swabbed_while_infected_negative_presented": 13
+   }
+  },
+  {
+   "seed": 20200212,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3576,
+   "presented_total": 2953,
+   "sampled_total": 3587,
+   "lab_confirmed_total": 2917,
+   "confirmed_channel": {
+    "campaign": 327,
+    "passive": 2590
+   },
+   "confirmed_never_presented": 246,
+   "confirmed_pre_onset_catch": 6,
+   "dpi_at_confirmation_median": 9,
+   "campaign_positives": 329,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 235,
+     "pre_onset": 10,
+     "post_onset": 84
+    },
+    "hosts": {
+     "never_presented": 234,
+     "pre_onset": 10,
+     "post_onset": 83
+    }
+   },
+   "asymptomatic_share": 0.7446808510638298,
+   "recorded_onsets": 2607,
+   "dated_share_of_confirmed": 0.8937264312649983,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 309,
+    "swabbed_while_infected_negative_presented": 239,
+    "never_swabbed_never_presented": 68,
+    "never_swabbed_presented": 43
+   }
+  },
+  {
+   "seed": 20200213,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3573,
+   "presented_total": 2982,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3406,
+   "confirmed_channel": {
+    "campaign": 543,
+    "passive": 2863
+   },
+   "confirmed_never_presented": 437,
+   "confirmed_pre_onset_catch": 22,
+   "dpi_at_confirmation_median": 7.0,
+   "campaign_positives": 587,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 466,
+     "pre_onset": 30,
+     "post_onset": 91
+    },
+    "hosts": {
+     "never_presented": 426,
+     "pre_onset": 30,
+     "post_onset": 87
+    }
+   },
+   "asymptomatic_share": 0.8449744463373083,
+   "recorded_onsets": 2961,
+   "dated_share_of_confirmed": 0.8693482090428656,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 154,
+    "swabbed_while_infected_negative_presented": 12,
+    "never_swabbed_presented": 1
+   }
+  },
+  {
+   "seed": 20200214,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3571,
+   "presented_total": 2958,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3322,
+   "confirmed_channel": {
+    "campaign": 468,
+    "passive": 2854
+   },
+   "confirmed_never_presented": 393,
+   "confirmed_pre_onset_catch": 14,
+   "dpi_at_confirmation_median": 8.0,
+   "campaign_positives": 484,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 391,
+     "pre_onset": 22,
+     "post_onset": 71
+    },
+    "hosts": {
+     "never_presented": 377,
+     "pre_onset": 22,
+     "post_onset": 69
+    }
+   },
+   "asymptomatic_share": 0.8533057851239669,
+   "recorded_onsets": 2915,
+   "dated_share_of_confirmed": 0.8774834437086093,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 220,
+    "swabbed_while_infected_negative_presented": 28,
+    "never_swabbed_presented": 1
+   }
+  },
+  {
+   "seed": 20200215,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3583,
+   "presented_total": 2950,
+   "sampled_total": 3683,
+   "lab_confirmed_total": 3146,
+   "confirmed_channel": {
+    "campaign": 402,
+    "passive": 2744
+   },
+   "confirmed_never_presented": 322,
+   "confirmed_pre_onset_catch": 8,
+   "dpi_at_confirmation_median": 9.0,
+   "campaign_positives": 408,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 316,
+     "pre_onset": 11,
+     "post_onset": 81
+    },
+    "hosts": {
+     "never_presented": 311,
+     "pre_onset": 11,
+     "post_onset": 80
+    }
+   },
+   "asymptomatic_share": 0.8014705882352942,
+   "recorded_onsets": 2778,
+   "dated_share_of_confirmed": 0.8830260648442466,
+   "unconfirmed_infected_drains": {
+    "never_swabbed_never_presented": 19,
+    "swabbed_while_infected_negative_presented": 119,
+    "swabbed_while_infected_negative_never_presented": 292,
+    "never_swabbed_presented": 7
+   }
+  },
+  {
+   "seed": 20200216,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3569,
+   "presented_total": 2947,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3387,
+   "confirmed_channel": {
+    "campaign": 533,
+    "passive": 2854
+   },
+   "confirmed_never_presented": 452,
+   "confirmed_pre_onset_catch": 23,
+   "dpi_at_confirmation_median": 7,
+   "campaign_positives": 576,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 473,
+     "pre_onset": 29,
+     "post_onset": 74
+    },
+    "hosts": {
+     "never_presented": 434,
+     "pre_onset": 29,
+     "post_onset": 70
+    }
+   },
+   "asymptomatic_share": 0.8715277777777778,
+   "recorded_onsets": 2930,
+   "dated_share_of_confirmed": 0.865072335400059,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 170,
+    "swabbed_while_infected_negative_presented": 11,
+    "never_swabbed_presented": 1
+   }
+  },
+  {
+   "seed": 20200217,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 1,
+   "presented_total": 1,
+   "sampled_total": 2020,
+   "lab_confirmed_total": 0,
+   "confirmed_channel": {
+    "campaign": 0,
+    "passive": 0
+   },
+   "confirmed_never_presented": 0,
+   "confirmed_pre_onset_catch": 0,
+   "dpi_at_confirmation_median": null,
+   "campaign_positives": 0,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 0,
+     "pre_onset": 0,
+     "post_onset": 0
+    },
+    "hosts": {
+     "never_presented": 0,
+     "pre_onset": 0,
+     "post_onset": 0
+    }
+   },
+   "asymptomatic_share": null,
+   "recorded_onsets": 0,
+   "dated_share_of_confirmed": null,
+   "unconfirmed_infected_drains": {
+    "never_swabbed_presented": 1
+   }
+  },
+  {
+   "seed": 20200218,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3560,
+   "presented_total": 2894,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3378,
+   "confirmed_channel": {
+    "campaign": 608,
+    "passive": 2770
+   },
+   "confirmed_never_presented": 494,
+   "confirmed_pre_onset_catch": 23,
+   "dpi_at_confirmation_median": 7.0,
+   "campaign_positives": 652,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 510,
+     "pre_onset": 37,
+     "post_onset": 105
+    },
+    "hosts": {
+     "never_presented": 475,
+     "pre_onset": 37,
+     "post_onset": 96
+    }
+   },
+   "asymptomatic_share": 0.838957055214724,
+   "recorded_onsets": 2879,
+   "dated_share_of_confirmed": 0.8522794552989935,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 172,
+    "swabbed_while_infected_negative_presented": 9,
+    "never_swabbed_presented": 1
+   }
+  },
+  {
+   "seed": 20200219,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3590,
+   "presented_total": 2986,
+   "sampled_total": 3161,
+   "lab_confirmed_total": 2190,
+   "confirmed_channel": {
+    "campaign": 223,
+    "passive": 1967
+   },
+   "confirmed_never_presented": 124,
+   "confirmed_pre_onset_catch": 3,
+   "dpi_at_confirmation_median": 11.0,
+   "campaign_positives": 223,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 112,
+     "pre_onset": 4,
+     "post_onset": 107
+    },
+    "hosts": {
+     "never_presented": 112,
+     "pre_onset": 4,
+     "post_onset": 107
+    }
+   },
+   "asymptomatic_share": 0.5201793721973094,
+   "recorded_onsets": 1952,
+   "dated_share_of_confirmed": 0.891324200913242,
+   "unconfirmed_infected_drains": {
+    "never_swabbed_presented": 326,
+    "swabbed_while_infected_negative_never_presented": 300,
+    "swabbed_while_infected_negative_presented": 594,
+    "never_swabbed_never_presented": 180
+   }
+  },
+  {
+   "seed": 20200220,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3574,
+   "presented_total": 2950,
+   "sampled_total": 3499,
+   "lab_confirmed_total": 2759,
+   "confirmed_channel": {
+    "campaign": 281,
+    "passive": 2478
+   },
+   "confirmed_never_presented": 205,
+   "confirmed_pre_onset_catch": 5,
+   "dpi_at_confirmation_median": 10,
+   "campaign_positives": 281,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 193,
+     "pre_onset": 4,
+     "post_onset": 84
+    },
+    "hosts": {
+     "never_presented": 193,
+     "pre_onset": 4,
+     "post_onset": 84
+    }
+   },
+   "asymptomatic_share": 0.701067615658363,
+   "recorded_onsets": 2483,
+   "dated_share_of_confirmed": 0.8999637549836897,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 320,
+    "never_swabbed_never_presented": 99,
+    "swabbed_while_infected_negative_presented": 302,
+    "never_swabbed_presented": 94
+   }
+  },
+  {
+   "seed": 20200221,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3587,
+   "presented_total": 2955,
+   "sampled_total": 3677,
+   "lab_confirmed_total": 3155,
+   "confirmed_channel": {
+    "campaign": 387,
+    "passive": 2768
+   },
+   "confirmed_never_presented": 323,
+   "confirmed_pre_onset_catch": 13,
+   "dpi_at_confirmation_median": 9,
+   "campaign_positives": 391,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 316,
+     "pre_onset": 18,
+     "post_onset": 57
+    },
+    "hosts": {
+     "never_presented": 312,
+     "pre_onset": 18,
+     "post_onset": 57
+    }
+   },
+   "asymptomatic_share": 0.8542199488491049,
+   "recorded_onsets": 2810,
+   "dated_share_of_confirmed": 0.8906497622820919,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 285,
+    "never_swabbed_never_presented": 24,
+    "swabbed_while_infected_negative_presented": 117,
+    "never_swabbed_presented": 6
+   }
+  },
+  {
+   "seed": 20200222,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3571,
+   "presented_total": 2979,
+   "sampled_total": 3685,
+   "lab_confirmed_total": 3225,
+   "confirmed_channel": {
+    "campaign": 414,
+    "passive": 2811
+   },
+   "confirmed_never_presented": 338,
+   "confirmed_pre_onset_catch": 16,
+   "dpi_at_confirmation_median": 9,
+   "campaign_positives": 426,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 333,
+     "pre_onset": 17,
+     "post_onset": 76
+    },
+    "hosts": {
+     "never_presented": 323,
+     "pre_onset": 17,
+     "post_onset": 74
+    }
+   },
+   "asymptomatic_share": 0.8215962441314554,
+   "recorded_onsets": 2856,
+   "dated_share_of_confirmed": 0.8855813953488372,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 237,
+    "swabbed_while_infected_negative_presented": 89,
+    "never_swabbed_never_presented": 17,
+    "never_swabbed_presented": 3
+   }
+  },
+  {
+   "seed": 20200223,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3575,
+   "presented_total": 2951,
+   "sampled_total": 3636,
+   "lab_confirmed_total": 2911,
+   "confirmed_channel": {
+    "campaign": 295,
+    "passive": 2616
+   },
+   "confirmed_never_presented": 224,
+   "confirmed_pre_onset_catch": 9,
+   "dpi_at_confirmation_median": 9,
+   "campaign_positives": 296,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 210,
+     "pre_onset": 10,
+     "post_onset": 76
+    },
+    "hosts": {
+     "never_presented": 209,
+     "pre_onset": 10,
+     "post_onset": 76
+    }
+   },
+   "asymptomatic_share": 0.7432432432432432,
+   "recorded_onsets": 2623,
+   "dated_share_of_confirmed": 0.9010649261422191,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 348,
+    "swabbed_while_infected_negative_presented": 246,
+    "never_swabbed_never_presented": 52,
+    "never_swabbed_presented": 18
+   }
+  },
+  {
+   "seed": 20200224,
+   "theta": 316227766016.83795,
+   "arm_id": "baseline",
+   "design_id": "covid_theta_refit_01_dp",
+   "infections_total": 3575,
+   "presented_total": 2974,
+   "sampled_total": 3710,
+   "lab_confirmed_total": 3306,
+   "confirmed_channel": {
+    "campaign": 445,
+    "passive": 2861
+   },
+   "confirmed_never_presented": 366,
+   "confirmed_pre_onset_catch": 14,
+   "dpi_at_confirmation_median": 8.0,
+   "campaign_positives": 460,
+   "campaign_positive": {
+    "specimens": {
+     "never_presented": 367,
+     "pre_onset": 26,
+     "post_onset": 67
+    },
+    "hosts": {
+     "never_presented": 352,
+     "pre_onset": 26,
+     "post_onset": 67
+    }
+   },
+   "asymptomatic_share": 0.8543478260869565,
+   "recorded_onsets": 2924,
+   "dated_share_of_confirmed": 0.8844525105868118,
+   "unconfirmed_infected_drains": {
+    "swabbed_while_infected_negative_never_presented": 235,
+    "swabbed_while_infected_negative_presented": 33,
+    "never_swabbed_presented": 1
+   }
+  }
+ ],
+ "pooled": {
+  "cells": 20,
+  "takeoff_onsets": 10,
+  "takeoff_cells": 19,
+  "infections_total": 67869,
+  "presented_total": 56157,
+  "lab_confirmed_total": 59726,
+  "recorded_onsets": 52456,
+  "confirmed_channel": {
+   "campaign": 8326,
+   "passive": 51400
+  },
+  "confirmed_never_presented": 6634,
+  "confirmed_pre_onset_catch": 308,
+  "campaign_positive": {
+   "specimens": {
+    "never_presented": 6692,
+    "pre_onset": 408,
+    "post_onset": 1594
+   },
+   "hosts": {
+    "never_presented": 6367,
+    "pre_onset": 407,
+    "post_onset": 1552
+   }
+  },
+  "unconfirmed_infected_drains": {
+   "swabbed_while_infected_negative_never_presented": 4496,
+   "swabbed_while_infected_negative_presented": 2377,
+   "never_swabbed_presented": 688,
+   "never_swabbed_never_presented": 581,
+   "swabbed_only_pre_infection_never_presented": 1
+  },
+  "medians": {
+   "infections_total": 3574,
+   "presented_total": 2955,
+   "lab_confirmed_total": 3274,
+   "recorded_onsets": 2879,
+   "campaign_positives": 460,
+   "asymptomatic_share": 0.8414634146341463,
+   "dated_share_of_confirmed": 0.8830260648442466,
+   "dpi_at_confirmation_median": 8.0
+  }
+ }
+}
