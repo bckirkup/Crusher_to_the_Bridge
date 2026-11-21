@@ -1361,7 +1361,7 @@
     "shedding_variance_log10": 1.0
    },
    "pending_effective_state": {
-    "rhythm.layer_attached": "no SHIP-RHYTHM-02 catalog row for the platform (NORO-EXPOCAP-EXPLORER-01); decision open, contract section 2.8"
+    "rhythm.layer_attached": "no SHIP-RHYTHM-02 catalog row for the platform (NORO-EXPOCAP-EXPLORER-01); declared exception, contract section 2.8: rhythm-free reference plus a declared rhythm_off paired arm"
    },
    "population": {
     "class_counts": {

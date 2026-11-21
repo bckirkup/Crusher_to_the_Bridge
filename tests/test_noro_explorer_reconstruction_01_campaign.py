@@ -289,9 +289,15 @@ def test_rhythm_off_arm_is_declared_on_both_hulls_with_paired_seeds(
     shipped = build.shipped_rhythm()
     assert arm["baseline_objects"]["rhythm"] == shipped
     assert arm["effective_objects"]["rhythm"] == {**shipped, "enabled": False}
-    assert arm["named_commit"]["sha"] in (
-        REPO_ROOT / arm["contract"]
-    ).read_text("utf-8")
+    named_sources = [REPO_ROOT / arm["contract"]] + sorted(
+        (REPO_ROOT / "docs" / "norovirus").glob(
+            "paper1_freeze_declaration*.md"
+        )
+    )
+    assert any(
+        arm["named_commit"]["sha"] in p.read_text("utf-8")
+        for p in named_sources
+    )
     platforms = set()
     for arm_tier, reference_tier in arm["paired_with"].items():
         tier, reference = manifest["tiers"][arm_tier], manifest["tiers"][reference_tier]

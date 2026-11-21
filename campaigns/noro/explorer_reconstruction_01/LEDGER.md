@@ -86,6 +86,18 @@ The measurements under "Local validation" above predate #1359: their "cap inacti
 - The readout enforces exact tier/seed/arm coverage: duplicates dropped before pairing as defects, unexpected tiers/seeds excluded and recorded, `status` is `complete` only with exact coverage, zero defects, and `--expect-sha` naming the source reference.
 - `design/build.py` reads the named commit from the freeze declaration (`docs/norovirus/paper1_freeze_declaration*.md`, `**Named commit.**`) once it exists, falling back to the contract's §1 candidate until then.
 
+## Freeze declared
+
+`docs/norovirus/paper1_freeze_declaration_2026_11_21.md` names
+`bf0ec16825ed15176fe0362459a72a7be1667f41` (merge of #1369) as the source
+reference. The campaign image `noro-explorer-recon01` was built from that
+commit and is pinned by digest
+`sha256:354b27b62076cfad6df13de899319d0b55e594a1a1edaf5bc3982bcf4ec55d82`
+in `design/build.py` (`IMAGE_DIGEST`) and `campaign.json`. The manifest's
+`named_commit` now reads the declaration.
+
 ## Next step
 
-After the freeze is declared: build the image from the named commit, pin its digest in `design/build.py`, rebuild, then a canary of the first 20 seeds of `exp_declared_five`, then stop and report.
+Canary of the first 20 seeds of `exp_declared_five` on AWS Batch against
+the pinned image, then stop and report; the user decides whether the
+remaining 580 cells run.
