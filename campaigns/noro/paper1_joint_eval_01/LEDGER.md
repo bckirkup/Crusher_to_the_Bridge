@@ -176,7 +176,36 @@ archive (`readout.py --reference-root`). Owner: `campaign-preflight`.
   reconstruction's ~5% take-off under `declared_five`: on exp hull at
   the census's highest provisioned burdens, every cell takes.
 
+## Stage B submitted (2026-11-21)
+
+User approved after the canary readout. 43 arrays x 20 = 860 children on
+`picard-campaign-queue`, jobdef `picard-noro-paper1-joint-eval-01:8`
+(image `sha256:80884d60…f149a`); the canary's 20 cells of
+`fl_je_exp_7d_outbreak` complete that block. Batch job ids:
+
+- exp: `e1353fc1` 7d_quiet, `79cc438e` 7d_near, `221787d3` 7d_outbreak
+  (canary), `66d49f51` 12d_quiet, `93892a0f` 12d_near, `fb3c5386`
+  12d_outbreak, `80dae4af` 21d_quiet, `eef4a27f` 21d_near, `75e8a2c4`
+  21d_outbreak, `d1d5252e` eval_uncontaminated, `3fe432ca`
+  eval_contaminated
+- cls: `742b2691` 7d_quiet, `b0b35743` 7d_near, `f8f5f223` 7d_outbreak,
+  `898966e6` 12d_quiet, `6767c633` 12d_near, `4761bd22` 12d_outbreak,
+  `462b1a0a` 21d_quiet, `5164b082` 21d_near, `9fbe3c1f` 21d_outbreak,
+  `2e27f56b` eval_uncontaminated, `756f9c9e` eval_contaminated
+- spr: `95efbf63` 7d_quiet, `95db961c` 7d_near, `f731d4eb` 7d_outbreak,
+  `350b3b28` 12d_quiet, `daf1f1f6` 12d_near, `b02fc0c1` 12d_outbreak,
+  `d3f85843` 21d_quiet, `eae3058d` 21d_near, `25aeeeb0` 21d_outbreak,
+  `bb61a840` eval_uncontaminated, `827da078` eval_contaminated
+- meg: `a978715f` 7d_quiet, `46be5cd9` 7d_near, `46a3c17e` 7d_outbreak,
+  `3ab5ec56` 12d_quiet, `d25f3213` 12d_near, `59e648ac` 12d_outbreak,
+  `5edd38dd` 21d_quiet, `7e6b99df` 21d_near, `806ef5de` 21d_outbreak,
+  `88202e7c` eval_uncontaminated, `f6af2454` eval_contaminated
+
+(Ids are the first 8 chars of each Batch job id; full ids are in the
+session record.)
+
 ## Next decision
 
-Whether to run the 880 Stage-B children (bridge 720 + pilot 160) after
-the bridge canary reports clean.
+Whether the readout verdict admits the campaign complete: technical
+completion of all 1,696 cells, the ordering diagnostic against the
+frozen bands, and the pilot reports.
