@@ -48,6 +48,7 @@ ROLE_KEYS = (
 )
 DEFAULT_MANIFEST = Path(__file__).resolve().parent / "manifest.json"
 Z95 = 1.959964
+HASH_SEED = "1"
 
 
 def clopper_pearson(k: int, n: int, level: float = 0.95) -> tuple[float, float]:
@@ -86,6 +87,7 @@ def read_cell(path: Path) -> dict[str, Any]:
         "posted_epoch": (block.get("threshold") or {}).get("vsp_trigger_epoch"),
         "first_role": (block.get("first_role") or {}).get("first_role"),
         "burden": block.get("burden") or {},
+        "python_hash_seed": block.get("python_hash_seed"),
         "arm": block.get("arm") or {},
         "effective": block.get("effective_config") or {},
         "roles": block.get("roles") or {},
@@ -101,6 +103,7 @@ def inputs_ok(cell: dict[str, Any], tier: dict[str, Any], sha: str) -> bool:
         cell["arm"].get("changed_paths") == meta["changed_paths"]
         and cell["arm"].get("effective_sha256") == sha
         and cell["num_epochs"] == meta["epochs"]
+        and cell["python_hash_seed"] == HASH_SEED
         and cell["effective"].get("mismatched") == []
         and cell["effective"].get("runner_changed_paths") == []
         and cell["roles"].get("initialised") == meta["intended_roles"]

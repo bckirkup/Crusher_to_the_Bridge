@@ -93,6 +93,20 @@ synthetic selection, `PYTHONHASHSEED=1`):
 Not re-run after the amendment: `--verify-draws`, the census worker, and the
 48- and 96-epoch smokes.
 
+## Amendment 2026-11-20: hash seed pinned in the worker
+
+Reported by the WP3 review and checked on main: neither the shared job
+definition template nor the campaign image sets `PYTHONHASHSEED`, although
+the freeze contract (section 2.5) says the job definition does. `cell.py`
+now re-executes itself under `PYTHONHASHSEED=1` and records the value in
+every archive; the readout requires it. `DESIGN.md` ("Hash seed: contract
+versus actual") records the gap for WP1b's contract revision.
+
+- [x] Worker run as a script with `PYTHONHASHSEED` unset (reproduction arm
+  index 0, seed 900470, 24 epochs): archive records `python_hash_seed` =
+  `"1"`. One seed.
+- [x] `tests/test_paper1_joint_eval_campaign.py`: 36 passed.
+
 ## Findings recorded during authoring
 
 - With the block alone, initialised role counts differ from the platforms'
