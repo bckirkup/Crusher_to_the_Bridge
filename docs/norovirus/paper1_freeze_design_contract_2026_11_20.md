@@ -1,7 +1,7 @@
 # Paper-1 freeze design contract (WP1)
 
 > **Status:** Design contract proposed for Edison's pre-freeze review —
-> **not a freeze declaration**. Candidate reference `a01130fb` (main HEAD when
+> **not a freeze declaration**. Candidate reference `b25cb0f2` (main HEAD when
 > drafted, 2026-11-20); the named reference is whatever main HEAD is at freeze
 > time (§1). The frozen block in §2 was verified at the candidate by
 > `scripts/paper1_freeze_block_check.py` (57 pinned keys, 0 failures; no voyage
@@ -22,7 +22,7 @@ named reference. Edison's blocker findings on this contract gate the freeze;
 the freeze is declared only after they are resolved, in a separate commit that
 records the SHA.
 
-**Candidate.** `a01130fb0c97349d129b172faea934c6bdea1db1` (merge of #1352).
+**Candidate.** `b25cb0f22d80dc3118c8613563992f9de28e8e49` (merge of #1353, a documentation-only change after #1352).
 It carries everything WP0/WP1 depend on: the `explorer_seas_06` platform
 (merge `a175b5c9`, generated at `695df1b5`), the commissioning fold-back
 (#1349) and the regeneration readout (#1351). Nothing WP0/WP1 need is
@@ -309,11 +309,13 @@ python3 scripts/paper1_freeze_block_check.py --markdown # regenerates §2.3 rows
 
 The script reads the block out of this file, builds one cell through the
 NORO-GENO-02 path, and for each key checks that the merged config carries the
-pinned value, that the named consumer file reads the key, and that flipping
-the key moves the resolved state. It then parses and initialises the block on
+pinned value, that the named consumer file reads the key, that the engine
+resolves the pinned value itself (several parsers substitute their default
+for an unknown mode name), and that flipping the key moves the resolved
+state. It then parses and initialises the block on
 `expedition_cruise_450`, `classic_cruise_1900`, `spirit_cruise_3000`,
 `mega_cruise_5000` and `explorer_seas_06`. It steps no epoch. Result at
-`a01130fb`: 57 keys, 0 failures, five hulls parse and initialise.
+`b25cb0f2`: 57 keys, 0 failures, five hulls parse and initialise.
 
 ### 2.5 Frozen outside `config_overrides`
 

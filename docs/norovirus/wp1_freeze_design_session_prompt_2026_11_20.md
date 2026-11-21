@@ -101,7 +101,7 @@ Delivered in PR #1355
 ([`paper1_freeze_design_contract_2026_11_20.md`](paper1_freeze_design_contract_2026_11_20.md)).
 The freeze is proposed, not declared.
 
-- **Candidate SHA:** `a01130fb0c97349d129b172faea934c6bdea1db1` (main HEAD
+- **Candidate SHA:** `b25cb0f22d80dc3118c8613563992f9de28e8e49` (main HEAD
   when drafted). The named reference is main HEAD at freeze time.
 - **Pinned keys:** 57, each with config default, resolved default, consumer
   file and a flip-test liveness result. `scripts/paper1_freeze_block_check.py`
