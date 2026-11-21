@@ -48,7 +48,7 @@ def _explorer_zip(seed: int = 101) -> bytes:
     summary = {
         "campaign": "noro_explorer_reconstruction_01",
         "tier": "tier_1_baseline",
-        "declared_arm": "baseline_v1",
+        "declared_arm": {"arm": "baseline_v1", "status": "ok"},
         "seed": seed,
         "platform": "explorer_of_the_seas",
         "engine_git_sha": "bf0ec168",
@@ -114,12 +114,13 @@ def _explorer_zip(seed: int = 101) -> bytes:
 
 def _joint_eval_zip(seed: int = 202) -> bytes:
     summary = {
-        "campaign": "noro_paper1_joint_eval_01",
-        "tier": "diagnostic",
-        "arm": "arm_a",
-        "seed": seed,
-        "platform": "large_resort",
-        "engine_git_sha": "90aa3ec2",
+        "run_id": f"fl_je_meg_12d_quiet__s{seed}",
+        "parameters": {
+            "tier_id": "fl_je_meg_12d_quiet",
+            "seed": seed,
+            "platform_id": "mega_cruise_5000",
+            "engine_git_sha": "90aa3ec2",
+        },
         "summary": {
             "passenger_complement": 4000,
             "crew_complement": 1500,
@@ -138,6 +139,7 @@ def _joint_eval_zip(seed: int = 202) -> bytes:
         "derived": {"vsp_trigger_epoch": 96},
         "role_checkpoints": {"day_3": {"passenger": 10, "crew": 2}},
         "joint_eval": {
+            "arm": {"arm": "bridge", "hull": "mega_cruise_5000", "epochs": 288},
             "effective_config": {"observation_mode": "full_env"},
             "burden": {
                 "passenger_complement": 4000,
@@ -237,11 +239,13 @@ def _joint_eval_zip(seed: int = 202) -> bytes:
 
 def _solver_ref_zip(seed: int = 303) -> bytes:
     summary = {
-        "campaign": "noro_supply_solver_screen_01_bf0",
-        "tier": "exp_station_lots_continuous",
-        "seed": seed,
-        "platform": "large_resort",
-        "engine_git_sha": "bf0ec168",
+        "run_id": f"exp_station_lots_continuous__s{seed}",
+        "parameters": {
+            "tier_id": "exp_station_lots_continuous",
+            "seed": seed,
+            "platform_id": "expedition_cruise_450",
+            "engine_git_sha": "bf0ec168",
+        },
         "initiation": {"resolved": {"mode": "preboarding_binomial"}},
         "census": {"n_imports": 4, "n_acquired": 21},
         "summary": {
@@ -359,6 +363,10 @@ def test_mixed_three_cohorts_materialization():
     # Explorer checks
     exp = by_cohort["explorer_reconstruction"]
     ev = exp["values"]
+    assert ev["arm"] == "baseline_v1"
+    assert ev["total_passengers"] == 3100
+    assert ev["total_crew"] == 1180
+    assert ev["burden"]["ever_ill_total"] == 30
     assert ev["initial_infected_total"] == 3
     assert ev["initial_infected_by_role"] == {"passenger": 2, "crew": 1}
     assert ev["initial_disease_states"] == {"exposed": 2, "infectious": 1}
@@ -373,6 +381,10 @@ def test_mixed_three_cohorts_materialization():
     je = by_cohort["paper1_joint_eval"]
     jv = je["values"]
     assert je["sidecar_member"] == "joint_eval.json.gz"
+    assert jv["tier"] == "fl_je_meg_12d_quiet"
+    assert jv["arm"] == "bridge"
+    assert jv["platform"] == "mega_cruise_5000"
+    assert jv["engine_git_sha"] == "90aa3ec2"
     assert jv["design_stratum"] == "diagnostic"
     assert jv["first_role"]["category"] == "crew_first"
     assert jv["initial_infected_by_role"]["scope"] == "preboarding_declared_only"
@@ -393,6 +405,9 @@ def test_mixed_three_cohorts_materialization():
     # Solver reference checks (verifies growth_census.json.gz was NOT read)
     bf0 = by_cohort["supply_solver_reference"]
     bv = bf0["values"]
+    assert bv["tier"] == "exp_station_lots_continuous"
+    assert bv["platform"] == "expedition_cruise_450"
+    assert bv["engine_git_sha"] == "bf0ec168"
     assert bv["design_stratum"] == "solver_reference_bf0"
     assert bv["initial_infected_total"] == 4
     assert bv["burden"]["acquired_total"] == 21

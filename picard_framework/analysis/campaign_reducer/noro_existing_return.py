@@ -155,6 +155,15 @@ def _design_stratum(
     return None
 
 
+def _arm_label(raw: Any) -> str | None:
+    if isinstance(raw, dict):
+        val = raw.get("arm")
+        return str(val) if val is not None else None
+    if raw is None:
+        return None
+    return str(raw)
+
+
 def _extract_identity(
     summary: dict[str, Any],
     joint_eval: dict[str, Any] | None,
@@ -166,28 +175,38 @@ def _extract_identity(
 ) -> str:
     je = joint_eval or {}
     je_scalars = summary.get("joint_eval") if isinstance(summary.get("joint_eval"), dict) else {}
+    params = summary.get("parameters") if isinstance(summary.get("parameters"), dict) else {}
     cohort = _cohort_kind(summary, joint_eval, src)
     campaign = _first_non_null(summary.get("campaign"), je.get("campaign"), src.campaign_id)
-    tier = _first_non_null(summary.get("tier"), je.get("tier"), src.cell_id)
+    tier = _first_non_null(
+        summary.get("tier"),
+        params.get("tier_id"),
+        je.get("tier"),
+        src.cell_id,
+    )
     arm = _first_non_null(
-        summary.get("declared_arm"),
-        summary.get("arm"),
-        je.get("arm"),
+        _arm_label(summary.get("declared_arm")),
+        _arm_label(je_scalars.get("arm")),
+        _arm_label(summary.get("arm")),
+        _arm_label(je.get("arm")),
     )
     seed = _first_non_null(
         summary.get("seed"),
+        params.get("seed"),
+        params.get("random_seed"),
         je.get("seed"),
-        (summary.get("parameters") or {}).get("random_seed"),
         src.seed,
     )
     platform = _first_non_null(
         summary.get("platform"),
-        (summary.get("parameters") or {}).get("platform"),
+        params.get("platform_id"),
+        params.get("platform"),
         je.get("platform"),
         src.hull_id,
     )
     engine_sha = _first_non_null(
         summary.get("engine_git_sha"),
+        params.get("engine_git_sha"),
         je.get("engine_git_sha"),
         src.engine_sha,
     )
