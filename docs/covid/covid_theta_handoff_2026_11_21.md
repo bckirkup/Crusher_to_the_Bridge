@@ -35,7 +35,7 @@ including the verbatim replay.
 
 ## 3. Evidence for
 
-- `COVID-CAPTURE-01` (measured at `6fa5e3bc`): capture is bimodal by
+- `COVID-CAPTURE-01` (measured at `7b34405d`): capture is bimodal by
   incidence timing — record-timed cells confirm 0.911–0.930 as declared;
   unconditioned ~0.52 is the structural ~18% post-window pool.
   Declared contract consequence: `confirmed / infections_reachable`.
