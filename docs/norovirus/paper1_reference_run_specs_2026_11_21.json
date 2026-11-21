@@ -1,0 +1,3134 @@
+{
+ "classic_cruise_1900": {
+  "resolved": {
+   "introduction": {
+    "boarding": {
+     "enabled": true,
+     "norwalk_gi": {
+      "age_draw": "stationary_detectable",
+      "preboarding_assessment": {
+       "crew": {
+        "declaration_compliance": 1.0,
+        "denial_probability": 0.0,
+        "enabled": true,
+        "recall_halflife_days": null,
+        "reportable": true
+       },
+       "lookback_days": 3,
+       "passenger": {
+        "enabled": false
+       }
+      },
+      "rate_mode": "renewal",
+      "renewal": {
+       "case_incidence_per_1000_py": {
+        "crew": 39.0,
+        "passenger": 39.0
+       },
+       "detectable_duration_days": 28
+      },
+      "state_split": {
+       "never_symptomatic_fraction": 0.29,
+       "presymptomatic_share_of_presenting": 0.04
+      },
+      "symptomatic_stream": {
+       "enabled": true
+      }
+     }
+    }
+   },
+   "mechanism_state": {
+    "crew_duty_exclusion.enabled": false,
+    "hvac.duty0_terminal_mode": "extract",
+    "hvac.passive_link_mode": "bidirectional",
+    "hvac.pathogen_pool_transport": "airflow",
+    "observation.wastewater_assay_mode": "WastewaterHoldingTankAssay",
+    "service_surface_knockout.enabled": false,
+    "transmission.activity_contacts.enabled": "dict",
+    "transmission.activity_contacts.rates_per_hour.cabin": 0.25,
+    "transmission.activity_contacts.rates_per_hour.corridor": 0.25,
+    "transmission.activity_contacts.rates_per_hour.dining_table": 2.0,
+    "transmission.activity_contacts.rates_per_hour.dining_venue": 2.0,
+    "transmission.activity_contacts.rates_per_hour.leisure": 1.0,
+    "transmission.activity_contacts.rates_per_hour.other": 0.0,
+    "transmission.activity_contacts.rates_per_hour.work_other": 0.5,
+    "transmission.activity_contacts.rates_per_hour.work_service": 2.9,
+    "transmission.blackwater_plumbing": "BlackwaterHoldingTank",
+    "transmission.cabin_air_mode": "cabin_compartment",
+    "transmission.cabin_confined_fomite.mode": "own_cabin",
+    "transmission.cabin_cooccupancy.mode": "time_partitioned",
+    "transmission.caregiver.budget_mode": "reallocate",
+    "transmission.caregiver.mode": "on",
+    "transmission.common_source.diner_mode": "object",
+    "transmission.common_source.handler_mode": "object",
+    "transmission.common_source.lot_extent_mode": "emergent",
+    "transmission.common_source.lot_mint_model": "provisioned_source",
+    "transmission.common_source.lot_mode": "object",
+    "transmission.common_source.mode": "on",
+    "transmission.common_source.provisioned_source.lot_layer_mode": "station_lots",
+    "transmission.common_source.provisioned_source.source_id": "generic_cruise_port",
+    "transmission.common_source.titre_draw_mode": "two_mode",
+    "transmission.contact_class_exponent": 0.0,
+    "transmission.contact_mode": "per_partner_contact",
+    "transmission.contamination_solver": "continuous",
+    "transmission.dining_party_contact_share": 1.0,
+    "transmission.droplet_emission_mode": "profile_conditioned",
+    "transmission.droplet_field_split.far_field_share": 0.175,
+    "transmission.droplet_field_split.mode": "partition",
+    "transmission.droplet_field_split.settled_share": 0.0,
+    "transmission.exposure_cap.enabled": true,
+    "transmission.exposure_cap.include_fixed_rings": false,
+    "transmission.flush_aerosol_fraction": 0.0,
+    "transmission.flush_cabin_emission": true,
+    "transmission.hand_redeposit_mode": "shedders_only",
+    "transmission.hand_reservoir_mode": "hygiene_cycle",
+    "transmission.high_touch_area_scale": 1.0,
+    "transmission.intra_epoch_causal_order": "legacy",
+    "transmission.intra_epoch_substeps": 1,
+    "transmission.isolated_quarters_deposits.mode": "deposits_only",
+    "transmission.near_field_air.interzonal_airflow_m3_per_hour": 204.0,
+    "transmission.near_field_air.mode": "two_box",
+    "transmission.near_field_air.neighbour_table_ratio": 0.43,
+    "transmission.room_air_removal.default_ach_per_hour": 0.0,
+    "transmission.room_air_removal.map_arm": "ambient_on",
+    "transmission.room_air_removal.mode": "first_order",
+    "transmission.sanitary_visit_mode": "none",
+    "transmission.surface_cleaning.enabled": true,
+    "transmission.surface_cleaning.outbreak_response.by_zone_class.cabin.events_per_day": 1.0,
+    "transmission.surface_cleaning.outbreak_response.coverage": 0.58,
+    "transmission.surface_cleaning.outbreak_response.events_per_day": 24.0,
+    "transmission.surface_cleaning.outbreak_response.log10_reduction": 4.29,
+    "transmission.surface_cleaning.routine.coverage": 0.37,
+    "transmission.surface_cleaning.routine.events_per_day": 1.0,
+    "transmission.surface_cleaning.routine.log10_reduction": 1.29
+   },
+   "pathogen": {
+    "airborne_emission_mode": "emesis_conditioned",
+    "dose_adjustment": 7.57,
+    "pathogen_id": "norwalk_gi",
+    "shedding_variance_log10": 1.0
+   },
+   "pending_effective_state": {},
+   "population": {
+    "class_counts": {
+     "crew_engineering": 187,
+     "crew_galley": 93,
+     "crew_general": 187,
+     "crew_medical": 93,
+     "passenger_elderly": 193,
+     "passenger_family": 193,
+     "passenger_general": 964
+    },
+    "crew": 560,
+    "num_agents": 1910,
+    "passenger": 1350
+   },
+   "reporting": {
+    "counter_confinement_enabled": true,
+    "escalation": {
+     "alert_sick_call_threshold": 3,
+     "confirm_attack_rate": 0.03,
+     "decision_latency": {
+      "alert_delay_hours": 0,
+      "confirmed_delay_hours": 0,
+      "lockdown_delay_hours": 0,
+      "suspected_delay_hours": 0
+     },
+     "detection_modes": {
+      "syndromic": {
+       "amber_sick_call_count": 2,
+       "red_sick_call_count": 5
+      }
+     },
+     "lockdown_attack_rate": 0.05,
+     "pcr_confirm_ct_threshold": 35.0,
+     "respiratory_overrides": {
+      "alert_confirmed_cases": 1,
+      "suspect_attack_rate": 0.01
+     },
+     "suspect_attack_rate": 0.02,
+     "syndromic_suspect_threshold": 3
+    },
+    "infection_counters": [
+     {
+      "counter_id": "crew_attack_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_attack_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "all_attack_rate",
+      "filter": {},
+      "label": "Overall Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_reported_case_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "crew_reported_case_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "all_reported_case_rate",
+      "filter": {},
+      "label": "Overall Reported Case Rate",
+      "metric": "reported_case_rate"
+     },
+     {
+      "counter_id": "crew_infected_count",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Infected",
+      "metric": "infected_count"
+     },
+     {
+      "counter_id": "passenger_infected_count",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Infected",
+      "metric": "infected_count"
+     }
+    ],
+    "syndromic": {
+     "background_noise_rate": 0.015,
+     "cadence": 1,
+     "crew_screening_interval_hours": null,
+     "description": "Symptom-based screening (fever, GI distress, etc.)",
+     "detection_delay_hours": 0.0,
+     "sick_call_probability": 0.7,
+     "sick_call_probability_per_day": 0.7
+    }
+   },
+   "source": {
+    "lot_layer_mode": "station_lots",
+    "preparation_survival_mode": "raw_rte_only",
+    "prevalence_scale": 1.0,
+    "q_source": [
+     0.00086,
+     0.0047
+    ],
+    "q_source_by_item_line": {
+     "fresh_produce": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0036,
+       0.036
+      ]
+     },
+     "salad_leaf": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0,
+       0.053
+      ]
+     },
+     "shellfish": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.039,
+       0.144
+      ]
+     }
+    },
+    "source_id": "generic_cruise_port"
+   },
+   "strategy": {
+    "diagnostic_cascade_enabled": false,
+    "fred_behavior": {
+     "clinic_wait_hours": 6,
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "defiant_escalation_hours": 24,
+     "escort_delay_hours": 1,
+     "healthy_noise_categories": [
+      {
+       "probability_per_day": 0.0042,
+       "reason": "seasickness",
+       "syndrome": "gastrointestinal"
+      },
+      {
+       "probability_per_day": 0.003,
+       "reason": "fatigue",
+       "syndrome": "systemic_febrile"
+      },
+      {
+       "probability_per_day": 0.002,
+       "reason": "minor_injury",
+       "syndrome": "wound_soft_tissue"
+      }
+     ],
+     "quarantine_compliance": 0.65,
+     "reluctant_delay_hours": 48,
+     "reluctant_fraction": 0.75,
+     "symptomatic_order_trigger": "presenting_sign"
+    },
+    "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": "RhythmLayer"
+   }
+  },
+  "run_spec": {
+   "actors": [],
+   "campaign_parameters": {
+    "agent_class_fractions": {
+     "crew_engineering": null,
+     "crew_galley": null,
+     "crew_general": null,
+     "crew_medical": null,
+     "passenger_elderly": null,
+     "passenger_family": null,
+     "passenger_general": null
+    },
+    "blackwater_plumbing": true,
+    "boarding_age_draw": "stationary_detectable",
+    "boarding_mechanism_rung": "reportable",
+    "boarding_pathogen": "norwalk_gi",
+    "boarding_rate_mode": "renewal",
+    "common_source": {
+     "diner_mode": "object",
+     "handler_mode": "object",
+     "lot_extent_mode": "emergent",
+     "lot_mint_model": "provisioned_source",
+     "lot_mode": "object",
+     "mode": "on",
+     "provisioned_source": {
+      "lot_layer_mode": "station_lots",
+      "source_id": "generic_cruise_port"
+     },
+     "titre_draw_mode": "two_mode"
+    },
+    "dose_adjustment": 7.57,
+    "engine_git_sha": "<named commit>",
+    "flush_aerosol_fraction": 0.0,
+    "flush_cabin_emission": true,
+    "history_retention": "compact",
+    "illness_duration_draw": "empirical_survival",
+    "lockdown_attack_rate": 0.05,
+    "never_symptomatic_fraction": 0.29,
+    "num_agents": 1910,
+    "num_epochs": 168,
+    "pathogen": "norovirus",
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "classic_cruise_1900",
+    "presymptomatic_share_of_presenting": 0.04,
+    "quarantine_compliance": 0.65,
+    "run_id": "fl_norovirus_classic_cruise_1900_dose7p57_rung-reportable_n1910_ep168_syndromic_comp65_s8105",
+    "sanitary_visit_mode": "none",
+    "seed": 8105,
+    "sick_call_probability_per_day": 0.7,
+    "surveillance": "syndromic_comp65",
+    "suspect_attack_rate": 0.02,
+    "symptomatic_stream": true,
+    "tier_id": "fl_exp_7d_rep_mixture",
+    "transport_engine": "native"
+   },
+   "catalog": {
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "classic_cruise_1900"
+   },
+   "config_overrides": {
+    "crew_duty_exclusion": {
+     "enabled": false
+    },
+    "diagnostic_cascade": {
+     "enabled": false
+    },
+    "escalation": {
+     "confirm_attack_rate": 0.03,
+     "lockdown_attack_rate": 0.05,
+     "suspect_attack_rate": 0.02
+    },
+    "fred_behavior": {
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "quarantine_compliance": 0.65
+    },
+    "hvac": {
+     "duty0_terminal_mode": "extract",
+     "passive_link_mode": "bidirectional",
+     "pathogen_pool_transport": "airflow",
+     "transport_engine": "native"
+    },
+    "initiation": {
+     "boarding": {
+      "enabled": true,
+      "norwalk_gi": {
+       "age_draw": "stationary_detectable",
+       "preboarding_assessment": {
+        "crew": {
+         "declaration_compliance": 1.0,
+         "denial_probability": 0.0,
+         "enabled": true,
+         "recall_halflife_days": null,
+         "reportable": true
+        },
+        "lookback_days": 3,
+        "passenger": {
+         "enabled": false
+        }
+       },
+       "rate_mode": "renewal",
+       "renewal": {
+        "case_incidence_per_1000_py": {
+         "crew": 39.0,
+         "passenger": 39.0
+        },
+        "detectable_duration_days": 28
+       },
+       "state_split": {
+        "never_symptomatic_fraction": 0.29,
+        "presymptomatic_share_of_presenting": 0.04
+       },
+       "symptomatic_stream": {
+        "enabled": true
+       }
+      }
+     }
+    },
+    "observation": {
+     "enabled": true,
+     "surface_swab_source": "surface_pool_density",
+     "wastewater_assay_mode": "holding_tank"
+    },
+    "service_surface_knockout": {
+     "enabled": false
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "count": 964,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_family",
+       "count": 193,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_elderly",
+       "count": 193,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "crew_general",
+       "count": 187,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_general"
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "count": 93,
+       "duty_zone": "Medical_Center",
+       "free_zone_preference": "Medical",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_medical"
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "count": 187,
+       "duty_zone": "Engine",
+       "free_zone_preference": "Engine",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_engineering"
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "count": 93,
+       "duty_zone": "Galley",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_galley"
+       }
+      }
+     ],
+     "num_agents": 1910
+    },
+    "transmission": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.25,
+       "corridor": 0.25,
+       "dining_table": 2.0,
+       "dining_venue": 2.0,
+       "leisure": 1.0,
+       "other": 0.0,
+       "work_other": 0.5,
+       "work_service": 2.9
+      }
+     },
+     "blackwater_plumbing": true,
+     "cabin_air_mode": "cabin_compartment",
+     "cabin_confined_fomite": {
+      "mode": "own_cabin"
+     },
+     "cabin_cooccupancy": {
+      "mode": "time_partitioned"
+     },
+     "caregiver": {
+      "budget_mode": "reallocate",
+      "mode": "on"
+     },
+     "common_source": {
+      "diner_mode": "object",
+      "handler_mode": "object",
+      "lot_extent_mode": "emergent",
+      "lot_mint_model": "provisioned_source",
+      "lot_mode": "object",
+      "mode": "on",
+      "provisioned_source": {
+       "lot_layer_mode": "station_lots",
+       "source_id": "generic_cruise_port"
+      },
+      "titre_draw_mode": "two_mode"
+     },
+     "contact_class_exponent": 0.0,
+     "contact_mode": "per_partner_contact",
+     "contamination_solver": "continuous",
+     "dining_party_contact_share": 1.0,
+     "droplet_emission_mode": "profile_conditioned",
+     "droplet_field_split": {
+      "far_field_share": 0.175,
+      "mode": "partition",
+      "settled_share": 0.0
+     },
+     "exposure_cap": {
+      "enabled": true,
+      "include_fixed_rings": false
+     },
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "hand_redeposit_mode": "shedders_only",
+     "hand_reservoir_mode": "hygiene_cycle",
+     "high_touch_area_scale": 1.0,
+     "intra_epoch_causal_order": "legacy",
+     "intra_epoch_substeps": 1,
+     "isolated_quarters_deposits": {
+      "mode": "deposits_only"
+     },
+     "near_field_air": {
+      "interzonal_airflow_m3_per_hour": 204.0,
+      "mode": "two_box",
+      "neighbour_table_ratio": 0.43
+     },
+     "room_air_removal": {
+      "default_ach_per_hour": 0.0,
+      "map_arm": "ambient_on",
+      "mode": "first_order"
+     },
+     "sanitary_visit_mode": "none",
+     "surface_cleaning": {
+      "enabled": true,
+      "outbreak_response": {
+       "by_zone_class": {
+        "cabin": {
+         "events_per_day": 1.0
+        }
+       },
+       "coverage": 0.58,
+       "events_per_day": 24.0,
+       "log10_reduction": 4.29
+      },
+      "routine": {
+       "coverage": 0.37,
+       "events_per_day": 1.0,
+       "log10_reduction": 1.29
+      }
+     }
+    },
+    "variant_surveillance": {
+     "enabled": false
+    }
+   },
+   "description": "fl_norovirus_classic_cruise_1900_dose7p57_rung-reportable_n1910_ep168_syndromic_comp65_s8105",
+   "incentives": {},
+   "legacy_yaml": "crusher_labs/config.yaml",
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "dose_adjustment": 7.57,
+     "illness_duration": {
+      "draw": "empirical_survival"
+     }
+    },
+    "remove": [
+     "sars_cov2_resp",
+     "influenza_a"
+    ]
+   },
+   "run": {
+    "history_retention": "compact",
+    "num_epochs": 168,
+    "random_seed": 8105,
+    "sentinel_line_list": "<run_dir>/sentinel_line_list.json",
+    "write_ground_truth": false
+   },
+   "schema_version": "1.0.0"
+  }
+ },
+ "expedition_cruise_450": {
+  "resolved": {
+   "introduction": {
+    "boarding": {
+     "enabled": true,
+     "norwalk_gi": {
+      "age_draw": "stationary_detectable",
+      "preboarding_assessment": {
+       "crew": {
+        "declaration_compliance": 1.0,
+        "denial_probability": 0.0,
+        "enabled": true,
+        "recall_halflife_days": null,
+        "reportable": true
+       },
+       "lookback_days": 3,
+       "passenger": {
+        "enabled": false
+       }
+      },
+      "rate_mode": "renewal",
+      "renewal": {
+       "case_incidence_per_1000_py": {
+        "crew": 39.0,
+        "passenger": 39.0
+       },
+       "detectable_duration_days": 28
+      },
+      "state_split": {
+       "never_symptomatic_fraction": 0.29,
+       "presymptomatic_share_of_presenting": 0.04
+      },
+      "symptomatic_stream": {
+       "enabled": true
+      }
+     }
+    }
+   },
+   "mechanism_state": {
+    "crew_duty_exclusion.enabled": false,
+    "hvac.duty0_terminal_mode": "extract",
+    "hvac.passive_link_mode": "bidirectional",
+    "hvac.pathogen_pool_transport": "airflow",
+    "observation.wastewater_assay_mode": "WastewaterHoldingTankAssay",
+    "service_surface_knockout.enabled": false,
+    "transmission.activity_contacts.enabled": "dict",
+    "transmission.activity_contacts.rates_per_hour.cabin": 0.25,
+    "transmission.activity_contacts.rates_per_hour.corridor": 0.25,
+    "transmission.activity_contacts.rates_per_hour.dining_table": 2.0,
+    "transmission.activity_contacts.rates_per_hour.dining_venue": 2.0,
+    "transmission.activity_contacts.rates_per_hour.leisure": 1.0,
+    "transmission.activity_contacts.rates_per_hour.other": 0.0,
+    "transmission.activity_contacts.rates_per_hour.work_other": 0.5,
+    "transmission.activity_contacts.rates_per_hour.work_service": 2.9,
+    "transmission.blackwater_plumbing": "BlackwaterHoldingTank",
+    "transmission.cabin_air_mode": "cabin_compartment",
+    "transmission.cabin_confined_fomite.mode": "own_cabin",
+    "transmission.cabin_cooccupancy.mode": "time_partitioned",
+    "transmission.caregiver.budget_mode": "reallocate",
+    "transmission.caregiver.mode": "on",
+    "transmission.common_source.diner_mode": "object",
+    "transmission.common_source.handler_mode": "object",
+    "transmission.common_source.lot_extent_mode": "emergent",
+    "transmission.common_source.lot_mint_model": "provisioned_source",
+    "transmission.common_source.lot_mode": "object",
+    "transmission.common_source.mode": "on",
+    "transmission.common_source.provisioned_source.lot_layer_mode": "station_lots",
+    "transmission.common_source.provisioned_source.source_id": "generic_cruise_port",
+    "transmission.common_source.titre_draw_mode": "two_mode",
+    "transmission.contact_class_exponent": 0.0,
+    "transmission.contact_mode": "per_partner_contact",
+    "transmission.contamination_solver": "continuous",
+    "transmission.dining_party_contact_share": 1.0,
+    "transmission.droplet_emission_mode": "profile_conditioned",
+    "transmission.droplet_field_split.far_field_share": 0.175,
+    "transmission.droplet_field_split.mode": "partition",
+    "transmission.droplet_field_split.settled_share": 0.0,
+    "transmission.exposure_cap.enabled": true,
+    "transmission.exposure_cap.include_fixed_rings": false,
+    "transmission.flush_aerosol_fraction": 0.0,
+    "transmission.flush_cabin_emission": true,
+    "transmission.hand_redeposit_mode": "shedders_only",
+    "transmission.hand_reservoir_mode": "hygiene_cycle",
+    "transmission.high_touch_area_scale": 1.0,
+    "transmission.intra_epoch_causal_order": "legacy",
+    "transmission.intra_epoch_substeps": 1,
+    "transmission.isolated_quarters_deposits.mode": "deposits_only",
+    "transmission.near_field_air.interzonal_airflow_m3_per_hour": 204.0,
+    "transmission.near_field_air.mode": "two_box",
+    "transmission.near_field_air.neighbour_table_ratio": 0.43,
+    "transmission.room_air_removal.default_ach_per_hour": 0.0,
+    "transmission.room_air_removal.map_arm": "ambient_on",
+    "transmission.room_air_removal.mode": "first_order",
+    "transmission.sanitary_visit_mode": "none",
+    "transmission.surface_cleaning.enabled": true,
+    "transmission.surface_cleaning.outbreak_response.by_zone_class.cabin.events_per_day": 1.0,
+    "transmission.surface_cleaning.outbreak_response.coverage": 0.58,
+    "transmission.surface_cleaning.outbreak_response.events_per_day": 24.0,
+    "transmission.surface_cleaning.outbreak_response.log10_reduction": 4.29,
+    "transmission.surface_cleaning.routine.coverage": 0.37,
+    "transmission.surface_cleaning.routine.events_per_day": 1.0,
+    "transmission.surface_cleaning.routine.log10_reduction": 1.29
+   },
+   "pathogen": {
+    "airborne_emission_mode": "emesis_conditioned",
+    "dose_adjustment": 7.57,
+    "pathogen_id": "norwalk_gi",
+    "shedding_variance_log10": 1.0
+   },
+   "pending_effective_state": {},
+   "population": {
+    "class_counts": {
+     "crew_engineering": 50,
+     "crew_galley": 25,
+     "crew_general": 50,
+     "crew_medical": 25,
+     "passenger_elderly": 43,
+     "passenger_family": 43,
+     "passenger_general": 214
+    },
+    "crew": 150,
+    "num_agents": 450,
+    "passenger": 300
+   },
+   "reporting": {
+    "counter_confinement_enabled": true,
+    "escalation": {
+     "alert_sick_call_threshold": 3,
+     "confirm_attack_rate": 0.03,
+     "decision_latency": {
+      "alert_delay_hours": 0,
+      "confirmed_delay_hours": 0,
+      "lockdown_delay_hours": 0,
+      "suspected_delay_hours": 0
+     },
+     "detection_modes": {
+      "syndromic": {
+       "amber_sick_call_count": 2,
+       "red_sick_call_count": 5
+      }
+     },
+     "lockdown_attack_rate": 0.05,
+     "pcr_confirm_ct_threshold": 35.0,
+     "respiratory_overrides": {
+      "alert_confirmed_cases": 1,
+      "suspect_attack_rate": 0.01
+     },
+     "suspect_attack_rate": 0.02,
+     "syndromic_suspect_threshold": 3
+    },
+    "infection_counters": [
+     {
+      "counter_id": "crew_attack_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_attack_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "all_attack_rate",
+      "filter": {},
+      "label": "Overall Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_reported_case_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "crew_reported_case_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "all_reported_case_rate",
+      "filter": {},
+      "label": "Overall Reported Case Rate",
+      "metric": "reported_case_rate"
+     },
+     {
+      "counter_id": "crew_infected_count",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Infected",
+      "metric": "infected_count"
+     },
+     {
+      "counter_id": "passenger_infected_count",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Infected",
+      "metric": "infected_count"
+     }
+    ],
+    "syndromic": {
+     "background_noise_rate": 0.015,
+     "cadence": 1,
+     "crew_screening_interval_hours": null,
+     "description": "Symptom-based screening (fever, GI distress, etc.)",
+     "detection_delay_hours": 0.0,
+     "sick_call_probability": 0.7,
+     "sick_call_probability_per_day": 0.7
+    }
+   },
+   "source": {
+    "lot_layer_mode": "station_lots",
+    "preparation_survival_mode": "raw_rte_only",
+    "prevalence_scale": 1.0,
+    "q_source": [
+     0.00086,
+     0.0047
+    ],
+    "q_source_by_item_line": {
+     "fresh_produce": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0036,
+       0.036
+      ]
+     },
+     "salad_leaf": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0,
+       0.053
+      ]
+     },
+     "shellfish": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.039,
+       0.144
+      ]
+     }
+    },
+    "source_id": "generic_cruise_port"
+   },
+   "strategy": {
+    "diagnostic_cascade_enabled": false,
+    "fred_behavior": {
+     "clinic_wait_hours": 6,
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "defiant_escalation_hours": 24,
+     "escort_delay_hours": 1,
+     "healthy_noise_categories": [
+      {
+       "probability_per_day": 0.0042,
+       "reason": "seasickness",
+       "syndrome": "gastrointestinal"
+      },
+      {
+       "probability_per_day": 0.003,
+       "reason": "fatigue",
+       "syndrome": "systemic_febrile"
+      },
+      {
+       "probability_per_day": 0.002,
+       "reason": "minor_injury",
+       "syndrome": "wound_soft_tissue"
+      }
+     ],
+     "quarantine_compliance": 0.65,
+     "reluctant_delay_hours": 48,
+     "reluctant_fraction": 0.75,
+     "symptomatic_order_trigger": "presenting_sign"
+    },
+    "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": "RhythmLayer"
+   }
+  },
+  "run_spec": {
+   "actors": [],
+   "campaign_parameters": {
+    "agent_class_fractions": {
+     "crew_engineering": null,
+     "crew_galley": null,
+     "crew_general": null,
+     "crew_medical": null,
+     "passenger_elderly": null,
+     "passenger_family": null,
+     "passenger_general": null
+    },
+    "blackwater_plumbing": true,
+    "boarding_age_draw": "stationary_detectable",
+    "boarding_mechanism_rung": "reportable",
+    "boarding_pathogen": "norwalk_gi",
+    "boarding_rate_mode": "renewal",
+    "common_source": {
+     "diner_mode": "object",
+     "handler_mode": "object",
+     "lot_extent_mode": "emergent",
+     "lot_mint_model": "provisioned_source",
+     "lot_mode": "object",
+     "mode": "on",
+     "provisioned_source": {
+      "lot_layer_mode": "station_lots",
+      "source_id": "generic_cruise_port"
+     },
+     "titre_draw_mode": "two_mode"
+    },
+    "dose_adjustment": 7.57,
+    "engine_git_sha": "<named commit>",
+    "flush_aerosol_fraction": 0.0,
+    "flush_cabin_emission": true,
+    "history_retention": "compact",
+    "illness_duration_draw": "empirical_survival",
+    "lockdown_attack_rate": 0.05,
+    "never_symptomatic_fraction": 0.29,
+    "num_agents": 450,
+    "num_epochs": 168,
+    "pathogen": "norovirus",
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "expedition_cruise_450",
+    "presymptomatic_share_of_presenting": 0.04,
+    "quarantine_compliance": 0.65,
+    "run_id": "fl_norovirus_expedition_cruise_450_dose7p57_rung-reportable_n450_ep168_syndromic_comp65_s8105",
+    "sanitary_visit_mode": "none",
+    "seed": 8105,
+    "sick_call_probability_per_day": 0.7,
+    "surveillance": "syndromic_comp65",
+    "suspect_attack_rate": 0.02,
+    "symptomatic_stream": true,
+    "tier_id": "fl_exp_7d_rep_mixture",
+    "transport_engine": "native"
+   },
+   "catalog": {
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "expedition_cruise_450"
+   },
+   "config_overrides": {
+    "crew_duty_exclusion": {
+     "enabled": false
+    },
+    "diagnostic_cascade": {
+     "enabled": false
+    },
+    "escalation": {
+     "confirm_attack_rate": 0.03,
+     "lockdown_attack_rate": 0.05,
+     "suspect_attack_rate": 0.02
+    },
+    "fred_behavior": {
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "quarantine_compliance": 0.65
+    },
+    "hvac": {
+     "duty0_terminal_mode": "extract",
+     "passive_link_mode": "bidirectional",
+     "pathogen_pool_transport": "airflow",
+     "transport_engine": "native"
+    },
+    "initiation": {
+     "boarding": {
+      "enabled": true,
+      "norwalk_gi": {
+       "age_draw": "stationary_detectable",
+       "preboarding_assessment": {
+        "crew": {
+         "declaration_compliance": 1.0,
+         "denial_probability": 0.0,
+         "enabled": true,
+         "recall_halflife_days": null,
+         "reportable": true
+        },
+        "lookback_days": 3,
+        "passenger": {
+         "enabled": false
+        }
+       },
+       "rate_mode": "renewal",
+       "renewal": {
+        "case_incidence_per_1000_py": {
+         "crew": 39.0,
+         "passenger": 39.0
+        },
+        "detectable_duration_days": 28
+       },
+       "state_split": {
+        "never_symptomatic_fraction": 0.29,
+        "presymptomatic_share_of_presenting": 0.04
+       },
+       "symptomatic_stream": {
+        "enabled": true
+       }
+      }
+     }
+    },
+    "observation": {
+     "enabled": true,
+     "surface_swab_source": "surface_pool_density",
+     "wastewater_assay_mode": "holding_tank"
+    },
+    "service_surface_knockout": {
+     "enabled": false
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "count": 214,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_family",
+       "count": 43,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_elderly",
+       "count": 43,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "crew_general",
+       "count": 50,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_general"
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "count": 25,
+       "duty_zone": "Medical_Center",
+       "free_zone_preference": "Medical",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_medical"
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "count": 50,
+       "duty_zone": "Engine",
+       "free_zone_preference": "Engine",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_engineering"
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "count": 25,
+       "duty_zone": "Galley",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_galley"
+       }
+      }
+     ],
+     "num_agents": 450
+    },
+    "transmission": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.25,
+       "corridor": 0.25,
+       "dining_table": 2.0,
+       "dining_venue": 2.0,
+       "leisure": 1.0,
+       "other": 0.0,
+       "work_other": 0.5,
+       "work_service": 2.9
+      }
+     },
+     "blackwater_plumbing": true,
+     "cabin_air_mode": "cabin_compartment",
+     "cabin_confined_fomite": {
+      "mode": "own_cabin"
+     },
+     "cabin_cooccupancy": {
+      "mode": "time_partitioned"
+     },
+     "caregiver": {
+      "budget_mode": "reallocate",
+      "mode": "on"
+     },
+     "common_source": {
+      "diner_mode": "object",
+      "handler_mode": "object",
+      "lot_extent_mode": "emergent",
+      "lot_mint_model": "provisioned_source",
+      "lot_mode": "object",
+      "mode": "on",
+      "provisioned_source": {
+       "lot_layer_mode": "station_lots",
+       "source_id": "generic_cruise_port"
+      },
+      "titre_draw_mode": "two_mode"
+     },
+     "contact_class_exponent": 0.0,
+     "contact_mode": "per_partner_contact",
+     "contamination_solver": "continuous",
+     "dining_party_contact_share": 1.0,
+     "droplet_emission_mode": "profile_conditioned",
+     "droplet_field_split": {
+      "far_field_share": 0.175,
+      "mode": "partition",
+      "settled_share": 0.0
+     },
+     "exposure_cap": {
+      "enabled": true,
+      "include_fixed_rings": false
+     },
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "hand_redeposit_mode": "shedders_only",
+     "hand_reservoir_mode": "hygiene_cycle",
+     "high_touch_area_scale": 1.0,
+     "intra_epoch_causal_order": "legacy",
+     "intra_epoch_substeps": 1,
+     "isolated_quarters_deposits": {
+      "mode": "deposits_only"
+     },
+     "near_field_air": {
+      "interzonal_airflow_m3_per_hour": 204.0,
+      "mode": "two_box",
+      "neighbour_table_ratio": 0.43
+     },
+     "room_air_removal": {
+      "default_ach_per_hour": 0.0,
+      "map_arm": "ambient_on",
+      "mode": "first_order"
+     },
+     "sanitary_visit_mode": "none",
+     "surface_cleaning": {
+      "enabled": true,
+      "outbreak_response": {
+       "by_zone_class": {
+        "cabin": {
+         "events_per_day": 1.0
+        }
+       },
+       "coverage": 0.58,
+       "events_per_day": 24.0,
+       "log10_reduction": 4.29
+      },
+      "routine": {
+       "coverage": 0.37,
+       "events_per_day": 1.0,
+       "log10_reduction": 1.29
+      }
+     }
+    },
+    "variant_surveillance": {
+     "enabled": false
+    }
+   },
+   "description": "fl_norovirus_expedition_cruise_450_dose7p57_rung-reportable_n450_ep168_syndromic_comp65_s8105",
+   "incentives": {},
+   "legacy_yaml": "crusher_labs/config.yaml",
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "dose_adjustment": 7.57,
+     "illness_duration": {
+      "draw": "empirical_survival"
+     }
+    },
+    "remove": [
+     "sars_cov2_resp",
+     "influenza_a"
+    ]
+   },
+   "run": {
+    "history_retention": "compact",
+    "num_epochs": 168,
+    "random_seed": 8105,
+    "sentinel_line_list": "<run_dir>/sentinel_line_list.json",
+    "write_ground_truth": false
+   },
+   "schema_version": "1.0.0"
+  }
+ },
+ "explorer_seas_06": {
+  "resolved": {
+   "introduction": {
+    "boarding": {
+     "enabled": true,
+     "norwalk_gi": {
+      "age_draw": "stationary_detectable",
+      "preboarding_assessment": {
+       "crew": {
+        "declaration_compliance": 1.0,
+        "denial_probability": 0.0,
+        "enabled": true,
+        "recall_halflife_days": null,
+        "reportable": true
+       },
+       "lookback_days": 3,
+       "passenger": {
+        "enabled": false
+       }
+      },
+      "rate_mode": "renewal",
+      "renewal": {
+       "case_incidence_per_1000_py": {
+        "crew": 39.0,
+        "passenger": 39.0
+       },
+       "detectable_duration_days": 28
+      },
+      "state_split": {
+       "never_symptomatic_fraction": 0.29,
+       "presymptomatic_share_of_presenting": 0.04
+      },
+      "symptomatic_stream": {
+       "enabled": true
+      }
+     }
+    }
+   },
+   "mechanism_state": {
+    "crew_duty_exclusion.enabled": false,
+    "hvac.duty0_terminal_mode": "extract",
+    "hvac.passive_link_mode": "bidirectional",
+    "hvac.pathogen_pool_transport": "airflow",
+    "observation.wastewater_assay_mode": "WastewaterHoldingTankAssay",
+    "service_surface_knockout.enabled": false,
+    "transmission.activity_contacts.enabled": "dict",
+    "transmission.activity_contacts.rates_per_hour.cabin": 0.25,
+    "transmission.activity_contacts.rates_per_hour.corridor": 0.25,
+    "transmission.activity_contacts.rates_per_hour.dining_table": 2.0,
+    "transmission.activity_contacts.rates_per_hour.dining_venue": 2.0,
+    "transmission.activity_contacts.rates_per_hour.leisure": 1.0,
+    "transmission.activity_contacts.rates_per_hour.other": 0.0,
+    "transmission.activity_contacts.rates_per_hour.work_other": 0.5,
+    "transmission.activity_contacts.rates_per_hour.work_service": 2.9,
+    "transmission.blackwater_plumbing": "BlackwaterHoldingTank",
+    "transmission.cabin_air_mode": "cabin_compartment",
+    "transmission.cabin_confined_fomite.mode": "own_cabin",
+    "transmission.cabin_cooccupancy.mode": "time_partitioned",
+    "transmission.caregiver.budget_mode": "reallocate",
+    "transmission.caregiver.mode": "on",
+    "transmission.common_source.diner_mode": "object",
+    "transmission.common_source.handler_mode": "object",
+    "transmission.common_source.lot_extent_mode": "emergent",
+    "transmission.common_source.lot_mint_model": "provisioned_source",
+    "transmission.common_source.lot_mode": "object",
+    "transmission.common_source.mode": "on",
+    "transmission.common_source.provisioned_source.lot_layer_mode": "station_lots",
+    "transmission.common_source.provisioned_source.source_id": "generic_cruise_port",
+    "transmission.common_source.titre_draw_mode": "two_mode",
+    "transmission.contact_class_exponent": 0.0,
+    "transmission.contact_mode": "per_partner_contact",
+    "transmission.contamination_solver": "continuous",
+    "transmission.dining_party_contact_share": 1.0,
+    "transmission.droplet_emission_mode": "profile_conditioned",
+    "transmission.droplet_field_split.far_field_share": 0.175,
+    "transmission.droplet_field_split.mode": "partition",
+    "transmission.droplet_field_split.settled_share": 0.0,
+    "transmission.exposure_cap.enabled": true,
+    "transmission.exposure_cap.include_fixed_rings": false,
+    "transmission.flush_aerosol_fraction": 0.0,
+    "transmission.flush_cabin_emission": true,
+    "transmission.hand_redeposit_mode": "shedders_only",
+    "transmission.hand_reservoir_mode": "hygiene_cycle",
+    "transmission.high_touch_area_scale": 1.0,
+    "transmission.intra_epoch_causal_order": "legacy",
+    "transmission.intra_epoch_substeps": 1,
+    "transmission.isolated_quarters_deposits.mode": "deposits_only",
+    "transmission.near_field_air.interzonal_airflow_m3_per_hour": 204.0,
+    "transmission.near_field_air.mode": "two_box",
+    "transmission.near_field_air.neighbour_table_ratio": 0.43,
+    "transmission.room_air_removal.default_ach_per_hour": 0.0,
+    "transmission.room_air_removal.map_arm": "ambient_on",
+    "transmission.room_air_removal.mode": "first_order",
+    "transmission.sanitary_visit_mode": "none",
+    "transmission.surface_cleaning.enabled": true,
+    "transmission.surface_cleaning.outbreak_response.by_zone_class.cabin.events_per_day": 1.0,
+    "transmission.surface_cleaning.outbreak_response.coverage": 0.58,
+    "transmission.surface_cleaning.outbreak_response.events_per_day": 24.0,
+    "transmission.surface_cleaning.outbreak_response.log10_reduction": 4.29,
+    "transmission.surface_cleaning.routine.coverage": 0.37,
+    "transmission.surface_cleaning.routine.events_per_day": 1.0,
+    "transmission.surface_cleaning.routine.log10_reduction": 1.29
+   },
+   "pathogen": {
+    "airborne_emission_mode": "emesis_conditioned",
+    "dose_adjustment": 7.57,
+    "pathogen_id": "norwalk_gi",
+    "shedding_variance_log10": 1.0
+   },
+   "pending_effective_state": {
+    "rhythm.layer_attached": "no SHIP-RHYTHM-02 catalog row for the platform (NORO-EXPOCAP-EXPLORER-01); decision open, contract section 2.8"
+   },
+   "population": {
+    "class_counts": {
+     "crew_engineering": 394,
+     "crew_galley": 197,
+     "crew_general": 395,
+     "crew_medical": 197,
+     "passenger_elderly": 463,
+     "passenger_family": 464,
+     "passenger_general": 2318
+    },
+    "crew": 1183,
+    "num_agents": 4428,
+    "passenger": 3245
+   },
+   "reporting": {
+    "counter_confinement_enabled": true,
+    "escalation": {
+     "alert_sick_call_threshold": 3,
+     "confirm_attack_rate": 0.03,
+     "decision_latency": {
+      "alert_delay_hours": 0,
+      "confirmed_delay_hours": 0,
+      "lockdown_delay_hours": 0,
+      "suspected_delay_hours": 0
+     },
+     "detection_modes": {
+      "syndromic": {
+       "amber_sick_call_count": 2,
+       "red_sick_call_count": 5
+      }
+     },
+     "lockdown_attack_rate": 0.05,
+     "pcr_confirm_ct_threshold": 35.0,
+     "respiratory_overrides": {
+      "alert_confirmed_cases": 1,
+      "suspect_attack_rate": 0.01
+     },
+     "suspect_attack_rate": 0.02,
+     "syndromic_suspect_threshold": 3
+    },
+    "infection_counters": [
+     {
+      "counter_id": "crew_attack_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_attack_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "all_attack_rate",
+      "filter": {},
+      "label": "Overall Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_reported_case_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "crew_reported_case_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "all_reported_case_rate",
+      "filter": {},
+      "label": "Overall Reported Case Rate",
+      "metric": "reported_case_rate"
+     },
+     {
+      "counter_id": "crew_infected_count",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Infected",
+      "metric": "infected_count"
+     },
+     {
+      "counter_id": "passenger_infected_count",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Infected",
+      "metric": "infected_count"
+     }
+    ],
+    "syndromic": {
+     "background_noise_rate": 0.015,
+     "cadence": 1,
+     "crew_screening_interval_hours": null,
+     "description": "Symptom-based screening (fever, GI distress, etc.)",
+     "detection_delay_hours": 0.0,
+     "sick_call_probability": 0.7,
+     "sick_call_probability_per_day": 0.7
+    }
+   },
+   "source": {
+    "lot_layer_mode": "station_lots",
+    "preparation_survival_mode": "raw_rte_only",
+    "prevalence_scale": 1.0,
+    "q_source": [
+     0.00086,
+     0.0047
+    ],
+    "q_source_by_item_line": {
+     "fresh_produce": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0036,
+       0.036
+      ]
+     },
+     "salad_leaf": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0,
+       0.053
+      ]
+     },
+     "shellfish": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.039,
+       0.144
+      ]
+     }
+    },
+    "source_id": "generic_cruise_port"
+   },
+   "strategy": {
+    "diagnostic_cascade_enabled": false,
+    "fred_behavior": {
+     "clinic_wait_hours": 6,
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "defiant_escalation_hours": 24,
+     "escort_delay_hours": 1,
+     "healthy_noise_categories": [
+      {
+       "probability_per_day": 0.0042,
+       "reason": "seasickness",
+       "syndrome": "gastrointestinal"
+      },
+      {
+       "probability_per_day": 0.003,
+       "reason": "fatigue",
+       "syndrome": "systemic_febrile"
+      },
+      {
+       "probability_per_day": 0.002,
+       "reason": "minor_injury",
+       "syndrome": "wound_soft_tissue"
+      }
+     ],
+     "quarantine_compliance": 0.65,
+     "reluctant_delay_hours": 48,
+     "reluctant_fraction": 0.75,
+     "symptomatic_order_trigger": "presenting_sign"
+    },
+    "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": null
+   }
+  },
+  "run_spec": {
+   "actors": [],
+   "campaign_parameters": {
+    "agent_class_fractions": {
+     "crew_engineering": null,
+     "crew_galley": null,
+     "crew_general": null,
+     "crew_medical": null,
+     "passenger_elderly": null,
+     "passenger_family": null,
+     "passenger_general": null
+    },
+    "blackwater_plumbing": true,
+    "boarding_age_draw": "stationary_detectable",
+    "boarding_mechanism_rung": "reportable",
+    "boarding_pathogen": "norwalk_gi",
+    "boarding_rate_mode": "renewal",
+    "common_source": {
+     "diner_mode": "object",
+     "handler_mode": "object",
+     "lot_extent_mode": "emergent",
+     "lot_mint_model": "provisioned_source",
+     "lot_mode": "object",
+     "mode": "on",
+     "provisioned_source": {
+      "lot_layer_mode": "station_lots",
+      "source_id": "generic_cruise_port"
+     },
+     "titre_draw_mode": "two_mode"
+    },
+    "dose_adjustment": 7.57,
+    "engine_git_sha": "<named commit>",
+    "flush_aerosol_fraction": 0.0,
+    "flush_cabin_emission": true,
+    "history_retention": "compact",
+    "illness_duration_draw": "empirical_survival",
+    "lockdown_attack_rate": 0.05,
+    "never_symptomatic_fraction": 0.29,
+    "num_agents": 4428,
+    "num_epochs": 192,
+    "pathogen": "norovirus",
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "explorer_seas_06",
+    "presymptomatic_share_of_presenting": 0.04,
+    "quarantine_compliance": 0.65,
+    "run_id": "fl_norovirus_explorer_seas_06_dose7p57_rung-reportable_n4428_ep192_syndromic_comp65_s8105",
+    "sanitary_visit_mode": "none",
+    "seed": 8105,
+    "sick_call_probability_per_day": 0.7,
+    "surveillance": "syndromic_comp65",
+    "suspect_attack_rate": 0.02,
+    "symptomatic_stream": true,
+    "tier_id": "fl_exp_7d_rep_mixture",
+    "transport_engine": "native"
+   },
+   "catalog": {
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "explorer_seas_06"
+   },
+   "config_overrides": {
+    "crew_duty_exclusion": {
+     "enabled": false
+    },
+    "diagnostic_cascade": {
+     "enabled": false
+    },
+    "escalation": {
+     "confirm_attack_rate": 0.03,
+     "lockdown_attack_rate": 0.05,
+     "suspect_attack_rate": 0.02
+    },
+    "fred_behavior": {
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "quarantine_compliance": 0.65
+    },
+    "hvac": {
+     "duty0_terminal_mode": "extract",
+     "passive_link_mode": "bidirectional",
+     "pathogen_pool_transport": "airflow",
+     "transport_engine": "native"
+    },
+    "initiation": {
+     "boarding": {
+      "enabled": true,
+      "norwalk_gi": {
+       "age_draw": "stationary_detectable",
+       "preboarding_assessment": {
+        "crew": {
+         "declaration_compliance": 1.0,
+         "denial_probability": 0.0,
+         "enabled": true,
+         "recall_halflife_days": null,
+         "reportable": true
+        },
+        "lookback_days": 3,
+        "passenger": {
+         "enabled": false
+        }
+       },
+       "rate_mode": "renewal",
+       "renewal": {
+        "case_incidence_per_1000_py": {
+         "crew": 39.0,
+         "passenger": 39.0
+        },
+        "detectable_duration_days": 28
+       },
+       "state_split": {
+        "never_symptomatic_fraction": 0.29,
+        "presymptomatic_share_of_presenting": 0.04
+       },
+       "symptomatic_stream": {
+        "enabled": true
+       }
+      }
+     }
+    },
+    "observation": {
+     "enabled": true,
+     "surface_swab_source": "surface_pool_density",
+     "wastewater_assay_mode": "holding_tank"
+    },
+    "service_surface_knockout": {
+     "enabled": false
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "count": 2318,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_family",
+       "count": 464,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_elderly",
+       "count": 463,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "crew_general",
+       "count": 395,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_general"
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "count": 197,
+       "duty_zone": "Medical_Center",
+       "free_zone_preference": "Medical",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_medical"
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "count": 394,
+       "duty_zone": "Engine",
+       "free_zone_preference": "Engine",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_engineering"
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "count": 197,
+       "duty_zone": "Galley",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_galley"
+       }
+      }
+     ],
+     "num_agents": 4428
+    },
+    "transmission": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.25,
+       "corridor": 0.25,
+       "dining_table": 2.0,
+       "dining_venue": 2.0,
+       "leisure": 1.0,
+       "other": 0.0,
+       "work_other": 0.5,
+       "work_service": 2.9
+      }
+     },
+     "blackwater_plumbing": true,
+     "cabin_air_mode": "cabin_compartment",
+     "cabin_confined_fomite": {
+      "mode": "own_cabin"
+     },
+     "cabin_cooccupancy": {
+      "mode": "time_partitioned"
+     },
+     "caregiver": {
+      "budget_mode": "reallocate",
+      "mode": "on"
+     },
+     "common_source": {
+      "diner_mode": "object",
+      "handler_mode": "object",
+      "lot_extent_mode": "emergent",
+      "lot_mint_model": "provisioned_source",
+      "lot_mode": "object",
+      "mode": "on",
+      "provisioned_source": {
+       "lot_layer_mode": "station_lots",
+       "source_id": "generic_cruise_port"
+      },
+      "titre_draw_mode": "two_mode"
+     },
+     "contact_class_exponent": 0.0,
+     "contact_mode": "per_partner_contact",
+     "contamination_solver": "continuous",
+     "dining_party_contact_share": 1.0,
+     "droplet_emission_mode": "profile_conditioned",
+     "droplet_field_split": {
+      "far_field_share": 0.175,
+      "mode": "partition",
+      "settled_share": 0.0
+     },
+     "exposure_cap": {
+      "enabled": true,
+      "include_fixed_rings": false
+     },
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "hand_redeposit_mode": "shedders_only",
+     "hand_reservoir_mode": "hygiene_cycle",
+     "high_touch_area_scale": 1.0,
+     "intra_epoch_causal_order": "legacy",
+     "intra_epoch_substeps": 1,
+     "isolated_quarters_deposits": {
+      "mode": "deposits_only"
+     },
+     "near_field_air": {
+      "interzonal_airflow_m3_per_hour": 204.0,
+      "mode": "two_box",
+      "neighbour_table_ratio": 0.43
+     },
+     "room_air_removal": {
+      "default_ach_per_hour": 0.0,
+      "map_arm": "ambient_on",
+      "mode": "first_order"
+     },
+     "sanitary_visit_mode": "none",
+     "surface_cleaning": {
+      "enabled": true,
+      "outbreak_response": {
+       "by_zone_class": {
+        "cabin": {
+         "events_per_day": 1.0
+        }
+       },
+       "coverage": 0.58,
+       "events_per_day": 24.0,
+       "log10_reduction": 4.29
+      },
+      "routine": {
+       "coverage": 0.37,
+       "events_per_day": 1.0,
+       "log10_reduction": 1.29
+      }
+     }
+    },
+    "variant_surveillance": {
+     "enabled": false
+    }
+   },
+   "description": "fl_norovirus_explorer_seas_06_dose7p57_rung-reportable_n4428_ep192_syndromic_comp65_s8105",
+   "incentives": {},
+   "legacy_yaml": "crusher_labs/config.yaml",
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "dose_adjustment": 7.57,
+     "illness_duration": {
+      "draw": "empirical_survival"
+     }
+    },
+    "remove": [
+     "sars_cov2_resp",
+     "influenza_a"
+    ]
+   },
+   "run": {
+    "history_retention": "compact",
+    "num_epochs": 192,
+    "random_seed": 8105,
+    "sentinel_line_list": "<run_dir>/sentinel_line_list.json",
+    "write_ground_truth": false
+   },
+   "schema_version": "1.0.0"
+  }
+ },
+ "mega_cruise_5000": {
+  "resolved": {
+   "introduction": {
+    "boarding": {
+     "enabled": true,
+     "norwalk_gi": {
+      "age_draw": "stationary_detectable",
+      "preboarding_assessment": {
+       "crew": {
+        "declaration_compliance": 1.0,
+        "denial_probability": 0.0,
+        "enabled": true,
+        "recall_halflife_days": null,
+        "reportable": true
+       },
+       "lookback_days": 3,
+       "passenger": {
+        "enabled": false
+       }
+      },
+      "rate_mode": "renewal",
+      "renewal": {
+       "case_incidence_per_1000_py": {
+        "crew": 39.0,
+        "passenger": 39.0
+       },
+       "detectable_duration_days": 28
+      },
+      "state_split": {
+       "never_symptomatic_fraction": 0.29,
+       "presymptomatic_share_of_presenting": 0.04
+      },
+      "symptomatic_stream": {
+       "enabled": true
+      }
+     }
+    }
+   },
+   "mechanism_state": {
+    "crew_duty_exclusion.enabled": false,
+    "hvac.duty0_terminal_mode": "extract",
+    "hvac.passive_link_mode": "bidirectional",
+    "hvac.pathogen_pool_transport": "airflow",
+    "observation.wastewater_assay_mode": "WastewaterHoldingTankAssay",
+    "service_surface_knockout.enabled": false,
+    "transmission.activity_contacts.enabled": "dict",
+    "transmission.activity_contacts.rates_per_hour.cabin": 0.25,
+    "transmission.activity_contacts.rates_per_hour.corridor": 0.25,
+    "transmission.activity_contacts.rates_per_hour.dining_table": 2.0,
+    "transmission.activity_contacts.rates_per_hour.dining_venue": 2.0,
+    "transmission.activity_contacts.rates_per_hour.leisure": 1.0,
+    "transmission.activity_contacts.rates_per_hour.other": 0.0,
+    "transmission.activity_contacts.rates_per_hour.work_other": 0.5,
+    "transmission.activity_contacts.rates_per_hour.work_service": 2.9,
+    "transmission.blackwater_plumbing": "BlackwaterHoldingTank",
+    "transmission.cabin_air_mode": "cabin_compartment",
+    "transmission.cabin_confined_fomite.mode": "own_cabin",
+    "transmission.cabin_cooccupancy.mode": "time_partitioned",
+    "transmission.caregiver.budget_mode": "reallocate",
+    "transmission.caregiver.mode": "on",
+    "transmission.common_source.diner_mode": "object",
+    "transmission.common_source.handler_mode": "object",
+    "transmission.common_source.lot_extent_mode": "emergent",
+    "transmission.common_source.lot_mint_model": "provisioned_source",
+    "transmission.common_source.lot_mode": "object",
+    "transmission.common_source.mode": "on",
+    "transmission.common_source.provisioned_source.lot_layer_mode": "station_lots",
+    "transmission.common_source.provisioned_source.source_id": "generic_cruise_port",
+    "transmission.common_source.titre_draw_mode": "two_mode",
+    "transmission.contact_class_exponent": 0.0,
+    "transmission.contact_mode": "per_partner_contact",
+    "transmission.contamination_solver": "continuous",
+    "transmission.dining_party_contact_share": 1.0,
+    "transmission.droplet_emission_mode": "profile_conditioned",
+    "transmission.droplet_field_split.far_field_share": 0.175,
+    "transmission.droplet_field_split.mode": "partition",
+    "transmission.droplet_field_split.settled_share": 0.0,
+    "transmission.exposure_cap.enabled": true,
+    "transmission.exposure_cap.include_fixed_rings": false,
+    "transmission.flush_aerosol_fraction": 0.0,
+    "transmission.flush_cabin_emission": true,
+    "transmission.hand_redeposit_mode": "shedders_only",
+    "transmission.hand_reservoir_mode": "hygiene_cycle",
+    "transmission.high_touch_area_scale": 1.0,
+    "transmission.intra_epoch_causal_order": "legacy",
+    "transmission.intra_epoch_substeps": 1,
+    "transmission.isolated_quarters_deposits.mode": "deposits_only",
+    "transmission.near_field_air.interzonal_airflow_m3_per_hour": 204.0,
+    "transmission.near_field_air.mode": "two_box",
+    "transmission.near_field_air.neighbour_table_ratio": 0.43,
+    "transmission.room_air_removal.default_ach_per_hour": 0.0,
+    "transmission.room_air_removal.map_arm": "ambient_on",
+    "transmission.room_air_removal.mode": "first_order",
+    "transmission.sanitary_visit_mode": "none",
+    "transmission.surface_cleaning.enabled": true,
+    "transmission.surface_cleaning.outbreak_response.by_zone_class.cabin.events_per_day": 1.0,
+    "transmission.surface_cleaning.outbreak_response.coverage": 0.58,
+    "transmission.surface_cleaning.outbreak_response.events_per_day": 24.0,
+    "transmission.surface_cleaning.outbreak_response.log10_reduction": 4.29,
+    "transmission.surface_cleaning.routine.coverage": 0.37,
+    "transmission.surface_cleaning.routine.events_per_day": 1.0,
+    "transmission.surface_cleaning.routine.log10_reduction": 1.29
+   },
+   "pathogen": {
+    "airborne_emission_mode": "emesis_conditioned",
+    "dose_adjustment": 7.57,
+    "pathogen_id": "norwalk_gi",
+    "shedding_variance_log10": 1.0
+   },
+   "pending_effective_state": {},
+   "population": {
+    "class_counts": {
+     "crew_engineering": 667,
+     "crew_galley": 333,
+     "crew_general": 667,
+     "crew_medical": 333,
+     "passenger_elderly": 714,
+     "passenger_family": 714,
+     "passenger_general": 3572
+    },
+    "crew": 2000,
+    "num_agents": 7000,
+    "passenger": 5000
+   },
+   "reporting": {
+    "counter_confinement_enabled": true,
+    "escalation": {
+     "alert_sick_call_threshold": 3,
+     "confirm_attack_rate": 0.03,
+     "decision_latency": {
+      "alert_delay_hours": 0,
+      "confirmed_delay_hours": 0,
+      "lockdown_delay_hours": 0,
+      "suspected_delay_hours": 0
+     },
+     "detection_modes": {
+      "syndromic": {
+       "amber_sick_call_count": 2,
+       "red_sick_call_count": 5
+      }
+     },
+     "lockdown_attack_rate": 0.05,
+     "pcr_confirm_ct_threshold": 35.0,
+     "respiratory_overrides": {
+      "alert_confirmed_cases": 1,
+      "suspect_attack_rate": 0.01
+     },
+     "suspect_attack_rate": 0.02,
+     "syndromic_suspect_threshold": 3
+    },
+    "infection_counters": [
+     {
+      "counter_id": "crew_attack_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_attack_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "all_attack_rate",
+      "filter": {},
+      "label": "Overall Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_reported_case_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "crew_reported_case_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "all_reported_case_rate",
+      "filter": {},
+      "label": "Overall Reported Case Rate",
+      "metric": "reported_case_rate"
+     },
+     {
+      "counter_id": "crew_infected_count",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Infected",
+      "metric": "infected_count"
+     },
+     {
+      "counter_id": "passenger_infected_count",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Infected",
+      "metric": "infected_count"
+     }
+    ],
+    "syndromic": {
+     "background_noise_rate": 0.015,
+     "cadence": 1,
+     "crew_screening_interval_hours": null,
+     "description": "Symptom-based screening (fever, GI distress, etc.)",
+     "detection_delay_hours": 0.0,
+     "sick_call_probability": 0.7,
+     "sick_call_probability_per_day": 0.7
+    }
+   },
+   "source": {
+    "lot_layer_mode": "station_lots",
+    "preparation_survival_mode": "raw_rte_only",
+    "prevalence_scale": 1.0,
+    "q_source": [
+     0.00086,
+     0.0047
+    ],
+    "q_source_by_item_line": {
+     "fresh_produce": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0036,
+       0.036
+      ]
+     },
+     "salad_leaf": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0,
+       0.053
+      ]
+     },
+     "shellfish": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.039,
+       0.144
+      ]
+     }
+    },
+    "source_id": "generic_cruise_port"
+   },
+   "strategy": {
+    "diagnostic_cascade_enabled": false,
+    "fred_behavior": {
+     "clinic_wait_hours": 6,
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "defiant_escalation_hours": 24,
+     "escort_delay_hours": 1,
+     "healthy_noise_categories": [
+      {
+       "probability_per_day": 0.0042,
+       "reason": "seasickness",
+       "syndrome": "gastrointestinal"
+      },
+      {
+       "probability_per_day": 0.003,
+       "reason": "fatigue",
+       "syndrome": "systemic_febrile"
+      },
+      {
+       "probability_per_day": 0.002,
+       "reason": "minor_injury",
+       "syndrome": "wound_soft_tissue"
+      }
+     ],
+     "quarantine_compliance": 0.65,
+     "reluctant_delay_hours": 48,
+     "reluctant_fraction": 0.75,
+     "symptomatic_order_trigger": "presenting_sign"
+    },
+    "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": "RhythmLayer"
+   }
+  },
+  "run_spec": {
+   "actors": [],
+   "campaign_parameters": {
+    "agent_class_fractions": {
+     "crew_engineering": null,
+     "crew_galley": null,
+     "crew_general": null,
+     "crew_medical": null,
+     "passenger_elderly": null,
+     "passenger_family": null,
+     "passenger_general": null
+    },
+    "blackwater_plumbing": true,
+    "boarding_age_draw": "stationary_detectable",
+    "boarding_mechanism_rung": "reportable",
+    "boarding_pathogen": "norwalk_gi",
+    "boarding_rate_mode": "renewal",
+    "common_source": {
+     "diner_mode": "object",
+     "handler_mode": "object",
+     "lot_extent_mode": "emergent",
+     "lot_mint_model": "provisioned_source",
+     "lot_mode": "object",
+     "mode": "on",
+     "provisioned_source": {
+      "lot_layer_mode": "station_lots",
+      "source_id": "generic_cruise_port"
+     },
+     "titre_draw_mode": "two_mode"
+    },
+    "dose_adjustment": 7.57,
+    "engine_git_sha": "<named commit>",
+    "flush_aerosol_fraction": 0.0,
+    "flush_cabin_emission": true,
+    "history_retention": "compact",
+    "illness_duration_draw": "empirical_survival",
+    "lockdown_attack_rate": 0.05,
+    "never_symptomatic_fraction": 0.29,
+    "num_agents": 7000,
+    "num_epochs": 168,
+    "pathogen": "norovirus",
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "mega_cruise_5000",
+    "presymptomatic_share_of_presenting": 0.04,
+    "quarantine_compliance": 0.65,
+    "run_id": "fl_norovirus_mega_cruise_5000_dose7p57_rung-reportable_n7000_ep168_syndromic_comp65_s8105",
+    "sanitary_visit_mode": "none",
+    "seed": 8105,
+    "sick_call_probability_per_day": 0.7,
+    "surveillance": "syndromic_comp65",
+    "suspect_attack_rate": 0.02,
+    "symptomatic_stream": true,
+    "tier_id": "fl_exp_7d_rep_mixture",
+    "transport_engine": "native"
+   },
+   "catalog": {
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "mega_cruise_5000"
+   },
+   "config_overrides": {
+    "crew_duty_exclusion": {
+     "enabled": false
+    },
+    "diagnostic_cascade": {
+     "enabled": false
+    },
+    "escalation": {
+     "confirm_attack_rate": 0.03,
+     "lockdown_attack_rate": 0.05,
+     "suspect_attack_rate": 0.02
+    },
+    "fred_behavior": {
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "quarantine_compliance": 0.65
+    },
+    "hvac": {
+     "duty0_terminal_mode": "extract",
+     "passive_link_mode": "bidirectional",
+     "pathogen_pool_transport": "airflow",
+     "transport_engine": "native"
+    },
+    "initiation": {
+     "boarding": {
+      "enabled": true,
+      "norwalk_gi": {
+       "age_draw": "stationary_detectable",
+       "preboarding_assessment": {
+        "crew": {
+         "declaration_compliance": 1.0,
+         "denial_probability": 0.0,
+         "enabled": true,
+         "recall_halflife_days": null,
+         "reportable": true
+        },
+        "lookback_days": 3,
+        "passenger": {
+         "enabled": false
+        }
+       },
+       "rate_mode": "renewal",
+       "renewal": {
+        "case_incidence_per_1000_py": {
+         "crew": 39.0,
+         "passenger": 39.0
+        },
+        "detectable_duration_days": 28
+       },
+       "state_split": {
+        "never_symptomatic_fraction": 0.29,
+        "presymptomatic_share_of_presenting": 0.04
+       },
+       "symptomatic_stream": {
+        "enabled": true
+       }
+      }
+     }
+    },
+    "observation": {
+     "enabled": true,
+     "surface_swab_source": "surface_pool_density",
+     "wastewater_assay_mode": "holding_tank"
+    },
+    "service_surface_knockout": {
+     "enabled": false
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "count": 3572,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_family",
+       "count": 714,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_elderly",
+       "count": 714,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "crew_general",
+       "count": 667,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_general"
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "count": 333,
+       "duty_zone": "Medical_Center",
+       "free_zone_preference": "Medical",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_medical"
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "count": 667,
+       "duty_zone": "Engine",
+       "free_zone_preference": "Engine",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_engineering"
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "count": 333,
+       "duty_zone": "Galley",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_galley"
+       }
+      }
+     ],
+     "num_agents": 7000
+    },
+    "transmission": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.25,
+       "corridor": 0.25,
+       "dining_table": 2.0,
+       "dining_venue": 2.0,
+       "leisure": 1.0,
+       "other": 0.0,
+       "work_other": 0.5,
+       "work_service": 2.9
+      }
+     },
+     "blackwater_plumbing": true,
+     "cabin_air_mode": "cabin_compartment",
+     "cabin_confined_fomite": {
+      "mode": "own_cabin"
+     },
+     "cabin_cooccupancy": {
+      "mode": "time_partitioned"
+     },
+     "caregiver": {
+      "budget_mode": "reallocate",
+      "mode": "on"
+     },
+     "common_source": {
+      "diner_mode": "object",
+      "handler_mode": "object",
+      "lot_extent_mode": "emergent",
+      "lot_mint_model": "provisioned_source",
+      "lot_mode": "object",
+      "mode": "on",
+      "provisioned_source": {
+       "lot_layer_mode": "station_lots",
+       "source_id": "generic_cruise_port"
+      },
+      "titre_draw_mode": "two_mode"
+     },
+     "contact_class_exponent": 0.0,
+     "contact_mode": "per_partner_contact",
+     "contamination_solver": "continuous",
+     "dining_party_contact_share": 1.0,
+     "droplet_emission_mode": "profile_conditioned",
+     "droplet_field_split": {
+      "far_field_share": 0.175,
+      "mode": "partition",
+      "settled_share": 0.0
+     },
+     "exposure_cap": {
+      "enabled": true,
+      "include_fixed_rings": false
+     },
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "hand_redeposit_mode": "shedders_only",
+     "hand_reservoir_mode": "hygiene_cycle",
+     "high_touch_area_scale": 1.0,
+     "intra_epoch_causal_order": "legacy",
+     "intra_epoch_substeps": 1,
+     "isolated_quarters_deposits": {
+      "mode": "deposits_only"
+     },
+     "near_field_air": {
+      "interzonal_airflow_m3_per_hour": 204.0,
+      "mode": "two_box",
+      "neighbour_table_ratio": 0.43
+     },
+     "room_air_removal": {
+      "default_ach_per_hour": 0.0,
+      "map_arm": "ambient_on",
+      "mode": "first_order"
+     },
+     "sanitary_visit_mode": "none",
+     "surface_cleaning": {
+      "enabled": true,
+      "outbreak_response": {
+       "by_zone_class": {
+        "cabin": {
+         "events_per_day": 1.0
+        }
+       },
+       "coverage": 0.58,
+       "events_per_day": 24.0,
+       "log10_reduction": 4.29
+      },
+      "routine": {
+       "coverage": 0.37,
+       "events_per_day": 1.0,
+       "log10_reduction": 1.29
+      }
+     }
+    },
+    "variant_surveillance": {
+     "enabled": false
+    }
+   },
+   "description": "fl_norovirus_mega_cruise_5000_dose7p57_rung-reportable_n7000_ep168_syndromic_comp65_s8105",
+   "incentives": {},
+   "legacy_yaml": "crusher_labs/config.yaml",
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "dose_adjustment": 7.57,
+     "illness_duration": {
+      "draw": "empirical_survival"
+     }
+    },
+    "remove": [
+     "sars_cov2_resp",
+     "influenza_a"
+    ]
+   },
+   "run": {
+    "history_retention": "compact",
+    "num_epochs": 168,
+    "random_seed": 8105,
+    "sentinel_line_list": "<run_dir>/sentinel_line_list.json",
+    "write_ground_truth": false
+   },
+   "schema_version": "1.0.0"
+  }
+ },
+ "spirit_cruise_3000": {
+  "resolved": {
+   "introduction": {
+    "boarding": {
+     "enabled": true,
+     "norwalk_gi": {
+      "age_draw": "stationary_detectable",
+      "preboarding_assessment": {
+       "crew": {
+        "declaration_compliance": 1.0,
+        "denial_probability": 0.0,
+        "enabled": true,
+        "recall_halflife_days": null,
+        "reportable": true
+       },
+       "lookback_days": 3,
+       "passenger": {
+        "enabled": false
+       }
+      },
+      "rate_mode": "renewal",
+      "renewal": {
+       "case_incidence_per_1000_py": {
+        "crew": 39.0,
+        "passenger": 39.0
+       },
+       "detectable_duration_days": 28
+      },
+      "state_split": {
+       "never_symptomatic_fraction": 0.29,
+       "presymptomatic_share_of_presenting": 0.04
+      },
+      "symptomatic_stream": {
+       "enabled": true
+      }
+     }
+    }
+   },
+   "mechanism_state": {
+    "crew_duty_exclusion.enabled": false,
+    "hvac.duty0_terminal_mode": "extract",
+    "hvac.passive_link_mode": "bidirectional",
+    "hvac.pathogen_pool_transport": "airflow",
+    "observation.wastewater_assay_mode": "WastewaterHoldingTankAssay",
+    "service_surface_knockout.enabled": false,
+    "transmission.activity_contacts.enabled": "dict",
+    "transmission.activity_contacts.rates_per_hour.cabin": 0.25,
+    "transmission.activity_contacts.rates_per_hour.corridor": 0.25,
+    "transmission.activity_contacts.rates_per_hour.dining_table": 2.0,
+    "transmission.activity_contacts.rates_per_hour.dining_venue": 2.0,
+    "transmission.activity_contacts.rates_per_hour.leisure": 1.0,
+    "transmission.activity_contacts.rates_per_hour.other": 0.0,
+    "transmission.activity_contacts.rates_per_hour.work_other": 0.5,
+    "transmission.activity_contacts.rates_per_hour.work_service": 2.9,
+    "transmission.blackwater_plumbing": "BlackwaterHoldingTank",
+    "transmission.cabin_air_mode": "cabin_compartment",
+    "transmission.cabin_confined_fomite.mode": "own_cabin",
+    "transmission.cabin_cooccupancy.mode": "time_partitioned",
+    "transmission.caregiver.budget_mode": "reallocate",
+    "transmission.caregiver.mode": "on",
+    "transmission.common_source.diner_mode": "object",
+    "transmission.common_source.handler_mode": "object",
+    "transmission.common_source.lot_extent_mode": "emergent",
+    "transmission.common_source.lot_mint_model": "provisioned_source",
+    "transmission.common_source.lot_mode": "object",
+    "transmission.common_source.mode": "on",
+    "transmission.common_source.provisioned_source.lot_layer_mode": "station_lots",
+    "transmission.common_source.provisioned_source.source_id": "generic_cruise_port",
+    "transmission.common_source.titre_draw_mode": "two_mode",
+    "transmission.contact_class_exponent": 0.0,
+    "transmission.contact_mode": "per_partner_contact",
+    "transmission.contamination_solver": "continuous",
+    "transmission.dining_party_contact_share": 1.0,
+    "transmission.droplet_emission_mode": "profile_conditioned",
+    "transmission.droplet_field_split.far_field_share": 0.175,
+    "transmission.droplet_field_split.mode": "partition",
+    "transmission.droplet_field_split.settled_share": 0.0,
+    "transmission.exposure_cap.enabled": true,
+    "transmission.exposure_cap.include_fixed_rings": false,
+    "transmission.flush_aerosol_fraction": 0.0,
+    "transmission.flush_cabin_emission": true,
+    "transmission.hand_redeposit_mode": "shedders_only",
+    "transmission.hand_reservoir_mode": "hygiene_cycle",
+    "transmission.high_touch_area_scale": 1.0,
+    "transmission.intra_epoch_causal_order": "legacy",
+    "transmission.intra_epoch_substeps": 1,
+    "transmission.isolated_quarters_deposits.mode": "deposits_only",
+    "transmission.near_field_air.interzonal_airflow_m3_per_hour": 204.0,
+    "transmission.near_field_air.mode": "two_box",
+    "transmission.near_field_air.neighbour_table_ratio": 0.43,
+    "transmission.room_air_removal.default_ach_per_hour": 0.0,
+    "transmission.room_air_removal.map_arm": "ambient_on",
+    "transmission.room_air_removal.mode": "first_order",
+    "transmission.sanitary_visit_mode": "none",
+    "transmission.surface_cleaning.enabled": true,
+    "transmission.surface_cleaning.outbreak_response.by_zone_class.cabin.events_per_day": 1.0,
+    "transmission.surface_cleaning.outbreak_response.coverage": 0.58,
+    "transmission.surface_cleaning.outbreak_response.events_per_day": 24.0,
+    "transmission.surface_cleaning.outbreak_response.log10_reduction": 4.29,
+    "transmission.surface_cleaning.routine.coverage": 0.37,
+    "transmission.surface_cleaning.routine.events_per_day": 1.0,
+    "transmission.surface_cleaning.routine.log10_reduction": 1.29
+   },
+   "pathogen": {
+    "airborne_emission_mode": "emesis_conditioned",
+    "dose_adjustment": 7.57,
+    "pathogen_id": "norwalk_gi",
+    "shedding_variance_log10": 1.0
+   },
+   "pending_effective_state": {},
+   "population": {
+    "class_counts": {
+     "crew_engineering": 300,
+     "crew_galley": 150,
+     "crew_general": 300,
+     "crew_medical": 150,
+     "passenger_elderly": 300,
+     "passenger_family": 300,
+     "passenger_general": 1500
+    },
+    "crew": 900,
+    "num_agents": 3000,
+    "passenger": 2100
+   },
+   "reporting": {
+    "counter_confinement_enabled": true,
+    "escalation": {
+     "alert_sick_call_threshold": 3,
+     "confirm_attack_rate": 0.03,
+     "decision_latency": {
+      "alert_delay_hours": 0,
+      "confirmed_delay_hours": 0,
+      "lockdown_delay_hours": 0,
+      "suspected_delay_hours": 0
+     },
+     "detection_modes": {
+      "syndromic": {
+       "amber_sick_call_count": 2,
+       "red_sick_call_count": 5
+      }
+     },
+     "lockdown_attack_rate": 0.05,
+     "pcr_confirm_ct_threshold": 35.0,
+     "respiratory_overrides": {
+      "alert_confirmed_cases": 1,
+      "suspect_attack_rate": 0.01
+     },
+     "suspect_attack_rate": 0.02,
+     "syndromic_suspect_threshold": 3
+    },
+    "infection_counters": [
+     {
+      "counter_id": "crew_attack_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_attack_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "all_attack_rate",
+      "filter": {},
+      "label": "Overall Attack Rate",
+      "metric": "attack_rate"
+     },
+     {
+      "counter_id": "passenger_reported_case_rate",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "crew_reported_case_rate",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Reported Case Rate",
+      "metric": "reported_case_rate",
+      "on_exceed": "confine_symptomatic",
+      "threshold": 0.03
+     },
+     {
+      "counter_id": "all_reported_case_rate",
+      "filter": {},
+      "label": "Overall Reported Case Rate",
+      "metric": "reported_case_rate"
+     },
+     {
+      "counter_id": "crew_infected_count",
+      "filter": {
+       "role_group": "crew"
+      },
+      "label": "Crew Infected",
+      "metric": "infected_count"
+     },
+     {
+      "counter_id": "passenger_infected_count",
+      "filter": {
+       "role_group": "passenger"
+      },
+      "label": "Passenger Infected",
+      "metric": "infected_count"
+     }
+    ],
+    "syndromic": {
+     "background_noise_rate": 0.015,
+     "cadence": 1,
+     "crew_screening_interval_hours": null,
+     "description": "Symptom-based screening (fever, GI distress, etc.)",
+     "detection_delay_hours": 0.0,
+     "sick_call_probability": 0.7,
+     "sick_call_probability_per_day": 0.7
+    }
+   },
+   "source": {
+    "lot_layer_mode": "station_lots",
+    "preparation_survival_mode": "raw_rte_only",
+    "prevalence_scale": 1.0,
+    "q_source": [
+     0.00086,
+     0.0047
+    ],
+    "q_source_by_item_line": {
+     "fresh_produce": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0036,
+       0.036
+      ]
+     },
+     "salad_leaf": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.0,
+       0.053
+      ]
+     },
+     "shellfish": {
+      "implicated_share": 0.141,
+      "prevalence": [
+       0.039,
+       0.144
+      ]
+     }
+    },
+    "source_id": "generic_cruise_port"
+   },
+   "strategy": {
+    "diagnostic_cascade_enabled": false,
+    "fred_behavior": {
+     "clinic_wait_hours": 6,
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "defiant_escalation_hours": 24,
+     "escort_delay_hours": 1,
+     "healthy_noise_categories": [
+      {
+       "probability_per_day": 0.0042,
+       "reason": "seasickness",
+       "syndrome": "gastrointestinal"
+      },
+      {
+       "probability_per_day": 0.003,
+       "reason": "fatigue",
+       "syndrome": "systemic_febrile"
+      },
+      {
+       "probability_per_day": 0.002,
+       "reason": "minor_injury",
+       "syndrome": "wound_soft_tissue"
+      }
+     ],
+     "quarantine_compliance": 0.65,
+     "reluctant_delay_hours": 48,
+     "reluctant_fraction": 0.75,
+     "symptomatic_order_trigger": "presenting_sign"
+    },
+    "name": "syndromic_comp65"
+   },
+   "unpinned_platform_state": {
+    "rhythm.layer_attached": "RhythmLayer"
+   }
+  },
+  "run_spec": {
+   "actors": [],
+   "campaign_parameters": {
+    "agent_class_fractions": {
+     "crew_engineering": null,
+     "crew_galley": null,
+     "crew_general": null,
+     "crew_medical": null,
+     "passenger_elderly": null,
+     "passenger_family": null,
+     "passenger_general": null
+    },
+    "blackwater_plumbing": true,
+    "boarding_age_draw": "stationary_detectable",
+    "boarding_mechanism_rung": "reportable",
+    "boarding_pathogen": "norwalk_gi",
+    "boarding_rate_mode": "renewal",
+    "common_source": {
+     "diner_mode": "object",
+     "handler_mode": "object",
+     "lot_extent_mode": "emergent",
+     "lot_mint_model": "provisioned_source",
+     "lot_mode": "object",
+     "mode": "on",
+     "provisioned_source": {
+      "lot_layer_mode": "station_lots",
+      "source_id": "generic_cruise_port"
+     },
+     "titre_draw_mode": "two_mode"
+    },
+    "dose_adjustment": 7.57,
+    "engine_git_sha": "<named commit>",
+    "flush_aerosol_fraction": 0.0,
+    "flush_cabin_emission": true,
+    "history_retention": "compact",
+    "illness_duration_draw": "empirical_survival",
+    "lockdown_attack_rate": 0.05,
+    "never_symptomatic_fraction": 0.29,
+    "num_agents": 3000,
+    "num_epochs": 168,
+    "pathogen": "norovirus",
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "spirit_cruise_3000",
+    "presymptomatic_share_of_presenting": 0.04,
+    "quarantine_compliance": 0.65,
+    "run_id": "fl_norovirus_spirit_cruise_3000_dose7p57_rung-reportable_n3000_ep168_syndromic_comp65_s8105",
+    "sanitary_visit_mode": "none",
+    "seed": 8105,
+    "sick_call_probability_per_day": 0.7,
+    "surveillance": "syndromic_comp65",
+    "suspect_attack_rate": 0.02,
+    "symptomatic_stream": true,
+    "tier_id": "fl_exp_7d_rep_mixture",
+    "transport_engine": "native"
+   },
+   "catalog": {
+    "pathogen_bundle_id": "active_profiles",
+    "platform_id": "spirit_cruise_3000"
+   },
+   "config_overrides": {
+    "crew_duty_exclusion": {
+     "enabled": false
+    },
+    "diagnostic_cascade": {
+     "enabled": false
+    },
+    "escalation": {
+     "confirm_attack_rate": 0.03,
+     "lockdown_attack_rate": 0.05,
+     "suspect_attack_rate": 0.02
+    },
+    "fred_behavior": {
+     "compliance_by_class": {
+      "crew": 0.65,
+      "passenger_elderly": 0.54,
+      "passenger_young": 0.34
+     },
+     "quarantine_compliance": 0.65
+    },
+    "hvac": {
+     "duty0_terminal_mode": "extract",
+     "passive_link_mode": "bidirectional",
+     "pathogen_pool_transport": "airflow",
+     "transport_engine": "native"
+    },
+    "initiation": {
+     "boarding": {
+      "enabled": true,
+      "norwalk_gi": {
+       "age_draw": "stationary_detectable",
+       "preboarding_assessment": {
+        "crew": {
+         "declaration_compliance": 1.0,
+         "denial_probability": 0.0,
+         "enabled": true,
+         "recall_halflife_days": null,
+         "reportable": true
+        },
+        "lookback_days": 3,
+        "passenger": {
+         "enabled": false
+        }
+       },
+       "rate_mode": "renewal",
+       "renewal": {
+        "case_incidence_per_1000_py": {
+         "crew": 39.0,
+         "passenger": 39.0
+        },
+        "detectable_duration_days": 28
+       },
+       "state_split": {
+        "never_symptomatic_fraction": 0.29,
+        "presymptomatic_share_of_presenting": 0.04
+       },
+       "symptomatic_stream": {
+        "enabled": true
+       }
+      }
+     }
+    },
+    "observation": {
+     "enabled": true,
+     "surface_swab_source": "surface_pool_density",
+     "wastewater_assay_mode": "holding_tank"
+    },
+    "service_surface_knockout": {
+     "enabled": false
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "count": 1500,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_family",
+       "count": 300,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "passenger_elderly",
+       "count": 300,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "PC_",
+       "role_group": "passenger"
+      },
+      {
+       "class_id": "crew_general",
+       "count": 300,
+       "duty_zone": "",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_general"
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "count": 150,
+       "duty_zone": "Medical_Center",
+       "free_zone_preference": "Medical",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_medical"
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "count": 300,
+       "duty_zone": "Engine",
+       "free_zone_preference": "Engine",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_engineering"
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "count": 150,
+       "duty_zone": "Galley",
+       "free_zone_preference": "",
+       "home_zone_preference": "CC_",
+       "role_group": "crew",
+       "schedule": {
+        "night_watch_fraction": 0.05,
+        "template": "crew_galley"
+       }
+      }
+     ],
+     "num_agents": 3000
+    },
+    "transmission": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.25,
+       "corridor": 0.25,
+       "dining_table": 2.0,
+       "dining_venue": 2.0,
+       "leisure": 1.0,
+       "other": 0.0,
+       "work_other": 0.5,
+       "work_service": 2.9
+      }
+     },
+     "blackwater_plumbing": true,
+     "cabin_air_mode": "cabin_compartment",
+     "cabin_confined_fomite": {
+      "mode": "own_cabin"
+     },
+     "cabin_cooccupancy": {
+      "mode": "time_partitioned"
+     },
+     "caregiver": {
+      "budget_mode": "reallocate",
+      "mode": "on"
+     },
+     "common_source": {
+      "diner_mode": "object",
+      "handler_mode": "object",
+      "lot_extent_mode": "emergent",
+      "lot_mint_model": "provisioned_source",
+      "lot_mode": "object",
+      "mode": "on",
+      "provisioned_source": {
+       "lot_layer_mode": "station_lots",
+       "source_id": "generic_cruise_port"
+      },
+      "titre_draw_mode": "two_mode"
+     },
+     "contact_class_exponent": 0.0,
+     "contact_mode": "per_partner_contact",
+     "contamination_solver": "continuous",
+     "dining_party_contact_share": 1.0,
+     "droplet_emission_mode": "profile_conditioned",
+     "droplet_field_split": {
+      "far_field_share": 0.175,
+      "mode": "partition",
+      "settled_share": 0.0
+     },
+     "exposure_cap": {
+      "enabled": true,
+      "include_fixed_rings": false
+     },
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "hand_redeposit_mode": "shedders_only",
+     "hand_reservoir_mode": "hygiene_cycle",
+     "high_touch_area_scale": 1.0,
+     "intra_epoch_causal_order": "legacy",
+     "intra_epoch_substeps": 1,
+     "isolated_quarters_deposits": {
+      "mode": "deposits_only"
+     },
+     "near_field_air": {
+      "interzonal_airflow_m3_per_hour": 204.0,
+      "mode": "two_box",
+      "neighbour_table_ratio": 0.43
+     },
+     "room_air_removal": {
+      "default_ach_per_hour": 0.0,
+      "map_arm": "ambient_on",
+      "mode": "first_order"
+     },
+     "sanitary_visit_mode": "none",
+     "surface_cleaning": {
+      "enabled": true,
+      "outbreak_response": {
+       "by_zone_class": {
+        "cabin": {
+         "events_per_day": 1.0
+        }
+       },
+       "coverage": 0.58,
+       "events_per_day": 24.0,
+       "log10_reduction": 4.29
+      },
+      "routine": {
+       "coverage": 0.37,
+       "events_per_day": 1.0,
+       "log10_reduction": 1.29
+      }
+     }
+    },
+    "variant_surveillance": {
+     "enabled": false
+    }
+   },
+   "description": "fl_norovirus_spirit_cruise_3000_dose7p57_rung-reportable_n3000_ep168_syndromic_comp65_s8105",
+   "incentives": {},
+   "legacy_yaml": "crusher_labs/config.yaml",
+   "pathogen_overrides": {
+    "norwalk_gi": {
+     "dose_adjustment": 7.57,
+     "illness_duration": {
+      "draw": "empirical_survival"
+     }
+    },
+    "remove": [
+     "sars_cov2_resp",
+     "influenza_a"
+    ]
+   },
+   "run": {
+    "history_retention": "compact",
+    "num_epochs": 168,
+    "random_seed": 8105,
+    "sentinel_line_list": "<run_dir>/sentinel_line_list.json",
+    "write_ground_truth": false
+   },
+   "schema_version": "1.0.0"
+  }
+ }
+}

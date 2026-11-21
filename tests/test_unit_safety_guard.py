@@ -52,6 +52,7 @@ ALLOWED_EPOCH_KEYS = (
     ("data/config/protocols.json", "costs_per_epoch"),  # active protocol maintenance debit per simulation epoch
     ("data/platforms/*/voyage_config.json", "total_epochs"),  # run-length bookkeeping
     ("picard_framework/runs/*.json", "num_epochs"),  # run-length bookkeeping
+    ("docs/norovirus/paper1_reference_run_specs_*.json", "num_epochs"),  # run-length bookkeeping in emitted example run specs
     ("picard_framework/runs/mega_cruise_campaign/*.json", "default_epochs"),  # run-length bookkeeping
     ("campaigns/*/*/manifest.json", "default_epochs"),  # campaign manifest run-length fallback
     ("picard_framework/runs/mega_cruise_campaign/*.json", "sampling_interval_epochs"),  # Sentinel wastewater consumer; defer to separate unit pass required by AGENTS.md

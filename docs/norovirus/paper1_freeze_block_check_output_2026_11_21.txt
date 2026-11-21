@@ -1,0 +1,86 @@
+ok   [resolved-state] transmission.contact_mode = "per_partner_contact" [default "per_partner_contact"; resolved 'per_partner_contact'; expected rejection (ValueError: activity_contacts requires contact_mode per_partner_contact)]
+ok   [resolved-state] transmission.droplet_emission_mode = "profile_conditioned" [default absent; resolved 'profile_conditioned'; live]
+ok   [resolved-state] transmission.droplet_field_split.mode = "partition" [default absent; resolved 'partition'; live]
+ok   [resolved-state] transmission.droplet_field_split.far_field_share = 0.175 [default absent; resolved 0.175; live]
+ok   [resolved-state] transmission.droplet_field_split.settled_share = 0.0 [default absent; resolved 0.0; live]
+ok   [resolved-state] transmission.near_field_air.mode = "two_box" [default absent; resolved 'two_box'; live]
+ok   [resolved-state] transmission.near_field_air.interzonal_airflow_m3_per_hour = 204.0 [default absent; resolved 204.0; live]
+ok   [resolved-state] transmission.near_field_air.neighbour_table_ratio = 0.43 [default absent; resolved 0.43; live]
+ok   [resolved-state] transmission.room_air_removal.mode = "first_order" [default absent; resolved 'first_order'; live]
+ok   [resolved-state] transmission.room_air_removal.map_arm = "ambient_on" [default absent; resolved 'ambient_on'; live]
+ok   [resolved-state] transmission.room_air_removal.default_ach_per_hour = 0.0 [default absent; resolved 0.0; live]
+ok   [resolved-state] transmission.cabin_air_mode = "cabin_compartment" [default "cabin_compartment"; resolved 'cabin_compartment'; live]
+ok   [resolved-state] transmission.cabin_cooccupancy.mode = "time_partitioned" [default absent; resolved 'time_partitioned'; live]
+ok   [resolved-state] transmission.cabin_confined_fomite.mode = "own_cabin" [default absent; resolved 'own_cabin'; live]
+ok   [resolved-state] transmission.isolated_quarters_deposits.mode = "deposits_only" [default absent; resolved 'deposits_only'; live]
+ok   [resolved-state] transmission.caregiver.mode = "on" [default absent; resolved 'on'; live]
+ok   [resolved-state] transmission.caregiver.budget_mode = "reallocate" [default absent; resolved 'reallocate'; live]
+ok   [resolved-state] transmission.sanitary_visit_mode = "none" [default "none"; resolved 'none'; live]
+ok   [resolved-state] transmission.flush_aerosol_fraction = 0.0 [default absent; resolved 0.0; live]
+ok   [resolved-state] transmission.flush_cabin_emission = true [default absent; resolved True; live; conditional: inactive while flush_aerosol_fraction = 0.0]
+ok   [resolved-state] transmission.blackwater_plumbing = true [default true; resolved 'BlackwaterHoldingTank'; live]
+ok   [resolved-state] transmission.hand_reservoir_mode = "hygiene_cycle" [default absent; resolved 'hygiene_cycle'; live]
+ok   [resolved-state] transmission.hand_redeposit_mode = "shedders_only" [default absent; resolved 'shedders_only'; live]
+ok   [resolved-state] transmission.contamination_solver = "continuous" [default absent; resolved 'continuous'; live]
+ok   [resolved-state] transmission.intra_epoch_causal_order = "legacy" [default absent; resolved 'legacy'; live; conditional: inactive while contamination_solver = continuous]
+ok   [resolved-state] transmission.intra_epoch_substeps = 1 [default absent; resolved 1; expected rejection (ValueError: intra_epoch_substeps > 1 requires); conditional: inactive while contamination_solver = continuous]
+ok   [resolved-state] transmission.high_touch_area_scale = 1.0 [default absent; resolved 1.0; live]
+ok   [resolved-state] transmission.dining_party_contact_share = 1.0 [default absent; resolved 1.0; live]
+ok   [resolved-state] transmission.contact_class_exponent = 0.0 [default absent; resolved 0.0; live]
+ok   [resolved-state] transmission.exposure_cap.enabled = true [default true; resolved True; live]
+ok   [resolved-state] transmission.exposure_cap.include_fixed_rings = false [default absent; resolved False; live]
+ok   [resolved-state] transmission.activity_contacts.enabled = true [default true; resolved 'dict'; live]
+ok   [resolved-state] transmission.activity_contacts.rates_per_hour.cabin = 0.25 [default 0.25; resolved 0.25; live]
+ok   [resolved-state] transmission.activity_contacts.rates_per_hour.corridor = 0.25 [default 0.25; resolved 0.25; live]
+ok   [resolved-state] transmission.activity_contacts.rates_per_hour.work_service = 2.9 [default 2.9; resolved 2.9; live]
+ok   [resolved-state] transmission.activity_contacts.rates_per_hour.work_other = 0.5 [default 0.5; resolved 0.5; live]
+ok   [resolved-state] transmission.activity_contacts.rates_per_hour.dining_table = 2.0 [default 2.0; resolved 2.0; live]
+ok   [resolved-state] transmission.activity_contacts.rates_per_hour.dining_venue = 2.0 [default 2.0; resolved 2.0; live]
+ok   [resolved-state] transmission.activity_contacts.rates_per_hour.leisure = 1.0 [default 1.0; resolved 1.0; live]
+ok   [resolved-state] transmission.activity_contacts.rates_per_hour.other = 0.0 [default 0.0; resolved 0.0; live]
+ok   [resolved-state] transmission.surface_cleaning.enabled = true [default true; resolved True; live]
+ok   [resolved-state] transmission.surface_cleaning.routine.coverage = 0.37 [default 0.37; resolved 0.37; live]
+ok   [resolved-state] transmission.surface_cleaning.routine.log10_reduction = 1.29 [default 1.29; resolved 1.29; live]
+ok   [resolved-state] transmission.surface_cleaning.routine.events_per_day = 1.0 [default 1.0; resolved 1.0; live]
+ok   [resolved-state] transmission.surface_cleaning.outbreak_response.coverage = 0.58 [default 0.58; resolved 0.58; live]
+ok   [resolved-state] transmission.surface_cleaning.outbreak_response.log10_reduction = 4.29 [default 4.29; resolved 4.29; live]
+ok   [resolved-state] transmission.surface_cleaning.outbreak_response.events_per_day = 24.0 [default 24.0; resolved 24.0; live]
+ok   [resolved-state] transmission.surface_cleaning.outbreak_response.by_zone_class.cabin.events_per_day = 1.0 [default 1.0; resolved 1.0; live]
+ok   [resolved-state] transmission.common_source.mode = "on" [default absent; resolved 'on'; live]
+ok   [resolved-state] transmission.common_source.lot_mode = "object" [default absent; resolved 'object'; live]
+ok   [resolved-state] transmission.common_source.handler_mode = "object" [default absent; resolved 'object'; live]
+ok   [resolved-state] transmission.common_source.diner_mode = "object" [default absent; resolved 'object'; live]
+ok   [resolved-state] transmission.common_source.lot_mint_model = "provisioned_source" [default "provisioned_source"; resolved 'provisioned_source'; live]
+ok   [resolved-state] transmission.common_source.titre_draw_mode = "two_mode" [default absent; resolved 'two_mode'; live]
+ok   [resolved-state] transmission.common_source.lot_extent_mode = "emergent" [default absent; resolved 'emergent'; live]
+ok   [resolved-state] transmission.common_source.provisioned_source.source_id = "generic_cruise_port" [default "generic_cruise_port"; resolved 'generic_cruise_port'; live]
+ok   [resolved-state] transmission.common_source.provisioned_source.lot_layer_mode = "station_lots" [default absent; resolved 'station_lots'; live]
+ok   [resolved-state] hvac.pathogen_pool_transport = "airflow" [default "airflow"; resolved 'airflow'; live]
+ok   [resolved-state] hvac.duty0_terminal_mode = "extract" [default absent; resolved 'extract'; live]
+ok   [resolved-state] hvac.passive_link_mode = "bidirectional" [default absent; resolved 'bidirectional'; live]
+ok   [configuration-only] hvac.transport_engine = "native" [default "native"; resolved cfg-read; cfg + consumer read]
+ok   [configuration-only] observation.enabled = true [default true; resolved cfg-read; cfg + consumer read]
+ok   [configuration-only] observation.surface_swab_source = "surface_pool_density" [default "surface_pool_density"; resolved cfg-read; cfg + consumer read]
+ok   [resolved-state] observation.wastewater_assay_mode = "holding_tank" [default "holding_tank"; resolved 'WastewaterHoldingTankAssay'; live]
+ok   [resolved-state] service_surface_knockout.enabled = false [default false; resolved False; live]
+ok   [resolved-state] crew_duty_exclusion.enabled = false [default false; resolved False; live]
+ok   [configuration-only] variant_surveillance.enabled = false [default false; resolved cfg-read; cfg + consumer read]
+ok   [configuration-only] escalation.suspect_attack_rate = 0.02 [default 0.02; resolved cfg-read; cfg + consumer read]
+ok   [configuration-only] escalation.confirm_attack_rate = 0.03 [default 0.03; resolved cfg-read; cfg + consumer read]
+ok   [configuration-only] escalation.lockdown_attack_rate = 0.05 [default 0.05; resolved cfg-read; cfg + consumer read]
+expedition_cruise_450: generated cell initialises; 300 passengers / 150 crew; 0 failures, 0 pending
+classic_cruise_1900: generated cell initialises; 1350 passengers / 560 crew; 0 failures, 0 pending
+spirit_cruise_3000: generated cell initialises; 2100 passengers / 900 crew; 0 failures, 0 pending
+mega_cruise_5000: generated cell initialises; 5000 passengers / 2000 crew; 0 failures, 0 pending
+explorer_seas_06: generated cell initialises; 3245 passengers / 1183 crew; 0 failures, 1 pending
+annex matches: docs/norovirus/paper1_reference_run_specs_2026_11_21.json
+declared units: 57; scalar leaves: 70 (block scalar leaves: 70)
+evidence: resolved-state 63; configuration-only 7
+expected validation rejections: 2; conditionally inactive pins: 3
+failures: 0; pending: 1; resolved state differing from no-block default: 0
+EXPECTED REJECTION: transmission.contact_mode
+EXPECTED REJECTION: transmission.intra_epoch_substeps
+CONDITIONAL: transmission.flush_cabin_emission
+CONDITIONAL: transmission.intra_epoch_causal_order
+CONDITIONAL: transmission.intra_epoch_substeps
+PENDING: explorer_seas_06: rhythm.layer_attached diverges (no SHIP-RHYTHM-02 catalog row for the platform (NORO-EXPOCAP-EXPLORER-01); decision open, contract section 2.8)
