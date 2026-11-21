@@ -66,13 +66,17 @@ Consequences:
   declaration on the same campaign; founders alone cannot land the clause.
 - The scored clause's failing leg is the before_share median (0.040 vs
   record 0.173; the q05–q95 onset interval formally contains 197 on both
-  arms). The decomposition shows why it cannot move: before-share is
-  bimodal — record-timed cells sit at ~0.26–0.49 while late igniters sit
-  ≲0.10 — so the takeoff-seed median is set by the late-igniter majority,
-  and every early-igniting cell overshoots the whole-voyage mass band
-  anyway. The contract question this raises (envelope scoring vs a
-  voyage-stage declaration) is an owner call, same footing as conditioned
-  capture and FRAQMB_DUTY.
+  arms). The takeoff population is split between a late-igniter majority
+  (before_share ≲0.10) and a record-timed minority spanning
+  **0.084–0.491 — six of the eight actually inside the scored
+  [0.073,0.273] band**; the median fails because early ignition draws
+  only ~20% of the time, not because on-time cells land off-band. But
+  every one of those in-band early cells still overshoots the
+  whole-voyage infection band (all 8 end 1,268–3,136 vs ≤960): the
+  ensemble leg is reachable only by a founder-lottery majority that the
+  same θ would push further over mass. The contract question this
+  raises (envelope scoring vs a voyage-stage declaration) is an owner
+  call, same footing as conditioned capture and FRAQMB_DUTY.
 
 Evidence: `reports/early_growth_01/seed_ring_01_growth_table.md`;
 tool: `tools/covid_early_growth_readout.py`; ops:
