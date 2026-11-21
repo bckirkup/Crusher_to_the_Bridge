@@ -10,7 +10,8 @@
 (DP `boxed_s1s2` 12 θ × 20 seeds; GM `hygiene_cycle` 12 θ × 50 seeds),
 recomputing the verbatim `merge_fit` T1+T3 loss per cell and attaching
 the `covid.H5` band residual (takeoff-conditional `infections_total` vs
-[712, 960], log-space distance; inside-band = 0) per seed. Paired-seed
+[712, 960], log-space distance; inside-band = 0; cells with no
+`infections_total` carry no residual) per seed. Paired-seed
 bootstrap (2000 resamples, seed 20200205, ties to smaller θ — the
 merge's own rule) gives two selection surfaces:
 
@@ -71,8 +72,14 @@ fitted θ) is the settled observation-channel residual.
   under floor) and 1e9 (median 2,246, 2.3× over top) — a half-decade
   the observable channels cannot inhabit: at 3.16e8 campaign positives
   run 159 vs the record's 634; at 1e9 recorded onsets run 1,460 vs 197.
-- **The defect is capture, not dose**: confirmed/infections at
-  right-sized truth ≈ 0.39 (262/677) vs the record's ~0.85 (712/840).
+- **The defect is capture, not dose**: takeoff-conditional
+  confirmed/infections at right-sized truth ≈ 0.60 (406/677 at
+  θ=3.16e8) vs the record's ~0.85 (712/840). The all-cells
+  `lab_confirmed` median is also reported per θ in the surface JSON
+  (`lab_confirmed_total` vs `lab_confirmed_total_takeoff`); the capture
+  comparison is made on the takeoff-conditional population only —
+  mixing the fizzle-inclusive confirmations with takeoff-only
+  infections would understate capture.
 - **Augmentation cannot select its way out**: the band residual's
   0.78–1.32 spread is flat next to the verbatim gradient (13.7 vs ≥19.2).
 - **Named, not taken**: whether a serology-aware observable enters

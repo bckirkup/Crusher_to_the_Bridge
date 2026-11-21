@@ -3,7 +3,7 @@
 **Commit:** eb024892
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** c053e15f (cell payloads; readout at `eb024892`)
+**Measured at:** c053e15f
 
 Pure-readout rescore of the committed `COVID-THETA-REFIT-01` surface
 with the serology band `covid.H5` reported per θ — the lever
@@ -11,7 +11,8 @@ with the serology band `covid.H5` reported per θ — the lever
 attack-size/serology-aware observable"). No new cells, no constant
 changes, no contract adoption: the same 840 committed `cell_<seed>.json`
 payloads (DP `boxed_s1s2` 12 θ × 20 seeds, GM `hygiene_cycle` 12 θ × 50
-seeds) decomposed by `tools/covid_h5_rescore.py`; evidence
+seeds — cell payloads committed at `c053e15f`; the readout ran at
+`eb024892`) decomposed by `tools/covid_h5_rescore.py`; evidence
 `reports/h5_rescore/surface.json`. Per θ: verbatim T1+T3 contract loss
 (recomputed identically — same `ThetaObjective` machinery), takeoff
 fraction under the scorer's gate (`recorded_onsets >= 10`), and
@@ -47,8 +48,9 @@ seed 20200205, ties to smaller θ).
   takeoff cells land in band anywhere on the grid.
 - **The truth-band region falsifies the observable record**: at the
   band-adjacent θ≈3.16e8, `campaign_positives` med 159 vs 634 (~4×
-  under) and `lab_confirmed` med 262 — on right-sized truth the model
-  confirms ~0.39 of infections vs the record's 712/840 ≈ 0.85. The
+  under) and takeoff-conditional `lab_confirmed` med 406 vs infections
+  677 — on right-sized truth the model confirms ~0.60 of infections
+  (~1.4× under) vs the record's 712/840 ≈ 0.85. The
   binding defect is per-infection capture (the swabbed-and-missed drain
   + campaign roster starvation ONSET-FUNNEL-01/ASYM-CONF-01 measured),
   not dose: Θ compensated by over-infecting ~4.3×.
@@ -86,7 +88,8 @@ for it).
    a readout only.
 3. **Next lever is the per-infection capture rate**, not Θ and not a
    new transmission mechanism: at right-sized truth the model's
-   confirmed/infections ratio (~0.39 at θ=3.16e8, ~0.91 at θ=1e11)
+   `infections_total` (~0.60 at θ=3.16e8 takeoff cells, ~0.91 at
+   θ=1e11)
    brackets the record's ~0.85 — the seam where the record's serial
    retesting meets the model's specimen-sensitivity loss
    (ONSET-FUNNEL-01's 6,873 swabbed-while-infected-negative; ASYM-CONF-01's
