@@ -214,13 +214,14 @@ attempts accounted, pairs meaningful. `engine_git_sha` verified:
 declared commits); reference fingerprints resolved from
 `noro_supply_solver_screen_01`.
 
-Measured, posting rate (posted/20) by stratum — ordering holds
-everywhere: quiet 0/20 on all four hulls at all three lengths; near
-exp 3-4/20 and 0/20 elsewhere; outbreak exp 20/20, cls 19/20,
-spr 11-12/20, meg 7/20. Band verdicts: exp all-in at 168/288/504;
-cls quiet+outbreak in, near undetermined; spr quiet+outbreak in, near
-undetermined; meg quiet in only — hull states: exp "in", others
-"undetermined".
+Measured, posting rate (posted/20) by stratum: quiet 0/20 on all four
+hulls at all three lengths (240/240 suppression); near exp 3-4/20 and
+0/20 elsewhere; outbreak exp 20/20, cls 19/20, spr 11-12/20, meg 7/20.
+Strict stratum ordering is verifiable only where near posts — exp,
+which is "in" at every length; on cls/spr/meg quiet and near both post
+~0 so ordering between them is undetermined by the frozen bands: cls
+and spr quiet+outbreak in, near undetermined; meg quiet in only. Hull
+states: exp "in", others "undetermined".
 
 Continuation (predeclared, inferred): **justified_defect_fix** — the
 reproduction arm does not reproduce: `fl_je_repro_exp_solver01_station_
@@ -228,7 +229,8 @@ continuous` compared seed by seed against the
 `fl_exp_12d_sens_p06_paxv_station_lots_continuous` reference
 fingerprints, 16/16 compared, **0/16 identical**. All 16 reposted
 (AR median 0.057) so the cells ran; the joint-eval wiring produces a
-different run than the solver-screen wiring on the same seed.
+different run than the solver-screen wiring on the same seed. Canonical
+entry: `docs/ledger/NORO-JE-REPRO-01.md`.
 
 Pilots (measured): temporal prefix-identity — quiet 31-38/40 on
 exp/spr/cls (17/40 meg), near 0-5/40, outbreak 0/40; truncation_valid
