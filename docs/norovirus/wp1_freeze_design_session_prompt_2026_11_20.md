@@ -96,3 +96,27 @@ number — commit that update).
 ```
 
 ## Result
+
+Delivered in PR #1355
+([`paper1_freeze_design_contract_2026_11_20.md`](paper1_freeze_design_contract_2026_11_20.md)).
+The freeze is proposed, not declared.
+
+- **Candidate SHA:** `a01130fb0c97349d129b172faea934c6bdea1db1` (main HEAD
+  when drafted). The named reference is main HEAD at freeze time.
+- **Pinned keys:** 57, each with config default, resolved default, consumer
+  file and a flip-test liveness result. `scripts/paper1_freeze_block_check.py`
+  at the candidate: 0 failures, 0 keys whose resolved state differs from the
+  no-block default, and the block parses and initialises (no epoch stepped)
+  on the four joint-evaluation hulls and `explorer_seas_06`.
+- **Limitations declared:** 12.
+- **Reported during the session:** the VSP either-channel rule has no config
+  key and shedding variance is a pathogen-profile key, so neither can be
+  carried in `config_overrides` (fixed by the named commit; no override path
+  added). `sanitary_visit_mode` ships as `none`, not default-ON. The campaign
+  runner injects `escalation.lockdown_attack_rate` 0.05 where
+  `crusher_labs/config.yaml` declares `never`; the block pins the runner's
+  values. No ledger open item forced a change to the evaluation contract,
+  and the candidate carries no unmerged machinery WP0/WP1 depend on.
+- **Next decision:** Edison's blocker findings on the contract, then the
+  freeze declaration on the then-current main HEAD with the block check
+  re-run there.
