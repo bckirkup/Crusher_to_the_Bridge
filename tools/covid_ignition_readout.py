@@ -217,9 +217,11 @@ def main(argv: list[str] | None = None) -> int:
         },
     }
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(args.out).write_text(json.dumps(evidence, indent=1))
+    Path(args.out).write_text(  # NOSONAR — operator-specified report path in a local readout tool
+        json.dumps(evidence, indent=1))
     if args.out_md:
-        Path(args.out_md).write_text(_md(records, summary))
+        Path(args.out_md).write_text(  # NOSONAR — operator-specified report path in a local readout tool
+            _md(records, summary))
     print(json.dumps(summary, indent=1))
     return 0
 
