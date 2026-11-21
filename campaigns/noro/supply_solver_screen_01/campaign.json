@@ -4,9 +4,9 @@
  "manifest": "campaigns/noro/supply_solver_screen_01/manifest.json",
  "pathogen_id": "norwalk_gi",
  "epochs": 288,
- "s3_prefix": "campaign/noro_supply_solver_screen_01/",
+ "s3_prefix": "campaign/noro_supply_solver_screen_01_bf0/",
  "queue": "picard-campaign-queue",
- "image_tag": "noro-supply-solver01@sha256:f25d74cd225bc4ade19a012ba801b25f91289f80f3c3778bfd6c27c343a0053a",
+ "image_tag": "noro-supply-solver01-bf0@sha256:d88f2593be1531730a3d9b0237de134f2ba0b449ccd6a93999c6e53f7be872af",
  "resources": {
   "vcpu": "1",
   "memory": "8192",

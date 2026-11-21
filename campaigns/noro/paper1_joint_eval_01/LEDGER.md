@@ -232,6 +232,30 @@ fingerprints, 16/16 compared, **0/16 identical**. All 16 reposted
 different run than the solver-screen wiring on the same seed. Canonical
 entry: `docs/ledger/NORO-JE-REPRO-01.md`.
 
+Attribution (2026-11-21, paired-seed replays, measured): engine drift
+across the campaign boundary, not a joint-eval wiring defect. The
+solver-screen worker at `bf0ec168` reproduces the joint-eval
+fingerprint; the engine set reverted to `3500c205` reproduces the
+reference. Named causes: `9661da33` (ROOM-AIR-01, ambient openings
+enter the room-air ACH map — PoolDeck ~73,400 m3/h becomes a live
+removal path) and `63210391` (CONTAM-DUCT-EXCLUDE-01, PoolDeck
+exchange_m3h re-solved 73376.0 -> 73493.4). First infection flip at
+epoch 43; recording-level additions (`room_air_witness`,
+`room_air_map_arm`) and an epoch-74 `total_pathogen_mass` float move
+carry no infection effect.
+
+Re-baseline (2026-11-21, measured): Benjamin elected to re-run the
+reference at the freeze commit. 16 `exp_station_lots_continuous`
+cells on Batch job `1ba4083f` (jobdef `:11`, image
+`noro-supply-solver01-bf0@sha256:d88f2593` = the `bf0ec168` build,
+solver-screen worker), S3 prefix `campaign/noro_supply_solver_screen_
+01_bf0/`, synced to `out/noro/supply_solver_screen_01_bf0/` —
+**16/16 fingerprints identical to the reproduction arm**. Canary
+s900470 verified before the array. `justified_defect_fix` closes:
+defect named (engine drift across the campaign boundary), reference
+re-baselined, repro arm reproduces. Canonical entry `docs/ledger/
+NORO-JE-REPRO-01.md` closed.
+
 Pilots (measured): temporal prefix-identity — quiet 31-38/40 on
 exp/spr/cls (17/40 meg), near 0-5/40, outbreak 0/40; truncation_valid
 false on every cell. Joint-outcome estimates (288 ep, evaluation
@@ -242,7 +266,8 @@ contaminated stratum. Readout committed at
 
 ## Next decision
 
-Whether to take the predeclared `justified_defect_fix` continuation:
-find why the joint-eval cell diverges from the solver-screen run on the
-same seed (16/16 seeds differ, all posted — a systematic, not
-seed-specific, divergence).
+~~Whether to take the predeclared `justified_defect_fix` continuation~~
+— taken and closed 2026-11-21: engine drift across the campaign
+boundary named with paired-seed evidence; reference re-baselined at
+`bf0ec168` and the repro arm then reproduces 16/16 (see the
+Re-baseline record above and `docs/ledger/NORO-JE-REPRO-01.md`).
