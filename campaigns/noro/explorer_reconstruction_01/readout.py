@@ -245,10 +245,6 @@ def tier_summary(
             "onset_attack_rate": {
                 **_interval(onset_rate),
                 "target": finals["cases"] / finals["denominator"],
-                "target_in_central_90": _covers(
-                    _interval(onset_rate),
-                    finals["cases"] / finals["denominator"],
-                ),
             },
             "reported_attack_rate_vs_posting": {
                 **_interval(reported_rate),
@@ -257,7 +253,10 @@ def tier_summary(
             "curve_total_variation": _interval(curve_distance),
         }
         if same_ship:
-            totals = [float(c["onset_total"][role]) for c in cells]
+            totals = [float(c["onset_total"][role]) for c in evaluable]
+            block["onset_total_all_cells"] = _interval(
+                [float(c["onset_total"][role]) for c in cells],
+            )
             block["onset_total"] = {
                 **_interval(totals),
                 "target": finals["cases"],
@@ -266,7 +265,8 @@ def tier_summary(
                 ),
             }
             block["onset_total_first_seven_days"] = _interval([
-                float(c["onset_total_first_seven_days"][role]) for c in cells
+                float(c["onset_total_first_seven_days"][role])
+                for c in evaluable
             ])
         out[role] = block
     return out

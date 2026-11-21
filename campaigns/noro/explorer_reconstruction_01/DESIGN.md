@@ -134,7 +134,7 @@ The engine splits `num_agents` by the shipped class fractions (70/30) and does n
 ## Curve extraction
 
 - **Onsets:** `run.sentinel_line_list`, per-person `onset_epoch` and `crew`. `onset_epoch` is the first epoch the person is observed symptomatic, clamped to ≥ 1, so a host symptomatic at embarkation lands on day 0. Binned to voyage days with the run's own clock; day 0 is the embarkation day (Feb 26). Two curves per role: all onsets, and onsets excluding the declared seeds.
-- **Reporting:** per-epoch `cumulative_reported_cases_{passenger,crew}`, read at the last epoch of each day, with the epoch-0 value kept separately. The line list's `report_epoch` is a detection-channel epoch and is not used as the reporting curve.
+- **Reporting:** per-epoch `cumulative_reported_cases_{passenger,crew}`, read at the last epoch of each day. Embarkation declarations are read from the engine's own counter (`preboarding_reportable_ids`), not from the epoch-0 value of the series: sick-call reports made during epoch 0 are already in that value, so it is kept separately and labelled as such. The line list's `report_epoch` is a detection-channel epoch and is not used as the reporting curve.
 
 ## Comparison metrics
 
@@ -151,7 +151,7 @@ Computed by `readout.py`. Peaks and the lag use onsets excluding the declared se
 
 **Evaluable cells.** A peak day is defined only where a curve exists: a cell is evaluable when it has at least 20 passenger onsets and at least 5 crew onsets, excluding the declared seeds. The thresholds are set here, before any cell runs, and are not derived from model output. The evaluable fraction is itself reported.
 
-**Reading.** For each of lag, passenger peak day, crew peak day and the two onset totals, the readout reports the seed distribution on evaluable cells (median, 5th and 95th percentiles), the share of cells equal to the target, and whether the target lies in the central 90%. "Reproduces" means the target lies in the central 90% on `exp_declared_five`. `P(lag ≥ 1)` is reported beside it. No other statement is a criterion.
+**Reading.** For each of lag, passenger peak day, crew peak day and the two onset totals, the readout reports the seed distribution on evaluable cells (median, 5th and 95th percentiles), the share of cells equal to the target, and whether the target lies in the central 90%. "Reproduces" means the target lies in the central 90% on `exp_declared_five`. Attack rates and all-cell onset totals are reported over every cell, quiet ones included, and are never judged. `P(lag ≥ 1)` is reported beside it. No other statement is a criterion.
 
 **Explorer against mega.** Differences are reported on matched seed labels. The two hulls differ in geometry and in complement (and here in passenger–crew split), so a difference is attributed to the bundle. This campaign cannot attribute it to geometry.
 
