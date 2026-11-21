@@ -57,6 +57,7 @@ New ledger entries are registered here as they land; the filename remains the st
 - [CONTAM-FLEET-WORKUP-CANARY-01](CONTAM-FLEET-WORKUP-CANARY-01.md) — four-hull canary amendment: outdoor-air fraction does not reach the ContamX solved field; results split into solved airflow and derived downstream mixing; realized-field gates.
 - [CONTAM-SOLVER-RETURN-02](CONTAM-SOLVER-RETURN-02.md) — protected return of the engineering package and 140-row seed table, with recovered Batch accounting.
 - [CONTAM-FLEET-WORKUP-FLEET-01](CONTAM-FLEET-WORKUP-FLEET-01.md) — remaining 73 hulls measured on AWS; 77-hull readout and offline package: totals and air change agree within about 1 %, interzone flow and material time do not.
+- [FLU-CONTAM-SOLVER-01](FLU-CONTAM-SOLVER-01.md) — measured: paired ContamX vs. native organic `influenza_a` across 6 commissioned current cruise hulls (240 cells, 120 paired seeds, 288 epochs; `mega_cruise_5000` held): no statistically detected directional shift (pooled mean paired diff +0.32, exploratory Wilcoxon p = 0.9048), 1.032× worker wall / 1.031× worker CPU (`contamx3` child CPU 0.005%).
 - [CONTAM-FLEET-WORKUP-PROTOCOL-01](CONTAM-FLEET-WORKUP-PROTOCOL-01.md) — declared pre-results design for the 77-hull native-vs-ContamX workup: roster, run matrix, input SHA manifest, runtime protocol, output contract.
 - [CONTAM-PHASE3-BASELINE-01](CONTAM-PHASE3-BASELINE-01.md) — corrected two-hull tracer and air-balance checks; version-sensitive transport, not as-built or epidemiological validation.
 
