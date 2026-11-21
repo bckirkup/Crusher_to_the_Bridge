@@ -441,6 +441,78 @@ def entry_design() -> str:
     return "picard_framework/runs/covid_seed_ring_01_design.json"
 
 
+class TestSeedPatchGrammar:
+    """The boarding-screen side of the arm grammar (covid_boarding_screen
+    ``_apply_seed_patch`` → ``_validate_seed_patch_value``)."""
+
+    def _patch(self, value):
+        from picard_framework.covid_boarding_screen import (
+            _apply_seed_patch,
+        )
+
+        raw: dict = {
+            "config_overrides": {"initiation": {"explicit_seeds": [{}]}},
+        }
+        _apply_seed_patch(raw, value)
+        return raw["config_overrides"]["initiation"]["explicit_seeds"][0]
+
+    def test_placement_applies(self):
+        seed = self._patch(
+            {"placement": {"dining_service_type": "buffet"}},
+        )
+        assert seed["placement"] == {"dining_service_type": "buffet"}
+
+    def test_non_mapping_placement_refused(self):
+        with pytest.raises(ValueError, match="must be a mapping"):
+            self._patch({"placement": "buffet"})
+
+    def test_unknown_placement_key_refused(self):
+        with pytest.raises(ValueError, match="not placement fields"):
+            self._patch(
+                {"placement": {"dining_service_type": "buffet", "x": 1}},
+            )
+
+    def test_non_string_service_type_refused(self):
+        with pytest.raises(ValueError, match="must be a string"):
+            self._patch({"placement": {"dining_service_type": 7}})
+
+    def test_unknown_seed_key_refused(self):
+        with pytest.raises(ValueError, match="not seed fields"):
+            self._patch({"bogus_key": 1})
+
+
+class TestMainEndToEnd:
+    def test_dir_readout_writes_md(self, tmp_path, capsys):
+        for seed in range(20200205, 20200210):
+            p = _payload(seed=seed, ign_day=8)
+            (tmp_path / f"cell_{seed}.json").write_text(
+                json.dumps(p), encoding="utf-8",
+            )
+        out_md = tmp_path / "readout.md"
+        assert ro.main([
+            "--dir", str(tmp_path), "--no-refit",
+            "--out-md", str(out_md),
+        ]) == 0
+        report = out_md.read_text(encoding="utf-8")
+        assert "SEED-RING-LANDED" in report
+        assert capsys.readouterr().out  # also printed
+
+    def test_dir_empty_dies(self, tmp_path):
+        with pytest.raises(SystemExit):
+            ro.main(["--dir", str(tmp_path), "--no-refit"])
+
+    def test_split_s3(self):
+        bucket, prefix = ro._split_s3("s3://bkt/campaign/x")
+        assert (bucket, prefix) == ("bkt", "campaign/x/")
+
+    def test_audit_thresholds_missing_dies(self, monkeypatch):
+        monkeypatch.setattr(
+            ro, "_DESIGN", "picard_framework/runs/no_such_design.json",
+        )
+        with pytest.raises((SystemExit, FileNotFoundError)):
+            ro._audit_thresholds()
+
+
 class TestRender:
     def test_per_cell_table_and_sections(self):
         payloads = {
