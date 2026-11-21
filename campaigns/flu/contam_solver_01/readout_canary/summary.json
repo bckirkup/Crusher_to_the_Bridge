@@ -1,0 +1,61 @@
+{
+  "platforms": [
+    {
+      "platform": "expedition_cruise_450",
+      "n_pairs": 20,
+      "complement": 450,
+      "native_onboard": {
+        "mean": 1,
+        "median": 1.0,
+        "min": 0,
+        "max": 6
+      },
+      "contamx_onboard": {
+        "mean": 1.6,
+        "median": 1.0,
+        "min": 0,
+        "max": 18
+      },
+      "diff_onboard_contamx_minus_native": {
+        "mean": 0.6,
+        "median": 0.0,
+        "min": -4,
+        "max": 18
+      },
+      "native_airborne_dom_mean": 0,
+      "contamx_airborne_dom_mean": 0,
+      "native_total_wall_s": {
+        "mean": 64.7339,
+        "median": 62.526,
+        "min": 54.741,
+        "max": 85.0912
+      },
+      "contamx_total_wall_s": {
+        "mean": 61.9259,
+        "median": 62.7151,
+        "min": 55.0753,
+        "max": 67.6548
+      },
+      "wall_ratio_contamx_over_native": 0.957,
+      "native_total_cpu_s": {
+        "mean": 65.4596,
+        "median": 63.263,
+        "min": 55.2757,
+        "max": 85.7179
+      },
+      "contamx_total_cpu_s": {
+        "mean": 62.5504,
+        "median": 63.1638,
+        "min": 55.7739,
+        "max": 68.0821
+      },
+      "contamx_child_cpu_s": {
+        "mean": 0.0056,
+        "median": 0.0057,
+        "min": 0.0045,
+        "max": 0.0068
+      },
+      "cpu_ratio_contamx_over_native": 0.956
+    }
+  ]
+}
