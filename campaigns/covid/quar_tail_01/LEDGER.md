@@ -67,3 +67,26 @@ Ops status, verdicts, and follow-ups are appended below as the campaign runs.
   (median 0, [-483,+269]) — no systematic damping from symptomatic-crew
   removal alone. Consistent with the cabin-resident-tail hypothesis;
   FRAQMB is the remaining share-axis discriminator.
+
+## 2026-11-21 — full campaign submitted + read out
+
+- Remaining 60 cells submitted under jobdef rev :3 (same pinned digest):
+  t8p50_d0 `41ec8037-3eb1-432a-b84d-25b4c891cfca`,
+  t8p50_fraqmb `9f102ca2-82e7-4f00-8fc1-b0735569faf0`,
+  t8p50_fraqmb_duty `cbcd3f60-418e-4d9d-89e8-57c8b0c0e424`.
+- 80/80 cells SUCCEEDED, 0 audit violations.
+- Frozen-grammar verdicts: D0_declared BASELINE (bit-exact replay —
+  paired during-median delta 0.0 vs committed dp_theta_8p50, n=16);
+  FRAQMB UNDER-DAMPED (394); MB_DUTY UNDER-DAMPED (425);
+  **FRAQMB_DUTY HALF-LANDED-MASS (257, in [150,350] band)** — paired
+  13/16 negative, median -62.5. The tail is crew-service-fed only
+  jointly: neither lever alone damps it.
+- Conditioned capture (CAPTURE-01 declared basis, infection_day ≤ 29,
+  takeoff-conditional medians): 0.811–0.845 on every arm — the ≥0.80 criterion is already met on
+  reachable infections; the unconditioned ~0.52 is the structural
+  post-window residual. On the conditioned basis FRAQMB_DUTY is
+  SEAM-LANDED.
+- Residual Θ blocker: the trajectory clause (before_share 0.059 vs
+  record 0.173 — the ~10d-late ignition) untouched by every arm.
+- Committed readout: `docs/covid/covid_quar_tail_01_readout.md`;
+  ledger entry `docs/ledger/COVID-QUAR-TAIL-SEAM-01.md`.
