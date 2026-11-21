@@ -45,3 +45,25 @@ Ops status, verdicts, and follow-ups are appended below as the campaign runs.
   (43 off-duty at end); FRAQMB_DUTY reads SOP-017-QUARTERMB +
   exempt_fraction_drawn {QUARTERMB: crew_general 261} + duty resolved
   (44 off-duty); funnel_hosts populated on both.
+
+## 2026-11-21 — canary submitted + read out
+
+- Image `picard-campaign:covid-quar-tail-01` built at merged main
+  43e45aeda07894f164a48180e39034f48ae26292, pushed digest
+  `sha256:39eb3d53b9f6310f7047a6db66eafe0d716ccc6d77e6885b6fdf1e156cf28a34`;
+  jobdef `picard-covid-quar-tail-01:1` pins the digest.
+- Single-cell gate (`--canary --index 0`, job
+  `2365f804-d8d4-4965-8ede-f948d9fecb42`): SUCCEEDED, verified MESSBOX +
+  11 zones + duty resolved + funnel_hosts populated + share@act 0.315.
+- Canary block array `a1b8ffb5-a014-4b2d-83f0-d27306bcc65a` (20 seeds,
+  `t8p50_mb_duty`): 20/20 SUCCEEDED, ~30 min; prefix
+  `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_quar_tail_01/`
+  (design.json alongside).
+- Readout `readout_mb_duty.md`: **UNDER-DAMPED** — takeoff-conditional
+  during median 425 vs band [150,350]; capture median 0.519 vs ≥0.80;
+  15/20 takeoff; 0 audit violations. Mechanism fired (duty excluded
+  median 168; off-duty-at-end 1–210), but paired vs committed
+  `dp_theta_8p50` cells the before/during deltas are symmetric scatter
+  (median 0, [-483,+269]) — no systematic damping from symptomatic-crew
+  removal alone. Consistent with the cabin-resident-tail hypothesis;
+  FRAQMB is the remaining share-axis discriminator.
