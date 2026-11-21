@@ -2,7 +2,7 @@
 
 The readout only restates committed payload echoes, so its correctness
 is the bookkeeping on ``funnel_hosts`` + ``campaign_specimen_log`` plus
-the serial-escape expectation over the declared sensitivity curve;
+the per-draw miss calibration over the declared sensitivity curve;
 these pin it on synthetic cells.
 """
 
@@ -110,7 +110,11 @@ def test_sensitivity_miss_dpi_and_escape_expectation(mod):
     assert out["miss_starved_retest"] == 1
     assert out["miss_exhausted"] == 0
     assert out["swabbed_infected_hosts"] == 1
-    assert out["swabbed_infected_expected_escape"] == pytest.approx(0.18)
+    # Per-draw calibration: both draws negative, each with its
+    # declared miss expectation.
+    assert out["while_infected_draws"] == 2
+    assert out["realized_negative_draws"] == 2
+    assert out["expected_negative_draws"] == pytest.approx(0.9 + 0.2)
 
 
 def test_miss_exhausted_when_last_swab_is_last_campaign_day(mod):
@@ -126,7 +130,8 @@ def test_miss_exhausted_when_last_swab_is_last_campaign_day(mod):
 
 def test_passive_only_specimen_miss_in_passive_hist(mod):
     # Specimen day present but no campaign swab while infected: the
-    # single passive-channel specimen is histogrammed by its own dpi.
+    # single passive-channel specimen is histogrammed by its own dpi
+    # and enters the escape product.
     payload = _cell_payload(
         hosts={
             1: {
@@ -141,6 +146,31 @@ def test_passive_only_specimen_miss_in_passive_hist(mod):
     assert out["drains"]["sensitivity_miss_presented"] == 1
     assert out["miss_passive_dpi_hist"]["5_14"] == 1
     assert out["miss_expected_escape"] == pytest.approx(0.2)
+    assert out["while_infected_draws"] == 1
+    assert out["realized_negative_draws"] == 1
+
+
+def test_passive_draw_joins_mixed_history_escape(mod):
+    # Campaign miss at day 12 (dpi 2) plus a passive specimen at day 17
+    # (dpi 7) that is not in the campaign log: both draws enter the
+    # escape product and the passive one lands in its own histogram.
+    payload = _cell_payload(
+        hosts={
+            1: {
+                "infection_day": 10,
+                "presented_day": 15,
+                "specimen_day": 17,
+            }
+        },
+        log=[_log_row(1, 12), _log_row(2, 20)],
+    )
+    out = mod._decompose_cell(payload, _CURVE)
+    assert out["miss_expected_escape"] == pytest.approx(0.9 * 0.2)
+    assert out["miss_passive_dpi_hist"]["5_14"] == 1
+    assert out["miss_swab_dpi_hist"]["0_4"] == 1
+    assert out["miss_swabs_per_host"] == {2: 1}
+    assert out["while_infected_draws"] == 2
+    assert out["realized_negative_draws"] == 2
 
 
 def test_pool_buckets_drain_infection_days_and_takeoff_gate(mod):
@@ -168,21 +198,33 @@ def test_pool_buckets_drain_infection_days_and_takeoff_gate(mod):
     ]
     assert hist == {"25_29": 1}
     assert pooled["infections_total"] == 1
+    assert pooled["while_infected_draws"] == 1
+    assert pooled["realized_negative_draws"] == 1
+    # Infected day 27, last campaign day 28: dpi 1.
+    assert pooled["exit_screen_expected"] == pytest.approx(_CURVE[1])
 
 
-def test_confirmed_escape_includes_confirming_draw(mod):
+def test_confirmed_draw_calibration(mod):
     # Infected day 10; campaign swab at day 12 (dpi 2) misses,
-    # passive confirmation at day 17 (dpi 7): the confirming draw's
-    # own escape factor (1 - 0.80) multiplies the product.
+    # passive confirmation at day 17 (dpi 7): two while-infected
+    # draws, one realized negative, each with its expectation.
     payload = _cell_payload(
         hosts={1: {"infection_day": 10, "confirmed_day": 17}},
         log=[_log_row(1, 12), _log_row(2, 20)],
     )
     out = mod._decompose_cell(payload, _CURVE)
     assert out["swabbed_infected_hosts"] == 1
-    expected = (1 - 0.10) * (1 - 0.80)
-    assert (
-        out["swabbed_infected_expected_escape"]
-        == pytest.approx(expected)
-    )
+    assert out["while_infected_draws"] == 2
+    assert out["realized_negative_draws"] == 1
+    assert out["expected_negative_draws"] == pytest.approx(0.9 + 0.2)
     assert out["confirmed_swab_dpi_hist"]["5_14"] == 1
+
+
+def test_exit_screen_expected_uses_dpi_at_last_campaign_day(mod):
+    payload = _cell_payload(
+        hosts={1: {"infection_day": 15, "specimen_day": 18}},
+        log=[_log_row(1, 18), _log_row(2, 20)],
+    )
+    out = mod._decompose_cell(payload, _CURVE)
+    # Unconfirmed host, dpi 20 - 15 = 5 at the last campaign day.
+    assert out["exit_screen_expected"] == pytest.approx(_CURVE[5])

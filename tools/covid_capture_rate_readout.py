@@ -27,11 +27,23 @@ into:
   dpi band (structural - the record's serial retesting is what catches
   these) and swabs in the high band (a real assay miss).
 
+Realized-vs-declared calibration is per-draw, not serial: confirmed
+hosts' draw sequences truncate at first positive (``_specimen_barred``),
+so a serial-escape expectation over observed draws is outcome-biased.
+Every while-infected draw contributes one realized miss indicator and
+one declared-curve expectation; their ratio says whether assay draws
+miss more or less often than declared, unbiased by how many draws a
+host happened to receive.
+
 The campaign specimen log carries every campaign swab day per host;
 ``_lab_sampled`` carries each host's last specimen across channels, so
 the per-host swab history is complete for never-presented hosts (their
 only channel is the campaign) and bounded by the last specimen day for
 presented hosts (the passive channel also swabs them).
+
+``exit_screen_expected`` bounds a hypothetical universal exit swab at
+the last campaign day: the sum over unconfirmed infected hosts of the
+declared sensitivity at their dpi on that day.
 
 Takeoff follows the scorer's gate: ``recorded_onsets >= 10``.
 
@@ -86,34 +98,25 @@ def _sens(curve: list[float], dpi: int) -> float:
     return curve[min(max(dpi, 0), len(curve) - 1)]
 
 
-def _decompose_cell(
-    payload: dict[str, Any], curve: list[float],
-) -> dict[str, Any]:
-    obs = payload.get("observables") or {}
-    hosts = payload.get("funnel_hosts") or {}
-    log = payload.get("campaign_specimen_log") or []
+def _bucket(dpi: int) -> str:
+    for lo, hi in _DPI_BUCKETS:
+        if lo <= dpi <= hi:
+            return f"{lo}_{hi}"
+    raise ValueError(f"dpi {dpi} outside buckets")
 
-    campaign_days = sorted({int(r["day"]) for r in log})
-    last_campaign_day = campaign_days[-1] if campaign_days else None
-    campaign_pos_days: dict[int, set[int]] = {}
-    swabs_by_host: dict[int, list[int]] = {}
-    for r in log:
-        aid = int(r["agent_id"])
-        day = int(r["day"])
-        swabs_by_host.setdefault(aid, []).append(day)
-        if r.get("positive"):
-            campaign_pos_days.setdefault(aid, set()).add(day)
 
-    out_hosts: dict[str, Any] = {
+def _new_hosts_block() -> dict[str, Any]:
+    return {
         "confirmed_campaign": 0,
         "confirmed_passive": 0,
         "drains": {},
         # For the swabbed-while-infected-negative drain: every while-
         # infected campaign swab's dpi bucketed on the declared curve,
-        # the passive last-specimen dpi for hosts with no campaign swab,
-        # and whether a later declared campaign day existed after the
-        # host's last while-infected swab (a starved retest) or not
-        # (the declared tiers were exhausted).
+        # the passive last-specimen dpi for hosts whose missed draws
+        # include a passive specimen, and whether a later declared
+        # campaign day existed after the host's last while-infected
+        # swab (a starved retest) or not (the declared tiers were
+        # exhausted).
         "miss_swab_dpi_hist": {f"{a}_{b}": 0 for a, b in _DPI_BUCKETS},
         "miss_passive_dpi_hist": {f"{a}_{b}": 0 for a, b in _DPI_BUCKETS},
         "miss_swabs_per_host": {},
@@ -125,15 +128,149 @@ def _decompose_cell(
         # one peaking at the last days is the incidence tail outrunning
         # the declared tiers.
         "drain_infection_days": {},
-        # Denominator for the serial-escape expectation: every host
-        # swabbed at least once while infected, missed or not, with the
-        # sum of its declared-curve escape probability. Realized misses
-        # vs this expectation says whether the misses are assay draws
-        # running hot or the structure itself under-catching.
+        # Unbiased per-draw calibration: every while-infected draw on
+        # an infected host, its realized outcome, and its declared-curve
+        # miss expectation. Outcome-dependent draw counts cancel out.
+        "while_infected_draws": 0,
+        "expected_negative_draws": 0.0,
+        "realized_negative_draws": 0,
         "swabbed_infected_hosts": 0,
-        "swabbed_infected_expected_escape": 0.0,
         "confirmed_swab_dpi_hist": {f"{a}_{b}": 0 for a, b in _DPI_BUCKETS},
+        # Universal-exit-swab bound: expected captures if every still-
+        # aboard unconfirmed infected host were swabbed once at the
+        # last campaign day under the declared curve.
+        "exit_screen_expected": 0.0,
     }
+
+
+def _record_draw(
+    out: dict[str, Any], curve: list[float], dpi: int, negative: bool,
+) -> None:
+    out["while_infected_draws"] += 1
+    out["expected_negative_draws"] += 1.0 - _sens(curve, dpi)
+    if negative:
+        out["realized_negative_draws"] += 1
+
+
+def _record_drain(
+    out: dict[str, Any], key: str, inf_day: int,
+) -> None:
+    out["drains"][key] = out["drains"].get(key, 0) + 1
+    out["drain_infection_days"].setdefault(key, []).append(inf_day)
+
+
+def _confirmed_host(
+    out: dict[str, Any],
+    curve: list[float],
+    aid: int,
+    inf_day: int,
+    conf_day: int,
+    campaign_pos_days: dict[int, set[int]],
+    campaign_log_days: dict[int, set[int]],
+    swabs_by_host: dict[int, list[int]],
+) -> None:
+    # Per-draw calibration over every while-infected campaign swab:
+    # the confirming draw and the pre-confirmation misses it took to
+    # get there.
+    for d in swabs_by_host.get(aid, []):
+        if d >= inf_day:
+            _record_draw(
+                out, curve, d - inf_day,
+                negative=d not in campaign_pos_days.get(aid, set()),
+            )
+    if conf_day in campaign_pos_days.get(aid, set()):
+        out["confirmed_campaign"] += 1
+    else:
+        out["confirmed_passive"] += 1
+        # The confirming draw happened on the passive channel and is
+        # not in the campaign log; count it as a realized hit.
+        if conf_day not in campaign_log_days.get(aid, set()):
+            _record_draw(out, curve, conf_day - inf_day, negative=False)
+    out["confirmed_swab_dpi_hist"][_bucket(conf_day - inf_day)] += 1
+    out["swabbed_infected_hosts"] += 1
+
+
+def _unconfirmed_host(
+    out: dict[str, Any],
+    curve: list[float],
+    aid: int,
+    entry: dict[str, Any],
+    inf_day: int,
+    presented: bool,
+    last_campaign_day: int | None,
+    swabs_by_host: dict[int, list[int]],
+) -> None:
+    state = "presented" if presented else "never_presented"
+    spec_day = entry.get("specimen_day")
+    spec_day = int(spec_day) if spec_day is not None else None
+    if spec_day is None:
+        mode = "tail_infected" if (
+            last_campaign_day is not None and inf_day > last_campaign_day
+        ) else "starved_never_swabbed"
+        _record_drain(out, f"{mode}_{state}", inf_day)
+        return
+    if spec_day < inf_day:
+        # Every swab predates the infection: a negative the declared
+        # retest tiers could still reach if a later campaign day ran
+        # after the infection.
+        mode = "starved_pre_infection_negative" if (
+            last_campaign_day is not None and inf_day <= last_campaign_day
+        ) else "tail_infected"
+        _record_drain(out, f"{mode}_{state}", inf_day)
+        return
+    # Swabbed at least once while infected and every specimen missed.
+    while_swabs = sorted(
+        d for d in swabs_by_host.get(aid, []) if d >= inf_day
+    )
+    for d in while_swabs:
+        out["miss_swab_dpi_hist"][_bucket(d - inf_day)] += 1
+        _record_draw(out, curve, d - inf_day, negative=True)
+    escape = 1.0
+    for d in while_swabs:
+        escape *= 1.0 - _sens(curve, d - inf_day)
+    if spec_day not in while_swabs:
+        # A passive-channel specimen the campaign log does not carry -
+        # a real missed draw at its own dpi.
+        out["miss_passive_dpi_hist"][_bucket(spec_day - inf_day)] += 1
+        _record_draw(out, curve, spec_day - inf_day, negative=True)
+        escape *= 1.0 - _sens(curve, spec_day - inf_day)
+    n_draws = len(while_swabs) + (0 if spec_day in while_swabs else 1)
+    out["miss_swabs_per_host"][n_draws] = (
+        out["miss_swabs_per_host"].get(n_draws, 0) + 1
+    )
+    out["miss_expected_escape"] += escape
+    last_while_infected = max(while_swabs + [spec_day])
+    if last_campaign_day is not None and (
+        last_while_infected < last_campaign_day
+    ):
+        out["miss_starved_retest"] += 1
+    else:
+        out["miss_exhausted"] += 1
+    out["swabbed_infected_hosts"] += 1
+    _record_drain(out, f"sensitivity_miss_{state}", inf_day)
+
+
+def _decompose_cell(
+    payload: dict[str, Any], curve: list[float],
+) -> dict[str, Any]:
+    obs = payload.get("observables") or {}
+    hosts = payload.get("funnel_hosts") or {}
+    log = payload.get("campaign_specimen_log") or []
+
+    campaign_days = sorted({int(r["day"]) for r in log})
+    last_campaign_day = campaign_days[-1] if campaign_days else None
+    campaign_pos_days: dict[int, set[int]] = {}
+    campaign_log_days: dict[int, set[int]] = {}
+    swabs_by_host: dict[int, list[int]] = {}
+    for r in log:
+        aid = int(r["agent_id"])
+        day = int(r["day"])
+        swabs_by_host.setdefault(aid, []).append(day)
+        campaign_log_days.setdefault(aid, set()).add(day)
+        if r.get("positive"):
+            campaign_pos_days.setdefault(aid, set()).add(day)
+
+    out_hosts = _new_hosts_block()
     capture_inf = 0
     capture_conf = 0
     inf_days: list[int] = []
@@ -149,103 +286,19 @@ def _decompose_cell(
         presented = entry.get("presented_day") is not None
         if conf_day is not None:
             capture_conf += 1
-            if int(conf_day) in campaign_pos_days.get(aid, set()):
-                out_hosts["confirmed_campaign"] += 1
-            else:
-                out_hosts["confirmed_passive"] += 1
-            conf_dpi = int(conf_day) - inf_day
-            for lo, hi in _DPI_BUCKETS:
-                if lo <= conf_dpi <= hi:
-                    out_hosts["confirmed_swab_dpi_hist"][f"{lo}_{hi}"] += 1
-                    break
-            # Serial-escape denominator: this host was swabbed while
-            # infected on every campaign day before the confirming
-            # specimen - each of those was a missed draw it escaped.
-            missed = [
-                d for d in swabs_by_host.get(aid, [])
-                if inf_day <= d < int(conf_day)
-            ]
-            out_hosts["swabbed_infected_hosts"] += 1
-            escape = 1.0
-            for d in missed:
-                escape *= 1.0 - _sens(curve, d - inf_day)
-            # The confirming draw had the same per-draw escape
-            # probability; the expectation counts hosts escaping every
-            # while-infected draw, positive ones included.
-            escape *= 1.0 - _sens(curve, conf_dpi)
-            out_hosts["swabbed_infected_expected_escape"] += escape
-            continue
-
-        spec_day = entry.get("specimen_day")
-        state = "presented" if presented else "never_presented"
-        if spec_day is None:
-            mode = "tail_infected" if (
-                last_campaign_day is not None and inf_day > last_campaign_day
-            ) else "starved_never_swabbed"
-            key = f"{mode}_{state}"
-            out_hosts["drains"][key] = out_hosts["drains"].get(key, 0) + 1
-            out_hosts["drain_infection_days"].setdefault(
-                key, [],
-            ).append(inf_day)
-            continue
-        spec_day = int(spec_day)
-        if spec_day < inf_day:
-            # Every swab predates the infection: a negative the declared
-            # retest tiers could still reach if a later campaign day ran
-            # after the infection.
-            mode = "starved_pre_infection_negative" if (
-                last_campaign_day is not None and inf_day <= last_campaign_day
-            ) else "tail_infected"
-            key = f"{mode}_{state}"
-            out_hosts["drains"][key] = out_hosts["drains"].get(key, 0) + 1
-            out_hosts["drain_infection_days"].setdefault(
-                key, [],
-            ).append(inf_day)
-            continue
-        # Swabbed at least once while infected and every specimen missed.
-        # The campaign log gives the full swab history for this channel;
-        # a host with no campaign swab shows only its channel-agnostic
-        # last specimen day (the passive channel's).
-        swabs = sorted(d for d in swabs_by_host.get(aid, []) if d >= inf_day)
-        for d in swabs:
-            dpi = d - inf_day
-            for lo, hi in _DPI_BUCKETS:
-                if lo <= dpi <= hi:
-                    out_hosts["miss_swab_dpi_hist"][f"{lo}_{hi}"] += 1
-                    break
-        if swabs:
-            out_hosts["miss_swabs_per_host"][len(swabs)] = (
-                out_hosts["miss_swabs_per_host"].get(len(swabs), 0) + 1
+            _confirmed_host(
+                out_hosts, curve, aid, inf_day, int(conf_day),
+                campaign_pos_days, campaign_log_days, swabs_by_host,
             )
-            # Expected serial-test escape probability under the declared
-            # curve, draws treated as independent - what the record's
-            # retesting structure implies for this host's swab set.
-            escape = 1.0
-            for d in swabs:
-                escape *= 1.0 - _sens(curve, d - inf_day)
-        else:
-            dpi = spec_day - inf_day
-            for lo, hi in _DPI_BUCKETS:
-                if lo <= dpi <= hi:
-                    out_hosts["miss_passive_dpi_hist"][f"{lo}_{hi}"] += 1
-                    break
-            out_hosts["miss_swabs_per_host"][1] = (
-                out_hosts["miss_swabs_per_host"].get(1, 0) + 1
+            continue
+        _unconfirmed_host(
+            out_hosts, curve, aid, entry, inf_day, presented,
+            last_campaign_day, swabs_by_host,
+        )
+        if last_campaign_day is not None:
+            out_hosts["exit_screen_expected"] += _sens(
+                curve, last_campaign_day - inf_day
             )
-            escape = 1.0 - _sens(curve, dpi)
-        out_hosts["miss_expected_escape"] += escape
-        last_while_infected = max(swabs + [spec_day])
-        if last_campaign_day is not None and (
-            last_while_infected < last_campaign_day
-        ):
-            out_hosts["miss_starved_retest"] += 1
-        else:
-            out_hosts["miss_exhausted"] += 1
-        out_hosts["swabbed_infected_hosts"] += 1
-        out_hosts["swabbed_infected_expected_escape"] += escape
-        key = f"sensitivity_miss_{state}"
-        out_hosts["drains"][key] = out_hosts["drains"].get(key, 0) + 1
-        out_hosts["drain_infection_days"].setdefault(key, []).append(inf_day)
 
     takeoff = (obs.get("recorded_onsets") or 0) >= 10
     return {
@@ -298,11 +351,20 @@ def _pool(cells: list[dict[str, Any]]) -> dict[str, Any]:
         "confirmed_swab_dpi_hist": _merge_hist(
             c["confirmed_swab_dpi_hist"] for c in takeoff
         ),
+        "while_infected_draws": sum(
+            c["while_infected_draws"] for c in takeoff
+        ),
+        "expected_negative_draws": round(
+            sum(c["expected_negative_draws"] for c in takeoff), 1
+        ),
+        "realized_negative_draws": sum(
+            c["realized_negative_draws"] for c in takeoff
+        ),
         "swabbed_infected_hosts": sum(
             c["swabbed_infected_hosts"] for c in takeoff
         ),
-        "swabbed_infected_expected_escape": round(
-            sum(c["swabbed_infected_expected_escape"] for c in takeoff), 1
+        "exit_screen_expected": round(
+            sum(c["exit_screen_expected"] for c in takeoff), 1
         ),
         "drain_infection_days": {},
     }

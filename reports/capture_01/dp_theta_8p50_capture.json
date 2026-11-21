@@ -26,19 +26,19 @@
     "15_999": 11
    },
    "miss_passive_dpi_hist": {
-    "0_4": 1,
-    "5_14": 8,
+    "0_4": 2,
+    "5_14": 9,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 133,
-    "2": 6,
+    "1": 131,
+    "2": 8,
     "3": 3,
     "6": 1,
     "4": 2,
     "5": 1
    },
-   "miss_expected_escape": 102.73417648000002,
+   "miss_expected_escape": 101.78417648000001,
    "miss_starved_retest": 12,
    "miss_exhausted": 134,
    "drain_infection_days": {
@@ -290,13 +290,16 @@
      0
     ]
    },
+   "while_infected_draws": 1086,
+   "expected_negative_draws": 632.8009999999962,
+   "realized_negative_draws": 644,
    "swabbed_infected_hosts": 587,
-   "swabbed_infected_expected_escape": 243.3492696813564,
    "confirmed_swab_dpi_hist": {
     "0_4": 89,
     "5_14": 338,
     "15_999": 14
-   }
+   },
+   "exit_screen_expected": 74.34199999999997
   },
   {
    "seed": 20200206,
@@ -380,13 +383,16 @@
      29
     ]
    },
+   "while_infected_draws": 37,
+   "expected_negative_draws": 21.915000000000003,
+   "realized_negative_draws": 29,
    "swabbed_infected_hosts": 33,
-   "swabbed_infected_expected_escape": 18.997653804000006,
    "confirmed_swab_dpi_hist": {
     "0_4": 2,
     "5_14": 6,
     "15_999": 0
-   }
+   },
+   "exit_screen_expected": 14.409999999999993
   },
   {
    "seed": 20200207,
@@ -414,19 +420,19 @@
     "15_999": 13
    },
    "miss_passive_dpi_hist": {
-    "0_4": 15,
-    "5_14": 4,
+    "0_4": 16,
+    "5_14": 7,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 188,
-    "3": 2,
-    "2": 9,
+    "1": 185,
+    "2": 11,
+    "3": 3,
     "4": 3,
     "6": 1,
     "5": 1
    },
-   "miss_expected_escape": 148.65008203999994,
+   "miss_expected_escape": 146.48968203999996,
    "miss_starved_retest": 16,
    "miss_exhausted": 188,
    "drain_infection_days": {
@@ -886,13 +892,16 @@
      0
     ]
    },
+   "while_infected_draws": 1100,
+   "expected_negative_draws": 657.2969999999954,
+   "realized_negative_draws": 669,
    "swabbed_infected_hosts": 633,
-   "swabbed_infected_expected_escape": 287.22213757093294,
    "confirmed_swab_dpi_hist": {
     "0_4": 89,
     "5_14": 324,
     "15_999": 16
-   }
+   },
+   "exit_screen_expected": 98.48099999999985
   },
   {
    "seed": 20200208,
@@ -920,21 +929,21 @@
     "15_999": 42
    },
    "miss_passive_dpi_hist": {
-    "0_4": 32,
-    "5_14": 20,
+    "0_4": 38,
+    "5_14": 23,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "2": 21,
-    "1": 145,
-    "3": 6,
+    "2": 26,
+    "1": 138,
+    "3": 8,
     "12": 1,
     "8": 1,
     "4": 1,
     "6": 2,
     "5": 1
    },
-   "miss_expected_escape": 118.19340258530111,
+   "miss_expected_escape": 115.01200668530113,
    "miss_starved_retest": 41,
    "miss_exhausted": 137,
    "drain_infection_days": {
@@ -1365,13 +1374,16 @@
      33
     ]
    },
+   "while_infected_draws": 1946,
+   "expected_negative_draws": 1042.8989999999965,
+   "realized_negative_draws": 1047,
    "swabbed_infected_hosts": 1068,
-   "swabbed_infected_expected_escape": 388.22224369248744,
    "confirmed_swab_dpi_hist": {
     "0_4": 133,
     "5_14": 729,
     "15_999": 28
-   }
+   },
+   "exit_screen_expected": 161.2350000000003
   },
   {
    "seed": 20200209,
@@ -1409,13 +1421,16 @@
      0
     ]
    },
+   "while_infected_draws": 0,
+   "expected_negative_draws": 0.0,
+   "realized_negative_draws": 0,
    "swabbed_infected_hosts": 0,
-   "swabbed_infected_expected_escape": 0.0,
    "confirmed_swab_dpi_hist": {
     "0_4": 0,
     "5_14": 0,
     "15_999": 0
-   }
+   },
+   "exit_screen_expected": 0.68
   },
   {
    "seed": 20200210,
@@ -1443,20 +1458,20 @@
     "15_999": 27
    },
    "miss_passive_dpi_hist": {
-    "0_4": 20,
-    "5_14": 13,
+    "0_4": 21,
+    "5_14": 23,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 155,
-    "2": 23,
+    "1": 147,
+    "2": 28,
+    "3": 6,
     "4": 3,
     "7": 1,
-    "3": 3,
     "6": 2,
     "5": 1
    },
-   "miss_expected_escape": 133.01178742921036,
+   "miss_expected_escape": 126.73159842921041,
    "miss_starved_retest": 40,
    "miss_exhausted": 148,
    "drain_infection_days": {
@@ -1867,13 +1882,16 @@
      0
     ]
    },
+   "while_infected_draws": 2024,
+   "expected_negative_draws": 1128.4879999999973,
+   "realized_negative_draws": 1112,
    "swabbed_infected_hosts": 1087,
-   "swabbed_infected_expected_escape": 419.8958422998669,
    "confirmed_swab_dpi_hist": {
     "0_4": 168,
     "5_14": 709,
     "15_999": 22
-   }
+   },
+   "exit_screen_expected": 141.5920000000003
   },
   {
    "seed": 20200211,
@@ -1911,13 +1929,16 @@
      1
     ]
    },
+   "while_infected_draws": 13,
+   "expected_negative_draws": 6.7,
+   "realized_negative_draws": 9,
    "swabbed_infected_hosts": 4,
-   "swabbed_infected_expected_escape": 0.5068310015999999,
    "confirmed_swab_dpi_hist": {
     "0_4": 0,
     "5_14": 4,
     "15_999": 0
-   }
+   },
+   "exit_screen_expected": 0.68
   },
   {
    "seed": 20200212,
@@ -1945,18 +1966,19 @@
     "15_999": 112
    },
    "miss_passive_dpi_hist": {
-    "0_4": 5,
-    "5_14": 1,
-    "15_999": 2
+    "0_4": 8,
+    "5_14": 7,
+    "15_999": 3
    },
    "miss_swabs_per_host": {
-    "2": 13,
+    "2": 8,
     "4": 8,
-    "3": 16,
-    "1": 82,
+    "3": 21,
+    "1": 81,
+    "6": 1,
     "5": 7
    },
-   "miss_expected_escape": 75.75398551514995,
+   "miss_expected_escape": 71.13246461514997,
    "miss_starved_retest": 44,
    "miss_exhausted": 82,
    "drain_infection_days": {
@@ -2177,13 +2199,16 @@
      3
     ]
    },
+   "while_infected_draws": 3626,
+   "expected_negative_draws": 1615.6760000000224,
+   "realized_negative_draws": 1024,
    "swabbed_infected_hosts": 2716,
-   "swabbed_infected_expected_escape": 943.928787792734,
    "confirmed_swab_dpi_hist": {
     "0_4": 350,
     "5_14": 2123,
     "15_999": 117
-   }
+   },
+   "exit_screen_expected": 72.49000000000008
   },
   {
    "seed": 20200213,
@@ -2211,18 +2236,18 @@
     "15_999": 12
    },
    "miss_passive_dpi_hist": {
-    "0_4": 10,
-    "5_14": 12,
+    "0_4": 13,
+    "5_14": 15,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 216,
-    "2": 9,
-    "3": 6,
+    "1": 211,
+    "3": 7,
+    "2": 13,
     "4": 2,
     "12": 1
    },
-   "miss_expected_escape": 180.73976619066525,
+   "miss_expected_escape": 177.88976619066528,
    "miss_starved_retest": 20,
    "miss_exhausted": 214,
    "drain_infection_days": {
@@ -2578,13 +2603,16 @@
      32
     ]
    },
+   "while_infected_draws": 656,
+   "expected_negative_draws": 434.88599999999684,
+   "realized_negative_draws": 450,
    "swabbed_infected_hosts": 440,
-   "swabbed_infected_expected_escape": 259.3560294292866,
    "confirmed_swab_dpi_hist": {
     "0_4": 60,
     "5_14": 144,
     "15_999": 2
-   }
+   },
+   "exit_screen_expected": 98.12999999999981
   },
   {
    "seed": 20200214,
@@ -2612,20 +2640,20 @@
     "15_999": 19
    },
    "miss_passive_dpi_hist": {
-    "0_4": 8,
-    "5_14": 5,
+    "0_4": 9,
+    "5_14": 9,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 152,
-    "3": 5,
-    "2": 7,
+    "1": 150,
+    "4": 4,
+    "2": 8,
     "9": 1,
+    "3": 4,
     "5": 3,
-    "4": 2,
     "6": 1
    },
-   "miss_expected_escape": 116.08741429021184,
+   "miss_expected_escape": 113.17221429021185,
    "miss_starved_retest": 9,
    "miss_exhausted": 162,
    "drain_infection_days": {
@@ -2921,13 +2949,16 @@
      31
     ]
    },
+   "while_infected_draws": 725,
+   "expected_negative_draws": 426.1389999999969,
+   "realized_negative_draws": 466,
    "swabbed_infected_hosts": 427,
-   "swabbed_infected_expected_escape": 204.97997474479772,
    "confirmed_swab_dpi_hist": {
     "0_4": 62,
     "5_14": 188,
     "15_999": 6
-   }
+   },
+   "exit_screen_expected": 82.36899999999996
   },
   {
    "seed": 20200215,
@@ -2956,18 +2987,18 @@
    },
    "miss_passive_dpi_hist": {
     "0_4": 3,
-    "5_14": 5,
+    "5_14": 6,
     "15_999": 0
    },
    "miss_swabs_per_host": {
     "1": 172,
-    "2": 8,
-    "3": 2,
+    "3": 3,
+    "2": 7,
     "6": 1,
     "8": 1,
     "4": 1
    },
-   "miss_expected_escape": 134.9868656435662,
+   "miss_expected_escape": 134.36686564356623,
    "miss_starved_retest": 8,
    "miss_exhausted": 177,
    "drain_infection_days": {
@@ -3292,13 +3323,16 @@
      0
     ]
    },
+   "while_infected_draws": 803,
+   "expected_negative_draws": 496.1519999999965,
+   "realized_negative_draws": 535,
    "swabbed_infected_hosts": 453,
-   "swabbed_infected_expected_escape": 219.4190201027529,
    "confirmed_swab_dpi_hist": {
     "0_4": 50,
     "5_14": 207,
     "15_999": 11
-   }
+   },
+   "exit_screen_expected": 61.4099999999999
   },
   {
    "seed": 20200216,
@@ -3327,16 +3361,17 @@
     "15_999": 10
    },
    "miss_passive_dpi_hist": {
-    "0_4": 2,
-    "5_14": 0,
+    "0_4": 3,
+    "5_14": 1,
     "15_999": 0
    },
    "miss_swabs_per_host": {
     "1": 141,
-    "2": 4,
+    "2": 2,
+    "3": 2,
     "10": 1
    },
-   "miss_expected_escape": 136.46325399481833,
+   "miss_expected_escape": 135.52805399481832,
    "miss_starved_retest": 5,
    "miss_exhausted": 141,
    "drain_infection_days": {
@@ -3609,13 +3644,16 @@
      30
     ]
    },
+   "while_infected_draws": 231,
+   "expected_negative_draws": 184.59799999999973,
+   "realized_negative_draws": 190,
    "swabbed_infected_hosts": 187,
-   "swabbed_infected_expected_escape": 149.54670727481832,
    "confirmed_swab_dpi_hist": {
     "0_4": 7,
     "5_14": 32,
     "15_999": 2
-   }
+   },
+   "exit_screen_expected": 19.092999999999996
   },
   {
    "seed": 20200217,
@@ -3652,13 +3690,16 @@
      0
     ]
    },
+   "while_infected_draws": 0,
+   "expected_negative_draws": 0.0,
+   "realized_negative_draws": 0,
    "swabbed_infected_hosts": 0,
-   "swabbed_infected_expected_escape": 0.0,
    "confirmed_swab_dpi_hist": {
     "0_4": 0,
     "5_14": 0,
     "15_999": 0
-   }
+   },
+   "exit_screen_expected": 0.34
   },
   {
    "seed": 20200218,
@@ -3686,19 +3727,19 @@
     "15_999": 1
    },
    "miss_passive_dpi_hist": {
-    "0_4": 2,
-    "5_14": 8,
+    "0_4": 3,
+    "5_14": 13,
     "15_999": 1
    },
    "miss_swabs_per_host": {
-    "1": 207,
-    "2": 8,
-    "3": 4,
-    "6": 1,
+    "1": 204,
+    "2": 9,
+    "3": 6,
+    "7": 1,
     "4": 2,
     "5": 1
    },
-   "miss_expected_escape": 171.70612186239978,
+   "miss_expected_escape": 168.90087557247978,
    "miss_starved_retest": 7,
    "miss_exhausted": 216,
    "drain_infection_days": {
@@ -4013,13 +4054,16 @@
      0
     ]
    },
+   "while_infected_draws": 813,
+   "expected_negative_draws": 513.3909999999966,
+   "realized_negative_draws": 558,
    "swabbed_infected_hosts": 472,
-   "swabbed_infected_expected_escape": 253.22123317053143,
    "confirmed_swab_dpi_hist": {
     "0_4": 59,
     "5_14": 188,
     "15_999": 2
-   }
+   },
+   "exit_screen_expected": 67.44499999999988
   },
   {
    "seed": 20200219,
@@ -4047,20 +4091,20 @@
     "15_999": 116
    },
    "miss_passive_dpi_hist": {
-    "0_4": 4,
-    "5_14": 5,
-    "15_999": 3
+    "0_4": 9,
+    "5_14": 11,
+    "15_999": 4
    },
    "miss_swabs_per_host": {
-    "4": 4,
+    "4": 7,
     "5": 12,
     "6": 4,
-    "3": 16,
-    "1": 95,
-    "2": 13,
+    "3": 17,
+    "1": 90,
+    "2": 14,
     "7": 1
    },
-   "miss_expected_escape": 81.59045585098966,
+   "miss_expected_escape": 76.58538763826968,
    "miss_starved_retest": 48,
    "miss_exhausted": 97,
    "drain_infection_days": {
@@ -4313,13 +4357,16 @@
      0
     ]
    },
+   "while_infected_draws": 3615,
+   "expected_negative_draws": 1656.5740000000253,
+   "realized_negative_draws": 1168,
    "swabbed_infected_hosts": 2575,
-   "swabbed_infected_expected_escape": 899.4191001965319,
    "confirmed_swab_dpi_hist": {
     "0_4": 354,
     "5_14": 1966,
     "15_999": 110
-   }
+   },
+   "exit_screen_expected": 92.71900000000008
   },
   {
    "seed": 20200220,
@@ -4347,19 +4394,19 @@
     "15_999": 6
    },
    "miss_passive_dpi_hist": {
-    "0_4": 8,
-    "5_14": 3,
+    "0_4": 11,
+    "5_14": 6,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 153,
-    "2": 7,
+    "1": 148,
+    "2": 12,
     "6": 2,
-    "3": 6,
-    "5": 2,
-    "4": 3
+    "4": 4,
+    "3": 5,
+    "5": 2
    },
-   "miss_expected_escape": 129.44288408000006,
+   "miss_expected_escape": 126.60768408000006,
    "miss_starved_retest": 13,
    "miss_exhausted": 160,
    "drain_infection_days": {
@@ -4669,13 +4716,16 @@
      29
     ]
    },
+   "while_infected_draws": 1070,
+   "expected_negative_draws": 655.1899999999947,
+   "realized_negative_draws": 685,
    "swabbed_infected_hosts": 556,
-   "swabbed_infected_expected_escape": 247.34817327448008,
    "confirmed_swab_dpi_hist": {
     "0_4": 71,
     "5_14": 308,
     "15_999": 4
-   }
+   },
+   "exit_screen_expected": 81.71199999999988
   },
   {
    "seed": 20200221,
@@ -4703,17 +4753,17 @@
     "15_999": 4
    },
    "miss_passive_dpi_hist": {
-    "0_4": 11,
-    "5_14": 6,
+    "0_4": 12,
+    "5_14": 7,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 217,
-    "3": 3,
-    "2": 11,
-    "4": 2
+    "1": 216,
+    "4": 3,
+    "2": 12,
+    "3": 2
    },
-   "miss_expected_escape": 187.56444399999984,
+   "miss_expected_escape": 186.62924399999983,
    "miss_starved_retest": 18,
    "miss_exhausted": 215,
    "drain_infection_days": {
@@ -5130,13 +5180,16 @@
      29
     ]
    },
+   "while_infected_draws": 650,
+   "expected_negative_draws": 430.2389999999969,
+   "realized_negative_draws": 426,
    "swabbed_infected_hosts": 453,
-   "swabbed_infected_expected_escape": 266.00960684319915,
    "confirmed_swab_dpi_hist": {
     "0_4": 50,
     "5_14": 169,
     "15_999": 1
-   }
+   },
+   "exit_screen_expected": 93.42399999999994
   },
   {
    "seed": 20200222,
@@ -5164,19 +5217,19 @@
     "15_999": 161
    },
    "miss_passive_dpi_hist": {
-    "0_4": 2,
-    "5_14": 2,
+    "0_4": 3,
+    "5_14": 4,
     "15_999": 1
    },
    "miss_swabs_per_host": {
-    "1": 57,
-    "4": 11,
-    "3": 9,
+    "1": 56,
+    "4": 10,
+    "3": 10,
+    "5": 14,
     "2": 9,
-    "6": 4,
-    "5": 13
+    "6": 4
    },
-   "miss_expected_escape": 48.042496276313976,
+   "miss_expected_escape": 46.755788276313965,
    "miss_starved_retest": 28,
    "miss_exhausted": 75,
    "drain_infection_days": {
@@ -5390,13 +5443,16 @@
      0
     ]
    },
+   "while_infected_draws": 3662,
+   "expected_negative_draws": 1578.5160000000258,
+   "realized_negative_draws": 1006,
    "swabbed_infected_hosts": 2747,
-   "swabbed_infected_expected_escape": 926.9005510865379,
    "confirmed_swab_dpi_hist": {
     "0_4": 348,
     "5_14": 2166,
     "15_999": 130
-   }
+   },
+   "exit_screen_expected": 78.19600000000023
   },
   {
    "seed": 20200223,
@@ -5425,15 +5481,15 @@
    },
    "miss_passive_dpi_hist": {
     "0_4": 1,
-    "5_14": 2,
+    "5_14": 5,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 54,
-    "2": 2,
-    "3": 2
+    "1": 53,
+    "3": 4,
+    "2": 1
    },
-   "miss_expected_escape": 50.942600000000006,
+   "miss_expected_escape": 49.143692,
    "miss_starved_retest": 4,
    "miss_exhausted": 54,
    "drain_infection_days": {
@@ -5527,13 +5583,16 @@
      3
     ]
    },
+   "while_infected_draws": 143,
+   "expected_negative_draws": 101.121,
+   "realized_negative_draws": 101,
    "swabbed_infected_hosts": 100,
-   "swabbed_infected_expected_escape": 64.35628580000001,
    "confirmed_swab_dpi_hist": {
     "0_4": 3,
     "5_14": 38,
     "15_999": 1
-   }
+   },
+   "exit_screen_expected": 15.579999999999998
   },
   {
    "seed": 20200224,
@@ -5561,18 +5620,18 @@
     "15_999": 17
    },
    "miss_passive_dpi_hist": {
-    "0_4": 10,
-    "5_14": 9,
+    "0_4": 11,
+    "5_14": 13,
     "15_999": 0
    },
    "miss_swabs_per_host": {
-    "1": 188,
+    "1": 185,
+    "2": 5,
     "5": 2,
-    "2": 3,
-    "3": 9,
-    "4": 2
+    "4": 3,
+    "3": 9
    },
-   "miss_expected_escape": 145.95046381759997,
+   "miss_expected_escape": 143.28910381759997,
    "miss_starved_retest": 16,
    "miss_exhausted": 188,
    "drain_infection_days": {
@@ -5963,13 +6022,16 @@
      0
     ]
    },
+   "while_infected_draws": 1219,
+   "expected_negative_draws": 721.6809999999955,
+   "realized_negative_draws": 741,
    "swabbed_infected_hosts": 680,
-   "swabbed_infected_expected_escape": 297.95500823435736,
    "confirmed_swab_dpi_hist": {
     "0_4": 88,
     "5_14": 369,
     "15_999": 19
-   }
+   },
+   "exit_screen_expected": 99.32999999999991
   }
  ],
  "pooled": {
@@ -5989,24 +6051,24 @@
    "15_999": 570
   },
   "miss_passive_dpi_hist": {
-   "0_4": 134,
-   "5_14": 103,
-   "15_999": 7
+   "0_4": 163,
+   "5_14": 159,
+   "15_999": 9
   },
   "miss_swabs_per_host": {
-   "1": 2355,
-   "2": 153,
-   "3": 92,
+   "1": 2308,
+   "2": 173,
+   "3": 110,
    "6": 19,
-   "4": 46,
-   "5": 44,
+   "4": 53,
+   "5": 45,
    "12": 2,
    "8": 2,
-   "7": 2,
+   "7": 3,
    "9": 1,
    "10": 1
   },
-  "miss_expected_escape": 1961.9,
+  "miss_expected_escape": 1920.0,
   "miss_starved_retest": 329,
   "miss_exhausted": 2388,
   "confirmed_campaign": 4596,
@@ -6016,8 +6078,11 @@
    "5_14": 9998,
    "15_999": 485
   },
+  "while_infected_draws": 23369,
+  "expected_negative_draws": 12275.6,
+  "realized_negative_draws": 10822,
   "swabbed_infected_hosts": 15181,
-  "swabbed_infected_expected_escape": 6071.1,
+  "exit_screen_expected": 1337.5,
   "drain_infection_days": {
    "starved_never_swabbed_never_presented": {
     "30_34": 885,

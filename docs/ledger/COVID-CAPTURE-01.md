@@ -54,20 +54,26 @@ Kucirka sensitivity ≤0.33); 2,388 of the 2,717 are `miss_exhausted`
 detectable dpi, vs 329 `miss_starved_retest` (a later campaign day
 existed and did not reach them).
 
-**Realized vs declared-curve escapes:** among the 15,181
-swabbed-while-infected hosts, the declared sensitivity curve
-(serial-independent per-draw misses) expects 6,071 serial escapes;
-2,717 realized — the retest structure **outperforms** the declared
-curve, i.e. assay-draw miss-rate is not running hot. The gap is not
-in the observation machinery; it is that right-sized-Θ incidence
-peaks ~10–15 days too late for the declared test window.
+**Realized vs declared-curve calibration (per-draw, unbiased):**
+23,369 while-infected specimen draws on the 15,181
+swabbed-while-infected hosts → 10,822 realized negatives vs 12,276
+declared-curve expectations — draws miss at **0.88×** the declared
+rate, i.e. the assay detects at-or-above its declared sensitivity.
+(The calibration is per-draw, not serial: confirmed hosts' draw
+sequences truncate at first positive, so a serial-escape expectation
+over observed draws would be outcome-biased.) The gap is not in the
+observation machinery; it is that right-sized-Θ incidence peaks
+~10–15 days too late for the declared test window.
 
-**Bound on any observation-seam lever:** an end-of-voyage exit
-catch-all with *perfect* detection of every infected reaching
-dpi ≥5 by voyage end could add at most the ~1,653 unconfirmed hosts
-infected ≤ day 29 → capture ≈0.82 pooled, still short of ~0.85,
-because ~3,100 infections (18% of the takeoff pool) occur days
-30–34 and are unreachable by any in-voyage specimen structure.
+**Bound on any observation-seam lever:** a universal exit swab at
+the last campaign day (day 34) has declared-curve expectation
++1,337 captures → capture ≈0.80 pooled; even *perfect* detection of
+every infected reaching dpi ≥5 adds at most the ~1,653 unconfirmed
+hosts infected ≤ day 29 → ≈0.82. Either way it falls short of ~0.85
+because ~3,100 unconfirmed infections (65% of the unconfirmed pool,
+18% of all infections) sit at dpi ≤4 on the last campaign day —
+unreachable at declared sensitivities by any in-voyage specimen
+structure.
 Real roster-reach residual (reachable-dpi hosts the declared
 rosters never touch): ~660 hosts (~3.8% of infected — 260
 never-swabbed infected ≤ day 24, ~330 missed despite a later
@@ -104,8 +110,8 @@ belongs with the H5 timing tail, not the observation layer.
 ## Non-results
 
 - No evidence of a specimen-sensitivity hotness defect: realized
-  serial escapes (2,717) run at 45% of the declared-curve
-  expectation (6,071).
+  per-draw misses (10,822) run at 0.88× the declared-curve
+  expectation (12,276).
 - Tail-infection drain is zero; every infected host had at least
   one campaign day at-or-after infection day.
 - Record anchor ~0.85 confirmed-per-infection is **not** a property
