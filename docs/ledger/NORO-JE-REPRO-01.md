@@ -3,7 +3,7 @@
 **Commit:** 01156c62
 **Pathogens:** norwalk_gi
 **Status:** measured
-**Measured at:** 90aa3ec2 (campaign), attribution replays at 3500c205 / bf0ec168
+**Measured at:** 90aa3ec2
 
 The Paper-1 WP2 reproduction arm
 (`campaigns/noro/paper1_joint_eval_01`, tier
