@@ -486,6 +486,14 @@ are the platform's `nominal_complement`, delivered as exact per-class
   same counts: `passenger_complement` / `crew_complement` in the run summary
   and `n_passengers` / `n_crew` in the Sentinel line list equal the declared
   reference counts, or the cell fails technical completion (§5.3).
+- **Open reconciliation with WP2.** The WP2 design merged while this
+  revision was in review
+  (`campaigns/noro/paper1_joint_eval_01/DESIGN.md`) declares the
+  template-fraction allocation (316 / 134, 1,338 / 572, 4,900 / 2,100) as
+  its intended counts and treats nominal as a baseline change. That is this
+  section's `archetype_template_baseline`, not its reference. One of the two
+  documents changes before the freeze is declared; which one is a decision
+  for Benjamin and Edison, and neither is run as "the reference" until then.
 - **Explorer against the mega archetype (WP3).** Retained differences: total
   complement, role split and vessel geometry. Controlled: within-role class
   ratios, the §2.1 block, strategy, dose and source. WP3 states this in its
