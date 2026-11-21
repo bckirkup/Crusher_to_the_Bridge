@@ -44,7 +44,7 @@ def test_main_reports_and_empty_dir(tmp_path, capsys):
     cells = tmp_path / "cells"
     cells.mkdir()
     (cells / "cell_1.json").write_text(json.dumps(
-        _cell(1, {d: 5 for d in range(35)})))  # ign day 10 -> late
+        _cell(1, {d: 2 for d in range(35)})))  # crosses 50 at day 25 -> late
     early = {d: 3 for d in range(35)}
     early[6] = 200  # crosses 50 at day 6 -> record-timed
     (cells / "cell_2.json").write_text(json.dumps(_cell(2, early)))
