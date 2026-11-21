@@ -1,0 +1,403 @@
+{
+  "platforms": [
+    {
+      "platform": "classic_cruise_1900",
+      "n_pairs": 20,
+      "complement": 1910,
+      "native_onboard": {
+        "mean": 2.25,
+        "median": 2.0,
+        "min": 0,
+        "max": 5
+      },
+      "contamx_onboard": {
+        "mean": 2.2,
+        "median": 1.0,
+        "min": 0,
+        "max": 7
+      },
+      "diff_onboard_contamx_minus_native": {
+        "mean": -0.05,
+        "median": 0.0,
+        "min": -2,
+        "max": 2
+      },
+      "native_airborne_dom_mean": 0.05,
+      "contamx_airborne_dom_mean": 0.05,
+      "native_total_wall_s": {
+        "mean": 299.2423,
+        "median": 303.7734,
+        "min": 271.9145,
+        "max": 326.8763
+      },
+      "contamx_total_wall_s": {
+        "mean": 304.9007,
+        "median": 307.6805,
+        "min": 280.9511,
+        "max": 317.9794
+      },
+      "wall_ratio_contamx_over_native": 1.019,
+      "native_total_cpu_s": {
+        "mean": 300.6853,
+        "median": 304.7918,
+        "min": 273.283,
+        "max": 328.0541
+      },
+      "contamx_total_cpu_s": {
+        "mean": 306.2232,
+        "median": 308.9658,
+        "min": 282.2497,
+        "max": 319.1656
+      },
+      "contamx_child_cpu_s": {
+        "mean": 0.0114,
+        "median": 0.0118,
+        "min": 0.0097,
+        "max": 0.012
+      },
+      "cpu_ratio_contamx_over_native": 1.018
+    },
+    {
+      "platform": "diamond_princess",
+      "n_pairs": 20,
+      "complement": 3810,
+      "native_onboard": {
+        "mean": 44.4,
+        "median": 29.5,
+        "min": 3,
+        "max": 191
+      },
+      "contamx_onboard": {
+        "mean": 46.6,
+        "median": 29.5,
+        "min": 2,
+        "max": 140
+      },
+      "diff_onboard_contamx_minus_native": {
+        "mean": 2.2,
+        "median": 1.0,
+        "min": -82,
+        "max": 70
+      },
+      "native_airborne_dom_mean": 37.05,
+      "contamx_airborne_dom_mean": 37.2,
+      "native_total_wall_s": {
+        "mean": 627.5481,
+        "median": 630.0184,
+        "min": 561.0522,
+        "max": 670.2338
+      },
+      "contamx_total_wall_s": {
+        "mean": 643.4581,
+        "median": 652.1336,
+        "min": 563.8213,
+        "max": 698.4397
+      },
+      "wall_ratio_contamx_over_native": 1.025,
+      "native_total_cpu_s": {
+        "mean": 635.5946,
+        "median": 637.1415,
+        "min": 571.2193,
+        "max": 680.774
+      },
+      "contamx_total_cpu_s": {
+        "mean": 651.6457,
+        "median": 659.9339,
+        "min": 574.1374,
+        "max": 705.2199
+      },
+      "contamx_child_cpu_s": {
+        "mean": 0.0502,
+        "median": 0.0506,
+        "min": 0.0458,
+        "max": 0.0545
+      },
+      "cpu_ratio_contamx_over_native": 1.025
+    },
+    {
+      "platform": "expedition_cruise_450",
+      "n_pairs": 20,
+      "complement": 450,
+      "native_onboard": {
+        "mean": 1,
+        "median": 1.0,
+        "min": 0,
+        "max": 6
+      },
+      "contamx_onboard": {
+        "mean": 1.6,
+        "median": 1.0,
+        "min": 0,
+        "max": 18
+      },
+      "diff_onboard_contamx_minus_native": {
+        "mean": 0.6,
+        "median": 0.0,
+        "min": -4,
+        "max": 18
+      },
+      "native_airborne_dom_mean": 0,
+      "contamx_airborne_dom_mean": 0,
+      "native_total_wall_s": {
+        "mean": 64.7339,
+        "median": 62.526,
+        "min": 54.741,
+        "max": 85.0912
+      },
+      "contamx_total_wall_s": {
+        "mean": 61.9259,
+        "median": 62.7151,
+        "min": 55.0753,
+        "max": 67.6548
+      },
+      "wall_ratio_contamx_over_native": 0.957,
+      "native_total_cpu_s": {
+        "mean": 65.4596,
+        "median": 63.263,
+        "min": 55.2757,
+        "max": 85.7179
+      },
+      "contamx_total_cpu_s": {
+        "mean": 62.5504,
+        "median": 63.1638,
+        "min": 55.7739,
+        "max": 68.0821
+      },
+      "contamx_child_cpu_s": {
+        "mean": 0.0056,
+        "median": 0.0057,
+        "min": 0.0045,
+        "max": 0.0068
+      },
+      "cpu_ratio_contamx_over_native": 0.956
+    },
+    {
+      "platform": "explorer_seas_06",
+      "n_pairs": 20,
+      "complement": 4428,
+      "native_onboard": {
+        "mean": 2.95,
+        "median": 3.5,
+        "min": 0,
+        "max": 5
+      },
+      "contamx_onboard": {
+        "mean": 3.3,
+        "median": 3.0,
+        "min": 0,
+        "max": 9
+      },
+      "diff_onboard_contamx_minus_native": {
+        "mean": 0.35,
+        "median": 0.0,
+        "min": -2,
+        "max": 4
+      },
+      "native_airborne_dom_mean": 0,
+      "contamx_airborne_dom_mean": 0,
+      "native_total_wall_s": {
+        "mean": 762.0413,
+        "median": 781.4977,
+        "min": 702.8289,
+        "max": 832.5659
+      },
+      "contamx_total_wall_s": {
+        "mean": 790.8939,
+        "median": 797.7262,
+        "min": 703.0658,
+        "max": 850.092
+      },
+      "wall_ratio_contamx_over_native": 1.038,
+      "native_total_cpu_s": {
+        "mean": 765.4817,
+        "median": 783.1959,
+        "min": 704.9661,
+        "max": 834.9085
+      },
+      "contamx_total_cpu_s": {
+        "mean": 793.2719,
+        "median": 799.6786,
+        "min": 704.9885,
+        "max": 852.1145
+      },
+      "contamx_child_cpu_s": {
+        "mean": 0.0274,
+        "median": 0.0275,
+        "min": 0.0235,
+        "max": 0.0375
+      },
+      "cpu_ratio_contamx_over_native": 1.036
+    },
+    {
+      "platform": "greg_mortimer",
+      "n_pairs": 20,
+      "complement": 243,
+      "native_onboard": {
+        "mean": 5,
+        "median": 1.5,
+        "min": 0,
+        "max": 49
+      },
+      "contamx_onboard": {
+        "mean": 4.35,
+        "median": 1.5,
+        "min": 0,
+        "max": 39
+      },
+      "diff_onboard_contamx_minus_native": {
+        "mean": -0.65,
+        "median": 0.0,
+        "min": -49,
+        "max": 30
+      },
+      "native_airborne_dom_mean": 3.1,
+      "contamx_airborne_dom_mean": 2.8,
+      "native_total_wall_s": {
+        "mean": 33.0651,
+        "median": 32.9989,
+        "min": 28.4507,
+        "max": 37.3145
+      },
+      "contamx_total_wall_s": {
+        "mean": 33.4157,
+        "median": 34.02,
+        "min": 30.1089,
+        "max": 36.0698
+      },
+      "wall_ratio_contamx_over_native": 1.011,
+      "native_total_cpu_s": {
+        "mean": 34.3668,
+        "median": 34.4543,
+        "min": 29.8342,
+        "max": 38.6
+      },
+      "contamx_total_cpu_s": {
+        "mean": 34.9385,
+        "median": 34.8401,
+        "min": 31.6556,
+        "max": 37.2474
+      },
+      "contamx_child_cpu_s": {
+        "mean": 0.006,
+        "median": 0.0062,
+        "min": 0.0052,
+        "max": 0.0067
+      },
+      "cpu_ratio_contamx_over_native": 1.017
+    },
+    {
+      "platform": "mega_cruise_5000",
+      "n_pairs": 20,
+      "complement": 7000,
+      "native_onboard": {
+        "mean": 4.4,
+        "median": 3.5,
+        "min": 1,
+        "max": 9
+      },
+      "contamx_onboard": {
+        "mean": 4.3,
+        "median": 4.0,
+        "min": 2,
+        "max": 9
+      },
+      "diff_onboard_contamx_minus_native": {
+        "mean": -0.1,
+        "median": 0.0,
+        "min": -5,
+        "max": 3
+      },
+      "native_airborne_dom_mean": 0,
+      "contamx_airborne_dom_mean": 0,
+      "native_total_wall_s": {
+        "mean": 1486.8413,
+        "median": 1457.3877,
+        "min": 1374.2438,
+        "max": 1633.2786
+      },
+      "contamx_total_wall_s": {
+        "mean": 1577.4056,
+        "median": 1606.7949,
+        "min": 1390.595,
+        "max": 1664.7295
+      },
+      "wall_ratio_contamx_over_native": 1.061,
+      "native_total_cpu_s": {
+        "mean": 1491.2599,
+        "median": 1461.9592,
+        "min": 1379.9286,
+        "max": 1638.0139
+      },
+      "contamx_total_cpu_s": {
+        "mean": 1582.3443,
+        "median": 1611.341,
+        "min": 1397.8519,
+        "max": 1669.706
+      },
+      "contamx_child_cpu_s": {
+        "mean": 0.0579,
+        "median": 0.0581,
+        "min": 0.0564,
+        "max": 0.0592
+      },
+      "cpu_ratio_contamx_over_native": 1.061
+    },
+    {
+      "platform": "spirit_cruise_3000",
+      "n_pairs": 20,
+      "complement": 3000,
+      "native_onboard": {
+        "mean": 3.05,
+        "median": 2.5,
+        "min": 0,
+        "max": 8
+      },
+      "contamx_onboard": {
+        "mean": 2.5,
+        "median": 2.0,
+        "min": 0,
+        "max": 9
+      },
+      "diff_onboard_contamx_minus_native": {
+        "mean": -0.55,
+        "median": 0.0,
+        "min": -4,
+        "max": 2
+      },
+      "native_airborne_dom_mean": 0,
+      "contamx_airborne_dom_mean": 0,
+      "native_total_wall_s": {
+        "mean": 488.0945,
+        "median": 484.4516,
+        "min": 453.1208,
+        "max": 526.2836
+      },
+      "contamx_total_wall_s": {
+        "mean": 512.5699,
+        "median": 519.7543,
+        "min": 464.0441,
+        "max": 545.7217
+      },
+      "wall_ratio_contamx_over_native": 1.05,
+      "native_total_cpu_s": {
+        "mean": 490.8629,
+        "median": 487.9475,
+        "min": 454.7114,
+        "max": 527.8977
+      },
+      "contamx_total_cpu_s": {
+        "mean": 515.0284,
+        "median": 522.0377,
+        "min": 465.9323,
+        "max": 547.5817
+      },
+      "contamx_child_cpu_s": {
+        "mean": 0.0237,
+        "median": 0.0246,
+        "min": 0.0206,
+        "max": 0.025
+      },
+      "cpu_ratio_contamx_over_native": 1.049
+    }
+  ]
+}
