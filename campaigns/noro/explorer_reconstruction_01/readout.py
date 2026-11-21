@@ -247,6 +247,10 @@ def tier_summary(
     """Seed-ensemble summary of one tier against the target."""
     evaluable = [c for c in cells if c["evaluable"]]
     lags = [c["lag_days"] for c in evaluable if c["lag_days"] is not None]
+    lags_first_seven = [
+        c["lag_days_first_seven"] for c in evaluable
+        if c["lag_days_first_seven"] is not None
+    ]
     target_lag = target["crew_minus_passenger_peak_lag_days"]
     out: dict[str, Any] = {
         "cells": len(cells),
@@ -260,10 +264,18 @@ def tier_summary(
             "target": target_lag,
             "target_in_central_90": _covers(_interval(lags), target_lag),
         },
-        "lag_days_first_seven": _interval([
-            float(c["lag_days_first_seven"]) for c in evaluable
-            if c["lag_days_first_seven"] is not None
-        ]),
+        "lag_days_first_seven": {
+            **_interval(lags_first_seven),
+            "p_equal_target": _share(lags_first_seven, target_lag),
+            "p_crew_later": (
+                None if not lags_first_seven
+                else sum(v >= 1 for v in lags_first_seven) / len(lags_first_seven)
+            ),
+            "target": target_lag,
+            "target_in_central_90": _covers(
+                _interval(lags_first_seven), target_lag,
+            ),
+        },
         "lag_days_incident": _interval([
             float(c["lag_days_incident"]) for c in evaluable
             if c["lag_days_incident"] is not None
@@ -289,6 +301,10 @@ def tier_summary(
     }
     for role in ROLES:
         peaks = [c["peak_day"][role] for c in evaluable]
+        peaks7 = [
+            c["peak_day_first_seven"][role] for c in evaluable
+            if c["peak_day_first_seven"][role] is not None
+        ]
         finals = target["investigation_finals"][role]
         posting = target["posting_figures"][role]
         onset_rate = [c["onset_attack_rate"][role] for c in cells]
@@ -314,10 +330,19 @@ def tier_summary(
                 ),
                 "tied_cells": sum(c["peak_tied"][role] for c in evaluable),
             },
-            "peak_day_first_seven": _interval([
-                float(c["peak_day_first_seven"][role]) for c in evaluable
-                if c["peak_day_first_seven"][role] is not None
-            ]),
+            "peak_day_first_seven": {
+                **_interval(peaks7),
+                "p_equal_target": _share(
+                    peaks7, target["peak_day_index"][role],
+                ),
+                "p_within_one_day": _share(
+                    peaks7, target["peak_day_index"][role], 1,
+                ),
+                "target": target["peak_day_index"][role],
+                "target_in_central_90": _covers(
+                    _interval(peaks7), target["peak_day_index"][role],
+                ),
+            },
             "peak_day_incident": _interval([
                 float(c["peak_day_incident"][role]) for c in evaluable
                 if c["peak_day_incident"][role] is not None
@@ -794,17 +819,25 @@ def build_markdown(readout: dict[str, Any]) -> str:
         "|---|---|---|---|---|---|---|---|",
     ]
     for tier, block in readout["tiers"].items():
+        approx = " (approx.)" if block["incident_curve_approximated"] else ""
         lines.append(
             f"| `{tier}` | "
             f"{_span(block['passenger']['peak_day_first_seven'], 1)} | "
             f"{_span(block['crew']['peak_day_first_seven'], 1)} | "
             f"{_span(block['lag_days_first_seven'], 1)} | "
-            f"{_span(block['passenger']['peak_day_incident'], 1)} | "
-            f"{_span(block['crew']['peak_day_incident'], 1)} | "
-            f"{_span(block['lag_days_incident'], 1)} | "
-            f"{_span(block['passenger']['incident_onset_total'], 0)} | "
-            f"{_span(block['crew']['incident_onset_total'], 0)} |",
+            f"{_span(block['passenger']['peak_day_incident'], 1)}{approx} | "
+            f"{_span(block['crew']['peak_day_incident'], 1)}{approx} | "
+            f"{_span(block['lag_days_incident'], 1)}{approx} | "
+            f"{_span(block['passenger']['incident_onset_total'], 0)}{approx} | "
+            f"{_span(block['crew']['incident_onset_total'], 0)}{approx} |",
         )
+    lines += [
+        "",
+        "`(approx.)` marks incident columns read from an archive written "
+        "before the incident curve existed: the value is the "
+        "excluding-declared-seeds curve, which still counts boarding "
+        "prevalence beyond the five declared seeds.",
+    ]
     for arm, block in readout.get("arms", {}).items():
         lines += _arm_markdown(arm, block)
     if readout["defects"]:

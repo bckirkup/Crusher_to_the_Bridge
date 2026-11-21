@@ -766,6 +766,7 @@ def harvest(
             "initialised": run["checks"]["roles_initialised"],
             "payload": run["checks"]["roles_payload"],
         },
+        "mechanism_state": run["checks"].get("mechanism_state"),
         "python_hash_seed": os.environ.get("PYTHONHASHSEED"),
         "wall_clock_s": run["wall_clock_s"],
     }
