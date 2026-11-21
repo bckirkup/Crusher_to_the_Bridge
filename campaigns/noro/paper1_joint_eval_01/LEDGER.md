@@ -232,6 +232,20 @@ fingerprints, 16/16 compared, **0/16 identical**. All 16 reposted
 different run than the solver-screen wiring on the same seed. Canonical
 entry: `docs/ledger/NORO-JE-REPRO-01.md`.
 
+Attribution (2026-11-21, paired-seed replays, measured): engine drift
+across the campaign boundary, not a joint-eval wiring defect. The
+solver-screen worker at `bf0ec168` reproduces the joint-eval
+fingerprint; the engine set reverted to `3500c205` reproduces the
+reference. Named causes: `9661da33` (ROOM-AIR-01, ambient openings
+enter the room-air ACH map — PoolDeck ~73,400 m3/h becomes a live
+removal path) and `63210391` (CONTAM-DUCT-EXCLUDE-01, PoolDeck
+exchange_m3h re-solved 73376.0 -> 73493.4). First infection flip at
+epoch 43; recording-level additions (`room_air_witness`,
+`room_air_map_arm`) and an epoch-74 `total_pathogen_mass` float move
+carry no infection effect. Open fix: re-baseline the reference at the
+freeze commit or close the continuation as attributed — Benjamin's
+call.
+
 Pilots (measured): temporal prefix-identity — quiet 31-38/40 on
 exp/spr/cls (17/40 meg), near 0-5/40, outbreak 0/40; truncation_valid
 false on every cell. Joint-outcome estimates (288 ep, evaluation
