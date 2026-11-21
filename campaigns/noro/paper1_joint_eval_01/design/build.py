@@ -127,7 +127,8 @@ SELECTION_RULE = {
 # The bridge gate is technical completion only. No outcome voids the freeze.
 TECHNICAL_COMPLETION = {
     "intended_inputs_used": "every archive: voyage length equals the "
-                            "tier's epochs, arm changed_paths equal the "
+                            "tier's epochs, PYTHONHASHSEED recorded as 1, "
+                            "arm changed_paths equal the "
                             "declaration, effective config resolved with "
                             "no mismatch, effective hash equals the "
                             "manifest tier's, intended role counts on "

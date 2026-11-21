@@ -24,6 +24,10 @@ has initialised (a failed check exits non-zero; no archive is written):
 * the initialised passenger and crew counts equal the tier's intended
   counts, and so do the complements in the outcome payload.
 
+Hash seed: run as a script, the worker re-executes itself under
+``PYTHONHASHSEED=1`` (``pin_hash_seed``) and records the value it ran under
+in every archive. The shared job definition and image do not set it.
+
 Environment harvest: campaign runs use ``history_retention: compact``, whose
 epoch record drops the ``observation_engine`` block. Swab and holding-tank
 results are therefore read output-only through
@@ -43,6 +47,7 @@ import gzip
 import hashlib
 import json
 import math
+import os
 import sys
 import tempfile
 import time
@@ -82,6 +87,9 @@ SCHEMA = "paper1_joint_eval_cell/2.0.0"
 THRESHOLD = 0.03
 MEMBER = "joint_eval.json.gz"
 ABSENT = "<absent>"
+# Freeze contract section 2.5 names PYTHONHASHSEED=1. Neither the shared job
+# definition nor the campaign image sets it, so the worker pins it itself.
+HASH_SEED = "1"
 DAY0_LABEL = (
     "day 0 includes pre-boarding AGE declarations seeded at embarkation; "
     "preboarding_declared_* counts them (read from the initialised engine), "
@@ -690,6 +698,7 @@ def harvest(
             "initialised": run["checks"]["roles_initialised"],
             "payload": run["checks"]["roles_payload"],
         },
+        "python_hash_seed": os.environ.get("PYTHONHASHSEED"),
         "wall_clock_s": run["wall_clock_s"],
     }
     scalars["families"] = family_status(
@@ -759,8 +768,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def pin_hash_seed() -> None:
+    """Re-execute under ``PYTHONHASHSEED=1`` unless already running so."""
+    if os.environ.get("PYTHONHASHSEED") == HASH_SEED:
+        return
+    env = {**os.environ, "PYTHONHASHSEED": HASH_SEED}
+    os.execve(sys.executable, [sys.executable, *sys.argv], env)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if argv is None:
+        pin_hash_seed()
     manifest = validated_json_load(REPO_ROOT, args.manifest)
     clock = manifest.get("natural_history_clock")
     arm = check_arm(manifest, args.tier)

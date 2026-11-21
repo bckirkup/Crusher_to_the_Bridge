@@ -44,7 +44,8 @@ continuation. No outcome voids the freeze. This is not an anchor fit.
   fingerprints computed from that campaign's archive at the gated stage.
 - **Held fixed outside the block** (contract section 2.5): dose 7.57,
   `syndromic_comp65`, bundle `active_profiles` / `norwalk_gi` minus
-  `sars_cov2_resp`, clock `hours`, `PYTHONHASHSEED=1` (`entry.py`).
+  `sars_cov2_resp`, clock `hours`, `PYTHONHASHSEED=1` (pinned by `cell.py`
+  and `entry.py`; see "Hash seed" below).
 
 ### Role split (the one declared arm difference)
 
@@ -161,7 +162,7 @@ carries it and a `families` block with `present` or `missing` per family.
 
 | Criterion | Rule |
 |---|---|
-| intended inputs used | every archive: voyage length equals the tier's epochs; arm differences equal the declaration; effective config resolved with no mismatch; effective hash equals the tier's; intended role counts on agents and in the payload; one engine commit per tier |
+| intended inputs used | every archive: voyage length equals the tier's epochs; `PYTHONHASHSEED` recorded as 1; arm differences equal the declaration; effective config resolved with no mismatch; effective hash equals the tier's; intended role counts on agents and in the payload; one engine commit per tier |
 | outcomes extractable | every archive: all six families `present` |
 | independent attempts accounted | seeds read are exactly the tier's seeds, each once; a failed child is listed with its reason, retried at most once on the same seed, never replaced |
 | paired comparisons meaningful | the three lengths hold the same seed set per hull and stratum and all are read; the reproduction arm is compared on every one of its seeds |
@@ -223,6 +224,22 @@ Continuation, evaluated only on a technically complete bridge, first match:
 
 Reported attack rates, first-role split, swab and holding-tank detection
 counts and timing, engine commits seen.
+
+## Hash seed: contract versus actual
+
+The freeze contract (section 2.5) says `PYTHONHASHSEED=1` is set in the job
+definition environment. It is not: neither the shared job definition
+template nor the campaign image sets it (checked on main, 2026-11-20;
+reported by the WP3 review). For WP1b's contract revision: the pin lives in
+the workers, not the job definition.
+
+In this campaign `cell.py` re-executes itself under `PYTHONHASHSEED=1` when
+run as a script (the same approach as
+`campaigns/noro/explorer_reconstruction_01/cell.py`) and records the value
+in every archive; the readout counts an archive as an intended input only
+if it is `1`. The census worker (`supply_seed_scan.py`) has no pin of its
+own and gets it from `entry.py`, which sets it for the subprocess; a direct
+invocation of the census worker must set it explicitly.
 
 ## Limitations
 

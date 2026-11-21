@@ -172,7 +172,7 @@
    "shortfall": "a stratum the fixed census cannot fill is run at its achieved count and reported; the census is not extended and no seed is hand-picked"
   },
   "technical_completion": {
-   "intended_inputs_used": "every archive: voyage length equals the tier's epochs, arm changed_paths equal the declaration, effective config resolved with no mismatch, effective hash equals the manifest tier's, intended role counts on initialised agents and in the payload, engine commit recorded and single-valued per tier",
+   "intended_inputs_used": "every archive: voyage length equals the tier's epochs, PYTHONHASHSEED recorded as 1, arm changed_paths equal the declaration, effective config resolved with no mismatch, effective hash equals the manifest tier's, intended role counts on initialised agents and in the payload, engine commit recorded and single-valued per tier",
    "outcomes_extractable": "every archive: all six families 'present'",
    "attempts_accounted": "the seeds read are exactly the tier's seeds, each once; a failed child is listed with its reason, retried at most once on the same seed, never replaced by a new seed",
    "pairs_meaningful": "within hull and stratum the three lengths hold the same seed set and all three are read; the reproduction arm is compared seed by seed"

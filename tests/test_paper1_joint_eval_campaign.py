@@ -386,7 +386,7 @@ def test_a_shortened_voyage_is_not_an_intended_input(stage_b):
     tier = manifest["tiers"]["fl_je_exp_7d_quiet"]
     meta = tier["joint_eval"]
     good = {
-        "num_epochs": 168, "engine_git_sha": "abc",
+        "num_epochs": 168, "engine_git_sha": "abc", "python_hash_seed": "1",
         "arm": {"changed_paths": meta["changed_paths"],
                 "effective_sha256": "h"},
         "effective": {"mismatched": [], "runner_changed_paths": []},
@@ -395,3 +395,17 @@ def test_a_shortened_voyage_is_not_an_intended_input(stage_b):
     }
     assert readout.inputs_ok(good, tier, "h")
     assert not readout.inputs_ok({**good, "num_epochs": 48}, tier, "h")
+    assert not readout.inputs_ok({**good, "python_hash_seed": None}, tier, "h")
+    assert not readout.inputs_ok({**good, "python_hash_seed": "0"}, tier, "h")
+
+
+def test_worker_re_executes_under_the_pinned_hash_seed(monkeypatch):
+    calls = []
+    monkeypatch.setattr(cell.os, "execve", lambda *a: calls.append(a))
+    monkeypatch.setenv("PYTHONHASHSEED", "1")
+    cell.pin_hash_seed()
+    assert calls == []
+    monkeypatch.delenv("PYTHONHASHSEED")
+    cell.pin_hash_seed()
+    assert len(calls) == 1
+    assert calls[0][2]["PYTHONHASHSEED"] == "1"
