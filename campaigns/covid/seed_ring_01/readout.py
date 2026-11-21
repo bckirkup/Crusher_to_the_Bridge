@@ -42,6 +42,11 @@ if str(_REPO_ROOT) not in sys.path:
 from engines.infection_dynamics_bridge import (  # noqa: E402
     resolve_dining_service_type,
 )
+from engines.transmission_core import (  # noqa: E402
+    DEFAULT_DROPLET_FIELD_SPLIT_FAR_SHARE,
+    DEFAULT_DROPLET_FIELD_SPLIT_MODE,
+    DEFAULT_DROPLET_FIELD_SPLIT_SETTLED_SHARE,
+)
 from picard_framework.covid_boarding_screen import (  # noqa: E402
     KEY_INDEX_ONSET_DAY,
     KEY_INDEX_SHEDDING_AT_DAY0,
@@ -59,6 +64,9 @@ _BASELINE_ARM = "D0_declared"
 _IGNITION_MASS = 50
 _PLACEMENT_ECHO = {"dining_service_type": "buffet"}
 _BUFFET_ZONE = "Windjammer"  # mega_cruise_5000's surge venue
+_DEPARTURE_DAY = 5
+_EPOCHS_PER_DAY = 24  # DP replay clock: 1-hour epochs
+_QUAR_WINDOW = [16, 30]
 
 
 def _audit_thresholds() -> dict[str, Any]:
@@ -233,9 +241,12 @@ def _row_metrics(payloads: list[dict[str, Any]]) -> dict[str, Any]:
         float(_seed_ring(p).get("aboard_window_acquisitions") or 0)
         for p in taken
     ]
+    # Censored median: a takeoff cell that never reaches IGNITION_MASS
+    # counts as +inf, so >50% non-ignition yields an infinite median
+    # rather than a median over a small ignited survivor subset.
     ignitions = [
-        float(d) for d in (_ignition_day(p) for p in taken)
-        if d is not None
+        float(d) if d is not None else float("inf")
+        for d in (_ignition_day(p) for p in taken)
     ]
     all_founders = [
         float(_seed_ring(p).get("aboard_window_acquisitions") or 0)
@@ -250,6 +261,7 @@ def _row_metrics(payloads: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "n": len(payloads),
         "takeoff_n": len(taken),
+        "ignited_n": sum(1 for d in ignitions if d != float("inf")),
         "founder_median_takeoff": _median(founders),
         "founder_median_all": _median(all_founders),
         "ignition_day_median_takeoff": _median(ignitions),
@@ -266,10 +278,8 @@ def _verdict(arm: str, metrics: dict[str, Any]) -> str:
     founder_ok = (
         (metrics["founder_median_takeoff"] or 0.0) >= _FOUNDER_MIN
     )
-    ignition_ok = (
-        metrics["ignition_day_median_takeoff"] is not None
-        and metrics["ignition_day_median_takeoff"] <= _IGN_MAX
-    )
+    ign_med = metrics["ignition_day_median_takeoff"]
+    ignition_ok = ign_med is not None and ign_med <= _IGN_MAX
     trajectory_ok = bool(metrics["trajectory"].get("ok"))
     if founder_ok and ignition_ok and trajectory_ok:
         return "SEED-RING-LANDED"
@@ -344,7 +354,71 @@ def _audit(
                 f"{tag}: seeded_hosts {len(sr_hosts)} != declared count "
                 f"{spec.get('count')}",
             )
+        _audit_replay_echoes(payload, tag, violations)
     return violations, flags
+
+
+def _audit_replay_echoes(
+    payload: dict[str, Any], tag: str, violations: list[str],
+) -> None:
+    """The frozen replay echo invariants (design audit_invariants legs 3
+    and 5-6): seed geometry, quarantine witness, propensity/delivery."""
+    departed = payload.get("index_departed_epoch")
+    if (
+        departed is None
+        or int(departed) // _EPOCHS_PER_DAY != _DEPARTURE_DAY
+    ):
+        violations.append(
+            f"{tag}: index_departed_epoch {departed} is not a day-"
+            f"{_DEPARTURE_DAY} departure",
+        )
+    witness = payload.get("quarantine_witness") or {}
+    if (
+        witness.get("window_days") != _QUAR_WINDOW
+        or witness.get("activated") is not True
+    ):
+        violations.append(
+            f"{tag}: quarantine_witness window "
+            f"{witness.get('window_days')} activated "
+            f"{witness.get('activated')} != {_QUAR_WINDOW} true",
+        )
+    propensity = payload.get("propensity_draw") or {}
+    if int(propensity.get("units_drawn") or 0) <= 0:
+        violations.append(
+            f"{tag}: propensity_draw.units_drawn "
+            f"{propensity.get('units_drawn')} <= 0",
+        )
+    delivery = payload.get("delivery") or {}
+    expected = {
+        "presentation_draw_mode": "once_per_course",
+        "hand_reservoir_mode": "hygiene_cycle",
+    }
+    for field, want in expected.items():
+        if delivery.get(field) != want:
+            violations.append(
+                f"{tag}: delivery.{field} "
+                f"{delivery.get(field)!r} != {want!r}",
+            )
+    if (delivery.get("caregiver") or {}).get("mode") != "on":
+        violations.append(
+            f"{tag}: delivery.caregiver.mode "
+            f"{(delivery.get('caregiver') or {}).get('mode')!r} != 'on'",
+        )
+    split = delivery.get("droplet_field_split") or {}
+    if (
+        split.get("mode") != DEFAULT_DROPLET_FIELD_SPLIT_MODE
+        or split.get("far_field_share")
+        != DEFAULT_DROPLET_FIELD_SPLIT_FAR_SHARE
+        or split.get("settled_share")
+        != DEFAULT_DROPLET_FIELD_SPLIT_SETTLED_SHARE
+        or split.get("declared") != {}
+        or not split.get("active")
+    ):
+        violations.append(
+            f"{tag}: delivery.droplet_field_split "
+            f"{json.dumps(split, sort_keys=True)} is not the shipped "
+            "partition",
+        )
 
 
 def _refit_witness(
@@ -373,12 +447,50 @@ def _refit_witness(
                 _obs(new).get("recorded_onsets") or 0)
             deltas.append(new_onsets - old_onsets)
         nonzero = sum(1 for d in deltas if d != 0)
+        if paired < len(new_row):
+            verdict = (
+                "DRIFT WITNESS UNVERIFIED — "
+                f"paired {paired}/{len(new_row)} D0 cells; do not "
+                "trust the baseline read"
+            )
+        elif nonzero:
+            verdict = "DRIFT: attribute before trusting the placement read"
+        else:
+            verdict = "DRIFT WITNESS CLEAN"
         lines.append(
             f"Theta {theta:g}: n={paired} paired vs committed "
             f"dp_theta_8p50 — recorded_onsets paired deltas nonzero on "
-            f"{nonzero}/{paired} seeds, median delta {_fmt(_median(deltas))}"
-            + (" — DRIFT WITNESS CLEAN" if not nonzero else
-               " — DRIFT: attribute before trusting the placement read"),
+            f"{nonzero}/{paired} seeds, median delta "
+            f"{_fmt(_median(deltas))} — {verdict}",
+        )
+    return lines
+
+
+def _per_cell_lines(seeds: dict[int, dict[str, Any]]) -> list[str]:
+    """One evidence row per cell: the founder-vs-timing diagnostic."""
+    lines = [
+        "| seed | founders | clean | d0 | routes | ign | takeoff | "
+        "onsets | before_share | dining |",
+        "|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    for seed, payload in sorted(seeds.items()):
+        sr = _seed_ring(payload)
+        routes = ",".join(
+            f"{k}:{v}"
+            for k, v in (sr.get("aboard_window_by_route") or {}).items()
+        ) or "-"
+        ign = _ignition_day(payload)
+        lines.append(
+            f"| {seed} "
+            f"| {sr.get('aboard_window_acquisitions')!r} "
+            f"| {sr.get('aboard_window_clean_bound')!r} "
+            f"| {(sr.get('aboard_window_by_day') or {}).get('0', 0)} "
+            f"| {routes} "
+            f"| {ign if ign is not None else '-'} "
+            f"| {'yes' if _takeoff(payload) else 'no'} "
+            f"| {_obs(payload).get('recorded_onsets')!r} "
+            f"| {_fmt(_before_share(payload))} "
+            f"| {','.join(_seeded_dining_zones(payload)) or '-'} |",
         )
     return lines
 
@@ -419,7 +531,8 @@ def _render(
             f"{_fmt(metrics['founder_median_takeoff'])} takeoff-conditional "
             f"({_fmt(metrics['founder_median_all'])} all cells; committed "
             f"drawn median 2.5); ignition median "
-            f"{_fmt(metrics['ignition_day_median_takeoff'])}; routes "
+            f"{_fmt(metrics['ignition_day_median_takeoff'])} (ignited "
+            f"{metrics['ignited_n']}/{metrics['takeoff_n']}); routes "
             f"{metrics['route_totals']}",
         )
         if traj.get("recorded_onsets_q05") is not None:
@@ -433,6 +546,10 @@ def _render(
             )
         else:
             lines.append(f"  trajectory: {traj['verdict']}")
+        lines += [
+            "", f"### {arm}@{theta:g} — per-cell", "",
+            *_per_cell_lines(seeds), "",
+        ]
     lines += [
         "",
         f"Frozen legs: founder median >= {_FOUNDER_MIN:g}, ignition "
