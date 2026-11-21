@@ -81,8 +81,8 @@ Ops status, verdicts, and follow-ups are appended below as the campaign runs.
   **FRAQMB_DUTY HALF-LANDED-MASS (257, in [150,350] band)** — paired
   13/16 negative, median -62.5. The tail is crew-service-fed only
   jointly: neither lever alone damps it.
-- Conditioned capture (CAPTURE-01 basis, confirmed/infections_reachable):
-  0.811–0.843 on every arm — the ≥0.80 criterion is already met on
+- Conditioned capture (CAPTURE-01 declared basis, infection_day ≤ 29,
+  takeoff-conditional medians): 0.811–0.845 on every arm — the ≥0.80 criterion is already met on
   reachable infections; the unconditioned ~0.52 is the structural
   post-window residual. On the conditioned basis FRAQMB_DUTY is
   SEAM-LANDED.

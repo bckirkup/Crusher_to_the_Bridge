@@ -1,7 +1,7 @@
 # COVID-QUAR-TAIL-SEAM-01
 **Date:** 2026-11-21
 **Commit:** b45911709e277bd51bf09de8ba73a742add314d9
-**Pathogens:** covid
+**Pathogens:** sars_cov2_resp
 **Status:** measured
 **Measured at:** b45911709e277bd51bf09de8ba73a742add314d9
 
@@ -20,9 +20,10 @@ incidence when symptomatic removal is also armed. Single-lever confinement
 fixes are falsified at this θ.
 
 **The capture half of the dual prediction resolves to a metric artifact.**
-Conditioned on reachable infections (`infection_day ≤ last − 5`, the
-CAPTURE-01 declared basis), confirmed-per-infection is 0.811–0.843 on every
-arm, baseline included — the specimen machinery already satisfies the ≥0.80
+Conditioned on reachable infections (CAPTURE-01's declared basis:
+`funnel_hosts.infection_day ≤ 29` — infected ≥5 d before the last campaign
+day 34; takeoff-conditional medians), confirmed-per-infection is
+0.811–0.845 on every arm, baseline included — the specimen machinery already satisfies the ≥0.80
 rise criterion; the unconditioned ~0.52 median is the structural post-window
 residual (~18% of infections), unchanged by damping. On the conditioned basis
 FRAQMB_DUTY is SEAM-LANDED.

@@ -44,13 +44,17 @@ the exempt pool is quartered. Single-lever confinement changes are falsified
 at this θ.
 
 **The capture half of the dual prediction is a metric artifact, not a
-defect.** Conditioned on reachable infections (`funnel_hosts.infection_day ≤
-cell last-infection day − 5`, the CAPTURE-01 declared basis),
-confirmed-per-infection is **0.811–0.843 on every arm, D0 included** — the
+defect.** Conditioned on reachable infections — CAPTURE-01's declared basis:
+`funnel_hosts.infection_day ≤ 29`, i.e. infected ≥5 d before the last
+campaign day 34; numerator `confirmed_day` non-null; takeoff-conditional
+medians per arm (supplemental computation over the cell payloads — the
+campaign readout and CAPTURE-01 tool do not emit this statistic) —
+confirmed-per-infection is **0.811–0.845 on every arm, D0 included** — the
 specimen machinery already meets the ≥0.80 criterion everywhere. The
 unconditioned ~0.52 median fails only because ~18% of infections postdate the
 swabbable window (CAPTURE-01's structural bound). On the conditioned basis
-FRAQMB_DUTY is effectively SEAM-LANDED.
+FRAQMB_DUTY is effectively SEAM-LANDED. Per-arm medians (takeoff cells):
+D0_declared 0.819, MB_DUTY 0.845, FRAQMB 0.811, FRAQMB_DUTY 0.843.
 
 ## What remains blocking Θ
 
