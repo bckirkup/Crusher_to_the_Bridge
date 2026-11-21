@@ -1,9 +1,9 @@
 # FLU-CONTAM-SOLVER-01
 **Date:** 2026-11-21
 **Commit:** #1382
-**Measured at:** 77235441
 **Pathogens:** influenza_a
 **Status:** measured
+**Measured at:** 77235441
 
 Paired `ContamXTransportEngine` (`contamx`) vs. `ContamTransportEngine` (`native`) organic `influenza_a` (`active_profiles`, 288 epochs, seeds `8105`–`8124`, 20 paired seeds per hull) across 6 commissioned current cruise ship hulls on AWS Batch (`picard-flu-contam-solver-01:1`, ECR digest `sha256:23c5e8286e25bbcb911772e05145d7f43781667c65da9760ff57b3751c0136f2`, 240/240 verified cells; historic naval vessels excluded; `mega_cruise_5000` held).
 
