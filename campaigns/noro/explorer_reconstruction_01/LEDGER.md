@@ -117,9 +117,29 @@ Twenty-child array of the first 20 seeds (8105–8124) of
   above), so the canary's ETA is ~15–30 min depending on queue
   concurrency.
 
+## Canary result (2026-11-21)
+
+All 20 children SUCCEEDED in ~9 min of compute. Readout
+(`--allow-partial --expect-sha bf0ec168`, exit 0): 20/20 cells audited
+clean — pinned-leaf witness 70/70 matched, `engine_git_sha` =
+`bf0ec168`, expected state resolved as declared (cap active, rhythm
+requested-but-absent on Explorer per the §2.8 exception), the three
+labelled onset curves present, per-cell archives non-degenerate
+(~505 s wall each).
+
+**Measured:** 0/20 cells evaluable. Design thresholds are ≥20 pax and
+≥5 crew onsets excluding the declared seeds (DESIGN.md, "Evaluable
+cells"); per-cell pax onsets ranged 0–5 and crew 0–25 (two seeds, 8115
+and 8120, had crew outbreaks of 18 and 25 with pax ≤ 2). Median pax
+onset AR 0.0020 [0.0015, 0.0031] vs target 0.0777; median crew 0.0008
+[0.0000, 0.0155] vs target 0.0169. On `exp_declared_five` the frozen
+engine produces fizzled outbreaks on the Explorer hull — consistent
+with the seed-8105 smoke (8 cases, flagged not evaluable at authoring).
+This says nothing yet about the mega hull or the background_only or
+rhythm_off cells.
+
 ## Next step
 
-Inspect one finished canary child (expected state resolved, incident
-curve present, non-degenerate), run the readout with `--allow-partial`
-on the 20 cells, then stop and report; the user decides whether the
-remaining 580 cells run.
+Stop and report; the user decides whether the remaining 580 cells run.
+Readout artifacts: `telemetry_buffer/noro_explorer_reconstruction_01/`
+(readout.json, reconstruction_table.md).
