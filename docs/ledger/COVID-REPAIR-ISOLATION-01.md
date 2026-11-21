@@ -8,7 +8,7 @@
 Paired-arm isolation of the four airflow repairs on the DP `boxed_s1s2`
 @ Θ7.9e6 replay — which of B1–B3 removed the dose the record funnel was
 catching. 120 cells (6 arms × seeds 20200205–24), native transport only
-(solver axis closed by COVID-TRANSPORT-FIT-01), zero failures, audit
+(provider fixed for this experiment), zero failures, audit
 clean: every payload carries resolved `room_air_removal.map_arm`,
 `near_field_air.mode`, `pathogen_pool_transport`, `duty0_terminal_mode`
 witnesses, and the cell fails closed on a mismatch. Campaign

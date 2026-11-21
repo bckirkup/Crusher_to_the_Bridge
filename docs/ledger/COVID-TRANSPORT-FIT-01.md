@@ -57,10 +57,10 @@ Median recorded_onsets 8 [q05–q95 0–121; max 454 native, 493 ContamX]
 vs 197; lab_confirmed 10.5 [q05–q95 0–145; max 540, 590] vs
 712; **takeoff 9/20 seeds**. Pooled lab_confirmed 1,236–1,294 across
 20 cells vs CREW-REACH-01's ~1,351–1,453 on the same boxed design
-family — pooled volume is roughly preserved, so the ensemble is now a
-few record-scale cells carrying a mostly-fizzled set: the airflow
-repairs cut outbreak *frequency*, not dose volume. When an outbreak
-lands: dated share ~0.8 vs 0.277, asym share ~0.22 vs 0.44, DP-scale
+family. These are aggregate confirmations from separate campaigns.
+They establish neither preserved delivered dose nor attribution of the
+9/20 takeoff count to a particular repair. When an outbreak
+lands, dated share ~0.8 vs 0.277, asym share ~0.22 vs 0.44, DP-scale
 crew share ~0.44 vs 0.29 — the settled ASC/DATING/CREW-REACH
 residuals unchanged.
 
@@ -81,14 +81,13 @@ above). "Use whichever is cheaper" is withdrawn: no timing was read when
 it was written, and the timing now tabulated in `READOUT_PAIRED.md`
 (Batch child medians within 1.1%; a cold ContamX build 55–385 ms slower
 in the engineering benchmark) is not a matched cost comparison. The
-other finding is negative: after the B1–B3 airflow repairs DP takeoff is
-~45% at Θ7.9e6 where the record always took off, so every composition
-comparison sits on a mostly-fizzled ensemble. That before/after
-contrast is against an earlier campaign, not a paired arm here, so the
-attribution to the repairs is a hypothesis. Next measurement target:
-which repair (room-air removal ambient exchange, near-field, pool
-transport, duty-0 terminal) cut realization frequency — paired-arm cell
-runs per repair flag.
+observed takeoff count is 9/20 at this configuration. The selected
+historical record establishes that an outbreak occurred on one voyage.
+It supplies no population takeoff probability. Repair attribution
+requires a separate comparison. The subsequent
+`COVID-REPAIR-ISOLATION-01` measured repair-toggle arms with native
+transport. Low observed provider sensitivity on these cases is supported.
+Provider equivalence and a cost-based provider recommendation remain open.
 
 Full table: `campaigns/covid/transport_fit_01/LEDGER.md`; readout:
 `campaigns/covid/transport_fit_01/readout.py`; paired readout and

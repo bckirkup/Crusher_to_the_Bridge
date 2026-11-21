@@ -67,22 +67,13 @@ arm payload resolves `ContamXTransportEngine`.
 
 ### Full readout — 140/140 cells, audit clean (0 wrong_engine, 0 missing, 0 duplicates)
 
-> **Corrected 2026-11-20 — read `READOUT_PAIRED.md` first.** The engine
-> verdict below overstates the agreement. Its brackets are nearest-rank
-> q05–q95, not ranges: observed Δ is −9 to +39 (DP onsets), −3 to +50
-> (DP confirmations), −15 to +10 (GM positives). "A handful of
-> infections" is wrong for DP seed 20200223 (+39 onsets, +50
-> confirmations, +59 infections). "Flip nothing" holds for the ≥10-onset
-> takeoff flag in all 70 pairs. "Set upstream of the HVAC transport
-> operator" and "indistinguishability" were not measured. The text is
-> kept as written for the record.
-
-**Engine verdict: the solver choice is immaterial at this grain.** Every
-seed-paired contamx−native delta centres on zero — DP recorded_onsets
-Δ0 [0–4], lab_confirmed Δ0 [0–11]; GM campaign_positives Δ−0.48 mean
-[-11,+7]. The two solvers move individual seeds by a handful of
-infections and flip nothing. Under the repaired airflow model the
-outcome is set upstream of the HVAC transport operator on both hulls.
+**Updated 2026-11-21.** The two replay ensembles showed low observed
+provider sensitivity on the reported voyage-wide endpoints. See
+[`READOUT_PAIRED.md`](READOUT_PAIRED.md) for paired mean intervals,
+observed ranges, influential pairs and both directions of threshold
+discordance. The historical record supplies one selected outbreak.
+Full-job accounting and the reviewed return are in
+[`CONTAM-SOLVER-RETURN-02`](../../../docs/contam_solver_return_02.md).
 
 **DP `boxed_s1s2` @ Θ7.9e6 — both engines read the same failure:**
 
@@ -90,22 +81,19 @@ outcome is set upstream of the HVAC transport operator on both hulls.
 |---|---|---|---|
 | recorded_onsets | 8 [0–121] | 8 [0–121] | 197 |
 | lab_confirmed | 10.5 [0–145] | 10.5 [0–145] | 712 |
-| takeoff (≥10 onsets) | 9/20 | 9/20 | always |
+| takeoff (≥10 onsets) | 9/20 | 9/20 | one observed outbreak |
 | dated share | 0.835 | 0.807 | 0.277 |
 | asym share day-31 | 0.146 | 0.146 | 0.505 |
 | asym share final | 0.217 | 0.237 | 0.437 |
 | crew share (DP-scale) | 0.425 (n=4) | 0.453 (n=4) | 0.29 |
 
-The airflow repairs (B1–B3) turned DP takeoff into a coin flip: 9/20
-seeds reach ≥10 recorded onsets, and the median cell records 8 onsets
-vs the record's 197. Pooled confirmations are roughly preserved
-(1,236–1,294 over 20 cells vs CREW-REACH-01's ~1,351–1,453 on the same
-boxed design family) — the ensemble is now a few record-scale cells
-carrying a mostly-fizzled set rather than a shift of the whole
-distribution, so the deficit is outbreak *frequency*, not delivered
-dose volume. When an outbreak does occur it is still too symptomatic
-and still too crew-loaded — the settled ASC/DATING residuals, not new
-structure.
+Nine of 20 seeds reach the declared threshold in each arm. The
+median cell records 8 onsets against the historical count of 197.
+Pooled confirmations were 1,236–1,294 over 20 seeds. An earlier
+campaign reported ~1,351–1,453 under a different revision. These totals
+measure confirmations. Delivered-dose preservation and attribution of
+changes in outbreak frequency to an individual repair remain unmeasured
+by this comparison.
 
 **GM `hygiene_cycle` @ Θ2.37e11:**
 
@@ -120,12 +108,9 @@ takeoff is near-certain, but the asymptomatic-at-testing share misses
 by ~3.4× — the same too-symptomatic residual as DP, now measured on a
 held-out hull.
 
-**Verdict:** the airflow repairs landed a transport layer whose solver
-indistinguishability is clean (the operator barely matters to outcomes),
-but under the repaired model DP takeoff is ~45% at Θ7.9e6 where the
-record always took off — pooled volume is preserved while the
-realization frequency halved. The shared residual across both hulls is
-not solver or ascertainment: symptomatic-overweight composition.
+**Verdict.** Both ensembles retain a symptomatic-overweight composition
+residual. Provider equivalence, the population frequency of historical
+outbreaks and a cost-based provider choice remain open.
 
 ### Canary readout — DP under ContamX (20 seeds, Θ 7.9e6)
 
@@ -136,7 +121,7 @@ Median [q05–q95] vs record:
 | recorded_onsets | 8 [0–121] | 197 |
 | lab_confirmed | 10.5 [0–145] | 712 |
 | infections_total | 31 [0–299] | — |
-| takeoff share (≥10 onsets) | 0.45 | 1.0 |
+| takeoff share (≥10 onsets) | 0.45 | one observed outbreak |
 | dated share | 0.807 | 0.277 |
 | lab crew share (DP-scale, n=4) | 0.453 [0.39–0.89] | 0.29 |
 | asym share day-31 | 0.146 [0–0.29] | 0.505 |

@@ -20,11 +20,12 @@ and hulls is a model defect to locate, not a fitting failure.
 
 ## 2. Current hypothesis
 
-The mass budget is now internally consistent and the solver question is closed
-on the scored channels — seed-paired native vs ContamX deltas are ≈0 on every
-record channel on both hulls, so the divergence is not in the transport leg
-(the readout scored channels and takeoff classes; it did not measure delivered
-dose directly). Under that budget the composite Θ refits to 3.162e11 (the
+The paired provider readout supports low observed provider sensitivity on
+these cases. DP has three differing pairs, including +39 recorded onsets
+and +50 confirmations in one seed. All 70 pairs agree at the declared
+takeoff threshold. Equivalence and delivered-dose preservation remain
+unmeasured (`campaigns/covid/transport_fit_01/READOUT_PAIRED.md`).
+Under that budget the composite Θ refits to 3.162e11 (the
 ~12× emission rescale plus the ambient/deck sinks absorbed the old 7.9e6 point)
 and magnitude is restored on both hulls. **The remaining defect is not moved
 by dose**: the asymptomatic-share miss is invariant across θ, both engines, and
@@ -33,11 +34,12 @@ recorded_onsets channel overshoots an order of magnitude at the fitted point.
 
 ## 3. Evidence for
 
-- **native ≈ ContamX on scored channels** — `COVID-TRANSPORT-FIT-01`
-  (measured at `106a3583`, 140 cells): seed-paired deltas ≈ 0 on every
-  record channel on both hulls (DP recorded_onsets Δ0 [0–4]; GM positives
-  Δ−0.5 mean); takeoff classes match. The comparison did not measure
-  delivered dose itself — equivalence of outcomes, not of internals.
+- **Low observed provider sensitivity on these cases** —
+  `COVID-TRANSPORT-FIT-01` (140 cells measured at `106a3583` and
+  `8de77294`). DP onset mean Δ +1.70 with paired-t 95% interval
+  [−2.54, +5.94], observed range −9 to +39. GM positive mean Δ −0.48
+  [−1.83, +0.87], range −15 to +10. Takeoff classes match in 70 pairs.
+  No equivalence margin was declared. Delivered dose was unmeasured.
 - **near-field carries the confirmations** — `COVID-REPAIR-ISOLATION-01`
   (measured at `ecdb2c9f`, 120 cells): `nearfield_off` collapses pooled lab_confirmed
   1,236 → 76 (takeoff 9/20 → 1/20); `pool_off` doubles pooled volume to 2,449
@@ -108,8 +110,10 @@ and the merged readouts are committed in the campaign LEDGERs and
   canonical spec is now `thetas: [3.162e11]`. Campaign specs that ran at the
   old point (TF-01, RI-01, GM rescore, CREW-REACH-01, PF-02) keep their own
   θ as the record of what ran; `open_ledger` §1 records the withdrawal.
-- **Any "solver divergence" claim predating TF-01** on these hulls is void:
-  the engines agree seed-paired on the post-repair stack.
+- **Provider comparisons retain their input revision.** TF-01 establishes
+  agreement on the takeoff flag for its seeds and configurations.
+  Outcome differences and earlier transport measurements retain their
+  measured scope.
 - **The pre-repair (~1,400 pooled) ensemble at `90b2fdae` is not a target
   state** — it predates the emission rescale and the sink series; `all_off`
   at the current SHA measures 156, a different mass budget, not a regression
