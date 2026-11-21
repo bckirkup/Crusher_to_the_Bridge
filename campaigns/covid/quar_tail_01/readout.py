@@ -50,24 +50,42 @@ _REFIT_PREFIX = (
 )
 _REFIT_D0_BLOCK = "dp_theta_8p50"
 
-_BAND = (150.0, 350.0)
-_CAPTURE_RISE = 0.80
-_RECORD_CREW_SHARE = 0.29
+def _audit_thresholds() -> dict[str, Any]:
+    """The frozen decision cutoffs, read from the design (Preflight Rule A).
+
+    Every numerical gate the verdict/audit applies lives in the design's
+    ``admissibility.audit_thresholds`` block; the readout never carries a
+    cutoff the frozen design does not declare.
+    """
+    raw = json.loads((_REPO_ROOT / _DESIGN).read_text(encoding="utf-8"))
+    thresholds = (raw.get("admissibility") or {}).get("audit_thresholds")
+    if not isinstance(thresholds, dict):
+        raise SystemExit(
+            f"{_DESIGN} carries no admissibility.audit_thresholds block",
+        )
+    return thresholds
+
+
+_TH = _audit_thresholds()
+_BAND = tuple(float(v) for v in _TH["during_band"])
+_CAPTURE_RISE = float(_TH["capture_rise"])
+_BEFORE_UNMOVED_MAX_ABS = float(_TH["before_unmoved_max_abs"])
+_SHARE_DEPARTURE_ABS = float(_TH["share_departure_abs"])
+_MIN_TAKEOFF = int(_TH["min_takeoff_cells"])
+_RECORD_ONSETS = float(_TH["record_total_onsets"])
+_RECORD_BEFORE_SHARE = float(_TH["record_before_share"])
+_RECORD_CREW_SHARE = float(_TH["record_crew_share_whole_voyage"])
 _SHIPPED_EXEMPT = ("crew_engineering", "crew_galley", "crew_general",
                    "crew_medical")
-_ZONE_ARMS = {"ZONE_NARROW", "ZN_DUTY"}
-_ZONE_EXPECTED = {"ZONE_NARROW": 11 / 34, "ZN_DUTY": 11 / 34}
-_FRAC_ARMS = {"F25_DUTY": 0.25}
-_FRAC_PROTOCOL = {"F25_DUTY": "SOP-017-QUARTER"}
-_DUTY_ARMS = {"ZN_DUTY", "F25_DUTY"}
+# MESSBOX arms echo the 11-zone essential exempt list verbatim.
+_MESSBOX_ARMS = {"D0_declared", "MB_DUTY"}
+_ZONE_EXPECTED = {"D0_declared": 11 / 34, "MB_DUTY": 11 / 34}
+_FRAC_ARMS = {"FRAQMB", "FRAQMB_DUTY"}
+_FRAC_PROTOCOL = {arm: "SOP-017-QUARTERMB" for arm in _FRAC_ARMS}
+_DUTY_ARMS = {"MB_DUTY", "FRAQMB_DUTY"}
+_BASELINE_ARM = "D0_declared"
 _CREW_N = 1045
 _SHIPPED_DROPLET = (0.175, 0.0)  # far_field_share, settled_share
-# "Before mass seed-paired unmoved": every |delta| under this bound counts
-# as unmoved (RNG reorder wobble); a material move is reported, not scored.
-_BEFORE_UNMOVED_MAX_ABS = 5
-# ZONE-arm realized-share report threshold: departure from the lottery
-# expectation beyond this absolute share is flagged in the readout.
-_SHARE_DEPARTURE_ABS = 0.10
 
 
 def _s3_client() -> Any:
@@ -150,18 +168,14 @@ def _activation_snap(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 def _frac_expected(arm: str) -> int | None:
-    frac = _FRAC_ARMS.get(arm)
-    return None if frac is None else int(frac * _CREW_N + 0.5)
+    if arm not in _FRAC_ARMS:
+        return None
+    return int(0.25 * _CREW_N + 0.5)
 
 
-def _audit_cell(payload: dict[str, Any]) -> list[str]:
-    """The frozen audit invariants, swept on one cell payload."""
+def _audit_shared(payload: dict[str, Any], tag: str) -> list[str]:
+    """Shared invariants: witness, index geometry, propensity, delivery."""
     violations: list[str] = []
-    cell = payload.get("cell") or {}
-    arm = str(cell.get("arm_id"))
-    seed = cell.get("seed")
-    tag = f"{arm}@{cell.get('theta'):g}s{seed}"
-
     witness = payload.get("quarantine_witness") or {}
     if witness.get("window_days") != [16, 30] or not witness.get("activated"):
         violations.append(f"{tag}: quarantine_witness window/activation")
@@ -193,20 +207,12 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
     if not math.isclose(float(settled_got if settled_got is not None else -1),
                         settled):
         violations.append(f"{tag}: droplet settled_share")
+    return violations
 
-    # Duty-exclusion resolved echo.
-    duty = payload.get("crew_duty_exclusion") or {}
-    enabled = bool((duty.get("resolved") or {}).get("enabled"))
-    if arm in _DUTY_ARMS and not enabled:
-        violations.append(f"{tag}: crew_duty_exclusion resolved disabled")
-    if arm not in _DUTY_ARMS and enabled:
-        violations.append(f"{tag}: crew_duty_exclusion resolved enabled")
 
-    # Realized-share witnesses.
-    cw = _crew_window(payload)
-    if not cw:
-        violations.append(f"{tag}: crew_window block missing")
-        return violations
+def _audit_crew_counts(cw: dict[str, Any], tag: str) -> list[str]:
+    """crew_window snapshot bookkeeping: totals and count sums."""
+    violations: list[str] = []
     for when in ("at_activation", "at_end"):
         snap = cw.get(when) or {}
         total = int(snap.get("total_crew") or -1)
@@ -218,17 +224,21 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
         if (int(confined_n if confined_n is not None else -1)
                 + int(working_n if working_n is not None else -1)) != total:
             violations.append(f"{tag}: crew_window.{when} count mismatch")
+    return violations
+
+
+def _audit_arm_echo(payload: dict[str, Any], arm: str, tag: str) -> list[str]:
+    """The arm-specific confinement-gate echo and realized share."""
+    violations: list[str] = []
+    cw = _crew_window(payload)
     snap = _activation_snap(payload)
     share = snap.get("realized_exempt_share")
-    if arm == "D0_declared":
-        if cw.get("exempt_work_zones") or cw.get("exempt_fraction"):
-            violations.append(f"{tag}: D0 carries a confinement-gate echo")
-        if share is not None and share <= 0.9:
-            violations.append(f"{tag}: D0 realized_exempt_share {share}")
-    elif arm in _ZONE_ARMS:
+    if arm in _MESSBOX_ARMS:
         zones = cw.get("exempt_work_zones")
         if not isinstance(zones, list) or len(zones) != 11:
             violations.append(f"{tag}: exempt_work_zones echo {zones}")
+        if cw.get("exempt_fraction"):
+            violations.append(f"{tag}: MESSBOX arm carries a fraction echo")
         working_zones = set(
             (snap.get("working_crew_by_posted_zone") or {}).keys()
         )
@@ -237,8 +247,6 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
                 f"{tag}: working crew outside essential list "
                 f"{sorted(working_zones - set(zones))}",
             )
-        if share is None or not 0.0 < share < 1.0:
-            violations.append(f"{tag}: degenerate realized share {share}")
     elif arm in _FRAC_ARMS:
         k = _frac_expected(arm)
         drawn = (cw.get("exempt_fraction_drawn") or {}).get(
@@ -249,16 +257,45 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
             violations.append(
                 f"{tag}: exempt_fraction_drawn {got_k} != {k}",
             )
-        if share is None or not 0.0 < share < 1.0:
-            violations.append(f"{tag}: degenerate realized share {share}")
+        if cw.get("exempt_work_zones"):
+            violations.append(f"{tag}: FRAQMB arm carries a zone echo")
+    if share is None or not 0.0 < share < 1.0:
+        violations.append(f"{tag}: degenerate realized share {share}")
+    return violations
+
+
+def _audit_cell(payload: dict[str, Any]) -> list[str]:
+    """The frozen audit invariants, swept on one cell payload."""
+    cell = payload.get("cell") or {}
+    arm = str(cell.get("arm_id"))
+    tag = f"{arm}@{cell.get('theta'):g}s{cell.get('seed')}"
+
+    violations = _audit_shared(payload, tag)
+
+    duty = payload.get("crew_duty_exclusion") or {}
+    enabled = bool((duty.get("resolved") or {}).get("enabled"))
+    if enabled != (arm in _DUTY_ARMS):
+        violations.append(
+            f"{tag}: crew_duty_exclusion resolved "
+            f"{'disabled' if arm in _DUTY_ARMS else 'enabled'}",
+        )
+
+    cw = _crew_window(payload)
+    if not cw:
+        violations.append(f"{tag}: crew_window block missing")
+        return violations
+    violations += _audit_crew_counts(cw, tag)
+    violations += _audit_arm_echo(payload, arm, tag)
     if int(cw.get("service_deliveries") or 0) <= 0:
         violations.append(f"{tag}: service_deliveries zero")
+    if not isinstance(payload.get("funnel_hosts"), list):
+        violations.append(f"{tag}: funnel_hosts missing (funnel_echo armed)")
     return violations
 
 
 def _reach_echo(arm: str, payloads: list[dict[str, Any]]) -> dict[str, Any]:
     """Whether the arm's mechanism provably fired, per the design's order."""
-    if arm in _ZONE_ARMS:
+    if arm in _MESSBOX_ARMS:
         snaps = [_activation_snap(p) for p in payloads]
         zones = [
             _crew_window(p).get("exempt_work_zones") for p in payloads
@@ -305,7 +342,7 @@ def _reach_echo(arm: str, payloads: list[dict[str, Any]]) -> dict[str, Any]:
                 and all(s is not None and 0.0 < s < 1.0 for s in shares)
             ),
         }
-    return {"kind": "baseline", "reached": True}
+    return {"kind": "baseline", "reached": arm == _BASELINE_ARM}
 
 
 def _duty_witness(payloads: list[dict[str, Any]]) -> dict[str, Any]:
@@ -375,31 +412,45 @@ def _row_metrics(
 def _verdict(
     arm: str, metrics: dict[str, Any], reach: dict[str, Any],
 ) -> str:
-    if arm == "D0_declared":
+    if arm == _BASELINE_ARM:
         return "BASELINE"
     if not reach["reached"]:
         return f"UNMOVED (reach echo {reach['kind']} shows the arm never fired)"
+    if metrics["takeoff_n"] < _MIN_TAKEOFF:
+        return "INSUFFICIENT-TAKEOFF-MASS"
     median = metrics["during_median_takeoff"]
     capture = metrics["capture_median_takeoff"]
-    if metrics["takeoff_n"] < 5:
-        median = metrics["during_median"]
     if median is None:
         return "NO CELLS"
     low, high = _BAND
-    before_ok = (
-        metrics["before_delta_median"] == 0
-        and (metrics["before_delta_max_abs"] or 0) <= _BEFORE_UNMOVED_MAX_ABS
-    )
     in_band = low <= median <= high
-    capture_ok = capture is not None and capture >= _CAPTURE_RISE
-    if in_band and capture_ok and before_ok:
-        return "SEAM-LANDED"
-    if in_band:
-        return (
-            "HALF-LANDED-MASS (in band; capture "
-            f"{_fmt(capture)} < {_CAPTURE_RISE}"
-            + ("" if before_ok else "; before-window moved") + ")"
+    failures: list[str] = []
+    notes: list[str] = []
+    if capture is None or capture < _CAPTURE_RISE:
+        failures.append(f"capture {_fmt(capture)} < {_CAPTURE_RISE}")
+    before_moved = (
+        metrics["before_delta_median"] is not None
+        and (
+            metrics["before_delta_median"] != 0
+            or (metrics["before_delta_max_abs"] or 0)
+            > _BEFORE_UNMOVED_MAX_ABS
         )
+    )
+    if before_moved and arm in _DUTY_ARMS:
+        # Standing policy: pre-window removals are the expected reported
+        # effect (design admissibility), not a failed criterion.
+        notes.append("before-window moved (expected: standing duty policy)")
+    elif before_moved:
+        failures.append("before-window moved")
+    if metrics["before_delta_median"] is None:
+        notes.append("before-pairing unavailable")
+    if in_band and not failures:
+        verdict = "SEAM-LANDED"
+        if notes:
+            verdict += " (" + "; ".join(notes) + ")"
+        return verdict
+    if in_band:
+        return "HALF-LANDED-MASS (" + "; ".join(failures + notes) + ")"
     if median < low:
         return "OVER-DAMPED"
     return "UNDER-DAMPED"
@@ -408,13 +459,14 @@ def _verdict(
 def _refit_witness(
     rows: dict[tuple[float, str], dict[int, dict[str, Any]]],
     refit_prefix: str,
+    takeoff_min: int,
 ) -> list[str]:
-    """Pair this design's D0 cells against the committed 8p50 cells."""
+    """Pair this design's D0 cells against the committed takeoff 8p50 cells."""
     bucket, key_prefix = _split_s3(refit_prefix)
     client = _s3_client()
     lines: list[str] = []
     for (theta, arm), new_row in sorted(rows.items()):
-        if arm != "D0_declared":
+        if arm != _BASELINE_ARM:
             continue
         deltas, old_during, new_during = [], [], []
         old_capture, new_capture = [], []
@@ -424,6 +476,9 @@ def _refit_witness(
                 old = json.loads(client.get_object(
                     Bucket=bucket, Key=key)["Body"].read())
             except Exception:  # noqa: BLE001 - missing cell, report count
+                continue
+            # The design pairs only the committed takeoff seeds.
+            if not _takeoff(old, takeoff_min):
                 continue
             old_during.append(float(old.get("infections_during_window") or 0))
             new_during.append(
@@ -435,12 +490,63 @@ def _refit_witness(
                 new_capture.append(_capture(new))
         lines.append(
             f"Theta {theta:g}: n={len(deltas)} paired vs committed "
-            f"dp_theta_8p50 — during median new {_median(new_during)} "
-            f"vs committed {_median(old_during)}, median paired delta "
-            f"{_median(deltas)}; capture new {_fmt(_median(new_capture))} "
-            f"vs committed {_fmt(_median(old_capture))}",
+            f"dp_theta_8p50 (committed-takeoff seeds) — during median new "
+            f"{_median(new_during)} vs committed {_median(old_during)}, "
+            f"median paired delta {_median(deltas)}; capture new "
+            f"{_fmt(_median(new_capture))} vs committed "
+            f"{_fmt(_median(old_capture))}",
         )
     return lines
+
+
+def _baseline_trajectory(
+    payloads: list[dict[str, Any]], takeoff_min: int,
+) -> dict[str, Any]:
+    """The frozen conditional_trajectory_clause scored on the D0 row.
+
+    Among takeoff seeds: q05-q95 of recorded_onsets must contain the
+    record's 197 and the median before_share must sit within 0.10 of the
+    record's 0.173; scored only with >= _MIN_TAKEOFF takeoff cells.
+    """
+    taken = [p for p in payloads if _takeoff(p, takeoff_min)]
+    if len(taken) < _MIN_TAKEOFF:
+        return {
+            "takeoff_n": len(taken),
+            "verdict": "insufficient takeoff mass",
+        }
+    onsets = [
+        float(_obs(p).get("recorded_onsets") or 0) for p in taken
+    ]
+    shares = [
+        float(_obs(p).get("onsets_before_split_day") or 0) / o
+        for p, o in zip(taken, onsets) if o > 0
+    ]
+    ordered = sorted(onsets)
+
+    def _q(q: float) -> float:
+        idx = q * (len(ordered) - 1)
+        lo = int(idx)
+        frac = idx - lo
+        return ordered[lo] + frac * (ordered[min(lo + 1, len(ordered) - 1)]
+                                     - ordered[lo])
+
+    q05, q95 = _q(0.05), _q(0.95)
+    before_med = _median(shares)
+    ok = (
+        q05 <= _RECORD_ONSETS <= q95
+        and before_med is not None
+        and abs(before_med - _RECORD_BEFORE_SHARE) <= 0.10
+    )
+    return {
+        "takeoff_n": len(taken),
+        "recorded_onsets_q05": q05,
+        "recorded_onsets_q95": q95,
+        "before_share_median": before_med,
+        "verdict": (
+            "contains 197 and within 0.10 of 0.173"
+            if ok else "outside the clause"
+        ),
+    }
 
 
 def _rows(
@@ -482,7 +588,7 @@ def _render(
     ]
     flags: list[str] = []
     for (theta, arm), seeds in sorted(by_seed_row.items()):
-        baseline = by_seed_row.get((theta, "D0_declared"), {})
+        baseline = by_seed_row.get((theta, _BASELINE_ARM), {})
         metrics = _row_metrics(list(seeds.values()), baseline, takeoff_min)
         reach = _reach_echo(arm, list(seeds.values()))
         verdict = _verdict(arm, metrics, reach)
@@ -515,10 +621,28 @@ def _render(
                 f"{arm}@{theta:g}: crew_duty_exclusion fired with "
                 "excluded_hosts 0 (mechanism-didn't-fire witness)",
             )
-        if arm != "D0_declared" and metrics["service_deliveries_min"] == 0:
+        if arm != _BASELINE_ARM and metrics["service_deliveries_min"] == 0:
             flags.append(
                 f"{arm}@{theta:g}: service_deliveries collapsed to zero "
                 "on a confining arm",
+            )
+    lines += ["", "## Baseline trajectory clause (D0, takeoff seeds)", ""]
+    for (theta, arm), seeds in sorted(by_seed_row.items()):
+        if arm != _BASELINE_ARM:
+            continue
+        traj = _baseline_trajectory(list(seeds.values()), takeoff_min)
+        if traj["takeoff_n"] < _MIN_TAKEOFF:
+            lines.append(
+                f"- {arm}@{theta:g}: {traj['verdict']} "
+                f"(takeoff {traj['takeoff_n']} < {_MIN_TAKEOFF})",
+            )
+        else:
+            lines.append(
+                f"- {arm}@{theta:g}: recorded_onsets q05-q95 "
+                f"{traj['recorded_onsets_q05']:.0f}-{traj['recorded_onsets_q95']:.0f} "
+                f"(record {_RECORD_ONSETS:g}), before_share median "
+                f"{_fmt(traj['before_share_median'])} (record "
+                f"{_RECORD_BEFORE_SHARE}) -> {traj['verdict']}",
             )
     lines += [
         "",
@@ -570,6 +694,7 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit(f"no cell payloads under {source}")
     refit_lines = [] if args.no_refit else _refit_witness(
         _rows(payloads), args.refit_prefix or _REFIT_PREFIX,
+        design.takeoff_recorded_onsets,
     )
     report = _render(design, payloads, source, refit_lines)
     if args.out_md:
