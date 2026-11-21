@@ -69,11 +69,22 @@ voyage-end tail that lands hosts at dpi ≤4 for the day-34 crew wave
 CREW-WINDOW-02 (at the clause-leg thetas 1e6/7.9e6) measured
 during-window mass monotone in the realized exempt share: ~0.25–0.31
 (FRAC_25 / ZONE_NARROW) lands the record-informed during band
-[150,350]; boxed_s1s2's all-classes-exempt declaration realizes
-~0.96–0.99 — roughly 3–4× over-declared on the confinement-dose
-axis. The CW-02 band was a during-mass target at clause-leg
-incidence; at right-sized truth the same lever is what the capture
-leg needs.
+[150,350]; at clause-leg θ, D0's all-classes-exempt declaration
+realizes ~0.96–0.99 working at activation. **Correction (measured
+on the same committed 8p50 cells):** at right-sized truth the
+illness does most of that damping itself —
+`crew_window.at_activation.realized_exempt_share` reads
+**0.27–0.31** (716–759 of 1,045 crew already confined by
+infection/isolation before SOP-017 fires) and falls to ~0.02 by
+day 34 (~98% confined). The ~0.96–0.99 figure was the clause-leg
+realization and does not carry to this operating point: the working
+share is already at CW-02's band-landing point, yet the during
+median still runs 415. The confinement-dose hypothesis therefore
+tightens to a discrimination — whether the confined tail is
+crew-service-fed *at the margin* (a further push below ~0.25 plus
+duty exclusion lands the band) or cabin-resident (droplet chains
+among already-confined hosts, for which the exempt lever is nearly
+inert at 8p50).
 
 ## Seam design — declared
 
@@ -82,11 +93,14 @@ now measured handles:**
 
 1. **Confinement dose** (declared, immediate): re-run boxed_s1s2 at
    θ=3.162e8 with the CW-02 FRAC_25 / ZONE_NARROW arm ported to this
-   operating point (exempt share ~0.25–0.31, symptomatic-crew
-   exclusion armed). Dual prediction: during-window mass falls into
-   band AND confirmed-per-infection capture rises toward ~0.85
-   (fewer hosts stranded at dpi ≤4 inside the test window). One arm
-   change tests the whole seam.
+   operating point (realized working share ~0.16–0.23 on the arms
+   vs ~0.27–0.31 on D0, symptomatic-crew exclusion armed — measured
+   on smoke cells). Frozen dual prediction: during-window mass
+   falls into band AND confirmed-per-infection capture rises to
+   ≥0.80 (fewer hosts stranded at dpi ≤4 inside the test window).
+   A null/marginal response now *also* discriminates — it would
+   name the cabin-resident droplet loop (56%/72% shares) as the
+   carrier, not the working crew.
 2. **Ignition timing** (harder, hypothesis): the ~10-day-late
    exponential phase at right-sized truth — the within-cabin / early
    seed-ring structure produces a slower front than the record's
