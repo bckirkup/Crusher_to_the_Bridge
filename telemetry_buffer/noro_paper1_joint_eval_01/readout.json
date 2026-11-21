@@ -1,0 +1,2171 @@
+{
+ "campaign": "noro_paper1_joint_eval_01",
+ "rules_source": "manifest joint_eval (frozen before any cell)",
+ "gate": {
+  "kind": "inferred",
+  "stage_b_emitted": true,
+  "intended_inputs_used": true,
+  "outcomes_extractable": true,
+  "attempts_accounted": true,
+  "pairs_meaningful": true,
+  "technically_complete": true
+ },
+ "completion": [
+  {
+   "tier": "fl_je_repro_exp_solver01_station_continuous",
+   "kind": "measured",
+   "arm": "reproduction",
+   "n_expected": 16,
+   "n_read": 16,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 16,
+   "n_outcomes_ok": 16,
+   "engine_git_shas": [
+    "bf0ec16825ed15176fe0362459a72a7be1667f41"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_7d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_7d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_7d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_12d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_12d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_12d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_21d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_21d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_21d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_12d_eval_uncontaminated",
+   "kind": "measured",
+   "arm": "pilot",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_exp_12d_eval_contaminated",
+   "kind": "measured",
+   "arm": "pilot",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_7d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_7d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_7d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_12d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_12d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_12d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_21d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_21d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_21d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_12d_eval_uncontaminated",
+   "kind": "measured",
+   "arm": "pilot",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_cls_12d_eval_contaminated",
+   "kind": "measured",
+   "arm": "pilot",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_7d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_7d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_7d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_12d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_12d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_12d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_21d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_21d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_21d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_12d_eval_uncontaminated",
+   "kind": "measured",
+   "arm": "pilot",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_spr_12d_eval_contaminated",
+   "kind": "measured",
+   "arm": "pilot",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_7d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_7d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_7d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_12d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_12d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_12d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_21d_quiet",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_21d_near",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_21d_outbreak",
+   "kind": "measured",
+   "arm": "bridge",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_12d_eval_uncontaminated",
+   "kind": "measured",
+   "arm": "pilot",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  },
+  {
+   "tier": "fl_je_meg_12d_eval_contaminated",
+   "kind": "measured",
+   "arm": "pilot",
+   "n_expected": 20,
+   "n_read": 20,
+   "seeds_missing": [],
+   "seeds_unexpected": [],
+   "seeds_duplicated": [],
+   "n_inputs_ok": 20,
+   "n_outcomes_ok": 20,
+   "engine_git_shas": [
+    "90aa3ec2cebd483ba93e8600bf12d6af4f3ef48f"
+   ],
+   "intended_inputs_used": true,
+   "outcomes_extractable": true,
+   "attempts_accounted": true
+  }
+ ],
+ "rates": [
+  {
+   "tier": "fl_je_repro_exp_solver01_station_continuous",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 288,
+   "stratum": null,
+   "n": 16,
+   "posted": 16,
+   "posting_rate": 1.0,
+   "posting_rate_ci95": [
+    0.7941,
+    1.0
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "passenger_first": 16
+   },
+   "reported_ar_median": 0.056666666666666664,
+   "reported_ar_max": 0.13111111111111112,
+   "swab_detected_voyages": 16,
+   "tank_detected_voyages": 16
+  },
+  {
+   "tier": "fl_je_exp_7d_quiet",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 168,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0,
+   "reported_ar_max": 0.0022222222222222222,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 12
+  },
+  {
+   "tier": "fl_je_exp_7d_near",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 168,
+   "stratum": "near",
+   "n": 20,
+   "posted": 3,
+   "posting_rate": 0.15,
+   "posting_rate_ci95": [
+    0.0321,
+    0.3789
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "neither": 17,
+    "passenger_first": 1,
+    "crew_first": 2
+   },
+   "reported_ar_median": 0.008888888888888889,
+   "reported_ar_max": 0.02,
+   "swab_detected_voyages": 16,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_exp_7d_outbreak",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 168,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 20,
+   "posting_rate": 1.0,
+   "posting_rate_ci95": [
+    0.8316,
+    1.0
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "passenger_first": 12,
+    "crew_first": 8
+   },
+   "reported_ar_median": 0.06,
+   "reported_ar_max": 0.09111111111111111,
+   "swab_detected_voyages": 20,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_exp_12d_quiet",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 288,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0,
+   "reported_ar_max": 0.0022222222222222222,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 12
+  },
+  {
+   "tier": "fl_je_exp_12d_near",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 288,
+   "stratum": "near",
+   "n": 20,
+   "posted": 4,
+   "posting_rate": 0.2,
+   "posting_rate_ci95": [
+    0.0573,
+    0.4366
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "neither": 16,
+    "crew_first": 3,
+    "passenger_first": 1
+   },
+   "reported_ar_median": 0.008888888888888889,
+   "reported_ar_max": 0.022222222222222223,
+   "swab_detected_voyages": 14,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_exp_12d_outbreak",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 288,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 20,
+   "posting_rate": 1.0,
+   "posting_rate_ci95": [
+    0.8316,
+    1.0
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "passenger_first": 12,
+    "crew_first": 8
+   },
+   "reported_ar_median": 0.058888888888888886,
+   "reported_ar_max": 0.10666666666666667,
+   "swab_detected_voyages": 20,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_exp_21d_quiet",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 504,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0,
+   "reported_ar_max": 0.0022222222222222222,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 12
+  },
+  {
+   "tier": "fl_je_exp_21d_near",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 504,
+   "stratum": "near",
+   "n": 20,
+   "posted": 4,
+   "posting_rate": 0.2,
+   "posting_rate_ci95": [
+    0.0573,
+    0.4366
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "neither": 16,
+    "crew_first": 3,
+    "passenger_first": 1
+   },
+   "reported_ar_median": 0.008888888888888889,
+   "reported_ar_max": 0.02,
+   "swab_detected_voyages": 15,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_exp_21d_outbreak",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 504,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 20,
+   "posting_rate": 1.0,
+   "posting_rate_ci95": [
+    0.8316,
+    1.0
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "passenger_first": 12,
+    "crew_first": 8
+   },
+   "reported_ar_median": 0.06666666666666667,
+   "reported_ar_max": 0.10222222222222223,
+   "swab_detected_voyages": 20,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_exp_12d_eval_uncontaminated",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 288,
+   "stratum": "uncontaminated",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0,
+   "reported_ar_max": 0.0022222222222222222,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 10
+  },
+  {
+   "tier": "fl_je_exp_12d_eval_contaminated",
+   "kind": "measured",
+   "hull": "expedition_cruise_450",
+   "epochs": 288,
+   "stratum": "contaminated",
+   "n": 20,
+   "posted": 18,
+   "posting_rate": 0.9,
+   "posting_rate_ci95": [
+    0.683,
+    0.9877
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "crew_first": 9,
+    "passenger_first": 9,
+    "neither": 2
+   },
+   "reported_ar_median": 0.034444444444444444,
+   "reported_ar_max": 0.06666666666666667,
+   "swab_detected_voyages": 20,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_7d_quiet",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 168,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0,
+   "reported_ar_max": 0.0010471204188481676,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_7d_near",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 168,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0023560209424083774,
+   "reported_ar_max": 0.006806282722513089,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_7d_outbreak",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 168,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 19,
+   "posting_rate": 0.95,
+   "posting_rate_ci95": [
+    0.7513,
+    0.9987
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "passenger_first": 15,
+    "crew_first": 4,
+    "neither": 1
+   },
+   "reported_ar_median": 0.04816753926701571,
+   "reported_ar_max": 0.06544502617801047,
+   "swab_detected_voyages": 19,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_12d_quiet",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 288,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0,
+   "reported_ar_max": 0.0010471204188481676,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_12d_near",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 288,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.002617801047120419,
+   "reported_ar_max": 0.005235602094240838,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_12d_outbreak",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 288,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 19,
+   "posting_rate": 0.95,
+   "posting_rate_ci95": [
+    0.7513,
+    0.9987
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "passenger_first": 15,
+    "crew_first": 4,
+    "neither": 1
+   },
+   "reported_ar_median": 0.048167539267015703,
+   "reported_ar_max": 0.07225130890052356,
+   "swab_detected_voyages": 19,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_21d_quiet",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 504,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0,
+   "reported_ar_max": 0.0005235602094240838,
+   "swab_detected_voyages": 2,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_21d_near",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 504,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0020942408376963353,
+   "reported_ar_max": 0.005235602094240838,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_21d_outbreak",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 504,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 19,
+   "posting_rate": 0.95,
+   "posting_rate_ci95": [
+    0.7513,
+    0.9987
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "passenger_first": 15,
+    "crew_first": 4,
+    "neither": 1
+   },
+   "reported_ar_median": 0.04816753926701571,
+   "reported_ar_max": 0.07172774869109948,
+   "swab_detected_voyages": 19,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_cls_12d_eval_uncontaminated",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 288,
+   "stratum": "uncontaminated",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0,
+   "reported_ar_max": 0.0015706806282722514,
+   "swab_detected_voyages": 2,
+   "tank_detected_voyages": 19
+  },
+  {
+   "tier": "fl_je_cls_12d_eval_contaminated",
+   "kind": "measured",
+   "hull": "classic_cruise_1900",
+   "epochs": 288,
+   "stratum": "contaminated",
+   "n": 20,
+   "posted": 6,
+   "posting_rate": 0.3,
+   "posting_rate_ci95": [
+    0.1189,
+    0.5428
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "passenger_first": 5,
+    "neither": 14,
+    "crew_first": 1
+   },
+   "reported_ar_median": 0.007329842931937173,
+   "reported_ar_max": 0.049738219895287955,
+   "swab_detected_voyages": 9,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_7d_quiet",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 168,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0003333333333333333,
+   "reported_ar_max": 0.001,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_7d_near",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 168,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0015,
+   "reported_ar_max": 0.0026666666666666666,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_7d_outbreak",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 168,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 11,
+   "posting_rate": 0.55,
+   "posting_rate_ci95": [
+    0.3153,
+    0.7694
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "crew_first": 4,
+    "passenger_first": 7,
+    "neither": 9
+   },
+   "reported_ar_median": 0.02266666666666667,
+   "reported_ar_max": 0.04666666666666667,
+   "swab_detected_voyages": 12,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_12d_quiet",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 288,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0003333333333333333,
+   "reported_ar_max": 0.001,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_12d_near",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 288,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0018333333333333335,
+   "reported_ar_max": 0.0033333333333333335,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_12d_outbreak",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 288,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 11,
+   "posting_rate": 0.55,
+   "posting_rate_ci95": [
+    0.3153,
+    0.7694
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "crew_first": 4,
+    "passenger_first": 7,
+    "neither": 9
+   },
+   "reported_ar_median": 0.026000000000000002,
+   "reported_ar_max": 0.049666666666666665,
+   "swab_detected_voyages": 13,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_21d_quiet",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 504,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0003333333333333333,
+   "reported_ar_max": 0.0016666666666666668,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_21d_near",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 504,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.002,
+   "reported_ar_max": 0.004,
+   "swab_detected_voyages": 2,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_21d_outbreak",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 504,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 12,
+   "posting_rate": 0.6,
+   "posting_rate_ci95": [
+    0.3605,
+    0.8088
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "crew_first": 4,
+    "passenger_first": 8,
+    "neither": 8
+   },
+   "reported_ar_median": 0.027,
+   "reported_ar_max": 0.04666666666666667,
+   "swab_detected_voyages": 12,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_12d_eval_uncontaminated",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 288,
+   "stratum": "uncontaminated",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0003333333333333333,
+   "reported_ar_max": 0.001,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_spr_12d_eval_contaminated",
+   "kind": "measured",
+   "hull": "spirit_cruise_3000",
+   "epochs": 288,
+   "stratum": "contaminated",
+   "n": 20,
+   "posted": 1,
+   "posting_rate": 0.05,
+   "posting_rate_ci95": [
+    0.0013,
+    0.2487
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "neither": 19,
+    "crew_first": 1
+   },
+   "reported_ar_median": 0.005666666666666667,
+   "reported_ar_max": 0.024,
+   "swab_detected_voyages": 5,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_7d_quiet",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 168,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.00014285714285714287,
+   "reported_ar_max": 0.0007142857142857143,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_7d_near",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 168,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0006428571428571429,
+   "reported_ar_max": 0.007571428571428572,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_7d_outbreak",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 168,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 7,
+   "posting_rate": 0.35,
+   "posting_rate_ci95": [
+    0.1539,
+    0.5922
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "crew_first": 6,
+    "neither": 13,
+    "passenger_first": 1
+   },
+   "reported_ar_median": 0.008714285714285714,
+   "reported_ar_max": 0.023857142857142858,
+   "swab_detected_voyages": 10,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_12d_quiet",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 288,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.00014285714285714287,
+   "reported_ar_max": 0.0008571428571428571,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_12d_near",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 288,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0005714285714285715,
+   "reported_ar_max": 0.005571428571428572,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_12d_outbreak",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 288,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 7,
+   "posting_rate": 0.35,
+   "posting_rate_ci95": [
+    0.1539,
+    0.5922
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "crew_first": 6,
+    "neither": 13,
+    "passenger_first": 1
+   },
+   "reported_ar_median": 0.010214285714285714,
+   "reported_ar_max": 0.026714285714285715,
+   "swab_detected_voyages": 8,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_21d_quiet",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 504,
+   "stratum": "quiet",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.00014285714285714287,
+   "reported_ar_max": 0.001,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_21d_near",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 504,
+   "stratum": "near",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0007142857142857143,
+   "reported_ar_max": 0.0074285714285714285,
+   "swab_detected_voyages": 1,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_21d_outbreak",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 504,
+   "stratum": "outbreak",
+   "n": 20,
+   "posted": 7,
+   "posting_rate": 0.35,
+   "posting_rate_ci95": [
+    0.1539,
+    0.5922
+   ],
+   "zero_event_upper95_one_sided": null,
+   "first_role": {
+    "crew_first": 6,
+    "neither": 13,
+    "passenger_first": 1
+   },
+   "reported_ar_median": 0.010071428571428571,
+   "reported_ar_max": 0.026857142857142857,
+   "swab_detected_voyages": 9,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_12d_eval_uncontaminated",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 288,
+   "stratum": "uncontaminated",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.00014285714285714287,
+   "reported_ar_max": 0.0007142857142857143,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 20
+  },
+  {
+   "tier": "fl_je_meg_12d_eval_contaminated",
+   "kind": "measured",
+   "hull": "mega_cruise_5000",
+   "epochs": 288,
+   "stratum": "contaminated",
+   "n": 20,
+   "posted": 0,
+   "posting_rate": 0.0,
+   "posting_rate_ci95": [
+    0.0,
+    0.1684
+   ],
+   "zero_event_upper95_one_sided": 0.13911,
+   "first_role": {
+    "neither": 20
+   },
+   "reported_ar_median": 0.0017857142857142859,
+   "reported_ar_max": 0.006571428571428572,
+   "swab_detected_voyages": 0,
+   "tank_detected_voyages": 20
+  }
+ ],
+ "ordering_diagnostic": [
+  {
+   "hull": "classic_cruise_1900",
+   "epochs": 168,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "undetermined"
+   },
+   "ordered": false
+  },
+  {
+   "hull": "classic_cruise_1900",
+   "epochs": 288,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "undetermined"
+   },
+   "ordered": false
+  },
+  {
+   "hull": "classic_cruise_1900",
+   "epochs": 504,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "undetermined"
+   },
+   "ordered": false
+  },
+  {
+   "hull": "expedition_cruise_450",
+   "epochs": 168,
+   "kind": "inferred",
+   "state": "in",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "in"
+   },
+   "ordered": true
+  },
+  {
+   "hull": "expedition_cruise_450",
+   "epochs": 288,
+   "kind": "inferred",
+   "state": "in",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "in"
+   },
+   "ordered": true
+  },
+  {
+   "hull": "expedition_cruise_450",
+   "epochs": 504,
+   "kind": "inferred",
+   "state": "in",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "in"
+   },
+   "ordered": true
+  },
+  {
+   "hull": "mega_cruise_5000",
+   "epochs": 168,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "undetermined",
+    "near": "undetermined"
+   },
+   "ordered": false
+  },
+  {
+   "hull": "mega_cruise_5000",
+   "epochs": 288,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "undetermined",
+    "near": "undetermined"
+   },
+   "ordered": false
+  },
+  {
+   "hull": "mega_cruise_5000",
+   "epochs": 504,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "undetermined",
+    "near": "undetermined"
+   },
+   "ordered": false
+  },
+  {
+   "hull": "spirit_cruise_3000",
+   "epochs": 168,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "undetermined"
+   },
+   "ordered": false
+  },
+  {
+   "hull": "spirit_cruise_3000",
+   "epochs": 288,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "undetermined"
+   },
+   "ordered": false
+  },
+  {
+   "hull": "spirit_cruise_3000",
+   "epochs": 504,
+   "kind": "inferred",
+   "state": "undetermined",
+   "strata": {
+    "quiet": "in",
+    "outbreak": "in",
+    "near": "undetermined"
+   },
+   "ordered": false
+  }
+ ],
+ "continuation": {
+  "kind": "inferred",
+  "continuation": "justified_defect_fix",
+  "hull_states": {
+   "classic_cruise_1900": "undetermined",
+   "expedition_cruise_450": "in",
+   "mega_cruise_5000": "undetermined",
+   "spirit_cruise_3000": "undetermined"
+  },
+  "defect_evidence": [
+   "fl_je_repro_exp_solver01_station_continuous: 0/16 reproduce"
+  ]
+ },
+ "temporal_pilot": [
+  {
+   "hull": "classic_cruise_1900",
+   "stratum": "near",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 3,
+   "truncation_valid": false
+  },
+  {
+   "hull": "classic_cruise_1900",
+   "stratum": "outbreak",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 0,
+   "truncation_valid": false
+  },
+  {
+   "hull": "classic_cruise_1900",
+   "stratum": "quiet",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 34,
+   "truncation_valid": false
+  },
+  {
+   "hull": "expedition_cruise_450",
+   "stratum": "near",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 0,
+   "truncation_valid": false
+  },
+  {
+   "hull": "expedition_cruise_450",
+   "stratum": "outbreak",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 0,
+   "truncation_valid": false
+  },
+  {
+   "hull": "expedition_cruise_450",
+   "stratum": "quiet",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 38,
+   "truncation_valid": false
+  },
+  {
+   "hull": "mega_cruise_5000",
+   "stratum": "near",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 5,
+   "truncation_valid": false
+  },
+  {
+   "hull": "mega_cruise_5000",
+   "stratum": "outbreak",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 0,
+   "truncation_valid": false
+  },
+  {
+   "hull": "mega_cruise_5000",
+   "stratum": "quiet",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 17,
+   "truncation_valid": false
+  },
+  {
+   "hull": "spirit_cruise_3000",
+   "stratum": "near",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 2,
+   "truncation_valid": false
+  },
+  {
+   "hull": "spirit_cruise_3000",
+   "stratum": "outbreak",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 0,
+   "truncation_valid": false
+  },
+  {
+   "hull": "spirit_cruise_3000",
+   "stratum": "quiet",
+   "kind": "measured",
+   "pairs_compared": 40,
+   "prefix_identical": 31,
+   "truncation_valid": false
+  }
+ ],
+ "joint_outcome_pilot": [
+  {
+   "hull": "classic_cruise_1900",
+   "epochs": 288,
+   "kind": "measured",
+   "estimate": 0.027764999999999998,
+   "standard_error": 0.009483552933895608,
+   "neyman_share": {
+    "uncontaminated": 0.0,
+    "contaminated": 1.0
+   },
+   "n_for_half_width_0p10": 1,
+   "note": "evaluation seeds only; a zero-variance stratum is sized by the quiet_bound target, not by this formula"
+  },
+  {
+   "hull": "expedition_cruise_450",
+   "epochs": 288,
+   "kind": "measured",
+   "estimate": 0.05328,
+   "standard_error": 0.003971256728039626,
+   "neyman_share": {
+    "uncontaminated": 0.0,
+    "contaminated": 1.0
+   },
+   "n_for_half_width_0p10": 1,
+   "note": "evaluation seeds only; a zero-variance stratum is sized by the quiet_bound target, not by this formula"
+  },
+  {
+   "hull": "mega_cruise_5000",
+   "epochs": 288,
+   "kind": "measured",
+   "estimate": 0.0,
+   "standard_error": 0.0,
+   "neyman_share": {
+    "uncontaminated": null,
+    "contaminated": null
+   },
+   "n_for_half_width_0p10": null,
+   "note": "evaluation seeds only; a zero-variance stratum is sized by the quiet_bound target, not by this formula"
+  },
+  {
+   "hull": "spirit_cruise_3000",
+   "epochs": 288,
+   "kind": "measured",
+   "estimate": 0.0076275,
+   "standard_error": 0.007434367386503036,
+   "neyman_share": {
+    "uncontaminated": 0.0,
+    "contaminated": 1.0
+   },
+   "n_for_half_width_0p10": 1,
+   "note": "evaluation seeds only; a zero-variance stratum is sized by the quiet_bound target, not by this formula"
+  }
+ ],
+ "reproduction": [
+  {
+   "tier": "fl_je_repro_exp_solver01_station_continuous",
+   "kind": "measured",
+   "n_expected": 16,
+   "n_reference": 16,
+   "n_compared": 16,
+   "n_identical": 0
+  }
+ ],
+ "zero_event_convention": "k = 0 of n: exact (Clopper-Pearson) one-sided 95% upper bound 1 - 0.05^(1/n); 0/300 -> 0.994%, 0/20 -> 13.9%. Stated with its sampling frame: hull, voyage length, source stratum, census seed range"
+}
