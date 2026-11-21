@@ -1,0 +1,1904 @@
+{
+ "campaign": "noro_explorer_reconstruction_01",
+ "expected_cells": 600,
+ "cells": 20,
+ "engine_git_sha": [
+  "bf0ec16825ed15176fe0362459a72a7be1667f41"
+ ],
+ "status": "partial",
+ "incomplete_reasons": [
+  "fl_exp_8d_recon_declared_five: 80 seeds missing",
+  "fl_exp_8d_recon_background_only: 100 seeds missing",
+  "fl_meg_8d_recon_declared_five: 100 seeds missing",
+  "fl_meg_8d_recon_background_only: 100 seeds missing",
+  "fl_exp_8d_recon_declared_five_rhythm_off: 100 seeds missing",
+  "fl_meg_8d_recon_declared_five_rhythm_off: 100 seeds missing"
+ ],
+ "coverage": {
+  "fl_exp_8d_recon_declared_five": {
+   "expected": 100,
+   "read": 20,
+   "missing": [
+    8125,
+    8126,
+    8127,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132,
+    8133,
+    8134,
+    8135,
+    8136,
+    8137,
+    8138,
+    8139,
+    8140,
+    8141,
+    8142,
+    8143,
+    8144,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8150,
+    8151,
+    8152,
+    8153,
+    8154,
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8160,
+    8161,
+    8162,
+    8163,
+    8164,
+    8165,
+    8166,
+    8167,
+    8168,
+    8169,
+    8170,
+    8171,
+    8172,
+    8173,
+    8174,
+    8175,
+    8176,
+    8177,
+    8178,
+    8179,
+    8180,
+    8181,
+    8182,
+    8183,
+    8184,
+    8185,
+    8186,
+    8187,
+    8188,
+    8189,
+    8190,
+    8191,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8203,
+    8204
+   ],
+   "unexpected": []
+  },
+  "fl_exp_8d_recon_background_only": {
+   "expected": 100,
+   "read": 0,
+   "missing": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112,
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132,
+    8133,
+    8134,
+    8135,
+    8136,
+    8137,
+    8138,
+    8139,
+    8140,
+    8141,
+    8142,
+    8143,
+    8144,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8150,
+    8151,
+    8152,
+    8153,
+    8154,
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8160,
+    8161,
+    8162,
+    8163,
+    8164,
+    8165,
+    8166,
+    8167,
+    8168,
+    8169,
+    8170,
+    8171,
+    8172,
+    8173,
+    8174,
+    8175,
+    8176,
+    8177,
+    8178,
+    8179,
+    8180,
+    8181,
+    8182,
+    8183,
+    8184,
+    8185,
+    8186,
+    8187,
+    8188,
+    8189,
+    8190,
+    8191,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8203,
+    8204
+   ],
+   "unexpected": []
+  },
+  "fl_meg_8d_recon_declared_five": {
+   "expected": 100,
+   "read": 0,
+   "missing": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112,
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132,
+    8133,
+    8134,
+    8135,
+    8136,
+    8137,
+    8138,
+    8139,
+    8140,
+    8141,
+    8142,
+    8143,
+    8144,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8150,
+    8151,
+    8152,
+    8153,
+    8154,
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8160,
+    8161,
+    8162,
+    8163,
+    8164,
+    8165,
+    8166,
+    8167,
+    8168,
+    8169,
+    8170,
+    8171,
+    8172,
+    8173,
+    8174,
+    8175,
+    8176,
+    8177,
+    8178,
+    8179,
+    8180,
+    8181,
+    8182,
+    8183,
+    8184,
+    8185,
+    8186,
+    8187,
+    8188,
+    8189,
+    8190,
+    8191,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8203,
+    8204
+   ],
+   "unexpected": []
+  },
+  "fl_meg_8d_recon_background_only": {
+   "expected": 100,
+   "read": 0,
+   "missing": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112,
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132,
+    8133,
+    8134,
+    8135,
+    8136,
+    8137,
+    8138,
+    8139,
+    8140,
+    8141,
+    8142,
+    8143,
+    8144,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8150,
+    8151,
+    8152,
+    8153,
+    8154,
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8160,
+    8161,
+    8162,
+    8163,
+    8164,
+    8165,
+    8166,
+    8167,
+    8168,
+    8169,
+    8170,
+    8171,
+    8172,
+    8173,
+    8174,
+    8175,
+    8176,
+    8177,
+    8178,
+    8179,
+    8180,
+    8181,
+    8182,
+    8183,
+    8184,
+    8185,
+    8186,
+    8187,
+    8188,
+    8189,
+    8190,
+    8191,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8203,
+    8204
+   ],
+   "unexpected": []
+  },
+  "fl_exp_8d_recon_declared_five_rhythm_off": {
+   "expected": 100,
+   "read": 0,
+   "missing": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112,
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132,
+    8133,
+    8134,
+    8135,
+    8136,
+    8137,
+    8138,
+    8139,
+    8140,
+    8141,
+    8142,
+    8143,
+    8144,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8150,
+    8151,
+    8152,
+    8153,
+    8154,
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8160,
+    8161,
+    8162,
+    8163,
+    8164,
+    8165,
+    8166,
+    8167,
+    8168,
+    8169,
+    8170,
+    8171,
+    8172,
+    8173,
+    8174,
+    8175,
+    8176,
+    8177,
+    8178,
+    8179,
+    8180,
+    8181,
+    8182,
+    8183,
+    8184,
+    8185,
+    8186,
+    8187,
+    8188,
+    8189,
+    8190,
+    8191,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8203,
+    8204
+   ],
+   "unexpected": []
+  },
+  "fl_meg_8d_recon_declared_five_rhythm_off": {
+   "expected": 100,
+   "read": 0,
+   "missing": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112,
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132,
+    8133,
+    8134,
+    8135,
+    8136,
+    8137,
+    8138,
+    8139,
+    8140,
+    8141,
+    8142,
+    8143,
+    8144,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8150,
+    8151,
+    8152,
+    8153,
+    8154,
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8160,
+    8161,
+    8162,
+    8163,
+    8164,
+    8165,
+    8166,
+    8167,
+    8168,
+    8169,
+    8170,
+    8171,
+    8172,
+    8173,
+    8174,
+    8175,
+    8176,
+    8177,
+    8178,
+    8179,
+    8180,
+    8181,
+    8182,
+    8183,
+    8184,
+    8185,
+    8186,
+    8187,
+    8188,
+    8189,
+    8190,
+    8191,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8203,
+    8204
+   ],
+   "unexpected": []
+  }
+ },
+ "defects": [],
+ "target": {
+  "source": "docs/norovirus/mega_voyage_source_evidence.md",
+  "source_snapshot": "74a6eff3ec45734b377acb07afe287ca6298f02f",
+  "source_location": "CDC trip report Appendix C (labeled bars), pp. 1 and 7, as transcribed in the evidence readout; not re-transcribed here",
+  "voyage": "Explorer of the Seas, Feb 26 - Mar 5 2006",
+  "day_labels": [
+   "Feb 26",
+   "Feb 27",
+   "Feb 28",
+   "Mar 1",
+   "Mar 2",
+   "Mar 3",
+   "Mar 4",
+   "Mar 5"
+  ],
+  "onsets_by_day": {
+   "passenger": [
+    2,
+    53,
+    74,
+    43,
+    43,
+    21,
+    16,
+    0
+   ],
+   "crew": [
+    0,
+    1,
+    2,
+    2,
+    7,
+    5,
+    3,
+    0
+   ]
+  },
+  "investigation_finals": {
+   "passenger": {
+    "cases": 252,
+    "denominator": 3245
+   },
+   "crew": {
+    "cases": 20,
+    "denominator": 1183
+   },
+   "use": "with the onset curve"
+  },
+  "posting_figures": {
+   "passenger": {
+    "cases": 243,
+    "denominator": 3245
+   },
+   "crew": {
+    "cases": 19,
+    "denominator": 1184
+   },
+   "use": "cross-posting comparisons only"
+  },
+  "peak_day_index": {
+   "passenger": 2,
+   "crew": 4
+  },
+  "peak_day_label": {
+   "passenger": "Feb 28",
+   "crew": "Mar 2"
+  },
+  "crew_minus_passenger_peak_lag_days": 2,
+  "preboarding_ill_passenger_surveys": 5
+ },
+ "tiers": {
+  "fl_exp_8d_recon_declared_five": {
+   "cells": 20,
+   "evaluable": 0,
+   "lag_days": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_first_seven": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_incident": {
+    "median": null,
+    "q05": null,
+    "q95": null
+   },
+   "incident_curve_approximated": false,
+   "response_sop_cells": {
+    "SOP-007": 1,
+    "SOP-009": 0
+   },
+   "effective_state": [
+    {
+     "exposure_cap_active": true,
+     "exposure_cap_requested": true,
+     "rhythm_catalog": false,
+     "rhythm_layer_active": false,
+     "rhythm_requested": true
+    }
+   ],
+   "embarkation_declarations_max": {
+    "passenger": 0,
+    "crew": 1
+   },
+   "epoch_zero_reported_max": {
+    "passenger": 1,
+    "crew": 1
+   },
+   "passenger": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": 0.0,
+     "q05": 0.0,
+     "q95": 2.0500000000000007
+    },
+    "onset_attack_rate": {
+     "median": 0.002003081664098613,
+     "q05": 0.0015408320493066256,
+     "q95": 0.0030816640986132513,
+     "target": 0.07765793528505392
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": 0.0018489984591679508,
+     "q05": 0.0012326656394453005,
+     "q95": 0.002788906009244992,
+     "target": 0.074884437596302
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total_all_cells": {
+     "median": 6.5,
+     "q05": 5.0,
+     "q95": 10.0
+    },
+    "onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 252,
+     "target_in_central_90": null
+    },
+    "onset_total_first_seven_days": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   },
+   "crew": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": 1.0,
+     "q05": 0.0,
+     "q95": 18.350000000000005
+    },
+    "onset_attack_rate": {
+     "median": 0.0008453085376162299,
+     "q05": 0.0,
+     "q95": 0.015511411665257824,
+     "target": 0.0169061707523246
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": 0.0008453085376162299,
+     "q05": 0.0,
+     "q95": 0.008622147083685548,
+     "target": 0.016047297297297296
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total_all_cells": {
+     "median": 1.0,
+     "q05": 0.0,
+     "q95": 18.350000000000005
+    },
+    "onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 20,
+     "target_in_central_90": null
+    },
+    "onset_total_first_seven_days": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   }
+  },
+  "fl_exp_8d_recon_background_only": {
+   "cells": 0,
+   "evaluable": 0,
+   "lag_days": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_first_seven": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_incident": {
+    "median": null,
+    "q05": null,
+    "q95": null
+   },
+   "incident_curve_approximated": false,
+   "response_sop_cells": {
+    "SOP-007": 0,
+    "SOP-009": 0
+   },
+   "effective_state": [],
+   "embarkation_declarations_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "epoch_zero_reported_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "passenger": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.07765793528505392
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.074884437596302
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total_all_cells": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 252,
+     "target_in_central_90": null
+    },
+    "onset_total_first_seven_days": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   },
+   "crew": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.0169061707523246
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.016047297297297296
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total_all_cells": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 20,
+     "target_in_central_90": null
+    },
+    "onset_total_first_seven_days": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   }
+  },
+  "fl_meg_8d_recon_declared_five": {
+   "cells": 0,
+   "evaluable": 0,
+   "lag_days": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_first_seven": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_incident": {
+    "median": null,
+    "q05": null,
+    "q95": null
+   },
+   "incident_curve_approximated": false,
+   "response_sop_cells": {
+    "SOP-007": 0,
+    "SOP-009": 0
+   },
+   "effective_state": [],
+   "embarkation_declarations_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "epoch_zero_reported_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "passenger": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.07765793528505392
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.074884437596302
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   },
+   "crew": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.0169061707523246
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.016047297297297296
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   }
+  },
+  "fl_meg_8d_recon_background_only": {
+   "cells": 0,
+   "evaluable": 0,
+   "lag_days": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_first_seven": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_incident": {
+    "median": null,
+    "q05": null,
+    "q95": null
+   },
+   "incident_curve_approximated": false,
+   "response_sop_cells": {
+    "SOP-007": 0,
+    "SOP-009": 0
+   },
+   "effective_state": [],
+   "embarkation_declarations_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "epoch_zero_reported_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "passenger": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.07765793528505392
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.074884437596302
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   },
+   "crew": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.0169061707523246
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.016047297297297296
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   }
+  },
+  "fl_exp_8d_recon_declared_five_rhythm_off": {
+   "cells": 0,
+   "evaluable": 0,
+   "lag_days": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_first_seven": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_incident": {
+    "median": null,
+    "q05": null,
+    "q95": null
+   },
+   "incident_curve_approximated": false,
+   "response_sop_cells": {
+    "SOP-007": 0,
+    "SOP-009": 0
+   },
+   "effective_state": [],
+   "embarkation_declarations_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "epoch_zero_reported_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "passenger": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.07765793528505392
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.074884437596302
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total_all_cells": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 252,
+     "target_in_central_90": null
+    },
+    "onset_total_first_seven_days": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   },
+   "crew": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.0169061707523246
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.016047297297297296
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total_all_cells": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 20,
+     "target_in_central_90": null
+    },
+    "onset_total_first_seven_days": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   }
+  },
+  "fl_meg_8d_recon_declared_five_rhythm_off": {
+   "cells": 0,
+   "evaluable": 0,
+   "lag_days": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_first_seven": {
+    "median": null,
+    "q05": null,
+    "q95": null,
+    "p_equal_target": null,
+    "p_crew_later": null,
+    "target": 2,
+    "target_in_central_90": null
+   },
+   "lag_days_incident": {
+    "median": null,
+    "q05": null,
+    "q95": null
+   },
+   "incident_curve_approximated": false,
+   "response_sop_cells": {
+    "SOP-007": 0,
+    "SOP-009": 0
+   },
+   "effective_state": [],
+   "embarkation_declarations_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "epoch_zero_reported_max": {
+    "passenger": 0,
+    "crew": 0
+   },
+   "passenger": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 2,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.07765793528505392
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.074884437596302
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   },
+   "crew": {
+    "peak_day": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null,
+     "tied_cells": 0
+    },
+    "peak_day_first_seven": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "p_equal_target": null,
+     "p_within_one_day": null,
+     "target": 4,
+     "target_in_central_90": null
+    },
+    "peak_day_incident": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "incident_onset_total": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.0169061707523246
+    },
+    "reported_attack_rate_vs_posting": {
+     "median": null,
+     "q05": null,
+     "q95": null,
+     "target": 0.016047297297297296
+    },
+    "curve_total_variation": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   }
+  }
+ },
+ "explorer_minus_mega": {
+  "declared_five": {
+   "pairs": 0,
+   "pairs_both_evaluable": 0,
+   "lag_days_diff": {
+    "median": null,
+    "q05": null,
+    "q95": null
+   },
+   "passenger": {
+    "peak_day_diff": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate_diff": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   },
+   "crew": {
+    "peak_day_diff": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate_diff": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   }
+  },
+  "background_only": {
+   "pairs": 0,
+   "pairs_both_evaluable": 0,
+   "lag_days_diff": {
+    "median": null,
+    "q05": null,
+    "q95": null
+   },
+   "passenger": {
+    "peak_day_diff": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate_diff": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   },
+   "crew": {
+    "peak_day_diff": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    },
+    "onset_attack_rate_diff": {
+     "median": null,
+     "q05": null,
+     "q95": null
+    }
+   }
+  }
+ },
+ "arms": {
+  "rhythm_off": {
+   "changed_paths": [
+    {
+     "path": "rhythm.enabled",
+     "baseline": true,
+     "arm": false
+    }
+   ],
+   "reference_minus_arm": {
+    "fl_exp_8d_recon_declared_five_rhythm_off": {
+     "reference_tier": "fl_exp_8d_recon_declared_five",
+     "platform": "explorer_seas_06",
+     "pairs": 0,
+     "pairs_identical_curves": 0,
+     "mean_daily_onset_diff": {
+      "passenger": null,
+      "crew": null
+     },
+     "mean_cumulative_reported_diff": {
+      "passenger": null,
+      "crew": null
+     },
+     "passenger": {
+      "onset_attack_rate": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      },
+      "reported_attack_rate": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      }
+     },
+     "crew": {
+      "onset_attack_rate": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      },
+      "reported_attack_rate": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      }
+     },
+     "contrast": {
+      "pairs": 0,
+      "pairs_both_evaluable": 0,
+      "lag_days_diff": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      },
+      "passenger": {
+       "peak_day_diff": {
+        "median": null,
+        "q05": null,
+        "q95": null
+       },
+       "onset_attack_rate_diff": {
+        "median": null,
+        "q05": null,
+        "q95": null
+       }
+      },
+      "crew": {
+       "peak_day_diff": {
+        "median": null,
+        "q05": null,
+        "q95": null
+       },
+       "onset_attack_rate_diff": {
+        "median": null,
+        "q05": null,
+        "q95": null
+       }
+      }
+     }
+    },
+    "fl_meg_8d_recon_declared_five_rhythm_off": {
+     "reference_tier": "fl_meg_8d_recon_declared_five",
+     "platform": "mega_cruise_5000",
+     "pairs": 0,
+     "pairs_identical_curves": 0,
+     "mean_daily_onset_diff": {
+      "passenger": null,
+      "crew": null
+     },
+     "mean_cumulative_reported_diff": {
+      "passenger": null,
+      "crew": null
+     },
+     "passenger": {
+      "onset_attack_rate": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      },
+      "reported_attack_rate": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      }
+     },
+     "crew": {
+      "onset_attack_rate": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      },
+      "reported_attack_rate": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      }
+     },
+     "contrast": {
+      "pairs": 0,
+      "pairs_both_evaluable": 0,
+      "lag_days_diff": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      },
+      "passenger": {
+       "peak_day_diff": {
+        "median": null,
+        "q05": null,
+        "q95": null
+       },
+       "onset_attack_rate_diff": {
+        "median": null,
+        "q05": null,
+        "q95": null
+       }
+      },
+      "crew": {
+       "peak_day_diff": {
+        "median": null,
+        "q05": null,
+        "q95": null
+       },
+       "onset_attack_rate_diff": {
+        "median": null,
+        "q05": null,
+        "q95": null
+       }
+      }
+     }
+    }
+   },
+   "explorer_minus_mega": {
+    "declared_five": {
+     "pairs": 0,
+     "pairs_both_evaluable": 0,
+     "lag_days_diff": {
+      "median": null,
+      "q05": null,
+      "q95": null
+     },
+     "passenger": {
+      "peak_day_diff": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      },
+      "onset_attack_rate_diff": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      }
+     },
+     "crew": {
+      "peak_day_diff": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      },
+      "onset_attack_rate_diff": {
+       "median": null,
+       "q05": null,
+       "q95": null
+      }
+     }
+    }
+   }
+  }
+ }
+}

@@ -96,8 +96,50 @@ commit and is pinned by digest
 in `design/build.py` (`IMAGE_DIGEST`) and `campaign.json`. The manifest's
 `named_commit` now reads the declaration.
 
+## Canary submitted (2026-11-21)
+
+Twenty-child array of the first 20 seeds (8105–8124) of
+`exp_declared_five` on AWS Batch:
+
+- Array job `ce5b4e20-61b4-490a-af29-6e8b68edf271`, queue
+  `picard-campaign-queue`, jobdef
+  `picard-noro-explorer-reconstruction-01:1`.
+- Image pinned by digest:
+  `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign@sha256:354b27b62076cfad6df13de899319d0b55e594a1a1edaf5bc3982bcf4ec55d82`
+  (built at the named commit `bf0ec168`).
+- Output prefix:
+  `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_explorer_reconstruction_01/`.
+- `scripts/campaign submit` emits one job per seed (`--index` canary) or a
+  full-size array; the 20-child canary was submitted with the same
+  payload shape, `arrayProperties.size` set to 20 over the full seed
+  list, so children 0–19 map to seeds 8105–8124.
+- Measured wall clock per cell at 192 epochs: ~535 s (seed 8105 smoke,
+  above), so the canary's ETA is ~15–30 min depending on queue
+  concurrency.
+
+## Canary result (2026-11-21)
+
+All 20 children SUCCEEDED in ~9 min of compute. Readout
+(`--allow-partial --expect-sha bf0ec168`, exit 0): 20/20 cells audited
+clean — pinned-leaf witness 70/70 matched, `engine_git_sha` =
+`bf0ec168`, expected state resolved as declared (cap active, rhythm
+requested-but-absent on Explorer per the §2.8 exception), the three
+labelled onset curves present, per-cell archives non-degenerate
+(~505 s wall each).
+
+**Measured:** 0/20 cells evaluable. Design thresholds are ≥20 pax and
+≥5 crew onsets excluding the declared seeds (DESIGN.md, "Evaluable
+cells"); per-cell pax onsets ranged 0–5 and crew 0–25 (two seeds, 8115
+and 8120, had crew outbreaks of 18 and 25 with pax ≤ 2). Median pax
+onset AR 0.0020 [0.0015, 0.0031] vs target 0.0777; median crew 0.0008
+[0.0000, 0.0155] vs target 0.0169. On `exp_declared_five` the frozen
+engine produces fizzled outbreaks on the Explorer hull — consistent
+with the seed-8105 smoke (8 cases, flagged not evaluable at authoring).
+This says nothing yet about the mega hull or the background_only or
+rhythm_off cells.
+
 ## Next step
 
-Canary of the first 20 seeds of `exp_declared_five` on AWS Batch against
-the pinned image, then stop and report; the user decides whether the
-remaining 580 cells run.
+Stop and report; the user decides whether the remaining 580 cells run.
+Readout artifacts: `telemetry_buffer/noro_explorer_reconstruction_01/`
+(readout.json, reconstruction_table.md).
