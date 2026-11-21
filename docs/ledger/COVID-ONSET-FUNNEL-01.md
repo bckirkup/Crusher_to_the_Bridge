@@ -41,7 +41,7 @@ The 14.6× recorded-onset overshoot factorizes as ~4.6× confirmed
 volume × ~3.2× dating share (4.6 × 3.19 ≈ 14.7); the 4.6 confirmed
 factor itself decomposes into ~4.3× infections (vs the band midpoint
 836; the combined confirmed ratio is denominator-free, the split is
-not) × ~1.05 ascertainment.
+not) × ~1.08 ascertainment.
 Presented share of *infected* is 0.827 ≈ the record's ~0.82
 never-symptomatic complement — on the infected population the share is
 right-sized. Honest caveat: the record's share is of confirmed cases,
