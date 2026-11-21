@@ -16,11 +16,15 @@ image build and regenerated specification names.
 
 ### 1. Checker re-run at the named commit
 
-`python3 scripts/paper1_freeze_block_check.py` run on the named commit:
+`python3 scripts/paper1_freeze_block_check.py` run **on a clean checkout of
+the named commit** (a linked worktree at `bf0ec168`, not this branch):
 exit 0 — 0 failures, 1 pending, 0 resolved-state differences from the
 no-block default; expected validation rejections 2; conditionally inactive
 pins 3; annex matches. Output committed beside this record as
 [paper1_freeze_block_check_output_bf0ec168_2026_11_21.txt](paper1_freeze_block_check_output_bf0ec168_2026_11_21.txt).
+Its `PENDING` line still carries the pre-decision wording "decision open"
+verbatim, as printed by the checker at that commit; the corrected
+§2.8 wording lands in this same change (see §1.4).
 
 ### 2. Intervening-commit record (candidate → named commit)
 
@@ -54,11 +58,13 @@ at the named commit.
 ### 4. Checker output and annex regeneration
 
 The checker's output at the named commit is committed (§1 above). The
-example run specifications were regenerated with `--write-annex`; the diff
-against the committed annex is **one line** — the Explorer
+example run specifications were regenerated with `--write-annex` on this
+branch; the diff against the committed annex is **one line** — the Explorer
 `rhythm.layer_attached` PENDING reason now reads "declared exception,
 contract section 2.8: rhythm-free reference plus a declared rhythm_off
 paired arm" in place of "decision open". No resolved-state leaf changed.
+The same wording change appears in the checker script's `PENDING_EFFECTIVE`
+label and in the transcript's provenance note above.
 
 ### 5. PENDING record
 
