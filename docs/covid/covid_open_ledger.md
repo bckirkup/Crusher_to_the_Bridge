@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `ea9550ef` (fill with the
+> **Status:** Living. Head commit of record: `a01130fb` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -16,6 +16,15 @@ for the COVID arm.
 ---
 
 ## 1. Currently withdrawn
+
+**`COVID-THETA-REFIT-01` (ledger entry): every DP/GM replay figure measured
+at the Θ=7.9e6 (or older 1e6) operating point is historical on the Θ
+channel.** The canonical replay operating point is now
+`thetas: [3.162e11]` on `covid_crew_reach_01_design.json` and
+`covid_platform_fidelity_02_dp_design.json` (provenance-register Θ row
+updated; merged #1352). Completed campaign specs keep their own θ as the
+record of what ran. Figures not resting on the operating point stand at
+their own `Measured at` SHAs.
 
 **`CONTAM-SANITARY-DIR-01` (ledger entry): every airborne/downstream-map
 dose figure measured before this change on a hull with `Sanitary_Makeup`
