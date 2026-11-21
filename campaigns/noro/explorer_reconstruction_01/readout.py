@@ -25,6 +25,7 @@ ROLES = ("passenger", "crew")
 # Frozen in DESIGN.md ("Evaluable cells").
 MIN_ABOARD_ONSETS = {"passenger": 20, "crew": 5}
 CENTRAL_INTERVAL = (0.05, 0.95)
+REFERENCE_ARM = "reference"
 RESPONSE_SOPS = ("SOP-007", "SOP-009")
 # The itinerary spans eight calendar dates and seven elapsed days.
 ELAPSED_DAYS = 7
@@ -107,6 +108,8 @@ def cell_metrics(payload: dict[str, Any]) -> dict[str, Any]:
             "preboarding_reportable"
         ],
         "aboard_curve": aboard,
+        "onset_curve": every,
+        "reported_curve": reported,
         "effective_state": payload["effective_state"],
         "onset_total_first_seven_days": {
             role: sum(every[role][:ELAPSED_DAYS]) for role in ROLES
@@ -147,8 +150,24 @@ def audit_cell(
         )
     if payload["introduction"]["preboarding_reportable"]["passenger"]:
         problems.append("passenger in the embarkation report counter")
+    problems += audit_arm(payload, tier)
     if expect_sha and not str(payload["engine_git_sha"]).startswith(expect_sha):
         problems.append(f"engine {payload['engine_git_sha']}")
+    return problems
+
+
+def audit_arm(payload: dict[str, Any], tier: dict[str, Any]) -> list[str]:
+    """The cell ran the tier's declared arm and resolved it as declared."""
+    wanted = tier.get("arm", REFERENCE_ARM)
+    witness = payload.get("declared_arm")
+    if witness is None:
+        # Archives written before any arm was declared are reference cells.
+        return [] if wanted == REFERENCE_ARM else ["no declared-arm witness"]
+    problems = []
+    if witness["arm"] != wanted:
+        problems.append(f"ran arm {witness['arm']}, tier declares {wanted}")
+    if witness["mismatches"]:
+        problems.append(f"arm not resolved as declared: {witness['mismatches']}")
     return problems
 
 
@@ -307,6 +326,95 @@ def paired_contrast(
     return out
 
 
+def _mean_daily_diff(
+    pairs: list[tuple[dict[str, Any], dict[str, Any]]], curve: str,
+) -> dict[str, list[float] | None]:
+    """Mean over pairs of the per-day difference of one curve, per role."""
+    out: dict[str, list[float] | None] = {}
+    for role in ROLES:
+        rows = [
+            [a - b for a, b in zip(left[curve][role], right[curve][role])]
+            for left, right in pairs
+        ]
+        out[role] = (
+            [sum(day) / len(rows) for day in zip(*rows)] if rows else None
+        )
+    return out
+
+
+def arm_contribution(
+    reference: list[dict[str, Any]], arm: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Reference minus arm on paired seeds of one hull: what the arm removed.
+
+    Every pair is used, quiet cells included; nothing here is a criterion.
+    """
+    by_seed = {c["seed"]: c for c in arm}
+    pairs = [(c, by_seed[c["seed"]]) for c in reference if c["seed"] in by_seed]
+    curves = ("onset_curve", "reported_curve")
+    out: dict[str, Any] = {
+        "pairs": len(pairs),
+        "pairs_identical_curves": sum(
+            all(r[c] == a[c] for c in curves) for r, a in pairs
+        ),
+        "mean_daily_onset_diff": _mean_daily_diff(pairs, "onset_curve"),
+        "mean_cumulative_reported_diff": _mean_daily_diff(
+            pairs, "reported_curve",
+        ),
+    }
+    for role in ROLES:
+        out[role] = {
+            key: _interval([r[key][role] - a[key][role] for r, a in pairs])
+            for key in ("onset_attack_rate", "reported_attack_rate")
+        }
+    out["contrast"] = paired_contrast(reference, arm)
+    return out
+
+
+def _hull_contrasts(
+    manifest: dict[str, Any], by_tier: dict[str, list[dict[str, Any]]],
+    arm: str,
+) -> dict[str, Any]:
+    """Explorer minus mega per introduction, within one arm."""
+    explorer_platform = manifest["platform"]
+    contrasts = {}
+    for introduction in manifest["introduction_blocks"]:
+        names = {
+            tier["platform"]: name for name, tier in manifest["tiers"].items()
+            if tier["introduction"] == introduction
+            and tier.get("arm", REFERENCE_ARM) == arm
+        }
+        mega = [p for p in names if p != explorer_platform]
+        if explorer_platform in names and mega:
+            contrasts[introduction] = paired_contrast(
+                by_tier[names[explorer_platform]], by_tier[names[mega[0]]],
+            )
+    return contrasts
+
+
+def _arm_readouts(
+    manifest: dict[str, Any], by_tier: dict[str, list[dict[str, Any]]],
+) -> dict[str, Any]:
+    """Per declared arm: its contribution per hull and its hull contrast."""
+    out = {}
+    for arm, block in (manifest.get("arm_blocks") or {}).items():
+        out[arm] = {
+            "changed_paths": block["changed_paths"],
+            "reference_minus_arm": {
+                arm_tier: {
+                    "reference_tier": reference_tier,
+                    "platform": manifest["tiers"][arm_tier]["platform"],
+                    **arm_contribution(
+                        by_tier[reference_tier], by_tier[arm_tier],
+                    ),
+                }
+                for arm_tier, reference_tier in block["paired_with"].items()
+            },
+            "explorer_minus_mega": _hull_contrasts(manifest, by_tier, arm),
+        }
+    return out
+
+
 def build_readout(
     payloads: list[dict[str, Any]], manifest: dict[str, Any],
     target: dict[str, Any], expect_sha: str | None = None,
@@ -329,17 +437,7 @@ def build_readout(
         )
         for tier, cells in by_tier.items()
     }
-    contrasts = {}
-    for introduction in manifest["introduction_blocks"]:
-        names = {
-            manifest["tiers"][t]["platform"]: t for t in manifest["tiers"]
-            if manifest["tiers"][t]["introduction"] == introduction
-        }
-        mega = [p for p in names if p != explorer_platform]
-        if explorer_platform in names and mega:
-            contrasts[introduction] = paired_contrast(
-                by_tier[names[explorer_platform]], by_tier[names[mega[0]]],
-            )
+    contrasts = _hull_contrasts(manifest, by_tier, REFERENCE_ARM)
     return {
         "campaign": manifest["campaign"],
         "expected_cells": sum(len(t["seeds"]) for t in manifest["tiers"].values()),
@@ -349,6 +447,7 @@ def build_readout(
         "target": target,
         "tiers": tiers,
         "explorer_minus_mega": contrasts,
+        "arms": _arm_readouts(manifest, by_tier),
     }
 
 
@@ -367,6 +466,72 @@ def _span(stats: dict[str, Any], digits: int = 2) -> str:
         f"{_fmt(stats['median'], digits)} "
         f"[{_fmt(stats['q05'], digits)}, {_fmt(stats['q95'], digits)}]"
     )
+
+
+def _curve(values: list[float] | None) -> str:
+    if values is None:
+        return "—"
+    return ", ".join(f"{value:+.2f}" for value in values)
+
+
+def _arm_markdown(arm: str, block: dict[str, Any]) -> list[str]:
+    changed = "; ".join(
+        f"`{c['path']}` {c['baseline']} → {c['arm']}"
+        for c in block["changed_paths"]
+    )
+    lines = [
+        "",
+        f"Declared arm `{arm}` ({changed}). Reference tier minus arm tier "
+        "on paired seeds of the same hull: what the changed path "
+        "contributes. All pairs, quiet cells included; reported, never "
+        "judged:",
+        "",
+        "| Arm tier | Pairs | Identical curves | Pax onset AR diff | "
+        "Crew onset AR diff | Pax reported AR diff | Crew reported AR diff |",
+        "|---|---:|---:|---|---|---|---|",
+    ]
+    for tier, row in block["reference_minus_arm"].items():
+        lines.append(
+            f"| `{tier}` | {row['pairs']} | {row['pairs_identical_curves']} | "
+            f"{_span(row['passenger']['onset_attack_rate'], 4)} | "
+            f"{_span(row['crew']['onset_attack_rate'], 4)} | "
+            f"{_span(row['passenger']['reported_attack_rate'], 4)} | "
+            f"{_span(row['crew']['reported_attack_rate'], 4)} |",
+        )
+    lines += [
+        "",
+        "Mean paired difference by voyage day (reference minus arm):",
+        "",
+        "| Arm tier | Curve | Passengers | Crew |",
+        "|---|---|---|---|",
+    ]
+    for tier, row in block["reference_minus_arm"].items():
+        for label, key in (
+            ("daily onsets", "mean_daily_onset_diff"),
+            ("cumulative reported", "mean_cumulative_reported_diff"),
+        ):
+            lines.append(
+                f"| `{tier}` | {label} | {_curve(row[key]['passenger'])} | "
+                f"{_curve(row[key]['crew'])} |",
+            )
+    lines += [
+        "",
+        f"Explorer minus mega within arm `{arm}` (both hulls on the arm "
+        "value):",
+        "",
+        "| Introduction | Pairs | Both evaluable | Lag diff | "
+        "Pax onset AR diff | Crew onset AR diff |",
+        "|---|---:|---:|---|---|---|",
+    ]
+    for introduction, row in block["explorer_minus_mega"].items():
+        lines.append(
+            f"| {introduction} | {row['pairs']} | "
+            f"{row['pairs_both_evaluable']} | "
+            f"{_span(row['lag_days_diff'], 1)} | "
+            f"{_span(row['passenger']['onset_attack_rate_diff'], 4)} | "
+            f"{_span(row['crew']['onset_attack_rate_diff'], 4)} |",
+        )
+    return lines
 
 
 def build_markdown(readout: dict[str, Any]) -> str:
@@ -495,6 +660,8 @@ def build_markdown(readout: dict[str, Any]) -> str:
             f"{_span(block['passenger']['onset_attack_rate_diff'], 4)} | "
             f"{_span(block['crew']['onset_attack_rate_diff'], 4)} |",
         )
+    for arm, block in readout.get("arms", {}).items():
+        lines += _arm_markdown(arm, block)
     if readout["defects"]:
         lines += ["", "Audit defects:", ""]
         lines += [

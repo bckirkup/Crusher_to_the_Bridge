@@ -173,6 +173,9 @@ def _synthetic_cell(
             "rhythm_layer_active": True,
         },
         "frozen_block_witness": {"pinned_leaves": 1, "mismatches": []},
+        "declared_arm": {
+            "arm": tier.get("arm", "reference"), "mismatches": [],
+        },
         "introduction": {
             "declared_seed_roles": ["passenger"] * n_seeds,
             "preboarding_reportable": {"passenger": 0, "crew": 0},
@@ -249,3 +252,123 @@ def test_readout_audit_flags_design_violations(
     bad["num_epochs"] = 24
     bad["effective_state"]["exposure_cap_active"] = False
     assert len(readout.audit_cell(bad, manifest, "zzz")) == 6
+
+
+def test_rhythm_off_arm_is_declared_on_both_hulls_with_paired_seeds(
+    build: types.ModuleType, manifest: dict,
+) -> None:
+    arm = manifest["arm_blocks"]["rhythm_off"]
+    assert arm["changed_paths"] == [
+        {"path": "rhythm.enabled", "baseline": True, "arm": False},
+    ]
+    shipped = build.shipped_rhythm()
+    assert arm["baseline_objects"]["rhythm"] == shipped
+    assert arm["effective_objects"]["rhythm"] == {**shipped, "enabled": False}
+    assert arm["named_commit"]["sha"] in (
+        REPO_ROOT / arm["contract"]
+    ).read_text("utf-8")
+    platforms = set()
+    for arm_tier, reference_tier in arm["paired_with"].items():
+        tier, reference = manifest["tiers"][arm_tier], manifest["tiers"][reference_tier]
+        assert tier["arm"] == "rhythm_off" and "arm" not in reference
+        assert tier["paired_with"] == reference_tier
+        differing = {k for k in tier if tier[k] != reference.get(k)}
+        assert differing == {"description", "arm", "paired_with"}
+        assert tier["seeds"] == reference["seeds"]
+        platforms.add(tier["platform"])
+    assert platforms == set(arm["hulls"]) and len(platforms) == 2
+    armed = {t for t, tier in manifest["tiers"].items() if "arm" in tier}
+    assert armed == set(arm["paired_with"])
+
+
+def test_paired_cells_generate_the_same_run_apart_from_the_arm(
+    cell: types.ModuleType, manifest: dict,
+) -> None:
+    arm = manifest["arm_blocks"]["rhythm_off"]
+    for arm_tier, reference_tier in arm["paired_with"].items():
+        sides = []
+        for tier_id in (reference_tier, arm_tier):
+            runs = [
+                spec for _, spec in cell.generate_tier_runs(
+                    manifest, tier_id, natural_history_clock="hours",
+                )
+            ]
+            for spec in runs:
+                cell.compose_introduction(spec, manifest, tier_id)
+                cell.compose_complement(spec, manifest, tier_id)
+                cell.compose_arm(spec, manifest, tier_id)
+            sides.append(runs)
+        reference_runs, arm_runs = sides
+        assert len(reference_runs) == len(arm_runs) == len(
+            manifest["tiers"][arm_tier]["seeds"],
+        )
+        for reference, armed in zip(reference_runs, arm_runs):
+            assert "rhythm" not in reference["config_overrides"]
+            rhythm = armed["config_overrides"].pop("rhythm")
+            assert rhythm == arm["effective_objects"]["rhythm"]
+            assert armed["campaign_parameters"].pop("tier_id") == arm_tier
+            assert (
+                reference["campaign_parameters"].pop("tier_id")
+                == reference_tier
+            )
+            assert armed == reference
+
+
+def test_arm_witness_requires_each_side_to_resolve_its_declared_value(
+    cell: types.ModuleType, manifest: dict,
+) -> None:
+    arm = manifest["arm_blocks"]["rhythm_off"]
+    off = {"rhythm": copy.deepcopy(arm["effective_objects"]["rhythm"])}
+    on = {"rhythm": copy.deepcopy(arm["baseline_objects"]["rhythm"])}
+    detached, attached = (
+        {"rhythm_layer_active": False}, {"rhythm_layer_active": True},
+    )
+    good = cell.arm_witness(manifest, "rhythm_off", off, detached)
+    assert good["mismatches"] == []
+    assert good["resolved_objects"] == off
+    assert good["changed_paths"][0]["resolved"] is False
+    assert cell.arm_witness(manifest, "reference", on, attached)["mismatches"] == []
+    # Explorer's reference cell: layer requested, not attached (section 2.8).
+    assert cell.arm_witness(manifest, "reference", on, detached)["mismatches"] == []
+    assert cell.arm_witness(manifest, "rhythm_off", on, detached)["mismatches"]
+    assert cell.arm_witness(manifest, "rhythm_off", off, attached)["mismatches"]
+    assert cell.arm_witness(manifest, "reference", off, detached)["mismatches"]
+    drifted = copy.deepcopy(off)
+    drifted["rhythm"]["post_prandial_window_minutes"] = 60
+    assert cell.arm_witness(manifest, "rhythm_off", drifted, detached)["mismatches"]
+
+
+def test_readout_measures_what_the_arm_removed(
+    readout: types.ModuleType, manifest: dict, target: dict,
+) -> None:
+    arm = manifest["arm_blocks"]["rhythm_off"]
+    base = target["onsets_by_day"]
+    payloads = []
+    for tier_id, tier in manifest["tiers"].items():
+        for seed in (1, 2):
+            onsets = copy.deepcopy(base)
+            if "arm" in tier:
+                onsets["passenger"][2] -= 10 * seed
+            payloads.append(_synthetic_cell(manifest, tier_id, seed, onsets))
+    result = readout.build_readout(payloads, manifest, target)
+    assert result["defects"] == []
+    block = result["arms"]["rhythm_off"]
+    assert set(block["reference_minus_arm"]) == set(arm["paired_with"])
+    for row in block["reference_minus_arm"].values():
+        assert row["pairs"] == 2 and row["pairs_identical_curves"] == 0
+        daily = row["mean_daily_onset_diff"]
+        assert daily["passenger"][2] == 15.0
+        assert sum(daily["passenger"]) == 15.0 and not any(daily["crew"])
+        assert row["mean_cumulative_reported_diff"]["passenger"][-1] == 15.0
+        assert row["passenger"]["onset_attack_rate"]["median"] > 0
+        assert row["crew"]["onset_attack_rate"]["median"] == 0
+    assert set(block["explorer_minus_mega"]) == {"declared_five"}
+    assert set(result["explorer_minus_mega"]) == set(
+        manifest["introduction_blocks"],
+    )
+    assert "rhythm_off" in readout.build_markdown(result)
+    wrong = copy.deepcopy(payloads[-1])
+    wrong["declared_arm"]["arm"] = "reference"
+    assert readout.audit_cell(wrong, manifest, None)
+    del wrong["declared_arm"]
+    assert readout.audit_cell(wrong, manifest, None)

@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-20
 **Pathogens:** norwalk_gi
-**Status:** design frozen before any cell runs; campaign gated on the declared Paper-1 freeze **and on the pre-freeze blocker below**
+**Status:** design frozen before any cell runs; campaign gated on the declared Paper-1 freeze; `rhythm_off` paired arm declared 2026-11-21
 **Context:** `docs/norovirus/paper1_simulation_plan_assessment_2026_11_20.md` (item 2), `docs/norovirus/paper1_freeze_design_contract_2026_11_20.md` (§2 block, limitation 11), `docs/norovirus/wp0_explorer_platform_session_prompt_2026_11_20.md`
 
 ## Question
@@ -25,6 +25,8 @@ Measured by the cell worker's `effective_state` read-back (`tx_core._exposure_ca
 So the same requested block is a different effective engine on Explorer. A platform-class label does not change this: the gate reads the platform id. Until it is resolved, an Explorer cell is not a cell of the frozen reference, and an Explorer-against-mega difference would mix this in with geometry and complement.
 
 The campaign encodes the blocker instead of hiding it. Every archive records the requested and effective state, and the readout treats "exposure cap requested but inactive" as an audit defect. As authored, every Explorer cell fails that audit, so no clean reconstruction table can be produced.
+
+**Update, 2026-11-21 (measured at `e8be51c7`, seed 8105, initialization only).** The exposure-cap half is resolved: after `NORO-EXPOCAP-EXPLORER-01` (#1359) the cap is requested and active on both hulls. The rhythm half is decided, not removed: Edison's §2.8 decision (contract decision commit `c50e3dd1`, PR #1365) keeps Explorer rhythm-free as a labelled deferred exception and adds the declared paired arm in "Declared arm: `rhythm_off`" below. The table and the two options that follow are the record as authored.
 
 Two ways out, both outside this campaign and neither taken here:
 
@@ -61,7 +63,7 @@ Source location: CDC trip report Appendix C (labeled bars), pp. 1 and 7, as tran
 
 ## Cells
 
-400 cells = 2 hulls × 2 introductions × 100 seeds, 192 epochs (8 days). The 192-epoch length is declared on these tiers only; the 168/288/504 grid is not touched.
+600 cells: 400 reference cells = 2 hulls × 2 introductions × 100 seeds, plus 200 cells of the declared `rhythm_off` arm = 2 hulls × 1 introduction × the same 100 seeds. 192 epochs (8 days) throughout. The 192-epoch length is declared on these tiers only; the 168/288/504 grid is not touched.
 
 | Block | Tier | Platform | Agents | Introduction |
 |---|---|---|---:|---|
@@ -69,10 +71,61 @@ Source location: CDC trip report Appendix C (labeled bars), pp. 1 and 7, as tran
 | `exp_background_only` | `fl_exp_8d_recon_background_only` | `explorer_seas_06` | 4,428 | engine boarding only (labelled baseline) |
 | `meg_declared_five` | `fl_meg_8d_recon_declared_five` | `mega_cruise_5000` | 7,000 | five declared passengers + engine boarding |
 | `meg_background_only` | `fl_meg_8d_recon_background_only` | `mega_cruise_5000` | 7,000 | engine boarding only (labelled baseline) |
+| `exp_declared_five_rhythm_off` | `fl_exp_8d_recon_declared_five_rhythm_off` | `explorer_seas_06` | 4,428 | as `exp_declared_five`; arm `rhythm_off` |
+| `meg_declared_five_rhythm_off` | `fl_meg_8d_recon_declared_five_rhythm_off` | `mega_cruise_5000` | 7,000 | as `meg_declared_five`; arm `rhythm_off` |
 
 Seeds 8105–8204 in every block. 100 seeds resolve a probability near one half to about ±0.10; this count is a proposal for Edison's review. Seeds are paired by label: two hulls never share draws, and a declared seed consumes draws the baseline arm does not, so a pair is a matched label and not a common-random-number pair.
 
 `exp_declared_five` is the primary block. The two `background_only` blocks are attribution baselines for what the declared five add; either can be dropped at submission without changing the primary comparison.
+
+## Declared arm: `rhythm_off`
+
+One difference arm, declared under contract §2.9 and required by Edison's §2.8 decision. No other arm is declared. The machine-readable copy is `arm_blocks.rhythm_off` in `manifest.json`; the worker composes and checks against that copy, not this prose.
+
+| §2.9 item | Declaration |
+|---|---|
+| Contract | `docs/norovirus/paper1_freeze_design_contract_2026_11_20.md`, §2.8 (decision) and §2.9 (form) |
+| Named commit | `b25cb0f22d80dc3118c8613563992f9de28e8e49`, the contract's §1 **candidate**. No freeze is declared; when one is, `design/build.py` reads the SHA from the contract again and the manifest is rebuilt. The §2.8 decision text is commit `c50e3dd1` (PR #1365), not yet on `main` when this arm was authored |
+| Hulls | **both**: `explorer_seas_06` and `mega_cruise_5000` |
+| Changed path | `rhythm.enabled`: baseline `true` → arm `false`. Nothing else |
+| Baseline of the path | `crusher_labs/config.yaml` (shipped default). `rhythm` is not a key of the §2.1 block, so every tier's `config_overrides` stays the frozen block verbatim and the arm is composed beside it by the worker, the same way as the introduction |
+| Pairing | Each arm tier carries the seed list of the rhythm-enabled tier it names in `paired_with` (8105–8204). A pair is (hull, `declared_five`, seed); the two generated run specs are equal except for the tier id and the `rhythm` object (test) |
+| Introductions | `declared_five` only, the primary comparison. `background_only` is not paired |
+
+Complete effective object. Both config merges are one level deep, so the whole second-level object is written, not the leaf:
+
+```yaml
+rhythm:
+  enabled: false                          # baseline: true (the only changed leaf)
+  post_prandial_emesis_multiplier: 2.0    # shipped value, inert with the layer off
+  post_prandial_window_minutes: 90        # shipped value
+  port_return_front_concentration: 0.5    # shipped value
+  port_day_onboard_midday_residual: 0.30  # shipped value
+```
+
+`design/build.py` builds this object from the shipped file, so a shipped sibling that moves shows up as a failed `--check`, not as an undeclared difference.
+
+**Resolved config, post-axis.** The worker writes the object into the generated run spec after the runner's axes, initializes the engine, and reads back from the merged config. Every archive, arm and reference alike, records `declared_arm` (the arm id, each declared path with its baseline, arm and resolved value, and the resolved `rhythm` object) and `generated_config_overrides` (the complete post-axis override tree). A cell aborts before epoch 0 if an arm cell does not resolve `rhythm.enabled: false`, the declared object, and a detached layer, or if a reference cell does not resolve `rhythm.enabled: true`. The readout repeats the check as an audit defect.
+
+**What the arm does on each hull** (measured at initialization, seed 8105, `e8be51c7` plus this change; no epoch stepped):
+
+| Tier | `rhythm.enabled` resolved | Layer attached | Exposure cap active |
+|---|---|---|---|
+| `fl_meg_8d_recon_declared_five` | true | **yes** | yes |
+| `fl_meg_8d_recon_declared_five_rhythm_off` | false | **no** | yes |
+| `fl_exp_8d_recon_declared_five` | true | no (no day program, §2.8 exception) | yes |
+| `fl_exp_8d_recon_declared_five_rhythm_off` | false | no | yes |
+
+So the arm detaches the layer on mega and pins off what is already absent on Explorer. The Explorer pair is expected to be identical cell for cell (inferred from the attach path, `RhythmLayer.from_platform` returning nothing in both cases; not measured over a voyage). The readout counts identical pairs, so that expectation is tested by the campaign and not assumed.
+
+**Comparison metric: the schedule layer's contribution.** Rhythm-enabled tier minus arm tier on paired seeds, per hull, over all pairs with quiet cells included:
+
+- the mean paired difference of the daily onset curve by role, day by day;
+- the mean paired difference of the end-of-day cumulative reported curve by role;
+- the paired difference in onset and reported attack rate by role, and in peak day and lag where both cells are evaluable (median, 5th–95th percentile);
+- the number of pairs whose onset and reported curves are identical.
+
+And the common rhythm-free comparison: Explorer minus mega within the arm, on the same metrics as the main contrast. The arm is reported, never judged: it has no acceptance threshold, does not replace the rhythm-enabled reference, and is not scored against the empirical target as a candidate reconstruction. A paired difference includes stream disruption once the two cells diverge, so it is read as a distribution over 100 pairs, not per seed.
 
 ## Held fixed on every cell
 
@@ -128,7 +181,8 @@ The engine splits `num_agents` by the shipped class fractions (70/30) and does n
 | Declared introduction: five passengers | Count controlled; per-capita share differs with the complement |
 | Engine boarding draw | Coordinates controlled; expected imports scale with the complement |
 | Frozen block, dose, surveillance, voyage length, seed labels | Controlled |
-| Exposure cap and rhythm layer | **Not controlled: active on mega, inactive on Explorer (blocker above)** |
+| Exposure cap | Controlled since #1359 (active on both) |
+| Rhythm layer | **Not controlled on the reference tiers: attached on mega, absent on Explorer (§2.8 exception).** Controlled on the `rhythm_off` arm: off on both |
 | Closure targets of SOP-007 / SOP-009 | Not controlled: valid on mega only (below) |
 
 ## Curve extraction
@@ -194,4 +248,4 @@ Rispens et al., "Notes from the Field: Multiple Cruise Ship Outbreaks of Norovir
 
 ## Preflight and gates
 
-Authoring only. No array, no canary, and no cell beyond the local smoke until the Paper-1 freeze is declared and the pre-freeze blocker is resolved. Then, in order: image built from the named commit and pinned by digest; `scripts/campaign submit --dry-run` count = 100 per block; a canary of the first 20 seeds of `exp_declared_five`; stop and report; the user decides whether the remaining cells run.
+Authoring only. No array, no canary, and no cell beyond the local smoke until the Paper-1 freeze is declared. Then, in order: image built from the named commit and pinned by digest; `scripts/campaign submit --dry-run` count = 100 per block (six blocks, 600 cells); a canary of the first 20 seeds of `exp_declared_five`; stop and report; the user decides whether the remaining cells run.

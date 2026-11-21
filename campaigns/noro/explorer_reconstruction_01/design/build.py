@@ -79,6 +79,16 @@ INTRODUCTIONS: dict[str, dict[str, Any]] = {
     "background_only": {"explicit_seeds": []},
 }
 
+# Declared difference arms (contract section 2.9). The reference tiers carry
+# no arm. Edison's section 2.8 decision adds one: the schedule layer
+# (SHIP-RHYTHM-02) switched off on BOTH hulls, on the seed list of the
+# rhythm-enabled tier it is paired with. Only the primary introduction is
+# paired; no other arm is declared.
+REFERENCE_ARM = "reference"
+RHYTHM_OFF_ARM = "rhythm_off"
+ARM_INTRODUCTIONS = {RHYTHM_OFF_ARM: ("declared_five",)}
+RHYTHM_PATH = "rhythm.enabled"
+
 # Verbatim from the NORO-GENO-02 manifest (contract section 2.5).
 PATHOGEN_CONFIGS = {
     "norovirus": {
@@ -116,6 +126,75 @@ def frozen_block() -> dict[str, Any]:
     if match is None:
         raise SystemExit(f"no frozen block after {BLOCK_MARKER}")
     return json.loads(match.group(1))
+
+
+def candidate_commit() -> str:
+    """The contract's section 1 candidate SHA (no freeze is declared yet)."""
+    text = (REPO / CONTRACT_REL).read_text(encoding="utf-8")
+    match = re.search(r"\*\*Candidate\.\*\* `([0-9a-f]{40})`", text)
+    if match is None:
+        raise SystemExit(f"no candidate commit in {CONTRACT_REL}")
+    return match.group(1)
+
+
+def shipped_rhythm() -> dict[str, Any]:
+    """The shipped ``rhythm`` object, the baseline the arm edits a copy of."""
+    config = yaml.safe_load(
+        (REPO / "crusher_labs/config.yaml").read_text(encoding="utf-8"),
+    )
+    rhythm = dict(config["rhythm"])
+    if rhythm.get("enabled") is not True:
+        raise SystemExit("shipped rhythm.enabled is no longer true")
+    return rhythm
+
+
+def arm_tier_name(hull: str, introduction: str, arm: str) -> str:
+    return f"{tier_name(hull, introduction)}_{arm}"
+
+
+def arm_pairs(arm: str) -> dict[str, str]:
+    """Arm tier -> the reference tier it shares a seed list with."""
+    return {
+        arm_tier_name(hull, introduction, arm): tier_name(hull, introduction)
+        for hull in PLATFORMS
+        for introduction in ARM_INTRODUCTIONS[arm]
+    }
+
+
+def arm_blocks() -> dict[str, Any]:
+    """Each arm's declared-difference specification (contract section 2.9)."""
+    baseline = shipped_rhythm()
+    return {
+        RHYTHM_OFF_ARM: {
+            "contract": CONTRACT_REL,
+            "contract_sections": ["2.8", "2.9"],
+            "named_commit": {
+                "sha": candidate_commit(),
+                "status": "contract section 1 candidate; no freeze declared",
+            },
+            "hulls": [p["platform"] for p in PLATFORMS.values()],
+            "changed_paths": [
+                {"path": RHYTHM_PATH, "baseline": True, "arm": False},
+            ],
+            # Both merges are one level deep, so the second-level object is
+            # written out whole: the shipped object with one leaf changed.
+            "effective_objects": {"rhythm": {**baseline, "enabled": False}},
+            "baseline_objects": {"rhythm": baseline},
+            "effective_state": {"rhythm_layer_active": False},
+            "paired_with": arm_pairs(RHYTHM_OFF_ARM),
+            "pairing": (
+                "same seed list as the paired rhythm-enabled tier; cells "
+                "match on (hull, introduction, seed)"
+            ),
+            "comparison_metric": (
+                "schedule-layer contribution = rhythm-enabled tier minus "
+                "this arm on paired seeds, per hull: daily onset curve and "
+                "end-of-day cumulative reported curve per role, onset and "
+                "reported attack rates, peak days and lag; plus Explorer "
+                "minus mega with the layer off on both hulls"
+            ),
+        },
+    }
 
 
 def _table_row(text: str, label: str) -> list[int]:
@@ -328,6 +407,19 @@ def build_manifest() -> dict[str, Any]:
                 "complement": COMPLEMENTS[hull],
                 "seeds": list(SEEDS),
             }
+    for arm, block in arm_blocks().items():
+        for arm_tier, reference_tier in block["paired_with"].items():
+            reference = tiers[reference_tier]
+            tiers[arm_tier] = {
+                **copy.deepcopy(reference),
+                "description": (
+                    f"{reference['description']} Declared arm {arm}: "
+                    f"{RHYTHM_PATH} false, paired by seed with "
+                    f"{reference_tier}."
+                ),
+                "arm": arm,
+                "paired_with": reference_tier,
+            }
     return {
         "campaign": CAMPAIGN_NAME,
         "description": (
@@ -345,6 +437,7 @@ def build_manifest() -> dict[str, Any]:
         "pathogen_configs": copy.deepcopy(PATHOGEN_CONFIGS),
         "surveillance_configs": copy.deepcopy(SURVEILLANCE_CONFIGS),
         "introduction_blocks": copy.deepcopy(INTRODUCTIONS),
+        "arm_blocks": arm_blocks(),
         "complement_blocks": {
             "explorer_investigation": exact_complement_block(
                 PLATFORMS["exp"]["platform"],
@@ -365,6 +458,13 @@ def build_campaign() -> dict[str, Any]:
         for hull in PLATFORMS
         for introduction in INTRODUCTIONS
     }
+    for arm in ARM_INTRODUCTIONS:
+        for arm_tier in arm_pairs(arm):
+            blocks[arm_tier.removeprefix("fl_").replace("_8d_recon", "")] = {
+                "worker": f"{CAMPAIGN_REL}/cell.py",
+                "tier": arm_tier,
+                "seeds": list(SEEDS),
+            }
     return {
         "name": CAMPAIGN_NAME,
         "pathogen": "norovirus",

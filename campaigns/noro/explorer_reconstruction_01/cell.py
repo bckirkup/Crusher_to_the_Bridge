@@ -2,7 +2,7 @@
 """WP3 Explorer reconstruction cell worker: one (tier, seed) voyage.
 
 A manifest-tier worker (``--manifest --tier --index``). It differs from the
-stock campaign cell in four ways, none of which touches the engine:
+stock campaign cell in five ways, none of which touches the engine:
 
 * the tier's ``introduction`` names a block in the manifest's
   ``introduction_blocks``; its ``explicit_seeds`` are composed into the
@@ -12,6 +12,11 @@ stock campaign cell in four ways, none of which touches the engine:
   counts are composed into ``ship_graph`` the same way (the engine otherwise
   splits the complement 70/30, not the investigation's 3,245 / 1,183) and
   the initialized counts are asserted before the first epoch;
+* a tier may name a declared difference arm (contract section 2.9) in the
+  manifest's ``arm_blocks``; its complete effective objects are composed
+  the same way, and after initialization every declared path is read back
+  from the merged config on arm and reference cells alike, so a paired
+  cell that does not differ exactly as declared aborts before epoch 0;
 * ``run.sentinel_line_list`` is armed, so the per-person onset line list
   survives ``compact`` retention;
 * the archive carries day-binned onset and reporting curves, the
@@ -101,6 +106,71 @@ def compose_complement(
         )
         graph["agent_classes"] = [dict(cls) for cls in block["agent_classes"]]
     return name, {role: int(block["intended"][role]) for role in ROLES}
+
+
+REFERENCE_ARM = "reference"
+
+
+def _leaf(tree: Any, dotted: str) -> Any:
+    for key in dotted.split("."):
+        tree = tree.get(key) if isinstance(tree, dict) else None
+    return tree
+
+
+def compose_arm(
+    spec: dict[str, Any], manifest: dict[str, Any], tier: str,
+) -> str:
+    """Write the tier's declared arm objects into the spec; return its id.
+
+    Applied after the runner's axes, as whole second-level objects (both
+    config merges are one level deep). A reference tier composes nothing.
+    """
+    arm = str(manifest["tiers"][tier].get("arm", REFERENCE_ARM))
+    if arm != REFERENCE_ARM:
+        overrides = spec.setdefault("config_overrides", {})
+        for key, value in manifest["arm_blocks"][arm]["effective_objects"].items():
+            overrides[key] = json.loads(json.dumps(value))
+    return arm
+
+
+def arm_witness(
+    manifest: dict[str, Any], arm: str, resolved: dict[str, Any],
+    state: dict[str, Any],
+) -> dict[str, Any]:
+    """Every declared arm path as the engine resolved it, with mismatches.
+
+    A reference cell must resolve each path to its baseline value and an
+    arm cell to its arm value, so a pair differs on the declared paths and
+    the two sides are known to be on opposite sides of each.
+    """
+    paths, mismatches = [], []
+    for name, block in (manifest.get("arm_blocks") or {}).items():
+        side = "arm" if name == arm else "baseline"
+        for change in block["changed_paths"]:
+            value = _leaf(resolved, change["path"])
+            paths.append({**change, "declared_by": name, "resolved": value})
+            if value != change[side]:
+                mismatches.append(
+                    f"{change['path']} resolved {value!r}, {side} declares "
+                    f"{change[side]!r}",
+                )
+        if side != "arm":
+            continue
+        for key, wanted in block["effective_objects"].items():
+            if resolved.get(key) != wanted:
+                mismatches.append(f"{key} is not the declared object")
+        for key, wanted in block["effective_state"].items():
+            if state.get(key) != wanted:
+                mismatches.append(f"{key} is {state.get(key)!r}")
+    block = (manifest.get("arm_blocks") or {}).get(arm) or {}
+    return {
+        "arm": arm,
+        "changed_paths": paths,
+        "resolved_objects": {
+            key: resolved.get(key) for key in block.get("effective_objects", {})
+        },
+        "mismatches": mismatches,
+    }
 
 
 def realized_complement(sim: Any) -> dict[str, int]:
@@ -251,6 +321,7 @@ def run_cell(
     """Run one voyage; return (summary payload, line-list document)."""
     introduction = compose_introduction(spec, manifest, tier)
     complement, intended = compose_complement(spec, manifest, tier)
+    arm = compose_arm(spec, manifest, tier)
     platform = manifest["tiers"][tier]["platform"]
     spec["run"]["sentinel_line_list"] = os.path.relpath(
         line_list_path, _REPO_ROOT,
@@ -267,6 +338,12 @@ def run_cell(
                 f"declared {intended} ({complement})",
             )
         state = effective_state(sim, platform)
+        declared_arm = arm_witness(manifest, arm, sim.cfg, state)
+        if declared_arm["mismatches"]:
+            raise SystemExit(
+                f"{tier}: arm {arm} did not resolve as declared: "
+                f"{declared_arm['mismatches']}",
+            )
         sim.epoch_observer = watch.observe
         started = time.perf_counter()
         result = sim.run()
@@ -299,6 +376,8 @@ def run_cell(
         "complement_block": complement,
         "intended_complement": intended,
         "effective_state": state,
+        "declared_arm": declared_arm,
+        "generated_config_overrides": spec["config_overrides"],
         "frozen_block_witness": {
             "pinned_leaves": n_keys, "mismatches": mismatches,
         },
@@ -366,6 +445,8 @@ def main(argv: list[str] | None = None) -> int:
         print(
             f"seed {payload['seed']}: line_list={payload['line_list_cases']} "
             f"declared_seeds={len(payload['introduction']['declared_seed_agent_ids'])} "
+            f"arm={payload['declared_arm']['arm']} "
+            f"rhythm_layer={payload['effective_state']['rhythm_layer_active']} "
             f"block_mismatches={len(payload['frozen_block_witness']['mismatches'])} "
             f"wall={payload['wall_clock_s']}s -> {zip_path}",
             flush=True,
