@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
-"""Paper-1 WP2 joint-evaluation readout: the go/no-go table.
+"""Paper-1 WP2 joint-evaluation readout.
 
 Reads cell zips written by ``cell.py`` (``<root>/<tier>/<run_id>.zip``) and
-scores them against the criteria frozen in the campaign manifest
-(``joint_eval.criteria``, written by ``design/build.py`` before any cell
-ran). Nothing here chooses a threshold: a criterion missing from the
-manifest is an error, not a default.
+reports three things, in this order and kept apart:
 
-Every figure in the output is one of three kinds and is labelled:
+1. **Technical completion** (the bridge gate). Intended inputs used,
+   outcomes extractable, independent attempts accounted for, paired
+   comparisons meaningful. This is the only gate. No outcome voids it.
+2. **Ordering diagnostic.** Posting rates by diagnostic stratum against the
+   bands frozen in the manifest. A quiet stratum that posts, or a hull with
+   no events, is a measured result. It selects a predeclared continuation
+   (reconstruction / population-geometry / uncertainty / precision /
+   justified defect fix); it never re-opens mechanism work by itself.
+3. **Pilots.** The temporal pilot (prefix identity across paired lengths)
+   and the joint-outcome pilot (source-weighted estimates from
+   independently sampled evaluation seeds, with the replication each
+   endpoint's precision target implies).
 
-* measured  -- a count or rate over the zips actually read
-* inferred  -- the verdict the frozen rule assigns to those measurements
-* hypothesis -- never emitted by this script; an explanation of a verdict
-  belongs in the ledger with the evidence that would test it
+Every rule and number comes from the manifest's ``joint_eval`` block,
+written by ``design/build.py`` before any cell ran. Each output row is
+labelled ``measured`` or ``inferred``. This script emits no hypotheses.
 
 Reads only; no engine involvement.
 """
@@ -20,21 +27,26 @@ Reads only; no engine involvement.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
 import sys
 import zipfile
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+from scipy.stats import beta
 
-from scipy.stats import beta  # noqa: E402
-
-FAMILIES = ("burden", "threshold", "first_role", "curves", "environment")
+FAMILIES = (
+    "burden", "threshold", "size_distribution", "first_role", "curves",
+    "environment",
+)
+ROLE_KEYS = (
+    "cumulative_reported_cases_passenger", "cumulative_reported_cases_crew",
+)
 DEFAULT_MANIFEST = Path(__file__).resolve().parent / "manifest.json"
+Z95 = 1.959964
 
 
 def clopper_pearson(k: int, n: int, level: float = 0.95) -> tuple[float, float]:
@@ -47,35 +59,123 @@ def clopper_pearson(k: int, n: int, level: float = 0.95) -> tuple[float, float]:
     return lower, upper
 
 
+def zero_event_upper(n: int, level: float = 0.95) -> float | None:
+    """Exact one-sided upper bound for 0 events in n: 1 - (1-level)^(1/n)."""
+    return None if n <= 0 else 1.0 - (1.0 - level) ** (1.0 / n)
+
+
 def read_cell(path: Path) -> dict[str, Any]:
     with zipfile.ZipFile(path) as archive:
         summary = json.loads(archive.read("summary.json"))
         members = set(archive.namelist())
     block = summary.get("joint_eval") or {}
     params = summary.get("parameters") or {}
+    families = block.get("families") or {}
+    series = summary.get("timeseries") or []
     return {
         "path": str(path),
-        "seed": params.get("seed", params.get("random_seed")),
+        "seed": params.get("seed"),
         "engine_git_sha": params.get("engine_git_sha"),
-        "families_present": [f for f in FAMILIES if block.get(f)],
+        "families_missing": [
+            f for f in FAMILIES
+            if (families.get(f) or {}).get("status") != "present"
+        ],
         "member_present": "joint_eval.json.gz" in members,
-        "posted": bool((block.get("threshold") or {}).get("posted")),
+        "posted_epoch": (block.get("threshold") or {}).get("vsp_trigger_epoch"),
         "first_role": (block.get("first_role") or {}).get("first_role"),
         "burden": block.get("burden") or {},
-        "echo_mismatched": (block.get("config_echo") or {}).get("mismatched"),
-        "overrides_sha256": (block.get("config_echo") or {}).get(
-            "overrides_sha256",
-        ),
+        "arm": block.get("arm") or {},
+        "effective": block.get("effective_config") or {},
+        "roles": block.get("roles") or {},
         "fingerprint": block.get("voyage_fingerprint_sha256"),
         "environment": block.get("environment") or {},
+        "role_series": [[row.get(k) for k in ROLE_KEYS] for row in series],
     }
 
 
-def _quantile(values: list[float], q: float) -> float | None:
-    if not values:
-        return None
-    ordered = sorted(values)
-    return ordered[min(len(ordered) - 1, int(q * len(ordered)))]
+def inputs_ok(cell: dict[str, Any], tier: dict[str, Any], sha: str) -> bool:
+    meta = tier["joint_eval"]
+    return bool(
+        cell["arm"].get("changed_paths") == meta["changed_paths"]
+        and cell["arm"].get("effective_sha256") == sha
+        and cell["effective"].get("mismatched") == []
+        and cell["effective"].get("runner_changed_paths") == []
+        and cell["roles"].get("initialised") == meta["intended_roles"]
+        and cell["roles"].get("payload") == meta["intended_roles"]
+        and cell["engine_git_sha"]
+    )
+
+
+def canonical_sha(tree: dict[str, Any]) -> str:
+    blob = json.dumps(tree, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(blob.encode()).hexdigest()
+
+
+def completion_row(
+    tier_id: str, tier: dict[str, Any], cells: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Measured technical-completion facts for one tier."""
+    sha = canonical_sha(tier["config_overrides"])
+    expected = sorted(int(s) for s in tier["seeds"])
+    seen = Counter(int(c["seed"]) for c in cells if c["seed"] is not None)
+    shas = sorted({str(c["engine_git_sha"]) for c in cells})
+    row = {
+        "tier": tier_id,
+        "kind": "measured",
+        "arm": tier["joint_eval"]["arm"],
+        "n_expected": len(expected),
+        "n_read": len(cells),
+        "seeds_missing": [s for s in expected if s not in seen],
+        "seeds_unexpected": sorted(s for s in seen if s not in set(expected)),
+        "seeds_duplicated": sorted(s for s, n in seen.items() if n > 1),
+        "n_inputs_ok": sum(1 for c in cells if inputs_ok(c, tier, sha)),
+        "n_outcomes_ok": sum(
+            1 for c in cells
+            if not c["families_missing"] and c["member_present"]
+        ),
+        "engine_git_shas": shas,
+    }
+    row["intended_inputs_used"] = (
+        row["n_inputs_ok"] == len(cells) > 0 and len(shas) == 1
+    )
+    row["outcomes_extractable"] = row["n_outcomes_ok"] == len(cells) > 0
+    row["attempts_accounted"] = not (
+        row["seeds_missing"] or row["seeds_unexpected"]
+        or row["seeds_duplicated"]
+    )
+    return row
+
+
+def rate_row(
+    tier_id: str, meta: dict[str, Any], cells: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Measured posting and burden for one tier."""
+    n = len(cells)
+    posted = sum(1 for c in cells if c["posted_epoch"] is not None)
+    lower, upper = clopper_pearson(posted, n)
+    ars = sorted(a for a in (_reported_ar(c) for c in cells) if a is not None)
+    return {
+        "tier": tier_id,
+        "kind": "measured",
+        **{k: meta[k] for k in ("hull", "epochs") if k in meta},
+        "stratum": meta.get("stratum") or meta.get("source_stratum"),
+        "n": n,
+        "posted": posted,
+        "posting_rate": posted / n if n else None,
+        "posting_rate_ci95": [round(lower, 4), round(upper, 4)],
+        "zero_event_upper95_one_sided": (
+            round(zero_event_upper(n), 5) if n and posted == 0 else None
+        ),
+        "first_role": dict(Counter(str(c["first_role"]) for c in cells)),
+        "reported_ar_median": ars[len(ars) // 2] if ars else None,
+        "reported_ar_max": ars[-1] if ars else None,
+        "swab_detected_voyages": sum(
+            1 for c in cells if c["environment"].get("swab_detected_total")
+        ),
+        "tank_detected_voyages": sum(
+            1 for c in cells if c["environment"].get("tank_detected_total")
+        ),
+    }
 
 
 def _reported_ar(cell: dict[str, Any]) -> float | None:
@@ -86,89 +186,158 @@ def _reported_ar(cell: dict[str, Any]) -> float | None:
     return ((b.get("rep_pax_n") or 0) + (b.get("rep_crew_n") or 0)) / total
 
 
-def tier_row(
-    tier_id: str, meta: dict[str, Any], cells: list[dict[str, Any]],
-    expected: int, block_sha: str,
+def _stratum_state(row: dict[str, Any], lo: float, hi: float) -> str:
+    """in / out / undetermined for a rate against the band [lo, hi]."""
+    rate = row["posting_rate"]
+    low, high = row["posting_rate_ci95"]
+    if rate is None:
+        return "undetermined"
+    if lo <= rate <= hi:
+        return "in"
+    return "out" if (low > hi or high < lo) else "undetermined"
+
+
+def band_state(
+    rows: dict[str, dict[str, Any]], bands: dict[str, Any],
 ) -> dict[str, Any]:
-    """Measured quantities for one tier (hull x length x arm)."""
-    n = len(cells)
-    posted = sum(1 for c in cells if c["posted"])
-    lower, upper = clopper_pearson(posted, n)
-    ars = [a for a in (_reported_ar(c) for c in cells) if a is not None]
-    clean = [
-        c for c in cells
-        if len(c["families_present"]) == len(FAMILIES)
-        and c["member_present"] and c["echo_mismatched"] == []
-        and c["overrides_sha256"] == block_sha and c["engine_git_sha"]
-    ]
+    """Inferred diagnostic state of one hull x length."""
+    states = {
+        "quiet": _stratum_state(
+            rows["quiet"], 0.0, bands["quiet_max_posting_rate"],
+        ),
+        "outbreak": _stratum_state(
+            rows["outbreak"], bands["outbreak_min_posting_rate"], 1.0,
+        ),
+        "near": _stratum_state(
+            rows["near"], bands["near_min_posting_rate"],
+            bands["near_max_posting_rate"],
+        ),
+    }
+    rates = [rows[s]["posting_rate"] for s in ("quiet", "near", "outbreak")]
+    ordered = None not in rates and rates[0] < rates[1] < rates[2]
+    if "out" in states.values():
+        state = "out"
+    elif ordered and set(states.values()) == {"in"}:
+        state = "in"
+    else:
+        state = "undetermined"
+    return {"kind": "inferred", "state": state, "strata": states,
+            "ordered": ordered}
+
+
+def hull_state(cell_states: list[str]) -> str:
+    if "out" in cell_states:
+        return "out"
+    return "in" if set(cell_states) == {"in"} else "undetermined"
+
+
+def continuation(
+    hull_states: dict[str, str], defect_evidence: list[str],
+) -> dict[str, Any]:
+    """The predeclared continuation the diagnostic selects."""
+    states = list(hull_states.values())
+    if defect_evidence:
+        choice = "justified_defect_fix"
+    elif states and set(states) == {"out"}:
+        choice = "reconstruction"
+    elif "out" in states:
+        choice = "population_geometry"
+    elif "undetermined" in states or not states:
+        choice = "uncertainty"
+    else:
+        choice = "precision"
+    return {"kind": "inferred", "continuation": choice,
+            "hull_states": hull_states, "defect_evidence": defect_evidence}
+
+
+def temporal_pilot(
+    by_length: dict[int, list[dict[str, Any]]],
+) -> dict[str, Any]:
+    """Is a shorter voyage the prefix of the same seed's longest voyage?"""
+    lengths = sorted(by_length)
+    longest = {int(c["seed"]): c for c in by_length[lengths[-1]]}
+    compared = identical = 0
+    for length in lengths[:-1]:
+        for cell in by_length[length]:
+            ref = longest.get(int(cell["seed"]))
+            if ref is None:
+                continue
+            compared += 1
+            n = len(cell["role_series"])
+            identical += int(ref["role_series"][:n] == cell["role_series"])
+    return {"kind": "measured", "pairs_compared": compared,
+            "prefix_identical": identical,
+            "truncation_valid": compared > 0 and identical == compared}
+
+
+def pilot_estimate(
+    strata: dict[str, tuple[dict[str, Any], dict[str, Any]]],
+) -> dict[str, Any]:
+    """Source-weighted posting probability from evaluation seeds."""
+    estimate = variance = 0.0
+    neyman = {}
+    for source, (meta, row) in strata.items():
+        n, p, w = row["n"], row["posting_rate"], meta.get("source_weight")
+        if not n or p is None or w is None:
+            return {"kind": "measured", "estimate": None, "reason": "incomplete"}
+        estimate += w * p
+        variance += w * w * p * (1 - p) / n
+        neyman[source] = w * math.sqrt(p * (1 - p))
+    total = sum(neyman.values())
     return {
-        "tier": tier_id,
-        **meta,
         "kind": "measured",
-        "n_expected": expected,
-        "n_read": n,
-        "n_clean": len(clean),
-        "posted": posted,
-        "posting_rate": posted / n if n else None,
-        "posting_rate_ci95": [round(lower, 4), round(upper, 4)],
-        "first_role": dict(Counter(c["first_role"] for c in cells)),
-        "reported_ar_median": _quantile(ars, 0.5),
-        "reported_ar_p95": _quantile(ars, 0.95),
-        "reported_ar_max": max(ars, default=None),
-        "swab_detected_voyages": sum(
-            1 for c in cells if c["environment"].get("swab_detected_total")
+        "estimate": estimate,
+        "standard_error": math.sqrt(variance),
+        "neyman_share": {
+            s: (v / total if total else None) for s, v in neyman.items()
+        },
+        "n_for_half_width_0p10": (
+            math.ceil((Z95 * total / 0.10) ** 2) if total else None
         ),
-        "tank_detected_voyages": sum(
-            1 for c in cells if c["environment"].get("tank_detected_total")
-        ),
-        "engine_git_shas": sorted({str(c["engine_git_sha"]) for c in cells}),
+        "note": "evaluation seeds only; a zero-variance stratum is sized "
+                "by the quiet_bound target, not by this formula",
     }
 
 
-def score_cell(
-    rows: dict[str, dict[str, Any]], criteria: dict[str, Any],
-) -> dict[str, Any]:
-    """Inferred verdict for one hull x length from its three stratum rows."""
-    quiet, near, loud = (rows.get(s) for s in ("quiet", "near", "outbreak"))
-    if not (quiet and near and loud) or None in (
-        quiet["posting_rate"], near["posting_rate"], loud["posting_rate"],
-    ):
-        return {"kind": "inferred", "verdict": "incomplete", "checks": {}}
-    q, m, o = (r["posting_rate"] for r in (quiet, near, loud))
-    checks = {
-        "contract_clean": all(
-            r["n_clean"] == r["n_expected"] for r in (quiet, near, loud)
-        ),
-        "quiet_rare": q <= criteria["quiet_max_posting_rate"],
-        "outbreak_posts": o >= criteria["outbreak_min_posting_rate"],
-        "near_between": (
-            q < m < o
-            and criteria["near_min_posting_rate"] <= m
-            <= criteria["near_max_posting_rate"]
-        ),
-        "quiet_not_comparable": (
-            q < criteria["comparable_ratio"] * o
-            and quiet["posting_rate_ci95"][1] < loud["posting_rate_ci95"][0]
-        ),
-    }
-    return {
-        "kind": "inferred",
-        "verdict": "go" if all(checks.values()) else "no-go",
-        "checks": checks,
-    }
+VOYAGE_KEYS = (
+    "parameters", "trigger_status", "timeseries", "derived", "summary",
+    "cost_accounting", "role_checkpoints",
+)
 
 
-def baseline_rows(
+def archive_fingerprint(summary: dict[str, Any]) -> str:
+    """``cell.fingerprint`` applied to an archived ``summary.json``."""
+    body = {k: summary[k] for k in VOYAGE_KEYS if k in summary}
+    body["parameters"] = {
+        k: v for k, v in (body.get("parameters") or {}).items()
+        if k != "engine_git_sha"
+    }
+    blob = json.dumps(body, sort_keys=True)
+    return hashlib.sha256(blob.encode()).hexdigest()
+
+
+def reference_fingerprints(root: Path) -> dict[str, str]:
+    """seed -> fingerprint over a prior campaign's run zips under *root*."""
+    out = {}
+    for path in sorted(root.rglob("*.zip")):
+        with zipfile.ZipFile(path) as archive:
+            summary = json.loads(archive.read("summary.json"))
+        seed = (summary.get("parameters") or {}).get("seed")
+        if seed is not None:
+            out[str(seed)] = archive_fingerprint(summary)
+    return out
+
+
+def reproduction_rows(
     tiers: dict[str, dict[str, Any]], cells: dict[str, list[dict[str, Any]]],
 ) -> list[dict[str, Any]]:
-    """Bit-identity of each labelled-baseline arm against its reference."""
     out = []
     for tier_id, tier in tiers.items():
-        meta = tier.get("joint_eval") or {}
-        if meta.get("arm") != "baseline":
+        meta = tier["joint_eval"]
+        if meta["arm"] != "reproduction":
             continue
         want = meta.get("reference_fingerprints") or {}
-        got = {str(c["seed"]): c["fingerprint"] for c in cells.get(tier_id, [])}
+        got = {str(c["seed"]): c["fingerprint"] for c in cells[tier_id]}
         compared = sorted(set(want) & set(got))
         out.append({
             "tier": tier_id,
@@ -176,88 +345,148 @@ def baseline_rows(
             "n_reference": len(want),
             "n_compared": len(compared),
             "n_identical": sum(1 for s in compared if want[s] == got[s]),
-            "reproduces": bool(want) and len(compared) == len(want)
-            and all(want[s] == got[s] for s in compared),
         })
     return out
 
 
+def _grid(
+    manifest: dict[str, Any], cells: dict[str, list[dict[str, Any]]], arm: str,
+) -> dict[str, dict[int, dict[str, str]]]:
+    """hull -> epochs -> stratum -> tier id, for one arm."""
+    grid: dict[str, dict[int, dict[str, str]]] = {}
+    for tier_id, tier in manifest["tiers"].items():
+        meta = tier["joint_eval"]
+        if meta["arm"] != arm:
+            continue
+        key = meta.get("stratum") or meta.get("source_stratum")
+        grid.setdefault(meta["hull"], {}).setdefault(
+            meta["epochs"], {},
+        )[key] = tier_id
+    return grid
+
+
 def build_readout(manifest: dict[str, Any], root: Path) -> dict[str, Any]:
     design = manifest["joint_eval"]
-    criteria = design["criteria"]
-    cells = {
-        tier_id: [read_cell(p) for p in sorted((root / tier_id).glob("*.zip"))]
-        for tier_id in manifest["tiers"]
+    tiers = {
+        t: v for t, v in manifest["tiers"].items()
+        if v["joint_eval"]["arm"] != "census"
     }
-    tier_rows = []
-    grid: dict[tuple[str, int], dict[str, dict[str, Any]]] = {}
-    for tier_id, tier in manifest["tiers"].items():
-        meta = tier.get("joint_eval") or {}
-        if meta.get("arm") != "bridge":
-            continue
-        row = tier_row(
-            tier_id,
-            {k: meta[k] for k in ("hull", "epochs", "stratum")},
-            cells[tier_id], len(tier["seeds"]), design["block_sha256"],
-        )
-        tier_rows.append(row)
-        grid.setdefault((meta["hull"], meta["epochs"]), {})[meta["stratum"]] = row
-    verdicts = [
-        {"hull": hull, "epochs": epochs, **score_cell(rows, criteria)}
-        for (hull, epochs), rows in sorted(grid.items())
+    cells = {
+        t: [read_cell(p) for p in sorted((root / t).glob("*.zip"))]
+        for t in tiers
+    }
+    completion = [completion_row(t, tiers[t], cells[t]) for t in tiers]
+    rates = {t: rate_row(t, tiers[t]["joint_eval"], cells[t]) for t in tiers}
+    bridge = _grid(manifest, cells, "bridge")
+    pairs_ok = bool(bridge)
+    diag, temporal, hull_states = [], [], {}
+    for hull, lengths in sorted(bridge.items()):
+        states = []
+        for epochs, strata in sorted(lengths.items()):
+            state = band_state(
+                {s: rates[t] for s, t in strata.items()},
+                design["diagnostic_bands"],
+            )
+            states.append(state["state"])
+            diag.append({"hull": hull, "epochs": epochs, **state})
+        hull_states[hull] = hull_state(states)
+        for stratum in sorted(next(iter(lengths.values()))):
+            by_length = {e: cells[s[stratum]] for e, s in lengths.items()}
+            seed_sets = {
+                frozenset(c["seed"] for c in v) for v in by_length.values()
+            }
+            pairs_ok = pairs_ok and len(seed_sets) == 1 and all(by_length.values())
+            temporal.append({
+                "hull": hull, "stratum": stratum, **temporal_pilot(by_length),
+            })
+    reproduction = reproduction_rows(tiers, cells)
+    pilot = [
+        {"hull": hull, "epochs": epochs, **pilot_estimate({
+            s: (tiers[t]["joint_eval"], rates[t]) for s, t in strata.items()
+        })}
+        for hull, lengths in sorted(_grid(manifest, cells, "pilot").items())
+        for epochs, strata in sorted(lengths.items())
     ]
-    baselines = baseline_rows(manifest["tiers"], cells)
-    states = {v["verdict"] for v in verdicts}
-    if "incomplete" in states or not baselines:
-        overall = "incomplete"
-    elif states == {"go"} and all(b["reproduces"] for b in baselines):
-        overall = "go"
-    else:
-        overall = "no-go"
+    gate = {
+        "kind": "inferred",
+        "stage_b_emitted": bool(design["stage_b_emitted"]),
+        "intended_inputs_used": all(r["intended_inputs_used"] for r in completion),
+        "outcomes_extractable": all(r["outcomes_extractable"] for r in completion),
+        "attempts_accounted": all(r["attempts_accounted"] for r in completion),
+        "pairs_meaningful": pairs_ok and all(
+            r["n_reference"] and r["n_compared"] == r["n_reference"]
+            for r in reproduction
+        ),
+    }
+    gate["technically_complete"] = all(
+        gate[k] for k in gate if k != "kind"
+    )
+    defects = [
+        f"{r['tier']}: {r['n_identical']}/{r['n_compared']} reproduce"
+        for r in reproduction if r["n_identical"] != r["n_compared"]
+    ]
     return {
         "campaign": manifest["campaign"],
-        "criteria": criteria,
-        "criteria_source": "manifest joint_eval.criteria (frozen before cells)",
-        "tiers": tier_rows,
-        "cells": verdicts,
-        "baselines": baselines,
-        "overall": {"kind": "inferred", "verdict": overall},
+        "rules_source": "manifest joint_eval (frozen before any cell)",
+        "gate": gate,
+        "completion": completion,
+        "rates": list(rates.values()),
+        "ordering_diagnostic": diag,
+        "continuation": (
+            continuation(hull_states, defects)
+            if gate["technically_complete"]
+            else {"kind": "inferred", "continuation": None,
+                  "reason": "not evaluated: bridge not technically complete"}
+        ),
+        "temporal_pilot": temporal,
+        "joint_outcome_pilot": pilot,
+        "reproduction": reproduction,
+        "zero_event_convention": design["precision"]["zero_event_convention"],
     }
 
 
 def render(readout: dict[str, Any]) -> str:
+    gate = readout["gate"]
     lines = [
-        f"# {readout['campaign']} go/no-go",
+        f"# {readout['campaign']} bridge readout", "",
+        "## 1. Technical completion (the gate; inferred from measured rows)",
         "",
-        "Measured: posting counts and rates per tier. Inferred: verdicts "
-        "under the frozen criteria.",
-        "",
-        "| hull | epochs | stratum | read/expected | clean | posted | "
-        "rate | 95% CI |",
-        "|---|---|---|---|---|---|---|---|",
     ]
-    for r in readout["tiers"]:
+    lines += [f"- {k}: {v}" for k, v in gate.items() if k != "kind"]
+    lines += [
+        "", "| tier | read/expected | inputs ok | outcomes ok | missing seeds |",
+        "|---|---|---|---|---|",
+    ]
+    for r in readout["completion"]:
+        lines.append(
+            f"| {r['tier']} | {r['n_read']}/{r['n_expected']} | "
+            f"{r['n_inputs_ok']} | {r['n_outcomes_ok']} | "
+            f"{len(r['seeds_missing'])} |",
+        )
+    lines += [
+        "", "## 2. Ordering diagnostic (measured rates; inferred states)", "",
+        "| tier | n | posted | rate | 95% CI | 0-event upper |",
+        "|---|---|---|---|---|---|",
+    ]
+    for r in readout["rates"]:
         rate = "-" if r["posting_rate"] is None else f"{r['posting_rate']:.3f}"
         lines.append(
-            f"| {r['hull']} | {r['epochs']} | {r['stratum']} | "
-            f"{r['n_read']}/{r['n_expected']} | {r['n_clean']} | "
-            f"{r['posted']} | {rate} | {r['posting_rate_ci95']} |",
+            f"| {r['tier']} | {r['n']} | {r['posted']} | {rate} | "
+            f"{r['posting_rate_ci95']} | {r['zero_event_upper95_one_sided']} |",
         )
-    lines += ["", "| hull | epochs | verdict | failed checks |", "|---|---|---|---|"]
-    for v in readout["cells"]:
-        failed = [k for k, ok in v["checks"].items() if not ok]
+    lines += ["", "| hull | epochs | state | strata |", "|---|---|---|---|"]
+    for d in readout["ordering_diagnostic"]:
         lines.append(
-            f"| {v['hull']} | {v['epochs']} | {v['verdict']} | "
-            f"{', '.join(failed) or '-'} |",
+            f"| {d['hull']} | {d['epochs']} | {d['state']} | {d['strata']} |",
         )
-    lines += ["", "| baseline tier | compared/reference | identical | reproduces |",
-              "|---|---|---|---|"]
-    for b in readout["baselines"]:
-        lines.append(
-            f"| {b['tier']} | {b['n_compared']}/{b['n_reference']} | "
-            f"{b['n_identical']} | {b['reproduces']} |",
-        )
-    lines += ["", f"Overall (inferred): **{readout['overall']['verdict']}**"]
+    lines += [
+        "", f"Continuation (inferred): {readout['continuation']}", "",
+        "Zero-event convention: " + readout["zero_event_convention"], "",
+        "## 3. Pilots (measured)", "",
+    ]
+    lines += [f"- temporal {t}" for t in readout["temporal_pilot"]]
+    lines += [f"- joint-outcome {p}" for p in readout["joint_outcome_pilot"]]
+    lines += [f"- reproduction {r}" for r in readout["reproduction"]]
     return "\n".join(lines) + "\n"
 
 
@@ -270,13 +499,27 @@ def main(argv: list[str] | None = None) -> int:
              "campaign prefix, or a local smoke out dir)",
     )
     parser.add_argument("--json", type=Path, default=None)
+    parser.add_argument(
+        "--reference-root", type=Path, default=None,
+        help="run zips of the prior campaign the reproduction arm re-runs; "
+             "fingerprints computed here replace the manifest's (empty) "
+             "reference_fingerprints",
+    )
     args = parser.parse_args(argv)
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+    if args.reference_root is not None:
+        reference = reference_fingerprints(args.reference_root)
+        for tier in manifest["tiers"].values():
+            if tier["joint_eval"]["arm"] == "reproduction":
+                tier["joint_eval"]["reference_fingerprints"] = {
+                    str(s): reference[str(s)]
+                    for s in tier["seeds"] if str(s) in reference
+                }
     readout = build_readout(manifest, args.root)
     if args.json:
         args.json.write_text(json.dumps(readout, indent=1), encoding="utf-8")
     print(render(readout))
-    return 0 if readout["overall"]["verdict"] == "go" else 1
+    return 0 if readout["gate"]["technically_complete"] else 1
 
 
 if __name__ == "__main__":

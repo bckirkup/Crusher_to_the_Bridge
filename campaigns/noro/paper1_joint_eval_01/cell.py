@@ -2,35 +2,38 @@
 """Paper-1 WP2 joint-evaluation cell: six outcome families from one run.
 
 One voyage per array child, spec taken verbatim from the campaign manifest
-tier (``generate_tier_runs``), so the tier's ``config_overrides`` -- the
-freeze contract's section 2 block -- reaches the engine through the verified
-loader path. Nothing here changes engine behaviour or adds an engine output
-field: every family is read from what the run already produces.
+tier (``generate_tier_runs``), so the tier's ``config_overrides`` reaches the
+engine through the verified loader path. Nothing here changes engine
+behaviour or adds an engine output field.
 
-Families (freeze contract section 5):
+The output contract is ``OUTPUT_CONTRACT`` below: for each family, what the
+worker requests, where it reads it, and how a missing source is recorded.
+Every archive carries a ``families`` block with an explicit status per
+family, so "not requested", "requested and empty" and "missing" are
+distinguishable.
 
-1. burden by role      final-epoch ``cumulative_reported_cases_*`` + census
-2. threshold timing    ``derived.vsp_trigger_epoch``
-3. size distribution   the seed ensemble of 1 and 2 (readout side)
-4. first role to 0.03  per-epoch ``cumulative_reported_cases_{passenger,crew}``
-5. daily curves        onsets from ``run.sentinel_line_list``; reporting curve
-                       from the per-epoch cumulative series. Day 0 of the
-                       reporting curve includes pre-boarding AGE declarations
-                       and is labelled so.
-6. environment         surface swabs (``surface_pool_density``) and the
-                       holding-tank wastewater assay
+Input checks, made after the runner has applied every axis and the engine
+has initialised (a failed check exits non-zero; no archive is written):
 
-Family 6 note: campaign runs use ``history_retention: compact``, whose epoch
-record drops the ``observation_engine`` block. The swab and holding-tank
-results the engine computes every epoch are therefore read through
-``ShipSimulation.epoch_observer`` (the read-only per-epoch hook the census
-workers already use). The observer reads results the epoch already produced
-and draws nothing; ``--verify-draws`` measures that claim by running the
-same spec with no observer and no line list and comparing voyage
-fingerprints.
+* the tier's effective ``config_overrides`` differs from the manifest's
+  invariant baseline block on exactly the paths the tier declares;
+* the runner changed no leaf the tier declared (the paths it added are
+  recorded);
+* every leaf of the run spec's ``config_overrides`` equals the
+  engine-resolved ``sim.cfg``;
+* the initialised passenger and crew counts equal the tier's intended
+  counts, and so do the complements in the outcome payload.
 
-Zip members: ``summary.json`` (campaign anchor layout plus ``joint_eval``
-scalars) and ``joint_eval.json.gz`` (daily curves and environment series).
+Environment harvest: campaign runs use ``history_retention: compact``, whose
+epoch record drops the ``observation_engine`` block. Swab and holding-tank
+results are therefore read output-only through
+``ShipSimulation.epoch_observer``. The observer reads results the epoch
+already produced and draws nothing; ``--verify-draws`` measures that by
+running the same spec with no observer and no line list and comparing
+voyage fingerprints.
+
+Zip members: ``summary.json`` (campaign anchor layout plus ``joint_eval``)
+and ``joint_eval.json.gz`` (curves, environment rows, resolved config).
 """
 
 from __future__ import annotations
@@ -74,16 +77,72 @@ from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
     _attach_voyage_blocks,
 )
 
-SCHEMA = "paper1_joint_eval_cell/1.0.0"
+SCHEMA = "paper1_joint_eval_cell/2.0.0"
 THRESHOLD = 0.03
 MEMBER = "joint_eval.json.gz"
+ABSENT = "<absent>"
 DAY0_LABEL = (
     "day 0 includes pre-boarding AGE declarations seeded at embarkation "
     "(preboarding_reportable_ids); see preboarding_reported_*"
 )
-FAMILY_KEYS = (
-    "burden", "threshold", "first_role", "curves", "environment",
+FIRST_ROLE_CLASSES = (
+    "passenger_first", "crew_first", "same_epoch", "neither", "missing",
 )
+OUTPUT_CONTRACT: dict[str, dict[str, str]] = {
+    "burden": {
+        "request": "none (always emitted)",
+        "source": "final-epoch summary cumulative_reported_cases_*, "
+                  "cumulative_ever_ill_*, cumulative_ever_infected_*, "
+                  "role complements",
+    },
+    "threshold": {
+        "request": "none (always emitted)",
+        "source": "derived.vsp_trigger_epoch (either channel at 3% of "
+                  "that channel's complement)",
+    },
+    "size_distribution": {
+        "request": "none; an ensemble property",
+        "source": "seed ensemble of burden and threshold, computed by "
+                  "readout.py -- no per-run field",
+    },
+    "first_role": {
+        "request": "none (always emitted)",
+        "source": "per-epoch cumulative_reported_cases_{passenger,crew} "
+                  "over the role complement against 0.03; classes "
+                  + " / ".join(FIRST_ROLE_CLASSES),
+    },
+    "curves": {
+        "request": "run.sentinel_line_list set explicitly by this worker "
+                   "(the campaign runner arms it only for shore-exposure "
+                   "or variant-surveillance runs)",
+        "source": "onsets: line-list clinical_cases.onset_epoch; reporting "
+                  "curve: per-epoch cumulative_reported_cases_* (not the "
+                  "line list's report_epoch, which is detection clamped to "
+                  "onset)",
+    },
+    "environment": {
+        "request": "output-only harvest via ShipSimulation.epoch_observer "
+                   "(compact retention drops observation_engine)",
+        "source": "work.swab_results (targeted surface swab, "
+                  "surface_pool_density) and work.wastewater_ht_result "
+                  "(holding-tank qPCR assay). The wastewater_sequencing "
+                  "channel is a different instrument and is not harvested",
+    },
+}
+ENV_UNITS = {
+    "swab.epoch": "simulation epoch (hours since embarkation / "
+                  "hours_per_epoch)",
+    "swab.density": "genome copies per cm2 of high-touch area",
+    "swab.recovered": "genome copies recovered per swab",
+    "swab.lod": "genome copies per swab",
+    "tank.concentration": "genome copies per litre of tank contents",
+    "tank.lod": "genome copies per litre",
+    "tank.loq": "genome copies per litre",
+}
+
+
+class ContractError(SystemExit):
+    """An input check failed; the run writes no archive."""
 
 
 def leaf_items(tree: dict[str, Any], prefix: str = "") -> list[tuple[str, Any]]:
@@ -102,64 +161,159 @@ def get_path(tree: Any, dotted: str) -> Any:
     node = tree
     for part in dotted.split("."):
         if not isinstance(node, dict) or part not in node:
-            return "<absent>"
+            return ABSENT
         node = node[part]
     return node
 
 
-def config_echo(sim: Any, overrides: dict[str, Any]) -> dict[str, Any]:
-    """The engine-resolved value of every leaf the tier overrides.
+def canonical_sha(tree: dict[str, Any]) -> str:
+    blob = json.dumps(tree, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(blob.encode()).hexdigest()
 
-    Read from ``sim.cfg`` after ``initialize()`` -- the merged config the
-    engine actually runs on, not the manifest that asked for it.
-    """
-    cfg = sim.cfg
-    rows = {
-        path: get_path(cfg, path) for path, _ in leaf_items(overrides)
-    }
-    mismatched = sorted(
-        path for path, want in leaf_items(overrides) if rows[path] != want
-    )
-    canonical = json.dumps(overrides, sort_keys=True, separators=(",", ":"))
+
+def changed_paths(
+    baseline: dict[str, Any], effective: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Leaf paths on which *effective* differs from *baseline*."""
+    base = dict(leaf_items(baseline))
+    arm = dict(leaf_items(effective))
+    return [
+        {"path": path, "baseline": base.get(path, ABSENT),
+         "arm": arm.get(path, ABSENT)}
+        for path in sorted(set(base) | set(arm))
+        if base.get(path, ABSENT) != arm.get(path, ABSENT)
+    ]
+
+
+def check_arm(manifest: dict[str, Any], tier_id: str) -> dict[str, Any]:
+    """The tier differs from the baseline block only where it says it does."""
+    design = manifest["joint_eval"]
+    tier = manifest["tiers"][tier_id]
+    meta = tier["joint_eval"]
+    actual = changed_paths(design["baseline_block"], tier["config_overrides"])
+    if actual != meta["changed_paths"]:
+        raise ContractError(
+            f"{tier_id}: effective config differs from the baseline on "
+            f"{[c['path'] for c in actual]}, declared "
+            f"{[c['path'] for c in meta['changed_paths']]}",
+        )
     return {
-        "n_leaves": len(rows),
-        "mismatched": mismatched,
-        "resolved": rows,
-        "overrides_sha256": hashlib.sha256(canonical.encode()).hexdigest(),
+        "arm": meta["arm"],
+        "baseline_sha256": canonical_sha(design["baseline_block"]),
+        "effective_sha256": canonical_sha(tier["config_overrides"]),
+        "changed_paths": actual,
     }
+
+
+def check_effective(
+    sim: Any, tier_overrides: dict[str, Any], spec_overrides: dict[str, Any],
+) -> dict[str, Any]:
+    """Validate the config after the runner applied every axis.
+
+    ``tier_overrides`` is what the manifest declared; ``spec_overrides`` is
+    what ``generate_tier_runs`` produced from it; ``sim.cfg`` is what the
+    engine resolved after ``initialize()``.
+    """
+    declared = dict(leaf_items(tier_overrides))
+    spec = dict(leaf_items(spec_overrides))
+    runner_changed = sorted(
+        path for path, want in declared.items()
+        if spec.get(path, ABSENT) != want
+    )
+    resolved = {path: get_path(sim.cfg, path) for path in spec}
+    unresolved = sorted(p for p, want in spec.items() if resolved[p] != want)
+    if runner_changed or unresolved:
+        raise ContractError(
+            f"effective config check failed: runner changed "
+            f"{runner_changed}; engine resolved differently {unresolved}",
+        )
+    return {
+        "n_declared_leaves": len(declared),
+        "n_effective_leaves": len(spec),
+        "runner_added_paths": sorted(set(spec) - set(declared)),
+        "runner_changed_paths": runner_changed,
+        "mismatched": unresolved,
+        "resolved": resolved,
+    }
+
+
+def check_roles(
+    sim: Any, intended: dict[str, int], where: str,
+    counts: dict[str, int] | None = None,
+) -> dict[str, int]:
+    """Intended passenger/crew counts against the initialised agents."""
+    if counts is None:
+        agents = sim.engine.agents
+        crew = sum(1 for a in agents if a.role == "crew")
+        counts = {"passenger": len(agents) - crew, "crew": crew}
+    want = {k: int(intended[k]) for k in ("passenger", "crew")}
+    if counts != want:
+        raise ContractError(
+            f"role counts in {where} are {counts}, intended {want}",
+        )
+    return counts
 
 
 class EnvRecorder:
-    """Per-epoch swab and holding-tank rows from the epoch scratch pad."""
+    """Swab and holding-tank results read from the epoch scratch pad.
+
+    Every swab is counted per epoch. A swab that recovered any copies keeps
+    its own row (zone, epoch, amount, units via ``ENV_UNITS``, censoring);
+    a swab that recovered nothing is represented by the per-epoch count
+    alone, so the member stays bounded on the mega hull.
+    """
 
     def __init__(self) -> None:
-        self.rows: list[dict[str, Any]] = []
+        self.epochs: list[dict[str, Any]] = []
+        self.swabs: list[dict[str, Any]] = []
+        self.tank: list[dict[str, Any]] = []
+        self.zones: set[str] = set()
+
+    def _swab_row(self, epoch: int, zone: str, swab: dict[str, Any]) -> None:
+        if not (swab.get("recovered_copies") or 0) > 0:
+            return
+        self.swabs.append({
+            "epoch": epoch,
+            "zone": zone,
+            "surface_class": swab.get("surface_class"),
+            "density": swab.get("surface_density_copies_per_cm2"),
+            "recovered": swab.get("recovered_copies"),
+            "lod": swab.get("lod_copies_per_swab"),
+            "detected": bool(swab.get("detected")),
+            "censored_below_lod": bool(swab.get("censored_below_lod")),
+        })
+
+    def _tank_row(self, epoch: int, tank: dict[str, Any]) -> None:
+        self.tank.append({
+            "epoch": epoch,
+            "instrument": tank.get("instrument"),
+            "stream": tank.get("stream"),
+            "concentration": tank.get("concentration_copies_per_l"),
+            "lod": tank.get("lod_copies_per_l"),
+            "loq": tank.get("loq_copies_per_l"),
+            "detected": bool(tank.get("detected")),
+            "quantifiable": bool(tank.get("quantifiable")),
+            "censored_below_lod": bool(tank.get("censored_below_lod")),
+        })
 
     def observe(self, _sim: Any, work: Any) -> None:
+        epoch = int(work.epoch)
         swabs = getattr(work, "swab_results", None) or {}
         tank = getattr(work, "wastewater_ht_result", None)
-        detected = [s for s in swabs.values() if s.get("detected")]
-        densities = [
-            float(s.get("surface_density_copies_per_cm2") or 0.0)
-            for s in swabs.values()
-        ]
-        row: dict[str, Any] = {
-            "epoch": int(work.epoch),
+        for zone, swab in swabs.items():
+            self.zones.add(str(zone))
+            self._swab_row(epoch, str(zone), swab)
+        self.epochs.append({
+            "epoch": epoch,
             "swab_n": len(swabs),
-            "swab_detected": len(detected),
+            "swab_detected": sum(1 for s in swabs.values() if s.get("detected")),
             "swab_censored": sum(
                 1 for s in swabs.values() if s.get("censored_below_lod")
             ),
-            "swab_max_density": max(densities, default=0.0),
-            "tank": tank is not None,
-        }
+            "tank_assayed": tank is not None,
+        })
         if tank is not None:
-            row.update(
-                tank_detected=bool(tank.get("detected")),
-                tank_quantifiable=bool(tank.get("quantifiable")),
-                tank_log10_copies_per_l=tank.get("log10_copies_per_l"),
-            )
-        self.rows.append(row)
+            self._tank_row(epoch, tank)
 
 
 def _first_crossing(series: list[dict[str, Any]], role: str) -> int | None:
@@ -171,23 +325,40 @@ def _first_crossing(series: list[dict[str, Any]], role: str) -> int | None:
     return None
 
 
+_ROLE_SERIES_KEYS = (
+    "passenger_complement", "crew_complement",
+    "cumulative_reported_cases_passenger", "cumulative_reported_cases_crew",
+)
+
+
 def first_role(series: list[dict[str, Any]]) -> dict[str, Any]:
+    """Which role's cumulative reports reached 3% of its complement first.
+
+    ``missing`` when the series is empty or lacks a role series or a
+    positive complement -- never folded into ``neither``.
+    """
+    out: dict[str, Any] = {
+        "threshold": THRESHOLD, "passenger_epoch": None, "crew_epoch": None,
+    }
+    usable = bool(series) and all(
+        row.get(key) is not None for row in series for key in _ROLE_SERIES_KEYS
+    ) and all(
+        (series[-1].get(k) or 0) > 0
+        for k in ("passenger_complement", "crew_complement")
+    )
+    if not usable:
+        return {**out, "first_role": "missing"}
     pax = _first_crossing(series, "passenger")
     crew = _first_crossing(series, "crew")
     if pax is None and crew is None:
-        role = "none"
+        role = "neither"
     elif crew is None or (pax is not None and pax < crew):
-        role = "passenger"
+        role = "passenger_first"
     elif pax is None or crew < pax:
-        role = "crew"
+        role = "crew_first"
     else:
-        role = "tie"
-    return {
-        "threshold": THRESHOLD,
-        "passenger_epoch": pax,
-        "crew_epoch": crew,
-        "first_role": role,
-    }
+        role = "same_epoch"
+    return {**out, "passenger_epoch": pax, "crew_epoch": crew, "first_role": role}
 
 
 def _daily_increments(
@@ -239,6 +410,8 @@ def curves(
         channel = str(case.get("reported_via"))
         channels[channel] = channels.get(channel, 0) + 1
     return {
+        "line_list_requested": True,
+        "line_list_received": "clinical_cases" in line_list,
         "epochs_per_day": epochs_per_day,
         "n_days": n_days,
         "reporting_source": "per-epoch cumulative_reported_cases_* series",
@@ -262,40 +435,41 @@ def curves(
     }
 
 
-def environment(rows: list[dict[str, Any]], epochs_per_day: int) -> dict[str, Any]:
-    tank_rows = [r for r in rows if r["tank"]]
-    daily: list[dict[str, Any]] = []
-    for start in range(0, len(rows), epochs_per_day):
-        chunk = rows[start:start + epochs_per_day]
-        logs = [
-            r["tank_log10_copies_per_l"] for r in chunk
-            if r.get("tank_log10_copies_per_l") is not None
-        ]
-        daily.append({
-            "day": start // epochs_per_day,
-            "swab_n": sum(r["swab_n"] for r in chunk),
-            "swab_detected": sum(r["swab_detected"] for r in chunk),
-            "swab_censored": sum(r["swab_censored"] for r in chunk),
-            "swab_max_density": max(r["swab_max_density"] for r in chunk),
-            "tank_assays": sum(1 for r in chunk if r["tank"]),
-            "tank_detected": sum(1 for r in chunk if r.get("tank_detected")),
-            "tank_max_log10_copies_per_l": max(logs, default=None),
-        })
+def environment(rec: EnvRecorder) -> dict[str, Any]:
+    detected_swabs = [r for r in rec.swabs if r["detected"]]
+    detected_tank = [r for r in rec.tank if r["detected"]]
     return {
-        "swab_source": "work.swab_results (surface_pool_density)",
-        "tank_source": "work.wastewater_ht_result (holding_tank)",
-        "epochs_observed": len(rows),
-        "swab_total": sum(r["swab_n"] for r in rows),
-        "swab_detected_total": sum(r["swab_detected"] for r in rows),
-        "swab_first_detected_epoch": next(
-            (r["epoch"] for r in rows if r["swab_detected"]), None,
+        "harvest": "output-only via ShipSimulation.epoch_observer",
+        "channels": {
+            "swab": "targeted_surface_swab (surface_pool_density)",
+            "tank": "wastewater_holding_tank qPCR assay",
+            "not_harvested": "wastewater_sequencing",
+        },
+        "units": ENV_UNITS,
+        "epochs_observed": len(rec.epochs),
+        "zones_swabbed": sorted(rec.zones),
+        "swab_total": sum(r["swab_n"] for r in rec.epochs),
+        "swab_rows_kept": len(rec.swabs),
+        "swab_rows_rule": "one row per swab with recovered copies > 0; "
+                          "zero-recovery swabs are in swab_total only",
+        "swab_detected_total": len(detected_swabs),
+        "swab_censored_total": sum(
+            1 for r in rec.swabs if r["censored_below_lod"]
         ),
-        "tank_assays": len(tank_rows),
-        "tank_detected_total": sum(1 for r in tank_rows if r["tank_detected"]),
-        "tank_first_detected_epoch": next(
-            (r["epoch"] for r in tank_rows if r["tank_detected"]), None,
+        "swab_first_detected_epoch": min(
+            (r["epoch"] for r in detected_swabs), default=None,
         ),
-        "daily": daily,
+        "tank_assays": len(rec.tank),
+        "tank_detected_total": len(detected_tank),
+        "tank_censored_total": sum(
+            1 for r in rec.tank if r["censored_below_lod"]
+        ),
+        "tank_first_detected_epoch": min(
+            (r["epoch"] for r in detected_tank), default=None,
+        ),
+        "per_epoch": rec.epochs,
+        "swab_rows": rec.swabs,
+        "tank_rows": rec.tank,
     }
 
 
@@ -313,18 +487,28 @@ def burden(voyage: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+VOYAGE_KEYS = (
+    "parameters", "trigger_status", "timeseries", "derived", "summary",
+    "cost_accounting", "role_checkpoints",
+)
+
+
 def fingerprint(voyage: dict[str, Any]) -> str:
     """Hash of the voyage blocks, engine commit excluded.
 
     ``parameters.engine_git_sha`` names the commit, not the draw, so a
-    labelled baseline re-run on a later commit can still be bit-identical.
+    reproduction arm re-run on a later commit can still be bit-identical.
+    Hashed after a JSON round trip so the same function applied to an
+    archived ``summary.json`` (``readout.py``) gives the same digest.
     """
-    body = dict(voyage)
+    body = json.loads(json.dumps(
+        {k: voyage[k] for k in VOYAGE_KEYS if k in voyage}, default=str,
+    ))
     body["parameters"] = {
-        k: v for k, v in (voyage.get("parameters") or {}).items()
+        k: v for k, v in (body.get("parameters") or {}).items()
         if k != "engine_git_sha"
     }
-    blob = json.dumps(body, sort_keys=True, default=str)
+    blob = json.dumps(body, sort_keys=True)
     return hashlib.sha256(blob.encode()).hexdigest()
 
 
@@ -336,10 +520,16 @@ def _read_line_list(path: str) -> dict[str, Any]:
 
 def run_voyage(
     spec_dict: dict[str, Any], clock: str | None, *, instrumented: bool,
+    tier: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """One voyage. ``instrumented=False`` is the draw-neutrality control."""
+    """One voyage. ``instrumented=False`` is the draw-neutrality control.
+
+    With *tier* given, the effective-config and role-count checks run after
+    ``initialize()`` and before any epoch is stepped.
+    """
     spec = json.loads(json.dumps(spec_dict))
     recorder = EnvRecorder()
+    checks: dict[str, Any] = {}
     with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
         line_path = resolve_child_path(tmp, "sentinel_line_list.json")
         if instrumented:
@@ -347,13 +537,21 @@ def run_voyage(
         with materialized_picard_spec(spec, REPO_ROOT) as picard_spec:
             sim = ShipSimulation(picard_spec, display=False)
             sim.initialize()
-            echo = config_echo(sim, spec_dict.get("config_overrides") or {})
+            if tier is not None:
+                checks["effective_config"] = check_effective(
+                    sim, tier["config_overrides"],
+                    spec_dict.get("config_overrides") or {},
+                )
+                checks["roles_initialised"] = check_roles(
+                    sim, tier["joint_eval"]["intended_roles"],
+                    "initialised agents",
+                )
             if instrumented:
                 sim.epoch_observer = recorder.observe
             started = time.perf_counter()
             result = sim.run()
             wall = time.perf_counter() - started
-            epochs_per_day = max(1, round(24.0 / sim.clock.hours_per_epoch))
+            epochs_per_day = max(1, round(sim.clock.epochs_per_day))
         line_list = _read_line_list(line_path) if instrumented else {}
     num_agents = int(
         (spec_dict.get("config_overrides") or {})
@@ -363,61 +561,128 @@ def run_voyage(
     _attach_voyage_blocks(
         voyage, spec_dict, result, num_agents, natural_history_clock=clock,
     )
+    if tier is not None:
+        summary = voyage["summary"]
+        checks["roles_payload"] = check_roles(
+            sim, tier["joint_eval"]["intended_roles"], "outcome payload",
+            counts={
+                "passenger": int(summary.get("passenger_complement") or 0),
+                "crew": int(summary.get("crew_complement") or 0),
+            },
+        )
     return {
         "voyage": voyage,
-        "echo": echo,
-        "env_rows": recorder.rows,
+        "checks": checks,
+        "recorder": recorder,
         "line_list": line_list,
         "epochs_per_day": epochs_per_day,
         "wall_clock_s": round(wall, 2),
     }
 
 
-def harvest(run: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+def family_status(
+    scalars: dict[str, Any], curve_block: dict[str, Any],
+    env_block: dict[str, Any], expected_epochs: int,
+) -> dict[str, dict[str, str]]:
+    """Explicit present/missing status per family, with the reason."""
+    def status(ok: bool, reason: str) -> dict[str, str]:
+        return {"status": "present" if ok else "missing", "reason": reason}
+
+    burden_block = scalars["burden"]
+    return {
+        "burden": status(
+            all(burden_block.get(k) is not None for k in (
+                "rep_pax_n", "rep_crew_n",
+                "passenger_complement", "crew_complement",
+            )),
+            "final-epoch role counts and complements",
+        ),
+        "threshold": status(
+            "vsp_trigger_epoch" in scalars["threshold"],
+            "derived.vsp_trigger_epoch key (null = did not post)",
+        ),
+        "size_distribution": status(
+            True, "ensemble property; computed by readout.py",
+        ),
+        "first_role": status(
+            scalars["first_role"]["first_role"] != "missing",
+            "role cumulative series and complements",
+        ),
+        "curves": status(
+            bool(curve_block["line_list_received"])
+            and len(curve_block["reported_daily_passenger"])
+            == curve_block["n_days"] > 0,
+            "line list received (may hold zero cases) and reporting "
+            "series covers every day",
+        ),
+        "environment": status(
+            env_block["epochs_observed"] == expected_epochs
+            and env_block["swab_total"] > 0
+            and env_block["tank_assays"] > 0,
+            "observer saw every epoch, with swabs and tank assays",
+        ),
+    }
+
+
+def harvest(
+    run: dict[str, Any], arm: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
     """(summary-side scalars, member payload) for the six families."""
     voyage = run["voyage"]
     series = voyage["timeseries"]
-    epd = run["epochs_per_day"]
-    curve_block = curves(series, run["line_list"], epd)
-    env_block = environment(run["env_rows"], epd)
-    scalars = {
+    curve_block = curves(series, run["line_list"], run["epochs_per_day"])
+    env_block = environment(run["recorder"])
+    posted_epoch = voyage["derived"].get("vsp_trigger_epoch")
+    effective = run["checks"]["effective_config"]
+    scalars: dict[str, Any] = {
         "schema": SCHEMA,
+        "output_contract": OUTPUT_CONTRACT,
         "burden": burden(voyage),
         "threshold": {
-            "vsp_trigger_epoch": voyage["derived"].get("vsp_trigger_epoch"),
-            "posted": voyage["derived"].get("vsp_trigger_epoch") is not None,
+            "vsp_trigger_epoch": posted_epoch,
+            "posted": posted_epoch is not None,
         },
         "first_role": first_role(series),
         "curves": {
             k: curve_block[k] for k in (
-                "n_days", "day0_label", "preboarding_reported_passenger",
+                "line_list_requested", "line_list_received", "n_days",
+                "day0_label", "preboarding_reported_passenger",
                 "preboarding_reported_crew", "line_list_cases",
             )
         },
         "environment": {
-            k: v for k, v in env_block.items() if k != "daily"
+            k: v for k, v in env_block.items()
+            if k not in ("per_epoch", "swab_rows", "tank_rows", "zones_swabbed")
         },
         "voyage_fingerprint_sha256": fingerprint(voyage),
-        "config_echo": {
-            k: run["echo"][k] for k in
-            ("n_leaves", "mismatched", "overrides_sha256")
+        "arm": arm,
+        "effective_config": {
+            k: v for k, v in effective.items() if k != "resolved"
+        },
+        "roles": {
+            "initialised": run["checks"]["roles_initialised"],
+            "payload": run["checks"]["roles_payload"],
         },
         "wall_clock_s": run["wall_clock_s"],
     }
+    scalars["families"] = family_status(
+        scalars, curve_block, env_block, len(series),
+    )
     member = {
         "schema": SCHEMA,
         "curves": curve_block,
         "environment": env_block,
-        "config_echo_resolved": run["echo"]["resolved"],
+        "effective_config_resolved": effective["resolved"],
     }
     return scalars, member
 
 
 def write_cell(
     out_dir: Path, tier: str, run_id: str, run: dict[str, Any],
+    arm: dict[str, Any],
 ) -> Path:
     voyage = run["voyage"]
-    scalars, member = harvest(run)
+    scalars, member = harvest(run, arm)
     anchor = {
         "run_id": run_id,
         "parameters": voyage["parameters"],
@@ -471,6 +736,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     manifest = validated_json_load(REPO_ROOT, args.manifest)
     clock = manifest.get("natural_history_clock")
+    arm = check_arm(manifest, args.tier)
+    tier = manifest["tiers"][args.tier]
     runs = list(generate_tier_runs(
         manifest, args.tier, epochs_override=args.epochs_override,
         natural_history_clock=str(clock) if clock is not None else None,
@@ -489,12 +756,12 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"checks": checks}, indent=1))
         return 0 if all(c["voyage_fingerprint_equal"] for c in checks) else 1
     for run_id, spec in runs:
-        run = run_voyage(spec, clock, instrumented=True)
-        zip_path = write_cell(out_dir, args.tier, run_id, run)
+        run = run_voyage(spec, clock, instrumented=True, tier=tier)
+        zip_path = write_cell(out_dir, args.tier, run_id, run, arm)
         print(
             f"seed {spec['run']['random_seed']}: "
             f"posted={run['voyage']['derived'].get('vsp_trigger_epoch')} "
-            f"echo_mismatch={len(run['echo']['mismatched'])} -> {zip_path}",
+            f"roles={run['checks']['roles_initialised']} -> {zip_path}",
             flush=True,
         )
     return 0
