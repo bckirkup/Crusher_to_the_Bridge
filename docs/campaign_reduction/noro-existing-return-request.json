@@ -1,0 +1,18 @@
+{
+  "schema": "crusher-reducer-request/v1",
+  "reduction_id": "red-noro-existing-return-01",
+  "extraction_profile": "noro_existing_return",
+  "source_bucket": "crusherbucket-994254241749-us-east-1-an",
+  "sources": [],
+  "sources_uri": "REPLACE_WITH_COLLECTED_SOURCES_MANIFEST_S3_URI",
+  "sources_sha256": "REPLACE_WITH_COLLECTED_SOURCES_MANIFEST_SHA256",
+  "shard_size": 200,
+  "budgets": {
+    "max_api_calls_total": 12000,
+    "max_get_requests": 8000,
+    "max_compressed_bytes_read": 268435456,
+    "max_decompressed_bytes_read": 536870912,
+    "max_wall_seconds": 1800
+  },
+  "notes": "Prepared request template only. Do not dispatch until sources manifest is collected and owner authorizes execution."
+}
