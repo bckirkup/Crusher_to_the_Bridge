@@ -1,12 +1,18 @@
 # Paper-1 freeze design contract (WP1)
 
-> **Status:** Design contract proposed for Edison's pre-freeze review —
-> **not a freeze declaration**. Candidate reference `b25cb0f2` (main HEAD when
-> drafted, 2026-11-20); the named reference is whatever main HEAD is at freeze
-> time (§1). The frozen block in §2 was verified at the candidate by
-> `scripts/paper1_freeze_block_check.py` (57 pinned keys, 0 failures; no voyage
-> epoch stepped). No simulation was run and no number in this document is a
-> model result. Context:
+> **Status:** Design contract, **revision 2 (2026-11-21)** — revised in place
+> per Edison's pre-freeze review
+> ([`edison_freeze_review_2026_11_21/REVIEW.md`](edison_freeze_review_2026_11_21/REVIEW.md),
+> reviewed at `73ad8724`). **Not a freeze declaration**; Edison reviews this
+> revision and the freeze record is a separate later document. The §2.1 block
+> is byte-identical to the reviewed one. Verified on the revision branch (base
+> `af0640d4`) by `scripts/paper1_freeze_block_check.py`: 57 declared units,
+> 70 scalar leaves (63 resolved-state, 7 configuration-only), 0 failures,
+> 1 pending (Explorer exposure cap, §2.8); output retained at
+> [`paper1_freeze_block_check_output_2026_11_21.txt`](paper1_freeze_block_check_output_2026_11_21.txt).
+> No voyage epoch was stepped and no number in this document is a model
+> result. §7 maps each review correction to the section that resolves it; §8
+> is the revision history. Context:
 > [`paper1_simulation_plan_assessment_2026_11_20.md`](paper1_simulation_plan_assessment_2026_11_20.md).
 
 The assessment's "one declared reference version is itself a work item" asks
@@ -41,14 +47,21 @@ their committed platform files at the named commit are the reference.
    one-line statement of whether it moves norovirus behaviour.
 3. Every campaign image used for evaluation is built from the named commit
    and referenced by digest.
+4. The checker's output at the named commit is committed beside the freeze
+   record, and the example run specifications (§2.10) are regenerated there
+   with `--write-annex`; any diff against the committed annex is listed in
+   the declaration.
+5. No `PENDING` line remains in that output, or each one is recorded in the
+   declaration as a deferred, labelled exception (§2.8).
 
 ## 2. Frozen config block
 
 ### 2.1 What the block is and how it is carried
 
 The block is a `config_overrides` object, the shape NORO-GENO-02 carried on
-every cell. It is pasted verbatim as the tier's `config_overrides` in a
-campaign manifest. The loader path, verified rather than assumed, is:
+every cell. It is the **invariant baseline**: every cell's tier
+`config_overrides` starts from it, and an arm changes it only through
+prospectively declared paths (§2.9). The loader path, verified rather than assumed, is:
 
 `tiers[*].config_overrides` → `generate_tier_runs`
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) →
@@ -197,9 +210,9 @@ silently. The one place it departs from `crusher_labs/config.yaml` is
   already declares.
 - **An arm that varies one sub-key restates the whole nested block.** An arm
   override of `{"transmission": {"common_source": {"mode": "off"}}}`
-  drops the other seven frozen `common_source` keys. WP2 cells apply an arm
+  drops the other seven frozen `common_source` keys. Cells apply an arm
   by editing a copy of the frozen block, never by layering a partial block
-  over it.
+  over it (§2.9).
 - **Unknown keys are accepted.** The merge does not validate names, so a pin
   that parses can be dead. The check in §2.4 exists for that reason.
 - **The runner adds its own overrides beneath the tier's**:
@@ -209,77 +222,118 @@ silently. The one place it departs from `crusher_labs/config.yaml` is
   `lockdown_attack_rate: never`, so the value otherwise depends on which
   loader built the cell.
 
-### 2.3 Pinned keys — default, pinned value, consumer
+### 2.3 Pinned keys — default, pinned value, consumer, evidence
 
-57 keys. "Config default" is the value in the merged config with no block
-(`absent` means the YAML does not declare it and the engine default applies);
-"resolved default" is what the engine resolved at `initialize()` with no
-block. "Liveness" is the result of flipping that one key to another value:
-`live` means the engine's resolved state followed the flip, `flip rejected`
-means the consumer raised on the alternate (so it read the key), and
-`cfg + consumer read` marks a key with nothing to probe after `initialize()` —
-it is read inside the epoch loop, or, for `hvac.transport_engine`, the
-alternate needs the ContamX binary and falls back to native without it.
+57 declared units covering **70 scalar leaves**. Four units are grouped
+dictionaries (`activity_contacts.rates_per_hour`, `surface_cleaning.routine`,
+`surface_cleaning.outbreak_response`, `common_source.provisioned_source`);
+each of their 17 leaves is listed and checked on its own row.
 
-| Key | Config default | Resolved default | Pinned | Consumer | Liveness |
-|---|---|---|---|---|---|
-| `transmission.contact_mode` | `"per_partner_contact"` | `'per_partner_contact'` | `"per_partner_contact"` | `engines/transmission_core.py` | live (flip rejected: ValueError) |
-| `transmission.droplet_emission_mode` | `absent` | `'profile_conditioned'` | `"profile_conditioned"` | `engines/transmission_core.py` | live |
-| `transmission.droplet_field_split.mode` | `absent` | `'partition'` | `"partition"` | `engines/transmission_core.py` | live |
-| `transmission.droplet_field_split.far_field_share` | `absent` | `0.175` | `0.175` | `engines/transmission_core.py` | live |
-| `transmission.droplet_field_split.settled_share` | `absent` | `0.0` | `0.0` | `engines/transmission_core.py` | live |
-| `transmission.near_field_air.mode` | `absent` | `'two_box'` | `"two_box"` | `engines/transmission_core.py` | live |
-| `transmission.near_field_air.interzonal_airflow_m3_per_hour` | `absent` | `204.0` | `204.0` | `engines/transmission_core.py` | live |
-| `transmission.near_field_air.neighbour_table_ratio` | `absent` | `0.43` | `0.43` | `engines/transmission_core.py` | live |
-| `transmission.room_air_removal.mode` | `absent` | `'first_order'` | `"first_order"` | `engines/transmission_core.py` | live |
-| `transmission.room_air_removal.map_arm` | `absent` | `'ambient_on'` | `"ambient_on"` | `engines/transmission_core.py` | live |
-| `transmission.room_air_removal.default_ach_per_hour` | `absent` | `0.0` | `0.0` | `engines/transmission_core.py` | live |
-| `transmission.cabin_air_mode` | `"cabin_compartment"` | `'cabin_compartment'` | `"cabin_compartment"` | `engines/transmission_core.py` | live |
-| `transmission.cabin_cooccupancy.mode` | `absent` | `'time_partitioned'` | `"time_partitioned"` | `engines/transmission_core.py` | live |
-| `transmission.cabin_confined_fomite.mode` | `absent` | `'own_cabin'` | `"own_cabin"` | `engines/transmission_core.py` | live |
-| `transmission.isolated_quarters_deposits.mode` | `absent` | `'deposits_only'` | `"deposits_only"` | `engines/transmission_core.py` | live |
-| `transmission.caregiver.mode` | `absent` | `'on'` | `"on"` | `engines/transmission_core.py` | live |
-| `transmission.caregiver.budget_mode` | `absent` | `'reallocate'` | `"reallocate"` | `engines/transmission_core.py` | live |
-| `transmission.sanitary_visit_mode` | `"none"` | `'none'` | `"none"` | `engines/transmission_core.py` | live |
-| `transmission.flush_aerosol_fraction` | `absent` | `0.0` | `0.0` | `engines/transmission_core.py` | live |
-| `transmission.flush_cabin_emission` | `absent` | `True` | `true` | `engines/transmission_core.py` | live |
-| `transmission.blackwater_plumbing` | `true` | `'BlackwaterHoldingTank'` | `true` | `engines/transmission_core.py` | live |
-| `transmission.hand_reservoir_mode` | `absent` | `'hygiene_cycle'` | `"hygiene_cycle"` | `engines/transmission_core.py` | live |
-| `transmission.hand_redeposit_mode` | `absent` | `'shedders_only'` | `"shedders_only"` | `engines/transmission_core.py` | live |
-| `transmission.contamination_solver` | `absent` | `'continuous'` | `"continuous"` | `engines/transmission_core.py` | live |
-| `transmission.intra_epoch_causal_order` | `absent` | `'legacy'` | `"legacy"` | `engines/transmission_core.py` | live |
-| `transmission.intra_epoch_substeps` | `absent` | `1` | `1` | `engines/transmission_core.py` | live (flip rejected: ValueError) |
-| `transmission.high_touch_area_scale` | `absent` | `1.0` | `1.0` | `engines/transmission_core.py` | live |
-| `transmission.dining_party_contact_share` | `absent` | `1.0` | `1.0` | `engines/transmission_core.py` | live |
-| `transmission.contact_class_exponent` | `absent` | `0.0` | `0.0` | `engines/transmission_core.py` | live |
-| `transmission.exposure_cap.enabled` | `true` | `True` | `true` | `engines/transmission_core.py` | live |
-| `transmission.exposure_cap.include_fixed_rings` | `absent` | `False` | `false` | `engines/transmission_core.py` | live |
-| `transmission.activity_contacts.enabled` | `true` | `{'cabin': {'passenger': 0.25, 'crew': 0.25}, 'corridor': {'passenger': 0.25, 'crew': 0.25}, 'work_service': {'passenger': 2.9, 'crew': 2.9}, 'work_other': {'passenger': 0.5, 'crew': 0.5}, 'dining_table': {'passenger': 2.0, 'crew': 2.0}, 'dining_venue': {'passenger': 2.0, 'crew': 2.0}, 'leisure': {'passenger': 1.0, 'crew': 1.0}, 'other': {'passenger': 0.0, 'crew': 0.0}}` | `true` | `engines/transmission_core.py` | live |
-| `transmission.activity_contacts.rates_per_hour` | `{"cabin": 0.25, "corridor": 0.25, "work_service": 2.9, "work_other": 0.5, "dining_table": 2.0, "dining_venue": 2.0, "leisure": 1.0, "other": 0.0}` | `{'cabin': {'passenger': 0.25, 'crew': 0.25}, 'corridor': {'passenger': 0.25, 'crew': 0.25}, 'work_service': {'passenger': 2.9, 'crew': 2.9}, 'work_other': {'passenger': 0.5, 'crew': 0.5}, 'dining_table': {'passenger': 2.0, 'crew': 2.0}, 'dining_venue': {'passenger': 2.0, 'crew': 2.0}, 'leisure': {'passenger': 1.0, 'crew': 1.0}, 'other': {'passenger': 0.0, 'crew': 0.0}}` | `{"cabin": 0.25, "corridor": 0.25, "work_service": 2.9, "work_other": 0.5, "dining_table": 2.0, "dining_venue": 2.0, "leisure": 1.0, "other": 0.0}` | `engines/transmission_core.py` | live |
-| `transmission.surface_cleaning.enabled` | `true` | `True` | `true` | `engines/transmission_core.py` | live |
-| `transmission.surface_cleaning.routine` | `{"coverage": 0.37, "log10_reduction": 1.29, "events_per_day": 1.0}` | `0.37` | `{"coverage": 0.37, "log10_reduction": 1.29, "events_per_day": 1.0}` | `engines/transmission_core.py` | live |
-| `transmission.surface_cleaning.outbreak_response` | `{"coverage": 0.58, "log10_reduction": 4.29, "events_per_day": 24.0, "by_zone_class": {"cabin": {"events_per_day": 1.0}}}` | `0.58` | `{"coverage": 0.58, "log10_reduction": 4.29, "events_per_day": 24.0, "by_zone_class": {"cabin": {"events_per_day": 1.0}}}` | `engines/transmission_core.py` | live |
-| `transmission.common_source.mode` | `absent` | `'on'` | `"on"` | `engines/transmission_core.py` | live |
-| `transmission.common_source.lot_mode` | `absent` | `'object'` | `"object"` | `engines/transmission_core.py` | live |
-| `transmission.common_source.handler_mode` | `absent` | `'object'` | `"object"` | `engines/transmission_core.py` | live |
-| `transmission.common_source.diner_mode` | `absent` | `'object'` | `"object"` | `engines/transmission_core.py` | live |
-| `transmission.common_source.lot_mint_model` | `"provisioned_source"` | `'provisioned_source'` | `"provisioned_source"` | `engines/transmission_core.py` | live |
-| `transmission.common_source.titre_draw_mode` | `absent` | `'two_mode'` | `"two_mode"` | `engines/transmission_core.py` | live |
-| `transmission.common_source.lot_extent_mode` | `absent` | `'emergent'` | `"emergent"` | `engines/transmission_core.py` | live |
-| `transmission.common_source.provisioned_source` | `{"source_id": "generic_cruise_port"}` | `'station_lots'` | `{"source_id": "generic_cruise_port", "lot_layer_mode": "station_lots"}` | `engines/transmission_core.py` | live |
-| `hvac.pathogen_pool_transport` | `"airflow"` | `'airflow'` | `"airflow"` | `engines/py_contam_bridge.py` | live |
-| `hvac.duty0_terminal_mode` | `absent` | `'extract'` | `"extract"` | `engines/py_contam_bridge.py` | live |
-| `hvac.passive_link_mode` | `absent` | `'bidirectional'` | `"bidirectional"` | `engines/py_contam_bridge.py` | live |
-| `hvac.transport_engine` | `"native"` | `cfg-read` | `"native"` | `engines/py_contam_bridge.py` | cfg + consumer read |
-| `observation.enabled` | `true` | `cfg-read` | `true` | `picard_framework/simulation/ship_simulation.py` | cfg + consumer read |
-| `observation.surface_swab_source` | `"surface_pool_density"` | `cfg-read` | `"surface_pool_density"` | `orchestrator_epoch.py` | cfg + consumer read |
-| `observation.wastewater_assay_mode` | `"holding_tank"` | `'WastewaterHoldingTankAssay'` | `"holding_tank"` | `orchestrator_init.py` | live |
-| `service_surface_knockout.enabled` | `false` | `False` | `false` | `engines/transmission_core.py` | live |
-| `crew_duty_exclusion.enabled` | `false` | `False` | `false` | `picard_framework/simulation/ship_simulation.py` | live |
-| `variant_surveillance.enabled` | `false` | `cfg-read` | `false` | `picard_framework/simulation/ship_simulation.py` | cfg + consumer read |
-| `escalation.suspect_attack_rate` | `0.02` | `cfg-read` | `0.02` | `orchestrator_init.py` | cfg + consumer read |
-| `escalation.confirm_attack_rate` | `0.03` | `cfg-read` | `0.03` | `orchestrator_init.py` | cfg + consumer read |
-| `escalation.lockdown_attack_rate` | `0.05` | `cfg-read` | `0.05` | `orchestrator_init.py` | cfg + consumer read |
+Two evidence categories, which are not added together:
+
+- **resolved-state (63 leaves).** The engine's own attribute after
+  `initialize()` equals the pin, and flipping that one leaf moves it.
+- **configuration-only (7 leaves).** `hvac.transport_engine`,
+  `observation.enabled`, `observation.surface_swab_source`,
+  `variant_surveillance.enabled` and the three `escalation.*` rates. The
+  merged config carries the pin and the consumer file names the key; nothing
+  is probed, because the key is read inside the epoch loop or, for
+  `transport_engine`, the alternate needs the ContamX binary. Runtime
+  evidence for these seven comes from the bridge, not from this check.
+
+"Config default" is the merged config with no block (`absent`: the YAML does
+not declare it and the engine default applies); "resolved default" is what
+the engine resolved with no block. "0 leaves differ from the no-block
+default" is a statement about this representation, not a full runtime
+behavioural comparison.
+
+Liveness values:
+
+- `live` — the resolved state followed the flip.
+- `expected rejection (…)` — the engine refuses the alternate with the
+  declared validation message. Two leaves: `contact_mode` (`legacy` is
+  refused because `activity_contacts` requires `per_partner_contact`) and
+  `intra_epoch_substeps` (`2` requires `intra_epoch_causal_order: ordered`).
+- Any other exception during a flip **fails the check** (`UNEXPECTED …`), as
+  does a declared rejection that does not occur.
+- `conditional: …` — the leaf is read and honoured but cannot move a run
+  while another pin holds. Three leaves: `intra_epoch_causal_order` and
+  `intra_epoch_substeps` (the continuous solver replaces the discrete
+  ordering) and `flush_cabin_emission` (no flush emission at fraction 0.0).
+  They are live keys, not independently influential ones.
+
+| Key | Config default | Resolved default | Pinned | Consumer | Evidence | Liveness |
+|---|---|---|---|---|---|---|
+| `transmission.contact_mode` | `"per_partner_contact"` | `'per_partner_contact'` | `"per_partner_contact"` | `engines/transmission_core.py` | resolved-state | expected rejection (ValueError: activity_contacts requires contact_mode per_partner_contact) |
+| `transmission.droplet_emission_mode` | `absent` | `'profile_conditioned'` | `"profile_conditioned"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.droplet_field_split.mode` | `absent` | `'partition'` | `"partition"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.droplet_field_split.far_field_share` | `absent` | `0.175` | `0.175` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.droplet_field_split.settled_share` | `absent` | `0.0` | `0.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.near_field_air.mode` | `absent` | `'two_box'` | `"two_box"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.near_field_air.interzonal_airflow_m3_per_hour` | `absent` | `204.0` | `204.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.near_field_air.neighbour_table_ratio` | `absent` | `0.43` | `0.43` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.room_air_removal.mode` | `absent` | `'first_order'` | `"first_order"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.room_air_removal.map_arm` | `absent` | `'ambient_on'` | `"ambient_on"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.room_air_removal.default_ach_per_hour` | `absent` | `0.0` | `0.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.cabin_air_mode` | `"cabin_compartment"` | `'cabin_compartment'` | `"cabin_compartment"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.cabin_cooccupancy.mode` | `absent` | `'time_partitioned'` | `"time_partitioned"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.cabin_confined_fomite.mode` | `absent` | `'own_cabin'` | `"own_cabin"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.isolated_quarters_deposits.mode` | `absent` | `'deposits_only'` | `"deposits_only"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.caregiver.mode` | `absent` | `'on'` | `"on"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.caregiver.budget_mode` | `absent` | `'reallocate'` | `"reallocate"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.sanitary_visit_mode` | `"none"` | `'none'` | `"none"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.flush_aerosol_fraction` | `absent` | `0.0` | `0.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.flush_cabin_emission` | `absent` | `True` | `true` | `engines/transmission_core.py` | resolved-state | live; conditional: inactive while flush_aerosol_fraction = 0.0 |
+| `transmission.blackwater_plumbing` | `true` | `'BlackwaterHoldingTank'` | `true` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.hand_reservoir_mode` | `absent` | `'hygiene_cycle'` | `"hygiene_cycle"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.hand_redeposit_mode` | `absent` | `'shedders_only'` | `"shedders_only"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.contamination_solver` | `absent` | `'continuous'` | `"continuous"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.intra_epoch_causal_order` | `absent` | `'legacy'` | `"legacy"` | `engines/transmission_core.py` | resolved-state | live; conditional: inactive while contamination_solver = continuous |
+| `transmission.intra_epoch_substeps` | `absent` | `1` | `1` | `engines/transmission_core.py` | resolved-state | expected rejection (ValueError: intra_epoch_substeps > 1 requires); conditional: inactive while contamination_solver = continuous |
+| `transmission.high_touch_area_scale` | `absent` | `1.0` | `1.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.dining_party_contact_share` | `absent` | `1.0` | `1.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.contact_class_exponent` | `absent` | `0.0` | `0.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.exposure_cap.enabled` | `true` | `True` | `true` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.exposure_cap.include_fixed_rings` | `absent` | `False` | `false` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.enabled` | `true` | `'dict'` | `true` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.rates_per_hour.cabin` | `0.25` | `0.25` | `0.25` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.rates_per_hour.corridor` | `0.25` | `0.25` | `0.25` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.rates_per_hour.work_service` | `2.9` | `2.9` | `2.9` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.rates_per_hour.work_other` | `0.5` | `0.5` | `0.5` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.rates_per_hour.dining_table` | `2.0` | `2.0` | `2.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.rates_per_hour.dining_venue` | `2.0` | `2.0` | `2.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.rates_per_hour.leisure` | `1.0` | `1.0` | `1.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.activity_contacts.rates_per_hour.other` | `0.0` | `0.0` | `0.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.surface_cleaning.enabled` | `true` | `True` | `true` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.surface_cleaning.routine.coverage` | `0.37` | `0.37` | `0.37` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.surface_cleaning.routine.log10_reduction` | `1.29` | `1.29` | `1.29` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.surface_cleaning.routine.events_per_day` | `1.0` | `1.0` | `1.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.surface_cleaning.outbreak_response.coverage` | `0.58` | `0.58` | `0.58` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.surface_cleaning.outbreak_response.log10_reduction` | `4.29` | `4.29` | `4.29` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.surface_cleaning.outbreak_response.events_per_day` | `24.0` | `24.0` | `24.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.surface_cleaning.outbreak_response.by_zone_class.cabin.events_per_day` | `1.0` | `1.0` | `1.0` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.mode` | `absent` | `'on'` | `"on"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.lot_mode` | `absent` | `'object'` | `"object"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.handler_mode` | `absent` | `'object'` | `"object"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.diner_mode` | `absent` | `'object'` | `"object"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.lot_mint_model` | `"provisioned_source"` | `'provisioned_source'` | `"provisioned_source"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.titre_draw_mode` | `absent` | `'two_mode'` | `"two_mode"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.lot_extent_mode` | `absent` | `'emergent'` | `"emergent"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.provisioned_source.source_id` | `"generic_cruise_port"` | `'generic_cruise_port'` | `"generic_cruise_port"` | `engines/transmission_core.py` | resolved-state | live |
+| `transmission.common_source.provisioned_source.lot_layer_mode` | `absent` | `'station_lots'` | `"station_lots"` | `engines/transmission_core.py` | resolved-state | live |
+| `hvac.pathogen_pool_transport` | `"airflow"` | `'airflow'` | `"airflow"` | `engines/py_contam_bridge.py` | resolved-state | live |
+| `hvac.duty0_terminal_mode` | `absent` | `'extract'` | `"extract"` | `engines/py_contam_bridge.py` | resolved-state | live |
+| `hvac.passive_link_mode` | `absent` | `'bidirectional'` | `"bidirectional"` | `engines/py_contam_bridge.py` | resolved-state | live |
+| `hvac.transport_engine` | `"native"` | `cfg-read` | `"native"` | `engines/py_contam_bridge.py` | configuration-only | cfg + consumer read |
+| `observation.enabled` | `true` | `cfg-read` | `true` | `picard_framework/simulation/ship_simulation.py` | configuration-only | cfg + consumer read |
+| `observation.surface_swab_source` | `"surface_pool_density"` | `cfg-read` | `"surface_pool_density"` | `orchestrator_epoch.py` | configuration-only | cfg + consumer read |
+| `observation.wastewater_assay_mode` | `"holding_tank"` | `'WastewaterHoldingTankAssay'` | `"holding_tank"` | `orchestrator_init.py` | resolved-state | live |
+| `service_surface_knockout.enabled` | `false` | `False` | `false` | `engines/transmission_core.py` | resolved-state | live |
+| `crew_duty_exclusion.enabled` | `false` | `False` | `false` | `picard_framework/simulation/ship_simulation.py` | resolved-state | live |
+| `variant_surveillance.enabled` | `false` | `cfg-read` | `false` | `picard_framework/simulation/ship_simulation.py` | configuration-only | cfg + consumer read |
+| `escalation.suspect_attack_rate` | `0.02` | `cfg-read` | `0.02` | `orchestrator_init.py` | configuration-only | cfg + consumer read |
+| `escalation.confirm_attack_rate` | `0.03` | `cfg-read` | `0.03` | `orchestrator_init.py` | configuration-only | cfg + consumer read |
+| `escalation.lockdown_attack_rate` | `0.05` | `cfg-read` | `0.05` | `orchestrator_init.py` | configuration-only | cfg + consumer read |
 
 Consumer detail for the keys the assessment and the WP1 brief named:
 `sanitary_visit_mode`, `flush_aerosol_fraction`, `cabin_air_mode`,
@@ -292,30 +346,39 @@ Consumer detail for the keys the assessment and the WP1 brief named:
 "Cabin-mates" is three keys: `cabin_cooccupancy`, `cabin_confined_fomite`
 and `isolated_quarters_deposits`.
 
-Keys added by walking the parsers against the ledger, beyond the brief's
-list: the caregiver channel (`CAREGIVER-V1`, default-ON for `norwalk_gi`),
-the hand-reservoir, hand-redeposit, solver and intra-epoch-order arms, the
-exposure cap, activity contacts (`CONTACT-ARCH-01`, shipped on), surface
-cleaning, blackwater plumbing, the common-source block, the passive-link
-mode, the transport engine, crew duty exclusion, service-surface knockout,
-variant surveillance and escalation.
-
 ### 2.4 Verification
 
 ```bash
-python3 scripts/paper1_freeze_block_check.py            # exit 0 required
-python3 scripts/paper1_freeze_block_check.py --markdown # regenerates §2.3 rows
+python3 scripts/paper1_freeze_block_check.py               # exit 0 required
+python3 scripts/paper1_freeze_block_check.py --markdown    # regenerates §2.3 rows
+python3 scripts/paper1_freeze_block_check.py --write-annex # regenerates §2.10
 ```
 
-The script reads the block out of this file, builds one cell through the
-NORO-GENO-02 path, and for each key checks that the merged config carries the
-pinned value, that the named consumer file reads the key, that the engine
-resolves the pinned value itself (several parsers substitute their default
-for an unknown mode name), and that flipping the key moves the resolved
-state. It then parses and initialises the block on
-`expedition_cruise_450`, `classic_cruise_1900`, `spirit_cruise_3000`,
-`mega_cruise_5000` and `explorer_seas_06`. It steps no epoch. Result at
-`b25cb0f2`: 57 keys, 0 failures, five hulls parse and initialise.
+The script reads the block (§2.1) and the population block (§2.7) out of this
+file and builds cells through the NORO-GENO-02 path, so everything is checked
+on the cell **after the runner has applied its axes** (escalation, strategy,
+boarding, `ship_graph.num_agents`). It steps no epoch.
+
+| Check | Scope | Fails when |
+|---|---|---|
+| Merged config carries each pin | 70 leaves, all five hulls | any leaf differs after the runner's axes |
+| Consumer file names the key | 70 leaves | the key string is absent |
+| Resolved state equals the pin | 63 leaves, **all five hulls** | any hull resolves another value, unless declared pending |
+| Flip moves resolved state | 63 leaves, Expedition | state does not move, an undeclared exception is raised, or a declared rejection does not occur |
+| Grouped dictionaries complete | 4 units, 17 leaves | a pinned leaf has no probe, or a probe has no pinned leaf |
+| Declared role counts | all five hulls, both allocations | initialized passengers, crew or class counts differ from §2.7 |
+| Example run specifications | all five hulls | the committed annex differs from the generated cells |
+
+Flips run on Expedition only: liveness is a property of the parser, and the
+one pin whose effect is gated on the platform is covered by the per-hull
+resolved-state probe. A `PENDING` line is a declared, known non-effective
+pin; it does not fail the check, and an entry that stops reproducing does.
+
+Result on the revision branch (base `af0640d4`): 0 failures, 1 pending, 0
+leaves differing from the no-block default. The verbatim output is
+[`paper1_freeze_block_check_output_2026_11_21.txt`](paper1_freeze_block_check_output_2026_11_21.txt).
+`tests/test_paper1_freeze_block_check.py` covers the exception
+classification with initialization replaced (no simulation built).
 
 ### 2.5 Frozen outside `config_overrides`
 
@@ -330,7 +393,10 @@ block. The first two are named modes the WP1 brief asked to pin.
 | Airborne emission arm | Profile key `airborne_emission_mode: emesis_conditioned` | Named commit |
 | Pathogen bundle | `active_profiles`, `norwalk_gi`, `overrides.remove: ["sars_cov2_resp"]` | Manifest `pathogen_configs`, verbatim from NORO-GENO-02 |
 | Natural-history clock | `hours` | Manifest `natural_history_clock` |
-| Hulls and complements | `expedition_cruise_450` (450), `classic_cruise_1900` (1,910), `spirit_cruise_3000` (3,000), `mega_cruise_5000` (7,000) | Tier `platform` / `num_agents`; platform files at the named commit |
+| Hulls and role counts | Four archetypes plus `explorer_seas_06`; passenger and crew counts in §2.7 | Tier `platform` / `num_agents` and exact `ship_graph.agent_classes` counts; platform files at the named commit |
+| Recognition and reporting | `syndromic_comp65`, the reported-case counters and `syndromic` settings (§2.6 item 3) | Restated on every cell; resolved values in the annex (§2.10) |
+| Introduction | `initiation.boarding` as the runner generates it for the cell's boarding rung | Recorded per cell; the rung is a declared axis (§2.9) |
+| Output requests | `run.sentinel_line_list`; compact retention plus the environmental panel (§5.1) | Set by the cell worker; not a config override |
 | Voyage grid (joint evaluation) | **168 / 288 / 504 epochs** (7 / 12 / 21 days) | Tier `epoch_durations`. 192 epochs belongs to the Explorer reconstruction (WP3) only and is not a joint-evaluation length |
 | Hash seed | `PYTHONHASHSEED=1` | Job definition environment, as in the supply-solver screens |
 
@@ -338,38 +404,314 @@ Neither of the first two is a machinery gap that blocks the freeze, and no
 new override path is proposed. They are recorded so that nobody reads the
 block as pinning them.
 
-### 2.6 Choices this block makes that the reviewer should confirm
+### 2.6 Affirmed baseline decisions
 
-1. **Sanitary visits and flush aerosol are pinned off** (`none`, `0.0`),
-   which is the shipped default. NORO-GENO-02 and the flush sweeps pinned
-   `dwell_weighted`. The ledger withdraws every flush-sweep result as a
-   current-engine measurement, and records the structure-only arm as a null
-   without a flush term, so no current measurement supports adopting a flush
-   value. Pinning `dwell_weighted` instead is a one-key change.
-2. **Escalation is pinned at the campaign runner's values** (suspect 0.02,
-   confirm 0.03, lockdown 0.05) rather than the YAML's `lockdown: never`,
-   because every norovirus campaign to date ran under the runner's values.
-3. **The surveillance strategy is not in the block.** NORO-GENO-02 used
-   `syndromic_comp65` (cascade off, quarantine compliance 0.65 with a class
-   split). It sets `fred_behavior` and `diagnostic_cascade`, which the
-   response-demonstration arm (WP5) varies. The contract proposes
-   `syndromic_comp65` as the usual-recognition arm for WP2, restated on every
-   cell.
-4. **Common-source food events stay on** with the provisioned-source mint
-   model and the registry's `generic_cruise_port` values. The supply-solver
-   screens pinned additional rungs (`q_source`, station pin, venue arm);
-   those are screen arms and are not adopted here.
+Edison's review affirms these four without reopening mechanism work. They are
+recorded as decisions, not open questions.
+
+1. **Sanitary visits `none`, flush aerosol `0.0`.** The shipped defaults stay
+   as the baseline. A sourced alternative is a later declared comparison
+   (§2.9); no value is chosen to obtain an outcome.
+2. **Escalation 2% suspected / 3% confirmed / 5% lockdown.** These are the
+   campaign runner's values (`_CAMPAIGN_ESCALATION_DEFAULTS`), which every
+   norovirus campaign ran under. `crusher_labs/config.yaml` declares
+   `lockdown_attack_rate: never` for small smokes, so a cell built by another
+   loader would differ; the block pins all three so the loader does not
+   decide. The complete effective `escalation` object, including decision
+   latency and sick-call thresholds, is in the annex (§2.10).
+3. **`syndromic_comp65` is the usual-recognition baseline**, restated on
+   every cell: `diagnostic_cascade.enabled: false`, quarantine compliance
+   0.65 with `compliance_by_class` crew 0.65, `passenger_elderly` 0.54,
+   `passenger_young` 0.34. The baseline also includes the upstream settings
+   that the hard-coded either-channel aggregation does not freeze:
+   - the eight `ship_graph.infection_counters`, in particular
+     `passenger_reported_case_rate` and `crew_reported_case_rate` (metric
+     `reported_case_rate`, role filter, threshold 0.03, `on_exceed:
+     confine_symptomatic`);
+   - `counter_confinement_enabled: true`;
+   - the `syndromic` block (sick-call probability 0.70 per day, detection
+     delay 0 h, background noise 0.015).
+
+   These are not in the §2.1 block; they are `crusher_labs/config.yaml`
+   values at the named commit, and the annex records what each hull resolves.
+   The response demonstration (WP5) declares its changes against them (§2.9).
+   Recorded, not changed: `passenger_young` is not one of the seven
+   initialized class ids.
+4. **Generic registry source and station-lot formulation.**
+   `source_id: generic_cruise_port`, `lot_layer_mode: station_lots`. The
+   values the source resolves (`q_source` [0.00086, 0.0047] and the per-line
+   prevalences in `data/config/provisioning_sources.json`) and the boarding
+   block are saved in each hull's example specification (§2.10). The
+   supply-solver screen rungs (`q_source` override, station pin, venue arm)
+   remain screen arms. Selected-seed diagnostic strata and
+   population-weighted voyage inference are different analyses and are not
+   pooled.
+
+### 2.7 Reference populations — declared role counts
+
+The reference states passenger **and** crew counts for every scenario. They
+are the platform's `nominal_complement`, delivered as exact per-class
+`count` entries in `ship_graph.agent_classes` (the engine's
+`_allocate_class_counts` facility), not as fractions.
+
+| Hull | Agents | Reference passengers / crew | Template-fraction allocation (labelled baseline) |
+|---|---:|---:|---:|
+| `expedition_cruise_450` | 450 | 300 / 150 | 316 / 134 |
+| `classic_cruise_1900` | 1,910 | 1,350 / 560 | 1,338 / 572 |
+| `spirit_cruise_3000` | 3,000 | 2,100 / 900 | 2,100 / 900 |
+| `mega_cruise_5000` | 7,000 | 5,000 / 2,000 | 4,900 / 2,100 |
+| `explorer_seas_06` | 4,428 | 3,245 / 1,183 | 3,102 / 1,326 |
+
+- **Why the template drifts.** With no class counts, the YAML's seven class
+  fractions (passenger 0.50 / 0.10 / 0.10, crew 0.10 / 0.05 / 0.10 / 0.05)
+  take precedence over `passenger_fraction`, each class is floored, and the
+  remainder goes to the first class. Every norovirus campaign to date ran
+  that allocation. Both columns were measured on initialized agents by the
+  checker and match Edison's static arithmetic.
+- **Explorer uses the investigation counts exactly**: 3,245 passengers and
+  1,183 crew.
+- **Within-role class allocation is declared**, not fitted: each role's count
+  is split in the template's within-role ratio (passengers 5 : 1 : 1 general
+  / family / elderly; crew 2 : 1 : 2 : 1 general / medical / engineering /
+  galley) by largest remainder, ties to declaration order. The resulting
+  class counts are in the block below.
+- **Labelled baseline.** `archetype_template_baseline` is the allocation the
+  earlier campaigns used. A bridge arm that reproduces a prior draw omits
+  the class counts and is labelled with this name; it is a declared arm
+  (§2.9), not the reference.
+- **Asserted, not assumed.** The checker asserts both allocations on
+  initialized agents on all five hulls. Every outcome payload must carry the
+  same counts: `passenger_complement` / `crew_complement` in the run summary
+  and `n_passengers` / `n_crew` in the Sentinel line list equal the declared
+  reference counts, or the cell fails technical completion (§5.3).
+- **Explorer against the mega archetype (WP3).** Retained differences: total
+  complement, role split and vessel geometry. Controlled: within-role class
+  ratios, the §2.1 block, strategy, dose and source. WP3 states this in its
+  design and owns the date-to-epoch convention.
+
+<!-- paper1-reference-population -->
+```json
+{
+  "class_template": "crusher_labs/config.yaml ship_graph.agent_classes",
+  "within_role_allocation": "template_fraction_ratio_largest_remainder",
+  "hulls": {
+    "expedition_cruise_450": {
+      "num_agents": 450,
+      "reference": {
+        "passenger": 300,
+        "crew": 150,
+        "class_counts": {
+          "passenger_general": 214,
+          "passenger_family": 43,
+          "passenger_elderly": 43,
+          "crew_general": 50,
+          "crew_medical": 25,
+          "crew_engineering": 50,
+          "crew_galley": 25
+        }
+      },
+      "archetype_template_baseline": {
+        "passenger": 316,
+        "crew": 134
+      }
+    },
+    "classic_cruise_1900": {
+      "num_agents": 1910,
+      "reference": {
+        "passenger": 1350,
+        "crew": 560,
+        "class_counts": {
+          "passenger_general": 964,
+          "passenger_family": 193,
+          "passenger_elderly": 193,
+          "crew_general": 187,
+          "crew_medical": 93,
+          "crew_engineering": 187,
+          "crew_galley": 93
+        }
+      },
+      "archetype_template_baseline": {
+        "passenger": 1338,
+        "crew": 572
+      }
+    },
+    "spirit_cruise_3000": {
+      "num_agents": 3000,
+      "reference": {
+        "passenger": 2100,
+        "crew": 900,
+        "class_counts": {
+          "passenger_general": 1500,
+          "passenger_family": 300,
+          "passenger_elderly": 300,
+          "crew_general": 300,
+          "crew_medical": 150,
+          "crew_engineering": 300,
+          "crew_galley": 150
+        }
+      },
+      "archetype_template_baseline": {
+        "passenger": 2100,
+        "crew": 900
+      }
+    },
+    "mega_cruise_5000": {
+      "num_agents": 7000,
+      "reference": {
+        "passenger": 5000,
+        "crew": 2000,
+        "class_counts": {
+          "passenger_general": 3572,
+          "passenger_family": 714,
+          "passenger_elderly": 714,
+          "crew_general": 667,
+          "crew_medical": 333,
+          "crew_engineering": 667,
+          "crew_galley": 333
+        }
+      },
+      "archetype_template_baseline": {
+        "passenger": 4900,
+        "crew": 2100
+      }
+    },
+    "explorer_seas_06": {
+      "num_agents": 4428,
+      "reference": {
+        "passenger": 3245,
+        "crew": 1183,
+        "class_counts": {
+          "passenger_general": 2318,
+          "passenger_family": 464,
+          "passenger_elderly": 463,
+          "crew_general": 395,
+          "crew_medical": 197,
+          "crew_engineering": 394,
+          "crew_galley": 197
+        }
+      },
+      "archetype_template_baseline": {
+        "passenger": 3102,
+        "crew": 1326
+      }
+    }
+  }
+}
+```
+
+### 2.8 Effective mechanism state per hull
+
+A pin is *requested* in the block and *effective* only if the engine resolves
+it on that hull. The checker probes all 63 resolved-state leaves on every
+reference hull.
+
+**Explorer exposure cap — pending.** The block requests
+`transmission.exposure_cap.enabled: true`. The engine activates the cap only
+when the platform is in the rhythm/event catalog
+(`platform_has_rhythm_catalog`, `engines/rhythm_layer.py`). Measured at
+initialization:
+
+| Hull | Cap requested | Cap effective |
+|---|---|---|
+| Four archetypes | true | true |
+| `explorer_seas_06` | true | **false** |
+
+So the same block gives a different mechanism state on the historical vessel
+than on its archetype. Resolution path:
+
+1. **WP1c** — the bounded, separately reviewed eligibility correction for the
+   intended cruise-platform scope, importing no other ship's activity
+   schedule. **Not merged when this revision was written**; this item is
+   pending its PR. This contract makes no mechanism change.
+2. The checker carries the case as a declared `PENDING` entry. When WP1c
+   lands, the entry stops reproducing, the check fails until the entry is
+   removed, and the check then requires the cap effective on all five hulls.
+3. Until then Explorer's same-mechanism comparison is **reserved**: no
+   Explorer cell is run as a reference cell. If WP1c is not adopted, Explorer
+   is carried as a deferred, labelled exception in the freeze record. A
+   platform-class label alone is not accepted as a fix.
+
+This is a configuration-state finding. It says nothing about the size of the
+cap's epidemiological effect.
+
+**Unregistered source ids are accepted.** A `source_id` absent from the
+registry initializes without error and resolves no registry values. The
+annex therefore records the registry entry each hull resolved, and the
+checker fails if the pinned id is not registered.
+
+### 2.9 Invariant baseline and declared arm differences
+
+The §2.1 block, the §2.5 items, the §2.6 decisions and the §2.7 reference
+counts are the **invariant baseline**. The planned work includes
+supply-structure, uncertainty, response, population and labelled-baseline
+arms that change settings on purpose. Those are declared differences, not
+default changes.
+
+Every arm, in its design file and before any of its cells runs:
+
+1. **Retains the baseline reference**: names this contract and the named
+   commit.
+2. **Declares its changed paths**: a list of dotted paths with baseline and
+   arm value. Nothing outside the list may differ.
+3. **Materializes complete effective nested objects.** Both merges are one
+   level deep (§2.2), so a changed second-level object is written out whole.
+   The runner adds its own objects after the tier's — `escalation`, the
+   strategy's `diagnostic_cascade` and `fred_behavior`, `initiation.boarding`,
+   `ship_graph.num_agents` — and a later generated override replaces a tier
+   value at the same key.
+4. **Records the resolved effective configuration** of each cell in its
+   archive: the generated run specification and, for one cell per arm and
+   hull, the resolved record in the annex's shape (§2.10).
+5. **Validates after the runner has applied every axis**: the generated
+   cell, not the tier block before generation, is compared with baseline
+   plus declared paths. The checker's per-hull comparison is the template.
+
+A difference in an approved arm is not an undeclared default change. A
+difference outside an arm's declared paths fails the cell. An **unplanned
+biological change restarts the reference/version decision** (§4).
+
+Axes a design declares rather than inherits: voyage length, boarding rung
+and the resulting `initiation.boarding` block, seed stratum, and population
+allocation (reference counts or `archetype_template_baseline`).
+
+### 2.10 Annex — example run specification per hull
+
+[`paper1_reference_run_specs_2026_11_21.json`](paper1_reference_run_specs_2026_11_21.json)
+holds one complete example cell for each of the five hulls, generated by the
+checker (`--write-annex`) and compared with the generated cells on every
+check run.
+
+| Part | Content |
+|---|---|
+| `run_spec` | The run specification as the runner emits it after all axes: platform, bundle, seed, epochs, `pathogen_overrides`, full `config_overrides` (block, class counts, escalation, strategy, boarding), `campaign_parameters`, and the `run.sentinel_line_list` output request |
+| `resolved.population` | Passengers, crew and class counts of the initialized agents |
+| `resolved.introduction` | Effective `initiation` block |
+| `resolved.reporting` | Infection counters, `counter_confinement_enabled`, `syndromic`, complete `escalation` |
+| `resolved.strategy` | `syndromic_comp65`, complete effective `fred_behavior`, cascade state |
+| `resolved.source` | Source id, lot layer, prevalence scale, preparation-survival mode, registry `q_source` values |
+| `resolved.pathogen` | `norwalk_gi` dose adjustment 7.57, shedding variance, airborne emission arm |
+| `resolved.mechanism_state` | All 63 resolved-state leaves as the engine holds them |
+| `resolved.pending_effective_state` | Declared non-effective pins (Explorer only) |
+
+Conventions: archetype examples use 168 epochs (288 and 504 differ only in
+`run.num_epochs`); Explorer uses 192, whose calendar convention WP3 owns.
+The example boarding rung is `reportable`, seed 8105.
+`campaign_parameters.engine_git_sha` is written as `<named commit>` and the
+line-list path as `<run_dir>/…`, since both are filled at run time.
 
 ## 3. Declared limitations
 
 Each item cites `norovirus_open_ledger.md` (section or stamp) or the document
-that records it. The count is 12.
+that records it. The count is 13.
 
-1. **Every dose figure except one is void pending refit.** Only
-   `environmental_faecal_release_log10_g_per_epoch` = 7.57 [7.14, 8.86]
-   (`NORO-DOSE-REFIT-01`) is current. Attack rates, route shares, ladder
-   tables and per-host dose tables measured before the refit are historical
-   (§1, "Every dose figure in this repository is void").
+1. **Dose figures are dispositioned by version, not voided as a class.**
+   The ledger's dose stamp (§1, "Every dose figure in this repository is
+   void") withdraws figures measured **before** `NORO-DOSE-REFIT-01`
+   (2026-09-27); the refit replaced the normaliser with
+   `dose_adjustment` 7.57 [7.14, 8.86]. That amendment predates the November
+   focal experiments. Results after it stand
+   as development evidence at their producing commit and configuration unless
+   a specific ledger stamp withdraws them (items 7 and 10).
 2. **A4, A8 and A9 are scored as the ledger now defines them**, not as the
    September gate did. A4 is the reported passenger attack rate conditional
    on a posted outbreak, against the hull-class IQR. A8 and A9 are
@@ -402,10 +744,15 @@ that records it. The count is 12.
 9. **Food-route signature is thin.** `NORO-FOOD-SCORE-01` records a
    posted-conditional passenger attack rate below the recovery edge and
    under-conversion of classic and spirit excursions to posting (§4).
-10. **Earlier results that must not be reused as current**: every result
-    before `COMPLEMENT-01` belongs to no ship class, every arrival prevalence
-    and posting rate before `ARRIVE-01` is void, and caregiver-adjacent
-    readings before `CAREGIVER-V1` are a labelled baseline (§1).
+10. **Specific earlier withdrawals remain specific.** Results before
+    `COMPLEMENT-01` belong to no ship class; arrival prevalences and posting
+    rates before `ARRIVE-01` are withdrawn; caregiver-adjacent readings
+    before `CAREGIVER-V1` are a labelled baseline (§1). Each applies to the
+    mechanism and versions its stamp names and to nothing else. Old
+    campaigns are kept as version-specific evidence. The bridge measures
+    transfer to the new reference; it does not restore, erase or re-run a
+    historical output by declaration, and claims about the new reference
+    rest on fresh measurements.
 11. **SOP-007/009 `close_zones` name `mega_cruise_5000` zone ids** and skip
     Explorer's galley and crew mess. This affects only response arms run on
     Explorer; WP3 owns the decision
@@ -414,81 +761,218 @@ that records it. The count is 12.
     either-channel rule and the shedding variance are fixed by the named
     commit alone.
 
+13. **The exposure cap is not effective on `explorer_seas_06`** at this
+    revision (§2.8). Explorer's same-mechanism comparison waits on WP1c.
+
 None of these forces a change to the evaluation contract in §5. Items 2 and
 5 limit what a pass can claim; item 4 is what the bridge measures.
 
 ## 4. Moratorium
 
-From the freeze declaration until the WP2 bridge readout is delivered and a
-go/no-go is recorded, and thereafter for as long as evaluation cells are
-being run against the named commit.
+**Scope.** The moratorium protects the **named reference and its effective
+configuration**, from the freeze declaration for as long as evaluation cells
+are run against it. It is not a repository-wide stop: unrelated work
+continues on other revisions, and evaluation images are built from the named
+commit by digest, so later commits on `main` do not reach them.
 
-| During evaluation | Examples |
+| Change | Status |
 |---|---|
-| **Not allowed — mechanism work** | Any change under `engines/`, `orchestrator*.py`, `crusher_labs/` or `picard_framework/simulation/` that can move a norovirus run's output; any change to a default in `crusher_labs/config.yaml` or an engine `DEFAULT_*`; any change to `data/pathogens/` profiles or to the five platforms' data; any change to the scoring definitions of A1–A9; changing a value in the frozen block |
-| **Allowed — config, campaign, documentation** | New `campaigns/noro/<name>/` directories (design, manifest, cell worker, readout); manifests that carry the block verbatim; readout and analysis code that reads archives; new output fields that do not consume random draws or change state; ledger entries and documents; tests; CI and tooling; work on other pathogens that does not touch shared defaults |
-| **Allowed only as a declared exception** | A defect fix that moves norovirus output. It is recorded in the ledger, the named commit moves to the fix, §1's conditions are re-met, and every cell already run is either re-run or labelled as measured at the earlier commit |
+| Work on other revisions that no evaluation image is built from, including other pathogens and tooling | Allowed |
+| New `campaigns/noro/<name>/` directories, manifests, cell workers, readouts; analysis code that reads archives; ledger entries, documents, tests, CI | Allowed |
+| New telemetry or output fields that change an archive's metadata or contents but not its scientific outputs | Allowed; **not new biology**. Checked by scientific-output neutrality (same seed, same outcome families) and recorded with its version |
+| A declared arm difference (§2.9) | Allowed; it is an experiment, not a default change |
+| An unplanned change that moves norovirus scientific output: `engines/`, `orchestrator*.py`, `crusher_labs/`, `picard_framework/simulation/`, a default, a `data/pathogens/` profile, the five platforms' data, the scoring definitions of A1–A9, a value in the frozen block | Creates a **new reference**. Recorded in the ledger, the named commit moves, §1's conditions are re-met, and every cell already run gets an explicit disposition: re-run, or labelled as measured at the earlier reference |
 
-A change is mechanism work if the same seed can produce a different archive
-after it. When that cannot be decided by reading the diff, the test is a
-paired-seed run of one bridge cell before and after.
+A change is scientific-output-moving if the same seed can produce different
+outcome-family values after it. When that cannot be decided by reading the
+diff, the test is a paired-seed run of one bridge cell before and after.
 
 ## 5. Evaluation contract — summary for Edison
 
-**What is scored.** Six outcome families, all harvested from one run per
-cell (sources as verified in the assessment):
+### 5.1 Output contract — six outcome families
 
-| Family | Source in run output |
-|---|---|
-| Routine and reported burden, by role | `rep_pax_n` / `rep_crew_n`, `cumulative_reported_cases_*`, census |
-| Reaching the reporting threshold | `vsp_trigger_epoch` (either channel at 3% of that channel's complement) |
-| Outbreak-size distribution and tails | Seed ensemble of the above |
-| First role to threshold | Per-epoch `cumulative_reported_cases_{passenger,crew}` against the 0.03 line. Model-side outcome: the public series does not record which role crossed first |
-| Daily onset and reporting curves | Onsets from `run.sentinel_line_list`; the reporting curve from the per-epoch `cumulative_reported_cases_*` series |
-| Environmental observables | Surface swab (`surface_pool_density`) and holding-tank wastewater assay |
+An ordinary compact campaign cell does not collect all six. The worker
+contract is therefore explicit.
 
-**Design.** Four hulls (450 / 1,910 / 3,000 / 7,000) × three voyage lengths
-(168 / 288 / 504 epochs) × three bridge strata — quiet, near-threshold,
-outbreak — on paired seeds, every cell carrying the §2 block verbatim.
-Labelled-baseline arms that reproduce a prior draw give a bit-identity check
-of the contract.
-
-**Seeds per stratum.** The assessment fixes the first and last rows; the
-middle rows apply its arithmetic and are proposals for review.
-
-| Stratum | Seeds per cell | What that resolves |
+| Family | Source | What the cell worker must request |
 |---|---|---|
-| Outbreak (loud) | ~20 | Contract cleanliness and a posting rate that is not rare |
-| Near-threshold | 100 (proposed) | A posting probability near one half to about ±0.10 |
-| Quiet | 300 (proposed), or report a bound | Zero postings in 300 bounds the rate at ≤1.0%; zero in 20 bounds it only at ≲14% |
-| Tail-resolution cells | ≥1,000 | Tail frequencies of outbreak size |
+| Routine and reported burden, by role | Run summary: `rep_pax_n` / `rep_crew_n`, `cumulative_reported_cases_*`, `passenger_complement` / `crew_complement`, census | Compact record (default) |
+| Reaching the reporting threshold | `vsp_trigger_epoch` (either channel at 3% of that role's complement) | Compact record |
+| Outbreak-size distribution and tails | Seed ensemble of the two above | Compact record |
+| First role to threshold | Derived from per-epoch `cumulative_reported_cases_{passenger,crew}` and the role complements (states below) | Compact record with the per-epoch role series retained |
+| Daily onset and reporting curves | Clinical onsets from the Sentinel line list; reporting from the per-epoch role series | **`run.sentinel_line_list` set explicitly** |
+| Environmental observables | Surface swab (`surface_pool_density`) and holding-tank wastewater assay records | **Environmental panel** (below) |
 
-The 0.5% quiet event rate used in the planning arithmetic is illustrative and
-unmeasured on the current engine; the bridge returns the actual rate per
-stratum.
+**Sentinel line-list request.** The runner arms the line list only when
+shore exposure or `variant_surveillance` is enabled, and the block pins
+`variant_surveillance.enabled: false`. The worker sets
+`run.sentinel_line_list` on the run specification itself; no mechanism is
+switched on to obtain a field. The line list survives compact retention.
 
-**Go/no-go reading.** The bridge is read before any ensemble cell is
+**First role to threshold.** For each role, the crossing epoch is the first
+epoch at which cumulative reported cases divided by that role's complement
+reaches 0.03. Five states, each cell in exactly one:
+
+| State | Definition |
+|---|---|
+| `passenger_first` | Passengers cross, and crew cross later or not at all |
+| `crew_first` | Crew cross, and passengers cross later or not at all |
+| `same_epoch` | Both roles cross in the same epoch; a tie is not broken |
+| `neither` | Both series are complete over the observation window and neither crosses |
+| `missing` | Either role series or either role denominator is absent or incomplete; never coerced to `neither` |
+
+Both crossing epochs are recorded. The first crossing triggers symptomatic
+confinement, so the second role's epoch is conditional on that response.
+This is a model-side outcome: the public series does not record which role
+crossed first.
+
+**Environmental panel.** Compact records and generic summaries omit the
+assay payload; full telemetry retains it. The contract declares a **core
+compact outcome record for every cell plus a prospectively selected
+environmental panel run with full telemetry**. The panel's cells are fixed
+by seed index in the design file before any cell runs, never by outcome.
+The panel record preserves, per swab: zone, epoch, recovered amount with its
+density unit (copies per cm² of high-touch area), and the detection and
+censoring flags; per wastewater sample: epoch, concentration in copies per
+litre, and `censored_below_lod` (a below-LOD sample keeps its quantitative
+value). The **holding-tank assay** (`observation.wastewater_assay_mode:
+holding_tank`) is reported separately from the **wastewater sequencing**
+channel (`wastewater_sequencing`); the two are not merged under one name.
+An output-only compact harvest of the same fields is an acceptable
+substitute if a later change adds one; it would be telemetry, not biology
+(§4).
+
+**Extraction fixtures before the bridge.** The bridge design is not executed
+until fixtures on a real archive from the named commit show, for every
+family: the field is present, onset and reporting coverage are stated (cases
+with an onset epoch, cases with a report epoch, observation-window end), and
+passenger and crew denominators equal §2.7. If the panel runs a seed that
+also runs compact, the fixture shows the two agree on the compact families.
+
+### 5.2 Design and bridge size
+
+Four hulls × three voyage lengths (168 / 288 / 504 epochs) × three bridge
+strata — quiet, near-threshold, outbreak — on paired seeds, every cell
+carrying the §2.1 block as its invariant baseline (§2.9). Labelled-baseline
+arms that reproduce a prior draw give a bit-identity check of the contract.
+Explorer joins only after §2.8 is resolved.
+
+**Arithmetic, stated plainly.** The seed table of revision 1 (20 outbreak,
+100 near-threshold, 300 quiet per cell) is 4 × 3 × (20 + 100 + 300) =
+**5,040 trajectories at one reference**, before any tail-resolution cell,
+and 10,080 if duplicated across an old and a new reference. That is not a
+modest bridge, and it is withdrawn as the bridge's size.
+
+**Principle recorded here; WP2 owns the design.**
+
+- A **small complete four-hull bridge first**, then the temporal pilot and a
+  joint-outcome pilot; replication is allocated after those, where it
+  improves a claim. All three voyage lengths stay in the scientific
+  evaluation.
+- WP2's design states endpoint-specific precision, batch and analysis rules,
+  and source-stratum inclusion probabilities before any cell runs.
+- **Zero-event convention.** Zero events in *n* independent voyages gives an
+  exact one-sided 95% upper bound of 1 − 0.05^(1/n) on the per-voyage event
+  probability: 0.994% for 0/300, 13.9% for 0/20. A reported bound names its
+  sampling frame — the hull, voyage length and stratum, and how the seeds
+  were drawn.
+- A thousand voyages is not a thousand posted outbreaks: conditional tail
+  precision follows the number of eligible events and their weights.
+- Previously selected seeds are diagnostic evidence. Population estimates
+  need independently sampled evaluation seeds and justified source weights.
+
+### 5.3 Bridge gate — technical completion and scientific outcome
+
+Two separate decisions. The bridge is read before any ensemble cell is
 committed.
 
-- **Go** requires both: (a) the contract is clean — every cell completes, all
-  six families are present, each archive records the frozen block and the
-  named commit, and labelled-baseline arms reproduce; and (b) the mixture is
-  present — quiet-stratum cells post rarely or not at all within their
-  bound, outbreak-stratum cells post, and near-threshold cells sit between
-  them, on every hull.
-- **No-go** if the quiet stratum posts at a rate comparable to the outbreak
-  stratum (every voyage takes off), if the outbreak stratum does not post,
-  or if the contract is not clean. A no-go returns to mechanism work and
-  voids the freeze; it is not repaired by changing the block.
-- The numeric thresholds for "rarely", "post" and "between" are fixed in the
-  WP2 design file before any cell runs. This contract does not set them.
+**Gate: technical completion.** The bridge passes when all four hold:
 
-**What a go does not establish.** It does not establish that A4, A8 or A9
-pass (limitations 2 and 5), and it does not turn any withdrawn figure back
-into a current one (limitations 1, 3, 10).
+1. **Intended inputs were used.** Each archive records the named commit, the
+   image digest, the invariant baseline and its arm's declared paths, and
+   the generated cell validates after all runner axes (§2.9). Role counts in
+   every outcome payload equal §2.7.
+2. **Outcomes are extractable.** All six families are present with stated
+   coverage and denominators (§5.1).
+3. **Attempts are accounted for.** Every submitted cell is completed, failed
+   with a recorded cause, or re-run under a recorded rule; no cell is
+   dropped silently.
+4. **Paired comparisons are meaningful.** Paired arms share seeds and differ
+   only in declared paths; labelled-baseline arms reproduce their prior
+   draw.
+
+A technical failure is repaired and the affected cells re-run. It is not a
+scientific result.
+
+**Not a gate: the observed ordering.** Whether quiet strata stay quiet,
+outbreak strata post and near-threshold strata fall between them is a
+**measured result**. A zero-event stratum, including on a large hull, is
+data with a bound (§5.2); it does not void the reference, and a reversal
+does not automatically return the program to mechanism work.
+
+**Predeclared continuation decision.** Before any cell runs, the WP2 design
+fixes the rule that maps the measured rates to one of these continuations.
+More than one is valid:
+
+| Continuation | Chosen when the bridge shows |
+|---|---|
+| Temporal reconstruction | Outcome families extract cleanly and timing is the next informative contrast |
+| Population / geometry comparison | Hull or role-composition differences dominate the measured rates |
+| Targeted uncertainty evaluation | A named declared input plausibly accounts for a stratum's rate |
+| Precision expansion | A rate needed for a claim is bounded too loosely |
+| Justified defect correction | A specific defect is identified and evidenced; this creates a new reference (§4) |
+
+All four hulls are retained under every continuation.
+
+**Scientific adequacy stays a scientific criterion.** Splitting the gate
+does not permit claiming adequate performance from an unfavourable result.
+The numeric criteria for model utility and external comparison (A4, A8, A9
+as the ledger defines them, limitations 2 and 5) are fixed in the WP2 design
+before any cell runs and are judged there, not here.
+
+**What technical completion does not establish.** It does not establish that
+A4, A8 or A9 pass, and it does not turn any withdrawn figure back into a
+current one (limitations 1, 3, 10).
 
 ## 6. Out of scope for this contract
 
-The WP2 campaign directory and its numeric admissibility criteria, the WP3
-reconstruction campaign and its 192-epoch length, the response-demonstration
-pairing (WP5), and any regeneration of platform data.
+The freeze declaration itself; the WP2 campaign directory, seed allocation
+and numeric criteria; the WP3 reconstruction campaign, its 192-epoch length
+and date-to-epoch convention; the response-demonstration pairing (WP5); the
+WP1c eligibility correction; any mechanism change, campaign run or
+regeneration of platform data.
+
+## 7. Review corrections — where each is resolved
+
+Edison's six required corrections and four affirmed decisions
+(`REVIEW.md`), mapped to this revision.
+
+| # | Correction | Resolved in | Verified by |
+|---|---|---|---|
+| 1 | Role populations stated and asserted | §2.7 (counts, exact class counts, labelled baseline, Explorer comparison); §2.5 row; §5.3 item 1 | Checker role-count check on five hulls, both allocations |
+| 2 | Explorer exposure-cap eligibility | §2.8; limitation 13; §1 condition 5. **Pending WP1c** | Checker per-hull resolved-state probes; `PENDING` entry |
+| 3 | Explicit six-family output contract | §5.1 | Annex `run.sentinel_line_list` request; fixtures required before the bridge |
+| 4 | Bridge completion split from scientific outcome | §5.3; zero-event convention §5.2 | — (design rule) |
+| 5 | Invariant baseline and declared arms | §2.9; §2.1 and §2.2 wording; annex §2.10 | Checker compares generated cells after all runner axes |
+| 6 | Checker qualified and tightened | §2.3 (evidence categories, 57 units / 70 leaves, conditional pins); §2.4 | `scripts/paper1_freeze_block_check.py`, its retained output, `tests/test_paper1_freeze_block_check.py` |
+
+| Affirmed decision | Recorded in |
+|---|---|
+| Sanitary visits `none`, flush aerosol `0.0` | §2.6 item 1 |
+| Escalation 2% / 3% / 5%, YAML versus runner | §2.6 item 2; §2.2 |
+| `syndromic_comp65` with class compliance and upstream counters | §2.6 item 3; annex `resolved.reporting`, `resolved.strategy` |
+| Registry source and station-lot formulation | §2.6 item 4; annex `resolved.source`, `resolved.introduction` |
+
+| Other review point | Recorded in |
+|---|---|
+| Example run specification per hull, post-runner-axes | §2.10 |
+| Bridge-size arithmetic and small-bridge-first principle | §5.2 |
+| Version-specific disposition of old results | Limitations 1 and 10 |
+| Moratorium scope | §4 |
+
+## 8. Revision history
+
+| Revision | Date | Change |
+|---|---|---|
+| 1 | 2026-11-20 | Proposed for Edison's review; merged #1355, reviewed at `73ad8724` |
+| 2 | 2026-11-21 | Edison's six corrections and affirmed decisions applied. §2.1 block unchanged. Added §2.7–§2.10, §5.1–§5.3, §7, §8; rewrote §2.3, §2.4, §2.6, §4; limitations 1 and 10 reworded, 13 added. Checker tightened; output and annex committed |
