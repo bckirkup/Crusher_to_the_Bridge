@@ -7,8 +7,9 @@ Writes ``../manifest.json`` and ``../campaign.json``. The frozen design is
 Baseline and arms. The freeze contract's section 2 block is the invariant
 baseline, parsed from the contract and stored once in the manifest
 (``joint_eval.baseline_block``). Every tier is an arm: it declares the leaf
-paths on which it differs (``changed_paths``; empty for every bridge, pilot
-and census tier) and carries the complete effective nested object, because
+paths on which it differs (``changed_paths``; for every bridge, pilot and
+census tier exactly one, the hull's ``ship_graph.agent_classes``, which
+places the platform's declared passengers and crew) and carries the complete effective nested object, because
 ``merge_config_overrides`` is one level deep. ``build()`` refuses to emit a
 tier whose effective config differs from the baseline anywhere it did not
 declare. ``cell.py`` repeats the check and then validates the
@@ -36,9 +37,16 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 HERE = Path(__file__).resolve().parent
 CAMPAIGN_DIR = HERE.parent
 REPO_ROOT = CAMPAIGN_DIR.parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from simulation_utils.platform_complement import declared_complement  # noqa: E402
+
 CONTRACT = "docs/norovirus/paper1_freeze_design_contract_2026_11_20.md"
 BLOCK_MARKER = "<!-- paper1-frozen-config-block -->"
 SELECTION = HERE / "seed_selection.json"
@@ -46,24 +54,27 @@ NAME = "noro_paper1_joint_eval_01"
 REL = "campaigns/noro/paper1_joint_eval_01"
 ABSENT = "<absent>"
 
-# platform, total agents, intended (initialised) roles, declared nominal.
-# The initialised split is the shipped 70/30 class template; it is what the
-# engine places and what the 3% rule divides by. Measured at initialise on
-# two seeds per hull; cell.py asserts it on every run.
+# platform, total agents, and role counts. ``intended_roles`` is the
+# platform's declared nominal_complement, which every block arm reaches
+# through its declared ``ship_graph.agent_classes`` difference (class_mix
+# below). ``template_roles`` is what the shipped 70/30 class template placed
+# before that difference was declared (measured at initialise, two seeds
+# per hull); kept as the record of why the difference exists.
 HULLS: dict[str, dict[str, Any]] = {
     "exp": {"platform": "expedition_cruise_450", "num_agents": 450,
-            "intended_roles": {"passenger": 316, "crew": 134},
-            "nominal_roles": {"passenger": 300, "crew": 150}},
+            "intended_roles": {"passenger": 300, "crew": 150},
+            "template_roles": {"passenger": 316, "crew": 134}},
     "cls": {"platform": "classic_cruise_1900", "num_agents": 1910,
-            "intended_roles": {"passenger": 1338, "crew": 572},
-            "nominal_roles": {"passenger": 1350, "crew": 560}},
+            "intended_roles": {"passenger": 1350, "crew": 560},
+            "template_roles": {"passenger": 1338, "crew": 572}},
     "spr": {"platform": "spirit_cruise_3000", "num_agents": 3000,
             "intended_roles": {"passenger": 2100, "crew": 900},
-            "nominal_roles": {"passenger": 2100, "crew": 900}},
+            "template_roles": {"passenger": 2100, "crew": 900}},
     "meg": {"platform": "mega_cruise_5000", "num_agents": 7000,
-            "intended_roles": {"passenger": 4900, "crew": 2100},
-            "nominal_roles": {"passenger": 5000, "crew": 2000}},
+            "intended_roles": {"passenger": 5000, "crew": 2000},
+            "template_roles": {"passenger": 4900, "crew": 2100}},
 }
+CLASS_MIX_PATH = "ship_graph.agent_classes"
 # Voyage epochs -> day label used in tier ids (hours clock).
 VOYAGE_DAYS = {168: 7, 288: 12, 504: 21}
 EPOCHS = tuple(VOYAGE_DAYS)
@@ -267,12 +278,50 @@ def materialize(
     return effective
 
 
+def shipped_classes() -> list[dict[str, Any]]:
+    """``ship_graph.agent_classes`` as shipped in crusher_labs/config.yaml."""
+    text = (REPO_ROOT / "crusher_labs" / "config.yaml").read_text(
+        encoding="utf-8",
+    )
+    return yaml.safe_load(text)["ship_graph"]["agent_classes"]
+
+
+def class_mix(hull: str) -> list[dict[str, Any]]:
+    """The shipped class list re-weighted to the hull's declared roles.
+
+    Within each role the shipped proportions are kept; each class gets a
+    whole number of agents (largest remainder, ties to the earlier class)
+    and its fraction is that count over the complement, so the engine
+    places exactly the platform's declared passengers and crew.
+    """
+    spec = HULLS[hull]
+    passengers, crew = declared_complement(spec["platform"])
+    if {"passenger": passengers, "crew": crew} != spec["intended_roles"]:
+        raise SystemExit(f"{hull}: intended roles differ from the platform")
+    classes = json.loads(json.dumps(shipped_classes()))
+    for role, total in spec["intended_roles"].items():
+        members = [c for c in classes if c["role_group"] == role]
+        share = sum(c["fraction"] for c in members)
+        raw = [c["fraction"] / share * total for c in members]
+        counts = [int(x) for x in raw]
+        order = sorted(
+            range(len(members)), key=lambda i: (counts[i] - raw[i], i),
+        )
+        for i in order[:total - sum(counts)]:
+            counts[i] += 1
+        for member, count in zip(members, counts):
+            member["fraction"] = count / spec["num_agents"]
+    return classes
+
+
 def tier(
     hull: str, epochs: int, seeds: list[int], meta: dict[str, Any],
     block: dict[str, Any], changes: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     spec = HULLS[hull]
-    effective = materialize(block, changes or {})
+    effective = materialize(
+        block, {CLASS_MIX_PATH: class_mix(hull), **(changes or {})},
+    )
     label = " ".join(
         str(meta[k]) for k in ("arm", "stratum", "source_stratum") if k in meta
     )
@@ -285,7 +334,8 @@ def tier(
         "num_agents": spec["num_agents"],
         "description": (
             f"Paper-1 WP2 joint evaluation: {spec['platform']}, {epochs} "
-            f"epochs, {label}; baseline = freeze contract section 2 block."
+            f"epochs, {label}; baseline = freeze contract section 2 block, "
+            f"plus the hull's declared {CLASS_MIX_PATH}."
         ),
         "config_overrides": effective,
         "seeds": seeds,
@@ -293,7 +343,7 @@ def tier(
             "hull": spec["platform"], "epochs": epochs, **meta,
             "changed_paths": changed_paths(block, effective),
             "intended_roles": spec["intended_roles"],
-            "nominal_roles": spec["nominal_roles"],
+            "template_roles": spec["template_roles"],
         },
     }
 
@@ -352,8 +402,10 @@ def reproduction_tier(block: dict[str, Any]) -> dict[str, Any]:
                      "boarding_prevalence_points",
                      "never_symptomatic_fractions", "sensitivity_profile")
         ),
-        "intended_roles": hull["intended_roles"],
-        "nominal_roles": hull["nominal_roles"],
+        # A prior draw re-run verbatim: it keeps the class list it ran with,
+        # so the template split is what it intends.
+        "intended_roles": hull["template_roles"],
+        "template_roles": hull["template_roles"],
         "reference_fingerprints": {},
     }
     return spec

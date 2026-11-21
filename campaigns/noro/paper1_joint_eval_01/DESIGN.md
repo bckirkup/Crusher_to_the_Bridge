@@ -23,8 +23,9 @@ continuation. No outcome voids the freeze. This is not an anchor fit.
 - **Arms:** every tier is an arm. It declares the leaf paths on which it
   differs from the baseline (`joint_eval.changed_paths`) and carries the
   **complete effective nested objects**, because `merge_config_overrides`
-  is one level deep. Census, bridge and pilot arms declare no change: their
-  `config_overrides` is the block verbatim.
+  is one level deep. Census, bridge and pilot arms declare exactly one
+  change, `ship_graph.agent_classes` (the hull's role split, below); every
+  other key of their `config_overrides` is the block verbatim.
 - **Checks:** the builder refuses a tier whose effective config differs
   from the baseline anywhere undeclared. `cell.py` repeats that, then,
   after the runner has applied every axis and the engine has initialised,
@@ -45,24 +46,31 @@ continuation. No outcome voids the freeze. This is not an anchor fit.
   `syndromic_comp65`, bundle `active_profiles` / `norwalk_gi` minus
   `sars_cov2_resp`, clock `hours`, `PYTHONHASHSEED=1` (`entry.py`).
 
-### Intended role counts
+### Role split (the one declared arm difference)
 
-Recorded per tier (`joint_eval.intended_roles`) and asserted by `cell.py` on
-the initialised agents and on the complements in the outcome payload.
+The owner decided on 2026-11-20 that the reference runs each platform's
+declared `nominal_complement`, not the split the shipped class template
+happens to place. One block cannot hold four mixes, so the block is
+unchanged and each tier declares `ship_graph.agent_classes` as its
+difference (`build.py`, `class_mix`; contract section 2.5 records the
+decision).
 
-| Hull | Agents | Intended passenger / crew | Declared nominal |
+`class_mix` keeps the shipped class list and its within-role proportions,
+gives each class a whole number of agents (largest remainder) and writes
+each fraction as that count over the complement. Only `fraction` changes.
+
+| Hull | Agents | Intended passenger / crew (= declared nominal) | Shipped template placed |
 |---|---|---|---|
-| `expedition_cruise_450` | 450 | 316 / 134 | 300 / 150 |
-| `classic_cruise_1900` | 1,910 | 1,338 / 572 | 1,350 / 560 |
+| `expedition_cruise_450` | 450 | 300 / 150 | 316 / 134 |
+| `classic_cruise_1900` | 1,910 | 1,350 / 560 | 1,338 / 572 |
 | `spirit_cruise_3000` | 3,000 | 2,100 / 900 | 2,100 / 900 |
-| `mega_cruise_5000` | 7,000 | 4,900 / 2,100 | 5,000 / 2,000 |
+| `mega_cruise_5000` | 7,000 | 5,000 / 2,000 | 4,900 / 2,100 |
 
-The intended counts are what the shipped 70/30 class template places
-(measured at initialise, two seeds per hull, no epoch stepped). Three hulls
-differ from the platform's declared nominal split. The 3% rule divides by
-the intended counts. Matching nominal needs a per-hull
-`ship_graph.agent_classes` override, which is a change to the baseline
-block and a WP1 decision.
+Intended counts are recorded per tier (`joint_eval.intended_roles`) and
+asserted by `cell.py` on the initialised agents and on the complements in
+the outcome payload. The 3% rule divides by them. The reproduction arm
+re-runs a prior draw with the class list it ran with, so it intends the
+template split (316 / 134).
 
 ## Strata: diagnostic labels from a seed census
 
@@ -222,7 +230,9 @@ counts and timing, engine commits seen.
   epoch record; family 6 is read through the read-only observer hook.
   `cell.py --verify-draws` measures that the hook and the line list leave
   the voyage bit-identical.
-- Intended role counts differ from declared nominal on three hulls (above).
+- The role split is a declared arm difference, not part of the block; a
+  cell elsewhere that carries the block alone runs the template split.
+- The census draws its 100 agents from the same re-weighted class list.
 - The census runs at 100 agents; agent-count neutrality of the provisioned
   plan was measured once in `supply_seed_scan_01` (seed 8114, an earlier
   engine) and must be re-witnessed in the census canary.
