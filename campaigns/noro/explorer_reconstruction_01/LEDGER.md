@@ -66,17 +66,25 @@ The measurements under "Local validation" above predate #1359: their "cap inacti
 
 1. **Role counts.** A 4,428-agent Explorer cell with no class override resolved to 3,102 passengers / 1,326 crew (measured, seed 8105, 30-epoch run): the engine splits by the shipped 70/30 class fractions and does not read `nominal_complement`. The WP0 192-epoch smoke declared no class override, so it ran that split (inferred, not re-run). The Explorer tiers now declare exact class head counts and the worker asserts them.
 2. **Effective mechanisms differ by hull.** Exposure cap and rhythm layer are active on `mega_cruise_5000` and inactive on `explorer_seas_06`, because both are gated on the platform id being listed in `data/rhythm/event_catalogs.json` (measured at initialization, seed 8105). Recorded as the pre-freeze blocker.
-3. **The five pre-boarding passengers** are declarable as `initiation.explicit_seeds` and not as embarkation reports: the VSP 4.1.1.2 reportable clause is crew-only and a passenger `reportable` is a load error (read from `engines/initiation.py`). Their onset dates are not in the record; `onset_day -1.0` is a declared assumption.
+3. **The five pre-boarding passengers** are declarable as `initiation.explicit_seeds` and not as embarkation reports: the VSP 4.1.1.2 reportable clause is crew-only and a passenger `reportable` is a load error (read from `engines/initiation.py`). Their onset dates are not in the record; `onset_day -1.0` and `infection_age_days 2.2` are source-informed assumptions, labelled as such in the manifest.
 4. **Closure mapping.** SOP-007 and SOP-009 name mega zone ids; none exists on Explorer. Not relied on, no alias added; the worker records protocol activation.
 5. **Fruit-cluster gate closed.** Rispens et al. (MMWR 2020;69(16), DOI 10.15585/mmwr.mm6916a3) publish no per-day onset curve: the article has no figure, table or supplement (whole body text read via Europe PMC, cross-checked with Consensus full-text excerpts). No second hull is scoped.
 
 6. **Hash seed.** The contract (§2.5) places `PYTHONHASHSEED=1` in the job definition environment, but neither `deploy/aws/campaign_jobdef.json` nor the campaign image sets it. `cell.py` re-executes itself under `PYTHONHASHSEED=1` and records the value in the archive.
 
-## Open decisions (for the reviewer, before any cell runs)
+## Decisions (for the reviewer, before any cell runs)
 
 1. ~~The pre-freeze blocker.~~ Closed: cap eligibility fixed in #1359; rhythm decided in contract §2.8 (Explorer a labelled exception, plus the `rhythm_off` arm).
-2. Whether response procedures stay as shipped (closures valid on mega only) or a common protocol bundle is selected through `catalog.protocols_path`.
+2. ~~Whether response procedures stay as shipped (closures valid on mega only) or a common protocol bundle is selected through `catalog.protocols_path`.~~ Closed: the bundle is explicitly accepted (DESIGN.md, "Accepted bundle") — shared escalation/compliance settings controlled through the frozen block, realized hull-specific activations logged per cell, no common bundle synthesized.
 3. Seeds per cell (100 proposed) and whether the two `background_only` blocks run.
+
+## Finalization guards (Edison's pre-declaration corrections, 2026-11-21)
+
+- `expected_state` is declared per tier in the manifest and asserted at initialize before epoch 0 (worker) and audited at readout: rhythm requested+attached on mega, requested but absent on Explorer's exception, disabled+absent on both `rhythm_off` arms; exposure cap requested+active on both hulls.
+- The introduction block labels every seed field's provenance; `onset_day` and `infection_age_days` are source-informed assumptions, `count`/`role`/`epoch` the record.
+- Onset curves now carry three labellings: `all` (first observed symptom aboard), `excluding_declared_seeds`, and `incident` (every agent infected at initialize dropped — the incident-onset comparator). Temporal metrics are computed on the eight-day window and the first seven elapsed days.
+- The readout enforces exact tier/seed/arm coverage: duplicates dropped before pairing as defects, unexpected tiers/seeds excluded and recorded, `status` is `complete` only with exact coverage, zero defects, and `--expect-sha` naming the source reference.
+- `design/build.py` reads the named commit from the freeze declaration (`docs/norovirus/paper1_freeze_declaration*.md`, `**Named commit.**`) once it exists, falling back to the contract's §1 candidate until then.
 
 ## Next step
 

@@ -52,6 +52,22 @@ BLOCK_MARKER = "<!-- paper1-frozen-config-block -->"
 SELECTION = HERE / "seed_selection.json"
 NAME = "noro_paper1_joint_eval_01"
 REL = "campaigns/noro/paper1_joint_eval_01"
+# Paths generate_tier_runs may add on top of a tier's declared
+# config_overrides (contract section 2.9): the escalation defaults, the
+# surveillance strategy's diagnostic_cascade/fred_behavior blocks, the
+# initiation.boarding axis, the worker's natural_history_clock pin, and
+# ship_graph.num_agents. The worker rejects any other runner-added path.
+RUNNER_ADDED_ALLOWLIST = [
+    "escalation.",
+    "diagnostic_cascade.",
+    "fred_behavior.",
+    "initiation.boarding.",
+    "natural_history_clock",
+    "ship_graph.num_agents",
+]
+# All four joint-eval archetypes carry a rhythm catalog, so the requested
+# flag and the attached layer are both expected on every tier.
+EXPECTED_STATE = {"rhythm_enabled": True, "rhythm_layer_attached": True}
 ABSENT = "<absent>"
 
 # platform, total agents, and role counts. ``intended_roles`` is the
@@ -345,6 +361,7 @@ def tier(
             "changed_paths": changed_paths(block, effective),
             "intended_roles": spec["intended_roles"],
             "template_roles": spec["template_roles"],
+            "expected_state": dict(EXPECTED_STATE),
         },
     }
 
@@ -407,6 +424,7 @@ def reproduction_tier(block: dict[str, Any]) -> dict[str, Any]:
         # so the template split is what it intends.
         "intended_roles": hull["template_roles"],
         "template_roles": hull["template_roles"],
+        "expected_state": dict(EXPECTED_STATE),
         "reference_fingerprints": {},
     }
     return spec
@@ -557,6 +575,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
             "bridge_seeds_per_stratum": BRIDGE_SEEDS,
             "pilot_seeds_per_source_stratum": PILOT_SEEDS,
             "selection_rule": SELECTION_RULE,
+            "runner_added_allowlist": RUNNER_ADDED_ALLOWLIST,
             "technical_completion": TECHNICAL_COMPLETION,
             "diagnostic_bands": DIAGNOSTIC_BANDS,
             "continuation": CONTINUATION,

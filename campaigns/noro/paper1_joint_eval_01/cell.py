@@ -99,6 +99,22 @@ DAY0_LABEL = (
 FIRST_ROLE_CLASSES = (
     "passenger_first", "crew_first", "same_epoch", "neither", "missing",
 )
+# Paths the run-generation machinery (generate_tier_runs and the pieces it
+# composes) adds on top of the manifest's declared config_overrides. These
+# are the only additions an engine spec may introduce: escalation defaults,
+# the surveillance strategy's diagnostic_cascade and fred_behavior blocks,
+# the initiation.boarding axis, the worker's own natural_history_clock pin,
+# and ship_graph.num_agents (contract section 2.9). Anything else a runner
+# produces is a contract violation. The manifest's joint_eval block carries
+# the same list; this constant is the fallback for older manifests.
+RUNNER_ADDED_ALLOWLIST = (
+    "escalation.",
+    "diagnostic_cascade.",
+    "fred_behavior.",
+    "initiation.boarding.",
+    "natural_history_clock",
+    "ship_graph.num_agents",
+)
 OUTPUT_CONTRACT: dict[str, dict[str, str]] = {
     "burden": {
         "request": "none (always emitted)",
@@ -218,34 +234,83 @@ def check_arm(manifest: dict[str, Any], tier_id: str) -> dict[str, Any]:
 
 def check_effective(
     sim: Any, tier_overrides: dict[str, Any], spec_overrides: dict[str, Any],
+    allowlist: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     """Validate the config after the runner applied every axis.
 
     ``tier_overrides`` is what the manifest declared; ``spec_overrides`` is
     what ``generate_tier_runs`` produced from it; ``sim.cfg`` is what the
-    engine resolved after ``initialize()``.
+    engine resolved after ``initialize()``. Paths the runner added beyond
+    the declared leaves must all sit under ``allowlist`` (the manifest's
+    ``joint_eval.runner_added_allowlist``, falling back to
+    ``RUNNER_ADDED_ALLOWLIST``); any other added or changed path fails.
     """
+    prefixes = tuple(allowlist or RUNNER_ADDED_ALLOWLIST)
     declared = dict(leaf_items(tier_overrides))
     spec = dict(leaf_items(spec_overrides))
     runner_changed = sorted(
         path for path, want in declared.items()
         if spec.get(path, ABSENT) != want
     )
+    runner_added = sorted(set(spec) - set(declared))
+    unexpected_added = [
+        p for p in runner_added
+        if not any(p == prefix or p.startswith(prefix) for prefix in prefixes)
+    ]
     resolved = {path: get_path(sim.cfg, path) for path in spec}
     unresolved = sorted(p for p, want in spec.items() if resolved[p] != want)
-    if runner_changed or unresolved:
+    if runner_changed or unexpected_added or unresolved:
         raise ContractError(
             f"effective config check failed: runner changed "
-            f"{runner_changed}; engine resolved differently {unresolved}",
+            f"{runner_changed}; runner added undeclared paths "
+            f"{unexpected_added} (allowlist {list(prefixes)}); engine "
+            f"resolved differently {unresolved}",
         )
     return {
         "n_declared_leaves": len(declared),
         "n_effective_leaves": len(spec),
-        "runner_added_paths": sorted(set(spec) - set(declared)),
+        "runner_added_paths": runner_added,
+        "runner_added_allowlist": list(prefixes),
         "runner_changed_paths": runner_changed,
         "mismatched": unresolved,
         "resolved": resolved,
     }
+
+
+def check_mechanism_state(
+    sim: Any, tier: dict[str, Any],
+) -> dict[str, Any]:
+    """Requested and effective rhythm state on the initialised engine.
+
+    ``tier["joint_eval"]["expected_state"]`` declares what the hull and arm
+    should hold: ``rhythm_enabled`` is the requested flag in ``sim.cfg`` and
+    ``rhythm_layer_attached`` is whether the engine attached a rhythm layer.
+    The four archetypes must have it enabled and attached; a hull with no
+    rhythm catalog requests it but attaches nothing; a rhythm-off arm must
+    be disabled and absent.
+    """
+    expected = dict(
+        (tier.get("joint_eval") or {}).get("expected_state")
+        or {"rhythm_enabled": True, "rhythm_layer_attached": True},
+    )
+    actual = {
+        "rhythm_enabled": bool(
+            (sim.cfg.get("rhythm") or {}).get("enabled", True)
+        ),
+        "rhythm_layer_attached": getattr(
+            sim.engine, "_rhythm", None,
+        ) is not None,
+    }
+    mismatches = {
+        key: {"expected": expected[key], "actual": actual.get(key)}
+        for key in expected
+        if actual.get(key) != expected[key]
+    }
+    if mismatches:
+        raise ContractError(
+            f"mechanism state check failed: {mismatches}",
+        )
+    return {"expected_state": expected, "actual_state": actual}
 
 
 def check_roles(
@@ -549,11 +614,12 @@ def _read_line_list(path: str) -> dict[str, Any]:
 def run_voyage(
     spec_dict: dict[str, Any], clock: str | None, *, instrumented: bool,
     tier: dict[str, Any] | None = None,
+    allowlist: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     """One voyage. ``instrumented=False`` is the draw-neutrality control.
 
-    With *tier* given, the effective-config and role-count checks run after
-    ``initialize()`` and before any epoch is stepped.
+    With *tier* given, the effective-config, mechanism-state and role-count
+    checks run after ``initialize()`` and before any epoch is stepped.
     """
     spec = json.loads(json.dumps(spec_dict))
     recorder = EnvRecorder()
@@ -569,7 +635,9 @@ def run_voyage(
                 checks["effective_config"] = check_effective(
                     sim, tier["config_overrides"],
                     spec_dict.get("config_overrides") or {},
+                    allowlist=allowlist,
                 )
+                checks["mechanism_state"] = check_mechanism_state(sim, tier)
                 checks["roles_initialised"] = check_roles(
                     sim, tier["joint_eval"]["intended_roles"],
                     "initialised agents",
@@ -698,6 +766,7 @@ def harvest(
             "initialised": run["checks"]["roles_initialised"],
             "payload": run["checks"]["roles_payload"],
         },
+        "mechanism_state": run["checks"].get("mechanism_state"),
         "python_hash_seed": os.environ.get("PYTHONHASHSEED"),
         "wall_clock_s": run["wall_clock_s"],
     }
@@ -801,8 +870,14 @@ def main(argv: list[str] | None = None) -> int:
             json.dump({"checks": checks}, handle, indent=1)
         print(json.dumps({"checks": checks}, indent=1))
         return 0 if all(c["voyage_fingerprint_equal"] for c in checks) else 1
+    allowlist = tuple(
+        manifest["joint_eval"].get("runner_added_allowlist")
+        or RUNNER_ADDED_ALLOWLIST
+    )
     for run_id, spec in runs:
-        run = run_voyage(spec, clock, instrumented=True, tier=tier)
+        run = run_voyage(
+            spec, clock, instrumented=True, tier=tier, allowlist=allowlist,
+        )
         zip_path = write_cell(out_dir, args.tier, run_id, run, arm)
         print(
             f"seed {spec['run']['random_seed']}: "

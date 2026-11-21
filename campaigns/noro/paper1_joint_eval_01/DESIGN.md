@@ -29,10 +29,17 @@ continuation. No outcome voids the freeze. This is not an anchor fit.
 - **Checks:** the builder refuses a tier whose effective config differs
   from the baseline anywhere undeclared. `cell.py` repeats that, then,
   after the runner has applied every axis and the engine has initialised,
-  checks that the runner changed no declared leaf (and records the paths it
-  added) and that every leaf equals the engine-resolved `sim.cfg`. The
-  resolved effective config is written to every archive. A failed check
-  exits non-zero and writes no archive.
+  checks three things and exits non-zero, writing no archive, on any
+  failure: (1) the runner changed no declared leaf and added no path
+  outside the manifest's `joint_eval.runner_added_allowlist` — the
+  contract §2.9 runner objects: `escalation.*`, `diagnostic_cascade.*`,
+  `fred_behavior.*`, `initiation.boarding.*`, `natural_history_clock`,
+  `ship_graph.num_agents`; every other added or changed path is a
+  violation; (2) every leaf equals the engine-resolved `sim.cfg`;
+  (3) the tier's `joint_eval.expected_state` holds — rhythm requested
+  and the layer attached on all four archetypes (the only mechanism
+  state this campaign declares). The resolved effective config is
+  written to every archive.
 - **Reproduction arm** (the contract's labelled baseline that reproduces a
   prior draw): `supply_solver_screen_01` tier
   `fl_exp_12d_sens_p06_paxv_station_lots_continuous` on its own 16 seeds.

@@ -166,11 +166,8 @@ def _synthetic_cell(
         "platform": tier["platform"],
         "intended_complement": dict(complement),
         "effective_state": {
-            "rhythm_catalog": True,
-            "exposure_cap_requested": True,
-            "exposure_cap_active": True,
-            "rhythm_requested": True,
-            "rhythm_layer_active": True,
+            "rhythm_catalog": tier["platform"] == "mega_cruise_5000",
+            **tier["expected_state"],
         },
         "frozen_block_witness": {"pinned_leaves": 1, "mismatches": []},
         "declared_arm": {
@@ -181,7 +178,11 @@ def _synthetic_cell(
             "preboarding_reportable": {"passenger": 0, "crew": 0},
             "complement": complement,
         },
-        "onsets_by_day": {"all": onsets, "excluding_declared_seeds": onsets},
+        "onsets_by_day": {
+            "all": onsets,
+            "excluding_declared_seeds": onsets,
+            "incident": onsets,
+        },
         "reporting_by_day": {
             "cumulative_end_of_day": cumulative,
             "epoch_zero_cumulative": {"passenger": 0, "crew": 0},
@@ -190,16 +191,25 @@ def _synthetic_cell(
     }
 
 
+def _declared_seeds(manifest: dict, tier_id: str, n: int = 2) -> list[int]:
+    return manifest["tiers"][tier_id]["seeds"][:n]
+
+
 def test_readout_recovers_the_target_from_itself(
     readout: types.ModuleType, manifest: dict, target: dict,
 ) -> None:
     payloads = [
         _synthetic_cell(manifest, tier_id, seed, target["onsets_by_day"])
         for tier_id in manifest["tiers"]
-        for seed in (1, 2)
+        for seed in _declared_seeds(manifest, tier_id)
     ]
     result = readout.build_readout(payloads, manifest, target)
     assert result["defects"] == []
+    assert result["status"] == "partial"
+    assert all(
+        cov["read"] == 2 and len(cov["missing"]) == 98
+        for cov in result["coverage"].values()
+    )
     for tier_id, tier in manifest["tiers"].items():
         block = result["tiers"][tier_id]
         assert block["evaluable"] == block["cells"] == 2
@@ -221,14 +231,15 @@ def test_readout_grades_peaks_and_small_curves(
     assert readout.peak_tied([0, 3, 3, 1]) is True
     assert readout.peak_day([0, 0]) is None
     tier_id = next(iter(manifest["tiers"]))
+    seed = _declared_seeds(manifest, tier_id, 1)[0]
     small = _synthetic_cell(
-        manifest, tier_id, 1,
+        manifest, tier_id, seed,
         {"passenger": [1, 2, 0, 0, 0, 0, 0, 0], "crew": [0] * 8},
     )
     metrics = readout.cell_metrics(small)
     assert metrics["evaluable"] is False and metrics["lag_days"] is None
     shifted = _synthetic_cell(
-        manifest, tier_id, 1,
+        manifest, tier_id, seed,
         {"passenger": [0, 30, 10, 0, 0, 0, 0, 0],
          "crew": [0, 0, 0, 0, 0, 2, 6, 0]},
     )
@@ -243,7 +254,10 @@ def test_readout_audit_flags_design_violations(
         if tier["platform"] == manifest["platform"]
         and tier["introduction"] == "declared_five"
     )
-    good = _synthetic_cell(manifest, tier_id, 1, target["onsets_by_day"])
+    good = _synthetic_cell(
+        manifest, tier_id, _declared_seeds(manifest, tier_id, 1)[0],
+        target["onsets_by_day"],
+    )
     assert readout.audit_cell(good, manifest, "abc") == []
     bad = copy.deepcopy(good)
     bad["frozen_block_witness"]["mismatches"] = [{"key": "x"}]
@@ -251,7 +265,18 @@ def test_readout_audit_flags_design_violations(
     bad["introduction"]["complement"] = {"passenger": 3102, "crew": 1326}
     bad["num_epochs"] = 24
     bad["effective_state"]["exposure_cap_active"] = False
-    assert len(readout.audit_cell(bad, manifest, "zzz")) == 6
+    problems = readout.audit_cell(bad, manifest, "zzz")
+    assert len(problems) == 7
+    stray = copy.deepcopy(good)
+    stray["seed"] = 999999
+    assert readout.audit_cell(stray, manifest, None) == [
+        "seed 999999 is not in the tier's declared seeds",
+    ]
+    ghost = copy.deepcopy(good)
+    ghost["tier"] = "fl_ghost"
+    assert readout.audit_cell(ghost, manifest, None) == [
+        "tier fl_ghost is not in the manifest",
+    ]
 
 
 def test_rhythm_off_arm_is_declared_on_both_hulls_with_paired_seeds(
@@ -273,7 +298,10 @@ def test_rhythm_off_arm_is_declared_on_both_hulls_with_paired_seeds(
         assert tier["arm"] == "rhythm_off" and "arm" not in reference
         assert tier["paired_with"] == reference_tier
         differing = {k for k in tier if tier[k] != reference.get(k)}
-        assert differing == {"description", "arm", "paired_with"}
+        assert differing == {
+            "description", "arm", "paired_with", "expected_state",
+        }
+        assert tier["expected_state"]["rhythm_requested"] is False
         assert tier["seeds"] == reference["seeds"]
         platforms.add(tier["platform"])
     assert platforms == set(arm["hulls"]) and len(platforms) == 2
@@ -345,10 +373,12 @@ def test_readout_measures_what_the_arm_removed(
     base = target["onsets_by_day"]
     payloads = []
     for tier_id, tier in manifest["tiers"].items():
-        for seed in (1, 2):
+        for seed in _declared_seeds(manifest, tier_id):
             onsets = copy.deepcopy(base)
             if "arm" in tier:
-                onsets["passenger"][2] -= 10 * seed
+                onsets["passenger"][2] -= (
+                    10 * (seed - tier["seeds"][0] + 1)
+                )
             payloads.append(_synthetic_cell(manifest, tier_id, seed, onsets))
     result = readout.build_readout(payloads, manifest, target)
     assert result["defects"] == []
@@ -372,3 +402,65 @@ def test_readout_measures_what_the_arm_removed(
     assert readout.audit_cell(wrong, manifest, None)
     del wrong["declared_arm"]
     assert readout.audit_cell(wrong, manifest, None)
+
+
+def test_expected_state_distinguishes_the_hulls_and_arms(
+    cell: types.ModuleType, manifest: dict,
+) -> None:
+    # The reference check Edison flagged: an absent layer passes
+    # arm_witness on a mega reference cell; the tier's declared
+    # expected_state is what rejects it.
+    meg = "fl_meg_8d_recon_declared_five"
+    exp = "fl_exp_8d_recon_declared_five"
+    arm = "fl_meg_8d_recon_declared_five_rhythm_off"
+    on = {
+        "exposure_cap_requested": True, "exposure_cap_active": True,
+        "rhythm_requested": True, "rhythm_layer_active": True,
+    }
+    detached = {**on, "rhythm_layer_active": False}
+    off = {**detached, "rhythm_requested": False}
+    assert cell.check_expected_state(manifest, meg, on) == []
+    assert cell.check_expected_state(manifest, meg, detached)
+    assert cell.check_expected_state(manifest, exp, detached) == []
+    assert cell.check_expected_state(manifest, exp, on)
+    assert cell.check_expected_state(manifest, arm, off) == []
+    assert cell.check_expected_state(manifest, arm, detached)
+    cap_missing = {**detached, "exposure_cap_active": False}
+    assert cell.check_expected_state(manifest, exp, cap_missing)
+
+
+def test_readout_enforces_coverage_before_a_complete_verdict(
+    readout: types.ModuleType, manifest: dict, target: dict,
+) -> None:
+    tier_id = "fl_exp_8d_recon_declared_five"
+    seed = _declared_seeds(manifest, tier_id, 1)[0]
+    one = _synthetic_cell(manifest, tier_id, seed, target["onsets_by_day"])
+    partial = readout.build_readout([one], manifest, target)
+    assert partial["status"] == "partial"
+    assert partial["defects"] == []
+    assert partial["coverage"][tier_id]["missing"]
+    # A duplicate archive is dropped before pairing and recorded.
+    dup = readout.build_readout(
+        [one, copy.deepcopy(one)], manifest, target,
+    )
+    assert partial["coverage"][tier_id]["read"] == 1
+    assert any(
+        "duplicate" in problem
+        for defect in dup["defects"] for problem in defect["problems"]
+    )
+    assert dup["coverage"][tier_id]["read"] == 1
+    # An unexpected seed is excluded and recorded, not paired.
+    stray = copy.deepcopy(one)
+    stray["seed"] = 999999
+    out = readout.build_readout([stray], manifest, target)
+    assert out["coverage"][tier_id]["unexpected"] == [999999]
+    assert out["coverage"][tier_id]["read"] == 0
+    assert out["defects"]
+    # A cell for a tier outside the manifest is a defect, not a crash.
+    ghost = copy.deepcopy(one)
+    ghost["tier"] = "fl_ghost"
+    out = readout.build_readout([ghost], manifest, target)
+    assert out["defects"] and out["cells"] == 1
+    # Empty input is a partial readout, not a clean verdict.
+    empty = readout.build_readout([], manifest, target)
+    assert empty["status"] == "partial" and empty["cells"] == 0

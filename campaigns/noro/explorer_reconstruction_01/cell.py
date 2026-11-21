@@ -178,6 +178,45 @@ def realized_complement(sim: Any) -> dict[str, int]:
     return {role: roles.count(role) for role in ROLES}
 
 
+def initially_infected_agent_ids(sim: Any) -> set[int]:
+    """Agents carrying an active infection at initialize.
+
+    Everyone in this set boarded already infected: the declared explicit
+    seeds plus any boarding-prevalence draw. Read it at initialize, before
+    epoch 0, so an incident-aboard onset curve can exclude all prevalent
+    boarders and not just the declared seeds.
+    """
+    infected: set[int] = set()
+    for agent in sim.engine.agents:
+        infections = getattr(agent, "infections", None) or {}
+        for record in infections.values():
+            status = (record or {}).get("status")
+            if getattr(status, "name", status) == "INFECTED":
+                infected.add(int(agent.agent_id))
+                break
+    return infected
+
+
+def check_expected_state(
+    manifest: dict[str, Any], tier: str, state: dict[str, Any],
+) -> list[str]:
+    """Requested/effective mechanism state vs the tier's declared state.
+
+    ``tiers[tier]["expected_state"]`` declares each of ``rhythm_requested``,
+    ``rhythm_layer_active`` and the exposure-cap pair for that hull and arm:
+    requested and attached on hulls with a rhythm catalog, requested but
+    absent on Explorer's exception, disabled and absent on the rhythm-off
+    arms. An absent layer where the hull declares one is a mismatch here,
+    not an arm-path resolution issue.
+    """
+    expected = manifest["tiers"][tier].get("expected_state") or {}
+    return [
+        f"{key} is {state.get(key)!r}, declared {want!r}"
+        for key, want in expected.items()
+        if state.get(key) != want
+    ]
+
+
 def effective_state(sim: Any, platform: str) -> dict[str, Any]:
     """Mechanisms whose effective state depends on the hull, read back.
 
@@ -225,18 +264,34 @@ def day_index(clock: Any, epoch: int, n_days: int) -> int:
 
 def onset_curves(
     cases: list[dict[str, Any]], declared_ids: set[int], clock: Any,
-    n_days: int,
+    n_days: int, prevalent_ids: set[int] | None = None,
 ) -> dict[str, Any]:
-    """Day-binned line-list onsets per role, with and without the seeds."""
+    """Day-binned line-list onsets per role, three labellings.
+
+    ``all`` is first observed symptom aboard, the observed-onset curve.
+    ``excluding_declared_seeds`` drops only the imposed seeds, so it still
+    contains boarders already ill from the boarding draw. ``incident``
+    drops every agent infected at initialize (``prevalent_ids``), the
+    incident-onset comparator.
+    """
+    prevalent = prevalent_ids if prevalent_ids is not None else declared_ids
     every = {role: [0] * n_days for role in ROLES}
     aboard = {role: [0] * n_days for role in ROLES}
+    incident = {role: [0] * n_days for role in ROLES}
     for case in cases:
         role = "crew" if case["crew"] else "passenger"
+        pid = int(case["person_id"])
         day = day_index(clock, case["onset_epoch"], n_days)
         every[role][day] += 1
-        if int(case["person_id"]) not in declared_ids:
+        if pid not in declared_ids:
             aboard[role][day] += 1
-    return {"all": every, "excluding_declared_seeds": aboard}
+        if pid not in prevalent:
+            incident[role][day] += 1
+    return {
+        "all": every,
+        "excluding_declared_seeds": aboard,
+        "incident": incident,
+    }
 
 
 def reporting_curves(
@@ -337,7 +392,14 @@ def run_cell(
                 f"{tier}: initialized complement {realized} is not the "
                 f"declared {intended} ({complement})",
             )
+        prevalent_ids = initially_infected_agent_ids(sim)
         state = effective_state(sim, platform)
+        state_mismatches = check_expected_state(manifest, tier, state)
+        if state_mismatches:
+            raise SystemExit(
+                f"{tier}: effective state is not the tier's declared "
+                f"state: {state_mismatches}",
+            )
         declared_arm = arm_witness(manifest, arm, sim.cfg, state)
         if declared_arm["mismatches"]:
             raise SystemExit(
@@ -373,6 +435,7 @@ def run_cell(
         "python_hash_seed": os.environ.get("PYTHONHASHSEED"),
         "wall_clock_s": round(wall_clock_s, 1),
         "introduction": witness,
+        "initially_infected_agent_ids": sorted(prevalent_ids),
         "complement_block": complement,
         "intended_complement": intended,
         "effective_state": state,
@@ -385,6 +448,7 @@ def run_cell(
         "onsets_by_day": onset_curves(
             line_list["clinical_cases"],
             set(witness["declared_seed_agent_ids"]), clock, n_days,
+            prevalent_ids,
         ),
         "reporting_by_day": reporting_curves(
             payload["timeseries"], clock, n_days,

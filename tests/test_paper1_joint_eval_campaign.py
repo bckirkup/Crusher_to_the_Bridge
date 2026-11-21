@@ -399,6 +399,84 @@ def test_a_shortened_voyage_is_not_an_intended_input(stage_b):
     assert not readout.inputs_ok({**good, "python_hash_seed": "0"}, tier, "h")
 
 
+def _fake_sim(cfg: dict, rhythm: object = None):
+    import types
+
+    engine = types.SimpleNamespace(_rhythm=rhythm)
+    return types.SimpleNamespace(cfg=cfg, engine=engine)
+
+
+def test_effective_config_rejects_added_paths_outside_the_allowlist():
+    declared = {"ship_graph": {"agent_classes": [{"id": "x", "fraction": 1.0}]}}
+    spec = {
+        "ship_graph": {
+            "agent_classes": [{"id": "x", "fraction": 1.0}],
+            "num_agents": 450,
+        },
+        "escalation": {"suspect_attack_rate": 0.02},
+        "initiation": {"boarding": {"enabled": True}},
+        "natural_history_clock": "hours",
+    }
+    cfg = {
+        "ship_graph": spec["ship_graph"],
+        "escalation": spec["escalation"],
+        "initiation": spec["initiation"],
+        "natural_history_clock": "hours",
+        "rhythm": {"enabled": True},
+    }
+    out = cell.check_effective(_fake_sim(cfg, object()), declared, spec)
+    assert out["runner_changed_paths"] == []
+    assert set(out["runner_added_paths"]) == {
+        "escalation.suspect_attack_rate",
+        "initiation.boarding.enabled",
+        "natural_history_clock",
+        "ship_graph.num_agents",
+    }
+    added = copy.deepcopy(spec)
+    added["observation"] = {"enabled": True}
+    with pytest.raises(SystemExit):
+        cell.check_effective(
+            _fake_sim({**cfg, "observation": {"enabled": True}}),
+            declared, added,
+        )
+    moved = copy.deepcopy(spec)
+    moved["escalation"]["suspect_attack_rate"] = 0.05
+    with pytest.raises(SystemExit):
+        cell.check_effective(_fake_sim(cfg), declared, moved)
+
+
+def test_mechanism_state_asserts_requested_and_attached():
+    sim = _fake_sim({"rhythm": {"enabled": True}}, rhythm=object())
+    tier = {"joint_eval": {"expected_state": {
+        "rhythm_enabled": True, "rhythm_layer_attached": True,
+    }}}
+    out = cell.check_mechanism_state(sim, tier)
+    assert out["actual_state"] == {
+        "rhythm_enabled": True, "rhythm_layer_attached": True,
+    }
+    detached = _fake_sim({"rhythm": {"enabled": True}}, rhythm=None)
+    with pytest.raises(SystemExit):
+        cell.check_mechanism_state(detached, tier)
+    arm = {"joint_eval": {"expected_state": {
+        "rhythm_enabled": False, "rhythm_layer_attached": False,
+    }}}
+    off = _fake_sim({"rhythm": {"enabled": False}}, rhythm=None)
+    assert cell.check_mechanism_state(off, arm)["actual_state"][
+        "rhythm_enabled"
+    ] is False
+
+
+def test_manifest_declares_the_allowlist_and_expected_states(stage_b):
+    manifest, _campaign = stage_b
+    assert manifest["joint_eval"]["runner_added_allowlist"] == (
+        build.RUNNER_ADDED_ALLOWLIST
+    )
+    for tier in manifest["tiers"].values():
+        assert tier["joint_eval"]["expected_state"] == {
+            "rhythm_enabled": True, "rhythm_layer_attached": True,
+        }
+
+
 def test_worker_re_executes_under_the_pinned_hash_seed(monkeypatch):
     calls = []
     monkeypatch.setattr(cell.os, "execve", lambda *a: calls.append(a))
