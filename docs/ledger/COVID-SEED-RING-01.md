@@ -1,7 +1,7 @@
 # COVID-SEED-RING-01
 **Date:** 2026-11-21
 **Commit:** 87e8e3bb2f756c6698be5fe337814a955c2a40e4
-**Pathogens:** covid
+**Pathogens:** sars_cov2_resp
 **Status:** measured
 **Measured at:** 87e8e3bb2f756c6698be5fe337814a955c2a40e4 (image digest sha256:87bc852a27f52cf476d09e417df6845a4c66aa9485490785d40b9d1a160b4773)
 
