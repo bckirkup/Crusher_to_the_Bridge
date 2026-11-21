@@ -8,7 +8,8 @@
 > is byte-identical to the reviewed one. Verified on the revision branch
 > (main at `d9d4bf05`, which includes #1359) by `scripts/paper1_freeze_block_check.py`: 57 declared units,
 > 70 scalar leaves (63 resolved-state, 7 configuration-only), 0 failures,
-> 1 pending (Explorer rhythm-layer attachment, §2.8; the exposure-cap
+> 1 pending (Explorer rhythm-layer attachment, §2.8 — held as Edison's
+> declared exception, option C, 2026-11-21; the exposure-cap
 > divergence was closed by #1359); output retained at
 > [`paper1_freeze_block_check_output_2026_11_21.txt`](paper1_freeze_block_check_output_2026_11_21.txt).
 > No voyage epoch was stepped and no number in this document is a model
@@ -633,7 +634,8 @@ run made before `70e833b6` with the cap requested is a cap-off measurement.
 This was a configuration-state finding; it says nothing about the size of
 the cap's epidemiological effect.
 
-**Explorer rhythm layer — open, decision for Edison.** WP1c found a second
+**Explorer rhythm layer — decided by Edison (2026-11-21): option C plus a
+declared paired arm.** WP1c found a second
 divergence the review did not name. The four archetypes initialize with the
 SHIP-RHYTHM-02 schedule layer attached; `explorer_seas_06` initializes with
 none, because it has no catalog row. `crusher_labs/config.yaml` declares
@@ -647,7 +649,7 @@ neither requests nor records this state.
 
 The checker asserts attachment on every hull against Expedition's state and
 carries Explorer as a declared `PENDING` entry, which fails once it stops
-reproducing. The contract does not choose; the options are:
+reproducing. The options Edison chose among were:
 
 | Option | What it takes | Consequence |
 |---|---|---|
@@ -655,10 +657,23 @@ reproducing. The contract does not choose; the options are:
 | B. Rhythm-free reference | Add `rhythm.enabled: false` to the §2.1 block for all five hulls | Same mechanism on all five hulls, but the archetypes move off the shipped default (`rhythm.enabled: true`), **and it is a §2 block change that restarts this review** |
 | C. Labelled deferred exception | Record Explorer as rhythm-free in the freeze record | Archetype reference is unchanged; Explorer's comparison with the mega archetype carries a declared mechanism difference in addition to population and geometry |
 
-Until the decision is recorded, Explorer's same-mechanism comparison is
-**reserved**: no Explorer cell runs as a reference cell. Attaching an
-existing class's catalog to Explorer is not an option; it is the schedule
-import the review ruled out.
+**Edison's decision (2026-11-21):** option C is retained — Explorer stays
+rhythm-free as the labelled deferred exception — **plus a specifically
+declared paired arm** comparing Explorer and Mega with `rhythm.enabled:
+false` on both hulls. That arm gives a common rhythm-free comparison and
+measures the schedule layer's contribution; it does not replace the main
+rhythm-enabled reference and does not reopen unrelated parts of the review.
+Option A remains available later if a 2006 Explorer programme is recovered;
+option B stays closed (a §2.1 block change would restart the review). The
+paired arm is a §2.9 declared difference arm of the WP3 reconstruction
+campaign; its cells pin `rhythm.enabled: false` on *both* hulls and record
+the resolved value post-axis.
+
+Under this decision the checker's Explorer rhythm-attachment entry stays
+`PENDING` **as the declared exception itself** — it asserts the divergence
+continues to reproduce exactly, not that it heals. Explorer cells may run
+as reference cells carrying the declared difference. Attaching an existing
+class's catalog to Explorer remains ruled out.
 
 **Unregistered source ids are accepted.** A `source_id` absent from the
 registry initializes without error and resolves no registry values. The
@@ -885,7 +900,9 @@ Four hulls × three voyage lengths (168 / 288 / 504 epochs) × three bridge
 strata — quiet, near-threshold, outbreak — on paired seeds, every cell
 carrying the §2.1 block as its invariant baseline (§2.9). Labelled-baseline
 arms that reproduce a prior draw give a bit-identity check of the contract.
-Explorer joins only after §2.8 is resolved.
+Explorer cells run as reference cells carrying the §2.8 declared exception
+(option C); the reconstruction adds the declared rhythm-disabled Explorer×
+Mega paired arm that measures the schedule layer's contribution.
 
 **Arithmetic, stated plainly.** The seed table of revision 1 (20 outbreak,
 100 near-threshold, 300 quiet per cell) is 4 × 3 × (20 + 100 + 300) =
@@ -980,7 +997,7 @@ Edison's six required corrections and four affirmed decisions
 | # | Correction | Resolved in | Verified by |
 |---|---|---|---|
 | 1 | Role populations stated and asserted | §2.7 (counts, exact class counts, labelled baseline, Explorer comparison); §2.5 row; §5.3 item 1 | Checker role-count check on five hulls, both allocations |
-| 2 | Explorer exposure-cap eligibility | §2.8 (closed by WP1c, #1359); §1 condition 5. A second divergence found by WP1c — rhythm-layer attachment — is **open** in §2.8 and limitation 13 | Checker per-hull resolved-state probes on all five hulls; rhythm attachment asserted; one `PENDING` entry |
+| 2 | Explorer exposure-cap eligibility | §2.8 (closed by WP1c, #1359); §1 condition 5. The rhythm-layer divergence WP1c found is **decided** in §2.8: option C declared exception + a rhythm-disabled Explorer×Mega paired arm (Edison, 2026-11-21) | Checker per-hull resolved-state probes on all five hulls; rhythm attachment asserted; one `PENDING` entry held as the declared exception |
 | 3 | Explicit six-family output contract | §5.1 | Annex `run.sentinel_line_list` request; fixtures required before the bridge |
 | 4 | Bridge completion split from scientific outcome | §5.3; zero-event convention §5.2 | — (design rule) |
 | 5 | Invariant baseline and declared arms | §2.9; §2.1 and §2.2 wording; annex §2.10 | Checker compares generated cells after all runner axes |
@@ -1006,3 +1023,4 @@ Edison's six required corrections and four affirmed decisions
 |---|---|---|
 | 1 | 2026-11-20 | Proposed for Edison's review; merged #1355, reviewed at `73ad8724` |
 | 2 | 2026-11-21 | Edison's six corrections and affirmed decisions applied. §2.1 block unchanged. Added §2.7–§2.10, §5.1–§5.3, §7, §8; rewrote §2.3, §2.4, §2.6, §4; limitations 1 and 10 reworded, 13 added. Checker tightened; output and annex committed. §2.5 hash-seed row corrected to the worker-side pin (WP3 review). §2.8 updated for #1359 and the rhythm-layer divergence |
+| 2a | 2026-11-21 | §2.8 rhythm decision recorded: Edison chose option C (labelled deferred exception) plus a declared rhythm-disabled Explorer×Mega paired arm; Explorer reservation lifted under the declared-difference label; §5.2 updated |
