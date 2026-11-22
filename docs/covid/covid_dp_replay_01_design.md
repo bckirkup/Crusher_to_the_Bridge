@@ -32,13 +32,13 @@ where the engine can express it, adapted where it cannot) plus
 |-------|-------|------|
 | Hour-level SOP activation | `engines/scenario_schedule.py` | `start_hour_of_day`/`end_hour_of_day` on `ScheduledProtocol`; quarantine binds at epoch 391 (day 16, 07:00) |
 | Dealing-day union | `picard_framework/simulation/ship_simulation.py` | `protocol_ids_for_day` unions protocols opening later the same day into `active_sop_names` so day 16 deals the confinement variant before modifiers bind |
-| `diamond` rhythm catalog | `data/rhythm/event_catalogs.json` | `venue_map` + embarkation/sea_day/port_day templates + `diamond_confinement` sop_variant (effects + `additional_events` service routes + `exercise` block) + `passenger_disposition` |
+| `diamond` rhythm catalog | `data/rhythm/event_catalogs.json` | `opt_in` catalog (skipped by platform matching so other dedicated-hull arms keep the labelled baseline; named by `rhythm_overrides.catalog`): `venue_map` + embarkation/sea_day/port_day templates + `diamond_confinement` sop_variant (effects + `additional_events` service routes + `exercise` block) + `passenger_disposition`. Its `platforms` list is documentation only. |
 | Exercise outings | `engines/rhythm_layer.py` | `exercise_outing`/`exercise_transit`/`service_route` commitments (priority 8), `_deal_exercise` rollout/parity/willingness/caps, `outing_zone_for`, `exercise_telemetry` |
 | Confined-agent release | `engines/infection_dynamics_bridge.py` | `_place_agent_epoch` honors `outing_zone_for` ahead of the home-zone override |
 | Passenger disposition | `engines/rhythm_layer.py` | `location_for` claims uncommitted Free/Meal tokens at declared shares (persistent party cabin preference 0.75, outdoor 0.08, meal skip 0.55) |
 | Ventilation passthrough | `orchestrator_init.py` | `cabin_ventilation_type` reaches engine zones (interior/exterior cohort proxy) |
 | port_call capacity | `engines/rhythm_layer.py` | excursions skip the transit-front venue cap; the residual floor is the binding cap |
-| Arm keys | `picard_framework/covid_boarding_screen.py` | `protocols_path`, `rhythm_overrides` (`port_day_onboard_midday_residual`, `exercise`, `passenger_disposition`); retimer covers hour fields |
+| Arm keys | `picard_framework/covid_boarding_screen.py` | `protocols_path`, `rhythm_overrides` (`catalog`, `port_day_onboard_midday_residual`, `exercise`, `passenger_disposition`); retimer covers hour fields |
 | DP protocols | `data/config/protocols_covid_dp_dedicated.json` | SOP-017-DEDICATED: confinement + crew exempt + DP work zones + staggered crew mess (seatings 4) |
 | Acceptance harness | `tools/dp_replay_acceptance.py` | no-transmission voyage (explicit_seeds emptied) → person-hour budgets, confinement witness, exercise telemetry |
 
@@ -46,6 +46,10 @@ where the engine can express it, adapted where it cannot) plus
 
 - 45-min meals = `occupancy_share` of the window; 60-min outing dwell =
   the epoch with max overlap + 1 corridor transit epoch.
+- Excursion hours: a port day declaring both `disembarkation_window` and
+  `reembarkation_window` overrides the port_call template's span with the
+  real excursion window (Naha: 16:00–20:00), plumbed via
+  `EpochState.excursion_window_minutes`.
 - Cabin occupancy is corridor-zone presence (hourly resolution; no
   stateroom interiors).
 - Interior/exterior cohort = `cabin_ventilation_type`

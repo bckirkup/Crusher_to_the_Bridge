@@ -1,6 +1,6 @@
 # DP-REPLAY-ENVIRON-01
 **Date:** 2026-11-22
-**Commit:** 4f92bd69
+**Commit:** 96971a9e
 **Pathogens:** sars_cov2_resp
 **Status:** measured
 **Scope note:** environs only — no dose figure, no theta
@@ -20,9 +20,12 @@ scored anchor.
 - `ScheduledProtocol.start/end_hour_of_day` + `protocol_ids_for_day`
   dealing-day union → confinement binds epoch 391 (5 Feb 07:00) and
   dealing day 16 uses the confinement variant before modifiers bind.
-- `diamond` rhythm catalog: venue_map, embarkation/sea_day/port_day
-  templates, `diamond_confinement` variant (meals-to-cabin, service
-  routes, `exercise` block), `passenger_disposition` block.
+- `diamond` rhythm catalog (`opt_in`, named via
+  `rhythm_overrides.catalog`; platform matching alone returns nothing so
+  frozen platform-fidelity arms keep the labelled baseline): venue_map,
+  embarkation/sea_day/port_day templates, `diamond_confinement` variant
+  (meals-to-cabin, service routes, `exercise` block),
+  `passenger_disposition` block.
 - Exercise machinery: `exercise_outing`/`transit`/`service_route`
   commitments, cohort rollout by `cabin_ventilation_type`, alternate-day
   parity per travelling unit, persistent willingness, bounded parallel
@@ -35,35 +38,42 @@ scored anchor.
 - `orchestrator_init` engine-zone projection now carries
   `cabin_ventilation_type` (previously dropped — interior cohort read 0).
 - port_call excursions skip the transit-front venue cap; the voyage
-  midday residual floor is the binding cap.
+  midday residual floor is the binding cap. A port day declaring both
+  disembarkation and reembarkation windows deals the real excursion
+  window (`EpochState.excursion_window_minutes`; Naha 16:00–20:00)
+  instead of the template's generic 09:00–16:00 span.
 - New arm keys: `protocols_path`, `rhythm_overrides`
-  (port_day_onboard_midday_residual, exercise, passenger_disposition),
-  plus hour-field retiming under `scheduled_protocol_window`.
+  (catalog, port_day_onboard_midday_residual, exercise,
+  passenger_disposition), plus hour-field retiming under
+  `scheduled_protocol_window`.
 
 ## Measurement (tools/dp_replay_acceptance.py, arm `replay_niid`,
-no-transmission voyage, 480 epochs, seed 20200205, at branch head)
+no-transmission voyage, 480 epochs, seed 20200205)
+
+**Measured at:** 96971a9e
 
 Pre-quarantine passenger budgets (person-h / pax / day; spec target in
-parens): cabin 13.3 (15), dining 2.55 (2.25), indoor_free 3.4,
-corridor 1.8, outdoor 0.81 (0.5), ashore 0.62 avg.
+parens): cabin 14.8 (15), dining 2.76 (2.25), indoor_free 3.7,
+corridor 2.0, outdoor 0.9 (0.5), ashore 0.36 avg over 15 days.
 
-Ashore fires only on the six declared port calls (Kagoshima, Hong Kong,
-Chan May, Cai Lan, Keelung, Naha): ~4.2–4.6k person-h/day ≈ ~1,050 pax
-× ~4 h inside the 09:00–16:00 window; every sea day 0.
+Ashore fires only on the six declared port calls: Kagoshima 1,745,
+Hong Kong 2,695, Chan May 2,720, Cai Lan 2,656, Keelung 2,755,
+Naha 1,814 person-h (Naha inside the real 16:00–20:00 window; others
+09:00–16:00). Every sea day 0.
 
-Confinement witness: epoch 391 fraction-at-home 0.556 (transition hour),
-epoch 392 0.986, epoch ≥408 0.9996.
+Confinement witness: epoch 391 fraction-at-home 0.578 (transition hour
+with residual pre-declared commitments), epoch 392 1.000, epoch ≥408
+1.000.
 
-Exercise (interior `interior_hvac` first, exterior `balcony_partial`
-at offset 2): day_offset 0 (voyage_day 17, 6 Feb, slots ≥13:30)
-invited 356 interior / attended 165; offset 1 invited 350 / 184;
-offset 2 (8 Feb) invited 1,348 / 680; offset 3 1,318 / 685. Groups
-12/day, max size ≤75 (cap 125). ~49% willingness observed. Interior
-cohort size ~710 pax ≈ inside-cabin complement.
+Exercise — spec §6 rollout honoured exactly: voyage_day 17 (5 Feb,
+first confined day) invited 0; voyage_day 18 (6 Feb) interior cohort
+only, invited 356 / attended 139, slots ≥13:30; voyage_day 19 interior
+350 / 209; voyage_day 20 (8 Feb) interior + exterior invited 1,348 /
+attended 607, group max 40 (cap 125). Zero-invite days still emit a
+telemetry line.
 
-Quarantine-segment pax: ~25.5 h/day cabin-classed, 0.3 h outdoor
-(exercise), ≤0.3 h corridor. Crew: 26.6 cabin, 2.55 dining (staggered
-crew mess, seatings 4), 1.7 indoor free.
+Crew mess: all meal_seating events seatings=4 staggered with `rolling`
+egress so `synchronized_end` cannot claim the corridor epoch.
 
 ## Declared approximations / deviations vs the Kosmos spec
 
