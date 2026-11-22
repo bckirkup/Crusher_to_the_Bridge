@@ -86,3 +86,26 @@ Selection / decision rules:
 44 cells (2 arms × 22) on the existing layered image (rebuild only for
 the worker flag); ~45–60 min/cell at 1 vCPU. Canopy: same canary gate —
 ≥20-seed canary on arm B first, stop and report before the rest.
+
+## Result — arm B canary (20/22 cells, `Measured at` pending remainder)
+
+Campaign `noro_pool_pickup_01`, block `classic_cruise_1900_discrete`,
+seeds 8000–8019, 288 epochs, jobdef `picard-noro-pool-pickup-01:23`,
+image digest `sha256:770d24a9…`. All 20 artifacts passed the frozen
+audit (solver resolved `discrete`, len-288 ledgers, reconciliations).
+
+Pooled (20 cells): requested 79.8M GEC, offered 2.14B, delivered 79.6M —
+the per-touch path works end to end (~100% of requested filled). But
+~99.9% of delivered mass is still emesis-patch (79.5M); on cold cells
+the requests themselves are ~0–10k and deliveries ~0–5k, the same order
+as the continuous baseline's 0–4k. Σhazard 220.2 vs baseline 184.1 on
+the same hot cells (8006: 177.4 vs 146; 8000: 39.1 vs 31); mouth dose
+2.3M vs 1.0M pooled.
+
+**Verdict under the frozen rules: B ≈ A on cold cells.** Per-touch
+pickup is not the binding stage — the zone pool holds mass and pickup
+machinery delivers whatever is asked, but ordinary high-touch
+encounters *request* almost nothing. The deficit is upstream of pickup:
+encounter structure (who touches what, how often, at what intensity)
+rather than delivery mechanics. Arm C (per_surface) will say whether
+itemizing the pool changes the request side.

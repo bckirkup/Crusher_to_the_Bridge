@@ -27,10 +27,20 @@ the 22 frozen `classic_cruise_1900` cells (seeds 8000–8019 + 8105/8106,
 - [x] Dry-run array count = 22 per block (describe + submit --dry-run).
 - [x] S3 prefix `campaign/noro_pool_pickup_01/` clean (no artifacts ever
   landed).
-- [ ] Canary readout: 20 jobs `classic_cruise_1900_discrete`
+- [x] Canary readout: 20 jobs `classic_cruise_1900_discrete`
   `-20261122-222149` (index 0, verified RUNNING past entrypoint) +
   `-222726..-222850` (index 1–19), seeds 8000–8019, resubmitted on
-  jobdef :23; contract verify per artifact, STOP and report.
+  jobdef :23; all SUCCEEDED, all 20 artifacts clean (solver resolved
+  `discrete`, len-288 ledgers, reconciliations pass).
+  **Readout:** pooled requested 79.8M GEC, offered 2.14B, delivered
+  79.6M — per-touch pickup works (~100% of requested filled) but
+  ~99.9% of delivered mass is still emesis-patch; cold cells request
+  ~0–10k and deliver ~0–5k, same order as the continuous baseline.
+  Σhazard 220.2 vs baseline 184.1 (same cells hot: 8006 177 vs 146,
+  8000 39 vs 31; mouth dose 2.3M vs 1.0M pooled). Cold cells do not
+  ignite → per frozen rule, deficit is upstream of pickup: the pool
+  holds mass and pickup works, but encounters on ordinary high-touch
+  surfaces request almost nothing.
 - [ ] Arm-B remainder (seeds 8105/8106) + arm-C canary on user approval.
 - [ ] Readout committed in `docs/ledger/NORO-POOL-PICKUP-01.md` and the
   decision rule applied; interpretation sent.
@@ -39,3 +49,4 @@ the 22 frozen `classic_cruise_1900` cells (seeds 8000–8019 + 8105/8106,
 
 | date | block | shape | job ids | verdict |
 |---|---|---|---|---|
+| 2026-11-22 | classic_cruise_1900_discrete | 20-seed canary | `-222149`, `-222726..-222850` | delivered≈patch only; deficit upstream of pickup |
