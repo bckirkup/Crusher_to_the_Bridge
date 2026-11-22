@@ -42,6 +42,8 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- [NORO-CASCADE-ARMS-01](NORO-CASCADE-ARMS-01.md) — open. D1′ stopped before simulation. All direct hand donors must shed, and the carrier-redeposition witness misses the frozen solver's surface and food flows.
+
 - [NORO-EXPOCAP-EXPLORER-01](NORO-EXPOCAP-EXPLORER-01.md) — measured: under the Paper-1 frozen block the exposure cap resolved inactive on `explorer_seas_06` and active on the four archetypes; corrected by a cap-only platform scope (no rhythm catalog row); the rhythm layer still differs on Explorer and stays open.
 - [NORO-DOSE-LEDGER-01](NORO-DOSE-LEDGER-01.md) — declared, design only: joined per-epoch hand/fomite mass ledger (deposit → delivered → carriage → hand-to-hand → swallowed → credited → hazard, plus standing reservoirs) on the 22 NORO-DOSE-BLOCK-01 cells; gates D2′; nothing run beyond local smoke.
 - [COVID-TRANSPORT-FIT-01](COVID-TRANSPORT-FIT-01.md) — low observed provider sensitivity in two replays, with 0/70 takeoff flips and DP seed differences up to +39 onsets and +50 confirmations. Dose preservation, repair attribution and a historical takeoff probability are unmeasured.
