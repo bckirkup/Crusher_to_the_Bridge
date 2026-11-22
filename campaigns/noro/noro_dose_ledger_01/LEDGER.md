@@ -23,10 +23,10 @@ reservoirs (hands, surface pool, emesis patches) at each epoch end.
 - [x] Instrument built and locally smoke-verified (seed 8105, 24 epochs:
   ledger sums reconcile to voyage counters exactly; epoch-20 emesis event
   captured end-to-end)
-- [ ] `scripts/campaign describe` dry-run count check
-- [ ] image `noro-dose-ledger01` built from a commit containing the
-  instrument; digest pinned in campaign.json
-- [ ] jobdef registered; revision recorded below
+- [x] `scripts/campaign describe` dry-run count check (array=22)
+- [x] image `noro-dose-ledger01` built from `1f8a027c` (contains the
+  instrument + review fixes); digest pinned in campaign.json
+- [x] jobdef registered; revision recorded below
 - [ ] canary: 20 seeds, block `classic_cruise_1900`
 - [ ] canary readout + report to user
 - [ ] full array (remaining cells; already-uploaded cells skip)
@@ -34,8 +34,8 @@ reservoirs (hands, surface pool, emesis patches) at each epoch end.
 
 ## Pinned refs (fill at submit time)
 
-- job definition: `picard-noro-dose-ledger-01:<rev>`
-- image digest: `sha256:…`
+- job definition: `picard-noro-dose-ledger-01:1`
+- image digest: `sha256:958502fdb33283d41db65dbbd937791e687945311e4a7fbf842d14fe67ec652f`
 - S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_dose_ledger_01/`
 - canary job id: …
 - array job id: …
