@@ -73,7 +73,7 @@ def _layer(**cfg) -> RhythmLayer:
         _load_zones(),
         seed=42,
         clock=SimClock(mode=HOURS),
-        config={"enabled": True, **cfg},
+        config={"enabled": True, "catalog": "diamond", **cfg},
     )
     assert layer is not None
     return layer

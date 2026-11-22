@@ -200,7 +200,8 @@
      }
     },
     "rhythm_overrides": {
-     "port_day_onboard_midday_residual": 0.5
+     "port_day_onboard_midday_residual": 0.5,
+     "catalog": "diamond"
     }
    },
    "note": "DP-REPLAY-ENVIRON-01 primary arm: dedicated hull + diamond rhythm catalog + real itinerary + confinement variant at epoch 391 + corrected NIID index clock (onset day 3 = 23 Jan, age 2.8). port_day contact_rate_multiplier declared neutral 1.0 — mixing change comes from dealt schedule and ashore absence, not a rate scaler (spec: do not enable un-measured voyage defaults)."
@@ -362,7 +363,8 @@
      }
     },
     "rhythm_overrides": {
-     "port_day_onboard_midday_residual": 0.5
+     "port_day_onboard_midday_residual": 0.5,
+     "catalog": "diamond"
     }
    },
    "note": "Journal-clock variant of the same replay environs (scenario base seed: onset_day -1 = 19 Jan, infection_age_days 6.8). The two clock arms bracket the NIID correction so the theta stage can see the sensitivity, per THETA_AFTER_BEHAVIOR.md."

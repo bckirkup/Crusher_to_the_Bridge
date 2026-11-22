@@ -378,17 +378,36 @@ class RhythmLayer:
         # a legacy day-per-epoch run stays on the labelled baseline.
         if getattr(clock, "mode", _CLOCK_HOURS) != _CLOCK_HOURS:
             return None
-        catalog = cls._catalog_for(platform_id)
+        catalog_name = cfg.get("catalog")
+        catalog = (
+            cls._catalog_named(str(catalog_name))
+            if catalog_name
+            else cls._catalog_for(platform_id)
+        )
         if catalog is None:
             return None
         return cls(catalog, zones, seed=seed, clock=clock, config=cfg)
 
     @staticmethod
-    def _catalog_for(platform_id: str) -> dict[str, Any] | None:
-        if not platform_id or not _EVENT_CATALOG_PATH.is_file():
+    def _catalog_doc() -> dict[str, Any]:
+        if not _EVENT_CATALOG_PATH.is_file():
+            return {}
+        return json.loads(_EVENT_CATALOG_PATH.read_text())
+
+    @classmethod
+    def _catalog_named(cls, name: str) -> dict[str, Any] | None:
+        """An opt-in catalog by id — for replay arms on hulls whose
+        platform match must stay off (frozen controls keep their
+        labelled no-layer behavior unless they name a catalog)."""
+        return cls._catalog_doc().get("ship_class_catalogs", {}).get(name)
+
+    @classmethod
+    def _catalog_for(cls, platform_id: str) -> dict[str, Any] | None:
+        if not platform_id:
             return None
-        doc = json.loads(_EVENT_CATALOG_PATH.read_text())
-        for catalog in doc.get("ship_class_catalogs", {}).values():
+        for catalog in cls._catalog_doc().get("ship_class_catalogs", {}).values():
+            if catalog.get("opt_in"):
+                continue
             if platform_id in catalog.get("platforms", []):
                 return catalog
         return None

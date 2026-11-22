@@ -42,7 +42,6 @@ CATALOGED_PLATFORMS = (
     "expedition_cruise_450",
     "enterprise_galaxy_tng",
     "enterprise_constitution_tos",
-    "diamond_princess",
 )
 
 
@@ -95,6 +94,15 @@ def test_every_cataloged_platform_builds(platform_id: str) -> None:
         set(),
         1,
     )
+
+
+def test_opt_in_catalog_needs_naming() -> None:
+    # The diamond replay catalog is opt-in: platform match alone returns
+    # nothing so frozen dedicated-hull arms keep the labelled baseline.
+    layer = _layer("diamond_princess")
+    assert layer is None
+    layer = _layer("diamond_princess", catalog="diamond")
+    assert layer is not None
 
 
 def test_disabled_flag_builds_nothing() -> None:

@@ -120,11 +120,13 @@ VOYAGE_OVERRIDE_KEYS = frozenset({
     "effects_enabled", "itinerary", "defaults",
 })
 # Fields a rhythm_overrides arm may write onto ``config_overrides.rhythm``:
-# the layer's declared knobs — port-day ashore cap and the confinement
-# ``exercise`` block parameters (DP-REPLAY-ENVIRON-01). Validation stays in
-# ``RhythmLayer.__init__`` so an invalid arm raises at cell build.
+# the layer's declared knobs — opt-in ``catalog`` name, port-day ashore cap,
+# and the confinement ``exercise`` block parameters (DP-REPLAY-ENVIRON-01).
+# Validation stays in ``RhythmLayer.__init__`` so an invalid arm raises at
+# cell build.
 RHYTHM_OVERRIDE_KEYS = frozenset({
     "port_day_onboard_midday_residual", "exercise", "passenger_disposition",
+    "catalog",
 })
 # Fields an observation_overrides arm may write onto
 # ``config_overrides.syndromic``: the record-structure channels that are
