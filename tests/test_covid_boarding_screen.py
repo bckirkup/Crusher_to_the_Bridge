@@ -2022,3 +2022,83 @@ def test_theta_refit_echo_resolves_shipped_defaults():
         payload["delivery"]["presentation_draw_mode"] == "once_per_course"
     )
     assert payload["delivery"]["hand_reservoir_mode"] == "hygiene_cycle"
+
+
+# ── voyage_overrides arm grammar (COVID-SEED-RING-02) ───────────────────
+
+
+def test_voyage_overrides_writes_the_voyage_block():
+    """The stage arm's voyage document lands at config_overrides.voyage."""
+    from picard_framework.covid_boarding_screen import apply_arm_overrides
+
+    raw = {"config_overrides": {}}
+    block = {
+        "effects_enabled": True,
+        "itinerary": [{"day": 1, "type": "embarkation"}],
+        "defaults": {"embarkation": {"contact_rate_multiplier": 4.0}},
+    }
+    apply_arm_overrides(raw, {"voyage_overrides": block}, profile={})
+    assert raw["config_overrides"]["voyage"] == block
+
+
+def test_voyage_overrides_refuses_a_disabled_or_identity_layer():
+    """effects_enabled != true or an empty itinerary is a silent no-op
+    arm and must raise at cell build, not run the baseline."""
+    from picard_framework.covid_boarding_screen import apply_arm_overrides
+
+    for block in (
+        {"itinerary": [{"day": 1, "type": "embarkation"}]},
+        {"effects_enabled": False,
+         "itinerary": [{"day": 1, "type": "embarkation"}]},
+        {"effects_enabled": True, "itinerary": []},
+        {"effects_enabled": True},
+    ):
+        with pytest.raises(ValueError, match="voyage_overrides"):
+            apply_arm_overrides(
+                {"config_overrides": {}},
+                {"voyage_overrides": block},
+                profile={},
+            )
+
+
+def test_voyage_overrides_refuses_unknown_keys():
+    """Shore exposure and any other channel stay off the arm grammar."""
+    from picard_framework.covid_boarding_screen import apply_arm_overrides
+
+    with pytest.raises(ValueError, match="voyage_overrides declares"):
+        apply_arm_overrides(
+            {"config_overrides": {}},
+            {
+                "voyage_overrides": {
+                    "effects_enabled": True,
+                    "itinerary": [{"day": 1, "type": "embarkation"}],
+                    "shore_exposure": {"enabled": True},
+                },
+            },
+            profile={},
+        )
+
+
+def test_seed_ring_02_design_loads_and_enumerates():
+    """The frozen screen: 1 theta x 5 arms x 20 seeds, W5 itinerary is
+    five embarkation days, and the D0 arm stays override-free."""
+    from picard_framework.covid_boarding_screen import load_design
+
+    design = load_design(
+        "picard_framework/runs/covid_seed_ring_02_design.json",
+    )
+    cells = list(enumerate_cells(design))
+    assert len(cells) == 100
+    arm_ids = {a.get("arm_id") for a in design.arms}
+    assert arm_ids == {
+        "D0_declared",
+        "WINDOW_W1_A2",
+        "WINDOW_W1_A4",
+        "WINDOW_W1_A8",
+        "WINDOW_W5_A8",
+    }
+    w5 = design.arm_overrides("WINDOW_W5_A8")["voyage_overrides"]
+    assert [
+        d["type"] for d in w5["itinerary"]
+    ] == ["embarkation"] * 5
+    assert design.arm_overrides("D0_declared") == {}
