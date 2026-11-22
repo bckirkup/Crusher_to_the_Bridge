@@ -29,7 +29,7 @@ reservoirs (hands, surface pool, emesis patches) at each epoch end.
 - [x] jobdef registered; revision recorded below
 - [x] canary: 20 seeds, block `classic_cruise_1900` — all SUCCEEDED
 - [x] canary readout + report to user
-- [ ] full array (remaining cells; already-uploaded cells skip)
+- [x] full array submitted (22-child array; 20 canary cells skip on existing artifacts, 8105/8106 run)
 - [ ] readout + decision (gates D2′; scopes D1′)
 
 ## Pinned refs (fill at submit time)
@@ -38,7 +38,7 @@ reservoirs (hands, surface pool, emesis patches) at each epoch end.
 - image digest: `sha256:958502fdb33283d41db65dbbd937791e687945311e4a7fbf842d14fe67ec652f`
 - S3 prefix: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_dose_ledger_01/`
 - canary job ids: `picard-noro-dose-ledger-01-classic_cruise_1900-20261122-195110` …`-195151` (20 jobs, seeds 8000–8019)
-- array job id: …
+- array job id: `8f98bbe8-8d26-4f84-b2d7-581466fc3909`
 
 ## Canary readout (measured 2026-11-22, 20 cells × 288 epochs)
 
