@@ -133,13 +133,19 @@ day 15 (pre-quarantine infections median 1,292 vs the whole-voyage
 band [712,960]; before-17 onsets 383 vs 34; all 8 cells end 1,268–3,136,
 above the band), so the same θ that must lift the founder pool also
 drives the growth that overshoots the mass.
-The open decision is now **whether to declare voyage-stage contact
-structure** — a dense embarkation-window field that relaxes after the
-boarding days (the surge that expires), decoupling founder yield from
-settled-voyage growth — versus **re-scoping the Θ contract** to
-envelope/conditioned scoring. A founder-only arm is no longer an
-honest probe: it predicts the founder leg lands and the mass leg still
-fails. GM scoring stays gated; H5 stays held out.
+The voyage-stage direction was commissioned (2026-11-21): the
+evidence memo `docs/covid/covid_voyage_stage_contacts_evidence.md` and
+the frozen `docs/covid/covid_seed_ring_02_design.md` declare a
+day-windowed `voyage_contact_multiplier` (days 0..W at α, routine flat)
+and a two-leg prediction — window lands founders/ignition (Edison P1),
+routine keeps d15 ≤960 (P2). Open calls inside the design: W ∈ {1,5},
+α band {2,4,8}, and the Polymod-vs-Pung close-contact definition
+mapping that decides the routine stage. The alternative — **re-scoping
+the Θ contract** to envelope/conditioned scoring — stays open if
+SEED-RING-02 comes back FOUNDERS-ONLY or NULL-WINDOW. A founder-only
+arm is no longer an honest probe: it predicts the founder leg lands
+and the mass leg still fails. GM scoring stays gated; H5 stays held
+out.
 
 Standing owner calls recorded in the ledger (not session decisions):
 `confirmed / infections_reachable` as the scored capture basis, and
