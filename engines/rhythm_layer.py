@@ -56,7 +56,20 @@ _EVENT_PRIORITY = {
     "disembarkation_flow": 6,
     "open_venue": 7,
     "cleaning_rotation": 7,
+    # DP-REPLAY-ENVIRON-01: confinement-era commitments. Both outrank
+    # open-venue/leisure claims; an outing or an authorized work route is
+    # the reason a confined agent may leave its cabin at all.
+    "exercise_outing": 8,
+    "exercise_transit": 8,
+    "service_route": 8,
 }
+
+# Event classes whose commitments authorize a confined agent to leave its
+# cabin — read by ``outing_zone_for`` and honored by the engine ahead of
+# the confinement home-zone override.
+_OUTING_CLASSES = frozenset({
+    "exercise_outing", "exercise_transit", "service_route",
+})
 _DEFAULT_PRIORITY = 9
 
 # Venue roles that name transit space; the pour-out front and port-call
@@ -223,6 +236,43 @@ class RhythmLayer:
         self.sop_capacity_multiplier = (
             float(sop_cap) if sop_cap is not None else None
         )
+        # DP-REPLAY-ENVIRON-01: arm-declared exercise-block overrides,
+        # deep-merged over the active SOP variant's ``exercise`` block at
+        # deal time (rhythm_overrides.exercise).
+        self._exercise_override = dict(cfg.get("exercise") or {})
+        self._exercise_day_zero: int | None = None
+        self._exercise_willing_cache: dict[int, bool] = {}
+        # DP-REPLAY-ENVIRON-01 passenger disposition: declared time-use
+        # shares for the uncommitted Free / Meal-token epochs the token
+        # fallback would otherwise send to the fixed free_zone / dining.
+        # Catalog block deep-merged under config_overrides.rhythm keys
+        # ``passenger_disposition`` (arm-declared sensitivities).
+        self._disposition: dict[str, Any] = {}
+        base_dispo = catalog.get("passenger_disposition") or {}
+        override_dispo = cfg.get("passenger_disposition") or {}
+        merged = dict(base_dispo)
+        merged.update(override_dispo)
+        if merged:
+            self._disposition = {
+                "free_time_home_share": float(
+                    merged.get("free_time_home_share", 0.0),
+                ),
+                "free_time_outdoor_share": float(
+                    merged.get("free_time_outdoor_share", 0.0),
+                ),
+                "meal_token_home_share": float(
+                    merged.get("meal_token_home_share", 0.0),
+                ),
+            }
+        self._dispo_home_cache: dict[int, bool] = {}
+        self._dispo_outdoor: list[str] = []
+        self._dispo_indoor: list[str] = []
+        self.exercise_telemetry: dict[str, Any] = {
+            "days": [],
+            "invitations": 0,
+            "attendances": 0,
+            "declined": 0,
+        }
 
         # PROPENSITY-V1: the persistent contact-propensity block. The draw
         # lives on a dedicated spawn-keyed stream and is lazy — one draw
@@ -283,6 +333,22 @@ class RhythmLayer:
         self.embarkation_covered: bool = False
         self.meals_to_cabin: bool = False
         self._commitments: dict[int, list[_Commitment]] = {}
+        self._dispo_outdoor = self._resolve_venue(
+            list(
+                (catalog.get("passenger_disposition") or {}).get(
+                    "outdoor_roles",
+                )
+                or ["exercise_deck"],
+            ),
+        )
+        self._dispo_indoor = self._resolve_venue(
+            list(
+                (catalog.get("passenger_disposition") or {}).get(
+                    "indoor_roles",
+                )
+                or ["piazza_promenade", "misc_indoor", "quiet_deck"],
+            ),
+        )
         self._pp_hours: dict[int, set[int]] = {}
         self._sleep_mid: dict[int, int] = {}
 
@@ -407,16 +473,251 @@ class RhythmLayer:
         )
         for event in events:
             self._deal_event(event, agents, effects)
+        variant = self._active_sop_variant(sop_names)
+        for event in variant.get("additional_events") or []:
+            self._deal_event(dict(event), agents, {})
+        exercise = self._merged_exercise(variant)
+        if exercise is not None:
+            self._deal_exercise(agents, exercise, voyage_day)
 
-    def _active_sop_effects(self, sop_names: set[str]) -> dict[str, str]:
+    def _active_sop_variant(self, sop_names: set[str]) -> dict[str, Any]:
         """The most severe SOP variant whose triggers are active (§4.6)."""
         variants = self.catalog.get("sop_variants", {})
-        picked: dict[str, str] = {}
+        picked: dict[str, Any] = {}
         for variant in variants.values():
             triggers = set(variant.get("trigger_sop_names", []))
             if triggers & sop_names:
-                picked = dict(variant.get("effects", {}))
+                picked = variant
         return picked
+
+    def _active_sop_effects(self, sop_names: set[str]) -> dict[str, str]:
+        return dict(self._active_sop_variant(sop_names).get("effects", {}))
+
+    def _merged_exercise(
+        self, variant: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        """The variant's ``exercise`` block merged with arm overrides."""
+        base = variant.get("exercise")
+        if not base and not self._exercise_override:
+            return None
+        block = dict(base or {})
+        for key, value in self._exercise_override.items():
+            if isinstance(value, dict) and isinstance(block.get(key), dict):
+                merged = dict(block[key])
+                merged.update(value)
+                block[key] = merged
+            else:
+                block[key] = value
+        return block
+
+    def _exercise_key(self, agent: Any) -> int:
+        """The stable travelling-unit key for parity and willingness."""
+        party = getattr(agent, "party_id", -1)
+        party = -1 if party is None else int(party)
+        return party if party >= 0 else ~int(agent.agent_id)
+
+    def _exercise_willing(self, agent: Any, p: float) -> bool:
+        """Persistent person-weighted party willingness flag (spec §6)."""
+        key = self._exercise_key(agent)
+        if key not in self._exercise_willing_cache:
+            self._exercise_willing_cache[key] = bool(
+                self.rng.random() < p
+            )
+        return self._exercise_willing_cache[key]
+
+    def _is_interior_cabin(self, agent: Any, interior_types: set[str]) -> bool:
+        home = self._zone_by_name.get(
+            str(getattr(agent, "home_zone", "") or ""),
+        ) or {}
+        return str(home.get("cabin_ventilation_type") or "") in interior_types
+
+    def _deal_exercise(
+        self,
+        agents: list[Any],
+        block: dict[str, Any],
+        voyage_day: int,
+    ) -> None:
+        """Deal one confinement day's staggered common-deck outings (§6).
+
+        Rollout cohort by the cabin's declared ventilation proxy, an
+        alternate-day entitlement keyed on the travelling unit, a
+        persistent willingness flag, bounded parallel groups over the
+        declared exterior zones, an epoch-resolution outdoor dwell plus a
+        transit epoch in the corridor — the declared approximation of the
+        sub-hour offer/dwell/transit numbers.
+        """
+        if self._exercise_day_zero is None:
+            self._exercise_day_zero = voyage_day
+        day_offset = voyage_day - self._exercise_day_zero
+        interior_types = set(
+            block.get("interior_ventilation_types") or {"interior_hvac"},
+        )
+        cohorts = block.get("cohorts") or {}
+        offsets = {
+            name: int((cohorts.get(name) or {}).get("start_day_offset", 0))
+            for name in ("interior", "exterior")
+        }
+        offsets.setdefault("interior", 0)
+        offsets.setdefault("exterior", 2)
+        alternate = bool(block.get("alternate_day", True))
+        willing_p = float(block.get("willingness_fraction", 0.5))
+        dwell_min = int(block.get("dwell_minutes", 60))
+        transit_min = int(block.get("transit_minutes", 10))
+        # Epoch-resolution approximation: whole epochs, at least one.
+        transit_epochs = max(1, int((transit_min + 59) // 60))
+        slots = [
+            _parse_minutes(s)
+            for s in (
+                block.get("slot_starts")
+                or ["07:30", "09:30", "11:30", "13:30", "15:30", "17:30"]
+            )
+        ]
+        parallel = max(1, int(block.get("parallel_groups", 4)))
+        cap = max(1, int(block.get("group_cap", 125)))
+        zones = self._resolve_venue(
+            list(block.get("destination_roles") or []),
+        )
+        if not slots or not zones:
+            return
+
+        interior_first_slot = block.get("interior_first_slot")
+        interior_first_min = (
+            _parse_minutes(interior_first_slot)
+            if interior_first_slot is not None
+            else None
+        )
+        invited, willing = [], []
+        cohort_count = {"interior": 0, "exterior": 0}
+        for agent in agents:
+            if str(getattr(agent, "role", "")) != "passenger":
+                continue
+            cohort = (
+                "interior"
+                if self._is_interior_cabin(agent, interior_types)
+                else "exterior"
+            )
+            start_off = offsets[cohort]
+            if day_offset < start_off:
+                continue
+            if alternate and (
+                (day_offset - start_off + (self._exercise_key(agent) & 1))
+                % 2
+                != 0
+            ):
+                continue
+            invited.append(agent)
+            cohort_count[cohort] += 1
+            if self._exercise_willing(agent, willing_p):
+                willing.append(agent)
+        # Only the interior cohort is eligible on its rollout day (the
+        # exterior offset is later), so restricting that day's slots to
+        # the 13:30 start cannot starve another cohort.
+        usable_slots = [
+            i
+            for i, s in enumerate(slots)
+            if not (
+                day_offset == offsets["interior"]
+                and interior_first_min is not None
+                and s < interior_first_min
+            )
+        ]
+        group_ids = [
+            (slot_i, g) for slot_i in usable_slots for g in range(parallel)
+        ]
+        n_groups = len(group_ids)
+        if not n_groups:
+            return
+        buckets: list[list[Any]] = [[] for _ in range(n_groups)]
+        for agent in sorted(willing, key=self._exercise_key):
+            placed = False
+            base = self._exercise_key(agent) % n_groups
+            for probe in range(n_groups):
+                idx = (base + probe) % n_groups
+                if len(buckets[idx]) < cap:
+                    buckets[idx].append(agent)
+                    placed = True
+                    break
+            if not placed:
+                self.exercise_telemetry["declined"] += 1
+
+        attended = 0
+        for idx, bucket in enumerate(buckets):
+            if not bucket:
+                continue
+            slot_i, group_i = group_ids[idx]
+            slot = slots[slot_i]
+            zone = zones[group_i % len(zones)]
+            corridor = self._pick_corridor()
+            dwell_start = slot + transit_min
+            dwell_end = dwell_start + dwell_min
+            best_hour, best_overlap = dwell_start // 60, -1
+            for hour in range(dwell_start // 60, dwell_end // 60 + 1):
+                overlap = min(dwell_end, (hour + 1) * 60) - max(
+                    dwell_start, hour * 60,
+                )
+                if overlap > best_overlap:
+                    best_hour, best_overlap = hour % 24, overlap
+            for agent in bucket:
+                entries = self._commitments.setdefault(agent.agent_id, [])
+                entries.append(_Commitment(
+                    priority=_EVENT_PRIORITY["exercise_outing"],
+                    start_min=best_hour * 60,
+                    end_min=best_hour * 60 + 60,
+                    zone=zone,
+                    event_id=f"exercise_d{voyage_day}_g{idx}",
+                    event_class="exercise_outing",
+                    egress_min=None,
+                    corridor_zone=None,
+                    is_meal=False,
+                    port_span=None,
+                ))
+                for back in range(1, transit_epochs + 1):
+                    t_hour = (best_hour - back) % 24
+                    entries.append(_Commitment(
+                        priority=_EVENT_PRIORITY["exercise_transit"],
+                        start_min=t_hour * 60,
+                        end_min=t_hour * 60 + 60,
+                        zone=corridor or zone,
+                        event_id=f"exercise_transit_d{voyage_day}_g{idx}",
+                        event_class="exercise_transit",
+                        egress_min=None,
+                        corridor_zone=None,
+                        is_meal=False,
+                        port_span=None,
+                    ))
+                attended += 1
+
+        self.exercise_telemetry["invitations"] += len(invited)
+        self.exercise_telemetry["attendances"] += attended
+        self.exercise_telemetry["declined"] += len(invited) - attended
+        self.exercise_telemetry["days"].append({
+            "voyage_day": voyage_day,
+            "day_offset": day_offset,
+            "invited": len(invited),
+            "willing": len(willing),
+            "attended": attended,
+            "cohorts": dict(cohort_count),
+            "groups_formed": sum(1 for b in buckets if b),
+            "group_size_max": max((len(b) for b in buckets), default=0),
+        })
+
+    def outing_zone_for(self, agent: Any, hour: int) -> str | None:
+        """The authorized destination a confined agent may visit this epoch.
+
+        An exercise or service-route commitment covering the hour is the
+        declared reason a confined host leaves its cabin — the engine
+        honors it ahead of the confinement home-zone override.
+        """
+        entries = self._commitments.get(agent.agent_id)
+        if not entries:
+            return None
+        covering = [
+            c for c in entries
+            if c.event_class in _OUTING_CLASSES and c.covers(hour)
+        ]
+        if not covering:
+            return None
+        return min(covering, key=lambda c: c.start_min).zone
 
     def _eligible(self, event: dict[str, Any], agents: list[Any]) -> list[Any]:
         elig = event.get("eligible", {}) or {}
@@ -580,7 +881,10 @@ class RhythmLayer:
         else:
             draws = self.rng.random(len(eligible)) < p
         participants = [a for a, hit in zip(eligible, draws, strict=True) if hit]
-        if len(participants) > capacity:
+        # port_call's venue role names the transit front, not a dwell
+        # space — the binding cap on shore excursions is the voyage's
+        # midday residual floor, applied by the thinning below.
+        if len(participants) > capacity and eclass != "port_call":
             idx = self.rng.choice(
                 len(participants), size=int(capacity), replace=False
             )
@@ -847,7 +1151,42 @@ class RhythmLayer:
             and token.startswith("Meal")
         ):
             return agent.home_zone
+        # DP-REPLAY-ENVIRON-01 passenger disposition: uncommitted Free and
+        # Meal-token epochs carry the declared time-use shares — a
+        # persistent cabin-preferring flag per travelling unit for Free
+        # time, and a per-epoch skip draw for Meal tokens — instead of the
+        # spawn-fixed free_zone / always-dining fallback.
+        if str(getattr(agent, "role", "")) != "passenger":
+            return None
+        if token == "Free" and self._disposition.get("free_time_home_share"):
+            if self._disposition_home(
+                agent, self._disposition["free_time_home_share"],
+            ):
+                return agent.home_zone
+            outdoor = self._dispo_outdoor
+            indoor = self._dispo_indoor
+            if self.rng.random() < self._disposition[
+                "free_time_outdoor_share"
+            ] and outdoor:
+                return str(outdoor[int(self.rng.integers(0, len(outdoor)))])
+            if indoor:
+                return str(indoor[int(self.rng.integers(0, len(indoor)))])
+            return None
+        if token.startswith("Meal") and self._disposition.get(
+            "meal_token_home_share",
+        ):
+            if self.rng.random() < self._disposition["meal_token_home_share"]:
+                return agent.home_zone
         return None
+
+    def _disposition_home(self, agent: Any, share: float) -> bool:
+        """Persistent cabin-preferring flag per travelling unit (§5)."""
+        key = self._exercise_key(agent)
+        if key not in self._dispo_home_cache:
+            self._dispo_home_cache[key] = bool(
+                self.rng.random() < share
+            )
+        return self._dispo_home_cache[key]
 
     def _share_for(self, agent: Any, hour: int) -> float:
         """In-cabin share at this hour, shifted onto the agent's own sleep

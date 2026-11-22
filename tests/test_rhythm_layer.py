@@ -42,6 +42,7 @@ CATALOGED_PLATFORMS = (
     "expedition_cruise_450",
     "enterprise_galaxy_tng",
     "enterprise_constitution_tos",
+    "diamond_princess",
 )
 
 

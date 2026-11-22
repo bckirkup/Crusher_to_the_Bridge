@@ -1178,9 +1178,19 @@ class ShipSimulation:
         pe = getattr(self.proto_ctx, "protocol_engine", None)
         if pe is not None:
             name_by_id = {p.protocol_id: p.name for p in pe.protocols}
+            active_ids = set(pe.get_active_protocols())
+            # DP-REPLAY-ENVIRON-01 dealing-day union: a scheduled order that
+            # opens later today is part of this day's dealt SOP variant, so
+            # the confinement template deals its service routes and exercise
+            # outings on the activation day. The order's own modifiers still
+            # bind only at the declared hour — this changes only which
+            # template the first-epoch-of-day deal reads.
+            active_ids |= self.scenario_schedule.protocol_ids_for_day(
+                self.clock.day_index(self.epoch),
+            )
             self.engine.active_sop_names = [
                 name_by_id.get(pid, pid)
-                for pid in pe.get_active_protocols()
+                for pid in active_ids
             ]
         self.engine.step()
         self._note_shore_introductions(
