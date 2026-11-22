@@ -912,13 +912,14 @@ class RhythmLayer:
         share = float(event.get("occupancy_share", 1.0))
         egress_mode = str(event.get("egress_mode", "rolling"))
         seatings = self._event_seatings(zones) if eclass == "meal_seating" else 1
+        staggered = bool(event.get("seat_staggered", False))
 
         for occurrence in range(occurrences):
             shift = occurrence * int((end - start) / max(occurrences, 1))
             self._deal_occurrence(
                 event, eligible, p, capacity, zones,
                 start + shift, end + shift,
-                share, egress_mode, seatings, eclass,
+                share, egress_mode, seatings, eclass, staggered,
             )
 
     def _event_seatings(self, zones: list[str]) -> int:
@@ -945,6 +946,7 @@ class RhythmLayer:
         egress_mode: str,
         seatings: int,
         eclass: str,
+        staggered: bool = False,
     ) -> None:
         if (
             eclass in self._propensity_classes
@@ -973,7 +975,7 @@ class RhythmLayer:
         for agent in participants:
             self._commit_agent(
                 agent, event, zones, zone_weights, start, end,
-                share, egress_mode, seatings, eclass,
+                share, egress_mode, seatings, eclass, staggered,
             )
 
     def _propensity_draw(self) -> float:
@@ -1051,6 +1053,7 @@ class RhythmLayer:
         egress_mode: str,
         seatings: int,
         eclass: str,
+        staggered: bool = False,
     ) -> None:
         # Meals keep the agent's assigned dining venue when the venue is in
         # the event's set, so the seated-party deal stays coherent.
@@ -1061,6 +1064,7 @@ class RhythmLayer:
             zone = str(self.rng.choice(zones, p=zone_weights))
         occ_start, occ_end = self._occupancy_interval(
             agent, start, end, share, egress_mode, seatings, eclass,
+            staggered,
         )
         egress_min = occ_end if egress_mode == "synchronized_end" else None
         corridor = self._pick_corridor() if egress_min is not None else None
@@ -1092,11 +1096,15 @@ class RhythmLayer:
         egress_mode: str,
         seatings: int,
         eclass: str,
+        staggered: bool = False,
     ) -> tuple[int, int]:
         length = max(end - start, 1)
-        if eclass == "meal_seating" and seatings > 1:
-            # Assigned sittings stagger under every egress mode; rolling
-            # keeps the share-length dwell on top of the seat offset.
+        if eclass == "meal_seating" and seatings > 1 and (
+            egress_mode == "synchronized_end" or staggered
+        ):
+            # Assigned sittings stagger start times; a declared
+            # ``seat_staggered`` rolling event keeps the share-length
+            # dwell on top of the seat offset.
             turn = max(length // seatings, 1)
             seat = int(getattr(agent, "meal_seating", 0)) % seatings
             occ = start + seat * turn

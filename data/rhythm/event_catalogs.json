@@ -3774,7 +3774,8 @@
               "window": [
                 "17:00",
                 "19:00"
-              ]
+              ],
+              "seat_staggered": true
             }
           ],
           "source": "dp_behavior_spec \u00a75 boarding-day realization"
@@ -3922,7 +3923,8 @@
               "window": [
                 "06:00",
                 "08:00"
-              ]
+              ],
+              "seat_staggered": true
             },
             {
               "egress_mode": "rolling",
@@ -3945,7 +3947,8 @@
               "window": [
                 "11:00",
                 "13:00"
-              ]
+              ],
+              "seat_staggered": true
             },
             {
               "egress_mode": "rolling",
@@ -3968,7 +3971,8 @@
               "window": [
                 "17:00",
                 "19:00"
-              ]
+              ],
+              "seat_staggered": true
             }
           ],
           "source": "dp_behavior_spec \u00a74-5: declared 0.5 shore participation, 09:00-16:00 window clipped to port opportunity, 30-min return margin"
@@ -4355,7 +4359,8 @@
               "window": [
                 "06:00",
                 "08:00"
-              ]
+              ],
+              "seat_staggered": true
             },
             {
               "egress_mode": "rolling",
@@ -4378,7 +4383,8 @@
               "window": [
                 "11:00",
                 "13:00"
-              ]
+              ],
+              "seat_staggered": true
             },
             {
               "egress_mode": "rolling",
@@ -4401,7 +4407,8 @@
               "window": [
                 "17:00",
                 "19:00"
-              ]
+              ],
+              "seat_staggered": true
             }
           ],
           "source": "dp_behavior_spec \u00a75 24h budget: cabin 15, indoor 5.5, dining 2.25, transit 0.75, outdoor 0.5"
