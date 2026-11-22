@@ -24,6 +24,7 @@ import argparse
 import json
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -137,7 +138,12 @@ def main() -> int:
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
-    design = load_design(args.design)
+    design_path = Path(args.design).expanduser().resolve()
+    if _REPO_ROOT != design_path and _REPO_ROOT not in design_path.parents:
+        raise SystemExit(
+            f"--design must be under the repo tree: {design_path}"
+        )
+    design = load_design(str(design_path))
     matches = [
         c for c in enumerate_cells(design)
         if c.arm_id == args.arm and c.seed == args.seed
@@ -221,7 +227,17 @@ def main() -> int:
     }
     text = json.dumps(readout, indent=1, sort_keys=True)
     if args.out:
-        Path(args.out).write_text(text)
+        # The readout file is caller-named; confine it to the repo tree or
+        # the system temp dir so a bad --out cannot write anywhere else.
+        out_path = Path(args.out).expanduser().resolve()
+        allowed = (_REPO_ROOT, Path(tempfile.gettempdir()).resolve())
+        if not any(
+            out_path == base or base in out_path.parents for base in allowed
+        ):
+            raise SystemExit(
+                f"--out must be under the repo or the temp dir: {out_path}"
+            )
+        out_path.write_text(text)
     print(text)
     return 0
 
