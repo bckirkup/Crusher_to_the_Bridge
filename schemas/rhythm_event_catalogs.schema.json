@@ -80,7 +80,11 @@
               "type": "object",
               "properties": {
                 "trigger_sop_names": { "type": "array", "items": { "type": "string" } },
-                "effects": { "type": "object" }
+                "effects": { "type": "object" },
+                "additional_events": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/event" }
+                }
               },
               "additionalProperties": true
             }
