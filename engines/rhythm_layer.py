@@ -1094,10 +1094,16 @@ class RhythmLayer:
         eclass: str,
     ) -> tuple[int, int]:
         length = max(end - start, 1)
-        if eclass == "meal_seating" and seatings > 1 and egress_mode == "synchronized_end":
+        if eclass == "meal_seating" and seatings > 1:
+            # Assigned sittings stagger under every egress mode; rolling
+            # keeps the share-length dwell on top of the seat offset.
             turn = max(length // seatings, 1)
             seat = int(getattr(agent, "meal_seating", 0)) % seatings
-            return start + seat * turn, start + (seat + 1) * turn
+            occ = start + seat * turn
+            if egress_mode == "synchronized_end":
+                return occ, min(start + (seat + 1) * turn, end)
+            occ_len = max(int(round(length * share)), 1)
+            return occ, min(occ + occ_len, end)
         occ_len = max(int(round(length * share)), 1)
         if egress_mode == "synchronized_end":
             return end - occ_len, end
