@@ -1,6 +1,7 @@
 """Coverage for the DP replay acceptance harness (tools/dp_replay_acceptance.py)."""
 from __future__ import annotations
 
+import errno
 import json
 import os
 import sys
@@ -171,8 +172,9 @@ def test_out_symlink_planted_at_write_refused(tmp_path, monkeypatch) -> None:
     )
     try:
         acc.main()
-    except OSError:
-        pass  # O_NOFOLLOW refused the post-check symlink
+    except OSError as exc:
+        assert link.is_symlink()
+        assert exc.errno == errno.ELOOP  # O_NOFOLLOW refused the link
     else:
         raise AssertionError("write followed a post-check symlink")
 
