@@ -912,7 +912,9 @@ class RhythmLayer:
         share = float(event.get("occupancy_share", 1.0))
         egress_mode = str(event.get("egress_mode", "rolling"))
         seatings = self._event_seatings(zones) if eclass == "meal_seating" else 1
-        staggered = bool(event.get("seat_staggered", False))
+        # Only a declared boolean true staggers; a quoted "false" (or any
+        # other truthy string) must not silently enable it.
+        staggered = event.get("seat_staggered") is True
 
         for occurrence in range(occurrences):
             shift = occurrence * int((end - start) / max(occurrences, 1))
