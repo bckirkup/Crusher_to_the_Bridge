@@ -2,7 +2,7 @@
 **Date:** 2026-11-22
 **Commit:** #1392
 **Pathogens:** norwalk_gi
-**Status:** measured (22 cells, AWS Batch picard-noro-dose-ledger-01:1)
+**Status:** measured
 
 Joined per-epoch mass-ledger diagnostic for the norovirus hand/fomite
 mechanism review (D0′ in the 2026-11-22 review). Edison's first question —
@@ -112,7 +112,7 @@ smoke ran ~4 min; 288 epochs expected ~45–60 min/cell on Batch).
 **Measured at:** `1f8a027c` (instrument + review fixes; engine
 unchanged since the declaration). Image
 `picard-campaign@sha256:958502fdb33283d41db65dbbd937791e687945311e4a7fbf842d14fe67ec652f`,
-jobdef `picard-noro-dose-ledger-01:1`, cells seeds 8000–8019 + 8105/8106.
+jobdef `picard-noro-dose-ledger-01:1`, 22 cells: seeds 8000–8019 + 8105/8106.
 
 All frozen invariants passed on all 22 cells (len-288 ledgers; sums
 reconcile to voyage counters within 1e-9; `Σ secondaries == acquired_ids`;
