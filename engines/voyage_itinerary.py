@@ -307,7 +307,15 @@ def _effects_epoch_state(
         day_type, DEFAULT_DAY_DEFAULTS["sea_day"],
     )
     dining = _normalize_dining_multiplier(defaults.get("dining_demand_multiplier", 1.0))
-    contact = float(defaults.get("contact_rate_multiplier", 1.0))
+    # An itinerary entry may pin its own contact_rate_multiplier, so an
+    # arm can declare an elevated-contact sea day without typing the day
+    # "embarkation" (which would re-deal the boarding template).
+    contact = float(
+        day_entry.get(
+            "contact_rate_multiplier",
+            defaults.get("contact_rate_multiplier", 1.0),
+        )
+    )
 
     in_embark = _in_window(
         epoch_of_day, day_entry.get("embarkation_window_hours_of_day"),

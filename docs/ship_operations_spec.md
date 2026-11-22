@@ -107,6 +107,12 @@ Added to the platform spatial layout or a new `voyage_config.json`:
 }
 ```
 
+An itinerary entry may also pin `contact_rate_multiplier` on the entry
+itself; that value resolves ahead of the entry's day-type block in
+`defaults` and the shipped day-type defaults, so a day can carry an
+elevated contact field while staying typed `sea_day` — typing it
+`embarkation` also re-deals that day's boarding rhythm template.
+
 ### Per-Platform Dining Meal Weights
 
 Added to each platform's spatial layout or agent behavior config.

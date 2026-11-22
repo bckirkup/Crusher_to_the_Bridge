@@ -21,6 +21,7 @@ and records the transmission core's execution witness in every cell so
 
 from __future__ import annotations
 
+import copy
 import json
 import math
 import os
@@ -103,6 +104,18 @@ ARM_OVERRIDE_KEYS = frozenset({
     "participation_propensity",
     "crew_duty_exclusion",
     "observation_overrides",
+    "voyage_overrides",
+})
+# Fields a voyage_overrides arm may write onto ``config_overrides.voyage``.
+# The arm declares the voyage layer's own document — effects flag,
+# itinerary, per-day-type defaults — and ``merge_voyage_overrides``
+# deep-merges it over the platform voyage_config at initialize. Anything
+# outside this set raises at cell build: shore exposure stays off the
+# grammar (it needs the engine's second gate and is not a contact-stage
+# declaration), and day-entry contents are the itinerary's own grammar
+# (``voyage_itinerary.normalize_voyage_config`` validates day types).
+VOYAGE_OVERRIDE_KEYS = frozenset({
+    "effects_enabled", "itinerary", "defaults",
 })
 # Fields an observation_overrides arm may write onto
 # ``config_overrides.syndromic``: the record-structure channels that are
@@ -977,6 +990,8 @@ def _dispatch_arm_overrides(
         )
     if "observation_overrides" in overrides:
         _apply_observation_overrides(raw, overrides["observation_overrides"])
+    if "voyage_overrides" in overrides:
+        _apply_voyage_overrides(raw, overrides["voyage_overrides"])
 
 
 def apply_arm_overrides(
@@ -1044,6 +1059,47 @@ def _apply_observation_overrides(
         syndromic.setdefault("testing_campaigns", {})["waves"] = [
             str(w) for w in waves
         ]
+
+
+def _apply_voyage_overrides(
+    raw: dict[str, Any], block: Any,
+) -> None:
+    """Write a voyage-stage arm's block onto config_overrides.voyage.
+
+    COVID-SEED-RING-02's declaration channel: the embarkation-window
+    contact uplift is a voyage-layer declaration (``effects_enabled`` +
+    an embarkation-typed itinerary + per-day-type
+    ``contact_rate_multiplier``), deep-merged over the platform
+    voyage_config by ``load_and_merge_voyage_config`` at initialize —
+    the partner draw itself is untouched (same Poisson, multiplied by
+    the resolved epoch multiplier). ``effects_enabled`` must be declared
+    true; an arm that touches the voyage layer without enabling effects
+    is a silent no-op arm and raises instead.
+    """
+    if not isinstance(block, Mapping):
+        raise ValueError("voyage_overrides must be a mapping")
+    unknown = set(block) - VOYAGE_OVERRIDE_KEYS
+    if unknown:
+        raise ValueError(
+            f"voyage_overrides declares unknown keys {sorted(unknown)}; "
+            f"allowed: {sorted(VOYAGE_OVERRIDE_KEYS)}",
+        )
+    if block.get("effects_enabled") is not True:
+        raise ValueError(
+            "voyage_overrides must declare effects_enabled: true — an "
+            "arm that leaves the voyage layer disabled is a silent no-op",
+        )
+    itinerary = block.get("itinerary")
+    if not isinstance(itinerary, list) or not itinerary:
+        raise ValueError(
+            "voyage_overrides.itinerary must be a non-empty list — an "
+            "identity-effects run confounds the pairing",
+        )
+    voyage = raw.setdefault("config_overrides", {}).setdefault(
+        "voyage", {},
+    )
+    for key, value in block.items():
+        voyage[key] = copy.deepcopy(value)
 
 
 def _apply_near_field_air_mode(raw: dict[str, Any], mode: Any) -> None:
@@ -2299,6 +2355,38 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         "participation_propensity": (
             lambda _rh: _rh.propensity_resolved if _rh is not None else None
         )(getattr(getattr(sim, "engine", None), "_rhythm", None)),
+        # The resolved voyage layer (COVID-SEED-RING-02): the merged
+        # voyage_config the sim actually resolved at initialize, reduced
+        # to the fields the stage declaration moves — effects flag,
+        # itinerary day types, the embarkation contact multiplier — so a
+        # voyage_overrides arm is auditable from the payload alone.
+        "voyage": _voyage_echo(sim),
+    }
+
+
+def _voyage_echo(sim: Any) -> dict[str, Any]:
+    """Reduced voyage-layer echo for the cell audit."""
+    voyage = (
+        getattr(getattr(sim, "state", None), "voyage_config", None) or {}
+    ).get("voyage") or {}
+    itinerary = voyage.get("itinerary") or []
+    embark_defaults = (voyage.get("defaults") or {}).get("embarkation") or {}
+    return {
+        "effects_enabled": bool(voyage.get("effects_enabled", False)),
+        "itinerary_day_types": {
+            str(d.get("day")): str(d.get("type"))
+            for d in itinerary
+            if isinstance(d, Mapping)
+        },
+        "itinerary_contact_rate_multipliers": {
+            str(d.get("day")): d.get("contact_rate_multiplier")
+            for d in itinerary
+            if isinstance(d, Mapping)
+            and d.get("contact_rate_multiplier") is not None
+        },
+        "embarkation_contact_rate_multiplier": (
+            embark_defaults.get("contact_rate_multiplier")
+        ),
     }
 
 

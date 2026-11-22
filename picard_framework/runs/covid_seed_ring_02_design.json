@@ -1,0 +1,228 @@
+{
+  "design_id": "covid_seed_ring_02",
+  "task_id": "COVID-SEED-RING-02",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_seed_ring_01",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "design_doc": "docs/covid/covid_seed_ring_02_design.md",
+  "evidence_memo": "docs/covid/covid_voyage_stage_contacts_evidence.md",
+  "supersedes": "Nothing. Executes the voyage-stage contact declaration commissioned after COVID-EARLY-GROWTH-01 (measured 87e8e3bb): at right-sized truth theta=3.162e8 the record-timed overshoot sits in early growth, not the tail - the same composite scales the founder draw and the growth that follows, so no theta satisfies the trajectory clause under the flat POLYMOD field. The discriminating probe: does declaring the embarkation-window contact field as a voyage stage - a dense day-0 crowd draw that relaxes to the unchanged routine draw - land the founder/ignition legs AND hold pre-quarantine mass, with theta and every dose constant unchanged? The frozen two-leg prediction separates early establishment from subsequent growth (Edison's two propositions).",
+  "description": "COVID-SEED-RING-02: voyage-stage contact declaration on the verbatim boxed_s1s2 replay at the one right-sized-theta DP operating point - theta 3.162e8 x 5 arms x 20 seeds = 100 declared-replay cells on the diamond_princess_2020 contract (infection_age_days 6.8, imports 1, dwell_weighted, quarantine days 16-30). Every cell runs base_overrides (the boxed_s1s2 resolved configuration) with only the arm's declared delta on top. Arms: D0_declared (boxed_s1s2 verbatim; pairing base + drift witness), WINDOW_W1_A{2,4,8} (voyage.effects_enabled + voyage_day 1 embarkation, contact_rate_multiplier alpha swept - the day-0 Yokohama turnaround crowd declared for the whole population), WINDOW_W5_A8 (the declared W=5 alternative: voyage_days 1-5 embarkation at alpha=8 - the index's whole aboard window). alpha is a declared assumption band bounded by mass-gathering measurements - no cruise embarkation sensor record exists; it is declared, never fit. The routine stage is held flat deliberately until the Polymod-vs-Pung definition mapping (memo section 2) is resolved.",
+  "prerequisites": [
+    "COVID-EARLY-GROWTH-01 measured (87e8e3bb): on the 8 record-timed cells (ign <=9) pre-quarantine (d15) infections median 1,292 vs the whole-voyage band [712,960]; all 8 end at 1,268-3,136; the un-damped tail is a separate regime on late igniters. No cell lands timing and mass together - theta is confounded between founder yield and post-founder growth.",
+    "COVID-SEED-RING-01 measured NULL-PLACEMENT (87e8e3bb): dining-zone assignment is correlative; surge participation is rare in the drawn schedule (founder median 2.0 vs >=10). The under-declared structure is the realized embarkation-day crowd itself, which this design declares voyage-stage rather than per-agent placement.",
+    "Evidence memo committed (docs/covid/covid_voyage_stage_contacts_evidence.md): settled-routine contacts independently sourced from Pung 2022 (median 20 pax / 10 crew unique close contacts/day, COVID-era floor) and Pung 2024 (86% of cruise contact pairs single-day - cruise novelty is intrinsically high); embarkation window is declared-assumption territory bounded by mass-gathering measurements over the day-0 Yokohama turnaround (arrive 06:00, depart 17:00).",
+    "Mechanism verified in-tree: engines/voyage_itinerary.py resolves a per-day contact_rate_multiplier into tx_core.voyage_contact_multiplier (ship_simulation.py:1141) when voyage.effects_enabled; the DP platform voyage_config.json ships effects_enabled false with an empty itinerary, so the replay runs the flat POLYMOD draw because the stage declaration was never turned on. voyage_overrides reaches the spec through apply_arm_overrides under VOYAGE_OVERRIDE_KEYS; merge_voyage_overrides deep-merges the arm's voyage document over the platform config at initialize.",
+    "COVID-CAPTURE-01 measured (7b34405d): conditioned capture already exceeds 0.80 on every arm - capture stays out of this probe's verdict.",
+    "COVID-QUAR-TAIL-SEAM-01 measured (b4591170): the confined tail is crew-service-fed only jointly. This probe is pre-confinement machinery and runs on the D0 base - the during-window composition is unchanged and unscored here."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [
+    316227766.01683795
+  ],
+  "thetas_note": "The single right-sized operating point - verbatim the covid_theta_refit_01 dp_theta_8p50 block theta - where CAPTURE-01, QUAR-TAIL-SEAM-01, IGNITION-01, SEED-RING-01 and EARLY-GROWTH-01 were measured. theta is not an axis: the window uplift is a contact-stage declaration, and every dose constant is unchanged.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "Verbatim replay contract; a null axis on explicit seeds (COVID-SEED-GEOM-01).",
+  "imports": [
+    1
+  ],
+  "imports_note": "The record declares one index; imports>1 is a falsification probe reserved by COVID-IGNITION-01, never a fit axis, and is not an arm here.",
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The matched 20-seed set 20200205-20200224 - identical to THETA-REFIT-01/SEAM-01/SEED-RING-01 so every arm row pairs seed-for-seed against the committed dp_theta_8p50 cells and the SEED-RING-01 D0 block.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "funnel_echo": true,
+  "base_overrides": {
+    "scheduled_protocol_id": "SOP-017-MESSBOX",
+    "transmission_overrides": {
+      "caregiver": {
+        "service": {
+          "direction": "both",
+          "service_responder_mode": "section",
+          "service_section_cabins": [
+            10,
+            15
+          ],
+          "contact_factor_to_host": [
+            0.005,
+            0.02
+          ]
+        }
+      }
+    },
+    "observation_overrides": {
+      "retest_negative_sweeps": true,
+      "campaign_waves": [
+        "crew_wave"
+      ]
+    }
+  },
+  "base_overrides_note": "The boxed_s1s2 resolved configuration - verbatim the covid_theta_refit_01 / covid_seed_ring_01 base block - applied to every cell BEFORE the arm's own overrides so each arm is a single declared delta on the committed replay. The cell worker composes base under arm (arm keys win).",
+  "cells_note": "1 theta x 5 arms x 20 seeds = 100 declared-replay cells (~30 min each on the campaign image). Cell order arm x seed. Canary = WINDOW_W1_A8 (the highest-uplift probe arm; reads the voyage-effects echo + resolved contact_multiplier audit) - read out and reported before the remaining blocks submit per the campaign-preflight gate.",
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "boxed_s1s2 verbatim - the flat-field baseline. First arm so empty overrides per the arm grammar. Doubles as the pairing base and as the drift witness against the committed dp_theta_8p50 cells and the SEED-RING-01 D0 block (bit-exact under the same image-family engine)."
+    },
+    {
+      "arm_id": "WINDOW_W1_A2",
+      "overrides": {
+        "voyage_overrides": {
+          "effects_enabled": true,
+          "itinerary": [
+            {
+              "day": 1,
+              "type": "embarkation",
+              "embarkation_window_hours_of_day": [
+                6,
+                17
+              ]
+            }
+          ],
+          "defaults": {
+            "embarkation": {
+              "contact_rate_multiplier": 2.0
+            }
+          }
+        }
+      },
+      "note": "Voyage-stage declaration, W=1 alpha=2: voyage_day 1 (day 0, the Yokohama turnaround 06:00-17:00) typed embarkation with the embarkation-day contact draw doubled for the whole population; embarkation_window_hours_of_day bounds the buffet surge to the turnaround hours; all remaining days resolve sea_day at identity defaults so the routine stage is untouched. Declared assumption, bounded by mass-gathering measurements; non-scoring."
+    },
+    {
+      "arm_id": "WINDOW_W1_A4",
+      "overrides": {
+        "voyage_overrides": {
+          "effects_enabled": true,
+          "itinerary": [
+            {
+              "day": 1,
+              "type": "embarkation",
+              "embarkation_window_hours_of_day": [
+                6,
+                17
+              ]
+            }
+          ],
+          "defaults": {
+            "embarkation": {
+              "contact_rate_multiplier": 4.0
+            }
+          }
+        }
+      },
+      "note": "Voyage-stage declaration, W=1 alpha=4: same declaration at fourfold day-0 contact draw. Declared assumption band midpoint; non-scoring."
+    },
+    {
+      "arm_id": "WINDOW_W1_A8",
+      "overrides": {
+        "voyage_overrides": {
+          "effects_enabled": true,
+          "itinerary": [
+            {
+              "day": 1,
+              "type": "embarkation",
+              "embarkation_window_hours_of_day": [
+                6,
+                17
+              ]
+            }
+          ],
+          "defaults": {
+            "embarkation": {
+              "contact_rate_multiplier": 8.0
+            }
+          }
+        }
+      },
+      "note": "Voyage-stage declaration, W=1 alpha=8: the canary arm - the band top. If maximal crowd exposure cannot reach the founder lottery the verdict is NULL-WINDOW. Declared assumption; non-scoring."
+    },
+    {
+      "arm_id": "WINDOW_W5_A8",
+      "overrides": {
+        "voyage_overrides": {
+          "effects_enabled": true,
+          "itinerary": [
+            {
+              "day": 1,
+              "type": "embarkation",
+              "embarkation_window_hours_of_day": [
+                6,
+                17
+              ]
+            },
+            {
+              "day": 2,
+              "type": "sea_day",
+              "contact_rate_multiplier": 8.0
+            },
+            {
+              "day": 3,
+              "type": "sea_day",
+              "contact_rate_multiplier": 8.0
+            },
+            {
+              "day": 4,
+              "type": "sea_day",
+              "contact_rate_multiplier": 8.0
+            },
+            {
+              "day": 5,
+              "type": "sea_day",
+              "contact_rate_multiplier": 8.0
+            }
+          ],
+          "defaults": {
+            "embarkation": {
+              "contact_rate_multiplier": 8.0
+            }
+          }
+        }
+      },
+      "note": "The declared W=5 alternative at the band top: voyage_day 1 embarkation (the turnaround, with the 06:00-17:00 buffet-surge window) at alpha=8, then voyage_days 2-5 typed sea_day with a per-entry pinned contact_rate_multiplier of 8 - the elevated-contact settling window spanning the index's whole aboard window before his day-5 Hong Kong departure, WITHOUT re-dealing the embarkation rhythm template (boarding-flow crowds) on settled days. The owner call leans W=1; this arm declares the alternative rather than choosing, so the readout can separate window length from window intensity. Declared assumption; non-scoring."
+    }
+  ],
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The prediction is the commissioned two-leg voyage-stage declaration verbatim: declaring the embarkation-window contact field as a voyage stage lifts the founder draw to the record-implied level (leg 1: WINDOW_W1_A8 founder median >= 10 with takeoff ignition median <= 9) AND, with the routine stage held flat, record-timed cells hold pre-quarantine (d15) cumulative infections median <= 960 (leg 2). EARLY-GROWTH-01's reading is that leg 2 fails - d15 is already 1,292 at alpha=1 and the window only adds mass - which names the routine field itself as the residual, not stage timing and not theta. Either result lands a declaration; neither is a fit.",
+    "leg1_establishment": {
+      "criterion": "On WINDOW_W1_A8: takeoff-conditional median seed_ring.aboard_window_acquisitions >= 10 AND takeoff-conditional ignition-day median <= 9 (censored). At alpha=2 the prediction is intermediate lift (founder median 4-10); alpha=4 predicts median >= 10 on at least half of seeds.",
+      "source": "COVID-IGNITION-01 founder-yield discriminant (>=10 -> ign <=9) + the record-implied founder pool of ~10."
+    },
+    "leg2_routine_does_not_overproduce": {
+      "criterion": "On every window arm: among record-timed cells (ignition <= 9), the median of cumulative infections at day 15 (pre-quarantine; quarantine opens day 16) is <= 960 - the serology band top.",
+      "source": "EARLY-GROWTH-01 d15 landmark (record-timed median 1,292 at alpha=1) vs RECORD_INFECTION_BAND [712,960]."
+    },
+    "audit_thresholds": {
+      "founder_yield_median_min": 10,
+      "ignition_day_median_max": 9,
+      "d15_cum_infections_median_max": 960,
+      "ignition_day_record_timed_max": 9,
+      "share_departure_abs": 0.1,
+      "min_takeoff_cells": 5,
+      "record_total_onsets": 197,
+      "record_before_share": 0.173
+    },
+    "audit_invariants": [
+      "Every cell carries the verbatim boxed_s1s2 base_overrides block.",
+      "The explicit seed declares imports 1 at infection_age 6.8, onset_day -1.0, departure epoch 120.",
+      "theta is exactly 3.162e8 on every cell; no dose constant differs between arms.",
+      "voyage.shore_exposure.enabled is false on every cell; no arm may declare it (it is not a VOYAGE_OVERRIDE_KEYS member).",
+      "D0_declared resolves effects_active false and contact_multiplier 1.0 on every epoch; every WINDOW arm resolves effects_active true with contact_rate_multiplier alpha on the declared voyage_days and 1.0 on every sea_day epoch.",
+      "quarantine_witness window_days [16,30] activated true on every cell; propensity_draw units_drawn > 0; funnel_hosts non-empty.",
+      "Every cell echoes the resolved voyage layer (effects_enabled, itinerary day types, embarkation contact_rate_multiplier) in the seed_ring block for the audit."
+    ],
+    "verdict_grammar": [
+      "WINDOW-LANDED: some arm lands leg 1 AND leg 2 - the voyage-stage declaration is the missing structure.",
+      "FOUNDERS-ONLY: leg 1 lands and leg 2 fails at every alpha - the window is real but the routine field is independently over-dense; next seam is the routine stage itself (Pung mapping + activity_contacts), not theta.",
+      "SPLIT-STAGE: the legs land at different alpha and no arm lands both - read as FOUNDERS-ONLY: the uplift that buys founders is itself what breaks the mass leg.",
+      "NULL-WINDOW: leg 1 fails at alpha=8 - even maximal crowd exposure does not reach the founder lottery; the founder channel is narrower than voyage-stage mixing (Arm-B itinerary-level continuation).",
+      "DRIFT-WITNESS-FAIL: any D0_declared cell departs the committed dp_theta_8p50 payload on the seed-paired channels - the window read is then image drift, not physics, and the campaign re-runs at the fixed image."
+    ]
+  }
+}

@@ -154,6 +154,15 @@ a norovirus case incubates ~24-29 epochs and clears at ~72 epochs; budget
 (`SimClock.hours_per_epoch` is 24 in legacy mode whatever the voyage grid says),
 so a 72 h microbiology TAT is 3 legacy epochs, matching pre-clock behaviour.
 
+Voyage effects (`config_overrides.voyage`, `effects_enabled: true` + an
+`itinerary`) type each voyage day and resolve a per-day contact multiplier
+into `EpochState.contact_multiplier`. Precedence: an explicit
+`contact_rate_multiplier` on the itinerary entry itself wins, then the
+entry's day-type block under `voyage.defaults`, then the shipped day-type
+defaults. Typing a day `embarkation` also re-deals the boarding rhythm
+template that day — to declare elevated contact on a settled day without
+boarding crowds, type it `sea_day` and pin the multiplier on the entry.
+
 Fast ways to grade timing without a long voyage:
 - `InstrumentTurnaroundRegistry.load('data/config/instrument_turnaround.json',
   clock=SimClock(h, "hours")).delay_epochs_for(name)` — physical hours should

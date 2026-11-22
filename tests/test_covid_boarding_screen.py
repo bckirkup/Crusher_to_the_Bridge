@@ -2022,3 +2022,118 @@ def test_theta_refit_echo_resolves_shipped_defaults():
         payload["delivery"]["presentation_draw_mode"] == "once_per_course"
     )
     assert payload["delivery"]["hand_reservoir_mode"] == "hygiene_cycle"
+
+
+# ── voyage_overrides arm grammar (COVID-SEED-RING-02) ───────────────────
+
+
+def test_voyage_overrides_writes_the_voyage_block():
+    """The stage arm's voyage document lands at config_overrides.voyage."""
+    from picard_framework.covid_boarding_screen import apply_arm_overrides
+
+    raw = {"config_overrides": {}}
+    block = {
+        "effects_enabled": True,
+        "itinerary": [{"day": 1, "type": "embarkation"}],
+        "defaults": {"embarkation": {"contact_rate_multiplier": 4.0}},
+    }
+    apply_arm_overrides(raw, {"voyage_overrides": block}, profile={})
+    assert raw["config_overrides"]["voyage"] == block
+
+
+def test_voyage_overrides_refuses_a_disabled_or_identity_layer():
+    """effects_enabled != true or an empty itinerary is a silent no-op
+    arm and must raise at cell build, not run the baseline."""
+    from picard_framework.covid_boarding_screen import apply_arm_overrides
+
+    for block in (
+        {"itinerary": [{"day": 1, "type": "embarkation"}]},
+        {"effects_enabled": False,
+         "itinerary": [{"day": 1, "type": "embarkation"}]},
+        {"effects_enabled": True, "itinerary": []},
+        {"effects_enabled": True},
+    ):
+        with pytest.raises(ValueError, match="voyage_overrides"):
+            apply_arm_overrides(
+                {"config_overrides": {}},
+                {"voyage_overrides": block},
+                profile={},
+            )
+
+
+def test_voyage_overrides_refuses_unknown_keys():
+    """Shore exposure and any other channel stay off the arm grammar."""
+    from picard_framework.covid_boarding_screen import apply_arm_overrides
+
+    with pytest.raises(ValueError, match="voyage_overrides declares"):
+        apply_arm_overrides(
+            {"config_overrides": {}},
+            {
+                "voyage_overrides": {
+                    "effects_enabled": True,
+                    "itinerary": [{"day": 1, "type": "embarkation"}],
+                    "shore_exposure": {"enabled": True},
+                },
+            },
+            profile={},
+        )
+
+
+def test_seed_ring_02_design_loads_and_enumerates():
+    """The frozen screen: 1 theta x 5 arms x 20 seeds, W5 itinerary is
+    five embarkation days, and the D0 arm stays override-free."""
+    from picard_framework.covid_boarding_screen import load_design
+
+    design = load_design(
+        "picard_framework/runs/covid_seed_ring_02_design.json",
+    )
+    cells = list(enumerate_cells(design))
+    assert len(cells) == 100
+    arm_ids = {a.get("arm_id") for a in design.arms}
+    assert arm_ids == {
+        "D0_declared",
+        "WINDOW_W1_A2",
+        "WINDOW_W1_A4",
+        "WINDOW_W1_A8",
+        "WINDOW_W5_A8",
+    }
+    w5 = design.arm_overrides("WINDOW_W5_A8")["voyage_overrides"]
+    # W5 declares the elevated-contact window over days 1-5 without
+    # re-dealing the boarding template on settled days: day 1 is the
+    # embarkation turnaround, days 2-5 are sea days pinned at alpha=8.
+    assert [
+        d["type"] for d in w5["itinerary"]
+    ] == ["embarkation"] + ["sea_day"] * 4
+    assert all(
+        d.get("contact_rate_multiplier") == 8.0
+        for d in w5["itinerary"][1:]
+    )
+    assert design.arm_overrides("D0_declared") == {}
+
+
+def test_itinerary_entry_pins_contact_multiplier_on_a_sea_day():
+    """A sea_day itinerary entry carries its own contact uplift, so a
+    W>1 window arm need not type settled days 'embarkation' (which
+    would re-deal the boarding-flow rhythm template)."""
+    from engines.voyage_itinerary import resolve_epoch_state
+
+    cfg = {
+        "voyage": {
+            "effects_enabled": True,
+            "itinerary": [
+                {"day": 1, "type": "embarkation"},
+                {"day": 2, "type": "sea_day",
+                 "contact_rate_multiplier": 8.0},
+            ],
+            "defaults": {
+                "embarkation": {"contact_rate_multiplier": 8.0},
+            },
+        }
+    }
+    day2 = resolve_epoch_state(cfg, 25, epoch_duration_hours=1)
+    assert day2.day_type == "sea_day"
+    assert day2.contact_multiplier == 8.0
+    # An unpinned day falls back to its day-type default.
+    cfg["voyage"]["itinerary"].append({"day": 3, "type": "sea_day"})
+    day3 = resolve_epoch_state(cfg, 49, epoch_duration_hours=1)
+    assert day3.contact_multiplier == 1.0
