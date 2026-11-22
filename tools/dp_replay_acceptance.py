@@ -84,7 +84,17 @@ class MovementLedger:
         engine = sim.engine
         epoch = int(getattr(sim, "epoch", getattr(engine, "epoch", 0)))
         day = epoch // 24  # clock-exempt: epoch→day index, not a unit conversion
-        bucket = "quarantine" if day >= 16 else ("day0" if day == 0 else "pre_quarantine")
+        # Confinement opens at epoch 391 (day 16, 07:00) and runs to day 30
+        # inclusive (the SOP's declared day_range); hours outside the
+        # [391, 744) window are not quarantine time.
+        if 391 <= epoch < 744:
+            bucket = "quarantine"
+        elif day == 0:
+            bucket = "day0"
+        elif epoch < 391:
+            bucket = "pre_quarantine"
+        else:
+            bucket = "post_release"
         aboard_pax = confined = 0
         for agent in engine.agents:
             role = str(getattr(agent, "role", "crew"))
@@ -137,13 +147,21 @@ def main() -> int:
         design, cell, num_epochs=args.num_epochs, repo_root=str(_REPO_ROOT),
     )
     # Declared no-transmission acceptance: no infectives ever exist, so
-    # placements are the dealt schedule alone.
-    initiation = raw.get("initiation") or {}
-    initiation["explicit_seeds"] = []
-    raw["initiation"] = initiation
+    # placements are the dealt schedule alone. The screen writes the index
+    # under config_overrides.initiation; clear every level it could sit at.
+    overrides = raw.setdefault("config_overrides", {})
+    for container in (raw, overrides):
+        initiation = container.get("initiation") or {}
+        initiation["explicit_seeds"] = []
+        container["initiation"] = initiation
 
+    platform_id = str(
+        raw.get("platform_id")
+        or (raw.get("config_overrides") or {}).get("platform_id")
+        or "diamond_princess"
+    )
     layout = json.loads(
-        (_REPO_ROOT / "data/platforms/diamond_princess/spatial_layout.json")
+        (_REPO_ROOT / "data/platforms" / platform_id / "spatial_layout.json")
         .read_text(),
     )
     zone_meta = {str(z["id"]): str(z.get("type")) for z in layout["zones"]}
