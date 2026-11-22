@@ -156,18 +156,31 @@ def test_exercise_rollout_cohorts_and_caps() -> None:
     layer = _layer()
     agents = _confined_agents()
     sops = {CONFINEMENT_SOP}
-    # Day offset 0: interior cohort only; offset 1: interior parity flips;
-    # offset 2: exterior joins.
+    # Spec §6: nothing on the first confined day (offset 0); interior
+    # cohort from offset 1 (6 Feb 13:30); exterior joins at offset 3
+    # (8 Feb).
     layer.deal_day(agents, "sea_day", sops, 16)
     day0 = layer.exercise_telemetry["days"][-1]
-    assert day0["cohorts"]["exterior"] == 0
-    assert day0["cohorts"]["interior"] > 0
-    assert 0 < day0["attended"] <= day0["willing"]
-    assert day0["group_size_max"] <= 125
+    assert day0["invited"] == 0
     layer.deal_day(agents, "sea_day", sops, 17)
+    day1 = layer.exercise_telemetry["days"][-1]
+    assert day1["cohorts"]["exterior"] == 0
+    assert day1["cohorts"]["interior"] > 0
+    assert 0 < day1["attended"] <= day1["willing"]
+    assert day1["group_size_max"] <= 125
+    # The interior rollout day offers only slots at/after 13:30.
+    outings_d1 = [
+        c
+        for entries in layer._commitments.values()
+        for c in entries
+        if c.event_class == "exercise_outing"
+    ]
+    assert outings_d1
+    assert min(c.start_min for c in outings_d1) >= 13 * 60 + 30
     layer.deal_day(agents, "sea_day", sops, 18)
-    day2 = layer.exercise_telemetry["days"][-1]
-    assert day2["cohorts"]["exterior"] > 0
+    layer.deal_day(agents, "sea_day", sops, 19)
+    day3 = layer.exercise_telemetry["days"][-1]
+    assert day3["cohorts"]["exterior"] > 0
     # Outings land in the declared exterior destinations.
     outings = [
         c
@@ -192,7 +205,9 @@ def test_no_exercise_without_confinement_sop() -> None:
 def test_outing_zone_for_and_transit() -> None:
     layer = _layer()
     agents = _confined_agents()
-    layer.deal_day(agents, "sea_day", {CONFINEMENT_SOP}, 16)
+    # Deal through the exterior rollout day (offset 3) so outings exist.
+    for voyage_day in (16, 17, 18, 19):
+        layer.deal_day(agents, "sea_day", {CONFINEMENT_SOP}, voyage_day)
     seen = set()
     for a in agents:
         for h in range(24):

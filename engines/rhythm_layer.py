@@ -576,9 +576,34 @@ class RhythmLayer:
         if self._exercise_day_zero is None:
             self._exercise_day_zero = voyage_day
         day_offset = voyage_day - self._exercise_day_zero
-        interior_types = set(
-            block.get("interior_ventilation_types") or {"interior_hvac"},
+        plan = self._exercise_plan(block)
+        if plan is None:
+            return
+        invited, willing, cohort_count = self._exercise_invitees(
+            agents, plan, day_offset,
         )
+        buckets, group_ids = self._exercise_buckets(willing, plan, day_offset)
+        # Zero-invite days still record a telemetry line so the rollout
+        # gap (nothing on the first confined day) is visible.
+        attended = self._commit_exercise(
+            buckets, group_ids, plan, voyage_day,
+        )
+        self.exercise_telemetry["invitations"] += len(invited)
+        self.exercise_telemetry["attendances"] += attended
+        self.exercise_telemetry["declined"] += len(invited) - attended
+        self.exercise_telemetry["days"].append({
+            "voyage_day": voyage_day,
+            "day_offset": day_offset,
+            "invited": len(invited),
+            "willing": len(willing),
+            "attended": attended,
+            "cohorts": dict(cohort_count),
+            "groups_formed": sum(1 for b in buckets if b),
+            "group_size_max": max((len(b) for b in buckets), default=0),
+        })
+
+    def _exercise_plan(self, block: dict[str, Any]) -> dict[str, Any] | None:
+        """Resolve the merged exercise block into a dealing plan."""
         cohorts = block.get("cohorts") or {}
         offsets = {
             name: int((cohorts.get(name) or {}).get("start_day_offset", 0))
@@ -586,12 +611,6 @@ class RhythmLayer:
         }
         offsets.setdefault("interior", 0)
         offsets.setdefault("exterior", 2)
-        alternate = bool(block.get("alternate_day", True))
-        willing_p = float(block.get("willingness_fraction", 0.5))
-        dwell_min = int(block.get("dwell_minutes", 60))
-        transit_min = int(block.get("transit_minutes", 10))
-        # Epoch-resolution approximation: whole epochs, at least one.
-        transit_epochs = max(1, int((transit_min + 59) // 60))
         slots = [
             _parse_minutes(s)
             for s in (
@@ -599,20 +618,42 @@ class RhythmLayer:
                 or ["07:30", "09:30", "11:30", "13:30", "15:30", "17:30"]
             )
         ]
-        parallel = max(1, int(block.get("parallel_groups", 4)))
-        cap = max(1, int(block.get("group_cap", 125)))
         zones = self._resolve_venue(
             list(block.get("destination_roles") or []),
         )
         if not slots or not zones:
-            return
+            return None
+        first_slot = block.get("interior_first_slot")
+        return {
+            "offsets": offsets,
+            "interior_types": set(
+                block.get("interior_ventilation_types") or {"interior_hvac"},
+            ),
+            "alternate": bool(block.get("alternate_day", True)),
+            "willing_p": float(block.get("willingness_fraction", 0.5)),
+            "dwell_min": int(block.get("dwell_minutes", 60)),
+            "transit_min": int(block.get("transit_minutes", 10)),
+            # Epoch-resolution approximation: whole epochs, at least one.
+            "transit_epochs": max(
+                1, (int(block.get("transit_minutes", 10)) + 59) // 60,
+            ),
+            "slots": slots,
+            "parallel": max(1, int(block.get("parallel_groups", 4))),
+            "cap": max(1, int(block.get("group_cap", 125))),
+            "zones": zones,
+            "interior_first_min": (
+                _parse_minutes(first_slot) if first_slot is not None else None
+            ),
+        }
 
-        interior_first_slot = block.get("interior_first_slot")
-        interior_first_min = (
-            _parse_minutes(interior_first_slot)
-            if interior_first_slot is not None
-            else None
-        )
+    def _exercise_invitees(
+        self,
+        agents: list[Any],
+        plan: dict[str, Any],
+        day_offset: int,
+    ) -> tuple[list[Any], list[Any], dict[str, int]]:
+        """The day's entitled passengers and the willing subset."""
+        offsets = plan["offsets"]
         invited, willing = [], []
         cohort_count = {"interior": 0, "exterior": 0}
         for agent in agents:
@@ -620,13 +661,13 @@ class RhythmLayer:
                 continue
             cohort = (
                 "interior"
-                if self._is_interior_cabin(agent, interior_types)
+                if self._is_interior_cabin(agent, plan["interior_types"])
                 else "exterior"
             )
             start_off = offsets[cohort]
             if day_offset < start_off:
                 continue
-            if alternate and (
+            if plan["alternate"] and (
                 (day_offset - start_off + (self._exercise_key(agent) & 1))
                 % 2
                 != 0
@@ -634,49 +675,66 @@ class RhythmLayer:
                 continue
             invited.append(agent)
             cohort_count[cohort] += 1
-            if self._exercise_willing(agent, willing_p):
+            if self._exercise_willing(agent, plan["willing_p"]):
                 willing.append(agent)
+        return invited, willing, cohort_count
+
+    def _exercise_buckets(
+        self,
+        willing: list[Any],
+        plan: dict[str, Any],
+        day_offset: int,
+    ) -> tuple[list[list[Any]], list[tuple[int, int]]]:
+        """Fill slot x parallel-group buckets, probe-forward, cap-bounded."""
         # Only the interior cohort is eligible on its rollout day (the
         # exterior offset is later), so restricting that day's slots to
-        # the 13:30 start cannot starve another cohort.
+        # the declared first slot cannot starve another cohort.
         usable_slots = [
             i
-            for i, s in enumerate(slots)
+            for i, s in enumerate(plan["slots"])
             if not (
-                day_offset == offsets["interior"]
-                and interior_first_min is not None
-                and s < interior_first_min
+                day_offset == plan["offsets"]["interior"]
+                and plan["interior_first_min"] is not None
+                and s < plan["interior_first_min"]
             )
         ]
         group_ids = [
-            (slot_i, g) for slot_i in usable_slots for g in range(parallel)
+            (slot_i, g)
+            for slot_i in usable_slots
+            for g in range(plan["parallel"])
         ]
         n_groups = len(group_ids)
         if not n_groups:
-            return
+            return [], []
         buckets: list[list[Any]] = [[] for _ in range(n_groups)]
         for agent in sorted(willing, key=self._exercise_key):
-            placed = False
-            base = self._exercise_key(agent) % n_groups
+            # The parity bit claims key&1 — a different key field seeds
+            # the group probe so deck slots are not parity-correlated.
+            base = (self._exercise_key(agent) >> 1) % n_groups
             for probe in range(n_groups):
                 idx = (base + probe) % n_groups
-                if len(buckets[idx]) < cap:
+                if len(buckets[idx]) < plan["cap"]:
                     buckets[idx].append(agent)
-                    placed = True
                     break
-            if not placed:
-                self.exercise_telemetry["declined"] += 1
+        return buckets, group_ids
 
+    def _commit_exercise(
+        self,
+        buckets: list[list[Any]],
+        group_ids: list[tuple[int, int]],
+        plan: dict[str, Any],
+        voyage_day: int,
+    ) -> int:
+        """Commit each group's dwell epoch plus corridor transit epochs."""
         attended = 0
         for idx, bucket in enumerate(buckets):
             if not bucket:
                 continue
             slot_i, group_i = group_ids[idx]
-            slot = slots[slot_i]
-            zone = zones[group_i % len(zones)]
+            dwell_start = plan["slots"][slot_i] + plan["transit_min"]
+            dwell_end = dwell_start + plan["dwell_min"]
+            zone = plan["zones"][group_i % len(plan["zones"])]
             corridor = self._pick_corridor()
-            dwell_start = slot + transit_min
-            dwell_end = dwell_start + dwell_min
             best_hour, best_overlap = dwell_start // 60, -1
             for hour in range(dwell_start // 60, dwell_end // 60 + 1):
                 overlap = min(dwell_end, (hour + 1) * 60) - max(
@@ -698,7 +756,7 @@ class RhythmLayer:
                     is_meal=False,
                     port_span=None,
                 ))
-                for back in range(1, transit_epochs + 1):
+                for back in range(1, plan["transit_epochs"] + 1):
                     t_hour = (best_hour - back) % 24
                     entries.append(_Commitment(
                         priority=_EVENT_PRIORITY["exercise_transit"],
@@ -713,20 +771,8 @@ class RhythmLayer:
                         port_span=None,
                     ))
                 attended += 1
+        return attended
 
-        self.exercise_telemetry["invitations"] += len(invited)
-        self.exercise_telemetry["attendances"] += attended
-        self.exercise_telemetry["declined"] += len(invited) - attended
-        self.exercise_telemetry["days"].append({
-            "voyage_day": voyage_day,
-            "day_offset": day_offset,
-            "invited": len(invited),
-            "willing": len(willing),
-            "attended": attended,
-            "cohorts": dict(cohort_count),
-            "groups_formed": sum(1 for b in buckets if b),
-            "group_size_max": max((len(b) for b in buckets), default=0),
-        })
 
     def outing_zone_for(self, agent: Any, hour: int) -> str | None:
         """The authorized destination a confined agent may visit this epoch.
