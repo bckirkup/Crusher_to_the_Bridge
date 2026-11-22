@@ -1,6 +1,6 @@
 # NORO-POOL-PICKUP-01
 **Date:** 2026-11-22
-**Commit:** 8c6fae12 (`--contamination-solver` worker knob + campaign spec)
+**Commit:** 8c6fae12
 **Pathogens:** norwalk_gi
 **Status:** declared
 
