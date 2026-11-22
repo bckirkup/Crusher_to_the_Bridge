@@ -288,14 +288,16 @@ def _arm_verdicts(
             out[arm] = {"metrics": metrics,
                         "verdict": "INSUFFICIENT-TAKEOFF-MASS"}
             continue
+        ign_med = metrics["ignition_day_median_takeoff"]
+        d15_med = metrics["d15_median_record_timed"]
         leg1 = (
             (metrics["founder_median_takeoff"] or 0.0) >= _FOUNDER_MIN
-            and (metrics["ignition_day_median_takeoff"] or float("inf"))
+            and (ign_med if ign_med is not None else float("inf"))
             <= _IGN_MAX
         )
         leg2 = (
             metrics["record_timed_n"] > 0
-            and (metrics["d15_median_record_timed"] or float("inf"))
+            and (d15_med if d15_med is not None else float("inf"))
             <= _D15_MAX
         )
         out[arm] = {"metrics": metrics, "leg1": leg1, "leg2": leg2,
@@ -306,7 +308,14 @@ def _arm_verdicts(
 
 def _campaign_verdict(
     verdicts: dict[str, dict[str, Any]],
+    drift_failed: bool = False,
 ) -> str:
+    if drift_failed:
+        return (
+            "DRIFT-WITNESS-FAIL — the D0 block moved vs committed "
+            "dp_theta_8p50; attribute drift before trusting any "
+            "window read"
+        )
     window = {
         arm: v for arm, v in verdicts.items()
         if _ARM_RE.match(arm) and "leg1" in v
@@ -342,6 +351,62 @@ def _campaign_verdict(
     return "UNREAD — leg 1 untested at the band top"
 
 
+def _audit_voyage_echo(
+    arm: str,
+    voyage: dict[str, Any],
+    tag: str,
+    violations: list[str],
+) -> None:
+    """The stage-declaration echo per arm: a window arm must show the
+    day-1 embarkation typing plus pinned uplift days (W>1 declares
+    elevated-contact sea days, not repeated boarding days), and the
+    baseline must show the layer still off."""
+    match = _ARM_RE.match(arm)
+    if match:
+        w = int(match.group("w"))
+        want_days = {"1": "embarkation"}
+        want_days.update({str(d): "sea_day" for d in range(2, w + 1)})
+        got_days = voyage.get("itinerary_day_types") or {}
+        if voyage.get("effects_enabled") is not True:
+            violations.append(
+                f"{tag}: delivery.voyage.effects_enabled "
+                f"{voyage.get('effects_enabled')!r} != true — the "
+                "stage declaration never reached the cell",
+            )
+        if got_days != want_days:
+            violations.append(
+                f"{tag}: voyage itinerary day types {got_days} != "
+                f"declared {want_days}",
+            )
+        want_a = float(match.group("a"))
+        got_a = voyage.get("embarkation_contact_rate_multiplier")
+        if got_a != want_a:
+            violations.append(
+                f"{tag}: embarkation contact_rate_multiplier "
+                f"{got_a!r} != declared {want_a:g}",
+            )
+        want_pins = {str(d): want_a for d in range(2, w + 1)}
+        got_pins = {
+            k: float(v)
+            for k, v in (
+                voyage.get("itinerary_contact_rate_multipliers") or {}
+            ).items()
+        }
+        if got_pins != want_pins:
+            violations.append(
+                f"{tag}: per-entry contact_rate_multipliers "
+                f"{got_pins} != declared {want_pins}",
+            )
+        return
+    if arm == _BASELINE_ARM:
+        if voyage.get("effects_enabled") is not False:
+            violations.append(
+                f"{tag}: voyage effects_enabled "
+                f"{voyage.get('effects_enabled')!r} on the baseline "
+                "arm — the declaration leaked off its arm",
+            )
+
+
 def _audit(
     payloads: dict[str, dict[str, Any]],
 ) -> tuple[list[str], list[str]]:
@@ -357,38 +422,7 @@ def _audit(
         delivery = payload.get("delivery") or {}
         voyage = delivery.get("voyage") or {}
         spec = sr.get("seed_spec") or {}
-        match = _ARM_RE.match(arm)
-        if match:
-            want_days = {
-                str(d): "embarkation"
-                for d in range(1, int(match.group("w")) + 1)
-            }
-            got_days = voyage.get("itinerary_day_types") or {}
-            if voyage.get("effects_enabled") is not True:
-                violations.append(
-                    f"{tag}: delivery.voyage.effects_enabled "
-                    f"{voyage.get('effects_enabled')!r} != true — the "
-                    "stage declaration never reached the cell",
-                )
-            if got_days != want_days:
-                violations.append(
-                    f"{tag}: voyage itinerary day types {got_days} != "
-                    f"declared {want_days}",
-                )
-            want_a = float(match.group("a"))
-            got_a = voyage.get("embarkation_contact_rate_multiplier")
-            if got_a != want_a:
-                violations.append(
-                    f"{tag}: embarkation contact_rate_multiplier "
-                    f"{got_a!r} != declared {want_a:g}",
-                )
-        elif arm == _BASELINE_ARM:
-            if voyage.get("effects_enabled") is not False:
-                violations.append(
-                    f"{tag}: voyage effects_enabled "
-                    f"{voyage.get('effects_enabled')!r} on the baseline "
-                    "arm — the declaration leaked off its arm",
-                )
+        _audit_voyage_echo(arm, voyage, tag, violations)
         if "placement" in spec:
             violations.append(
                 f"{tag}: placement echo present — no arm in this design "
@@ -486,11 +520,14 @@ def _audit_replay_echoes(
 def _refit_witness(
     rows: dict[tuple[float, str], dict[int, dict[str, Any]]],
     refit_prefix: str,
-) -> list[str]:
-    """Pair this design's D0 cells against the committed 8p50 cells."""
+) -> tuple[list[str], bool]:
+    """Pair this design's D0 cells against the committed 8p50 cells;
+    returns (report lines, drift_failed) so the campaign verdict cannot
+    land on a drifted baseline."""
     bucket, key_prefix = _split_s3(refit_prefix)
     client = _s3_client()
     lines: list[str] = []
+    drifted = False
     for (theta, arm), new_row in sorted(rows.items()):
         if arm != _BASELINE_ARM:
             continue
@@ -515,17 +552,20 @@ def _refit_witness(
                 f"paired {paired}/{len(new_row)} D0 cells; do not "
                 "trust the baseline read"
             )
+            drifted = True
         elif nonzero:
             verdict = "DRIFT: attribute before trusting the window read"
+            drifted = True
         else:
             verdict = "DRIFT WITNESS CLEAN"
+            drifted = False
         lines.append(
             f"Theta {theta:g}: n={paired} paired vs committed "
             f"dp_theta_8p50 — recorded_onsets paired deltas nonzero on "
             f"{nonzero}/{paired} seeds, median delta "
             f"{_fmt(_median(deltas))} — {verdict}",
         )
-    return lines
+    return lines, drifted
 
 
 def _per_cell_lines(seeds: dict[int, dict[str, Any]]) -> list[str]:
@@ -580,11 +620,12 @@ def _render(
     payloads: dict[str, dict[str, Any]],
     source: str,
     refit_lines: list[str],
+    drift_failed: bool = False,
 ) -> str:
     violations, flags = _audit(payloads)
     rows = _rows(payloads)
     verdicts = _arm_verdicts(rows)
-    campaign = _campaign_verdict(verdicts)
+    campaign = _campaign_verdict(verdicts, drift_failed)
     lines = [
         f"# {design.design_id} readout — {source}",
         "",
@@ -670,10 +711,15 @@ def main(argv: list[str] | None = None) -> int:
     }
     if not payloads:
         raise SystemExit(f"no cell payloads under {source}")
-    refit_lines = [] if args.no_refit else _refit_witness(
-        _rows(payloads), args.refit_prefix or _REFIT_PREFIX,
+    refit_lines: list[str] = []
+    drift_failed = False
+    if not args.no_refit:
+        refit_lines, drift_failed = _refit_witness(
+            _rows(payloads), args.refit_prefix or _REFIT_PREFIX,
+        )
+    report = _render(
+        design, payloads, source, refit_lines, drift_failed,
     )
-    report = _render(design, payloads, source, refit_lines)
     if args.out_md:
         args.out_md.write_text(report, encoding="utf-8")
     print(report)
