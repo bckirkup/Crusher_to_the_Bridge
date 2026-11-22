@@ -132,6 +132,13 @@ is config-only and never introduces pathogens. Enabling effects changes
 onboard mixing (ashore exclusion, contact/dining multipliers, embarkation
 surge) but does not model off-ship exposure.
 
+Multiplier precedence: an itinerary entry's own `contact_rate_multiplier`
+pins the resolved contact multiplier for that day, ahead of its day-type
+block in `voyage.defaults` and the shipped day-type defaults — so an
+elevated-contact day can stay typed `sea_day` instead of `embarkation`
+(typing it `embarkation` also re-deals that day's boarding rhythm
+template).
+
 ## Outputs
 
 | File | Description |
