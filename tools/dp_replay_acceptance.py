@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import tempfile
@@ -239,7 +240,15 @@ def main() -> int:
     }
     text = json.dumps(readout, indent=1, sort_keys=True)
     if out_path is not None:
-        out_path.write_text(text)
+        # O_NOFOLLOW: a symlink planted at the destination after the
+        # up-front check cannot redirect the write outside the roots.
+        fd = os.open(
+            str(out_path),
+            os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW,
+            0o644,
+        )
+        with os.fdopen(fd, "w") as fh:
+            fh.write(text)
     print(text)
     return 0
 

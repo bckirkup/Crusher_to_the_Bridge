@@ -79,6 +79,65 @@ def test_main_rejects_unexpected_platform_id(tmp_path, monkeypatch) -> None:
         raise AssertionError("main() accepted a traversal platform id")
 
 
+def test_main_rejects_outside_out_before_sim(monkeypatch) -> None:
+    import tools.dp_replay_acceptance as acc
+
+    called = {"design": False}
+    monkeypatch.setattr(
+        acc, "load_design",
+        lambda *a, **k: called.update(design=True) or {},
+    )
+    monkeypatch.setattr(
+        sys, "argv",
+        ["dp_replay_acceptance", "--out", "/etc/evil.json"],
+    )
+    try:
+        acc.main()
+    except SystemExit as exc:
+        assert "--out must be under the repo" in str(exc)
+    else:
+        raise AssertionError("main() accepted an out-of-tree --out")
+    assert called["design"] is False
+
+
+def test_main_rejects_outside_design_before_sim(monkeypatch) -> None:
+    import tools.dp_replay_acceptance as acc
+
+    called = {"design": False}
+    monkeypatch.setattr(
+        acc, "load_design",
+        lambda *a, **k: called.update(design=True) or {},
+    )
+    monkeypatch.setattr(
+        sys, "argv",
+        ["dp_replay_acceptance", "--design", "/etc/passwd"],
+    )
+    try:
+        acc.main()
+    except SystemExit as exc:
+        assert "--design must be under the repo" in str(exc)
+    else:
+        raise AssertionError("main() accepted an out-of-tree --design")
+    assert called["design"] is False
+
+
+def test_out_symlink_to_outside_rejected(tmp_path, monkeypatch) -> None:
+    import tools.dp_replay_acceptance as acc
+
+    link = tmp_path / "link.json"
+    link.symlink_to("/etc/evil.json")
+    monkeypatch.setattr(
+        sys, "argv",
+        ["dp_replay_acceptance", "--num-epochs", "4", "--out", str(link)],
+    )
+    try:
+        acc.main()
+    except SystemExit as exc:
+        assert "--out must be under the repo" in str(exc)
+    else:
+        raise AssertionError("--out followed a symlink outside the roots")
+
+
 def test_main_smoke_writes_readout(tmp_path, monkeypatch, capsys) -> None:
     import tools.dp_replay_acceptance as acc
 
