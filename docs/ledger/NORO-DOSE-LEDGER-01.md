@@ -2,7 +2,7 @@
 **Date:** 2026-11-22
 **Commit:** #1392
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured (22 cells, AWS Batch picard-noro-dose-ledger-01:1)
 
 Joined per-epoch mass-ledger diagnostic for the norovirus hand/fomite
 mechanism review (D0′ in the 2026-11-22 review). Edison's first question —
@@ -104,3 +104,47 @@ Selection / decision rules:
 
 22 cells × 1 vCPU; per-cell wall clock from the canary (the local 24-epoch
 smoke ran ~4 min; 288 epochs expected ~45–60 min/cell on Batch).
+
+## Result — measured 2026-11-22 (22 cells, 288 epochs, jobdef :1)
+
+**Status:** measured.
+
+All frozen invariants passed on all 22 cells (len-288 ledgers; sums
+reconcile to voyage counters within 1e-9; `Σ secondaries == acquired_ids`;
+`Σ emesis_events` matches the emesis witness).
+
+Pooled mass ledger (GEC):
+
+| stage | pooled |
+|---|---|
+| net surface gain | 215,527 |
+| delivered to hands | 24,707,373 |
+| — of which emesis patch | 24,640,696 (99.7%) |
+| mouth dose (discrete + solver-integrated) | 1,006,596 (504k + 452k) |
+| hand→hand moved | 4,061 |
+| Σhazard → secondaries | 184.1 → 182 |
+
+Per-cell structure:
+
+- Hot cells are patch cells. Every high-hazard cell (8000: 31.0, 8006:
+  146.0, 8105: 1.1) is ≥98% patch-delivered; the largest hazard epochs
+  inside them are `common_source_food` bursts (1.5–22M GEC/epoch
+  credited) that ignite the chain, after which the tail runs on
+  patch-fomite + caregiver mass (fomite credits 100–150k GEC in patch
+  epochs).
+- The zone pool is a write-only reservoir: cold cells deposit 65–14,129
+  GEC net gain yet deliver ~0–4k total; pooled over all cells,
+  non-patch delivered mass is ~0.3% of delivered.
+- Delivered→mouth conversion ~4% pooled — the hand reservoir sheds
+  ~96% of delivered mass to wash/decay before swallowing.
+- Hand→hand moved mass is negligible everywhere (≤2k GEC/cell) — the
+  multi-hop leg contributes nothing measurable under the freeze.
+- Secondaries ≈ Σhazard at the cell level (182/184): once a dense
+  encounter exists, the challenge converts at ~99%.
+
+Verdict on Edison's attenuation-vs-structure question: within-epoch
+attenuation is real (96% delivered→mouth loss) but is not the binding
+term — the binding term is structural: ordinary pooled fomite never
+delivers, so interpersonal propagation exists only where an emesis
+event lands a concentrated patch in an occupied unit. Take-off
+requires dense-encounter structure, not magnitude.
