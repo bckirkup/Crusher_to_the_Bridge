@@ -97,6 +97,5 @@ multi-day W5 declaration are unmeasured — a future session that wants
 them should note the canary's bimodal signature (the binding constraint
 is participation, not intensity) before spending.
 
-Readout: `campaigns/covid/seed_ring_02/readout.py --prefix
-s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_seed_ring_02/`
-(rendered verdict NULL-WINDOW, all 20 cells).
+Canonical readout: `seed_ring_02_readout.md` (rendered verdict
+NULL-WINDOW, all 20 cells, per-cell evidence table).

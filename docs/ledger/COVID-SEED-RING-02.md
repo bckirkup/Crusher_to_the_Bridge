@@ -46,9 +46,9 @@ null is read against clean in-cell audits, not a paired replay.
 ## What the null measures
 
 A single dense embarkation day at α=8 cannot lift the *median* founder
-pool to ≥10 — the 3/4 of draws that produce the DP timing need the
-index inside the surge geometry, and declaring intensity does not move
-participation. The α=2/α=4 dose-response and the multi-day W5
+pool to ≥10 — only ~1/4 of draws (6/20) place the index inside the
+surge geometry and produce record-class timing; declaring intensity
+does not move that participation. The α=2/α=4 dose-response and the multi-day W5
 declaration were left unrun; a future session should treat the
 participation-vs-intensity split, not window intensity, as the open
 question. The θ contract consequence stands as before: envelope or

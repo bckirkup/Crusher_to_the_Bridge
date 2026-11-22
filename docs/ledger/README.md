@@ -58,6 +58,8 @@ New ledger entries are registered here as they land; the filename remains the st
 
 - [COVID-EARLY-GROWTH-01](COVID-EARLY-GROWTH-01.md) — measured: pure-readout growth decomposition over the SEED-RING-01 cells. Record-timed cells (ign ≤9) hold pre-quarantine (d15) infections median 1,292 vs whole-voyage band [712,960] and ~383 before-17 onsets vs 34 — early growth carries the overshoot, not the tail; all 8 end at 1,268–3,136, above the band. Θ is confounded: the same composite scales founder yield and post-founder growth; the record needs a dense embarkation-window contact field that relaxes — a voyage-stage declaration, not dose.
 
+- [COVID-SEED-RING-02](COVID-SEED-RING-02.md) — measured: NULL-WINDOW at α=8 on the 1-day embarkation window (20-cell canary at θ=3.162e8, audits clean; campaign stopped at the canary gate, remaining blocks unrun). Founder median 4.0 vs ≥10, ignition 13 vs ≤9, d15 median 2,404 vs ≤960 — windowed intensity is not the binding constraint on the founder channel; index participation in the surge geometry is (6/20 seeds ride the surge to record-class pools). Open: contract re-scope vs a participation-side declaration.
+
 - [ROOM-AIR-PAIRED-VALIDATION-01](ROOM-AIR-PAIRED-VALIDATION-01.md) — declared, design only: paired `ambient_on`/`ambient_off` respiratory contrast with matched seeds, exact sign-flip rule, sealed-mode no-change control and aggregate encounter witness; three pre-execution blockers; nothing run.
 
 - [CONTAM-FLEET-WORKUP-CANARY-01](CONTAM-FLEET-WORKUP-CANARY-01.md) — four-hull canary amendment: outdoor-air fraction does not reach the ContamX solved field; results split into solved airflow and derived downstream mixing; realized-field gates.
