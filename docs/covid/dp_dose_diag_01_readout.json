@@ -1,0 +1,4532 @@
+{
+ "arm": "replay_niid",
+ "design": "picard_framework/runs/covid_dp_replay_01_design.json",
+ "runs": [
+  {
+   "dose_by_role": {
+    "crew": 3.331375784205092e-08,
+    "passenger": 1.752207383897564e-07
+   },
+   "dose_by_route": {
+    "caregiver": 3.251822226625759e-08,
+    "direct_contact": 9.918609236118911e-15,
+    "droplet": 1.7601468684436337e-07,
+    "fomite": 2.1829786027752183e-15,
+    "hvac_airborne": 1.5750195943423777e-12
+   },
+   "dose_by_setting": {
+    "cabin": 1.7280086705712732e-07,
+    "corridor": 5.80244793295936e-10,
+    "dining": 5.841468524794956e-09,
+    "indoor_free": 2.93119158525212e-08,
+    "outdoor": 4.066203633077766e-18
+   },
+   "dose_epoch_quantiles": {
+    "p50": 14.0,
+    "p90": 36.0,
+    "p99": 52.0
+   },
+   "dose_quantiles": {
+    "p50": 2.908557056117719e-13,
+    "p90": 1.163412626918267e-12,
+    "p99": 8.794924047345137e-11
+   },
+   "dose_total": 2.0853449623180338e-07,
+   "eligible_agents": 3710,
+   "epochs": 120,
+   "recipient_role_counts": {
+    "crew": 149,
+    "passenger": 1656
+   },
+   "recipient_zero_fraction": 0.5135,
+   "recipients": 1805,
+   "seed": 20200205,
+   "source_trace": [
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 0,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 1,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 2,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 3,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 4,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 5,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 6,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 7,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 8,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 9,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 10,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 11,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 12,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 13,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 14,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 15,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 16,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 17,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 18,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 19,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 20,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 21,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 22,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 23,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 24,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 25,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 26,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 27,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 28,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 29,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 30,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 31,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 32,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 33,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 34,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 35,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 36,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 37,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PhotoGallery"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 38,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PhotoGallery"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 39,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PhotoGallery"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 40,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandCasino"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 41,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "International"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 42,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PromGalleria"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 43,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 44,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 45,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 46,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 47,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 48,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 49,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 50,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 51,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 52,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 53,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 54,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 55,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 56,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 57,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 58,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 59,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 60,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 61,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 62,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 63,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 64,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 65,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 66,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 67,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 68,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 69,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 70,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 71,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 72,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 73,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 74,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 75,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 76,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 77,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 78,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 79,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 80,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 81,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 82,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 83,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 84,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 85,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 86,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 87,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 88,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 89,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 90,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 91,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 92,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 93,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 94,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 13540.387964367705,
+     "epoch": 95,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 96,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 97,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 98,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 99,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 100,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 101,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 102,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 103,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 104,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 105,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 106,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 107,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 108,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 109,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 110,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 111,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 112,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 113,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 114,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 115,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 116,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 117,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 118,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_M"
+    },
+    {
+     "agent_id": 1826,
+     "ashore": false,
+     "current_shedding": 240785.93120973927,
+     "epoch": 119,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Departed"
+    }
+   ],
+   "susceptibility_scale": 1e-30,
+   "theta_cell": 7900000.0,
+   "weighted_dose_mean": 3.378739164132106e-14,
+   "weighted_dose_quantiles": {
+    "p50": 7.57290160004046e-18,
+    "p90": 2.9543909158851584e-15,
+    "p99": 6.327013607692725e-14
+   }
+  },
+  {
+   "dose_by_role": {
+    "crew": 2.1801124741096277e-10,
+    "passenger": 4.057746782927788e-08
+   },
+   "dose_by_route": {
+    "caregiver": 4.018536505886901e-08,
+    "direct_contact": 9.061143226360544e-17,
+    "droplet": 6.101060870680487e-10,
+    "fomite": 1.3689025820668964e-17,
+    "hvac_airborne": 7.826452068176565e-15
+   },
+   "dose_by_setting": {
+    "cabin": 4.0561948438002934e-08,
+    "corridor": 2.730608701397146e-16,
+    "dining": 1.070739847691817e-10,
+    "indoor_free": 1.264292208897138e-10,
+    "outdoor": 2.7159966499542755e-14
+   },
+   "dose_epoch_quantiles": {
+    "p50": 12.0,
+    "p90": 33.0,
+    "p99": 49.0
+   },
+   "dose_quantiles": {
+    "p50": 6.595142493556453e-19,
+    "p90": 2.711162428050395e-15,
+    "p99": 4.9787779649044635e-14
+   },
+   "dose_total": 4.079547907668989e-08,
+   "eligible_agents": 3710,
+   "epochs": 120,
+   "recipient_role_counts": {
+    "crew": 776,
+    "passenger": 2555
+   },
+   "recipient_zero_fraction": 0.1022,
+   "recipients": 3331,
+   "seed": 20200206,
+   "source_trace": [
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 0,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 1,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 2,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 3,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "NeptunePool"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 4,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 5,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 6,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 7,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 8,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 9,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 10,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Savoy"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 11,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 12,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 13,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 14,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 15,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "CC_D1_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 16,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Savoy"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 17,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 18,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 19,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 20,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 21,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 22,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 23,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 24,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 25,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 26,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 27,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 28,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 29,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 30,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "NeptunePool"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 31,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Savoy"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 32,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 33,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 34,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 35,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "CC_D2_A"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 36,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 37,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 38,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 39,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 40,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Savoy"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 41,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 42,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 43,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 44,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 45,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 46,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 47,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "NeptunePool"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 48,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 49,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 50,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 51,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 52,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 53,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 54,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 55,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 56,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 57,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 58,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Savoy"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 59,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 60,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 61,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 62,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 63,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 64,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 65,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 66,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 67,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 68,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 69,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 70,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "NeptunePool"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 71,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 72,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 73,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 74,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 75,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 76,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 77,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 78,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 79,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 80,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 81,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 82,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 83,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D10_S_A"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 84,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 85,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 86,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 87,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 88,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PregoPizza"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 89,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PregoPizza"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 90,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 91,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 92,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 93,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 94,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 63.10142758460691,
+     "epoch": 95,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 96,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 97,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 98,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 99,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 100,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 101,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 102,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 103,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 104,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 105,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 106,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 107,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 108,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 109,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 110,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 111,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 112,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 113,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 114,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 115,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 116,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 117,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 118,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D12_P_F"
+    },
+    {
+     "agent_id": 1581,
+     "ashore": false,
+     "current_shedding": 1122.1196941776857,
+     "epoch": 119,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Departed"
+    }
+   ],
+   "susceptibility_scale": 1e-30,
+   "theta_cell": 7900000.0,
+   "weighted_dose_mean": 1.8828705864563667e-13,
+   "weighted_dose_quantiles": {
+    "p50": 1.5549009143967053e-22,
+    "p90": 1.9113471591621214e-18,
+    "p99": 8.761601870041696e-17
+   }
+  },
+  {
+   "dose_by_role": {
+    "crew": 3.749465286951708e-10,
+    "passenger": 3.906098447032581e-08
+   },
+   "dose_by_route": {
+    "caregiver": 3.891620237226114e-08,
+    "direct_contact": 1.3634175322506268e-16,
+    "droplet": 5.197197391959733e-10,
+    "fomite": 2.515374049372967e-17,
+    "hvac_airborne": 8.726068316933286e-15
+   },
+   "dose_by_setting": {
+    "cabin": 3.9055659319731846e-08,
+    "corridor": 4.0290503424393064e-16,
+    "dining": 1.0172928097523434e-10,
+    "indoor_free": 2.785419953667532e-10,
+    "outdoor": 4.252033427899067e-20
+   },
+   "dose_epoch_quantiles": {
+    "p50": 13.0,
+    "p90": 38.0,
+    "p99": 50.0
+   },
+   "dose_quantiles": {
+    "p50": 1.2287250211084117e-18,
+    "p90": 2.6432428737718763e-15,
+    "p99": 6.505914158449316e-15
+   },
+   "dose_total": 3.943593099902099e-08,
+   "eligible_agents": 3710,
+   "epochs": 120,
+   "recipient_role_counts": {
+    "crew": 470,
+    "passenger": 2462
+   },
+   "recipient_zero_fraction": 0.2097,
+   "recipients": 2932,
+   "seed": 20200207,
+   "source_trace": [
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 0,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 1,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 2,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 3,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 4,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 5,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 6,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PrincessTheater"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 7,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 8,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 9,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 10,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 11,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 12,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 13,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 14,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 15,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D10_P_F"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 16,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 17,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 18,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 19,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 20,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 21,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 22,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PrincessTheater"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 23,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PrincessTheater"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 24,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PrincessTheater"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 25,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 26,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 27,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 28,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 29,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 30,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PrincessTheater"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 31,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 32,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 33,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 34,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 35,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 36,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 37,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 38,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 39,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 40,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 41,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 42,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 43,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 44,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 45,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 46,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PrincessTheater"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 47,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 48,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 49,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 50,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 51,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 52,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 53,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 54,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 55,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 56,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 57,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 58,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 59,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 60,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 61,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 62,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 63,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 64,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 65,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 66,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 67,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 68,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 69,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 70,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PrincessTheater"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 71,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 72,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 73,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 74,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 75,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 76,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 77,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 78,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 79,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 80,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 81,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 82,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 83,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 84,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 85,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 86,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 87,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 88,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 89,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 90,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 91,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 92,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 93,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 94,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 123.03878367127072,
+     "epoch": 95,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 96,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 97,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 98,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 99,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 100,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 101,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 102,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 103,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 104,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 105,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 106,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 107,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 108,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 109,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 110,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 111,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 112,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 113,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 114,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 115,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 116,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 117,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 118,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_S_M"
+    },
+    {
+     "agent_id": 391,
+     "ashore": false,
+     "current_shedding": 2187.9733563885393,
+     "epoch": 119,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Departed"
+    }
+   ],
+   "susceptibility_scale": 1e-30,
+   "theta_cell": 7900000.0,
+   "weighted_dose_mean": 2.560484367094977e-13,
+   "weighted_dose_quantiles": {
+    "p50": 2.3640269264895765e-22,
+    "p90": 3.161587199703522e-19,
+    "p99": 4.302217263399346e-17
+   }
+  },
+  {
+   "dose_by_role": {
+    "crew": 3.010089973438547e-09,
+    "passenger": 7.72988617757503e-09
+   },
+   "dose_by_route": {
+    "caregiver": 2.8522818045446582e-09,
+    "direct_contact": 9.550571485683413e-17,
+    "droplet": 7.887536805749662e-09,
+    "fomite": 3.3044221948252213e-16,
+    "hvac_airborne": 1.5711477135861425e-13
+   },
+   "dose_by_setting": {
+    "cabin": 6.526314749643334e-09,
+    "corridor": 8.762079090995568e-11,
+    "dining": 1.3052804010830975e-09,
+    "indoor_free": 1.3318128130043232e-09,
+    "outdoor": 1.4889473963729291e-09
+   },
+   "dose_epoch_quantiles": {
+    "p50": 13.0,
+    "p90": 34.0,
+    "p99": 48.0
+   },
+   "dose_quantiles": {
+    "p50": 1.1405579838842267e-13,
+    "p90": 1.026502192101748e-12,
+    "p99": 1.811761649673865e-11
+   },
+   "dose_total": 1.0739976151013591e-08,
+   "eligible_agents": 3710,
+   "epochs": 120,
+   "recipient_role_counts": {
+    "crew": 239,
+    "passenger": 1404
+   },
+   "recipient_zero_fraction": 0.5571,
+   "recipients": 1643,
+   "seed": 20200208,
+   "source_trace": [
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 0,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 1,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 2,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 3,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 4,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 5,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 6,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 7,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 8,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "FineArts"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 9,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "OasisBar"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 10,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 11,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "ClubFusion"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 12,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 13,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 14,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 15,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "CaptainCircle"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 16,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 17,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 18,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 19,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 20,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GoodSpirits"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 21,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "CalypsoBar"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 22,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 23,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 24,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 25,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 26,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 27,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 28,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 29,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 30,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 31,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GrandPlaza"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 32,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "CaptainCircle"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 33,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "TerracePool"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 34,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "TerracePool"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 35,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D10_S_M"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 36,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "TridentGrill"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 37,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GoodSpirits"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 38,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "OceanFront"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 39,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "TerracePool"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 40,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 41,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D8_P_M"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 42,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "HorizonCourt"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 43,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D11_P_M"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 44,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "WheelhouseBar"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 45,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "WheelhouseBar"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 46,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 47,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 48,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 49,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 50,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 51,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 52,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 53,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 54,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "TridentGrill"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 55,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "TridentGrill"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 56,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "ShoreExcursions"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 57,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PromGalleria"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 58,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": true,
+     "current_shedding": 0.0,
+     "epoch": 59,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Ashore"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 60,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 61,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "ChurchillLounge"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 62,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "WakeViewBar"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 63,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "CalypsoBar"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 64,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 65,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 66,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "SantaFe"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 67,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D5_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 68,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Facets"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 69,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "GuestServices"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 70,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 0.0,
+     "epoch": 71,
+     "illness_status": "IllnessStatus.NOT_ILL",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 72,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 73,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 74,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 75,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 76,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 77,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 78,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 79,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 80,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 81,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 82,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 83,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 84,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 85,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 86,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 87,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 88,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 89,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 90,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 91,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 92,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 93,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 94,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 1493.3700565150352,
+     "epoch": 95,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 96,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 97,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 98,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 99,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 100,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 101,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 102,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 103,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 104,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 105,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 106,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 107,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 108,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 109,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 110,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 111,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 112,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 113,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 114,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 115,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 116,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 117,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 118,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "PC_D6_P_A"
+    },
+    {
+     "agent_id": 1259,
+     "ashore": false,
+     "current_shedding": 26556.292230693492,
+     "epoch": 119,
+     "illness_status": "IllnessStatus.SYMPTOMATIC",
+     "infection_status": "InfectionStatus.INFECTED",
+     "location": "Departed"
+    }
+   ],
+   "susceptibility_scale": 1e-30,
+   "theta_cell": 7900000.0,
+   "weighted_dose_mean": 9.139280442197225e-15,
+   "weighted_dose_quantiles": {
+    "p50": 1.0236702579446923e-17,
+    "p90": 1.5578146920921279e-15,
+    "p99": 3.362587627803317e-14
+   }
+  }
+ ],
+ "seeds": [
+  20200205,
+  20200206,
+  20200207,
+  20200208
+ ]
+}
