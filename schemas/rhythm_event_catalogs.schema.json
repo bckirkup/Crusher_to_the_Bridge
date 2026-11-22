@@ -80,7 +80,11 @@
               "type": "object",
               "properties": {
                 "trigger_sop_names": { "type": "array", "items": { "type": "string" } },
-                "effects": { "type": "object" }
+                "effects": { "type": "object" },
+                "additional_events": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/event" }
+                }
               },
               "additionalProperties": true
             }
@@ -116,6 +120,7 @@
         "participation_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
         "occupancy_share": { "type": "number", "minimum": 0, "maximum": 1 },
         "egress_mode": { "type": "string", "enum": ["synchronized_end", "rolling", "windowed"] },
+        "seat_staggered": { "type": "boolean" },
         "source": {
           "type": "object",
           "description": "Every timetable entry traceable: either a document citation or an explicit notional marker with a construction rule.",

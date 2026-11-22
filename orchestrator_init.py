@@ -810,6 +810,9 @@ def build_engine(
             "dining_service_type": z.get("dining_service_type", ""),
             "food_contamination_multiplier": z.get("food_contamination_multiplier"),
             "meal_seatings": z.get("meal_seatings"),
+            # DP-REPLAY-ENVIRON-01: the interior/exterior cabin proxy the
+            # rhythm layer's exercise rollout cohorts read.
+            "cabin_ventilation_type": z.get("cabin_ventilation_type"),
         }
         for z in zones
     ]

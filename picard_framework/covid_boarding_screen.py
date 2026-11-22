@@ -85,6 +85,8 @@ FLEET_MEAN_MAX = 0.06
 # one event population rides two hulls with every other input held fixed.
 ARM_OVERRIDE_KEYS = frozenset({
     "platform_id",
+    "protocols_path",
+    "rhythm_overrides",
     "scheduled_protocol_id",
     "scheduled_protocol_window",
     "pathogen_pool_transport",
@@ -116,6 +118,15 @@ ARM_OVERRIDE_KEYS = frozenset({
 # (``voyage_itinerary.normalize_voyage_config`` validates day types).
 VOYAGE_OVERRIDE_KEYS = frozenset({
     "effects_enabled", "itinerary", "defaults",
+})
+# Fields a rhythm_overrides arm may write onto ``config_overrides.rhythm``:
+# the layer's declared knobs — opt-in ``catalog`` name, port-day ashore cap,
+# and the confinement ``exercise`` block parameters (DP-REPLAY-ENVIRON-01).
+# Validation stays in ``RhythmLayer.__init__`` so an invalid arm raises at
+# cell build.
+RHYTHM_OVERRIDE_KEYS = frozenset({
+    "port_day_onboard_midday_residual", "exercise", "passenger_disposition",
+    "catalog",
 })
 # Fields an observation_overrides arm may write onto
 # ``config_overrides.syndromic``: the record-structure channels that are
@@ -608,6 +619,10 @@ def _retime_scheduled_protocol(
             entry["end_day"] = (
                 None if window["end_day"] is None else int(window["end_day"])
             )
+        if "start_hour_of_day" in window:
+            entry["start_hour_of_day"] = window["start_hour_of_day"]
+        if "end_hour_of_day" in window:
+            entry["end_hour_of_day"] = window["end_hour_of_day"]
         return
     raise ValueError(
         f"the run spec's scenario_schedule schedules no {protocol_id} "
@@ -922,6 +937,22 @@ def _apply_hazard_frailty(raw: dict[str, Any], spec: Any) -> None:
     }
 
 
+def _apply_protocols_path(raw: dict[str, Any], path: Any) -> None:
+    """Point ``catalog.protocols_path`` at a different protocols file.
+
+    DP-REPLAY-ENVIRON-01's policy-file axis: the replayed hull's historical
+    orders live in their own protocols document (dedicated zone names,
+    historical meal service) rather than the diagnostic file the boxed
+    counterfactual ships. The path is resolved against the repo root by
+    ``PicardRunSpec`` exactly like the registry default.
+    """
+    if not isinstance(path, str) or not path:
+        raise ValueError(
+            f"protocols_path override must be a non-empty string, got {path!r}",
+        )
+    raw.setdefault("catalog", {})["protocols_path"] = path
+
+
 def _apply_platform_id(raw: dict[str, Any], platform_id: Any) -> None:
     """Swap the run's hull by rewriting ``catalog.platform_id`` in place.
 
@@ -950,6 +981,10 @@ def _dispatch_arm_overrides(
     """Apply declared override keys in the frozen arm order."""
     if "platform_id" in overrides:
         _apply_platform_id(raw, overrides["platform_id"])
+    if "protocols_path" in overrides:
+        _apply_protocols_path(raw, overrides["protocols_path"])
+    if "rhythm_overrides" in overrides:
+        _apply_rhythm_overrides(raw, overrides["rhythm_overrides"])
     if "scheduled_protocol_window" in overrides:
         _apply_scheduled_window(raw, overrides["scheduled_protocol_window"])
     if "scheduled_protocol_id" in overrides:
@@ -1212,6 +1247,30 @@ def _apply_participation_propensity(
             "null",
         )
     rhythm["participation_propensity"] = dict(block)
+
+
+def _apply_rhythm_overrides(
+    raw: dict[str, Any], block: Any,
+) -> None:
+    """Merge declared rhythm-layer config onto ``config_overrides.rhythm``.
+
+    DP-REPLAY-ENVIRON-01's declaration channel for the layer's own knobs
+    (``port_day_onboard_midday_residual``, the confinement ``exercise``
+    block parameters). Resolution and validation stay in
+    ``RhythmLayer.__init__``; ``participation_propensity`` keeps its own
+    arm key and is not re-writable here.
+    """
+    if not isinstance(block, Mapping):
+        raise ValueError("rhythm_overrides must be a mapping")
+    unknown = set(block) - RHYTHM_OVERRIDE_KEYS
+    if unknown:
+        raise ValueError(
+            f"rhythm_overrides declares unknown keys {sorted(unknown)}; "
+            f"allowed: {sorted(RHYTHM_OVERRIDE_KEYS)}",
+        )
+    rhythm = raw.setdefault("config_overrides", {}).setdefault("rhythm", {})
+    for key, value in block.items():
+        rhythm[key] = copy.deepcopy(value)
 
 
 class QuarantineAttributionLedger:

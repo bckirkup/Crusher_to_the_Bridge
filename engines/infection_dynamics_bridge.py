@@ -2986,6 +2986,11 @@ class KorkinShipEngine:
                     day_type,
                     set(self.active_sop_names),
                     voyage_day,
+                    excursion_window=(
+                        getattr(voyage_state, "excursion_window_minutes", None)
+                        if voyage_state is not None
+                        else None
+                    ),
                 )
         if voyage_state is None:
             return False
@@ -3123,6 +3128,14 @@ class KorkinShipEngine:
             agent.current_location = "Isolated_In_Quarters"
             return
         if agent.agent_id in self.quarantined_ids:
+            # DP-REPLAY-ENVIRON-01: an authorized outing — a staggered
+            # common-deck exercise slot or a crew service route — is the
+            # declared reason a confined agent leaves its cabin this epoch.
+            if self._rhythm is not None:
+                outing = self._rhythm.outing_zone_for(agent, hour)
+                if outing is not None:
+                    agent.current_location = outing
+                    return
             agent.current_location = agent.home_zone
             return
         tending_zone = self.caregiver_tending_zones.get(agent.agent_id)

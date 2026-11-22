@@ -1,0 +1,38 @@
+{
+  "description": "DP-REPLAY-ENVIRON-01 dedicated-hull protocols for the diamond_princess_2020 pair. Carries the single scheduled confinement order (SOP-017-DEDICATED) with diamond_princess zone IDs and the documented staggered crew-mess reference, and no reactive protocols: the protocol engine may only activate what this file declares. Distinct from protocols_covid_pf_dp.json (the boxed-meal diagnostic counterfactual), which stays untouched.",
+  "protocols": [
+    {
+      "protocol_id": "SOP-017-DEDICATED",
+      "name": "Diamond Princess Cabin Quarantine (2020-02-05)",
+      "description": "Historical reference for DP-REPLAY-ENVIRON-01: cabin confinement of all passengers, essential-zone crew exempt, crew meals served in staggered mess seatings (the documented historical crew feeding mode; boxed delivery is the named diagnostic alternative in protocols_covid_pf_dp.json). Crew movement to work zones is granted by the rhythm layer's service_route commitments on the confinement variant (meal delivery, galley production, medical, service) — this file only declares who is exempt from the cabin rule and which zones remain work destinations. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general"
+        ],
+        "exempt_work_zones": [
+          "MainGalley",
+          "CrewMess",
+          "CrewMessOff",
+          "MedicalCenter",
+          "IsolWard",
+          "Engine_Room",
+          "Bridge",
+          "Stores",
+          "Laundry"
+        ],
+        "crew_meal_service": {
+          "mode": "staggered",
+          "seatings": 4
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    }
+  ]
+}

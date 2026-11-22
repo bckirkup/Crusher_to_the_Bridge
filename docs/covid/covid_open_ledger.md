@@ -631,6 +631,19 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`DP-REPLAY-ENVIRON-01` landed (ledger
+  `docs/ledger/DP-REPLAY-ENVIRON-01.md`, design
+  `docs/covid/covid_dp_replay_01_design.md`): the `covid_dp_replay_01`
+  arms declare a real-2020 activity replay on the dedicated
+  `diamond_princess` hull — hour-level quarantine at epoch 391, diamond
+  rhythm catalog with confinement variant (meals-to-cabin, exercise
+  outings), real itinerary, NIID index clock.** Local no-transmission
+  movement acceptance read out via `tools/dp_replay_acceptance.py`. This
+  is environs only: no dose figure, no theta fit, and every prior replay
+  figure remains withdrawn at its own `Measured at` SHA. The theta legs
+  (Checkpoint B local dose diagnostic → 12-cell pilot at declared
+  θ shortlist) are the successor session's decision.
+
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
   follow-up to the platform-fidelity study — measured 2026-11-08: 400/400
   cells, both-takeoff size endpoint rejects (p=0.0202), takeoff McNemar

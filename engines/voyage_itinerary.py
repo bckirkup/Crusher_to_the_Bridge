@@ -96,6 +96,9 @@ class EpochState:
     shore_pathogen: str = ""
     crew_shore_leave_fraction: float = 0.0
     shore_exposure_enabled: bool = False
+    # Declared (departure-end, return-start) minutes bounding this port
+    # day's shore excursions; None for non-port days / undeclared days.
+    excursion_window_minutes: tuple[int, int] | None = None
     notes: str = ""
 
     def to_telemetry(self) -> dict[str, Any]:
@@ -320,13 +323,17 @@ def _effects_epoch_state(
     in_embark = _in_window(
         epoch_of_day, day_entry.get("embarkation_window_hours_of_day"),
     )
-    in_disembark = _in_window(
-        epoch_of_day, day_entry.get("disembark_window_hours_of_day"),
-    )
-    in_reembark = _in_window(
-        epoch_of_day, day_entry.get("reembark_window_hours_of_day"),
-    )
+    disembark_win = day_entry.get("disembark_window_hours_of_day")
+    reembark_win = day_entry.get("reembark_window_hours_of_day")
+    in_disembark = _in_window(epoch_of_day, disembark_win)
+    in_reembark = _in_window(epoch_of_day, reembark_win)
     between_ashore = _between_ashore_windows(day_type, day_entry, epoch_of_day)
+    excursion_window = None
+    if day_type == "port_day" and disembark_win and reembark_win:
+        excursion_window = (
+            int(float(disembark_win[1]) * 60),  # clock-exempt: itinerary hours -> minutes for the rhythm layer's minute-resolution windows
+            int(float(reembark_win[0]) * 60),  # clock-exempt: itinerary hours -> minutes for the rhythm layer's minute-resolution windows
+        )
 
     buffet_surge, contact = _embarkation_surge(
         day_type, day_entry, defaults, in_embark, contact,
@@ -357,6 +364,7 @@ def _effects_epoch_state(
         between_ashore_windows=between_ashore,
         buffet_surge_fraction=buffet_surge,
         disembark_fraction=disembark_fraction,
+        excursion_window_minutes=excursion_window,
         shore_infection_probability=float(
             _shore_probability_per_epoch(
                 day_entry.get("shore_infection_probability_per_hour", 0.0),

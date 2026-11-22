@@ -171,6 +171,8 @@ class HullScenario:
                         "protocol_id": entry["protocol_id"],
                         "start_day": int(entry["start_day"]),
                         "end_day": entry.get("end_day"),
+                        "start_hour_of_day": entry.get("start_hour_of_day"),
+                        "end_hour_of_day": entry.get("end_hour_of_day"),
                     }
                     for entry in self.scheduled_protocols
                 ],
