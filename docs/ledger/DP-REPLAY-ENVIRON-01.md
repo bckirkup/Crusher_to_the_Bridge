@@ -58,8 +58,9 @@ corridor 2.0, outdoor 0.9 (0.5), ashore 0.36 avg over 15 days.
 
 Ashore fires only on the six declared port calls: Kagoshima 1,745,
 Hong Kong 2,695, Chan May 2,720, Cai Lan 2,656, Keelung 2,755,
-Naha 1,814 person-h (Naha inside the real 16:00–20:00 window; others
-09:00–16:00). Every sea day 0.
+Naha 1,814 person-h (Kagoshima inside the declared 10:00–14:00
+excursion window, the four middle ports 10:00–15:00, Naha 16:00–20:00).
+Every sea day 0.
 
 Confinement witness: epoch 391 fraction-at-home 0.578 (transition hour
 with residual pre-declared commitments), epoch 392 1.000, epoch ≥408
