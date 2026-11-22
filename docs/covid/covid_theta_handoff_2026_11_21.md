@@ -133,19 +133,38 @@ day 15 (pre-quarantine infections median 1,292 vs the whole-voyage
 band [712,960]; before-17 onsets 383 vs 34; all 8 cells end 1,268–3,136,
 above the band), so the same θ that must lift the founder pool also
 drives the growth that overshoots the mass.
-The voyage-stage direction was commissioned (2026-11-21): the
-evidence memo `docs/covid/covid_voyage_stage_contacts_evidence.md` and
-the frozen `docs/covid/covid_seed_ring_02_design.md` declare a
-day-windowed `voyage_contact_multiplier` (days 0..W at α, routine flat)
-and a two-leg prediction — window lands founders/ignition (Edison P1),
-routine keeps d15 ≤960 (P2). Open calls inside the design: W ∈ {1,5},
-α band {2,4,8}, and the Polymod-vs-Pung close-contact definition
-mapping that decides the routine stage. The alternative — **re-scoping
-the Θ contract** to envelope/conditioned scoring — stays open if
-SEED-RING-02 comes back FOUNDERS-ONLY or NULL-WINDOW. A founder-only
-arm is no longer an honest probe: it predicts the founder leg lands
-and the mass leg still fails. GM scoring stays gated; H5 stays held
-out.
+The voyage-stage direction was commissioned (2026-11-21) and its
+canary is measured (2026-11-22): **`WINDOW_W1_A8` is NULL-WINDOW** —
+a dense day-0 embarkation contact field at α=8 lifts the founder
+median only to 4.0 (vs ≥10), with the mechanism firing as a lottery:
+6/20 seeds produced record-class pools (60/41/56/23/21/10 founders,
+ignition days 3–9) where the index draw lands inside the surge
+geometry; the rest ignite days 12–27. Leg 2 fails as frozen-predicted
+(d15 median 2,404 vs ≤960). Audits clean on all 20 cells; the
+seed-paired drift witness was not executed — the owner stopped the
+campaign at the canary gate with `t8p50_d0`, `w1_a2`, `w1_a4` and
+`w5_a8` unrun. Ledger `docs/ledger/COVID-SEED-RING-02.md`.
+
+Two seam probes have now hit the same wall: neither venue assignment
+(placement) nor windowed intensity moves the *median* founder pool —
+what moves it is whether the index participates in the surge
+geometry at all, which neither lever schedules. The open decision is
+therefore:
+
+- **Re-scope the Θ contract** to envelope/conditioned scoring — the
+  typical draw produces record-class outbreaks and on-time ignition is
+  a ~1-in-4 lottery the record may simply be a draw of. θ=3.162e8 is
+  likely defensible under that contract.
+- **Or probe participation directly** — a declaration about *where the
+  index is* during day-0 (muster/queue/boarding-crush geometry, not
+  dining or a global multiplier). This is a harder declaration: it
+  needs a participation channel the itinerary layer does not currently
+  express, and the unrun α-sweep/W5 blocks stay available if a future
+  session wants the multi-day evidence first.
+- The routine-stage redeclaration stays deferred on the Pung
+  close-contact threshold mapping.
+
+GM scoring stays gated; H5 stays held out.
 
 Standing owner calls recorded in the ledger (not session decisions):
 `confirmed / infections_reachable` as the scored capture basis, and
@@ -161,8 +180,10 @@ whether FRAQMB_DUTY becomes the boxed_s1s2 replay default.
 - The tail's joint-only damping (FRAQMB_DUTY) is measured — single-lever
   confinement fixes are falsified at this θ; do not re-propose them.
 - Index dining-zone placement as a founder-pool lever: measured NULL at
-  θ=3.162e8 (SEED-RING-01); do not re-run placement variants. The
-  remaining lever is itinerary-level surge exposure, not venue
-  assignment.
+  θ=3.162e8 (SEED-RING-01); do not re-run placement variants.
+- Single-day windowed embarkation intensity as a founder-pool lever:
+  measured NULL at α=8 (SEED-RING-02 canary); do not re-run
+  window-intensity variants — the constraint is index *participation*
+  in the surge geometry, not the window's multiplier.
 - Capture must be quoted on the conditioned basis; the unconditioned
   ~0.52 is the structural post-window residual, not a defect.

@@ -6,6 +6,7 @@
   "s3_prefix": "campaign/covid_seed_ring_02/",
   "queue": "picard-analysis-queue",
   "image_tag": "covid-seed-ring-02",
+  "image_digest": "sha256:84dbb44299fd47c714dd98a557e5de416a9c9634907e08963111307796ae6611",
   "resources": {
     "vcpu": "1",
     "memory": "4096"
