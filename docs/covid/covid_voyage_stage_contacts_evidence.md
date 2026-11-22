@@ -109,11 +109,14 @@ Two propositions, two declarations:
 - **P1 — embarkation window.** A voyage-day-windowed contact schedule: the
   day-0/1 window (muster, terminal, boarding buffet) carries an uplift α on
   the partner draw for *everyone* (the crowd mixes, not just the index),
-  relaxing to the routine draw after the window. Mechanism: extend
-  `voyage_contact_multiplier` to a day-windowed schedule — small engine
-  change, no new pathway. α is a declared assumption bounded by
-  mass-gathering measurements (no embarkation sensor record); the design
-  declares it, not fits it.
+  relaxing to the routine draw after the window. Mechanism already in
+  tree: the voyage itinerary layer (`engines/voyage_itinerary.py`)
+  resolves a per-day `contact_rate_multiplier` into
+  `voyage_contact_multiplier` when `voyage.effects_enabled` — the DP
+  config ships the flag off with an empty itinerary, so the declaration
+  is config-level (embarkation day type + α), not an engine change.
+  α is a declared assumption bounded by mass-gathering measurements
+  (no embarkation sensor record); the design declares it, not fits it.
 - **P2 — settled routine.** The routine stage gets its own independently
   justified draw — the honest candidates are the flat POLYMOD draw (current)
   vs a Pung-anchored activity schedule (`activity_contacts` armed, all 8

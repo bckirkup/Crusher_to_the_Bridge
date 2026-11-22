@@ -18,18 +18,38 @@ EARLY-GROWTH-01: founders alone cannot land the clause (record-timed cells
 already overshoot mass), so the window declaration must be tested jointly
 with the routine stage, not as a surge add-on.
 
-## Engine change required
+## Mechanism — the voyage itinerary layer already exists
 
-`transmission.voyage_contact_multiplier` becomes a **day-windowed
-schedule**: `{days 0..W: α, days W+1..34: 1.0}` where W is the declared
-window length and α the window uplift on the partner draw. It multiplies
-the existing Poisson partner draw exactly as today's flat scalar does — no
-new pathway, no RNG-path change beyond the stage lookup. The window applies
-to every host (the crowd mixes, not only the index).
+No engine change. `engines/voyage_itinerary.py` already resolves a
+per-day `contact_rate_multiplier` into `tx_core.voyage_contact_multiplier`
+(`ship_simulation.py:1141`) when `voyage.effects_enabled` is true. The DP
+platform `voyage_config.json` ships `effects_enabled: false` with an
+empty itinerary — the replay runs the flat POLYMOD draw because the stage
+declaration was never turned on, not because the mechanism is missing.
 
-Open call (owner): W = 1 (turnaround afternoon only) vs W = 5 (the index's
-whole aboard window). Fastest cells' founder bursts concentrate day 0–1;
-lean W=1, declare the alternative as a second arm rather than choose.
+The declaration is a scenario `config_overrides.voyage` block:
+`effects_enabled: true`, itinerary declaring days 1..W as
+`type: "embarkation"` (voyage_day is 1-indexed; voyage_day 1 = day 0,
+the Yokohama turnaround), `defaults.embarkation.contact_rate_multiplier:
+α`, all remaining days `sea_day` (identity defaults — onboard fraction,
+dining demand and contact all 1.0, so the routine stage is untouched).
+Declared caveats, frozen here so the readout attributes correctly:
+
+- The contact uplift applies to the **whole embarkation voyage day**.
+  Hour-windowing exists only for `buffet_surge_fraction`
+  (`embarkation_window_hours_of_day`); the contact multiplier has no
+  hour window. The declared unit is the voyage day, matching W in days.
+- An embarkation day also sets `embarkation_buffet_surge` — surge dining
+  assignment on day 0, which is part of the embarkation declaration, not
+  a confound: it is the same boarding-day crowd declared through the
+  dining channel. `buffet_surge_fraction` stays at its default 0.80.
+- `voyage.shore_exposure.enabled` stays false — no ashore/port exposure
+  enters the arm.
+
+Open call (owner): W = 1 (voyage_day 1 only — the turnaround day) vs
+W = 5 (voyage_days 1–5 — the index's aboard window, departing day 5).
+Fastest cells' founder bursts concentrate day 0–1; lean W=1, declare
+the alternative as a second arm rather than choose.
 
 α is a **declared assumption band**, not a sourced constant — no cruise
 embarkation sensor record exists (memo §3). Bound: mass-gathering
@@ -40,8 +60,8 @@ measurements put transient proximities well above routine rates; declare
 
 | arm | window | routine |
 |---|---|---|
-| `D0_declared` | flat (α=1, all days) | POLYMOD flat — pairing base + drift witness |
-| `WINDOW_W1_A*` | days 0..W α ∈ {2,4,8} | POLYMOD flat |
+| `D0_declared` | `effects_enabled: false` (flat) | POLYMOD flat — pairing base + drift witness |
+| `WINDOW_W1_A*` | voyage_days 1..W embarkation, `contact_rate_multiplier` α ∈ {2,4,8} | POLYMOD flat |
 
 The routine stage is held flat deliberately: the memo's open Polymod-vs-Pung
 definition gap means the routine count is not yet independently justified;
@@ -75,10 +95,18 @@ If leg 2 fails on all α, the residual is in the routine field itself
 - **FOUNDERS-ONLY:** leg 1 lands, leg 2 fails at every α — the window is
   real but the routine field is independently over-dense; next seam is the
   routine stage itself (Pung mapping + `activity_contacts`), not θ.
+- **SPLIT-STAGE:** the legs land at different α and no arm lands both
+  (e.g. leg 1 only at α=8 while leg 2 only holds at α=2) — read as
+  FOUNDERS-ONLY: the uplift that buys founders is itself what breaks the
+  mass leg, so the residual is again the routine field, not stage timing.
 - **NULL-WINDOW:** leg 1 fails at α=8 — even maximal crowd exposure
   doesn't reach the founder lottery; the founder channel is something
   narrower than voyage-stage mixing (itinerary-level realized schedule,
   Arm-B continuation).
+
+An arm that flips `effects_enabled` without declaring an itinerary is
+rejected at design check — an identity-effects run would confound the
+pairing (the layer being on is itself a delta).
 
 ## Audit invariants (carried from SEED-RING-01)
 
