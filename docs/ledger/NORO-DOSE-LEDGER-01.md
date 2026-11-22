@@ -109,6 +109,11 @@ smoke ran ~4 min; 288 epochs expected ~45–60 min/cell on Batch).
 
 **Status:** measured.
 
+**Measured at:** `1f8a027c` (instrument + review fixes; engine
+unchanged since the declaration). Image
+`picard-campaign@sha256:958502fdb33283d41db65dbbd937791e687945311e4a7fbf842d14fe67ec652f`,
+jobdef `picard-noro-dose-ledger-01:1`, cells seeds 8000–8019 + 8105/8106.
+
 All frozen invariants passed on all 22 cells (len-288 ledgers; sums
 reconcile to voyage counters within 1e-9; `Σ secondaries == acquired_ids`;
 `Σ emesis_events` matches the emesis witness).
@@ -120,7 +125,7 @@ Pooled mass ledger (GEC):
 | net surface gain | 215,527 |
 | delivered to hands | 24,707,373 |
 | — of which emesis patch | 24,640,696 (99.7%) |
-| mouth dose (discrete + solver-integrated) | 1,006,596 (504k + 452k) |
+| mouth dose (discrete + solver-integrated) | 1,006,596 (532k + 475k) |
 | hand→hand moved | 4,061 |
 | Σhazard → secondaries | 184.1 → 182 |
 
