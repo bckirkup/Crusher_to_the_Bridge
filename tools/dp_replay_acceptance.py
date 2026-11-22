@@ -84,10 +84,12 @@ class MovementLedger:
         engine = sim.engine
         epoch = int(getattr(sim, "epoch", getattr(engine, "epoch", 0)))
         day = epoch // 24  # clock-exempt: epoch→day index, not a unit conversion
-        # Confinement opens at epoch 391 (day 16, 07:00) and runs to day 30
-        # inclusive (the SOP's declared day_range); hours outside the
-        # [391, 744) window are not quarantine time.
-        if 391 <= epoch < 744:
+        # Quarantine hours are whatever the arm's own schedule activates:
+        # the dedicated order binds at epoch 391 (day 16, 07:00) while the
+        # shipped baseline binds whole-day at day 16 — bucket by the live
+        # SOP set, not a fixed window.
+        active = getattr(engine, "active_sop_names", None) or []
+        if any("Cabin Quarantine" in str(name) for name in active):
             bucket = "quarantine"
         elif day == 0:
             bucket = "day0"
