@@ -138,6 +138,45 @@ def test_out_symlink_to_outside_rejected(tmp_path, monkeypatch) -> None:
         raise AssertionError("--out followed a symlink outside the roots")
 
 
+def test_out_symlink_planted_at_write_refused(tmp_path, monkeypatch) -> None:
+    """A link that appears after validation must still be refused."""
+    import tools.dp_replay_acceptance as acc
+    import picard_framework.run_spec as run_spec
+    from picard_framework.simulation import ship_simulation as ss
+
+    link = tmp_path / "link.json"
+
+    class FakeSim:
+        def __init__(self, spec, display=False):
+            self.engine = SimpleNamespace(agents=[], _rhythm=None)
+            self.num_epochs = 1
+            self.epoch_observer = None
+
+        def initialize(self):
+            pass
+
+        def step(self):
+            link.symlink_to("/etc/evil.json")
+
+    monkeypatch.setattr(
+        run_spec, "PicardRunSpec",
+        SimpleNamespace(
+            from_picard_dict=staticmethod(lambda *a, **k: object()),
+        ),
+    )
+    monkeypatch.setattr(ss, "ShipSimulation", FakeSim)
+    monkeypatch.setattr(
+        sys, "argv",
+        ["dp_replay_acceptance", "--num-epochs", "1", "--out", str(link)],
+    )
+    try:
+        acc.main()
+    except OSError:
+        pass  # O_NOFOLLOW refused the post-check symlink
+    else:
+        raise AssertionError("write followed a post-check symlink")
+
+
 def test_main_smoke_writes_readout(tmp_path, monkeypatch, capsys) -> None:
     import tools.dp_replay_acceptance as acc
 

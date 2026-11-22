@@ -240,12 +240,15 @@ def main() -> int:
     }
     text = json.dumps(readout, indent=1, sort_keys=True)
     if out_path is not None:
-        # O_NOFOLLOW: a symlink planted at the destination after the
-        # up-front check cannot redirect the write outside the roots.
+        # O_NOFOLLOW where it exists (POSIX): a symlink planted at the
+        # destination after the up-front check cannot redirect the write
+        # outside the roots. 0o666 so the operator's umask decides the
+        # final permissions, matching a normal file create.
         fd = os.open(
             str(out_path),
-            os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW,
-            0o644,
+            os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+            | getattr(os, "O_NOFOLLOW", 0),
+            0o666,
         )
         with os.fdopen(fd, "w") as fh:
             fh.write(text)
