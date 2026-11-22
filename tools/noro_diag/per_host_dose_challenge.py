@@ -369,6 +369,16 @@ class Recorder:
     # Infected census summed over epochs -> ill host-epochs, the denominator
     # the per-ill-host-day release is divided by.
     ill_host_epochs: int = 0
+    # Joined per-epoch mass ledger (NORO-DOSE-LEDGER-01): the voyage
+    # counters above are already keyed to the target pathogen, so the epoch
+    # observer snapshots them once per epoch and emits the delta row,
+    # joined with the standing reservoir state at epoch end. The two
+    # cumulative terms no existing witness covers get their own counters.
+    hazard_cum: float = 0.0
+    hand_to_hand_moved_gec: float = 0.0
+    hand_to_hand_calls: int = 0
+    epoch_ledger: list[dict[str, Any]] = field(default_factory=list)
+    _ledger_prev: dict[str, Any] = field(default_factory=dict)
 
     def host(self, agent_id: int) -> HostRecord:
         """Return (creating if needed) one host's record."""
@@ -504,6 +514,7 @@ def _wrap_hazard(core_cls: type, rec: Recorder) -> Any:
             float(effective_dose), frailty, float(hazard),
         )
         if pathogen_id == rec.pathogen_id:
+            rec.hazard_cum += float(hazard)
             record = rec.host(agent.agent_id)
             record.evaluated += 1
             record.evaluated_dose += float(effective_dose)
@@ -688,6 +699,7 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
             core_cls._fomite_pickup_request_for_area
         ),
         "_apply_contamination_flow": core_cls._apply_contamination_flow,
+        "_per_partner_contact_dose": core_cls._per_partner_contact_dose,
         # RNG-free helpers, re-called from the witness below; kept in
         # ``originals`` so the restore loop covers them uniformly even though
         # nothing replaces them.
@@ -797,6 +809,12 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         )
         if rec.current_pathogen != rec.pathogen_id:
             return
+        # Mouth dose integrated inside the RK4 solve: the solver swallows
+        # off the hand load itself, so it never reaches
+        # ``_hand_to_mouth_dose`` and would otherwise be invisible.
+        rec.fomite["flow_mouth_dose_gec"] += float(
+            sum(result.mouth_dose.values())
+        )
         delivered = float(sum(
             float(mass) for mass in result.pickup_mass.values()
         ))
@@ -807,6 +825,20 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         rec.fomite["mass_requested_gec"] += delivered
         rec.fomite["mass_delivered_to_hands_gec"] += delivered
 
+    def partner_contact(
+        self: Any, target: Any, *args: Any, **kwargs: Any,
+    ) -> Any:
+        """Witness hand->hand mass moved per contact without a draw."""
+        dose, moved = originals["_per_partner_contact_dose"](
+            self, target, *args, **kwargs,
+        )
+        if rec.current_pathogen == rec.pathogen_id:
+            rec.hand_to_hand_calls += 1
+            rec.hand_to_hand_moved_gec += float(
+                sum(amount for _, amount in moved)
+            )
+        return dose, moved
+
     core_cls._deliver_fomite_requests = deliver
     core_cls._deliver_fomite_requests_by_class = deliver_by_class
     core_cls._fomite_pickup_requests_by_class = pickup_requests_by_class
@@ -815,6 +847,7 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
     core_cls._replenish_hand = replenish_hand
     core_cls._fomite_pickup_request_for_area = pickup_request_for_area
     core_cls._apply_contamination_flow = apply_flow
+    core_cls._per_partner_contact_dose = partner_contact
     return originals
 
 
@@ -1367,6 +1400,149 @@ def _ill_census(rec: Recorder, pathogen_id: str) -> Any:
         )
 
     return observe
+
+
+def _epoch_observer(rec: Recorder, pathogen_id: str) -> Any:
+    """Epoch observer: the ill census, then the mass-ledger row.
+
+    The observer fires at the end of ``ShipSimulation.step``, after
+    ``_step_biology`` and the challenge resolution, so every pathway
+    counter and the acquisition list for the epoch is final when the
+    row is flushed.
+    """
+    census = _ill_census(rec, pathogen_id)
+
+    def observe(sim: Any, work: Any) -> None:
+        census(sim, work)
+        _flush_epoch_ledger(rec, sim, work)
+
+    return observe
+
+
+def _flush_epoch_ledger(rec: Recorder, sim: Any, work: Any) -> None:
+    """Emit the epoch's delta row: flows in, reservoirs at epoch end.
+
+    Every counter is voyage-cumulative and keyed to the target pathogen
+    already, so the per-epoch flow is the delta against the previous
+    snapshot; nothing here reads state that costs an RNG draw. Losses
+    (wash strip, inactivation, cleaning, surface decay) are not
+    instrumented -- they are the residual a downstream readout closes
+    from start + in - out - end.
+    """
+    pid = rec.pathogen_id
+    prev = rec._ledger_prev
+
+    def d_scalar(key: str, val: float) -> float:
+        v = float(val)
+        delta = v - float(prev.get(key, 0.0))
+        prev[key] = v
+        return delta
+
+    def d_dict(name: str, cur: dict[str, float]) -> dict[str, float]:
+        current = {str(k): float(v) for k, v in cur.items()}
+        old = prev.get(name) or {}
+        prev[name] = current
+        return {
+            k: current.get(k, 0.0) - old.get(k, 0.0)
+            for k in set(current) | set(old)
+        }
+
+    core = getattr(sim, "tx_core", None) or getattr(sim, "engine", None)
+    agents = getattr(getattr(sim, "engine", None), "agents", ()) or ()
+    pools = (
+        getattr(core, "surface_pools_by_pathogen", None) or {}
+    ).get(pid) or {}
+    patches = (
+        getattr(core, "emesis_patch_pools_by_pathogen", None) or {}
+    ).get(pid) or {}
+    deposit_by_callsite = d_dict("dep_callsite", rec.deposit_callsite_gec)
+    row = {
+        "epoch": int(getattr(work, "epoch", rec.epoch)),
+        "ill_hosts": int(d_scalar("ill", rec.ill_host_epochs)),
+        "secondaries": int(d_scalar("acq", len(rec.acquisitions))),
+        "hazard": d_scalar("haz", rec.hazard_cum),
+        # Net surface gain only: under the continuous solver the
+        # ``_write_flow_surface`` callsite writes the pool's net change,
+        # so removals during pickup epochs cancel deposits in the same
+        # epoch. Gross emission lives in the solver's own ledger, not
+        # here.
+        "net_surface_gain_gec": sum(deposit_by_callsite.values()),
+        "net_gain_by_callsite_gec": deposit_by_callsite,
+        # The discrete ``_deliver_fomite_requests`` path only (patch +
+        # sanitary pooled calls): the continuous solver's pickups skip it,
+        # so these are the per-call offered/requested pair, not totals.
+        "discrete_requested_gec": d_scalar(
+            "req", rec.delivery_scale["sum_requested_gec"],
+        ),
+        "discrete_offered_gec": d_scalar(
+            "off", rec.delivery_scale["sum_offered_gec"],
+        ),
+        # Everything delivered to hands, all paths: discrete delivers
+        # (patch pickups included) plus the solver's pickup_mass. Patch
+        # mass is a subset of this total, never an addend.
+        "delivered_to_hands_gec": d_scalar(
+            "del", rec.fomite["mass_delivered_to_hands_gec"],
+        ),
+        "deliver_calls": int(
+            d_scalar("dcalls", rec.fomite["deliver_calls"]),
+        ),
+        "scaled_calls": int(
+            d_scalar("scalls", rec.delivery_scale["scaled_calls"]),
+        ),
+        "patch_delivered_gec": d_scalar(
+            "pdel", rec.emesis["patch_pickup_dose_gec"],
+        ),
+        "patch_pickups": int(
+            d_scalar("ppick", rec.emesis["patch_pickups"]),
+        ),
+        "patch_mass_deposited_gec": d_scalar(
+            "pmass", rec.emesis["patch_mass_gec"],
+        ),
+        "emesis_events": int(
+            d_scalar("eev", rec.emesis["emesis_events"]),
+        ),
+        "hand_to_hand_moved_gec": d_scalar(
+            "h2h", rec.hand_to_hand_moved_gec,
+        ),
+        "hand_to_hand_calls": int(
+            d_scalar("h2hcalls", rec.hand_to_hand_calls),
+        ),
+        "hand_to_mouth_dose_gec": d_scalar(
+            "h2m", rec.fomite["hand_to_mouth_dose_gec"],
+        ),
+        "hand_to_mouth_calls": int(
+            d_scalar("h2mcalls", rec.fomite["hand_to_mouth_calls"]),
+        ),
+        # Mouth dose the continuous solver integrated itself; the two
+        # mouth channels are disjoint (solver-integrated vs per-touch).
+        "flow_mouth_dose_gec": d_scalar(
+            "fh2m", rec.fomite["flow_mouth_dose_gec"],
+        ),
+        "hand_load_seen_gec": d_scalar(
+            "hlseen", rec.fomite["hand_load_seen_gec"],
+        ),
+        "sanitary_delivered_gec": d_scalar(
+            "san", rec.sanitary_delivered_gec,
+        ),
+        "emesis_aerosol_gec": d_scalar(
+            "em_aer", rec.emesis_aerosol_gec,
+        ),
+        "emesis_episode_load_gec": d_scalar(
+            "em_epi", rec.emesis_episode_load_gec,
+        ),
+        "credited_by_pathway_gec": d_dict("pw", rec.pathway_dose),
+        "hand_load_end_gec": float(sum(
+            float(agent.hand_load_by_pathogen.get(pid, 0.0))
+            for agent in agents
+        )),
+        "surface_pool_end_gec": float(sum(
+            float(v) for v in pools.values()
+        )),
+        "patch_mass_end_gec": float(sum(
+            float(p.mass) for unit in patches.values() for p in unit
+        )),
+    }
+    rec.epoch_ledger.append(row)
 
 
 def _record_schedule_draw(
@@ -2029,6 +2205,7 @@ def run_seed(
         rec, sw.fomite_representation, sw.fomite_touch_share,
     )
     summary = summarise(rec, alpha, beta, seed, epochs)
+    summary["epoch_mass_ledger"] = rec.epoch_ledger
     summary["dose_response_resolved"] = {
         "alpha_requested": alpha,
         "alpha_resolved": float(resolved["alpha"]),
@@ -2175,7 +2352,7 @@ def _run_instrumented_voyage(
             )
         with instrumented(rec, top_ids):
             sim = ShipSimulation(picard_spec, display=False)
-            sim.epoch_observer = _ill_census(rec, pathogen_id)
+            sim.epoch_observer = _epoch_observer(rec, pathogen_id)
             started_run = time.perf_counter()
             result = sim.run()
             wall_clock_run = time.perf_counter() - started_run
