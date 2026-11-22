@@ -240,6 +240,7 @@ class RhythmLayer:
         # deep-merged over the active SOP variant's ``exercise`` block at
         # deal time (rhythm_overrides.exercise).
         self._exercise_override = dict(cfg.get("exercise") or {})
+        self._excursion_window: tuple[int, int] | None = None
         self._exercise_day_zero: int | None = None
         self._exercise_willing_cache: dict[int, bool] = {}
         # DP-REPLAY-ENVIRON-01 passenger disposition: declared time-use
@@ -455,14 +456,21 @@ class RhythmLayer:
         day_type: str,
         sop_names: set[str],
         voyage_day: int,
+        excursion_window: tuple[int, int] | None = None,
     ) -> None:
-        """Deal every agent's itinerary for one ship day (spec §4.1)."""
+        """Deal every agent's itinerary for one ship day (spec §4.1).
+
+        ``excursion_window`` bounds a port_call's ashore spans to the
+        voyage-declared interval between the day's disembark and reembark
+        windows (a late call like Naha cannot deal morning excursions).
+        """
         self.dealt_day = voyage_day
         self.day_type = day_type
         self._commitments = {}
         self._pp_hours = {}
         self.meals_to_cabin = False
         self.embarkation_covered = False
+        self._excursion_window = excursion_window
         template = self.catalog.get("baseline_day_templates", {}).get(day_type)
         if not template:
             return
@@ -832,6 +840,10 @@ class RhythmLayer:
         end = _parse_minutes(event.get("window", ["00:00", "00:00"])[1])
         if end <= start:
             end += MINUTES_PER_DAY
+        # A voyage-declared excursion window replaces the template's
+        # generic call span (late-day ports cannot send morning tenders).
+        if eclass == "port_call" and self._excursion_window is not None:
+            start, end = self._excursion_window
         share = float(event.get("occupancy_share", 1.0))
         egress_mode = str(event.get("egress_mode", "rolling"))
         seatings = self._event_seatings(zones) if eclass == "meal_seating" else 1

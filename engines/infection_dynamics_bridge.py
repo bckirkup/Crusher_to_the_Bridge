@@ -2986,6 +2986,11 @@ class KorkinShipEngine:
                     day_type,
                     set(self.active_sop_names),
                     voyage_day,
+                    excursion_window=(
+                        getattr(voyage_state, "excursion_window_minutes", None)
+                        if voyage_state is not None
+                        else None
+                    ),
                 )
         if voyage_state is None:
             return False
