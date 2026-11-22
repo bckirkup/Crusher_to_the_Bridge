@@ -3,8 +3,9 @@
 > **Status:** implemented. Deliverable: a declared replay arm on the
 > dedicated `diamond_princess` hull with a real-2020 activity schedule,
 > confinement-era exercise outings, and a local movement-acceptance
-> readout. Theta legs (Checkpoint B dose diagnostic → 12-cell pilot) are
-> the next session's decision; nothing here is fitted to an anchor.
+> readout. Checkpoint B (index-only dose diagnostic) is measured — see
+> ledger `DP-REPLAY-DOSE-DIAG-01`; the 12-cell theta pilot (Checkpoint C)
+> is the next session's decision. Nothing here is fitted to an anchor.
 
 Source spec: Kosmos `DP_BEHAVIOR_SPEC.md` (third-party proposal; adopted
 where the engine can express it, adapted where it cannot) plus

@@ -640,9 +640,19 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   outings), real itinerary, NIID index clock.** Local no-transmission
   movement acceptance read out via `tools/dp_replay_acceptance.py`. This
   is environs only: no dose figure, no theta fit, and every prior replay
-  figure remains withdrawn at its own `Measured at` SHA. The theta legs
-  (Checkpoint B local dose diagnostic → 12-cell pilot at declared
-  θ shortlist) are the successor session's decision.
+  figure remains withdrawn at its own `Measured at` SHA.
+
+- **`DP-REPLAY-DOSE-DIAG-01` measured (ledger
+  `docs/ledger/DP-REPLAY-DOSE-DIAG-01.md`, committed readout
+  `docs/covid/dp_dose_diag_01_readout.json`): Checkpoint B index-only
+  diagnostic — the four prespecified seeds of `replay_niid`, 120 epochs,
+  secondary transmission suspended by pinning `susceptibility_scale` to
+  1e-30.** Reach 1643–3331/3710 across seeds; dose concentrated in cabin
+  setting (~99%) via caregiver+droplet routes; normalized U·D means
+  9e-15–2.6e-13. The Θ_old·Q_old/Q_new mapping is inapplicable (no
+  old-kernel arm on the dedicated hull) — Q_new is reported and
+  Checkpoint C brackets directly. The 12-cell theta pilot (declared
+  θ shortlist, 3 Θ × 4 matched seeds) is the next session's decision.
 
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
   follow-up to the platform-fidelity study — measured 2026-11-08: 400/400
