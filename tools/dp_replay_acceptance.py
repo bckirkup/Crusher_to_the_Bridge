@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -162,10 +163,14 @@ def main() -> int:
         or (raw.get("config_overrides") or {}).get("platform_id")
         or "diamond_princess"
     )
-    layout = json.loads(
-        (_REPO_ROOT / "data/platforms" / platform_id / "spatial_layout.json")
-        .read_text(),
-    )
+    if not re.fullmatch(r"[a-z0-9_]+", platform_id):
+        raise SystemExit(f"unexpected platform id: {platform_id!r}")
+    layout_path = (
+        _REPO_ROOT / "data/platforms" / platform_id / "spatial_layout.json"
+    ).resolve()
+    if _REPO_ROOT / "data/platforms" not in layout_path.parents:
+        raise SystemExit(f"layout path escapes data/platforms: {layout_path}")
+    layout = json.loads(layout_path.read_text())
     zone_meta = {str(z["id"]): str(z.get("type")) for z in layout["zones"]}
 
     import contextlib  # noqa: E402
