@@ -124,21 +124,9 @@ class MovementLedger:
                 self.home_fraction[epoch] = (confined, aboard_pax)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--design",
-        default="picard_framework/runs/covid_dp_replay_01_design.json",
-    )
-    parser.add_argument("--arm", default="replay_niid")
-    parser.add_argument("--seed", type=int, default=20200205)
-    parser.add_argument(
-        "--num-epochs", type=int, default=None,
-        help="cap the voyage for a smoke pass",
-    )
-    parser.add_argument("--out", default=None)
-    args = parser.parse_args()
-
+def resolve_arg_paths(args) -> tuple[Path, Path | None]:
+    """Confine --design to the repo tree and --out to repo/temp, before
+    any simulation work runs."""
     design_path = Path(args.design).expanduser().resolve()
     if _REPO_ROOT != design_path and _REPO_ROOT not in design_path.parents:
         raise SystemExit(
@@ -156,6 +144,83 @@ def main() -> int:
             raise SystemExit(
                 f"--out must be under the repo or the temp dir: {out_path}"
             )
+    return design_path, out_path
+
+
+def load_zone_meta(raw: dict) -> dict[str, str]:
+    """Resolve the spec's platform to a {zone_id: type} map, confining
+    the layout read to data/platforms."""
+    platform_id = str(
+        raw.get("platform_id")
+        or (raw.get("config_overrides") or {}).get("platform_id")
+        or "diamond_princess"
+    )
+    if not re.fullmatch(r"[a-z0-9_]+", platform_id):
+        raise SystemExit(f"unexpected platform id: {platform_id!r}")
+    layout_path = (
+        _REPO_ROOT / "data/platforms" / platform_id / "spatial_layout.json"
+    ).resolve()
+    if _REPO_ROOT / "data/platforms" not in layout_path.parents:
+        raise SystemExit(f"layout path escapes data/platforms: {layout_path}")
+    layout = json.loads(layout_path.read_text())
+    return {str(z["id"]): str(z.get("type")) for z in layout["zones"]}
+
+
+def build_sim(raw: dict):
+    import contextlib  # noqa: E402
+    import io  # noqa: E402
+
+    from picard_framework.run_spec import PicardRunSpec  # noqa: E402
+    from picard_framework.simulation.ship_simulation import (  # noqa: E402
+        ShipSimulation,
+    )
+
+    spec = PicardRunSpec.from_picard_dict(str(_REPO_ROOT), raw)
+    with contextlib.redirect_stdout(io.StringIO()):
+        sim = ShipSimulation(spec, display=False)
+        sim.initialize()
+    return sim
+
+
+def run_epochs(sim) -> None:
+    import contextlib  # noqa: E402
+    import io  # noqa: E402
+
+    with contextlib.redirect_stdout(io.StringIO()):
+        for _ in range(sim.num_epochs):
+            sim.step()
+
+
+def write_json(out_path: Path | None, text: str) -> None:
+    """Write the readout, refusing a symlink planted after the upfront
+    path check (O_NOFOLLOW where it exists; 0o666 so the umask decides)."""
+    if out_path is None:
+        return
+    fd = os.open(
+        str(out_path),
+        os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0),
+        0o666,
+    )
+    with os.fdopen(fd, "w") as fh:
+        fh.write(text)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--design",
+        default="picard_framework/runs/covid_dp_replay_01_design.json",
+    )
+    parser.add_argument("--arm", default="replay_niid")
+    parser.add_argument("--seed", type=int, default=20200205)
+    parser.add_argument(
+        "--num-epochs", type=int, default=None,
+        help="cap the voyage for a smoke pass",
+    )
+    parser.add_argument("--out", default=None)
+    args = parser.parse_args()
+
+    design_path, out_path = resolve_arg_paths(args)
     design = load_design(str(design_path))
     matches = [
         c for c in enumerate_cells(design)
@@ -176,40 +241,16 @@ def main() -> int:
         initiation["explicit_seeds"] = []
         container["initiation"] = initiation
 
-    platform_id = str(
-        raw.get("platform_id")
-        or (raw.get("config_overrides") or {}).get("platform_id")
-        or "diamond_princess"
-    )
-    if not re.fullmatch(r"[a-z0-9_]+", platform_id):
-        raise SystemExit(f"unexpected platform id: {platform_id!r}")
-    layout_path = (
-        _REPO_ROOT / "data/platforms" / platform_id / "spatial_layout.json"
-    ).resolve()
-    if _REPO_ROOT / "data/platforms" not in layout_path.parents:
-        raise SystemExit(f"layout path escapes data/platforms: {layout_path}")
-    layout = json.loads(layout_path.read_text())
-    zone_meta = {str(z["id"]): str(z.get("type")) for z in layout["zones"]}
+    zone_meta = load_zone_meta(raw)
 
-    import contextlib  # noqa: E402
-    import io  # noqa: E402
-
-    from picard_framework.run_spec import PicardRunSpec  # noqa: E402
-    from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
-
-    spec = PicardRunSpec.from_picard_dict(str(_REPO_ROOT), raw)
-    with contextlib.redirect_stdout(io.StringIO()):
-        sim = ShipSimulation(spec, display=False)
-        sim.initialize()
+    sim = build_sim(raw)
     home_zones = {
         int(a.agent_id): str(getattr(a, "home_zone", "") or "")
         for a in sim.engine.agents
     }
     ledger = MovementLedger(zone_meta, home_zones)
     sim.epoch_observer = ledger.observe
-    with contextlib.redirect_stdout(io.StringIO()):
-        for _ in range(sim.num_epochs):
-            sim.step()
+    run_epochs(sim)
 
     rhythm = getattr(sim.engine, "_rhythm", None)
     exercise = getattr(rhythm, "exercise_telemetry", None)
@@ -239,19 +280,7 @@ def main() -> int:
         "exercise_telemetry": exercise,
     }
     text = json.dumps(readout, indent=1, sort_keys=True)
-    if out_path is not None:
-        # O_NOFOLLOW where it exists (POSIX): a symlink planted at the
-        # destination after the up-front check cannot redirect the write
-        # outside the roots. 0o666 so the operator's umask decides the
-        # final permissions, matching a normal file create.
-        fd = os.open(
-            str(out_path),
-            os.O_WRONLY | os.O_CREAT | os.O_TRUNC
-            | getattr(os, "O_NOFOLLOW", 0),
-            0o666,
-        )
-        with os.fdopen(fd, "w") as fh:
-            fh.write(text)
+    write_json(out_path, text)
     print(text)
     return 0
 

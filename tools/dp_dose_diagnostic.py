@@ -24,10 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import re
 import sys
-import tempfile
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -40,7 +37,14 @@ from picard_framework.covid_boarding_screen import (  # noqa: E402
     load_design,
     prepare_cell_run_spec,
 )
-from tools.dp_replay_acceptance import MovementLedger  # noqa: E402
+from tools.dp_replay_acceptance import (  # noqa: E402
+    MovementLedger,
+    build_sim,
+    load_zone_meta,
+    resolve_arg_paths,
+    run_epochs,
+    write_json,
+)
 
 _SUSPENDED_SCALE = 1e-30
 _DEFAULT_SEEDS = (20200205, 20200206, 20200207, 20200208)
@@ -141,18 +145,7 @@ def _run_seed(
         design, cell, num_epochs=args.num_epochs, repo_root=str(_REPO_ROOT),
     )
     _suspend_secondary_transmission(raw)
-
-    import contextlib  # noqa: E402
-    import io  # noqa: E402
-
-    from picard_framework.run_spec import PicardRunSpec  # noqa: E402
-    from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
-
-    spec = PicardRunSpec.from_picard_dict(str(_REPO_ROOT), raw)
-    with contextlib.redirect_stdout(io.StringIO()):
-        sim = ShipSimulation(spec, display=False)
-        sim.initialize()
-
+    sim = build_sim(raw)
     engine = sim.engine
     seed_ids = set(getattr(engine, "explicit_seed_agent_ids", []) or [])
     if not seed_ids:
@@ -165,9 +158,7 @@ def _run_seed(
     }
     ledger = DoseLedger(zone_meta, home_zones, seed_ids)
     sim.epoch_observer = ledger.observe
-    with contextlib.redirect_stdout(io.StringIO()):
-        for _ in range(sim.num_epochs):
-            sim.step()
+    run_epochs(sim)
 
     recipients: list[dict] = []
     route_totals: dict[str, float] = {}
@@ -255,21 +246,7 @@ def main() -> int:
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
-    design_path = Path(args.design).expanduser().resolve()
-    if _REPO_ROOT != design_path and _REPO_ROOT not in design_path.parents:
-        raise SystemExit(
-            f"--design must be under the repo tree: {design_path}"
-        )
-    out_path = None
-    if args.out:
-        out_path = Path(args.out).expanduser().resolve()
-        allowed = (_REPO_ROOT, Path(tempfile.gettempdir()).resolve())
-        if not any(
-            out_path == base or base in out_path.parents for base in allowed
-        ):
-            raise SystemExit(
-                f"--out must be under the repo or the temp dir: {out_path}"
-            )
+    design_path, out_path = resolve_arg_paths(args)
     design = load_design(str(design_path))
     cells = {
         int(c.seed): c
@@ -286,20 +263,7 @@ def main() -> int:
         design, cells[args.seeds[0]], num_epochs=1,
         repo_root=str(_REPO_ROOT),
     )
-    platform_id = str(
-        probe.get("platform_id")
-        or (probe.get("config_overrides") or {}).get("platform_id")
-        or "diamond_princess"
-    )
-    if not re.fullmatch(r"[a-z0-9_]+", platform_id):
-        raise SystemExit(f"unexpected platform id: {platform_id!r}")
-    layout_path = (
-        _REPO_ROOT / "data/platforms" / platform_id / "spatial_layout.json"
-    ).resolve()
-    if _REPO_ROOT / "data/platforms" not in layout_path.parents:
-        raise SystemExit(f"layout path escapes data/platforms: {layout_path}")
-    layout = json.loads(layout_path.read_text())
-    zone_meta = {str(z["id"]): str(z.get("type")) for z in layout["zones"]}
+    zone_meta = load_zone_meta(probe)
 
     runs = [
         _run_seed(design, cells[s], args, zone_meta)
@@ -312,15 +276,7 @@ def main() -> int:
         "runs": runs,
     }
     text = json.dumps(readout, indent=1, sort_keys=True)
-    if out_path is not None:
-        fd = os.open(
-            str(out_path),
-            os.O_WRONLY | os.O_CREAT | os.O_TRUNC
-            | getattr(os, "O_NOFOLLOW", 0),
-            0o666,
-        )
-        with os.fdopen(fd, "w") as fh:
-            fh.write(text)
+    write_json(out_path, text)
     print(text)
     return 0
 
