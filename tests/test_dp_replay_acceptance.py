@@ -38,16 +38,14 @@ def test_observe_records_bounded_buckets() -> None:
         agent_id=1, role="passenger", current_location="PC_D8_P_M",
     )
     engine = SimpleNamespace(
-        agents=[agent], epoch=0, active_sop_names=[],
+        agents=[agent], epoch=0, quarantined_ids=set(),
     )
     sim = SimpleNamespace(engine=engine, epoch=390)
     ledger.observe(sim, None)
-    engine.active_sop_names = [
-        "Diamond Princess Cabin Quarantine (2020-02-05)",
-    ]
+    engine.quarantined_ids = {1}
     sim.epoch = engine.epoch = 391
     ledger.observe(sim, None)
-    engine.active_sop_names = []
+    engine.quarantined_ids = set()
     sim.epoch = engine.epoch = 745
     ledger.observe(sim, None)
     assert "passenger|pre_quarantine" in ledger.hours
