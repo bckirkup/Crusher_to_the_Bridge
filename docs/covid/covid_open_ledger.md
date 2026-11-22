@@ -647,9 +647,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `docs/covid/dp_dose_diag_01_readout.json`): Checkpoint B index-only
   diagnostic — the four prespecified seeds of `replay_niid`, 120 epochs,
   secondary transmission suspended by pinning `susceptibility_scale` to
-  1e-30.** Reach 1643–3331/3710 across seeds; dose concentrated in cabin
-  setting (~99%) via caregiver+droplet routes; normalized U·D means
-  9e-15–2.6e-13. The Θ_old·Q_old/Q_new mapping is inapplicable (no
+  1e-30.** Reach 1643–3331/3710 across seeds; cabin setting carries
+  60.8–99.5% of dose by seed via caregiver+droplet routes; normalized
+  U·D means 9e-15–2.6e-13. The Θ_old·Q_old/Q_new mapping is inapplicable (no
   old-kernel arm on the dedicated hull) — Q_new is reported and
   Checkpoint C brackets directly. The 12-cell theta pilot (declared
   θ shortlist, 3 Θ × 4 matched seeds) is the next session's decision.

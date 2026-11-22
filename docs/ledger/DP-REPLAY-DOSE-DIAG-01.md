@@ -43,16 +43,17 @@ Checkpoint C brackets directly off a labelled historical reference.
   `direct_contact` and `fomite` ~1e-15; `hvac_airborne` nonzero at
   1e-12–1e-13 — present but orders below the contact routes, consistent
   with the "outside isn't venting much virion" picture.
-- Setting mix: ~99% of dose lands in `cabin` on every seed; dining and
-  indoor-free each ~e-9–e-10 on the passenger-deck seeds; outdoor is
-  ~1e-9 on seed 20200208 only and ~e-14–e-20 otherwise.
+- Setting mix: `cabin` takes 60.8–99.5% of dose by seed (82.9% / 99.5%
+  / 99.1% / 60.8% on 05/06/07/08); on 20200208 the index's pool and
+  grill visits leave 14% outdoor and ~12% each in dining and
+  indoor-free, while outdoor is e-14–e-20 elsewhere.
 - Reach vs intensity are anti-correlated across seeds: the two
   passenger-corridor sources dose ~half the ship with a heavy tail
   (p99 ~1e-11–1e-10), while the PC_D12/PC_D8_S sources reach ~80–90%
   thinly (p50 ~1e-18, p99 ~1e-14–1e-15). The crew share of recipients
   swings 149–776 — the staff-cabin source (20200207) doses crew
-  preferentially; all seeds still land ~99% of dose on passengers
-  because crew dose per head is thin.
+  preferentially; passenger share of delivered dose is 72–99.5% by
+  seed (84.0% / 99.5% / 99.0% / 72.0%).
 - U·D (normalized host-susceptibility-weighted dose, i.e. the exponent
   factor a Θ multiplies): seed means 9e-15–2.6e-13; p99 across seeds
   4e-17–6e-14. For P_i = 1−exp(−Θ·U_i·D_i) to matter on the heavy tail
