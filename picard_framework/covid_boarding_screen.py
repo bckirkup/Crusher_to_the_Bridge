@@ -2378,6 +2378,12 @@ def _voyage_echo(sim: Any) -> dict[str, Any]:
             for d in itinerary
             if isinstance(d, Mapping)
         },
+        "itinerary_contact_rate_multipliers": {
+            str(d.get("day")): d.get("contact_rate_multiplier")
+            for d in itinerary
+            if isinstance(d, Mapping)
+            and d.get("contact_rate_multiplier") is not None
+        },
         "embarkation_contact_rate_multiplier": (
             embark_defaults.get("contact_rate_multiplier")
         ),

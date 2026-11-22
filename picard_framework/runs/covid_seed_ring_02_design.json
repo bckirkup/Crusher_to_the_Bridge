@@ -79,7 +79,10 @@
             {
               "day": 1,
               "type": "embarkation",
-              "embarkation_window_hours_of_day": [6, 17]
+              "embarkation_window_hours_of_day": [
+                6,
+                17
+              ]
             }
           ],
           "defaults": {
@@ -100,7 +103,10 @@
             {
               "day": 1,
               "type": "embarkation",
-              "embarkation_window_hours_of_day": [6, 17]
+              "embarkation_window_hours_of_day": [
+                6,
+                17
+              ]
             }
           ],
           "defaults": {
@@ -121,7 +127,10 @@
             {
               "day": 1,
               "type": "embarkation",
-              "embarkation_window_hours_of_day": [6, 17]
+              "embarkation_window_hours_of_day": [
+                6,
+                17
+              ]
             }
           ],
           "defaults": {
@@ -142,23 +151,30 @@
             {
               "day": 1,
               "type": "embarkation",
-              "embarkation_window_hours_of_day": [6, 17]
+              "embarkation_window_hours_of_day": [
+                6,
+                17
+              ]
             },
             {
               "day": 2,
-              "type": "embarkation"
+              "type": "sea_day",
+              "contact_rate_multiplier": 8.0
             },
             {
               "day": 3,
-              "type": "embarkation"
+              "type": "sea_day",
+              "contact_rate_multiplier": 8.0
             },
             {
               "day": 4,
-              "type": "embarkation"
+              "type": "sea_day",
+              "contact_rate_multiplier": 8.0
             },
             {
               "day": 5,
-              "type": "embarkation"
+              "type": "sea_day",
+              "contact_rate_multiplier": 8.0
             }
           ],
           "defaults": {
@@ -168,7 +184,7 @@
           }
         }
       },
-      "note": "The declared W=5 alternative at the band top: voyage_days 1-5 (days 0-4, the index's whole aboard window before his day-5 Hong Kong departure) all typed embarkation at alpha=8. The owner call leans W=1; this arm declares the alternative rather than choosing, so the readout can separate window length from window intensity. Only day 1 carries embarkation_window_hours_of_day - the buffet surge is a turnaround-day event, not a 5-day one. Declared assumption; non-scoring."
+      "note": "The declared W=5 alternative at the band top: voyage_day 1 embarkation (the turnaround, with the 06:00-17:00 buffet-surge window) at alpha=8, then voyage_days 2-5 typed sea_day with a per-entry pinned contact_rate_multiplier of 8 - the elevated-contact settling window spanning the index's whole aboard window before his day-5 Hong Kong departure, WITHOUT re-dealing the embarkation rhythm template (boarding-flow crowds) on settled days. The owner call leans W=1; this arm declares the alternative rather than choosing, so the readout can separate window length from window intensity. Declared assumption; non-scoring."
     }
   ],
   "admissibility": {
@@ -187,7 +203,7 @@
       "ignition_day_median_max": 9,
       "d15_cum_infections_median_max": 960,
       "ignition_day_record_timed_max": 9,
-      "share_departure_abs": 0.10,
+      "share_departure_abs": 0.1,
       "min_takeoff_cells": 5,
       "record_total_onsets": 197,
       "record_before_share": 0.173

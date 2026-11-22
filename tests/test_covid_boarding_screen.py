@@ -2098,7 +2098,42 @@ def test_seed_ring_02_design_loads_and_enumerates():
         "WINDOW_W5_A8",
     }
     w5 = design.arm_overrides("WINDOW_W5_A8")["voyage_overrides"]
+    # W5 declares the elevated-contact window over days 1-5 without
+    # re-dealing the boarding template on settled days: day 1 is the
+    # embarkation turnaround, days 2-5 are sea days pinned at alpha=8.
     assert [
         d["type"] for d in w5["itinerary"]
-    ] == ["embarkation"] * 5
+    ] == ["embarkation"] + ["sea_day"] * 4
+    assert all(
+        d.get("contact_rate_multiplier") == 8.0
+        for d in w5["itinerary"][1:]
+    )
     assert design.arm_overrides("D0_declared") == {}
+
+
+def test_itinerary_entry_pins_contact_multiplier_on_a_sea_day():
+    """A sea_day itinerary entry carries its own contact uplift, so a
+    W>1 window arm need not type settled days 'embarkation' (which
+    would re-deal the boarding-flow rhythm template)."""
+    from engines.voyage_itinerary import resolve_epoch_state
+
+    cfg = {
+        "voyage": {
+            "effects_enabled": True,
+            "itinerary": [
+                {"day": 1, "type": "embarkation"},
+                {"day": 2, "type": "sea_day",
+                 "contact_rate_multiplier": 8.0},
+            ],
+            "defaults": {
+                "embarkation": {"contact_rate_multiplier": 8.0},
+            },
+        }
+    }
+    day2 = resolve_epoch_state(cfg, 25, epoch_duration_hours=1)
+    assert day2.day_type == "sea_day"
+    assert day2.contact_multiplier == 8.0
+    # An unpinned day falls back to its day-type default.
+    cfg["voyage"]["itinerary"].append({"day": 3, "type": "sea_day"})
+    day3 = resolve_epoch_state(cfg, 49, epoch_duration_hours=1)
+    assert day3.contact_multiplier == 1.0
