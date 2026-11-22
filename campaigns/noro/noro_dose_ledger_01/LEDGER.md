@@ -30,7 +30,7 @@ reservoirs (hands, surface pool, emesis patches) at each epoch end.
 - [x] canary: 20 seeds, block `classic_cruise_1900` — all SUCCEEDED
 - [x] canary readout + report to user
 - [x] full array submitted (22-child array; 20 canary cells skip on existing artifacts, 8105/8106 run)
-- [ ] readout + decision (gates D2′; scopes D1′)
+- [x] readout — see docs/ledger/NORO-DOSE-LEDGER-01.md Result; decision pending user
 
 ## Pinned refs (fill at submit time)
 

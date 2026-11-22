@@ -329,6 +329,7 @@ class Recorder:
     # a witnessed fact rather than an assumption.
     fomite_representation_seen: str | None = None
     fomite_touch_share_seen: str | None = None
+    contamination_solver_seen: str | None = None
     # Per-item-class fomite witness (NORO-TOUCH-SHARE-01): pool-level
     # requested/delivered/calls/capped_calls per class, and per-host
     # delivered mass per class reconstructed in the delivery wrapper from
@@ -426,6 +427,7 @@ def _wrap_execute_pathways(core_cls: type, rec: Recorder) -> Any:
         rec.current_pathogen = pathogen_id
         rec.epoch = int(epoch)
         rec.fomite_representation_seen = self.fomite_representation
+        rec.contamination_solver_seen = self.contamination_solver
         if self._per_surface is not None:
             rec.fomite_touch_share_seen = self._per_surface.cfg.touch_share
         try:
@@ -1041,6 +1043,7 @@ def _record_deposit_witness(
     mass: float,
 ) -> None:
     rec.fomite_representation_seen = core.fomite_representation
+    rec.contamination_solver_seen = core.contamination_solver
     if core._per_surface is not None:
         rec.fomite_touch_share_seen = core._per_surface.cfg.touch_share
     if pathogen_id == rec.pathogen_id and float(mass) > 0.0:
@@ -1713,6 +1716,7 @@ class TransmissionSweepKnobs:
     fomite_touch_share_table: dict[str, Any] | None = None
     cabin_confined_fomite: str | None = None
     fomite_touch_share_table_path: str | None = None
+    contamination_solver: str | None = None
 
 
 @dataclass(frozen=True)
@@ -1770,6 +1774,8 @@ def build_spec(
         tx_overrides["cabin_confined_fomite"] = {
             "mode": str(sw.cabin_confined_fomite),
         }
+    if sw.contamination_solver is not None:
+        tx_overrides["contamination_solver"] = str(sw.contamination_solver)
     config_overrides: dict[str, Any] = {
         "ship_graph": {"num_agents": int(num_agents)},
     }
@@ -2180,6 +2186,7 @@ def run_seed(
                 fomite_touch_share=sw.fomite_touch_share,
                 fomite_touch_share_table=share_table,
                 cabin_confined_fomite=sw.cabin_confined_fomite,
+                contamination_solver=sw.contamination_solver,
             ),
         )
     # The campaign's declared complement for this spec, when it carries one:
@@ -2203,6 +2210,7 @@ def run_seed(
     )
     _check_override_witnesses(
         rec, sw.fomite_representation, sw.fomite_touch_share,
+        sw.contamination_solver,
     )
     summary = summarise(rec, alpha, beta, seed, epochs)
     summary["epoch_mass_ledger"] = rec.epoch_ledger
@@ -2225,11 +2233,13 @@ def run_seed(
         summary, arm_tag, sw.high_touch_area_scale,
         sw.high_touch_area_scale_by_zone_class, sw.fomite_representation,
         sw.fomite_touch_share, sw.fomite_touch_share_table_path,
+        sw.contamination_solver,
     )
     summary["fomite_representation_resolved"] = (
         rec.fomite_representation_seen
     )
     summary["fomite_touch_share_resolved"] = rec.fomite_touch_share_seen
+    summary["contamination_solver_resolved"] = rec.contamination_solver_seen
     if verbatim:
         _attach_voyage_blocks(
             summary, spec_dict, result, num_agents,
@@ -2363,6 +2373,7 @@ def _check_override_witnesses(
     rec: Recorder,
     fomite_representation: str | None,
     fomite_touch_share: str | None,
+    contamination_solver: str | None,
 ) -> None:
     if fomite_representation is not None and (
         rec.fomite_representation_seen != fomite_representation
@@ -2371,6 +2382,14 @@ def _check_override_witnesses(
             "fomite_representation override dropped: requested "
             f"fomite_representation={fomite_representation}, resolved "
             f"{rec.fomite_representation_seen}",
+        )
+    if contamination_solver is not None and (
+        rec.contamination_solver_seen != contamination_solver
+    ):
+        raise RuntimeError(
+            "contamination_solver override dropped: requested "
+            f"contamination_solver={contamination_solver}, resolved "
+            f"{rec.contamination_solver_seen}",
         )
     if fomite_touch_share is not None and (
         rec.fomite_touch_share_seen != fomite_touch_share
@@ -2413,6 +2432,7 @@ def _apply_arm_metadata(
     fomite_representation: str | None,
     fomite_touch_share: str | None,
     fomite_touch_share_table: str | None,
+    contamination_solver: str | None,
 ) -> None:
     if not any(
         value is not None
@@ -2423,6 +2443,7 @@ def _apply_arm_metadata(
             fomite_representation,
             fomite_touch_share,
             fomite_touch_share_table,
+            contamination_solver,
         )
     ):
         return
@@ -2433,6 +2454,7 @@ def _apply_arm_metadata(
     )
     summary["fomite_representation"] = fomite_representation
     summary["fomite_touch_share"] = fomite_touch_share
+    summary["contamination_solver"] = contamination_solver
     if fomite_touch_share_table is not None:
         resolved_table = _safe_path(fomite_touch_share_table)
         summary["fomite_touch_share_table"] = os.path.relpath(
@@ -2547,6 +2569,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
              "(required when --fomite-touch-share declared)",
     )
     parser.add_argument(
+        "--contamination-solver",
+        choices=("continuous", "discrete"), default=None,
+        help="NORO-POOL-PICKUP-01 arm selector: the engine's "
+             "transmission.contamination_solver mode; the run aborts if "
+             "the engine resolves a different solver",
+    )
+    parser.add_argument(
         "--arm-tag", type=_identifier, default=None,
         help="arm label stamped into the output filename and summary",
     )
@@ -2599,6 +2628,7 @@ def _validate_manifest_mode(
             "--fomite-touch-share-table": (
                 args.fomite_touch_share_table is not None
             ),
+            "--contamination-solver": args.contamination_solver is not None,
         }
         used = [flag for flag, present in forbidden.items() if present]
         if used:
@@ -2735,6 +2765,7 @@ def main(argv: list[str] | None = None) -> int:
                         if args.fomite_touch_share_table is not None
                         else None
                     ),
+                    contamination_solver=args.contamination_solver,
                 ),
                 arm_tag=args.arm_tag,
             ),
