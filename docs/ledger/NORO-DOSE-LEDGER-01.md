@@ -1,6 +1,6 @@
 # NORO-DOSE-LEDGER-01
 **Date:** 2026-11-22
-**Commit:** (pending — instrument change this PR)
+**Commit:** #1392
 **Pathogens:** norwalk_gi
 **Status:** declared
 
@@ -58,11 +58,21 @@ the per-seed summary; every existing key is unchanged.
 Audit invariants — a violation is an instrument defect, not a null result:
 
 - `len(epoch_mass_ledger) == 288` on every cell.
-- Ledger sums reconcile against the voyage counters on the same dump:
-  `Σ deposited_gec == surface_mass_deposited_gec`,
-  `Σ (pool_delivered_gec + patch_delivered_gec) == mass_delivered_to_hands_gec`,
-  `Σ hand_to_mouth_dose_gec == hand_to_mouth_dose_gec`,
-  `Σ hazard == sum_evaluated_hazard`, each within 1e-9 relative.
+- Ledger sums reconcile against the voyage counters on the same dump,
+  each within 1e-9 relative:
+  `Σ net_surface_gain_gec == surface_mass_deposited_gec`,
+  `Σ delivered_to_hands_gec == mass_delivered_to_hands_gec`,
+  `Σ (hand_to_mouth_dose_gec + flow_mouth_dose_gec)` equals the voyage
+  mouth-dose counters,
+  `Σ hazard == sum_evaluated_hazard`.
+- Semantics pinned, because two fields are easy to misread:
+  `net_surface_gain_gec` is the pool's net per-epoch change (pickups
+  cancel deposits in-epoch), not gross emission;
+  `delivered_to_hands_gec` already contains `patch_delivered_gec` —
+  patches deliver through the shared `_deliver_fomite_requests`, so
+  patch mass is a subset, never an addend;
+  `discrete_requested/offered_gec` see only the discrete `_deliver`
+  calls, not the solver's `pickup_mass`.
 - `Σ secondaries` equals the acquisitions count; `Σ emesis_events` equals
   the emesis witness total.
 

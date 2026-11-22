@@ -809,6 +809,12 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         )
         if rec.current_pathogen != rec.pathogen_id:
             return
+        # Mouth dose integrated inside the RK4 solve: the solver swallows
+        # off the hand load itself, so it never reaches
+        # ``_hand_to_mouth_dose`` and would otherwise be invisible.
+        rec.fomite["flow_mouth_dose_gec"] += float(
+            sum(result.mouth_dose.values())
+        )
         delivered = float(sum(
             float(mass) for mass in result.pickup_mass.values()
         ))
@@ -1455,15 +1461,26 @@ def _flush_epoch_ledger(rec: Recorder, sim: Any, work: Any) -> None:
         "ill_hosts": int(d_scalar("ill", rec.ill_host_epochs)),
         "secondaries": int(d_scalar("acq", len(rec.acquisitions))),
         "hazard": d_scalar("haz", rec.hazard_cum),
-        "deposited_gec": sum(deposit_by_callsite.values()),
-        "deposit_by_callsite_gec": deposit_by_callsite,
-        "pool_requested_gec": d_scalar(
+        # Net surface gain only: under the continuous solver the
+        # ``_write_flow_surface`` callsite writes the pool's net change,
+        # so removals during pickup epochs cancel deposits in the same
+        # epoch. Gross emission lives in the solver's own ledger, not
+        # here.
+        "net_surface_gain_gec": sum(deposit_by_callsite.values()),
+        "net_gain_by_callsite_gec": deposit_by_callsite,
+        # The discrete ``_deliver_fomite_requests`` path only (patch +
+        # sanitary pooled calls): the continuous solver's pickups skip it,
+        # so these are the per-call offered/requested pair, not totals.
+        "discrete_requested_gec": d_scalar(
             "req", rec.delivery_scale["sum_requested_gec"],
         ),
-        "pool_offered_gec": d_scalar(
+        "discrete_offered_gec": d_scalar(
             "off", rec.delivery_scale["sum_offered_gec"],
         ),
-        "pool_delivered_gec": d_scalar(
+        # Everything delivered to hands, all paths: discrete delivers
+        # (patch pickups included) plus the solver's pickup_mass. Patch
+        # mass is a subset of this total, never an addend.
+        "delivered_to_hands_gec": d_scalar(
             "del", rec.fomite["mass_delivered_to_hands_gec"],
         ),
         "deliver_calls": int(
@@ -1495,6 +1512,11 @@ def _flush_epoch_ledger(rec: Recorder, sim: Any, work: Any) -> None:
         ),
         "hand_to_mouth_calls": int(
             d_scalar("h2mcalls", rec.fomite["hand_to_mouth_calls"]),
+        ),
+        # Mouth dose the continuous solver integrated itself; the two
+        # mouth channels are disjoint (solver-integrated vs per-touch).
+        "flow_mouth_dose_gec": d_scalar(
+            "fh2m", rec.fomite["flow_mouth_dose_gec"],
         ),
         "hand_load_seen_gec": d_scalar(
             "hlseen", rec.fomite["hand_load_seen_gec"],
