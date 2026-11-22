@@ -16,11 +16,14 @@ the 22 frozen `classic_cruise_1900` cells (seeds 8000–8019 + 8105/8106,
 - [x] Local smoke: `--contamination-solver discrete` resolves
   (`contamination_solver_resolved: "discrete"` stamped), epoch ledger
   schema intact, discrete requested/offered columns present.
-- [ ] Jobdef registered with pinned image digest (fill in at submit).
-- [ ] Dry-run array count = 22 per block.
-- [ ] S3 prefix `campaign/noro_pool_pickup_01/` clean.
-- [ ] Canary: 20-seed block `classic_cruise_1900_discrete`
-  (seeds 8000–8019), contract verified per artifact, STOP and report.
+- [x] Jobdef `picard-noro-pool-pickup-01:1` registered against image
+  digest `sha256:2b498f102f32ea6d4637e4d75739a2d5668c392a8faf4a1a5c726b695db7ab15`
+  (pinned in campaign.json).
+- [x] Dry-run array count = 22 per block (describe + submit --dry-run).
+- [x] S3 prefix `campaign/noro_pool_pickup_01/` clean (new prefix).
+- [ ] Canary readout: 20 jobs `classic_cruise_1900_discrete`
+  `-20261122-215919..-220039` (seeds 8000–8019) submitted 2026-11-22 ~22:00Z;
+  contract verify per artifact, STOP and report.
 - [ ] Arm-B remainder (seeds 8105/8106) + arm-C canary on user approval.
 - [ ] Readout committed in `docs/ledger/NORO-POOL-PICKUP-01.md` and the
   decision rule applied; interpretation sent.
