@@ -1,6 +1,7 @@
-> **Status:** Proposed. Nothing here is implemented or adopted; no constant is
-> added, moved or re-sourced; the default `pooled` representation is unchanged
-> and a run without the block must stay bit-identical to today's engine. Every
+> **Status:** Implemented (PR #1403, canary pending) as a selectable arm;
+> not adopted — the default `pooled` representation is unchanged and a run
+> without the block stays bit-identical to the pre-change engine. No constant
+> is added, moved or re-sourced. Every
 > number quoted is either a repository constant read at its definition site or
 > a measurement quoted from its ledger entry with that entry's `Measured at`
 > SHA — and every dose figure in the repository remains void pending the
