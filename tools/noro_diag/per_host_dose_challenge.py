@@ -3147,25 +3147,38 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
-def _implicit_arm_tag(sweep: TransmissionSweepKnobs | None) -> str | None:
-    """Tag derived from non-default sweep knobs so untagged arm runs cannot
-    silently overwrite each other's artifact (``--arm-tag`` stays preferred)."""
-    if sweep is None:
-        return None
+def _implicit_arm_tag(
+    sweep: TransmissionSweepKnobs | None,
+    alpha: float | None = None,
+) -> str | None:
+    """Tag derived from non-default sweep knobs (and ``--alpha``) so untagged
+    arm runs cannot silently overwrite each other's artifact (``--arm-tag``
+    stays preferred). ASCII-slugged and length-capped so the tag is always a
+    legal, bounded filename component; an alpha-only run reproduces the
+    legacy ``a{alpha:.4f}`` filename exactly."""
     parts = []
-    for f in fields(sweep):
-        value = getattr(sweep, f.name)
-        if value is None:
-            continue
-        if isinstance(value, dict):
-            value = hashlib.sha256(
-                json.dumps(value, sort_keys=True).encode(),
-            ).hexdigest()[:8]
-        parts.append(f"{f.name}-{value}")
+    if sweep is not None:
+        for f in fields(sweep):
+            value = getattr(sweep, f.name)
+            if value is None:
+                continue
+            if isinstance(value, dict):
+                value = hashlib.sha256(
+                    json.dumps(value, sort_keys=True).encode(),
+                ).hexdigest()[:8]
+            parts.append(f"{f.name}-{value}")
+    if alpha is not None:
+        parts.append(f"a{alpha:.4f}")
     if not parts:
         return None
     tag = "+".join(parts)
-    return "".join(c if (c.isalnum() or c in "._-") else "_" for c in tag)
+    tag = "".join(
+        c if (c.isascii() and (c.isalnum() or c in "._-")) else "_"
+        for c in tag
+    )
+    if len(tag) > 200:
+        tag = tag[:180] + "-" + hashlib.sha256(tag.encode()).hexdigest()[:8]
+    return tag
 
 
 def _validate_manifest_mode(
@@ -3328,6 +3341,9 @@ def main(argv: list[str] | None = None) -> int:
             hand_sequester_fill=args.hand_sequester_fill,
             hand_residual_mouthing=args.hand_residual_mouthing,
         )
+        tag = args.arm_tag if args.arm_tag is not None else (
+            _implicit_arm_tag(sweep, args.alpha)
+        )
         summary = run_seed(
             seed=seed,
             platform=args.platform,
@@ -3338,11 +3354,8 @@ def main(argv: list[str] | None = None) -> int:
             options=RunSeedOptions(
                 alpha_override=args.alpha,
                 sweep=sweep,
-                arm_tag=args.arm_tag,
+                arm_tag=tag,
             ),
-        )
-        tag = args.arm_tag if args.arm_tag is not None else (
-            _implicit_arm_tag(sweep)
         )
         if tag is not None:
             filename = (
