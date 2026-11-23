@@ -10,6 +10,7 @@
     "memory": "2048"
   },
   "image_tag": "dp-theta-fit-01",
+  "image_digest": "sha256:8891880d99c2b2d533d62af077602873141f201be55bd4a762514b34acf4b954",
   "readout": "campaigns/covid/dp_theta_fit_01/readout.py",
   "blocks": {
     "niid_t1e9_canary": {
