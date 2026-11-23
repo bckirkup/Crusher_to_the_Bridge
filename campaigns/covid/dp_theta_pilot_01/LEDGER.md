@@ -22,7 +22,8 @@ doc `docs/covid/covid_dp_theta_pilot_01_design.md`).
 - **Canary readout (measured, 20/20 SUCCEEDED, audits clean):**
   θ=1e11 `replay_niid` 120ep — secondaries/seed: median **39**,
   range **0–1516**, 1 zero-secondary seed (20200217). Cell neither
-  saturated nor dead → θ=1e11 bracket-admissible on the canary seeds.
-  Heavy seed variance (index-identity lottery). Readout committed:
+  saturated nor dead on these seeds; admissibility still pending a
+  measurable adjacent-cell contrast (full array). Heavy seed
+  variance (index-identity lottery). Readout committed:
   `docs/covid/dp_theta_pilot_01_canary_readout.json`. Full array
   STOPPED pending user decision per campaign gate.

@@ -661,7 +661,8 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   (20200205–20200228) × arms `replay_baseline`+`replay_niid` at the
   declared 120-epoch horizon = 240 cells.** Canary measured 2026-11-23 (job `b86ab9d7`, 20/20 SUCCEEDED,
   audits clean): θ=1e11 `replay_niid` secondaries/seed median 39,
-  range 0–1516, 1 zero-secondary seed → bracket-admissible;
+  range 0–1516, 1 zero-secondary seed → cell alive, not saturated;
+  admissibility pending adjacent-cell contrast;
   readout `docs/covid/dp_theta_pilot_01_canary_readout.json`. Full
   array stopped pending Benjamin's decision per campaign gate.
 

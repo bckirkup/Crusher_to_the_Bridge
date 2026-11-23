@@ -15,7 +15,9 @@
       "secondaries": 1228,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200206,
@@ -24,7 +26,9 @@
       "secondaries": 3,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200207,
@@ -33,7 +37,9 @@
       "secondaries": 2,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200208,
@@ -42,7 +48,9 @@
       "secondaries": 152,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200209,
@@ -51,7 +59,9 @@
       "secondaries": 6,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200210,
@@ -60,7 +70,9 @@
       "secondaries": 268,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200211,
@@ -69,7 +81,9 @@
       "secondaries": 29,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200212,
@@ -78,7 +92,9 @@
       "secondaries": 38,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200213,
@@ -87,7 +103,9 @@
       "secondaries": 20,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200214,
@@ -96,7 +114,9 @@
       "secondaries": 425,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200215,
@@ -105,7 +125,9 @@
       "secondaries": 88,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200216,
@@ -114,7 +136,9 @@
       "secondaries": 519,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200217,
@@ -123,7 +147,9 @@
       "secondaries": 0,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200218,
@@ -132,7 +158,9 @@
       "secondaries": 17,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200219,
@@ -141,7 +169,9 @@
       "secondaries": 1014,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200220,
@@ -150,7 +180,9 @@
       "secondaries": 40,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200221,
@@ -159,7 +191,9 @@
       "secondaries": 1516,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200222,
@@ -168,7 +202,9 @@
       "secondaries": 2,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200223,
@@ -177,7 +213,9 @@
       "secondaries": 36,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     },
     {
       "seed": 20200224,
@@ -186,7 +224,9 @@
       "secondaries": 201,
       "close_zones_fired": false,
       "theta_echo": 100000000000.0,
-      "epochs": 120
+      "epochs": 120,
+      "index_onset_day": 3.0,
+      "susceptibility_scale": 32322222222222.223
     }
   ],
   "summary": {
@@ -194,6 +234,7 @@
     "min": 0,
     "max": 1516,
     "zero_secondary_seeds": 1,
-    "audits_clean": true
+    "audits_clean": true,
+    "expected_susceptibility_scale": 32322222222222.223
   }
 }

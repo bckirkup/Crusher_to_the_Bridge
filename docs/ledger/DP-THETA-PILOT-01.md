@@ -62,9 +62,10 @@ image `picard-campaign@sha256:a65b9aae29b1ff221649181dbb2ca920c6e2384391f8223ea8
 Secondaries per seed (θ=1e11, replay_niid, 120ep): **median 39,
 range 0–1516**; 1 zero-secondary seed (20200217); high seeds
 20200205=1228, 20200221=1516, 20200219=1014, 20200216=519. Per frozen
-criteria the cell is neither saturated nor dead → **θ=1e11
-bracket-admissible** on the canary seeds. Variance is index-identity
-driven. Committed readout: `docs/covid/dp_theta_pilot_01_canary_readout.json`;
+criteria the cell is neither saturated nor dead on the canary seeds;
+**bracket-admissibility still requires a measurable difference from an
+adjacent grid cell** — pending the full array. Variance is
+index-identity driven. Committed readout: `docs/covid/dp_theta_pilot_01_canary_readout.json`;
 synced cells under `out/dp_theta_canary/` (untracked).
 
 ## Handoff
