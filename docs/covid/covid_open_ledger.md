@@ -662,9 +662,13 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   declared 120-epoch horizon = 240 cells.** Canary measured 2026-11-23 (job `b86ab9d7`, 20/20 SUCCEEDED,
   audits clean): θ=1e11 `replay_niid` secondaries/seed median 39,
   range 0–1516, 1 zero-secondary seed → cell alive, not saturated;
-  admissibility pending adjacent-cell contrast;
-  readout `docs/covid/dp_theta_pilot_01_canary_readout.json`. Full
-  array stopped pending Benjamin's decision per campaign gate.
+  readout `docs/covid/dp_theta_pilot_01_canary_readout.json`.
+  Full array measured 2026-11-23 (Benjamin "ok execute"): 240/240
+  SUCCEEDED. Median secondaries niid 2.5/8/37/392/1054, baseline
+  41.5/95.5/232.5/599.5/1577.5 (θ lo→hi); no cell saturated or dead,
+  all 8 adjacent pairs measurable → every θ bracket-admissible on both
+  arms; seed 20200217 is a dead-index seed (0 secondaries at all θ on
+  niid). Readout `docs/covid/dp_theta_pilot_01_array_readout.json`.
 
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
   follow-up to the platform-fidelity study — measured 2026-11-08: 400/400
