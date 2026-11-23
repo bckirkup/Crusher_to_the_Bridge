@@ -2,7 +2,7 @@
 **Date:** 2026-11-23
 **Commit:** 9c40ff3b
 **Pathogens:** sars_cov2_resp
-**Status:** open
+**Status:** measured
 
 ## Endpoint audit
 
@@ -76,8 +76,10 @@ Two cells, pilot worker with no horizon cap (full voyage), `replay_niid`,
 
 Quarantine activated at epoch 391 on both. Measured: the engine runs the
 testing campaign inside the extended window and returns positives.
-Hypothesis (two seeds): the pilot's lowest θ is saturated on the full
-voyage, so the whole pilot grid sits above the T3 bracket. Measured on the
+Hypothesis (two seeds): the pilot's lowest θ infects about nine in ten
+aboard on the full voyage, so the whole pilot grid sits above the T3
+bracket. Neither seed reached the frozen 0.95 saturation threshold, and
+that rule is a 24-seed median, so the upper edge is unclassified. Measured on the
 same two cells: at attack about 0.9 the campaign returns only 1.2–1.3 ×
 the T3 count, so the scored quantity compresses near saturation.
 
@@ -104,7 +106,7 @@ Block `niid_t1e9_canary`: θ=1e9, seeds 20200205–20200224. Readout
 
 | Quantity | Value |
 | --- | --- |
-| Scored positives through day 31, sorted by seed value | 0, 0, 0, 0, 0, 70, 87, 136, 229, 255, 307, 365, 373, 401, 402, 450, 463, 572, 777, 802 |
+| Scored positives through day 31, in ascending order (per-seed values are in the readout) | 0, 0, 0, 0, 0, 70, 87, 136, 229, 255, 307, 365, 373, 401, 402, 450, 463, 572, 777, 802 |
 | Median scored positives (target 634) | 281 |
 | Seeds below / above 634 | 18 / 2 |
 | Seeds with zero secondaries | 5 |
@@ -120,11 +122,12 @@ exactly (2,881 secondaries, 777 positives). Measured: 18 seeds are below
 θ=1e9 is on the low side of T3 whatever the four remaining seeds return.
 Measured: the cell is neither dead nor saturated.
 
-Inferred: the T3 bracket lies above 1e9, inside the two remaining grid
-intervals (1e9, 3.16e9) and (3.16e9, 1e10). The upper edge rests on two
-pre-freeze seeds at 1e10 (745 and 821 all-day positives), not on 24.
-Inferred: the four cells below 1e9 will sit further below the target and
-serve as the dead-edge reference only.
+Not established: that the grid covers T3. The bracket rule needs
+adjacent 24-seed medians, and no cell above 1e9 has been run on the fit
+worker. Hypothesis: the bracket lies in (1e9, 3.16e9) or (3.16e9, 1e10);
+its only support above 1e9 is two pre-freeze seeds at 1e10 (745 and 821
+positives). Hypothesis: the four cells below 1e9 sit further below the
+target and serve as the dead-edge reference only.
 
 Hypothesis (20 seeds, one θ): the outcome is strongly seed-dependent at
 fixed θ — a quarter of seeds go extinct and the rest spread from 70 to

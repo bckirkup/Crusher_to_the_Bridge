@@ -42,7 +42,7 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
-- [DP-THETA-FIT-01](DP-THETA-FIT-01.md) records the endpoint audit and the declared extended-horizon fit against `covid.T3` (design `docs/covid/covid_dp_theta_fit_01_design.md`, campaign `campaigns/covid/dp_theta_fit_01/`). Status is open. Two pre-freeze smoke cells showed in-window ascertainment and saturation at θ=1e10. The 20-seed canary at θ=1e9 is below T3 (median 281 scored positives). The full array and fit readout remain outstanding.
+- [DP-THETA-FIT-01](DP-THETA-FIT-01.md) records the endpoint audit and the declared extended-horizon fit against `covid.T3` (design `docs/covid/covid_dp_theta_fit_01_design.md`, campaign `campaigns/covid/dp_theta_fit_01/`). Status is measured (canary only; the fit is pending). Two pre-freeze smoke cells showed in-window ascertainment and an attack rate near 0.9 at θ=1e10. The 20-seed canary at θ=1e9 is below T3 (median 281 scored positives). Grid coverage of T3 is not yet established; the full array and fit readout remain outstanding.
 
 - [NORO-CASCADE-ARMS-01](NORO-CASCADE-ARMS-01.md) — open. D1′ stopped before simulation. All direct hand donors must shed, and the carrier-redeposition witness misses the frozen solver's surface and food flows.
 

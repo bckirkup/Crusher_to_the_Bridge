@@ -631,7 +631,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
-- **`DP-THETA-FIT-01` is open: the extended-horizon fit is declared**
+- **`DP-THETA-FIT-01` canary is measured; the extended-horizon fit is pending**
   (ledger `docs/ledger/DP-THETA-FIT-01.md`, design
   `docs/covid/covid_dp_theta_fit_01_design.md`, campaign
   `campaigns/covid/dp_theta_fit_01/`). The scored endpoint is `covid.T3`,
