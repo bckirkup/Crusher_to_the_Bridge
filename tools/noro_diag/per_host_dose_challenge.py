@@ -3179,7 +3179,9 @@ def _implicit_arm_tag(
     if tag != raw or len(tag) > 200:
         # Slug or cap could alias distinct inputs; hash the raw tag to keep
         # filenames unique.
-        tag = tag[:180] + "-" + hashlib.sha256(raw.encode()).hexdigest()[:8]
+        tag = tag[:180] + "-" + hashlib.sha256(
+            raw.encode("utf-8", errors="backslashreplace")
+        ).hexdigest()[:8]
     return tag
 
 
