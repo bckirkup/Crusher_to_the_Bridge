@@ -28,11 +28,11 @@ measured `1f8a027c`):
   arm did not ignite; the "requests rise / stay ~0" rules in spec
   section 6 then classify the bound.
 
-The 20-child array is itself the canary cohort: the preflight
-single-child output inspection is folded into the canary readout
-(child-0 artifact inspected against the section-6 audit invariants
-before any further submission -- the two held seeds 8105/8106 and
-any promotion decision).
+Preflight order enforced: a single-child job (`--canary --index 0`,
+seed 8000) runs first and its artifact is inspected against the
+section-6 audit invariants; only then does the 20-child canary array
+(seeds 8000-8019) go out. The two held seeds 8105/8106 and any
+promotion decision remain gated on the full canary readout.
 
 ## Gate checklist
 
@@ -65,4 +65,5 @@ any promotion decision).
 | date | block | shape | job ids | verdict |
 |---|---|---|---|---|
 | 2026-11-23 | classic_cruise_1900_item_instances | 20-child array, seeds 8000-8019 (indices 0-19; 8105/8106 held for the full-campaign decision) | 110a1dae-ff16-4cc3-a616-be36e8eccdd7 | FAILED fast, all 20: manual submit passed `python3` as argv[0]; container ran `python3 python3`, exit 2 |
-| 2026-11-23 | classic_cruise_1900_item_instances | 20-child array, seeds 8000-8019 (indices 0-19; 8105/8106 held for the full-campaign decision) | cc56f036-cab8-49fd-9c98-ca85fa9531e6 | submitted, awaiting readout |
+| 2026-11-23 | classic_cruise_1900_item_instances | 20-child array, seeds 8000-8019 | cc56f036-cab8-49fd-9c98-ca85fa9531e6 | TERMINATED: bare --s3-prefix fails _s3_uri (requires s3:// scheme) |
+| 2026-11-23 | classic_cruise_1900_item_instances | single-child preflight canary, index 0 (seed 8000), jobdef :2 | b5f62f1b-d1b0-4adc-9b0e-57d040267ff1 | submitted; inspect before the 20-child array goes out |
