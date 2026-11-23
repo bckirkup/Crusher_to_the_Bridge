@@ -105,7 +105,15 @@ with an announced ETA -> stop and report.
   present in-container), jobdef `picard-noro-external-sequester-01:3`.
 - [x] Dry-run array count = 40 (2 blocks x 20 seeds).
 - [x] S3 prefix `campaign/noro_external_sequester_01/` clean.
-- [ ] Single-child canary inspected against the audit invariants
+- [x] Single-child canary inspected against the audit invariants
   (job `ceb69538-a9cf-4c41-aa3f-79980fc2a6ae`, seed 8000, arm S+R,
-  RUNNING).
-- [ ] Both 20-seed arrays submitted; ETA announced; stop and report.
+  SUCCEEDED 5.3 min): len-288 ledger; `sources = sinks + residual`
+  closure 1.2e-14 rel; all five sources / nine sinks / five internal
+  flows witnessed (migrated sum 56.4k GEC); pending mass nonzero all
+  288 epochs, protected nonzero 287; provenance 1539 holders, 0
+  violations; resolved stamps `any_load` + `per_epoch` +
+  `item_instances` + `discrete`.
+- [x] Both 20-seed arrays submitted on jobdef `:3`, image
+  `sha256:d92f1d4c`: arm S `e15d50cd-0a5f-4184-886b-8d7ef8577731`,
+  arm S+R `66d64d2f-a680-4ee5-9ff0-7131fa15ca0a` (seeds 8000-8019
+  each). Stop and report; verdict readout when the arrays land.
