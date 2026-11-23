@@ -1,6 +1,6 @@
 # NORO-TOUCH-PATCH-01
 **Date:** 2026-11-23
-**Commit:** 8a698da7
+**Commit:** #1403
 **Pathogens:** norwalk_gi
 **Status:** measured
 
@@ -31,14 +31,16 @@ four reconciliations ≤1e-9, Σinstance_mass == surface_pools drift 0.0,
 `fomite_representation_resolved: item_instances`, solver resolved
 discrete vs configured continuous).
 
-- **The mechanism fired.** Instance witness per cell: 0.1–6.6M touches
-  sampling items, 8k–1.5M contaminated touches, 3k–58k coincident
-  deliveries (distinct susceptibles on one contaminated instance —
-  the co-location count the spec wanted), 51–2850 contaminated
-  instances.
-- **Requests rose.** Discrete requests on cold cells: 0.1k–1.1M GEC
-  (vs ~0–4k baseline delivered ceiling). Non-patch delivered mass
-  reached hands on 16 of 18 cold cells — up to 12.4k GEC (8014).
+- **The mechanism fired on 19 of 20 cells.** Instance witness per
+  cell: up to 6.6M touches sampling items, up to 1.5M contaminated
+  touches, up to 58k coincident deliveries (distinct susceptibles on
+  one contaminated instance — the co-location count the spec wanted),
+  6–2850 contaminated instances; seed 8004 sampled zero touches.
+- **Requests rose.** Ordinary-instance (non-patch) requests on cold
+  cells: 0–14.6k GEC — against a baseline where ordinary fomite
+  requests measured ~0 (NORO-POOL-PICKUP-01; its ~0–51k cold-cell
+  request totals were patch-driven). Non-patch delivered mass reached
+  hands on 16 of 18 cold cells — up to 12.4k GEC (8014).
 - **Take-off did not cross the gate:** 2/18 cold cells ≥1.1 Σhazard
   (8008: 2.27, 8018: 1.39) — below the required 9.
 - **The waterfall moved downstream.** Mouth dose stayed ~1–4% of
@@ -59,8 +61,9 @@ Caveats (recorded, not attributed): both crossing cells are
 patch-dominated (8008: 1.7k of 299k delivered non-patch; 8018: 3.8k
 of 2.25M) so their hazard is largely food-burst driven; ordinary-
 instance delivery contributes mass but did not produce new hot cells.
-Two cold cells (8004, 8011) sampled zero/one instance touches at all —
-their voyage realized almost no ordinary-fomite contact structure.
+Two cold cells realized almost no ordinary-fomite contact structure:
+8004 sampled zero instance touches at all; 8011 sampled ~0.11M
+touches but never hit a contaminated instance.
 
 ## Consequence
 
