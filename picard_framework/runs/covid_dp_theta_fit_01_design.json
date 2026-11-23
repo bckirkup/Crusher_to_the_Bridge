@@ -1,0 +1,229 @@
+{
+  "design_id": "covid-dp-theta-fit-01",
+  "task_id": "covid-dp-theta-fit-01",
+  "design_doc": "docs/covid/covid_dp_theta_fit_01_design.md",
+  "parent_design": "covid-dp-theta-pilot-01",
+  "prerequisites": [
+    "DP-THETA-PILOT-01 measured (merged #1399/#1400 lineage): replay_niid arm machinery and 24 matched seeds are inherited verbatim",
+    "DP-THETA-FIT-01 endpoint audit (merged #1402): covid.T3 = 634 campaign PCR positives / 3,063 tests through 20 Feb (day index 31)",
+    "Benjamin 2026-11-23 'Go with A': scored endpoint is the extended horizon through ~Feb 20 against covid.T3; onboard table 691/3894 through Feb 23 is the secondary cross-check",
+    "Pre-freeze smoke (2 cells, theta 1e10, full voyage): ascertainment produces in-window positives; attack rate ~0.9 - the pilot grid sits above the extended-horizon bracket"
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [
+    10000000.0,
+    31600000.0,
+    100000000.0,
+    316000000.0,
+    1000000000.0,
+    3160000000.0,
+    10000000000.0
+  ],
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 24,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "replay_baseline",
+      "overrides": {},
+      "note": "Shipped diamond_princess_2020 verbatim — mega_cruise_5000 hull, SOP-017 days 16-30 whole-day, journal index clock. The labelled baseline the replay arms' environs are measured against. Required empty-override first arm; NOT run in this fit (no campaign block declares it)."
+    },
+    {
+      "arm_id": "replay_niid",
+      "overrides": {
+        "platform_id": "diamond_princess",
+        "protocols_path": "data/config/protocols_covid_dp_dedicated.json",
+        "scheduled_protocol_id": "SOP-017-DEDICATED",
+        "scheduled_protocol_window": {
+          "start_day": 16,
+          "end_day": 30,
+          "start_hour_of_day": 7
+        },
+        "seed_patch": {
+          "onset_day": 3.0,
+          "infection_age_days": 2.8
+        },
+        "voyage_overrides": {
+          "effects_enabled": true,
+          "itinerary": [
+            {
+              "day": 1,
+              "type": "embarkation",
+              "embarkation_window_hours_of_day": [
+                12,
+                16
+              ],
+              "port": "Yokohama",
+              "notes": "declared: staggered boarding 12:00-16:00 + 16:00-16:30 assembly (spec §5)"
+            },
+            {
+              "day": 2,
+              "type": "sea_day",
+              "notes": "sea day after departure"
+            },
+            {
+              "day": 3,
+              "type": "port_day",
+              "port": "Kagoshima",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                14,
+                16
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "declared window; spec §4 excursion 09:00-16:00 + 30-min return margin"
+            },
+            {
+              "day": 4,
+              "type": "sea_day"
+            },
+            {
+              "day": 5,
+              "type": "sea_day"
+            },
+            {
+              "day": 6,
+              "type": "port_day",
+              "port": "Hong Kong",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "index case departs permanently (departure_day 5.0)"
+            },
+            {
+              "day": 7,
+              "type": "sea_day"
+            },
+            {
+              "day": 8,
+              "type": "port_day",
+              "port": "Chan May",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 9,
+              "type": "port_day",
+              "port": "Cai Lan",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 10,
+              "type": "sea_day"
+            },
+            {
+              "day": 11,
+              "type": "sea_day"
+            },
+            {
+              "day": 12,
+              "type": "port_day",
+              "port": "Keelung",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 13,
+              "type": "port_day",
+              "port": "Naha",
+              "disembark_window_hours_of_day": [
+                14,
+                16
+              ],
+              "reembark_window_hours_of_day": [
+                20,
+                22
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "late port call 13:30-23:00 per spec §4"
+            },
+            {
+              "day": 14,
+              "type": "sea_day"
+            },
+            {
+              "day": 15,
+              "type": "sea_day",
+              "notes": "early return to Yokohama; passengers remain aboard, routine continues (spec §4)"
+            },
+            {
+              "day": 16,
+              "type": "sea_day",
+              "notes": "early return; routine continues aboard"
+            },
+            {
+              "day": 17,
+              "type": "sea_day",
+              "notes": "quarantine activation epoch 391 (day 16, 07:00) via scheduled_protocol_window"
+            }
+          ],
+          "defaults": {
+            "port_day": {
+              "onboard_passenger_fraction": 0.5,
+              "contact_rate_multiplier": 1.0,
+              "dining_demand_multiplier": 1.0
+            }
+          }
+        },
+        "rhythm_overrides": {
+          "port_day_onboard_midday_residual": 0.5,
+          "catalog": "diamond"
+        }
+      },
+      "note": "DP-REPLAY-ENVIRON-01 primary arm: dedicated hull + diamond rhythm catalog + real itinerary + confinement variant at epoch 391 + corrected NIID index clock (onset day 3 = 23 Jan, age 2.8). port_day contact_rate_multiplier declared neutral 1.0 — mixing change comes from dealt schedule and ashore absence, not a rate scaler (spec: do not enable un-measured voyage defaults)."
+    }
+  ],
+  "funnel_echo": true,
+  "fit_target": {
+    "anchor_id": "covid.T3",
+    "cumulative_positives": 634,
+    "cumulative_tests": 3063,
+    "through_day_index": 31,
+    "secondary_cross_check": {
+      "positives": 691,
+      "tests": 3894,
+      "through": "2020-02-23",
+      "role": "reported only, never selected on"
+    }
+  }
+}

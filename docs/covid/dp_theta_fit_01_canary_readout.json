@@ -1,0 +1,161 @@
+{
+  "task_id": "DP-THETA-FIT-01",
+  "design_id": "covid-dp-theta-fit-01",
+  "target": {
+    "anchor_id": "covid.T3",
+    "cumulative_positives": 634,
+    "cumulative_tests": 3063,
+    "through_day_index": 31,
+    "secondary_cross_check": {
+      "positives": 691,
+      "tests": 3894,
+      "through": "2020-02-23",
+      "role": "reported only, never selected on"
+    }
+  },
+  "declared_thetas": [
+    10000000.0,
+    31600000.0,
+    100000000.0,
+    316000000.0,
+    1000000000.0,
+    3160000000.0,
+    10000000000.0
+  ],
+  "complete_thetas": [],
+  "incomplete_thetas": {
+    "1000000000.0": 20
+  },
+  "selection": null,
+  "rows": [
+    {
+      "theta": 1000000000.0,
+      "n": 20,
+      "provisional": true,
+      "median_positives": 281.0,
+      "seeds_above_target": 2,
+      "seeds_below_target": 18,
+      "side": "below",
+      "dead": false,
+      "saturated": false,
+      "seeds_in_band": 9,
+      "audit_deviations": {},
+      "reported_only": {
+        "positives_per_seed": {
+          "20200205": 777,
+          "20200206": 255,
+          "20200207": 365,
+          "20200208": 229,
+          "20200209": 572,
+          "20200210": 0,
+          "20200211": 136,
+          "20200212": 0,
+          "20200213": 87,
+          "20200214": 463,
+          "20200215": 401,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 70,
+          "20200219": 450,
+          "20200220": 373,
+          "20200221": 307,
+          "20200222": 0,
+          "20200223": 802,
+          "20200224": 402
+        },
+        "secondaries_per_seed": {
+          "20200205": 2881,
+          "20200206": 954,
+          "20200207": 962,
+          "20200208": 875,
+          "20200209": 1523,
+          "20200210": 0,
+          "20200211": 1112,
+          "20200212": 0,
+          "20200213": 780,
+          "20200214": 1212,
+          "20200215": 1245,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 664,
+          "20200219": 1095,
+          "20200220": 937,
+          "20200221": 968,
+          "20200222": 0,
+          "20200223": 2978,
+          "20200224": 948
+        },
+        "extinct_seeds": 5,
+        "median_secondaries": 951.0,
+        "median_attack_rate": 0.25626515763945024,
+        "median_specimens": 3063.0,
+        "median_recorded_onsets": 580.5,
+        "median_lab_confirmed_total": 645.0,
+        "median_infections_before_quarantine": 11.0,
+        "median_infections_during_quarantine": 870.0,
+        "median_infections_after_quarantine": 54.0,
+        "median_positive_share": 0.09174012406137774,
+        "median_onsets_before_split_day": 2.5,
+        "median_onsets_on_or_after_split_day": 577.5,
+        "median_by_day": {
+          "16": {
+            "specimens": 31.0,
+            "positives": 0.5
+          },
+          "17": {
+            "specimens": 71.0,
+            "positives": 0.5
+          },
+          "18": {
+            "specimens": 171.0,
+            "positives": 1.0
+          },
+          "19": {
+            "specimens": 6.0,
+            "positives": 0.0
+          },
+          "20": {
+            "specimens": 57.0,
+            "positives": 1.0
+          },
+          "21": {
+            "specimens": 103.0,
+            "positives": 3.5
+          },
+          "23": {
+            "specimens": 53.0,
+            "positives": 5.0
+          },
+          "24": {
+            "specimens": 221.0,
+            "positives": 12.5
+          },
+          "26": {
+            "specimens": 217.0,
+            "positives": 31.0
+          },
+          "27": {
+            "specimens": 289.0,
+            "positives": 39.5
+          },
+          "28": {
+            "specimens": 504.0,
+            "positives": 44.0
+          },
+          "29": {
+            "specimens": 681.0,
+            "positives": 58.0
+          },
+          "30": {
+            "specimens": 607.0,
+            "positives": 62.0
+          },
+          "31": {
+            "specimens": 52.0,
+            "positives": 9.0
+          }
+        }
+      }
+    }
+  ]
+}

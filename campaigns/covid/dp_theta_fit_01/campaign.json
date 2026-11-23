@@ -1,0 +1,273 @@
+{
+  "name": "covid_dp_theta_fit_01",
+  "pathogen": "covid",
+  "manifest": null,
+  "pathogen_id": null,
+  "s3_prefix": "campaign/covid_dp_theta_fit_01/",
+  "queue": "picard-analysis-queue",
+  "resources": {
+    "vcpu": "1",
+    "memory": "2048"
+  },
+  "image_tag": "dp-theta-fit-01",
+  "image_digest": "sha256:8891880d99c2b2d533d62af077602873141f201be55bd4a762514b34acf4b954",
+  "readout": "campaigns/covid/dp_theta_fit_01/readout.py",
+  "blocks": {
+    "niid_t1e9_canary": {
+      "worker": "campaigns/covid/dp_theta_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 1000000000.0,
+        "arm_id": "replay_niid",
+        "design": "picard_framework/runs/covid_dp_theta_fit_01_design.json"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214,
+        20200215,
+        20200216,
+        20200217,
+        20200218,
+        20200219,
+        20200220,
+        20200221,
+        20200222,
+        20200223,
+        20200224
+      ]
+    },
+    "niid_t1e9_rest": {
+      "worker": "campaigns/covid/dp_theta_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 1000000000.0,
+        "arm_id": "replay_niid",
+        "design": "picard_framework/runs/covid_dp_theta_fit_01_design.json"
+      },
+      "seeds": [
+        20200225,
+        20200226,
+        20200227,
+        20200228
+      ]
+    },
+    "niid_t1e7": {
+      "worker": "campaigns/covid/dp_theta_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 10000000.0,
+        "arm_id": "replay_niid",
+        "design": "picard_framework/runs/covid_dp_theta_fit_01_design.json"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214,
+        20200215,
+        20200216,
+        20200217,
+        20200218,
+        20200219,
+        20200220,
+        20200221,
+        20200222,
+        20200223,
+        20200224,
+        20200225,
+        20200226,
+        20200227,
+        20200228
+      ]
+    },
+    "niid_t3e7": {
+      "worker": "campaigns/covid/dp_theta_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 31600000.0,
+        "arm_id": "replay_niid",
+        "design": "picard_framework/runs/covid_dp_theta_fit_01_design.json"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214,
+        20200215,
+        20200216,
+        20200217,
+        20200218,
+        20200219,
+        20200220,
+        20200221,
+        20200222,
+        20200223,
+        20200224,
+        20200225,
+        20200226,
+        20200227,
+        20200228
+      ]
+    },
+    "niid_t1e8": {
+      "worker": "campaigns/covid/dp_theta_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 100000000.0,
+        "arm_id": "replay_niid",
+        "design": "picard_framework/runs/covid_dp_theta_fit_01_design.json"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214,
+        20200215,
+        20200216,
+        20200217,
+        20200218,
+        20200219,
+        20200220,
+        20200221,
+        20200222,
+        20200223,
+        20200224,
+        20200225,
+        20200226,
+        20200227,
+        20200228
+      ]
+    },
+    "niid_t3e8": {
+      "worker": "campaigns/covid/dp_theta_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 316000000.0,
+        "arm_id": "replay_niid",
+        "design": "picard_framework/runs/covid_dp_theta_fit_01_design.json"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214,
+        20200215,
+        20200216,
+        20200217,
+        20200218,
+        20200219,
+        20200220,
+        20200221,
+        20200222,
+        20200223,
+        20200224,
+        20200225,
+        20200226,
+        20200227,
+        20200228
+      ]
+    },
+    "niid_t3e9": {
+      "worker": "campaigns/covid/dp_theta_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 3160000000.0,
+        "arm_id": "replay_niid",
+        "design": "picard_framework/runs/covid_dp_theta_fit_01_design.json"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214,
+        20200215,
+        20200216,
+        20200217,
+        20200218,
+        20200219,
+        20200220,
+        20200221,
+        20200222,
+        20200223,
+        20200224,
+        20200225,
+        20200226,
+        20200227,
+        20200228
+      ]
+    },
+    "niid_t1e10": {
+      "worker": "campaigns/covid/dp_theta_fit_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 10000000000.0,
+        "arm_id": "replay_niid",
+        "design": "picard_framework/runs/covid_dp_theta_fit_01_design.json"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214,
+        20200215,
+        20200216,
+        20200217,
+        20200218,
+        20200219,
+        20200220,
+        20200221,
+        20200222,
+        20200223,
+        20200224,
+        20200225,
+        20200226,
+        20200227,
+        20200228
+      ]
+    }
+  }
+}
