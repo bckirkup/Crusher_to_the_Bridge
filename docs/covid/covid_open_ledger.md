@@ -631,6 +631,15 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`DP-THETA-FIT-01` is open following the endpoint audit** (ledger
+  `docs/ledger/DP-THETA-FIT-01.md`). The pilot records secondary infections
+  over 120 hours. The declared `covid.T3` endpoint records 634 campaign
+  positives through February 20. The onboard testing table records 691
+  positives through February 23, the replay cutoff, and excludes emergency
+  disembarkations. The final confirmed count covers 712 people. The fit
+  design and scoring rule remain
+  unfrozen, and the fit campaign remains unrun.
+
 - **`DP-REPLAY-ENVIRON-01` landed (ledger
   `docs/ledger/DP-REPLAY-ENVIRON-01.md`, design
   `docs/covid/covid_dp_replay_01_design.md`): the `covid_dp_replay_01`
