@@ -107,5 +107,10 @@ pickup is not the binding stage — the zone pool holds mass and pickup
 machinery delivers whatever is asked, but ordinary high-touch
 encounters *request* almost nothing. The deficit is upstream of pickup:
 encounter structure (who touches what, how often, at what intensity)
-rather than delivery mechanics. Arm C (per_surface) will say whether
-itemizing the pool changes the request side.
+rather than delivery mechanics.
+
+**Arm C declined (user decision, 2026-11-22).** Itemizing the pool
+cannot move a request volume already measured near zero — the request
+side is upstream of representation, so arm C's prior was too weak to
+justify the spend. D2′ closes on arm B: the next proposal lives in the
+encounter/activity layer, not in pool delivery or representation.
