@@ -28,9 +28,13 @@ DP-REPLAY-DOSE-DIAG-01 measured window. Design doc:
 
 ## Frozen criteria (before any cell ran)
 
-Selector: paired-seed conversion count/timing per (θ, arm) from
-`cell_payload`. θ bracket-admissible on `replay_niid` iff neither
-saturated nor dead and the nearest grid neighbour differs measurably.
+Selector: paired-seed secondary conversions per (θ, arm) from
+`cell_payload` minus the seeded index. Frozen thresholds (design doc):
+saturated = median secondaries ≥ 0.95×(aboard−1); dead = zero
+secondaries on ≥20/24 seeds; measurable neighbour difference =
+same-sign paired difference on ≥18/24 seeds or median ratio ≥1.5.
+θ bracket-admissible on `replay_niid` iff neither saturated nor dead
+and ≥1 adjacent cell differs measurably.
 Audit invariants: NIID `seed_patch` resolved; `close_zones` firing =
 FAILED COMPARISON; payload `cell.theta` and run-spec
 `susceptibility_scale` (= θ·(α+β)/α, α=0.18 β=58) must match the

@@ -30,14 +30,24 @@ environs, at the 120-epoch window DP-REPLAY-DOSE-DIAG-01 measured.
 
 ## Frozen criteria
 
-**Selector:** per (θ, arm), the count and timing of conversions over the
-120-epoch window across the 24 seeds — specifically the per-cell
-`cell_payload` infection fields, compared across θ on the SAME seed
-(paired). θ is bracket-admissible on `replay_niid` if its seedwise
-conversion mass sits strictly inside the grid's range — i.e. the
-nearest grid neighbour differs measurably and the cell is neither
-saturated (≈ all reached eligibles convert, indistinguishable above)
-nor dead (≈ zero secondaries on every seed).
+**Selector:** per (θ, arm), secondary conversions over the 120-epoch
+window across the 24 seeds — per-cell `cell_payload` infection fields
+minus the seeded index — compared across θ on the SAME seed (paired).
+Frozen thresholds for `replay_niid`:
+
+- **saturated cell:** median seedwise secondaries ≥ 0.95 ×
+  (`aboard_total` − 1 index);
+- **dead cell:** zero secondaries on ≥ 20 of 24 seeds;
+- **neighbour differs measurably:** the paired seedwise difference in
+  secondaries between adjacent grid θs is same-sign on ≥ 18 of 24
+  seeds, or the seedwise median ratio is ≥ 1.5.
+
+θ is **bracket-admissible** on `replay_niid` iff its cell is neither
+saturated nor dead AND at least one adjacent grid cell differs
+measurably from it (edge θs need differ only from the one existing
+neighbour). Interior θs differing measurably from both neighbours are
+the pilot's working shortlist; a θ bounded only below or only above
+marks the bracket edge.
 
 **Reported, never selected on:** cabin/outdoor dose share, route
 composition, takeoff/onset counts versus `takeoff_recorded_onsets`,
