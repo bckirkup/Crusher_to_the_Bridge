@@ -90,11 +90,22 @@ constant is introduced; the capacity re-reading is declared, Grade C.
 
 ## 3. Mechanism
 
-Selector: a new knob `transmission.hand_sequester_fill` with values
-`"stool_only"` (default — shipped behaviour, bit-identical) and `"any_load"`.
-The arm applies only under `hand_reservoir_mode: "hygiene_cycle"` (the
-protected compartment exists nowhere else); under `wash_reuptake` /
-`spike_decay` the arm resolves but has no state to fill and must warn.
+Selectors: two independent knobs, each defaulting to shipped behaviour so a
+run without them is bit-identical:
+
+- `transmission.hand_sequester_fill: "stool_only" | "any_load"` — the fill
+  rule of §3.1. Applies only under `hand_reservoir_mode: "hygiene_cycle"`
+  (the protected compartment exists nowhere else); under `wash_reuptake` /
+  `spike_decay` it resolves but has no state to fill and must warn.
+- `transmission.hand_residual_mouthing: "pickup_only" | "per_epoch"` — the
+  residual mouth draw of §3.3. `"pickup_only"` is the shipped `discrete`
+  behaviour; under `continuous` the integrator already mouths residual load
+  so the knob is a no-op there (declared, warned).
+
+They are separate because the canary must attribute its outcome: residual
+sampling alone is measurable (~few %, §4) but must not be credited to
+retention — `noro_external_sequester_01` therefore runs **two arms** per
+cell (§6).
 
 ### 3.1 The fill rule
 
@@ -152,17 +163,19 @@ shipped mouth step fires **only at pickup events**
 (`_hand_to_mouth_dose` inside `_deliver_one_pickup`): retained load is
 never re-sampled. A retention arm without residual sampling would hold the
 dose for days and still mouth ~0 — the retention bound in §5 is realizable
-only if the retained reservoir is re-exposed. The arm therefore includes a
-per-epoch residual mouth draw under `discrete`, built entirely from shipped
-constants: for each host with positive `hand_load`, book
+only if the retained reservoir is re-exposed. The
+`hand_residual_mouthing: "per_epoch"` arm therefore adds a residual mouth
+draw under `discrete`, built entirely from shipped constants and scoped to
+the same population the `continuous` solver mouths: **each susceptible
+host** with positive `hand_load` books
 `contacts × f × e × hand_load` through the same `_hand_to_mouth_dose`
 accounting — `contacts` drawn from the shipped non-eating
 `N(2.9, 2.5)`/h (eating `N(7.7, 4.1)`/h when the epoch's schedule state is
 an eating venue), `f ~ U(0.008, 0.012)`, `e ~ N(0.339, 0.132)`, all
-`× hours_per_epoch`. This is the discrete-arm counterpart of the mouth term
-`integrate_hand_flow` already runs on `continuous`; it adds no constant and
-changes no shipped value. Under `continuous` the component is a no-op (the
-integrator already mouths residual load), so the arm is solver-symmetric.
+`× hours_per_epoch`. Susceptible-only matches the population
+`_flow_mouth_rates` integrates on `continuous` (a shedder mouthing its own
+hand adds no new infection), so the arm is solver-symmetric; it adds no
+constant and changes no shipped value.
 
 ## 4. Why this and not the alternatives
 
@@ -221,11 +234,20 @@ using no new physical input.
 
 ## 6. Frozen criteria (for `noro_external_sequester_01`, written before any cell runs)
 
-Arm on the same 20-cell cold cohort (seeds 8000–8019,
-`classic_cruise_1900`, 288 epochs, `norwalk_gi`, `item_instances` +
-`hand_sequester_fill: "any_load"` — the arm stacks on the TOUCH-PATCH
-representation that produced the measured requests), same instrumented worker
-and epoch mass ledger. 8105/8106 stay held for the full-campaign decision.
+A two-arm factorial on the same 20-cell cold cohort (seeds 8000–8019,
+`classic_cruise_1900`, 288 epochs, `norwalk_gi`, `item_instances` — the arm
+stacks on the TOUCH-PATCH representation that produced the measured
+requests), same instrumented worker and epoch mass ledger — **40 cells**:
+
+- **Arm S (sampling-only):** `hand_residual_mouthing: "per_epoch"`,
+  `hand_sequester_fill: "stool_only"` — the attribution control: what
+  residual sampling alone buys.
+- **Arm S+R (retention + sampling):** `hand_residual_mouthing: "per_epoch"`,
+  `hand_sequester_fill: "any_load"` — the full mechanism.
+
+Arm S exists so the verdict separates the two components: residual sampling
+is bounded at a few percent (§4) but must not be credited to retention.
+8105/8106 stay held for the full-campaign decision.
 
 Audit invariants — a violation is an instrument defect, not a null result:
 
@@ -236,11 +258,13 @@ Audit invariants — a violation is an instrument defect, not a null result:
   reconciles within 1e-9 relative as
   `sources = sinks + residual`, where **sources** = delivered to hands
   (all touch points) + mass created on the hand (stool-linked sequester
-  draws + self-contact reloads + `hygiene_cycle` first-event priming),
+  draws + the stool visit's `accessible = max(accessible, target)` top-up +
+  self-contact reloads + `hygiene_cycle` first-event priming),
   **sinks** = mouth (pickup-instant + §3.3 residual draws) + accessible
   inactivation + routine-wash strips + post-visit wash strips +
-  redeposited, and **residual** = end-state `accessible + pending +
-  protected`. The internal flows — `sequester_migrated`, pending→protected
+  redeposited + infection/recovery resets (hand load cleared at recovery,
+  pending dropped at infection), and **residual** = end-state
+  `accessible + pending + protected`. The internal flows — `sequester_migrated`, pending→protected
   settle, and the protected→accessible leak — are witnessed but are **not**
   balance terms (migration relocates mass; sheltered decay returns mass to
   accessible rather than killing it).
@@ -252,10 +276,11 @@ Audit invariants — a violation is an instrument defect, not a null result:
   event must have a witnessed earlier positive accessible acquisition —
   the carrier-provenance check that distinguishes the new fill from the
   shipped stool path.
-- The worker stamps `hand_sequester_fill_resolved: "any_load"` (the
-  "resolved" convention), so a dropped override is a witnessed fact.
-- Baseline-identity gate: off-arm is bit-identical to the pre-change tree on
-  one seed.
+- The worker stamps `hand_sequester_fill_resolved` and
+  `hand_residual_mouthing_resolved` per cell (the "resolved" convention), so
+  a dropped override is a witnessed fact.
+- Baseline-identity gate: with both knobs at their defaults the engine is
+  bit-identical to the pre-change tree on one seed.
 
 Reported, never selected on, per cell:
 
@@ -267,18 +292,23 @@ Reported, never selected on, per cell:
 - Σhazard, secondaries, take-off per cell; wall-clock multiplier vs the
   `item_instances` arm.
 
-Selection / decision rules:
+Selection / decision rules (the frozen Σhazard ≥ 1.1 gate applies to arm
+cells, 18 cold cells per arm):
 
-- **Ignites:** ≥9 of 18 previously-cold cells reach Σhazard ≥ 1.1 → the
-  missing structure was hand-reservoir retention; promotion to default-on
-  and `stool_only` as labelled baseline is a *separate* change and decision.
-- **Mouth fraction rises but take-off does not:** retention restores dwell
-  but the ~1%/h mouth-capture product still strands the dose — the bound
-  moves to mouth-touch structure or the challenge; report the partition,
-  change nothing else.
-- **Mouth fraction does not rise:** the capacity band or settle rate
-  itself bounds retention — a measured bound on the protected
-  compartment's reach, reported with the partition.
+- **Arm S ignites** (≥9/18 at ≥1.1): residual sampling frequency was the
+  binding stage all along; retention is not the missing structure — report,
+  do not promote the fill.
+- **Arm S+R ignites, arm S does not:** retention was the needed addition —
+  the missing structure was hand-reservoir retention; promotion to
+  default-on with the shipped behaviours as labelled baselines is a
+  *separate* change and decision.
+- **Neither ignites, but mouth fraction rises materially on S+R vs S:**
+  dwell is restored but the ~1%/h capture still strands the dose — the
+  bound moves to mouth-touch structure or the challenge; report the
+  partition, change nothing else.
+- **Mouth fraction does not rise on either arm:** the capacity band or
+  settle rate itself bounds retention, and the residual-draw magnitude is
+  measured — a bound on both components, reported with the partition.
 
 ## 7. Out of scope / follow-ups this spec does not authorize
 
