@@ -1,7 +1,7 @@
 {
  "task_id": "DP-THETA-PILOT-01-ARRAY",
  "design_id": "covid-dp-theta-pilot-01",
- "measured_at": "a57a7d48 (PR #1399 merge); image sha256:a65b9aae29b1ff221649181dbb2ca920c6e2384391f8223ea80df9cb53e6f308 built at 086ecc84",
+ "measured_at": "image built at 086ecc84 (branch SHA at build time); jobdef picard-covid-dp-theta-pilot-01 revs :1 canary, :2-:11 array; design declared on PR #1399 merged a57a7d48",
  "jobdef": "picard-covid-dp-theta-pilot-01",
  "horizon_hours": 120,
  "seeds": "20200205..20200228 (24)",
@@ -476,5 +476,7 @@
     }
    }
   }
- }
+ },
+ "image_digest": "sha256:a65b9aae29b1ff221649181dbb2ca920c6e2384391f8223ea80df9cb53e6f308",
+ "jobdef_revisions": ":1 (canary, 20 cells), :2-:11 (array, 220 cells)"
 }

@@ -77,20 +77,28 @@ Full array approved by Benjamin ("ok execute" 2026-11-22 21:21 EST);
 the canary. **240/240 cells SUCCEEDED.**
 
 Median secondaries per seed (120-epoch horizon), θ lo→hi:
-- `replay_niid` (diamond_princess, NIID clock): 2.5 / 8 / 37 / 392 / 1054; zero-secondary seeds 4/2/1/0/0.
-- `replay_baseline` (mega_cruise_5000 default stack, declared null reference): 41.5 / 95.5 / 232.5 / 599.5 / 1577.5; zero-secondary seeds 0.
+- `replay_niid` (diamond_princess, NIID clock): 2.5 / 8 / 37 / 392 / 1054; zero-secondary seeds 7/3/2/1/1.
+- `replay_baseline` (mega_cruise_5000 default stack, declared null reference): 41.5 / 95.5 / 232.5 / 599.5 / 1577.5; zero-secondary seeds 1/1/0/0/0.
 
 Frozen criteria: no cell saturated (no median ≥0.95·(aboard−1)), none
 dead (no cell with ≥20/24 zero seeds); every adjacent θ pair on both
 arms shows a measurable contrast (all ≥18/24 same-sign paired diffs,
-median ratios 2.3–10.6×) → **all five θ are bracket-admissible on both
-arms; the grid is a working fitting instrument, not a straddle.**
+median ratios 2.3–10.6×) → **all five θ are bracket-admissible on
+`replay_niid`; the grid is a working fitting instrument, not a
+straddle.** The declared audit marks `close_zones` firings as FAILED
+COMPARISON: on `replay_baseline` that applies to 16 cells (1 at θ=3.16e10,
+4 at 1e11, 4 at 3.16e11, 7 at 1e12 — seeds listed in the array readout),
+so only baseline θ=1e10 is a clean admissible cell; the other four
+baseline cells are measured but comparison-failed under the declared
+audit (close_zones never fired on niid, 120/120).
 
 Notable: seed 20200217 draws a dead index — zero secondaries at every
 θ on niid (and on baseline at θ≤3.16e10); index-identity lottery
 dominates within-cell variance as predicted. niid medians run ~2–16×
-below baseline at the same θ (dedicated hull + NIID clock suppress
-secondary spread relative to the default stack). Audits: susceptibility_scale
+below baseline at the same θ — a bundled contrast of the declared
+dedicated-stack arm vs the default stack (hull, protocols, NIID clock
+change together; the gap does not isolate any one of them).
+Audits: susceptibility_scale
 = θ·(α+β)/α exact on all 240 cells; close_zones never fired on niid
 (120/120), fired on 16/120 baseline cells (default-stack protocol
 context, declared).

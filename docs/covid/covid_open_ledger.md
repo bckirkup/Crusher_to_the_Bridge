@@ -666,9 +666,10 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   Full array measured 2026-11-23 (Benjamin "ok execute"): 240/240
   SUCCEEDED. Median secondaries niid 2.5/8/37/392/1054, baseline
   41.5/95.5/232.5/599.5/1577.5 (θ lo→hi); no cell saturated or dead,
-  all 8 adjacent pairs measurable → every θ bracket-admissible on both
-  arms; seed 20200217 is a dead-index seed (0 secondaries at all θ on
-  niid). Readout `docs/covid/dp_theta_pilot_01_array_readout.json`.
+  all 8 adjacent pairs measurable → every θ bracket-admissible on
+  `replay_niid` (on `replay_baseline` 16 cells fired `close_zones` =
+  declared failed comparison); seed 20200217 is a dead-index seed
+  (0 secondaries at all θ on niid). Readout `docs/covid/dp_theta_pilot_01_array_readout.json`.
 
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
   follow-up to the platform-fidelity study — measured 2026-11-08: 400/400

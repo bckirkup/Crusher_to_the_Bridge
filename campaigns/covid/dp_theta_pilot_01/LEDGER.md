@@ -40,11 +40,13 @@ doc `docs/covid/covid_dp_theta_pilot_01_design.md`).
   base_t1e12 `e268ef9f-27f3-424f-9d77-bad1d56658bd`.
   PR #1399 merged at a57a7d48 (declared pilot + canary readout).
 - **Array readout (measured):** 240/240 SUCCEEDED across 11 parent
-  jobs. Median secondaries — niid: 2.5/8/37/392/1054 (θ lo→hi),
-  baseline: 41.5/95.5/232.5/599.5/1577.5. No cell saturated, none
-  dead; all 8 adjacent θ pairs measurable → every θ bracket-admissible
-  on both arms. Seed 20200217 is a dead-index seed (0 secondaries at
-  every θ on niid). Audits clean: niid=diamond_princess 120/120,
-  index_onset 3.0, iad 2.8; baseline=mega_cruise_5000 120/120
+  jobs (jobdef revs :2–:11). Median secondaries — niid: 2.5/8/37/392/1054
+  (θ lo→hi), baseline: 41.5/95.5/232.5/599.5/1577.5. No cell saturated,
+  none dead; all 8 adjacent θ pairs measurable → every θ
+  bracket-admissible on `replay_niid`; on `replay_baseline` 16 cells
+  fired `close_zones` (declared FAILED COMPARISON), so only baseline
+  θ=1e10 is a clean admissible cell. Seed 20200217 is a dead-index
+  seed (0 secondaries at every θ on niid). Audits: niid=diamond_princess
+  120/120, index_onset 3.0, iad 2.8; baseline=mega_cruise_5000 120/120
   (declared default-stack reference), close_zones fired 16/120.
   Readout: `docs/covid/dp_theta_pilot_01_array_readout.json`.
