@@ -658,7 +658,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   secondary transmission suspended by pinning `susceptibility_scale` to
   1e-30.** Reach 1643–3331/3710 across seeds; cabin setting carries
   60.8–99.5% of dose by seed via caregiver+droplet routes; normalized
-  U·D means 9e-15–2.6e-13. The Θ_old·Q_old/Q_new mapping is inapplicable (no
+  U·D means 3e-12–8.3e-11 (includes the `(α+β)/α` = 323.22 convention
+  factor; corrected 2026-11-23 — the first readout's `weighted_dose`
+  omitted it and read 9e-15–2.6e-13). The Θ_old·Q_old/Q_new mapping is inapplicable (no
   old-kernel arm on the dedicated hull) — Q_new is reported and
   Checkpoint C brackets directly.
 
@@ -669,12 +671,12 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   {1e10, 3.16e10, 1e11, 3.16e11, 1e12} × 24 matched seeds
   (20200205–20200228) × arms `replay_baseline`+`replay_niid` at the
   declared 120-epoch horizon = 240 cells.** Canary measured 2026-11-23 (job `b86ab9d7`, 20/20 SUCCEEDED,
-  audits clean): θ=1e11 `replay_niid` secondaries/seed median 39,
-  range 0–1516, 1 zero-secondary seed → cell alive, not saturated;
+  audits clean): θ=1e11 `replay_niid` secondaries/seed median 40,
+  range 0–1517, 1 zero-secondary seed → cell alive, not saturated;
   readout `docs/covid/dp_theta_pilot_01_canary_readout.json`.
   Full array measured 2026-11-23 (Benjamin "ok execute"): 240/240
-  SUCCEEDED. Median secondaries niid 2.5/8/37/392/1054, baseline
-  41.5/95.5/232.5/599.5/1577.5 (θ lo→hi); no cell saturated or dead,
+  SUCCEEDED. Median secondaries niid 3.5/9/38/393/1055, baseline
+  42.5/96.5/233.5/600.5/1578.5 (θ lo→hi); no cell saturated or dead,
   all 8 adjacent pairs measurable → every θ bracket-admissible on
   `replay_niid` (on `replay_baseline` 16 cells fired `close_zones` =
   declared failed comparison); seed 20200217 is a dead-index seed

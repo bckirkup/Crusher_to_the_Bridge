@@ -18,6 +18,14 @@ ratio is not attempted: there is no old-movement-kernel arm on the
 dedicated hull, so per the protocol the bracket decision defers to
 Checkpoint C with the labelled historical reference.
 
+Under the implemented Θ convention the cell's ``susceptibility_scale``
+is ``theta * (alpha + beta) / alpha``, so a labelled theta multiplies
+``dose * draw * age_band * (alpha + beta) / alpha``. The normalized
+U·D a reader compares against a labelled θ is therefore
+``dose * susceptibility * (alpha + beta) / alpha`` — reported as
+``normalized_ud`` alongside ``weighted_dose`` (which carries the host
+factor alone).
+
 Readout only — nothing here is scored against an epidemiological anchor.
 """
 from __future__ import annotations
@@ -72,6 +80,19 @@ def _suspend_secondary_transmission(raw: dict) -> None:
     dr["susceptibility_scale"] = _SUSPENDED_SCALE
 
 
+def _theta_scale_ratio(overrides: dict) -> float:
+    """(alpha + beta) / alpha on the resolved dose_response — the factor
+    the engine folds into susceptibility_scale = theta * ratio."""
+    dr = overrides.get(PATHOGEN_ID, {}).get("dose_response", {})
+    alpha = dr.get("alpha")
+    beta = dr.get("beta")
+    if not alpha or not beta:
+        raise SystemExit(
+            "no dose_response alpha/beta to normalize U·D against"
+        )
+    return (float(alpha) + float(beta)) / float(alpha)
+
+
 class DoseLedger:
     """Epoch observer: per-setting dose deltas + index source echo."""
 
@@ -92,6 +113,10 @@ class DoseLedger:
 
     def observe(self, sim: object, work: object) -> None:
         engine = sim.engine
+        profiles = getattr(sim, "pathogen_profiles", None) or getattr(
+            engine, "pathogen_profiles", {}
+        )
+        profile = profiles.get(PATHOGEN_ID, {})
         epoch = int(getattr(sim, "epoch", getattr(engine, "epoch", 0)))
         if not self._source_agents:
             self._source_agents = {
@@ -134,6 +159,9 @@ class DoseLedger:
                 "current_shedding": float(
                     getattr(agent, "current_shedding", 0.0)
                 ),
+                "pathogen_shedding": float(
+                    agent.get_pathogen_shedding(PATHOGEN_ID, profile)
+                ),
                 "ashore": bool(getattr(agent, "ashore", False)),
             })
 
@@ -144,6 +172,7 @@ def _run_seed(
     raw = prepare_cell_run_spec(
         design, cell, num_epochs=args.num_epochs, repo_root=str(_REPO_ROOT),
     )
+    theta_scale_ratio = _theta_scale_ratio(raw.get("pathogen_overrides", {}))
     _suspend_secondary_transmission(raw)
     sim = build_sim(raw)
     engine = sim.engine
@@ -189,6 +218,7 @@ def _run_seed(
             "role": str(getattr(agent, "role", "crew")),
             "dose": dose,
             "weighted_dose": dose * susceptibility,
+            "normalized_ud": dose * susceptibility * theta_scale_ratio,
             "susceptibility": susceptibility,
             "dose_epochs": ledger.dose_epochs.get(aid, 0),
         })
@@ -218,6 +248,15 @@ def _run_seed(
             sum(weighted) / len(weighted) if weighted else 0.0
         ),
         "weighted_dose_quantiles": _quantiles(weighted),
+        "normalized_ud_quantiles": _quantiles(
+            [r["normalized_ud"] for r in recipients]
+        ),
+        "normalized_ud_mean": (
+            sum(r["normalized_ud"] for r in recipients) / len(recipients)
+            if recipients
+            else 0.0
+        ),
+        "theta_scale_ratio": theta_scale_ratio,
         "dose_epoch_quantiles": _quantiles(
             [float(r["dose_epochs"]) for r in recipients]
         ),
