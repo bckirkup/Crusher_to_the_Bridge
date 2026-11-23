@@ -349,6 +349,19 @@ def cmd_submit(args: argparse.Namespace) -> int:
         )
     directory, spec = _load_spec(args.campaign)
     block = _block(spec, args.block)
+    # Validate the submission shape before registering anything: a
+    # rejected combination must not mint a job-definition revision.
+    if args.canary and args.size is not None:
+        raise _die("--size has no effect with --canary (single job)")
+    size = None
+    if not args.canary and not args.register_only:
+        size = args.size if args.size is not None else len(block["seeds"])
+        if not 2 <= size <= len(block["seeds"]):
+            raise _die(
+                f"--size must be in 2..{len(block['seeds'])}"
+                f" for block {args.block} (Batch arrays need >=2;"
+                " use --canary for a single job)"
+            )
     bucket = args.bucket or os.environ.get("CAMPAIGN_BUCKET")
     if not bucket:
         raise _die("--bucket (or CAMPAIGN_BUCKET) is required")
@@ -392,7 +405,9 @@ def cmd_submit(args: argparse.Namespace) -> int:
         command += ["--index", str(args.index)]
         submit_json["jobName"] += "-canary"
     else:
-        submit_json["arrayProperties"] = {"size": len(block["seeds"])}
+        submit_json["arrayProperties"] = {"size": size}
+        if size != len(block["seeds"]):
+            submit_json["jobName"] += f"-first{size}"
 
     print(json.dumps(submit_json, indent=2))
     if args.dry_run:
@@ -466,6 +481,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                              "credentials (e.g. OIDC in CI)")
     submit.add_argument("--canary", action="store_true",
                         help="single job with --index instead of the array")
+    submit.add_argument("--size", type=int, default=None,
+                        help="array size cap: submit only the first N seeds "
+                             "of the block (default: all seeds)")
     submit.add_argument("--index", type=int, default=0)
     submit.add_argument("--register-only", action="store_true")
     submit.add_argument("--dry-run", action="store_true")

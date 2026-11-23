@@ -33,7 +33,7 @@ _REPO_ROOT = os.path.realpath(
     os.path.join(os.path.dirname(__file__), ".."),
 )
 
-FOMITE_REPRESENTATIONS = ("pooled", "per_surface")
+FOMITE_REPRESENTATIONS = ("pooled", "per_surface", "item_instances")
 DEFAULT_FOMITE_REPRESENTATION = "pooled"
 TOUCH_SHARE_MODES = ("areal", "declared")
 DEFAULT_TOUCH_SHARE_MODE = "areal"
@@ -243,6 +243,7 @@ ZONE_ITEM_SETS: dict[str, dict[str, Any]] = {
 class PerSurfaceConfig:
     """Resolved ``transmission.fomite_*`` block for the per-surface arm."""
 
+    representation: str = "per_surface"
     touch_share: str = DEFAULT_TOUCH_SHARE_MODE
     area_basis: str = DEFAULT_FOMITE_AREA_BASIS
     item_reading: str = DEFAULT_FOMITE_ITEM_READING
@@ -423,12 +424,21 @@ def parse_per_surface_config(tx: Mapping[str, Any]) -> PerSurfaceConfig | None:
         tx, "fomite_item_reading",
         FOMITE_ITEM_READINGS, DEFAULT_FOMITE_ITEM_READING,
     )
+    # TOUCH-PATCH (docs/norovirus/fomite_touch_patch_spec.md): the instance
+    # arm enumerates the ``shared`` unit inventory only -- per-occupant item
+    # groups and the hardware/broad readings are declared out of scope.
+    if rep == "item_instances" and item_reading != "shared":
+        raise ValueError(
+            "transmission.fomite_representation = 'item_instances' "
+            f"requires fomite_item_reading = 'shared', got {item_reading!r}",
+        )
     declared_shares = _parse_declared_shares(
         tx.get("fomite_touch_share_table") or {},
     )
     if declared_shares:
         _check_declared_completeness(declared_shares, item_reading)
     return PerSurfaceConfig(
+        representation=rep,
         touch_share=_validated_enum(
             tx, "fomite_touch_share",
             TOUCH_SHARE_MODES, DEFAULT_TOUCH_SHARE_MODE,
@@ -726,6 +736,13 @@ class PerSurfaceFomiteState:
     def classes(self, unit_key: str, pathogen_id: str) -> list[str]:
         return [key[2] for key in self._keys(unit_key, pathogen_id)]
 
+    def class_masses(
+        self,
+        unit_key: str,
+        pathogen_id: str,
+    ) -> dict[str, float]:
+        return {key[2]: self.mass[key] for key in self._keys(unit_key, pathogen_id)}
+
     def class_density_per_m2(
         self,
         unit_key: str,
@@ -735,9 +752,216 @@ class PerSurfaceFomiteState:
         inv = self._inventory.get(unit_key)
         if inv is None:
             return {}
+        masses = self.class_masses(unit_key, pathogen_id)
         density: dict[str, float] = {}
         for item_class, count in inv.counts.items():
             area = count * inv.area_each_m2[item_class]
-            mass_c = self.mass.get((unit_key, pathogen_id, item_class), 0.0)
-            density[item_class] = mass_c / area if area > 0.0 else 0.0
+            density[item_class] = (
+                masses.get(item_class, 0.0) / area if area > 0.0 else 0.0
+            )
+        return density
+
+
+class ItemInstanceFomiteState(PerSurfaceFomiteState):
+    """Per-(unit, pathogen, item-class, index) bookkeeping (TOUCH-PATCH).
+
+    The TOUCH-PATCH arm (``docs/norovirus/fomite_touch_patch_spec.md``)
+    disaggregates each class sub-pool once more into the discrete items a
+    hand's touches actually sample: deposits land on ``n_touches`` iid
+    drawn instances, and each pickup touch draws one reachable instance
+    and requests at that instance's own areal density. Keys are
+    ``(unit_key, pathogen_id, item_class, index)``; every inherited
+    roll-up (``scale``/``consume``/``routine_clean``/``disinfect``/
+    ``_floor_unit``/``total``) already filters on ``key[0]``/``key[1]``,
+    so pooled-mass mirroring needs no new code.
+    """
+
+    def __init__(self, cfg: PerSurfaceConfig) -> None:
+        super().__init__(cfg)
+        # ``served``: instance key -> the distinct susceptible agent_ids a
+        #   request was delivered to this run (coincidence witness).
+        self.served: dict[tuple[str, str, str, int], set[int]] = {}
+        # ``coincidence``: (unit, pathogen) -> count of deliveries that
+        #   served a susceptible already credited via the same instance.
+        self.coincidence: dict[tuple[str, str], int] = {}
+        # ``touch_stats``: (unit, pathogen) -> touch / contaminated-touch
+        #   tallies across all targets, for the request-witness columns.
+        self.touch_stats: dict[tuple[str, str], dict[str, int]] = {}
+
+    @staticmethod
+    def slots(count: float) -> list[tuple[int, float]]:
+        """Enumerated slots for a class count: ``[(index, extent), ...]``.
+
+        Fractional counts (e.g. ``grab_rail_m: 0.5``) enumerate
+        ``ceil(count)`` slots whose last slot's extent is the fractional
+        remainder, so ``sum(extent_i * area_each) == count * area_each``.
+        """
+        n_slots = math.ceil(count - 1e-9) if count > 0.0 else 0
+        return [
+            (index, min(1.0, count - index)) for index in range(n_slots)
+        ]
+
+    def sample_touch(
+        self,
+        inv: UnitInventory,
+        unit_key: str,
+        pathogen_id: str,
+        rng: Any,
+    ) -> tuple[str, str, str, int]:
+        """Draw one touch's instance: class by touch_share, then uniform.
+
+        Two draws on the caller's rng stream: one class draw weighted by
+        the resolved ``touch_share``, one uniform over ``[0, count)`` into
+        the enumerated slots.
+        """
+        u = rng.uniform()
+        acc = 0.0
+        item_class = next(reversed(inv.touch_share))
+        for item_class_iter, share in inv.touch_share.items():
+            acc += share
+            if u < acc:
+                item_class = item_class_iter
+                break
+        count = inv.counts[item_class]
+        index = min(int(rng.uniform(0.0, count)), math.ceil(count) - 1)
+        return (unit_key, pathogen_id, item_class, index)
+
+    def instance_area(
+        self,
+        inv: UnitInventory,
+        item_class: str,
+        index: int,
+    ) -> float:
+        """One instance's effective area (``area_each`` x slot extent)."""
+        extent = min(1.0, inv.counts[item_class] - index)
+        return inv.area_each_m2[item_class] * max(0.0, extent)
+
+    def deposit(
+        self,
+        unit_key: str,
+        pathogen_id: str,
+        mass: float,
+        inv: UnitInventory,
+    ) -> None:
+        """Touch-unaware fallback spread (legacy/flow write-back paths).
+
+        Callsites with no touch stream spread the deposit share-wise and
+        extent-uniformly over instances. The campaign path never reaches
+        this: contact deposits carry a ``placement`` and land via
+        ``deposit_instances``.
+        """
+        for item_class, share in inv.touch_share.items():
+            count = inv.counts[item_class]
+            if count <= 0.0:
+                continue
+            for index, extent in self.slots(count):
+                key = (unit_key, pathogen_id, item_class, index)
+                weight = share * extent / count
+                self.mass[key] = self.mass.get(key, 0.0) + mass * weight
+                self.cleanable[key] = (
+                    self.cleanable.get(key, 0.0)
+                    + mass * weight * inv.coverage[item_class]
+                )
+
+    def deposit_instances(
+        self,
+        unit_key: str,
+        pathogen_id: str,
+        mass: float,
+        inv: UnitInventory,
+        contacts: float,
+        rng: Any,
+    ) -> None:
+        """Land one deposit on ``contacts`` iid-sampled instances.
+
+        The fractional contact count is resolved by stochastic rounding
+        (one draw on the caller's stream) so E[touches] = contacts; a
+        positive deposit always lands at least once, so instance mass
+        mirrors the pooled add exactly.
+        """
+        base = int(contacts)
+        n_draws = base + (1 if rng.uniform() < contacts - base else 0)
+        n_draws = max(1, n_draws)
+        per_touch = mass / n_draws
+        for _ in range(n_draws):
+            key = self.sample_touch(inv, unit_key, pathogen_id, rng)
+            self.mass[key] = self.mass.get(key, 0.0) + per_touch
+            self.cleanable[key] = (
+                self.cleanable.get(key, 0.0)
+                + per_touch * inv.coverage[key[2]]
+            )
+
+    def pickup_requests(
+        self,
+        inv: UnitInventory,
+        unit_key: str,
+        pathogen_id: str,
+        contacts: float,
+        used_fraction: float,
+        hand_area_m2: float,
+        transfer_efficiency: float,
+    ) -> dict[str, float]:
+        raise NotImplementedError(
+            "item_instances samples one instance per touch; the engine's "
+            "instance pickup path draws class+index per touch instead",
+        )
+
+    def consume_instances(
+        self,
+        unit_key: str,
+        pathogen_id: str,
+        delivered: dict[tuple[str, str, str, int], float],
+    ) -> None:
+        """Remove delivered mass instance by instance (4-tuple keys)."""
+        for key, amount in delivered.items():
+            old_mass = self.mass.get(key, 0.0)
+            new_mass = max(0.0, old_mass - amount)
+            self.mass[key] = new_mass
+            self.cleanable[key] = min(
+                new_mass,
+                self.cleanable.get(key, 0.0)
+                * (new_mass / old_mass if old_mass > 0.0 else 0.0),
+            )
+        self._floor_unit(unit_key, pathogen_id)
+
+    def record_served(
+        self,
+        key: tuple[str, str, str, int],
+        agent_id: int,
+    ) -> None:
+        """Tally one delivery's recipient for the coincidence witness."""
+        served = self.served.setdefault(key, set())
+        if agent_id not in served:
+            if served:
+                pair = (key[0], key[1])
+                self.coincidence[pair] = self.coincidence.get(pair, 0) + 1
+            served.add(agent_id)
+
+    def class_masses(
+        self,
+        unit_key: str,
+        pathogen_id: str,
+    ) -> dict[str, float]:
+        """Instance mass rolled back up to item class (diagnostic view)."""
+        totals: dict[str, float] = {}
+        for key in self._keys(unit_key, pathogen_id):
+            totals[key[2]] = totals.get(key[2], 0.0) + self.mass[key]
+        return totals
+
+    def class_density_per_m2(
+        self,
+        unit_key: str,
+        pathogen_id: str,
+    ) -> dict[str, float]:
+        """Per-class summed instance mass over its enumerated area."""
+        inv = self._inventory.get(unit_key)
+        if inv is None:
+            return {}
+        masses = self.class_masses(unit_key, pathogen_id)
+        density: dict[str, float] = {}
+        for item_class, count in inv.counts.items():
+            area = count * inv.area_each_m2[item_class]
+            density[item_class] = (
+                masses.get(item_class, 0.0) / area if area > 0.0 else 0.0
+            )
         return density

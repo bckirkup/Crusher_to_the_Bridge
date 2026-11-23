@@ -37,7 +37,10 @@ dose result.
 
 ## 1. The seam (as shipped in PR1)
 
-`transmission.fomite_representation: pooled | per_surface`, default `pooled`.
+`transmission.fomite_representation: pooled | per_surface | item_instances`,
+default `pooled` (`item_instances` is the TOUCH-PATCH arm —
+`docs/norovirus/fomite_touch_patch_spec.md`; requires
+`fomite_item_reading: shared`).
 Absent or `pooled` runs the pre-change code with no extra RNG draw (every hook
 is an attribute guard, `self._per_surface is None`). Under `per_surface`:
 

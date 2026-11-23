@@ -60,6 +60,7 @@ from engines.environmental_hazards import (
     cumulative_toxicity_spec,
 )
 from engines.fomite_surfaces import (
+    ItemInstanceFomiteState,
     PerSurfaceFomiteState,
     UnitInventory,
     floor_surface_residue,
@@ -4374,11 +4375,15 @@ class TransmissionCore:
         # hook inert (``self._per_surface is None`` guards), so the shipped
         # path is bit-identical to the pre-change tree.
         self.per_surface_config = parse_per_surface_config(tx)
-        self._per_surface = (
-            PerSurfaceFomiteState(self.per_surface_config)
-            if self.per_surface_config is not None
-            else None
-        )
+        self._per_surface = None
+        if self.per_surface_config is not None:
+            state_cls = (
+                ItemInstanceFomiteState
+                if self.per_surface_config.representation
+                == "item_instances"
+                else PerSurfaceFomiteState
+            )
+            self._per_surface = state_cls(self.per_surface_config)
         if self.intra_epoch_substeps > 1 and self.intra_epoch_order != "ordered":
             raise ValueError(
                 "transmission.intra_epoch_substeps > 1 requires "
@@ -4390,7 +4395,9 @@ class TransmissionCore:
                 "pooled fomite with no per_surface fomite arm",
             )
         self.fomite_representation = (
-            "per_surface" if self._per_surface is not None else "pooled"
+            self.per_surface_config.representation
+            if self.per_surface_config is not None
+            else "pooled"
         )
         # The blackwater tank reads mass that is otherwise dropped (the
         # non-aerosolised bowl share and emesis ``non_touchable``) and
@@ -5047,8 +5054,15 @@ class TransmissionCore:
         pathogen_id: str,
         zone_name: str,
         mass: float,
+        placement: tuple[Any, float] | None = None,
     ) -> None:
-        """Add surface mass to the aggregate and cleanable compartments."""
+        """Add surface mass to the aggregate and cleanable compartments.
+
+        ``placement`` is ``(rng, contacts)`` from a touch-stream callsite;
+        under the ``item_instances`` arm it places the mass on the discrete
+        items those touches sampled. Other callsites leave it ``None`` and
+        the mass spreads share-wise over the unit's instances.
+        """
         mass = float(mass)
         if not math.isfinite(mass) or mass <= 0.0:
             return
@@ -5063,15 +5077,21 @@ class TransmissionCore:
         )
         cleanable[zone_name] = cleanable.get(zone_name, 0.0) + mass * coverage
         self._routine_cleaning_accumulators.setdefault(zone_name, 0.0)
-        if self._per_surface is not None:
-            self._per_surface.deposit(
-                zone_name,
-                pathogen_id,
-                mass,
-                self._per_surface_inventory(
-                    zone_name, self._fomite_surface_area_pooled(zone_name),
-                ),
+        if self._per_surface is None:
+            return
+        inv = self._per_surface_inventory(
+            zone_name, self._fomite_surface_area_pooled(zone_name),
+        )
+        if (
+            isinstance(self._per_surface, ItemInstanceFomiteState)
+            and placement is not None
+        ):
+            rng, n_touches = placement
+            self._per_surface.deposit_instances(
+                zone_name, pathogen_id, mass, inv, n_touches, rng,
             )
+            return
+        self._per_surface.deposit(zone_name, pathogen_id, mass, inv)
 
     def _scale_surface_mass(
         self,
@@ -9483,6 +9503,69 @@ class TransmissionCore:
             used_fraction, hand_area, transfer_efficiency,
         )
 
+    def _fomite_pickup_requests_by_instance(
+        self,
+        target: KorkinAgent,
+        zone_name: str,
+        epoch: int,
+        pathogen_id: str,
+    ) -> dict[tuple[str, str, str, int], float] | None:
+        """One target's per-instance pickup requests (item_instances arm).
+
+        Each contact draws one reachable instance from the resolved
+        inventory (class by ``touch_share``, then a uniform instance).
+        A hit on an instance below the one-copy gate contributes no
+        request and consumes no transfer draws (TOUCH-PATCH spec 3.3);
+        a hit above it requests at that instance's own areal density,
+        ``used_fraction * hand_area / area(instance) * transfer_eff *
+        mass(instance)`` capped at the instance mass, and takes the
+        three surface->hand draws. Fractional contact counts resolve by
+        stochastic rounding on the same stream. ``None`` for a confined
+        target out of scope, exactly as the by-class request.
+        """
+        if (
+            self._cabin_confinement_active(target)
+            and not self._cabin_fomite_scoped(target, zone_name)
+        ):
+            return None
+        state = self._per_surface
+        rng = self._fomite_rng(target, zone_name)
+        contacts = (
+            self._fomite_surface_contacts(zone_name, target, epoch)
+            * self._cabin_presence_share(target, epoch)
+        )
+        inv = self._per_surface_inventory(
+            zone_name, self._fomite_surface_area_pooled(zone_name),
+        )
+        stats = state.touch_stats.setdefault(
+            (zone_name, pathogen_id), {"touches": 0, "hits": 0},
+        )
+        n_touches = int(contacts)
+        if rng.uniform() < contacts - n_touches:
+            n_touches += 1
+        requests: dict[tuple[str, str, str, int], float] = {}
+        for _ in range(n_touches):
+            stats["touches"] += 1
+            key = state.sample_touch(inv, zone_name, pathogen_id, rng)
+            instance_mass = state.mass.get(key, 0.0)
+            if not pickup_gate_open(instance_mass):
+                continue
+            stats["hits"] += 1
+            hand_area, used_fraction, transfer_efficiency = (
+                self._draw_surface_to_hand(rng)
+            )
+            request = (
+                used_fraction
+                * hand_area
+                / state.instance_area(inv, key[2], key[3])
+                * transfer_efficiency
+                * instance_mass
+            )
+            requests[key] = requests.get(key, 0.0) + min(
+                instance_mass, max(0.0, request),
+            )
+        return requests
+
     @staticmethod
     def _hand_to_surface_drying(profile: dict | None) -> float:
         """Drying-state multiplier on hand -> surface transfer efficiency.
@@ -12275,6 +12358,122 @@ class TransmissionCore:
             pathogen_id, zone_name, delivered_by_class, surface_mass,
         )
 
+    def _deliver_fomite_requests_by_instance(
+        self,
+        requests: list[
+            tuple[KorkinAgent, dict[tuple[str, str, str, int], float]]
+        ],
+        zone_name: str,
+        surface_mass: float,
+        epoch: int,
+        prev_occupant_ids: set[int],
+        prev_shedders: list[int],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        surface_attribution: DoseAttribution | None,
+    ) -> dict[tuple[str, str, str, int], float]:
+        """Scale per-instance requests to each instance and deliver.
+
+        Requests sharing one instance are scaled together by
+        ``_delivery_scale`` on the instance's own mass, so simultaneous
+        hits split it without exceeding it (TOUCH-PATCH spec 3.3); the
+        unit aggregate stays within supply because instances partition
+        the pool. Returns the delivered mass per instance key.
+        """
+        keys = {key for _, req in requests for key in req}
+        scales = {
+            key: self._delivery_scale(
+                sum(req.get(key, 0.0) for _, req in requests),
+                self._per_surface.mass.get(key, 0.0),
+            )
+            for key in keys
+        }
+        delivered_by_instance = dict.fromkeys(keys, 0.0)
+        for target, request in requests:
+            delivered = sum(
+                request.get(key, 0.0) * scales[key] for key in keys
+            )
+            if delivered <= 0.0:
+                continue
+            self._deliver_one_pickup(
+                target, delivered, zone_name, surface_mass, epoch,
+                prev_occupant_ids, prev_shedders,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                surface_attribution,
+            )
+            for key in keys:
+                served = request.get(key, 0.0) * scales[key]
+                delivered_by_instance[key] += served
+                if served > 0.0:
+                    self._per_surface.record_served(key, target.agent_id)
+        # An instance whose demand exceeds its supply is emptied exactly,
+        # matching the by-class and pooled delivery paths.
+        for key in keys:
+            if scales[key] < 1.0:
+                delivered_by_instance[key] = self._per_surface.mass.get(
+                    key, 0.0,
+                )
+        return delivered_by_instance
+
+    def _consume_surface_mass_by_instance(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        delivered_by_instance: dict[tuple[str, str, str, int], float],
+        previous_mass: float,
+    ) -> None:
+        """Per-instance analogue of ``_consume_surface_mass``."""
+        if previous_mass <= 0.0 or not any(
+            delivered > 0.0 for delivered in delivered_by_instance.values()
+        ):
+            return
+        self._per_surface.consume_instances(
+            zone_name, pathogen_id, delivered_by_instance,
+        )
+        pools = self.surface_pools_by_pathogen.setdefault(pathogen_id, {})
+        tracked = max(0.0, float(pools.get(zone_name, 0.0)))
+        self._roll_up_per_surface_zone(
+            pathogen_id,
+            zone_name,
+            tracked,
+            self._per_surface.total(zone_name, pathogen_id) / previous_mass,
+            decay_requires_registry=False,
+        )
+
+    def _fomite_pickup_by_instance(
+        self,
+        zone_name: str,
+        targets: list[KorkinAgent],
+        surface_mass: float,
+        epoch: int,
+        prev_occupant_ids: set[int],
+        prev_shedders: list[int],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        surface_attribution: DoseAttribution | None,
+    ) -> None:
+        """Per-instance request/deliver/consume for one unit (item_instances)."""
+        requests = []
+        for target in targets:
+            request = self._fomite_pickup_requests_by_instance(
+                target, zone_name, epoch, pathogen_id,
+            )
+            if request is not None:
+                requests.append((target, request))
+        delivered_by_instance = self._deliver_fomite_requests_by_instance(
+            requests, zone_name, surface_mass, epoch,
+            prev_occupant_ids, prev_shedders,
+            agent_doses, matrix, agent_pathway_doses, pathogen_id,
+            surface_attribution,
+        )
+        self._consume_surface_mass_by_instance(
+            pathogen_id, zone_name, delivered_by_instance, surface_mass,
+        )
+
     def _pathway_fomite_legacy_default(
         self,
         epoch: int,
@@ -12538,6 +12737,12 @@ class TransmissionCore:
         )
 
         # Pickup by susceptible visitors, grouped per venue pool.
+        if isinstance(self._per_surface, ItemInstanceFomiteState):
+            self._sanitary_pickup_by_instance(
+                records, agents, epoch, pathogen_id,
+                agent_doses, matrix, agent_pathway_doses, ledger,
+            )
+            return
         if self._per_surface is not None:
             self._sanitary_pickup_by_class(
                 records, agents, epoch, pathogen_id,
@@ -12593,17 +12798,17 @@ class TransmissionCore:
                 1.0,
                 max(0.0, float(self.rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
             ) * self._hand_to_surface_drying(profile)
-            requested = (
-                self._fomite_surface_contacts(venue, agent, epoch)
-                * share
-                * used_fraction
-                * transfer_efficiency
-                * hand
+            contacts = (
+                self._fomite_surface_contacts(venue, agent, epoch) * share
             )
+            requested = contacts * used_fraction * transfer_efficiency * hand
             deposit = min(hand, max(0.0, requested))
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
             deposits_by_venue.setdefault(venue, []).append((agent, deposit))
-            self._deposit_surface_mass(pathogen_id, venue, deposit)
+            self._deposit_surface_mass(
+                pathogen_id, venue, deposit,
+                placement=(self.rng, contacts),
+            )
             self._credit_own_environment_pool(
                 agent, pathogen_id, venue, deposit,
             )
@@ -12817,6 +13022,116 @@ class TransmissionCore:
                 )
         self._consume_surface_mass_by_class(
             pathogen_id, venue, delivered_by_class, surface_mass,
+        )
+
+    def _sanitary_pickup_by_instance(
+        self,
+        records: dict[tuple[int, str], int],
+        agents: dict[int, KorkinAgent],
+        epoch: int,
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Per-instance pickup at sanitary venues (item_instances arm).
+
+        Same shape as ``_sanitary_pickup_by_class``: each record's
+        per-instance requests are dwell-share scaled and grouped per
+        venue before delivery.
+        """
+        share_of = self._sanitary_visit_share
+        reservoir_arm = self.hand_reservoir_mode == "wash_reuptake"
+        requests_by_venue: dict[
+            str, list[tuple[KorkinAgent, dict[tuple[str, str, str, int], float]]]
+        ] = {}
+        for (aid, venue), n in records.items():
+            agent = agents.get(aid)
+            if agent is None or (
+                not reservoir_arm
+                and agent not in self._get_susceptible([agent], pathogen_id)
+            ):
+                continue
+            surface_mass = self._venue_surface_mass(venue, pathogen_id)
+            if not pickup_gate_open(surface_mass):
+                continue
+            request = self._fomite_pickup_requests_by_instance(
+                agent, venue, epoch, pathogen_id,
+            )
+            if request is None:
+                continue
+            share = share_of(agent, n)
+            scaled = {key: value * share for key, value in request.items()}
+            if any(value > 0.0 for value in scaled.values()):
+                requests_by_venue.setdefault(venue, []).append(
+                    (agent, scaled),
+                )
+        for venue, requests in requests_by_venue.items():
+            self._deliver_sanitary_requests_by_instance(
+                requests, venue, epoch, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, ledger,
+            )
+
+    def _deliver_sanitary_requests_by_instance(
+        self,
+        requests: list[
+            tuple[KorkinAgent, dict[tuple[str, str, str, int], float]]
+        ],
+        venue: str,
+        epoch: int,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Per-instance delivery at one sanitary venue (item_instances)."""
+        path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+        surface_mass = (
+            path_pools.get(venue, 0.0)
+            if path_pools is not None
+            else self.surface_pools.get(venue, 0.0)
+        )
+        keys = {key for _, req in requests for key in req}
+        scales = {
+            key: self._delivery_scale(
+                sum(req.get(key, 0.0) for _, req in requests),
+                self._per_surface.mass.get(key, 0.0),
+            )
+            for key in keys
+        }
+        surface_attribution = attribution(
+            ledger,
+            self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, venue),
+        )
+        delivered_by_instance = dict.fromkeys(keys, 0.0)
+        for agent, request in requests:
+            delivered = sum(
+                request.get(key, 0.0) * scales[key] for key in keys
+            )
+            if delivered <= 0.0:
+                continue
+            dose = self._deliver_one_pickup(
+                agent, delivered, venue, surface_mass, epoch,
+                set(), [], agent_doses, matrix, agent_pathway_doses,
+                pathogen_id, surface_attribution,
+            )
+            if agent in self._get_susceptible([agent], pathogen_id):
+                self.sanitary_telemetry["dose_delivered"] += dose
+                self.sanitary_telemetry["recipients"] += 1
+            for key in keys:
+                served = request.get(key, 0.0) * scales[key]
+                delivered_by_instance[key] += served
+                if served > 0.0:
+                    self._per_surface.record_served(key, agent.agent_id)
+        for key in keys:
+            if scales[key] < 1.0:
+                delivered_by_instance[key] = self._per_surface.mass.get(
+                    key, 0.0,
+                )
+        self._consume_surface_mass_by_instance(
+            pathogen_id, venue, delivered_by_instance, surface_mass,
         )
 
     def _pathway_fomite(
@@ -13554,17 +13869,18 @@ class TransmissionCore:
             ) * self._hand_to_surface_drying(
                 profile,
             ) * self._hand_deposit_factor(agent, pathogen_id)
-            requested = (
+            contacts = (
                 self._fomite_surface_contacts(zone_name, agent, epoch)
                 * self._cabin_presence_share(agent, epoch)
-                * used_fraction
-                * transfer_efficiency
-                * hand
             )
+            requested = contacts * used_fraction * transfer_efficiency * hand
             deposit = min(hand, max(0.0, requested))
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
             deposits.append((agent, deposit))
-            self._deposit_surface_mass(pathogen_id, zone_name, deposit)
+            self._deposit_surface_mass(
+                pathogen_id, zone_name, deposit,
+                placement=(rng, contacts),
+            )
             self._credit_own_environment_pool(
                 agent, pathogen_id, zone_name, deposit,
             )
@@ -13611,6 +13927,14 @@ class TransmissionCore:
             self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
         )
 
+        if isinstance(self._per_surface, ItemInstanceFomiteState):
+            self._fomite_pickup_by_instance(
+                zone_name, targets, surface_mass, epoch,
+                prev_occupant_ids, prev_shedders,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                surface_attribution,
+            )
+            return
         if self._per_surface is not None:
             self._fomite_pickup_by_class(
                 zone_name, targets, surface_mass, epoch,
@@ -13685,11 +14009,11 @@ class TransmissionCore:
         density = self._per_surface.class_density_per_m2(
             zone_name, pathogen_id,
         )
+        masses = self._per_surface.class_masses(zone_name, pathogen_id)
         state: dict[str, dict[str, float]] = {}
         for item_class, count in inv.counts.items():
-            key = (zone_name, pathogen_id, item_class)
             state[item_class] = {
-                "mass": self._per_surface.mass.get(key, 0.0),
+                "mass": masses.get(item_class, 0.0),
                 "area_m2": count * inv.area_each_m2[item_class],
                 "count": count,
                 "density_per_m2": density.get(item_class, 0.0),

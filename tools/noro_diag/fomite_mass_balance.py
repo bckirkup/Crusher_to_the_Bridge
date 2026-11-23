@@ -185,9 +185,12 @@ def _wrap_surface_mass(core_cls: type, rec: Recorder) -> dict[str, Any]:
 
     def deposit(
         self: Any, pathogen_id: str, zone_name: str, mass: float,
+        **kwargs: Any,
     ) -> None:
         rec.core = self
-        originals["_deposit_surface_mass"](self, pathogen_id, zone_name, mass)
+        originals["_deposit_surface_mass"](
+            self, pathogen_id, zone_name, mass, **kwargs,
+        )
         if pathogen_id != rec.pathogen_id or float(mass) <= 0.0:
             return
         book = rec.zone(zone_name)
