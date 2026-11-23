@@ -1,6 +1,6 @@
 # noro_touch_patch_01 — campaign ledger
 
-TOUCH-PATCH canary, declared as `docs/proposals/fomite_touch_patch_spec.md`
+TOUCH-PATCH canary, declared as `docs/norovirus/fomite_touch_patch_spec.md`
 (merged via PR #1401). One new arm on the 22 frozen `classic_cruise_1900`
 cells (seeds 8000–8019 + 8105/8106, 288 epochs) against the
 NORO-POOL-PICKUP-01 measured baseline:
@@ -14,7 +14,7 @@ NORO-POOL-PICKUP-01 measured baseline:
 
 ## Gate checklist
 
-- [x] Design declared and merged: `docs/proposals/fomite_touch_patch_spec.md`,
+- [x] Design declared and merged: `docs/norovirus/fomite_touch_patch_spec.md`,
   frozen audit invariants and decision rules in section 6.
 - [ ] Local smoke: `--fomite-representation item_instances` resolves
   (`fomite_representation_resolved: "item_instances"` stamped), epoch

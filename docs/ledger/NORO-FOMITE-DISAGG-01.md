@@ -39,7 +39,7 @@ dose result.
 
 `transmission.fomite_representation: pooled | per_surface | item_instances`,
 default `pooled` (`item_instances` is the TOUCH-PATCH arm —
-`docs/proposals/fomite_touch_patch_spec.md`; requires
+`docs/norovirus/fomite_touch_patch_spec.md`; requires
 `fomite_item_reading: shared`).
 Absent or `pooled` runs the pre-change code with no extra RNG draw (every hook
 is an attribute guard, `self._per_surface is None`). Under `per_surface`:

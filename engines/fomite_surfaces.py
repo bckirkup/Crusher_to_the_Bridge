@@ -424,7 +424,7 @@ def parse_per_surface_config(tx: Mapping[str, Any]) -> PerSurfaceConfig | None:
         tx, "fomite_item_reading",
         FOMITE_ITEM_READINGS, DEFAULT_FOMITE_ITEM_READING,
     )
-    # TOUCH-PATCH (docs/proposals/fomite_touch_patch_spec.md): the instance
+    # TOUCH-PATCH (docs/norovirus/fomite_touch_patch_spec.md): the instance
     # arm enumerates the ``shared`` unit inventory only -- per-occupant item
     # groups and the hardware/broad readings are declared out of scope.
     if rep == "item_instances" and item_reading != "shared":
@@ -765,7 +765,7 @@ class PerSurfaceFomiteState:
 class ItemInstanceFomiteState(PerSurfaceFomiteState):
     """Per-(unit, pathogen, item-class, index) bookkeeping (TOUCH-PATCH).
 
-    The TOUCH-PATCH arm (``docs/proposals/fomite_touch_patch_spec.md``)
+    The TOUCH-PATCH arm (``docs/norovirus/fomite_touch_patch_spec.md``)
     disaggregates each class sub-pool once more into the discrete items a
     hand's touches actually sample: deposits land on ``n_touches`` iid
     drawn instances, and each pickup touch draws one reachable instance

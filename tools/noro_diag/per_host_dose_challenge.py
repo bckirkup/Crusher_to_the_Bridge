@@ -2279,7 +2279,11 @@ def summarise(
         "transfer_product_witness": _transfer_product_summary(rec),
         "delivery_scale_witness": _delivery_scale_summary(rec),
         "fomite_by_class": _fomite_by_class_summary(rec),
-        "fomite_instance_witness": dict(rec.instance_witness),
+        **(
+            {"fomite_instance_witness": dict(rec.instance_witness)}
+            if rec.instance_witness
+            else {}
+        ),
         "fomite_delivered_by_host": {
             str(agent_id): float(mass)
             for agent_id, mass in sorted(
@@ -2524,7 +2528,15 @@ def run_seed(
     summary["contamination_solver_resolved"] = (
         rec.contamination_solver_effective or rec.contamination_solver_seen
     )
-    summary["contamination_solver_configured"] = rec.contamination_solver_seen
+    # Only stamped when resolution diverges from configuration, so pooled
+    # artifacts keep the pre-change schema exactly.
+    if (
+        rec.contamination_solver_effective is not None
+        and rec.contamination_solver_effective != rec.contamination_solver_seen
+    ):
+        summary["contamination_solver_configured"] = (
+            rec.contamination_solver_seen
+        )
     if verbatim:
         _attach_voyage_blocks(
             summary, spec_dict, result, num_agents,
