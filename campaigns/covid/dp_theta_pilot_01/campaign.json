@@ -382,5 +382,7 @@
         20200228
       ]
     }
-  }
+  },
+  "image_tag": "dp-theta-pilot-01",
+  "image_digest": "sha256:a65b9aae29b1ff221649181dbb2ca920c6e2384391f8223ea80df9cb53e6f308"
 }

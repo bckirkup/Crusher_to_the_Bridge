@@ -12,5 +12,11 @@ doc `docs/covid/covid_dp_theta_pilot_01_design.md`).
   `susceptibility_scale` = 1e11·(α+β)/α = 3.2322e13, platform
   `diamond_princess`, `close_zones_fired` false, attack_rate 0.331
   (non-degenerate, secondaries compounding).
-- **Jobdef rev / image digest:** pending first submit.
-- **Canary:** `niid_t1e11_canary` — pending.
+- **Jobdef rev / image digest:** `picard-covid-dp-theta-pilot-01:1` →
+  `picard-campaign@sha256:a65b9aae29b1ff221649181dbb2ca920c6e2384391f8223ea80df9cb53e6f308`
+  (built at 086ecc84, in-container verified: design + campaign tree +
+  `ENGINE_GIT_SHA` present).
+- **Canary:** `niid_t1e11_canary` submitted 2026-11-23T01:51Z —
+  parent array job `b86ab9d7-16de-4149-aa9d-21c22eb701a0` (20 children),
+  S3 prefix `campaign/covid_dp_theta_pilot_01/niid_t1e11_canary/`.
+  Readout pending.
