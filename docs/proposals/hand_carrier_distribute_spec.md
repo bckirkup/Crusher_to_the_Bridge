@@ -2,7 +2,8 @@
 
 Status: **design proposal — not implemented**. `hand_redeposit_mode: "carriers"`
 exists in the engine (NORO-HAND-CASCADE-01a) but has never been measured on the
-`classic_cruise_1900` cohort or on the EXTERNAL-SEQUESTER stack;
+`classic_cruise_1900` 8000–8019 cohort or on the EXTERNAL-SEQUESTER stack
+(a two-seed witness on this hull's held seeds exists — see §0);
 `hand_donor_mode` is a new selector declared here.
 
 ## 0. Settled inputs (quoted, not re-derived)
@@ -29,23 +30,28 @@ exists in the engine (NORO-HAND-CASCADE-01a) but has never been measured on the
 - **Same decomposition on a hot cell:** seed 8000 credited 4.26M GEC raw
   across ≥36 hosts (90% mass on 36 hosts, max share 6%) → naive hazard 33.7
   → 36 secondaries. The cold/hot contrast is ~200× in credited volume *and*
-  ~18× in challenged-host breadth.
+  ~18× in the count of hosts carrying 90% of dose (both cohorts challenge
+  ~1.5k hosts; the difference is concentration, not reach).
 - **Susceptibility wiring verified:** the 1521 challenged hosts on 8016 drew
   `dose_response_susceptibility` with mean 0.00338 ≈
   E[Beta(0.111, 32.81)] = 0.00337 and matching quantiles — the draw is the
   declared Beta, not a wiring defect (the DOSE-FRAIL-01 class of bug is
   ruled out for this path).
-- **`NORO-DOSE-LEDGER-01`:** secondaries ≈ Σhazard (182/184) — once mass
-  reaches a mouth the challenge converts at ~99%; the challenge itself is
+- **`NORO-DOSE-LEDGER-01`:** realized secondaries ≈ summed naive hazard
+  (182/184) — the challenge resolves booked hazard faithfully; it is
   measured not-binding.
 - **RNG caveat (NORO-POOL-PICKUP-01):** arms adding draws perturb the shared
   stream; per-seed arm contrasts are not paired realizations — pooled
   readouts are the unit of evidence.
 - **`hand_redeposit_mode: "carriers"`** is shipped
   (`_get_hand_depositors` admits non-shedder hosts with
-  `pickup_gate_open(hand_load)` — a whole-copy load) but was only ever
-  measured on `fl_exp_12d_sens_p06_paxv` (mixed: 8073 +22, 8038 −6
-  infected), never on this cohort.
+  `pickup_gate_open(hand_load)` — a whole-copy load). Prior measurement:
+  `fl_exp_12d_sens_p06_paxv` (mixed: 8073 +22, 8038 −6 infected) and a
+  two-seed witness on this hull's *held* seeds
+  (`NORO-HAND-REDEPOSIT-STREAM-01-WITNESS`, 8105/8106: carrier
+  surface + food deposits nonzero, dose +29.7k GEC on 8105 for +1
+  infected) — but never on the 8000–8019 cohort and never on the
+  sequester stack, where carriers now retain mass for days.
 
 ## 1. What is wrong with the present structure
 
@@ -110,9 +116,9 @@ Two selectors, both default-off and bit-identical at defaults:
 
 ## 4. Why this and not the alternatives
 
-- **vs the challenge:** measured not-binding — the engine's hazard math
-  converts ~99% of Σhazard and the Beta draw verifies against its declared
-  parameters.
+- **vs the challenge:** measured not-binding — realized secondaries track
+  summed naive hazard (182/184) and the Beta draw verifies against its
+  declared parameters.
 - **vs mouth-touch structure:** `contacts × f × e` is a sourced constants
   triple; moving it is constant tuning against the outcome — forbidden.
 - **vs the dead-mouth leak:** ~70% swallowed by infected carriers is

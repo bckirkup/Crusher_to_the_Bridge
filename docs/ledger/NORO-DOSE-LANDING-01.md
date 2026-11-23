@@ -1,12 +1,13 @@
 # NORO-DOSE-LANDING-01
 **Date:** 2026-11-23
-**Commit:** `d752427e` (origin/main after #1407 merge)
+**Commit:** d752427e
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** f357dd16
 
 Post-hoc decomposition of `noro_external_sequester_01` artifacts (the
 20 arm-S+R cells measured in `NORO-EXTERNAL-SEQUESTER-01`, image
-`sha256:d92f1d4c`, `classic_cruise_1900`, seeds 8000–8019) to locate the
+`sha256:d92f1d4c` at code `f357dd16`, `classic_cruise_1900`, seeds 8000–8019) to locate the
 bound the sequester verdict left open: mouth-dose → infection.
 
 ## Measurement (seed 8016, arm S+R — worked example)
@@ -38,7 +39,8 @@ cell's `hand_partition`:
 
 ## Read
 
-Mouth dose reaches hands and the challenge converts (~99%,
+Mouth dose reaches hands and the challenge resolves booked hazard
+faithfully (182 secondaries vs 184 summed naive hazard,
 NORO-DOSE-LEDGER-01). The binding structure is **where the dose lands**:
 (a) a ~70% dead-mouth share on uninfectable carriers; (b) a
 concentration lottery — cold-cell take-off is decided by one or two
