@@ -631,7 +631,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
-- **`DP-THETA-FIT-01` canary is measured; the extended-horizon fit is pending**
+- **`DP-THETA-FIT-01` is measured on three θ — T3 brackets θ in (3.16e9, 1e10) but bounds it weakly from above**
   (ledger `docs/ledger/DP-THETA-FIT-01.md`, design
   `docs/covid/covid_dp_theta_fit_01_design.md`, campaign
   `campaigns/covid/dp_theta_fit_01/`). The scored endpoint is `covid.T3`,
@@ -641,8 +641,12 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   smoke cells at θ=1e10 returned in-window positives and an attack rate
   near 0.9, so the declared grid runs from 1e7 to 1e10. The 20-seed canary at
   θ=1e9 returned a median of 281 scored positives with 18 seeds below
-  634, so that cell is below T3. The full array is not submitted and no
-  θ is selected.
+  634, so that cell is below T3. On 24 matched seeds the medians are 281 (1e9, below),
+  600 (3.16e9, compatible) and 735.5 (1e10, compatible); the frozen rule
+  selects 3.16e9 and interpolates 4.22e9. Median attack rate runs 0.47 to
+  0.80 across the two compatible θ, so T3 does not separate them. The
+  four θ below 1e9 were not run by owner decision. Open decision: accept
+  the weakly bounded fit or add a second scored observable.
 
 - **`DP-REPLAY-ENVIRON-01` landed (ledger
   `docs/ledger/DP-REPLAY-ENVIRON-01.md`, design
