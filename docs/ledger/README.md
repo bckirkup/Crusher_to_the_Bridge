@@ -42,7 +42,7 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
-- [DP-THETA-FIT-01](DP-THETA-FIT-01.md) records the endpoint audit. Status is open. The 120-hour pilot, February 20 campaign positives and final confirmed total have distinct endpoints. Fit design and campaign execution remain outstanding.
+- [DP-THETA-FIT-01](DP-THETA-FIT-01.md) records the endpoint audit and the declared extended-horizon fit against `covid.T3` (design `docs/covid/covid_dp_theta_fit_01_design.md`, campaign `campaigns/covid/dp_theta_fit_01/`). Status is open. Two pre-freeze smoke cells showed in-window ascertainment and saturation at θ=1e10. The canary and fit readout remain outstanding.
 
 - [NORO-CASCADE-ARMS-01](NORO-CASCADE-ARMS-01.md) — open. D1′ stopped before simulation. All direct hand donors must shed, and the carrier-redeposition witness misses the frozen solver's surface and food flows.
 

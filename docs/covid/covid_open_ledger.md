@@ -631,14 +631,16 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
-- **`DP-THETA-FIT-01` is open following the endpoint audit** (ledger
-  `docs/ledger/DP-THETA-FIT-01.md`). The pilot records secondary infections
-  over 120 hours. The declared `covid.T3` endpoint records 634 campaign
-  positives through February 20. The onboard testing table records 691
-  positives through February 23, the replay cutoff, and excludes emergency
-  disembarkations. The final confirmed count covers 712 people. The fit
-  design and scoring rule remain
-  unfrozen, and the fit campaign remains unrun.
+- **`DP-THETA-FIT-01` is open: the extended-horizon fit is declared**
+  (ledger `docs/ledger/DP-THETA-FIT-01.md`, design
+  `docs/covid/covid_dp_theta_fit_01_design.md`, campaign
+  `campaigns/covid/dp_theta_fit_01/`). The scored endpoint is `covid.T3`,
+  634 campaign positives through February 20, on `replay_niid` over the
+  full declared voyage; the onboard table's 691 through February 23 is a
+  reported cross-check and the final 712 is not scored. Two pre-freeze
+  smoke cells at θ=1e10 returned in-window positives and an attack rate
+  near 0.9, so the declared grid runs from 1e7 to 1e10. No fit cell has
+  been read out and no θ is selected.
 
 - **`DP-REPLAY-ENVIRON-01` landed (ledger
   `docs/ledger/DP-REPLAY-ENVIRON-01.md`, design

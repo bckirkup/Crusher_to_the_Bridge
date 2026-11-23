@@ -46,7 +46,42 @@ The pilot supplies no matched-seed evidence about whether the proposed
 bracket covers a comparable confirmed-case outcome or whether either
 edge is dead or saturated at that endpoint.
 
+## Declaration (2026-11-23)
+
+Benjamin's decision on the endpoint: "Go with A" — the scored endpoint is
+the extended horizon through 20 February against `covid.T3`; the onboard
+table's 691 of 3,894 through 23 February is the secondary cross-check.
+
+The fit design is frozen in `docs/covid/covid_dp_theta_fit_01_design.md`
+(design file `picard_framework/runs/covid_dp_theta_fit_01_design.json`,
+campaign `campaigns/covid/dp_theta_fit_01/`): `replay_niid` only, 24
+matched seeds 20200205–20200228, full declared voyage, θ {1e7, 3.16e7,
+1e8, 3.16e8, 1e9, 3.16e9, 1e10}, 168 cells. The scored quantity is the
+count of positive campaign specimens taken on or before day index 31 on
+the shipped observation process (crew wave not armed). θ is selected on
+the median over the 24 seeds; the side-of-target, dead, saturated,
+bracket, selection and representativeness rules are in the design doc.
+
+## Pre-freeze smoke (measured, not scored)
+
+**Measured at:** da6365ba
+
+Two cells, pilot worker with no horizon cap (full voyage), `replay_niid`,
+θ=1e10, seeds 20200205 and 20200212:
+
+| Seed | Infected of 3,711 | Before quarantine | Campaign specimens | Campaign positives | `lab_confirmed_total` |
+| --- | --- | --- | --- | --- | --- |
+| 20200205 | 3,414 | 2,913 | 2,608 | 745 | 3,331 |
+| 20200212 | 3,333 | 2,600 | 2,829 | 821 | 3,235 |
+
+Quarantine activated at epoch 391 on both. Measured: the engine runs the
+testing campaign inside the extended window and returns positives.
+Hypothesis (two seeds): the pilot's lowest θ is saturated on the full
+voyage, so the whole pilot grid sits above the T3 bracket. Measured on the
+same two cells: at attack about 0.9 the campaign returns only 1.2–1.3 ×
+the T3 count, so the scored quantity compresses near saturation.
+
 ## Execution status
 
-The endpoint audit is complete. The fit design remains unfrozen. Zero
-fit cells ran, so this entry records no selected theta or canary readout.
+Design declared; canary pending. No fit cell has been read out, so this
+entry records no selected theta.
