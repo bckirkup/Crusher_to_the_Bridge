@@ -610,6 +610,7 @@ def _advance_one_infection(
         agent.hand_load_by_pathogen.pop(pid, None)
         agent.hand_protected_load_by_pathogen.pop(pid, None)
         agent.hand_protected_pending_by_pathogen.pop(pid, None)
+        agent.hand_sequester_capacity_by_pathogen.pop(pid, None)
         agent.hand_self_pool_by_pathogen.pop(pid, None)
         _clear_emesis_records(agent, pid)
 

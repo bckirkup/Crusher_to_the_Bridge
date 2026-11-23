@@ -122,6 +122,10 @@ from engines import transmission_core as tc  # noqa: E402
 from engines.fomite_surfaces import (  # noqa: E402
     load_declared_share_table,
 )
+from engines.infection_dynamics_bridge import (  # noqa: E402
+    KorkinAgent,
+    KorkinShipEngine,
+)
 from picard_framework.run_spec import CRUSHER_CONFIG_REL  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
@@ -330,6 +334,22 @@ class Recorder:
     fomite_representation_seen: str | None = None
     fomite_touch_share_seen: str | None = None
     contamination_solver_seen: str | None = None
+    # EXTERNAL-SEQUESTER arms the engine actually resolved, stamped the
+    # same way so a dropped override is witnessed rather than assumed.
+    hand_sequester_fill_seen: str | None = None
+    hand_residual_mouthing_seen: str | None = None
+    # Hand-reservoir reset sinks the engine cannot see itself: pending
+    # mass dropped at infection, and reservoir mass cleared at
+    # recovery. Cumulative per pathogen, keyed like core.hand_partition.
+    hand_resets: dict[str, dict[str, float]] = field(
+        default_factory=lambda: defaultdict(
+            lambda: defaultdict(float),
+        ),
+    )
+    # End-state references for the partition audit: the last epoch
+    # observer flush leaves the final reservoir standing.
+    audit_core: Any = None
+    audit_agents: tuple = ()
     # The solver that actually ran: ``_use_contamination_flow`` disables
     # continuous flow under any per-surface representation, so this can
     # differ from the configured value stamped in ``_seen``.
@@ -442,6 +462,8 @@ def _wrap_execute_pathways(core_cls: type, rec: Recorder) -> Any:
         )
         if self._per_surface is not None:
             rec.fomite_touch_share_seen = self._per_surface.cfg.touch_share
+        rec.hand_sequester_fill_seen = self.hand_sequester_fill
+        rec.hand_residual_mouthing_seen = self.hand_residual_mouthing
         try:
             return original(self, epoch, *args, **kwargs)
         finally:
@@ -1135,6 +1157,8 @@ def _record_deposit_witness(
     )
     if core._per_surface is not None:
         rec.fomite_touch_share_seen = core._per_surface.cfg.touch_share
+    rec.hand_sequester_fill_seen = core.hand_sequester_fill
+    rec.hand_residual_mouthing_seen = core.hand_residual_mouthing
     if pathogen_id == rec.pathogen_id and float(mass) > 0.0:
         rec.fomite["surface_deposit_calls"] += 1
         rec.fomite["surface_mass_deposited_gec"] += float(mass)
@@ -1646,6 +1670,70 @@ def _epoch_observer(rec: Recorder, pathogen_id: str) -> Any:
     return observe
 
 
+def _hand_partition_view(
+    rec: Recorder, core: Any, pid: str,
+) -> dict[str, float]:
+    """Cumulative partition buckets merged with worker-witnessed resets."""
+    merged = dict(
+        (getattr(core, "hand_partition", None) or {}).get(pid) or {},
+    )
+    for key, value in (rec.hand_resets.get(pid) or {}).items():
+        merged[f"sink_{key}"] = merged.get(f"sink_{key}", 0.0) + value
+    return merged
+
+
+def _hand_partition_audit(rec: Recorder, pid: str) -> dict[str, Any]:
+    """Close sources = sinks + residual over the hand reservoir, plus the
+    carrier-provenance witness. Run once per cell at summary time."""
+    merged = _hand_partition_view(rec, rec.audit_core, pid)
+    sources = {
+        key: value for key, value in merged.items()
+        if key.startswith("source_")
+    }
+    sinks = {
+        key: value for key, value in merged.items()
+        if key.startswith("sink_")
+    }
+    internal = {
+        key: value for key, value in merged.items()
+        if key.startswith("internal_")
+    }
+    residual = sum(
+        float(agent.hand_load_by_pathogen.get(pid, 0.0))
+        + float(agent.hand_protected_pending_by_pathogen.get(pid, 0.0))
+        for agent in rec.audit_agents
+    )
+    total_source = sum(sources.values())
+    total_sink = sum(sinks.values())
+    delta = total_source - total_sink - residual
+    scale = max(1.0, abs(total_source), abs(total_sink), abs(residual))
+    provenance = (
+        getattr(rec.audit_core, "hand_provenance", None) or {}
+    ).get(pid) or {}
+    holds_protected = sorted(
+        str(agent_id) for agent_id, flags in provenance.items()
+        if flags.get("holds_protected")
+    )
+    violations = [
+        agent_id for agent_id, flags in (
+            (str(aid), flags) for aid, flags in provenance.items()
+        )
+        if flags.get("holds_protected")
+        and not flags.get("fill_stool")
+        and not flags.get("fill_external")
+    ]
+    return {
+        "sources_gec": sources,
+        "sinks_gec": sinks,
+        "internal_gec": internal,
+        "residual_gec": residual,
+        "closure_delta_gec": delta,
+        "closure_rel": abs(delta) / scale,
+        "provenance_holds_protected_hosts": holds_protected,
+        "provenance_violations": violations,
+    }
+
+
 def _flush_epoch_ledger(rec: Recorder, sim: Any, work: Any) -> None:
     """Emit the epoch's delta row: flows in, reservoirs at epoch end.
 
@@ -1676,6 +1764,8 @@ def _flush_epoch_ledger(rec: Recorder, sim: Any, work: Any) -> None:
 
     core = getattr(sim, "tx_core", None) or getattr(sim, "engine", None)
     agents = getattr(getattr(sim, "engine", None), "agents", ()) or ()
+    rec.audit_core = core
+    rec.audit_agents = agents
     pools = (
         getattr(core, "surface_pools_by_pathogen", None) or {}
     ).get(pid) or {}
@@ -1762,6 +1852,19 @@ def _flush_epoch_ledger(rec: Recorder, sim: Any, work: Any) -> None:
             float(agent.hand_load_by_pathogen.get(pid, 0.0))
             for agent in agents
         )),
+        "hand_pending_end_gec": float(sum(
+            float(agent.hand_protected_pending_by_pathogen.get(pid, 0.0))
+            for agent in agents
+        )),
+        "hand_protected_end_gec": float(sum(
+            float(agent.hand_protected_load_by_pathogen.get(pid, 0.0))
+            for agent in agents
+        )),
+        # EXTERNAL-SEQUESTER partition: cumulative source/sink/internal
+        # bucket deltas for the target pathogen (resets merged in).
+        "hand_partition_delta_gec": d_dict(
+            "hpart", _hand_partition_view(rec, core, pid),
+        ),
         "surface_pool_end_gec": float(sum(
             float(v) for v in pools.values()
         )),
@@ -1940,6 +2043,76 @@ def _record_matched_units(
         )
 
 
+def _wrap_infect_reset(agent_cls: type, rec: Recorder) -> Any:
+    """Witness pending mass dropped when a host takes a new infection."""
+    original = agent_cls.infect_with_pathogen
+
+    def wrapper(
+        self: Any, pathogen_id: str, *args: Any, **kwargs: Any,
+    ) -> Any:
+        before = self.hand_protected_pending_by_pathogen.get(
+            pathogen_id, 0.0,
+        )
+        result = original(self, pathogen_id, *args, **kwargs)
+        if pathogen_id == rec.pathogen_id:
+            after = self.hand_protected_pending_by_pathogen.get(
+                pathogen_id, 0.0,
+            )
+            dropped = before - after
+            if dropped != 0.0:
+                rec.hand_resets[pathogen_id]["reset_infection"] += dropped
+        return result
+
+    return wrapper
+
+
+def _wrap_recovery_reset(rec: Recorder) -> Any:
+    """Witness reservoir mass cleared when an infection clears."""
+    original = natural_history_module._advance_one_infection
+
+    def wrapper(agent: Any, pid: str, *args: Any, **kwargs: Any) -> Any:
+        before = (
+            agent.hand_load_by_pathogen.get(pid, 0.0)
+            + agent.hand_protected_pending_by_pathogen.get(pid, 0.0)
+        )
+        result = original(agent, pid, *args, **kwargs)
+        if pid == rec.pathogen_id:
+            after = (
+                agent.hand_load_by_pathogen.get(pid, 0.0)
+                + agent.hand_protected_pending_by_pathogen.get(pid, 0.0)
+            )
+            dropped = before - after
+            if dropped != 0.0:
+                rec.hand_resets[pid]["reset_recovery"] += dropped
+        return result
+
+    return wrapper
+
+
+def _wrap_fallback_reset(engine_cls: type, rec: Recorder) -> Any:
+    """Witness whole-dict clears on the legacy illness/recovery path."""
+    original = engine_cls._advance_illness_and_recovery
+
+    def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        pid = rec.pathogen_id
+        before = sum(
+            agent.hand_load_by_pathogen.get(pid, 0.0)
+            + agent.hand_protected_pending_by_pathogen.get(pid, 0.0)
+            for agent in self.agents
+        )
+        result = original(self, *args, **kwargs)
+        dropped = before - sum(
+            agent.hand_load_by_pathogen.get(pid, 0.0)
+            + agent.hand_protected_pending_by_pathogen.get(pid, 0.0)
+            for agent in self.agents
+        )
+        if dropped != 0.0:
+            rec.hand_resets[pid]["reset_recovery"] += dropped
+        return result
+
+    return wrapper
+
+
 @contextmanager
 def instrumented(rec: Recorder, top_ids: set[int]) -> Any:
     """Install the read-only wrappers for the duration of one run."""
@@ -1959,6 +2132,18 @@ def instrumented(rec: Recorder, top_ids: set[int]) -> Any:
         patches.swap(
             core_cls, "_resolve_pathogen_challenge",
             _wrap_challenge(core_cls, rec, top_ids),
+        )
+        patches.swap(
+            KorkinAgent, "infect_with_pathogen",
+            _wrap_infect_reset(KorkinAgent, rec),
+        )
+        patches.swap(
+            natural_history_module, "_advance_one_infection",
+            _wrap_recovery_reset(rec),
+        )
+        patches.swap(
+            KorkinShipEngine, "_advance_illness_and_recovery",
+            _wrap_fallback_reset(KorkinShipEngine, rec),
         )
         emesis_saved = _wrap_emesis(core_cls, rec)
         # The helpers' restore dicts apply in install order —
@@ -1998,6 +2183,8 @@ class TransmissionSweepKnobs:
     cabin_confined_fomite: str | None = None
     fomite_touch_share_table_path: str | None = None
     contamination_solver: str | None = None
+    hand_sequester_fill: str | None = None
+    hand_residual_mouthing: str | None = None
 
 
 @dataclass(frozen=True)
@@ -2057,6 +2244,10 @@ def build_spec(
         }
     if sw.contamination_solver is not None:
         tx_overrides["contamination_solver"] = str(sw.contamination_solver)
+    if sw.hand_sequester_fill is not None:
+        tx_overrides["hand_sequester_fill"] = str(sw.hand_sequester_fill)
+    if sw.hand_residual_mouthing is not None:
+        tx_overrides["hand_residual_mouthing"] = str(sw.hand_residual_mouthing)
     config_overrides: dict[str, Any] = {
         "ship_graph": {"num_agents": int(num_agents)},
     }
@@ -2473,6 +2664,8 @@ def run_seed(
                 fomite_touch_share_table=share_table,
                 cabin_confined_fomite=sw.cabin_confined_fomite,
                 contamination_solver=sw.contamination_solver,
+                hand_sequester_fill=sw.hand_sequester_fill,
+                hand_residual_mouthing=sw.hand_residual_mouthing,
             ),
         )
     # The campaign's declared complement for this spec, when it carries one:
@@ -2496,7 +2689,8 @@ def run_seed(
     )
     _check_override_witnesses(
         rec, sw.fomite_representation, sw.fomite_touch_share,
-        sw.contamination_solver,
+        sw.contamination_solver, sw.hand_sequester_fill,
+        sw.hand_residual_mouthing,
     )
     summary = summarise(rec, alpha, beta, seed, epochs)
     summary["epoch_mass_ledger"] = rec.epoch_ledger
@@ -2519,7 +2713,8 @@ def run_seed(
         summary, arm_tag, sw.high_touch_area_scale,
         sw.high_touch_area_scale_by_zone_class, sw.fomite_representation,
         sw.fomite_touch_share, sw.fomite_touch_share_table_path,
-        sw.contamination_solver,
+        sw.contamination_solver, sw.hand_sequester_fill,
+        sw.hand_residual_mouthing,
     )
     summary["fomite_representation_resolved"] = (
         rec.fomite_representation_seen
@@ -2527,6 +2722,15 @@ def run_seed(
     summary["fomite_touch_share_resolved"] = rec.fomite_touch_share_seen
     summary["contamination_solver_resolved"] = (
         rec.contamination_solver_effective or rec.contamination_solver_seen
+    )
+    summary["hand_sequester_fill_resolved"] = (
+        rec.hand_sequester_fill_seen
+    )
+    summary["hand_residual_mouthing_resolved"] = (
+        rec.hand_residual_mouthing_seen
+    )
+    summary["hand_partition"] = _hand_partition_audit(
+        rec, pathogen_id,
     )
     # Only stamped when resolution diverges from configuration, so pooled
     # artifacts keep the pre-change schema exactly.
@@ -2671,6 +2875,8 @@ def _check_override_witnesses(
     fomite_representation: str | None,
     fomite_touch_share: str | None,
     contamination_solver: str | None,
+    hand_sequester_fill: str | None = None,
+    hand_residual_mouthing: str | None = None,
 ) -> None:
     if fomite_representation is not None and (
         rec.fomite_representation_seen != fomite_representation
@@ -2695,6 +2901,22 @@ def _check_override_witnesses(
             "fomite_touch_share override dropped: requested "
             f"fomite_touch_share={fomite_touch_share}, resolved "
             f"{rec.fomite_touch_share_seen}",
+        )
+    if hand_sequester_fill is not None and (
+        rec.hand_sequester_fill_seen != hand_sequester_fill
+    ):
+        raise RuntimeError(
+            "hand_sequester_fill override dropped: requested "
+            f"hand_sequester_fill={hand_sequester_fill}, resolved "
+            f"{rec.hand_sequester_fill_seen}",
+        )
+    if hand_residual_mouthing is not None and (
+        rec.hand_residual_mouthing_seen != hand_residual_mouthing
+    ):
+        raise RuntimeError(
+            "hand_residual_mouthing override dropped: requested "
+            f"hand_residual_mouthing={hand_residual_mouthing}, resolved "
+            f"{rec.hand_residual_mouthing_seen}",
         )
 
 
@@ -2730,6 +2952,8 @@ def _apply_arm_metadata(
     fomite_touch_share: str | None,
     fomite_touch_share_table: str | None,
     contamination_solver: str | None,
+    hand_sequester_fill: str | None = None,
+    hand_residual_mouthing: str | None = None,
 ) -> None:
     if not any(
         value is not None
@@ -2741,6 +2965,8 @@ def _apply_arm_metadata(
             fomite_touch_share,
             fomite_touch_share_table,
             contamination_solver,
+            hand_sequester_fill,
+            hand_residual_mouthing,
         )
     ):
         return
@@ -2752,6 +2978,8 @@ def _apply_arm_metadata(
     summary["fomite_representation"] = fomite_representation
     summary["fomite_touch_share"] = fomite_touch_share
     summary["contamination_solver"] = contamination_solver
+    summary["hand_sequester_fill"] = hand_sequester_fill
+    summary["hand_residual_mouthing"] = hand_residual_mouthing
     if fomite_touch_share_table is not None:
         resolved_table = _safe_path(fomite_touch_share_table)
         summary["fomite_touch_share_table"] = os.path.relpath(
@@ -2874,6 +3102,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
              "the engine resolves a different solver",
     )
     parser.add_argument(
+        "--hand-sequester-fill",
+        choices=("stool_only", "any_load"), default=None,
+        help="EXTERNAL-SEQUESTER fill arm: stool_only (default-path "
+             "identity) or any_load (externally acquired hand mass may "
+             "migrate into the protected compartment, bounded by a "
+             "per-host capacity draw); the run aborts if the engine "
+             "resolves a different mode",
+    )
+    parser.add_argument(
+        "--hand-residual-mouthing",
+        choices=("pickup_only", "per_epoch"), default=None,
+        help="EXTERNAL-SEQUESTER residual arm: pickup_only (default-path "
+             "identity) or per_epoch (discrete arm re-exposes residual "
+             "hand load to the mouth each epoch); the run aborts if the "
+             "engine resolves a different mode",
+    )
+    parser.add_argument(
         "--arm-tag", type=_identifier, default=None,
         help="arm label stamped into the output filename and summary",
     )
@@ -2927,6 +3172,10 @@ def _validate_manifest_mode(
                 args.fomite_touch_share_table is not None
             ),
             "--contamination-solver": args.contamination_solver is not None,
+            "--hand-sequester-fill": args.hand_sequester_fill is not None,
+            "--hand-residual-mouthing": (
+                args.hand_residual_mouthing is not None
+            ),
         }
         used = [flag for flag, present in forbidden.items() if present]
         if used:
@@ -3064,6 +3313,8 @@ def main(argv: list[str] | None = None) -> int:
                         else None
                     ),
                     contamination_solver=args.contamination_solver,
+                    hand_sequester_fill=args.hand_sequester_fill,
+                    hand_residual_mouthing=args.hand_residual_mouthing,
                 ),
                 arm_tag=args.arm_tag,
             ),
