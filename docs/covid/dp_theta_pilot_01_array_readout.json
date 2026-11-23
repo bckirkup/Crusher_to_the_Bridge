@@ -256,28 +256,28 @@
      "pos": 21,
      "neg": 1,
      "zero": 2,
-     "median_ratio": 3.2,
+     "median_ratio": 2.5714285714285716,
      "measurable": true
     },
     "3.16e+10->1e+11": {
      "pos": 18,
      "neg": 2,
      "zero": 4,
-     "median_ratio": 4.625,
+     "median_ratio": 4.222222222222222,
      "measurable": true
     },
     "1e+11->3.16e+11": {
      "pos": 19,
      "neg": 3,
      "zero": 2,
-     "median_ratio": 10.594594594594595,
+     "median_ratio": 10.342105263157896,
      "measurable": true
     },
     "3.16e+11->1e+12": {
      "pos": 22,
      "neg": 1,
      "zero": 1,
-     "median_ratio": 2.688775510204082,
+     "median_ratio": 2.6844783715012723,
      "measurable": true
     }
    }
@@ -474,28 +474,28 @@
      "pos": 22,
      "neg": 1,
      "zero": 1,
-     "median_ratio": 2.3012048192771086,
+     "median_ratio": 2.2705882352941176,
      "measurable": true
     },
     "3.16e+10->1e+11": {
      "pos": 21,
      "neg": 3,
      "zero": 0,
-     "median_ratio": 2.4345549738219896,
+     "median_ratio": 2.4196891191709846,
      "measurable": true
     },
     "1e+11->3.16e+11": {
      "pos": 22,
      "neg": 2,
      "zero": 0,
-     "median_ratio": 2.578494623655914,
+     "median_ratio": 2.571734475374732,
      "measurable": true
     },
     "3.16e+11->1e+12": {
      "pos": 20,
      "neg": 4,
      "zero": 0,
-     "median_ratio": 2.6313594662218516,
+     "median_ratio": 2.6286427976686095,
      "measurable": true
     }
    }

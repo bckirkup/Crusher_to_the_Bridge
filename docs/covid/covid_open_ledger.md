@@ -658,7 +658,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   secondary transmission suspended by pinning `susceptibility_scale` to
   1e-30.** Reach 1643–3331/3710 across seeds; cabin setting carries
   60.8–99.5% of dose by seed via caregiver+droplet routes; normalized
-  U·D means 9e-15–2.6e-13. The Θ_old·Q_old/Q_new mapping is inapplicable (no
+  U·D means 3e-12–8.3e-11 (includes the `(α+β)/α` = 323.22 convention
+  factor; corrected 2026-11-23 — the first readout's `weighted_dose`
+  omitted it and read 9e-15–2.6e-13). The Θ_old·Q_old/Q_new mapping is inapplicable (no
   old-kernel arm on the dedicated hull) — Q_new is reported and
   Checkpoint C brackets directly.
 

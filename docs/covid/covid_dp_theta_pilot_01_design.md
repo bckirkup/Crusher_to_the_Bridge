@@ -31,8 +31,10 @@ environs, at the 120-epoch window DP-REPLAY-DOSE-DIAG-01 measured.
 ## Frozen criteria
 
 **Selector:** per (θ, arm), secondary conversions over the 120-epoch
-window across the 24 seeds — per-cell `cell_payload` infection fields
-minus the seeded index — compared across θ on the SAME seed (paired).
+window across the 24 seeds — per-cell `cell_payload.infections_total`
+(the payload already excludes the seeded import; corrected 2026-11-23 —
+the first reduction subtracted 1 again and mislabeled 1-secondary seeds
+as zeros) — compared across θ on the SAME seed (paired).
 Frozen thresholds for `replay_niid`:
 
 - **saturated cell:** median seedwise secondaries ≥ 0.95 ×
