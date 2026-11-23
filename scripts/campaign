@@ -354,7 +354,7 @@ def cmd_submit(args: argparse.Namespace) -> int:
     if args.canary and args.size is not None:
         raise _die("--size has no effect with --canary (single job)")
     size = None
-    if not args.canary:
+    if not args.canary and not args.register_only:
         size = args.size if args.size is not None else len(block["seeds"])
         if not 2 <= size <= len(block["seeds"]):
             raise _die(
