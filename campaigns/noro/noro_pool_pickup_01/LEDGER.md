@@ -41,12 +41,20 @@ the 22 frozen `classic_cruise_1900` cells (seeds 8000–8019 + 8105/8106,
   ignite → per frozen rule, deficit is upstream of pickup: the pool
   holds mass and pickup works, but encounters on ordinary high-touch
   surfaces request almost nothing.
-- [ ] Arm-B remainder (seeds 8105/8106) + arm-C canary on user approval.
-- [ ] Readout committed in `docs/ledger/NORO-POOL-PICKUP-01.md` and the
-  decision rule applied; interpretation sent.
+- [x] Arm-B remainder (seeds 8105/8106): array `e2d63e9e-2963-4345-9384-2274afd8d376`
+  SUCCEEDED; 8105 cold (del 51k, haz 0.01 — its continuous-arm patch event
+  did not realize: RNG-stream divergence caveat recorded in the design doc),
+  8106 inert (0 GEC moved, haz ~0). Full-22 pooled numbers confirm the
+  canary verdict unchanged.
+- [x] Arm C declined by user (2026-11-22): request volume is upstream of
+  representation, so itemization's prior was too weak to spend on.
+- [x] Readout committed in `docs/ledger/NORO-POOL-PICKUP-01.md` (Status:
+  measured) and the decision rule applied: B ≈ A → deficit upstream of
+  pickup; next proposal lives in the encounter/activity layer.
 
 ## Runs
 
 | date | block | shape | job ids | verdict |
 |---|---|---|---|---|
 | 2026-11-22 | classic_cruise_1900_discrete | 20-seed canary | `-222149`, `-222726..-222850` | delivered≈patch only; deficit upstream of pickup |
+| 2026-11-22 | classic_cruise_1900_discrete | seeds 8105/8106 (remainder) | array `e2d63e9e` | confirms canary; D2′ closed on arm B |
