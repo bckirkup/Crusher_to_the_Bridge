@@ -651,8 +651,20 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   60.8–99.5% of dose by seed via caregiver+droplet routes; normalized
   U·D means 9e-15–2.6e-13. The Θ_old·Q_old/Q_new mapping is inapplicable (no
   old-kernel arm on the dedicated hull) — Q_new is reported and
-  Checkpoint C brackets directly. The 12-cell theta pilot (declared
-  θ shortlist, 3 Θ × 4 matched seeds) is the next session's decision.
+  Checkpoint C brackets directly.
+
+- **`DP-THETA-PILOT-01` declared (ledger
+  `docs/ledger/DP-THETA-PILOT-01.md`, design
+  `docs/covid/covid_dp_theta_pilot_01_design.md`, campaign
+  `campaigns/covid/dp_theta_pilot_01/`): Checkpoint C pilot — θ
+  {1e10, 3.16e10, 1e11, 3.16e11, 1e12} × 24 matched seeds
+  (20200205–20200228) × arms `replay_baseline`+`replay_niid` at the
+  declared 120-epoch horizon = 240 cells.** Canary measured 2026-11-23 (job `b86ab9d7`, 20/20 SUCCEEDED,
+  audits clean): θ=1e11 `replay_niid` secondaries/seed median 39,
+  range 0–1516, 1 zero-secondary seed → cell alive, not saturated;
+  admissibility pending adjacent-cell contrast;
+  readout `docs/covid/dp_theta_pilot_01_canary_readout.json`. Full
+  array stopped pending Benjamin's decision per campaign gate.
 
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
   follow-up to the platform-fidelity study — measured 2026-11-08: 400/400
