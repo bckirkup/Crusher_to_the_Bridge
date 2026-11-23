@@ -2059,7 +2059,7 @@ def _wrap_infect_reset(agent_cls: type, rec: Recorder) -> Any:
                 pathogen_id, 0.0,
             )
             dropped = before - after
-            if dropped != 0.0:
+            if dropped:
                 rec.hand_resets[pathogen_id]["reset_infection"] += dropped
         return result
 
@@ -2075,16 +2075,15 @@ def _wrap_recovery_reset(rec: Recorder) -> Any:
             agent.hand_load_by_pathogen.get(pid, 0.0)
             + agent.hand_protected_pending_by_pathogen.get(pid, 0.0)
         )
-        result = original(agent, pid, *args, **kwargs)
+        original(agent, pid, *args, **kwargs)
         if pid == rec.pathogen_id:
             after = (
                 agent.hand_load_by_pathogen.get(pid, 0.0)
                 + agent.hand_protected_pending_by_pathogen.get(pid, 0.0)
             )
             dropped = before - after
-            if dropped != 0.0:
+            if dropped:
                 rec.hand_resets[pid]["reset_recovery"] += dropped
-        return result
 
     return wrapper
 
@@ -2106,7 +2105,7 @@ def _wrap_fallback_reset(engine_cls: type, rec: Recorder) -> Any:
             + agent.hand_protected_pending_by_pathogen.get(pid, 0.0)
             for agent in self.agents
         )
-        if dropped != 0.0:
+        if dropped:
             rec.hand_resets[pid]["reset_recovery"] += dropped
         return result
 

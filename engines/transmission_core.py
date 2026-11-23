@@ -10420,7 +10420,7 @@ class TransmissionCore:
         mutation of ``hand_load + pending`` as a source, a sink, or an
         internal flow; the readout closes ``sources = sinks + residual``.
         """
-        if amount == 0.0:
+        if not amount:
             return
         bucket = self.hand_partition.setdefault(pathogen_id, {})
         bucket[key] = bucket.get(key, 0.0) + float(amount)
