@@ -39,6 +39,7 @@ from __future__ import annotations
 import fnmatch
 import math
 import os
+import warnings
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field, replace
 from functools import lru_cache
@@ -2030,6 +2031,19 @@ DEFAULT_SANITARY_VISIT_MODE = "none"
 HAND_RESERVOIR_MODES = ("hygiene_cycle", "wash_reuptake", "spike_decay")
 DEFAULT_HAND_RESERVOIR_MODE = "hygiene_cycle"
 
+# EXTERNAL-SEQUESTER (D2''): which loads may migrate into the wash-proof
+# protected compartment. ``stool_only`` is the shipped arm -- only
+# propensity-fired stool-linked draws queue pending mass. ``any_load``
+# also admits externally acquired accessible load, bounded by a per-host
+# capacity drawn from the shipped sequester band.
+HAND_SEQUESTER_FILL_MODES = ("stool_only", "any_load")
+DEFAULT_HAND_SEQUESTER_FILL = "stool_only"
+# Whether the discrete arm re-exposes residual hand load to the shipped
+# mouth draw once per epoch. ``pickup_only`` is the shipped arm -- a host
+# mouths only at pickup instants, so retained load is never re-sampled.
+HAND_RESIDUAL_MOUTHING_MODES = ("pickup_only", "per_epoch")
+DEFAULT_HAND_RESIDUAL_MOUTHING = "pickup_only"
+
 # NORO-HAND-CASCADE-01a: carrier redeposition and causal intra-epoch order.
 # ``carriers`` lets a non-shedder with a whole-copy hand load redeposit it;
 # hand maintenance stays on the shared replenish stream so the arm isolates
@@ -2079,6 +2093,26 @@ def _parse_hand_reservoir_mode(tx: dict[str, Any]) -> str:
         raise ValueError(
             "transmission.hand_reservoir_mode must be one of "
             f"{HAND_RESERVOIR_MODES}, got {mode!r}",
+        )
+    return mode
+
+
+def _parse_hand_sequester_fill(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("hand_sequester_fill", DEFAULT_HAND_SEQUESTER_FILL))
+    if mode not in HAND_SEQUESTER_FILL_MODES:
+        raise ValueError(
+            "transmission.hand_sequester_fill must be one of "
+            f"{HAND_SEQUESTER_FILL_MODES}, got {mode!r}",
+        )
+    return mode
+
+
+def _parse_hand_residual_mouthing(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("hand_residual_mouthing", DEFAULT_HAND_RESIDUAL_MOUTHING))
+    if mode not in HAND_RESIDUAL_MOUTHING_MODES:
+        raise ValueError(
+            "transmission.hand_residual_mouthing must be one of "
+            f"{HAND_RESIDUAL_MOUTHING_MODES}, got {mode!r}",
         )
     return mode
 
@@ -4340,6 +4374,34 @@ class TransmissionCore:
         self.intra_epoch_order = _parse_intra_epoch_order(tx)
         self.intra_epoch_substeps = _parse_intra_epoch_substeps(tx)
         self.contamination_solver = _parse_contamination_solver(tx)
+        self.hand_sequester_fill = _parse_hand_sequester_fill(tx)
+        self.hand_residual_mouthing = _parse_hand_residual_mouthing(tx)
+        if (
+            self.hand_sequester_fill != "stool_only"
+            and self.hand_reservoir_mode != "hygiene_cycle"
+        ):
+            warnings.warn(
+                "transmission.hand_sequester_fill only acts under "
+                "hand_reservoir_mode='hygiene_cycle' (resolved "
+                f"{self.hand_reservoir_mode!r}); the arm is inert here",
+                stacklevel=2,
+            )
+        if (
+            self.hand_residual_mouthing != "pickup_only"
+            and self.contamination_solver == "continuous"
+        ):
+            warnings.warn(
+                "transmission.hand_residual_mouthing='per_epoch' is a "
+                "no-op under the continuous solver (its mouth term is "
+                "already integrated); use it with 'discrete'",
+                stacklevel=2,
+            )
+        # EXTERNAL-SEQUESTER audit witnesses (spec section 6): cumulative
+        # hand-reservoir mass partition (sources/sinks/internal flows per
+        # pathogen) and per-(pathogen, host) provenance of protected mass.
+        # Counters are RNG-free bookkeeping; every arm is witnessed.
+        self.hand_partition: dict[str, dict[str, float]] = {}
+        self.hand_provenance: dict[str, dict[int, dict[str, bool]]] = {}
         self._ordered_hygiene_occupants: dict[str, dict[str, list]] = {}
         self._book_epoch: int | None = None
         # Served zone id -> {"male"/"female"/"any": head zone id}, from the
@@ -8090,6 +8152,9 @@ class TransmissionCore:
             if amount <= 0.0:
                 continue
             shedder.hand_load_by_pathogen[pathogen_id] = donor - amount
+            self._hand_partition_add(
+                pathogen_id, "internal_host_transfer", amount,
+            )
             moved.append((shedder, amount))
         return moved
 
@@ -8117,6 +8182,9 @@ class TransmissionCore:
             return 0.0, moved
         hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
         target.hand_load_by_pathogen[pathogen_id] = hand + acquired
+        self._hand_partition_add(
+            pathogen_id, "internal_host_transfer_received", acquired,
+        )
         if self.hand_redeposit_mode == "carriers" and moved:
             donor, _amount = max(moved, key=lambda item: item[1])
             strain_id = (
@@ -8127,6 +8195,9 @@ class TransmissionCore:
                 target.hand_strain_by_pathogen[pathogen_id] = strain_id
         dose = self._hand_to_mouth_dose(target, epoch, hand + acquired)
         target.hand_load_by_pathogen[pathogen_id] = hand + acquired - dose
+        self._hand_partition_add(
+            pathogen_id, "sink_mouth_pickup", dose,
+        )
         return dose * self._confinement_factor(target), moved
 
     def _effective_contacts(
@@ -9652,7 +9723,16 @@ class TransmissionCore:
         """
         target = agent.get_pathogen_hand_target(pathogen_id, profile or {})
         current = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-        if target <= 0.0 and current <= 0.0:
+        pending_held = agent.hand_protected_pending_by_pathogen.get(
+            pathogen_id, 0.0,
+        )
+        if (
+            target <= 0.0
+            and current <= 0.0
+            and not (
+                self.hand_sequester_fill == "any_load" and pending_held > 0.0
+            )
+        ):
             return
         rate = self._hand_inactivation_rate(agent, pathogen_id, profile)
         survival = math.exp(-rate * self.clock.hours_per_epoch)
@@ -9671,7 +9751,18 @@ class TransmissionCore:
                 protected, accessible = self._hand_protected_decay(
                     agent, pathogen_id, current, practice,
                 )
+                self._hand_partition_add(
+                    pathogen_id, "sink_inactivation",
+                    accessible * (1.0 - survival),
+                )
+                self._hand_partition_add(
+                    pathogen_id, "source_relaxation",
+                    target * (1.0 - survival),
+                )
                 accessible = target + (accessible - target) * survival
+                accessible = self._hand_external_sequester(
+                    agent, pathogen_id, protected, accessible,
+                )
                 accessible, wet_seconds = self._hand_practice_epoch(
                     agent, pathogen_id, profile, target, practice,
                     accessible,
@@ -9684,6 +9775,14 @@ class TransmissionCore:
                 )
                 self._set_hand_wet_factor(agent, pathogen_id, wet_seconds)
                 return
+            self._hand_partition_add(
+                pathogen_id, "sink_inactivation",
+                current * (1.0 - survival),
+            )
+            self._hand_partition_add(
+                pathogen_id, "source_relaxation",
+                target * (1.0 - survival),
+            )
             relaxed = target + (current - target) * survival
             agent.hand_load_by_pathogen[pathogen_id] = relaxed
             return
@@ -9711,8 +9810,18 @@ class TransmissionCore:
             current = self._stationary_hand_load(
                 target, rate, events_per_day,
             )
+            self._hand_partition_add(
+                pathogen_id, "source_priming", current,
+            )
         decayed = current * survival
+        self._hand_partition_add(
+            pathogen_id, "sink_inactivation", current - decayed,
+        )
         if self._stool_event_occurs(events_per_day):
+            self._hand_partition_add(
+                pathogen_id, "source_stool_topup",
+                max(0.0, target - decayed),
+            )
             decayed = max(decayed, target)
             self._route_stool_event_venue(
                 agent, pathogen_id, profile, zone_name,
@@ -9751,14 +9860,28 @@ class TransmissionCore:
                 target, inactivation_rate,
                 events_per_day * propensity,
             ) * math.pow(10.0, -self._hand_hygiene_efficacy(profile))
+            self._hand_partition_add(
+                pathogen_id, "source_priming", current,
+            )
         decayed = current * survival
+        self._hand_partition_add(
+            pathogen_id, "sink_inactivation", current - decayed,
+        )
         if self._stool_event_occurs(events_per_day):
             propensity = self._hand_carriage_propensity(agent, pathogen_id)
             if self.rng.random() < propensity:
+                self._hand_partition_add(
+                    pathogen_id, "source_stool_topup",
+                    max(0.0, target - decayed),
+                )
                 decayed = max(decayed, target)
-            decayed *= math.pow(
+            stripped = decayed * math.pow(
                 10.0, -self._hand_hygiene_efficacy(profile),
             )
+            self._hand_partition_add(
+                pathogen_id, "sink_wash_visit", decayed - stripped,
+            )
+            decayed = stripped
             self._route_stool_event_venue(
                 agent, pathogen_id, profile, zone_name,
             )
@@ -9841,13 +9964,19 @@ class TransmissionCore:
         event contamination takes days to become wash-proof, so until it
         settles it is neither accessible nor counted in the rinse.
         """
-        protected = min(
-            agent.hand_protected_load_by_pathogen.get(pathogen_id, 0.0),
-            current,
+        stored = agent.hand_protected_load_by_pathogen.get(
+            pathogen_id, 0.0,
         )
+        protected = min(stored, current)
         protected *= math.exp(
             -practice["protected_inactivation_per_hour"]
             * self.clock.hours_per_epoch
+        )
+        # Sheltered decay returns the lost share to the accessible side of
+        # the same rinse total -- the shipped split is a leak, not a kill.
+        self._hand_partition_add(
+            pathogen_id, "internal_protected_leak",
+            min(stored, current) - protected,
         )
         accessible = max(0.0, current - protected)
         pending = agent.hand_protected_pending_by_pathogen.get(
@@ -9865,6 +9994,14 @@ class TransmissionCore:
             agent.hand_protected_pending_by_pathogen[pathogen_id] = (
                 pending - settle
             )
+            self._hand_partition_add(
+                pathogen_id, "internal_sequester_settled", settle,
+            )
+        if protected > 0.0 or (
+            agent.hand_protected_pending_by_pathogen.get(pathogen_id, 0.0)
+            > 0.0
+        ):
+            self._hand_prov_note(agent, pathogen_id, "holds_protected")
         return protected, accessible
 
     def _hand_practice_epoch(
@@ -9895,7 +10032,11 @@ class TransmissionCore:
         )))
         for _ in range(routine):
             efficacy, wet = self._hand_wash_act()
-            accessible *= math.pow(10.0, -efficacy)
+            stripped = accessible * math.pow(10.0, -efficacy)
+            self._hand_partition_add(
+                pathogen_id, "sink_wash_routine", accessible - stripped,
+            )
+            accessible = stripped
             wet_seconds += wet
         pool = (
             agent.hand_self_pool_by_pathogen.get(pathogen_id, 0.0)
@@ -9913,12 +10054,22 @@ class TransmissionCore:
                 max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
             )
             gain = min(pool, pool * uptake)
+            before = accessible
             if target > 0.0:
                 accessible = min(target, accessible + gain)
             else:
                 # A non-shedding carrier has no stool-linked target ceiling;
                 # self-contact moves own-environment mass onto the hand.
                 accessible += gain
+            delta = accessible - before
+            self._hand_partition_add(
+                pathogen_id, "source_self_reload", max(0.0, delta),
+            )
+            # A tick on an over-target load clips down to the ceiling --
+            # a real loss, not a reload.
+            self._hand_partition_add(
+                pathogen_id, "sink_self_clip", max(0.0, -delta),
+            )
             pool -= gain
         agent.hand_self_pool_by_pathogen[pathogen_id] = pool
         return accessible, wet_seconds
@@ -10022,14 +10173,27 @@ class TransmissionCore:
             efficacy, wet = self._hand_wash_act()
             current *= math.pow(10.0, -efficacy)
             wet_seconds += wet
+            self._hand_partition_add(
+                pathogen_id, "source_priming", current,
+            )
         practice = self._hand_practice(agent, pathogen_id)
         protected, accessible = self._hand_protected_decay(
             agent, pathogen_id, current, practice,
         )
-        accessible *= survival
+        stripped = accessible * survival
+        self._hand_partition_add(
+            pathogen_id, "sink_inactivation", accessible - stripped,
+        )
+        accessible = self._hand_external_sequester(
+            agent, pathogen_id, protected, stripped,
+        )
         propensity = self._hand_carriage_propensity(agent, pathogen_id)
         if self._stool_event_occurs(events_per_day):
             if self.rng.random() < propensity:
+                self._hand_partition_add(
+                    pathogen_id, "source_stool_topup",
+                    max(0.0, target - accessible),
+                )
                 accessible = max(accessible, target)
                 sequestered = math.pow(
                     10.0,
@@ -10053,9 +10217,19 @@ class TransmissionCore:
                     agent.hand_protected_pending_by_pathogen[pathogen_id] = (
                         pending + sequestered
                     )
+                    self._hand_partition_add(
+                        pathogen_id, "source_stool_draw", sequestered,
+                    )
+                    self._hand_prov_note(
+                        agent, pathogen_id, "fill_stool",
+                    )
             if self.rng.random() < practice["wash_compliance"]:
                 efficacy, wet = self._hand_wash_act()
-                accessible *= math.pow(10.0, -efficacy)
+                stripped = accessible * math.pow(10.0, -efficacy)
+                self._hand_partition_add(
+                    pathogen_id, "sink_wash_visit", accessible - stripped,
+                )
+                accessible = stripped
                 wet_seconds += wet
             self._route_stool_event_venue(
                 agent, pathogen_id, profile, zone_name,
@@ -10225,10 +10399,174 @@ class TransmissionCore:
                 hand,
             )
             accessible = max(0.0, hand - protected)
-            hand = protected + accessible * math.pow(
+            stripped = protected + accessible * math.pow(
                 10.0, -self._hand_hygiene_efficacy(profile),
             )
+            self._hand_partition_add(
+                pathogen_id, "sink_wash_epoch", hand - stripped,
+            )
+            hand = stripped
         agent.hand_load_by_pathogen[pathogen_id] = max(hand, 0.0)
+
+    def _hand_partition_add(
+        self,
+        pathogen_id: str,
+        key: str,
+        amount: float,
+    ) -> None:
+        """One cumulative hand-reservoir mass-ledger entry (audit only).
+
+        The EXTERNAL-SEQUESTER (spec section 6) mass partition counts every
+        mutation of ``hand_load + pending`` as a source, a sink, or an
+        internal flow; the readout closes ``sources = sinks + residual``.
+        """
+        if not amount:
+            return
+        bucket = self.hand_partition.setdefault(pathogen_id, {})
+        bucket[key] = bucket.get(key, 0.0) + float(amount)
+
+    def _hand_prov_note(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        key: str,
+    ) -> None:
+        """Mark a carrier-provenance fact for the audit's fill witness."""
+        entry = self.hand_provenance.setdefault(pathogen_id, {}).setdefault(
+            agent.agent_id, {},
+        )
+        entry[key] = True
+
+    def _hand_sequester_capacity(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+    ) -> float:
+        """This host's protected-compartment capacity, drawn once lazily.
+
+        The same log-uniform 50--3200 GEC family the shipped per-event
+        stool sequester draw uses, re-read as the compartment's total
+        room rather than an event payload (EXTERNAL-SEQUESTER section 3.1,
+        declared Grade C there).
+        """
+        capacity = agent.hand_sequester_capacity_by_pathogen.get(
+            pathogen_id,
+        )
+        if capacity is None:
+            capacity = math.pow(
+                10.0,
+                self.rng.uniform(
+                    math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[0]),
+                    math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[1]),
+                ),
+            )
+            agent.hand_sequester_capacity_by_pathogen[pathogen_id] = (
+                capacity
+            )
+        return capacity
+
+    def _hand_external_sequester(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        protected: float,
+        accessible: float,
+    ) -> float:
+        """Queue acquired accessible mass for the protected sites.
+
+        ``hand_sequester_fill: any_load`` (EXTERNAL-SEQUESTER section 3.1):
+        the shipped arm lets only propensity-fired stool-linked draws
+        reach the wash-proof compartment; this arm lets externally
+        acquired load migrate too, bounded by the host's drawn capacity
+        and what pending has already claimed. Placed after the epoch's
+        sheltered decay and before routine washes/ticks, per the spec's
+        declared order. Returns the accessible remainder.
+        """
+        if self.hand_sequester_fill != "any_load" or accessible <= 0.0:
+            return accessible
+        pending = agent.hand_protected_pending_by_pathogen.get(
+            pathogen_id, 0.0,
+        )
+        migrate = min(
+            max(
+                0.0,
+                self._hand_sequester_capacity(agent, pathogen_id)
+                - protected
+                - pending,
+            ),
+            accessible,
+        )
+        if migrate <= 0.0:
+            return accessible
+        agent.hand_protected_pending_by_pathogen[pathogen_id] = (
+            pending + migrate
+        )
+        self._hand_partition_add(
+            pathogen_id, "internal_sequester_migrated", migrate,
+        )
+        self._hand_prov_note(agent, pathogen_id, "fill_external")
+        return accessible - migrate
+
+    def _hand_residual_mouth_sweep(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+    ) -> None:
+        """Per-epoch residual hand->mouth draw for susceptible carriers.
+
+        ``hand_residual_mouthing: per_epoch`` (EXTERNAL-SEQUESTER
+        section 3.3): under the discrete arm the shipped mouth step
+        fires only at pickup instants, so mass that survives on the
+        hand is never re-exposed to a swallow. Each susceptible host
+        holding load books the shipped
+        ``contacts x f x e x hand_load`` draw once per epoch -- the
+        counterpart of the continuous solver's integrated mouth term --
+        and loses the mouthed dose exactly as a pickup delivery does.
+        """
+        if self.hand_residual_mouthing != "per_epoch":
+            return
+        seen: set[int] = set()
+        for zone_name, occupants in zone_occupants.items():
+            for agent in occupants:
+                if agent.agent_id in seen:
+                    continue
+                seen.add(agent.agent_id)
+                self._hand_residual_mouth_agent(
+                    agent, epoch, zone_name, pathogen_id,
+                    agent_doses, agent_pathway_doses,
+                )
+
+    def _hand_residual_mouth_agent(
+        self,
+        agent: KorkinAgent,
+        epoch: int,
+        zone_name: str,
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+    ) -> None:
+        hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        if hand <= 0.0:
+            return
+        if agent not in self._get_susceptible([agent], pathogen_id):
+            return
+        dose = self._hand_to_mouth_dose(
+            agent, epoch, hand,
+            self._fomite_rng(agent, zone_name),
+        )
+        if dose <= 0.0:
+            return
+        agent.hand_load_by_pathogen[pathogen_id] = hand - dose
+        self._accumulate(
+            agent.agent_id, "fomite", dose,
+            agent_doses, agent_pathway_doses,
+        )
+        self._hand_partition_add(
+            pathogen_id, "sink_mouth_residual", dose,
+        )
 
     @staticmethod
     def _emesis_range(
@@ -11059,6 +11397,12 @@ class TransmissionCore:
         responder.hand_load_by_pathogen[pathogen_id] = (
             hand + picked - dose
         )
+        self._hand_partition_add(
+            pathogen_id, "source_delivered", picked,
+        )
+        self._hand_partition_add(
+            pathogen_id, "sink_mouth_pickup", dose,
+        )
         self.caregiver_telemetry["caregiver_dose_delivered"] += dose
         self.caregiver_telemetry["cleanup_dose_delivered"] += dose
         if dose > 0.0 and responder in self._get_susceptible(
@@ -11657,6 +12001,12 @@ class TransmissionCore:
         hand = steward.hand_load_by_pathogen.get(pathogen_id, 0.0)
         dose = self._hand_to_mouth_dose(steward, epoch, hand + picked)
         steward.hand_load_by_pathogen[pathogen_id] = hand + picked - dose
+        self._hand_partition_add(
+            pathogen_id, "source_delivered", picked,
+        )
+        self._hand_partition_add(
+            pathogen_id, "sink_mouth_pickup", dose,
+        )
         return dose
 
     def _caregiver_service_epoch(
@@ -12040,6 +12390,12 @@ class TransmissionCore:
         )
         target.hand_load_by_pathogen[pathogen_id] = (
             hand + delivered - dose
+        )
+        self._hand_partition_add(
+            pathogen_id, "source_delivered", delivered,
+        )
+        self._hand_partition_add(
+            pathogen_id, "sink_mouth_pickup", dose,
         )
         self._record_fomite_pickup(
             target, zone_name, surface_mass, delivered, dose,
@@ -12498,6 +12854,10 @@ class TransmissionCore:
                 agent_doses, matrix, agent_pathway_doses,
                 pathogen_id, ledger,
             )
+        self._hand_residual_mouth_sweep(
+            epoch, zone_occupants, agent_doses, agent_pathway_doses,
+            pathogen_id,
+        )
 
     def _legacy_fomite_deposits(
         self,
@@ -12804,6 +13164,9 @@ class TransmissionCore:
             requested = contacts * used_fraction * transfer_efficiency * hand
             deposit = min(hand, max(0.0, requested))
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
+            self._hand_partition_add(
+                pathogen_id, "sink_redeposited", deposit,
+            )
             deposits_by_venue.setdefault(venue, []).append((agent, deposit))
             self._deposit_surface_mass(
                 pathogen_id, venue, deposit,
@@ -12952,6 +13315,12 @@ class TransmissionCore:
             dose = self._hand_to_mouth_dose(agent, epoch, hand + delivered)
             agent.hand_load_by_pathogen[pathogen_id] = (
                 hand + delivered - dose
+            )
+            self._hand_partition_add(
+                pathogen_id, "source_delivered", delivered,
+            )
+            self._hand_partition_add(
+                pathogen_id, "sink_mouth_pickup", dose,
             )
             self._record_fomite_pickup(
                 agent, venue, surface_mass, delivered, dose,
@@ -13215,6 +13584,11 @@ class TransmissionCore:
                 agent_pathway_doses, pathogen_id, profile, ledger,
             )
 
+        self._hand_residual_mouth_sweep(
+            epoch, zone_occupants, agent_doses, agent_pathway_doses,
+            pathogen_id,
+        )
+
         self._fomite_hygiene(zone_occupants, pathogen_id, profile)
 
     def _pathway_fomite_ordered(
@@ -13262,6 +13636,10 @@ class TransmissionCore:
                 zone_name, occupants, epoch,
                 agent_doses, matrix, agent_pathway_doses, pathogen_id, ledger,
             )
+        self._hand_residual_mouth_sweep(
+            epoch, zone_occupants, agent_doses, agent_pathway_doses,
+            pathogen_id,
+        )
         if self._defer_ordered_hand_hygiene(profile):
             self._ordered_hygiene_occupants[pathogen_id] = zone_occupants
         else:
@@ -13638,9 +14016,17 @@ class TransmissionCore:
         self._write_flow_surface(pathogen_id, result.surface, surface0)
         self._write_flow_food(pathogen_id, result.food, food0)
         for agent_id, agent in agents_by_id.items():
-            agent.hand_load_by_pathogen[pathogen_id] = max(
-                0.0, result.hand.get(agent_id, 0.0),
-            )
+            previous = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            resolved = max(0.0, result.hand.get(agent_id, 0.0))
+            agent.hand_load_by_pathogen[pathogen_id] = resolved
+            if resolved >= previous:
+                self._hand_partition_add(
+                    pathogen_id, "source_flow_net", resolved - previous,
+                )
+            else:
+                self._hand_partition_add(
+                    pathogen_id, "sink_flow_net", previous - resolved,
+                )
 
     def _write_flow_surface(
         self,
@@ -13876,6 +14262,9 @@ class TransmissionCore:
             requested = contacts * used_fraction * transfer_efficiency * hand
             deposit = min(hand, max(0.0, requested))
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
+            self._hand_partition_add(
+                pathogen_id, "sink_redeposited", deposit,
+            )
             deposits.append((agent, deposit))
             self._deposit_surface_mass(
                 pathogen_id, zone_name, deposit,
@@ -14088,6 +14477,9 @@ class TransmissionCore:
             self.clock = previous_clock
             self._book_epoch = previous_book_epoch
             self._sanitary_epoch_hours = previous_sanitary_epoch_hours
+        self._hand_residual_mouth_sweep(
+            epoch, zone_units, agent_doses, agent_pathway_doses, pathogen_id,
+        )
 
     def _contamination_epoch_once(
         self,
@@ -14433,6 +14825,9 @@ class TransmissionCore:
             if deposit <= 0.0:
                 continue
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
+            self._hand_partition_add(
+                pathogen_id, "sink_redeposited", deposit,
+            )
             deposits.append((agent, deposit))
         return deposits
 
@@ -16245,6 +16640,9 @@ class TransmissionCore:
         deposit = min(hand, max(0.0, contacts * transfer * hand))
         if deposit > 0.0:
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
+            self._hand_partition_add(
+                pathogen_id, "sink_redeposited", deposit,
+            )
         if mix is _MIX_UNSET:
             mix = (
                 build_emission_mix(

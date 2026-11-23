@@ -837,6 +837,7 @@ class KorkinAgent:
         "hand_practice_by_pathogen", "hand_wet_transfer_by_pathogen",
         "hand_protected_load_by_pathogen", "hand_self_pool_by_pathogen",
         "hand_protected_pending_by_pathogen",
+        "hand_sequester_capacity_by_pathogen",
         "emesis_episode_schedule_by_pathogen",
         "emesis_titre_gec_per_ml_by_pathogen",
         "emesis_censored_below_lod_by_pathogen",
@@ -987,6 +988,11 @@ class KorkinAgent:
         # over the per-infection timescale (McNeil 2001 day-scale
         # accretion); not yet rinse-visible.
         self.hand_protected_pending_by_pathogen: dict[str, float] = {}
+        # Per-(host, pathogen) protected-compartment capacity under
+        # hand_sequester_fill=any_load (EXTERNAL-SEQUESTER): the total
+        # room the compartment offers externally acquired load, drawn
+        # lazily from the shipped sequester band.
+        self.hand_sequester_capacity_by_pathogen: dict[str, float] = {}
         # Mass this host deposited on its own environment (own cabin
         # compartment / home zone), feeding the routine self-contact ticks.
         self.hand_self_pool_by_pathogen: dict[str, float] = {}
@@ -1361,6 +1367,7 @@ class KorkinAgent:
         self.hand_wet_transfer_by_pathogen.pop(pathogen_id, None)
         self.hand_protected_load_by_pathogen.pop(pathogen_id, None)
         self.hand_protected_pending_by_pathogen.pop(pathogen_id, None)
+        self.hand_sequester_capacity_by_pathogen.pop(pathogen_id, None)
         self.hand_self_pool_by_pathogen.pop(pathogen_id, None)
         shedding_mult = (
             draw_shedding_multiplier(rng, profile or {})
@@ -2926,6 +2933,7 @@ class KorkinShipEngine:
                 agent.hand_strain_by_pathogen.clear()
                 agent.hand_protected_load_by_pathogen.clear()
                 agent.hand_protected_pending_by_pathogen.clear()
+                agent.hand_sequester_capacity_by_pathogen.clear()
                 agent.hand_self_pool_by_pathogen.clear()
 
     def _draw_fallback_onset(self, agent: KorkinAgent) -> None:
