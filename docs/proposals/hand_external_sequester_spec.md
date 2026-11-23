@@ -302,6 +302,11 @@ cells, 18 cold cells per arm):
   the missing structure was hand-reservoir retention; promotion to
   default-on with the shipped behaviours as labelled baselines is a
   *separate* change and decision.
+- **Neither ignites; mouth fraction rises on arm S but S+R adds nothing
+  over S:** sampling exposure moves mouth dose but retention does not —
+  the protected compartment is measured not-binding, and the stranded term
+  is the ~1%/h capture product or the challenge; report the partition,
+  change nothing else.
 - **Neither ignites, but mouth fraction rises materially on S+R vs S:**
   dwell is restored but the ~1%/h capture still strands the dose — the
   bound moves to mouth-touch structure or the challenge; report the
@@ -315,9 +320,9 @@ cells, 18 cold cells per arm):
 - Any change to a shipped constant, draw family, band or rate — including
   the sequester draw, settle rate, sheltered/pad inactivation, mouth-contact
   frequency, contact fraction and transfer efficiency.
-- Residual-load mouthing as a standalone arm (§3.3 is a component here,
-  not a separate proposal; a residual-only arm is listed in §4 as
-  measured-not-binding scale if ever run alone).
+- Residual-load mouthing promoted as the mechanism on its own — arm S runs
+  it only as the attribution control inside this campaign, never as a
+  candidate answer (§4 bounds it at a few percent).
 - Carrier redeposition eligibility (D1′), `sanitary_visit_mode`, schedule /
   rhythm (D3′), food pathway, challenge-floor questions — all parked or
   measured-not-binding.
