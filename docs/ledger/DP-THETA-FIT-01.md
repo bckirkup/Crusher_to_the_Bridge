@@ -134,7 +134,81 @@ fixed θ — a quarter of seeds go extinct and the rest spread from 70 to
 802 — so the selected θ's median may not describe a typical voyage; the
 frozen representativeness flag reports this.
 
+## Fit array (measured, 72 of the 168 declared cells)
+
+**Measured at:** 6e23f0d9 (same pinned image as the canary; job
+definitions `picard-covid-dp-theta-fit-01:2`–`:4`; Batch arrays
+`d6d64ab8-1665-4f44-a384-4f26afbb101f` (θ=1e9, 4 seeds),
+`68cf99ae-0553-41fa-9b70-85b30f1a3b13` (θ=3.16e9, 24 seeds),
+`4c2e5d23-8b90-4f2e-bf6c-43687c01e4fc` (θ=1e10, 24 seeds); 52 of 52
+succeeded)
+
+Benjamin's decision after the canary: run only the remaining four seeds
+at 1e9 plus 3.16e9 and 1e10, and skip the four θ below 1e9. Seeds are
+20200205–20200228 at every run θ. Readout
+`docs/covid/dp_theta_fit_01_array_readout.json`; no audit deviation on
+any of the 72 cells.
+
+| θ | Median scored positives (target 634) | Seeds above / below 634 | Side | Seeds in [317, 1268] | Extinct seeds | Median secondaries | Median attack rate | Median `lab_confirmed_total` | Median infections before / during / after quarantine |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1e9 | 281 | 3 / 21 | below | 11 | 7 | 951 | 0.256 | 645 | 11 / 870 / 54 |
+| 3.16e9 | 600 | 11 / 13 | compatible | 19 | 3 | 1,758.5 | 0.474 | 1,282.5 | 136 / 1,197.5 / 98.5 |
+| 1e10 | 735.5 | 14 / 10 | compatible | 19 | 3 | 2,956 | 0.797 | 2,546 | 865.5 / 967 / 22 |
+
+No run cell is dead or saturated. Medians are monotone in θ.
+
+### Frozen rules applied to the three run θ
+
+The committed readout carries `selection: null`, because the readout
+emits a selection only when all seven declared θ are complete. The
+values below come from calling the same `_selection` function on the
+three complete rows; no rule was changed.
+
+- Bracket: (3.16e9, 1e10), medians 600 < 634 ≤ 735.5.
+- Interpolated θ* (log10-θ between the bracket medians): 4.22e9.
+- Selected grid θ (compatible, closest median to 634): 3.16e9.
+- Representativeness flag: not raised (19 of 24 seeds in band).
+
+Measured: the seeds 20200205 and 20200212 at 1e10 return 745 and 821
+scored positives, the same counts as the pre-freeze smoke.
+
+### Interpretation
+
+Measured: T3 excludes θ=1e9 and passes both 3.16e9 and 1e10. The top
+grid value is compatible, so the grid does not bound θ from above.
+
+Measured: the scored count discriminates weakly above the bracket. From
+3.16e9 to 1e10 the median attack rate rises from 0.47 to 0.80 and median
+secondaries from 1,758.5 to 2,956, while median scored positives rise
+only from 600 to 735.5 on a fixed 3,063 specimens.
+
+Inferred: T3 by itself supports θ ≥ about 3e9 on `replay_niid` and does
+not separate a half-ship epidemic from a four-fifths-ship one. The
+selected 3.16e9 and interpolated 4.22e9 are the frozen rule's output, not
+a tight estimate.
+
+Measured, reported only and not selected on: at the selected 3.16e9 the
+median all-channel `lab_confirmed_total` is 1,282.5 against the final
+CDC count of 712, and median infections are 1,758.5 of 3,711.
+
+Inferred: the four unrun θ below 1e9 would not change the bracket if the
+medians stay monotone, which holds on the three run θ. The dead edge of
+the grid is unmeasured.
+
+Not run: the secondary cross-check against 691 positives of 3,894 tests
+through 23 February. The design runs it only at the selected θ with the
+`crew_wave` and retest sweeps armed, as a separate set of cells; it was
+outside the 52 cells Benjamin authorized, so no 23 February result is
+reported here.
+
+Hypothesis: three seeds (20200210, 20200217, 20200226) are extinct at
+all three θ, so early extinction on those seeds is set by the index
+host's draw rather than by θ.
+
 ## Execution status
 
-Canary read out; the full array is not submitted and waits on Benjamin's
-decision. No θ is selected.
+Fit read out on three of seven declared θ. The next decision is
+Benjamin's: accept θ≈3.16e9–4.22e9 as the T3 fit with the weak upper
+bound stated above, or add a second scored observable that separates
+attack rates (for example the all-channel confirmed count or a serology
+band) before a θ is carried forward.

@@ -14,4 +14,10 @@ doc `docs/covid/covid_dp_theta_fit_01_design.md`).
 - **Canary:** `niid_t1e9_canary`, Batch array
   `653e82d7-351e-48c5-8362-dae004d96601`, 20/20 succeeded; readout
   `docs/covid/dp_theta_fit_01_canary_readout.json`.
-- **Remaining blocks:** not submitted; gated on Benjamin's decision.
+- **Fit blocks run (Benjamin's decision: 52 cells, four θ below 1e9
+  skipped):** `niid_t1e9_rest` `d6d64ab8-1665-4f44-a384-4f26afbb101f`
+  (jobdef `:2`), `niid_t3e9` `68cf99ae-0553-41fa-9b70-85b30f1a3b13`
+  (`:3`), `niid_t1e10` `4c2e5d23-8b90-4f2e-bf6c-43687c01e4fc` (`:4`);
+  52/52 succeeded, same image digest. Readout
+  `docs/covid/dp_theta_fit_01_array_readout.json`.
+- **Not run:** `niid_t1e7`, `niid_t3e7`, `niid_t1e8`, `niid_t3e8`.

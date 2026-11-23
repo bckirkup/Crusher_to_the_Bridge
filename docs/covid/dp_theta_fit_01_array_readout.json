@@ -1,0 +1,445 @@
+{
+  "task_id": "DP-THETA-FIT-01",
+  "design_id": "covid-dp-theta-fit-01",
+  "target": {
+    "anchor_id": "covid.T3",
+    "cumulative_positives": 634,
+    "cumulative_tests": 3063,
+    "through_day_index": 31,
+    "secondary_cross_check": {
+      "positives": 691,
+      "tests": 3894,
+      "through": "2020-02-23",
+      "role": "reported only, never selected on"
+    }
+  },
+  "declared_thetas": [
+    10000000.0,
+    31600000.0,
+    100000000.0,
+    316000000.0,
+    1000000000.0,
+    3160000000.0,
+    10000000000.0
+  ],
+  "complete_thetas": [
+    1000000000.0,
+    3160000000.0,
+    10000000000.0
+  ],
+  "incomplete_thetas": {},
+  "selection": null,
+  "rows": [
+    {
+      "theta": 1000000000.0,
+      "n": 24,
+      "provisional": false,
+      "median_positives": 281.0,
+      "seeds_above_target": 3,
+      "seeds_below_target": 21,
+      "side": "below",
+      "dead": false,
+      "saturated": false,
+      "seeds_in_band": 11,
+      "audit_deviations": {},
+      "reported_only": {
+        "positives_per_seed": {
+          "20200205": 777,
+          "20200206": 255,
+          "20200207": 365,
+          "20200208": 229,
+          "20200209": 572,
+          "20200210": 0,
+          "20200211": 136,
+          "20200212": 0,
+          "20200213": 87,
+          "20200214": 463,
+          "20200215": 401,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 70,
+          "20200219": 450,
+          "20200220": 373,
+          "20200221": 307,
+          "20200222": 0,
+          "20200223": 802,
+          "20200224": 402,
+          "20200225": 516,
+          "20200226": 0,
+          "20200227": 799,
+          "20200228": 0
+        },
+        "secondaries_per_seed": {
+          "20200205": 2881,
+          "20200206": 954,
+          "20200207": 962,
+          "20200208": 875,
+          "20200209": 1523,
+          "20200210": 0,
+          "20200211": 1112,
+          "20200212": 0,
+          "20200213": 780,
+          "20200214": 1212,
+          "20200215": 1245,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 664,
+          "20200219": 1095,
+          "20200220": 937,
+          "20200221": 968,
+          "20200222": 0,
+          "20200223": 2978,
+          "20200224": 948,
+          "20200225": 1249,
+          "20200226": 0,
+          "20200227": 2698,
+          "20200228": 0
+        },
+        "extinct_seeds": 7,
+        "median_secondaries": 951.0,
+        "median_attack_rate": 0.25626515763945024,
+        "median_specimens": 3063.0,
+        "median_recorded_onsets": 580.5,
+        "median_lab_confirmed_total": 645.0,
+        "median_infections_before_quarantine": 11.0,
+        "median_infections_during_quarantine": 870.0,
+        "median_infections_after_quarantine": 54.0,
+        "median_positive_share": 0.09174012406137774,
+        "median_onsets_before_split_day": 2.5,
+        "median_onsets_on_or_after_split_day": 577.5,
+        "median_by_day": {
+          "16": {
+            "specimens": 31.0,
+            "positives": 0.0
+          },
+          "17": {
+            "specimens": 71.0,
+            "positives": 0.5
+          },
+          "18": {
+            "specimens": 171.0,
+            "positives": 1.0
+          },
+          "19": {
+            "specimens": 6.0,
+            "positives": 0.0
+          },
+          "20": {
+            "specimens": 57.0,
+            "positives": 1.0
+          },
+          "21": {
+            "specimens": 103.0,
+            "positives": 3.5
+          },
+          "23": {
+            "specimens": 53.0,
+            "positives": 5.0
+          },
+          "24": {
+            "specimens": 221.0,
+            "positives": 12.5
+          },
+          "26": {
+            "specimens": 217.0,
+            "positives": 31.0
+          },
+          "27": {
+            "specimens": 289.0,
+            "positives": 39.5
+          },
+          "28": {
+            "specimens": 504.0,
+            "positives": 44.0
+          },
+          "29": {
+            "specimens": 681.0,
+            "positives": 58.0
+          },
+          "30": {
+            "specimens": 607.0,
+            "positives": 62.0
+          },
+          "31": {
+            "specimens": 52.0,
+            "positives": 9.0
+          }
+        }
+      }
+    },
+    {
+      "theta": 3160000000.0,
+      "n": 24,
+      "provisional": false,
+      "median_positives": 600.0,
+      "seeds_above_target": 11,
+      "seeds_below_target": 13,
+      "side": "compatible",
+      "dead": false,
+      "saturated": false,
+      "seeds_in_band": 19,
+      "audit_deviations": {},
+      "reported_only": {
+        "positives_per_seed": {
+          "20200205": 862,
+          "20200206": 352,
+          "20200207": 602,
+          "20200208": 849,
+          "20200209": 646,
+          "20200210": 0,
+          "20200211": 98,
+          "20200212": 826,
+          "20200213": 778,
+          "20200214": 598,
+          "20200215": 722,
+          "20200216": 284,
+          "20200217": 0,
+          "20200218": 860,
+          "20200219": 714,
+          "20200220": 562,
+          "20200221": 768,
+          "20200222": 334,
+          "20200223": 553,
+          "20200224": 532,
+          "20200225": 775,
+          "20200226": 0,
+          "20200227": 776,
+          "20200228": 473
+        },
+        "secondaries_per_seed": {
+          "20200205": 3000,
+          "20200206": 942,
+          "20200207": 1679,
+          "20200208": 2808,
+          "20200209": 2003,
+          "20200210": 0,
+          "20200211": 810,
+          "20200212": 2655,
+          "20200213": 2425,
+          "20200214": 1838,
+          "20200215": 2434,
+          "20200216": 1045,
+          "20200217": 0,
+          "20200218": 2907,
+          "20200219": 3310,
+          "20200220": 1401,
+          "20200221": 3303,
+          "20200222": 1018,
+          "20200223": 1552,
+          "20200224": 1442,
+          "20200225": 2438,
+          "20200226": 0,
+          "20200227": 3291,
+          "20200228": 1263
+        },
+        "extinct_seeds": 3,
+        "median_secondaries": 1758.5,
+        "median_attack_rate": 0.47386149285906765,
+        "median_specimens": 3063.0,
+        "median_recorded_onsets": 1117.0,
+        "median_lab_confirmed_total": 1282.5,
+        "median_infections_before_quarantine": 136.0,
+        "median_infections_during_quarantine": 1197.5,
+        "median_infections_after_quarantine": 98.5,
+        "median_positive_share": 0.19588638589618024,
+        "median_onsets_before_split_day": 15.5,
+        "median_onsets_on_or_after_split_day": 1099.0,
+        "median_by_day": {
+          "16": {
+            "specimens": 31.0,
+            "positives": 3.0
+          },
+          "17": {
+            "specimens": 71.0,
+            "positives": 4.0
+          },
+          "18": {
+            "specimens": 171.0,
+            "positives": 5.0
+          },
+          "19": {
+            "specimens": 6.0,
+            "positives": 1.0
+          },
+          "20": {
+            "specimens": 57.0,
+            "positives": 11.5
+          },
+          "21": {
+            "specimens": 103.0,
+            "positives": 19.5
+          },
+          "23": {
+            "specimens": 53.0,
+            "positives": 11.5
+          },
+          "24": {
+            "specimens": 221.0,
+            "positives": 52.5
+          },
+          "26": {
+            "specimens": 217.0,
+            "positives": 61.5
+          },
+          "27": {
+            "specimens": 289.0,
+            "positives": 83.0
+          },
+          "28": {
+            "specimens": 504.0,
+            "positives": 115.5
+          },
+          "29": {
+            "specimens": 681.0,
+            "positives": 106.0
+          },
+          "30": {
+            "specimens": 607.0,
+            "positives": 90.5
+          },
+          "31": {
+            "specimens": 52.0,
+            "positives": 11.0
+          }
+        }
+      }
+    },
+    {
+      "theta": 10000000000.0,
+      "n": 24,
+      "provisional": false,
+      "median_positives": 735.5,
+      "seeds_above_target": 14,
+      "seeds_below_target": 10,
+      "side": "compatible",
+      "dead": false,
+      "saturated": false,
+      "seeds_in_band": 19,
+      "audit_deviations": {},
+      "reported_only": {
+        "positives_per_seed": {
+          "20200205": 745,
+          "20200206": 726,
+          "20200207": 132,
+          "20200208": 839,
+          "20200209": 776,
+          "20200210": 0,
+          "20200211": 179,
+          "20200212": 821,
+          "20200213": 873,
+          "20200214": 884,
+          "20200215": 890,
+          "20200216": 690,
+          "20200217": 0,
+          "20200218": 905,
+          "20200219": 553,
+          "20200220": 822,
+          "20200221": 477,
+          "20200222": 465,
+          "20200223": 910,
+          "20200224": 922,
+          "20200225": 904,
+          "20200226": 0,
+          "20200227": 491,
+          "20200228": 518
+        },
+        "secondaries_per_seed": {
+          "20200205": 3414,
+          "20200206": 2208,
+          "20200207": 860,
+          "20200208": 3287,
+          "20200209": 2417,
+          "20200210": 0,
+          "20200211": 1001,
+          "20200212": 3333,
+          "20200213": 2878,
+          "20200214": 2744,
+          "20200215": 3108,
+          "20200216": 3431,
+          "20200217": 0,
+          "20200218": 3081,
+          "20200219": 3453,
+          "20200220": 2622,
+          "20200221": 3456,
+          "20200222": 1457,
+          "20200223": 3247,
+          "20200224": 3034,
+          "20200225": 3328,
+          "20200226": 0,
+          "20200227": 3441,
+          "20200228": 1048
+        },
+        "extinct_seeds": 3,
+        "median_secondaries": 2956.0,
+        "median_attack_rate": 0.7965507949339801,
+        "median_specimens": 3063.0,
+        "median_recorded_onsets": 2237.0,
+        "median_lab_confirmed_total": 2546.0,
+        "median_infections_before_quarantine": 865.5,
+        "median_infections_during_quarantine": 967.0,
+        "median_infections_after_quarantine": 22.0,
+        "median_positive_share": 0.2608553705517467,
+        "median_onsets_before_split_day": 90.5,
+        "median_onsets_on_or_after_split_day": 1412.5,
+        "median_by_day": {
+          "16": {
+            "specimens": 31.0,
+            "positives": 5.5
+          },
+          "17": {
+            "specimens": 71.0,
+            "positives": 12.0
+          },
+          "18": {
+            "specimens": 171.0,
+            "positives": 37.5
+          },
+          "19": {
+            "specimens": 6.0,
+            "positives": 1.0
+          },
+          "20": {
+            "specimens": 57.0,
+            "positives": 16.5
+          },
+          "21": {
+            "specimens": 103.0,
+            "positives": 34.0
+          },
+          "23": {
+            "specimens": 53.0,
+            "positives": 16.0
+          },
+          "24": {
+            "specimens": 221.0,
+            "positives": 65.5
+          },
+          "26": {
+            "specimens": 217.0,
+            "positives": 70.0
+          },
+          "27": {
+            "specimens": 289.0,
+            "positives": 89.0
+          },
+          "28": {
+            "specimens": 504.0,
+            "positives": 141.0
+          },
+          "29": {
+            "specimens": 681.0,
+            "positives": 123.5
+          },
+          "30": {
+            "specimens": 607.0,
+            "positives": 83.0
+          },
+          "31": {
+            "specimens": 52.0,
+            "positives": 8.0
+          }
+        }
+      }
+    }
+  ]
+}

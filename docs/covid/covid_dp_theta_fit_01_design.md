@@ -1,6 +1,6 @@
-# covid-dp-theta-fit-01 — extended-horizon theta fit against covid.T3 (canary measured)
+# covid-dp-theta-fit-01 — extended-horizon theta fit against covid.T3 (measured on three of seven θ)
 
-**Status:** canary measured, full array not run. Criteria below are frozen before any fit cell ran;
+**Status:** measured on θ {1e9, 3.16e9, 1e10}; the four θ below 1e9 were not run by owner decision after the canary. Criteria below are frozen before any fit cell ran;
 no criterion may be altered after the surface is seen.
 
 ## Scope
