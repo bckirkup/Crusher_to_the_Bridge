@@ -389,14 +389,17 @@ def cmd_submit(args: argparse.Namespace) -> int:
         "containerOverrides": {"command": command},
     }
     if args.canary:
+        if args.size is not None:
+            raise _die("--size has no effect with --canary (single job)")
         command += ["--index", str(args.index)]
         submit_json["jobName"] += "-canary"
     else:
         size = args.size if args.size is not None else len(block["seeds"])
-        if not 1 <= size <= len(block["seeds"]):
+        if not 2 <= size <= len(block["seeds"]):
             raise _die(
-                f"--size must be in 1..{len(block['seeds'])}"
-                f" for block {args.block}"
+                f"--size must be in 2..{len(block['seeds'])}"
+                f" for block {args.block} (Batch arrays need >=2;"
+                " use --canary for a single job)"
             )
         submit_json["arrayProperties"] = {"size": size}
         if size != len(block["seeds"]):

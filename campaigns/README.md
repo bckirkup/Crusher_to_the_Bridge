@@ -88,6 +88,10 @@ index for canaries exactly as before (the Batch env var is reserved).
 scripts/campaign list
 scripts/campaign describe <pathogen>/<name>
 scripts/campaign run    <pathogen>/<name> --block B --index N [--out DIR]
-scripts/campaign submit <pathogen>/<name> --block B [--canary] [--queue Q]
+scripts/campaign submit <pathogen>/<name> --block B [--canary] [--size N] [--queue Q]
 scripts/campaign readout <pathogen>/<name> [-- <readout args>]
 ```
+
+`--size N` submits only the first N seeds of the block as the array
+(N >= 2 — Batch rejects single-element arrays; use `--canary --index N`
+for one cell). `--canary` and `--size` are mutually exclusive.
