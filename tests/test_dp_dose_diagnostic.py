@@ -10,10 +10,10 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
 from tools.dp_dose_diagnostic import (  # noqa: E402
+    PATHOGEN_ID,
     DoseLedger,
     _quantiles,
     _suspend_secondary_transmission,
-    PATHOGEN_ID,
 )
 
 
@@ -55,6 +55,7 @@ def test_observe_attributes_dose_deltas() -> None:
         agent_id=9, role="passenger", current_location="GrandPlaza",
         infection_status="INFECTED", illness_status="NOT_ILL",
         current_shedding=1.5, ashore=False,
+        get_pathogen_shedding=lambda _pid, _profile: 2.0,
     )
     pax = SimpleNamespace(
         agent_id=1, role="passenger", current_location="PC_D8_P_M",
@@ -77,6 +78,7 @@ def test_observe_attributes_dose_deltas() -> None:
     # The source is echoed each epoch but never dose-attributed.
     assert len(ledger.source_trace) == 2
     assert ledger.source_trace[1]["current_shedding"] == 1.5
+    assert ledger.source_trace[1]["pathogen_shedding"] == 2.0
     assert all(t["agent_id"] == 9 for t in ledger.source_trace)
 
 
@@ -89,8 +91,8 @@ def test_quantiles() -> None:
 
 def test_out_symlink_planted_at_write_refused(tmp_path, monkeypatch) -> None:
     """A link that appears after validation must still be refused."""
-    import tools.dp_dose_diagnostic as diag
     import picard_framework.run_spec as run_spec
+    import tools.dp_dose_diagnostic as diag
     from picard_framework.simulation import ship_simulation as ss
 
     link = tmp_path / "link.json"

@@ -34,6 +34,12 @@
    "dose_total": 2.0853449623180338e-07,
    "eligible_agents": 3710,
    "epochs": 120,
+   "normalized_ud_mean": 1.0920835809400327e-11,
+   "normalized_ud_quantiles": {
+    "p50": 2.4477300838352997e-15,
+    "p90": 9.549247971455472e-13,
+    "p99": 2.0450313983086817e-11
+   },
    "recipient_role_counts": {
     "crew": 149,
     "passenger": 1656
@@ -49,7 +55,8 @@
      "epoch": 0,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -58,7 +65,8 @@
      "epoch": 1,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -67,7 +75,8 @@
      "epoch": 2,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -76,7 +85,8 @@
      "epoch": 3,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -85,7 +95,8 @@
      "epoch": 4,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -94,7 +105,8 @@
      "epoch": 5,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -103,7 +115,8 @@
      "epoch": 6,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -112,7 +125,8 @@
      "epoch": 7,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -121,7 +135,8 @@
      "epoch": 8,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -130,7 +145,8 @@
      "epoch": 9,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -139,7 +155,8 @@
      "epoch": 10,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -148,7 +165,8 @@
      "epoch": 11,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -157,7 +175,8 @@
      "epoch": 12,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -166,7 +185,8 @@
      "epoch": 13,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -175,7 +195,8 @@
      "epoch": 14,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -184,7 +205,8 @@
      "epoch": 15,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_M"
+     "location": "PC_D12_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -193,7 +215,8 @@
      "epoch": 16,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -202,7 +225,8 @@
      "epoch": 17,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -211,7 +235,8 @@
      "epoch": 18,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -220,7 +245,8 @@
      "epoch": 19,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -229,7 +255,8 @@
      "epoch": 20,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -238,7 +265,8 @@
      "epoch": 21,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -247,7 +275,8 @@
      "epoch": 22,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -256,7 +285,8 @@
      "epoch": 23,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1826,
@@ -265,7 +295,8 @@
      "epoch": 24,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -274,7 +305,8 @@
      "epoch": 25,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -283,7 +315,8 @@
      "epoch": 26,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -292,7 +325,8 @@
      "epoch": 27,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -301,7 +335,8 @@
      "epoch": 28,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -310,7 +345,8 @@
      "epoch": 29,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -319,7 +355,8 @@
      "epoch": 30,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -328,7 +365,8 @@
      "epoch": 31,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -337,7 +375,8 @@
      "epoch": 32,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -346,7 +385,8 @@
      "epoch": 33,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -355,7 +395,8 @@
      "epoch": 34,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -364,7 +405,8 @@
      "epoch": 35,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -373,7 +415,8 @@
      "epoch": 36,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -382,7 +425,8 @@
      "epoch": 37,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PhotoGallery"
+     "location": "PhotoGallery",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -391,7 +435,8 @@
      "epoch": 38,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PhotoGallery"
+     "location": "PhotoGallery",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -400,7 +445,8 @@
      "epoch": 39,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PhotoGallery"
+     "location": "PhotoGallery",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -409,7 +455,8 @@
      "epoch": 40,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandCasino"
+     "location": "GrandCasino",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -418,7 +465,8 @@
      "epoch": 41,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "International"
+     "location": "International",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -427,7 +475,8 @@
      "epoch": 42,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PromGalleria"
+     "location": "PromGalleria",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -436,7 +485,8 @@
      "epoch": 43,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -445,7 +495,8 @@
      "epoch": 44,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -454,7 +505,8 @@
      "epoch": 45,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -463,7 +515,8 @@
      "epoch": 46,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -472,7 +525,8 @@
      "epoch": 47,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -481,7 +535,8 @@
      "epoch": 48,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -490,7 +545,8 @@
      "epoch": 49,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -499,7 +555,8 @@
      "epoch": 50,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -508,7 +565,8 @@
      "epoch": 51,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -517,7 +575,8 @@
      "epoch": 52,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -526,7 +585,8 @@
      "epoch": 53,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -535,7 +595,8 @@
      "epoch": 54,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -544,7 +605,8 @@
      "epoch": 55,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -553,7 +615,8 @@
      "epoch": 56,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -562,7 +625,8 @@
      "epoch": 57,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -571,7 +635,8 @@
      "epoch": 58,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -580,7 +645,8 @@
      "epoch": 59,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -589,7 +655,8 @@
      "epoch": 60,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -598,7 +665,8 @@
      "epoch": 61,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -607,7 +675,8 @@
      "epoch": 62,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -616,7 +685,8 @@
      "epoch": 63,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -625,7 +695,8 @@
      "epoch": 64,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -634,7 +705,8 @@
      "epoch": 65,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -643,7 +715,8 @@
      "epoch": 66,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -652,7 +725,8 @@
      "epoch": 67,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -661,7 +735,8 @@
      "epoch": 68,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -670,7 +745,8 @@
      "epoch": 69,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -679,7 +755,8 @@
      "epoch": 70,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -688,7 +765,8 @@
      "epoch": 71,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -697,7 +775,8 @@
      "epoch": 72,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -706,7 +785,8 @@
      "epoch": 73,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -715,7 +795,8 @@
      "epoch": 74,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -724,7 +805,8 @@
      "epoch": 75,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -733,7 +815,8 @@
      "epoch": 76,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -742,7 +825,8 @@
      "epoch": 77,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -751,7 +835,8 @@
      "epoch": 78,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -760,7 +845,8 @@
      "epoch": 79,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -769,7 +855,8 @@
      "epoch": 80,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -778,7 +865,8 @@
      "epoch": 81,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -787,7 +875,8 @@
      "epoch": 82,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -796,7 +885,8 @@
      "epoch": 83,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -805,7 +895,8 @@
      "epoch": 84,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -814,7 +905,8 @@
      "epoch": 85,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -823,7 +915,8 @@
      "epoch": 86,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -832,7 +925,8 @@
      "epoch": 87,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -841,7 +935,8 @@
      "epoch": 88,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -850,7 +945,8 @@
      "epoch": 89,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -859,7 +955,8 @@
      "epoch": 90,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -868,7 +965,8 @@
      "epoch": 91,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -877,7 +975,8 @@
      "epoch": 92,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -886,7 +985,8 @@
      "epoch": 93,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -895,7 +995,8 @@
      "epoch": 94,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -904,7 +1005,8 @@
      "epoch": 95,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 2.4078593120973928e-06
     },
     {
      "agent_id": 1826,
@@ -913,7 +1015,8 @@
      "epoch": 96,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -922,7 +1025,8 @@
      "epoch": 97,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -931,7 +1035,8 @@
      "epoch": 98,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -940,7 +1045,8 @@
      "epoch": 99,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -949,7 +1055,8 @@
      "epoch": 100,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -958,7 +1065,8 @@
      "epoch": 101,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -967,7 +1075,8 @@
      "epoch": 102,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -976,7 +1085,8 @@
      "epoch": 103,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -985,7 +1095,8 @@
      "epoch": 104,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -994,7 +1105,8 @@
      "epoch": 105,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1003,7 +1115,8 @@
      "epoch": 106,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1012,7 +1125,8 @@
      "epoch": 107,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1021,7 +1135,8 @@
      "epoch": 108,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1030,7 +1145,8 @@
      "epoch": 109,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1039,7 +1155,8 @@
      "epoch": 110,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1048,7 +1165,8 @@
      "epoch": 111,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1057,7 +1175,8 @@
      "epoch": 112,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1066,7 +1185,8 @@
      "epoch": 113,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1075,7 +1195,8 @@
      "epoch": 114,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1084,7 +1205,8 @@
      "epoch": 115,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1093,7 +1215,8 @@
      "epoch": 116,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1102,7 +1225,8 @@
      "epoch": 117,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1111,7 +1235,8 @@
      "epoch": 118,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_M"
+     "location": "PC_D6_P_M",
+     "pathogen_shedding": 0.00024078593120973932
     },
     {
      "agent_id": 1826,
@@ -1120,11 +1245,13 @@
      "epoch": 119,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Departed"
+     "location": "Departed",
+     "pathogen_shedding": 0.00024078593120973932
     }
    ],
    "susceptibility_scale": 1e-30,
    "theta_cell": 7900000.0,
+   "theta_scale_ratio": 323.22222222222223,
    "weighted_dose_mean": 3.378739164132106e-14,
    "weighted_dose_quantiles": {
     "p50": 7.57290160004046e-18,
@@ -1164,6 +1291,12 @@
    "dose_total": 4.079547907668989e-08,
    "eligible_agents": 3710,
    "epochs": 120,
+   "normalized_ud_mean": 6.085856151112826e-11,
+   "normalized_ud_quantiles": {
+    "p50": 5.025785288866684e-20,
+    "p90": 6.177898762225124e-16,
+    "p99": 2.831944426661255e-14
+   },
    "recipient_role_counts": {
     "crew": 776,
     "passenger": 2555
@@ -1179,7 +1312,8 @@
      "epoch": 0,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1188,7 +1322,8 @@
      "epoch": 1,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1197,7 +1332,8 @@
      "epoch": 2,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1206,7 +1342,8 @@
      "epoch": 3,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "NeptunePool"
+     "location": "NeptunePool",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1215,7 +1352,8 @@
      "epoch": 4,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1224,7 +1362,8 @@
      "epoch": 5,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1233,7 +1372,8 @@
      "epoch": 6,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1242,7 +1382,8 @@
      "epoch": 7,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1251,7 +1392,8 @@
      "epoch": 8,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1260,7 +1402,8 @@
      "epoch": 9,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1269,7 +1412,8 @@
      "epoch": 10,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Savoy"
+     "location": "Savoy",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1278,7 +1422,8 @@
      "epoch": 11,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1287,7 +1432,8 @@
      "epoch": 12,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1296,7 +1442,8 @@
      "epoch": 13,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1305,7 +1452,8 @@
      "epoch": 14,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1314,7 +1462,8 @@
      "epoch": 15,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "CC_D1_F"
+     "location": "CC_D1_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1323,7 +1472,8 @@
      "epoch": 16,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Savoy"
+     "location": "Savoy",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1332,7 +1482,8 @@
      "epoch": 17,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1341,7 +1492,8 @@
      "epoch": 18,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1350,7 +1502,8 @@
      "epoch": 19,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1359,7 +1512,8 @@
      "epoch": 20,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1368,7 +1522,8 @@
      "epoch": 21,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1377,7 +1532,8 @@
      "epoch": 22,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1386,7 +1542,8 @@
      "epoch": 23,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1581,
@@ -1395,7 +1552,8 @@
      "epoch": 24,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1404,7 +1562,8 @@
      "epoch": 25,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1413,7 +1572,8 @@
      "epoch": 26,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1422,7 +1582,8 @@
      "epoch": 27,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1431,7 +1592,8 @@
      "epoch": 28,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1440,7 +1602,8 @@
      "epoch": 29,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1449,7 +1612,8 @@
      "epoch": 30,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "NeptunePool"
+     "location": "NeptunePool",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1458,7 +1622,8 @@
      "epoch": 31,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Savoy"
+     "location": "Savoy",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1467,7 +1632,8 @@
      "epoch": 32,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1476,7 +1642,8 @@
      "epoch": 33,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1485,7 +1652,8 @@
      "epoch": 34,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1494,7 +1662,8 @@
      "epoch": 35,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "CC_D2_A"
+     "location": "CC_D2_A",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1503,7 +1672,8 @@
      "epoch": 36,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1512,7 +1682,8 @@
      "epoch": 37,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1521,7 +1692,8 @@
      "epoch": 38,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1530,7 +1702,8 @@
      "epoch": 39,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1539,7 +1712,8 @@
      "epoch": 40,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Savoy"
+     "location": "Savoy",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1548,7 +1722,8 @@
      "epoch": 41,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1557,7 +1732,8 @@
      "epoch": 42,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1566,7 +1742,8 @@
      "epoch": 43,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1575,7 +1752,8 @@
      "epoch": 44,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1584,7 +1762,8 @@
      "epoch": 45,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1593,7 +1772,8 @@
      "epoch": 46,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1602,7 +1782,8 @@
      "epoch": 47,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "NeptunePool"
+     "location": "NeptunePool",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1611,7 +1792,8 @@
      "epoch": 48,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1620,7 +1802,8 @@
      "epoch": 49,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1629,7 +1812,8 @@
      "epoch": 50,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1638,7 +1822,8 @@
      "epoch": 51,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1647,7 +1832,8 @@
      "epoch": 52,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1656,7 +1842,8 @@
      "epoch": 53,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1665,7 +1852,8 @@
      "epoch": 54,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1674,7 +1862,8 @@
      "epoch": 55,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1683,7 +1872,8 @@
      "epoch": 56,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1692,7 +1882,8 @@
      "epoch": 57,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1701,7 +1892,8 @@
      "epoch": 58,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Savoy"
+     "location": "Savoy",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1710,7 +1902,8 @@
      "epoch": 59,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1719,7 +1912,8 @@
      "epoch": 60,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1728,7 +1922,8 @@
      "epoch": 61,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1737,7 +1932,8 @@
      "epoch": 62,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1746,7 +1942,8 @@
      "epoch": 63,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1755,7 +1952,8 @@
      "epoch": 64,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1764,7 +1962,8 @@
      "epoch": 65,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1773,7 +1972,8 @@
      "epoch": 66,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1782,7 +1982,8 @@
      "epoch": 67,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1791,7 +1992,8 @@
      "epoch": 68,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1800,7 +2002,8 @@
      "epoch": 69,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1809,7 +2012,8 @@
      "epoch": 70,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "NeptunePool"
+     "location": "NeptunePool",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1818,7 +2022,8 @@
      "epoch": 71,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1827,7 +2032,8 @@
      "epoch": 72,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1836,7 +2042,8 @@
      "epoch": 73,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1845,7 +2052,8 @@
      "epoch": 74,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1854,7 +2062,8 @@
      "epoch": 75,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1863,7 +2072,8 @@
      "epoch": 76,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1872,7 +2082,8 @@
      "epoch": 77,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1881,7 +2092,8 @@
      "epoch": 78,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1890,7 +2102,8 @@
      "epoch": 79,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1899,7 +2112,8 @@
      "epoch": 80,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1908,7 +2122,8 @@
      "epoch": 81,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1917,7 +2132,8 @@
      "epoch": 82,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1926,7 +2142,8 @@
      "epoch": 83,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D10_S_A"
+     "location": "PC_D10_S_A",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1935,7 +2152,8 @@
      "epoch": 84,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1944,7 +2162,8 @@
      "epoch": 85,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1953,7 +2172,8 @@
      "epoch": 86,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1962,7 +2182,8 @@
      "epoch": 87,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1971,7 +2192,8 @@
      "epoch": 88,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PregoPizza"
+     "location": "PregoPizza",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1980,7 +2202,8 @@
      "epoch": 89,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PregoPizza"
+     "location": "PregoPizza",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1989,7 +2212,8 @@
      "epoch": 90,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -1998,7 +2222,8 @@
      "epoch": 91,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -2007,7 +2232,8 @@
      "epoch": 92,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -2016,7 +2242,8 @@
      "epoch": 93,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -2025,7 +2252,8 @@
      "epoch": 94,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -2034,7 +2262,8 @@
      "epoch": 95,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776856e-08
     },
     {
      "agent_id": 1581,
@@ -2043,7 +2272,8 @@
      "epoch": 96,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2052,7 +2282,8 @@
      "epoch": 97,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2061,7 +2292,8 @@
      "epoch": 98,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2070,7 +2302,8 @@
      "epoch": 99,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2079,7 +2312,8 @@
      "epoch": 100,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2088,7 +2322,8 @@
      "epoch": 101,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2097,7 +2332,8 @@
      "epoch": 102,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2106,7 +2342,8 @@
      "epoch": 103,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2115,7 +2352,8 @@
      "epoch": 104,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2124,7 +2362,8 @@
      "epoch": 105,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2133,7 +2372,8 @@
      "epoch": 106,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2142,7 +2382,8 @@
      "epoch": 107,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2151,7 +2392,8 @@
      "epoch": 108,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2160,7 +2402,8 @@
      "epoch": 109,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2169,7 +2412,8 @@
      "epoch": 110,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2178,7 +2422,8 @@
      "epoch": 111,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2187,7 +2432,8 @@
      "epoch": 112,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2196,7 +2442,8 @@
      "epoch": 113,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2205,7 +2452,8 @@
      "epoch": 114,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2214,7 +2462,8 @@
      "epoch": 115,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2223,7 +2472,8 @@
      "epoch": 116,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2232,7 +2482,8 @@
      "epoch": 117,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2241,7 +2492,8 @@
      "epoch": 118,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D12_P_F"
+     "location": "PC_D12_P_F",
+     "pathogen_shedding": 1.1221196941776858e-06
     },
     {
      "agent_id": 1581,
@@ -2250,11 +2502,13 @@
      "epoch": 119,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Departed"
+     "location": "Departed",
+     "pathogen_shedding": 1.1221196941776858e-06
     }
    ],
    "susceptibility_scale": 1e-30,
    "theta_cell": 7900000.0,
+   "theta_scale_ratio": 323.22222222222223,
    "weighted_dose_mean": 1.8828705864563667e-13,
    "weighted_dose_quantiles": {
     "p50": 1.5549009143967053e-22,
@@ -2294,6 +2548,12 @@
    "dose_total": 3.943593099902099e-08,
    "eligible_agents": 3710,
    "epochs": 120,
+   "normalized_ud_mean": 8.276054470976984e-11,
+   "normalized_ud_quantiles": {
+    "p50": 7.641060365731309e-20,
+    "p90": 1.0218952404375052e-16,
+    "p99": 1.390572224358744e-14
+   },
    "recipient_role_counts": {
     "crew": 470,
     "passenger": 2462
@@ -2309,7 +2569,8 @@
      "epoch": 0,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2318,7 +2579,8 @@
      "epoch": 1,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2327,7 +2589,8 @@
      "epoch": 2,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2336,7 +2599,8 @@
      "epoch": 3,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2345,7 +2609,8 @@
      "epoch": 4,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2354,7 +2619,8 @@
      "epoch": 5,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2363,7 +2629,8 @@
      "epoch": 6,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PrincessTheater"
+     "location": "PrincessTheater",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2372,7 +2639,8 @@
      "epoch": 7,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2381,7 +2649,8 @@
      "epoch": 8,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2390,7 +2659,8 @@
      "epoch": 9,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2399,7 +2669,8 @@
      "epoch": 10,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2408,7 +2679,8 @@
      "epoch": 11,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2417,7 +2689,8 @@
      "epoch": 12,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2426,7 +2699,8 @@
      "epoch": 13,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2435,7 +2709,8 @@
      "epoch": 14,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2444,7 +2719,8 @@
      "epoch": 15,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D10_P_F"
+     "location": "PC_D10_P_F",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2453,7 +2729,8 @@
      "epoch": 16,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2462,7 +2739,8 @@
      "epoch": 17,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2471,7 +2749,8 @@
      "epoch": 18,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2480,7 +2759,8 @@
      "epoch": 19,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2489,7 +2769,8 @@
      "epoch": 20,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2498,7 +2779,8 @@
      "epoch": 21,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2507,7 +2789,8 @@
      "epoch": 22,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PrincessTheater"
+     "location": "PrincessTheater",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2516,7 +2799,8 @@
      "epoch": 23,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PrincessTheater"
+     "location": "PrincessTheater",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 391,
@@ -2525,7 +2809,8 @@
      "epoch": 24,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PrincessTheater"
+     "location": "PrincessTheater",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2534,7 +2819,8 @@
      "epoch": 25,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2543,7 +2829,8 @@
      "epoch": 26,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2552,7 +2839,8 @@
      "epoch": 27,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2561,7 +2849,8 @@
      "epoch": 28,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2570,7 +2859,8 @@
      "epoch": 29,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2579,7 +2869,8 @@
      "epoch": 30,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PrincessTheater"
+     "location": "PrincessTheater",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2588,7 +2879,8 @@
      "epoch": 31,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2597,7 +2889,8 @@
      "epoch": 32,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2606,7 +2899,8 @@
      "epoch": 33,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2615,7 +2909,8 @@
      "epoch": 34,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2624,7 +2919,8 @@
      "epoch": 35,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2633,7 +2929,8 @@
      "epoch": 36,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2642,7 +2939,8 @@
      "epoch": 37,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2651,7 +2949,8 @@
      "epoch": 38,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2660,7 +2959,8 @@
      "epoch": 39,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2669,7 +2969,8 @@
      "epoch": 40,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2678,7 +2979,8 @@
      "epoch": 41,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2687,7 +2989,8 @@
      "epoch": 42,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2696,7 +2999,8 @@
      "epoch": 43,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2705,7 +3009,8 @@
      "epoch": 44,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2714,7 +3019,8 @@
      "epoch": 45,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2723,7 +3029,8 @@
      "epoch": 46,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PrincessTheater"
+     "location": "PrincessTheater",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2732,7 +3039,8 @@
      "epoch": 47,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2741,7 +3049,8 @@
      "epoch": 48,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2750,7 +3059,8 @@
      "epoch": 49,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2759,7 +3069,8 @@
      "epoch": 50,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2768,7 +3079,8 @@
      "epoch": 51,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2777,7 +3089,8 @@
      "epoch": 52,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2786,7 +3099,8 @@
      "epoch": 53,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2795,7 +3109,8 @@
      "epoch": 54,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2804,7 +3119,8 @@
      "epoch": 55,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2813,7 +3129,8 @@
      "epoch": 56,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2822,7 +3139,8 @@
      "epoch": 57,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2831,7 +3149,8 @@
      "epoch": 58,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2840,7 +3159,8 @@
      "epoch": 59,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2849,7 +3169,8 @@
      "epoch": 60,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2858,7 +3179,8 @@
      "epoch": 61,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2867,7 +3189,8 @@
      "epoch": 62,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2876,7 +3199,8 @@
      "epoch": 63,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2885,7 +3209,8 @@
      "epoch": 64,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2894,7 +3219,8 @@
      "epoch": 65,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2903,7 +3229,8 @@
      "epoch": 66,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2912,7 +3239,8 @@
      "epoch": 67,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2921,7 +3249,8 @@
      "epoch": 68,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2930,7 +3259,8 @@
      "epoch": 69,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2939,7 +3269,8 @@
      "epoch": 70,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PrincessTheater"
+     "location": "PrincessTheater",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2948,7 +3279,8 @@
      "epoch": 71,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2957,7 +3289,8 @@
      "epoch": 72,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2966,7 +3299,8 @@
      "epoch": 73,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2975,7 +3309,8 @@
      "epoch": 74,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2984,7 +3319,8 @@
      "epoch": 75,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -2993,7 +3329,8 @@
      "epoch": 76,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3002,7 +3339,8 @@
      "epoch": 77,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3011,7 +3349,8 @@
      "epoch": 78,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3020,7 +3359,8 @@
      "epoch": 79,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3029,7 +3369,8 @@
      "epoch": 80,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3038,7 +3379,8 @@
      "epoch": 81,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3047,7 +3389,8 @@
      "epoch": 82,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3056,7 +3399,8 @@
      "epoch": 83,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3065,7 +3409,8 @@
      "epoch": 84,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3074,7 +3419,8 @@
      "epoch": 85,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3083,7 +3429,8 @@
      "epoch": 86,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3092,7 +3439,8 @@
      "epoch": 87,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3101,7 +3449,8 @@
      "epoch": 88,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3110,7 +3459,8 @@
      "epoch": 89,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3119,7 +3469,8 @@
      "epoch": 90,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3128,7 +3479,8 @@
      "epoch": 91,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3137,7 +3489,8 @@
      "epoch": 92,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3146,7 +3499,8 @@
      "epoch": 93,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3155,7 +3509,8 @@
      "epoch": 94,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3164,7 +3519,8 @@
      "epoch": 95,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885393e-08
     },
     {
      "agent_id": 391,
@@ -3173,7 +3529,8 @@
      "epoch": 96,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3182,7 +3539,8 @@
      "epoch": 97,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3191,7 +3549,8 @@
      "epoch": 98,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3200,7 +3559,8 @@
      "epoch": 99,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3209,7 +3569,8 @@
      "epoch": 100,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3218,7 +3579,8 @@
      "epoch": 101,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3227,7 +3589,8 @@
      "epoch": 102,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3236,7 +3599,8 @@
      "epoch": 103,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3245,7 +3609,8 @@
      "epoch": 104,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3254,7 +3619,8 @@
      "epoch": 105,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3263,7 +3629,8 @@
      "epoch": 106,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3272,7 +3639,8 @@
      "epoch": 107,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3281,7 +3649,8 @@
      "epoch": 108,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3290,7 +3659,8 @@
      "epoch": 109,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3299,7 +3669,8 @@
      "epoch": 110,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3308,7 +3679,8 @@
      "epoch": 111,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3317,7 +3689,8 @@
      "epoch": 112,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3326,7 +3699,8 @@
      "epoch": 113,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3335,7 +3709,8 @@
      "epoch": 114,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3344,7 +3719,8 @@
      "epoch": 115,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3353,7 +3729,8 @@
      "epoch": 116,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3362,7 +3739,8 @@
      "epoch": 117,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3371,7 +3749,8 @@
      "epoch": 118,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_S_M"
+     "location": "PC_D8_S_M",
+     "pathogen_shedding": 2.1879733563885395e-06
     },
     {
      "agent_id": 391,
@@ -3380,11 +3759,13 @@
      "epoch": 119,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Departed"
+     "location": "Departed",
+     "pathogen_shedding": 2.1879733563885395e-06
     }
    ],
    "susceptibility_scale": 1e-30,
    "theta_cell": 7900000.0,
+   "theta_scale_ratio": 323.22222222222223,
    "weighted_dose_mean": 2.560484367094977e-13,
    "weighted_dose_quantiles": {
     "p50": 2.3640269264895765e-22,
@@ -3424,6 +3805,12 @@
    "dose_total": 1.0739976151013591e-08,
    "eligible_agents": 3710,
    "epochs": 120,
+   "normalized_ud_mean": 2.95401853403908e-12,
+   "normalized_ud_quantiles": {
+    "p50": 3.308729755956789e-15,
+    "p90": 5.035203265884444e-13,
+    "p99": 1.0868630454755387e-11
+   },
    "recipient_role_counts": {
     "crew": 239,
     "passenger": 1404
@@ -3439,7 +3826,8 @@
      "epoch": 0,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3448,7 +3836,8 @@
      "epoch": 1,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3457,7 +3846,8 @@
      "epoch": 2,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3466,7 +3856,8 @@
      "epoch": 3,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3475,7 +3866,8 @@
      "epoch": 4,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3484,7 +3876,8 @@
      "epoch": 5,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3493,7 +3886,8 @@
      "epoch": 6,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3502,7 +3896,8 @@
      "epoch": 7,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3511,7 +3906,8 @@
      "epoch": 8,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "FineArts"
+     "location": "FineArts",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3520,7 +3916,8 @@
      "epoch": 9,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "OasisBar"
+     "location": "OasisBar",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3529,7 +3926,8 @@
      "epoch": 10,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3538,7 +3936,8 @@
      "epoch": 11,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "ClubFusion"
+     "location": "ClubFusion",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3547,7 +3946,8 @@
      "epoch": 12,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3556,7 +3956,8 @@
      "epoch": 13,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3565,7 +3966,8 @@
      "epoch": 14,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3574,7 +3976,8 @@
      "epoch": 15,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "CaptainCircle"
+     "location": "CaptainCircle",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3583,7 +3986,8 @@
      "epoch": 16,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3592,7 +3996,8 @@
      "epoch": 17,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3601,7 +4006,8 @@
      "epoch": 18,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3610,7 +4016,8 @@
      "epoch": 19,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3619,7 +4026,8 @@
      "epoch": 20,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GoodSpirits"
+     "location": "GoodSpirits",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3628,7 +4036,8 @@
      "epoch": 21,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "CalypsoBar"
+     "location": "CalypsoBar",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3637,7 +4046,8 @@
      "epoch": 22,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3646,7 +4056,8 @@
      "epoch": 23,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 0.0
     },
     {
      "agent_id": 1259,
@@ -3655,7 +4066,8 @@
      "epoch": 24,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3664,7 +4076,8 @@
      "epoch": 25,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3673,7 +4086,8 @@
      "epoch": 26,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3682,7 +4096,8 @@
      "epoch": 27,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3691,7 +4106,8 @@
      "epoch": 28,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3700,7 +4116,8 @@
      "epoch": 29,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3709,7 +4126,8 @@
      "epoch": 30,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3718,7 +4136,8 @@
      "epoch": 31,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GrandPlaza"
+     "location": "GrandPlaza",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3727,7 +4146,8 @@
      "epoch": 32,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "CaptainCircle"
+     "location": "CaptainCircle",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3736,7 +4156,8 @@
      "epoch": 33,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "TerracePool"
+     "location": "TerracePool",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3745,7 +4166,8 @@
      "epoch": 34,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "TerracePool"
+     "location": "TerracePool",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3754,7 +4176,8 @@
      "epoch": 35,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D10_S_M"
+     "location": "PC_D10_S_M",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3763,7 +4186,8 @@
      "epoch": 36,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "TridentGrill"
+     "location": "TridentGrill",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3772,7 +4196,8 @@
      "epoch": 37,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GoodSpirits"
+     "location": "GoodSpirits",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3781,7 +4206,8 @@
      "epoch": 38,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "OceanFront"
+     "location": "OceanFront",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3790,7 +4216,8 @@
      "epoch": 39,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "TerracePool"
+     "location": "TerracePool",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3799,7 +4226,8 @@
      "epoch": 40,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3808,7 +4236,8 @@
      "epoch": 41,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D8_P_M"
+     "location": "PC_D8_P_M",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3817,7 +4246,8 @@
      "epoch": 42,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "HorizonCourt"
+     "location": "HorizonCourt",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3826,7 +4256,8 @@
      "epoch": 43,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D11_P_M"
+     "location": "PC_D11_P_M",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3835,7 +4266,8 @@
      "epoch": 44,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "WheelhouseBar"
+     "location": "WheelhouseBar",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3844,7 +4276,8 @@
      "epoch": 45,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "WheelhouseBar"
+     "location": "WheelhouseBar",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3853,7 +4286,8 @@
      "epoch": 46,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3862,7 +4296,8 @@
      "epoch": 47,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3871,7 +4306,8 @@
      "epoch": 48,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3880,7 +4316,8 @@
      "epoch": 49,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3889,7 +4326,8 @@
      "epoch": 50,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3898,7 +4336,8 @@
      "epoch": 51,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3907,7 +4346,8 @@
      "epoch": 52,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3916,7 +4356,8 @@
      "epoch": 53,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3925,7 +4366,8 @@
      "epoch": 54,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "TridentGrill"
+     "location": "TridentGrill",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3934,7 +4376,8 @@
      "epoch": 55,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "TridentGrill"
+     "location": "TridentGrill",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3943,7 +4386,8 @@
      "epoch": 56,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "ShoreExcursions"
+     "location": "ShoreExcursions",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3952,7 +4396,8 @@
      "epoch": 57,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PromGalleria"
+     "location": "PromGalleria",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3961,7 +4406,8 @@
      "epoch": 58,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3970,7 +4416,8 @@
      "epoch": 59,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Ashore"
+     "location": "Ashore",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3979,7 +4426,8 @@
      "epoch": 60,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3988,7 +4436,8 @@
      "epoch": 61,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "ChurchillLounge"
+     "location": "ChurchillLounge",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -3997,7 +4446,8 @@
      "epoch": 62,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "WakeViewBar"
+     "location": "WakeViewBar",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4006,7 +4456,8 @@
      "epoch": 63,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "CalypsoBar"
+     "location": "CalypsoBar",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4015,7 +4466,8 @@
      "epoch": 64,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4024,7 +4476,8 @@
      "epoch": 65,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4033,7 +4486,8 @@
      "epoch": 66,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "SantaFe"
+     "location": "SantaFe",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4042,7 +4496,8 @@
      "epoch": 67,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D5_P_A"
+     "location": "PC_D5_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4051,7 +4506,8 @@
      "epoch": 68,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Facets"
+     "location": "Facets",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4060,7 +4516,8 @@
      "epoch": 69,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "GuestServices"
+     "location": "GuestServices",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4069,7 +4526,8 @@
      "epoch": 70,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4078,7 +4536,8 @@
      "epoch": 71,
      "illness_status": "IllnessStatus.NOT_ILL",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4087,7 +4546,8 @@
      "epoch": 72,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4096,7 +4556,8 @@
      "epoch": 73,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4105,7 +4566,8 @@
      "epoch": 74,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4114,7 +4576,8 @@
      "epoch": 75,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4123,7 +4586,8 @@
      "epoch": 76,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4132,7 +4596,8 @@
      "epoch": 77,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4141,7 +4606,8 @@
      "epoch": 78,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4150,7 +4616,8 @@
      "epoch": 79,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4159,7 +4626,8 @@
      "epoch": 80,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4168,7 +4636,8 @@
      "epoch": 81,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4177,7 +4646,8 @@
      "epoch": 82,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4186,7 +4656,8 @@
      "epoch": 83,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4195,7 +4666,8 @@
      "epoch": 84,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4204,7 +4676,8 @@
      "epoch": 85,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4213,7 +4686,8 @@
      "epoch": 86,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4222,7 +4696,8 @@
      "epoch": 87,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4231,7 +4706,8 @@
      "epoch": 88,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4240,7 +4716,8 @@
      "epoch": 89,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4249,7 +4726,8 @@
      "epoch": 90,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4258,7 +4736,8 @@
      "epoch": 91,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4267,7 +4746,8 @@
      "epoch": 92,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4276,7 +4756,8 @@
      "epoch": 93,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4285,7 +4766,8 @@
      "epoch": 94,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4294,7 +4776,8 @@
      "epoch": 95,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.6556292230693495e-07
     },
     {
      "agent_id": 1259,
@@ -4303,7 +4786,8 @@
      "epoch": 96,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4312,7 +4796,8 @@
      "epoch": 97,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4321,7 +4806,8 @@
      "epoch": 98,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4330,7 +4816,8 @@
      "epoch": 99,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4339,7 +4826,8 @@
      "epoch": 100,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4348,7 +4836,8 @@
      "epoch": 101,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4357,7 +4846,8 @@
      "epoch": 102,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4366,7 +4856,8 @@
      "epoch": 103,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4375,7 +4866,8 @@
      "epoch": 104,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4384,7 +4876,8 @@
      "epoch": 105,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4393,7 +4886,8 @@
      "epoch": 106,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4402,7 +4896,8 @@
      "epoch": 107,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4411,7 +4906,8 @@
      "epoch": 108,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4420,7 +4916,8 @@
      "epoch": 109,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4429,7 +4926,8 @@
      "epoch": 110,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4438,7 +4936,8 @@
      "epoch": 111,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4447,7 +4946,8 @@
      "epoch": 112,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4456,7 +4956,8 @@
      "epoch": 113,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4465,7 +4966,8 @@
      "epoch": 114,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4474,7 +4976,8 @@
      "epoch": 115,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4483,7 +4986,8 @@
      "epoch": 116,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4492,7 +4996,8 @@
      "epoch": 117,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4501,7 +5006,8 @@
      "epoch": 118,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "PC_D6_P_A"
+     "location": "PC_D6_P_A",
+     "pathogen_shedding": 2.65562922306935e-05
     },
     {
      "agent_id": 1259,
@@ -4510,11 +5016,13 @@
      "epoch": 119,
      "illness_status": "IllnessStatus.SYMPTOMATIC",
      "infection_status": "InfectionStatus.INFECTED",
-     "location": "Departed"
+     "location": "Departed",
+     "pathogen_shedding": 2.65562922306935e-05
     }
    ],
    "susceptibility_scale": 1e-30,
    "theta_cell": 7900000.0,
+   "theta_scale_ratio": 323.22222222222223,
    "weighted_dose_mean": 9.139280442197225e-15,
    "weighted_dose_quantiles": {
     "p50": 1.0236702579446923e-17,
