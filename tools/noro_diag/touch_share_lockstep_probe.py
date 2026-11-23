@@ -364,12 +364,13 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
 
     def deposit(
         self: Any, pathogen_id: str, zone_name: str, mass: float,
+        **kwargs: Any,
     ) -> None:
         arm, start, phase = _mark()
         prev = _set_ctx(f"fomite.deposit|{pathogen_id}|{zone_name}")
         try:
             originals["_deposit_surface_mass"](
-                self, pathogen_id, zone_name, mass,
+                self, pathogen_id, zone_name, mass, **kwargs,
             )
         finally:
             _restore_ctx(prev)

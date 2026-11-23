@@ -1,0 +1,54 @@
+{
+ "name": "noro_touch_patch_01",
+ "pathogen": "norovirus",
+ "manifest": "picard_framework/runs/mega_cruise_campaign/noro_dose_refit_01_manifest.json",
+ "pathogen_id": "norwalk_gi",
+ "epochs": 288,
+ "s3_prefix": "campaign/noro_touch_patch_01/",
+ "queue": "picard-campaign-queue",
+ "image_tag": "noro-touch-patch01",
+ "resources": {
+  "vcpu": "1",
+  "memory": "8192",
+  "shm": 512
+ },
+ "canary": {
+  "block": "classic_cruise_1900_item_instances",
+  "seeds": 20
+ },
+ "blocks": {
+  "classic_cruise_1900_item_instances": {
+   "worker": "tools/noro_diag/per_host_dose_challenge.py",
+   "artifact": "per_host_dose_challenge_item_instances_seed{seed}.json.gz",
+   "args": {
+    "fomite_representation": "item_instances",
+    "arm_tag": "item_instances"
+   },
+   "seeds": [
+    8000,
+    8001,
+    8002,
+    8003,
+    8004,
+    8005,
+    8006,
+    8007,
+    8008,
+    8009,
+    8010,
+    8011,
+    8012,
+    8013,
+    8014,
+    8015,
+    8016,
+    8017,
+    8018,
+    8019,
+    8105,
+    8106
+   ]
+  }
+ },
+ "image_digest": "PENDING"
+}

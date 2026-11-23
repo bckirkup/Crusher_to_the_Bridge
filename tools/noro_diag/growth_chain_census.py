@@ -604,8 +604,9 @@ def _wrap_deposit_surface_mass(core_cls: type, rec: CensusRecorder) -> Any:
 
     def wrapper(
         self: Any, pathogen_id: str, zone_name: str, mass: float,
+        **kwargs: Any,
     ) -> None:
-        original(self, pathogen_id, zone_name, mass)
+        original(self, pathogen_id, zone_name, mass, **kwargs)
         if pathogen_id != rec.pathogen_id or mass <= 0.0:
             return
         probe = _frame_probe()

@@ -349,6 +349,10 @@ class Recorder:
             lambda: defaultdict(float),
         ),
     )
+    # Per-instance fomite witness (TOUCH-PATCH): cumulative touch/hit and
+    # coincidence tallies plus the instance<->pool mass drift, refreshed
+    # once per epoch by the ledger observer.
+    instance_witness: dict[str, float] = field(default_factory=dict)
     # Release-composition witness (NORO-DOSE-REFIT-01): which callsites move
     # mass into the fomite/emesis environment per voyage, so the release the
     # profile's ``dose_adjustment`` asserts is measured rather than assumed.
@@ -691,8 +695,14 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         "_deliver_fomite_requests_by_class": (
             core_cls._deliver_fomite_requests_by_class
         ),
+        "_deliver_fomite_requests_by_instance": (
+            core_cls._deliver_fomite_requests_by_instance
+        ),
         "_fomite_pickup_requests_by_class": (
             core_cls._fomite_pickup_requests_by_class
+        ),
+        "_fomite_pickup_requests_by_instance": (
+            core_cls._fomite_pickup_requests_by_instance
         ),
         "_hand_to_mouth_dose": core_cls._hand_to_mouth_dose,
         "_deposit_surface_mass": core_cls._deposit_surface_mass,
@@ -721,9 +731,10 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
 
     def deposit(
         self: Any, pathogen_id: str, zone_name: str, mass: float,
+        **kwargs: Any,
     ) -> None:
         return _deposit_wrapped(
-            originals, rec, self, pathogen_id, zone_name, mass,
+            originals, rec, self, pathogen_id, zone_name, mass, kwargs,
         )
 
     def deliver(
@@ -787,6 +798,32 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
             originals, rec, self, target, zone_name, epoch, pathogen_id,
         )
 
+    def pickup_requests_by_instance(
+        self: Any,
+        target: Any,
+        zone_name: str,
+        epoch: int,
+        pathogen_id: str,
+    ) -> Any:
+        """Instance-arm analogue of ``pickup_requests_by_class``."""
+        return _pickup_by_instance_wrapped(
+            originals, rec, self, target, zone_name, epoch, pathogen_id,
+        )
+
+    def deliver_by_instance(
+        self: Any,
+        requests: list[tuple[Any, dict]],
+        zone_name: str,
+        surface_mass: float,
+        *args: Any,
+        **kwargs: Any,
+    ) -> dict:
+        """Instance-arm analogue of ``deliver_by_class``."""
+        return _deliver_by_instance_wrapped(
+            originals, rec, self, requests, zone_name, surface_mass,
+            (args, kwargs),
+        )
+
     def apply_flow(
         self: Any,
         pathogen_id: str,
@@ -843,7 +880,11 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
 
     core_cls._deliver_fomite_requests = deliver
     core_cls._deliver_fomite_requests_by_class = deliver_by_class
+    core_cls._deliver_fomite_requests_by_instance = deliver_by_instance
     core_cls._fomite_pickup_requests_by_class = pickup_requests_by_class
+    core_cls._fomite_pickup_requests_by_instance = (
+        pickup_requests_by_instance
+    )
     core_cls._hand_to_mouth_dose = hand_to_mouth
     core_cls._deposit_surface_mass = deposit
     core_cls._replenish_hand = replenish_hand
@@ -875,10 +916,11 @@ def _deposit_wrapped(
     pathogen_id: str,
     zone_name: str,
     mass: float,
+    kwargs: dict[str, Any],
 ) -> None:
     _record_deposit_witness(rec, core, pathogen_id, mass)
     return originals["_deposit_surface_mass"](
-        core, pathogen_id, zone_name, mass,
+        core, pathogen_id, zone_name, mass, **kwargs,
     )
 
 
@@ -902,6 +944,42 @@ def _deliver_wrapped(
         rec.fomite["mass_requested_gec"] += requested
         rec.fomite["mass_delivered_to_hands_gec"] += float(delivered)
         _record_deliver_scale(rec.delivery_scale, requested, surface_mass)
+    return delivered
+
+
+def _deliver_by_instance_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    requests: list[tuple[Any, dict]],
+    zone_name: str,
+    surface_mass: float,
+    extra: tuple[tuple, dict],
+) -> dict:
+    """Instance-arm analogue of ``_deliver_by_class_wrapped``.
+
+    ``requests`` carries ``{(unit, pathogen, class, index): mass}`` per
+    target; class-level buckets aggregate on ``key[2]`` so the
+    ``fomite_by_class`` columns stay comparable across arms.
+    """
+    args, kwargs = extra
+    delivered = originals["_deliver_fomite_requests_by_instance"](
+        core, requests, zone_name, surface_mass, *args, **kwargs,
+    )
+    if rec.current_pathogen == rec.pathogen_id:
+        requested = float(
+            sum(m for _, req in requests for m in req.values())
+        )
+        rec.fomite["deliver_calls"] += 1
+        rec.fomite["surface_mass_offered_gec"] += float(surface_mass)
+        rec.fomite["mass_requested_gec"] += requested
+        rec.fomite["mass_delivered_to_hands_gec"] += float(
+            sum(delivered.values())
+        )
+        _record_deliver_by_instance(
+            rec, core, requests, delivered, zone_name, surface_mass,
+            requested,
+        )
     return delivered
 
 
@@ -1219,6 +1297,82 @@ def _record_f_touch(
     _hist_add(bucket, "hist_log10_f_touch", log10_f)
 
 
+def _pickup_by_instance_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    target: Any,
+    zone_name: str,
+    epoch: int,
+    pathogen_id: str,
+) -> Any:
+    """Count per-instance pickup calls and capped requests; reads only.
+
+    Instance keys are ``(unit, pathogen, class, index)``; the
+    ``fomite_by_class`` buckets aggregate on the class element so the
+    instance arm's columns stay comparable with the by-class arm's.
+    """
+    state = core._per_surface
+    mass_before = (
+        dict(state.mass)
+        if pathogen_id == rec.pathogen_id and state is not None
+        else {}
+    )
+    request = originals["_fomite_pickup_requests_by_instance"](
+        core, target, zone_name, epoch, pathogen_id,
+    )
+    if request is None or not mass_before:
+        return request
+    zone_class = core._fomite_zone_class(zone_name)
+    for key, requested_i in request.items():
+        bucket = rec.fomite_by_class[f"{zone_class}.{key[2]}"]
+        bucket["calls"] += 1
+        mass_i = mass_before.get(key, 0.0)
+        if mass_i > 0.0 and requested_i >= mass_i:
+            bucket["capped_calls"] += 1
+    return request
+
+
+def _requests_by_class(
+    requests: list[tuple[Any, dict]],
+) -> list[tuple[Any, dict[str, float]]]:
+    """Collapse per-instance request dicts to per-class dicts."""
+    out: list[tuple[Any, dict[str, float]]] = []
+    for target, req in requests:
+        by_class: dict[str, float] = defaultdict(float)
+        for key, mass in req.items():
+            by_class[key[2]] += float(mass)
+        out.append((target, by_class))
+    return out
+
+
+def _record_deliver_by_instance(
+    rec: Recorder,
+    core: Any,
+    requests: list[tuple[Any, dict]],
+    delivered: dict,
+    zone_name: str,
+    surface_mass: float,
+    requested: float,
+) -> None:
+    """Instance-keyed analogue of ``_record_deliver_by_class``."""
+    zone_class = core._fomite_zone_class(zone_name)
+    class_requests = _requests_by_class(requests)
+    requested_by_class: dict[str, float] = defaultdict(float)
+    for _, req in class_requests:
+        for item_class, mass in req.items():
+            requested_by_class[item_class] += mass
+    delivered_by_class: dict[str, float] = defaultdict(float)
+    for key, mass in delivered.items():
+        delivered_by_class[key[2]] += float(mass)
+    for item_class, requested_c in requested_by_class.items():
+        _record_class_deliver(
+            rec, class_requests, delivered_by_class,
+            zone_class, item_class, requested_c,
+        )
+    _record_deliver_scale(rec.delivery_scale, requested, surface_mass)
+
+
 def _pickup_masses_before(
     core: Any,
     pathogen_id: str,
@@ -1349,8 +1503,11 @@ def _wrap_mass_books(core_cls: type, rec: Recorder) -> dict[str, Any]:
 
     def deposit(
         self: Any, pathogen_id: str, zone_name: str, mass: float,
+        **kwargs: Any,
     ) -> None:
-        originals["_deposit_surface_mass"](self, pathogen_id, zone_name, mass)
+        originals["_deposit_surface_mass"](
+            self, pathogen_id, zone_name, mass, **kwargs,
+        )
         if pathogen_id != rec.pathogen_id or float(mass) <= 0.0:
             return
         rec.deposit_callsite_gec[_caller_name()] += float(mass)
@@ -1545,7 +1702,64 @@ def _flush_epoch_ledger(rec: Recorder, sim: Any, work: Any) -> None:
             float(p.mass) for unit in patches.values() for p in unit
         )),
     }
+    row.update(_instance_ledger_row(rec, core, pools, d_scalar))
     rec.epoch_ledger.append(row)
+
+
+def _instance_ledger_row(
+    rec: Recorder,
+    core: Any,
+    pools: dict[str, float],
+    d_scalar: Any,
+) -> dict[str, Any]:
+    """TOUCH-PATCH epoch columns for the item_instances arm.
+
+    Empty under every other arm (the state carries no ``touch_stats``),
+    so the ledger schema stays identical row to row: the deltas read as
+    0 and the levels as absent keys are not emitted at all.
+    """
+    state = getattr(core, "_per_surface", None)
+    stats = getattr(state, "touch_stats", None)
+    if stats is None:
+        return {}
+    pid = rec.pathogen_id
+    touches = float(sum(
+        s["touches"] for (unit, p), s in stats.items() if p == pid
+    ))
+    hits = float(sum(
+        s["hits"] for (unit, p), s in stats.items() if p == pid
+    ))
+    coincidence = float(sum(
+        v for (unit, p), v
+        in (getattr(state, "coincidence", None) or {}).items() if p == pid
+    ))
+    instance_mass = float(sum(
+        m for k, m in state.mass.items() if k[1] == pid
+    ))
+    pool_mass = float(sum(float(v) for v in pools.values()))
+    contaminated = float(
+        sum(1 for k, m in state.mass.items() if k[1] == pid and m > 0.0)
+    )
+    rec.instance_witness.update({
+        "touches": touches,
+        "contaminated_touches": hits,
+        "coincident_deliveries": coincidence,
+        "instances_contaminated": contaminated,
+        "standing_mass_gec": instance_mass,
+        "pool_drift_gec": instance_mass - pool_mass,
+    })
+    return {
+        "instance_touches": int(d_scalar("inst_touch", touches)),
+        "instance_contaminated_touches": int(
+            d_scalar("inst_hits", hits),
+        ),
+        "instance_coincident_deliveries": int(
+            d_scalar("inst_coin", coincidence),
+        ),
+        "instance_standing_gec": instance_mass,
+        "instance_pool_drift_gec": instance_mass - pool_mass,
+        "instances_contaminated": int(contaminated),
+    }
 
 
 def _record_schedule_draw(
@@ -1998,6 +2212,7 @@ def summarise(
         "transfer_product_witness": _transfer_product_summary(rec),
         "delivery_scale_witness": _delivery_scale_summary(rec),
         "fomite_by_class": _fomite_by_class_summary(rec),
+        "fomite_instance_witness": dict(rec.instance_witness),
         "fomite_delivered_by_host": {
             str(agent_id): float(mass)
             for agent_id, mass in sorted(
@@ -2552,16 +2767,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--fomite-representation",
-        choices=("pooled", "per_surface"), default=None,
-        help="NORO-FOMITE-DISAGG-01 arm: pooled (default-path identity) or "
-             "per_surface (per-item-class fomite accounting); the run "
-             "aborts if the engine resolves a different representation",
+        choices=("pooled", "per_surface", "item_instances"), default=None,
+        help="NORO-FOMITE-DISAGG-01 / TOUCH-PATCH arm: pooled (default-path "
+             "identity), per_surface (per-item-class fomite accounting) or "
+             "item_instances (per-item touch sampling); the run aborts if "
+             "the engine resolves a different representation",
     )
     parser.add_argument(
         "--fomite-touch-share",
         choices=("areal", "declared"), default=None,
         help="NORO-TOUCH-SHARE-01 arm selector; requires "
-             "--fomite-representation per_surface",
+             "--fomite-representation per_surface or item_instances",
     )
     parser.add_argument(
         "--fomite-touch-share-table", type=Path, default=None,
@@ -2648,10 +2864,10 @@ def _validate_touch_share(
     if (
         args.fomite_touch_share is not None
         or args.fomite_touch_share_table is not None
-    ) and args.fomite_representation != "per_surface":
+    ) and args.fomite_representation not in ("per_surface", "item_instances"):
         parser.error(
             "--fomite-touch-share/--fomite-touch-share-table require "
-            "--fomite-representation per_surface",
+            "--fomite-representation per_surface or item_instances",
         )
     if args.fomite_touch_share == "declared" and (
         args.fomite_touch_share_table is None
