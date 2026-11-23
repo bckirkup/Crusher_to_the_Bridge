@@ -1,0 +1,199 @@
+{
+  "canary": "niid_t1e11_canary",
+  "job": "b86ab9d7-16de-4149-aa9d-21c22eb701a0",
+  "jobdef": "picard-covid-dp-theta-pilot-01:1",
+  "image": "picard-campaign@sha256:a65b9aae29b1ff221649181dbb2ca920c6e2384391f8223ea80df9cb53e6f308",
+  "cells": 20,
+  "theta": 100000000000.0,
+  "arm": "replay_niid",
+  "num_epochs": 120,
+  "results": [
+    {
+      "seed": 20200205,
+      "aboard": 3711,
+      "attack_rate": 0.3311775801670709,
+      "secondaries": 1228,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200206,
+      "aboard": 3711,
+      "attack_rate": 0.0010778765831312314,
+      "secondaries": 3,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200207,
+      "aboard": 3711,
+      "attack_rate": 0.0008084074373484236,
+      "secondaries": 2,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200208,
+      "aboard": 3711,
+      "attack_rate": 0.041228779304769606,
+      "secondaries": 152,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200209,
+      "aboard": 3711,
+      "attack_rate": 0.001886284020479655,
+      "secondaries": 6,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200210,
+      "aboard": 3711,
+      "attack_rate": 0.07248720021557532,
+      "secondaries": 268,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200211,
+      "aboard": 3711,
+      "attack_rate": 0.008084074373484237,
+      "secondaries": 29,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200212,
+      "aboard": 3711,
+      "attack_rate": 0.010509296685529508,
+      "secondaries": 38,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200213,
+      "aboard": 3711,
+      "attack_rate": 0.005658852061438965,
+      "secondaries": 20,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200214,
+      "aboard": 3711,
+      "attack_rate": 0.11479385610347616,
+      "secondaries": 425,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200215,
+      "aboard": 3711,
+      "attack_rate": 0.0239827539746699,
+      "secondaries": 88,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200216,
+      "aboard": 3711,
+      "attack_rate": 0.14012395580706008,
+      "secondaries": 519,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200217,
+      "aboard": 3711,
+      "attack_rate": 0.0,
+      "secondaries": 0,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200218,
+      "aboard": 3711,
+      "attack_rate": 0.004850444624090542,
+      "secondaries": 17,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200219,
+      "aboard": 3711,
+      "attack_rate": 0.27351118296954996,
+      "secondaries": 1014,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200220,
+      "aboard": 3711,
+      "attack_rate": 0.011048234977095122,
+      "secondaries": 40,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200221,
+      "aboard": 3711,
+      "attack_rate": 0.40878469415251956,
+      "secondaries": 1516,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200222,
+      "aboard": 3711,
+      "attack_rate": 0.0008084074373484236,
+      "secondaries": 2,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200223,
+      "aboard": 3711,
+      "attack_rate": 0.009970358393963891,
+      "secondaries": 36,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    },
+    {
+      "seed": 20200224,
+      "aboard": 3711,
+      "attack_rate": 0.05443276744812719,
+      "secondaries": 201,
+      "close_zones_fired": false,
+      "theta_echo": 100000000000.0,
+      "epochs": 120
+    }
+  ],
+  "summary": {
+    "median": 39.0,
+    "min": 0,
+    "max": 1516,
+    "zero_secondary_seeds": 1,
+    "audits_clean": true
+  }
+}

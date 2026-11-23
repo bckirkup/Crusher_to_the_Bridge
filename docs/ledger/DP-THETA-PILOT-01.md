@@ -2,7 +2,8 @@
 **Date:** 2026-11-22
 **Commit:** b8194d7c
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** 086ecc84
 
 ## Scope
 
@@ -50,8 +51,24 @@ counts (24-seed rare-event resolution is coarse by declaration).
   the pilot is about); array awaits readout + user decision per the
   campaign gate.
 
+## Canary readout (measured 2026-11-23)
+
+`niid_t1e11_canary` — 20/20 children SUCCEEDED on jobdef
+`picard-covid-dp-theta-pilot-01:1`,
+image `picard-campaign@sha256:a65b9aae29b1ff221649181dbb2ca920c6e2384391f8223ea80df9cb53e6f308`
+(built at 086ecc84). All audits clean: `cell.theta`=1e11 resolved,
+120 epochs, platform `diamond_princess`, `close_zones` never fired.
+
+Secondaries per seed (θ=1e11, replay_niid, 120ep): **median 39,
+range 0–1516**; 1 zero-secondary seed (20200217); high seeds
+20200205=1228, 20200221=1516, 20200219=1014, 20200216=519. Per frozen
+criteria the cell is neither saturated nor dead → **θ=1e11
+bracket-admissible** on the canary seeds. Variance is index-identity
+driven. Committed readout: `docs/covid/dp_theta_pilot_01_canary_readout.json`;
+synced cells under `out/dp_theta_canary/` (untracked).
+
 ## Handoff
 
-Next after canary readout: user decision on the 240-cell array;
-surviving θ (or interval) gates Checkpoint D densification and the
-Greg Mortimer transfer.
+Full 240-cell array STOPPED per campaign gate — user decides.
+Next: user decision on array; surviving θ interval gates Checkpoint D
+densification and the Greg Mortimer transfer.

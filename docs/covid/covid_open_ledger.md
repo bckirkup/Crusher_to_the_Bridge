@@ -659,10 +659,11 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `campaigns/covid/dp_theta_pilot_01/`): Checkpoint C pilot — θ
   {1e10, 3.16e10, 1e11, 3.16e11, 1e12} × 24 matched seeds
   (20200205–20200228) × arms `replay_baseline`+`replay_niid` at the
-  declared 120-epoch horizon = 240 cells.** Criteria frozen before
-  any cell ran; `niid_t1e11_canary` (20 seeds at the middle θ) gates
-  the array per the campaign gate — the full pilot runs only after
-  the canary readout and Benjamin's decision.
+  declared 120-epoch horizon = 240 cells.** Canary measured 2026-11-23 (job `b86ab9d7`, 20/20 SUCCEEDED,
+  audits clean): θ=1e11 `replay_niid` secondaries/seed median 39,
+  range 0–1516, 1 zero-secondary seed → bracket-admissible;
+  readout `docs/covid/dp_theta_pilot_01_canary_readout.json`. Full
+  array stopped pending Benjamin's decision per campaign gate.
 
 - **PLATFORM-FIDELITY-02 (approved by Benjamin, 2026-11-08): larger-seed DP
   follow-up to the platform-fidelity study — measured 2026-11-08: 400/400
