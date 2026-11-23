@@ -73,8 +73,11 @@ seeds, *below* if `P < 634` on ≥ 18 of 24, otherwise *T3-compatible*.
 
 **Edges.**
 - dead cell: `P = 0` on ≥ 20 of 24 seeds;
-- saturated cell: median seedwise secondaries (`infections_total` − 1)
-  ≥ 0.95 × (`aboard_total` − 1).
+- saturated cell: median seedwise secondaries ≥ 0.95 ×
+  (`aboard_total` − 1). Secondaries are `infections_total` as written
+  by the worker, which already excludes the seeded index host (the
+  first draft of this line subtracted the index a second time; corrected
+  before the canary, with no fit cell run).
 
 **Bracket.** The lowest adjacent grid pair with
 `S(θ_lo) < 634 ≤ S(θ_hi)`. The grid *covers* T3 iff such a pair exists.
