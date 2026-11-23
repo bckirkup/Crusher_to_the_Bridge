@@ -330,10 +330,15 @@ class Recorder:
     fomite_representation_seen: str | None = None
     fomite_touch_share_seen: str | None = None
     contamination_solver_seen: str | None = None
+    # The solver that actually ran: ``_use_contamination_flow`` disables
+    # continuous flow under any per-surface representation, so this can
+    # differ from the configured value stamped in ``_seen``.
+    contamination_solver_effective: str | None = None
     # Per-item-class fomite witness (NORO-TOUCH-SHARE-01): pool-level
     # requested/delivered/calls/capped_calls per class, and per-host
-    # delivered mass per class reconstructed in the delivery wrapper from
-    # the engine's uniform per-class scale.
+    # delivered mass per class reconstructed in the delivery wrapper —
+    # per-class scale under the by-class arm, per-instance scale under
+    # item_instances.
     fomite_by_class: dict[str, dict[str, float]] = field(
         default_factory=lambda: defaultdict(
             lambda: {
@@ -432,6 +437,9 @@ def _wrap_execute_pathways(core_cls: type, rec: Recorder) -> Any:
         rec.epoch = int(epoch)
         rec.fomite_representation_seen = self.fomite_representation
         rec.contamination_solver_seen = self.contamination_solver
+        rec.contamination_solver_effective = _resolved_contamination_solver(
+            self, pathogen_id,
+        )
         if self._per_surface is not None:
             rec.fomite_touch_share_seen = self._per_surface.cfg.touch_share
         try:
@@ -1122,6 +1130,9 @@ def _record_deposit_witness(
 ) -> None:
     rec.fomite_representation_seen = core.fomite_representation
     rec.contamination_solver_seen = core.contamination_solver
+    rec.contamination_solver_effective = _resolved_contamination_solver(
+        core, pathogen_id,
+    )
     if core._per_surface is not None:
         rec.fomite_touch_share_seen = core._per_surface.cfg.touch_share
     if pathogen_id == rec.pathogen_id and float(mass) > 0.0:
@@ -1129,21 +1140,52 @@ def _record_deposit_witness(
         rec.fomite["surface_mass_deposited_gec"] += float(mass)
 
 
+def _resolved_contamination_solver(core: Any, pathogen_id: str) -> str:
+    """The solver that actually runs, not the configured one.
+
+    ``_use_contamination_flow`` disables continuous flow whenever a
+    per-surface representation is active (and for the ``_default``
+    pathogen), so a run configured ``continuous`` under item_instances
+    still solves discretely.
+    """
+    if core.contamination_solver != "continuous":
+        return core.contamination_solver
+    return (
+        "continuous"
+        if core._use_contamination_flow(pathogen_id, None)
+        else "discrete"
+    )
+
+
 def _record_deliver_scale(
     scale_witness: dict[str, Any],
     requested: float,
     surface_mass: float,
+    delivered_total: float | None = None,
 ) -> None:
     scale_witness["deliver_calls"] += 1
     scale_witness["sum_requested_gec"] += requested
     scale_witness["sum_offered_gec"] += float(surface_mass)
-    if requested > float(surface_mass) > 0.0:
-        scale_witness["scaled_calls"] += 1
-        log10_scale = math.log10(float(surface_mass) / requested)
-        scale_witness["sum_log10_scale"] += log10_scale
-        scale_witness["min_log10_scale"] = min(
-            scale_witness["min_log10_scale"], log10_scale,
+    if delivered_total is not None:
+        # Instance arm: per-key caps bind at delivered < requested even
+        # when the zone pool was not oversubscribed; the 1e-9 relative
+        # slack keeps float summation noise out of the counter.
+        effective = (
+            float(delivered_total) / requested if requested > 0.0 else 1.0
         )
+        scaled = effective < 1.0 - 1e-9
+        scale_val = effective
+    else:
+        scaled = requested > float(surface_mass) > 0.0
+        scale_val = float(surface_mass) / requested if requested > 0.0 else 0.0
+    if scaled:
+        scale_witness["scaled_calls"] += 1
+        if scale_val > 0.0:
+            log10_scale = math.log10(scale_val)
+            scale_witness["sum_log10_scale"] += log10_scale
+            scale_witness["min_log10_scale"] = min(
+                scale_witness["min_log10_scale"], log10_scale,
+            )
 
 
 def _record_deliver_by_class(
@@ -1313,21 +1355,19 @@ def _pickup_by_instance_wrapped(
     instance arm's columns stay comparable with the by-class arm's.
     """
     state = core._per_surface
-    mass_before = (
-        dict(state.mass)
-        if pathogen_id == rec.pathogen_id and state is not None
-        else {}
-    )
     request = originals["_fomite_pickup_requests_by_instance"](
         core, target, zone_name, epoch, pathogen_id,
     )
-    if request is None or not mass_before:
+    # The request path is read-only on ``state.mass`` (consumption happens
+    # in delivery), so per-key masses are still valid read post-call — no
+    # shipwide copy per target.
+    if request is None or state is None or pathogen_id != rec.pathogen_id:
         return request
     zone_class = core._fomite_zone_class(zone_name)
     for key, requested_i in request.items():
         bucket = rec.fomite_by_class[f"{zone_class}.{key[2]}"]
         bucket["calls"] += 1
-        mass_i = mass_before.get(key, 0.0)
+        mass_i = state.mass.get(key, 0.0)
         if mass_i > 0.0 and requested_i >= mass_i:
             bucket["capped_calls"] += 1
     return request
@@ -1357,20 +1397,47 @@ def _record_deliver_by_instance(
 ) -> None:
     """Instance-keyed analogue of ``_record_deliver_by_class``."""
     zone_class = core._fomite_zone_class(zone_name)
-    class_requests = _requests_by_class(requests)
+    requested_per_key: dict[Any, float] = defaultdict(float)
+    for _, req in requests:
+        for key, mass in req.items():
+            requested_per_key[key] += float(mass)
+    # Per-instance scales differ inside one class; a class-wide
+    # delivered/requested ratio would mis-assign each host's share.
+    scales = {
+        key: min(1.0, float(delivered.get(key, 0.0)) / req_total)
+        for key, req_total in requested_per_key.items()
+        if req_total > 0.0
+    }
     requested_by_class: dict[str, float] = defaultdict(float)
-    for _, req in class_requests:
-        for item_class, mass in req.items():
-            requested_by_class[item_class] += mass
+    for key, mass in requested_per_key.items():
+        requested_by_class[key[2]] += mass
     delivered_by_class: dict[str, float] = defaultdict(float)
     for key, mass in delivered.items():
         delivered_by_class[key[2]] += float(mass)
     for item_class, requested_c in requested_by_class.items():
-        _record_class_deliver(
-            rec, class_requests, delivered_by_class,
-            zone_class, item_class, requested_c,
-        )
-    _record_deliver_scale(rec.delivery_scale, requested, surface_mass)
+        class_key = f"{zone_class}.{item_class}"
+        bucket = rec.fomite_by_class[class_key]
+        bucket["requested_gec"] += requested_c
+        delivered_c = float(delivered_by_class.get(item_class, 0.0))
+        bucket["delivered_gec"] += delivered_c
+        if requested_c <= 0.0 or delivered_c <= 0.0:
+            continue
+        for target, req in requests:
+            host_c = sum(
+                float(mass) * scales[key]
+                for key, mass in req.items()
+                if key[2] == item_class and key in scales
+            )
+            if host_c > 0.0:
+                rec.fomite_host_class_gec[int(target.agent_id)][
+                    class_key
+                ] += host_c
+    # Per-instance caps bind even when the zone aggregate does not
+    # oversubscribe, so the scale witness reads the true delivered total.
+    _record_deliver_scale(
+        rec.delivery_scale, requested, surface_mass,
+        delivered_total=float(sum(delivered.values())),
+    )
 
 
 def _pickup_masses_before(
@@ -2454,7 +2521,10 @@ def run_seed(
         rec.fomite_representation_seen
     )
     summary["fomite_touch_share_resolved"] = rec.fomite_touch_share_seen
-    summary["contamination_solver_resolved"] = rec.contamination_solver_seen
+    summary["contamination_solver_resolved"] = (
+        rec.contamination_solver_effective or rec.contamination_solver_seen
+    )
+    summary["contamination_solver_configured"] = rec.contamination_solver_seen
     if verbatim:
         _attach_voyage_blocks(
             summary, spec_dict, result, num_agents,
