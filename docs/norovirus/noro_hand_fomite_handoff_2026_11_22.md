@@ -57,8 +57,8 @@ mind §4's sign reversal).
 ## 4. Evidence against / unexplained
 
 - **D3′ rhythm re-read** (`docs/ledger/NORO-RHYTHM-REREAD-01.md`,
-  commit `5007b3a4`, branch `devin/1795384511-noro-rhythm-reread`,
-  PR pending at handoff): on the 8-day mega reconstruction the 4 seeds
+  commit `5007b3a4`, PR
+  [#1398](https://github.com/bckirkup/Crusher_to_the_Bridge/pull/1398)): on the 8-day mega reconstruction the 4 seeds
   igniting in both arms show rhythm-on *reducing* onboard acquisitions
   148.0 → 113.5 (−23.3%, sign-test p = 0.125). Scheduling may damp
   rather than amplify — the encounter-density explanation is unverified;
@@ -90,11 +90,12 @@ mind §4's sign reversal).
 - [#1395](https://github.com/bckirkup/Crusher_to_the_Bridge/pull/1395)
   — D1′ blocker record (child session
   `454b9750b8624ea78ba9daaa526db9a9`). Merged.
-- Branch `devin/1795383895-noro-dose-ledger-01-readout` — unmerged at
-  handoff: `--contamination-solver` worker knob, `noro_pool_pickup_01`
-  campaign spec, D2′ measured readout, this handoff. PR pending.
-- Branch `devin/1795384511-noro-rhythm-reread` — D3′ ledger
-  `NORO-RHYTHM-REREAD-01` at `5007b3a4`, unmerged; PR pending.
+- [#1397](https://github.com/bckirkup/Crusher_to_the_Bridge/pull/1397)
+  — `--contamination-solver` worker knob, `noro_pool_pickup_01`
+  campaign spec, D2′ measured readout, this handoff. Open at handoff.
+- [#1398](https://github.com/bckirkup/Crusher_to_the_Bridge/pull/1398)
+  — D3′ ledger `NORO-RHYTHM-REREAD-01` at `5007b3a4` (child
+  `3ec803fb0fde432f813df15087e20802`). Open at handoff.
 
 ## 6. Running jobs
 
