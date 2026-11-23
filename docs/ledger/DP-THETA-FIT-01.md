@@ -195,6 +195,12 @@ Inferred: the four unrun θ below 1e9 would not change the bracket if the
 medians stay monotone, which holds on the three run θ. The dead edge of
 the grid is unmeasured.
 
+Not run: the secondary cross-check against 691 positives of 3,894 tests
+through 23 February. The design runs it only at the selected θ with the
+`crew_wave` and retest sweeps armed, as a separate set of cells; it was
+outside the 52 cells Benjamin authorized, so no 23 February result is
+reported here.
+
 Hypothesis: three seeds (20200210, 20200217, 20200226) are extinct at
 all three θ, so early extinction on those seeds is set by the index
 host's draw rather than by θ.

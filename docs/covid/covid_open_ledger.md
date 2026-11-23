@@ -631,7 +631,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
-- **`DP-THETA-FIT-01` is measured on three θ — T3 brackets θ in (3.16e9, 1e10) but bounds it weakly from above**
+- **`DP-THETA-FIT-01` is measured on three θ — the median crosses T3 between 3.16e9 and 1e10, and the top θ is still compatible, so T3 sets no upper bound**
   (ledger `docs/ledger/DP-THETA-FIT-01.md`, design
   `docs/covid/covid_dp_theta_fit_01_design.md`, campaign
   `campaigns/covid/dp_theta_fit_01/`). The scored endpoint is `covid.T3`,
@@ -645,7 +645,8 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   600 (3.16e9, compatible) and 735.5 (1e10, compatible); the frozen rule
   selects 3.16e9 and interpolates 4.22e9. Median attack rate runs 0.47 to
   0.80 across the two compatible θ, so T3 does not separate them. The
-  four θ below 1e9 were not run by owner decision. Open decision: accept
+  four θ below 1e9 were not run by owner decision. The 691/3894 cross-check through February 23 was not run.
+  Open decision: accept
   the weakly bounded fit or add a second scored observable.
 
 - **`DP-REPLAY-ENVIRON-01` landed (ledger
