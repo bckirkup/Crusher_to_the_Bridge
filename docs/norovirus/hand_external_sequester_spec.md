@@ -1,6 +1,10 @@
-> **Status:** Implemented (PR #1407, canary pending) as selectable arms; not
+> **Status:** Implemented (PR #1407) and **measured** as selectable arms; not
 > adopted — the `stool_only`/`pickup_only` defaults are unchanged and a run
-> without the new blocks stays bit-identical to the pre-change engine. No epidemiological constant is added, moved, re-sourced, or tuned:
+> without the new blocks stays bit-identical to the pre-change engine.
+> Campaign verdict in `docs/ledger/NORO-EXTERNAL-SEQUESTER-01.md`: mouth dose
+> rose but take-off does not (S 3/18, S+R 1/18 cold cells vs the ≥9 gate).
+>
+> No epidemiological constant is added, moved, re-sourced, or tuned:
 > every number quoted is either a repository constant read at its definition
 > site or a measurement quoted from its ledger entry with that entry's
 > `Measured at` SHA — and every dose figure in the repository remains void

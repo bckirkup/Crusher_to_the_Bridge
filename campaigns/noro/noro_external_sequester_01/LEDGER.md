@@ -116,4 +116,7 @@ with an announced ETA -> stop and report.
 - [x] Both 20-seed arrays submitted on jobdef `:3`, image
   `sha256:d92f1d4c`: arm S `e15d50cd-0a5f-4184-886b-8d7ef8577731`,
   arm S+R `66d64d2f-a680-4ee5-9ff0-7131fa15ca0a` (seeds 8000-8019
-  each). Stop and report; verdict readout when the arrays land.
+  each). All 40 children SUCCEEDED.
+- [x] Readout: all 40 cells pass the audit invariants; verdict and
+  full waterfall in `docs/ledger/NORO-EXTERNAL-SEQUESTER-01.md` —
+  mouth dose rose but take-off does not (S 3/18, S+R 1/18 vs ≥9).
