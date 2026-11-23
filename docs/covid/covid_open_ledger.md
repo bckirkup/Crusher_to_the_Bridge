@@ -639,8 +639,10 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   full declared voyage; the onboard table's 691 through February 23 is a
   reported cross-check and the final 712 is not scored. Two pre-freeze
   smoke cells at θ=1e10 returned in-window positives and an attack rate
-  near 0.9, so the declared grid runs from 1e7 to 1e10. No fit cell has
-  been read out and no θ is selected.
+  near 0.9, so the declared grid runs from 1e7 to 1e10. The 20-seed canary at
+  θ=1e9 returned a median of 281 scored positives with 18 seeds below
+  634, so that cell is below T3. The full array is not submitted and no
+  θ is selected.
 
 - **`DP-REPLAY-ENVIRON-01` landed (ledger
   `docs/ledger/DP-REPLAY-ENVIRON-01.md`, design

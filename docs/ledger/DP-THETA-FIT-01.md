@@ -81,7 +81,57 @@ voyage, so the whole pilot grid sits above the T3 bracket. Measured on the
 same two cells: at attack about 0.9 the campaign returns only 1.2–1.3 ×
 the T3 count, so the scored quantity compresses near saturation.
 
+## Local smoke through the registered path (measured, one seed)
+
+**Measured at:** 6e23f0d9
+
+`scripts/campaign run covid/dp_theta_fit_01 --block niid_t1e9_canary
+--index 0` (θ=1e9, seed 20200205, full voyage): 3,063 specimens and 777
+positives through day 31, last specimen day 31, no wave-tagged specimen,
+2,881 secondaries, quarantine activated at epoch 391, resolved platform
+`diamond_princess`, susceptibility scale 3.2322e11 = θ·(α+β)/α. Every
+audit invariant held. The dry run counts 168 cells over eight blocks.
+
+## Canary (measured, 20 matched seeds at one cell)
+
+**Measured at:** 6e23f0d9 (image
+`picard-campaign@sha256:8891880d99c2b2d533d62af077602873141f201be55bd4a762514b34acf4b954`,
+job definition `picard-covid-dp-theta-fit-01:1`, Batch array
+`653e82d7-351e-48c5-8362-dae004d96601`, 20 of 20 succeeded)
+
+Block `niid_t1e9_canary`: θ=1e9, seeds 20200205–20200224. Readout
+`docs/covid/dp_theta_fit_01_canary_readout.json`.
+
+| Quantity | Value |
+| --- | --- |
+| Scored positives through day 31, sorted by seed value | 0, 0, 0, 0, 0, 70, 87, 136, 229, 255, 307, 365, 373, 401, 402, 450, 463, 572, 777, 802 |
+| Median scored positives (target 634) | 281 |
+| Seeds below / above 634 | 18 / 2 |
+| Seeds with zero secondaries | 5 |
+| Median secondaries; median attack rate | 951; 0.256 |
+| Median infections before / during / after quarantine | 11 / 870 / 54 |
+| Median specimens through day 31 | 3,063 |
+| Median `lab_confirmed_total` | 645 |
+| Audit deviations | none on any seed |
+
+Measured: the Batch cell for seed 20200205 reproduces the local smoke
+exactly (2,881 secondaries, 777 positives). Measured: 18 seeds are below
+634, which already meets the frozen "below" rule for the full 24, so
+θ=1e9 is on the low side of T3 whatever the four remaining seeds return.
+Measured: the cell is neither dead nor saturated.
+
+Inferred: the T3 bracket lies above 1e9, inside the two remaining grid
+intervals (1e9, 3.16e9) and (3.16e9, 1e10). The upper edge rests on two
+pre-freeze seeds at 1e10 (745 and 821 all-day positives), not on 24.
+Inferred: the four cells below 1e9 will sit further below the target and
+serve as the dead-edge reference only.
+
+Hypothesis (20 seeds, one θ): the outcome is strongly seed-dependent at
+fixed θ — a quarter of seeds go extinct and the rest spread from 70 to
+802 — so the selected θ's median may not describe a typical voyage; the
+frozen representativeness flag reports this.
+
 ## Execution status
 
-Design declared; canary pending. No fit cell has been read out, so this
-entry records no selected theta.
+Canary read out; the full array is not submitted and waits on Benjamin's
+decision. No θ is selected.
