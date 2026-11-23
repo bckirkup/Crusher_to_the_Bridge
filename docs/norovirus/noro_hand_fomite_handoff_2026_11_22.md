@@ -46,13 +46,24 @@ mind §4's sign reversal).
   requested 79.85M GEC, offered 2.15B, delivered 79.66M (~100% fill of
   requests), still ~99.9% emesis-patch. B ≈ A on cold cells → per the
   frozen rule, deficit is upstream of pickup.
-- **Mechanism review + optimistic upper bound** (this session, memo
-  `noro_hand_fomite_mechanism_review_2026_11_22.md` — NOT committed;
-  its content is superseded by the ledger entries above): magnitude
-  levers top out ~3–5×; structural ignition is the only route to the
-  ~35× AR gap vs the Explorer target.
-- **NORO-HAND-RESERVOIR-01** (prior ledger): occupancy `partial`,
-  18.9% vs Liu's 25.4% — emission gated on a mostly-empty reservoir.
+- **Optimistic upper bound** (derived in-session from the
+  NORO-DOSE-LEDGER-01 artifacts — derivation folded here, not a
+  committed measurement): baseline Σhazard 2.95 → ~3 secondaries,
+  mean take-off 7.4%, three hot cells carrying ~97% of hazard.
+  Magnitude levers at their most optimistic: reservoir occupancy to
+  100% bounds emission ≤5.3× (1.34× at Liu's 25.4%); areal
+  concentration ≤20× absolute / 2.2× call-weighted; schedule
+  concentration ~3× (hypothesis). Regime A — dose alone: a 500× dose
+  multiplier lifts mean take-off only to ~30% (19/22 cells stay cold).
+  Regime B — structural ignition: hot-cell hazard ≈ 1.1 → P ≈ 67%
+  per cell; if carrier hops, item-level patchiness and event
+  scheduling give every cell a dense encounter, per-cell take-off
+  bounds ~65–80% and onboard AR plausibly reaches the ~5–10% band the
+  Explorer record demands (~35× the measured 0.22%). Conclusion:
+  the gap is closable only through structure, not magnitude.
+- **NORO-HAND-CARRIAGE-01** (prior ledger, measured `1c94de2d`):
+  hand-reservoir occupancy 18.9% vs Liu's 25.4% (R = 0.737, verdict
+  `partial`) — emission gated on a mostly-empty reservoir.
 
 ## 4. Evidence against / unexplained
 
