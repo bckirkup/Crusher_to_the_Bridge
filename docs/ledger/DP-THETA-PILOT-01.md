@@ -59,9 +59,9 @@ image `picard-campaign@sha256:a65b9aae29b1ff221649181dbb2ca920c6e2384391f8223ea8
 (built at 086ecc84). All audits clean: `cell.theta`=1e11 resolved,
 120 epochs, platform `diamond_princess`, `close_zones` never fired.
 
-Secondaries per seed (θ=1e11, replay_niid, 120ep): **median 39,
-range 0–1516**; 1 zero-secondary seed (20200217); high seeds
-20200205=1228, 20200221=1516, 20200219=1014, 20200216=519. Per frozen
+Secondaries per seed (θ=1e11, replay_niid, 120ep): **median 40,
+range 0–1517**; 1 zero-secondary seed (20200217); high seeds
+20200205=1229, 20200221=1517, 20200219=1015, 20200216=520. Per frozen
 criteria the cell is neither saturated nor dead on the canary seeds;
 **bracket-admissibility still requires a measurable difference from an
 adjacent grid cell** — pending the full array. Variance is
@@ -77,13 +77,20 @@ Full array approved by Benjamin ("ok execute" 2026-11-22 21:21 EST);
 the canary. **240/240 cells SUCCEEDED.**
 
 Median secondaries per seed (120-epoch horizon), θ lo→hi:
-- `replay_niid` (diamond_princess, NIID clock): 2.5 / 8 / 37 / 392 / 1054; zero-secondary seeds 7/3/2/1/1.
-- `replay_baseline` (mega_cruise_5000 default stack, declared null reference): 41.5 / 95.5 / 232.5 / 599.5 / 1577.5; zero-secondary seeds 1/1/0/0/0.
+- `replay_niid` (diamond_princess, NIID clock): 3.5 / 9 / 38 / 393 / 1055; zero-secondary seeds 3/1/1/1/1.
+- `replay_baseline` (mega_cruise_5000 default stack, declared null reference): 42.5 / 96.5 / 233.5 / 600.5 / 1578.5; zero-secondary seeds 1/1/0/0/0.
+
+*Correction (Edison, 2026-11-23):* secondaries = the cell payload's
+`infections_total`, which already excludes the import; the first
+reduction subtracted 1, which also mislabeled seeds with exactly one
+secondary as zeros — true zero counts above (was 7/3/2/1/1 and
+1/1/0/0/0). Medians/verdicts re-reduced from the raw payloads in
+`out/dp_theta_array/`.
 
 Frozen criteria: no cell saturated (no median ≥0.95·(aboard−1)), none
 dead (no cell with ≥20/24 zero seeds); every adjacent θ pair on both
 arms shows a measurable contrast (all ≥18/24 same-sign paired diffs,
-median ratios 2.3–10.6×) → **all five θ are bracket-admissible on
+median ratios 2.3–10.3×) → **all five θ are bracket-admissible on
 `replay_niid`; the grid is a working fitting instrument, not a
 straddle.** The declared audit marks `close_zones` firings as FAILED
 COMPARISON: on `replay_baseline` that applies to 16 cells (1 at θ=3.16e10,
@@ -95,7 +102,7 @@ array readout `audits.close_zones_fired`).
 
 Notable: seed 20200217 draws a dead index — zero secondaries at every
 θ on niid (and on baseline at θ≤3.16e10); index-identity lottery
-dominates within-cell variance as predicted. niid medians run ~2–16×
+dominates within-cell variance as predicted. niid medians run ~1.5–12×
 below baseline at the same θ — a bundled contrast of the declared
 dedicated-stack arm vs the default stack (hull, protocols, NIID clock
 change together; the gap does not isolate any one of them).

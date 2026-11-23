@@ -20,8 +20,8 @@ doc `docs/covid/covid_dp_theta_pilot_01_design.md`).
   parent array job `b86ab9d7-16de-4149-aa9d-21c22eb701a0` (20 children),
   S3 prefix `campaign/covid_dp_theta_pilot_01/niid_t1e11_canary/`.
 - **Canary readout (measured, 20/20 SUCCEEDED, audits clean):**
-  θ=1e11 `replay_niid` 120ep — secondaries/seed: median **39**,
-  range **0–1516**, 1 zero-secondary seed (20200217). Cell neither
+  θ=1e11 `replay_niid` 120ep — secondaries/seed: median **40**,
+  range **0–1517**, 1 zero-secondary seed (20200217). Cell neither
   saturated nor dead on these seeds; admissibility still pending a
   measurable adjacent-cell contrast (full array). Heavy seed
   variance (index-identity lottery). Readout committed:
@@ -40,8 +40,8 @@ doc `docs/covid/covid_dp_theta_pilot_01_design.md`).
   base_t1e12 `e268ef9f-27f3-424f-9d77-bad1d56658bd`.
   PR #1399 merged at a57a7d48 (declared pilot + canary readout).
 - **Array readout (measured):** 240/240 SUCCEEDED across 11 parent
-  jobs (jobdef revs :1–:11 — :1 canary, :2–:11 array). Median secondaries — niid: 2.5/8/37/392/1054
-  (θ lo→hi), baseline: 41.5/95.5/232.5/599.5/1577.5. No cell saturated,
+  jobs (jobdef revs :1–:11 — :1 canary, :2–:11 array). Median secondaries — niid: 3.5/9/38/393/1055
+  (θ lo→hi), baseline: 42.5/96.5/233.5/600.5/1578.5. No cell saturated,
   none dead; all 8 adjacent θ pairs measurable → every θ
   bracket-admissible on `replay_niid`; on `replay_baseline` 16 cells
   fired `close_zones` (declared FAILED COMPARISON), so only baseline
