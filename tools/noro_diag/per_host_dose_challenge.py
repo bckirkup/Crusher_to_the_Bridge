@@ -106,7 +106,7 @@ import sys
 import time
 from collections import defaultdict
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
@@ -3147,6 +3147,27 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
+def _implicit_arm_tag(sweep: TransmissionSweepKnobs | None) -> str | None:
+    """Tag derived from non-default sweep knobs so untagged arm runs cannot
+    silently overwrite each other's artifact (``--arm-tag`` stays preferred)."""
+    if sweep is None:
+        return None
+    parts = []
+    for f in fields(sweep):
+        value = getattr(sweep, f.name)
+        if value is None:
+            continue
+        if isinstance(value, dict):
+            value = hashlib.sha256(
+                json.dumps(value, sort_keys=True).encode(),
+            ).hexdigest()[:8]
+        parts.append(f"{f.name}-{value}")
+    if not parts:
+        return None
+    tag = "+".join(parts)
+    return "".join(c if (c.isalnum() or c in "._-") else "_" for c in tag)
+
+
 def _validate_manifest_mode(
     parser: argparse.ArgumentParser, args: argparse.Namespace,
 ) -> None:
@@ -3291,6 +3312,22 @@ def main(argv: list[str] | None = None) -> int:
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )
     for seed in args.seeds:
+        sweep = TransmissionSweepKnobs(
+            high_touch_area_scale=args.high_touch_area_scale,
+            high_touch_area_scale_by_zone_class=(
+                args.high_touch_area_scale_by_zone_class
+            ),
+            fomite_representation=args.fomite_representation,
+            fomite_touch_share=args.fomite_touch_share,
+            fomite_touch_share_table_path=(
+                str(args.fomite_touch_share_table)
+                if args.fomite_touch_share_table is not None
+                else None
+            ),
+            contamination_solver=args.contamination_solver,
+            hand_sequester_fill=args.hand_sequester_fill,
+            hand_residual_mouthing=args.hand_residual_mouthing,
+        )
         summary = run_seed(
             seed=seed,
             platform=args.platform,
@@ -3300,28 +3337,16 @@ def main(argv: list[str] | None = None) -> int:
             top_hosts=args.top_hosts,
             options=RunSeedOptions(
                 alpha_override=args.alpha,
-                sweep=TransmissionSweepKnobs(
-                    high_touch_area_scale=args.high_touch_area_scale,
-                    high_touch_area_scale_by_zone_class=(
-                        args.high_touch_area_scale_by_zone_class
-                    ),
-                    fomite_representation=args.fomite_representation,
-                    fomite_touch_share=args.fomite_touch_share,
-                    fomite_touch_share_table_path=(
-                        str(args.fomite_touch_share_table)
-                        if args.fomite_touch_share_table is not None
-                        else None
-                    ),
-                    contamination_solver=args.contamination_solver,
-                    hand_sequester_fill=args.hand_sequester_fill,
-                    hand_residual_mouthing=args.hand_residual_mouthing,
-                ),
+                sweep=sweep,
                 arm_tag=args.arm_tag,
             ),
         )
-        if args.arm_tag is not None:
+        tag = args.arm_tag if args.arm_tag is not None else (
+            _implicit_arm_tag(sweep)
+        )
+        if tag is not None:
             filename = (
-                f"per_host_dose_challenge_{args.arm_tag}_seed{seed}.json.gz"
+                f"per_host_dose_challenge_{tag}_seed{seed}.json.gz"
             )
         elif args.alpha is None:
             filename = f"per_host_dose_challenge_seed{seed}.json.gz"

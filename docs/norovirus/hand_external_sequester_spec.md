@@ -1,6 +1,6 @@
-> **Status:** Proposed (design PR). No field exists, no value is adopted, and
-> a run without the new block must stay bit-identical to the pre-change
-> engine. No epidemiological constant is added, moved, re-sourced, or tuned:
+> **Status:** Implemented (PR #1407, canary pending) as selectable arms; not
+> adopted — the `stool_only`/`pickup_only` defaults are unchanged and a run
+> without the new blocks stays bit-identical to the pre-change engine. No epidemiological constant is added, moved, re-sourced, or tuned:
 > every number quoted is either a repository constant read at its definition
 > site or a measurement quoted from its ledger entry with that entry's
 > `Measured at` SHA — and every dose figure in the repository remains void

@@ -1,7 +1,9 @@
 # noro_external_sequester_01 — campaign ledger
 
 EXTERNAL-SEQUESTER (D2'') canary, declared as
-`docs/proposals/hand_external_sequester_spec.md` (merged via PR #1404).
+`docs/norovirus/hand_external_sequester_spec.md` (merged via PR #1404;
+moved to the norovirus subject directory on implementation per the docs
+filing rule).
 Two arms on the 20-cell cold cohort of the TOUCH-PATCH canary
 (seeds 8000–8019, `classic_cruise_1900`, 288 epochs, `norwalk_gi`),
 stacked on `fomite_representation: item_instances` — **40 cells**:
@@ -66,7 +68,7 @@ with an announced ETA -> stop and report.
 
 ## Gate checklist
 
-- [x] Design declared and merged: `docs/proposals/hand_external_sequester_spec.md`
+- [x] Design declared and merged: `docs/norovirus/hand_external_sequester_spec.md`
   (PR #1404); frozen audit invariants and decision rules in section 6.
 - [x] Engine + worker implementation (this branch): two selectors with
   bit-identical defaults, hand-loss partition witness across every
@@ -80,8 +82,16 @@ with an announced ETA -> stop and report.
   `discrete`; partition closes at 3.5e-18 rel; migration exercised
   (0.021 GEC migrated, 25 protected carriers, 0 provenance violations);
   12-row ledger carries the partition columns.
-- [ ] Baseline-identity gate: default-knob artifact bit-identical to
-  the pre-change tree on one seed (bar wall-clock + audit-only keys).
+- [x] Baseline-identity gate: seed 8000 / 12 epochs / `item_instances` +
+  `discrete`, both knobs at defaults — the branch artifact is bit-identical
+  to a `main` worktree (`c3030809`) artifact on every shared key, 12/12
+  ledger rows included. Excluded from the comparison, by construction:
+  `wall_clock_seconds_*`, `arm_tag`, and the keys that only exist on the
+  new tree (`hand_partition`, `hand_sequester_fill` /
+  `hand_residual_mouthing` resolved stamps, the per-epoch
+  `hand_partition_delta_gec` / `hand_pending_end_gec` /
+  `hand_protected_end_gec` columns) — all additive witness, none
+  behavioural.
 - [ ] Jobdef revision registered against pinned image digest; digest
   pinned in campaign.json.
 - [ ] Dry-run array count = 40 (2 blocks x 20 seeds).
