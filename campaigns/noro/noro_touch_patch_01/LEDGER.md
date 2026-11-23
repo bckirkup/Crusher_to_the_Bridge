@@ -64,4 +64,5 @@ any promotion decision).
 
 | date | block | shape | job ids | verdict |
 |---|---|---|---|---|
-| 2026-11-23 | classic_cruise_1900_item_instances | 20-child array, seeds 8000-8019 (indices 0-19; 8105/8106 held for the full-campaign decision) | 110a1dae-ff16-4cc3-a616-be36e8eccdd7 | submitted, awaiting readout |
+| 2026-11-23 | classic_cruise_1900_item_instances | 20-child array, seeds 8000-8019 (indices 0-19; 8105/8106 held for the full-campaign decision) | 110a1dae-ff16-4cc3-a616-be36e8eccdd7 | FAILED fast, all 20: manual submit passed `python3` as argv[0]; container ran `python3 python3`, exit 2 |
+| 2026-11-23 | classic_cruise_1900_item_instances | 20-child array, seeds 8000-8019 (indices 0-19; 8105/8106 held for the full-campaign decision) | cc56f036-cab8-49fd-9c98-ca85fa9531e6 | submitted, awaiting readout |
