@@ -2,7 +2,7 @@
 **Date:** 2026-11-22
 **Commit:** 8c6fae12
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
 
 D2′ re-spec after NORO-DOSE-LEDGER-01. The 22-cell mass ledger showed the
 ordinary zone pool is a write-only reservoir under the frozen
@@ -86,3 +86,37 @@ Selection / decision rules:
 44 cells (2 arms × 22) on the existing layered image (rebuild only for
 the worker flag); ~45–60 min/cell at 1 vCPU. Canopy: same canary gate —
 ≥20-seed canary on arm B first, stop and report before the rest.
+
+## Result — arm B, all 22 cells (Measured at: f9d806ac)
+
+Campaign `noro_pool_pickup_01`, block `classic_cruise_1900_discrete`,
+seeds 8000–8019 + 8105/8106, 288 epochs, jobdef `picard-noro-pool-pickup-01`,
+image digest `sha256:770d24a9…`. All 22 artifacts passed the frozen
+audit (solver resolved `discrete`, len-288 ledgers, reconciliations).
+
+Pooled (22 cells): requested 79.85M GEC, offered 2.147B, delivered
+79.66M — the per-touch path works end to end (~100% of requested
+filled). But ~99.9% of delivered mass is still emesis-patch (79.57M);
+on cold cells the requests themselves are ~0–51k and deliveries
+~0–51k, the same order as the continuous baseline's 0–4k. Σhazard
+220.2 vs baseline 184.1, carried by the same hot cells (8006: 177.4 vs
+146; 8000: 39.1 vs 31); mouth dose 2.32M vs 1.0M pooled.
+
+Caveat (recorded, not attributed): seed 8105 realized its emesis-patch
+event under `continuous` (1.17M delivered, haz 1.098) but not under
+`discrete` (51k, haz 0.01) — solver choice perturbs the RNG stream on
+some seeds, so per-seed arm contrasts are not paired-realization
+comparisons; the pooled verdict is the unit of evidence.
+
+**Verdict under the frozen rules: B ≈ A on cold cells.** Per-touch
+pickup is not the binding stage — the zone pool holds mass and pickup
+machinery delivers whatever is asked, but ordinary high-touch
+encounters *request* almost nothing. The deficit is upstream of pickup:
+encounter structure (who touches what, how often, at what intensity)
+rather than delivery mechanics.
+
+**Arm C declined (user decision, 2026-11-22).** Itemizing the pool
+cannot move a request volume already measured near zero — the request
+side is upstream of representation, so arm C's prior was too weak to
+justify the spend. D2′ closes on arm B: the next proposal lives in the
+encounter/activity layer, not in pool delivery or representation.
