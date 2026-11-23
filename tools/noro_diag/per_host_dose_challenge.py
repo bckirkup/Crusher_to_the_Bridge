@@ -3171,13 +3171,15 @@ def _implicit_arm_tag(
         parts.append(f"a{alpha:.4f}")
     if not parts:
         return None
-    tag = "+".join(parts)
+    raw = "+".join(parts)
     tag = "".join(
         c if (c.isascii() and (c.isalnum() or c in "._-")) else "_"
-        for c in tag
+        for c in raw
     )
-    if len(tag) > 200:
-        tag = tag[:180] + "-" + hashlib.sha256(tag.encode()).hexdigest()[:8]
+    if tag != raw or len(tag) > 200:
+        # Slug or cap could alias distinct inputs; hash the raw tag to keep
+        # filenames unique.
+        tag = tag[:180] + "-" + hashlib.sha256(raw.encode()).hexdigest()[:8]
     return tag
 
 
