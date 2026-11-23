@@ -2,7 +2,7 @@
 **Date:** 2026-11-23
 **Commit:** 8a698da7
 **Pathogens:** norwalk_gi
-**Status:** measured (canary, 20 of 22 cells)
+**Status:** measured
 
 TOUCH-PATCH canary per `docs/norovirus/fomite_touch_patch_spec.md`
 (PR #1401), implementation PR #1403. NORO-POOL-PICKUP-01 measured that
