@@ -42,8 +42,11 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- [NORO-CASCADE-ARMS-01](NORO-CASCADE-ARMS-01.md) — open. D1′ stopped before simulation. All direct hand donors must shed, and the carrier-redeposition witness misses the frozen solver's surface and food flows.
+
 - [NORO-EXPOCAP-EXPLORER-01](NORO-EXPOCAP-EXPLORER-01.md) — measured: under the Paper-1 frozen block the exposure cap resolved inactive on `explorer_seas_06` and active on the four archetypes; corrected by a cap-only platform scope (no rhythm catalog row); the rhythm layer still differs on Explorer and stays open.
-- [NORO-DOSE-LEDGER-01](NORO-DOSE-LEDGER-01.md) — declared, design only: joined per-epoch hand/fomite mass ledger (deposit → delivered → carriage → hand-to-hand → swallowed → credited → hazard, plus standing reservoirs) on the 22 NORO-DOSE-BLOCK-01 cells; gates D2′; nothing run beyond local smoke.
+- [NORO-DOSE-LEDGER-01](NORO-DOSE-LEDGER-01.md) — measured (22 cells, AWS Batch): the ordinary zone pool is a write-only reservoir under `continuous` (99.7% of delivered mass is emesis-patch; ~4% of delivered reaches a mouth; hand→hand negligible). Binding term is structural, not attenuation.
+- [NORO-POOL-PICKUP-01](NORO-POOL-PICKUP-01.md) — measured (22 cells, AWS Batch): discrete solver delivers ~100% of requested mass but ~99.9% is still emesis-patch; cold cells request ~0 under either solver. Deficit is upstream of pickup — encounter/activity structure. Arm C (per_surface) declined.
 - [NORO-RHYTHM-REREAD-01](NORO-RHYTHM-REREAD-01.md) — measured (archive re-read, no new cells): on the 8-day mega reconstruction the 4 take-off-gated pairs show rhythm-on −23.3% onboard acquisitions (148.0 → 113.5, sign-test p=0.125); the 12-day archive's `ignited` flag is void (true at zero acquisitions — rescore on counts); confirmatory A/B recommended.
 - [COVID-TRANSPORT-FIT-01](COVID-TRANSPORT-FIT-01.md) — low observed provider sensitivity in two replays, with 0/70 takeoff flips and DP seed differences up to +39 onsets and +50 confirmations. Dose preservation, repair attribution and a historical takeoff probability are unmeasured.
 
@@ -62,6 +65,7 @@ New ledger entries are registered here as they land; the filename remains the st
 
 - [COVID-SEED-RING-02](COVID-SEED-RING-02.md) — measured: NULL-WINDOW at α=8 on the 1-day embarkation window (20-cell canary at θ=3.162e8, audits clean; campaign stopped at the canary gate, remaining blocks unrun). Founder median 4.0 vs ≥10, ignition 13 vs ≤9, d15 median 2,404 vs ≤960 — windowed intensity is not the binding constraint on the founder channel; index participation in the surge geometry is (6/20 seeds ride the surge to record-class pools). Open: contract re-scope vs a participation-side declaration.
 - [DP-REPLAY-ENVIRON-01](DP-REPLAY-ENVIRON-01.md) — measured (environs): `covid_dp_replay_01` declares the real-2020 DP activity replay on the dedicated hull — hour-level confinement at epoch 391, diamond rhythm catalog (meals-to-cabin, exercise outings, passenger disposition), real itinerary, NIID clock via seed_patch. Local no-transmission acceptance: confinement 0.9996 by epoch 408, port-day ashore only on the six calls, interior exercise from 6 Feb 13:30 / exterior 8 Feb, ~49% willingness. Environs only — no dose figure, no theta.
+- [DP-REPLAY-DOSE-DIAG-01](DP-REPLAY-DOSE-DIAG-01.md) — measured (index-only dose diagnostic): four prespecified `replay_niid` seeds, 120 epochs, secondaries suspended via `susceptibility_scale`=1e-30. Reach 1643–3331/3710; dose concentrated in cabin via caregiver+droplet; normalized U·D means 9e-15–2.6e-13. Θ_old·Q_old/Q_new inapplicable (no old-kernel arm on the dedicated hull) — Checkpoint C brackets directly.
 
 - [ROOM-AIR-PAIRED-VALIDATION-01](ROOM-AIR-PAIRED-VALIDATION-01.md) — declared, design only: paired `ambient_on`/`ambient_off` respiratory contrast with matched seeds, exact sign-flip rule, sealed-mode no-change control and aggregate encounter witness; three pre-execution blockers; nothing run.
 
