@@ -349,6 +349,19 @@ def cmd_submit(args: argparse.Namespace) -> int:
         )
     directory, spec = _load_spec(args.campaign)
     block = _block(spec, args.block)
+    # Validate the submission shape before registering anything: a
+    # rejected combination must not mint a job-definition revision.
+    if args.canary and args.size is not None:
+        raise _die("--size has no effect with --canary (single job)")
+    size = None
+    if not args.canary:
+        size = args.size if args.size is not None else len(block["seeds"])
+        if not 2 <= size <= len(block["seeds"]):
+            raise _die(
+                f"--size must be in 2..{len(block['seeds'])}"
+                f" for block {args.block} (Batch arrays need >=2;"
+                " use --canary for a single job)"
+            )
     bucket = args.bucket or os.environ.get("CAMPAIGN_BUCKET")
     if not bucket:
         raise _die("--bucket (or CAMPAIGN_BUCKET) is required")
@@ -389,18 +402,9 @@ def cmd_submit(args: argparse.Namespace) -> int:
         "containerOverrides": {"command": command},
     }
     if args.canary:
-        if args.size is not None:
-            raise _die("--size has no effect with --canary (single job)")
         command += ["--index", str(args.index)]
         submit_json["jobName"] += "-canary"
     else:
-        size = args.size if args.size is not None else len(block["seeds"])
-        if not 2 <= size <= len(block["seeds"]):
-            raise _die(
-                f"--size must be in 2..{len(block['seeds'])}"
-                f" for block {args.block} (Batch arrays need >=2;"
-                " use --canary for a single job)"
-            )
         submit_json["arrayProperties"] = {"size": size}
         if size != len(block["seeds"]):
             submit_json["jobName"] += f"-first{size}"
