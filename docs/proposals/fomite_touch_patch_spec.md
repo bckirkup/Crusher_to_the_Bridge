@@ -161,9 +161,12 @@ used_fraction × hand_area / area_each(instance) × transfer_eff × mass(instanc
 capped at the instance's mass and gated per instance by
 `pickup_gate_open(instance_mass)` (the same 1-GEC quantum, moved from the
 unit pool to the instance — an untouched or sub-copy instance contributes
-0 and consumes no further draws). Delivery scaling is unchanged in law:
-`_delivery_scale` over the substep's total requested against the unit's
-total standing mass, then `_record_fomite_pickup` / hand→mouth exactly as
+0 and consumes no further draws). Delivery scaling is unchanged in law but
+applied at instance granularity: requests on one instance are scaled
+together by `_delivery_scale(Σ requests on i, mass_i)`, so simultaneous
+hits on the same object split its mass without exceeding it, and the
+unit's aggregate is then automatically within supply because instances
+partition the pool. `_record_fomite_pickup` / hand→mouth run exactly as
 shipped. A susceptible whose touches all land on clean instances requests
 0 — that *is* the measured structure: most touches land on clean objects,
 and a contaminated shared item is touched by `touch_share / count ×
