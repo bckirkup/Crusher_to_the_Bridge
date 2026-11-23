@@ -105,7 +105,7 @@ accessible load is positive:
 
 ```text
 capacity   = lazy per-(host, pathogen) draw ~ logU(50, 3200)      # drawn once
-migrate    = min(capacity − protected − pending, accessible)
+migrate    = min(max(0.0, capacity − protected − pending), accessible)
 pending   += migrate
 accessible −= migrate
 ```
@@ -119,11 +119,20 @@ convention that queued mass is not rinse-visible until settled.
   `hand_inactivation_rate_by_pathogen`) — a host that acquires, clears and
   re-acquires refills toward the same capacity while load lasts; protected
   drains at its sheltered rate and is topped back up only to the draw.
-- The queue admits `min(capacity, accessible)`, so mass is *relocated*, never
-  created — unlike the stool path, where the draw is new source mass from
-  defecation. Mass conservation: delivered = accessible + pending +
-  protected + washed + inactivated + mouthed (+redeposited, zero for
-  susceptibles under `shedders_only`) + residual.
+- `migrate` is clamped at zero: a host whose queued stool draw already
+  exceeds its capacity draw migrates nothing that epoch — the capacity
+  re-read bounds the *external* fill only and never pulls mass back out of
+  the queue (the stool fill keeps its shipped unbounded semantics).
+- The queue admits only the draw's free capacity, so mass is *relocated*,
+  never created — unlike the stool path, where the draw is new source mass
+  from defecation. Migration is an internal flow, not a sink (§6 audit).
+- **Queue enrollment:** `_replenish_hand` early-returns when
+  `target ≤ 0 and current ≤ 0`; a host whose entire load just migrated
+  into `pending` would strand the queue forever — no settle, no decay,
+  invisible to the mouth. Under the arm the enrollment condition gains
+  `pending > 0`: a host holding queued mass keeps running
+  `_hand_protected_decay` each epoch until the queue is empty, exactly as a
+  shedder with a stool-queued pending does today.
 - The stool-gated shedder fill is unchanged: propensity-fired visits queue
   their per-event draw exactly as shipped. A host can hold both fill
   contributions; `pending` is a queue, not a flag.
@@ -136,6 +145,25 @@ venue, hand-to-hand under `carriers`) lands in `hand_load` and so in
 the hand feeds the same fill rule. Deposits and mouth draws read
 `hand_load` as shipped.
 
+### 3.3 Residual mouth exposure under `discrete`
+
+The frozen cells run `contamination_solver: "discrete"`, and under it the
+shipped mouth step fires **only at pickup events**
+(`_hand_to_mouth_dose` inside `_deliver_one_pickup`): retained load is
+never re-sampled. A retention arm without residual sampling would hold the
+dose for days and still mouth ~0 — the retention bound in §5 is realizable
+only if the retained reservoir is re-exposed. The arm therefore includes a
+per-epoch residual mouth draw under `discrete`, built entirely from shipped
+constants: for each host with positive `hand_load`, book
+`contacts × f × e × hand_load` through the same `_hand_to_mouth_dose`
+accounting — `contacts` drawn from the shipped non-eating
+`N(2.9, 2.5)`/h (eating `N(7.7, 4.1)`/h when the epoch's schedule state is
+an eating venue), `f ~ U(0.008, 0.012)`, `e ~ N(0.339, 0.132)`, all
+`× hours_per_epoch`. This is the discrete-arm counterpart of the mouth term
+`integrate_hand_flow` already runs on `continuous`; it adds no constant and
+changes no shipped value. Under `continuous` the component is a no-op (the
+integrator already mouths residual load), so the arm is solver-symmetric.
+
 ## 4. Why this and not the alternatives
 
 - **vs mouth-touch frequency / swallow efficiency / contact fraction:** the
@@ -143,10 +171,12 @@ the hand feeds the same fill rule. Deposits and mouth draws read
   (~1%/h); moving it is constant tuning against the outcome — forbidden. The
   lever that does not touch a constant is *how long the mass stays
   mouth-reachable*.
-- **vs residual-load mouthing in the discrete arm:** under `discrete` the
-  mouth reads hand load only at pickup events; a residual that survives gets
-  ~1%/epoch more exposure — worth ~1–3% total, measured-not-binding scale.
-  Listed as a follow-up candidate, not this arm.
+- **vs residual-load mouthing alone (§3.3 without §3.1):** sampling the
+  residual every epoch without the protected compartment mouths the same
+  dying accessible load each epoch — the capture is ~1%/epoch and the load
+  still clears in ~1–3 epochs, so residual sampling alone adds only a few
+  percent. Retention (§3.1) is what gives the residual draw something to
+  sample.
 - **vs the challenge floor:** measured not-binding — D0′: once a dense
   encounter exists the challenge converts at ~99% (secondaries ≈ Σhazard,
   182/184); β-Poisson susceptibility (α = 0.111, β = 32.81) is linear at
@@ -162,16 +192,22 @@ the hand feeds the same fill rule. Deposits and mouth draws read
 
 ## 5. Retention bound — what the arm can change (bound, not result)
 
-Per GEC of picked-up mass, shipped constants:
+Per GEC of picked-up mass, shipped constants — with two shipped semantics
+the table names precisely: the protected compartment's 0.01–0.06/h is a
+**leak back into accessible**, not a kill (the shipped split writes
+`accessible = current − protected_post_decay`, returning decayed sheltered
+mass to the rinse), and the ~0.010/h mouth capture exists on `discrete`
+only through §3.3's residual draw (`continuous` has it natively):
 
-| compartment | inactivation /h | mouth capture /h | expected dwell | eventual mouth share |
+| compartment | loss /h | mouth capture /h | expected dwell | eventual mouth share |
 |---|---|---|---|---|
-| accessible | 0.61–1.7 | ~0.010 (non-eating) | ~0.6–1.6 h | ~1–2% |
-| protected | 0.01–0.06 | ~0.010 (non-eating) | ~17–100 h | ~15–60% |
+| accessible | 0.61–1.7 kill + washes | ~0.010 (non-eating, via §3.3) | ~0.6–1.6 h | ~1–2% |
+| protected | 0.01–0.06 leak→accessible | ~0.010 (non-eating, via §3.3) | ~17–100 h | ~15–60% |
 
-So each GEC migrated to protected converts ~15–60% to mouth over its dwell —
-an order ~10–40× the accessible conversion, bounded above by the per-host
-capacity draw (geometric mean ~400 GEC, arith ~800).
+So each GEC migrated to protected converts ~15–60% to mouth over its dwell
+(the leak returns the rest to accessible, where the same exposure and kill
+rates apply) — an order ~10–40× the accessible conversion, bounded above by
+the per-host capacity draw (geometric mean ~400 GEC, arith ~800).
 
 Cell arithmetic, illustrative on the measured canary cells: 8014 delivered
 23.8k to hands and mouthed 301. If that mass spread over ~10²–10³ carriers,
@@ -196,14 +232,26 @@ Audit invariants — a violation is an instrument defect, not a null result:
 - `len(epoch_mass_ledger) == 288` on every cell; the four counter
   reconciliations within 1e-9 relative as in the frozen D0′/D2′/
   TOUCH-PATCH audits.
-- **Hand-loss partition closes:** per cell, cumulative delivered to hands
-  reconciles to `mouth + accessible_inactivation + routine_wash_strip +
-  post_visit_wash_strip + sequester_migrated + protected_inactivation +
-  redeposited + residual_load` within 1e-9 relative — the decomposition
-  witness this arm adds.
-- `Σ hand_protected_load + Σ hand_protected_pending` is zero on every host
-  in the off arm (stool-gated only, unchanged), and in the on arm counts
-  only hosts that acquired non-stool load or stool-linked sequester.
+- **Hand-loss partition closes:** per cell, cumulative hand-pathogen mass
+  reconciles within 1e-9 relative as
+  `sources = sinks + residual`, where **sources** = delivered to hands
+  (all touch points) + mass created on the hand (stool-linked sequester
+  draws + self-contact reloads + `hygiene_cycle` first-event priming),
+  **sinks** = mouth (pickup-instant + §3.3 residual draws) + accessible
+  inactivation + routine-wash strips + post-visit wash strips +
+  redeposited, and **residual** = end-state `accessible + pending +
+  protected`. The internal flows — `sequester_migrated`, pending→protected
+  settle, and the protected→accessible leak — are witnessed but are **not**
+  balance terms (migration relocates mass; sheltered decay returns mass to
+  accessible rather than killing it).
+- **Off arm = shipped baseline, enforced by the bit-identity gate** — the
+  off arm keeps the shipped stool-gated fill untouched (shedders
+  legitimately hold pending/protected), so there is no separate
+  all-hosts-zero check. **On arm provenance witness:** every host that
+  holds `protected` or `pending` mass without a propensity-fired stool
+  event must have a witnessed earlier positive accessible acquisition —
+  the carrier-provenance check that distinguishes the new fill from the
+  shipped stool path.
 - The worker stamps `hand_sequester_fill_resolved: "any_load"` (the
   "resolved" convention), so a dropped override is a witnessed fact.
 - Baseline-identity gate: off-arm is bit-identical to the pre-change tree on
@@ -211,8 +259,8 @@ Audit invariants — a violation is an instrument defect, not a null result:
 
 Reported, never selected on, per cell:
 
-- the hand-loss partition (mouth / inactivation / wash / migrated /
-  protected-decay / residual) — the decomposition the verdict needs;
+- the hand-loss partition (sources / sinks / residual / the internal
+  flows) — the decomposition the verdict needs;
 - delivered→mouth fraction per cell, split non-patch vs patch delivered;
 - protected occupancy among carriers (share of hosts with acquired load that
   ever hold protected mass) and the capacity-draw distribution realized;
@@ -237,9 +285,9 @@ Selection / decision rules:
 - Any change to a shipped constant, draw family, band or rate — including
   the sequester draw, settle rate, sheltered/pad inactivation, mouth-contact
   frequency, contact fraction and transfer efficiency.
-- Residual-load mouthing between pickup events in the discrete arm
-  (reported-not-binding candidate; a separate small arm if the partition
-  says it matters).
+- Residual-load mouthing as a standalone arm (§3.3 is a component here,
+  not a separate proposal; a residual-only arm is listed in §4 as
+  measured-not-binding scale if ever run alone).
 - Carrier redeposition eligibility (D1′), `sanitary_visit_mode`, schedule /
   rhythm (D3′), food pathway, challenge-floor questions — all parked or
   measured-not-binding.
