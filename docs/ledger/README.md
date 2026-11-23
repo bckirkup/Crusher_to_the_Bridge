@@ -42,6 +42,8 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- [DP-THETA-FIT-01](DP-THETA-FIT-01.md) records the endpoint audit. Status is open. The 120-hour pilot, February 20 campaign positives and final confirmed total have distinct endpoints. Fit design and campaign execution remain outstanding.
+
 - [NORO-CASCADE-ARMS-01](NORO-CASCADE-ARMS-01.md) — open. D1′ stopped before simulation. All direct hand donors must shed, and the carrier-redeposition witness misses the frozen solver's surface and food flows.
 
 - [NORO-EXPOCAP-EXPLORER-01](NORO-EXPOCAP-EXPLORER-01.md) — measured: under the Paper-1 frozen block the exposure cap resolved inactive on `explorer_seas_06` and active on the four archetypes; corrected by a cap-only platform scope (no rhythm catalog row); the rhythm layer still differs on Explorer and stays open.
