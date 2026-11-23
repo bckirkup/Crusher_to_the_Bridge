@@ -113,3 +113,36 @@ def test_selected_cell_is_flagged_when_no_seed_resembles_the_target():
     selection = readout._selection([_row(1e9, bimodal)], _TARGET)
     assert selection["selected_theta"] == 1e9
     assert selection["selected_median_not_representative"] is True
+
+
+def _cell(seed: int, infections: int, positives: int) -> dict:
+    return {
+        "infections_total": infections,
+        "aboard_total": 3711,
+        "attack_rate": infections / 3711,
+        "lab_confirmed_total": positives,
+        "infections_before_quarantine": infections,
+        "observables": {"recorded_onsets": 0, "campaign_positives": positives},
+        "dp_theta_fit": {"seed": seed, "t3": {
+            "positives_through_day": positives,
+            "specimens_through_day": 10,
+            "last_specimen_day": 31,
+            "specimens_by_wave": {},
+            "by_day": {"16": {"specimens": 10, "positives": positives}},
+        }},
+    }
+
+
+@pytest.mark.parametrize(
+    "infections, extinct, saturated",
+    [(0, 20, False), (3524, 0, False), (3525, 0, True)],
+)
+def test_secondaries_exclude_the_index_exactly_once(infections, extinct, saturated):
+    readout = _load("readout")
+    by_seed = {seed: _cell(seed, infections, 5) for seed in range(20)}
+    row = readout._theta_row(1e9, by_seed, _TARGET, 24)
+    assert row["reported_only"]["extinct_seeds"] == extinct
+    assert row["reported_only"]["median_secondaries"] == infections
+    assert row["saturated"] is saturated
+    assert row["provisional"] is True
+    assert row["reported_only"]["median_by_day"]["16"]["positives"] == 5

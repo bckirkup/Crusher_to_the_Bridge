@@ -82,8 +82,37 @@ def _audit_cell(cell: dict[str, Any], theta: float, through_day: int) -> list[st
     return sorted(name for name, ok in checks.items() if not ok)
 
 
+def _median_of(cells: list[dict[str, Any]], *keys: str) -> float | None:
+    """Median over cells of a nested value; ``None`` when any cell lacks it."""
+    values = []
+    for cell in cells:
+        value: Any = cell
+        for key in keys:
+            value = value.get(key) if isinstance(value, dict) else None
+        if value is None:
+            return None
+        values.append(value)
+    return statistics.median(values)
+
+
+def _median_by_day(cells: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
+    """Per specimen day, the median specimens and positives over cells."""
+    tables = [cell["dp_theta_fit"]["t3"]["by_day"] for cell in cells]
+    days = sorted({day for table in tables for day in table}, key=int)
+    return {
+        day: {
+            field: statistics.median(
+                table.get(day, {}).get(field, 0) for table in tables
+            )
+            for field in ("specimens", "positives")
+        }
+        for day in days
+    }
+
+
 def _theta_row(
     theta: float, by_seed: dict[int, dict[str, Any]], target: dict[str, Any],
+    expected_seeds: int,
 ) -> dict[str, Any]:
     """Per-theta summary: the scored statistic, edge flags, reported-only."""
     positives_target = int(target["cumulative_positives"])
@@ -92,7 +121,8 @@ def _theta_row(
     positives = [
         by_seed[s]["dp_theta_fit"]["t3"]["positives_through_day"] for s in seeds
     ]
-    secondaries = [by_seed[s]["infections_total"] - 1 for s in seeds]
+    # ``infections_total`` already excludes the seeded index host.
+    secondaries = [by_seed[s]["infections_total"] for s in seeds]
     aboard = by_seed[seeds[0]]["aboard_total"]
     above = sum(1 for p in positives if p > positives_target)
     below = sum(1 for p in positives if p < positives_target)
@@ -106,9 +136,12 @@ def _theta_row(
         str(s): found for s in seeds
         if (found := _audit_cell(by_seed[s], theta, through_day))
     }
+    cells = [by_seed[s] for s in seeds]
     return {
         "theta": theta,
         "n": len(seeds),
+        # Side/dead/saturated flags on a partial row can still move.
+        "provisional": len(seeds) != expected_seeds,
         "median_positives": statistics.median(positives),
         "seeds_above_target": above,
         "seeds_below_target": below,
@@ -140,6 +173,22 @@ def _theta_row(
             "median_infections_before_quarantine": statistics.median(
                 by_seed[s]["infections_before_quarantine"] for s in seeds
             ),
+            "median_infections_during_quarantine": _median_of(
+                cells, "infections_during_quarantine",
+            ),
+            "median_infections_after_quarantine": _median_of(
+                cells, "infections_after_quarantine",
+            ),
+            "median_positive_share": _median_of(
+                cells, "observables", "positive_share",
+            ),
+            "median_onsets_before_split_day": _median_of(
+                cells, "observables", "onsets_before_split_day",
+            ),
+            "median_onsets_on_or_after_split_day": _median_of(
+                cells, "observables", "onsets_on_or_after_split_day",
+            ),
+            "median_by_day": _median_by_day(cells),
         },
     }
 
@@ -199,7 +248,10 @@ def main(argv: list[str] | None = None) -> int:
     target = design["fit_target"]
     expected = int(design["seeds"])
     cells = _load_cells(Path(args.cells_dir))
-    rows = [_theta_row(theta, cells[theta], target) for theta in sorted(cells)]
+    rows = [
+        _theta_row(theta, cells[theta], target, expected)
+        for theta in sorted(cells)
+    ]
     complete = [row for row in rows if row["n"] == expected]
     readout = {
         "task_id": "DP-THETA-FIT-01",
