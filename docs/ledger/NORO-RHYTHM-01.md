@@ -80,6 +80,14 @@ posted = VSP trigger epoch set.
 | mega_12d | off | 126/200 (63.0%, CI 56.1–69.4) | 194/200 (97.0%, CI 93.6–98.6) | 0/200 |
 | mega_12d | on | 127/200 (63.5%, CI 56.6–69.9) | 194/200 (97.0%) | 0/200 |
 
+**Correction (2026-11-22, NORO-RHYTHM-REREAD-01).** The mega `ignited`
+column above counted the archived `ignited` flag, which records a
+positive pool gain on an emesis deposit — not ≥1 onboard acquisition
+as the header defines. Rescored on acquisition counts, 38 off and
+45 on voyages had any onboard acquisition, 19 pairs jointly ignited.
+The 126/127 flag counts cannot establish propagation; see the re-read
+for the corrected table.
+
 Paired ignition discordance (same seed, off vs on): exp 0 off-only /
 2 on-only / 57 both (n=1000 per duration); spr 2/2/65 (n=200); cls
 2/0/50; mega 1/2/125. Every discordance count is inside paired-seed
