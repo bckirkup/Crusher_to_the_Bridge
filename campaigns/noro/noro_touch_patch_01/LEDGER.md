@@ -12,6 +12,28 @@ NORO-POOL-PICKUP-01 measured baseline:
   (`tools/noro_diag/per_host_dose_challenge.py`), same epoch mass
   ledger plus instance witness columns.
 
+## Frozen decision criteria (recorded 2026-11-23 before any cell ran)
+
+Spec section 6 leaves the take-off gate to be frozen here. Frozen
+values, both sourced from D0' (docs/ledger/NORO-DOSE-LEDGER-01.md,
+measured `1f8a027c`):
+
+- **Hot-cell floor:** the lowest Sigma-hazard among D0' take-off
+  cells is 1.1 (seed 8105; hot cells were 8000: 31.0, 8006: 146.0,
+  8105: 1.1, each >=98% patch-delivered).
+- **Previously-cold canary cells:** 18 of 20 (8000 and 8006 took off
+  under the baseline; 8105 is held for the full-campaign decision).
+- **Ignites :=** at least 9 of the 18 previously-cold canary cells
+  reach Sigma-hazard >= 1.1 under `item_instances`. Below that the
+  arm did not ignite; the "requests rise / stay ~0" rules in spec
+  section 6 then classify the bound.
+
+The 20-child array is itself the canary cohort: the preflight
+single-child output inspection is folded into the canary readout
+(child-0 artifact inspected against the section-6 audit invariants
+before any further submission -- the two held seeds 8105/8106 and
+any promotion decision).
+
 ## Gate checklist
 
 - [x] Design declared and merged: `docs/norovirus/fomite_touch_patch_spec.md`,
@@ -35,7 +57,8 @@ NORO-POOL-PICKUP-01 measured baseline:
   four counter reconciliations within 1e-9, instance-mass sum
   reconciles to `surface_pools_by_pathogen` per epoch within 1e-9,
   `fomite_representation_resolved: "item_instances"` stamped on every
-  artifact.
+  artifact, and child-0 artifact inspected before any further
+  submission.
 
 ## Runs
 
