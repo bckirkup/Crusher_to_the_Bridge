@@ -92,9 +92,20 @@ with an announced ETA -> stop and report.
   `hand_partition_delta_gec` / `hand_pending_end_gec` /
   `hand_protected_end_gec` columns) — all additive witness, none
   behavioural.
-- [ ] Jobdef revision registered against pinned image digest; digest
-  pinned in campaign.json.
-- [ ] Dry-run array count = 40 (2 blocks x 20 seeds).
-- [ ] S3 prefix `campaign/noro_external_sequester_01/` clean.
-- [ ] Single-child canary inspected against the audit invariants.
+- [x] Jobdef registered against pinned image digest; digest pinned in
+  campaign.json. **Image defect found and fixed at canary: the first
+  image was built from the root `Dockerfile` (ENTRYPOINT
+  `campaign_runner`), which mangles `command: [entrypoint.py, ...]`
+  into extra campaign_runner argv — every child exits 2 in ~2.5 s.
+  Campaign images must be the two-layer build: root `Dockerfile` as
+  `BASE_IMAGE`, then `-f deploy/aws/Dockerfile.campaign` (ENTRYPOINT
+  `python3`).** Rebuilt as
+  `sha256:d92f1d4c1a440ff0e46a045621d0db8bd5cccfccb157093834c43d8324c78abb`
+  (code == f357dd16; verified `deploy/aws/`, `tools/`, `campaigns/`
+  present in-container), jobdef `picard-noro-external-sequester-01:3`.
+- [x] Dry-run array count = 40 (2 blocks x 20 seeds).
+- [x] S3 prefix `campaign/noro_external_sequester_01/` clean.
+- [ ] Single-child canary inspected against the audit invariants
+  (job `ceb69538-a9cf-4c41-aa3f-79980fc2a6ae`, seed 8000, arm S+R,
+  RUNNING).
 - [ ] Both 20-seed arrays submitted; ETA announced; stop and report.
