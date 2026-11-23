@@ -3146,6 +3146,24 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
+def _sweep_tag_parts(sweep: TransmissionSweepKnobs | None) -> list[str]:
+    """``{field}-{value}`` parts for each non-default sweep knob; dict
+    values are hashed so the part stays a legal filename component."""
+    parts = []
+    if sweep is None:
+        return parts
+    for f in fields(sweep):
+        value = getattr(sweep, f.name)
+        if value is None:
+            continue
+        if isinstance(value, dict):
+            value = hashlib.sha256(
+                json.dumps(value, sort_keys=True).encode(),
+            ).hexdigest()[:8]
+        parts.append(f"{f.name}-{value}")
+    return parts
+
+
 def _implicit_arm_tag(
     sweep: TransmissionSweepKnobs | None,
     alpha: float | None = None,
@@ -3155,17 +3173,7 @@ def _implicit_arm_tag(
     stays preferred). ASCII-slugged and length-capped so the tag is always a
     legal, bounded filename component; an alpha-only run reproduces the
     legacy ``a{alpha:.4f}`` filename exactly."""
-    parts = []
-    if sweep is not None:
-        for f in fields(sweep):
-            value = getattr(sweep, f.name)
-            if value is None:
-                continue
-            if isinstance(value, dict):
-                value = hashlib.sha256(
-                    json.dumps(value, sort_keys=True).encode(),
-                ).hexdigest()[:8]
-            parts.append(f"{f.name}-{value}")
+    parts = _sweep_tag_parts(sweep)
     if alpha is not None:
         parts.append(f"a{alpha:.4f}")
     if not parts:

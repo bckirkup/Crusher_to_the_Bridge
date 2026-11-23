@@ -10534,25 +10534,39 @@ class TransmissionCore:
                 if agent.agent_id in seen:
                     continue
                 seen.add(agent.agent_id)
-                hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-                if hand <= 0.0:
-                    continue
-                if agent not in self._get_susceptible([agent], pathogen_id):
-                    continue
-                dose = self._hand_to_mouth_dose(
-                    agent, epoch, hand,
-                    self._fomite_rng(agent, zone_name),
-                )
-                if dose <= 0.0:
-                    continue
-                agent.hand_load_by_pathogen[pathogen_id] = hand - dose
-                self._accumulate(
-                    agent.agent_id, "fomite", dose,
+                self._hand_residual_mouth_agent(
+                    agent, epoch, zone_name, pathogen_id,
                     agent_doses, agent_pathway_doses,
                 )
-                self._hand_partition_add(
-                    pathogen_id, "sink_mouth_residual", dose,
-                )
+
+    def _hand_residual_mouth_agent(
+        self,
+        agent: KorkinAgent,
+        epoch: int,
+        zone_name: str,
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+    ) -> None:
+        hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        if hand <= 0.0:
+            return
+        if agent not in self._get_susceptible([agent], pathogen_id):
+            return
+        dose = self._hand_to_mouth_dose(
+            agent, epoch, hand,
+            self._fomite_rng(agent, zone_name),
+        )
+        if dose <= 0.0:
+            return
+        agent.hand_load_by_pathogen[pathogen_id] = hand - dose
+        self._accumulate(
+            agent.agent_id, "fomite", dose,
+            agent_doses, agent_pathway_doses,
+        )
+        self._hand_partition_add(
+            pathogen_id, "sink_mouth_residual", dose,
+        )
 
     @staticmethod
     def _emesis_range(
