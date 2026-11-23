@@ -19,8 +19,39 @@
   "niid_seed_patch_iad": 2.8,
   "baseline_iad": 6.8,
   "close_zones_fired": {
-   "replay_niid": "0/120",
-   "replay_baseline": "16/120"
+   "replay_niid": {
+    "total": "0/120",
+    "seeds_by_theta": {}
+   },
+   "replay_baseline": {
+    "total": "16/120",
+    "seeds_by_theta": {
+     "1e+11": [
+      20200208,
+      20200219,
+      20200220,
+      20200227
+     ],
+     "3.16e+10": [
+      20200219
+     ],
+     "3.16e+11": [
+      20200208,
+      20200219,
+      20200220,
+      20200224
+     ],
+     "1e+12": [
+      20200208,
+      20200219,
+      20200220,
+      20200222,
+      20200223,
+      20200227,
+      20200228
+     ]
+    }
+   }
   },
   "susceptibility_scale": "all 240 cells theta*(alpha+beta)/alpha exact"
  },

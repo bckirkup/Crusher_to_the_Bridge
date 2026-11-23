@@ -90,7 +90,8 @@ COMPARISON: on `replay_baseline` that applies to 16 cells (1 at θ=3.16e10,
 4 at 1e11, 4 at 3.16e11, 7 at 1e12 — seeds listed in the array readout),
 so only baseline θ=1e10 is a clean admissible cell; the other four
 baseline cells are measured but comparison-failed under the declared
-audit (close_zones never fired on niid, 120/120).
+audit (close_zones never fired on niid, 120/120; per-seed lists in the
+array readout `audits.close_zones_fired`).
 
 Notable: seed 20200217 draws a dead index — zero secondaries at every
 θ on niid (and on baseline at θ≤3.16e10); index-identity lottery

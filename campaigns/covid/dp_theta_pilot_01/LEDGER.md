@@ -40,7 +40,7 @@ doc `docs/covid/covid_dp_theta_pilot_01_design.md`).
   base_t1e12 `e268ef9f-27f3-424f-9d77-bad1d56658bd`.
   PR #1399 merged at a57a7d48 (declared pilot + canary readout).
 - **Array readout (measured):** 240/240 SUCCEEDED across 11 parent
-  jobs (jobdef revs :2–:11). Median secondaries — niid: 2.5/8/37/392/1054
+  jobs (jobdef revs :1–:11 — :1 canary, :2–:11 array). Median secondaries — niid: 2.5/8/37/392/1054
   (θ lo→hi), baseline: 41.5/95.5/232.5/599.5/1577.5. No cell saturated,
   none dead; all 8 adjacent θ pairs measurable → every θ
   bracket-admissible on `replay_niid`; on `replay_baseline` 16 cells
