@@ -40,7 +40,10 @@ Frozen thresholds for `replay_niid`:
 - **dead cell:** zero secondaries on ≥ 20 of 24 seeds;
 - **neighbour differs measurably:** the paired seedwise difference in
   secondaries between adjacent grid θs is same-sign on ≥ 18 of 24
-  seeds, or the seedwise median ratio is ≥ 1.5.
+  seeds, or the ratio of seedwise medians (higher-θ / lower-θ) is
+  ≥ 1.5. Ratio edge cases are frozen: lower-median 0 with
+  higher-median > 0 counts as infinitely different (measurable);
+  0/0 counts as no measurable difference.
 
 θ is **bracket-admissible** on `replay_niid` iff its cell is neither
 saturated nor dead AND at least one adjacent grid cell differs
