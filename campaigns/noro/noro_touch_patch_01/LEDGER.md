@@ -16,14 +16,20 @@ NORO-POOL-PICKUP-01 measured baseline:
 
 - [x] Design declared and merged: `docs/norovirus/fomite_touch_patch_spec.md`,
   frozen audit invariants and decision rules in section 6.
-- [ ] Local smoke: `--fomite-representation item_instances` resolves
-  (`fomite_representation_resolved: "item_instances"` stamped), epoch
-  ledger schema intact, instance witness columns present.
-- [ ] Jobdef `picard-noro-touch-patch-01` registered against a pinned
-  image digest built from `deploy/aws/Dockerfile.campaign`
-  (ENTRYPOINT `python3`), digest pinned in campaign.json.
-- [ ] Dry-run array count = 22 (describe + submit --dry-run).
-- [ ] S3 prefix `campaign/noro_touch_patch_01/` clean.
+- [x] Local smoke (out/touch_patch_smoke/, seed 8105, 24 epochs):
+  `fomite_representation_resolved: "item_instances"` stamped, epoch
+  ledger schema intact, instance witness columns present,
+  instance-pool drift 0.0, `contamination_solver_resolved: "discrete"`
+  stamped while configured continuous (per-surface rep forces discrete).
+- [x] Jobdef `picard-noro-touch-patch-01:1` registered against pinned
+  image digest `sha256:946ef435cb8e70516d53ed00c3612af51df4f58c98b1d2efc65b434bc4cd8217`
+  built from `deploy/aws/Dockerfile.campaign` over
+  `picard-campaign:touch-patch-base` (ENTRYPOINT `python3`), digest
+  pinned in campaign.json. Baseline-identity gate: pooled artifact
+  bit-identical branch-vs-stash except volatile wall-clock (additive
+  witness keys now emitted only when the arm ran / solver diverges).
+- [x] Dry-run array count = 22 (describe + submit --dry-run).
+- [x] S3 prefix `campaign/noro_touch_patch_01/` clean.
 - [ ] Canary readout: 20-seed canary at one cell, then stop and report.
   Audit invariants per spec section 6: len-288 epoch ledgers per cell,
   four counter reconciliations within 1e-9, instance-mass sum
@@ -35,3 +41,4 @@ NORO-POOL-PICKUP-01 measured baseline:
 
 | date | block | shape | job ids | verdict |
 |---|---|---|---|---|
+| 2026-11-23 | classic_cruise_1900_item_instances | 20-child array, seeds 8000-8019 (indices 0-19; 8105/8106 held for the full-campaign decision) | 110a1dae-ff16-4cc3-a616-be36e8eccdd7 | submitted, awaiting readout |
