@@ -23,8 +23,12 @@ beginning on February 3. The 120-hour pilot ends before this channel opens.
 The cell payload exposes `lab_confirmed_total` separately from
 `observables` and `infections_total` in
 `picard_framework/covid_boarding_screen.py::cell_payload`.
-The declared `covid.T3` channel is `campaign_confirmed`. The final
-confirmed count also contributes to the serology-informed `covid.H5`
+The declared `covid.T3` channel is `campaign_confirmed`. The payload's
+`observables.campaign_positives` counts every positive row in the
+campaign specimen log. `observables_from_modality` applies no February 20
+cutoff, so a replay with positive specimens in the February 23 wave
+includes them in that aggregate. T3 is already a scored anchor. The
+final confirmed count also contributes to the serology-informed `covid.H5`
 infection estimate, which the repository explicitly holds out forever.
 
 ## Interpretation
