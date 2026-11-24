@@ -93,5 +93,11 @@ Not run: every `_rest` block, and the canary blocks at 1e8, 1e9 (seeds
 scored grid and need no further seeds. A resubmitted block skips cells
 already in S3.
 
+Preflight deviation: the six 5-child pilot arrays were the first Batch
+submissions; no single Batch child was inspected before them. The gate
+before them was the local smoke and the dry-run only. All 30 children
+succeeded and the Batch cell at θ=1e8, seed 20200205 matches the local
+smoke, so nothing was lost, but the one-child canary step was skipped.
+
 Known readout wart: `machinery_gap_seeds` counts the index as a reachable
 infection, so it lists every extinct seed.

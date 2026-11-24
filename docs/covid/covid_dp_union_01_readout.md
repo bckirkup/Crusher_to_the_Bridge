@@ -59,7 +59,8 @@ Reported only — not the scored contract:
   timing legs do not. This is one θ; whether a lower θ brings attack into
   the band on taken-off seeds without losing T3 is what the array would
   measure. In the pilot, 1e7 already shows 2,553 secondaries on one seed
-  and extinction on three (5 seeds — hypothesis).
+  and at most one secondary on three (5 seeds —
+  hypothesis).
 - **Founder class is nearly empty at every θ run.** Median founder yield
   is 1 at the canary; the largest class mass anywhere is 2 of 5 seeds
   (1e10). The one founder-class canary seed ignites on day 8; the takeoff
