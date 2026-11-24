@@ -53,9 +53,26 @@ pilot, 20 canary), all succeeded, no audit deviation.
 - The crew wave under-fills on seeds with outbreaks (median 3,353
   specimens through day 34 against 3,894).
 
+## Staged array (24 seeds each at θ = 3.16e9 and 1e9)
+
+Staging rule committed at 11b759e8 before submission (3.16e9 first; stop
+below 5 founder-class seeds; otherwise 1e9). 43 further Batch cells, all
+succeeded, same image digest, no audit deviation.
+
+- **3.16e9 is scored (7 of 24 seeds in the founder class) and not
+  consistent.** Pass: ignition day 7, conditioned capture 0.964, P31 663
+  and P34 663 (both compatible). Fail: `before_share` 0.637 against 0.173
+  ± 0.10, attack 3,452 against [712, 960], during 112 against [150, 350].
+- **1e9 has no scored row** (4 of 24 in class).
+- Attack is far above its band in every class at 3.16e8, 1e9 and 3.16e9:
+  outbreak seeds infect about 90% of 3,710 or go extinct (3 of 24 extinct
+  at 3.16e9, 6 of 24 at 1e9).
+- The canary hypothesis that the class cannot be scored anywhere on the
+  grid is withdrawn.
+
 ## Next decision
 
-Benjamin decides whether the 66-cell array runs. The canary suggests
-(hypothesis, one θ) that it would return "insufficient class mass" at
-every θ, which would make the founder class rather than θ the binding
-constraint.
+Benjamin decides whether the remaining 23 cells (1e8, and 4 seeds at
+3.16e8) run. They complete the grid for the joint verdict; on 1 of 20 and
+4 of 24 class seeds at the neighbouring θ they are unlikely to be scored
+(inference).

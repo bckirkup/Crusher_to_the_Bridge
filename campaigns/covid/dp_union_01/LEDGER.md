@@ -88,8 +88,22 @@ changes a file the worker reads.
   `docs/covid/dp_union_01_readout.json`. Founder class 1 of 20 at the
   canary, so no leg is scored.
 
-Not run: every `_rest` block, and the canary blocks at 1e8, 1e9 (seeds
-6–20) and 3.16e9. Pilot blocks at 1e5, 1e6, 1e7 and 1e10 are outside the
+- **Staged array (owner-approved 2026-11-24; staging rule in the design,
+  committed 11b759e8 before submission), same image digest:**
+
+  | Block | Job ID | Revision | Result |
+  |---|---|---|---|
+  | `union_t3e9_canary` | 1de251ba-1fc7-483b-b98c-95bce4ae90fc | 8 | 20 of 20 |
+  | `union_t3e9_rest` | b3578655-23b9-45a8-9361-60f8fd5dc484 | 9 | 4 of 4 |
+  | `union_t1e9_canary` | e000b72a-70eb-4f90-aa91-304741d27c14 | 10 | 20 of 20 (5 pilot cells already in S3) |
+  | `union_t1e9_rest` | aee0751b-aada-4f77-81c7-dd16e2ce4a14 | 11 | 4 of 4 |
+
+  93 objects under the prefix. 3.16e9: 7 of 24 founder-class seeds, row
+  scored, fails `before_share`, attack and during. 1e9: 4 of 24, no
+  scored row. Numbers in the readout.
+
+Not run: `union_t1e8_canary` seeds 6–20, `union_t1e8_rest` and
+`union_t3e8_rest` (23 cells). Pilot blocks at 1e5, 1e6, 1e7 and 1e10 are outside the
 scored grid and need no further seeds. A resubmitted block skips cells
 already in S3.
 
