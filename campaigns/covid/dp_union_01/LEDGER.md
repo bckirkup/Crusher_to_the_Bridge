@@ -5,12 +5,12 @@ Declared 2026-11-24 (ledger `docs/ledger/DP-UNION-01.md`, design doc
 
 - **State:** grid declared on the post-fine-share scale; pilot (30 cells)
   and canary (20 cells at θ=3.16e8) read out; staged array run at 3.16e9
-  and 1e9 (24 seeds each). **1e8 and the last 4 seeds at 3.16e8 not
-  submitted — Benjamin's decision.** Details in the last section.
+  and 1e9, then the last 23 cells on the owner's decision. **The scored
+  grid is complete (96 cells).** Details in the last section.
 - **Matrix:** 1 arm (`union_niid`) × 24 seeds (20200205–20200228) × the
   scored grid {1e8, 3.16e8, 1e9, 3.16e9}; full declared voyage (840
   epochs), no horizon arg. The lattice has 11 runnable θ (264 cells).
-- **Jobdef rev / image digest:** `picard-covid-dp-union-01` revisions 1–11,
+- **Jobdef rev / image digest:** `picard-covid-dp-union-01` revisions 1–14,
   all on `sha256:0d01dae0f057770933b610346604875f05bf0fcd62b6f06145e5c19efeb049aa`.
 
 ## Local smoke through the registered path (one seed, old units, not scored)
@@ -103,8 +103,18 @@ changes a file the worker reads.
   scored, fails `before_share`, attack and during. 1e9: 4 of 24, no
   scored row. Numbers in the readout.
 
-Not run: `union_t1e8_canary` seeds 6–20, `union_t1e8_rest` and
-`union_t3e8_rest` (23 cells). Pilot blocks at 1e5, 1e6, 1e7 and 1e10 are outside the
+- **Grid completion (owner decision 2026-11-24), same image digest:**
+
+  | Block | Job ID | Revision | Result |
+  |---|---|---|---|
+  | `union_t1e8_canary` | eee911fd-e5f0-440f-b267-6de8780e6064 | 12 | 20 of 20 (5 pilot cells already in S3) |
+  | `union_t1e8_rest` | 21fa14c4-f7ee-4b76-8f7f-887bf5de1e4a | 13 | 4 of 4 |
+  | `union_t3e8_rest` | 74b44c41-20fe-487c-8a64-2d8c31b2de1d | 14 | 4 of 4 |
+
+  116 objects under the prefix. Founder-class seeds 0, 2, 4, 7 of 24 at
+  1e8, 3.16e8, 1e9, 3.16e9. Joint verdict: no consistent θ.
+
+Not run: nothing on the scored grid. Pilot blocks at 1e5, 1e6, 1e7 and 1e10 are outside the
 scored grid and need no further seeds. A resubmitted block skips cells
 already in S3.
 

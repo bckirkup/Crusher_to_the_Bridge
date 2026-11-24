@@ -71,9 +71,24 @@ succeeded, same image digest, no audit deviation.
 - The canary hypothesis that the class cannot be scored anywhere on the
   grid is withdrawn.
 
+## Completed grid (24 seeds at each of 1e8, 3.16e8, 1e9, 3.16e9)
+
+The last 23 cells ran on the owner's decision; 116 Batch cells in all,
+every one succeeded, one image digest, no audit deviation. No row dead or
+saturated.
+
+- Founder-class seeds: 0, 2, 4, 7 of 24 as θ rises. Only 3.16e9 is scored.
+- **Joint verdict: no consistent θ.** Ignition, capture, T3 and the
+  onboard table pass at 3.16e9 only; `before_share`, attack and during
+  pass at no θ (failed on the scored row, unscored on the other three).
+  No split verdict.
+- Extinct seeds: 13, 10, 6, 3 of 24. Takeoff-class median secondaries
+  3,019, 3,128.5, 3,288, 3,383 against [712, 960].
+
 ## Next decision
 
-Benjamin decides whether the remaining 23 cells (1e8, and 4 seeds at
-3.16e8) run. They complete the grid for the joint verdict; on 1 of 20 and
-4 of 24 class seeds at the neighbouring θ they are unlikely to be scored
-(inference).
+Benjamin decides what follows Suite 1. The contract cannot locate a θ on
+this arm because the founder class reaches the five-seed minimum only at the top θ
+(0, 2, 4, 7 class seeds of 24), and
+there it places the epidemic before quarantine (`before_share` 0.637,
+during 112).

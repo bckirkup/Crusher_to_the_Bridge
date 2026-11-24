@@ -1,13 +1,13 @@
-# DP-UNION-01 — pilot, canary and staged-array readout
+# DP-UNION-01 — pilot, canary and completed-grid readout
 
-> **Status:** measured. Two of four scored θ are complete (24 seeds at 1e9
-> and 3.16e9); 3.16e8 has 20 of 24 and 1e8 has 5. No joint verdict exists
-> (it needs every scored θ). The array was staged from 3.16e9 by the rule
-> in the design; the two lower cells are Benjamin's decision.
+> **Status:** measured, grid complete (24 seeds at each of 1e8, 3.16e8,
+> 1e9, 3.16e9). Joint verdict: no consistent θ. One row is scored
+> (3.16e9); the other three have insufficient class mass. The pilot and
+> canary sections below are the earlier partial reads.
 
 **Measured at:** c7f7f927 (image
 `picard-campaign@sha256:0d01dae0f057770933b610346604875f05bf0fcd62b6f06145e5c19efeb049aa`,
-job definition `picard-covid-dp-union-01` revisions 1–11). Readout code and
+job definition `picard-covid-dp-union-01` revisions 1–14). Readout code and
 selected grid at c8b7315d. Machine-readable:
 `docs/covid/dp_union_01_readout.json`. Cells:
 `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_dp_union_01/`.
@@ -117,30 +117,61 @@ one infects 2,452. Median specimens through day 34: 3,177 against 3,894.
 Founder-class seeds by θ: 1 of 20 at 3.16e8, 4 of 24 at 1e9, 7 of 24 at
 3.16e9.
 
+## Completed grid (24 of 24 seeds at every scored θ)
+
+The last 23 cells (19 seeds at 1e8, 4 at 3.16e8) ran on the owner's
+decision, same image digest, all succeeded, no audit deviation. No row is
+dead or saturated; the representativeness flag is set nowhere.
+
+| θ | Founder-class seeds (5 needed) | Scored | Takeoff seeds | Extinct seeds | Median secondaries, takeoff class | Median P31, takeoff class |
+|---|---|---|---|---|---|---|
+| 1e8 | 0 | no | 11 | 13 | 3,019 | 683, compatible |
+| 3.16e8 | 2 | no | 14 | 10 | 3,128.5 | 760.5, compatible |
+| 1e9 | 4 | no | 18 | 6 | 3,288 | 857, above |
+| 3.16e9 | 7 | yes | 21 | 3 | 3,383 | 859, above |
+
+**Joint verdict (frozen rule, founder class): no consistent θ.** Ignition,
+conditioned capture, T3 and the onboard table pass at 3.16e9 only.
+`before_share`, attack and during pass at no θ: they fail on the one
+scored row and are unscored ("insufficient class mass") on the other
+three. There is no split verdict, since no two legs pass at disjoint θ.
+
+Reported only, per θ on the takeoff class (1e8 / 3.16e8 / 1e9 / 3.16e9):
+ignition day 12 / 12.5 / 12 / 10; `before_share` 0.026 / 0.007 / 0.034 /
+0.094; during-quarantine 1,640 / 1,917.5 / 1,755 / 992; conditioned
+capture 0.908 / 0.902 / 0.937 / 0.961; P34 691 / 785 / 887 / 870.
+
+At 1e8 the all-seed medians of secondaries, during-quarantine, capture,
+P31 and P34 are 0 (13 of 24 seeds extinct); `before_share` is
+0.026 (median over the seeds where it is defined; the reducer drops
+seeds with no recorded onset) and the median ignition day is undefined (13 seeds never ignite).
+The dead edge
+(P31 = 0 on at least 20 of 24) is not met. Non-extinct seeds at 1e8
+infect 867–3,126; two (867, 917) are inside the attack band. At 3.16e8
+the 24-seed row has 14 non-extinct seeds, 946–3,268.
+
 ## What this does and does not establish
 
-- Measured: one scored row (3.16e9, 24 seeds, 7 in class) that fails
-  three legs; one complete unscored row (1e9); the 20-seed canary; the
-  pilot T3 sides.
-- Withdrawn: the canary hypothesis that the founder class cannot be
-  scored anywhere on the grid. It is scored at 3.16e9.
-- The attack leg is scored, and fails, only at 3.16e9. Descriptively
-  (unscored rows, not contract failures), the median secondaries are far
-  above 712–960 in every class at 3.16e8, 1e9 and 3.16e9, and on the
-  5-seed pilot at 1e8 (2,444). Non-extinct seeds infect 946–3,268 at
-  3.16e8 (11 of 13 above 2,198; one, 946, is inside the band),
-  2,419–3,411 at 1e9 and 2,452–3,474 at 3.16e9. "A leg fails at every
-  run θ" is therefore not established: one scored row exists.
-- The two timing legs pass on different classes at 3.16e9: ignition on
-  the founder class, `before_share` on the takeoff class and all seeds.
-  Only the founder class is scored.
-- Not established: a joint verdict (two scored θ incomplete), and whether
-  1e8 or 3.16e8 can be scored at 24 seeds. With 1 of 20 at 3.16e8 and 4
-  of 24 at 1e9, they would most likely read "insufficient class mass"
-  (inference).
+- Measured: the full scored grid, 96 cells. One scored row, not
+  consistent; three rows without class mass.
+- The founder class is reached by 0, 2, 4 and 7 of 24 seeds as θ rises.
+  Only the top θ can be scored, so the contract cannot locate a θ on this
+  arm: the class, not θ, is binding below 3.16e9.
+- On the one scored row, `before_share` (0.637) fails high and during
+  (112) fails low together: the founder class puts the epidemic before
+  quarantine. Attack (3,452) fails high.
+- Descriptively, in every class at every θ, non-extinct seeds mostly
+  infect 2,400–3,500 of 3,710; the median is never inside 712–960. Three
+  seeds across the grid land in the band (867 and 917 at 1e8, 946 at
+  3.16e8).
+- The timing legs pass on different classes at 3.16e9: ignition on the
+  founder class, `before_share` on the takeoff class and all seeds. Only
+  the founder class is scored.
+- Not established: that attack, `before_share` or during fail at every θ
+  as scored legs. They are scored at one θ. What is measured is that they
+  pass at none.
 
 ## Open decision
 
-Whether the two lower cells run: 19 seeds at 1e8 and 4 at 3.16e8, 23
-cells. They would complete the grid and so allow the joint verdict to be
-computed, but are unlikely to add a scored row.
+What follows Suite 1 (Benjamin). No DP-UNION-01 cell remains unrun on the
+scored grid.
