@@ -631,6 +631,22 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`DP-UNION-01` is designed and held — no scored cell has run**
+  (ledger `docs/ledger/DP-UNION-01.md`, design
+  `docs/covid/covid_dp_union_01_design.md`, campaign
+  `campaigns/covid/dp_union_01/`). The Suite-1 union arm (`replay_niid` +
+  `SOP-017-DEDQUARTER` quarter-exempt confinement + symptomatic-crew
+  removal + armed retest sweeps and 23 Feb crew wave) is frozen against a
+  seven-leg joint contract scored on the founder class: ignition day,
+  `before_share`, attack band, during-quarantine band, conditioned capture,
+  T3 through day 31 and the 691/3,894 onboard table through 23 Feb. The θ
+  grid is not declared: it waits for the airborne fine-share adoption to
+  re-denominate θ, and no fit runs in old units. One local machinery smoke
+  (θ=3.16e9 old units, seed 20200205) passed every audit invariant; on it
+  the armed crew wave drew 133 specimens rather than 831, an unexplained
+  one-seed observation recorded in the ledger entry. Open decision: none
+  until the fine-share leg merges; then declare the grid and run the
+  20-seed canary.
 - **`DP-THETA-FIT-01` is measured on three θ — the median crosses T3 between 3.16e9 and 1e10, and the top θ is still compatible, so T3 sets no upper bound**
   (ledger `docs/ledger/DP-THETA-FIT-01.md`, design
   `docs/covid/covid_dp_theta_fit_01_design.md`, campaign
