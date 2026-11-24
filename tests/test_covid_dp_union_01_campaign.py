@@ -30,13 +30,61 @@ def _arm(design: dict, arm_id: str) -> dict:
     return {a["arm_id"]: a["overrides"] for a in design["arms"]}[arm_id]
 
 
-def test_theta_grid_is_held_until_the_fine_share_scale_lands():
-    """No theta and no block is declared, so no cell can run in old units."""
+def test_blocks_are_generated_from_the_lattice_and_count_the_design():
+    """campaign.json is build.py's output; union-arm cells equal the design."""
     spec = json.loads((_CAMPAIGN / "campaign.json").read_text(encoding="utf-8"))
-    assert _DESIGN["theta_grid"]["status"] == "held"
-    assert _DESIGN["thetas"] == []
-    assert _DESIGN["cells"] == 0
-    assert spec["blocks"] == {}
+    build = _load("design/build")
+    assert spec["blocks"] == build.build_blocks(_DESIGN)
+    assert sum(len(b["seeds"]) for b in spec["blocks"].values()) == _DESIGN["cells"]
+    assert _DESIGN["cells"] == len(_DESIGN["thetas"]) * _DESIGN["seeds"]
+    thetas = {b["args"]["theta"] for b in spec["blocks"].values()}
+    assert thetas == set(_DESIGN["thetas"])
+    assert {b["args"]["arm_id"] for b in spec["blocks"].values()} == {"union_niid"}
+
+
+def test_pilot_is_a_prefix_of_the_canary_blocks_on_lattice_decades():
+    """Pilot cells are the first seeds of declared blocks, not extra cells."""
+    spec = json.loads((_CAMPAIGN / "campaign.json").read_text(encoding="utf-8"))
+    pilot = _DESIGN["theta_grid"]["pilot"]
+    assert set(pilot["thetas"]) <= set(_DESIGN["thetas"])
+    for theta in pilot["thetas"]:
+        (block,) = [
+            b for name, b in spec["blocks"].items()
+            if name.endswith("_canary") and b["args"]["theta"] == theta
+        ]
+        assert block["seeds"][:len(pilot["seeds"])] == pilot["seeds"]
+
+
+def test_scored_grid_is_a_subset_of_the_lattice():
+    grid = _DESIGN["theta_grid"]
+    scored = grid["scored_thetas"] or []
+    assert set(scored) <= set(_DESIGN["thetas"])
+    assert (grid["canary_theta"] is None) == (not scored)
+    if scored:
+        assert grid["canary_theta"] in scored
+
+
+def test_pilot_reads_the_t3_side_from_pilot_seeds_only():
+    readout = _load("readout")
+    contract = _DESIGN["joint_contract"]
+    grid = {"pilot": {"thetas": [1e7, 1e8], "seeds": [20200205, 20200206, 20200207]}}
+
+    def row(theta, p31):
+        return {
+            "theta": theta, "dead": False, "saturated": False,
+            "reported_only": {"p31_per_seed": p31},
+        }
+
+    rows = [
+        row(1e7, {"20200205": 0, "20200206": 100, "20200207": 700, "20200208": 9000}),
+        row(1e8, {"20200205": 634, "20200206": 800}),
+        row(3.16e8, {"20200205": 900}),
+    ]
+    pilot = readout._pilot(rows, grid, contract)
+    assert [p["theta"] for p in pilot] == [1e7, 1e8]
+    assert [p["median_p31"] for p in pilot] == [100, 717.0]
+    assert [p["at_or_above_t3"] for p in pilot] == [False, True]
+    assert [p["n"] for p in pilot] == [3, 2]
 
 
 def test_union_arm_is_replay_niid_plus_exactly_the_declared_deltas():

@@ -13,7 +13,19 @@
   ],
   "scenario_id": "diamond_princess_2020",
   "voyage_mode": "declared",
-  "thetas": [],
+  "thetas": [
+    100000.0,
+    316000.0,
+    1000000.0,
+    3160000.0,
+    10000000.0,
+    31600000.0,
+    100000000.0,
+    316000000.0,
+    1000000000.0,
+    3160000000.0,
+    10000000000.0
+  ],
   "infection_age_days": [
     6.8
   ],
@@ -108,7 +120,7 @@
                 16
               ],
               "port": "Yokohama",
-              "notes": "declared: staggered boarding 12:00-16:00 + 16:00-16:30 assembly (spec \u00a75)"
+              "notes": "declared: staggered boarding 12:00-16:00 + 16:00-16:30 assembly (spec §5)"
             },
             {
               "day": 2,
@@ -128,7 +140,7 @@
                 16
               ],
               "disembark_fraction": 0.5,
-              "notes": "declared window; spec \u00a74 excursion 09:00-16:00 + 30-min return margin"
+              "notes": "declared window; spec §4 excursion 09:00-16:00 + 30-min return margin"
             },
             {
               "day": 4,
@@ -220,7 +232,7 @@
                 22
               ],
               "disembark_fraction": 0.5,
-              "notes": "late port call 13:30-23:00 per spec \u00a74"
+              "notes": "late port call 13:30-23:00 per spec §4"
             },
             {
               "day": 14,
@@ -229,7 +241,7 @@
             {
               "day": 15,
               "type": "sea_day",
-              "notes": "early return to Yokohama; passengers remain aboard, routine continues (spec \u00a74)"
+              "notes": "early return to Yokohama; passengers remain aboard, routine continues (spec §4)"
             },
             {
               "day": 16,
@@ -267,10 +279,34 @@
       "note": "replay_niid verbatim (DP-THETA-FIT-01) plus three declared deltas: SOP-017-DEDQUARTER in place of SOP-017-DEDICATED (exempt_fraction crew_general 0.25), crew_duty_exclusion enabled (VSP 2018 OM 4.4.1.1.1 symptomatic working crew removed), and the record testing structure armed (retest sweeps + 23 Feb crew_wave). No mechanism code, no constant change."
     }
   ],
-  "cells": 0,
+  "cells": 264,
   "theta_grid": {
-    "status": "held",
-    "reason": "Owner decision 2026-11-23: the grid is declared on the post-fine-share emission scale after that leg merges; no fit in old units.",
-    "rule": "When declared: 3-4 values at half-decade spacing, located from a bracket measured on the post-adoption scale (one value below T3, one at or above it). Old theta values do not convert: the adoption raises only the zone airborne pool deposit, so the route mix shifts and FIT-01's 3.16e9 / 4.22e9 / 1e10 have no image on the new scale. Where the bracket comes from (the fine-share leg's cells or a declared pilot) is decided at declaration. The canary is 20 seeds at one declared value."
+    "status": "lattice_declared",
+    "arm_id": "union_niid",
+    "declared": "2026-11-24, on main e14f5bf3 (contains COVID-EMIT-FINE-01), before any cell on the post-adoption scale",
+    "lattice": "thetas is the runnable half-decade lattice 1e5..1e10, not the scored grid. Its span is a bound, not a conversion: theta scales dose on every route and the adoption raised only the zone airborne pool (x1.7e4), so the new-scale theta lies between old/1.7e4 (airborne pool the only route) and old (airborne pool negligible); FIT-01's old-unit bracket (1e9, 1e10) maps to no point inside it.",
+    "pilot": {
+      "thetas": [
+        100000.0,
+        1000000.0,
+        10000000.0,
+        100000000.0,
+        1000000000.0,
+        10000000000.0
+      ],
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209
+      ],
+      "how": "the first 5 seeds of each decade's canary block (scripts/campaign submit --size 5); the same cells the full block would run",
+      "statistic": "median over the 5 seeds of positives through day 31 (P31, all seeds, unconditioned), against 634",
+      "reads": "only the T3 side of each decade and the dead/saturated edges. No contract leg is scored from pilot cells; they are 5-seed provisional rows."
+    },
+    "selection_rule": "theta_hi = the lowest pilot decade whose median P31 >= 634; theta_lo = the decade below it. Scored grid = {theta_lo, 3.16*theta_lo, theta_hi, 3.16*theta_hi}, dropping a value above the lattice. Canary = 20 seeds at 3.16*theta_lo. If no pilot decade reaches 634, or the lowest one already does, no grid is declared and that is reported. A pilot median that falls back below 634 above theta_hi is reported and does not move the grid.",
+    "scored_thetas": null,
+    "canary_theta": null
   }
 }
