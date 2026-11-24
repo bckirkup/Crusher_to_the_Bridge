@@ -142,8 +142,9 @@ ignition day 12 / 12.5 / 12 / 10; `before_share` 0.026 / 0.007 / 0.034 /
 capture 0.908 / 0.902 / 0.937 / 0.961; P34 691 / 785 / 887 / 870.
 
 At 1e8 the all-seed medians of secondaries, during-quarantine, capture,
-P31 and P34 are 0 (13 of 24 seeds extinct); all-seed `before_share` is
-0.026 and the median ignition day is undefined (13 seeds never ignite).
+P31 and P34 are 0 (13 of 24 seeds extinct); `before_share` is
+0.026 (median over the seeds where it is defined; the reducer drops
+seeds with no recorded onset) and the median ignition day is undefined (13 seeds never ignite).
 The dead edge
 (P31 = 0 on at least 20 of 24) is not met. Non-extinct seeds at 1e8
 infect 867–3,126; two (867, 917) are inside the attack band. At 3.16e8
