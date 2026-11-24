@@ -652,6 +652,18 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`COVID-INDEX-CLOCK-01` — the union-arm index clock is honest
+  (`docs/ledger/COVID-INDEX-CLOCK-01.md`).** `seed_patch.onset_day` 3.0
+  is a voyage day: the stamped incubation is 2.8 + 3.0 = 5.8 d, so the
+  2.0 d presymptomatic window opens at voyage day 1.0, not before
+  boarding. One local trace (seed 20200205, θ 3.16e9,
+  `tools/diag/covid_index_clock_trace.py`): gate closed epochs 0–23,
+  first emission epoch 24, onset epoch 72. No defect, no seed-specific
+  path; the day-0 silence below is the declared geometry. Emission is
+  flat at 1e-6 of peak on days 1–3 and 100× that on day index 4, which
+  carries 97% of the index's aboard emission. Flagged, unchecked: whether
+  the authored curve shape (peak at onset + 4 d) matches the He et al.
+  source the window cites.
 - **`DP-PARTICIPATION-01` closed before any cell — Suite 2 needs
   re-scoping (`docs/ledger/DP-PARTICIPATION-01.md`).** Per-index day-0
   itinerary pinning is not expressible without engine work. A pure readout
