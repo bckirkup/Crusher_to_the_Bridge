@@ -46,7 +46,11 @@ Pure readout over the 96 completed DP-UNION-01 cells (θ 1e8, 3.16e8, 1e9,
 `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_dp_union_01/union_t{1e8,3e8,1e9,3e9}_{canary,rest}/`),
 `tools/covid_dp_participation_diag.py`, evidence
 `reports/dp_participation_01/day_of_acquisition.json`. Day index 0 is
-embarkation day (`sim.clock.day_index`).
+embarkation day (`sim.clock.day_index`). Only those eight blocks were
+synced (`aws s3 sync … --exclude "*" --include "union_t1e8_*/*" --include
+"union_t3e8_*/*" --include "union_t1e9_*/*" --include "union_t3e9_*/*"`);
+the prefix also holds off-grid pilot blocks, which the tool would pool if
+the whole prefix were synced.
 
 | θ | founder-class cells | aboard-window acquisitions | day 0 | day 1 | day 2 | day 3 | day 4 |
 |---|---|---|---|---|---|---|---|
@@ -65,9 +69,14 @@ embarkation day (`sim.clock.day_index`).
 - At θ 3.16e9 the 7 founder-class cells take 505 of 601 acquisitions by
   `hvac_airborne`, 86 by droplet and 10 by caregiver.
 
-Consequence: a day-0 itinerary pin cannot change founder yield under the
-union arm. Suite 2 as written would return a null that says nothing about
-participation.
+Consequence (inferred, no pinned cell was run): under the union arm a
+day-0 itinerary pin has no direct pathway to founder yield, because the
+drawn baseline already produces no day-0 acquisitions from an index that
+is not emitting at boarding (`index_shedding_at_day0` is evaluated at
+epoch 0). Whether a day-0 pin would leave days 1–4 unchanged is not
+established: it could still move them through rhythm-stream disruption or
+carry-over, which would not be a participation effect. Suite 2 as written
+would therefore not be interpretable as a participation test.
 
 ## What is not measured
 

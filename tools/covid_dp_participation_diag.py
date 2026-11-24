@@ -8,6 +8,10 @@ echo and reports, per theta, the aboard-window acquisitions by day index
 whether the index was shedding at boarding
 (``index_shedding_at_day0``). It runs no simulation.
 
+Every ``cell_*.json`` under ``--cells`` is pooled, so sync only the blocks
+that belong to the grid being read (a campaign prefix may also hold pilot
+blocks at other thetas).
+
 Usage:
     python3 tools/covid_dp_participation_diag.py --cells <dir> [--out <json>]
 """

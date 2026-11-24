@@ -659,7 +659,8 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   finds 0 of 868 aboard-window acquisitions on embarkation day and
   `index_shedding_at_day0` false in every cell (the union arm boards the
   index at infection age 2.8 d, onset day 3.0); 693 land on day index 4.
-  A day-0 pin cannot move founder yield under this arm. No design frozen,
+  A day-0 pin has no direct pathway to founder yield under this arm
+  (inferred; no pinned cell ran). No design frozen,
   no campaign registered, nothing submitted. Open decision: pin the
   shedding days, change the seed patch, or run a venue-attribution replay
   first.
