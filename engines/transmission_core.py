@@ -8186,7 +8186,7 @@ class TransmissionCore:
             self._hand_partition_add(
                 pathogen_id, "internal_host_transfer", amount,
             )
-            if _shedding == 0.0:
+            if _shedding <= 0.0:
                 # A zero-shedding donor is a carrier admitted by
                 # ``hand_donor_mode='carriers'``: witness the hop.
                 self._hand_prov_note(shedder, pathogen_id, "donated_carrier")
@@ -8606,7 +8606,7 @@ class TransmissionCore:
             if donor[0].agent_id != target.agent_id
             or (
                 self.hand_donor_mode == DEFAULT_HAND_DONOR_MODE
-                and donor[1] != 0.0
+                and donor[1] > 0.0
             )
         ]
         sampled_shedders = donors
@@ -13232,7 +13232,7 @@ class TransmissionCore:
                 pathogen_id, "sink_redeposited", deposit,
             )
             deposits_by_venue.setdefault(venue, []).append((agent, deposit))
-            if sv == 0.0 and deposit > 0.0:
+            if sv <= 0.0 and deposit > 0.0:
                 self._hand_prov_note(agent, pathogen_id, "deposited_carrier")
                 self._hand_carrier_activity_add(
                     pathogen_id, "deposit", agent, deposit,
@@ -14392,7 +14392,7 @@ class TransmissionCore:
                 pathogen_id, "sink_redeposited", deposit,
             )
             deposits.append((agent, deposit))
-            if _sv == 0.0 and deposit > 0.0:
+            if _sv <= 0.0 and deposit > 0.0:
                 self._hand_prov_note(agent, pathogen_id, "deposited_carrier")
                 self._hand_carrier_activity_add(
                     pathogen_id, "deposit", agent, deposit,
@@ -14959,7 +14959,7 @@ class TransmissionCore:
             self._hand_partition_add(
                 pathogen_id, "sink_redeposited", deposit,
             )
-            if _sv == 0.0:
+            if _sv <= 0.0:
                 self._hand_prov_note(agent, pathogen_id, "deposited_carrier")
                 self._hand_carrier_activity_add(
                     pathogen_id, "deposit", agent, deposit,
