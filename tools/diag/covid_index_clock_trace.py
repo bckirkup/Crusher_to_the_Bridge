@@ -10,7 +10,7 @@ returns (the quantity ``_get_shedders`` gates on). The engine is not
 modified; the observer only reads agent state after each step.
 
     python3 tools/diag/covid_index_clock_trace.py --theta 3.16e9 --seed 20200205 \
-        --num-epochs 130
+        --num-epochs 132
 """
 from __future__ import annotations
 
