@@ -159,7 +159,7 @@ the envelope widens *which draws count*, it does not drop objectives:
 | Objective leg | Record quantity | Status |
 |---|---|---|
 | Timing | ignition day, onset-peak at confinement (d13–15), `before_share` 0.173 ± band | measured targets |
-| Attack rate | the record's final confirmed count = 712 (~19% of 3,711 aboard); implied infections via the conditioned capture | no fit-target id covers the final count yet — the freeze declares it scored directly or folds it into the cross-check; `covid.T4` is the asymptomatic-share diagnostic (320/634), not this target; the serology band [712,960] is `covid.H5`'s admissible_band, held-out-forever and never a selection criterion |
+| Attack rate | onboard confirmed 691/3,894 through Feb 23 is the scored veto (~19% of the aboard manifest); the record's final confirmed 712 is reported context — its ~21 residual over 691 are post-window confirmations | a miss on the onboard count vetoes the cell; scoring the final 712 would need a post-voyage confirmation channel the arm does not declare, so it stays context. `covid.T4` is the asymptomatic-share diagnostic (320/634), not this target; the serology band [712,960] is `covid.H5`'s admissible_band, held-out-forever and never a selection criterion |
 | Confinement tail | during-quarantine mass [150,350], crew-skewed lag | measured band |
 | Testing observables | T3 = 634/3,063 through day 31; onboard 691/3,894 through Feb 23 | scored + cross-check |
 | Capture | confirmed/infections_reachable ≥ 0.80 class | conditioned basis |
