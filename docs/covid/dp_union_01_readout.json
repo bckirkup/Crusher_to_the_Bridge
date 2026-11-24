@@ -64,14 +64,16 @@
     3160000000.0,
     10000000000.0
   ],
-  "complete_thetas": [],
+  "complete_thetas": [
+    1000000000.0,
+    3160000000.0
+  ],
   "incomplete_thetas": {
     "100000.0": 5,
     "1000000.0": 5,
     "10000000.0": 5,
     "100000000.0": 5,
     "316000000.0": 20,
-    "1000000000.0": 5,
     "10000000000.0": 5
   },
   "theta_grid": {
@@ -107,7 +109,18 @@
       3160000000.0
     ],
     "canary_theta": 316000000.0,
-    "selected": "2026-11-24 from the pilot (image sha256:0d01dae0..., 30 cells): 5-seed median P31 = 0, 0, 0, 494, 879, 625 at 1e5..1e10, so theta_lo=1e8, theta_hi=1e9. The 1e10 median falls back below 634 and, by the rule, does not move the grid. Numbers: campaigns/covid/dp_union_01/LEDGER.md."
+    "selected": "2026-11-24 from the pilot (image sha256:0d01dae0..., 30 cells): 5-seed median P31 = 0, 0, 0, 494, 879, 625 at 1e5..1e10, so theta_lo=1e8, theta_hi=1e9. The 1e10 median falls back below 634 and, by the rule, does not move the grid. Numbers: campaigns/covid/dp_union_01/LEDGER.md.",
+    "array_staging": {
+      "declared": "2026-11-24, after the canary readout and before any array cell; owner-approved",
+      "first_theta": 3160000000.0,
+      "first_blocks": [
+        "union_t3e9_canary",
+        "union_t3e9_rest"
+      ],
+      "why": "the canary gave 1 of 20 founder-class seeds at 3.16e8, and founder count rose with theta on the pilot seeds, so the highest scored theta is the cell most likely to hold a scored row",
+      "stopping_rule": "Run the 24 seeds at 3.16e9 first. If fewer than 5 seeds are in the founder class (min_class_seeds), stop: no further array cell is submitted and the report is insufficient class mass on the scored grid. If 5 or more, run the 24 seeds at 1e9 next; the cells at 1e8 and 3.16e8 are a further owner decision.",
+      "does_not_change": "the scored grid, the class, the seven legs and their bands. A joint verdict still needs every scored theta complete; a staged stop is reported as an incomplete grid, not as a verdict."
+    }
   },
   "pilot": [
     {
@@ -1859,17 +1872,17 @@
     },
     {
       "theta": 1000000000.0,
-      "n": 5,
-      "provisional": true,
+      "n": 24,
+      "provisional": false,
       "scored_class": "founder",
       "class_n": {
-        "founder": 1,
-        "takeoff": 5,
-        "all": 5
+        "founder": 4,
+        "takeoff": 18,
+        "all": 24
       },
       "legs": {
         "timing_ignition": {
-          "median": 8,
+          "median": 8.0,
           "never_ignited": 0,
           "day_max": 9,
           "ok": true,
@@ -1877,7 +1890,7 @@
           "verdict": "insufficient class mass"
         },
         "timing_before_share": {
-          "median": 0.5339876408578699,
+          "median": 0.5024706198443533,
           "band": [
             0.07299999999999998,
             0.273
@@ -1887,7 +1900,7 @@
           "verdict": "insufficient class mass"
         },
         "attack": {
-          "median": 3370,
+          "median": 3347.0,
           "band": [
             712,
             960
@@ -1897,7 +1910,7 @@
           "verdict": "insufficient class mass"
         },
         "during": {
-          "median": 225,
+          "median": 219.5,
           "band": [
             150,
             350
@@ -1907,7 +1920,7 @@
           "verdict": "insufficient class mass"
         },
         "capture": {
-          "median": 0.97091124962897,
+          "median": 0.9613591790080755,
           "band": [
             0.8,
             1.0
@@ -1918,10 +1931,10 @@
         },
         "t3": {
           "target": 634,
-          "median": 747,
-          "seeds_above_target": 1,
-          "seeds_below_target": 0,
-          "seeds_needed_to_exclude": 1,
+          "median": 697.0,
+          "seeds_above_target": 3,
+          "seeds_below_target": 1,
+          "seeds_needed_to_exclude": 3,
           "side": "above",
           "ok": false,
           "pass": false,
@@ -1929,12 +1942,12 @@
         },
         "onboard_table": {
           "target": 691,
-          "median": 751,
-          "seeds_above_target": 1,
-          "seeds_below_target": 0,
-          "seeds_needed_to_exclude": 1,
-          "side": "above",
-          "ok": false,
+          "median": 700.5,
+          "seeds_above_target": 2,
+          "seeds_below_target": 2,
+          "seeds_needed_to_exclude": 3,
+          "side": "compatible",
+          "ok": true,
           "pass": false,
           "verdict": "insufficient class mass"
         }
@@ -1951,21 +1964,21 @@
       ],
       "dead": false,
       "saturated": false,
-      "consistent": null,
-      "seeds_in_band": 5,
-      "median_not_representative": true,
+      "consistent": false,
+      "seeds_in_band": 18,
+      "median_not_representative": false,
       "audit_deviations": {},
       "reported_only": {
         "legs_on_takeoff_class": {
           "timing_ignition": {
-            "median": 11,
+            "median": 12.0,
             "never_ignited": 0,
             "day_max": 9,
             "pass": false,
             "verdict": null
           },
           "timing_before_share": {
-            "median": 0.0661902971041745,
+            "median": 0.03428953291494236,
             "band": [
               0.07299999999999998,
               0.273
@@ -1974,7 +1987,7 @@
             "verdict": null
           },
           "attack": {
-            "median": 3289,
+            "median": 3288.0,
             "band": [
               712,
               960
@@ -1983,7 +1996,7 @@
             "verdict": null
           },
           "during": {
-            "median": 1672,
+            "median": 1755.0,
             "band": [
               150,
               350
@@ -1992,7 +2005,7 @@
             "verdict": null
           },
           "capture": {
-            "median": 0.9402023919043239,
+            "median": 0.9367884260570354,
             "band": [
               0.8,
               1.0
@@ -2002,20 +2015,20 @@
           },
           "t3": {
             "target": 634,
-            "median": 879,
-            "seeds_above_target": 5,
-            "seeds_below_target": 0,
-            "seeds_needed_to_exclude": 4,
+            "median": 857.0,
+            "seeds_above_target": 15,
+            "seeds_below_target": 3,
+            "seeds_needed_to_exclude": 14,
             "side": "above",
             "pass": false,
             "verdict": null
           },
           "onboard_table": {
             "target": 691,
-            "median": 905,
-            "seeds_above_target": 5,
-            "seeds_below_target": 0,
-            "seeds_needed_to_exclude": 4,
+            "median": 887.0,
+            "seeds_above_target": 14,
+            "seeds_below_target": 4,
+            "seeds_needed_to_exclude": 14,
             "side": "above",
             "pass": false,
             "verdict": null
@@ -2023,14 +2036,14 @@
         },
         "legs_on_all_seeds": {
           "timing_ignition": {
-            "median": 11,
-            "never_ignited": 0,
+            "median": 13.0,
+            "never_ignited": 6,
             "day_max": 9,
             "pass": false,
             "verdict": null
           },
           "timing_before_share": {
-            "median": 0.0661902971041745,
+            "median": 0.03428953291494236,
             "band": [
               0.07299999999999998,
               0.273
@@ -2039,7 +2052,7 @@
             "verdict": null
           },
           "attack": {
-            "median": 3289,
+            "median": 3280.0,
             "band": [
               712,
               960
@@ -2048,7 +2061,7 @@
             "verdict": null
           },
           "during": {
-            "median": 1672,
+            "median": 1342.0,
             "band": [
               150,
               350
@@ -2057,7 +2070,7 @@
             "verdict": null
           },
           "capture": {
-            "median": 0.9402023919043239,
+            "median": 0.9106819101365264,
             "band": [
               0.8,
               1.0
@@ -2067,22 +2080,22 @@
           },
           "t3": {
             "target": 634,
-            "median": 879,
-            "seeds_above_target": 5,
-            "seeds_below_target": 0,
-            "seeds_needed_to_exclude": 4,
-            "side": "above",
-            "pass": false,
+            "median": 758.0,
+            "seeds_above_target": 15,
+            "seeds_below_target": 9,
+            "seeds_needed_to_exclude": 18,
+            "side": "compatible",
+            "pass": true,
             "verdict": null
           },
           "onboard_table": {
             "target": 691,
-            "median": 905,
-            "seeds_above_target": 5,
-            "seeds_below_target": 0,
-            "seeds_needed_to_exclude": 4,
-            "side": "above",
-            "pass": false,
+            "median": 762.0,
+            "seeds_above_target": 14,
+            "seeds_below_target": 10,
+            "seeds_needed_to_exclude": 18,
+            "side": "compatible",
+            "pass": true,
             "verdict": null
           }
         },
@@ -2091,115 +2104,657 @@
           "20200206": 886,
           "20200207": 887,
           "20200208": 843,
-          "20200209": 879
+          "20200209": 879,
+          "20200210": 0,
+          "20200211": 496,
+          "20200212": 927,
+          "20200213": 924,
+          "20200214": 769,
+          "20200215": 891,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 386,
+          "20200219": 647,
+          "20200220": 948,
+          "20200221": 852,
+          "20200222": 0,
+          "20200223": 727,
+          "20200224": 862,
+          "20200225": 929,
+          "20200226": 0,
+          "20200227": 535,
+          "20200228": 0
         },
         "p34_per_seed": {
           "20200205": 751,
           "20200206": 954,
           "20200207": 909,
           "20200208": 871,
-          "20200209": 905
+          "20200209": 905,
+          "20200210": 0,
+          "20200211": 678,
+          "20200212": 983,
+          "20200213": 989,
+          "20200214": 773,
+          "20200215": 987,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 600,
+          "20200219": 650,
+          "20200220": 983,
+          "20200221": 890,
+          "20200222": 0,
+          "20200223": 732,
+          "20200224": 884,
+          "20200225": 1012,
+          "20200226": 0,
+          "20200227": 536,
+          "20200228": 0
         },
         "secondaries_per_seed": {
           "20200205": 3370,
           "20200206": 3289,
           "20200207": 3293,
           "20200208": 3267,
-          "20200209": 3287
+          "20200209": 3287,
+          "20200210": 0,
+          "20200211": 2419,
+          "20200212": 3277,
+          "20200213": 3284,
+          "20200214": 3289,
+          "20200215": 3253,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 2881,
+          "20200219": 3324,
+          "20200220": 3227,
+          "20200221": 3283,
+          "20200222": 0,
+          "20200223": 3334,
+          "20200224": 3310,
+          "20200225": 3295,
+          "20200226": 0,
+          "20200227": 3411,
+          "20200228": 0
         },
-        "extinct_seeds": 0,
-        "median_secondaries": 3289,
-        "median_attack_rate": 0.886284020479655,
-        "median_specimens_through_31": 3063,
-        "median_specimens_through_34": 3218,
-        "median_wave_positives": 26,
-        "median_recorded_onsets": 2659,
-        "median_lab_confirmed_total": 3072,
-        "median_infections_before_quarantine": 1594,
-        "median_infections_during_window_all_seeds": 1672,
-        "median_infections_after_quarantine": 27,
-        "median_crew_share_during_takeoff": 0.3235645933014354,
-        "median_unconditioned_capture": 0.9326047358834244,
-        "median_infections_reachable": 3242,
-        "median_duty_excluded_hosts": 722,
+        "extinct_seeds": 6,
+        "median_secondaries": 3280.0,
+        "median_attack_rate": 0.8838587981676098,
+        "median_specimens_through_31": 3063.0,
+        "median_specimens_through_34": 3265.0,
+        "median_wave_positives": 22.0,
+        "median_recorded_onsets": 2556.0,
+        "median_lab_confirmed_total": 2890.0,
+        "median_infections_before_quarantine": 384.0,
+        "median_infections_during_window_all_seeds": 1342.0,
+        "median_infections_after_quarantine": 13.0,
+        "median_crew_share_during_takeoff": 0.3229757994755764,
+        "median_unconditioned_capture": 0.8797893897140012,
+        "median_infections_reachable": 3169.0,
+        "median_duty_excluded_hosts": 713.5,
         "duty_excluded_zero_on_takeoff_seeds": 0,
-        "median_realized_exempt_share": 0.24210526315789474,
-        "median_founder_yield": 2,
+        "median_realized_exempt_share": 0.24976076555023924,
+        "median_founder_yield": 1.0,
         "founder_yield_per_seed": {
           "20200205": 37,
           "20200206": 1,
           "20200207": 1,
           "20200208": 6,
-          "20200209": 2
+          "20200209": 2,
+          "20200210": 0,
+          "20200211": 1,
+          "20200212": 2,
+          "20200213": 1,
+          "20200214": 14,
+          "20200215": 1,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 1,
+          "20200219": 18,
+          "20200220": 4,
+          "20200221": 3,
+          "20200222": 0,
+          "20200223": 5,
+          "20200224": 1,
+          "20200225": 3,
+          "20200226": 0,
+          "20200227": 40,
+          "20200228": 0
         },
         "ignition_day_per_seed": {
           "20200205": 8,
           "20200206": 13,
           "20200207": 11,
           "20200208": 10,
-          "20200209": 11
+          "20200209": 11,
+          "20200210": null,
+          "20200211": 18,
+          "20200212": 13,
+          "20200213": 13,
+          "20200214": 8,
+          "20200215": 15,
+          "20200216": null,
+          "20200217": null,
+          "20200218": 20,
+          "20200219": 8,
+          "20200220": 13,
+          "20200221": 13,
+          "20200222": null,
+          "20200223": 9,
+          "20200224": 10,
+          "20200225": 13,
+          "20200226": null,
+          "20200227": 6,
+          "20200228": null
         },
-        "machinery_gap_seeds": [],
+        "machinery_gap_seeds": [
+          20200210,
+          20200216,
+          20200217,
+          20200222,
+          20200226,
+          20200228
+        ],
         "median_by_day": {
           "16": {
-            "specimens": 31,
-            "positives": 10
+            "specimens": 31.0,
+            "positives": 1.5
           },
           "17": {
-            "specimens": 71,
-            "positives": 19
+            "specimens": 71.0,
+            "positives": 7.0
           },
           "18": {
-            "specimens": 171,
-            "positives": 46
+            "specimens": 171.0,
+            "positives": 13.0
           },
           "19": {
-            "specimens": 6,
-            "positives": 1
+            "specimens": 6.0,
+            "positives": 1.0
           },
           "20": {
-            "specimens": 57,
-            "positives": 16
+            "specimens": 57.0,
+            "positives": 15.5
           },
           "21": {
-            "specimens": 103,
-            "positives": 36
+            "specimens": 103.0,
+            "positives": 32.0
           },
           "23": {
-            "specimens": 53,
-            "positives": 16
+            "specimens": 53.0,
+            "positives": 11.0
           },
           "24": {
-            "specimens": 221,
-            "positives": 63
+            "specimens": 221.0,
+            "positives": 55.0
           },
           "26": {
-            "specimens": 217,
-            "positives": 72
+            "specimens": 217.0,
+            "positives": 65.5
           },
           "27": {
-            "specimens": 289,
-            "positives": 97
+            "specimens": 289.0,
+            "positives": 89.0
           },
           "28": {
-            "specimens": 504,
-            "positives": 161
+            "specimens": 504.0,
+            "positives": 136.5
           },
           "29": {
-            "specimens": 681,
-            "positives": 187
+            "specimens": 681.0,
+            "positives": 138.0
           },
           "30": {
-            "specimens": 607,
-            "positives": 115
+            "specimens": 607.0,
+            "positives": 93.5
           },
           "31": {
-            "specimens": 52,
-            "positives": 8
+            "specimens": 52.0,
+            "positives": 5.0
           },
           "34": {
-            "specimens": 155,
-            "positives": 26
+            "specimens": 202.0,
+            "positives": 22.0
+          }
+        }
+      }
+    },
+    {
+      "theta": 3160000000.0,
+      "n": 24,
+      "provisional": false,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 7,
+        "takeoff": 21,
+        "all": 24
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": 7,
+          "never_ignited": 0,
+          "day_max": 9,
+          "pass": true,
+          "verdict": null
+        },
+        "timing_before_share": {
+          "median": 0.6374824191279888,
+          "band": [
+            0.07299999999999998,
+            0.273
+          ],
+          "pass": false,
+          "verdict": null
+        },
+        "attack": {
+          "median": 3452,
+          "band": [
+            712,
+            960
+          ],
+          "pass": false,
+          "verdict": null
+        },
+        "during": {
+          "median": 112,
+          "band": [
+            150,
+            350
+          ],
+          "pass": false,
+          "verdict": null
+        },
+        "capture": {
+          "median": 0.9640287769784173,
+          "band": [
+            0.8,
+            1.0
+          ],
+          "pass": true,
+          "verdict": null
+        },
+        "t3": {
+          "target": 634,
+          "median": 663,
+          "seeds_above_target": 5,
+          "seeds_below_target": 2,
+          "seeds_needed_to_exclude": 6,
+          "side": "compatible",
+          "pass": true,
+          "verdict": null
+        },
+        "onboard_table": {
+          "target": 691,
+          "median": 663,
+          "seeds_above_target": 2,
+          "seeds_below_target": 5,
+          "seeds_needed_to_exclude": 6,
+          "side": "compatible",
+          "pass": true,
+          "verdict": null
+        }
+      },
+      "passing_legs": [
+        "timing_ignition",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "failing_legs": [
+        "timing_before_share",
+        "attack",
+        "during"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": false,
+      "seeds_in_band": 20,
+      "median_not_representative": false,
+      "audit_deviations": {},
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": 10,
+            "never_ignited": 0,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.09388335704125178,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3383,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 992,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.9611175115207373,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 859,
+            "seeds_above_target": 18,
+            "seeds_below_target": 3,
+            "seeds_needed_to_exclude": 16,
+            "side": "above",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 870,
+            "seeds_above_target": 15,
+            "seeds_below_target": 6,
+            "seeds_needed_to_exclude": 16,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": 10.5,
+            "never_ignited": 3,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.09388335704125178,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3373.0,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 658.0,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.9556412462952129,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 811.5,
+            "seeds_above_target": 18,
+            "seeds_below_target": 6,
+            "seeds_needed_to_exclude": 18,
+            "side": "above",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 819.0,
+            "seeds_above_target": 15,
+            "seeds_below_target": 9,
+            "seeds_needed_to_exclude": 18,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200205": 663,
+          "20200206": 951,
+          "20200207": 788,
+          "20200208": 859,
+          "20200209": 908,
+          "20200210": 0,
+          "20200211": 302,
+          "20200212": 729,
+          "20200213": 899,
+          "20200214": 666,
+          "20200215": 934,
+          "20200216": 971,
+          "20200217": 0,
+          "20200218": 859,
+          "20200219": 650,
+          "20200220": 987,
+          "20200221": 373,
+          "20200222": 1016,
+          "20200223": 835,
+          "20200224": 734,
+          "20200225": 913,
+          "20200226": 0,
+          "20200227": 623,
+          "20200228": 987
+        },
+        "p34_per_seed": {
+          "20200205": 663,
+          "20200206": 971,
+          "20200207": 795,
+          "20200208": 874,
+          "20200209": 937,
+          "20200210": 0,
+          "20200211": 557,
+          "20200212": 730,
+          "20200213": 916,
+          "20200214": 669,
+          "20200215": 960,
+          "20200216": 989,
+          "20200217": 0,
+          "20200218": 870,
+          "20200219": 650,
+          "20200220": 1011,
+          "20200221": 374,
+          "20200222": 1025,
+          "20200223": 843,
+          "20200224": 738,
+          "20200225": 933,
+          "20200226": 0,
+          "20200227": 625,
+          "20200228": 1008
+        },
+        "secondaries_per_seed": {
+          "20200205": 3474,
+          "20200206": 3392,
+          "20200207": 3354,
+          "20200208": 3363,
+          "20200209": 3341,
+          "20200210": 0,
+          "20200211": 2452,
+          "20200212": 3394,
+          "20200213": 3359,
+          "20200214": 3452,
+          "20200215": 3364,
+          "20200216": 3359,
+          "20200217": 0,
+          "20200218": 3383,
+          "20200219": 3424,
+          "20200220": 3411,
+          "20200221": 3464,
+          "20200222": 3369,
+          "20200223": 3375,
+          "20200224": 3391,
+          "20200225": 3399,
+          "20200226": 0,
+          "20200227": 3471,
+          "20200228": 3371
+        },
+        "extinct_seeds": 3,
+        "median_secondaries": 3373.0,
+        "median_attack_rate": 0.908919428725411,
+        "median_specimens_through_31": 3063.0,
+        "median_specimens_through_34": 3177.0,
+        "median_wave_positives": 8.5,
+        "median_recorded_onsets": 2778.0,
+        "median_lab_confirmed_total": 3232.0,
+        "median_infections_before_quarantine": 1879.5,
+        "median_infections_during_window_all_seeds": 658.0,
+        "median_infections_after_quarantine": 4.5,
+        "median_crew_share_during_takeoff": 0.31357048748353095,
+        "median_unconditioned_capture": 0.9497963933521827,
+        "median_infections_reachable": 3361.0,
+        "median_duty_excluded_hosts": 746.0,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.23110047846889953,
+        "median_founder_yield": 3.0,
+        "founder_yield_per_seed": {
+          "20200205": 76,
+          "20200206": 1,
+          "20200207": 1,
+          "20200208": 10,
+          "20200209": 6,
+          "20200210": 0,
+          "20200211": 1,
+          "20200212": 4,
+          "20200213": 2,
+          "20200214": 23,
+          "20200215": 1,
+          "20200216": 2,
+          "20200217": 0,
+          "20200218": 4,
+          "20200219": 36,
+          "20200220": 2,
+          "20200221": 383,
+          "20200222": 1,
+          "20200223": 17,
+          "20200224": 8,
+          "20200225": 4,
+          "20200226": 0,
+          "20200227": 56,
+          "20200228": 1
+        },
+        "ignition_day_per_seed": {
+          "20200205": 4,
+          "20200206": 12,
+          "20200207": 10,
+          "20200208": 10,
+          "20200209": 10,
+          "20200210": null,
+          "20200211": 19,
+          "20200212": 8,
+          "20200213": 12,
+          "20200214": 7,
+          "20200215": 13,
+          "20200216": 11,
+          "20200217": null,
+          "20200218": 10,
+          "20200219": 7,
+          "20200220": 11,
+          "20200221": 3,
+          "20200222": 11,
+          "20200223": 9,
+          "20200224": 9,
+          "20200225": 11,
+          "20200226": null,
+          "20200227": 4,
+          "20200228": 13
+        },
+        "machinery_gap_seeds": [
+          20200210,
+          20200217,
+          20200226
+        ],
+        "median_by_day": {
+          "16": {
+            "specimens": 31.0,
+            "positives": 8.0
+          },
+          "17": {
+            "specimens": 71.0,
+            "positives": 18.5
+          },
+          "18": {
+            "specimens": 171.0,
+            "positives": 49.5
+          },
+          "19": {
+            "specimens": 6.0,
+            "positives": 2.0
+          },
+          "20": {
+            "specimens": 57.0,
+            "positives": 20.0
+          },
+          "21": {
+            "specimens": 103.0,
+            "positives": 40.5
+          },
+          "23": {
+            "specimens": 53.0,
+            "positives": 19.0
+          },
+          "24": {
+            "specimens": 221.0,
+            "positives": 83.0
+          },
+          "26": {
+            "specimens": 217.0,
+            "positives": 76.0
+          },
+          "27": {
+            "specimens": 289.0,
+            "positives": 99.5
+          },
+          "28": {
+            "specimens": 504.0,
+            "positives": 144.5
+          },
+          "29": {
+            "specimens": 681.0,
+            "positives": 141.5
+          },
+          "30": {
+            "specimens": 607.0,
+            "positives": 74.0
+          },
+          "31": {
+            "specimens": 52.0,
+            "positives": 4.5
+          },
+          "34": {
+            "specimens": 114.0,
+            "positives": 8.5
           }
         }
       }

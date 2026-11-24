@@ -1,12 +1,13 @@
-# DP-UNION-01 — pilot and canary readout
+# DP-UNION-01 — pilot, canary and staged-array readout
 
-> **Status:** measured, provisional (20 of 24 seeds at one θ; 5-seed pilot
-> rows elsewhere). No final consistency verdict exists. The array has not
-> run; that decision is Benjamin's.
+> **Status:** measured. Two of four scored θ are complete (24 seeds at 1e9
+> and 3.16e9); 3.16e8 has 20 of 24 and 1e8 has 5. No joint verdict exists
+> (it needs every scored θ). The array was staged from 3.16e9 by the rule
+> in the design; the two lower cells are Benjamin's decision.
 
 **Measured at:** c7f7f927 (image
 `picard-campaign@sha256:0d01dae0f057770933b610346604875f05bf0fcd62b6f06145e5c19efeb049aa`,
-job definition `picard-covid-dp-union-01` revisions 1–7). Readout code and
+job definition `picard-covid-dp-union-01` revisions 1–11). Readout code and
 selected grid at c8b7315d. Machine-readable:
 `docs/covid/dp_union_01_readout.json`. Cells:
 `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_dp_union_01/`.
@@ -75,22 +76,71 @@ Reported only — not the scored contract:
   reachable infection — the index — and zero positives. No seed with a secondary infection has zero positives, so
   this is not a testing-machinery gap; the flag should exclude the index.
 
+## Staged array (θ = 3.16e9 and 1e9, seeds 20200205–20200228, 24 of 24 each)
+
+Staging rule committed at 11b759e8 before any array cell: 3.16e9 first;
+fewer than 5 founder-class seeds stops the array; 5 or more runs 1e9.
+Same image digest. No audit deviation on either row. Neither row is dead
+or saturated; the representativeness flag is not set.
+
+**3.16e9: the row is scored (7 founder-class seeds).**
+
+| Leg | Target | Founder class (7), scored | Takeoff class (21) | All 24 |
+|---|---|---|---|---|
+| Ignition day | ≤ 9 | 7, pass | 10 | 10.5 (3 never ignite) |
+| `before_share` | 0.173 ± 0.10 | 0.637, fail | 0.094 | 0.094 |
+| Attack (secondaries) | 712–960 | 3,452, fail | 3,383 | 3,373 |
+| During-quarantine | 150–350 | 112, fail | 992 | 658 |
+| Conditioned capture | ≥ 0.80 | 0.964, pass | 0.961 | 0.956 |
+| T3 (P31) | 634 | 663, compatible (5 above, 2 below) | 859, above | 811.5, above |
+| Onboard table (P34) | 691 | 663, compatible (2 above, 5 below) | 870, compatible | 819, compatible |
+
+Not consistent: `before_share`, attack and during fail. 3 seeds have no
+secondary infection; 20 of the other 21 infect 3,341–3,474 of 3,710 and
+one infects 2,452. Median specimens through day 34: 3,177 against 3,894.
+
+**1e9: no scored row (4 founder-class seeds; 5 needed).** Every leg reads
+"insufficient class mass". Reported only:
+
+| Leg | Target | Founder class (4), not scored | Takeoff class (18) | All 24 |
+|---|---|---|---|---|
+| Ignition day | ≤ 9 | 8 | 12 | 13 (6 never ignite) |
+| `before_share` | 0.173 ± 0.10 | 0.502 | 0.034 | 0.034 |
+| Attack (secondaries) | 712–960 | 3,347 | 3,288 | 3,280 |
+| During-quarantine | 150–350 | 219.5 | 1,755 | 1,342 |
+| Conditioned capture | ≥ 0.80 | 0.961 | 0.937 | 0.911 |
+| T3 (P31) | 634 | 697 | 857, above | 758, compatible |
+| Onboard table (P34) | 691 | 700.5 | 887, above | 762, compatible |
+
+6 seeds have no secondary infection; the other 18 infect 2,419–3,411.
+
+Founder-class seeds by θ: 1 of 20 at 3.16e8, 4 of 24 at 1e9, 7 of 24 at
+3.16e9.
+
 ## What this does and does not establish
 
-- Measured: the canary numbers above (20 seeds, one θ) and the pilot T3
-  sides (5 seeds per decade).
-- Not established: any pass or fail of the frozen contract — the scored
-  class has no row. A "leg fails at every run θ" claim would need the
-  array.
-- Hypothesis: the founder-conditioned contract cannot be scored on this
-  arm at any θ in the lattice, because index-driven founder yield ≥ 10 is
-  rare (1 of 20 here). If it holds on the array, the conditioning class,
-  not θ, is the binding constraint; that points at Suite 2 (index
-  participation) rather than more θ.
+- Measured: one scored row (3.16e9, 24 seeds, 7 in class) that fails
+  three legs; one complete unscored row (1e9); the 20-seed canary; the
+  pilot T3 sides.
+- Withdrawn: the canary hypothesis that the founder class cannot be
+  scored anywhere on the grid. It is scored at 3.16e9.
+- The attack leg is scored, and fails, only at 3.16e9. Descriptively
+  (unscored rows, not contract failures), the median secondaries are far
+  above 712–960 in every class at 3.16e8, 1e9 and 3.16e9, and on the
+  5-seed pilot at 1e8 (2,444). Non-extinct seeds infect 946–3,268 at
+  3.16e8 (11 of 13 above 2,198; one, 946, is inside the band),
+  2,419–3,411 at 1e9 and 2,452–3,474 at 3.16e9. "A leg fails at every
+  run θ" is therefore not established: one scored row exists.
+- The two timing legs pass on different classes at 3.16e9: ignition on
+  the founder class, `before_share` on the takeoff class and all seeds.
+  Only the founder class is scored.
+- Not established: a joint verdict (two scored θ incomplete), and whether
+  1e8 or 3.16e8 can be scored at 24 seeds. With 1 of 20 at 3.16e8 and 4
+  of 24 at 1e9, they would most likely read "insufficient class mass"
+  (inference).
 
 ## Open decision
 
-Whether the array runs: the remaining 4 seeds at 3.16e8 and 24 seeds at
-1e8, 1e9 and 3.16e9 (5 pilot seeds already exist at 1e8 and 1e9), 66
-cells. On the canary evidence it would most likely return "insufficient
-class mass" at every θ.
+Whether the two lower cells run: 19 seeds at 1e8 and 4 at 3.16e8, 23
+cells. They would complete the grid and so allow the joint verdict to be
+computed, but are unlikely to add a scored row.

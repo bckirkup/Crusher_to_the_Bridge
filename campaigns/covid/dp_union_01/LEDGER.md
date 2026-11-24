@@ -4,12 +4,13 @@ Declared 2026-11-24 (ledger `docs/ledger/DP-UNION-01.md`, design doc
 `docs/covid/covid_dp_union_01_design.md`).
 
 - **State:** grid declared on the post-fine-share scale; pilot (30 cells)
-  and canary (20 cells at θ=3.16e8) read out. **Array not submitted —
-  Benjamin's decision.** Details in the last section.
+  and canary (20 cells at θ=3.16e8) read out; staged array run at 3.16e9
+  and 1e9 (24 seeds each). **1e8 and the last 4 seeds at 3.16e8 not
+  submitted — Benjamin's decision.** Details in the last section.
 - **Matrix:** 1 arm (`union_niid`) × 24 seeds (20200205–20200228) × the
   scored grid {1e8, 3.16e8, 1e9, 3.16e9}; full declared voyage (840
   epochs), no horizon arg. The lattice has 11 runnable θ (264 cells).
-- **Jobdef rev / image digest:** `picard-covid-dp-union-01` revisions 1–7,
+- **Jobdef rev / image digest:** `picard-covid-dp-union-01` revisions 1–11,
   all on `sha256:0d01dae0f057770933b610346604875f05bf0fcd62b6f06145e5c19efeb049aa`.
 
 ## Local smoke through the registered path (one seed, old units, not scored)
@@ -88,8 +89,22 @@ changes a file the worker reads.
   `docs/covid/dp_union_01_readout.json`. Founder class 1 of 20 at the
   canary, so no leg is scored.
 
-Not run: every `_rest` block, and the canary blocks at 1e8, 1e9 (seeds
-6–20) and 3.16e9. Pilot blocks at 1e5, 1e6, 1e7 and 1e10 are outside the
+- **Staged array (owner-approved 2026-11-24; staging rule in the design,
+  committed 11b759e8 before submission), same image digest:**
+
+  | Block | Job ID | Revision | Result |
+  |---|---|---|---|
+  | `union_t3e9_canary` | 1de251ba-1fc7-483b-b98c-95bce4ae90fc | 8 | 20 of 20 |
+  | `union_t3e9_rest` | b3578655-23b9-45a8-9361-60f8fd5dc484 | 9 | 4 of 4 |
+  | `union_t1e9_canary` | e000b72a-70eb-4f90-aa91-304741d27c14 | 10 | 20 of 20 (5 pilot cells already in S3) |
+  | `union_t1e9_rest` | aee0751b-aada-4f77-81c7-dd16e2ce4a14 | 11 | 4 of 4 |
+
+  93 objects under the prefix. 3.16e9: 7 of 24 founder-class seeds, row
+  scored, fails `before_share`, attack and during. 1e9: 4 of 24, no
+  scored row. Numbers in the readout.
+
+Not run: `union_t1e8_canary` seeds 6–20, `union_t1e8_rest` and
+`union_t3e8_rest` (23 cells). Pilot blocks at 1e5, 1e6, 1e7 and 1e10 are outside the
 scored grid and need no further seeds. A resubmitted block skips cells
 already in S3.
 

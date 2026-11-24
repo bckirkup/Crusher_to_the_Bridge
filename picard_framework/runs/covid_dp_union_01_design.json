@@ -313,6 +313,17 @@
       3160000000.0
     ],
     "canary_theta": 316000000.0,
-    "selected": "2026-11-24 from the pilot (image sha256:0d01dae0..., 30 cells): 5-seed median P31 = 0, 0, 0, 494, 879, 625 at 1e5..1e10, so theta_lo=1e8, theta_hi=1e9. The 1e10 median falls back below 634 and, by the rule, does not move the grid. Numbers: campaigns/covid/dp_union_01/LEDGER.md."
+    "selected": "2026-11-24 from the pilot (image sha256:0d01dae0..., 30 cells): 5-seed median P31 = 0, 0, 0, 494, 879, 625 at 1e5..1e10, so theta_lo=1e8, theta_hi=1e9. The 1e10 median falls back below 634 and, by the rule, does not move the grid. Numbers: campaigns/covid/dp_union_01/LEDGER.md.",
+    "array_staging": {
+      "declared": "2026-11-24, after the canary readout and before any array cell; owner-approved",
+      "first_theta": 3160000000.0,
+      "first_blocks": [
+        "union_t3e9_canary",
+        "union_t3e9_rest"
+      ],
+      "why": "the canary gave 1 of 20 founder-class seeds at 3.16e8, and founder count rose with theta on the pilot seeds, so the highest scored theta is the cell most likely to hold a scored row",
+      "stopping_rule": "Run the 24 seeds at 3.16e9 first. If fewer than 5 seeds are in the founder class (min_class_seeds), stop: no further array cell is submitted and the report is insufficient class mass on the scored grid. If 5 or more, run the 24 seeds at 1e9 next; the cells at 1e8 and 3.16e8 are a further owner decision.",
+      "does_not_change": "the scored grid, the class, the seven legs and their bands. A joint verdict still needs every scored theta complete; a staged stop is reported as an incomplete grid, not as a verdict."
+    }
   }
 }

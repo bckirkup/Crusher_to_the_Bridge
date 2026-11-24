@@ -665,7 +665,15 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   attack is 3,124 secondaries against [712, 960], during-quarantine 1,919
   against [150, 350], `before_share` 0.004 against 0.173 and ignition day
   13 against ≤ 9. Seven seeds are extinct. Provisional (one θ, 20 seeds).
-  Open decision: whether the 66-cell array runs (Benjamin).
+  **Staged array (24 seeds each, staging rule committed 11b759e8 before
+  submission):** 3.16e9 is scored (7 of 24 in the founder class) and not
+  consistent — ignition day 7, capture 0.964, P31 663 and P34 663 pass;
+  `before_share` 0.637, attack 3,452 and during 112 fail. 1e9 has no
+  scored row (4 of 24). Descriptively (only 3.16e9 is scored), median
+  secondaries on taken-off seeds are 3,124, 3,288 and 3,383 at 3.16e8,
+  1e9 and 3.16e9 against [712, 960]; one canary seed (946) is in band. No joint verdict:
+  1e8 (5 seeds) and 3.16e8 (20 seeds) are incomplete.
+  Open decision: whether the remaining 23 cells run (Benjamin).
 
 - **`DP-THETA-FIT-01` is measured on three θ — the median crosses T3 between 3.16e9 and 1e10, and the top θ is still compatible, so T3 sets no upper bound**
   (ledger `docs/ledger/DP-THETA-FIT-01.md`, design
