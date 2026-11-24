@@ -31,10 +31,9 @@ below), `DP-THETA-FIT-01` (3.16e9 / 4.22e9), `COVID-H5-RESCORE-01`,
 `COVID-ONSET-FUNNEL-01`, the GM rescores, and every earlier Θ screen. Every
 airborne-route dose share and every DP/GM outcome at those Θ is likewise
 pre-change, as is every graywater-sequencing read mix for this arm (that
-channel takes the same zone pool as its pathogen input). Nothing has been
-scored under 0.85; the refit is DP-UNION-01
-(`docs/proposals/covid_theta_unification_plan.md`, proposed in #1410 and
-not yet on `main`).
+channel takes the same zone pool as its pathogen input). The first voyages scored under 0.85 are the DP-UNION-01 pilot and canary
+(`docs/covid/covid_dp_union_01_readout.md`); no operating point is fitted
+yet.
 
 **`COVID-THETA-REFIT-01` (ledger entry): every DP/GM replay figure measured
 at the Θ=7.9e6 (or older 1e6) operating point is historical on the Θ
@@ -653,22 +652,21 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
-- **`DP-UNION-01` is designed and held — no scored cell has run**
-  (ledger `docs/ledger/DP-UNION-01.md`, design
-  `docs/covid/covid_dp_union_01_design.md`, campaign
-  `campaigns/covid/dp_union_01/`). The Suite-1 union arm (`replay_niid` +
-  `SOP-017-DEDQUARTER` quarter-exempt confinement + symptomatic-crew
-  removal + armed retest sweeps and 23 Feb crew wave) is frozen against a
-  seven-leg joint contract scored on the founder class: ignition day,
-  `before_share`, attack band, during-quarantine band, conditioned capture,
-  T3 through day 31 and the 691/3,894 onboard table through 23 Feb. The θ
-  grid is not declared: it waits for the airborne fine-share adoption,
-  old θ values do not convert to the new scale, and no fit runs in old
-  units. One local machinery smoke
-  in old units passed every audit invariant; its record is in the campaign
-  LEDGER and is not a result. Open decision: none
-  until the fine-share leg merges; then declare the grid and run the
-  20-seed canary.
+- **`DP-UNION-01` canary measured (20 of 20 cells at θ=3.16e8, image at
+  `c7f7f927`; `docs/covid/covid_dp_union_01_readout.md`, ledger
+  `docs/ledger/DP-UNION-01.md`, campaign `campaigns/covid/dp_union_01/`)
+  — the first voyages scored under `airborne_emission_fraction` 0.85.**
+  The θ grid was located by a declared 5-seed pilot on the new scale
+  (median P31 0, 0, 0, 494, 879, 625 at 1e5 … 1e10): scored grid {1e8,
+  3.16e8, 1e9, 3.16e9}. The founder-conditioned contract has **no scored
+  row** at the canary: 1 of 20 seeds reaches 10 founders (5 needed).
+  Reported only, on the 13 taken-off seeds: P31 793 and P34 830 are
+  compatible with 634 and 691 and conditioned capture is 0.887, while
+  attack is 3,124 secondaries against [712, 960], during-quarantine 1,919
+  against [150, 350], `before_share` 0.004 against 0.173 and ignition day
+  13 against ≤ 9. Seven seeds are extinct. Provisional (one θ, 20 seeds).
+  Open decision: whether the 66-cell array runs (Benjamin).
+
 - **`DP-THETA-FIT-01` is measured on three θ — the median crosses T3 between 3.16e9 and 1e10, and the top θ is still compatible, so T3 sets no upper bound**
   (ledger `docs/ledger/DP-THETA-FIT-01.md`, design
   `docs/covid/covid_dp_theta_fit_01_design.md`, campaign
@@ -763,7 +761,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   droplet/direct/airborne deposit ×1.7e4". Only the zone airborne pool
   deposit reads the field and moves ×1.7e4; droplet/near-field, direct
   and fomite do not, so the Θ composite is not uniformly re-denominated
-  (§1). Still open: scoring any voyage under 0.85 (DP-UNION-01), and
+  (§1). DP-UNION-01's canary is the first voyage scored under 0.85. Still open:
   whether the droplet route should read the arm's declared share
   instead of the uniform 0.05.
 
