@@ -32,9 +32,13 @@ prevalent sample only ~4% of illness-destined infections board inside
 the presymptomatic window (`presymptomatic_share_of_presenting` 0.04 —
 the ~1–2 day window over Atmar's 28-day detectable duration), the other
 96% board convalescent with their vomiting already done on land, and
-29% never symptomatic at all. Per-import on-board vomiting probability
-≈ 0.71 × 0.04 × 0.72 ≈ 2% at the axis gate, before the in-window emit
-and schedule-count draws. **Cold is the correct default state** — the
+29% never symptomatic at all. The naive composition
+(0.71 × 0.04 × 0.72 ≈ 2% per import) understates the measured
+end-to-end rate (6.2–6.7%, table above) by ~3× — the composition omits
+incubating party members, whose illness window is entirely aboard, and
+the convalescent age-draw effects of tranche-42 finding B; the measured
+rate is the operative figure, and closing that gap is an open
+measurement. **Cold is the correct default state** — the
 measured emesis timing is not "too late": when events occur they land
 at epoch 5–16 of 288 (day 1–2). 10 of 18 cold cohort cells simply have
 zero emesis events all voyage.
@@ -53,8 +57,8 @@ zero emesis events all voyage.
   NORO-DOSE-REFIT-01 measured the same wall on spirit/mega: 22/60 and
   42/60 voyages ignite, **0/120 post** — growth never compounds past
   ~13 concurrent there. Yet the classic cohort's two hot cells *do*
-  compound (136–193 secondaries). The difference is ignition strength,
-  measured in section 3.
+  compound (45 and 193 secondaries, carrier-R+D arm). The difference is
+  ignition strength, measured in section 3.
 - The cohort's hot rate (2/20) is not a frequency estimator — seeds
   are fixed challenge cells, not a prevalence-stratified voyage sample,
   and the strong ignitions are seed-level lotteries. No valid model
@@ -74,6 +78,12 @@ Posted record, classic-capacity hulls, norovirus-only postings (n=46):
 passenger AR median **5.8%**, IQR [4.5, 8.8]; crew median 1.4%.
 Postings are ≥3%-threshold events by construction.
 
+- Endpoint caveat: the simulation AR counts **all** infections
+  (ever_infected / complement, asymptomatic included), while postings
+  count reported illness. The simulated rates are upward-biased against
+  the surveillance comparison, no passenger/crew split is computed here,
+  and neither role's threshold crossing is established — the comparison
+  is coarse in both directions.
 - 8006 (10.1%) lands just above the passenger IQR top — plausible-hot,
   moderately heavy.
 - **8000 (2.4%) would not post at all** — it is a sub-threshold hot
@@ -83,9 +93,18 @@ Postings are ≥3%-threshold events by construction.
   "hot" label straddles the posting definition.
 - **Both hot cells are food-dominated** in route tally — including
   8006, which is emesis-patch-driven in mass terms (1.24e9 GEC patch)
-  yet still attributes most infections to common_source_food. The
-  user's "leaning too hard on one kind of supply" is confirmed in the
-  route ledger: person-to-person amplification (fomite/caregiver/
+  yet still attributes most infections to common_source_food.
+  Corroborating pathway-dose evidence: `common_source_food` carries
+  21M GEC on 8000 and 213M GEC on 8006 against a hand-deposited `food`
+  pool of 37/521 GEC, and is **exactly zero on every cold cell**
+  (crossing or not) — consistent with discrete supply events firing on
+  the hot cells and nothing else. Caveat, stated not softened: the
+  attribution is pool-mix bookkeeping and these artifacts carry no
+  per-event witness (`common_source_events` is not exported), so the
+  supply-lot origin of the pool mass is inferred from the binary
+  presence/absence pattern, not independently witnessed; hand-redeposited
+  mass entering the same pool is not cleanly separable in the tally.
+  With that caveat, person-to-person amplification (fomite/caregiver/
   direct) is present but secondary in count. The investigated-record
   comparison (Rispens 2020: supply origin with onboard propagation;
   duration evidence against single-exposure-only) says real postings
@@ -96,7 +115,7 @@ Postings are ≥3%-threshold events by construction.
 
 | question | answer | confidence |
 |---|---|---|
-| 99.5% cold correct? | Structurally yes — the per-import vomiting chain makes cold the correct default; but the actual hot frequency is unmeasurable until the prevalence inconsistency (tranche-42) is resolved | measured structure, open magnitude |
+| 99.5% cold correct? | Untested as a frequency — rare events per import do not establish how often outbreaks occur per voyage, and the challenge cohort is not a prevalence-stratified voyage sample. The per-import chain makes cold the correct default state structurally, but the actual hot frequency is unmeasurable until the prevalence inconsistency (tranche-42) is resolved | measured structure, frequency untestable |
 | hot cruises transmit how? | Food-dominated in both hot cells, with real but secondary fomite/caregiver propagation; emesis amplifies mass but food attributes the infections | measured on 2 cells — small n |
 | final AR right? | In range: 10.1% vs posted IQR [4.5, 8.8]; one hot cell sub-threshold at 2.4% | measured, n=2, seed-lottery |
 
