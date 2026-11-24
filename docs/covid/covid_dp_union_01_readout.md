@@ -124,11 +124,13 @@ Founder-class seeds by θ: 1 of 20 at 3.16e8, 4 of 24 at 1e9, 7 of 24 at
   pilot T3 sides.
 - Withdrawn: the canary hypothesis that the founder class cannot be
   scored anywhere on the grid. It is scored at 3.16e9.
-- Attack fails high in every class at every θ that has an outbreak
-  (3.16e8, 1e9, 3.16e9; also the 5-seed pilot at 1e8, median 2,444).
-  Outbreak seeds infect about 90% of the ship or go extinct; no run θ
-  gives a median inside 712–960. The 1e8 row is 5 seeds, so "fails at
-  every scored θ" is measured on three of four.
+- The attack leg is scored, and fails, only at 3.16e9. Descriptively
+  (unscored rows, not contract failures), the median secondaries are far
+  above 712–960 in every class at 3.16e8, 1e9 and 3.16e9, and on the
+  5-seed pilot at 1e8 (2,444). Non-extinct seeds infect 946–3,268 at
+  3.16e8 (11 of 13 above 2,198; one, 946, is inside the band),
+  2,419–3,411 at 1e9 and 2,452–3,474 at 3.16e9. "A leg fails at every
+  run θ" is therefore not established: one scored row exists.
 - The two timing legs pass on different classes at 3.16e9: ignition on
   the founder class, `before_share` on the takeoff class and all seeds.
   Only the founder class is scored.

@@ -4,12 +4,13 @@ Declared 2026-11-24 (ledger `docs/ledger/DP-UNION-01.md`, design doc
 `docs/covid/covid_dp_union_01_design.md`).
 
 - **State:** grid declared on the post-fine-share scale; pilot (30 cells)
-  and canary (20 cells at θ=3.16e8) read out. **Array not submitted —
-  Benjamin's decision.** Details in the last section.
+  and canary (20 cells at θ=3.16e8) read out; staged array run at 3.16e9
+  and 1e9 (24 seeds each). **1e8 and the last 4 seeds at 3.16e8 not
+  submitted — Benjamin's decision.** Details in the last section.
 - **Matrix:** 1 arm (`union_niid`) × 24 seeds (20200205–20200228) × the
   scored grid {1e8, 3.16e8, 1e9, 3.16e9}; full declared voyage (840
   epochs), no horizon arg. The lattice has 11 runnable θ (264 cells).
-- **Jobdef rev / image digest:** `picard-covid-dp-union-01` revisions 1–7,
+- **Jobdef rev / image digest:** `picard-covid-dp-union-01` revisions 1–11,
   all on `sha256:0d01dae0f057770933b610346604875f05bf0fcd62b6f06145e5c19efeb049aa`.
 
 ## Local smoke through the registered path (one seed, old units, not scored)

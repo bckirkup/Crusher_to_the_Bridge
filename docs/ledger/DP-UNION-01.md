@@ -64,9 +64,10 @@ succeeded, same image digest, no audit deviation.
   and P34 663 (both compatible). Fail: `before_share` 0.637 against 0.173
   ± 0.10, attack 3,452 against [712, 960], during 112 against [150, 350].
 - **1e9 has no scored row** (4 of 24 in class).
-- Attack is far above its band in every class at 3.16e8, 1e9 and 3.16e9:
-  outbreak seeds infect about 90% of 3,710 or go extinct (3 of 24 extinct
-  at 3.16e9, 6 of 24 at 1e9).
+- Descriptively (only 3.16e9 is scored), median secondaries are far above
+  the band in every class at 3.16e8, 1e9 and 3.16e9: non-extinct seeds
+  infect 2,419–3,474 of 3,710 at the two upper θ and 946–3,268 at 3.16e8;
+  3 of 24 seeds are extinct at 3.16e9, 6 of 24 at 1e9.
 - The canary hypothesis that the class cannot be scored anywhere on the
   grid is withdrawn.
 

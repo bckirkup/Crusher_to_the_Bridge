@@ -669,8 +669,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   submission):** 3.16e9 is scored (7 of 24 in the founder class) and not
   consistent — ignition day 7, capture 0.964, P31 663 and P34 663 pass;
   `before_share` 0.637, attack 3,452 and during 112 fail. 1e9 has no
-  scored row (4 of 24). Attack is about 90% of the ship on every outbreak
-  seed at 3.16e8, 1e9 and 3.16e9, against [712, 960]. No joint verdict:
+  scored row (4 of 24). Descriptively (only 3.16e9 is scored), median
+  secondaries on taken-off seeds are 3,124, 3,288 and 3,383 at 3.16e8,
+  1e9 and 3.16e9 against [712, 960]; one canary seed (946) is in band. No joint verdict:
   1e8 (5 seeds) and 3.16e8 (20 seeds) are incomplete.
   Open decision: whether the remaining 23 cells run (Benjamin).
 
