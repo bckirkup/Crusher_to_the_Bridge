@@ -652,6 +652,18 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`DP-PARTICIPATION-01` closed before any cell — Suite 2 needs
+  re-scoping (`docs/ledger/DP-PARTICIPATION-01.md`).** Per-index day-0
+  itinerary pinning is not expressible without engine work. A pure readout
+  of the 96 DP-UNION-01 cells (`tools/covid_dp_participation_diag.py`)
+  finds 0 of 868 aboard-window acquisitions on embarkation day and
+  `index_shedding_at_day0` false in every cell (the union arm boards the
+  index at infection age 2.8 d, onset day 3.0); 693 land on day index 4.
+  A day-0 pin has no direct pathway to founder yield under this arm
+  (inferred; no pinned cell ran). No design frozen,
+  no campaign registered, nothing submitted. Open decision: pin the
+  shedding days, change the seed patch, or run a venue-attribution replay
+  first.
 - **`DP-UNION-01` canary measured (20 of 20 cells at θ=3.16e8, image at
   `c7f7f927`; `docs/covid/covid_dp_union_01_readout.md`, ledger
   `docs/ledger/DP-UNION-01.md`, campaign `campaigns/covid/dp_union_01/`)
