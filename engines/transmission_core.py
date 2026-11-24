@@ -2053,6 +2053,17 @@ DEFAULT_HAND_RESIDUAL_MOUTHING = "pickup_only"
 # paired-seed witnesses say the repair earns the move; substeps are deferred.
 HAND_REDEPOSIT_MODES = ("shedders_only", "carriers")
 DEFAULT_HAND_REDEPOSIT_MODE = "shedders_only"
+
+# CARRIER-DISTRIBUTE (D3''): which hosts may donate hand load in direct
+# contact. ``shedders_only`` is the shipped arm -- the donor sampling pool
+# is the shedder list itself. ``carriers`` widens the pool to non-shedders
+# whose accessible hand load passes the shipped ``pickup_gate_open`` gate,
+# so retained mass can move hand->hand to fresh susceptibles. The transfer
+# debit reads the donor's hand load and never the shedding value, so the
+# shipped path moves carrier mass unchanged once a carrier is sampled.
+HAND_DONOR_MODES = ("shedders_only", "carriers")
+DEFAULT_HAND_DONOR_MODE = "shedders_only"
+
 INTRA_EPOCH_ORDER_MODES = ("legacy", "ordered")
 DEFAULT_INTRA_EPOCH_ORDER = "legacy"
 # NORO-HAND-CASCADE-01 solver gate: repeat only the hand-mediated
@@ -2123,6 +2134,16 @@ def _parse_hand_redeposit_mode(tx: dict[str, Any]) -> str:
         raise ValueError(
             "transmission.hand_redeposit_mode must be one of "
             f"{HAND_REDEPOSIT_MODES}, got {mode!r}",
+        )
+    return mode
+
+
+def _parse_hand_donor_mode(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("hand_donor_mode", DEFAULT_HAND_DONOR_MODE))
+    if mode not in HAND_DONOR_MODES:
+        raise ValueError(
+            "transmission.hand_donor_mode must be one of "
+            f"{HAND_DONOR_MODES}, got {mode!r}",
         )
     return mode
 
@@ -3105,6 +3126,11 @@ class _ContactUnitCtx:
     hallway: bool
     occupants: list[KorkinAgent]
     shedders: list[tuple[KorkinAgent, float]]
+    # The sampling pool contacts are drawn from: ``shedders`` itself under
+    # ``hand_donor_mode='shedders_only'``, shedders + loaded carriers under
+    # ``carriers``. Shedder-keyed values (``shedder_ids``,
+    # ``total_shedding``, ``zone_mix``) stay on the real shedder list.
+    donors: list[tuple[KorkinAgent, float]]
     shedder_ids: list[int]
     total_shedding: float
     n_occupants: int
@@ -4371,6 +4397,7 @@ class TransmissionCore:
         self.sanitary_visit_mode = _parse_sanitary_visit_mode(tx)
         self.hand_reservoir_mode = _parse_hand_reservoir_mode(tx)
         self.hand_redeposit_mode = _parse_hand_redeposit_mode(tx)
+        self.hand_donor_mode = _parse_hand_donor_mode(tx)
         self.intra_epoch_order = _parse_intra_epoch_order(tx)
         self.intra_epoch_substeps = _parse_intra_epoch_substeps(tx)
         self.contamination_solver = _parse_contamination_solver(tx)
@@ -4402,6 +4429,10 @@ class TransmissionCore:
         # Counters are RNG-free bookkeeping; every arm is witnessed.
         self.hand_partition: dict[str, dict[str, float]] = {}
         self.hand_provenance: dict[str, dict[int, dict[str, bool]]] = {}
+        # CARRIER-DISTRIBUTE witness: calls/mass moved by non-shedder
+        # depositors (surfaces/food/sanitary) and hand->hand donors, per
+        # pathogen, so the readout can show the mechanism fired.
+        self.hand_carrier_activity: dict[str, dict[str, Any]] = {}
         self._ordered_hygiene_occupants: dict[str, dict[str, list]] = {}
         self._book_epoch: int | None = None
         # Served zone id -> {"male"/"female"/"any": head zone id}, from the
@@ -8155,6 +8186,13 @@ class TransmissionCore:
             self._hand_partition_add(
                 pathogen_id, "internal_host_transfer", amount,
             )
+            if _shedding == 0.0:
+                # A zero-shedding donor is a carrier admitted by
+                # ``hand_donor_mode='carriers'``: witness the hop.
+                self._hand_prov_note(shedder, pathogen_id, "donated_carrier")
+                self._hand_carrier_activity_add(
+                    pathogen_id, "donate", shedder, amount,
+                )
             moved.append((shedder, amount))
         return moved
 
@@ -8185,6 +8223,7 @@ class TransmissionCore:
         self._hand_partition_add(
             pathogen_id, "internal_host_transfer_received", acquired,
         )
+        self._hand_prov_note(target, pathogen_id, "acquired")
         if self.hand_redeposit_mode == "carriers" and moved:
             donor, _amount = max(moved, key=lambda item: item[1])
             strain_id = (
@@ -8459,8 +8498,9 @@ class TransmissionCore:
         use_het = self.contact_mode == "heterogeneous_zone_dose"
         use_partner = self.contact_mode == "per_partner_contact"
         shedders = self._get_shedders(occupants, pathogen_id, profile)
+        donors = self._get_hand_donors(occupants, shedders, pathogen_id)
         susceptible = self._get_susceptible(occupants, pathogen_id)
-        if not shedders or not susceptible:
+        if not donors or not susceptible:
             return
 
         zone_name = self.compartment_parent(unit_name)
@@ -8483,6 +8523,7 @@ class TransmissionCore:
             hallway=hallway,
             occupants=occupants,
             shedders=shedders,
+            donors=donors,
             shedder_ids=shedder_ids,
             total_shedding=total_shedding,
             n_occupants=n_occupants,
@@ -8553,16 +8594,24 @@ class TransmissionCore:
         """Unit dose for one target; also the partners actually contacted."""
         moved: list[tuple[KorkinAgent, float]] = []
         n_contacts = r0_draw
-        sampled_shedders = ctx.shedders
+        # A contact draw pairs the target with someone else. At defaults the
+        # donor pool is all-shedder and the target is susceptible, so the
+        # filter is a no-op; under ``carriers`` a loaded carrier can be both,
+        # and must not be sampled as its own partner.
+        donors = [
+            donor for donor in ctx.donors
+            if donor[0].agent_id != target.agent_id
+        ]
+        sampled_shedders = donors
         if ctx.use_partner:
             seated = self._seated_partner_sample(
-                target, ctx.shedders, ctx.occupants, ctx.present_ids,
+                target, donors, ctx.occupants, ctx.present_ids,
                 r0_draw, ctx.zone_name, ctx.epoch,
             )
             sampled_shedders, n_contacts = (
                 seated if seated is not None
                 else self._sample_contact_partners(
-                    ctx.shedders, ctx.n_occupants, r0_draw,
+                    donors, ctx.n_occupants, r0_draw,
                     self._pool_class_counts(ctx.occupants, target),
                 )
             )
@@ -8575,10 +8624,10 @@ class TransmissionCore:
                 ctx.pathogen_id, ctx.epoch,
             )
         else:
-            unit_shedders = ctx.shedders
+            unit_shedders = donors
             unit_shedding = ctx.total_shedding
             if ctx.hallway:
-                unit_shedders = self._hallway_shedders(target, ctx.shedders)
+                unit_shedders = self._hallway_shedders(target, donors)
                 unit_shedding = sum(sv for _, sv in unit_shedders)
             dose = self._direct_contact_dose(
                 target, unit_shedders, unit_shedding, ctx.n_occupants,
@@ -11397,6 +11446,8 @@ class TransmissionCore:
         responder.hand_load_by_pathogen[pathogen_id] = (
             hand + picked - dose
         )
+        if picked > 0.0:
+            self._hand_prov_note(responder, pathogen_id, "acquired")
         self._hand_partition_add(
             pathogen_id, "source_delivered", picked,
         )
@@ -12001,6 +12052,7 @@ class TransmissionCore:
         hand = steward.hand_load_by_pathogen.get(pathogen_id, 0.0)
         dose = self._hand_to_mouth_dose(steward, epoch, hand + picked)
         steward.hand_load_by_pathogen[pathogen_id] = hand + picked - dose
+        self._hand_prov_note(steward, pathogen_id, "acquired")
         self._hand_partition_add(
             pathogen_id, "source_delivered", picked,
         )
@@ -12381,6 +12433,7 @@ class TransmissionCore:
         """
         hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
         target.hand_load_by_pathogen[pathogen_id] = hand + delivered
+        self._hand_prov_note(target, pathogen_id, "acquired")
         self._record_hand_strain(target, pathogen_id, surface_attribution)
         dose = self._hand_to_mouth_dose(
             target,
@@ -13149,8 +13202,12 @@ class TransmissionCore:
             agent = agents.get(aid)
             if agent is None or self._cabin_confinement_active(agent):
                 continue
-            if not self._get_hand_depositors([agent], pathogen_id, profile):
+            deponents = self._get_hand_depositors(
+                [agent], pathogen_id, profile,
+            )
+            if not deponents:
                 continue
+            sv = deponents[0][1]
             share = share_of(agent, n)
             hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
             used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
@@ -13168,6 +13225,11 @@ class TransmissionCore:
                 pathogen_id, "sink_redeposited", deposit,
             )
             deposits_by_venue.setdefault(venue, []).append((agent, deposit))
+            if sv == 0.0 and deposit > 0.0:
+                self._hand_prov_note(agent, pathogen_id, "deposited_carrier")
+                self._hand_carrier_activity_add(
+                    pathogen_id, "deposit", agent, deposit,
+                )
             self._deposit_surface_mass(
                 pathogen_id, venue, deposit,
                 placement=(self.rng, contacts),
@@ -13311,6 +13373,7 @@ class TransmissionCore:
                 continue
             hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
             agent.hand_load_by_pathogen[pathogen_id] = hand + delivered
+            self._hand_prov_note(agent, pathogen_id, "acquired")
             self._record_hand_strain(agent, pathogen_id, surface_attribution)
             dose = self._hand_to_mouth_dose(agent, epoch, hand + delivered)
             agent.hand_load_by_pathogen[pathogen_id] = (
@@ -14023,6 +14086,8 @@ class TransmissionCore:
                 self._hand_partition_add(
                     pathogen_id, "source_flow_net", resolved - previous,
                 )
+                if resolved > 0.0:
+                    self._hand_prov_note(agent, pathogen_id, "acquired")
             else:
                 self._hand_partition_add(
                     pathogen_id, "sink_flow_net", previous - resolved,
@@ -14157,8 +14222,19 @@ class TransmissionCore:
         shedders = self._get_shedders(agents, pathogen_id, profile)
         if self.hand_redeposit_mode != "carriers":
             return shedders
+        return shedders + self._loaded_carriers(
+            agents, shedders, pathogen_id,
+        )
+
+    def _loaded_carriers(
+        self,
+        agents: list[KorkinAgent],
+        shedders: list[tuple[KorkinAgent, float]],
+        pathogen_id: str,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Non-shedder occupants whose hand load passes the pickup gate."""
         shedder_ids = {agent.agent_id for agent, _ in shedders}
-        carriers = [
+        return [
             (agent, 0.0)
             for agent in agents
             if agent.agent_id not in shedder_ids
@@ -14166,7 +14242,50 @@ class TransmissionCore:
                 agent.hand_load_by_pathogen.get(pathogen_id, 0.0),
             )
         ]
-        return shedders + carriers
+
+    def _get_hand_donors(
+        self,
+        occupants: list[KorkinAgent],
+        shedders: list[tuple[KorkinAgent, float]],
+        pathogen_id: str,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Direct-contact donor pool under ``hand_donor_mode``.
+
+        ``shedders_only`` returns the shipped list itself. ``carriers``
+        widens the sampling pool to non-shedder occupants whose hand load
+        passes the same ``pickup_gate_open`` gate ``_get_hand_depositors``
+        uses, each contributing ``(agent, 0.0)`` -- the transfer debit in
+        ``_hand_contact_transfers`` reads the donor's hand load and never
+        the shedding value (CARRIER-DISTRIBUTE section 3).
+        """
+        if self.hand_donor_mode != "carriers":
+            return shedders
+        return shedders + self._loaded_carriers(
+            occupants, shedders, pathogen_id,
+        )
+
+    def _hand_carrier_activity_add(
+        self,
+        pathogen_id: str,
+        key: str,
+        agent: KorkinAgent,
+        amount: float,
+    ) -> None:
+        """Witness a non-shedder moving retained mass (CARRIER-DISTRIBUTE)."""
+        bucket = self.hand_carrier_activity.setdefault(
+            pathogen_id,
+            {
+                "deposit_calls": 0,
+                "deposit_gec": 0.0,
+                "deposit_hosts": set(),
+                "donate_calls": 0,
+                "donate_gec": 0.0,
+                "donate_hosts": set(),
+            },
+        )
+        bucket[f"{key}_calls"] += 1
+        bucket[f"{key}_gec"] += float(amount)
+        bucket[f"{key}_hosts"].add(agent.agent_id)
 
     def _fomite_hand_deposits(
         self,
@@ -14266,6 +14385,11 @@ class TransmissionCore:
                 pathogen_id, "sink_redeposited", deposit,
             )
             deposits.append((agent, deposit))
+            if _sv == 0.0 and deposit > 0.0:
+                self._hand_prov_note(agent, pathogen_id, "deposited_carrier")
+                self._hand_carrier_activity_add(
+                    pathogen_id, "deposit", agent, deposit,
+                )
             self._deposit_surface_mass(
                 pathogen_id, zone_name, deposit,
                 placement=(rng, contacts),
@@ -14828,6 +14952,11 @@ class TransmissionCore:
             self._hand_partition_add(
                 pathogen_id, "sink_redeposited", deposit,
             )
+            if _sv == 0.0:
+                self._hand_prov_note(agent, pathogen_id, "deposited_carrier")
+                self._hand_carrier_activity_add(
+                    pathogen_id, "deposit", agent, deposit,
+                )
             deposits.append((agent, deposit))
         return deposits
 
