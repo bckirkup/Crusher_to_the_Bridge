@@ -1,7 +1,8 @@
 # covid-dp-union-01 — Suite-1 union arm, joint scored contract over θ
 
 **Status:** frozen design; θ lattice and grid-selection rule declared
-(2026-11-24). No scored cell has run. Every criterion below is frozen before any cell runs and may not be
+and the scored grid selected from
+the pilot (2026-11-24). Every criterion below is frozen before any cell runs and may not be
 altered after a surface is seen. Executes §2 (the arm), §3 Suite 1 (the
 scope) and §5 (the adopted joint conditioned contract) of
 `docs/proposals/covid_theta_unification_plan.md`.
@@ -76,8 +77,12 @@ code, no epidemiological constant change, θ the only swept quantity.
     the lowest already does, no grid is declared and that is the report. A
     pilot median that falls back below 634 above θ_hi is reported and does
     not move the grid.
-  - *Scored grid:* not yet selected (`theta_grid.scored_thetas` is null).
-    The joint verdict is computed over the scored grid only.
+  - *Scored grid (selected 2026-11-24 by the rule above, from the pilot):*
+    **{1e8, 3.16e8, 1e9, 3.16e9}**, canary at **3.16e8**. θ_lo = 1e8,
+    θ_hi = 1e9. The 1e10 pilot median falls back below 634; by the rule it
+    is reported and does not move the grid. Pilot numbers are in the
+    campaign LEDGER. The joint verdict is computed over the scored grid
+    only.
   - *Stated before the pilot:* the pilot shows 5 seeds of `P31` at θ_lo
     and θ_hi before the canary. Those cells are part of the scored rows;
     nothing in the contract is changed after seeing them.

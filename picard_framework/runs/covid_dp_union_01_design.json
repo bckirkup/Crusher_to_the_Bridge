@@ -281,7 +281,7 @@
   ],
   "cells": 264,
   "theta_grid": {
-    "status": "lattice_declared",
+    "status": "declared",
     "arm_id": "union_niid",
     "declared": "2026-11-24, on main e14f5bf3 (contains COVID-EMIT-FINE-01), before any cell on the post-adoption scale",
     "lattice": "thetas is the runnable half-decade lattice 1e5..1e10, not the scored grid. Its span is a bound, not a conversion: theta scales dose on every route and the adoption raised only the zone airborne pool (x1.7e4), so the new-scale theta lies between old/1.7e4 (airborne pool the only route) and old (airborne pool negligible); FIT-01's old-unit bracket (1e9, 1e10) maps to no point inside it.",
@@ -306,7 +306,13 @@
       "reads": "only the T3 side of each decade and the dead/saturated edges. No contract leg is scored from pilot cells; they are 5-seed provisional rows."
     },
     "selection_rule": "theta_hi = the lowest pilot decade whose median P31 >= 634; theta_lo = the decade below it. Scored grid = {theta_lo, 3.16*theta_lo, theta_hi, 3.16*theta_hi}, dropping a value above the lattice. Canary = 20 seeds at 3.16*theta_lo. If no pilot decade reaches 634, or the lowest one already does, no grid is declared and that is reported. A pilot median that falls back below 634 above theta_hi is reported and does not move the grid.",
-    "scored_thetas": null,
-    "canary_theta": null
+    "scored_thetas": [
+      100000000.0,
+      316000000.0,
+      1000000000.0,
+      3160000000.0
+    ],
+    "canary_theta": 316000000.0,
+    "selected": "2026-11-24 from the pilot (image sha256:0d01dae0..., 30 cells): 5-seed median P31 = 0, 0, 0, 494, 879, 625 at 1e5..1e10, so theta_lo=1e8, theta_hi=1e9. The 1e10 median falls back below 634 and, by the rule, does not move the grid. Numbers: campaigns/covid/dp_union_01/LEDGER.md."
   }
 }
