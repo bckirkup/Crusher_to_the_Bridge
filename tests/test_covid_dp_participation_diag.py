@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -59,3 +60,34 @@ def test_founder_class_and_shedding_counts(mod):
 
 def test_empty_pool_has_no_share(mod):
     assert mod.summarize([mod.cell_row(_payload(1, {}, False))])["day0_share"] is None
+
+
+def test_main_reads_cells_and_writes_readout(mod, tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(mod, "_REPO_ROOT", tmp_path)
+    block = tmp_path / "cells" / "block_a"
+    block.mkdir(parents=True)
+    (block / "cell_1.json").write_text(
+        json.dumps(_payload(1, {"0": 3, "4": 9}, True)), encoding="utf-8",
+    )
+    (block / "cell_2.json").write_text(
+        json.dumps(_payload(2, {"4": 1}, False)), encoding="utf-8",
+    )
+    assert mod.main(["--cells", "cells", "--out", "out.json"]) == 0
+    written = json.loads((tmp_path / "out.json").read_text(encoding="utf-8"))
+    assert written["pooled"]["acquisitions"] == 13
+    assert written["pooled"]["day0_acquisitions"] == 3
+    assert [row["seed"] for row in written["cells"]] == [1, 2]
+    assert json.loads(capsys.readouterr().out)["pooled"]["cells"] == 2
+
+
+def test_main_fails_on_empty_directory(mod, tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "_REPO_ROOT", tmp_path)
+    (tmp_path / "cells").mkdir()
+    assert mod.main(["--cells", "cells"]) == 1
+
+
+def test_main_rejects_paths_outside_the_checkout(mod, tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "_REPO_ROOT", tmp_path / "repo")
+    (tmp_path / "repo").mkdir()
+    with pytest.raises(ValueError):
+        mod.main(["--cells", str(tmp_path)])

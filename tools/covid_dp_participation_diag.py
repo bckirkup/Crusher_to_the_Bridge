@@ -2,7 +2,7 @@
 """DP-PARTICIPATION-01 diagnostic: when the index's founder yield lands.
 
 Pure readout over existing campaign cell payloads (sync the S3 blocks
-into a local directory first). For every cell it reads the ``seed_ring``
+into a directory inside the checkout first). For every cell it reads the ``seed_ring``
 echo and reports, per theta, the aboard-window acquisitions by day index
 (0 = embarkation day) and by route, the share falling on day 0, and
 whether the index was shedding at boarding
@@ -22,6 +22,12 @@ import json
 import sys
 from collections import Counter
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
 
 FOUNDER_CLASS_MIN = 10
 
@@ -87,18 +93,25 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cells", required=True, help="directory of cell JSONs")
     parser.add_argument("--out", help="write the full JSON readout here")
     args = parser.parse_args(argv)
-    paths = sorted(Path(args.cells).rglob("cell_*.json"))
+    root = str(_REPO_ROOT)
+    cells_dir = Path(resolve_repo_path(root, args.cells))
+    paths = sorted(cells_dir.rglob("cell_*.json"))
     if not paths:
         print(f"no cell_*.json under {args.cells}", file=sys.stderr)
         return 1
-    rows = [
-        cell_row(json.loads(path.read_text(encoding="utf-8"))) for path in paths
-    ]
+    rows = []
+    for path in paths:
+        with validated_open(
+            str(path), "r", allowed_roots=(root,), encoding="utf-8",
+        ) as handle:
+            rows.append(cell_row(json.load(handle)))
     result = build(rows)
     if args.out:
-        Path(args.out).write_text(
-            json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8",
-        )
+        out_path = resolve_repo_path(root, args.out)
+        with validated_open(
+            out_path, "w", allowed_roots=(root,), encoding="utf-8",
+        ) as handle:
+            handle.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
     summary = {k: v for k, v in result.items() if k != "cells"}
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0
