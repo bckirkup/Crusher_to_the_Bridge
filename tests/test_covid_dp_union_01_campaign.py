@@ -104,12 +104,8 @@ def test_capture_block_conditions_on_the_reachable_day(
 
 @pytest.mark.parametrize("mass, day", [(3, 4), (4, 9), (5, None)])
 def test_timing_block_finds_the_first_day_cumulative_mass_is_reached(mass, day):
-    hosts = {
-        "1": {"infection_day": 2}, "2": {"infection_day": 4},
-        "3": {"infection_day": 4}, "4": {"infection_day": 9},
-        "5": {"infection_day": None},
-    }
-    block = _load("cell").timing_block(hosts, mass)
+    by_day = {"9": 1, "2": 1, "4": 2}
+    block = _load("cell").timing_block(by_day, mass)
     assert block["ignition_day"] == day
     assert block["infections_by_day"] == {"2": 1, "4": 2, "9": 1}
 

@@ -72,18 +72,15 @@ def capture_block(
 
 
 def timing_block(
-    funnel_hosts: dict[str, dict[str, Any]], ignition_mass: int,
+    total_by_day: dict[str, int], ignition_mass: int,
 ) -> dict[str, Any]:
-    """Infections by day and the ignition day (COVID-IGNITION-01).
+    """Acquisitions by day and the ignition day (COVID-IGNITION-01).
 
-    Ignition day is the first day cumulative infections reach
-    ``ignition_mass``; ``None`` when the cell never does.
+    Reads ``acquisition_curve.total_by_day``, which excludes the seeded
+    index as that readout does. Ignition day is the first day cumulative
+    acquisitions reach ``ignition_mass``; ``None`` when the cell never does.
     """
-    by_day: dict[int, int] = {}
-    for entry in funnel_hosts.values():
-        day = entry.get("infection_day")
-        if day is not None:
-            by_day[int(day)] = by_day.get(int(day), 0) + 1
+    by_day = {int(day): int(count) for day, count in total_by_day.items()}
     ignition_day = None
     running = 0
     for day in sorted(by_day):
@@ -105,7 +102,10 @@ def union_block(
     log = run["campaign_specimen_log"]
     hosts = run.get("funnel_hosts") or {}
     return {
-        "timing": timing_block(hosts, int(contract["ignition"]["mass"])),
+        "timing": timing_block(
+            run["acquisition_curve"]["total_by_day"],
+            int(contract["ignition"]["mass"]),
+        ),
         "t3": t3_block(log, int(contract["t3"]["through_day_index"])),
         "onboard_table": t3_block(
             log, int(contract["onboard_table"]["through_day_index"]),

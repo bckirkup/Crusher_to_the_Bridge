@@ -88,7 +88,7 @@ conditioning. The same legs are also computed on the takeoff class
 
 | Leg | Statistic on the founder class | Passes when |
 | --- | --- | --- |
-| `timing_ignition` | median ignition day (first day cumulative infections ≥ 50; never-ignited counts as +∞) | ≤ 9 |
+| `timing_ignition` | median ignition day (first day cumulative acquisitions, `acquisition_curve.total_by_day`, seeded index excluded, ≥ 50; never-ignited counts as +∞) | ≤ 9 |
 | `timing_before_share` | median `onsets_before_split_day / recorded_onsets` | within 0.10 of 0.173 |
 | `attack` | median `infections_total` | inside [712, 960] |
 | `during` | median `infections_during_window` | inside [150, 350] |
