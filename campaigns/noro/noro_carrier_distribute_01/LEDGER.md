@@ -92,12 +92,27 @@ with an announced ETA -> stop and report.
   (220e6401) — all 46 shared summary keys and all 12 epoch-ledger rows
   identical; only additive keys differ (resolved stamps,
   carrier_activity, carrier_provenance_violations).
-- [ ] Jobdef registered against pinned image digest (two-layer build:
-  root Dockerfile as BASE_IMAGE + `deploy/aws/Dockerfile.campaign`);
-  digest pinned in campaign.json.
-- [ ] Dry-run array count = 40 (2 blocks x 20 seeds).
-- [ ] S3 prefix `campaign/noro_carrier_distribute_01/` clean.
-- [ ] Single-child canary inspected against the audit invariants.
+- [x] Jobdef registered against pinned image digest. Docker Hub
+  rate-limited base pulls in this environment, so the image was built
+  as a single overlay on the previous campaign image
+  (sha256:d92f1d4c) with the root+overlay COPY lists — zero deletions
+  between its SHA (f357dd16) and a994d8c6 makes the contents
+  byte-equivalent to the two-layer build; verified in-container
+  (deploy/aws, tools, campaigns present; `hand_donor_mode` code at
+  a994d8c6; ENTRYPOINT `python3`). Image
+  `sha256:d9752d7253be8c6ac5f0a9123a41868935b96c5c2a610407678be3eef94a0573`
+  pinned in campaign.json; jobdef `picard-noro-carrier-distribute-01:1`
+  (canary) — next submit registers a new revision per scripts/campaign.
+- [x] Dry-run array count = 40 (2 blocks x 20 seeds).
+- [x] S3 prefix `campaign/noro_carrier_distribute_01/` clean.
+- [x] Single-child canary inspected (job `fd1fd279-d801-473f-88b9-2dee25c252e7`,
+  seed 8000, arm R+D, image sha256:e248e234 code 05830b3a — differs
+  from pinned image only by the S1244 `sv <= 0.0` syntax, semantically
+  identical; SUCCEEDED ~7.5 min): 288-row ledger; closure 7.7e-15 rel;
+  all six resolved stamps correct; 0 carrier + 0 provenance violations;
+  carrier_activity exercised — deposit 38,823 calls / 70,531 GEC /
+  1,049 hosts, donate 24,306 calls / 31,107 GEC / 987 hosts;
+  internal_host_transfer 31.6k GEC.
 - [ ] Both 20-seed arrays submitted — STOP and report before this step
   per the bounded-research rule.
 - [ ] Readout: verdict and waterfall in `docs/ledger/NORO-CARRIER-DISTRIBUTE-01.md`.

@@ -7,6 +7,7 @@
   "s3_prefix": "campaign/noro_carrier_distribute_01/",
   "queue": "picard-campaign-queue",
   "image_tag": "noro-carrier-distribute01",
+  "image_digest": "sha256:d9752d7253be8c6ac5f0a9123a41868935b96c5c2a610407678be3eef94a0573",
   "resources": {
     "vcpu": "1",
     "memory": "8192",
