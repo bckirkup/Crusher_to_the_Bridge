@@ -43,6 +43,7 @@ to them as ledger `<ID>`.
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
 - [DP-THETA-FIT-01](DP-THETA-FIT-01.md) records the endpoint audit and the declared extended-horizon fit against `covid.T3` (design `docs/covid/covid_dp_theta_fit_01_design.md`, campaign `campaigns/covid/dp_theta_fit_01/`). Status is measured. Two pre-freeze smoke cells showed in-window ascertainment and an attack rate near 0.9 at θ=1e10. On 24 matched seeds, median scored positives are 281 at θ=1e9 (below), 600 at 3.16e9 and 735.5 at 1e10 (both compatible); the frozen rule selects 3.16e9 and interpolates 4.22e9. The top θ is still T3-compatible, so T3 sets no upper bound on the grid (attack rate 0.47 vs 0.80 across the two compatible θ). The four θ below 1e9 were not run by owner decision.
+- [DP-UNION-01](DP-UNION-01.md) records the Suite-1 union arm of the θ unification plan (design `docs/covid/covid_dp_union_01_design.md`, campaign `campaigns/covid/dp_union_01/`). Status is declared: the seven-leg founder-conditioned joint contract is frozen, the θ grid is held until the airborne fine-share adoption merges, and no scored cell has run. It carries no result.
 
 - [NORO-CASCADE-ARMS-01](NORO-CASCADE-ARMS-01.md) — open. D1′ stopped before simulation. All direct hand donors must shed, and the carrier-redeposition witness misses the frozen solver's surface and food flows.
 

@@ -1,0 +1,276 @@
+{
+  "design_id": "covid-dp-union-01",
+  "task_id": "DP-UNION-01",
+  "design_doc": "docs/covid/covid_dp_union_01_design.md",
+  "parent_design": "covid-dp-theta-fit-01",
+  "prerequisites": [
+    "docs/proposals/covid_theta_unification_plan.md section 2 (the union arm), section 3 Suite 1 (the scope), section 5 (the adopted joint conditioned contract)",
+    "DP-THETA-FIT-01: replay_niid arm, fit worker, 24 matched seeds, T3 mapping, edge rules and audit invariants inherited",
+    "COVID-QUAR-TAIL-SEAM-01: quarter-exempt x symptomatic-crew removal measured joint-only on boxed_s1s2; re-declared here on the dedicated hull protocols",
+    "CREW-REACH-01: retest sweeps and the 23 Feb crew_wave as declared scenario data, armed per arm",
+    "COVID-CAPTURE-01: conditioned capture confirmed / infections_reachable as the scored basis",
+    "Fine-share adoption leg (airborne_emission_fraction re-denomination) merged BEFORE thetas are declared; no cell runs in old emission units"
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [],
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 24,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "funnel_echo": true,
+  "joint_contract": {
+    "t3": {
+      "anchor_id": "covid.T3",
+      "cumulative_positives": 634,
+      "cumulative_tests": 3063,
+      "through_day_index": 31
+    },
+    "onboard_table": {
+      "positives": 691,
+      "tests": 3894,
+      "through_day_index": 34,
+      "through": "2020-02-23",
+      "wave": "crew_wave",
+      "wave_tests": 831
+    },
+    "during_quarantine_band": [
+      150,
+      350
+    ],
+    "before_share": {
+      "record": 0.173,
+      "tolerance": 0.1
+    },
+    "conditioned_capture": {
+      "floor": 0.8,
+      "reachable_infection_day_max": 29
+    },
+    "dead_seeds": 20,
+    "saturation_fraction": 0.95,
+    "representative_band": [
+      0.5,
+      2.0
+    ],
+    "representative_min_seeds": 6,
+    "conditioning": {
+      "scored_class": "founder",
+      "founder_min_aboard_window_acquisitions": 10,
+      "takeoff_min_recorded_onsets": 10,
+      "min_class_cells": 5
+    },
+    "side_fraction": 0.75,
+    "ignition": {
+      "mass": 50,
+      "day_max": 9
+    },
+    "attack_infections_band": [
+      712,
+      960
+    ]
+  },
+  "arms": [
+    {
+      "arm_id": "replay_baseline",
+      "overrides": {},
+      "note": "Required empty-override first arm; NOT run (no campaign block declares it)."
+    },
+    {
+      "arm_id": "union_niid",
+      "overrides": {
+        "platform_id": "diamond_princess",
+        "protocols_path": "data/config/protocols_covid_dp_dedicated.json",
+        "scheduled_protocol_id": "SOP-017-DEDQUARTER",
+        "scheduled_protocol_window": {
+          "start_day": 16,
+          "end_day": 30,
+          "start_hour_of_day": 7
+        },
+        "seed_patch": {
+          "onset_day": 3.0,
+          "infection_age_days": 2.8
+        },
+        "voyage_overrides": {
+          "effects_enabled": true,
+          "itinerary": [
+            {
+              "day": 1,
+              "type": "embarkation",
+              "embarkation_window_hours_of_day": [
+                12,
+                16
+              ],
+              "port": "Yokohama",
+              "notes": "declared: staggered boarding 12:00-16:00 + 16:00-16:30 assembly (spec \u00a75)"
+            },
+            {
+              "day": 2,
+              "type": "sea_day",
+              "notes": "sea day after departure"
+            },
+            {
+              "day": 3,
+              "type": "port_day",
+              "port": "Kagoshima",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                14,
+                16
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "declared window; spec \u00a74 excursion 09:00-16:00 + 30-min return margin"
+            },
+            {
+              "day": 4,
+              "type": "sea_day"
+            },
+            {
+              "day": 5,
+              "type": "sea_day"
+            },
+            {
+              "day": 6,
+              "type": "port_day",
+              "port": "Hong Kong",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "index case departs permanently (departure_day 5.0)"
+            },
+            {
+              "day": 7,
+              "type": "sea_day"
+            },
+            {
+              "day": 8,
+              "type": "port_day",
+              "port": "Chan May",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 9,
+              "type": "port_day",
+              "port": "Cai Lan",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 10,
+              "type": "sea_day"
+            },
+            {
+              "day": 11,
+              "type": "sea_day"
+            },
+            {
+              "day": 12,
+              "type": "port_day",
+              "port": "Keelung",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 13,
+              "type": "port_day",
+              "port": "Naha",
+              "disembark_window_hours_of_day": [
+                14,
+                16
+              ],
+              "reembark_window_hours_of_day": [
+                20,
+                22
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "late port call 13:30-23:00 per spec \u00a74"
+            },
+            {
+              "day": 14,
+              "type": "sea_day"
+            },
+            {
+              "day": 15,
+              "type": "sea_day",
+              "notes": "early return to Yokohama; passengers remain aboard, routine continues (spec \u00a74)"
+            },
+            {
+              "day": 16,
+              "type": "sea_day",
+              "notes": "early return; routine continues aboard"
+            },
+            {
+              "day": 17,
+              "type": "sea_day",
+              "notes": "quarantine activation epoch 391 (day 16, 07:00) via scheduled_protocol_window"
+            }
+          ],
+          "defaults": {
+            "port_day": {
+              "onboard_passenger_fraction": 0.5,
+              "contact_rate_multiplier": 1.0,
+              "dining_demand_multiplier": 1.0
+            }
+          }
+        },
+        "rhythm_overrides": {
+          "port_day_onboard_midday_residual": 0.5,
+          "catalog": "diamond"
+        },
+        "crew_duty_exclusion": {
+          "enabled": true
+        },
+        "observation_overrides": {
+          "retest_negative_sweeps": true,
+          "campaign_waves": [
+            "crew_wave"
+          ]
+        }
+      },
+      "note": "replay_niid verbatim (DP-THETA-FIT-01) plus three declared deltas: SOP-017-DEDQUARTER in place of SOP-017-DEDICATED (exempt_fraction crew_general 0.25), crew_duty_exclusion enabled (VSP 2018 OM 4.4.1.1.1 symptomatic working crew removed), and the record testing structure armed (retest sweeps + 23 Feb crew_wave). No mechanism code, no constant change."
+    }
+  ],
+  "cells": 0,
+  "theta_grid": {
+    "status": "held",
+    "reason": "Owner decision 2026-11-23: the grid is declared on the post-fine-share emission scale after that leg merges; no fit in old units.",
+    "rule": "When declared: 3-4 values at half-decade spacing, located from a bracket measured on the post-adoption scale (one value below T3, one at or above it). Old theta values do not convert: the adoption raises only the zone airborne pool deposit, so the route mix shifts and FIT-01's 3.16e9 / 4.22e9 / 1e10 have no image on the new scale. Where the bracket comes from (the fine-share leg's cells or a declared pilot) is decided at declaration. The canary is 20 seeds at one declared value."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "covid_dp_union_01",
+  "pathogen": "covid",
+  "manifest": null,
+  "pathogen_id": null,
+  "s3_prefix": "campaign/covid_dp_union_01/",
+  "queue": "picard-analysis-queue",
+  "resources": {
+    "vcpu": "1",
+    "memory": "4096"
+  },
+  "image_tag": "dp-union-01",
+  "readout": "campaigns/covid/dp_union_01/readout.py",
+  "blocks": {}
+}
