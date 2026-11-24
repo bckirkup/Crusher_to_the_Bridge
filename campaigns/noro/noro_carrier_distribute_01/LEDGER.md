@@ -123,4 +123,7 @@ with an announced ETA -> stop and report.
   (jobdef picard-noro-carrier-distribute-01:2),
   arm R+D job `c32d3cd8-13ed-4480-b095-3c27d697dad2`
   (jobdef picard-noro-carrier-distribute-01:3).
-- [ ] Readout: verdict and waterfall in `docs/ledger/NORO-CARRIER-DISTRIBUTE-01.md`.
+- [x] Readout: verdict and waterfall in `docs/ledger/NORO-CARRIER-DISTRIBUTE-01.md`
+  — neither arm ignites (R 5/18, R+D 4/18 vs ≥9 gate); all 40 cells
+  pass the frozen audit; mechanism fired where carriers held mass
+  (3 cells had zero carrier load); bound remains delivered volume.
