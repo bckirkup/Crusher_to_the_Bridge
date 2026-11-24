@@ -117,6 +117,10 @@ with an announced ETA -> stop and report.
   R+D array's seed-8000 cell resolves from the canary run — same engine
   semantics as the pinned image (diff: S1244 syntax only); all other
   cells run on the pinned digest.
-- [ ] Both 20-seed arrays submitted — STOP and report before this step
-  per the bounded-research rule.
+- [x] Both 20-seed arrays submitted 2026-11-24 on merge of #1411
+  (pinned digest d9752d72 on all jobdef revisions):
+  arm R job `94b2cae4-9d57-44a9-b528-f42bbf31bf79`
+  (jobdef picard-noro-carrier-distribute-01:2),
+  arm R+D job `c32d3cd8-13ed-4480-b095-3c27d697dad2`
+  (jobdef picard-noro-carrier-distribute-01:3).
 - [ ] Readout: verdict and waterfall in `docs/ledger/NORO-CARRIER-DISTRIBUTE-01.md`.
