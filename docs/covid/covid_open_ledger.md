@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `a01130fb` (fill with the
+> **Status:** Living. Head commit of record: `220e6401` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -17,10 +17,31 @@ for the COVID arm.
 
 ## 1. Currently withdrawn
 
+**`COVID-EMIT-FINE-01` (ledger entry): every Θ measured before this
+change is in the old emission units.** `airborne_emission_fraction` on
+`sars_cov2_resp` moved 5e-5 → 0.85 (Coleman 2021's fine share, inside the
+frozen tranche-27 interval [0.76, 0.92]; declared, fitted to nothing),
+which raises the zone airborne pool deposit ×1.7e4. The field is read by
+that pool only — the droplet/near-field route keeps the uniform engine
+`DROPLET_AEROSOL_FRACTION` 0.05 and direct/fomite do not read it — so the
+route mix shifts and **no single factor converts an old Θ**. Old-unit, kept
+as the record of what ran at their own `Measured at` SHAs:
+`COVID-THETA-REFIT-01` (3.162e11, the canonical replay operating point
+below), `DP-THETA-FIT-01` (3.16e9 / 4.22e9), `COVID-H5-RESCORE-01`,
+`COVID-ONSET-FUNNEL-01`, the GM rescores, and every earlier Θ screen. Every
+airborne-route dose share and every DP/GM outcome at those Θ is likewise
+pre-change, as is every graywater-sequencing read mix for this arm (that
+channel takes the same zone pool as its pathogen input). Nothing has been
+scored under 0.85; the refit is DP-UNION-01
+(`docs/proposals/covid_theta_unification_plan.md`, proposed in #1410 and
+not yet on `main`).
+
 **`COVID-THETA-REFIT-01` (ledger entry): every DP/GM replay figure measured
 at the Θ=7.9e6 (or older 1e6) operating point is historical on the Θ
-channel.** The canonical replay operating point is now
-`thetas: [3.162e11]` on `covid_crew_reach_01_design.json` and
+channel.** The canonical replay operating point is
+`thetas: [3.162e11]` — **an old-unit Θ since `COVID-EMIT-FINE-01`
+(above): it is still what the designs pin, and no new-unit operating
+point exists until DP-UNION-01 fits one** — on `covid_crew_reach_01_design.json` and
 `covid_platform_fidelity_02_dp_design.json` (provenance-register Θ row
 updated; merged #1352). Completed campaign specs keep their own θ as the
 record of what ran. Figures not resting on the operating point stand at
@@ -399,7 +420,8 @@ finding: the level and the shipped `airborne_emission_fraction`
 5e-5 are an inconsistent pair** — deposit ~25 copies/epoch at the
 shipped level, ~170× under the bracket floor; the measured fine
 share 0.85 (tranche 27's licensed adoption) is the consistent
-multiplicand and stays unadopted as the open Edison decision.
+multiplicand; it was unadopted at this measurement and is now adopted
+(`COVID-EMIT-FINE-01`, 0.85).
 8-run diagnostic (4 seeds × DP + GM, DP windowed to day 20) at
 `reports/covid_emission_level_30_diag.json` confirms it in-sim:
 per-shedder-epoch deposit medians 3.5e-5–3.1e-2, in-bracket share
@@ -716,15 +738,18 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   (both-takeoff size p=0.0202; takeoff p=0.6785; 16 inherited working-crew
   band misses diagnosed as extended-seed confinement variation).
 
-- **Adopt the measured fine share as `airborne_emission_fraction` —
-  the follow-on Edison decision #30 hands off.** With the level now a
-  real exhaled rate (`COVID-EMIT-LEVEL-01`), the shipped 5e-5 deposits
+- **Resolved by `COVID-EMIT-FINE-01`: the measured fine share is adopted
+  as `airborne_emission_fraction` (0.85).** The shipped 5e-5 deposited
   ~170× under the measured bracket floor; the consistent multiplicand
   is the tranche-27-licensed fine share (interval [0.76, 0.92],
-  Coleman's 0.85 inside it). Adopting it moves every droplet/direct/
-  airborne deposit ×1.7e4 and re-denominates the Theta composite
-  beside a real emission scale — a value change with its own
-  attribution, not part of #30's scope.
+  Coleman's 0.85 inside it), declared and fitted to no anchor.
+  **Correction:** this bullet previously said the adoption "moves every
+  droplet/direct/airborne deposit ×1.7e4". Only the zone airborne pool
+  deposit reads the field and moves ×1.7e4; droplet/near-field, direct
+  and fomite do not, so the Θ composite is not uniformly re-denominated
+  (§1). Still open: scoring any voyage under 0.85 (DP-UNION-01), and
+  whether the droplet route should read the arm's declared share
+  instead of the uniform 0.05.
 
 - **`CREW-MESS-01` canary measured (20/20 cells at `cca98cdc`,
   `docs/covid/covid_crew_mess_01_readout.md`,
