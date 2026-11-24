@@ -338,6 +338,9 @@ class Recorder:
     # same way so a dropped override is witnessed rather than assumed.
     hand_sequester_fill_seen: str | None = None
     hand_residual_mouthing_seen: str | None = None
+    # CARRIER-DISTRIBUTE arms, stamped the same way.
+    hand_redeposit_mode_seen: str | None = None
+    hand_donor_mode_seen: str | None = None
     # Hand-reservoir reset sinks the engine cannot see itself: pending
     # mass dropped at infection, and reservoir mass cleared at
     # recovery. Cumulative per pathogen, keyed like core.hand_partition.
@@ -464,6 +467,8 @@ def _wrap_execute_pathways(core_cls: type, rec: Recorder) -> Any:
             rec.fomite_touch_share_seen = self._per_surface.cfg.touch_share
         rec.hand_sequester_fill_seen = self.hand_sequester_fill
         rec.hand_residual_mouthing_seen = self.hand_residual_mouthing
+        rec.hand_redeposit_mode_seen = self.hand_redeposit_mode
+        rec.hand_donor_mode_seen = self.hand_donor_mode
         try:
             return original(self, epoch, *args, **kwargs)
         finally:
@@ -1722,6 +1727,21 @@ def _hand_partition_audit(rec: Recorder, pid: str) -> dict[str, Any]:
         and not flags.get("fill_stool")
         and not flags.get("fill_external")
     ]
+    # CARRIER-DISTRIBUTE: a non-shedder may only move retained mass it
+    # witnessed acquiring -- externally ("acquired") or through the
+    # sequester fill arms.
+    carrier_violations = [
+        agent_id for agent_id, flags in (
+            (str(aid), flags) for aid, flags in provenance.items()
+        )
+        if (flags.get("deposited_carrier") or flags.get("donated_carrier"))
+        and not flags.get("acquired")
+        and not flags.get("fill_stool")
+        and not flags.get("fill_external")
+    ]
+    activity = (
+        getattr(rec.audit_core, "hand_carrier_activity", None) or {}
+    ).get(pid) or {}
     return {
         "sources_gec": sources,
         "sinks_gec": sinks,
@@ -1731,6 +1751,15 @@ def _hand_partition_audit(rec: Recorder, pid: str) -> dict[str, Any]:
         "closure_rel": abs(delta) / scale,
         "provenance_holds_protected_hosts": holds_protected,
         "provenance_violations": violations,
+        "carrier_provenance_violations": carrier_violations,
+        "carrier_activity": {
+            "deposit_calls": int(activity.get("deposit_calls") or 0),
+            "deposit_gec": float(activity.get("deposit_gec") or 0.0),
+            "deposit_hosts": len(activity.get("deposit_hosts") or ()),
+            "donate_calls": int(activity.get("donate_calls") or 0),
+            "donate_gec": float(activity.get("donate_gec") or 0.0),
+            "donate_hosts": len(activity.get("donate_hosts") or ()),
+        },
     }
 
 
@@ -2184,6 +2213,8 @@ class TransmissionSweepKnobs:
     contamination_solver: str | None = None
     hand_sequester_fill: str | None = None
     hand_residual_mouthing: str | None = None
+    hand_redeposit_mode: str | None = None
+    hand_donor_mode: str | None = None
 
 
 @dataclass(frozen=True)
@@ -2247,6 +2278,10 @@ def build_spec(
         tx_overrides["hand_sequester_fill"] = str(sw.hand_sequester_fill)
     if sw.hand_residual_mouthing is not None:
         tx_overrides["hand_residual_mouthing"] = str(sw.hand_residual_mouthing)
+    if sw.hand_redeposit_mode is not None:
+        tx_overrides["hand_redeposit_mode"] = str(sw.hand_redeposit_mode)
+    if sw.hand_donor_mode is not None:
+        tx_overrides["hand_donor_mode"] = str(sw.hand_donor_mode)
     config_overrides: dict[str, Any] = {
         "ship_graph": {"num_agents": int(num_agents)},
     }
@@ -2665,6 +2700,8 @@ def run_seed(
                 contamination_solver=sw.contamination_solver,
                 hand_sequester_fill=sw.hand_sequester_fill,
                 hand_residual_mouthing=sw.hand_residual_mouthing,
+                hand_redeposit_mode=sw.hand_redeposit_mode,
+                hand_donor_mode=sw.hand_donor_mode,
             ),
         )
     # The campaign's declared complement for this spec, when it carries one:
@@ -2690,6 +2727,8 @@ def run_seed(
         rec, sw.fomite_representation, sw.fomite_touch_share,
         sw.contamination_solver, sw.hand_sequester_fill,
         sw.hand_residual_mouthing,
+        hand_redeposit_mode=sw.hand_redeposit_mode,
+        hand_donor_mode=sw.hand_donor_mode,
     )
     summary = summarise(rec, alpha, beta, seed, epochs)
     summary["epoch_mass_ledger"] = rec.epoch_ledger
@@ -2714,6 +2753,8 @@ def run_seed(
         sw.fomite_touch_share, sw.fomite_touch_share_table_path,
         sw.contamination_solver, sw.hand_sequester_fill,
         sw.hand_residual_mouthing,
+        hand_redeposit_mode=sw.hand_redeposit_mode,
+        hand_donor_mode=sw.hand_donor_mode,
     )
     summary["fomite_representation_resolved"] = (
         rec.fomite_representation_seen
@@ -2727,6 +2768,12 @@ def run_seed(
     )
     summary["hand_residual_mouthing_resolved"] = (
         rec.hand_residual_mouthing_seen
+    )
+    summary["hand_redeposit_mode_resolved"] = (
+        rec.hand_redeposit_mode_seen
+    )
+    summary["hand_donor_mode_resolved"] = (
+        rec.hand_donor_mode_seen
     )
     summary["hand_partition"] = _hand_partition_audit(
         rec, pathogen_id,
@@ -2876,6 +2923,8 @@ def _check_override_witnesses(
     contamination_solver: str | None,
     hand_sequester_fill: str | None = None,
     hand_residual_mouthing: str | None = None,
+    hand_redeposit_mode: str | None = None,
+    hand_donor_mode: str | None = None,
 ) -> None:
     if fomite_representation is not None and (
         rec.fomite_representation_seen != fomite_representation
@@ -2917,6 +2966,22 @@ def _check_override_witnesses(
             f"hand_residual_mouthing={hand_residual_mouthing}, resolved "
             f"{rec.hand_residual_mouthing_seen}",
         )
+    if hand_redeposit_mode is not None and (
+        rec.hand_redeposit_mode_seen != hand_redeposit_mode
+    ):
+        raise RuntimeError(
+            "hand_redeposit_mode override dropped: requested "
+            f"hand_redeposit_mode={hand_redeposit_mode}, resolved "
+            f"{rec.hand_redeposit_mode_seen}",
+        )
+    if hand_donor_mode is not None and (
+        rec.hand_donor_mode_seen != hand_donor_mode
+    ):
+        raise RuntimeError(
+            "hand_donor_mode override dropped: requested "
+            f"hand_donor_mode={hand_donor_mode}, resolved "
+            f"{rec.hand_donor_mode_seen}",
+        )
 
 
 def _route_attribution_block(result: Any, rec: Recorder) -> dict[str, Any]:
@@ -2953,6 +3018,8 @@ def _apply_arm_metadata(
     contamination_solver: str | None,
     hand_sequester_fill: str | None = None,
     hand_residual_mouthing: str | None = None,
+    hand_redeposit_mode: str | None = None,
+    hand_donor_mode: str | None = None,
 ) -> None:
     if not any(
         value is not None
@@ -2966,6 +3033,8 @@ def _apply_arm_metadata(
             contamination_solver,
             hand_sequester_fill,
             hand_residual_mouthing,
+            hand_redeposit_mode,
+            hand_donor_mode,
         )
     ):
         return
@@ -2979,6 +3048,8 @@ def _apply_arm_metadata(
     summary["contamination_solver"] = contamination_solver
     summary["hand_sequester_fill"] = hand_sequester_fill
     summary["hand_residual_mouthing"] = hand_residual_mouthing
+    summary["hand_redeposit_mode"] = hand_redeposit_mode
+    summary["hand_donor_mode"] = hand_donor_mode
     if fomite_touch_share_table is not None:
         resolved_table = _safe_path(fomite_touch_share_table)
         summary["fomite_touch_share_table"] = os.path.relpath(
@@ -3118,6 +3189,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
              "engine resolves a different mode",
     )
     parser.add_argument(
+        "--hand-redeposit-mode",
+        choices=("shedders_only", "carriers"), default=None,
+        help="CARRIER-DISTRIBUTE deposit arm: shedders_only (default-path "
+             "identity) or carriers (non-shedder hosts whose hand load "
+             "passes the pickup gate also deposit); the run aborts if "
+             "the engine resolves a different mode",
+    )
+    parser.add_argument(
+        "--hand-donor-mode",
+        choices=("shedders_only", "carriers"), default=None,
+        help="CARRIER-DISTRIBUTE donor arm: shedders_only (default-path "
+             "identity) or carriers (non-shedder hosts with gated hand "
+             "load join the direct-contact donor pool); the run aborts "
+             "if the engine resolves a different mode",
+    )
+    parser.add_argument(
         "--arm-tag", type=_identifier, default=None,
         help="arm label stamped into the output filename and summary",
     )
@@ -3221,6 +3308,8 @@ def _validate_manifest_mode(
             "--hand-residual-mouthing": (
                 args.hand_residual_mouthing is not None
             ),
+            "--hand-redeposit-mode": args.hand_redeposit_mode is not None,
+            "--hand-donor-mode": args.hand_donor_mode is not None,
         }
         used = [flag for flag, present in forbidden.items() if present]
         if used:
@@ -3351,6 +3440,8 @@ def main(argv: list[str] | None = None) -> int:
             contamination_solver=args.contamination_solver,
             hand_sequester_fill=args.hand_sequester_fill,
             hand_residual_mouthing=args.hand_residual_mouthing,
+            hand_redeposit_mode=args.hand_redeposit_mode,
+            hand_donor_mode=args.hand_donor_mode,
         )
         tag = args.arm_tag if args.arm_tag is not None else (
             _implicit_arm_tag(sweep, args.alpha)

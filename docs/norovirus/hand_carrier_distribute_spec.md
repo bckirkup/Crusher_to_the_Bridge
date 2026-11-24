@@ -1,10 +1,13 @@
 # CARRIER-DISTRIBUTE (D3″) — where the mouthed dose lands
 
-Status: **design proposal — not implemented**. `hand_redeposit_mode: "carriers"`
-exists in the engine (NORO-HAND-CASCADE-01a) but has never been measured on the
-`classic_cruise_1900` 8000–8019 cohort or on the EXTERNAL-SEQUESTER stack
-(a two-seed witness on this hull's held seeds exists — see §0);
-`hand_donor_mode` is a new selector declared here.
+Status: **implemented as selectable arms; not adopted, unmeasured**.
+`hand_redeposit_mode: "carriers"` was already shipped
+(NORO-HAND-CASCADE-01a); `hand_donor_mode` is now shipped beside it
+(`"shedders_only"` default), and `campaigns/noro/noro_carrier_distribute_01/`
+registers the R/R+D factorial of §6. Both defaults are unchanged and
+bit-identical; a run without the new keys reproduces the pre-change
+tree. Moved from `docs/proposals/` on implementation per the docs filing
+rule.
 
 ## 0. Settled inputs (quoted, not re-derived)
 
@@ -101,7 +104,7 @@ Two selectors, both default-off and bit-identical at defaults:
   `hand_load` passes `pickup_gate_open` (≥ `SURFACE_PICKUP_MIN_GEC`), so
   they deposit into zone surface pools and zone food pools
   (`_food_deposits`) exactly like shedders do.
-- `hand_donor_mode: "carriers"` — **new selector** (`"shedders_only"`
+- `hand_donor_mode: "carriers"` — **shipped selector** (`"shedders_only"`
   default). Under `carriers`, the direct-contact donor pool in
   `_direct_contact_unit` is shedders ∪ carriers (same `pickup_gate_open`
   gate, each carrier contributing `(agent, 0.0)` as `_get_hand_depositors`

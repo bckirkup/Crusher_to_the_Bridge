@@ -1,0 +1,92 @@
+{
+  "name": "noro_carrier_distribute_01",
+  "pathogen": "norovirus",
+  "manifest": "picard_framework/runs/mega_cruise_campaign/noro_dose_refit_01_manifest.json",
+  "pathogen_id": "norwalk_gi",
+  "epochs": 288,
+  "s3_prefix": "campaign/noro_carrier_distribute_01/",
+  "queue": "picard-campaign-queue",
+  "image_tag": "noro-carrier-distribute01",
+  "image_digest": "sha256:d9752d7253be8c6ac5f0a9123a41868935b96c5c2a610407678be3eef94a0573",
+  "resources": {
+    "vcpu": "1",
+    "memory": "8192",
+    "shm": 512
+  },
+  "canary": {
+    "block": "classic_cruise_1900_carrier_rd",
+    "seeds": 20
+  },
+  "blocks": {
+    "classic_cruise_1900_carrier_r": {
+      "worker": "tools/noro_diag/per_host_dose_challenge.py",
+      "artifact": "per_host_dose_challenge_carrier_r_seed{seed}.json.gz",
+      "args": {
+        "fomite_representation": "item_instances",
+        "contamination_solver": "discrete",
+        "hand_sequester_fill": "any_load",
+        "hand_residual_mouthing": "per_epoch",
+        "hand_redeposit_mode": "carriers",
+        "hand_donor_mode": "shedders_only",
+        "arm_tag": "carrier_r"
+      },
+      "seeds": [
+        8000,
+        8001,
+        8002,
+        8003,
+        8004,
+        8005,
+        8006,
+        8007,
+        8008,
+        8009,
+        8010,
+        8011,
+        8012,
+        8013,
+        8014,
+        8015,
+        8016,
+        8017,
+        8018,
+        8019
+      ]
+    },
+    "classic_cruise_1900_carrier_rd": {
+      "worker": "tools/noro_diag/per_host_dose_challenge.py",
+      "artifact": "per_host_dose_challenge_carrier_rd_seed{seed}.json.gz",
+      "args": {
+        "fomite_representation": "item_instances",
+        "contamination_solver": "discrete",
+        "hand_sequester_fill": "any_load",
+        "hand_residual_mouthing": "per_epoch",
+        "hand_redeposit_mode": "carriers",
+        "hand_donor_mode": "carriers",
+        "arm_tag": "carrier_rd"
+      },
+      "seeds": [
+        8000,
+        8001,
+        8002,
+        8003,
+        8004,
+        8005,
+        8006,
+        8007,
+        8008,
+        8009,
+        8010,
+        8011,
+        8012,
+        8013,
+        8014,
+        8015,
+        8016,
+        8017,
+        8018,
+        8019
+      ]
+    }
+  }
+}
