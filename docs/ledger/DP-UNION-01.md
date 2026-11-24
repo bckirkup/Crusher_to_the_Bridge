@@ -88,6 +88,7 @@ saturated.
 ## Next decision
 
 Benjamin decides what follows Suite 1. The contract cannot locate a θ on
-this arm because the founder class is reachable only at the top θ, and
+this arm because the founder class reaches the five-seed minimum only at the top θ
+(0, 2, 4, 7 class seeds of 24), and
 there it places the epidemic before quarantine (`before_share` 0.637,
 during 112).
