@@ -74,9 +74,9 @@ runs, and each scored on the *conditional* distribution — see §5):
 T3 campaign positives through day 31; the onboard-table 691/3,894
 cross-check through Feb 23 (crew wave armed); during-quarantine mass band
 [150,350]; `before_share` vs 0.173 ± band; conditioned capture; founder
-yield and ignition day reported. A θ that lands all legs at once is the
-"consistent θ" the program has been missing; the outcome per leg at every θ
-names the next structure, not a refit.
+yield reported; ignition day scored in the §5 timing leg. A θ that lands
+all legs at once is the "consistent θ" the program has been missing; the
+outcome per leg at every θ names the next structure, not a refit.
 
 ## 3. Suites, in order (weakest assumption first)
 
@@ -106,7 +106,8 @@ channel is built.
 threshold → Polymod-class mapping (the deferred §6 question), then declare
 the routine stage (Pung-anchored `activity_contacts`, or a voyage-stage
 routine multiplier). Frozen two-leg prediction: founder median ≥10 AND d15
-infections ≤960 at one θ. Decides whether a declared routine stage cools
+infections inside the pre-quarantine mass implied by T4 and the capture
+basis (~800–960, declared exactly at freeze) at one θ. Decides whether a declared routine stage cools
 sustained growth without touching θ — the untested half of the growth bound.
 
 **Suite 4 — engine work, only if 1–3 still fail.** Fixed-ring addback made
@@ -146,7 +147,7 @@ the envelope widens *which draws count*, it does not drop objectives:
 | Objective leg | Record quantity | Status |
 |---|---|---|
 | Timing | ignition day, onset-peak at confinement (d13–15), `before_share` 0.173 ± band | measured targets |
-| Attack rate | infections band [712,960] ≈ 19–26% of aboard | measured band |
+| Attack rate | final confirmed T4 = 712 (~19% of 3,711 aboard); implied infections via the conditioned capture | scored on T4 — the serology band [712,960] is `covid.H5`'s admissible_band, held-out-forever and never a selection criterion |
 | Confinement tail | during-quarantine mass [150,350], crew-skewed lag | measured band |
 | Testing observables | T3 = 634/3,063 through day 31; onboard 691/3,894 through Feb 23 | scored + cross-check |
 | Capture | confirmed/infections_reachable ≥ 0.80 class | conditioned basis |
