@@ -8594,15 +8594,20 @@ class TransmissionCore:
         """Unit dose for one target; also the partners actually contacted."""
         moved: list[tuple[KorkinAgent, float]] = []
         n_contacts = r0_draw
-        # A contact draw pairs the target with someone else. Under
-        # ``carriers`` a loaded carrier can be both donor and susceptible
-        # target, and must not be sampled as its own partner. The filter only
-        # touches carrier tuples (sv == 0.0): at defaults the pool is
-        # all-shedder, and a superinfection-susceptible shedder target keeps
-        # its shipped self-eligibility, so the draw stream is unchanged.
+        # A contact draw pairs the target with someone else; a self-sample
+        # wastes a contact slot that could have reached a real partner.
+        # Under ``carriers`` the target is dropped from the pool entirely
+        # (the arm is new behavior with no baseline to preserve). At defaults
+        # only carrier tuples (sv == 0.0) are removed, so a
+        # superinfection-susceptible shedder target keeps its shipped
+        # self-eligibility and the draw stream is unchanged.
         donors = [
             donor for donor in ctx.donors
-            if donor[1] != 0.0 or donor[0].agent_id != target.agent_id
+            if donor[0].agent_id != target.agent_id
+            or (
+                self.hand_donor_mode == DEFAULT_HAND_DONOR_MODE
+                and donor[1] != 0.0
+            )
         ]
         sampled_shedders = donors
         if ctx.use_partner:
