@@ -671,9 +671,11 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `before_share` 0.637, attack 3,452 and during 112 fail. 1e9 has no
   scored row (4 of 24). Descriptively (only 3.16e9 is scored), median
   secondaries on taken-off seeds are 3,124, 3,288 and 3,383 at 3.16e8,
-  1e9 and 3.16e9 against [712, 960]; one canary seed (946) is in band. No joint verdict:
-  1e8 (5 seeds) and 3.16e8 (20 seeds) are incomplete.
-  Open decision: whether the remaining 23 cells run (Benjamin).
+  1e9 and 3.16e9 against [712, 960]; one canary seed (946) is in band. 
+  **Grid completed (96 cells):** founder-class seeds 0, 2, 4, 7 of 24 at
+  1e8, 3.16e8, 1e9, 3.16e9, so only 3.16e9 is scored. Joint verdict: no
+  consistent θ; `before_share`, attack and during pass at no θ.
+  Open decision: what follows Suite 1 (Benjamin).
 
 - **`DP-THETA-FIT-01` is measured on three θ — the median crosses T3 between 3.16e9 and 1e10, and the top θ is still compatible, so T3 sets no upper bound**
   (ledger `docs/ledger/DP-THETA-FIT-01.md`, design
