@@ -1,0 +1,1435 @@
+{
+  "by_theta": {
+    "1e+08": {
+      "acquisitions": 28,
+      "by_day": {
+        "2": 1,
+        "3": 6,
+        "4": 21
+      },
+      "by_route": {
+        "caregiver": 12,
+        "droplet": 4,
+        "hvac_airborne": 12
+      },
+      "cells": 24,
+      "day0_acquisitions": 0,
+      "day0_share": 0.0,
+      "founder_class_by_route": {},
+      "founder_class_cells": 0,
+      "index_shedding_at_day0_cells": 0
+    },
+    "1e+09": {
+      "acquisitions": 141,
+      "by_day": {
+        "1": 5,
+        "2": 13,
+        "3": 12,
+        "4": 111
+      },
+      "by_route": {
+        "caregiver": 18,
+        "droplet": 35,
+        "hvac_airborne": 88
+      },
+      "cells": 24,
+      "day0_acquisitions": 0,
+      "day0_share": 0.0,
+      "founder_class_by_route": {
+        "caregiver": 6,
+        "droplet": 25,
+        "hvac_airborne": 78
+      },
+      "founder_class_cells": 4,
+      "index_shedding_at_day0_cells": 0
+    },
+    "3.16e+08": {
+      "acquisitions": 60,
+      "by_day": {
+        "1": 3,
+        "2": 5,
+        "3": 8,
+        "4": 44
+      },
+      "by_route": {
+        "caregiver": 16,
+        "droplet": 11,
+        "hvac_airborne": 33
+      },
+      "cells": 24,
+      "day0_acquisitions": 0,
+      "day0_share": 0.0,
+      "founder_class_by_route": {
+        "caregiver": 3,
+        "droplet": 6,
+        "hvac_airborne": 28
+      },
+      "founder_class_cells": 2,
+      "index_shedding_at_day0_cells": 0
+    },
+    "3.16e+09": {
+      "acquisitions": 639,
+      "by_day": {
+        "1": 22,
+        "2": 24,
+        "3": 76,
+        "4": 517
+      },
+      "by_route": {
+        "caregiver": 24,
+        "droplet": 93,
+        "hvac_airborne": 522
+      },
+      "cells": 24,
+      "day0_acquisitions": 0,
+      "day0_share": 0.0,
+      "founder_class_by_route": {
+        "caregiver": 10,
+        "droplet": 86,
+        "hvac_airborne": 505
+      },
+      "founder_class_cells": 7,
+      "index_shedding_at_day0_cells": 0
+    }
+  },
+  "cells": [
+    {
+      "by_day": {
+        "2": 1,
+        "3": 1,
+        "4": 4
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 1,
+        "hvac_airborne": 4
+      },
+      "founders": 6,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200205,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200206,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200207,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200208,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200209,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200210,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200211,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200212,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200213,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "3": 2,
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 1
+      },
+      "founders": 3,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200214,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200215,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200216,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200217,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200218,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "4": 2
+      },
+      "by_route": {
+        "caregiver": 2
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200219,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200220,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "4": 2
+      },
+      "by_route": {
+        "droplet": 1,
+        "hvac_airborne": 1
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200221,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200222,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200223,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200224,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200225,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200226,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "3": 2,
+        "4": 7
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 1,
+        "hvac_airborne": 7
+      },
+      "founders": 9,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200227,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200228,
+      "theta": 100000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "3": 2,
+        "4": 10
+      },
+      "by_route": {
+        "droplet": 1,
+        "hvac_airborne": 12
+      },
+      "founders": 13,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200205,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200206,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200207,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200208,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200209,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200210,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200211,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200212,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200213,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "3": 1,
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 1
+      },
+      "founders": 3,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200214,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200215,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200216,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200217,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "droplet": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200218,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "2": 2,
+        "4": 2
+      },
+      "by_route": {
+        "droplet": 2,
+        "hvac_airborne": 2
+      },
+      "founders": 4,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200219,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "4": 2
+      },
+      "by_route": {
+        "caregiver": 2
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200220,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "4": 2
+      },
+      "by_route": {
+        "droplet": 1,
+        "hvac_airborne": 1
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200221,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200222,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "4": 4
+      },
+      "by_route": {
+        "caregiver": 2,
+        "hvac_airborne": 2
+      },
+      "founders": 4,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200223,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "4": 2
+      },
+      "by_route": {
+        "caregiver": 2
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200224,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200225,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200226,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "2": 3,
+        "3": 3,
+        "4": 17
+      },
+      "by_route": {
+        "caregiver": 3,
+        "droplet": 5,
+        "hvac_airborne": 16
+      },
+      "founders": 24,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200227,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200228,
+      "theta": 316000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "3": 2,
+        "4": 34
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 1,
+        "hvac_airborne": 34
+      },
+      "founders": 37,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200205,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200206,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200207,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "3": 1,
+        "4": 5
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 2,
+        "hvac_airborne": 2
+      },
+      "founders": 6,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200208,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "4": 2
+      },
+      "by_route": {
+        "caregiver": 2
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200209,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200210,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "droplet": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200211,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "4": 2
+      },
+      "by_route": {
+        "droplet": 1,
+        "hvac_airborne": 1
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200212,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200213,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "2": 5,
+        "4": 8
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 6,
+        "hvac_airborne": 7
+      },
+      "founders": 14,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200214,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "droplet": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200215,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200216,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200217,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "droplet": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200218,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "2": 1,
+        "4": 16
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 6,
+        "hvac_airborne": 10
+      },
+      "founders": 18,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200219,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "4": 4
+      },
+      "by_route": {
+        "caregiver": 3,
+        "hvac_airborne": 1
+      },
+      "founders": 4,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200220,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "4": 3
+      },
+      "by_route": {
+        "droplet": 1,
+        "hvac_airborne": 2
+      },
+      "founders": 3,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200221,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200222,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "4": 5
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 1,
+        "hvac_airborne": 3
+      },
+      "founders": 5,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200223,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200224,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "2": 2,
+        "4": 1
+      },
+      "by_route": {
+        "droplet": 2,
+        "hvac_airborne": 1
+      },
+      "founders": 3,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200225,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200226,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "1": 2,
+        "2": 5,
+        "3": 5,
+        "4": 28
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 12,
+        "hvac_airborne": 27
+      },
+      "founders": 40,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200227,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200228,
+      "theta": 1000000000.0
+    },
+    {
+      "by_day": {
+        "1": 6,
+        "2": 1,
+        "3": 12,
+        "4": 57
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 8,
+        "hvac_airborne": 67
+      },
+      "founders": 76,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200205,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200206,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "3": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200207,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "1": 2,
+        "3": 2,
+        "4": 6
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 4,
+        "hvac_airborne": 5
+      },
+      "founders": 10,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200208,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "4": 6
+      },
+      "by_route": {
+        "caregiver": 1,
+        "hvac_airborne": 5
+      },
+      "founders": 6,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200209,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200210,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "droplet": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200211,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "3": 1,
+        "4": 3
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 1,
+        "hvac_airborne": 2
+      },
+      "founders": 4,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200212,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "3": 1,
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 2
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200213,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "1": 2,
+        "2": 1,
+        "3": 1,
+        "4": 19
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 3,
+        "hvac_airborne": 18
+      },
+      "founders": 23,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200214,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "droplet": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200215,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "2": 1,
+        "4": 1
+      },
+      "by_route": {
+        "droplet": 1,
+        "hvac_airborne": 1
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200216,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200217,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "4": 3
+      },
+      "by_route": {
+        "droplet": 2,
+        "hvac_airborne": 2
+      },
+      "founders": 4,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200218,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "1": 4,
+        "2": 6,
+        "3": 2,
+        "4": 24
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 14,
+        "hvac_airborne": 21
+      },
+      "founders": 36,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200219,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "4": 2
+      },
+      "by_route": {
+        "caregiver": 2
+      },
+      "founders": 2,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200220,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "2": 6,
+        "3": 46,
+        "4": 330
+      },
+      "by_route": {
+        "caregiver": 1,
+        "droplet": 39,
+        "hvac_airborne": 343
+      },
+      "founders": 383,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200221,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200222,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "3": 2,
+        "4": 15
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 1,
+        "hvac_airborne": 14
+      },
+      "founders": 17,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200223,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "3": 1,
+        "4": 7
+      },
+      "by_route": {
+        "caregiver": 2,
+        "hvac_airborne": 6
+      },
+      "founders": 8,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200224,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "1": 1,
+        "4": 3
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 1,
+        "hvac_airborne": 1
+      },
+      "founders": 4,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200225,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {},
+      "by_route": {},
+      "founders": 0,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200226,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "1": 5,
+        "2": 9,
+        "3": 6,
+        "4": 36
+      },
+      "by_route": {
+        "caregiver": 2,
+        "droplet": 17,
+        "hvac_airborne": 37
+      },
+      "founders": 56,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200227,
+      "theta": 3160000000.0
+    },
+    {
+      "by_day": {
+        "4": 1
+      },
+      "by_route": {
+        "caregiver": 1
+      },
+      "founders": 1,
+      "index_departed_epoch": 120,
+      "index_onset_day": 3.0,
+      "index_shedding_at_day0": false,
+      "seed": 20200228,
+      "theta": 3160000000.0
+    }
+  ],
+  "pooled": {
+    "acquisitions": 868,
+    "by_day": {
+      "1": 30,
+      "2": 43,
+      "3": 102,
+      "4": 693
+    },
+    "by_route": {
+      "caregiver": 70,
+      "droplet": 143,
+      "hvac_airborne": 655
+    },
+    "cells": 96,
+    "day0_acquisitions": 0,
+    "day0_share": 0.0,
+    "founder_class_by_route": {
+      "caregiver": 19,
+      "droplet": 117,
+      "hvac_airborne": 611
+    },
+    "founder_class_cells": 13,
+    "index_shedding_at_day0_cells": 0
+  }
+}
