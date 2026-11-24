@@ -1,9 +1,18 @@
 # covid-dp-union-01 — Suite-1 union arm, joint scored contract over θ
 
-**Status:** frozen design (2026-11-24); no cell run at freeze. Every
-criterion below is frozen before any cell runs and may not be altered after
-a surface is seen. Executes §2 (the arm) and §3 Suite 1 (the scope) of
-`docs/covid/covid_theta_unification_plan.md`.
+**Status:** frozen design, θ grid held (2026-11-24). No scored cell has
+run. Every criterion below is frozen before any cell runs and may not be
+altered after a surface is seen. Executes §2 (the arm), §3 Suite 1 (the
+scope) and §5 (the adopted joint conditioned contract) of
+`docs/proposals/covid_theta_unification_plan.md`.
+
+**Revision before any cell (2026-11-24).** The first freeze of this file
+(commit `d5273582`) scored five legs on takeoff seeds over θ {1e9, 3.16e9,
+4.22e9, 1e10}. Two owner decisions the same day replaced that before any
+cell ran: the contract is the joint multi-objective set conditioned on the
+founder class (below), and the θ grid is held until the airborne fine-share
+adoption re-denominates the emission scale. The confinement order was also
+renamed `SOP-017-DEDQUARTER` (the protocol schema allows one id suffix).
 
 ## Scope
 
@@ -20,7 +29,7 @@ code, no epidemiological constant change, θ the only swept quantity.
   catalog, confinement days 16–30 from 07:00, NIID index clock) plus three
   declared deltas:
   1. **Quarter-exempt confinement.** `scheduled_protocol_id`
-     `SOP-017-DEDICATED-QUARTER`, a new entry in
+     `SOP-017-DEDQUARTER`, a new entry in
      `data/config/protocols_covid_dp_dedicated.json`: SOP-017-DEDICATED with
      `exempt_work_zones` replaced by `exempt_fraction` `crew_general` 0.25
      (sticky exact-count draw at activation). The 0.25 is the headcount
@@ -43,10 +52,13 @@ code, no epidemiological constant change, θ the only swept quantity.
 - Seeds: 24 matched seeds 20200205–20200228 at every θ. Horizon: the
   scenario's full declared voyage (35 days, 840 epochs); no block passes a
   horizon.
-- Thetas: **{1e9, 3.16e9, 4.22e9, 1e10}** — the three θ DP-THETA-FIT-01
-  measured plus its interpolated θ\*. 96 cells. 4.22e9 is included because
-  FIT-01's bracket (3.16e9, 1e10) is where its only compatible θ sit and the
-  joint contract needs an interior point there.
+- **Thetas: held, none declared.** `thetas` is empty and the campaign
+  declares no block, so no cell can run. The grid is declared on the
+  post-fine-share emission scale after that leg merges (plan §4); no fit
+  runs in old units. Rule for the declaration: 3–4 values at half-decade
+  spacing bracketing the re-denominated images of FIT-01's 3.16e9 and 1e10.
+  Declaring the grid and the canary θ is an amendment to this file made
+  before any cell; it changes no criterion below.
 - Pairing: the arm adds RNG draws (exempt draw, duty exclusion, retest
   nominations), so same-seed cells are not paired realizations of the
   FIT-01 cells. FIT-01 rows are quoted as context only; no seed-paired delta
@@ -61,56 +73,78 @@ code, no epidemiological constant change, θ the only swept quantity.
 
 Per cell the worker writes `dp_union`: `t3` and `onboard_table` (the FIT-01
 `t3_block` reduction of the campaign specimen log through day index 31 and
-34), and `capture`. Takeoff seeds are those with `recorded_onsets` ≥ 10.
+34), `capture`, and `timing` (infections by day and the ignition day).
 
-| Leg | Per-θ statistic | Passes when |
+**Conditioning (plan §5).** The record is treated as one draw of the founder
+lottery, so every leg is scored on the **founder class** at each θ: seeds
+whose `seed_ring.aboard_window_acquisitions` ≥ 10 (COVID-IGNITION-01's
+record-implied founder pool). Every leg is still scored; conditioning
+changes which seeds count, not which objectives. A θ with fewer than 5
+founder-class seeds reads "insufficient class mass" on every leg and passes
+none. The founder-class count out of 24 is reported at every θ — it is the
+probability of the record's class under the arm and is not hidden by the
+conditioning. The same legs are also computed on the takeoff class
+(`recorded_onsets` ≥ 10) and on all seeds, reported and never scored.
+
+| Leg | Statistic on the founder class | Passes when |
 | --- | --- | --- |
-| L1 `covid.T3` | `P31` = positive campaign specimens with day ≤ 31; median over 24 seeds, target 634 | side is *compatible* |
-| L2 onboard table | `P34` = positive campaign specimens with day ≤ 34 (crew wave armed); median over 24 seeds, target 691 of 3,894 | side is *compatible* |
-| L3 during-quarantine mass | takeoff-seed median `infections_during_window` | inside [150, 350] |
-| L4 `before_share` | takeoff-seed median of `onsets_before_split_day / recorded_onsets` | within 0.10 of 0.173 |
-| L5 conditioned capture | takeoff-seed median of confirmed / infections_reachable, reachable = funnel `infection_day` ≤ 29 | ≥ 0.80 |
+| `timing_ignition` | median ignition day (first day cumulative infections ≥ 50; never-ignited counts as +∞) | ≤ 9 |
+| `timing_before_share` | median `onsets_before_split_day / recorded_onsets` | within 0.10 of 0.173 |
+| `attack` | median `infections_total` | inside [712, 960] |
+| `during` | median `infections_during_window` | inside [150, 350] |
+| `capture` | median confirmed / infections_reachable, reachable = funnel `infection_day` ≤ 29 | ≥ 0.80 |
+| `t3` | `P31` = positive campaign specimens with day ≤ 31, target 634 | side is *compatible* |
+| `onboard_table` | `P34` = positive campaign specimens with day ≤ 34 (crew wave armed), target 691 of 3,894 | side is *compatible* |
 
-- **Side rule (L1, L2), verbatim from FIT-01:** *above* if the count exceeds
-  the target on ≥ 18 of 24 seeds, *below* if under it on ≥ 18 of 24,
-  otherwise *compatible*.
-- **L3–L5** are scored only with ≥ 5 takeoff seeds at the θ; otherwise the
-  leg reads "insufficient takeoff mass" and does not pass. The L4 band
-  (±0.10) and the L3 band are QUAR-TAIL-SEAM-01's frozen thresholds; the L5
-  floor and day-29 basis are COVID-CAPTURE-01's (five days before the last
-  armed campaign day, 34).
-- **Edges, verbatim from FIT-01.** Dead cell: `P31` = 0 on ≥ 20 of 24
-  seeds. Saturated cell: median seedwise secondaries ≥ 0.95 ×
-  (`aboard_total` − 1), secondaries being `infections_total` as written
-  (index already excluded).
-- **Consistent θ.** A θ is *consistent* iff all five legs pass and the cell
-  is neither dead nor saturated. The result is the set of consistent θ. No
-  θ is selected among consistent ones by any further rule; if there are
-  several they are all reported.
-- **Failing leg.** A leg that fails at every run θ is reported as the named
-  next structure (plan §3): L4 failing everywhere → founder/ignition
-  (Suite 2); L3 or L1/L2 pinned above at every non-dead θ with growth
-  overshoot → routine-stage coolant (Suite 3). This is a report, not a
-  refit.
+- **Side rule (`t3`, `onboard_table`).** FIT-01's rule is ≥ 18 of 24 seeds
+  on one side of the target; on a class of n seeds it is applied as the
+  same fraction, ≥ ⌈0.75·n⌉ seeds *above* or *below*, otherwise
+  *compatible*. On all 24 seeds this is FIT-01's rule verbatim.
+- **Thresholds are inherited, not chosen here.** Ignition mass 50 and day
+  ≤ 9: COVID-IGNITION-01. `before_share` ±0.10 and the during band:
+  QUAR-TAIL-SEAM-01. Attack band [712, 960]: the growth-bound record band
+  (plan §5). Capture floor 0.80 and the day-29 basis: COVID-CAPTURE-01
+  (five days before the last armed campaign day, 34).
+- **Stated before any cell:** conditioning on founders ≥ 10 and scoring
+  ignition ≤ 9 are not independent — IGNITION-01 measured zero overlap
+  between them on a different configuration. `timing_ignition` is therefore
+  the weakest leg on this class; `timing_before_share` carries the timing
+  objective, and the takeoff-class column shows ignition without that
+  coupling.
+- **Edges, verbatim from FIT-01, on all 24 seeds (not the class).** Dead
+  cell: `P31` = 0 on ≥ 20 of 24 seeds. Saturated cell: median seedwise
+  secondaries ≥ 0.95 × (`aboard_total` − 1), secondaries being
+  `infections_total` as written (index already excluded).
+- **Consistent θ.** A θ is *consistent* iff all seven legs pass and the
+  cell is neither dead nor saturated. The result is the set of consistent
+  θ; no further rule selects among them.
+- **Split verdict (plan §3).** If no θ is consistent but every leg passes
+  at some non-dead, non-saturated θ, the result is the split verdict: the
+  per-leg passing-θ sets and every leg pair whose passing sets are
+  disjoint are reported. That pair names the opposing structures; it is
+  the measurement, not a failure to fit.
+- **Leg failing at every θ.** Reported as the named next structure:
+  `timing_*` → founder/ignition participation (Suite 2); `attack` or
+  `during` or `t3`/`onboard_table` pinned above at every live θ → the
+  routine-stage coolant (Suite 3). A report, not a refit.
 - **Representativeness flag, verbatim from FIT-01 (reported, changes
   nothing).** At each consistent θ, if fewer than 6 of 24 seeds have `P31`
   in [317, 1268], the θ is labelled "median not representative".
 - **Partial rows.** A row with fewer than 24 seeds is `provisional`: its
   legs are computed and shown, and no consistency verdict is issued. The
-  20-seed canary is provisional by construction; an L1/L2 side that already
-  has ≥ 18 seeds on one side is final for the 24.
+  20-seed canary is provisional by construction.
 
-**Reported, never scored:** founder yield (aboard-window acquisitions,
-`seed_ring`) and ignition day where the payload carries them, attack rate,
+**Reported, never scored:** per-seed founder yield and ignition day, the
+legs on the takeoff class and on all seeds, attack rate,
 secondaries, extinct seeds, `lab_confirmed_total`, unconditioned capture,
 `recorded_onsets` against 197, infections before/during/after quarantine,
 crew share of during-window infections, specimens through day 31 and 34,
 the by-day specimen table, duty-excluded host count, realized exempt share.
 
-**Known limits, stated before any cell.** L1 compresses near saturation
-(FIT-01). L1 and L2 are not independent: `P34` ≥ `P31` on every cell, so L2
+**Known limits, stated before any cell.** `t3` compresses near saturation
+(FIT-01). `t3` and `onboard_table` are not independent: `P34` ≥ `P31` on every cell, so the latter
 adds only the crew-wave increment (record: 57). With retest sweeps armed
-the day ≤ 31 observation process is not FIT-01's, so L1 here is not a
+the day ≤ 31 observation process is not FIT-01's, so `t3` here is not a
 re-measurement of FIT-01's rows.
 
 ## Audit invariants (deviation = defect, not a failed leg)
@@ -133,7 +167,7 @@ Added for the union's arming keys:
 
 - `platform_fidelity.protocols_path` is
   `data/config/protocols_covid_dp_dedicated.json` and
-  `SOP-017-DEDICATED-QUARTER` is the fired confinement order
+  `SOP-017-DEDQUARTER` is the fired confinement order
   (`SOP-017-DEDICATED` did not fire);
 - `crew_window.exempt_fraction` == {`crew_general`: 0.25} and
   `exempt_fraction_drawn` is one entry whose count equals
@@ -145,10 +179,9 @@ Added for the union's arming keys:
 - `funnel_hosts` was present: `capture.infections_funnel` > 0 whenever
   `infections_total` > 0.
 
-The exact payload paths for the echo invariants are pinned from the local
-smoke cell before the canary submits; a path that the payload does not
-carry is recorded as "not echoed" in the campaign LEDGER, not silently
-dropped.
+The payload paths for the echo invariants are checked against a smoke
+cell before the canary submits; a path the payload does not carry is
+recorded as "not echoed" in the campaign LEDGER, not silently dropped.
 
 **Report immediately:** no in-window positives where infections exist
 (machinery gap); a dead or saturated union cell; a leg that fails at every
@@ -156,9 +189,12 @@ run θ; any audit deviation.
 
 ## Campaign
 
-`campaigns/covid/dp_union_01/` — 5 blocks, 96 cells: `union_t3e9_canary`
-(20) + `union_t3e9_rest` (4), `union_t1e9`, `union_t4e9`, `union_t1e10`
-(24 each). Queue `picard-analysis-queue`, 1 vCPU / 4096 MB.
+`campaigns/covid/dp_union_01/` — worker, argv hook and readout registered;
+**no blocks declared while the grid is held**. On declaration: one 20-seed
+canary block plus a 4-seed remainder at the canary θ, and one 24-seed block
+per other θ. Queue `picard-analysis-queue`, 1 vCPU / 4096 MB. The image is
+built and its digest pinned after the fine-share leg merges, from a `main`
+that contains it.
 
-Canary gate: `union_t3e9_canary` (20 seeds, θ = 3.16e9, the θ FIT-01
-selected) read out, then stop; the array runs only on Benjamin's decision.
+Canary gate: 20 matched seeds at one declared θ, read out, then stop; the
+array runs only on Benjamin's decision.

@@ -71,18 +71,47 @@ def capture_block(
     }
 
 
+def timing_block(
+    funnel_hosts: dict[str, dict[str, Any]], ignition_mass: int,
+) -> dict[str, Any]:
+    """Infections by day and the ignition day (COVID-IGNITION-01).
+
+    Ignition day is the first day cumulative infections reach
+    ``ignition_mass``; ``None`` when the cell never does.
+    """
+    by_day: dict[int, int] = {}
+    for entry in funnel_hosts.values():
+        day = entry.get("infection_day")
+        if day is not None:
+            by_day[int(day)] = by_day.get(int(day), 0) + 1
+    ignition_day = None
+    running = 0
+    for day in sorted(by_day):
+        running += by_day[day]
+        if running >= ignition_mass:
+            ignition_day = day
+            break
+    return {
+        "ignition_mass": ignition_mass,
+        "ignition_day": ignition_day,
+        "infections_by_day": {str(day): by_day[day] for day in sorted(by_day)},
+    }
+
+
 def union_block(
     run: dict[str, Any], contract: dict[str, Any], t3_block: Any,
 ) -> dict[str, Any]:
     """The per-cell quantities the joint contract reads."""
     log = run["campaign_specimen_log"]
+    hosts = run.get("funnel_hosts") or {}
     return {
+        "timing": timing_block(hosts, int(contract["ignition"]["mass"])),
         "t3": t3_block(log, int(contract["t3"]["through_day_index"])),
         "onboard_table": t3_block(
             log, int(contract["onboard_table"]["through_day_index"]),
         ),
         "capture": capture_block(
-            run.get("funnel_hosts") or {},
+            hosts,
             int(contract["conditioned_capture"]["reachable_infection_day_max"]),
         ),
     }

@@ -4,20 +4,16 @@
   "design_doc": "docs/covid/covid_dp_union_01_design.md",
   "parent_design": "covid-dp-theta-fit-01",
   "prerequisites": [
-    "docs/covid/covid_theta_unification_plan.md section 2 (the union arm) and section 3 Suite 1 (the scope)",
+    "docs/proposals/covid_theta_unification_plan.md section 2 (the union arm), section 3 Suite 1 (the scope), section 5 (the adopted joint conditioned contract)",
     "DP-THETA-FIT-01: replay_niid arm, fit worker, 24 matched seeds, T3 mapping, edge rules and audit invariants inherited",
     "COVID-QUAR-TAIL-SEAM-01: quarter-exempt x symptomatic-crew removal measured joint-only on boxed_s1s2; re-declared here on the dedicated hull protocols",
     "CREW-REACH-01: retest sweeps and the 23 Feb crew_wave as declared scenario data, armed per arm",
-    "COVID-CAPTURE-01: conditioned capture confirmed / infections_reachable as the scored basis"
+    "COVID-CAPTURE-01: conditioned capture confirmed / infections_reachable as the scored basis",
+    "Fine-share adoption leg (airborne_emission_fraction re-denomination) merged BEFORE thetas are declared; no cell runs in old emission units"
   ],
   "scenario_id": "diamond_princess_2020",
   "voyage_mode": "declared",
-  "thetas": [
-    1000000000.0,
-    3160000000.0,
-    4220000000.0,
-    10000000000.0
-  ],
+  "thetas": [],
   "infection_age_days": [
     6.8
   ],
@@ -45,7 +41,6 @@
       "wave": "crew_wave",
       "wave_tests": 831
     },
-    "side_seeds": 18,
     "during_quarantine_band": [
       150,
       350
@@ -58,14 +53,28 @@
       "floor": 0.8,
       "reachable_infection_day_max": 29
     },
-    "min_takeoff_cells": 5,
     "dead_seeds": 20,
     "saturation_fraction": 0.95,
     "representative_band": [
       0.5,
       2.0
     ],
-    "representative_min_seeds": 6
+    "representative_min_seeds": 6,
+    "conditioning": {
+      "scored_class": "founder",
+      "founder_min_aboard_window_acquisitions": 10,
+      "takeoff_min_recorded_onsets": 10,
+      "min_class_cells": 5
+    },
+    "side_fraction": 0.75,
+    "ignition": {
+      "mass": 50,
+      "day_max": 9
+    },
+    "attack_infections_band": [
+      712,
+      960
+    ]
   },
   "arms": [
     {
@@ -78,7 +87,7 @@
       "overrides": {
         "platform_id": "diamond_princess",
         "protocols_path": "data/config/protocols_covid_dp_dedicated.json",
-        "scheduled_protocol_id": "SOP-017-DEDICATED-QUARTER",
+        "scheduled_protocol_id": "SOP-017-DEDQUARTER",
         "scheduled_protocol_window": {
           "start_day": 16,
           "end_day": 30,
@@ -255,8 +264,13 @@
           ]
         }
       },
-      "note": "replay_niid verbatim (DP-THETA-FIT-01) plus three declared deltas: SOP-017-DEDICATED-QUARTER in place of SOP-017-DEDICATED (exempt_fraction crew_general 0.25), crew_duty_exclusion enabled (VSP 2018 OM 4.4.1.1.1 symptomatic working crew removed), and the record testing structure armed (retest sweeps + 23 Feb crew_wave). No mechanism code, no constant change."
+      "note": "replay_niid verbatim (DP-THETA-FIT-01) plus three declared deltas: SOP-017-DEDQUARTER in place of SOP-017-DEDICATED (exempt_fraction crew_general 0.25), crew_duty_exclusion enabled (VSP 2018 OM 4.4.1.1.1 symptomatic working crew removed), and the record testing structure armed (retest sweeps + 23 Feb crew_wave). No mechanism code, no constant change."
     }
   ],
-  "cells": 96
+  "cells": 0,
+  "theta_grid": {
+    "status": "held",
+    "reason": "Owner decision 2026-11-23: the grid is declared on the post-fine-share emission scale after that leg merges; no fit in old units.",
+    "rule": "When declared: 3-4 values, half-decade spacing, bracketing the re-denominated images of FIT-01 3.16e9 and 1e10; the canary is 20 seeds at one declared value."
+  }
 }

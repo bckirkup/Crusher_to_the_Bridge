@@ -4,8 +4,7 @@ Blocks declare ``theta``/``arm_id`` in their ``args``; this hook translates
 (block args, seed) into the cell worker's argv and names the artifact the
 entrypoint uploads. No horizon is passed: every declared cell runs the
 scenario's full declared voyage, which is the extended horizon the fit is
-scored on. The ``union_t3e9_canary`` block's 20 seeds are the preflight
-canary.
+scored on. No block is declared while the design's theta grid is held.
 """
 from __future__ import annotations
 
