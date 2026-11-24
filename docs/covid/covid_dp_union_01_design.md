@@ -86,6 +86,17 @@ code, no epidemiological constant change, θ the only swept quantity.
   - *Stated before the pilot:* the pilot shows 5 seeds of `P31` at θ_lo
     and θ_hi before the canary. Those cells are part of the scored rows;
     nothing in the contract is changed after seeing them.
+  - *Array staging (declared 2026-11-24 after the canary, before any
+    array cell; owner-approved).* The canary gave 1 of 20 founder-class
+    seeds at 3.16e8, and founder count rose with θ on the pilot seeds, so
+    the array starts at the highest scored θ. Run the 24 seeds at 3.16e9
+    (`union_t3e9_canary` + `union_t3e9_rest`) first. Fewer than 5
+    founder-class seeds there: stop, submit nothing further, and report
+    insufficient class mass on the scored grid. 5 or more: run the 24
+    seeds at 1e9 next; 1e8 and the rest of 3.16e8 are a further owner
+    decision. This changes no part of the contract (grid, class, legs,
+    bands). A joint verdict still needs every scored θ complete; a staged
+    stop is an incomplete grid, not a verdict.
 - Pairing: the arm adds RNG draws (exempt draw, duty exclusion, retest
   nominations), so same-seed cells are not paired realizations of the
   FIT-01 cells. FIT-01 rows are quoted as context only; no seed-paired delta
@@ -225,4 +236,5 @@ in `campaign.json`.
 
 Order: local smoke (one cell) → pilot (30 cells) → grid selected by the
 frozen rule → canary (the remaining seeds of the 20 at 3.16·θ_lo, read out
-as 20) → stop. The array runs only on Benjamin's decision.
+as 20) → stop → (owner decision 2026-11-24) array staged from 3.16e9 by
+the staging rule above.
