@@ -32,7 +32,8 @@ founder-conditioned contract. Design
 
 No θ is declared and the campaign has no block: owner decision 2026-11-23
 holds the grid until the airborne fine-share adoption
-(`airborne_emission_fraction`) merges and re-denominates θ. No canary was
+(`airborne_emission_fraction`) merges. That adoption shifts the route mix, so old θ values do not
+convert and the grid needs a bracket measured on the new scale. No canary was
 submitted. No image is built or pinned.
 
 ## Machinery smoke

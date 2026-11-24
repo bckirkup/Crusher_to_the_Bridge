@@ -271,6 +271,6 @@
   "theta_grid": {
     "status": "held",
     "reason": "Owner decision 2026-11-23: the grid is declared on the post-fine-share emission scale after that leg merges; no fit in old units.",
-    "rule": "When declared: 3-4 values, half-decade spacing, bracketing the re-denominated images of FIT-01 3.16e9 and 1e10; the canary is 20 seeds at one declared value."
+    "rule": "When declared: 3-4 values at half-decade spacing, located from a bracket measured on the post-adoption scale (one value below T3, one at or above it). Old theta values do not convert: the adoption raises only the zone airborne pool deposit, so the route mix shifts and FIT-01's 3.16e9 / 4.22e9 / 1e10 have no image on the new scale. Where the bracket comes from (the fine-share leg's cells or a declared pilot) is decided at declaration. The canary is 20 seeds at one declared value."
   }
 }

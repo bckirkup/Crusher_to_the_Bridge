@@ -640,8 +640,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   seven-leg joint contract scored on the founder class: ignition day,
   `before_share`, attack band, during-quarantine band, conditioned capture,
   T3 through day 31 and the 691/3,894 onboard table through 23 Feb. The θ
-  grid is not declared: it waits for the airborne fine-share adoption to
-  re-denominate θ, and no fit runs in old units. One local machinery smoke
+  grid is not declared: it waits for the airborne fine-share adoption,
+  old θ values do not convert to the new scale, and no fit runs in old
+  units. One local machinery smoke
   in old units passed every audit invariant; its record is in the campaign
   LEDGER and is not a result. Open decision: none
   until the fine-share leg merges; then declare the grid and run the

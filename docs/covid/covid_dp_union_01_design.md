@@ -11,7 +11,7 @@ scope) and §5 (the adopted joint conditioned contract) of
 4.22e9, 1e10}. Two owner decisions the same day replaced that before any
 cell ran: the contract is the joint multi-objective set conditioned on the
 founder class (below), and the θ grid is held until the airborne fine-share
-adoption re-denominates the emission scale. The confinement order was also
+adoption (COVID-EMIT-FINE-01) lands and changes the emission scale. The confinement order was also
 renamed `SOP-017-DEDQUARTER` (the protocol schema allows one id suffix).
 
 ## Scope
@@ -56,7 +56,13 @@ code, no epidemiological constant change, θ the only swept quantity.
   declares no block, so no cell can run. The grid is declared on the
   post-fine-share emission scale after that leg merges (plan §4); no fit
   runs in old units. Rule for the declaration: 3–4 values at half-decade
-  spacing bracketing the re-denominated images of FIT-01's 3.16e9 and 1e10.
+  spacing, located from a bracket **measured on the post-adoption scale**
+  (one value below T3, one at or above it). Old θ values do not convert:
+  the adoption raises only the zone airborne pool deposit (×1.7e4 at one
+  site; droplet, direct and fomite do not read the fraction), so the route
+  mix shifts and FIT-01's 3.16e9 / 4.22e9 / 1e10 have no image on the new
+  scale. Where the bracket comes from — the fine-share leg's own cells or
+  a declared pilot — is decided at declaration.
   Declaring the grid and the canary θ is an amendment to this file made
   before any cell; it changes no criterion below.
 - Pairing: the arm adds RNG draws (exempt draw, duty exclusion, retest
