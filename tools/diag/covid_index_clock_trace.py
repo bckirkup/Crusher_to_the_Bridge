@@ -62,7 +62,7 @@ def index_row(
         "agent_id": int(agent.agent_id),
         "status": _enum_name(inf.get("status")),
         "illness": _enum_name(inf.get("illness")),
-        "time_infected_epochs": time_infected,
+        "time_infected": time_infected,
         "infection_age_days": (
             None if time_infected is None
             else float(clock.days_elapsed(time_infected))
@@ -137,7 +137,6 @@ def main(argv: list[str] | None = None) -> int:
     payload = {
         "design_id": design.design_id,
         "cell": cell.as_dict(),
-        "num_epochs": args.num_epochs,
         "index_onset_day": run.get("index_onset_day"),
         "index_shedding_at_day0": run.get("index_shedding_at_day0"),
         "index_departed_epoch": run.get("index_departed_epoch"),
