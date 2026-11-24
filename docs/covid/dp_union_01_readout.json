@@ -1,0 +1,2555 @@
+{
+  "task_id": "DP-UNION-01",
+  "design_id": "covid-dp-union-01",
+  "joint_contract": {
+    "t3": {
+      "anchor_id": "covid.T3",
+      "cumulative_positives": 634,
+      "cumulative_tests": 3063,
+      "through_day_index": 31
+    },
+    "onboard_table": {
+      "positives": 691,
+      "tests": 3894,
+      "through_day_index": 34,
+      "through": "2020-02-23",
+      "wave": "crew_wave",
+      "wave_tests": 831
+    },
+    "during_quarantine_band": [
+      150,
+      350
+    ],
+    "before_share": {
+      "record": 0.173,
+      "tolerance": 0.1
+    },
+    "conditioned_capture": {
+      "floor": 0.8,
+      "reachable_infection_day_max": 29
+    },
+    "dead_seeds": 20,
+    "saturation_fraction": 0.95,
+    "representative_band": [
+      0.5,
+      2.0
+    ],
+    "representative_min_seeds": 6,
+    "conditioning": {
+      "scored_class": "founder",
+      "founder_min_aboard_window_acquisitions": 10,
+      "takeoff_min_recorded_onsets": 10,
+      "min_class_cells": 5
+    },
+    "side_fraction": 0.75,
+    "ignition": {
+      "mass": 50,
+      "day_max": 9
+    },
+    "attack_infections_band": [
+      712,
+      960
+    ]
+  },
+  "declared_thetas": [
+    100000.0,
+    316000.0,
+    1000000.0,
+    3160000.0,
+    10000000.0,
+    31600000.0,
+    100000000.0,
+    316000000.0,
+    1000000000.0,
+    3160000000.0,
+    10000000000.0
+  ],
+  "complete_thetas": [],
+  "incomplete_thetas": {
+    "100000.0": 5,
+    "1000000.0": 5,
+    "10000000.0": 5,
+    "100000000.0": 5,
+    "316000000.0": 20,
+    "1000000000.0": 5,
+    "10000000000.0": 5
+  },
+  "theta_grid": {
+    "status": "declared",
+    "arm_id": "union_niid",
+    "declared": "2026-11-24, on main e14f5bf3 (contains COVID-EMIT-FINE-01), before any cell on the post-adoption scale",
+    "lattice": "thetas is the runnable half-decade lattice 1e5..1e10, not the scored grid. Its span is a bound, not a conversion: theta scales dose on every route and the adoption raised only the zone airborne pool (x1.7e4), so the new-scale theta lies between old/1.7e4 (airborne pool the only route) and old (airborne pool negligible); FIT-01's old-unit bracket (1e9, 1e10) maps to no point inside it.",
+    "pilot": {
+      "thetas": [
+        100000.0,
+        1000000.0,
+        10000000.0,
+        100000000.0,
+        1000000000.0,
+        10000000000.0
+      ],
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209
+      ],
+      "how": "the first 5 seeds of each decade's canary block (scripts/campaign submit --size 5); the same cells the full block would run",
+      "statistic": "median over the 5 seeds of positives through day 31 (P31, all seeds, unconditioned), against 634",
+      "reads": "only the T3 side of each decade and the dead/saturated edges. No contract leg is scored from pilot cells; they are 5-seed provisional rows."
+    },
+    "selection_rule": "theta_hi = the lowest pilot decade whose median P31 >= 634; theta_lo = the decade below it. Scored grid = {theta_lo, 3.16*theta_lo, theta_hi, 3.16*theta_hi}, dropping a value above the lattice. Canary = 20 seeds at 3.16*theta_lo. If no pilot decade reaches 634, or the lowest one already does, no grid is declared and that is reported. A pilot median that falls back below 634 above theta_hi is reported and does not move the grid.",
+    "scored_thetas": [
+      100000000.0,
+      316000000.0,
+      1000000000.0,
+      3160000000.0
+    ],
+    "canary_theta": 316000000.0,
+    "selected": "2026-11-24 from the pilot (image sha256:0d01dae0..., 30 cells): 5-seed median P31 = 0, 0, 0, 494, 879, 625 at 1e5..1e10, so theta_lo=1e8, theta_hi=1e9. The 1e10 median falls back below 634 and, by the rule, does not move the grid. Numbers: campaigns/covid/dp_union_01/LEDGER.md."
+  },
+  "pilot": [
+    {
+      "theta": 100000.0,
+      "n": 5,
+      "p31": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "median_p31": 0,
+      "at_or_above_t3": false,
+      "dead": false,
+      "saturated": false
+    },
+    {
+      "theta": 1000000.0,
+      "n": 5,
+      "p31": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "median_p31": 0,
+      "at_or_above_t3": false,
+      "dead": false,
+      "saturated": false
+    },
+    {
+      "theta": 10000000.0,
+      "n": 5,
+      "p31": [
+        589,
+        107,
+        0,
+        0,
+        0
+      ],
+      "median_p31": 0,
+      "at_or_above_t3": false,
+      "dead": false,
+      "saturated": false
+    },
+    {
+      "theta": 100000000.0,
+      "n": 5,
+      "p31": [
+        716,
+        494,
+        815,
+        314,
+        0
+      ],
+      "median_p31": 494,
+      "at_or_above_t3": false,
+      "dead": false,
+      "saturated": false
+    },
+    {
+      "theta": 1000000000.0,
+      "n": 5,
+      "p31": [
+        747,
+        886,
+        887,
+        843,
+        879
+      ],
+      "median_p31": 879,
+      "at_or_above_t3": true,
+      "dead": false,
+      "saturated": false
+    },
+    {
+      "theta": 10000000000.0,
+      "n": 5,
+      "p31": [
+        490,
+        951,
+        400,
+        625,
+        896
+      ],
+      "median_p31": 625,
+      "at_or_above_t3": false,
+      "dead": false,
+      "saturated": false
+    }
+  ],
+  "joint": null,
+  "rows": [
+    {
+      "theta": 100000.0,
+      "n": 5,
+      "provisional": true,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 0,
+        "takeoff": 0,
+        "all": 5
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "timing_before_share": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "attack": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "during": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "capture": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "t3": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "onboard_table": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        }
+      },
+      "passing_legs": [],
+      "failing_legs": [
+        "timing_ignition",
+        "timing_before_share",
+        "attack",
+        "during",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": null,
+      "seeds_in_band": 0,
+      "median_not_representative": true,
+      "audit_deviations": {},
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "timing_before_share": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "attack": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "during": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "capture": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "t3": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "onboard_table": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": null,
+            "never_ignited": 5,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": null,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 0,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 0,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.0,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 0,
+            "seeds_above_target": 0,
+            "seeds_below_target": 5,
+            "seeds_needed_to_exclude": 4,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 0,
+            "seeds_above_target": 0,
+            "seeds_below_target": 5,
+            "seeds_needed_to_exclude": 4,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200205": 0,
+          "20200206": 0,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "p34_per_seed": {
+          "20200205": 0,
+          "20200206": 0,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "secondaries_per_seed": {
+          "20200205": 0,
+          "20200206": 0,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "extinct_seeds": 5,
+        "median_secondaries": 0,
+        "median_attack_rate": 0.0,
+        "median_specimens_through_31": 3063,
+        "median_specimens_through_34": 3894,
+        "median_wave_positives": 0,
+        "median_recorded_onsets": 0,
+        "median_lab_confirmed_total": 0,
+        "median_infections_before_quarantine": 0,
+        "median_infections_during_window_all_seeds": 0,
+        "median_infections_after_quarantine": 0,
+        "median_crew_share_during_takeoff": null,
+        "median_unconditioned_capture": 0.0,
+        "median_infections_reachable": 1,
+        "median_duty_excluded_hosts": 0,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.24976076555023924,
+        "median_founder_yield": 0,
+        "founder_yield_per_seed": {
+          "20200205": 0,
+          "20200206": 0,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "ignition_day_per_seed": {
+          "20200205": null,
+          "20200206": null,
+          "20200207": null,
+          "20200208": null,
+          "20200209": null
+        },
+        "machinery_gap_seeds": [
+          20200205,
+          20200206,
+          20200207,
+          20200208,
+          20200209
+        ],
+        "median_by_day": {
+          "16": {
+            "specimens": 31,
+            "positives": 0
+          },
+          "17": {
+            "specimens": 71,
+            "positives": 0
+          },
+          "18": {
+            "specimens": 171,
+            "positives": 0
+          },
+          "19": {
+            "specimens": 6,
+            "positives": 0
+          },
+          "20": {
+            "specimens": 57,
+            "positives": 0
+          },
+          "21": {
+            "specimens": 103,
+            "positives": 0
+          },
+          "23": {
+            "specimens": 53,
+            "positives": 0
+          },
+          "24": {
+            "specimens": 221,
+            "positives": 0
+          },
+          "26": {
+            "specimens": 217,
+            "positives": 0
+          },
+          "27": {
+            "specimens": 289,
+            "positives": 0
+          },
+          "28": {
+            "specimens": 504,
+            "positives": 0
+          },
+          "29": {
+            "specimens": 681,
+            "positives": 0
+          },
+          "30": {
+            "specimens": 607,
+            "positives": 0
+          },
+          "31": {
+            "specimens": 52,
+            "positives": 0
+          },
+          "34": {
+            "specimens": 831,
+            "positives": 0
+          }
+        }
+      }
+    },
+    {
+      "theta": 1000000.0,
+      "n": 5,
+      "provisional": true,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 0,
+        "takeoff": 0,
+        "all": 5
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "timing_before_share": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "attack": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "during": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "capture": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "t3": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "onboard_table": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        }
+      },
+      "passing_legs": [],
+      "failing_legs": [
+        "timing_ignition",
+        "timing_before_share",
+        "attack",
+        "during",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": null,
+      "seeds_in_band": 0,
+      "median_not_representative": true,
+      "audit_deviations": {},
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "timing_before_share": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "attack": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "during": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "capture": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "t3": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "onboard_table": {
+            "median": null,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": null,
+            "never_ignited": 5,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": null,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 0,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 0,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.0,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 0,
+            "seeds_above_target": 0,
+            "seeds_below_target": 5,
+            "seeds_needed_to_exclude": 4,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 0,
+            "seeds_above_target": 0,
+            "seeds_below_target": 5,
+            "seeds_needed_to_exclude": 4,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200205": 0,
+          "20200206": 0,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "p34_per_seed": {
+          "20200205": 0,
+          "20200206": 0,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "secondaries_per_seed": {
+          "20200205": 0,
+          "20200206": 0,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "extinct_seeds": 5,
+        "median_secondaries": 0,
+        "median_attack_rate": 0.0,
+        "median_specimens_through_31": 3063,
+        "median_specimens_through_34": 3894,
+        "median_wave_positives": 0,
+        "median_recorded_onsets": 0,
+        "median_lab_confirmed_total": 0,
+        "median_infections_before_quarantine": 0,
+        "median_infections_during_window_all_seeds": 0,
+        "median_infections_after_quarantine": 0,
+        "median_crew_share_during_takeoff": null,
+        "median_unconditioned_capture": 0.0,
+        "median_infections_reachable": 1,
+        "median_duty_excluded_hosts": 0,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.24976076555023924,
+        "median_founder_yield": 0,
+        "founder_yield_per_seed": {
+          "20200205": 0,
+          "20200206": 0,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "ignition_day_per_seed": {
+          "20200205": null,
+          "20200206": null,
+          "20200207": null,
+          "20200208": null,
+          "20200209": null
+        },
+        "machinery_gap_seeds": [
+          20200205,
+          20200206,
+          20200207,
+          20200208,
+          20200209
+        ],
+        "median_by_day": {
+          "16": {
+            "specimens": 31,
+            "positives": 0
+          },
+          "17": {
+            "specimens": 71,
+            "positives": 0
+          },
+          "18": {
+            "specimens": 171,
+            "positives": 0
+          },
+          "19": {
+            "specimens": 6,
+            "positives": 0
+          },
+          "20": {
+            "specimens": 57,
+            "positives": 0
+          },
+          "21": {
+            "specimens": 103,
+            "positives": 0
+          },
+          "23": {
+            "specimens": 53,
+            "positives": 0
+          },
+          "24": {
+            "specimens": 221,
+            "positives": 0
+          },
+          "26": {
+            "specimens": 217,
+            "positives": 0
+          },
+          "27": {
+            "specimens": 289,
+            "positives": 0
+          },
+          "28": {
+            "specimens": 504,
+            "positives": 0
+          },
+          "29": {
+            "specimens": 681,
+            "positives": 0
+          },
+          "30": {
+            "specimens": 607,
+            "positives": 0
+          },
+          "31": {
+            "specimens": 52,
+            "positives": 0
+          },
+          "34": {
+            "specimens": 831,
+            "positives": 0
+          }
+        }
+      }
+    },
+    {
+      "theta": 10000000.0,
+      "n": 5,
+      "provisional": true,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 0,
+        "takeoff": 2,
+        "all": 5
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "timing_before_share": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "attack": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "during": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "capture": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "t3": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "onboard_table": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        }
+      },
+      "passing_legs": [],
+      "failing_legs": [
+        "timing_ignition",
+        "timing_before_share",
+        "attack",
+        "during",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": null,
+      "seeds_in_band": 1,
+      "median_not_representative": true,
+      "audit_deviations": {},
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": 18.0,
+            "never_ignited": 0,
+            "day_max": 9,
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "timing_before_share": {
+            "median": 0.0035711569360067693,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "attack": {
+            "median": 1875.5,
+            "band": [
+              712,
+              960
+            ],
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "during": {
+            "median": 1281.5,
+            "band": [
+              150,
+              350
+            ],
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "capture": {
+            "median": 0.7934406437190107,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "t3": {
+            "target": 634,
+            "median": 348.0,
+            "seeds_above_target": 0,
+            "seeds_below_target": 2,
+            "seeds_needed_to_exclude": 2,
+            "side": "below",
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 510.0,
+            "seeds_above_target": 0,
+            "seeds_below_target": 2,
+            "seeds_needed_to_exclude": 2,
+            "side": "below",
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": null,
+            "never_ignited": 3,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.0035711569360067693,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 1,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 0,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.0,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 0,
+            "seeds_above_target": 0,
+            "seeds_below_target": 5,
+            "seeds_needed_to_exclude": 4,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 0,
+            "seeds_above_target": 0,
+            "seeds_below_target": 5,
+            "seeds_needed_to_exclude": 4,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200205": 589,
+          "20200206": 107,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "p34_per_seed": {
+          "20200205": 689,
+          "20200206": 331,
+          "20200207": 0,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "secondaries_per_seed": {
+          "20200205": 2553,
+          "20200206": 1198,
+          "20200207": 1,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "extinct_seeds": 2,
+        "median_secondaries": 1,
+        "median_attack_rate": 0.00026946914578280785,
+        "median_specimens_through_31": 3063,
+        "median_specimens_through_34": 3894,
+        "median_wave_positives": 0,
+        "median_recorded_onsets": 0,
+        "median_lab_confirmed_total": 0,
+        "median_infections_before_quarantine": 1,
+        "median_infections_during_window_all_seeds": 0,
+        "median_infections_after_quarantine": 0,
+        "median_crew_share_during_takeoff": 0.5537747669094762,
+        "median_unconditioned_capture": 0.0,
+        "median_infections_reachable": 2,
+        "median_duty_excluded_hosts": 0,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.24976076555023924,
+        "median_founder_yield": 1,
+        "founder_yield_per_seed": {
+          "20200205": 3,
+          "20200206": 1,
+          "20200207": 1,
+          "20200208": 0,
+          "20200209": 0
+        },
+        "ignition_day_per_seed": {
+          "20200205": 14,
+          "20200206": 22,
+          "20200207": null,
+          "20200208": null,
+          "20200209": null
+        },
+        "machinery_gap_seeds": [
+          20200207,
+          20200208,
+          20200209
+        ],
+        "median_by_day": {
+          "16": {
+            "specimens": 31,
+            "positives": 0
+          },
+          "17": {
+            "specimens": 71,
+            "positives": 0
+          },
+          "18": {
+            "specimens": 171,
+            "positives": 0
+          },
+          "19": {
+            "specimens": 6,
+            "positives": 0
+          },
+          "20": {
+            "specimens": 57,
+            "positives": 0
+          },
+          "21": {
+            "specimens": 103,
+            "positives": 0
+          },
+          "23": {
+            "specimens": 53,
+            "positives": 0
+          },
+          "24": {
+            "specimens": 221,
+            "positives": 0
+          },
+          "26": {
+            "specimens": 217,
+            "positives": 0
+          },
+          "27": {
+            "specimens": 289,
+            "positives": 0
+          },
+          "28": {
+            "specimens": 504,
+            "positives": 0
+          },
+          "29": {
+            "specimens": 681,
+            "positives": 0
+          },
+          "30": {
+            "specimens": 607,
+            "positives": 0
+          },
+          "31": {
+            "specimens": 52,
+            "positives": 0
+          },
+          "34": {
+            "specimens": 831,
+            "positives": 0
+          }
+        }
+      }
+    },
+    {
+      "theta": 100000000.0,
+      "n": 5,
+      "provisional": true,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 0,
+        "takeoff": 4,
+        "all": 5
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "timing_before_share": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "attack": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "during": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "capture": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "t3": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "onboard_table": {
+          "median": null,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        }
+      },
+      "passing_legs": [],
+      "failing_legs": [
+        "timing_ignition",
+        "timing_before_share",
+        "attack",
+        "during",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": null,
+      "seeds_in_band": 3,
+      "median_not_representative": true,
+      "audit_deviations": {},
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": 13.0,
+            "never_ignited": 0,
+            "day_max": 9,
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "timing_before_share": {
+            "median": 0.026423927074535055,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "attack": {
+            "median": 2737.5,
+            "band": [
+              712,
+              960
+            ],
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "during": {
+            "median": 1751.0,
+            "band": [
+              150,
+              350
+            ],
+            "ok": false,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "capture": {
+            "median": 0.9073041803587782,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "ok": true,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "t3": {
+            "target": 634,
+            "median": 605.0,
+            "seeds_above_target": 2,
+            "seeds_below_target": 2,
+            "seeds_needed_to_exclude": 3,
+            "side": "compatible",
+            "ok": true,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 697.0,
+            "seeds_above_target": 2,
+            "seeds_below_target": 2,
+            "seeds_needed_to_exclude": 3,
+            "side": "compatible",
+            "ok": true,
+            "pass": false,
+            "verdict": "insufficient class mass"
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": 15,
+            "never_ignited": 1,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.026423927074535055,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 2444,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 1635,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.8934210526315789,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 494,
+            "seeds_above_target": 2,
+            "seeds_below_target": 3,
+            "seeds_needed_to_exclude": 4,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 615,
+            "seeds_above_target": 2,
+            "seeds_below_target": 3,
+            "seeds_needed_to_exclude": 4,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200205": 716,
+          "20200206": 494,
+          "20200207": 815,
+          "20200208": 314,
+          "20200209": 0
+        },
+        "p34_per_seed": {
+          "20200205": 779,
+          "20200206": 615,
+          "20200207": 865,
+          "20200208": 443,
+          "20200209": 0
+        },
+        "secondaries_per_seed": {
+          "20200205": 3051,
+          "20200206": 2444,
+          "20200207": 3031,
+          "20200208": 867,
+          "20200209": 0
+        },
+        "extinct_seeds": 1,
+        "median_secondaries": 2444,
+        "median_attack_rate": 0.6585825922931824,
+        "median_specimens_through_31": 3063,
+        "median_specimens_through_34": 3500,
+        "median_wave_positives": 63,
+        "median_recorded_onsets": 1240,
+        "median_lab_confirmed_total": 1413,
+        "median_infections_before_quarantine": 79,
+        "median_infections_during_window_all_seeds": 1635,
+        "median_infections_after_quarantine": 76,
+        "median_crew_share_during_takeoff": 0.42545204083805477,
+        "median_unconditioned_capture": 0.7926267281105991,
+        "median_infections_reachable": 1843,
+        "median_duty_excluded_hosts": 632,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.24880382775119617,
+        "median_founder_yield": 1,
+        "founder_yield_per_seed": {
+          "20200205": 6,
+          "20200206": 1,
+          "20200207": 1,
+          "20200208": 1,
+          "20200209": 0
+        },
+        "ignition_day_per_seed": {
+          "20200205": 11,
+          "20200206": 15,
+          "20200207": 11,
+          "20200208": 17,
+          "20200209": null
+        },
+        "machinery_gap_seeds": [
+          20200209
+        ],
+        "median_by_day": {
+          "16": {
+            "specimens": 31,
+            "positives": 0
+          },
+          "17": {
+            "specimens": 71,
+            "positives": 1
+          },
+          "18": {
+            "specimens": 171,
+            "positives": 1
+          },
+          "19": {
+            "specimens": 6,
+            "positives": 1
+          },
+          "20": {
+            "specimens": 57,
+            "positives": 6
+          },
+          "21": {
+            "specimens": 103,
+            "positives": 15
+          },
+          "23": {
+            "specimens": 53,
+            "positives": 6
+          },
+          "24": {
+            "specimens": 221,
+            "positives": 14
+          },
+          "26": {
+            "specimens": 217,
+            "positives": 54
+          },
+          "27": {
+            "specimens": 289,
+            "positives": 82
+          },
+          "28": {
+            "specimens": 504,
+            "positives": 103
+          },
+          "29": {
+            "specimens": 681,
+            "positives": 105
+          },
+          "30": {
+            "specimens": 607,
+            "positives": 103
+          },
+          "31": {
+            "specimens": 52,
+            "positives": 8
+          },
+          "34": {
+            "specimens": 437,
+            "positives": 63
+          }
+        }
+      }
+    },
+    {
+      "theta": 316000000.0,
+      "n": 20,
+      "provisional": true,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 1,
+        "takeoff": 13,
+        "all": 20
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": 8,
+          "never_ignited": 0,
+          "day_max": 9,
+          "ok": true,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "timing_before_share": {
+          "median": 0.49556868537666177,
+          "band": [
+            0.07299999999999998,
+            0.273
+          ],
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "attack": {
+          "median": 3268,
+          "band": [
+            712,
+            960
+          ],
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "during": {
+          "median": 330,
+          "band": [
+            150,
+            350
+          ],
+          "ok": true,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "capture": {
+          "median": 0.9617268830373545,
+          "band": [
+            0.8,
+            1.0
+          ],
+          "ok": true,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "t3": {
+          "target": 634,
+          "median": 626,
+          "seeds_above_target": 0,
+          "seeds_below_target": 1,
+          "seeds_needed_to_exclude": 1,
+          "side": "below",
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "onboard_table": {
+          "target": 691,
+          "median": 628,
+          "seeds_above_target": 0,
+          "seeds_below_target": 1,
+          "seeds_needed_to_exclude": 1,
+          "side": "below",
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        }
+      },
+      "passing_legs": [],
+      "failing_legs": [
+        "timing_ignition",
+        "timing_before_share",
+        "attack",
+        "during",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": null,
+      "seeds_in_band": 12,
+      "median_not_representative": false,
+      "audit_deviations": {},
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": 13,
+            "never_ignited": 0,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.004454342984409799,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3124,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 1919,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.8867989056087552,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 793,
+            "seeds_above_target": 9,
+            "seeds_below_target": 4,
+            "seeds_needed_to_exclude": 10,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 830,
+            "seeds_above_target": 9,
+            "seeds_below_target": 4,
+            "seeds_needed_to_exclude": 10,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": 15.0,
+            "never_ignited": 7,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.004454342984409799,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 2598.5,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 725.5,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.8230656209228704,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 622.5,
+            "seeds_above_target": 9,
+            "seeds_below_target": 11,
+            "seeds_needed_to_exclude": 15,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 659.0,
+            "seeds_above_target": 9,
+            "seeds_below_target": 11,
+            "seeds_needed_to_exclude": 15,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200205": 626,
+          "20200206": 871,
+          "20200207": 832,
+          "20200208": 410,
+          "20200209": 793,
+          "20200210": 0,
+          "20200211": 0,
+          "20200212": 0,
+          "20200213": 839,
+          "20200214": 818,
+          "20200215": 0,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 47,
+          "20200219": 859,
+          "20200220": 619,
+          "20200221": 819,
+          "20200222": 0,
+          "20200223": 687,
+          "20200224": 728
+        },
+        "p34_per_seed": {
+          "20200205": 628,
+          "20200206": 958,
+          "20200207": 906,
+          "20200208": 500,
+          "20200209": 830,
+          "20200210": 0,
+          "20200211": 0,
+          "20200212": 0,
+          "20200213": 878,
+          "20200214": 877,
+          "20200215": 0,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 185,
+          "20200219": 885,
+          "20200220": 690,
+          "20200221": 901,
+          "20200222": 0,
+          "20200223": 693,
+          "20200224": 740
+        },
+        "secondaries_per_seed": {
+          "20200205": 3268,
+          "20200206": 3101,
+          "20200207": 3133,
+          "20200208": 946,
+          "20200209": 3053,
+          "20200210": 0,
+          "20200211": 0,
+          "20200212": 0,
+          "20200213": 3187,
+          "20200214": 2999,
+          "20200215": 0,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 1367,
+          "20200219": 3176,
+          "20200220": 2198,
+          "20200221": 3124,
+          "20200222": 0,
+          "20200223": 3211,
+          "20200224": 3211
+        },
+        "extinct_seeds": 7,
+        "median_secondaries": 2598.5,
+        "median_attack_rate": 0.7002155753166263,
+        "median_specimens_through_31": 3063.0,
+        "median_specimens_through_34": 3353.0,
+        "median_wave_positives": 19.0,
+        "median_recorded_onsets": 1620.0,
+        "median_lab_confirmed_total": 1845.0,
+        "median_infections_before_quarantine": 120.5,
+        "median_infections_during_window_all_seeds": 725.5,
+        "median_infections_after_quarantine": 19.0,
+        "median_crew_share_during_takeoff": 0.3285444234404537,
+        "median_unconditioned_capture": 0.7238899803536346,
+        "median_infections_reachable": 2218.5,
+        "median_duty_excluded_hosts": 673.0,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.24976076555023924,
+        "median_founder_yield": 1.0,
+        "founder_yield_per_seed": {
+          "20200205": 13,
+          "20200206": 1,
+          "20200207": 1,
+          "20200208": 1,
+          "20200209": 1,
+          "20200210": 0,
+          "20200211": 0,
+          "20200212": 0,
+          "20200213": 1,
+          "20200214": 3,
+          "20200215": 0,
+          "20200216": 0,
+          "20200217": 0,
+          "20200218": 1,
+          "20200219": 4,
+          "20200220": 2,
+          "20200221": 2,
+          "20200222": 0,
+          "20200223": 4,
+          "20200224": 2
+        },
+        "ignition_day_per_seed": {
+          "20200205": 8,
+          "20200206": 14,
+          "20200207": 12,
+          "20200208": 15,
+          "20200209": 15,
+          "20200210": null,
+          "20200211": null,
+          "20200212": null,
+          "20200213": 11,
+          "20200214": 15,
+          "20200215": null,
+          "20200216": null,
+          "20200217": null,
+          "20200218": 25,
+          "20200219": 12,
+          "20200220": 14,
+          "20200221": 13,
+          "20200222": null,
+          "20200223": 10,
+          "20200224": 10
+        },
+        "machinery_gap_seeds": [
+          20200210,
+          20200211,
+          20200212,
+          20200215,
+          20200216,
+          20200217,
+          20200222
+        ],
+        "median_by_day": {
+          "16": {
+            "specimens": 31.0,
+            "positives": 0.0
+          },
+          "17": {
+            "specimens": 71.0,
+            "positives": 1.0
+          },
+          "18": {
+            "specimens": 171.0,
+            "positives": 0.5
+          },
+          "19": {
+            "specimens": 6.0,
+            "positives": 0.0
+          },
+          "20": {
+            "specimens": 57.0,
+            "positives": 11.0
+          },
+          "21": {
+            "specimens": 103.0,
+            "positives": 20.0
+          },
+          "23": {
+            "specimens": 53.0,
+            "positives": 8.5
+          },
+          "24": {
+            "specimens": 221.0,
+            "positives": 33.5
+          },
+          "26": {
+            "specimens": 217.0,
+            "positives": 53.0
+          },
+          "27": {
+            "specimens": 289.0,
+            "positives": 75.0
+          },
+          "28": {
+            "specimens": 504.0,
+            "positives": 108.0
+          },
+          "29": {
+            "specimens": 681.0,
+            "positives": 96.5
+          },
+          "30": {
+            "specimens": 607.0,
+            "positives": 66.5
+          },
+          "31": {
+            "specimens": 52.0,
+            "positives": 5.0
+          },
+          "34": {
+            "specimens": 290.0,
+            "positives": 19.0
+          }
+        }
+      }
+    },
+    {
+      "theta": 1000000000.0,
+      "n": 5,
+      "provisional": true,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 1,
+        "takeoff": 5,
+        "all": 5
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": 8,
+          "never_ignited": 0,
+          "day_max": 9,
+          "ok": true,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "timing_before_share": {
+          "median": 0.5339876408578699,
+          "band": [
+            0.07299999999999998,
+            0.273
+          ],
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "attack": {
+          "median": 3370,
+          "band": [
+            712,
+            960
+          ],
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "during": {
+          "median": 225,
+          "band": [
+            150,
+            350
+          ],
+          "ok": true,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "capture": {
+          "median": 0.97091124962897,
+          "band": [
+            0.8,
+            1.0
+          ],
+          "ok": true,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "t3": {
+          "target": 634,
+          "median": 747,
+          "seeds_above_target": 1,
+          "seeds_below_target": 0,
+          "seeds_needed_to_exclude": 1,
+          "side": "above",
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "onboard_table": {
+          "target": 691,
+          "median": 751,
+          "seeds_above_target": 1,
+          "seeds_below_target": 0,
+          "seeds_needed_to_exclude": 1,
+          "side": "above",
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        }
+      },
+      "passing_legs": [],
+      "failing_legs": [
+        "timing_ignition",
+        "timing_before_share",
+        "attack",
+        "during",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": null,
+      "seeds_in_band": 5,
+      "median_not_representative": true,
+      "audit_deviations": {},
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": 11,
+            "never_ignited": 0,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.0661902971041745,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3289,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 1672,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.9402023919043239,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 879,
+            "seeds_above_target": 5,
+            "seeds_below_target": 0,
+            "seeds_needed_to_exclude": 4,
+            "side": "above",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 905,
+            "seeds_above_target": 5,
+            "seeds_below_target": 0,
+            "seeds_needed_to_exclude": 4,
+            "side": "above",
+            "pass": false,
+            "verdict": null
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": 11,
+            "never_ignited": 0,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.0661902971041745,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3289,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 1672,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.9402023919043239,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 879,
+            "seeds_above_target": 5,
+            "seeds_below_target": 0,
+            "seeds_needed_to_exclude": 4,
+            "side": "above",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 905,
+            "seeds_above_target": 5,
+            "seeds_below_target": 0,
+            "seeds_needed_to_exclude": 4,
+            "side": "above",
+            "pass": false,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200205": 747,
+          "20200206": 886,
+          "20200207": 887,
+          "20200208": 843,
+          "20200209": 879
+        },
+        "p34_per_seed": {
+          "20200205": 751,
+          "20200206": 954,
+          "20200207": 909,
+          "20200208": 871,
+          "20200209": 905
+        },
+        "secondaries_per_seed": {
+          "20200205": 3370,
+          "20200206": 3289,
+          "20200207": 3293,
+          "20200208": 3267,
+          "20200209": 3287
+        },
+        "extinct_seeds": 0,
+        "median_secondaries": 3289,
+        "median_attack_rate": 0.886284020479655,
+        "median_specimens_through_31": 3063,
+        "median_specimens_through_34": 3218,
+        "median_wave_positives": 26,
+        "median_recorded_onsets": 2659,
+        "median_lab_confirmed_total": 3072,
+        "median_infections_before_quarantine": 1594,
+        "median_infections_during_window_all_seeds": 1672,
+        "median_infections_after_quarantine": 27,
+        "median_crew_share_during_takeoff": 0.3235645933014354,
+        "median_unconditioned_capture": 0.9326047358834244,
+        "median_infections_reachable": 3242,
+        "median_duty_excluded_hosts": 722,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.24210526315789474,
+        "median_founder_yield": 2,
+        "founder_yield_per_seed": {
+          "20200205": 37,
+          "20200206": 1,
+          "20200207": 1,
+          "20200208": 6,
+          "20200209": 2
+        },
+        "ignition_day_per_seed": {
+          "20200205": 8,
+          "20200206": 13,
+          "20200207": 11,
+          "20200208": 10,
+          "20200209": 11
+        },
+        "machinery_gap_seeds": [],
+        "median_by_day": {
+          "16": {
+            "specimens": 31,
+            "positives": 10
+          },
+          "17": {
+            "specimens": 71,
+            "positives": 19
+          },
+          "18": {
+            "specimens": 171,
+            "positives": 46
+          },
+          "19": {
+            "specimens": 6,
+            "positives": 1
+          },
+          "20": {
+            "specimens": 57,
+            "positives": 16
+          },
+          "21": {
+            "specimens": 103,
+            "positives": 36
+          },
+          "23": {
+            "specimens": 53,
+            "positives": 16
+          },
+          "24": {
+            "specimens": 221,
+            "positives": 63
+          },
+          "26": {
+            "specimens": 217,
+            "positives": 72
+          },
+          "27": {
+            "specimens": 289,
+            "positives": 97
+          },
+          "28": {
+            "specimens": 504,
+            "positives": 161
+          },
+          "29": {
+            "specimens": 681,
+            "positives": 187
+          },
+          "30": {
+            "specimens": 607,
+            "positives": 115
+          },
+          "31": {
+            "specimens": 52,
+            "positives": 8
+          },
+          "34": {
+            "specimens": 155,
+            "positives": 26
+          }
+        }
+      }
+    },
+    {
+      "theta": 10000000000.0,
+      "n": 5,
+      "provisional": true,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 2,
+        "takeoff": 5,
+        "all": 5
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": 4.5,
+          "never_ignited": 0,
+          "day_max": 9,
+          "ok": true,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "timing_before_share": {
+          "median": 0.8610362315847797,
+          "band": [
+            0.07299999999999998,
+            0.273
+          ],
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "attack": {
+          "median": 3519.5,
+          "band": [
+            712,
+            960
+          ],
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "during": {
+          "median": 54.5,
+          "band": [
+            150,
+            350
+          ],
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "capture": {
+          "median": 0.9583809574986699,
+          "band": [
+            0.8,
+            1.0
+          ],
+          "ok": true,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "t3": {
+          "target": 634,
+          "median": 557.5,
+          "seeds_above_target": 0,
+          "seeds_below_target": 2,
+          "seeds_needed_to_exclude": 2,
+          "side": "below",
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        },
+        "onboard_table": {
+          "target": 691,
+          "median": 557.5,
+          "seeds_above_target": 0,
+          "seeds_below_target": 2,
+          "seeds_needed_to_exclude": 2,
+          "side": "below",
+          "ok": false,
+          "pass": false,
+          "verdict": "insufficient class mass"
+        }
+      },
+      "passing_legs": [],
+      "failing_legs": [
+        "timing_ignition",
+        "timing_before_share",
+        "attack",
+        "during",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": null,
+      "seeds_in_band": 5,
+      "median_not_representative": true,
+      "audit_deviations": {},
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": 11,
+            "never_ignited": 0,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.13565891472868216,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3445,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 818,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.9716070414537195,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 625,
+            "seeds_above_target": 2,
+            "seeds_below_target": 3,
+            "seeds_needed_to_exclude": 4,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 625,
+            "seeds_above_target": 2,
+            "seeds_below_target": 3,
+            "seeds_needed_to_exclude": 4,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": 11,
+            "never_ignited": 0,
+            "day_max": 9,
+            "pass": false,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.13565891472868216,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3445,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 818,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.9716070414537195,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": true,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 625,
+            "seeds_above_target": 2,
+            "seeds_below_target": 3,
+            "seeds_needed_to_exclude": 4,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 625,
+            "seeds_above_target": 2,
+            "seeds_below_target": 3,
+            "seeds_needed_to_exclude": 4,
+            "side": "compatible",
+            "pass": true,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200205": 490,
+          "20200206": 951,
+          "20200207": 400,
+          "20200208": 625,
+          "20200209": 896
+        },
+        "p34_per_seed": {
+          "20200205": 490,
+          "20200206": 960,
+          "20200207": 589,
+          "20200208": 625,
+          "20200209": 906
+        },
+        "secondaries_per_seed": {
+          "20200205": 3518,
+          "20200206": 3434,
+          "20200207": 3111,
+          "20200208": 3521,
+          "20200209": 3445
+        },
+        "extinct_seeds": 0,
+        "median_secondaries": 3445,
+        "median_attack_rate": 0.9283212072217731,
+        "median_specimens_through_31": 3063,
+        "median_specimens_through_34": 3159,
+        "median_wave_positives": 9,
+        "median_recorded_onsets": 2854,
+        "median_lab_confirmed_total": 3340,
+        "median_infections_before_quarantine": 2620,
+        "median_infections_during_window_all_seeds": 818,
+        "median_infections_after_quarantine": 3,
+        "median_crew_share_during_takeoff": 0.33570625702510304,
+        "median_unconditioned_capture": 0.971561230412072,
+        "median_infections_reachable": 3436,
+        "median_duty_excluded_hosts": 760,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.20861244019138755,
+        "median_founder_yield": 9,
+        "founder_yield_per_seed": {
+          "20200205": 147,
+          "20200206": 1,
+          "20200207": 1,
+          "20200208": 31,
+          "20200209": 9
+        },
+        "ignition_day_per_seed": {
+          "20200205": 4,
+          "20200206": 11,
+          "20200207": 20,
+          "20200208": 5,
+          "20200209": 11
+        },
+        "machinery_gap_seeds": [],
+        "median_by_day": {
+          "16": {
+            "specimens": 31,
+            "positives": 7
+          },
+          "17": {
+            "specimens": 71,
+            "positives": 14
+          },
+          "18": {
+            "specimens": 171,
+            "positives": 59
+          },
+          "19": {
+            "specimens": 6,
+            "positives": 3
+          },
+          "20": {
+            "specimens": 57,
+            "positives": 25
+          },
+          "21": {
+            "specimens": 103,
+            "positives": 45
+          },
+          "23": {
+            "specimens": 53,
+            "positives": 22
+          },
+          "24": {
+            "specimens": 221,
+            "positives": 88
+          },
+          "26": {
+            "specimens": 217,
+            "positives": 66
+          },
+          "27": {
+            "specimens": 289,
+            "positives": 72
+          },
+          "28": {
+            "specimens": 504,
+            "positives": 84
+          },
+          "29": {
+            "specimens": 681,
+            "positives": 104
+          },
+          "30": {
+            "specimens": 607,
+            "positives": 109
+          },
+          "31": {
+            "specimens": 52,
+            "positives": 6
+          },
+          "34": {
+            "specimens": 96,
+            "positives": 9
+          }
+        }
+      }
+    }
+  ]
+}

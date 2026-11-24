@@ -1,7 +1,8 @@
 # covid-dp-union-01 — Suite-1 union arm, joint scored contract over θ
 
-**Status:** frozen design, θ grid held (2026-11-24). No scored cell has
-run. Every criterion below is frozen before any cell runs and may not be
+**Status:** frozen design; θ lattice and grid-selection rule declared
+and the scored grid selected from
+the pilot (2026-11-24). Every criterion below is frozen before any cell runs and may not be
 altered after a surface is seen. Executes §2 (the arm), §3 Suite 1 (the
 scope) and §5 (the adopted joint conditioned contract) of
 `docs/proposals/covid_theta_unification_plan.md`.
@@ -52,19 +53,39 @@ code, no epidemiological constant change, θ the only swept quantity.
 - Seeds: 24 matched seeds 20200205–20200228 at every θ. Horizon: the
   scenario's full declared voyage (35 days, 840 epochs); no block passes a
   horizon.
-- **Thetas: held, none declared.** `thetas` is empty and the campaign
-  declares no block, so no cell can run. The grid is declared on the
-  post-fine-share emission scale after that leg merges (plan §4); no fit
-  runs in old units. Rule for the declaration: 3–4 values at half-decade
-  spacing, located from a bracket **measured on the post-adoption scale**
-  (one value below T3, one at or above it). Old θ values do not convert:
-  the adoption raises only the zone airborne pool deposit (×1.7e4 at one
-  site; droplet, direct and fomite do not read the fraction), so the route
-  mix shifts and FIT-01's 3.16e9 / 4.22e9 / 1e10 have no image on the new
-  scale. Where the bracket comes from — the fine-share leg's own cells or
-  a declared pilot — is decided at declaration.
-  Declaring the grid and the canary θ is an amendment to this file made
-  before any cell; it changes no criterion below.
+- **Thetas: a declared lattice, a pilot, then a scored grid (amendment
+  2026-11-24, on `main` e14f5bf3 which contains COVID-EMIT-FINE-01, before
+  any cell on the post-adoption scale).**
+  - *Lattice.* `thetas` is the runnable half-decade lattice 1e5 … 1e10
+    (11 values, 264 union-arm cells). It is not the scored grid. Its span
+    is a bound, not a conversion: θ scales dose on every route and the
+    adoption raised only the zone airborne pool (×1.7e4), so the new-scale
+    θ lies between old/1.7e4 (airborne pool the only route) and old
+    (airborne pool negligible). FIT-01's old-unit values map to no point
+    inside it.
+  - *Pilot.* No bracket has been measured on the new scale
+    (COVID-EMIT-FINE-01 scored no voyage). The pilot is the first 5 seeds
+    (20200205–20200209) of the canary block at each decade 1e5 … 1e10: 30
+    cells, the same cells the full blocks would run. Statistic: the
+    5-seed median of `P31` on all seeds against 634. It reads only the T3
+    side of each decade and the dead/saturated edges; no contract leg is
+    scored from pilot cells.
+  - *Selection rule, frozen before the pilot.* θ_hi = the lowest pilot
+    decade whose median `P31` ≥ 634; θ_lo = the decade below. Scored grid
+    = {θ_lo, 3.16·θ_lo, θ_hi, 3.16·θ_hi}, dropping a value above the
+    lattice. Canary = 20 seeds at 3.16·θ_lo. If no decade reaches 634, or
+    the lowest already does, no grid is declared and that is the report. A
+    pilot median that falls back below 634 above θ_hi is reported and does
+    not move the grid.
+  - *Scored grid (selected 2026-11-24 by the rule above, from the pilot):*
+    **{1e8, 3.16e8, 1e9, 3.16e9}**, canary at **3.16e8**. θ_lo = 1e8,
+    θ_hi = 1e9. The 1e10 pilot median falls back below 634; by the rule it
+    is reported and does not move the grid. Pilot numbers are in the
+    campaign LEDGER. The joint verdict is computed over the scored grid
+    only.
+  - *Stated before the pilot:* the pilot shows 5 seeds of `P31` at θ_lo
+    and θ_hi before the canary. Those cells are part of the scored rows;
+    nothing in the contract is changed after seeing them.
 - Pairing: the arm adds RNG draws (exempt draw, duty exclusion, retest
   nominations), so same-seed cells are not paired realizations of the
   FIT-01 cells. FIT-01 rows are quoted as context only; no seed-paired delta
@@ -195,12 +216,13 @@ run θ; any audit deviation.
 
 ## Campaign
 
-`campaigns/covid/dp_union_01/` — worker, argv hook and readout registered;
-**no blocks declared while the grid is held**. On declaration: one 20-seed
-canary block plus a 4-seed remainder at the canary θ, and one 24-seed block
-per other θ. Queue `picard-analysis-queue`, 1 vCPU / 4096 MB. The image is
-built and its digest pinned after the fine-share leg merges, from a `main`
-that contains it.
+`campaigns/covid/dp_union_01/` — worker, argv hook, readout. Blocks are
+generated from the lattice by `design/build.py`: per θ one 20-seed
+`_canary` block and one 4-seed `_rest` block (22 blocks, 264 cells). Queue
+`picard-analysis-queue`, 1 vCPU / 4096 MB. The image is built from a `main`
+containing the fine-share leg and this amendment, and its digest is pinned
+in `campaign.json`.
 
-Canary gate: 20 matched seeds at one declared θ, read out, then stop; the
-array runs only on Benjamin's decision.
+Order: local smoke (one cell) → pilot (30 cells) → grid selected by the
+frozen rule → canary (the remaining seeds of the 20 at 3.16·θ_lo, read out
+as 20) → stop. The array runs only on Benjamin's decision.

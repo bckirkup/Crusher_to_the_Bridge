@@ -466,6 +466,38 @@ def _joint(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _pilot(
+    rows: list[dict[str, Any]], grid: dict[str, Any], contract: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """T3 side of each pilot decade: median P31 over the pilot seeds only.
+
+    Locates the bracket for the grid's selection rule; no leg is scored.
+    """
+    pilot = grid.get("pilot") or {}
+    seeds = [str(s) for s in pilot.get("seeds", [])]
+    target = int(contract["t3"]["cumulative_positives"])
+    out = []
+    for row in rows:
+        if not any(
+            math.isclose(row["theta"], t, rel_tol=1e-12)
+            for t in pilot.get("thetas", [])
+        ):
+            continue
+        per_seed = row["reported_only"]["p31_per_seed"]
+        p31 = [per_seed[s] for s in seeds if s in per_seed]
+        median = statistics.median(p31) if p31 else None
+        out.append({
+            "theta": row["theta"],
+            "n": len(p31),
+            "p31": p31,
+            "median_p31": median,
+            "at_or_above_t3": None if median is None else median >= target,
+            "dead": row["dead"],
+            "saturated": row["saturated"],
+        })
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cells-dir", required=True,
@@ -482,6 +514,12 @@ def main(argv: list[str] | None = None) -> int:
         for theta in sorted(cells)
     ]
     complete = [row for row in rows if row["n"] == expected]
+    grid = design.get("theta_grid") or {}
+    scored = grid.get("scored_thetas") or []
+    scored_rows = [
+        row for row in complete
+        if any(math.isclose(row["theta"], t, rel_tol=1e-12) for t in scored)
+    ]
     readout = {
         "task_id": "DP-UNION-01",
         "design_id": design["design_id"],
@@ -491,11 +529,11 @@ def main(argv: list[str] | None = None) -> int:
         "incomplete_thetas": {
             str(row["theta"]): row["n"] for row in rows if row["n"] != expected
         },
-        "theta_grid": design.get("theta_grid"),
+        "theta_grid": grid,
+        "pilot": _pilot(rows, grid, contract),
         "joint": (
-            _joint(complete)
-            if design["thetas"] and len(complete) == len(design["thetas"])
-            else None
+            _joint(scored_rows)
+            if scored and len(scored_rows) == len(scored) else None
         ),
         "rows": rows,
     }
