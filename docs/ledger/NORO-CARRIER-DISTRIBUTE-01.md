@@ -1,8 +1,9 @@
 # NORO-CARRIER-DISTRIBUTE-01
 **Date:** 2026-11-24
-**Commit:** #1411 (merge 4d06dff3)
+**Commit:** #1411
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** a994d8c6
 
 CARRIER-DISTRIBUTE (D3″) campaign per
 `docs/norovirus/hand_carrier_distribute_spec.md`, implementation PR
@@ -36,10 +37,19 @@ default-off and bit-identical at defaults.
 Batch arrays `94b2cae4-9d57-44a9-b528-f42bbf31bf79` (R, jobdef :2) and
 `c32d3cd8-13ed-4480-b095-3c27d697dad2` (R+D, jobdef :3), image
 `sha256:d9752d7253be8c6ac5f0a9123a41868935b96c5c2a610407678be3eef94a0573`,
-288 epochs. **All 40 cells passed the frozen audit** — len-288
-ledgers, partition closure ≤~8e-15 rel, zero provenance and zero
-carrier violations on every cell; resolved stamps read
-carriers/shedders_only and carriers/carriers as designed.
+288 epochs. Exception: the R+D seed-8000 artifact resolves from the
+canary run (image sha256:e248e234, code 05830b3a — differs from the
+pin only in the S1244 `sv <= 0.0` syntax, semantically identical;
+the role lacks s3:DeleteObject so the canary artifact stayed at the
+prefix). **All 40 cells passed the frozen audit** — len-288
+ledgers; the four counter reconciliations (Σrow hazard vs
+`sum_evaluated_hazard`, Σsecondaries vs `transmission.secondaries`,
+Σdelivered-to-hands vs `mass_delivered_to_hands_gec`,
+Σhand-to-mouth vs `hand_to_mouth_dose_gec`) within ~2e-13 rel
+(three of four exact); hand partition closure ≤~8e-15 rel; zero
+provenance and zero carrier violations on every cell; resolved
+stamps read carriers/shedders_only and carriers/carriers as
+designed.
 
 - **The mechanism fired wherever carriers held mass.** Arm R: median
   120 carrier depositors per cold cell (max 749). Arm R+D: median 120
@@ -67,14 +77,16 @@ carriers/shedders_only and carriers/carriers as designed.
 ## Verdict under the frozen rules
 
 **Carrier mass redistribution moves real mass but delivered volume is
-still the bound.** Frozen rule "breadth rises but neither ignites":
-the dose-landing decomposition is already wide (h90 in the hundreds)
-and carriers demonstrably deposit and donate where they hold load,
-yet the median cold cell sits at σ ≈ 0.25 — the same order as every
-measured arm. The residual bound is aggregate delivered volume /
-hazard conversion, i.e. the ~200× multiplier to hot-cell credited
-mass that the previous readouts already pointed at. Per the rule:
-report, change nothing else.
+still the bound.** The frozen rule's "breadth rises" clause does not
+apply verbatim — breadth was already above the ~8 bar at baseline
+(217) and stayed there (148/166; per-seed moves are RNG-divergent).
+The operative condition holds on either reading: dose landing is
+wide and neither arm ignites, so the bound the rule names is the
+operative one — aggregate delivered volume / hazard conversion, the
+~200× multiplier to hot-cell credited mass. Carriers demonstrably
+deposit and donate where they hold load, yet the median cold cell
+sits at σ ≈ 0.25 — the same order as every measured arm. Per the
+rule: report, change nothing else.
 
 ## Follow-ups the spec explicitly does not authorize
 
