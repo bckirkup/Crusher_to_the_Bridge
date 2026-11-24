@@ -82,6 +82,9 @@ end-of-epoch state; index host is agent 1826, `shedding_multiplier` 57.79.
 | 96–119 | 4 | 6.83–7.79 | 1.0 … 1.96 | open | 1 | 2.41e-4 | symptomatic |
 | 120– | 5 | 7.83– | 2.0 … | open | 2 | 2.41e-2 | departed at epoch 120 |
 
+- The shedding column is `get_pathogen_shedding`, which does not check
+  departure. From epoch 120 the host is off the ship and reaches no zone,
+  so the 2.41e-2 row is what the curve would emit, not realized emission.
 - First emission: **epoch 24**, infection age 3.83 d, 1.97 d before
   onset. The declared opening is 2.0 d before onset = infection-day 3.8 =
   epoch 24 on the hourly clock (`time_infected` 92 is the first integer
