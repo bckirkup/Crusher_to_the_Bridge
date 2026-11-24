@@ -120,11 +120,19 @@ dating ascertainment ≈3.4× of the ~18× recorded-onset gap; recorded_onsets
 - **Fine-share lands first (owner decision 2026-11-23).** The measured
   airborne fine share (declared interval [0.76, 0.92], Coleman's 0.85 inside
   it, tranche-27 license; `COVID-EMIT-LEVEL-01`) is adopted as
-  `airborne_emission_fraction`, replacing the shipped 5e-5 — every deposit
-  moves ×1.7e4 and the θ composite re-denominates. This is its own leg with
-  its own attribution (not part of Edison #30's scope), sequenced before
-  Suite 1 names a θ grid: the union design's grid is declared on the new
-  scale and no fit runs in old units.
+  `airborne_emission_fraction`, replacing the shipped 5e-5
+  (COVID-EMIT-FINE-01, PR #1412). Measured scope of the move (read from
+  code, not assumed): only the **zone airborne pool deposit** rises ×1.7e4
+  — the profile fraction is read at one site
+  (`orchestrator_epoch._accumulate_pathogen_zone_mass`); the droplet route
+  uses the uniform `DROPLET_AEROSOL_FRACTION = 0.05` and does not read it,
+  and direct/fomite do not either. Graywater reads the same pool, so
+  earlier wastewater read mixes are pre-change. The route mix therefore
+  shifts toward the room-pool airborne route — old θ values are old-unit
+  and **cannot be converted by dividing by 1.7e4**; a new θ must be fit on
+  the new scale. This is its own leg with its own attribution, sequenced
+  before Suite 1 names a θ grid: the union design's grid is declared on the
+  post-adoption scale and no fit runs in old units.
 - **Retired axes are not legs.** SUSCEPT-V1, HEAT-V1, SEED-GEOM-V1,
   PROPENSITY-V1, COVID-HAND-AB-01, COVID-COOP-V1, index dining placement,
   windowed embarkation intensity, dose-law/θ-alone — all measured and
@@ -167,7 +175,10 @@ One bounded session per leg (flat children, skeleton prompts):
 
 1. **Fine-share adoption** (own leg): declare the value inside [0.76,0.92]
    with provenance register entry + evidence grade + attribution for every
-   moved golden; merge before Suite 1's θ grid freezes.
+   moved golden; merge before Suite 1's θ grid freezes. Open item it
+   surfaced (a decision, not part of this plan): whether the droplet route
+   should read the arm's declared share instead of the uniform
+   `DROPLET_AEROSOL_FRACTION = 0.05`.
 2. **Suite 1**: design freeze → campaign registration → canary (20 seeds at
    one union-arm θ cell) → stop and report; the array decision follows the
    canary per the campaign gate.
