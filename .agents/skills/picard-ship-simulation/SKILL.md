@@ -55,6 +55,8 @@ ShipSimulation(spec).run()
 | `transmission.fomite_representation` | `pooled` default; `per_surface` disaggregates mass into item classes (see `docs/ledger/NORO-FOMITE-DISAGG-01.md`); `item_instances` is the TOUCH-PATCH arm — deposits land on the discrete items each touch samples, pickups request at instance density (see `docs/norovirus/fomite_touch_patch_spec.md`) |
 | `transmission.hand_sequester_fill` | `stool_only` default; `any_load` is the EXTERNAL-SEQUESTER arm — acquired accessible mass may migrate into the wash-proof protected compartment, bounded by a per-(host, pathogen) capacity draw from the shipped `logU(50, 3200)` band (see `docs/norovirus/hand_external_sequester_spec.md`) |
 | `transmission.hand_residual_mouthing` | `pickup_only` default; `per_epoch` re-exposes residual susceptible hand load to the shipped contacts×f×e draw once per epoch (discrete solver only) — EXTERNAL-SEQUESTER arm (see `docs/norovirus/hand_external_sequester_spec.md`) |
+| `transmission.hand_redeposit_mode` | `shedders_only` default; `carriers` lets loaded non-shedder occupants deposit hand load to surfaces and food — CARRIER-DISTRIBUTE arm (see `docs/norovirus/hand_carrier_distribute_spec.md`) |
+| `transmission.hand_donor_mode` | `shedders_only` default; `carriers` adds gate-passing loaded carriers to the direct-contact donor pool — CARRIER-DISTRIBUTE arm (see `docs/norovirus/hand_carrier_distribute_spec.md`) |
 | `agent_behavior` | Dining/free rotation probabilities (default `0.0` for golden stability) — see `docs/multi_pathogen_model_changes_spec.md` |
 
 Pathogen profiles may include `transmission_route_weights`, formal `dose_adjustment`
