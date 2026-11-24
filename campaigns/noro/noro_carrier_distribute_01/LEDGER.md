@@ -112,7 +112,11 @@ with an announced ETA -> stop and report.
   all six resolved stamps correct; 0 carrier + 0 provenance violations;
   carrier_activity exercised — deposit 38,823 calls / 70,531 GEC /
   1,049 hosts, donate 24,306 calls / 31,107 GEC / 987 hosts;
-  internal_host_transfer 31.6k GEC.
+  internal_host_transfer 31.6k GEC. The canary artifact remains at the
+  campaign prefix (picard-deploy-role lacks s3:DeleteObject), so the
+  R+D array's seed-8000 cell resolves from the canary run — same engine
+  semantics as the pinned image (diff: S1244 syntax only); all other
+  cells run on the pinned digest.
 - [ ] Both 20-seed arrays submitted — STOP and report before this step
   per the bounded-research rule.
 - [ ] Readout: verdict and waterfall in `docs/ledger/NORO-CARRIER-DISTRIBUTE-01.md`.
