@@ -106,8 +106,12 @@ channel is built.
 threshold → Polymod-class mapping (the deferred §6 question), then declare
 the routine stage (Pung-anchored `activity_contacts`, or a voyage-stage
 routine multiplier). Frozen two-leg prediction: founder median ≥10 AND d15
-infections inside the pre-quarantine mass implied by T4 and the capture
-basis (~800–960, declared exactly at freeze) at one θ. Decides whether a declared routine stage cools
+infections inside a bound declared at freeze from the record's
+*pre-quarantine* evidence (the day-16 arrest plus pre-quarantine
+confirmations) — not from the held-out band or from whole-voyage capture,
+which bounds only total reachable infections and says nothing about day
+15. EARLY-GROWTH-01 measured the overshoot as a d15 median of 1,292.
+Decides whether a declared routine stage cools
 sustained growth without touching θ — the untested half of the growth bound.
 
 **Suite 4 — engine work, only if 1–3 still fail.** Fixed-ring addback made
@@ -155,7 +159,7 @@ the envelope widens *which draws count*, it does not drop objectives:
 | Objective leg | Record quantity | Status |
 |---|---|---|
 | Timing | ignition day, onset-peak at confinement (d13–15), `before_share` 0.173 ± band | measured targets |
-| Attack rate | final confirmed T4 = 712 (~19% of 3,711 aboard); implied infections via the conditioned capture | scored on T4 — the serology band [712,960] is `covid.H5`'s admissible_band, held-out-forever and never a selection criterion |
+| Attack rate | the record's final confirmed count = 712 (~19% of 3,711 aboard); implied infections via the conditioned capture | no fit-target id covers the final count yet — the freeze declares it scored directly or folds it into the cross-check; `covid.T4` is the asymptomatic-share diagnostic (320/634), not this target; the serology band [712,960] is `covid.H5`'s admissible_band, held-out-forever and never a selection criterion |
 | Confinement tail | during-quarantine mass [150,350], crew-skewed lag | measured band |
 | Testing observables | T3 = 634/3,063 through day 31; onboard 691/3,894 through Feb 23 | scored + cross-check |
 | Capture | confirmed/infections_reachable ≥ 0.80 class | conditioned basis |
