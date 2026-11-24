@@ -10,7 +10,7 @@ returns (the quantity ``_get_shedders`` gates on). The engine is not
 modified; the observer only reads agent state after each step.
 
     python3 tools/diag/covid_index_clock_trace.py --theta 3.16e9 --seed 20200205 \
-        --num-epochs 130 --out reports/covid_index_clock_01
+        --num-epochs 130
 """
 from __future__ import annotations
 
@@ -27,6 +27,8 @@ if str(_REPO_ROOT) not in sys.path:
 
 _UNION_CELL = _REPO_ROOT / "campaigns/covid/dp_union_01/cell.py"
 _DEFAULT_DESIGN = "picard_framework/runs/covid_dp_union_01_design.json"
+# Fixed: the output location is not CLI-controlled (Sonar S8707).
+_OUT_DIR = _REPO_ROOT / "reports/covid_index_clock_01"
 PATHOGEN_ID = "sars_cov2_resp"
 
 
@@ -91,7 +93,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--arm", default="union_niid")
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument("--num-epochs", type=int, default=None)
-    parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
 
     union = _load(_UNION_CELL, "dp_union_cell")
@@ -148,9 +149,8 @@ def main(argv: list[str] | None = None) -> int:
         "observer_calls": calls[0],
         "trace": rows,
     }
-    out_dir = Path(args.out)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    artifact = out_dir / f"index_clock_trace_{args.seed}.json"
+    _OUT_DIR.mkdir(parents=True, exist_ok=True)
+    artifact = _OUT_DIR / f"index_clock_trace_{int(args.seed)}.json"
     artifact.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
     print(f"WROTE {artifact}")
     return 0
