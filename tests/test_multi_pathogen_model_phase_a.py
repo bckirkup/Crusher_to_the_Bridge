@@ -175,18 +175,33 @@ class TestNorovirusAirborneContracts:
                 UNSOURCED_AIRBORNE_EMISSION_FRACTION,
             ), profile["pathogen_id"]
 
-    @pytest.mark.parametrize("bundle", ["active_profiles.json", "edison_10pathogen_profiles.json"])
-    def test_covid_continuous_airborne_scope_guard(self, bundle: str) -> None:
-        data = json.loads((REPO_ROOT / "data/pathogens" / bundle).read_text())
+    def test_covid_active_arm_carries_the_measured_fine_share(self) -> None:
+        """COVID-EMIT-FINE-01: the active arm's fraction is a measured share.
+
+        Moved from 5e-5 with no ``airborne_emission_mode`` by exactly the two
+        profile keys that entry changes (attributed by reverting each alone).
+        0.85 is Coleman 2021's point inside the frozen tranche-27 interval.
+        """
+        data = json.loads(
+            (REPO_ROOT / "data/pathogens/active_profiles.json").read_text(),
+        )
         profile = next(
             p for p in data["pathogens"] if p["pathogen_id"] == "sars_cov2_resp"
         )
-        key = (
-            "airborne_emission_fraction"
-            if bundle == "active_profiles.json"
-            else "surface_deposition_fraction"
+        assert profile["airborne_emission_mode"] == "continuous_fraction"
+        assert profile["airborne_emission_fraction"] == pytest.approx(0.85)
+        assert 0.76 <= _airborne_emission_fraction(profile) <= 0.92
+        assert "environmental_release_log10_per_day" in profile
+        assert "dose_adjustment" not in profile
+
+    def test_covid_edison_bundle_airborne_scope_guard(self) -> None:
+        data = json.loads(
+            (REPO_ROOT / "data/pathogens/edison_10pathogen_profiles.json").read_text(),
         )
-        assert profile[key] == pytest.approx(5e-5)
+        profile = next(
+            p for p in data["pathogens"] if p["pathogen_id"] == "sars_cov2_resp"
+        )
+        assert profile["surface_deposition_fraction"] == pytest.approx(5e-5)
         assert "airborne_emission_mode" not in profile
 
 
