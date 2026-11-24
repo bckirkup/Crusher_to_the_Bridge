@@ -1,5 +1,5 @@
 {
-  "description": "DP-REPLAY-ENVIRON-01 dedicated-hull protocols for the diamond_princess_2020 pair. Carries the single scheduled confinement order (SOP-017-DEDICATED) with diamond_princess zone IDs and the documented staggered crew-mess reference, and no reactive protocols: the protocol engine may only activate what this file declares. Distinct from protocols_covid_pf_dp.json (the boxed-meal diagnostic counterfactual), which stays untouched.",
+  "description": "DP-REPLAY-ENVIRON-01 dedicated-hull protocols for the diamond_princess_2020 pair. Carries the scheduled confinement order (SOP-017-DEDICATED) and its declared quarter-exempt variant (SOP-017-DEDICATED-QUARTER, DP-UNION-01) with diamond_princess zone IDs and the documented staggered crew-mess reference, and no reactive protocols: the protocol engine may only activate what this file declares. Distinct from protocols_covid_pf_dp.json (the boxed-meal diagnostic counterfactual), which stays untouched.",
   "protocols": [
     {
       "protocol_id": "SOP-017-DEDICATED",
@@ -26,6 +26,31 @@
           "Stores",
           "Laundry"
         ],
+        "crew_meal_service": {
+          "mode": "staggered",
+          "seatings": 4
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-DEDICATED-QUARTER",
+      "name": "Diamond Princess Cabin Quarantine, 25% of Crew Exempt (DP-UNION-01 union arm)",
+      "description": "DP-UNION-01 (docs/covid/covid_dp_union_01_design.md): verbatim SOP-017-DEDICATED with the exempt_work_zones list replaced by exempt_fraction - a sticky exact-count draw of one quarter of crew_general taken once at order activation on a dedicated RNG stream; drawn agents keep working, all others confine. The dedicated-hull re-declaration of the quarter-exempt lever QUAR-TAIL-SEAM-01 measured on boxed_s1s2 (SOP-017-QUARTERMB); the 0.25 headcount is that arm's declared reading of 'skeleton crew', Grade C, not fitted. Crew meals stay this hull's documented staggered four-seating mess; the boxed-meal declaration is not carried across hulls. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general"
+        ],
+        "exempt_fraction": {
+          "crew_general": 0.25
+        },
         "crew_meal_service": {
           "mode": "staggered",
           "seatings": 4
