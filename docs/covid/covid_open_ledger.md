@@ -30,13 +30,18 @@ as the record of what ran at their own `Measured at` SHAs:
 below), `DP-THETA-FIT-01` (3.16e9 / 4.22e9), `COVID-H5-RESCORE-01`,
 `COVID-ONSET-FUNNEL-01`, the GM rescores, and every earlier Θ screen. Every
 airborne-route dose share and every DP/GM outcome at those Θ is likewise
-pre-change. Nothing has been scored under 0.85; the refit is DP-UNION-01
-(`docs/proposals/covid_theta_unification_plan.md`).
+pre-change, as is every graywater-sequencing read mix for this arm (that
+channel takes the same zone pool as its pathogen input). Nothing has been
+scored under 0.85; the refit is DP-UNION-01
+(`docs/proposals/covid_theta_unification_plan.md`, proposed in #1410 and
+not yet on `main`).
 
 **`COVID-THETA-REFIT-01` (ledger entry): every DP/GM replay figure measured
 at the Θ=7.9e6 (or older 1e6) operating point is historical on the Θ
-channel.** The canonical replay operating point is now
-`thetas: [3.162e11]` on `covid_crew_reach_01_design.json` and
+channel.** The canonical replay operating point is
+`thetas: [3.162e11]` — **an old-unit Θ since `COVID-EMIT-FINE-01`
+(above): it is still what the designs pin, and no new-unit operating
+point exists until DP-UNION-01 fits one** — on `covid_crew_reach_01_design.json` and
 `covid_platform_fidelity_02_dp_design.json` (provenance-register Θ row
 updated; merged #1352). Completed campaign specs keep their own θ as the
 record of what ran. Figures not resting on the operating point stand at

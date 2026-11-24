@@ -181,8 +181,10 @@ are not quantities at all (the superseded `innate_nonsusceptible_fraction` and
 emesis titre rows, the campaign-versus-profile divergence, the curve-selection
 defect, the emesis degrees-of-freedom reduction), three declared or
 construction inputs (`base_susceptibility` in both arms, secretor/innate
-nonsusceptibility), two still unsourced (`airborne_emission_fraction` on the
-SARS-CoV-2 arm, `presymptomatic_share_of_presenting`, which is derived from three profile
+nonsusceptibility), two unsourced at the time of this count
+(`airborne_emission_fraction` on the SARS-CoV-2 arm — **since adopted at
+Grade B, `COVID-EMIT-FINE-01`; the figures in this section predate that
+adoption and have not been recounted** — and `presymptomatic_share_of_presenting`, which is derived from three profile
 fields rather than measured), and Edison's proposed influenza
 `surface_decay_per_day` key, which is not in the tree — that proposal predates
 R1 and is quoted in the fraction spelling it was written in, which no longer

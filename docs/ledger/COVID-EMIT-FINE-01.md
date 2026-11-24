@@ -10,8 +10,9 @@ Adoption of the measured airborne fine share as
 "the fine share should be incorporated and not wasted"). Status is
 `open`: the constant and its provenance are landed and the moved test
 expectation is attributed, but no voyage has been scored under the new
-value — that is the DP-UNION-01 leg
-(`docs/proposals/covid_theta_unification_plan.md`), not this one.
+value — that is the DP-UNION-01 leg, not this one. Its plan,
+`docs/proposals/covid_theta_unification_plan.md`, is not on `main` at
+this entry's commit; it is proposed in #1410.
 
 ## What changed
 
@@ -63,8 +64,13 @@ does not support that. Read from code at `220e6401`:
   `orchestrator_epoch._airborne_emission_fraction` →
   `_accumulate_pathogen_zone_mass`: the per-pathogen **zone airborne
   pool** deposit `sv × fraction × confinement factor`. That pool, and
-  everything it feeds (room-air inhalation, pathogen pool transport), is
-  what rises ×1.7e4.
+  everything that reads it, is what rises ×1.7e4: room-air inhalation,
+  pathogen pool transport, and one **observation** channel — graywater
+  sequencing takes the per-pathogen zone mass as its pathogen input
+  (`orchestrator_epoch` → `build_wastewater_pathogen_mass_by_id` →
+  `wastewater_seq.sample_all_zones`), so the simulated read mix for
+  `Pathogen_sars_cov2_resp` moves with it. Wastewater-sequencing figures
+  for this arm measured before this change are pre-change too.
 - The droplet / near-field route uses the uniform engine constant
   `DROPLET_AEROSOL_FRACTION = 0.05`
   (`TransmissionCore._droplet_emission_fraction`), which explicitly does
