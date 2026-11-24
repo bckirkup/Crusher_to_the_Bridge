@@ -81,10 +81,17 @@ with an announced ETA -> stop and report.
   arm resolution, pool membership and gate, selector independence,
   carrier-only unit staying alive, donation/deposit witnesses,
   default-path inertness, spec/CLI/manifest plumbing).
-- [ ] Local smoke (arm R+D): resolved stamps; partition closes;
-  carrier activity and provenance exercised.
-- [ ] Baseline-identity gate: both selectors at defaults reproduce the
-  pre-change tree on one seed on every shared key.
+- [x] Local smoke (arm R+D): seed 8000, 12 and 48 epochs — all resolved
+  stamps correct, partition closes at 3.5e-18 / 6.7e-16 rel, zero
+  provenance violations, 48-row epoch ledger. carrier_activity still
+  zero at 48 epochs (no non-shedder passed the 1.0 GEC pickup gate on
+  hand load yet — mechanism exercised by unit tests, gate exposure
+  needs the full 288 epochs).
+- [x] Baseline-identity gate: seed 8000 / 12 epochs / item_instances +
+  discrete + S+R stack at selector defaults vs main worktree
+  (220e6401) — all 46 shared summary keys and all 12 epoch-ledger rows
+  identical; only additive keys differ (resolved stamps,
+  carrier_activity, carrier_provenance_violations).
 - [ ] Jobdef registered against pinned image digest (two-layer build:
   root Dockerfile as BASE_IMAGE + `deploy/aws/Dockerfile.campaign`);
   digest pinned in campaign.json.
