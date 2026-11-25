@@ -5,7 +5,7 @@ no criterion may be altered after the surface is seen.
 
 ## Scope
 
-Checkpoint C of the post-behavior theta protocol (THETA_AFTER_BEHAVIOR):
+Checkpoint C of the external Kosmos proposal (`THETA_AFTER_BEHAVIOR`):
 a log-spaced theta grid on matched seeds over the DP-REPLAY-ENVIRON-01
 environs, at the 120-epoch window DP-REPLAY-DOSE-DIAG-01 measured.
 
@@ -62,7 +62,7 @@ declaration, not a defect.
 
 **Audit invariants (deviation = defect, not failed criterion):**
 
-- index onset clock: `seed_patch` NIID correction must resolve
+- index onset clock: `seed_patch` [NIID correction](../ledger/DP-INDEX-CLOCK-EVIDENCE-01.md) must resolve
   (onset_day 3.0, infection_age_days 2.8) on `replay_niid` cells;
 - `close_zones` protocol firings flag a FAILED COMPARISON cell
   (quarantine zone closure changes the kernel being measured);

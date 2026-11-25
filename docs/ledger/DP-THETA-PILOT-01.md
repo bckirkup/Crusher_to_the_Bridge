@@ -7,7 +7,7 @@
 
 ## Scope
 
-Checkpoint C of the post-behavior theta protocol (THETA_AFTER_BEHAVIOR),
+Checkpoint C of the external Kosmos proposal (`THETA_AFTER_BEHAVIOR`),
 declared on the DP-REPLAY-ENVIRON-01 environs and anchored on the
 DP-REPLAY-DOSE-DIAG-01 measured window. Design doc:
 `docs/covid/covid_dp_theta_pilot_01_design.md`; design file:

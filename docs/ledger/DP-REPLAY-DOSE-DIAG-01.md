@@ -8,7 +8,7 @@
 
 ## Scope
 
-Checkpoint B of the post-behavior theta protocol (THETA_AFTER_BEHAVIOR):
+Checkpoint B of the external Kosmos proposal (`THETA_AFTER_BEHAVIOR`):
 the four prespecified, non-outcome-selected movement seeds of
 `covid_dp_replay_01` arm `replay_niid` (20200205–20200208), the first
 120 hours on the dedicated `diamond_princess` hull, one imported source,

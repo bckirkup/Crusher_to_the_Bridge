@@ -9,9 +9,13 @@
 
 Source spec: Kosmos `DP_BEHAVIOR_SPEC.md` (third-party proposal; adopted
 where the engine can express it, adapted where it cannot) plus
-`THETA_AFTER_BEHAVIOR.md` (NIID index-clock correction) and
+`THETA_AFTER_BEHAVIOR.md` (external Kosmos proposal) and
 `FINAL_REFERENCE_RECONCILIATION.md` / `ENGINEERING_HANDOFF.md` /
 `dp_movement_ref/`.
+
+The primary source for the 23 January clock is NIID's *Field Briefing*
+corrigendum. The Hong Kong clinical case history agrees. Yamagishi et al.
+report 19 January. [Index-clock evidence](../ledger/DP-INDEX-CLOCK-EVIDENCE-01.md)
 
 ## What runs
 

@@ -5,6 +5,10 @@
 > (3.16e9); the other three have insufficient class mass. The pilot and
 > canary sections below are the earlier partial reads.
 
+The [index-clock evidence audit](../ledger/DP-INDEX-CLOCK-EVIDENCE-01.md)
+supports the 23 January clock used throughout this grid. DP-UNION-CLOCK-01
+stopped before submission.
+
 **Measured at:** c7f7f927 (image
 `picard-campaign@sha256:0d01dae0f057770933b610346604875f05bf0fcd62b6f06145e5c19efeb049aa`,
 job definition `picard-covid-dp-union-01` revisions 1–14). Readout code and

@@ -42,6 +42,8 @@ to them as ledger `<ID>`.
 
 New ledger entries are registered here as they land; the filename remains the stable identifier.
 
+- [DP-INDEX-CLOCK-EVIDENCE-01](DP-INDEX-CLOCK-EVIDENCE-01.md) — NIID corrected index cough onset to 23 January. The proposed DP-UNION-CLOCK-01 canary stopped before submission.
+
 - [COVID-SHED-INTERVALS-01](COVID-SHED-INTERVALS-01.md) — measured literature digitization: five onset-axis shedding-curve segment envelopes, with endpoint-specific grades, where-read origins, wide uncertainty intervals, and no profile or simulation change.
 - [COVID-SHED-EVIDENCE-01](COVID-SHED-EVIDENCE-01.md) — open, partial methodology: distinguishes viable-virus-weighted emission from RNA and transmission-derived infectiousness, addresses downstream nonlinear dose-response, and records re-denomination implications. No quantitative target intervals or curve change.
 
