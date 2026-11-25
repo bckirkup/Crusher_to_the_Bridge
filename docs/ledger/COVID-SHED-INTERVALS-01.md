@@ -125,6 +125,6 @@ and not a licence to blend unlike endpoints.
 - Hakki's hierarchical credible intervals are very wide; the table exposes
   them but uses central-estimate envelopes for cross-study comparison. This is
   why the rise/decay rows remain Grade C rather than precise measurements.
-- Figure digitization was limited to Killingley Figure 2c peak timing; no
-  curve was digitized or reconstructed. No simulation, fitting or
-  implementation decision was run.
+- Figure digitization was limited to Killingley Figure 2c peak timing and
+  Figure 2f FFA-positive duration extrema; no curve was digitized or
+  reconstructed. No simulation, fitting or implementation decision was run.
