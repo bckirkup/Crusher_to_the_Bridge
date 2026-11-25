@@ -12,7 +12,7 @@ supported by the literature the profile cites or should cite? Audit only:
 
 **Verdict: the curve is unsupported by its own citation (He et al. 2020) in
 its presymptomatic and onset-to-peak segments, contested in its peak position,
-and supported only in its total period. This is a structural finding that
+and supported only in its infectious period. This is a structural finding that
 affects every COVID arm**, because every arm emits through this one array.
 
 | Segment | Verdict |
@@ -22,7 +22,8 @@ affects every COVID arm**, because every arm emits through this one array.
 | B. Onset-to-peak rise (10⁻⁶ at onset, ×100/day) | **unsupported** |
 | C. Peak position (onset +4 d) | **partially supported** (viral-load evidence for, the cited transmission evidence against) |
 | D. Post-peak decay | **partially supported** (direction yes, rate no) |
-| E. Total period (15 d; ~5 d effective) | **supported** |
+| E1. RNA-positive duration (15 d) | **partially supported** (0.5 d below the pooled interval [15.5, 18.6]) |
+| E2. Infectious period (~5 d effective, ~nil after day 9) | **supported** (consistent; endpoints differ, not like-for-like) |
 
 Settled input, not re-derived: `COVID-INDEX-CLOCK-01` (PR #1421, merged as
 `e3817535`) — the clock is honest; the presymptomatic
@@ -67,7 +68,7 @@ was seen only in the abstract or summary.
 | # | Quantity (unit) | Authored / assembled | Literature | Declared interval | Grade · Origin |
 |---|---|---|---|---|---|
 | A1 | Start of infectiousness (d before onset) | 2.0, citing "approximately 2.3 d" | He 2020 **corrected**: 12.3 (95% CI 5.9–17.0); the 2.3 (0.8–3.0) figure is the pre-correction value | not declarable as a start time; use A2 | C (fitted to 77 pairs) · R, Author Correction |
-| A2 | Share of transmission earlier than 3 d before onset | 0 (gated out) | He 2020 corrected: 9%; 1% before −5 d; <0.1% before −7 d | [0.01, 0.09] lost to a 2–3 d window | C · R |
+| A2 | Share of transmission earlier than the window (fraction) | 0 before −2 d (gated out) | He 2020 corrected: 0.09 before −3 d; 0.01 before −5 d; <0.001 before −7 d. The −3 to −2 d share is `?nr` | **≥ 0.09** lost to a 2 d window (lower bound only) | C · R |
 | A3 | Presymptomatic share (fraction of total) | **1.2e-6** of emission | He 2020: 0.44 (0.30–0.57) of transmission; 0.37–0.48 in sensitivity runs. Ferretti 2020: 0.41 (0.31–0.50) strictly presymptomatic, plus 0.35 (0.26–0.45) on onset day or the next. Casey-Bryars 2021: 0.459 (0.429–0.490) to 0.691 (0.662–0.719) across contexts | **[0.30, 0.69]** of transmission | He C · R; Ferretti C · Ab (preprint); Casey-Bryars C · Sec |
 | A4 | Hosts shedding infectious virus before onset (fraction of cases) | 1.0, at 10⁻⁶ of peak | Hakki 2022: 7/35 (0.20) culture-positive, 24/38 (0.63) PCR-positive before onset | — (a case fraction, not an emission share) | B · Ab |
 | B1 | Viral load on day of onset relative to peak (log10) | **−6** | He 2020: throat-swab load highest at onset, then monotonic decline. Wölfel 2020 (n=9): earliest swabs day 1; every swab days 1–5 positive, mean 6.76×10⁵ against a maximum 7.11×10⁸ copies/swab | no number retrieved; qualitatively within ~3 log10 of peak | B · R (He, Wölfel) |
@@ -126,8 +127,10 @@ bounds it directly. Nothing retrieved bounds it anywhere near 1.2e-6.
 ## 4. Per-segment reasoning
 
 - **A. Presymptomatic window.** A 2-day window is a defensible truncation
-  (it drops at most ~9% of transmission by He's corrected fit, and Hakki
-  supports a short window), but its stated source figure is withdrawn. The
+  (by He's corrected fit it drops at least 9% of transmission — the share
+  before −3 d; the −3 to −2 d share was not retrieved, so the loss is not
+  bounded above — and Hakki supports a short window), but its stated source
+  figure is withdrawn. The
   level is not sourced anywhere: the window re-uses curve entry 0, so two
   presymptomatic days carry 1.2e-6 of emission against a declared
   [0.30, 0.69] of transmission.
@@ -145,9 +148,13 @@ bounds it directly. Nothing retrieved bounds it anywhere near 1.2e-6.
   is declared as an RNA concentration, so on its own terms the tail is too
   steep, while as an infectious-virus curve it is within what culture data
   allow.
-- **E. Total period.** 15 d against a pooled 17.0 d (15.5–18.6) of RNA
-  positivity; effective emission of ~5 d against a measured median 5 d
-  infectious window.
+- **E. Total period.** E1: the nominal 15 d sits 2 d below the pooled mean
+  RNA-positive duration of 17.0 d and 0.5 d below its interval (15.5–18.6)
+  — close, but outside. E2: emission within 2 log10 of peak lasts 5 d and
+  2.8e-6 of emission falls after day 9, against a measured median 5 d
+  culture-positive window and no live virus beyond day ~9–10. These are
+  different endpoints (relative emission against culture positivity), so
+  E2 is consistency, not a like-for-like test.
 
 ## 5. Where the shape came from (measured from git; intent is inferred)
 
