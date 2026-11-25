@@ -24,8 +24,8 @@ affects every COVID arm**, because every arm emits through this one array.
 | D. Post-peak decay | **partially supported** (direction yes, rate no) |
 | E. Total period (15 d; ~5 d effective) | **supported** |
 
-Settled input, not re-derived: `COVID-INDEX-CLOCK-01` (PR #1421, open at the
-time of writing, not yet on `main`) — the clock is honest; the presymptomatic
+Settled input, not re-derived: `COVID-INDEX-CLOCK-01` (PR #1421, merged as
+`e3817535`) — the clock is honest; the presymptomatic
 window emits `shedding_curve_log10[0]`.
 
 ## 1. Authored and assembled curve (measured)
