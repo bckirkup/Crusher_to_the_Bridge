@@ -114,9 +114,10 @@ Because symptom onset is reported only as **2–4 days post-inoculation**, the
 library provides early/central/late axis-shift variants rather than pretending
 one participant-aligned onset axis exists. The `-5` log10 relative starting
 floor is a declared assay-floor sensitivity, not a measured emission floor.
-The piecewise tail offset explicitly borrows Hakki's infectious-virus decline
-(−1.13 log10/day) over about six days from peak to the central latest-viable-detection endpoint,
-not the shorter median detection duration; it is labelled as cross-study
+The piecewise tail endpoints use Killingley's latest viable-virus detection
+(throat day 11, nose day 12 post-inoculation). Their offsets explicitly borrow
+Hakki's infectious-virus decline (−1.13 log10/day) from peak to that upper
+tail, not the shorter median detection duration; this is labelled as cross-study
 culture-proxy inference, not a Killingley measured slope.
 
 Wölfel remains a duration/tail check only: peak throat RNA on illness day 4,
