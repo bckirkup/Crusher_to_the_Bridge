@@ -184,8 +184,10 @@ event-moment dose without adding exactly the mechanism assumptions under test.
    distance ring or a clock for the onset of far-field airborne exposure.
 4. **A minutes-to-hours aerosol tail exists.** Human GII RNA persisted in
    generated aerosols for hours in Rupprom, and MNV infectivity persisted for
-   hours in Meister and the small-chamber studies. Booth's non-detection of
-   viable FCV in air does not negate these rows because it is a surrogate,
+   hours in Meister. Purhonen is not counted toward persistence because it
+   measured infectious surrogate delivery during continuing nebulizer exposure,
+   not survival after the source stopped. Booth's non-detection of viable FCV
+   in air does not negate the persistence rows because it is a surrogate,
    sampler- and assay-limited non-detection. The tail's existence is licensed;
    its rate is not.
 
