@@ -175,11 +175,13 @@ event-moment dose without adding exactly the mechanism assumptions under test.
    concentrated. A structure that instantly spreads all event mass uniformly
    over a large venue is therefore the wrong form.
 3. **Two population classes at the event moment.** The coarse structure the
-   evidence supports is: (i) people and surfaces inside the event-local
-   splash/near-air footprint during the event and immediate response interval,
-   and (ii) everyone else exposed later through the diluted room air and the
-   contaminated environment. The measured record does not support a third,
-   finely resolved distance ring.
+   evidence supports is an event-local splash/near-air footprint as an
+   additional exposure class, not a boundary at which airborne exposure is
+   known to begin. People and surfaces inside the footprint can receive direct
+   deposition plus whatever airborne concentration exists there; people outside
+   it can only be assigned room-air and environmental exposure with timing
+   unspecified. The measured record does not support a third, finely resolved
+   distance ring or a clock for the onset of far-field airborne exposure.
 4. **A minutes-to-hours aerosol tail exists.** Human GII RNA persisted in
    generated aerosols for hours in Rupprom, and MNV infectivity persisted for
    hours in Meister and the small-chamber studies. Booth's non-detection of
