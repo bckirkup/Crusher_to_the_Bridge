@@ -682,6 +682,18 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   [−2, +1] d. Every COVID Θ, founder yield and onset-timing figure is
   conditional on this curve. Open decision: whether to re-author the curve
   on the onset axis, and against which evidence class.
+- **`COVID-SHED-SHAPELIB-01` — the implementation-ready literature shape
+  library is measured (`docs/ledger/COVID-SHED-SHAPELIB-01.md`,
+  machine-readable `docs/covid/covid_shed_shape_library_01.json`).** Zhou
+  time-resolved emitted-RNA families are recovered by validated figure
+  digitization, Hakki onset-aligned PFU families are computed from the
+  authors' machine-readable trajectories, Killingley/Wölfel remain
+  culture-proxy support, Jones/Kissler remain RNA sensitivity evidence, and
+  transmission-derived profiles are validation targets only. Documentation
+  input library only; no active profile, engine, simulation or campaign
+  change. Blocking owner decision before implementation: choose Zhou direct
+  emitted RNA with explicit zero-inflated heterogeneity, Hakki/Killingley
+  culture-proxy kinetics, or a declared hybrid proxy-transfer rule.
 - **`DP-PARTICIPATION-01` closed before any cell — Suite 2 needs
   re-scoping (`docs/ledger/DP-PARTICIPATION-01.md`).** Per-index day-0
   itinerary pinning is not expressible without engine work. A pure readout

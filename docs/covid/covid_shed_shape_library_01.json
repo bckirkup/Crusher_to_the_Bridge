@@ -1,0 +1,3019 @@
+{
+  "library_id": "COVID-SHED-SHAPELIB-01",
+  "status": "documentation_input_library_not_engine_active",
+  "created_date": "2026-11-25",
+  "target_quantity": "viable-virus-weighted emitted material upstream of contact, exposure, recipient susceptibility, isolation, and nonlinear infection probability",
+  "non_goals": [
+    "not read by active_profiles.json or engine code",
+    "not fitted or selected against Diamond Princess outcomes",
+    "no averaging or blending of unlike endpoints",
+    "transmission-derived profiles are validation targets only"
+  ],
+  "axis_conventions": {
+    "zhou_first_any_symptom": "integer days relative to the first nonzero self-reported symptom-score cell digitized from Zhou Figure 2; sampling-time alignment uncertainty approximately \u00b11 day",
+    "hakki_canonical_symptom_onset": "integer days relative to self-reported canonical symptom onset; day is day+1-contact_onset because the authors' R analysis uses 1-based which() indices while the public CSV day column is zero-based",
+    "jones_symptom_onset": "days relative to recalled symptom onset; hospitalized-case onset alignment, peak reported 1-3 days before onset",
+    "kissler_first_detectability": "days relative to first PCR detectability, not symptom onset; not a candidate emission source term without an owner axis decision"
+  },
+  "shape_classes": {
+    "direct_emitted_material": {
+      "class_role": "candidate source-term evidence; closest retrieved class to emission, but RNA emission is not viable-virus-weighted emission",
+      "families": [
+        {
+          "family_id": "zhou2023_mask_rna_onset_aligned_zero_inflated",
+          "description": "Daily exhaled-mask RNA emission measurements from 17 onset-aligned symptomatic challenge participants, with detection probability and conditional positive magnitude kept separate from normalized mean-shape variants.",
+          "evidence_grade": "B for emitted RNA in analogous human-challenge setting; C for transfer to viable-virus-weighted emission",
+          "measured_inferred_hypothesis": {
+            "measured": [
+              "daily mask E-gene RNA sample positivity and log10 copies per sample as plotted",
+              "first-nonzero symptom-score cells"
+            ],
+            "inferred": [
+              "digitized numeric heights",
+              "onset alignment within \u00b11 day",
+              "linear-copy conversion and normalization"
+            ],
+            "hypothesis": [
+              "use as a viable-emission source shape"
+            ]
+          },
+          "origin": "F2\u00b7dig for curves and symptom cells; R/Me/Table S2 for validation counts and AUC shares; Consensus full text plus publisher figure and supplementary appendix",
+          "digitization_validation": "Automated digitization recovered exactly 109 positive mask samples and 63 positive air samples, matching Results. Using the digitized symptom cells, mean per-participant pre-first-symptom log-AUC shares reproduce 9.57% mask (paper 10%, SD 26) with 4 positive participants and 8.52% air (paper 9%, SD 26) with 2 positive participants.",
+          "normalization": "digitized log10 values are exponentiated to linear E-gene copies/sample before normalization; normalized shapes integrate to 1 over the tabulated support. zeros are plotted nondetections, not proof of zero emission.",
+          "day_resolution_and_interpolation": "integer daily step function; no interpolation across missing days; outside [-5,13] deterministic shape mass is zero by truncation, not measurement",
+          "presymptomatic_behavior": "independent measured negative-onset rows; not clamped to onset day. Participant 18 never reported symptoms and is excluded from onset-aligned means but retained as a heterogeneity caveat.",
+          "peak_position": {
+            "equal_weight_normalized_shape_day": 3,
+            "mass_weighted_cohort_mean_day": 10,
+            "interpretation": "mass-weighted mean is dominated by sparse high-emission bursts and is not a typical-host peak"
+          },
+          "rise_decay_duration": "multimodal and zero-inflated; no single smooth rise/decay is measured. detection probability and conditional positive log10 magnitude are the implementation-facing representation.",
+          "host_heterogeneity": "severe overdispersion: two participants produced 86% of airborne viral RNA on three timepoints; nasal swab correlation does not determine individual emission; participant 7 emitted large quantities despite low/late symptoms.",
+          "variants": {
+            "equal_weight_central": "mean of per-participant normalized linear shapes, renormalized; avoids letting two high emitters define the entire shape",
+            "mass_weighted_high_emitter_sensitive": "cohort mean linear copies normalized; exposes the high-emission burst tail",
+            "zero_inflated_daily_model": "use detection_probability for occurrence and mean_log10_positive for positive magnitude; amplitude normalization remains an owner implementation decision"
+          },
+          "daily": [
+            {
+              "day": -5,
+              "n_observed_cases": 2,
+              "n_positive": 1,
+              "detection_probability": 0.5,
+              "mean_log10_positive": 2.09,
+              "positive_participants": [
+                "7"
+              ],
+              "normalized_mean_linear_shape": 7.981e-05,
+              "equal_weight_normalized_shape": 3.311e-05
+            },
+            {
+              "day": -4,
+              "n_observed_cases": 5,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_positive": null,
+              "positive_participants": [],
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0
+            },
+            {
+              "day": -3,
+              "n_observed_cases": 10,
+              "n_positive": 1,
+              "detection_probability": 0.1,
+              "mean_log10_positive": 2.56,
+              "positive_participants": [
+                "7"
+              ],
+              "normalized_mean_linear_shape": 4.711e-05,
+              "equal_weight_normalized_shape": 1.955e-05
+            },
+            {
+              "day": -2,
+              "n_observed_cases": 10,
+              "n_positive": 2,
+              "detection_probability": 0.2,
+              "mean_log10_positive": 3.78,
+              "positive_participants": [
+                "11",
+                "7"
+              ],
+              "normalized_mean_linear_shape": 0.06503861,
+              "equal_weight_normalized_shape": 0.02706325
+            },
+            {
+              "day": -1,
+              "n_observed_cases": 17,
+              "n_positive": 3,
+              "detection_probability": 0.1765,
+              "mean_log10_positive": 3.397,
+              "positive_participants": [
+                "11",
+                "3",
+                "7"
+              ],
+              "normalized_mean_linear_shape": 0.04295077,
+              "equal_weight_normalized_shape": 0.02047199
+            },
+            {
+              "day": 0,
+              "n_observed_cases": 17,
+              "n_positive": 7,
+              "detection_probability": 0.4118,
+              "mean_log10_positive": 3.396,
+              "positive_participants": [
+                "10",
+                "11",
+                "14",
+                "15",
+                "4",
+                "7",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.05281176,
+              "equal_weight_normalized_shape": 0.07230096
+            },
+            {
+              "day": 1,
+              "n_observed_cases": 17,
+              "n_positive": 7,
+              "detection_probability": 0.4118,
+              "mean_log10_positive": 3.207,
+              "positive_participants": [
+                "10",
+                "11",
+                "14",
+                "15",
+                "5",
+                "7",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.01162089,
+              "equal_weight_normalized_shape": 0.06715947
+            },
+            {
+              "day": 2,
+              "n_observed_cases": 17,
+              "n_positive": 7,
+              "detection_probability": 0.4118,
+              "mean_log10_positive": 3.466,
+              "positive_participants": [
+                "10",
+                "11",
+                "13",
+                "15",
+                "5",
+                "6",
+                "7"
+              ],
+              "normalized_mean_linear_shape": 0.00819217,
+              "equal_weight_normalized_shape": 0.09206599
+            },
+            {
+              "day": 3,
+              "n_observed_cases": 17,
+              "n_positive": 11,
+              "detection_probability": 0.6471,
+              "mean_log10_positive": 3.33,
+              "positive_participants": [
+                "10",
+                "11",
+                "14",
+                "15",
+                "16",
+                "17",
+                "2",
+                "5",
+                "6",
+                "7",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.03444925,
+              "equal_weight_normalized_shape": 0.13600751
+            },
+            {
+              "day": 4,
+              "n_observed_cases": 17,
+              "n_positive": 10,
+              "detection_probability": 0.5882,
+              "mean_log10_positive": 3.106,
+              "positive_participants": [
+                "10",
+                "11",
+                "16",
+                "17",
+                "3",
+                "4",
+                "5",
+                "6",
+                "8",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.00321253,
+              "equal_weight_normalized_shape": 0.07645633
+            },
+            {
+              "day": 5,
+              "n_observed_cases": 17,
+              "n_positive": 9,
+              "detection_probability": 0.5294,
+              "mean_log10_positive": 3.088,
+              "positive_participants": [
+                "1",
+                "11",
+                "14",
+                "17",
+                "4",
+                "6",
+                "7",
+                "8",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.10697981,
+              "equal_weight_normalized_shape": 0.09299307
+            },
+            {
+              "day": 6,
+              "n_observed_cases": 16,
+              "n_positive": 9,
+              "detection_probability": 0.5625,
+              "mean_log10_positive": 3.036,
+              "positive_participants": [
+                "1",
+                "10",
+                "11",
+                "16",
+                "2",
+                "3",
+                "4",
+                "8",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.00880879,
+              "equal_weight_normalized_shape": 0.0332922
+            },
+            {
+              "day": 7,
+              "n_observed_cases": 16,
+              "n_positive": 5,
+              "detection_probability": 0.3125,
+              "mean_log10_positive": 3.566,
+              "positive_participants": [
+                "1",
+                "10",
+                "16",
+                "3",
+                "8"
+              ],
+              "normalized_mean_linear_shape": 0.02755054,
+              "equal_weight_normalized_shape": 0.07935576
+            },
+            {
+              "day": 8,
+              "n_observed_cases": 16,
+              "n_positive": 9,
+              "detection_probability": 0.5625,
+              "mean_log10_positive": 3.034,
+              "positive_participants": [
+                "1",
+                "14",
+                "15",
+                "16",
+                "2",
+                "3",
+                "5",
+                "6",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.00958554,
+              "equal_weight_normalized_shape": 0.10589299
+            },
+            {
+              "day": 9,
+              "n_observed_cases": 16,
+              "n_positive": 6,
+              "detection_probability": 0.375,
+              "mean_log10_positive": 1.7,
+              "positive_participants": [
+                "1",
+                "12",
+                "13",
+                "16",
+                "3",
+                "4"
+              ],
+              "normalized_mean_linear_shape": 7.509e-05,
+              "equal_weight_normalized_shape": 0.06522157
+            },
+            {
+              "day": 10,
+              "n_observed_cases": 15,
+              "n_positive": 8,
+              "detection_probability": 0.5333,
+              "mean_log10_positive": 2.566,
+              "positive_participants": [
+                "1",
+                "13",
+                "16",
+                "4",
+                "5",
+                "6",
+                "8",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.62679876,
+              "equal_weight_normalized_shape": 0.10412999
+            },
+            {
+              "day": 11,
+              "n_observed_cases": 12,
+              "n_positive": 4,
+              "detection_probability": 0.3333,
+              "mean_log10_positive": 2.35,
+              "positive_participants": [
+                "1",
+                "16",
+                "2",
+                "6"
+              ],
+              "normalized_mean_linear_shape": 0.00013269,
+              "equal_weight_normalized_shape": 0.00212626
+            },
+            {
+              "day": 12,
+              "n_observed_cases": 7,
+              "n_positive": 2,
+              "detection_probability": 0.2857,
+              "mean_log10_positive": 2.775,
+              "positive_participants": [
+                "16",
+                "2"
+              ],
+              "normalized_mean_linear_shape": 0.00115357,
+              "equal_weight_normalized_shape": 0.02439937
+            },
+            {
+              "day": 13,
+              "n_observed_cases": 7,
+              "n_positive": 2,
+              "detection_probability": 0.2857,
+              "mean_log10_positive": 2.645,
+              "positive_participants": [
+                "2",
+                "5"
+              ],
+              "normalized_mean_linear_shape": 0.00051232,
+              "equal_weight_normalized_shape": 0.00101064
+            }
+          ],
+          "axis_definition": "Days relative to the first nonzero self-reported symptom-score cell digitized from Zhou Figure 2; participant 18 has no onset axis and is excluded from onset-aligned means.",
+          "central_and_uncertainty_variants": {
+            "central": "equal_weight_central daily normalized shape plus zero_inflated_daily_model occurrence/magnitude table",
+            "high_emitter_sensitive_uncertainty": "mass_weighted_high_emitter_sensitive normalized shape",
+            "heterogeneity_references": "digitized individual trajectories for participants 1, 5, 7, 9 and 18",
+            "axis_uncertainty_days": 1,
+            "digitization_uncertainty": "not numerically quantified bar-by-bar; validated by exact endpoint positive-count recovery and presymptomatic log-AUC reproduction"
+          },
+          "duration_tail": "Observed onset-aligned support is tabulated through day 13. Day 14 has no aligned observations because late-onset participants leave the support; this is censoring, not measured zero. Episodic positive emission persists through day 13 in the digitized cohort."
+        },
+        {
+          "family_id": "zhou2023_air_rna_onset_aligned_zero_inflated",
+          "description": "Daily Coriolis room-air RNA emission measurements from the same onset-aligned participants; burst-sensitive alternate direct-emission family, not interchangeable with mask capture.",
+          "evidence_grade": "B for emitted RNA in analogous human-challenge setting; C for transfer to viable-virus-weighted emission",
+          "measured_inferred_hypothesis": {
+            "measured": [
+              "daily air E-gene RNA sample positivity and log10 copies per sample as plotted"
+            ],
+            "inferred": [
+              "digitized numeric heights",
+              "onset alignment",
+              "linear-copy conversion and normalization"
+            ],
+            "hypothesis": [
+              "use as a viable-emission source shape"
+            ]
+          },
+          "origin": "F2\u00b7dig; R/Me/Table S2 for validation counts and AUC shares",
+          "digitization_validation": "same positive-count and presymptomatic-share validation as above; air sample method was 300 L/min for 10 min about 1 m from the participant",
+          "normalization": "same as mask family",
+          "day_resolution_and_interpolation": "integer daily step function; no interpolation across missing days; outside [-5,13] deterministic shape mass is zero by truncation, not measurement",
+          "presymptomatic_behavior": "independent measured negative-onset rows; first nonzero mass appears at day -2 in the onset-aligned symptomatic set",
+          "peak_position": {
+            "equal_weight_normalized_shape_day": 9,
+            "mass_weighted_cohort_mean_day": 3,
+            "interpretation": "the two summaries expose asynchronous burst timing; neither should be read as a smooth universal host peak"
+          },
+          "rise_decay_duration": "multimodal and episodic through day 13; no monotonic decay fitted",
+          "host_heterogeneity": "two participants produced 86% of airborne viral RNA on three individual timepoints",
+          "variants": {
+            "equal_weight_central": "mean of per-participant normalized linear shapes, renormalized",
+            "mass_weighted_high_emitter_sensitive": "cohort mean linear copies normalized",
+            "zero_inflated_daily_model": "use detection_probability for occurrence and mean_log10_positive for positive magnitude"
+          },
+          "daily": [
+            {
+              "day": -5,
+              "n_observed_cases": 2,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_positive": null,
+              "positive_participants": [],
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0
+            },
+            {
+              "day": -4,
+              "n_observed_cases": 5,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_positive": null,
+              "positive_participants": [],
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0
+            },
+            {
+              "day": -3,
+              "n_observed_cases": 10,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_positive": null,
+              "positive_participants": [],
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0
+            },
+            {
+              "day": -2,
+              "n_observed_cases": 10,
+              "n_positive": 1,
+              "detection_probability": 0.1,
+              "mean_log10_positive": 4.07,
+              "positive_participants": [
+                "7"
+              ],
+              "normalized_mean_linear_shape": 0.01843832,
+              "equal_weight_normalized_shape": 0.03661116
+            },
+            {
+              "day": -1,
+              "n_observed_cases": 17,
+              "n_positive": 1,
+              "detection_probability": 0.0588,
+              "mean_log10_positive": 2.42,
+              "positive_participants": [
+                "7"
+              ],
+              "normalized_mean_linear_shape": 0.00024281,
+              "equal_weight_normalized_shape": 0.00049177
+            },
+            {
+              "day": 0,
+              "n_observed_cases": 17,
+              "n_positive": 1,
+              "detection_probability": 0.0588,
+              "mean_log10_positive": 3.51,
+              "positive_participants": [
+                "7"
+              ],
+              "normalized_mean_linear_shape": 0.00298726,
+              "equal_weight_normalized_shape": 0.00605013
+            },
+            {
+              "day": 1,
+              "n_observed_cases": 17,
+              "n_positive": 2,
+              "detection_probability": 0.1176,
+              "mean_log10_positive": 2.73,
+              "positive_participants": [
+                "11",
+                "14"
+              ],
+              "normalized_mean_linear_shape": 0.00269626,
+              "equal_weight_normalized_shape": 0.02075554
+            },
+            {
+              "day": 2,
+              "n_observed_cases": 17,
+              "n_positive": 4,
+              "detection_probability": 0.2353,
+              "mean_log10_positive": 3.468,
+              "positive_participants": [
+                "15",
+                "4",
+                "7",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.02468813,
+              "equal_weight_normalized_shape": 0.08611161
+            },
+            {
+              "day": 3,
+              "n_observed_cases": 17,
+              "n_positive": 5,
+              "detection_probability": 0.2941,
+              "mean_log10_positive": 4.16,
+              "positive_participants": [
+                "14",
+                "2",
+                "5",
+                "6",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.64898407,
+              "equal_weight_normalized_shape": 0.13120424
+            },
+            {
+              "day": 4,
+              "n_observed_cases": 17,
+              "n_positive": 5,
+              "detection_probability": 0.2941,
+              "mean_log10_positive": 3.7,
+              "positive_participants": [
+                "2",
+                "3",
+                "5",
+                "6",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.1155807,
+              "equal_weight_normalized_shape": 0.07323174
+            },
+            {
+              "day": 5,
+              "n_observed_cases": 17,
+              "n_positive": 7,
+              "detection_probability": 0.4118,
+              "mean_log10_positive": 3.157,
+              "positive_participants": [
+                "13",
+                "2",
+                "4",
+                "5",
+                "6",
+                "7",
+                "9"
+              ],
+              "normalized_mean_linear_shape": 0.02755073,
+              "equal_weight_normalized_shape": 0.09178095
+            },
+            {
+              "day": 6,
+              "n_observed_cases": 16,
+              "n_positive": 4,
+              "detection_probability": 0.25,
+              "mean_log10_positive": 3.22,
+              "positive_participants": [
+                "13",
+                "2",
+                "3",
+                "5"
+              ],
+              "normalized_mean_linear_shape": 0.02953055,
+              "equal_weight_normalized_shape": 0.1047591
+            },
+            {
+              "day": 7,
+              "n_observed_cases": 16,
+              "n_positive": 6,
+              "detection_probability": 0.375,
+              "mean_log10_positive": 3.14,
+              "positive_participants": [
+                "1",
+                "14",
+                "2",
+                "3",
+                "5",
+                "8"
+              ],
+              "normalized_mean_linear_shape": 0.01943767,
+              "equal_weight_normalized_shape": 0.11245607
+            },
+            {
+              "day": 8,
+              "n_observed_cases": 16,
+              "n_positive": 5,
+              "detection_probability": 0.3125,
+              "mean_log10_positive": 3.19,
+              "positive_participants": [
+                "1",
+                "10",
+                "2",
+                "3",
+                "5"
+              ],
+              "normalized_mean_linear_shape": 0.01315145,
+              "equal_weight_normalized_shape": 0.05427349
+            },
+            {
+              "day": 9,
+              "n_observed_cases": 16,
+              "n_positive": 7,
+              "detection_probability": 0.4375,
+              "mean_log10_positive": 2.767,
+              "positive_participants": [
+                "1",
+                "11",
+                "12",
+                "2",
+                "3",
+                "5",
+                "6"
+              ],
+              "normalized_mean_linear_shape": 0.00912816,
+              "equal_weight_normalized_shape": 0.1320055
+            },
+            {
+              "day": 10,
+              "n_observed_cases": 15,
+              "n_positive": 5,
+              "detection_probability": 0.3333,
+              "mean_log10_positive": 3.256,
+              "positive_participants": [
+                "1",
+                "10",
+                "4",
+                "5",
+                "6"
+              ],
+              "normalized_mean_linear_shape": 0.06186629,
+              "equal_weight_normalized_shape": 0.09936801
+            },
+            {
+              "day": 11,
+              "n_observed_cases": 12,
+              "n_positive": 2,
+              "detection_probability": 0.1667,
+              "mean_log10_positive": 3.155,
+              "positive_participants": [
+                "1",
+                "2"
+              ],
+              "normalized_mean_linear_shape": 0.00377934,
+              "equal_weight_normalized_shape": 0.01772875
+            },
+            {
+              "day": 12,
+              "n_observed_cases": 7,
+              "n_positive": 2,
+              "detection_probability": 0.2857,
+              "mean_log10_positive": 3.43,
+              "positive_participants": [
+                "1",
+                "5"
+              ],
+              "normalized_mean_linear_shape": 0.0142966,
+              "equal_weight_normalized_shape": 0.0157724
+            },
+            {
+              "day": 13,
+              "n_observed_cases": 7,
+              "n_positive": 4,
+              "detection_probability": 0.5714,
+              "mean_log10_positive": 2.422,
+              "positive_participants": [
+                "1",
+                "2",
+                "5",
+                "6"
+              ],
+              "normalized_mean_linear_shape": 0.00764165,
+              "equal_weight_normalized_shape": 0.01739954
+            }
+          ],
+          "axis_definition": "Days relative to the first nonzero self-reported symptom-score cell digitized from Zhou Figure 2; participant 18 has no onset axis and is excluded from onset-aligned means.",
+          "central_and_uncertainty_variants": {
+            "central": "equal_weight_central daily normalized shape plus zero_inflated_daily_model occurrence/magnitude table",
+            "high_emitter_sensitive_uncertainty": "mass_weighted_high_emitter_sensitive normalized shape",
+            "heterogeneity_references": "digitized individual trajectories for participants 1, 5, 7, 9 and 18",
+            "axis_uncertainty_days": 1,
+            "digitization_uncertainty": "not numerically quantified bar-by-bar; validated by exact endpoint positive-count recovery and presymptomatic log-AUC reproduction"
+          },
+          "duration_tail": "Observed onset-aligned support is tabulated through day 13. Day 14 has no aligned observations because late-onset participants leave the support; this is censoring, not measured zero. Episodic positive emission persists through day 13 in the digitized cohort."
+        }
+      ],
+      "individual_reference_trajectories": {
+        "1": {
+          "role": "dominant mask emitter with a late high-emission burst",
+          "onset_day_post_inoculation": 1,
+          "axis_note": "onset-relative when onset_day_post_inoculation is not null",
+          "mask": [
+            {
+              "day": -1,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 0,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 1,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 2,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 3,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 4,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 5,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 2.56,
+              "normalized_linear_shape": 4.723e-05
+            },
+            {
+              "day": 6,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 4.9,
+              "normalized_linear_shape": 0.01033175
+            },
+            {
+              "day": 7,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 5.52,
+              "normalized_linear_shape": 0.0430699
+            },
+            {
+              "day": 8,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 4.51,
+              "normalized_linear_shape": 0.00420895
+            },
+            {
+              "day": 9,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 1.83,
+              "normalized_linear_shape": 8.79e-06
+            },
+            {
+              "day": 10,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 6.86,
+              "normalized_linear_shape": 0.94226668
+            },
+            {
+              "day": 11,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 2.71,
+              "normalized_linear_shape": 6.671e-05
+            },
+            {
+              "day": 12,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 13,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            }
+          ],
+          "air": [
+            {
+              "day": -1,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 0,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 1,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 2,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 3,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 4,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 5,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 6,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 7,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 4.05,
+              "normalized_linear_shape": 0.60623521
+            },
+            {
+              "day": 8,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 3.17,
+              "normalized_linear_shape": 0.07991737
+            },
+            {
+              "day": 9,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 2.76,
+              "normalized_linear_shape": 0.03109146
+            },
+            {
+              "day": 10,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 3.32,
+              "normalized_linear_shape": 0.11288628
+            },
+            {
+              "day": 11,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 3.22,
+              "normalized_linear_shape": 0.08966876
+            },
+            {
+              "day": 12,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 3.17,
+              "normalized_linear_shape": 0.07991737
+            },
+            {
+              "day": 13,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 0.72,
+              "normalized_linear_shape": 0.00028356
+            }
+          ]
+        },
+        "5": {
+          "role": "one of the two dominant airborne emitters",
+          "onset_day_post_inoculation": 1,
+          "axis_note": "onset-relative when onset_day_post_inoculation is not null; participant 18 is post-inoculation only",
+          "mask": [
+            {
+              "day": -1,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 0,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 1,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 2.58,
+              "normalized_linear_shape": 0.00095903
+            },
+            {
+              "day": 2,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 3.07,
+              "normalized_linear_shape": 0.00296369
+            },
+            {
+              "day": 3,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 5.57,
+              "normalized_linear_shape": 0.9371997
+            },
+            {
+              "day": 4,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 4.31,
+              "normalized_linear_shape": 0.05150295
+            },
+            {
+              "day": 5,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 6,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 7,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 8,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 2.35,
+              "normalized_linear_shape": 0.00056472
+            },
+            {
+              "day": 9,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 10,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 0.91,
+              "normalized_linear_shape": 2.05e-05
+            },
+            {
+              "day": 11,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 12,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 13,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 3.43,
+              "normalized_linear_shape": 0.00678941
+            }
+          ],
+          "air": [
+            {
+              "day": -1,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 0,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 1,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 2,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 3,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 4.2,
+              "normalized_linear_shape": 0.0744715
+            },
+            {
+              "day": 4,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 5.05,
+              "normalized_linear_shape": 0.52721785
+            },
+            {
+              "day": 5,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 3.69,
+              "normalized_linear_shape": 0.02301389
+            },
+            {
+              "day": 6,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 3.4,
+              "normalized_linear_shape": 0.01180294
+            },
+            {
+              "day": 7,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 3.76,
+              "normalized_linear_shape": 0.02703897
+            },
+            {
+              "day": 8,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 3.94,
+              "normalized_linear_shape": 0.04092513
+            },
+            {
+              "day": 9,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 3.02,
+              "normalized_linear_shape": 0.00492028
+            },
+            {
+              "day": 10,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 4.74,
+              "normalized_linear_shape": 0.25822014
+            },
+            {
+              "day": 11,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 12,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 3.69,
+              "normalized_linear_shape": 0.02301389
+            },
+            {
+              "day": 13,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 3.3,
+              "normalized_linear_shape": 0.00937541
+            }
+          ]
+        },
+        "7": {
+          "role": "high mask emission despite low/late symptoms",
+          "onset_day_post_inoculation": 9,
+          "axis_note": "onset-relative when onset_day_post_inoculation is not null; participant 18 is post-inoculation only",
+          "mask": [
+            {
+              "day": -9,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -8,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -7,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -6,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -5,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 2.09,
+              "normalized_linear_shape": 7.013e-05
+            },
+            {
+              "day": -4,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -3,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 2.56,
+              "normalized_linear_shape": 0.00020697
+            },
+            {
+              "day": -2,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 5.7,
+              "normalized_linear_shape": 0.2856928
+            },
+            {
+              "day": -1,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 5.75,
+              "normalized_linear_shape": 0.32055259
+            },
+            {
+              "day": 0,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 5.8,
+              "normalized_linear_shape": 0.35966592
+            },
+            {
+              "day": 1,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 4.05,
+              "normalized_linear_shape": 0.00639587
+            },
+            {
+              "day": 2,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 4.67,
+              "normalized_linear_shape": 0.0266624
+            },
+            {
+              "day": 3,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 2.92,
+              "normalized_linear_shape": 0.00047413
+            },
+            {
+              "day": 4,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 5,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 2.69,
+              "normalized_linear_shape": 0.00027919
+            }
+          ],
+          "air": [
+            {
+              "day": -9,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -8,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -7,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -6,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -5,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -4,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -3,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -2,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 4.07,
+              "normalized_linear_shape": 0.3583886
+            },
+            {
+              "day": -1,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 2.42,
+              "normalized_linear_shape": 0.00802332
+            },
+            {
+              "day": 0,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 3.51,
+              "normalized_linear_shape": 0.09870842
+            },
+            {
+              "day": 1,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 2,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 3.89,
+              "normalized_linear_shape": 0.236785
+            },
+            {
+              "day": 3,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 4,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 5,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 3.99,
+              "normalized_linear_shape": 0.29809466
+            }
+          ]
+        },
+        "9": {
+          "role": "one of the two dominant airborne emitters",
+          "onset_day_post_inoculation": 3,
+          "axis_note": "onset-relative when onset_day_post_inoculation is not null; participant 18 is post-inoculation only",
+          "mask": [
+            {
+              "day": -3,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -2,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -1,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 0,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 3.69,
+              "normalized_linear_shape": 0.00340105
+            },
+            {
+              "day": 1,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 2.97,
+              "normalized_linear_shape": 0.00064806
+            },
+            {
+              "day": 2,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 3,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 4.44,
+              "normalized_linear_shape": 0.01912554
+            },
+            {
+              "day": 4,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 3.69,
+              "normalized_linear_shape": 0.00340105
+            },
+            {
+              "day": 5,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 6.14,
+              "normalized_linear_shape": 0.95854752
+            },
+            {
+              "day": 6,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 4.33,
+              "normalized_linear_shape": 0.01484614
+            },
+            {
+              "day": 7,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 8,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 1.53,
+              "normalized_linear_shape": 2.353e-05
+            },
+            {
+              "day": 9,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 10,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 1.01,
+              "normalized_linear_shape": 7.11e-06
+            },
+            {
+              "day": 11,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            }
+          ],
+          "air": [
+            {
+              "day": -3,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -2,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": -1,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 0,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 1,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 2,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 4.23,
+              "normalized_linear_shape": 0.0248523
+            },
+            {
+              "day": 3,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 5.82,
+              "normalized_linear_shape": 0.9668667
+            },
+            {
+              "day": 4,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 3.61,
+              "normalized_linear_shape": 0.00596165
+            },
+            {
+              "day": 5,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 3.2,
+              "normalized_linear_shape": 0.00231935
+            },
+            {
+              "day": 6,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 7,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 8,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 9,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 10,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": 11,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            }
+          ]
+        },
+        "18": {
+          "role": "never-symptomatic participant excluded from onset-aligned means",
+          "onset_day_post_inoculation": null,
+          "axis_note": "onset-relative when onset_day_post_inoculation is not null; participant 18 is post-inoculation only",
+          "mask": [
+            {
+              "day": null,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 1.94,
+              "normalized_linear_shape": 0.00430341
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 3.25,
+              "normalized_linear_shape": 0.08786438
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 1.81,
+              "normalized_linear_shape": 0.00319016
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 3.1,
+              "normalized_linear_shape": 0.06220322
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 4.23,
+              "normalized_linear_shape": 0.83909832
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 1.83,
+              "normalized_linear_shape": 0.00334051
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            }
+          ],
+          "air": [
+            {
+              "day": null,
+              "post_inoculation_day": 0,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 1,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 2,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 3,
+              "log10_copies_per_sample": 2.42,
+              "normalized_linear_shape": 0.10513721
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 4,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 5,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 6,
+              "log10_copies_per_sample": 3.35,
+              "normalized_linear_shape": 0.89486279
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 7,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 8,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 9,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 10,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 11,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 12,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 13,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            },
+            {
+              "day": null,
+              "post_inoculation_day": 14,
+              "log10_copies_per_sample": 0.0,
+              "normalized_linear_shape": 0.0
+            }
+          ]
+        }
+      }
+    },
+    "viable_virus_culture_proxy": {
+      "class_role": "biological proxy candidate evidence; culture positivity or PFU concentration is not emitted material",
+      "families": [
+        {
+          "family_id": "hakki2022_pfu_unvaccinated_pre_alpha_alpha_onset_aligned",
+          "description": "Onset-aligned daily upper-respiratory PFU measurements from unvaccinated pre-alpha/alpha ATACCC cases with definitive symptom onset, using the authors' public trajectories.csv and symptoms.RDS.",
+          "evidence_grade": "B as human community culture kinetics in an analogous setting; C as a transfer to viable-virus-weighted emission",
+          "measured_inferred_hypothesis": {
+            "measured": [
+              "daily PFU/mL and symptom-onset data in the authors' public repository"
+            ],
+            "inferred": [
+              "treating pfu<=1 as the analysis' nondetect placeholder",
+              "excluding NaN PFU rows as censored missing observations rather than zeros",
+              "normalization",
+              "subset selection",
+              "onset-day boundary convention"
+            ],
+            "hypothesis": [
+              "use as an emission source shape"
+            ]
+          },
+          "origin": "R plus authors' public data repository (transcribed machine-readable data); Table 1 for kinetic rates",
+          "axis_validation": "the day+1-contact_onset transform reproduces the paper median onset-to-PFU-peak interval of 3 d. The published 7/35 (20%) presymptomatic PFU-positive fraction is recovered only when onset-day rows are included in presymptomatic counting (day+1-contact_onset <= 0); strict negative rows give 5/35. This boundary is part of the approximately \u00b11-day onset-alignment uncertainty.",
+          "normalization": "PFU/mL linear values; normalized shapes integrate to 1 over tabulated observed support. pfu<=1 is treated as nondetect because the authors' analysis uses pfu>1 for positivity.",
+          "day_resolution_and_interpolation": "integer daily observations; step function. NaN PFU rows are censored/missing and are excluded from n_observed_cases and means; they must not be interpolated or treated as zero.",
+          "presymptomatic_behavior": "independent measured negative-onset rows. In the unvaccinated pre-alpha/alpha subset presymptomatic normalized mass is very small, but this is a swab-PFU shape, not emitted material.",
+          "peak_position": {
+            "equal_weight_normalized_shape_day": 3,
+            "paper_median_onset_to_peak_days": 3,
+            "paper_iqr_days": [
+              3,
+              6
+            ]
+          },
+          "rise": "posterior mean infectious-virus growth 5.0 e-foldings/day = +2.17 log10/day, but measured during proliferation rather than as an onset-day emission slope; 95% CrI converts to +0.61 to +12.94 log10/day",
+          "decay": "posterior mean infectious-virus decline 2.6 e-foldings/day = -1.13 log10/day; 95% CrI converts to -4.56 to -0.30 log10/day",
+          "duration": "paper median infectious shedding 5 d (IQR 3-7); 65% culture-positive at onset+5 and 24% at onset+7 in the broader cohort",
+          "host_heterogeneity": "community cohort, mixed ages/variants; vaccination and delta are composition confounders. This subset is small (n=13 onset-aligned).",
+          "variants": {
+            "unvaccinated_pre_alpha_alpha_central": "most variant/immune-history analogous subset",
+            "all_symptomatic_sensitivity": "larger mixed variant/vaccination sensitivity set",
+            "vaccinated_delta_sensitivity": "not ancestral-matched; do not use for DP without owner decision"
+          },
+          "daily": [
+            {
+              "day": -8,
+              "n_observed_cases": 1,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 1
+            },
+            {
+              "day": -7,
+              "n_observed_cases": 1,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 1
+            },
+            {
+              "day": -6,
+              "n_observed_cases": 1,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 1
+            },
+            {
+              "day": -5,
+              "n_observed_cases": 1,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 1
+            },
+            {
+              "day": -4,
+              "n_observed_cases": 1,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 1
+            },
+            {
+              "day": -3,
+              "n_observed_cases": 2,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 2
+            },
+            {
+              "day": -2,
+              "n_observed_cases": 6,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 4
+            },
+            {
+              "day": -1,
+              "n_observed_cases": 7,
+              "n_positive": 1,
+              "detection_probability": 0.1429,
+              "mean_log10_pfu_positive": 2.699,
+              "normalized_mean_linear_shape": 0.00022402,
+              "equal_weight_normalized_shape": 6.298e-05,
+              "n_cases_in_equal_weight_mean": 5
+            },
+            {
+              "day": 0,
+              "n_observed_cases": 11,
+              "n_positive": 1,
+              "detection_probability": 0.0909,
+              "mean_log10_pfu_positive": 5.699,
+              "normalized_mean_linear_shape": 0.14255513,
+              "equal_weight_normalized_shape": 0.03499162,
+              "n_cases_in_equal_weight_mean": 9
+            },
+            {
+              "day": 1,
+              "n_observed_cases": 11,
+              "n_positive": 5,
+              "detection_probability": 0.4545,
+              "mean_log10_pfu_positive": 2.931,
+              "normalized_mean_linear_shape": 0.28602832,
+              "equal_weight_normalized_shape": 0.07694627,
+              "n_cases_in_equal_weight_mean": 9
+            },
+            {
+              "day": 2,
+              "n_observed_cases": 13,
+              "n_positive": 9,
+              "detection_probability": 0.6923,
+              "mean_log10_pfu_positive": 2.983,
+              "normalized_mean_linear_shape": 0.36555336,
+              "equal_weight_normalized_shape": 0.14063739,
+              "n_cases_in_equal_weight_mean": 11
+            },
+            {
+              "day": 3,
+              "n_observed_cases": 13,
+              "n_positive": 10,
+              "detection_probability": 0.7692,
+              "mean_log10_pfu_positive": 3.318,
+              "normalized_mean_linear_shape": 0.07163955,
+              "equal_weight_normalized_shape": 0.28890524,
+              "n_cases_in_equal_weight_mean": 11
+            },
+            {
+              "day": 4,
+              "n_observed_cases": 12,
+              "n_positive": 10,
+              "detection_probability": 0.8333,
+              "mean_log10_pfu_positive": 3.003,
+              "normalized_mean_linear_shape": 0.01096106,
+              "equal_weight_normalized_shape": 0.20350554,
+              "n_cases_in_equal_weight_mean": 10
+            },
+            {
+              "day": 5,
+              "n_observed_cases": 13,
+              "n_positive": 10,
+              "detection_probability": 0.7692,
+              "mean_log10_pfu_positive": 2.916,
+              "normalized_mean_linear_shape": 0.01035674,
+              "equal_weight_normalized_shape": 0.1588878,
+              "n_cases_in_equal_weight_mean": 11
+            },
+            {
+              "day": 6,
+              "n_observed_cases": 12,
+              "n_positive": 6,
+              "detection_probability": 0.5,
+              "mean_log10_pfu_positive": 2.989,
+              "normalized_mean_linear_shape": 0.10528528,
+              "equal_weight_normalized_shape": 0.08667618,
+              "n_cases_in_equal_weight_mean": 10
+            },
+            {
+              "day": 7,
+              "n_observed_cases": 13,
+              "n_positive": 5,
+              "detection_probability": 0.3846,
+              "mean_log10_pfu_positive": 2.136,
+              "normalized_mean_linear_shape": 0.00728325,
+              "equal_weight_normalized_shape": 0.00909206,
+              "n_cases_in_equal_weight_mean": 11
+            },
+            {
+              "day": 8,
+              "n_observed_cases": 13,
+              "n_positive": 3,
+              "detection_probability": 0.2308,
+              "mean_log10_pfu_positive": 1.94,
+              "normalized_mean_linear_shape": 9.409e-05,
+              "equal_weight_normalized_shape": 0.00027808,
+              "n_cases_in_equal_weight_mean": 11
+            },
+            {
+              "day": 9,
+              "n_observed_cases": 13,
+              "n_positive": 1,
+              "detection_probability": 0.0769,
+              "mean_log10_pfu_positive": 1.301,
+              "normalized_mean_linear_shape": 4.82e-06,
+              "equal_weight_normalized_shape": 3.76e-06,
+              "n_cases_in_equal_weight_mean": 11
+            },
+            {
+              "day": 10,
+              "n_observed_cases": 12,
+              "n_positive": 1,
+              "detection_probability": 0.0833,
+              "mean_log10_pfu_positive": 1.0,
+              "normalized_mean_linear_shape": 2.61e-06,
+              "equal_weight_normalized_shape": 1.071e-05,
+              "n_cases_in_equal_weight_mean": 11
+            },
+            {
+              "day": 11,
+              "n_observed_cases": 10,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 9
+            },
+            {
+              "day": 12,
+              "n_observed_cases": 8,
+              "n_positive": 1,
+              "detection_probability": 0.125,
+              "mean_log10_pfu_positive": 1.477,
+              "normalized_mean_linear_shape": 1.176e-05,
+              "equal_weight_normalized_shape": 2.36e-06,
+              "n_cases_in_equal_weight_mean": 8
+            },
+            {
+              "day": 13,
+              "n_observed_cases": 5,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 5
+            },
+            {
+              "day": 14,
+              "n_observed_cases": 4,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 4
+            }
+          ],
+          "sensitivity_daily_all_symptomatic": [
+            {
+              "day": -8,
+              "n_observed_cases": 3,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 3
+            },
+            {
+              "day": -7,
+              "n_observed_cases": 3,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 3
+            },
+            {
+              "day": -6,
+              "n_observed_cases": 7,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 7
+            },
+            {
+              "day": -5,
+              "n_observed_cases": 9,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 8
+            },
+            {
+              "day": -4,
+              "n_observed_cases": 9,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 8
+            },
+            {
+              "day": -3,
+              "n_observed_cases": 10,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 9
+            },
+            {
+              "day": -2,
+              "n_observed_cases": 18,
+              "n_positive": 1,
+              "detection_probability": 0.0556,
+              "mean_log10_pfu_positive": 5.789,
+              "normalized_mean_linear_shape": 0.1272068,
+              "equal_weight_normalized_shape": 0.03728046,
+              "n_cases_in_equal_weight_mean": 15
+            },
+            {
+              "day": -1,
+              "n_observed_cases": 25,
+              "n_positive": 5,
+              "detection_probability": 0.2,
+              "mean_log10_pfu_positive": 3.058,
+              "normalized_mean_linear_shape": 0.01963577,
+              "equal_weight_normalized_shape": 0.00553932,
+              "n_cases_in_equal_weight_mean": 22
+            },
+            {
+              "day": 0,
+              "n_observed_cases": 33,
+              "n_positive": 7,
+              "detection_probability": 0.2121,
+              "mean_log10_pfu_positive": 4.234,
+              "normalized_mean_linear_shape": 0.10324002,
+              "equal_weight_normalized_shape": 0.06458197,
+              "n_cases_in_equal_weight_mean": 30
+            },
+            {
+              "day": 1,
+              "n_observed_cases": 33,
+              "n_positive": 19,
+              "detection_probability": 0.5758,
+              "mean_log10_pfu_positive": 3.248,
+              "normalized_mean_linear_shape": 0.15401274,
+              "equal_weight_normalized_shape": 0.08955546,
+              "n_cases_in_equal_weight_mean": 31
+            },
+            {
+              "day": 2,
+              "n_observed_cases": 34,
+              "n_positive": 25,
+              "detection_probability": 0.7353,
+              "mean_log10_pfu_positive": 3.414,
+              "normalized_mean_linear_shape": 0.22839132,
+              "equal_weight_normalized_shape": 0.10776646,
+              "n_cases_in_equal_weight_mean": 32
+            },
+            {
+              "day": 3,
+              "n_observed_cases": 35,
+              "n_positive": 31,
+              "detection_probability": 0.8857,
+              "mean_log10_pfu_positive": 3.624,
+              "normalized_mean_linear_shape": 0.12761333,
+              "equal_weight_normalized_shape": 0.26249995,
+              "n_cases_in_equal_weight_mean": 33
+            },
+            {
+              "day": 4,
+              "n_observed_cases": 34,
+              "n_positive": 28,
+              "detection_probability": 0.8235,
+              "mean_log10_pfu_positive": 3.567,
+              "normalized_mean_linear_shape": 0.0571226,
+              "equal_weight_normalized_shape": 0.21702214,
+              "n_cases_in_equal_weight_mean": 32
+            },
+            {
+              "day": 5,
+              "n_observed_cases": 35,
+              "n_positive": 28,
+              "detection_probability": 0.8,
+              "mean_log10_pfu_positive": 2.995,
+              "normalized_mean_linear_shape": 0.053738,
+              "equal_weight_normalized_shape": 0.1237842,
+              "n_cases_in_equal_weight_mean": 33
+            },
+            {
+              "day": 6,
+              "n_observed_cases": 33,
+              "n_positive": 20,
+              "detection_probability": 0.6061,
+              "mean_log10_pfu_positive": 2.854,
+              "normalized_mean_linear_shape": 0.07273465,
+              "equal_weight_normalized_shape": 0.06033361,
+              "n_cases_in_equal_weight_mean": 31
+            },
+            {
+              "day": 7,
+              "n_observed_cases": 32,
+              "n_positive": 14,
+              "detection_probability": 0.4375,
+              "mean_log10_pfu_positive": 2.53,
+              "normalized_mean_linear_shape": 0.03827606,
+              "equal_weight_normalized_shape": 0.02353741,
+              "n_cases_in_equal_weight_mean": 30
+            },
+            {
+              "day": 8,
+              "n_observed_cases": 27,
+              "n_positive": 7,
+              "detection_probability": 0.2593,
+              "mean_log10_pfu_positive": 2.137,
+              "normalized_mean_linear_shape": 0.0173084,
+              "equal_weight_normalized_shape": 0.00681453,
+              "n_cases_in_equal_weight_mean": 25
+            },
+            {
+              "day": 9,
+              "n_observed_cases": 27,
+              "n_positive": 4,
+              "detection_probability": 0.1481,
+              "mean_log10_pfu_positive": 2.168,
+              "normalized_mean_linear_shape": 0.00056674,
+              "equal_weight_normalized_shape": 0.00064751,
+              "n_cases_in_equal_weight_mean": 25
+            },
+            {
+              "day": 10,
+              "n_observed_cases": 23,
+              "n_positive": 2,
+              "detection_probability": 0.087,
+              "mean_log10_pfu_positive": 1.681,
+              "normalized_mean_linear_shape": 3.885e-05,
+              "equal_weight_normalized_shape": 1.856e-05,
+              "n_cases_in_equal_weight_mean": 22
+            },
+            {
+              "day": 11,
+              "n_observed_cases": 22,
+              "n_positive": 1,
+              "detection_probability": 0.0455,
+              "mean_log10_pfu_positive": 2.58,
+              "normalized_mean_linear_shape": 6.431e-05,
+              "equal_weight_normalized_shape": 2.342e-05,
+              "n_cases_in_equal_weight_mean": 21
+            },
+            {
+              "day": 12,
+              "n_observed_cases": 16,
+              "n_positive": 1,
+              "detection_probability": 0.0625,
+              "mean_log10_pfu_positive": 1.477,
+              "normalized_mean_linear_shape": 6.98e-06,
+              "equal_weight_normalized_shape": 1.11e-06,
+              "n_cases_in_equal_weight_mean": 16
+            },
+            {
+              "day": 13,
+              "n_observed_cases": 10,
+              "n_positive": 0,
+              "detection_probability": 0.0,
+              "mean_log10_pfu_positive": null,
+              "normalized_mean_linear_shape": 0.0,
+              "equal_weight_normalized_shape": 0.0,
+              "n_cases_in_equal_weight_mean": 10
+            },
+            {
+              "day": 14,
+              "n_observed_cases": 6,
+              "n_positive": 1,
+              "detection_probability": 0.1667,
+              "mean_log10_pfu_positive": 1.845,
+              "normalized_mean_linear_shape": 4.344e-05,
+              "equal_weight_normalized_shape": 0.00059387,
+              "n_cases_in_equal_weight_mean": 6
+            }
+          ],
+          "axis_definition": "Days relative to self-reported canonical symptom onset, computed as zero-based public day + 1 - contact_onset to match the authors' one-based R indexing.",
+          "central_and_uncertainty_variants": {
+            "central": "unvaccinated_pre_alpha_alpha_central equal-weight normalized daily shape plus detection/conditional-positive table",
+            "sensitivity": "all_symptomatic_sensitivity mixed variant/vaccination table",
+            "not_ancestral_matched": "vaccinated_delta_sensitivity",
+            "statistical_uncertainty": "small n=13 principal subset; participant-day censoring is tabulated as n_observed_cases and must not be treated as zero",
+            "rate_uncertainty": "rise +0.61 to +12.94 log10/day and decay -4.56 to -0.30 log10/day after converting published credible intervals from e-foldings/day",
+            "axis_uncertainty": "strict negative onset rows versus inclusion of the onset-day boundary changes the computed presymptomatic PFU-positive fraction from 5/35 to the published 7/35"
+          },
+          "n_cases": 13,
+          "variant_vaccine_composition": {
+            "Alpha|False": 6,
+            "Pre-Alpha|False": 7
+          },
+          "sensitivity_n_cases": 38,
+          "sensitivity_variant_vaccine_composition": {
+            "Alpha|False": 6,
+            "Delta|False": 5,
+            "Delta|True": 20,
+            "Pre-Alpha|False": 7
+          }
+        },
+        {
+          "family_id": "killingley2022_ffa_piecewise_axis_bracket",
+          "description": "Human-challenge focus-forming-assay timing family on a broad onset-converted axis. This is a bracketed control-point family, not a digitized full curve.",
+          "evidence_grade": "B as human-challenge culture kinetics; C as onset-axis transfer and emission transfer",
+          "measured_inferred_hypothesis": {
+            "measured": [
+              "qPCR/FFA first quantification and peak timing",
+              "FFA-positive duration and latest detection"
+            ],
+            "inferred": [
+              "shift by symptom onset 2-4 d post-inoculation",
+              "piecewise interpolation",
+              "piecewise tail slope borrowed from Hakki infectious-virus decline"
+            ],
+            "hypothesis": [
+              "a smooth triangle inside the bracket"
+            ]
+          },
+          "origin": "R; prior COVID-SHED-INTERVALS-01 F2\u00b7dig for peak timing/duration extrema",
+          "axis_definition": "symptom onset is reported only as a 2-4 d post-inoculation range; use three axis-shift variants early=-2, central=-3, late=-4 rather than pretending a participant-aligned onset axis exists",
+          "control_points_post_inoculation": {
+            "ffa_peak_days_post_inoculation": {
+              "throat_approx": [
+                3.5,
+                3.7
+              ],
+              "nose_approx": 5.5
+            },
+            "qpcr_peak_days_post_inoculation": {
+              "throat": 4.7,
+              "nose": 6.2
+            },
+            "ffa_positive_duration_days": {
+              "nose_median": 6.5,
+              "throat_median": 6.25,
+              "individual_envelope_approx": [
+                2,
+                11
+              ]
+            },
+            "latest_viable_detection_post_inoculation_days": {
+              "nose": 12,
+              "throat": 11
+            },
+            "first_qpcr_quantifiable": "about throat 1.7 d and nose 2.4 d post-inoculation",
+            "ffa_start_basis": "FFA was reported as initially closely paralleling qPCR, but exact separate first-FFA times were not recovered; the piecewise start is therefore a declared sensitivity point, not measured FFA onset."
+          },
+          "onset_relative_piecewise_variants": [
+            {
+              "variant": "throat_early_onset_shift2",
+              "points_log10_relative": [
+                {
+                  "day": -0.3,
+                  "value": -5.0,
+                  "status": "detection-floor declared sensitivity"
+                },
+                {
+                  "day": 1.6,
+                  "value": 0.0,
+                  "status": "measured peak bracket centre"
+                },
+                {
+                  "day": 7.6,
+                  "value": -6.8,
+                  "status": "duration-tail inferred"
+                }
+              ]
+            },
+            {
+              "variant": "throat_central_onset_shift3",
+              "points_log10_relative": [
+                {
+                  "day": -1.3,
+                  "value": -5.0,
+                  "status": "detection-floor declared sensitivity"
+                },
+                {
+                  "day": 0.6,
+                  "value": 0.0,
+                  "status": "measured peak bracket centre"
+                },
+                {
+                  "day": 6.6,
+                  "value": -6.8,
+                  "status": "duration-tail inferred"
+                }
+              ]
+            },
+            {
+              "variant": "nose_central_onset_shift3",
+              "points_log10_relative": [
+                {
+                  "day": -0.6,
+                  "value": -5.0,
+                  "status": "detection-floor declared sensitivity"
+                },
+                {
+                  "day": 2.5,
+                  "value": 0.0,
+                  "status": "measured peak bracket centre"
+                },
+                {
+                  "day": 8.5,
+                  "value": -6.8,
+                  "status": "duration-tail inferred"
+                }
+              ]
+            }
+          ],
+          "interpolation": "piecewise linear in log10 relative units through the control points; the -5 floor is declared assay-floor sensitivity, not a measured emission floor; normalize in linear space after interpolation",
+          "normalization": "peak=1 before linear-area normalization; no absolute PFU-to-emitted-material conversion supplied",
+          "host_heterogeneity": "young seronegative healthy adults, controlled intranasal challenge, six early participants received remdesivir; individual duration envelope is wide",
+          "presymptomatic_behavior": "Negative-onset control points arise only through the early/central/late onset-shift bracket. They are inferred axis conversions, not participant-level measured onset-aligned rows.",
+          "peak_rise_decay_duration": "Peak timing and positive-duration window are measured/bracketed; no dense published numeric rise or decay curve was recovered, so slopes inside each piecewise variant are interpolation only.",
+          "central_and_uncertainty_variants": {
+            "central": "throat_central_onset_shift3 and nose_central_onset_shift3 piecewise variants",
+            "axis_uncertainty": "early onset shift 2 d versus late onset shift 4 d post-inoculation",
+            "shape_uncertainty": "piecewise interpolation is a declared simplification because full numeric FFA trajectories were not recovered"
+          },
+          "piecewise_slope_source": "The -6.8 log10 relative tail offset applies Hakki 2022 infectious-virus decline (-1.13 log10/day) over approximately 6 days from peak to the median duration endpoint. This is an explicit cross-study culture-proxy inference, not a Killingley measured slope and not a blend with RNA or emission data."
+        },
+        {
+          "family_id": "woelfel2020_culture_duration_check",
+          "description": "Supporting duration/tail check only, not a candidate curve.",
+          "evidence_grade": "B for hospitalized culture/RNA measurements; not implementation-shaped",
+          "origin": "R/F1\u00b7leg",
+          "numeric_checks": {
+            "peak_throat_rna_illness_day": 4,
+            "no_isolates_after_illness_day": 8,
+            "probit_below5pct_isolation_day": 9.78,
+            "probit_ci_days": [
+              8.45,
+              21.78
+            ]
+          },
+          "measured_inferred_hypothesis": {
+            "measured": [
+              "peak day and isolation tail"
+            ],
+            "inferred": [
+              "probit threshold"
+            ],
+            "hypothesis": []
+          }
+        }
+      ]
+    },
+    "rna_kinetic_sensitivity": {
+      "class_role": "assay-kinetic sensitivity evidence only; RNA persistence is not viable emission",
+      "families": [
+        {
+          "family_id": "jones2021_rna_onset_relative_piecewise_sensitivity",
+          "description": "Onset-relative RNA sensitivity family using Jones' large-cohort onset-of-shedding-to-peak timing, peak-before-onset bracket, post-peak RNA slope, and a declared assay-floor separation.",
+          "evidence_grade": "B as human RNA kinetics; C as onset-axis/emission transfer",
+          "origin": "R/Ab; exact slope and timing read in Results in Consensus full text",
+          "axis_definition": "symptom onset; hospitalized cases place peak viral load 1-3 d before symptom onset",
+          "central_parameters": {
+            "onset_of_shedding_to_peak_days": 4.31,
+            "onset_of_shedding_to_peak_ci_days": [
+              4.04,
+              4.6
+            ],
+            "peak_log10_copies_per_swab": 8.1,
+            "post_peak_decline_log10_per_day": -0.168,
+            "post_peak_decline_ci": [
+              -0.171,
+              -0.165
+            ],
+            "peak_relative_to_onset_days": [
+              -3,
+              -1
+            ]
+          },
+          "piecewise_variants": [
+            {
+              "variant": "central_peak_minus2_floor_minus5",
+              "points": [
+                {
+                  "day": -6,
+                  "log10_relative": -4.6404,
+                  "normalized_linear_shape": 7.17e-06
+                },
+                {
+                  "day": -5,
+                  "log10_relative": -3.4803,
+                  "normalized_linear_shape": 0.00010368
+                },
+                {
+                  "day": -4,
+                  "log10_relative": -2.3202,
+                  "normalized_linear_shape": 0.001499
+                },
+                {
+                  "day": -3,
+                  "log10_relative": -1.1601,
+                  "normalized_linear_shape": 0.02167218
+                },
+                {
+                  "day": -2,
+                  "log10_relative": -0.0,
+                  "normalized_linear_shape": 0.31333043
+                },
+                {
+                  "day": -1,
+                  "log10_relative": -0.168,
+                  "normalized_linear_shape": 0.21281517
+                },
+                {
+                  "day": 0,
+                  "log10_relative": -0.336,
+                  "normalized_linear_shape": 0.14454484
+                },
+                {
+                  "day": 1,
+                  "log10_relative": -0.504,
+                  "normalized_linear_shape": 0.09817538
+                },
+                {
+                  "day": 2,
+                  "log10_relative": -0.672,
+                  "normalized_linear_shape": 0.06668107
+                },
+                {
+                  "day": 3,
+                  "log10_relative": -0.84,
+                  "normalized_linear_shape": 0.04529003
+                },
+                {
+                  "day": 4,
+                  "log10_relative": -1.008,
+                  "normalized_linear_shape": 0.03076115
+                },
+                {
+                  "day": 5,
+                  "log10_relative": -1.176,
+                  "normalized_linear_shape": 0.02089309
+                },
+                {
+                  "day": 6,
+                  "log10_relative": -1.344,
+                  "normalized_linear_shape": 0.01419066
+                },
+                {
+                  "day": 7,
+                  "log10_relative": -1.512,
+                  "normalized_linear_shape": 0.00963835
+                },
+                {
+                  "day": 8,
+                  "log10_relative": -1.68,
+                  "normalized_linear_shape": 0.0065464
+                },
+                {
+                  "day": 9,
+                  "log10_relative": -1.848,
+                  "normalized_linear_shape": 0.00444634
+                },
+                {
+                  "day": 10,
+                  "log10_relative": -2.016,
+                  "normalized_linear_shape": 0.00301997
+                },
+                {
+                  "day": 11,
+                  "log10_relative": -2.184,
+                  "normalized_linear_shape": 0.00205117
+                },
+                {
+                  "day": 12,
+                  "log10_relative": -2.352,
+                  "normalized_linear_shape": 0.00139317
+                },
+                {
+                  "day": 13,
+                  "log10_relative": -2.52,
+                  "normalized_linear_shape": 0.00094624
+                },
+                {
+                  "day": 14,
+                  "log10_relative": -2.688,
+                  "normalized_linear_shape": 0.00064269
+                },
+                {
+                  "day": 15,
+                  "log10_relative": -2.856,
+                  "normalized_linear_shape": 0.00043652
+                },
+                {
+                  "day": 16,
+                  "log10_relative": -3.024,
+                  "normalized_linear_shape": 0.00029648
+                },
+                {
+                  "day": 17,
+                  "log10_relative": -3.192,
+                  "normalized_linear_shape": 0.00020137
+                },
+                {
+                  "day": 18,
+                  "log10_relative": -3.36,
+                  "normalized_linear_shape": 0.00013677
+                },
+                {
+                  "day": 19,
+                  "log10_relative": -3.528,
+                  "normalized_linear_shape": 9.29e-05
+                },
+                {
+                  "day": 20,
+                  "log10_relative": -3.696,
+                  "normalized_linear_shape": 6.31e-05
+                },
+                {
+                  "day": 21,
+                  "log10_relative": -3.864,
+                  "normalized_linear_shape": 4.286e-05
+                },
+                {
+                  "day": 22,
+                  "log10_relative": -4.032,
+                  "normalized_linear_shape": 2.911e-05
+                },
+                {
+                  "day": 23,
+                  "log10_relative": -4.2,
+                  "normalized_linear_shape": 1.977e-05
+                },
+                {
+                  "day": 24,
+                  "log10_relative": -4.368,
+                  "normalized_linear_shape": 1.343e-05
+                },
+                {
+                  "day": 25,
+                  "log10_relative": -4.536,
+                  "normalized_linear_shape": 9.12e-06
+                },
+                {
+                  "day": 26,
+                  "log10_relative": -4.704,
+                  "normalized_linear_shape": 6.19e-06
+                },
+                {
+                  "day": 27,
+                  "log10_relative": -4.872,
+                  "normalized_linear_shape": 4.21e-06
+                }
+              ],
+              "tail_floor_crossing_day": 27.76
+            },
+            {
+              "variant": "early_peak_minus3_floor_minus5",
+              "points": [
+                {
+                  "day": -7,
+                  "log10_relative": -4.6404,
+                  "normalized_linear_shape": 7.17e-06
+                },
+                {
+                  "day": -6,
+                  "log10_relative": -3.4803,
+                  "normalized_linear_shape": 0.00010368
+                },
+                {
+                  "day": -5,
+                  "log10_relative": -2.3202,
+                  "normalized_linear_shape": 0.001499
+                },
+                {
+                  "day": -4,
+                  "log10_relative": -1.1601,
+                  "normalized_linear_shape": 0.02167218
+                },
+                {
+                  "day": -3,
+                  "log10_relative": -0.0,
+                  "normalized_linear_shape": 0.31333043
+                },
+                {
+                  "day": -2,
+                  "log10_relative": -0.168,
+                  "normalized_linear_shape": 0.21281517
+                },
+                {
+                  "day": -1,
+                  "log10_relative": -0.336,
+                  "normalized_linear_shape": 0.14454484
+                },
+                {
+                  "day": 0,
+                  "log10_relative": -0.504,
+                  "normalized_linear_shape": 0.09817538
+                },
+                {
+                  "day": 1,
+                  "log10_relative": -0.672,
+                  "normalized_linear_shape": 0.06668107
+                },
+                {
+                  "day": 2,
+                  "log10_relative": -0.84,
+                  "normalized_linear_shape": 0.04529003
+                },
+                {
+                  "day": 3,
+                  "log10_relative": -1.008,
+                  "normalized_linear_shape": 0.03076115
+                },
+                {
+                  "day": 4,
+                  "log10_relative": -1.176,
+                  "normalized_linear_shape": 0.02089309
+                },
+                {
+                  "day": 5,
+                  "log10_relative": -1.344,
+                  "normalized_linear_shape": 0.01419066
+                },
+                {
+                  "day": 6,
+                  "log10_relative": -1.512,
+                  "normalized_linear_shape": 0.00963835
+                },
+                {
+                  "day": 7,
+                  "log10_relative": -1.68,
+                  "normalized_linear_shape": 0.0065464
+                },
+                {
+                  "day": 8,
+                  "log10_relative": -1.848,
+                  "normalized_linear_shape": 0.00444634
+                },
+                {
+                  "day": 9,
+                  "log10_relative": -2.016,
+                  "normalized_linear_shape": 0.00301997
+                },
+                {
+                  "day": 10,
+                  "log10_relative": -2.184,
+                  "normalized_linear_shape": 0.00205117
+                },
+                {
+                  "day": 11,
+                  "log10_relative": -2.352,
+                  "normalized_linear_shape": 0.00139317
+                },
+                {
+                  "day": 12,
+                  "log10_relative": -2.52,
+                  "normalized_linear_shape": 0.00094624
+                },
+                {
+                  "day": 13,
+                  "log10_relative": -2.688,
+                  "normalized_linear_shape": 0.00064269
+                },
+                {
+                  "day": 14,
+                  "log10_relative": -2.856,
+                  "normalized_linear_shape": 0.00043652
+                },
+                {
+                  "day": 15,
+                  "log10_relative": -3.024,
+                  "normalized_linear_shape": 0.00029648
+                },
+                {
+                  "day": 16,
+                  "log10_relative": -3.192,
+                  "normalized_linear_shape": 0.00020137
+                },
+                {
+                  "day": 17,
+                  "log10_relative": -3.36,
+                  "normalized_linear_shape": 0.00013677
+                },
+                {
+                  "day": 18,
+                  "log10_relative": -3.528,
+                  "normalized_linear_shape": 9.29e-05
+                },
+                {
+                  "day": 19,
+                  "log10_relative": -3.696,
+                  "normalized_linear_shape": 6.31e-05
+                },
+                {
+                  "day": 20,
+                  "log10_relative": -3.864,
+                  "normalized_linear_shape": 4.286e-05
+                },
+                {
+                  "day": 21,
+                  "log10_relative": -4.032,
+                  "normalized_linear_shape": 2.911e-05
+                },
+                {
+                  "day": 22,
+                  "log10_relative": -4.2,
+                  "normalized_linear_shape": 1.977e-05
+                },
+                {
+                  "day": 23,
+                  "log10_relative": -4.368,
+                  "normalized_linear_shape": 1.343e-05
+                },
+                {
+                  "day": 24,
+                  "log10_relative": -4.536,
+                  "normalized_linear_shape": 9.12e-06
+                },
+                {
+                  "day": 25,
+                  "log10_relative": -4.704,
+                  "normalized_linear_shape": 6.19e-06
+                },
+                {
+                  "day": 26,
+                  "log10_relative": -4.872,
+                  "normalized_linear_shape": 4.21e-06
+                }
+              ],
+              "tail_floor_crossing_day": 26.76
+            },
+            {
+              "variant": "late_peak_minus1_floor_minus5",
+              "points": [
+                {
+                  "day": -5,
+                  "log10_relative": -4.6404,
+                  "normalized_linear_shape": 7.17e-06
+                },
+                {
+                  "day": -4,
+                  "log10_relative": -3.4803,
+                  "normalized_linear_shape": 0.00010368
+                },
+                {
+                  "day": -3,
+                  "log10_relative": -2.3202,
+                  "normalized_linear_shape": 0.001499
+                },
+                {
+                  "day": -2,
+                  "log10_relative": -1.1601,
+                  "normalized_linear_shape": 0.02167218
+                },
+                {
+                  "day": -1,
+                  "log10_relative": -0.0,
+                  "normalized_linear_shape": 0.31333043
+                },
+                {
+                  "day": 0,
+                  "log10_relative": -0.168,
+                  "normalized_linear_shape": 0.21281517
+                },
+                {
+                  "day": 1,
+                  "log10_relative": -0.336,
+                  "normalized_linear_shape": 0.14454484
+                },
+                {
+                  "day": 2,
+                  "log10_relative": -0.504,
+                  "normalized_linear_shape": 0.09817538
+                },
+                {
+                  "day": 3,
+                  "log10_relative": -0.672,
+                  "normalized_linear_shape": 0.06668107
+                },
+                {
+                  "day": 4,
+                  "log10_relative": -0.84,
+                  "normalized_linear_shape": 0.04529003
+                },
+                {
+                  "day": 5,
+                  "log10_relative": -1.008,
+                  "normalized_linear_shape": 0.03076115
+                },
+                {
+                  "day": 6,
+                  "log10_relative": -1.176,
+                  "normalized_linear_shape": 0.02089309
+                },
+                {
+                  "day": 7,
+                  "log10_relative": -1.344,
+                  "normalized_linear_shape": 0.01419066
+                },
+                {
+                  "day": 8,
+                  "log10_relative": -1.512,
+                  "normalized_linear_shape": 0.00963835
+                },
+                {
+                  "day": 9,
+                  "log10_relative": -1.68,
+                  "normalized_linear_shape": 0.0065464
+                },
+                {
+                  "day": 10,
+                  "log10_relative": -1.848,
+                  "normalized_linear_shape": 0.00444634
+                },
+                {
+                  "day": 11,
+                  "log10_relative": -2.016,
+                  "normalized_linear_shape": 0.00301997
+                },
+                {
+                  "day": 12,
+                  "log10_relative": -2.184,
+                  "normalized_linear_shape": 0.00205117
+                },
+                {
+                  "day": 13,
+                  "log10_relative": -2.352,
+                  "normalized_linear_shape": 0.00139317
+                },
+                {
+                  "day": 14,
+                  "log10_relative": -2.52,
+                  "normalized_linear_shape": 0.00094624
+                },
+                {
+                  "day": 15,
+                  "log10_relative": -2.688,
+                  "normalized_linear_shape": 0.00064269
+                },
+                {
+                  "day": 16,
+                  "log10_relative": -2.856,
+                  "normalized_linear_shape": 0.00043652
+                },
+                {
+                  "day": 17,
+                  "log10_relative": -3.024,
+                  "normalized_linear_shape": 0.00029648
+                },
+                {
+                  "day": 18,
+                  "log10_relative": -3.192,
+                  "normalized_linear_shape": 0.00020137
+                },
+                {
+                  "day": 19,
+                  "log10_relative": -3.36,
+                  "normalized_linear_shape": 0.00013677
+                },
+                {
+                  "day": 20,
+                  "log10_relative": -3.528,
+                  "normalized_linear_shape": 9.29e-05
+                },
+                {
+                  "day": 21,
+                  "log10_relative": -3.696,
+                  "normalized_linear_shape": 6.31e-05
+                },
+                {
+                  "day": 22,
+                  "log10_relative": -3.864,
+                  "normalized_linear_shape": 4.286e-05
+                },
+                {
+                  "day": 23,
+                  "log10_relative": -4.032,
+                  "normalized_linear_shape": 2.911e-05
+                },
+                {
+                  "day": 24,
+                  "log10_relative": -4.2,
+                  "normalized_linear_shape": 1.977e-05
+                },
+                {
+                  "day": 25,
+                  "log10_relative": -4.368,
+                  "normalized_linear_shape": 1.343e-05
+                },
+                {
+                  "day": 26,
+                  "log10_relative": -4.536,
+                  "normalized_linear_shape": 9.12e-06
+                },
+                {
+                  "day": 27,
+                  "log10_relative": -4.704,
+                  "normalized_linear_shape": 6.19e-06
+                },
+                {
+                  "day": 28,
+                  "log10_relative": -4.872,
+                  "normalized_linear_shape": 4.21e-06
+                }
+              ],
+              "tail_floor_crossing_day": 28.76
+            }
+          ],
+          "day_resolution_and_interpolation": "piecewise linear in log10 relative units; normalize in linear space. The -5 log10 relative start is a declared assay-floor sensitivity spanning roughly 10^3 vs 10^8.1 copies/swab, not a measured emission floor.",
+          "presymptomatic_behavior": "strong positive RNA before onset is intrinsic to the Jones axis; this is not viable-virus emission",
+          "duration_tail": "RNA positivity remains long after culture positivity; do not use duration as infectious duration",
+          "host_heterogeneity": "very large population but hospitalized-case onset alignment and PAMS heterogeneity; peak position is class-split with Hakki",
+          "tail_rule": "Continue the post-peak -0.168 log10/day line until it crosses the declared -5 log10 assay-floor sensitivity; after that crossing the RNA sensitivity shape is zero. This is an assay-tail rule, not an infectious-period claim.",
+          "normalization": "Peak=1 before the integer day samples are normalized so the tabulated linear shapes sum to 1. The piecewise interpolation is in log10 relative units; normalization is in linear space.",
+          "measured_inferred_hypothesis": {
+            "measured": [
+              "onset-of-shedding-to-peak timing",
+              "peak viral-load magnitude",
+              "post-peak RNA decline slope",
+              "hospitalized-case peak-before-onset bracket"
+            ],
+            "inferred": [
+              "piecewise log-linear interpolation",
+              "onset-axis variants within the published 1-3 day bracket"
+            ],
+            "hypothesis": [
+              "-5 log10 relative assay-floor start and tail truncation rule",
+              "any transfer from RNA kinetics to viable emission"
+            ]
+          },
+          "central_and_uncertainty_variants": {
+            "central": "central_peak_minus2_floor_minus5",
+            "axis_uncertainty": "early_peak_minus3_floor_minus5 and late_peak_minus1_floor_minus5 span the published peak 1-3 days before onset",
+            "slope_uncertainty": "post-peak decline 95% CI -0.171 to -0.165 log10/day; onset-of-shedding-to-peak 95% CI 4.04-4.60 days"
+          }
+        },
+        {
+          "family_id": "kissler2021_rna_first_detectability_parameters",
+          "description": "First-detectability-axis RNA parameters; not an onset-relative candidate because symptom-onset timing was not recorded.",
+          "evidence_grade": "B as acute ambulatory RNA kinetics; not onset-convertible here",
+          "origin": "T1/R plus authors' public posterior parameter file",
+          "parameters": {
+            "proliferation_duration_days_mean": 3.3,
+            "proliferation_duration_days_cri": [
+              2.5,
+              4.2
+            ],
+            "clearance_duration_days_mean": 8.5,
+            "clearance_duration_days_cri": [
+              6.9,
+              10.1
+            ],
+            "acute_shedding_duration_days_mean": 11.7,
+            "acute_shedding_duration_days_cri": [
+              10.1,
+              13.6
+            ],
+            "proliferation_rate_log10_copies_ml_per_day": 1.5,
+            "proliferation_rate_cri": [
+              1.2,
+              2.0
+            ],
+            "clearance_rate_log10_copies_ml_per_day": -0.6,
+            "clearance_rate_cri": [
+              -0.7,
+              -0.5
+            ]
+          },
+          "axis_transfer_to_onset": "not defensible from the paper because symptom-onset timing was not recorded; use as sensitivity to proliferation/clearance only",
+          "normalization": "No normalized onset-relative curve is supplied because the axis is first PCR detectability and cannot be transferred to symptom onset from the paper.",
+          "measured_inferred_hypothesis": {
+            "measured": [
+              "posterior acute-infection proliferation, clearance and duration parameters"
+            ],
+            "inferred": [
+              "authors' hierarchical piecewise-linear trajectory model"
+            ],
+            "hypothesis": []
+          }
+        }
+      ]
+    },
+    "outcome_side_validation_targets": {
+      "class_role": "external validation checks only; never candidate source terms because exposure/contact/behavior and nonlinear dose-response are downstream in the engine",
+      "targets": [
+        {
+          "source": "He 2020 corrected",
+          "quantity": "presymptomatic share of transmission",
+          "value": 0.44,
+          "interval": [
+            0.3,
+            0.57
+          ],
+          "sensitivity_interval": [
+            0.37,
+            0.48
+          ],
+          "peak_day_relative_to_onset": 0,
+          "peak_ci": [
+            -0.9,
+            0.9
+          ],
+          "grade": "C",
+          "origin": "R + Author Correction"
+        },
+        {
+          "source": "Ferretti 2020",
+          "quantity": "strictly presymptomatic transmission share",
+          "value": 0.41,
+          "interval": [
+            0.31,
+            0.5
+          ],
+          "additional_onset_day_or_next_share": 0.35,
+          "additional_interval": [
+            0.26,
+            0.45
+          ],
+          "grade": "C",
+          "origin": "Ab/preprint"
+        },
+        {
+          "source": "Casey-Bryars 2021",
+          "quantity": "presymptomatic transmission share across contexts",
+          "interval": [
+            0.459,
+            0.691
+          ],
+          "mean_transmission_time_days_relative_to_onset": [
+            -2.6,
+            1.4
+          ],
+          "grade": "C",
+          "origin": "R/Sec"
+        },
+        {
+          "source": "Sender 2022",
+          "quantity": "unmitigated inferred infectiousness profile",
+          "use": "shape validation target accounting for inference biases; not a physical emission measurement",
+          "grade": "C",
+          "origin": "R/T1"
+        }
+      ]
+    }
+  },
+  "blocked_or_not_recovered": [
+    "Zhou individual participant data are not publicly downloadable; the article says de-identified data require a written approved request and data-access agreement. Figure digitization is therefore the recovered time resolution, not the underlying participant data.",
+    "Zhou does not report a viable-only time-resolved emitted-material AUC or curve. Culture-positive mask swabs are visually indicated in Figure 2, but overlapping symbols/annotations prevented a validated automated digitization of those fill states; exact time-resolved viable mask emission remains blocked.",
+    "No retrieved source directly measures emitted viable virus densely enough to report an onset-day rise slope or post-peak emission decay slope.",
+    "Kissler cannot be onset-aligned because symptom-onset timing was not recorded."
+  ],
+  "owner_decision_required_before_engine_implementation": "Choose the endpoint priority and representation for the source term: Zhou direct emitted RNA with explicit zero-inflated host heterogeneity, Hakki/Killingley culture-proxy PFU kinetics, or a declared hybrid proxy-transfer rule. This decision must be made before any implementation because the evidence classes must not be blended silently."
+}
