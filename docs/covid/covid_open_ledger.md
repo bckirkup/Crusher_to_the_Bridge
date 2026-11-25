@@ -664,6 +664,16 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   carries 97% of the index's aboard emission. Flagged, unchecked: whether
   the authored curve shape (peak at onset + 4 d) matches the He et al.
   source the window cites.
+- **`COVID-SHED-CURVE-01` — the shedding-curve shape is unsupported by its
+  own citation in two segments (`docs/ledger/COVID-SHED-CURVE-01.md`).**
+  Literature audit, nothing changed. The assembled curve puts 1.2e-6 of
+  emission before onset and 6.1e-5 before onset +2 d, against a declared
+  [0.30, 0.69] presymptomatic share of transmission (He 2020 as corrected,
+  Ferretti 2020, Casey-Bryars 2021); the peak at onset +4 d is inside the
+  viral-load interval [−2, +5] d and outside the transmission-derived
+  [−2, +1] d. Every COVID Θ, founder yield and onset-timing figure is
+  conditional on this curve. Open decision: whether to re-author the curve
+  on the onset axis, and against which evidence class.
 - **`DP-PARTICIPATION-01` closed before any cell — Suite 2 needs
   re-scoping (`docs/ledger/DP-PARTICIPATION-01.md`).** Per-index day-0
   itinerary pinning is not expressible without engine work. A pure readout
