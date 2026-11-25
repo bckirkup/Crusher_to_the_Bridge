@@ -8,6 +8,8 @@ approved implementation work will rely on.
 import json
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 LIBRARY_PATH = ROOT / "docs" / "covid" / "covid_shed_shape_library_01.json"
 
@@ -71,10 +73,15 @@ def test_hakki_family_validates_axis_and_keeps_culture_proxy_separate():
     assert "7/35 (20%) presymptomatic PFU-positive fraction" in family["axis_validation"]
     assert "strict negative rows give 5/35" in family["axis_validation"]
     assert "not emitted material" in load_library()["shape_classes"]["viable_virus_culture_proxy"]["class_role"]
-    rows = family["daily"]
-    assert any(row["day"] < 0 for row in rows)
-    assert abs(sum(row.get("equal_weight_normalized_shape") or 0.0 for row in rows) - 1.0) < 1e-6
-    assert abs(sum(row.get("normalized_mean_linear_shape") or 0.0 for row in rows) - 1.0) < 1e-6
+    rows = {row["day"]: row for row in family["daily"]}
+    assert rows[-1]["n_positive"] == 1
+    assert rows[0]["mean_log10_pfu_positive"] == pytest.approx(5.699)
+    assert rows[1]["detection_probability"] == pytest.approx(0.4545)
+    assert rows[2]["n_positive"] == 9
+    assert rows[3]["mean_log10_pfu_positive"] == pytest.approx(3.318)
+    assert any(day < 0 for day in rows)
+    assert abs(sum(row.get("equal_weight_normalized_shape") or 0.0 for row in rows.values()) - 1.0) < 1e-6
+    assert abs(sum(row.get("normalized_mean_linear_shape") or 0.0 for row in rows.values()) - 1.0) < 1e-6
 
 
 def test_kissler_is_not_invented_as_onset_aligned_and_owner_decision_is_named():
