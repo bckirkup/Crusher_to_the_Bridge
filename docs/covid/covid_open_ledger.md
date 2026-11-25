@@ -1,8 +1,8 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `220e6401` (fill with the
-> `main` SHA this file was authored against). If that is not the current head,
-> treat every number here as unverified.
+> **Status:** Living. The original ledger snapshot used `220e6401`.
+> Later entries cite their own source and revision. Check each measurement
+> at its cited revision before quoting it for the current model.
 
 What is currently withdrawn on the `sars_cov2_resp` arm, what the last
 measurement of record is, and what is outstanding. The permanent defect record
