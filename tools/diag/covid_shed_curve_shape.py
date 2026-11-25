@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Read-only shape readout of a profile's shedding curve (COVID-SHED-CURVE-01).
+"""Read-only shape readout of the ``sars_cov2_resp`` shedding curve (COVID-SHED-CURVE-01).
 
 Assembles the curve the engine emits on the symptom-onset axis: the
 presymptomatic gate, the clamp of negative day indices to entry 0, then one
 entry per whole day since onset (``KorkinAgent._shedding_curve_point``).
 Prints relative emission per day, cumulative shares and decade slopes.
 Changes nothing; reads ``data/pathogens/active_profiles.json`` only.
+
+Whole-day arithmetic, valid for this profile only: its presymptomatic window
+is a whole number of days and its shedding duration equals the curve length.
+Other profiles (fractional windows, clearance before the curve ends) are
+refused rather than misreported.
 """
 from __future__ import annotations
 
@@ -14,6 +19,7 @@ import json
 import math
 from pathlib import Path
 
+PATHOGEN_ID = "sars_cov2_resp"
 PROFILES = Path(__file__).resolve().parents[2] / "data/pathogens/active_profiles.json"
 
 
@@ -29,7 +35,10 @@ def assembled(profile: dict) -> list[tuple[int, float]]:
     """(day since onset, log10 relative to peak) for each emitting day."""
     curve = profile["shedding_curve_log10"]
     peak = max(curve)
-    first_day = -math.ceil(float(profile.get("presymptomatic_shedding_days", 0.0)))
+    window = float(profile.get("presymptomatic_shedding_days", 0.0))
+    if window != math.floor(window) or profile.get("shedding_duration_days") != len(curve):
+        raise SystemExit("whole-day readout does not apply to this profile")
+    first_day = -int(window)
     return [
         (day, curve[min(max(day, 0), len(curve) - 1)] - peak)
         for day in range(first_day, len(curve))
@@ -43,11 +52,10 @@ def share(days: list[tuple[int, float]], lo: float, hi: float) -> float:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pathogen", default="sars_cov2_resp")
-    parser.add_argument("--leave-day", type=float, default=2.0,
-                        help="day since onset the index leaves (DP: 2)")
+    parser.add_argument("--leave-day", type=int, default=2,
+                        help="whole day since onset the index leaves (DP: 2)")
     args = parser.parse_args()
-    profile = load_profile(args.pathogen)
+    profile = load_profile(PATHOGEN_ID)
     days = assembled(profile)
     inf = float("inf")
     print("day_since_onset  log10_rel_peak  share_of_total")
