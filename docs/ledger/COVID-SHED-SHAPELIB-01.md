@@ -115,8 +115,9 @@ library provides early/central/late axis-shift variants rather than pretending
 one participant-aligned onset axis exists. The `-5` log10 relative starting
 floor is a declared assay-floor sensitivity, not a measured emission floor.
 The piecewise tail offset explicitly borrows Hakki's infectious-virus decline
-(−1.13 log10/day) over about six days; it is labelled as cross-study culture-
-proxy inference, not a Killingley measured slope.
+(−1.13 log10/day) over about six days from peak to the central latest-viable-detection endpoint,
+not the shorter median detection duration; it is labelled as cross-study
+culture-proxy inference, not a Killingley measured slope.
 
 Wölfel remains a duration/tail check only: peak throat RNA on illness day 4,
 no isolates after illness day 8, and a wide probit threshold interval. It is

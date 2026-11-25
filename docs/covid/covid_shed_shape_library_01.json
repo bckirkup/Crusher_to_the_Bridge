@@ -2233,7 +2233,7 @@
                 {
                   "day": 7.6,
                   "value": -6.8,
-                  "status": "duration-tail inferred"
+                  "status": "latest-detection-tail inferred"
                 }
               ]
             },
@@ -2253,7 +2253,27 @@
                 {
                   "day": 6.6,
                   "value": -6.8,
-                  "status": "duration-tail inferred"
+                  "status": "latest-detection-tail inferred"
+                }
+              ]
+            },
+            {
+              "variant": "throat_late_onset_shift4",
+              "points_log10_relative": [
+                {
+                  "day": -2.3,
+                  "value": -5.0,
+                  "status": "detection-floor declared sensitivity"
+                },
+                {
+                  "day": -0.4,
+                  "value": 0.0,
+                  "status": "measured peak bracket centre"
+                },
+                {
+                  "day": 5.6,
+                  "value": -6.8,
+                  "status": "latest-detection-tail inferred"
                 }
               ]
             },
@@ -2273,7 +2293,27 @@
                 {
                   "day": 8.5,
                   "value": -6.8,
-                  "status": "duration-tail inferred"
+                  "status": "latest-detection-tail inferred"
+                }
+              ]
+            },
+            {
+              "variant": "nose_late_onset_shift4",
+              "points_log10_relative": [
+                {
+                  "day": -1.6,
+                  "value": -5.0,
+                  "status": "detection-floor declared sensitivity"
+                },
+                {
+                  "day": 1.5,
+                  "value": 0.0,
+                  "status": "measured peak bracket centre"
+                },
+                {
+                  "day": 7.5,
+                  "value": -6.8,
+                  "status": "latest-detection-tail inferred"
                 }
               ]
             }
@@ -2288,7 +2328,7 @@
             "axis_uncertainty": "early onset shift 2 d versus late onset shift 4 d post-inoculation",
             "shape_uncertainty": "piecewise interpolation is a declared simplification because full numeric FFA trajectories were not recovered"
           },
-          "piecewise_slope_source": "The -6.8 log10 relative tail offset applies Hakki 2022 infectious-virus decline (-1.13 log10/day) over approximately 6 days from peak to the median duration endpoint. This is an explicit cross-study culture-proxy inference, not a Killingley measured slope and not a blend with RNA or emission data."
+          "piecewise_slope_source": "The -6.8 log10 relative tail offset applies Hakki 2022 infectious-virus decline (-1.13 log10/day) over approximately 6 days from peak to the central latest-viable-detection endpoint. It does not represent the shorter median FFA detection duration. This is an explicit cross-study culture-proxy inference, not a Killingley measured slope and not a blend with RNA or emission data."
         },
         {
           "family_id": "woelfel2020_culture_duration_check",
