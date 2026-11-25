@@ -73,15 +73,18 @@ def test_hakki_family_validates_axis_and_keeps_culture_proxy_separate():
     assert "7/35 (20%) presymptomatic PFU-positive fraction" in family["axis_validation"]
     assert "strict negative rows give 5/35" in family["axis_validation"]
     assert "not emitted material" in load_library()["shape_classes"]["viable_virus_culture_proxy"]["class_role"]
-    rows = {row["day"]: row for row in family["daily"]}
+    row_list = family["daily"]
+    days = [row["day"] for row in row_list]
+    assert len(days) == len(set(days))
+    rows = {row["day"]: row for row in row_list}
     assert rows[-1]["n_positive"] == 1
     assert rows[0]["mean_log10_pfu_positive"] == pytest.approx(5.699)
     assert rows[1]["detection_probability"] == pytest.approx(0.4545)
     assert rows[2]["n_positive"] == 9
     assert rows[3]["mean_log10_pfu_positive"] == pytest.approx(3.318)
     assert any(day < 0 for day in rows)
-    assert abs(sum(row.get("equal_weight_normalized_shape") or 0.0 for row in rows.values()) - 1.0) < 1e-6
-    assert abs(sum(row.get("normalized_mean_linear_shape") or 0.0 for row in rows.values()) - 1.0) < 1e-6
+    assert abs(sum(row.get("equal_weight_normalized_shape") or 0.0 for row in row_list) - 1.0) < 1e-6
+    assert abs(sum(row.get("normalized_mean_linear_shape") or 0.0 for row in row_list) - 1.0) < 1e-6
 
 
 def test_kissler_is_not_invented_as_onset_aligned_and_owner_decision_is_named():
