@@ -17,22 +17,38 @@ provisions. No new campaign cells; no constants moved.
 
 Carrier-R+D arm artifacts, crossing/hot seeds:
 
-| seed | emesis events | patch mass GEC | picked up | pickups (count) | secondaries | yield/event |
-|---|---|---|---|---|---|---|
-| 8002 | 6 | 11.6M | 1.7% | 40 | 4 | 0.7 |
-| 8005 | 6 | 18.8M | 4.2% | 48 | 5 | 0.8 |
-| 8009 | 5 | 57M | 2.5% | 12 | 5 | 1.0 |
-| 8018 | 1 | 1.3M | 77% | 47 | 10 | 10.0 |
-| 8006 | 150 | 1.24B | 4.4% | 4,246 | 193 | 1.3 |
+| seed | emesis events | patch mass GEC | picked up | pickups (count) | onboard acquisitions (all routes) |
+|---|---|---|---|---|---|
+| 8002 | 6 | 11.6M | 1.7% | 40 | 4 |
+| 8005 | 6 | 18.8M | 4.2% | 48 | 5 |
+| 8009 | 5 | 57M | 2.5% | 12 | 5 |
+| 8018 | 1 | 1.3M | 77% | 47 | 10 |
+| 8006 | 150 | 1.24B | 4.4% | 4,246 | 193 |
 
-Witness counter fields: `emesis_witness` per artifact. Subcritical cells
-(~0.7–1.0 yield) fade; 8018 proves a single event can yield 10
-secondaries when its pickup connects.
+Witness counter fields: `emesis_witness` per artifact. Caveats, stated
+not softened: `secondaries`/`acquisitions` counts **every onboard
+acquisition regardless of route** — the artifact carries no
+emesis-attributed secondary count, so these figures are voyage totals
+that upper-bound emesis yield rather than measure it (on the cold cells
+no food events fired, so non-emesis routes contribute, but how much is
+not separable here); likewise `pickups` is a voyage total across
+possibly-concurrent patches and is not per-event attributable. With
+those caveats the qualitative read stands: 8002/8005/8009 fade at single-digit
+acquisitions while 8018 — one event, 47 pickups, 77% of its patch mass
+picked up — reached 10.
 
 ## 2. Which links are NOT the constraint (measured)
 
-- **Patch persistence**: patches live 83–264 of 288 epochs (`sweeps_with_filed_patch`).
-- **Dose per pickup**: 22k–117k GEC/pickup vs ~2.6e3 GEC hazard need at best frailty — 10–40× sufficient.
+- **Patch persistence**: at least one patch is filed in 83–264 of the
+  288 pickup sweeps on these cells (`sweeps_with_filed_patch` counts
+  sweeps with *any* patch present, not individual patch lifetimes —
+  per-patch lifetime is unmeasured; the directional evidence is that
+  exposure opportunity is not sweep-scarce).
+- **Dose per pickup**: 22k–117k GEC/pickup vs ~2.6e3 GEC hazard need at
+  best frailty — a 10–40× margin. Caveat: the norovirus open ledger
+  marks all dose figures void pending refit; this comparison is internal
+  to one consistent unit system (same GEC on both sides) so the ratio
+  survives any rescaling, but absolute figures carry the void mark.
 - **Venue occupancy** (local instrumented probe, seed 8001, 72 epochs, n=1910): cabin share of aboard agent-epochs **9.2%**; venues dense — LidoBuffet ~90 occupants/epoch mean, MainTheater 238, PoolDeck 115, MainDining_U/L ~98–100. No occupancy starvation.
 - **Withdrawal timing**: moot — there is no withdrawal at all (below).
 
@@ -49,21 +65,28 @@ Symptomatic hosts circulate at occupancy rates — nobody retreats.
 Realism questionable in the transmission-*favorable* direction;
 recorded, not acted on.
 
-## 4. Episode placement follows occupancy; the cabin-mass attribution was geometric
+## 4. The cabin-mass attribution was geometric, not placement evidence
 
-Instrumented emit logging (seed 8002): episodes fire in the zone the
-host physically occupies — the observed episode landed in `MainDining_U`
-while the host dined. The `patch_by_venue_class` split that showed 95–98%
-`cabin_fittings` (NORO-HOT-VOYAGE-VALIDATION-01 era reading) is a
-deposition-geometry artifact: `touchable_fraction = high_touch_area /
-max(floor_area, footprint)` is near 1 in cabins and 1–10% in large
-venues, so 90–99% of venue bolus mass is floor-loss and never enters the
-touchable record. **Episodes were in venues all along; recorded mass
-collapses there.** This entry supersedes the cabin-placement reading.
+Instrumented emit logging (seed 8002): the one episode observed in the
+probe fired in the zone the host physically occupied — `MainDining_U`
+mid-meal — consistent with occupancy-driven placement, but a single
+observation in a single seed does not establish placement cohort-wide.
+What *is* established: `patch_by_venue_class` records mass, not event
+counts, so it cannot speak to placement at all — the 95–98%
+`cabin_fittings` mass split (the NORO-HOT-VOYAGE-VALIDATION-01 era
+reading) is dominated by deposition geometry: `touchable_fraction =
+high_touch_area / max(floor_area, footprint)` is near 1 in cabins and
+1–10% in large venues, so most venue bolus mass is floor-loss and never
+enters the touchable record. Placement per se is therefore *unmeasured*
+cohort-wide; the cabin-placement reading is withdrawn as unsupported
+either way, and the mass-split inversion (recorded mass collapses in
+venues even if episodes occur there) stands as the geometric fact.
 
 ## 5. The binding constraint: pickup COUNT per event, and why pans win
 
-- 2–10 pickups per emesis event shipwide; cumulative susceptible
+- Pickups per event run ~2–8 on the fading cells (8002/8005/8009) and
+  28–47 where the chain connects (8018/8006) — voyage-total counts, not
+  per-event attributable (§1 caveat); cumulative susceptible
   occupants of patch-matched units run 1–4k over patch lifetime
   (8009: 3,914 matched susceptibles → 12 pickups, ~0.3% conversion of
   exposure to pickup).
