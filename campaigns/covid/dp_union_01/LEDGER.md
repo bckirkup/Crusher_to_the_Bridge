@@ -3,6 +3,10 @@
 Declared 2026-11-24 (ledger `docs/ledger/DP-UNION-01.md`, design doc
 `docs/covid/covid_dp_union_01_design.md`).
 
+**2026-11-25, DP-UNION-CLOCK-01.** The [evidence audit](../../../docs/ledger/DP-INDEX-CLOCK-EVIDENCE-01.md)
+verified NIID's explicit correction to 23 January. The proposed
+`union_journal` canary stopped before registration or submission.
+
 - **State:** grid declared on the post-fine-share scale; pilot (30 cells)
   and canary (20 cells at θ=3.16e8) read out; staged array run at 3.16e9
   and 1e9, then the last 23 cells on the owner's decision. **The scored

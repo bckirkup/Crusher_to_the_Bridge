@@ -7,6 +7,8 @@ altered after a surface is seen. Executes §2 (the arm), §3 Suite 1 (the
 scope) and §5 (the adopted joint conditioned contract) of
 `docs/proposals/covid_theta_unification_plan.md`.
 
+Index-clock provenance for the frozen arm: [NIID correction and competing case histories](../ledger/DP-INDEX-CLOCK-EVIDENCE-01.md).
+
 **Revision before any cell (2026-11-24).** The first freeze of this file
 (commit `d5273582`) scored five legs on takeoff seeds over θ {1e9, 3.16e9,
 4.22e9, 1e10}. Two owner decisions the same day replaced that before any

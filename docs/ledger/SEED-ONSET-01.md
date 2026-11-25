@@ -9,12 +9,16 @@
 `ExplicitSeed` carried `infection_age_days` but no way to declare the seeded
 host's observed onset date, so the seeded host's incubation period was drawn
 free from the profile distribution. Whether the Diamond Princess index
-"boarded already symptomatic" — a dated fact of the record (cough onset 19
-January, boarding 20 January = day 0; Yamagishi 2020, Eurosurveillance
-25(23):2000272, grade A) — was decided by a lottery: at the record's
+"boarded already symptomatic" under the Yamagishi chronology (cough onset
+19 January, boarding 20 January = day 0, Eurosurveillance 25(23):2000272,
+grade A for that reported history) was decided by a lottery: at the declared
 infection age (~5–6 d) the draw passes the geometry gate in only 45% of
 seeds, and no threshold fixes it because the gate was mixing "this replicate
 drew a short incubation" with "the index boarded symptomatic".
+
+NIID corrected its own briefing to 23 January for the same
+passenger's cough. The −1 day geometry below documents the journal-clock
+arm. [Primary-source audit](DP-INDEX-CLOCK-EVIDENCE-01.md)
 
 ## Fix: `ExplicitSeed.onset_day`
 

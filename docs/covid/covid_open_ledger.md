@@ -1,8 +1,8 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `220e6401` (fill with the
-> `main` SHA this file was authored against). If that is not the current head,
-> treat every number here as unverified.
+> **Status:** Living. The original ledger snapshot used `220e6401`.
+> Later entries cite their own source and revision. Check each measurement
+> at its cited revision before quoting it for the current model.
 
 What is currently withdrawn on the `sars_cov2_resp` arm, what the last
 measurement of record is, and what is outstanding. The permanent defect record
@@ -16,6 +16,12 @@ for the COVID arm.
 ---
 
 ## 1. Currently withdrawn
+
+**Index symptomatic at boarding.** The 19 January cough is the history in
+Yamagishi et al. NIID explicitly corrected its briefing to 23 January, also
+the cough date in the treating team's clinical history. DP-UNION-01 already
+used the corrected date. DP-UNION-CLOCK-01 stopped before submission.
+[Index-clock evidence and decision](../ledger/DP-INDEX-CLOCK-EVIDENCE-01.md)
 
 **`COVID-EMIT-FINE-01` (ledger entry): every Θ measured before this
 change is in the old emission units.** `airborne_emission_fraction` on
@@ -357,11 +363,13 @@ design, but unreachable for the replay leg. Readout:
 `docs/covid/covid_mech_v2_band_readout.md`.*
 
 **The declared index case is repaired — earlier text here was stale.**
-The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
-at Hong Kong on 25 Jan (Yamagishi 2020). Declared per-agent departure exists
+The Yamagishi account puts cough onset on 19 Jan, boarding on 20 Jan and
+disembarkation in Hong Kong on 25 Jan. The corrected NIID chronology is in
+[DP-INDEX-CLOCK-EVIDENCE-01](../ledger/DP-INDEX-CLOCK-EVIDENCE-01.md).
+Declared per-agent departure exists
 (`docs/ledger/INDEX-GEOM-01.md`: `departure_epoch` gates transmission and
-every aboard denominator through `LOCATION_DEPARTED`), and every stage-2
-replay since v11 declares the record's geometry verbatim —
+every aboard denominator through `LOCATION_DEPARTED`). The historical
+stage-2 journal-clock replays declared —
 `onset_day: -1.0`, `departure_day: 5.0`, `infection_age_days: 6.8`
 (bookkeeping only; under a declared `onset_day` the age axis is a measured
 null, COVID-SEED-GEOM-01). Verified live on the v15 cells:
