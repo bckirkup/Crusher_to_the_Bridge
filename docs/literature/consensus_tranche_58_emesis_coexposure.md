@@ -16,9 +16,12 @@ event-moment concentration, near-field receiving volume, inhalation fraction,
 decay rate, or distance kernel needed to make that structure quantitative.
 
 **Source discipline.** Consensus MCP was available. Every search used
-`include_full_text_chunks: true`, named the quantity and unit, and used no
-filters. Full text was opened through Consensus for the primary rows except
-where marked otherwise. Origins use the register vocabulary: **R** Results,
+`include_full_text_chunks: true` and no filters. The synthesis-critical
+queries named the quantity and unit; several early route-discovery queries did
+not state units explicitly, so unit-explicit supplementary queries were run and
+are logged in §5 rather than silently rewriting the search record. Full text
+was opened through Consensus for the primary rows except where marked
+otherwise. Origins use the register vocabulary: **R** Results,
 **Tn** table *n*, **Fn** figure *n*, **Me** Methods, **Ab** abstract only,
 **Sec** secondary/review, **Tr** transcribed. A blocked read is recorded as a
 retrieval state, never as a null result. Grades are Crusher grades: **A** this
@@ -266,6 +269,8 @@ remain declared and swept.
 | `norovirus vomiting concert hall outbreak airborne exposure audience attack rate distance cleanup` | returned Evans 2002; full text opened |
 | `norovirus vomiting outbreak aircraft passengers seated nearby attack rate exposure during flight vomiting episode` | returned Kirking 2010 and Thornley 2011 aircraft outbreaks |
 | `post-vomiting aerosol concentration time course minutes after vomiting event norovirus real room measurement` | returned Alsved 2020 first; no study with the requested post-event time-resolved room concentration series |
+| `restaurant vomiting attack rate percent by table distance metres co-present exposure minutes before cleanup norovirus` | unit-explicit supplementary query; returned Marks 2000 first, with attack-rate and table-layout full text |
+| `norovirus vomiting aerosol particle size micrometres spatial extent metres deposition footprint indoor airborne dispersion` | unit-explicit supplementary query; returned Alsved 2020 first, with size-fraction full text |
 
 Consensus rate limiting was encountered only when several searches were fired
 in parallel; spacing the same queries out completed them, so this is not an
