@@ -50,7 +50,12 @@ nasal-indexed curve and lognormal shedding variance. The Edison multi-pathogen
 library is deliberately unchanged in this PR. No old Θ converts to the new emission
 denomination by a scalar; DP-UNION-01 and all earlier replay outcomes remain
 measurements of the superseded source law at their own `Measured at` SHAs.
-No campaign has yet run under the replacement source law.
+The first campaign measurement under the replacement source law is the
+DP-UNION-02 `union_t1e8_canary` at theta `1e8` (20 seeds, formally provisional
+at 20/24): it is not consistent, with near-saturating attack, almost all
+incidence before quarantine, and testing positives far below the record. No
+full scored row or fitted operating point exists yet; see
+`docs/ledger/DP-UNION-02.md` and `campaigns/covid/dp_union_02/LEDGER.md`.
 
 **`COVID-PRESHED-GATE-01` (ledger entry): the first post-shape source-law
 correction is the owner-approved presymptomatic-gate and seed-clock fix.** The
@@ -61,7 +66,9 @@ onset day -5 and explicit-seed onset stamping uses the engine-represented age.
 No additional campaign result is withdrawn because no post-shape scored
 campaign existed; `COVID-INDEX-CLOCK-01`'s exact gate/boundary arithmetic is
 historical at its own revision. DP-UNION-02's ascertainment-conditioned seed
-cohort is frozen, but no scored DP-UNION-02 cell has run.
+cohort is frozen. Its first authorized canary cell (theta `1e8`, first 20
+seeds) has now run and is recorded in `docs/ledger/DP-UNION-02.md`; the four
+`_rest` seeds and every other lattice cell remain unrun.
 
 **`COVID-THETA-REFIT-01` (ledger entry): every DP/GM replay figure measured
 at the Θ=7.9e6 (or older 1e6) operating point is historical on the Θ
