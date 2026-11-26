@@ -15,6 +15,8 @@ if spec is None or spec.loader is None:
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
-if "--design" not in sys.argv:
+if not any(
+    arg == "--design" or arg.startswith("--design=") for arg in sys.argv[1:]
+):
     sys.argv.extend(["--design", _DESIGN])
 raise SystemExit(module.main())

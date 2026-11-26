@@ -83,11 +83,34 @@ def main(argv: list[str] | None = None) -> int:
     design_path = _REPO_ROOT / args.design
     design_sha = hashlib.sha256(design_path.read_bytes()).hexdigest()
 
+    # The frozen scored design contains only the already-selected cohort.
+    # Selection itself needs a candidate design whose explicit seed axis is
+    # the whole predeclared sequence; derive that probe-only design here so
+    # the measurement remains rerunnable after the scored cohort is frozen.
+    raw_design = json.loads(design_path.read_text(encoding="utf-8"))
+    raw_design["seeds"] = len(candidates)
+    raw_design["seed_values"] = candidates
+    raw_design["cells"] = (
+        len(candidates) * len(raw_design.get("thetas", []))
+        * len(raw_design.get("infection_age_days", []))
+        * len(raw_design.get("imports", []))
+        * len(raw_design.get("arms", []))
+    )
+    probe_design_path = (
+        _REPO_ROOT / "out" / "dp_union_02_probe"
+        / f"probe_design_{design_sha[:12]}_{len(candidates)}.json"
+    )
+    probe_design_path.parent.mkdir(parents=True, exist_ok=True)
+    probe_design_path.write_text(
+        json.dumps(raw_design, indent=2) + "\n", encoding="utf-8",
+    )
+    probe_design = str(probe_design_path)
+
     rows: list[dict[str, Any]] = []
     with concurrent.futures.ProcessPoolExecutor(max_workers=args.jobs) as pool:
         futures = {
             pool.submit(
-                _run_candidate, seed, args.design, args.theta, args.arm, cells_dir,
+                _run_candidate, seed, probe_design, args.theta, args.arm, cells_dir,
             ): seed
             for seed in candidates
         }

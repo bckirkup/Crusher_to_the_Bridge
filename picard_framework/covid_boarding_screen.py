@@ -1610,9 +1610,11 @@ def _index_geometry(
     # Infection age is whole epochs in the engine. Normalize direct callers
     # the same way cell_payload's run-spec readback does; re-quantizing an
     # already represented age is idempotent.
-    age = float(engine.clock.days_elapsed(
-        int(round(engine.clock.epochs_for_days(age))),
-    ))
+    clock = getattr(engine, "clock", None)
+    if clock is not None:
+        age = float(clock.days_elapsed(
+            int(round(clock.epochs_for_days(age))),
+        ))
     agent = _index_host(engine)
     if agent is None:
         return {
@@ -2178,7 +2180,7 @@ def prepare_cell_run_spec(
 
 
 def _index_infection_age(
-    raw: dict[str, Any], cell: ScreenCell, clock: Any,
+    raw: dict[str, Any], cell: ScreenCell, clock: Any | None,
 ) -> float:
     """The represented age the index host was seeded with.
 
@@ -2196,6 +2198,8 @@ def _index_infection_age(
         if len(seeds) == 1 and seeds[0].get("infection_age_days") is not None
         else float(cell.infection_age_days)
     )
+    if clock is None:
+        return age
     epochs = int(round(clock.epochs_for_days(age)))
     return float(clock.days_elapsed(epochs))
 
@@ -2237,7 +2241,9 @@ def cell_payload(
         },
         **_index_geometry(
             sim.engine, cell, sim.pathogen_profiles[PATHOGEN_ID],
-            infection_age_days=_index_infection_age(raw, cell, sim.engine.clock),
+            infection_age_days=_index_infection_age(
+                raw, cell, getattr(sim.engine, "clock", None),
+            ),
         ),
         **_truth_counts(sim.engine),
         "lab_confirmed_total": syndromic.lab_confirmed_count(PATHOGEN_ID),

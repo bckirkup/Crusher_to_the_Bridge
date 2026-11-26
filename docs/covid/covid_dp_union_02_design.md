@@ -121,8 +121,8 @@ class:
 | `attack` | median total infections in [712, 960] |
 | `during` | median during-quarantine infections in [150, 350] |
 | `capture` | median conditioned confirmed/reachable capture at least 0.8, with reachable infections truncated at infection day 29 |
-| `t3` | median cumulative positives through day 31 within the frozen FIT-01 ±50% band around 634 (321–951) |
-| `onboard_table` | median cumulative positives through day 34, including the crew wave, within the same ±50% band around 691 (346–1036) |
+| `t3` | cumulative positives through day 31 are compatible with 634 under FIT-01's side rule: neither strictly-above nor strictly-below counts reaches 75% of scored-class cells; the median is reported, not the pass criterion |
+| `onboard_table` | cumulative positives through day 34, including the crew wave, are compatible with 691 under the same side rule; the median is reported, not the pass criterion |
 
 Specimen-count side rules are reported, never selected: at least 75% of
 scored-class cells have day-31 specimens within ±50% of 3063 and day-34

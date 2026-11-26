@@ -303,7 +303,7 @@
       ],
       "how": "the first 5 selected ascertainment-conditioned seeds of each decade's canary block (scripts/campaign submit --size 5); the same cells the full block would run",
       "statistic": "median over the 5 seeds of positives through day 31 (P31, all seeds, unconditioned), against 634",
-      "reads": "only the T3 side of each decade and the dead/saturated edges. No contract leg is scored from pilot cells; they are 5-seed provisional rows."
+      "reads": "only the T3 side of each decade and the saturated edge. The 20-seed dead-row test cannot be read from five pilot cells and is not claimed. No contract leg is scored from pilot cells; they are 5-seed provisional rows."
     },
     "selection_rule": "theta_hi = the lowest pilot decade whose median P31 >= 634; theta_lo = the decade below it. Scored grid = {theta_lo, 3.16*theta_lo, theta_hi, 3.16*theta_hi}, dropping a value above the lattice. Canary = 20 seeds at 3.16*theta_lo. If no pilot decade reaches 634, or the lowest one already does, no grid is declared and that is reported. A pilot median that falls back below 634 above theta_hi is reported and does not move the grid.",
     "scored_thetas": null,

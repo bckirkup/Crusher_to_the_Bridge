@@ -183,6 +183,7 @@ def _cell(
         }
 
     return {
+        "design_id": "covid-dp-union-01",
         "infections_total": infections,
         "aboard_total": 3711,
         "attack_rate": infections / 3711,

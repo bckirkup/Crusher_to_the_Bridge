@@ -19,7 +19,8 @@ def build_argv(
     args: Any, block: dict[str, Any], seed: int, out_dir: Path,
 ) -> tuple[list[str], Path]:
     """Argv for one (theta, arm_id, seed) cell and its artifact path."""
-    artifact = Path(out_dir) / block["artifact"].format(
+    cell_out = Path(out_dir) / args.block
+    artifact = cell_out / block["artifact"].format(
         seed=seed, platform=args.platform,
     )
     block_args = block["args"]
@@ -29,6 +30,6 @@ def build_argv(
         "--theta", str(block_args["theta"]),
         "--arm", block_args["arm_id"],
         "--seed", str(seed),
-        "--out", str(out_dir),
+        "--out", str(cell_out),
     ]
     return command, artifact

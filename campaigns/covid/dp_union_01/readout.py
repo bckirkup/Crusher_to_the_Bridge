@@ -36,12 +36,14 @@ _LEGS = ("timing_ignition", "timing_before_share", "attack", "during",
          "capture", "t3", "onboard_table")
 
 
-def _load_cells(cells_dir: Path) -> dict[float, dict[int, dict[str, Any]]]:
+def _load_cells(cells_dir: Path, design_id: str) -> dict[float, dict[int, dict[str, Any]]]:
     """Every ``cell_<seed>.json`` under ``cells_dir``, keyed theta -> seed."""
     cells: dict[float, dict[int, dict[str, Any]]] = {}
     for path in sorted(cells_dir.rglob("cell_*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
         block = payload.get("dp_union") or {}
+        if payload.get("design_id") != design_id:
+            continue
         if block.get("arm_id") != _ARM or block.get("smoke_num_epochs") is not None:
             continue
         by_seed = cells.setdefault(float(block["theta"]), {})
@@ -425,7 +427,7 @@ def _theta_row(
         "consistent": (
             None if provisional else
             all(legs[name]["pass"] for name in _LEGS)
-            and not dead and not saturated
+            and not dead and not saturated and not audits
         ),
         "seeds_in_band": in_band,
         "median_not_representative": (
@@ -519,7 +521,7 @@ def main(argv: list[str] | None = None) -> int:
     design = json.loads(design_path.read_text(encoding="utf-8"))
     contract = design["joint_contract"]
     expected = int(design["seeds"])
-    cells = _load_cells(Path(args.cells_dir))
+    cells = _load_cells(Path(args.cells_dir), design["design_id"])
     rows = [
         _theta_row(theta, cells[theta], contract, expected)
         for theta in sorted(cells)
