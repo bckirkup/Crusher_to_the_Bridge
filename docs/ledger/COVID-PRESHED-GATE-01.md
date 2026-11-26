@@ -1,9 +1,9 @@
 # COVID-PRESHED-GATE-01
 **Date:** 2026-11-26
-**Commit:** 4abbd2cd
+**Commit:** f567c293
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 4abbd2cd plus this change's working tree
+**Measured at:** f567c293
 
 Owner-approved precursor to DP-UNION-02. The presymptomatic emission gate on
 the active COVID arm now covers the Zhou shape's negative support, and explicit
