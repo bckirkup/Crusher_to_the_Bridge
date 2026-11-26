@@ -1565,6 +1565,8 @@ def _boarding_emission_positive(
     occurrence_rows = inf.get("emission_shape_occurrence") or []
     if len(occurrence_rows) != len(daily):
         return False
+    if row_index >= len(occurrence_rows):
+        return False
     return (
         float(occurrence_rows[row_index])
         < float(row.get("detection_probability", 0.0))
