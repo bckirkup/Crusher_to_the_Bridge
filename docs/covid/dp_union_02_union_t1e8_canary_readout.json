@@ -111,7 +111,8 @@
       "median_p31": 186,
       "at_or_above_t3": false,
       "dead": false,
-      "saturated": false
+      "saturated": false,
+      "provenance": "pilot-seed slice of artifacts present in cells-dir; does not establish whether a separate pilot ran"
     }
   ],
   "joint": null,

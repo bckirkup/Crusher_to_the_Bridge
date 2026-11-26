@@ -507,6 +507,10 @@ def _pilot(
             "at_or_above_t3": None if median is None else median >= target,
             "dead": row["dead"],
             "saturated": row["saturated"],
+            "provenance": (
+                "pilot-seed slice of artifacts present in cells-dir; "
+                "does not establish whether a separate pilot ran"
+            ),
         })
     return out
 

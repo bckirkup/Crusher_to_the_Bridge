@@ -85,6 +85,10 @@ def test_pilot_reads_the_t3_side_from_pilot_seeds_only():
     assert [p["median_p31"] for p in pilot] == [100, 717.0]
     assert [p["at_or_above_t3"] for p in pilot] == [False, True]
     assert [p["n"] for p in pilot] == [3, 2]
+    assert all(
+        "does not establish whether a separate pilot ran" in p["provenance"]
+        for p in pilot
+    )
 
 
 def test_union_arm_is_replay_niid_plus_exactly_the_declared_deltas():
