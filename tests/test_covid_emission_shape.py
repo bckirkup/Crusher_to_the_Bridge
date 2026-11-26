@@ -170,7 +170,7 @@ class TestZeroInflatedDailyEmission:
         infection["incubation_days"] = 1.0
         assert agent.superinfect_with_strain(
             PATHOGEN, "s:invader", 3000.0, 0,
-            phenotype=Phenotype(),
+            phenotype=Phenotype(incubation_modifier=2.0),
         )
         rng = np.random.default_rng(7)
 
@@ -179,6 +179,12 @@ class TestZeroInflatedDailyEmission:
         residents = agent.resident_strains(PATHOGEN)
         assert "s:index" not in residents
         assert "s:invader" in residents
+        assert infection["status"] == InfectionStatus.INFECTED
+        assert infection["strain_incubation_modifier"] == pytest.approx(0.0)
+
+        for _ in range(round(2 * agent.clock.epochs_per_day)):
+            advance_infections(agent, {PATHOGEN: profile}, rng)
+        assert "s:invader" in agent.resident_strains(PATHOGEN)
         assert infection["status"] == InfectionStatus.INFECTED
 
         for _ in range(round(2 * agent.clock.epochs_per_day)):
