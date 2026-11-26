@@ -1848,6 +1848,7 @@ def _apply_one_seed(
     )
     onset_incubation, elapsed_since_onset, departure_epoch = _seed_epoch_fields(
         seed, engine, epoch, location,
+        represented_age_days=engine.clock.days_elapsed(time_infected),
     )
     chosen = (
         rng.choice(pool, size=count, replace=False) if count > 0 else []
@@ -1897,6 +1898,8 @@ def _seed_epoch_fields(
     engine: Any,
     epoch: int,
     location: str,
+    *,
+    represented_age_days: float,
 ) -> tuple[float | None, float | None, int | None]:
     """(onset incubation, elapsed since onset, departure epoch) — validated."""
     onset_incubation: float | None = None
@@ -1906,7 +1909,7 @@ def _seed_epoch_fields(
         # is a consequence of it, not a draw from the profile.
         seed_day = float(engine.clock.days_elapsed(epoch))
         onset_incubation = (
-            seed.infection_age_days + seed.onset_day - seed_day
+            represented_age_days + seed.onset_day - seed_day
         )
         if onset_incubation <= 0.0:
             raise ValueError(

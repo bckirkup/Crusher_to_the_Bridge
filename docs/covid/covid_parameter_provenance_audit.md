@@ -39,7 +39,7 @@ internally from another profile value.
 | Parameter | Value | Class before | Class after | Source status |
 |---|---|---|---|---|
 | `incubation.distribution` / `median_days` / `dispersion` | lognormal, 5.8 d, GSD 1.57 | M | M | Wei et al. 2021, ancestral lineage. Holds for Diamond Princess; wrong for Omicron |
-| `presymptomatic_shedding_days` | 2.0 | M | M | He et al. 2020 (infectiousness from ~2.3 d before onset); profile note records the 2.0 vs 2.3 rounding |
+| `presymptomatic_shedding_days` | 5.0 | M | D from active shape | Zhou et al. 2023 shape support begins at onset-relative day -5; He et al. 2020 remains independent evidence for presymptomatic infectiousness. Updated by COVID-PRESHED-GATE-01 after this audit |
 | `airborne_half_life_hours` | 1.1 | M | M | van Doremalen et al. 2020, NEJM median 1.1 h. Note the preprint reports 2.7 h; the profile uses the peer-reviewed figure |
 | `incubation.dose_reference_log10` | 3.43 | D | D | $\log_{10}$ of the profile's own $N_{50}$ — inherits whatever error the dose-response carries (§2) |
 | `incubation.dose_log10_shortening` / `dose_floor` | 0.15 / 0.3 | C | C | `ctb_incubation_spec.md` is an in-repo spec, not a measurement |

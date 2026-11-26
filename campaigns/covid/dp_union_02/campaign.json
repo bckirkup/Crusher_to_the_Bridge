@@ -1,0 +1,522 @@
+{
+  "name": "covid_dp_union_02",
+  "pathogen": "covid",
+  "manifest": null,
+  "pathogen_id": null,
+  "s3_prefix": "campaign/covid_dp_union_02/",
+  "queue": "picard-analysis-queue",
+  "resources": {
+    "vcpu": "1",
+    "memory": "4096"
+  },
+  "image_tag": "dp-union-02",
+  "readout": "campaigns/covid/dp_union_02/readout.py",
+  "blocks": {
+    "union_t1e5_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 100000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t1e5_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 100000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t3e5_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 316000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t3e5_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 316000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t1e6_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 1000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t1e6_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 1000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t3e6_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 3160000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t3e6_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 3160000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t1e7_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 10000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t1e7_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 10000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t3e7_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 31600000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t3e7_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 31600000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t1e8_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 100000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t1e8_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 100000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t3e8_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 316000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t3e8_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 316000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t1e9_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 1000000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t1e9_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 1000000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t3e9_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 3160000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t3e9_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 3160000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    },
+    "union_t1e10_canary": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 10000000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321,
+        20200323,
+        20200324,
+        20200412,
+        20200507,
+        20200509,
+        20200520,
+        20200525,
+        20200530,
+        20200610,
+        20200612,
+        20200621,
+        20200703,
+        20200713,
+        20200715,
+        20200721
+      ]
+    },
+    "union_t1e10_rest": {
+      "worker": "campaigns/covid/dp_union_01/cell.py",
+      "artifact": "cell_{seed}.json",
+      "args": {
+        "theta": 10000000000.0,
+        "arm_id": "union_niid",
+        "design": "picard_framework/runs/covid_dp_union_02_design.json"
+      },
+      "seeds": [
+        20200722,
+        20200724,
+        20200725,
+        20200727
+      ]
+    }
+  }
+}

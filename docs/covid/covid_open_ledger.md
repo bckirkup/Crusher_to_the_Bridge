@@ -52,6 +52,17 @@ denomination by a scalar; DP-UNION-01 and all earlier replay outcomes remain
 measurements of the superseded source law at their own `Measured at` SHAs.
 No campaign has yet run under the replacement source law.
 
+**`COVID-PRESHED-GATE-01` (ledger entry): the first post-shape source-law
+correction is the owner-approved presymptomatic-gate and seed-clock fix.** The
+legacy 2.0-day gate made day-0 NIID emission structurally impossible (measured
+360/360 silent before correction), and fractional seed age was inconsistently
+rounded across the Zhou day-row boundary. The gate now covers Zhou support to
+onset day -5 and explicit-seed onset stamping uses the engine-represented age.
+No additional campaign result is withdrawn because no post-shape scored
+campaign existed; `COVID-INDEX-CLOCK-01`'s exact gate/boundary arithmetic is
+historical at its own revision. DP-UNION-02's ascertainment-conditioned seed
+cohort is frozen, but no scored DP-UNION-02 cell has run.
+
 **`COVID-THETA-REFIT-01` (ledger entry): every DP/GM replay figure measured
 at the Θ=7.9e6 (or older 1e6) operating point is historical on the Θ
 channel.** The canonical replay operating point is

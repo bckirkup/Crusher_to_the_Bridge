@@ -190,6 +190,7 @@ def _cell(
         "infections_before_quarantine": 400,
         "infections_during_window": during,
         "index_onset_day": 3.0,
+        "index_shedding_at_day0": True,
         "dose_response": {"susceptibility_scale": 1e9 * 58.18 / 0.18},
         "quarantine_witness": {"activated": True, "activation_epoch": 391},
         "platform_fidelity": {
@@ -333,6 +334,8 @@ def test_dead_cell_and_machinery_gap_are_surfaced():
 @pytest.mark.parametrize(
     "mutate, deviation",
     [
+        (lambda c: c.update(index_shedding_at_day0=False),
+         "index_shedding_at_day0"),
         (lambda c: c["platform_fidelity"].update(
             fired_protocol_ids=["SOP-017-DEDICATED"]), "quarter_order_fired"),
         (lambda c: c["crew_window"].update(

@@ -1,0 +1,1524 @@
+{
+  "task_id": "DP-UNION-02-ASCERTAINMENT-PROBE",
+  "design": "picard_framework/runs/covid_dp_union_02_design.json",
+  "design_sha256": "e386d6741ff2d107a753ce52088cdd553aa9780ab376853f1beadc755cf7bdde",
+  "theta": 100000000.0,
+  "arm": "union_niid",
+  "selection_rule": "first 24 seeds in the predeclared calendar-date candidate sequence whose zero-epoch payload has index_shedding_at_day0 true; no outcome observable read",
+  "start_date": 20200205,
+  "candidate_days": 360,
+  "candidate_count": 360,
+  "positive_count": 42,
+  "selected_seeds": [
+    20200208,
+    20200213,
+    20200302,
+    20200320,
+    20200321,
+    20200323,
+    20200324,
+    20200412,
+    20200507,
+    20200509,
+    20200520,
+    20200525,
+    20200530,
+    20200610,
+    20200612,
+    20200621,
+    20200703,
+    20200713,
+    20200715,
+    20200721,
+    20200722,
+    20200724,
+    20200725,
+    20200727
+  ],
+  "positive_seeds": [
+    20200208,
+    20200213,
+    20200302,
+    20200320,
+    20200321,
+    20200323,
+    20200324,
+    20200412,
+    20200507,
+    20200509,
+    20200520,
+    20200525,
+    20200530,
+    20200610,
+    20200612,
+    20200621,
+    20200703,
+    20200713,
+    20200715,
+    20200721,
+    20200722,
+    20200724,
+    20200725,
+    20200727,
+    20200731,
+    20200806,
+    20200906,
+    20200911,
+    20200912,
+    20200921,
+    20200924,
+    20201014,
+    20201015,
+    20201018,
+    20201023,
+    20201024,
+    20201025,
+    20201107,
+    20201206,
+    20201216,
+    20210102,
+    20210116
+  ],
+  "rows": [
+    {
+      "seed": 20200205,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200206,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200207,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200208,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200209,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200210,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200211,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200212,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200213,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200214,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200215,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200216,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200217,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200218,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200219,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200220,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200221,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200222,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200223,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200224,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200225,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200226,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200227,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200228,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200229,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200301,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200302,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200303,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200304,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200305,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200306,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200307,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200308,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200309,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200310,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200311,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200312,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200313,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200314,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200315,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200316,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200317,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200318,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200319,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200320,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200321,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200322,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200323,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200324,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200325,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200326,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200327,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200328,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200329,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200330,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200331,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200401,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200402,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200403,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200404,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200405,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200406,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200407,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200408,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200409,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200410,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200411,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200412,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200413,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200414,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200415,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200416,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200417,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200418,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200419,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200420,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200421,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200422,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200423,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200424,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200425,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200426,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200427,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200428,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200429,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200430,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200501,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200502,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200503,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200504,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200505,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200506,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200507,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200508,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200509,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200510,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200511,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200512,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200513,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200514,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200515,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200516,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200517,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200518,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200519,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200520,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200521,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200522,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200523,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200524,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200525,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200526,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200527,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200528,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200529,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200530,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200531,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200601,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200602,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200603,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200604,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200605,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200606,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200607,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200608,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200609,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200610,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200611,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200612,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200613,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200614,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200615,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200616,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200617,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200618,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200619,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200620,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200621,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200622,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200623,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200624,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200625,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200626,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200627,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200628,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200629,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200630,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200701,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200702,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200703,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200704,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200705,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200706,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200707,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200708,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200709,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200710,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200711,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200712,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200713,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200714,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200715,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200716,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200717,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200718,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200719,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200720,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200721,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200722,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200723,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200724,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200725,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200726,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200727,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200728,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200729,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200730,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200731,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200801,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200802,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200803,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200804,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200805,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200806,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200807,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200808,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200809,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200810,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200811,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200812,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200813,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200814,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200815,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200816,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200817,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200818,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200819,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200820,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200821,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200822,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200823,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200824,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200825,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200826,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200827,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200828,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200829,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200830,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200831,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200901,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200902,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200903,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200904,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200905,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200906,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200907,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200908,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200909,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200910,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200911,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200912,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200913,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200914,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200915,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200916,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200917,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200918,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200919,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200920,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200921,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200922,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200923,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200924,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20200925,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200926,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200927,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200928,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200929,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20200930,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201001,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201002,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201003,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201004,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201005,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201006,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201007,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201008,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201009,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201010,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201011,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201012,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201013,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201014,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201015,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201016,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201017,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201018,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201019,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201020,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201021,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201022,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201023,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201024,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201025,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201026,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201027,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201028,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201029,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201030,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201031,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201101,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201102,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201103,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201104,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201105,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201106,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201107,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201108,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201109,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201110,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201111,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201112,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201113,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201114,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201115,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201116,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201117,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201118,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201119,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201120,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201121,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201122,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201123,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201124,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201125,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201126,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201127,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201128,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201129,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201130,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201201,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201202,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201203,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201204,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201205,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201206,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201207,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201208,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201209,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201210,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201211,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201212,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201213,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201214,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201215,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201216,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20201217,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201218,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201219,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201220,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201221,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201222,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201223,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201224,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201225,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201226,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201227,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201228,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201229,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201230,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20201231,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210101,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210102,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20210103,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210104,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210105,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210106,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210107,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210108,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210109,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210110,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210111,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210112,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210113,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210114,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210115,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210116,
+      "index_shedding_at_day0": true
+    },
+    {
+      "seed": 20210117,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210118,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210119,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210120,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210121,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210122,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210123,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210124,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210125,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210126,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210127,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210128,
+      "index_shedding_at_day0": false
+    },
+    {
+      "seed": 20210129,
+      "index_shedding_at_day0": false
+    }
+  ]
+}

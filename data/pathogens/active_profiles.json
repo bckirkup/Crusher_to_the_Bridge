@@ -978,8 +978,8 @@
         "cost_usd": 100.0,
         "notes": "Assay design from docs/paper3/variant_surveillance_spec.md \u00a72.1. read_accuracy is per-read consensus accuracy for this amplicon; read depth and the reporting floor are operator dials set at run time, not pathogen properties."
       },
-      "presymptomatic_shedding_days": 2.0,
-      "presymptomatic_shedding_notes": "He et al., Nat Med 2020: infectiousness begins approximately 2.3 days before symptom onset; 2.0 days is the profile window."
+      "presymptomatic_shedding_days": 5.0,
+      "presymptomatic_shedding_notes": "For the active Zhou onset-aligned zero-inflated emission shape, the presymptomatic gate is the shape's own negative support: rows begin at onset-relative day -5. This is not a new emission magnitude; day-resolved occurrence and conditional mass remain the shape rows. He et al., Nat Med 2020 independently supports infectiousness before onset (approximately 2.3 days), but the 2.0-day legacy gate truncated the authored Zhou support."
     },
     {
       "pathogen_id": "influenza_a",

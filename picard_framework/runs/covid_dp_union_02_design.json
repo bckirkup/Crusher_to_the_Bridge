@@ -1,0 +1,338 @@
+{
+  "design_id": "covid-dp-union-02",
+  "task_id": "DP-UNION-02",
+  "design_doc": "docs/covid/covid_dp_union_02_design.md",
+  "parent_design": "covid-dp-union-01",
+  "prerequisites": [
+    "docs/proposals/covid_theta_unification_plan.md section 2 (the union arm), section 3 Suite 1 (the scope), section 5 (the adopted joint conditioned contract)",
+    "DP-UNION-01: union-arm construction, worker/readout contract and audit invariants inherited; its numerical results are historical under COVID-SHED-SHAPE-01",
+    "COVID-SHED-SHAPE-01: active sars_cov2_resp emits through the Zhou onset-aligned zero-inflated shape and persistent high/low emitter mixture; no old theta converts",
+    "COVID-SEED-ASCERTAIN-01: DP/GM replay seeds are conditioned on actual positive day-0 index emission",
+    "COVID-PRESHED-GATE-01: owner-approved presymptomatic gate widening to Zhou negative support and represented-age onset stamping, without which day-0 emission is unreachable or epoch-quantization-shifted",
+    "COVID-QUAR-TAIL-SEAM-01, CREW-REACH-01 and COVID-CAPTURE-01: the union arm and scored contract inherited as structural inputs, not as numerical theta evidence"
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [
+    100000.0,
+    316000.0,
+    1000000.0,
+    3160000.0,
+    10000000.0,
+    31600000.0,
+    100000000.0,
+    316000000.0,
+    1000000000.0,
+    3160000000.0,
+    10000000000.0
+  ],
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 24,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "funnel_echo": true,
+  "joint_contract": {
+    "t3": {
+      "anchor_id": "covid.T3",
+      "cumulative_positives": 634,
+      "cumulative_tests": 3063,
+      "through_day_index": 31
+    },
+    "onboard_table": {
+      "positives": 691,
+      "tests": 3894,
+      "through_day_index": 34,
+      "through": "2020-02-23",
+      "wave": "crew_wave",
+      "wave_tests": 831
+    },
+    "during_quarantine_band": [
+      150,
+      350
+    ],
+    "before_share": {
+      "record": 0.173,
+      "tolerance": 0.1
+    },
+    "conditioned_capture": {
+      "floor": 0.8,
+      "reachable_infection_day_max": 29
+    },
+    "dead_seeds": 20,
+    "saturation_fraction": 0.95,
+    "representative_band": [
+      0.5,
+      2.0
+    ],
+    "representative_min_seeds": 6,
+    "conditioning": {
+      "scored_class": "founder",
+      "founder_min_aboard_window_acquisitions": 10,
+      "takeoff_min_recorded_onsets": 10,
+      "min_class_cells": 5
+    },
+    "side_fraction": 0.75,
+    "ignition": {
+      "mass": 50,
+      "day_max": 9
+    },
+    "attack_infections_band": [
+      712,
+      960
+    ]
+  },
+  "arms": [
+    {
+      "arm_id": "replay_baseline",
+      "overrides": {},
+      "note": "Required empty-override first arm; NOT run (no campaign block declares it)."
+    },
+    {
+      "arm_id": "union_niid",
+      "overrides": {
+        "platform_id": "diamond_princess",
+        "protocols_path": "data/config/protocols_covid_dp_dedicated.json",
+        "scheduled_protocol_id": "SOP-017-DEDQUARTER",
+        "scheduled_protocol_window": {
+          "start_day": 16,
+          "end_day": 30,
+          "start_hour_of_day": 7
+        },
+        "seed_patch": {
+          "onset_day": 3.0,
+          "infection_age_days": 2.8
+        },
+        "voyage_overrides": {
+          "effects_enabled": true,
+          "itinerary": [
+            {
+              "day": 1,
+              "type": "embarkation",
+              "embarkation_window_hours_of_day": [
+                12,
+                16
+              ],
+              "port": "Yokohama",
+              "notes": "declared: staggered boarding 12:00-16:00 + 16:00-16:30 assembly (spec \u00a75)"
+            },
+            {
+              "day": 2,
+              "type": "sea_day",
+              "notes": "sea day after departure"
+            },
+            {
+              "day": 3,
+              "type": "port_day",
+              "port": "Kagoshima",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                14,
+                16
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "declared window; spec \u00a74 excursion 09:00-16:00 + 30-min return margin"
+            },
+            {
+              "day": 4,
+              "type": "sea_day"
+            },
+            {
+              "day": 5,
+              "type": "sea_day"
+            },
+            {
+              "day": 6,
+              "type": "port_day",
+              "port": "Hong Kong",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "index case departs permanently (departure_day 5.0)"
+            },
+            {
+              "day": 7,
+              "type": "sea_day"
+            },
+            {
+              "day": 8,
+              "type": "port_day",
+              "port": "Chan May",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 9,
+              "type": "port_day",
+              "port": "Cai Lan",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 10,
+              "type": "sea_day"
+            },
+            {
+              "day": 11,
+              "type": "sea_day"
+            },
+            {
+              "day": 12,
+              "type": "port_day",
+              "port": "Keelung",
+              "disembark_window_hours_of_day": [
+                8,
+                10
+              ],
+              "reembark_window_hours_of_day": [
+                15,
+                17
+              ],
+              "disembark_fraction": 0.5
+            },
+            {
+              "day": 13,
+              "type": "port_day",
+              "port": "Naha",
+              "disembark_window_hours_of_day": [
+                14,
+                16
+              ],
+              "reembark_window_hours_of_day": [
+                20,
+                22
+              ],
+              "disembark_fraction": 0.5,
+              "notes": "late port call 13:30-23:00 per spec \u00a74"
+            },
+            {
+              "day": 14,
+              "type": "sea_day"
+            },
+            {
+              "day": 15,
+              "type": "sea_day",
+              "notes": "early return to Yokohama; passengers remain aboard, routine continues (spec \u00a74)"
+            },
+            {
+              "day": 16,
+              "type": "sea_day",
+              "notes": "early return; routine continues aboard"
+            },
+            {
+              "day": 17,
+              "type": "sea_day",
+              "notes": "quarantine activation epoch 391 (day 16, 07:00) via scheduled_protocol_window"
+            }
+          ],
+          "defaults": {
+            "port_day": {
+              "onboard_passenger_fraction": 0.5,
+              "contact_rate_multiplier": 1.0,
+              "dining_demand_multiplier": 1.0
+            }
+          }
+        },
+        "rhythm_overrides": {
+          "port_day_onboard_midday_residual": 0.5,
+          "catalog": "diamond"
+        },
+        "crew_duty_exclusion": {
+          "enabled": true
+        },
+        "observation_overrides": {
+          "retest_negative_sweeps": true,
+          "campaign_waves": [
+            "crew_wave"
+          ]
+        }
+      },
+      "note": "replay_niid verbatim (DP-THETA-FIT-01) plus three declared deltas: SOP-017-DEDQUARTER in place of SOP-017-DEDICATED (exempt_fraction crew_general 0.25), crew_duty_exclusion enabled (VSP 2018 OM 4.4.1.1.1 symptomatic working crew removed), and the record testing structure armed (retest sweeps + 23 Feb crew_wave). No mechanism code, no constant change."
+    }
+  ],
+  "cells": 264,
+  "theta_grid": {
+    "status": "declared-pre-pilot",
+    "arm_id": "union_niid",
+    "declared": "2026-11-26, on main after COVID-SHED-SHAPE-01 and COVID-SEED-ASCERTAIN-01, before any DP-UNION-02 cell",
+    "lattice": "thetas is the runnable half-decade lattice 1e5..1e10, not the scored grid. The zero-inflated shape re-denominates theta again; no scalar conversion is claimed. The lattice span is retained as a broad declared bound because both source representations are normalized to unit peak before theta is fitted and their normalized lifetime areas are the same order, while timing/occurrence heterogeneity prevents an exact conversion. Edge failure is a report, not license to extend after seeing outcomes.",
+    "pilot": {
+      "thetas": [
+        100000.0,
+        1000000.0,
+        10000000.0,
+        100000000.0,
+        1000000000.0,
+        10000000000.0
+      ],
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321
+      ],
+      "how": "the first 5 selected ascertainment-conditioned seeds of each decade's canary block (scripts/campaign submit --size 5); the same cells the full block would run",
+      "statistic": "median over the 5 seeds of positives through day 31 (P31, all seeds, unconditioned), against 634",
+      "reads": "only the T3 side of each decade and the dead/saturated edges. No contract leg is scored from pilot cells; they are 5-seed provisional rows."
+    },
+    "selection_rule": "theta_hi = the lowest pilot decade whose median P31 >= 634; theta_lo = the decade below it. Scored grid = {theta_lo, 3.16*theta_lo, theta_hi, 3.16*theta_hi}, dropping a value above the lattice. Canary = 20 seeds at 3.16*theta_lo. If no pilot decade reaches 634, or the lowest one already does, no grid is declared and that is reported. A pilot median that falls back below 634 above theta_hi is reported and does not move the grid.",
+    "scored_thetas": null,
+    "canary_theta": null
+  },
+  "seed_values": [
+    20200208,
+    20200213,
+    20200302,
+    20200320,
+    20200321,
+    20200323,
+    20200324,
+    20200412,
+    20200507,
+    20200509,
+    20200520,
+    20200525,
+    20200530,
+    20200610,
+    20200612,
+    20200621,
+    20200703,
+    20200713,
+    20200715,
+    20200721,
+    20200722,
+    20200724,
+    20200725,
+    20200727
+  ]
+}

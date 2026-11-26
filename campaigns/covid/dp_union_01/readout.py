@@ -59,7 +59,11 @@ def _audit_inherited(cell: dict[str, Any], theta: float) -> dict[str, bool]:
     scale = (cell.get("dose_response") or {}).get("susceptibility_scale")
     return {
         "platform": fidelity.get("resolved_platform_id") == "diamond_princess",
-        "index_onset_day": cell.get("index_onset_day") == _ONSET_DAY,
+        "index_onset_day": math.isclose(
+            float(cell.get("index_onset_day") or math.nan), _ONSET_DAY,
+            rel_tol=0.0, abs_tol=1e-9,
+        ),
+        "index_shedding_at_day0": cell.get("index_shedding_at_day0") is True,
         "susceptibility_scale": scale is not None and math.isclose(
             scale, theta * (_ALPHA + _BETA) / _ALPHA, rel_tol=1e-9,
         ),
@@ -502,10 +506,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cells-dir", required=True,
                         help="local directory holding the synced cell artifacts")
+    parser.add_argument("--design", default=str(_DESIGN),
+                        help="design JSON; defaults to the DP-UNION-01 design")
+    parser.add_argument("--task-id", default=None,
+                        help="readout task id; defaults to the design's task_id")
     parser.add_argument("--out", default=None)
     args = parser.parse_args(argv)
 
-    design = json.loads(_DESIGN.read_text(encoding="utf-8"))
+    design_path = Path(args.design)
+    if not design_path.is_absolute():
+        design_path = _REPO_ROOT / design_path
+    design = json.loads(design_path.read_text(encoding="utf-8"))
     contract = design["joint_contract"]
     expected = int(design["seeds"])
     cells = _load_cells(Path(args.cells_dir))
@@ -521,7 +532,7 @@ def main(argv: list[str] | None = None) -> int:
         if any(math.isclose(row["theta"], t, rel_tol=1e-12) for t in scored)
     ]
     readout = {
-        "task_id": "DP-UNION-01",
+        "task_id": args.task_id or design.get("task_id", "DP-UNION-01"),
         "design_id": design["design_id"],
         "joint_contract": contract,
         "declared_thetas": design["thetas"],
