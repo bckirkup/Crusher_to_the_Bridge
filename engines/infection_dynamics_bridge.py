@@ -1530,6 +1530,7 @@ class KorkinAgent:
         pathogen_id: str,
         shedding_clearance_day: float,
         cleared: list[str] | None = None,
+        shedding_clearance_by_strain: dict[str, float] | None = None,
     ) -> int:
         """Age each resident lineage by an epoch and clear those done shedding.
 
@@ -1545,9 +1546,16 @@ class KorkinAgent:
         residents = self.resident_strains(pathogen_id)
         for strain_id, resident in tuple(residents.items()):
             resident.time_infected += 1
+            clearance_day = shedding_clearance_day
+            if shedding_clearance_by_strain is not None:
+                clearance_day = float(
+                    shedding_clearance_by_strain.get(
+                        strain_id, shedding_clearance_day,
+                    ),
+                )
             if (
                 self.clock.days_elapsed(resident.time_infected)
-                >= shedding_clearance_day
+                >= clearance_day
             ):
                 del residents[strain_id]
                 if cleared is not None:

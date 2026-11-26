@@ -156,6 +156,23 @@ class TestZeroInflatedDailyEmission:
         assert later.get("s:index", 0.0) == pytest.approx(0.0)
         assert later.get("s:invader", 0.0) > 0.0
 
+    def test_later_strain_clearance_uses_its_own_virtual_course(self) -> None:
+        profile = _shape_profile(1.0)
+        agent = _agent(7, profile)
+        assert agent.superinfect_with_strain(
+            PATHOGEN, "s:invader", 3000.0, 0, phenotype=Phenotype(),
+        )
+        clearance = {"s:index": 1.0, "s:invader": 2.0}
+
+        for _ in range(round(agent.clock.epochs_per_day)):
+            agent.advance_resident_strains(
+                PATHOGEN, 1.0,
+                shedding_clearance_by_strain=clearance,
+            )
+        residents = agent.resident_strains(PATHOGEN)
+        assert "s:index" not in residents
+        assert "s:invader" in residents
+
     def test_strain_shares_use_the_same_inoculum_weighting_as_shape_emission(self) -> None:
         profile = _shape_profile(1.0)
         agent = _agent(7, profile)

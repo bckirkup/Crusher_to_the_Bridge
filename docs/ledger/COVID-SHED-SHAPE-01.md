@@ -104,8 +104,11 @@ transmission.
   onset/incubation clock; each later lineage follows its own acquisition clock
   with a virtual onset at the profile median incubation plus its phenotype
   modifier; each later lineage receives an independent deterministic episodic
-  occurrence sequence; and co-resident lineages partition, rather than
-  multiply, one host's emission capacity in proportion to inoculum. The dual-
+  occurrence sequence; each later lineage clears on its corresponding virtual
+  course; and co-resident lineages partition, rather than multiply, one host's
+  emission capacity in proportion to inoculum. When episodic respiratory
+  emission is silent, clinical specimen genotype composition falls back to
+  those inoculum weights rather than treating all lineages as equal. The dual-
   lineage evidence found in this pass is case-report-scale composition turnover
   (for example Pedro et al. 2021, DOI 10.3390/microorganisms9020300), not a
   measured general kinetic law.
