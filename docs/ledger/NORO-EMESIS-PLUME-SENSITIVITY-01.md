@@ -110,13 +110,22 @@ measured on a constant recipient-opportunity set. On that shared emission:
 | recipient-summed inhaled GEC | 1,957.935 | 259.198 | +1,698.737 |
 | exposure rows | 104 | 104 | 0 |
 
-The compartment-average rows do not themselves carry event-pulse distance-class
-fields. The table below therefore maps each compartment-average row onto the
-distance class of its identical event-pulse exposure key. All 104 shared rows
-are MainDining rows with 15 opportunity minutes per row, 4.0 h⁻¹ removal, and
-0.158030 integrated exposure hours per row.
+The compartment-average rows do not themselves carry event-pulse distance-class,
+receiving-volume, event-fraction, opportunity-window, removal, exposure-hour, or
+presence-share fields: the labelled baseline applies one whole-compartment
+average and records only mass, concentration, and dose. The table below
+therefore maps each compartment-average row onto the distance class of its
+identical event-pulse exposure key strictly as key-aligned bookkeeping. In
+`event_pulse`, all 104 shared rows are MainDining rows with 15 opportunity
+minutes per row, 4.0 h⁻¹ removal, and 0.158030 integrated exposure hours per
+row. In `compartment_average`, every one of the 104 rows instead has uniform
+measured concentration 16.925286 GEC/m³ and dose 2.492293 GEC. Arithmetic from
+those rows and the 0.6 m³ inhaled volume per one-hour epoch implies the
+baseline's epoch-mean first-order residence factor
+0.245421 = (1 − e⁻⁴)/4; that factor is not a per-row recorded field and is not
+an event-opportunity window.
 
-| distance class | rows | recipients | receiving volume m³ | `event_pulse` GEC | `compartment_average` GEC | contrast GEC |
+| `event_pulse` distance class | rows | recipients | `event_pulse` receiving volume m³ | `event_pulse` GEC | `compartment_average` GEC | contrast GEC |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `local` | 1 | 1 | 2.88 | 780.122 | 2.492 | +777.630 |
 | `adjacent` | 4 | 4 | 8.82 | 1,018.935 | 9.969 | +1,008.966 |
@@ -199,15 +208,18 @@ totals are reported, while axis-order validation uses the shared first emission.
 
 Measured at `f07c97a30b398ef4e2419d2db7bd6da0c3e121d7`: seed 8105's zero-event
 pair, seed 8002's firing gate, event counts, emitted masses, exposure rows,
-recipient-summed doses, shared first-emission identity, distance/volume/
-opportunity/removal decomposition, monotone axis ordering, absence of
+recipient-summed doses, shared first-emission identity, event-pulse
+distance/volume/opportunity/removal decomposition, compartment-average uniform
+concentration/dose rows, monotone axis ordering, absence of
 uncommitted-nonoccupant dose, and all configuration witnesses. All eight
 artifacts record the same engine git SHA.
 
 Inferred, not independently measured: the shared first-emission contrast is
 exposure arithmetic rather than RNG-stream disruption because the emission
 records and `(event, recipient)` exposure keys are identical and the observer
-consumes no RNG. Later divergence is consistent with dose-dependent infection
+consumes no RNG. The compartment-average residence factor 0.245421 is arithmetic
+from measured uniform row dose, concentration, and inhaled volume; it is not a
+recorded row field. Later divergence is consistent with dose-dependent infection
 feedback, but its exact challenge-level path is not traced.
 
 Not measured: population event incidence, a voyage-dose distribution,

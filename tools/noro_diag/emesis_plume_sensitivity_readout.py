@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -28,6 +29,10 @@ EXPECTED_CELLS = {
     f"seed{AXIS_SEED}_event_pulse_p15_v10",
     f"seed{ZERO_EVENT_WITNESS_SEED}_event_pulse_p15_v1",
     f"seed{ZERO_EVENT_WITNESS_SEED}_compartment_average_p15_v1",
+}
+EXPECTED_AXIS_VALUES = {
+    "pulse_minutes": [5.0, 15.0, 30.0],
+    "receiving_volume_scale": [0.1, 1.0, 10.0],
 }
 
 
@@ -108,6 +113,15 @@ def event_rows(
     return [row for row in rows if exposure_event_key(row) == key]
 
 
+def exposure_identity_digest(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    keys = sorted(exposure_row_identity(row) for row in rows)
+    encoded = json.dumps(keys, separators=(",", ":")).encode("utf-8")
+    return {
+        "count": len(keys),
+        "sha256": hashlib.sha256(encoded).hexdigest(),
+    }
+
+
 def event_dose_summary(
     rows: list[dict[str, Any]],
     event: dict[str, Any],
@@ -118,6 +132,7 @@ def event_dose_summary(
         "recipients": len({int(row["target_id"]) for row in subset}),
         "dose_gec": sum(float(row["credited_dose_gec"]) for row in subset),
         "distance_classes": distance_summary(subset),
+        "exposure_keys": exposure_identity_digest(subset),
     }
 
 
@@ -236,6 +251,31 @@ def axis_summary(
             tuple(record["key"]) for record in cell["events"]["records"]
         })
     shared_keys = set.intersection(*key_sets) if key_sets else set()
+    observed_axis_values = sorted(cell[axis] for cell in selected)
+    axis_complete = observed_axis_values == EXPECTED_AXIS_VALUES[axis]
+    exposure_signatures = []
+    for cell in selected:
+        signature = []
+        for key in sorted(shared_keys):
+            record = next(
+                (
+                    item for item in cell["events"]["records"]
+                    if tuple(item["key"]) == key
+                ),
+                None,
+            )
+            if record is None:
+                signature.append(None)
+                continue
+            exposure_keys = record["exposure"]["exposure_keys"]
+            signature.append((exposure_keys["count"], exposure_keys["sha256"]))
+        exposure_signatures.append(tuple(signature))
+    shared_exposure_keys_identical = (
+        axis_complete
+        and bool(shared_keys)
+        and len(set(exposure_signatures)) == 1
+        and None not in exposure_signatures[0]
+    )
     rows = []
     for cell in selected:
         shared = shared_event_dose(cell, shared_keys)
@@ -253,6 +293,14 @@ def axis_summary(
         })
     voyage_doses = [row["voyage_dose_gec"] for row in rows]
     shared_doses = [row["shared_event_dose"]["dose_gec"] for row in rows]
+    shared_exposure_rows_positive = all(
+        row["shared_event_dose"]["rows"] > 0 for row in rows
+    )
+    ordering_evaluable = (
+        axis_complete
+        and shared_exposure_keys_identical
+        and shared_exposure_rows_positive
+    )
     if axis == "pulse_minutes":
         voyage_ordered = voyage_doses == sorted(voyage_doses)
         shared_ordered = shared_doses == sorted(shared_doses)
@@ -263,10 +311,17 @@ def axis_summary(
         "axis": axis,
         "seed": seed,
         "cells": rows,
+        "axis_complete": axis_complete,
         "shared_event_count": len(shared_keys),
         "shared_event_keys": [list(key) for key in sorted(shared_keys)],
-        "voyage_dose_order_matches_arithmetic": voyage_ordered,
-        "shared_event_dose_order_matches_arithmetic": shared_ordered,
+        "shared_exposure_keys_identical": shared_exposure_keys_identical,
+        "shared_exposure_rows_positive": shared_exposure_rows_positive,
+        "voyage_dose_order_matches_arithmetic": (
+            ordering_evaluable and voyage_ordered
+        ),
+        "shared_event_dose_order_matches_arithmetic": (
+            ordering_evaluable and shared_ordered
+        ),
     }
 
 
@@ -443,6 +498,24 @@ def paired_central_contrast(
         "shared_event_contrast_gec": (
             pulse_shared["dose_gec"] - average_shared["dose_gec"]
         ),
+        "shared_distance_decomposition_metadata": {
+            "distance_and_exposure_fields_source": "event_pulse rows only",
+            "compartment_average_fields_absent": [
+                "distance_class",
+                "receiving_volume_m3",
+                "event_epoch_fraction",
+                "opportunity_windows",
+                "opportunity_minutes",
+                "removal_per_hour",
+                "exposure_hours",
+                "presence_share",
+            ],
+            "mapping_note": (
+                "compartment_average rows are mapped onto event_pulse "
+                "distance classes solely by identical exposure key; the "
+                "baseline itself applies one whole-compartment average"
+            ),
+        },
         "shared_distance_decomposition": paired_distance_decomposition(
             pulse, average, shared_keys,
         ),
