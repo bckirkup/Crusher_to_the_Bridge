@@ -98,6 +98,10 @@ transmission.
   separate owner decision.
 - The shape support ends at day +13 because the aligned observations end there;
   later emission is truncation, not measured clearance.
+- Multi-strain COVID co-infection does not yet have a literature-backed
+  per-lineage onset/incubation and episodic-occurrence contract. The shape
+  implementation therefore leaves that semantics open for a separate evidence
+  pass rather than inventing a natural-history rule.
 - This does not implement item 4 (household/service attribution) or item 5
   (person/specimen testing history). Those are explicitly outside this change.
 
