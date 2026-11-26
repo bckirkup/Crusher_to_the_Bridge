@@ -850,6 +850,7 @@ class StrainInfection:
     shedding_multiplier: float = 1.0
     incubation_modifier: float = 0.0
     infection_epoch: int = 0
+    primary_course: bool = False
 
 
 # ── Agent class ──────────────────────────────────────────────────────────
@@ -1581,7 +1582,6 @@ class KorkinAgent:
         heir = min(residents.values(), key=lambda r: r.infection_epoch)
         inf["strain_id"] = heir.strain_id
         inf["strain_shedding_multiplier"] = heir.shedding_multiplier
-        inf["strain_incubation_modifier"] = heir.incubation_modifier
 
     def is_infected_with(self, pathogen_id: str) -> bool:
         """Check if agent is infected with a specific pathogen."""
@@ -1660,6 +1660,7 @@ class KorkinAgent:
             shedding_multiplier=pheno.shedding_multiplier,
             incubation_modifier=pheno.incubation_modifier,
             infection_epoch=resident.infection_epoch,
+            primary_course=resident.primary_course,
         )
         inf = self.infections[pathogen_id]
         if inf.get("strain_id") == old_strain_id:
@@ -1694,6 +1695,7 @@ class KorkinAgent:
             shedding_multiplier=pheno.shedding_multiplier,
             incubation_modifier=pheno.incubation_modifier,
             infection_epoch=int(inf["infection_epoch"]),
+            primary_course=True,
         )}
 
     def _shedding_curve_point(
@@ -1822,12 +1824,8 @@ class KorkinAgent:
         }
         pool = sum(inocula.values())
         masses: dict[str, float] = {}
-        infection_epoch = int(inf.get("infection_epoch", -1))
         for sid, resident in residents.items():
-            primary = (
-                sid == inf.get("strain_id")
-                and resident.infection_epoch == infection_epoch
-            )
+            primary = resident.primary_course
             clock_inf = inf if primary else {
                 "incubation_days": self._resident_virtual_incubation(
                     profile, resident,

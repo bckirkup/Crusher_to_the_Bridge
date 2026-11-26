@@ -10,9 +10,11 @@ import numpy as np
 import pytest
 
 from engines.infection_dynamics_bridge import (
+    InfectionStatus,
     KorkinAgent,
     draw_shedding_multiplier,
 )
+from engines.natural_history import advance_infections
 from engines.sim_clock import HOURS, SimClock
 from engines.strain_state import Phenotype
 
@@ -155,6 +157,34 @@ class TestZeroInflatedDailyEmission:
         )
         assert later.get("s:index", 0.0) == pytest.approx(0.0)
         assert later.get("s:invader", 0.0) > 0.0
+
+    def test_natural_history_keeps_a_promoted_later_strain_on_its_virtual_course(self) -> None:
+        profile = {
+            **_shape_profile(1.0),
+            "incubation": {"median_days": 3.0},
+            "recovery_day": 1.0,
+            "shedding_duration_days": 1.0,
+        }
+        agent = _agent(7, profile)
+        infection = agent.infections[PATHOGEN]
+        infection["incubation_days"] = 1.0
+        assert agent.superinfect_with_strain(
+            PATHOGEN, "s:invader", 3000.0, 0,
+            phenotype=Phenotype(),
+        )
+        rng = np.random.default_rng(7)
+
+        for _ in range(round(2 * agent.clock.epochs_per_day)):
+            advance_infections(agent, {PATHOGEN: profile}, rng)
+        residents = agent.resident_strains(PATHOGEN)
+        assert "s:index" not in residents
+        assert "s:invader" in residents
+        assert infection["status"] == InfectionStatus.INFECTED
+
+        for _ in range(round(2 * agent.clock.epochs_per_day)):
+            advance_infections(agent, {PATHOGEN: profile}, rng)
+        assert agent.resident_strains(PATHOGEN) == {}
+        assert infection["status"] == InfectionStatus.RECOVERED
 
     def test_later_strain_clearance_uses_its_own_virtual_course(self) -> None:
         profile = _shape_profile(1.0)
