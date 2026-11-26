@@ -193,6 +193,10 @@ def summarize_cell(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def same_float(left: float, right: float) -> bool:
+    return math.isclose(left, right, rel_tol=0.0, abs_tol=1e-12)
+
+
 def filter_cells(
     cells: list[dict[str, Any]],
     *,
@@ -205,8 +209,14 @@ def filter_cells(
         cell for cell in cells
         if cell["seed"] == seed
         and cell["mode"] == mode
-        and (volume_scale is None or cell["receiving_volume_scale"] == volume_scale)
-        and (pulse_minutes is None or cell["pulse_minutes"] == pulse_minutes)
+        and (
+            volume_scale is None
+            or same_float(cell["receiving_volume_scale"], volume_scale)
+        )
+        and (
+            pulse_minutes is None
+            or same_float(cell["pulse_minutes"], pulse_minutes)
+        )
     ]
     return selected
 
@@ -482,18 +492,8 @@ def paired_central_contrast(
     selected = [
         payload for payload in payloads
         if int(payload["identity"]["seed"]) == seed
-        and math.isclose(
-            float(payload["identity"]["pulse_minutes_requested"]),
-            15.0,
-            rel_tol=0.0,
-            abs_tol=1e-12,
-        )
-        and math.isclose(
-            float(payload["identity"]["receiving_volume_scale"]),
-            1.0,
-            rel_tol=0.0,
-            abs_tol=1e-12,
-        )
+        and same_float(float(payload["identity"]["pulse_minutes_requested"]), 15.0)
+        and same_float(float(payload["identity"]["receiving_volume_scale"]), 1.0)
     ]
     by_mode = {
         str(payload["identity"]["mode"]): payload for payload in selected
@@ -655,6 +655,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     payload = aggregate(safe_path(args.artifact_dir))
+    payload["artifact_dir"] = str(args.artifact_dir)
     write_json(safe_path(args.out), payload)
     print_axis_table(payload["axes"]["pulse_minutes"])
     print_axis_table(payload["axes"]["receiving_volume_scale"])
