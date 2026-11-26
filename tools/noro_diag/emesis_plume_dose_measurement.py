@@ -9,6 +9,11 @@ Frozen local measurement design (declared before the 8105/8106 runs):
 * arms: ``transmission.emesis_event_plume.mode`` = ``event_pulse`` and the
   labelled pre-change ``compartment_average`` baseline;
 * paired seeds: 8105 and 8106, the norovirus attribution floor;
+* sensitivity axes: pulse duration [5, 15, 30] minutes and a declared
+  local/adjacent receiving-volume scale [0.1, 1, 10], run one axis at a
+  time around the central cell; seed 8105 carries the axis cells because it
+  is the event-firing member of the floor pair, while seed 8106 is retained
+  as the zero-event witness at the central cell;
 * statistic: voyage-total recipient-inhaled emesis-aerosol dose, summed over
   every recipient exposure row, using the exact dose returned by
   ``TransmissionCore._accumulate`` before route-efficiency, NPI, or host
@@ -17,9 +22,10 @@ Frozen local measurement design (declared before the 8105/8106 runs):
 * firing gate: at least one emesis event must occur, and the event_pulse arm
   must emit exposure rows carrying distance class, receiving volume,
   opportunity windows/minutes, removal, and exposure hours;
-* interpretation: two paired seeds prove the pathway fires and give the
-  measured per-voyage magnitudes at those seeds; they do not size a
-  population effect or support a significance claim.
+* interpretation: the firing seed measures event-conditioned sensitivity of
+  this realization; the zero-event seed documents the rare-event power
+  limitation. They do not size a population effect or support a significance
+  claim.
 
 The observer is read-only. It copies tracing rows after each epoch, wraps
 ``_accumulate`` only to retain full-precision doses that tracing rounds to
@@ -37,6 +43,7 @@ import argparse
 import copy
 import gzip
 import json
+import math
 import subprocess
 import sys
 import time
@@ -64,7 +71,15 @@ MEASUREMENT_DESIGN = {
     "hull": "classic_cruise_1900",
     "epochs": 288,
     "paired_seeds": [8105, 8106],
+    "event_firing_seed_for_axes": 8105,
     "arms": ["event_pulse", "compartment_average"],
+    "pulse_duration_axis_minutes": [5.0, 15.0, 30.0],
+    "receiving_volume_scale_axis": [0.1, 1.0, 10.0],
+    "axis_design": (
+        "one axis at a time around pulse 15 min and volume scale 1.0; "
+        "local/adjacent declared volumes scale together while room volumes "
+        "remain the hull-declared compartment volumes"
+    ),
     "statistic": (
         "voyage-total exact credited recipient-inhaled emesis-aerosol dose "
         "(GEC), summed over recipients; paired contrast is event_pulse minus "
@@ -75,8 +90,9 @@ MEASUREMENT_DESIGN = {
         "distance/volume/opportunity/removal decomposition"
     ),
     "interpretation": (
-        "mechanism-fired smoke at the paired-seed floor; no population effect "
-        "size or significance claim"
+        "event-conditioned mechanism sensitivity at the paired-seed floor; "
+        "seed 8106 is a zero-event witness, not mechanism evidence; no "
+        "population effect size or significance claim"
     ),
 }
 
@@ -379,8 +395,22 @@ def build_spec(
     bundle: str,
     epochs: int,
     mode: str,
+    pulse_minutes: float,
+    receiving_volume_scale: float,
 ) -> dict[str, Any]:
-    """One shipped voyage spec with only the plume-mode arm override."""
+    """One shipped voyage spec with the declared plume-cell overrides."""
+    plume_override = {
+        "mode": mode,
+        "pulse_minutes": float(pulse_minutes),
+        "local_volume_m3": (
+            tc.EMESIS_EVENT_PLUME_LOCAL_VOLUME_M3
+            * float(receiving_volume_scale)
+        ),
+        "adjacent_volume_m3": (
+            tc.EMESIS_EVENT_PLUME_ADJACENT_VOLUME_M3
+            * float(receiving_volume_scale)
+        ),
+    }
     return {
         "schema_version": "1.0.0",
         "description": "emesis plume recipient-dose measurement",
@@ -396,7 +426,7 @@ def build_spec(
         "incentives": {},
         "config_overrides": {
             "ship_graph": {"num_agents": declared_total(platform)},
-            "transmission": {"emesis_event_plume": {"mode": mode}},
+            "transmission": {"emesis_event_plume": plume_override},
         },
         "pathogen_overrides": {},
     }
@@ -581,6 +611,8 @@ def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
         bundle=args.bundle,
         epochs=args.epochs,
         mode=args.mode,
+        pulse_minutes=args.pulse_minutes,
+        receiving_volume_scale=args.receiving_volume_scale,
     )
     capture = ExposureCapture()
     started_total = time.perf_counter()
@@ -615,7 +647,7 @@ def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
     rows = capture.rows
     epoch_hours = float(sim.clock.hours_per_epoch)
     return {
-        "measurement": "emesis_plume_recipient_dose_v4",
+        "measurement": "emesis_plume_recipient_dose_v5",
         "design": MEASUREMENT_DESIGN,
         "identity": {
             "engine_git_sha": engine_git_sha,
@@ -626,6 +658,8 @@ def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
             "pathogen_id": args.pathogen_id,
             "seed": int(args.seed),
             "mode": args.mode,
+            "pulse_minutes_requested": float(args.pulse_minutes),
+            "receiving_volume_scale": float(args.receiving_volume_scale),
             "epochs": int(args.epochs),
             "epoch_duration_hours": epoch_hours,
             "num_agents": len(sim.engine.agents),
@@ -636,6 +670,7 @@ def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
             "rhythm_layer_active": rhythm_active,
             "room_air_removal_mode": sim.tx_core.room_air_removal.mode,
             "pulse_minutes": sim.tx_core.emesis_event_plume.pulse_minutes,
+            "receiving_volume_scale_requested": float(args.receiving_volume_scale),
             "local_volume_m3": sim.tx_core.emesis_event_plume.local_volume_m3,
             "adjacent_volume_m3": sim.tx_core.emesis_event_plume.adjacent_volume_m3,
         },
@@ -670,6 +705,15 @@ def write_gzip_json(path: Path, payload: dict[str, Any]) -> None:
         handle.write("\n")
 
 
+def positive_float(text: str) -> float:
+    value = float(text)
+    if not math.isfinite(value) or value <= 0.0:
+        raise argparse.ArgumentTypeError(
+            f"value must be finite and positive, got {text!r}",
+        )
+    return value
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", default=MEASUREMENT_DESIGN["hull"])
@@ -683,6 +727,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--epochs", type=int, default=MEASUREMENT_DESIGN["epochs"],
+    )
+    parser.add_argument("--pulse-minutes", type=positive_float, default=15.0)
+    parser.add_argument(
+        "--receiving-volume-scale", type=positive_float, default=1.0,
     )
     parser.add_argument("--out", type=Path, required=True)
     return parser.parse_args(argv)

@@ -26,6 +26,19 @@ occupant-only full-pulse fallback. The repair is measured at
 `event_pulse` recipient-opportunity channel, including the labelled
 `compartment_average` baseline control, stand at their own `Measured at` SHAs.
 
+**`NORO-EMESIS-PLUME-SENSITIVITY-01` (ledger entry): seed 8105's post-repair
+firing realization is historical as a current-`main` seed behavior.** At
+measurement commit `f07c97a30b398ef4e2419d2db7bd6da0c3e121d7`, a tooling-only
+descendant of main `4abbd2cd57f128fa3d33c09105cd495f2836d10b`, seed 8105
+instead fired zero emesis events in both central arms over 288 epochs. The
+497.035/64.3715 GEC pair remains measured at
+`953c6eab619ad1b5db694c4ad46a2efce8ce6b45`, but seed 8105 may not be assumed
+event-bearing on later `main`. The sensitivity readout uses fallback seed 8002
+with seed 8105 as the measured zero-event witness; because 8002 was selected
+from a historical event-bearing block, it is an event-conditioned and
+selection-enriched single-realization measurement that sizes neither incidence
+nor significance.
+
 **`CONTAM-SANITARY-DIR-01` (ledger entry): every airborne/downstream-map
 dose figure measured before this change on a hull with `Sanitary_Makeup`
 links is historical on the reverse-sanitary-edge channel.** The 585 links
