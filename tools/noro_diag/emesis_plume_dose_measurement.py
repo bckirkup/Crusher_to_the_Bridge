@@ -23,9 +23,10 @@ Frozen local measurement design (declared before the 8105/8106 runs):
 
 The observer is read-only. It copies tracing rows after each epoch, wraps
 ``_accumulate`` only to retain full-precision doses that tracing rounds to
-four decimals, and wraps ``_emit_emesis`` only to copy deposition records as
-they are emitted (the infection lifecycle clears those records at recovery).
-Neither observer path consumes RNG.
+four decimals, wraps ``_emit_emesis`` only to copy deposition records as
+they are emitted (the infection lifecycle clears those records at recovery),
+and wraps ``_emesis_schedule_candidates`` only to retain the exact occupant
+and candidate sets behind each row. No observer path consumes RNG.
 """
 
 from __future__ import annotations
@@ -97,6 +98,12 @@ class ExposureCapture:
     pending_exact: list[dict[str, float]] = field(default_factory=list)
     rows: list[dict[str, Any]] = field(default_factory=list)
     events: list[dict[str, Any]] = field(default_factory=list)
+    occupant_ids_by_unit: dict[tuple[int, str], set[int]] = field(
+        default_factory=dict,
+    )
+    schedule_candidate_ids_by_unit: dict[tuple[int, str], set[int]] = field(
+        default_factory=dict,
+    )
 
     def note_accumulate(
         self, pathway: str, input_dose: float, credited_dose: float,
@@ -121,8 +128,23 @@ class ExposureCapture:
             row["host_event_index"] = int(host_event_index)
             self.events.append(row)
 
-    @staticmethod
+    def note_schedule_candidates(
+        self,
+        zone_name: str,
+        epoch: int,
+        occupant_ids: set[int],
+        candidates: list[Any],
+    ) -> None:
+        key = (int(epoch), str(zone_name))
+        self.occupant_ids_by_unit[key] = {
+            int(agent_id) for agent_id in occupant_ids
+        }
+        self.schedule_candidate_ids_by_unit[key] = {
+            int(agent.agent_id) for agent in candidates
+        }
+
     def annotate_presence(
+        self,
         sim: ShipSimulation,
         row: dict[str, Any],
         agents_by_id: dict[int, Any],
@@ -134,13 +156,20 @@ class ExposureCapture:
         if target is None:
             row["observer_presence_overlap"] = "target_missing"
             return
-        location = str(getattr(target, "current_location", ""))
-        row["observer_target_current_location"] = location
-        row["observer_target_in_source_zone"] = location == row.get("source_zone")
+        key = (int(row["epoch"]), str(row["source_zone"]))
+        target_id = int(row["target_id"])
+        in_epoch_occupants = target_id in self.occupant_ids_by_unit.get(key, set())
+        row["observer_target_current_location"] = str(
+            getattr(target, "current_location", ""),
+        )
+        row["observer_target_in_epoch_occupants"] = in_epoch_occupants
+        row["observer_target_in_schedule_candidates"] = (
+            target_id in self.schedule_candidate_ids_by_unit.get(key, set())
+        )
         schedule = getattr(sim.tx_core, "_event_schedule", None)
         if schedule is None or not hasattr(schedule, "presence_overlap_window"):
             row["observer_presence_overlap"] = "schedule_unavailable"
-            row["observer_uncommitted_outside_source_zone"] = False
+            row["observer_uncommitted_nonoccupant"] = False
             return
         offset = (
             float(row["event_epoch_fraction"])
@@ -161,8 +190,8 @@ class ExposureCapture:
         else:
             state = "elsewhere_or_miss"
         row["observer_presence_overlap"] = state
-        row["observer_uncommitted_outside_source_zone"] = bool(
-            windows is None and location != row.get("source_zone"),
+        row["observer_uncommitted_nonoccupant"] = bool(
+            windows is None and not in_epoch_occupants,
         )
 
     def observe(self, sim: ShipSimulation, work: Any) -> None:
@@ -247,6 +276,29 @@ def capture_emesis_events(capture: ExposureCapture):
         yield
     finally:
         tc.TransmissionCore._emit_emesis = original
+
+
+@contextmanager
+def capture_emesis_candidate_sets(capture: ExposureCapture):
+    """Retain the exact occupant/candidate sets behind each exposure row."""
+    original = tc.TransmissionCore._emesis_schedule_candidates
+
+    def wrapper(
+        self: tc.TransmissionCore,
+        zone_name: str,
+        entries: list[Any],
+        epoch: int,
+        occupant_ids: set[int],
+    ) -> list[Any]:
+        candidates = original(self, zone_name, entries, epoch, occupant_ids)
+        capture.note_schedule_candidates(zone_name, epoch, occupant_ids, candidates)
+        return candidates
+
+    tc.TransmissionCore._emesis_schedule_candidates = wrapper
+    try:
+        yield
+    finally:
+        tc.TransmissionCore._emesis_schedule_candidates = original
 
 
 def build_spec(
@@ -353,8 +405,8 @@ def recipient_totals(rows: list[dict[str, Any]]) -> list[float]:
 def exposure_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     doses = values(rows, "credited_dose_gec")
     rounded_doses = values(rows, "dose")
-    uncommitted_outside = [
-        row for row in rows if row.get("observer_uncommitted_outside_source_zone")
+    uncommitted_nonoccupant = [
+        row for row in rows if row.get("observer_uncommitted_nonoccupant")
     ]
     return {
         "row_count": len(rows),
@@ -365,12 +417,14 @@ def exposure_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "observer_presence_overlap_counts": dict(
             sorted(_counts(row.get("observer_presence_overlap") for row in rows).items()),
         ),
-        "observer_uncommitted_outside_source_zone": {
-            "rows": len(uncommitted_outside),
+        "observer_uncommitted_nonoccupant": {
+            "rows": len(uncommitted_nonoccupant),
             "recipients": len({
-                int(row["target_id"]) for row in uncommitted_outside
+                int(row["target_id"]) for row in uncommitted_nonoccupant
             }),
-            "dose_gec": distribution(values(uncommitted_outside, "credited_dose_gec")),
+            "dose_gec": distribution(
+                values(uncommitted_nonoccupant, "credited_dose_gec"),
+            ),
         },
         "total_recipient_inhaled_dose_gec_exact": float(sum(doses)),
         "total_recipient_inhaled_dose_gec_rounded_rows": float(
@@ -467,7 +521,11 @@ def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
                 "measurement expects exactly one emesis-conditioned profile: "
                 f"{emetic_profiles!r}",
             )
-        with capture_exact_emesis_doses(capture), capture_emesis_events(capture):
+        with (
+            capture_exact_emesis_doses(capture),
+            capture_emesis_events(capture),
+            capture_emesis_candidate_sets(capture),
+        ):
             sim = ShipSimulation(picard_spec, display=False)
             sim.initialize()
             resolved_mode = sim.tx_core.emesis_event_plume.mode
@@ -483,7 +541,7 @@ def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
     rows = capture.rows
     epoch_hours = float(sim.clock.hours_per_epoch)
     return {
-        "measurement": "emesis_plume_recipient_dose_v2",
+        "measurement": "emesis_plume_recipient_dose_v3",
         "design": MEASUREMENT_DESIGN,
         "identity": {
             "engine_git_sha": git_value(["rev-parse", "HEAD"]),
