@@ -25,8 +25,10 @@ The observer is read-only. It copies tracing rows after each epoch, wraps
 ``_accumulate`` only to retain full-precision doses that tracing rounds to
 four decimals, wraps ``_emit_emesis`` only to copy deposition records as
 they are emitted (the infection lifecycle clears those records at recovery),
-and wraps ``_emesis_schedule_candidates`` only to retain the exact occupant
-and candidate sets behind each row. No observer path consumes RNG.
+wraps ``_emesis_schedule_candidates`` only to retain the exact occupant
+and candidate sets behind each row, and wraps ``presence_overlap_window``
+only to retain the exact booking evidence the pathway consulted. No observer
+path consumes RNG.
 """
 
 from __future__ import annotations
@@ -51,7 +53,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from engines import transmission_core as tc  # noqa: E402
-from engines.rhythm_layer import platform_has_rhythm_catalog  # noqa: E402
+from engines.rhythm_layer import RhythmLayer, platform_has_rhythm_catalog  # noqa: E402
 from picard_framework.run_spec import CRUSHER_CONFIG_REL  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
@@ -104,6 +106,7 @@ class ExposureCapture:
     schedule_candidate_ids_by_unit: dict[tuple[int, str], set[int]] = field(
         default_factory=dict,
     )
+    presence_calls: list[dict[str, Any]] = field(default_factory=list)
 
     def note_accumulate(
         self, pathway: str, input_dose: float, credited_dose: float,
@@ -143,6 +146,68 @@ class ExposureCapture:
             int(agent.agent_id) for agent in candidates
         }
 
+    def note_presence(
+        self,
+        agent: Any,
+        zone_name: str,
+        hour: int,
+        event_offset_minutes: float,
+        duration_minutes: float,
+        windows: list[tuple[float, float]] | None,
+    ) -> None:
+        self.presence_calls.append({
+            "target_id": int(agent.agent_id),
+            "zone_name": str(zone_name),
+            "hour": int(hour),
+            "event_offset_minutes": float(event_offset_minutes),
+            "duration_minutes": float(duration_minutes),
+            "windows": (
+                None if windows is None else [
+                    [float(entry), float(exit_)] for entry, exit_ in windows
+                ]
+            ),
+        })
+
+    def presence_state_for_row(
+        self,
+        sim: ShipSimulation,
+        row: dict[str, Any],
+    ) -> str:
+        """Exact captured booking state for one row, or not_consulted."""
+        hour = sim.clock.hour_of_day(int(row["epoch"]))
+        expected_offset = (
+            float(row["event_epoch_fraction"])
+            * sim.clock.hours_per_epoch
+            * 60.0
+        )
+        duration = float(sim.tx_core.emesis_event_plume.pulse_minutes)
+        candidates = [
+            call for call in self.presence_calls
+            if call["target_id"] == int(row["target_id"])
+            and call["zone_name"] == str(row["source_zone"])
+            and call["hour"] == int(hour)
+            and call["duration_minutes"] == duration
+        ]
+        if not candidates:
+            return "not_consulted"
+        best = min(
+            candidates,
+            key=lambda call: abs(
+                call["event_offset_minutes"] - expected_offset,
+            ),
+        )
+        if abs(best["event_offset_minutes"] - expected_offset) > 0.01:
+            return "not_consulted"
+        row["observer_presence_event_offset_minutes"] = best[
+            "event_offset_minutes"
+        ]
+        windows = best["windows"]
+        if windows is None:
+            return "no_commitment"
+        if windows:
+            return "resolved_segments"
+        return "elsewhere_or_miss"
+
     def annotate_presence(
         self,
         sim: ShipSimulation,
@@ -166,32 +231,10 @@ class ExposureCapture:
         row["observer_target_in_schedule_candidates"] = (
             target_id in self.schedule_candidate_ids_by_unit.get(key, set())
         )
-        schedule = getattr(sim.tx_core, "_event_schedule", None)
-        if schedule is None or not hasattr(schedule, "presence_overlap_window"):
-            row["observer_presence_overlap"] = "schedule_unavailable"
-            row["observer_uncommitted_nonoccupant"] = False
-            return
-        offset = (
-            float(row["event_epoch_fraction"])
-            * sim.clock.hours_per_epoch
-            * 60.0
-        )
-        windows = schedule.presence_overlap_window(
-            target,
-            str(row["source_zone"]),
-            sim.clock.hour_of_day(int(row["epoch"])),
-            offset,
-            float(sim.tx_core.emesis_event_plume.pulse_minutes),
-        )
-        if windows is None:
-            state = "no_commitment"
-        elif windows:
-            state = "resolved_segments"
-        else:
-            state = "elsewhere_or_miss"
+        state = self.presence_state_for_row(sim, row)
         row["observer_presence_overlap"] = state
         row["observer_uncommitted_nonoccupant"] = bool(
-            windows is None and not in_epoch_occupants,
+            state == "no_commitment" and not in_epoch_occupants,
         )
 
     def observe(self, sim: ShipSimulation, work: Any) -> None:
@@ -299,6 +342,34 @@ def capture_emesis_candidate_sets(capture: ExposureCapture):
         yield
     finally:
         tc.TransmissionCore._emesis_schedule_candidates = original
+
+
+@contextmanager
+def capture_presence_overlap_calls(capture: ExposureCapture):
+    """Retain exact booking lookups made by the emesis pathway."""
+    original = RhythmLayer.presence_overlap_window
+
+    def wrapper(
+        self: RhythmLayer,
+        agent: Any,
+        zone_name: str,
+        hour: int,
+        event_offset_minutes: float,
+        duration_minutes: float,
+    ) -> list[tuple[float, float]] | None:
+        windows = original(
+            self, agent, zone_name, hour, event_offset_minutes, duration_minutes,
+        )
+        capture.note_presence(
+            agent, zone_name, hour, event_offset_minutes, duration_minutes, windows,
+        )
+        return windows
+
+    RhythmLayer.presence_overlap_window = wrapper
+    try:
+        yield
+    finally:
+        RhythmLayer.presence_overlap_window = original
 
 
 def build_spec(
@@ -502,6 +573,8 @@ def proof_block(
 
 
 def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
+    engine_git_sha = git_value(["rev-parse", "HEAD"])
+    worktree_status_at_start = git_value(["status", "--porcelain"])
     spec = build_spec(
         seed=args.seed,
         platform=args.platform,
@@ -525,6 +598,7 @@ def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
             capture_exact_emesis_doses(capture),
             capture_emesis_events(capture),
             capture_emesis_candidate_sets(capture),
+            capture_presence_overlap_calls(capture),
         ):
             sim = ShipSimulation(picard_spec, display=False)
             sim.initialize()
@@ -541,11 +615,11 @@ def run_voyage(args: argparse.Namespace) -> dict[str, Any]:
     rows = capture.rows
     epoch_hours = float(sim.clock.hours_per_epoch)
     return {
-        "measurement": "emesis_plume_recipient_dose_v3",
+        "measurement": "emesis_plume_recipient_dose_v4",
         "design": MEASUREMENT_DESIGN,
         "identity": {
-            "engine_git_sha": git_value(["rev-parse", "HEAD"]),
-            "worktree_status_at_start": git_value(["status", "--porcelain"]),
+            "engine_git_sha": engine_git_sha,
+            "worktree_status_at_start": worktree_status_at_start,
             "python_version": sys.version.split()[0],
             "platform": args.platform,
             "pathogen_bundle_id": args.bundle,
