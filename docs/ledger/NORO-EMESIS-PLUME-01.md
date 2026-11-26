@@ -43,7 +43,7 @@ distance kernel. The implementation therefore declares:
 
 ## Recipient opportunity and hull schedules
 
-`RhythmLayer.presence_overlap_window` resolves minute-level ingress/egress and
+`RhythmLayer.presence_overlap_window` resolves minute-level ingress/egress as disjoint presence segments (a recipient who leaves and returns inside one pulse is credited for both) and
 synchronized egress fronts against the emitted event's reconstructed sub-epoch
 position. Rhythm-committed recipients are candidates even when hourly placement
 has already moved them to an egress corridor; confinement-overridden bookings do

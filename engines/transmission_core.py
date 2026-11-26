@@ -11069,20 +11069,22 @@ class TransmissionCore:
             return 0.5
         return max(0.0, min(float(event_fraction), 1.0))
 
-    def _emesis_opportunity_window(
+    def _emesis_opportunity_windows(
         self,
         target: KorkinAgent,
         zone_name: str,
         epoch: int,
         event_fraction: float,
-    ) -> tuple[float, float]:
-        """Recipient presence window in minutes after the event.
+    ) -> list[tuple[float, float]]:
+        """Recipient presence segments in minutes after the event.
 
-        The return is ``(entry, exit)`` relative to emission, clipped to the
-        declared pulse. A rhythm commitment supplies minute-resolution ingress
-        and egress. Without one, an epoch-resolved occupant is the coarse
-        fallback: present for the whole pulse. That fallback is deliberately
-        labelled in the exposure record.
+        Each ``(entry, exit)`` is relative to emission and clipped to the
+        declared pulse; disjoint segments cover a recipient who leaves and
+        returns inside one pulse. A rhythm commitment supplies minute-
+        resolution ingress and egress; an empty list means the commitment
+        affirmatively places the recipient elsewhere. Without one, an
+        epoch-resolved occupant is the coarse fallback: present for the
+        whole pulse.
         """
         pulse = self.emesis_event_plume.pulse_minutes
         offset = event_fraction * self.clock.hours_per_epoch * 60.0
@@ -11092,19 +11094,22 @@ class TransmissionCore:
             and hasattr(schedule, "presence_overlap_window")
             and not getattr(target, "_rhythm_confinement_overrode", False)
         ):
-            window = schedule.presence_overlap_window(
+            windows = schedule.presence_overlap_window(
                 target,
                 zone_name,
                 self.clock.hour_of_day(epoch),
                 offset,
                 pulse,
             )
-            if window is not None:
-                entry, exit_ = window
-                return max(0.0, min(float(entry), pulse)), max(
-                    0.0, min(float(exit_), pulse),
-                )
-        return 0.0, pulse
+            if windows is not None:
+                return [
+                    (
+                        max(0.0, min(float(entry), pulse)),
+                        max(0.0, min(float(exit_), pulse)),
+                    )
+                    for entry, exit_ in windows
+                ]
+        return [(0.0, pulse)]
 
     def _emesis_plume_distance_class(
         self,
@@ -11185,12 +11190,17 @@ class TransmissionCore:
                 continue
             if getattr(agent, "current_location", "") == "Isolated_In_Quarters":
                 continue
+            if agent.agent_id in self._cg_absorbed_ids:
+                # CAREGIVER-V1: the tending caregiver's hours are at the
+                # host's bedside — venue bookings they cancelled do not
+                # count as presence evidence.
+                continue
             for _emitter, _load, event_fraction in entries:
                 fraction = self._emesis_event_epoch_fraction(event_fraction)
-                entry_min, exit_min = self._emesis_opportunity_window(
+                windows = self._emesis_opportunity_windows(
                     agent, zone_name, epoch, fraction,
                 )
-                if exit_min > entry_min:
+                if any(exit_min > entry_min for entry_min, exit_min in windows):
                     candidates.append(agent)
                     break
         return candidates
@@ -11342,11 +11352,17 @@ class TransmissionCore:
                         zone_name, distance_class,
                     )
                     event_fraction = self._emesis_event_epoch_fraction(event_age)
-                    entry_min, exit_min = self._emesis_opportunity_window(
+                    windows = self._emesis_opportunity_windows(
                         target, zone_name, epoch, event_fraction,
                     )
-                    exposure_hours = self._first_order_exposure_hours(
-                        entry_min, exit_min, removal_per_hour,
+                    exposure_hours = sum(
+                        self._first_order_exposure_hours(
+                            entry_min, exit_min, removal_per_hour,
+                        )
+                        for entry_min, exit_min in windows
+                    )
+                    opportunity_minutes = sum(
+                        exit_min - entry_min for entry_min, exit_min in windows
                     )
                     concentration = load / receiving_volume
                     dose = (
@@ -11379,9 +11395,11 @@ class TransmissionCore:
                         "distance_class": distance_class,
                         "receiving_volume_m3": round(receiving_volume, 4),
                         "event_epoch_fraction": round(event_fraction, 4),
-                        "opportunity_entry_minutes": round(entry_min, 4),
-                        "opportunity_exit_minutes": round(exit_min, 4),
-                        "opportunity_minutes": round(exit_min - entry_min, 4),
+                        "opportunity_windows": [
+                            [round(entry_min, 4), round(exit_min, 4)]
+                            for entry_min, exit_min in windows
+                        ],
+                        "opportunity_minutes": round(opportunity_minutes, 4),
                         "removal_per_hour": round(removal_per_hour, 6),
                         "exposure_hours": round(exposure_hours, 6),
                         "presence_share": round(presence_share, 4),

@@ -501,7 +501,7 @@ def test_presence_overlap_window_resolves_minute_level_egress() -> None:
     assert layer.presence_overlap_window(
         agent, "Restaurant", hour=2, event_offset_minutes=30.0,
         duration_minutes=30.0,
-    ) == (0.0, 25.0)
+    ) == [(0.0, 25.0)]
 
 
 def test_presence_overlap_window_distinguishes_elsewhere_from_unresolved() -> None:
@@ -524,7 +524,7 @@ def test_presence_overlap_window_distinguishes_elsewhere_from_unresolved() -> No
     assert layer.presence_overlap_window(
         agent, "Restaurant", hour=2, event_offset_minutes=30.0,
         duration_minutes=30.0,
-    ) == (30.0, 30.0)
+    ) == []
     layer._commitments[agent.agent_id] = []
     assert layer.presence_overlap_window(
         agent, "Restaurant", hour=2, event_offset_minutes=30.0,
@@ -551,11 +551,11 @@ def test_presence_overlap_window_zero_when_pulse_misses_epoch_visit() -> None:
     assert layer.presence_overlap_window(
         agent, "Restaurant", hour=2, event_offset_minutes=0.0,
         duration_minutes=15.0,
-    ) == (15.0, 15.0)
+    ) == []
     assert layer.presence_overlap_window(
         agent, "Restaurant", hour=2, event_offset_minutes=55.0,
         duration_minutes=15.0,
-    ) == (15.0, 15.0)
+    ) == []
 
 
 def test_presence_overlap_window_uses_the_winning_booking() -> None:
@@ -590,7 +590,7 @@ def test_presence_overlap_window_uses_the_winning_booking() -> None:
     assert layer.presence_overlap_window(
         agent, "Restaurant", hour=2, event_offset_minutes=30.0,
         duration_minutes=15.0,
-    ) == (15.0, 15.0)
+    ) == []
     winning_restaurant = _Commitment(
         priority=0,
         start_min=120,
@@ -607,7 +607,7 @@ def test_presence_overlap_window_uses_the_winning_booking() -> None:
     assert layer.presence_overlap_window(
         agent, "Restaurant", hour=2, event_offset_minutes=30.0,
         duration_minutes=15.0,
-    ) == (0.0, 15.0)
+    ) == [(0.0, 15.0)]
 
 
 def test_corridor_commitment_does_not_enter_a_stateroom_compartment() -> None:
@@ -629,4 +629,32 @@ def test_corridor_commitment_does_not_enter_a_stateroom_compartment() -> None:
     assert layer.presence_overlap_window(
         agent, "Cabin_A::cabin7", hour=2, event_offset_minutes=30.0,
         duration_minutes=15.0,
-    ) == (15.0, 15.0)
+    ) == []
+
+
+def test_presence_overlap_window_returns_disjoint_repeated_visits() -> None:
+    layer = _layer()
+    assert layer is not None
+    agent = _agent(1)
+
+    def booking(start: int, end: int, event_id: str) -> "_Commitment":
+        return _Commitment(
+            priority=1,
+            start_min=start,
+            end_min=end,
+            zone="Restaurant",
+            event_id=event_id,
+            event_class="meal_seating",
+            egress_min=None,
+            corridor_zone=None,
+            is_meal=True,
+            port_span=None,
+        )
+    layer._commitments[agent.agent_id] = [
+        booking(120, 128, "first"),
+        booking(140, 150, "second"),
+    ]
+    assert layer.presence_overlap_window(
+        agent, "Restaurant", hour=2, event_offset_minutes=0.0,
+        duration_minutes=30.0,
+    ) == [(0.0, 8.0), (20.0, 30.0)]
