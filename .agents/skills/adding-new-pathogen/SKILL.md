@@ -209,7 +209,7 @@ The orchestrator picks up the new pathogen automatically and simulates multi-pat
 | Pathogen ID | Model | Notes |
 |-------------|-------|-------|
 | `norwalk_gi` | beta_poisson | GI Norovirus; `shedding_variance_log10`: 1.5; food contamination enabled |
-| `sars_cov2_resp` | beta_poisson | Respiratory SARS-CoV-2; `shedding_variance_log10`: 1.2; HVAC airborne route |
+| `sars_cov2_resp` | beta_poisson | Respiratory SARS-CoV-2; Zhou `emission_shape` plus mean-normalized `shedding_multiplier_mixture`; HVAC airborne route |
 
 For the extended 10-pathogen set, see `data/pathogens/edison_10pathogen_profiles.json`.
 For fiction-adapted Enterprise scenarios, see `enterprise_tos_profiles.json` and `enterprise_tng_profiles.json` with templates under `data/templates/`.
