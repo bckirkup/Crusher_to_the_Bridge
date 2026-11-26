@@ -11167,9 +11167,10 @@ class TransmissionCore:
         """Rhythm-committed recipients outside this epoch's occupant list.
 
         This catches the pre-egress part of an exit hour and arrivals inside a
-        short pulse. It deliberately requires a commitment-owned placement:
-        confinement, ashore/departed state, caregiver relocation, and token
-        fallback do not create sub-epoch presence evidence.
+        short pulse. Confinement, ashore/departed state, and isolation still
+        refuse the booking; ordinary fallback placement does not, because a
+        later commitment in the pulse is exactly the evidence needed for an
+        arrival across the epoch boundary.
         """
         schedule = self._event_schedule
         if schedule is None or not hasattr(schedule, "presence_overlap_window"):
@@ -11178,9 +11179,11 @@ class TransmissionCore:
         for agent in getattr(self, "_agents_by_id", {}).values():
             if agent.agent_id in occupant_ids:
                 continue
-            if not getattr(agent, "_rhythm_location_committed", False):
-                continue
             if getattr(agent, "_rhythm_confinement_overrode", False):
+                continue
+            if getattr(agent, "ashore", False) or agent.has_departed(epoch):
+                continue
+            if getattr(agent, "current_location", "") == "Isolated_In_Quarters":
                 continue
             for _emitter, _load, event_fraction in entries:
                 fraction = self._emesis_event_epoch_fraction(event_fraction)

@@ -450,7 +450,6 @@ def test_rhythm_committed_pre_egress_candidate_is_dosed() -> None:
     shedder = _emetic_shedder(core)
     target = _agent(2)
     target.current_location = "Corridor"
-    target._rhythm_location_committed = True
     matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
     rows = _emesis_dose_rows(matrix)
     assert [row["target_id"] for row in rows] == [2]
@@ -465,7 +464,6 @@ def test_confinement_override_does_not_use_an_unused_booking() -> None:
     shedder = _emetic_shedder(core)
     target = _agent(2)
     target.current_location = "Corridor"
-    target._rhythm_location_committed = True
     target._rhythm_confinement_overrode = True
     matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
     assert _emesis_dose_rows(matrix) == []
