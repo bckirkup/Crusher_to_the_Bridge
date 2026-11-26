@@ -1236,10 +1236,13 @@ class RhythmLayer:
         base_zone = str(zone_name).split("::cabin", 1)[0]
         overlapping = []
         same_zone: list[tuple[float, float]] = []
+        same_zone_epoch_claim = False
         for commitment in self._commitments.get(agent.agent_id, ()):
             occupancy_end = commitment.end_min
             if commitment.egress_min is not None:
                 occupancy_end = min(occupancy_end, commitment.egress_min)
+            if commitment.zone == base_zone and commitment.covers(hour):
+                same_zone_epoch_claim = True
             lo = max(start, float(commitment.start_min))
             hi = min(end, float(occupancy_end))
             if hi <= lo:
@@ -1252,7 +1255,7 @@ class RhythmLayer:
                 min(lo for lo, _ in same_zone),
                 max(hi for _, hi in same_zone),
             )
-        if overlapping:
+        if overlapping or same_zone_epoch_claim:
             zero = float(duration_minutes)
             return zero, zero
         return None

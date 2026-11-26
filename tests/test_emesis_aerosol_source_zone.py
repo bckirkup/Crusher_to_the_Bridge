@@ -414,3 +414,58 @@ class TestEventPulseExposure:
         assert rows[2]["dose"] > rows[3]["dose"] > rows[4]["dose"]
         assert rows[2]["receiving_volume_m3"] < rows[3]["receiving_volume_m3"]
         assert rows[3]["receiving_volume_m3"] < rows[4]["receiving_volume_m3"]
+
+    def test_table_numbers_do_not_join_different_sittings(self) -> None:
+        core = _core(_profile())
+        shedder = _emetic_shedder(core)
+        shedder.dining_party_ids = frozenset({1})
+        shedder.dining_table_index = 0
+        shedder.meal_seating = 0
+        target = _agent(2)
+        target.dining_party_ids = frozenset({2})
+        target.dining_table_index = 0
+        target.meal_seating = 1
+        matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+        rows = _emesis_dose_rows(matrix)
+        assert len(rows) == 1
+        assert rows[0]["distance_class"] == "room"
+
+
+def test_event_fraction_comes_from_infection_age_not_absolute_epoch() -> None:
+    core = _core(_profile())
+    shedder = _emetic_shedder(core, event_age=1.0 / 48.0)
+    shedder.infections[PATHOGEN]["time_infected"] = 1
+    target = _agent(2)
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=20)
+    rows = _emesis_dose_rows(matrix)
+    assert len(rows) == 1
+    assert rows[0]["event_epoch_fraction"] == pytest.approx(0.5)
+
+
+def test_rhythm_committed_pre_egress_candidate_is_dosed() -> None:
+    core = _core(
+        _profile(),
+        rhythm_layer=_WindowSchedule((0.0, 10.0)),
+    )
+    shedder = _emetic_shedder(core)
+    target = _agent(2)
+    target.current_location = "Corridor"
+    target._rhythm_location_committed = True
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+    rows = _emesis_dose_rows(matrix)
+    assert [row["target_id"] for row in rows] == [2]
+    assert rows[0]["opportunity_minutes"] == pytest.approx(10.0)
+
+
+def test_confinement_override_does_not_use_an_unused_booking() -> None:
+    core = _core(
+        _profile(),
+        rhythm_layer=_WindowSchedule((0.0, 10.0)),
+    )
+    shedder = _emetic_shedder(core)
+    target = _agent(2)
+    target.current_location = "Corridor"
+    target._rhythm_location_committed = True
+    target._rhythm_confinement_overrode = True
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+    assert _emesis_dose_rows(matrix) == []

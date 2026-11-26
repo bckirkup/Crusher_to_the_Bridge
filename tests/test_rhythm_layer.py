@@ -530,3 +530,29 @@ def test_presence_overlap_window_distinguishes_elsewhere_from_unresolved() -> No
         agent, "Restaurant", hour=2, event_offset_minutes=30.0,
         duration_minutes=30.0,
     ) is None
+
+
+def test_presence_overlap_window_zero_when_pulse_misses_epoch_visit() -> None:
+    layer = _layer()
+    assert layer is not None
+    agent = _agent(1)
+    layer._commitments[agent.agent_id] = [_Commitment(
+        priority=1,
+        start_min=135,
+        end_min=175,
+        zone="Restaurant",
+        event_id="meal",
+        event_class="meal_seating",
+        egress_min=None,
+        corridor_zone=None,
+        is_meal=True,
+        port_span=None,
+    )]
+    assert layer.presence_overlap_window(
+        agent, "Restaurant", hour=2, event_offset_minutes=0.0,
+        duration_minutes=15.0,
+    ) == (15.0, 15.0)
+    assert layer.presence_overlap_window(
+        agent, "Restaurant", hour=2, event_offset_minutes=55.0,
+        duration_minutes=15.0,
+    ) == (15.0, 15.0)

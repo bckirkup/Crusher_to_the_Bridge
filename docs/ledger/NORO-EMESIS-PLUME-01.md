@@ -1,8 +1,9 @@
-# NORO-EMESIS-PLUME-01 — event-moment emesis exposure pulse
+# NORO-EMESIS-PLUME-01
+**Date:** 2026-11-26
+**Commit:** 334e9c51
+**Pathogens:** norwalk_gi
+**Status:** declared
 
-Pathogens: norwalk_gi
-Base commit: 75ef817a
-Status: implemented; declared-structure sensitivity arm, not a fitted measurement
 
 ## Change
 
@@ -44,7 +45,9 @@ distance kernel. The implementation therefore declares:
 
 `RhythmLayer.presence_overlap_window` resolves minute-level ingress/egress and
 synchronized egress fronts against the emitted event's reconstructed sub-epoch
-position. Where no commitment resolves the pulse, current epoch occupancy is
+position. Rhythm-committed recipients are candidates even when hourly placement
+has already moved them to an egress corridor; confinement-overridden bookings do
+not count. Where no commitment resolves the pulse, current epoch occupancy is
 the coarse fallback and represents presence for the whole pulse. The regression
 suite now verifies every catalogued platform builds a rhythm layer when
 `rhythm.enabled` is unspecified, preserving the config-level default-on
@@ -56,7 +59,7 @@ Explorer exception; it was not given another hull's schedule.
 This is an event-moment exposure decomposition, not a CFD plume and not a
 mass-conserving two-box spatial dispersion model. The emitted mass continues
 into the existing reservoir drain for later transport; the event pulse is the
-pre-mixing exposure of the same mass before that room-pool tail. Arrivals in a
-later epoch who were not occupants in the emission epoch are outside the
-current candidate set. Pulse duration and receiving volumes are mandatory
-sensitivity axes before interpreting voyage dose magnitudes.
+pre-mixing exposure of the same mass before that room-pool tail. Uncommitted
+token-fallback movement still has only epoch-resolution opportunity evidence.
+Pulse duration and receiving volumes are mandatory sensitivity axes before
+interpreting voyage dose magnitudes.

@@ -4135,6 +4135,13 @@ its stable ID; pull requests must not append numbered items.
     `docs/norovirus/flush_sweep_v1_stage2e_readout.md`,
     `docs/norovirus/flush_sweep_v1_stage2e_findings.md`.
 
+    **Supersession note — `NORO-EMESIS-PLUME-01`:** the stage `s2r`/`s2e`
+    statements above are historical measurements on the compartment-averaged
+    emesis source-room arm. The default engine now uses the event-pulse arm;
+    those magnitudes and route-share conclusions are not current-engine
+    measurements until re-run or explicitly reproduced under
+    `transmission.emesis_event_plume.mode: compartment_average`.
+
 55. **`AERO-CABIN-05`: HVAC-downstream standing mass was dosed once per
     upstream shedding zone, inflating the route.** `_pathway_hvac_airborne`
     previously passed the whole transported target-zone mass to the dose helper

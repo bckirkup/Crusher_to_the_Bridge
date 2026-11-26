@@ -4681,7 +4681,7 @@ class TransmissionCore:
         self.aerosol_pools_by_pathogen: dict[str, dict[str, float]] = {}
         self.emesis_aerosol_pending_by_pathogen: dict[str, dict[str, float]] = {}
         # This epoch's emesis aerosol, per emitting zone as
-        # (emitter, mass, onset-relative event age in days): the source-zone
+        # (emitter, mass, event fraction inside this epoch): the source-zone
         # pathway doses it in the event epoch, and the per-emitter weight is
         # what the strain attribution shares over.
         self._emesis_aerosol_emitted_by_pathogen: dict[
@@ -10897,8 +10897,21 @@ class TransmissionCore:
             emitted = self._emesis_aerosol_emitted_by_pathogen.setdefault(
                 pathogen_id, {},
             )
+            if eligible is None:
+                event_fraction = 0.5
+            else:
+                _, current_age_days = eligible
+                lag_epochs = self.clock.epochs_for_days(max(
+                    0.0, current_age_days - float(event_age),
+                ))
+                event_fraction = 1.0 - lag_epochs
+                if not 0.0 <= event_fraction <= 1.0:
+                    # A post-prandial deferral emits later than its drawn
+                    # infection-age timestamp; the deferral carries no
+                    # sub-epoch time, so declare the epoch midpoint.
+                    event_fraction = 0.5
             emitted.setdefault(zone_name, []).append(
-                (agent, aerosol_load, float(event_age)),
+                (agent, aerosol_load, event_fraction),
             )
             caregiver_contacted = self._caregiver_response(
                 agent,
@@ -11049,31 +11062,12 @@ class TransmissionCore:
         """
         return self.flush_aerosol_pending_by_pathogen.pop(pathogen_id, {})
 
-    def _emesis_event_epoch_fraction(
-        self,
-        agent: KorkinAgent,
-        pathogen_id: str,
-        event_age: float | None,
-        epoch: int,
-    ) -> float:
-        """Scheduled event position inside the current epoch, clamped to [0, 1].
-
-        ``onset_time_infected`` is in integer epochs while the emesis schedule
-        is onset-relative fractional days. A deferred event whose reconstructed
-        position no longer falls in the emitting epoch uses the epoch midpoint:
-        the deferral mechanism does not carry a sub-epoch timestamp.
-        """
-        if event_age is None:
+    @staticmethod
+    def _emesis_event_epoch_fraction(event_fraction: float | None) -> float:
+        """Event position inside the emitting epoch, with deferral midpoint."""
+        if event_fraction is None:
             return 0.5
-        inf = agent.infections.get(pathogen_id) or {}
-        onset = inf.get("onset_time_infected")
-        if onset is None:
-            return 0.5
-        absolute = float(onset) + self.clock.epochs_for_days(float(event_age))
-        position = absolute - float(epoch - 1)
-        if 0.0 <= position <= 1.0:
-            return position
-        return 0.5
+        return max(0.0, min(float(event_fraction), 1.0))
 
     def _emesis_opportunity_window(
         self,
@@ -11093,7 +11087,11 @@ class TransmissionCore:
         pulse = self.emesis_event_plume.pulse_minutes
         offset = event_fraction * self.clock.hours_per_epoch * 60.0
         schedule = self._event_schedule
-        if schedule is not None and hasattr(schedule, "presence_overlap_window"):
+        if (
+            schedule is not None
+            and hasattr(schedule, "presence_overlap_window")
+            and not getattr(target, "_rhythm_confinement_overrode", False)
+        ):
             window = schedule.presence_overlap_window(
                 target,
                 zone_name,
@@ -11124,7 +11122,11 @@ class TransmissionCore:
             return "room"
         target_table = self._table_party(zone_name, target, epoch)
         emitter_table = self._table_party(zone_name, emitter, epoch)
-        if target_table is not None and emitter_table is not None:
+        if (
+            target_table is not None
+            and emitter_table is not None
+            and target.meal_seating == emitter.meal_seating
+        ):
             target_index = target_table[1]
             emitter_index = emitter_table[1]
             if target_index >= 0 and target_index == emitter_index:
@@ -11144,6 +11146,41 @@ class TransmissionCore:
         if distance_class == "adjacent":
             return min(self.emesis_event_plume.adjacent_volume_m3, room_volume)
         return room_volume
+
+    def _emesis_schedule_candidates(
+        self,
+        zone_name: str,
+        entries: list[tuple[KorkinAgent, float, float | None]],
+        epoch: int,
+        occupant_ids: set[int],
+    ) -> list[KorkinAgent]:
+        """Rhythm-committed recipients outside this epoch's occupant list.
+
+        This catches the pre-egress part of an exit hour and arrivals inside a
+        short pulse. It deliberately requires a commitment-owned placement:
+        confinement, ashore/departed state, caregiver relocation, and token
+        fallback do not create sub-epoch presence evidence.
+        """
+        schedule = self._event_schedule
+        if schedule is None or not hasattr(schedule, "presence_overlap_window"):
+            return []
+        candidates: list[KorkinAgent] = []
+        for agent in getattr(self, "_agents_by_id", {}).values():
+            if agent.agent_id in occupant_ids:
+                continue
+            if not getattr(agent, "_rhythm_location_committed", False):
+                continue
+            if getattr(agent, "_rhythm_confinement_overrode", False):
+                continue
+            for _emitter, _load, event_fraction in entries:
+                fraction = self._emesis_event_epoch_fraction(event_fraction)
+                entry_min, exit_min = self._emesis_opportunity_window(
+                    agent, zone_name, epoch, fraction,
+                )
+                if exit_min > entry_min:
+                    candidates.append(agent)
+                    break
+        return candidates
 
     @staticmethod
     def _first_order_exposure_hours(
@@ -11220,9 +11257,16 @@ class TransmissionCore:
             mass = sum(load for _, load, _ in entries)
             if mass <= 0.0:
                 continue
-            susceptible = self._get_susceptible(
-                units.get(zone_name, []), pathogen_id,
-            )
+            occupants = units.get(zone_name, [])
+            susceptible = self._get_susceptible(occupants, pathogen_id)
+            if self.emesis_event_plume.active:
+                extra = self._emesis_schedule_candidates(
+                    zone_name,
+                    entries,
+                    epoch,
+                    {agent.agent_id for agent in occupants},
+                )
+                susceptible += self._get_susceptible(extra, pathogen_id)
             if not susceptible:
                 continue
             # A cabin compartment sits on its parent corridor's HVAC branch,
@@ -11275,8 +11319,6 @@ class TransmissionCore:
                 self._unit_air_exchange_rate(zone_name)
                 if self.room_air_removal.active else 0.0
             )
-            dose_rows: dict[int, list[dict[str, Any]]] = {}
-            total_doses: dict[int, float] = {}
             for target in susceptible:
                 presence_share = self._cabin_presence_share(target, epoch)
                 for emitter, load, event_age in entries:
@@ -11286,9 +11328,7 @@ class TransmissionCore:
                     receiving_volume = self._emesis_plume_receiving_volume(
                         zone_name, distance_class,
                     )
-                    event_fraction = self._emesis_event_epoch_fraction(
-                        emitter, pathogen_id, event_age, epoch,
-                    )
+                    event_fraction = self._emesis_event_epoch_fraction(event_age)
                     entry_min, exit_min = self._emesis_opportunity_window(
                         target, zone_name, epoch, event_fraction,
                     )
@@ -11305,10 +11345,15 @@ class TransmissionCore:
                     )
                     if dose <= 0.0:
                         continue
-                    total_doses[target.agent_id] = (
-                        total_doses.get(target.agent_id, 0.0) + dose
+                    emitter_attribution = attribution(
+                        ledger,
+                        self._shedder_mix([(emitter, load)], pathogen_id),
                     )
-                    dose_rows.setdefault(target.agent_id, []).append({
+                    dose = self._accumulate(
+                        target.agent_id, "emesis_aerosol", dose,
+                        agent_doses, agent_pathway_doses, emitter_attribution,
+                    )
+                    matrix.emesis_aerosol_exposures.append({
                         "target_id": target.agent_id,
                         "target_zone": zone_name,
                         "source_zone": zone_name,
@@ -11328,12 +11373,6 @@ class TransmissionCore:
                         "exposure_hours": round(exposure_hours, 6),
                         "presence_share": round(presence_share, 4),
                     })
-            for target_id, dose in total_doses.items():
-                self._accumulate(
-                    target_id, "emesis_aerosol", dose,
-                    agent_doses, agent_pathway_doses, source_attribution,
-                )
-                matrix.emesis_aerosol_exposures.extend(dose_rows[target_id])
 
     def _sanitary_exhaust_ach(self, _venue: str) -> float:
         """Air changes per hour of a sanitary venue, from the provisioning
