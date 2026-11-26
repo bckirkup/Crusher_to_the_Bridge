@@ -14,6 +14,8 @@ import argparse
 import gzip
 import hashlib
 import json
+import math
+import os
 from pathlib import Path
 from typing import Any
 
@@ -480,8 +482,18 @@ def paired_central_contrast(
     selected = [
         payload for payload in payloads
         if int(payload["identity"]["seed"]) == seed
-        and float(payload["identity"]["pulse_minutes_requested"]) == 15.0
-        and float(payload["identity"]["receiving_volume_scale"]) == 1.0
+        and math.isclose(
+            float(payload["identity"]["pulse_minutes_requested"]),
+            15.0,
+            rel_tol=0.0,
+            abs_tol=1e-12,
+        )
+        and math.isclose(
+            float(payload["identity"]["receiving_volume_scale"]),
+            1.0,
+            rel_tol=0.0,
+            abs_tol=1e-12,
+        )
     ]
     by_mode = {
         str(payload["identity"]["mode"]): payload for payload in selected
@@ -602,9 +614,18 @@ def aggregate(artifact_dir: Path) -> dict[str, Any]:
     }
 
 
+def safe_path(path: Path) -> Path:
+    resolved = Path(os.path.realpath(path))
+    base_dir = Path(os.path.realpath(Path.cwd()))
+    if resolved != base_dir and base_dir not in resolved.parents:
+        raise ValueError(f"path {path!r} is outside the working directory")
+    return resolved
+
+
 def write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
+    resolved = safe_path(path)
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    with resolved.open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=1, sort_keys=True)
         handle.write("\n")
 
@@ -633,8 +654,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    payload = aggregate(args.artifact_dir)
-    write_json(args.out, payload)
+    payload = aggregate(safe_path(args.artifact_dir))
+    write_json(safe_path(args.out), payload)
     print_axis_table(payload["axes"]["pulse_minutes"])
     print_axis_table(payload["axes"]["receiving_volume_scale"])
     print(f"wrote {args.out}")

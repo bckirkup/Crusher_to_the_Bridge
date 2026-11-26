@@ -1,5 +1,5 @@
 {
- "artifact_dir": "docs/norovirus/noro_emesis_plume_sensitivity_01/classic_cruise_1900",
+ "artifact_dir": "/home/ubuntu/repos/Crusher-to-the-Bridge/docs/norovirus/noro_emesis_plume_sensitivity_01/classic_cruise_1900",
  "axes": {
   "pulse_minutes": {
    "axis": "pulse_minutes",
