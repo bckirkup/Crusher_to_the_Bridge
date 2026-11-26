@@ -1,0 +1,537 @@
+{
+  "task_id": "DP-UNION-02",
+  "design_id": "covid-dp-union-02",
+  "joint_contract": {
+    "t3": {
+      "anchor_id": "covid.T3",
+      "cumulative_positives": 634,
+      "cumulative_tests": 3063,
+      "through_day_index": 31
+    },
+    "onboard_table": {
+      "positives": 691,
+      "tests": 3894,
+      "through_day_index": 34,
+      "through": "2020-02-23",
+      "wave": "crew_wave",
+      "wave_tests": 831
+    },
+    "during_quarantine_band": [
+      150,
+      350
+    ],
+    "before_share": {
+      "record": 0.173,
+      "tolerance": 0.1
+    },
+    "conditioned_capture": {
+      "floor": 0.8,
+      "reachable_infection_day_max": 29
+    },
+    "dead_seeds": 20,
+    "saturation_fraction": 0.95,
+    "representative_band": [
+      0.5,
+      2.0
+    ],
+    "representative_min_seeds": 6,
+    "conditioning": {
+      "scored_class": "founder",
+      "founder_min_aboard_window_acquisitions": 10,
+      "takeoff_min_recorded_onsets": 10,
+      "min_class_cells": 5
+    },
+    "side_fraction": 0.75,
+    "ignition": {
+      "mass": 50,
+      "day_max": 9
+    },
+    "attack_infections_band": [
+      712,
+      960
+    ]
+  },
+  "declared_thetas": [
+    100000.0,
+    316000.0,
+    1000000.0,
+    3160000.0,
+    10000000.0,
+    31600000.0,
+    100000000.0,
+    316000000.0,
+    1000000000.0,
+    3160000000.0,
+    10000000000.0
+  ],
+  "complete_thetas": [],
+  "incomplete_thetas": {
+    "100000000.0": 20
+  },
+  "theta_grid": {
+    "status": "declared-pre-pilot",
+    "arm_id": "union_niid",
+    "declared": "2026-11-26, on main after COVID-SHED-SHAPE-01 and COVID-SEED-ASCERTAIN-01, before any DP-UNION-02 cell",
+    "lattice": "thetas is the runnable half-decade lattice 1e5..1e10, not the scored grid. The zero-inflated shape re-denominates theta again; no scalar conversion is claimed. The lattice span is retained as a broad declared bound because both source representations are normalized to unit peak before theta is fitted and their normalized lifetime areas are the same order, while timing/occurrence heterogeneity prevents an exact conversion. Edge failure is a report, not license to extend after seeing outcomes.",
+    "pilot": {
+      "thetas": [
+        100000.0,
+        1000000.0,
+        10000000.0,
+        100000000.0,
+        1000000000.0,
+        10000000000.0
+      ],
+      "seeds": [
+        20200208,
+        20200213,
+        20200302,
+        20200320,
+        20200321
+      ],
+      "how": "the first 5 selected ascertainment-conditioned seeds of each decade's canary block (scripts/campaign submit --size 5); the same cells the full block would run",
+      "statistic": "median over the 5 seeds of positives through day 31 (P31, all seeds, unconditioned), against 634",
+      "reads": "only the T3 side of each decade and the saturated edge. The 20-seed dead-row test cannot be read from five pilot cells and is not claimed. No contract leg is scored from pilot cells; they are 5-seed provisional rows."
+    },
+    "selection_rule": "theta_hi = the lowest pilot decade whose median P31 >= 634; theta_lo = the decade below it. Scored grid = {theta_lo, 3.16*theta_lo, theta_hi, 3.16*theta_hi}, dropping a value above the lattice. Canary = 20 seeds at 3.16*theta_lo. If no pilot decade reaches 634, or the lowest one already does, no grid is declared and that is reported. A pilot median that falls back below 634 above theta_hi is reported and does not move the grid.",
+    "scored_thetas": null,
+    "canary_theta": null
+  },
+  "pilot": [
+    {
+      "theta": 100000000.0,
+      "n": 5,
+      "p31": [
+        183,
+        186,
+        172,
+        189,
+        191
+      ],
+      "median_p31": 186,
+      "at_or_above_t3": false,
+      "dead": false,
+      "saturated": false
+    }
+  ],
+  "joint": null,
+  "rows": [
+    {
+      "theta": 100000000.0,
+      "n": 20,
+      "provisional": true,
+      "scored_class": "founder",
+      "class_n": {
+        "founder": 20,
+        "takeoff": 20,
+        "all": 20
+      },
+      "legs": {
+        "timing_ignition": {
+          "median": 1.0,
+          "never_ignited": 0,
+          "day_max": 9,
+          "pass": true,
+          "verdict": null
+        },
+        "timing_before_share": {
+          "median": 0.9833114203981133,
+          "band": [
+            0.07299999999999998,
+            0.273
+          ],
+          "pass": false,
+          "verdict": null
+        },
+        "attack": {
+          "median": 3255.5,
+          "band": [
+            712,
+            960
+          ],
+          "pass": false,
+          "verdict": null
+        },
+        "during": {
+          "median": 1.5,
+          "band": [
+            150,
+            350
+          ],
+          "pass": false,
+          "verdict": null
+        },
+        "capture": {
+          "median": 0.6047256797732786,
+          "band": [
+            0.8,
+            1.0
+          ],
+          "pass": false,
+          "verdict": null
+        },
+        "t3": {
+          "target": 634,
+          "median": 188.5,
+          "seeds_above_target": 0,
+          "seeds_below_target": 20,
+          "seeds_needed_to_exclude": 15,
+          "side": "below",
+          "pass": false,
+          "verdict": null
+        },
+        "onboard_table": {
+          "target": 691,
+          "median": 188.5,
+          "seeds_above_target": 0,
+          "seeds_below_target": 20,
+          "seeds_needed_to_exclude": 15,
+          "side": "below",
+          "pass": false,
+          "verdict": null
+        }
+      },
+      "passing_legs": [
+        "timing_ignition"
+      ],
+      "failing_legs": [
+        "timing_before_share",
+        "attack",
+        "during",
+        "capture",
+        "t3",
+        "onboard_table"
+      ],
+      "dead": false,
+      "saturated": false,
+      "consistent": null,
+      "seeds_in_band": 0,
+      "median_not_representative": true,
+      "audit_deviations": {},
+      "audit_clean": true,
+      "reported_only": {
+        "legs_on_takeoff_class": {
+          "timing_ignition": {
+            "median": 1.0,
+            "never_ignited": 0,
+            "day_max": 9,
+            "pass": true,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.9833114203981133,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3255.5,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 1.5,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.6047256797732786,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 188.5,
+            "seeds_above_target": 0,
+            "seeds_below_target": 20,
+            "seeds_needed_to_exclude": 15,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 188.5,
+            "seeds_above_target": 0,
+            "seeds_below_target": 20,
+            "seeds_needed_to_exclude": 15,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          }
+        },
+        "legs_on_all_seeds": {
+          "timing_ignition": {
+            "median": 1.0,
+            "never_ignited": 0,
+            "day_max": 9,
+            "pass": true,
+            "verdict": null
+          },
+          "timing_before_share": {
+            "median": 0.9833114203981133,
+            "band": [
+              0.07299999999999998,
+              0.273
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "attack": {
+            "median": 3255.5,
+            "band": [
+              712,
+              960
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "during": {
+            "median": 1.5,
+            "band": [
+              150,
+              350
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "capture": {
+            "median": 0.6047256797732786,
+            "band": [
+              0.8,
+              1.0
+            ],
+            "pass": false,
+            "verdict": null
+          },
+          "t3": {
+            "target": 634,
+            "median": 188.5,
+            "seeds_above_target": 0,
+            "seeds_below_target": 20,
+            "seeds_needed_to_exclude": 15,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          },
+          "onboard_table": {
+            "target": 691,
+            "median": 188.5,
+            "seeds_above_target": 0,
+            "seeds_below_target": 20,
+            "seeds_needed_to_exclude": 15,
+            "side": "below",
+            "pass": false,
+            "verdict": null
+          }
+        },
+        "p31_per_seed": {
+          "20200208": 183,
+          "20200213": 186,
+          "20200302": 172,
+          "20200320": 189,
+          "20200321": 191,
+          "20200323": 190,
+          "20200324": 201,
+          "20200412": 184,
+          "20200507": 206,
+          "20200509": 188,
+          "20200520": 169,
+          "20200525": 198,
+          "20200530": 199,
+          "20200610": 157,
+          "20200612": 201,
+          "20200621": 227,
+          "20200703": 177,
+          "20200713": 156,
+          "20200715": 182,
+          "20200721": 229
+        },
+        "p34_per_seed": {
+          "20200208": 183,
+          "20200213": 186,
+          "20200302": 172,
+          "20200320": 189,
+          "20200321": 191,
+          "20200323": 190,
+          "20200324": 201,
+          "20200412": 184,
+          "20200507": 206,
+          "20200509": 188,
+          "20200520": 170,
+          "20200525": 198,
+          "20200530": 199,
+          "20200610": 157,
+          "20200612": 201,
+          "20200621": 227,
+          "20200703": 177,
+          "20200713": 156,
+          "20200715": 182,
+          "20200721": 229
+        },
+        "secondaries_per_seed": {
+          "20200208": 3269,
+          "20200213": 3269,
+          "20200302": 3302,
+          "20200320": 3218,
+          "20200321": 3245,
+          "20200323": 3259,
+          "20200324": 3224,
+          "20200412": 3241,
+          "20200507": 3266,
+          "20200509": 3239,
+          "20200520": 3259,
+          "20200525": 3249,
+          "20200530": 3252,
+          "20200610": 3293,
+          "20200612": 3252,
+          "20200621": 3235,
+          "20200703": 3238,
+          "20200713": 3259,
+          "20200715": 3272,
+          "20200721": 3259
+        },
+        "extinct_seeds": 0,
+        "median_secondaries": 3255.5,
+        "median_attack_rate": 0.877256804095931,
+        "median_specimens_through_31": 3063.0,
+        "median_specimens_through_34": 3586.0,
+        "median_wave_positives": 0.0,
+        "median_recorded_onsets": 1755.5,
+        "median_lab_confirmed_total": 1959.0,
+        "median_infections_before_quarantine": 3253.0,
+        "median_infections_during_window_all_seeds": 1.5,
+        "median_infections_after_quarantine": 0.0,
+        "median_crew_share_during_takeoff": 0.25,
+        "median_unconditioned_capture": 0.6047256797732786,
+        "median_infections_reachable": 3256.5,
+        "median_duty_excluded_hosts": 703.5,
+        "duty_excluded_zero_on_takeoff_seeds": 0,
+        "median_realized_exempt_share": 0.00861244019138756,
+        "median_founder_yield": 3080.5,
+        "founder_yield_per_seed": {
+          "20200208": 3085,
+          "20200213": 2993,
+          "20200302": 3248,
+          "20200320": 3032,
+          "20200321": 3067,
+          "20200323": 3085,
+          "20200324": 2983,
+          "20200412": 2957,
+          "20200507": 3083,
+          "20200509": 2775,
+          "20200520": 3165,
+          "20200525": 3068,
+          "20200530": 3078,
+          "20200610": 3225,
+          "20200612": 3112,
+          "20200621": 2983,
+          "20200703": 3107,
+          "20200713": 3195,
+          "20200715": 3101,
+          "20200721": 2706
+        },
+        "ignition_day_per_seed": {
+          "20200208": 1,
+          "20200213": 2,
+          "20200302": 0,
+          "20200320": 1,
+          "20200321": 1,
+          "20200323": 1,
+          "20200324": 2,
+          "20200412": 1,
+          "20200507": 2,
+          "20200509": 2,
+          "20200520": 0,
+          "20200525": 1,
+          "20200530": 1,
+          "20200610": 0,
+          "20200612": 0,
+          "20200621": 1,
+          "20200703": 1,
+          "20200713": 0,
+          "20200715": 1,
+          "20200721": 3
+        },
+        "machinery_gap_seeds": [],
+        "median_by_day": {
+          "16": {
+            "specimens": 31.0,
+            "positives": 14.5
+          },
+          "17": {
+            "specimens": 71.0,
+            "positives": 33.0
+          },
+          "18": {
+            "specimens": 171.0,
+            "positives": 75.0
+          },
+          "19": {
+            "specimens": 6.0,
+            "positives": 3.0
+          },
+          "20": {
+            "specimens": 57.0,
+            "positives": 20.5
+          },
+          "21": {
+            "specimens": 103.0,
+            "positives": 24.5
+          },
+          "23": {
+            "specimens": 53.0,
+            "positives": 2.5
+          },
+          "24": {
+            "specimens": 221.0,
+            "positives": 7.0
+          },
+          "26": {
+            "specimens": 217.0,
+            "positives": 2.0
+          },
+          "27": {
+            "specimens": 289.0,
+            "positives": 2.0
+          },
+          "28": {
+            "specimens": 504.0,
+            "positives": 1.5
+          },
+          "29": {
+            "specimens": 681.0,
+            "positives": 1.0
+          },
+          "30": {
+            "specimens": 607.0,
+            "positives": 1.0
+          },
+          "31": {
+            "specimens": 52.0,
+            "positives": 0.0
+          },
+          "34": {
+            "specimens": 523.0,
+            "positives": 0.0
+          }
+        }
+      }
+    }
+  ]
+}

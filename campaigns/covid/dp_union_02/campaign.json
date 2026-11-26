@@ -10,6 +10,7 @@
     "memory": "4096"
   },
   "image_tag": "dp-union-02",
+  "image_digest": "sha256:40b95eb4b84c681ce0fb4020cbb0b11fc751c9b7a677d3109b40c80f7405b3e9",
   "readout": "campaigns/covid/dp_union_02/readout.py",
   "blocks": {
     "union_t1e5_canary": {
