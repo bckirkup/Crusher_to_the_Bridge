@@ -215,6 +215,26 @@ def _validate_arms(arms: tuple[Mapping[str, Any], ...]) -> None:
                 )
 
 
+def _validate_explicit_seed_values(
+    values: tuple[int, ...] | None,
+    seeds: int,
+) -> None:
+    if values is None:
+        return
+    if len(values) != seeds:
+        raise ValueError("seed_values must contain exactly seeds entries")
+    if len(set(values)) != len(values):
+        raise ValueError("seed_values must be distinct")
+
+
+def _validate_points(points: tuple[tuple[float, float, int], ...]) -> None:
+    for theta, age, imports in points:
+        if not math.isfinite(theta) or theta <= 0 or age < 0 or imports < 1:
+            raise ValueError(f"malformed refinement point {(theta, age, imports)}")
+    if len(set(points)) != len(points):
+        raise ValueError("refinement points must be distinct")
+
+
 @dataclass(frozen=True)
 class BoardingScreenDesign:
     """The screen as declared before any cell ran."""
@@ -255,24 +275,14 @@ class BoardingScreenDesign:
             )
         if self.seeds < 1:
             raise ValueError("a screen needs at least one seed")
-        if self.explicit_seed_values is not None:
-            if len(self.explicit_seed_values) != self.seeds:
-                raise ValueError(
-                    "seed_values must contain exactly seeds entries",
-                )
-            if len(set(self.explicit_seed_values)) != len(self.explicit_seed_values):
-                raise ValueError("seed_values must be distinct")
+        _validate_explicit_seed_values(self.explicit_seed_values, self.seeds)
         if any(age < 0 for age in self.infection_age_days):
             raise ValueError("infection_age_days must be non-negative")
         if any(n < 1 for n in self.imports):
             raise ValueError("imports must be at least 1")
         if any(not math.isfinite(t) or t <= 0 for t in self.thetas):
             raise ValueError("thetas must be finite and positive")
-        for theta, age, imports in self.points:
-            if not math.isfinite(theta) or theta <= 0 or age < 0 or imports < 1:
-                raise ValueError(f"malformed refinement point {(theta, age, imports)}")
-        if len(set(self.points)) != len(self.points):
-            raise ValueError("refinement points must be distinct")
+        _validate_points(self.points)
         if self.split_day < 0 or self.turn_day < 0:
             raise ValueError("split_day and turn_day must be non-negative")
         _validate_arms(self.arms)
