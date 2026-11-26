@@ -229,9 +229,18 @@ One firing realization cannot size the zero-event mass; seed 8105's measured
 zero pair is a witness to that rare-event power limitation, not a second
 event-conditioned sensitivity estimate.
 
-## Open decision
+## Decision: the wide band is the admissible region
 
-Whether the measured 53.572× shared-dose response across the declared
-receiving-volume scaling range is acceptable as a sensitivity band for
-downstream use, or whether the Grade C plume geometry/pulse declarations must be
-evidenced or narrowed before anyone interprets voyage recipient-dose magnitude.
+2026-11-26, Benjamin: the wide band is accepted — the recipient-dose
+measurement exists to bound an admissible region, not to produce a point
+estimate. The measured 53.572× shared-dose response across the declared
+receiving-volume scaling range therefore stands as a declared sensitivity
+band, and evidencing or narrowing the Grade C plume geometry/pulse
+declarations is not required before downstream use. Any voyage recipient-dose
+magnitude quoted downstream must carry the band (and this readout's
+event-conditioned, selection-enriched single-realization caveat) rather than a
+point value; a future decision to interpret magnitude inside the band, rather
+than use the band itself, reopens the narrowing question. This decision changes
+nothing in `docs/norovirus/norovirus_open_ledger.md`: the withdrawals recorded
+there stay in force, and the band licenses quoting declared sensitivity, never
+the withdrawn dose magnitudes.
