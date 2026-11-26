@@ -1899,7 +1899,7 @@ def _seed_epoch_fields(
     epoch: int,
     location: str,
     *,
-    represented_age_days: float,
+    represented_age_days: float | None = None,
 ) -> tuple[float | None, float | None, int | None]:
     """(onset incubation, elapsed since onset, departure epoch) — validated."""
     onset_incubation: float | None = None
@@ -1908,6 +1908,10 @@ def _seed_epoch_fields(
         # The record states the onset's voyage day; the implied incubation
         # is a consequence of it, not a draw from the profile.
         seed_day = float(engine.clock.days_elapsed(epoch))
+        if represented_age_days is None:
+            represented_age_days = float(engine.clock.days_elapsed(
+                int(round(engine.clock.epochs_for_days(seed.infection_age_days))),
+            ))
         onset_incubation = (
             represented_age_days + seed.onset_day - seed_day
         )

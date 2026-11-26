@@ -113,7 +113,15 @@ class TestImpliedIncubation:
         engine = _FakeEngine()
         _apply(_plan(infection_age_days=age, onset_day=onset), engine)
         inf = _seeded(engine).infections[PATHOGEN]
-        assert inf["incubation_days"] == pytest.approx(age + onset - 0.0)
+        clock = _clock()
+        represented_age = clock.days_elapsed(
+            int(round(clock.epochs_for_days(age))),
+        )
+        # COVID-PRESHED-GATE-01: the fixed record is the onset voyage day;
+        # incubation is computed from the epoch-represented infection age.
+        assert inf["incubation_days"] == pytest.approx(
+            represented_age + onset - 0.0,
+        )
         assert inf["will_present"] is True
 
     def test_onset_before_acquisition_is_refused(self) -> None:
