@@ -14,8 +14,9 @@ The emesis aerosol source-room route now has two declared arms under
   inhaled exposure as emission / receiving volume × breathing rate × the
   recipient's time-integrated presence window, with first-order air removal.
   Exposure records carry `airborne_mass`, `receiving_volume_m3`,
-  `event_epoch_fraction`, `opportunity_entry_minutes`,
-  `opportunity_exit_minutes`, `removal_per_hour`, `exposure_hours`, and
+  `event_epoch_fraction`, `opportunity_windows` (disjoint entry/exit
+  minute segments), `opportunity_minutes` (their summed width),
+  `removal_per_hour`, `exposure_hours`, and
   `distance_class`.
 - `compartment_average`: the labelled pre-change whole-epoch room-average
   baseline.
