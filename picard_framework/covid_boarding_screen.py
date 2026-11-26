@@ -1573,12 +1573,13 @@ def _index_geometry(
             + float(incubation)
             - age
         )
-    shedding_day0 = False
-    if incubation is not None:
-        presymptomatic = float(profile.get("presymptomatic_shedding_days", 0.0))
-        # The same gate _shedding_curve_point applies, evaluated at the
-        # boarding age: in-window means the host emits at epoch 0.
-        shedding_day0 = age - float(incubation) >= -presymptomatic
+    # Measure the emitted value itself. Zero-inflated source shapes make a
+    # host inside the presymptomatic eligibility window legitimately silent.
+    shedding_day0 = (
+        agent.get_pathogen_shedding(PATHOGEN_ID, profile) > 0.0
+        if incubation is not None
+        else False
+    )
     return {
         KEY_INDEX_ONSET_DAY: onset_day,
         KEY_INDEX_SHEDDING_AT_DAY0: shedding_day0,

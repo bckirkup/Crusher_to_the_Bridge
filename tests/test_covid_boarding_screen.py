@@ -418,13 +418,14 @@ def test_geometry_fields_are_none_on_pre_v7_payloads(design):
         assert entry["index_geometry_pass_fraction"] is None
 
 
-def test_a_real_cell_reports_the_index_geometry(design):
+def test_a_real_cell_reports_the_index_geometry(design, monkeypatch):
     """Age 9: onset lands before boarding and the host emits at epoch 0;
     age 0: onset cannot precede boarding (or never arrives in-window)."""
     cell_at = lambda age: ScreenCell(  # noqa: E731
         index=0, scenario_id="greg_mortimer_2020", theta=1e10,
         infection_age_days=age, imports=1, seed=20200205,
     )
+    _force_covid_emission_positive(monkeypatch)
     from picard_framework.covid_boarding_screen import simulate_screen_cell
     aged = simulate_screen_cell(design, cell_at(9.0), num_epochs=48)
     assert aged["index_onset_day"] is not None
