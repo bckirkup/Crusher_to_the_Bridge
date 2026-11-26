@@ -1555,23 +1555,18 @@ def _boarding_emission_positive(
         return True
     daily = list(shape.get("daily") or [])
     day = int(np.floor(onset_relative))
-    matches = [
-        (index, row) for index, row in enumerate(daily)
-        if int(row.get("day")) == day
-    ]
-    if not matches:
-        return False
-    row_index, row = matches[0]
     occurrence_rows = inf.get("emission_shape_occurrence") or []
     if len(occurrence_rows) != len(daily):
         return False
-    if row_index >= len(occurrence_rows):
-        return False
-    return (
-        float(occurrence_rows[row_index])
-        < float(row.get("detection_probability", 0.0))
-        and float(row.get("conditional_positive_relative_shape", 0.0)) > 0.0
-    )
+    for row, occurrence in zip(daily, occurrence_rows):
+        if int(row.get("day")) != day:
+            continue
+        return (
+            float(occurrence)
+            < float(row.get("detection_probability", 0.0))
+            and float(row.get("conditional_positive_relative_shape", 0.0)) > 0.0
+        )
+    return False
 
 
 def _index_geometry(
