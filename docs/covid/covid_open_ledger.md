@@ -41,6 +41,17 @@ channel takes the same zone pool as its pathogen input). The first voyages score
 (`docs/covid/covid_dp_union_01_readout.md`); no operating point is fitted
 yet.
 
+**`COVID-SHED-SHAPE-01` (ledger entry): every COVID Θ, attack, onset,
+founder-yield, route-share and testing-history measurement made before this
+change is historical on the source-emission channel.** The active COVID arm
+now emits through the Zhou onset-aligned zero-inflated emitted-RNA shape plus
+a persistent high/low emitter mixture, rather than through the smooth
+nasal-indexed curve and lognormal shedding variance. The Edison multi-pathogen
+library is deliberately unchanged in this PR. No old Θ converts to the new emission
+denomination by a scalar; DP-UNION-01 and all earlier replay outcomes remain
+measurements of the superseded source law at their own `Measured at` SHAs.
+No campaign has yet run under the replacement source law.
+
 **`COVID-THETA-REFIT-01` (ledger entry): every DP/GM replay figure measured
 at the Θ=7.9e6 (or older 1e6) operating point is historical on the Θ
 channel.** The canonical replay operating point is

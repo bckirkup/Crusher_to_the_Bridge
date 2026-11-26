@@ -350,6 +350,12 @@ class TestShippedRespiratoryArmReachesItsCurve:
         self, presented: bool,
     ) -> None:
         covid = _shipped("sars_cov2_resp")
+        if "emission_shape" in covid:
+            pytest.skip(
+                "COVID-SHED-SHAPE-01 replaces deterministic curve emission "
+                "with a zero-inflated shape; tests/test_covid_emission_shape.py "
+                "owns that contract",
+            )
         curve_key = (
             "shedding_curve_log10" if presented
             else "asymptomatic_shedding_log10"
@@ -393,7 +399,9 @@ class TestShippedRespiratoryArmReachesItsCurve:
             sample for sample in trace
             if illness_end <= sample.days < shedding_end
         ]
-        assert min(sample.shedding for sample in convalescent) > 0.0
+        assert all(np.isfinite(sample.shedding) for sample in convalescent)
+        assert all(sample.shedding >= 0.0 for sample in convalescent)
+        assert any(sample.shedding > 0.0 for sample in convalescent)
         assert _clearance_day(trace) == pytest.approx(shedding_end, abs=0.1)
 
 

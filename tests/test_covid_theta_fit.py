@@ -155,12 +155,13 @@ def test_theta_is_the_only_scale_the_overrides_move(profile):
     low = theta_profile_overrides(profile, 1e6)
     high = theta_profile_overrides(profile, 1e9)
     assert low["shedding_curve_log10"] == high["shedding_curve_log10"]
-    # Pin key renamed with the arm's canonical release normalizer (#30:
-    # the profile now carries environmental_release_log10_per_day, whose
-    # precedence outranks dose_adjustment; pinning the old key would be
-    # inert). The pin still forces the release adj to 0.
-    assert low["environmental_release_log10_per_day"] == pytest.approx(0.0)
-    assert high["environmental_release_log10_per_day"] == pytest.approx(0.0)
+    # COVID-SHED-SHAPE-01 deletes the curve-normalizer key rather than
+    # carrying it beside the direct emitted-material amplitude. The shape
+    # amplitude itself is pinned to zero log10 below.
+    assert "environmental_release_log10_per_day" not in low
+    assert "environmental_release_log10_per_day" not in high
+    assert low["emission_shape"]["peak_positive_log10_copies_per_day"] == pytest.approx(0.0)
+    assert high["emission_shape"]["peak_positive_log10_copies_per_day"] == pytest.approx(0.0)
     assert low["dose_response"]["model"] == "beta_poisson"
     assert low["dose_response"]["alpha"] == profile["dose_response"]["alpha"]
     assert high["dose_response"]["alpha"] == profile["dose_response"]["alpha"]

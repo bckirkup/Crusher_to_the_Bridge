@@ -7,6 +7,7 @@ and the sanitary execution witness can be checked exactly.
 
 from __future__ import annotations
 
+import copy
 import importlib.util
 from dataclasses import replace
 from pathlib import Path
@@ -826,6 +827,32 @@ def test_rebase_design_is_the_declared_generic_fleet_screen():
     assert cells[2399].theta == pytest.approx(4.22e10)
 
 
+def _force_covid_emission_positive(monkeypatch) -> None:
+    """Make boarding/frailty smokes independent of episodic emission occurrence.
+
+    These tests exercise immune/frailty challenge bookkeeping, not the
+    zero-inflated source shape. COVID-SHED-SHAPE-01 makes a seeded host
+    legitimately silent for a whole onset day, which would otherwise leave
+    these eight-epoch smokes with no challenge draw at all.
+    """
+    import picard_framework.covid_boarding_screen as boarding_screen
+
+    original = boarding_screen.load_covid_profile
+
+    def load_positive(repo_root=REPO_ROOT):
+        profile = copy.deepcopy(original(repo_root))
+        shape = profile.get("emission_shape")
+        if shape:
+            for row in shape["daily"]:
+                row["detection_probability"] = 1.0
+        return profile
+
+    monkeypatch.setattr(boarding_screen, "load_covid_profile", load_positive)
+    import picard_framework.covid_theta_fit as theta_fit
+
+    monkeypatch.setattr(theta_fit, "load_covid_profile", load_positive)
+
+
 def _arm_design(arms: list[dict]) -> BoardingScreenDesign:
     """A declared-replay arm probe: one Theta, declared age, two seeds."""
     return BoardingScreenDesign(
@@ -1403,12 +1430,14 @@ def test_dose_response_frailty_needs_the_cell_theta():
         )
 
 
-def test_a_real_immune_arm_cell_reports_the_susceptibility_echoes():
+def test_a_real_immune_arm_cell_reports_the_susceptibility_echoes(monkeypatch):
     """8-epoch smoke on an immune-split arm: the immune block echoes
     declared + resolved + realized counts, the acquisition curve and
     susceptibility draw blocks are populated, and the resolved cap flag
     is echoed. Susceptibility draws land lazily on the first challenge
     (epoch ~3), so 8 epochs replaces the full-voyage smoke."""
+    _force_covid_emission_positive(monkeypatch)
+
     from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([
@@ -1447,13 +1476,15 @@ def test_a_real_immune_arm_cell_reports_the_susceptibility_echoes():
     assert draw["q05"] <= draw["q50"] <= draw["q95"]
 
 
-def test_a_real_frailty_arm_cell_echoes_the_rewritten_dose_response():
+def test_a_real_frailty_arm_cell_echoes_the_rewritten_dose_response(monkeypatch):
     """8-epoch smoke: the frailty arm's payload echoes the arm-written
     beta-Poisson block (declared alpha, recomputed scale) and the draw
     quantiles report the challenged hosts' realized susceptibilities.
     Susceptibility draws land lazily on the first challenge (epoch ~2), so
     the echo fields could read at initialize() but the draw block needs a
     few epochs."""
+    _force_covid_emission_positive(monkeypatch)
+
     from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([
@@ -1720,11 +1751,13 @@ def test_hazard_frailty_rejects_out_of_grammar_values(spec):
         prepare_cell_run_spec(design, cell)
 
 
-def test_hazard_frailty_cell_reports_the_draw_echoes():
+def test_hazard_frailty_cell_reports_the_draw_echoes(monkeypatch):
     """8-epoch smoke on an armed arm: the resolved frailty block echoes on
     dose_response, frailty_draw quantiles report the challenged hosts'
     realized multipliers at declared cv, and the draw set is exactly the
     challenged set (same n as the susceptibility draw)."""
+    _force_covid_emission_positive(monkeypatch)
+
     from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([
@@ -1752,11 +1785,13 @@ def test_hazard_frailty_cell_reports_the_draw_echoes():
     assert 0.2 <= draw["mean"] <= 5.0
 
 
-def test_hazard_frailty_inert_corner_is_bit_identical_to_baseline():
+def test_hazard_frailty_inert_corner_is_bit_identical_to_baseline(monkeypatch):
     """The cv 0 corner must reproduce the baseline exactly: frailty fires,
     every challenged host carries a recorded 1.0, and the shared stream is
     untouched so the whole payload — outcomes and draw quantiles alike —
     is identical between B0 and the inert arm at the same seed."""
+    _force_covid_emission_positive(monkeypatch)
+
     from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([

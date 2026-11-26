@@ -1508,7 +1508,8 @@ All values verified against `data/pathogens/active_profiles.json` at SHA d557f39
 | `incubation.dose_log10_shortening` | 0.15 | ctb_incubation_spec |
 | `incubation.dose_floor` | 0.3 | ctb_incubation_spec |
 | `recovery_day` | 7 (days from onset) | Oordt-Speets 2024; Wu 2023 (duration); deterministic clearance is a convention |
-| `shedding_variance_log10` | 1.2 | — |
+| `shedding_multiplier_mixture` | high fraction 0.111111; high/low ratio 49.142857 | Zhou et al. 2023 emitted-RNA overdispersion; persistent-class transfer is declared Grade C (COVID-SHED-SHAPE-01) |
+| `emission_shape` | Zhou onset-aligned zero-inflated daily shape; peak positive amplitude 10^7.0755 copies/day | Zhou et al. 2023 digitized in COVID-SHED-SHAPELIB-01; amplitude central measured-emission bracket (COVID-SHED-SHAPE-01) |
 | `presymptomatic_shedding_days` | 2.0 | He et al. 2020 |
 | `dose_adjustment` | 3.0 | — |
 | `shedding_curve_log10` | `[3.0, 5.0, 7.0, 8.5, 9.0, 8.5, 7.5, 6.5, 5.5, 4.5, 3.5, 3.0, 2.5, 2.0, 2.0]` | — |
