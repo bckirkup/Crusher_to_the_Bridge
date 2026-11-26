@@ -32,6 +32,7 @@ held.
 from __future__ import annotations
 
 import contextlib
+import copy
 import io
 import json
 import math
@@ -85,14 +86,14 @@ DECLARED_ASSUMPTIONS: tuple[DeclaredAssumption, ...] = (
     DeclaredAssumption(
         name="shedding curve enters as shape only",
         value=(
-            "shedding_curve_log10 shifted so the symptomatic peak is 0; the "
-            "measured asymptomatic offset is preserved by shifting both "
-            "curves by the same amount"
+            "emission_shape relative occurrence/mass rows are unchanged and "
+            "peak_positive_log10_copies_per_day is normalized to 0; legacy "
+            "shedding curves remain normalized for non-emission consumers"
         ),
-        evidence_grade="B for the shape, from the profile's own sourced curve",
+        evidence_grade="B for emitted-RNA shape, Grade C for viable-emission transfer",
         source=(
             "data/pathogens/active_profiles.json sars_cov2_resp "
-            "shedding_curve_log10 / asymptomatic_shedding_log10"
+            "emission_shape, sourced from COVID-SHED-SHAPELIB-01"
         ),
     ),
     DeclaredAssumption(
@@ -201,9 +202,10 @@ def theta_profile_overrides(
 ) -> dict[str, Any]:
     """Profile overrides that put Theta on the one axis it occupies.
 
-    The emission curves keep their measured shape and their measured
-    symptomatic/asymptomatic separation; only their scale moves, and it moves
-    as part of the composite rather than as an emission figure of its own.
+    The zero-inflated emission shape keeps its measured occurrence and
+    relative-mass rows; only its amplitude moves, as part of the composite
+    rather than as an emission figure of its own. Legacy shedding curves are
+    normalized the same way for downstream consumers that still read them.
     """
     theta = float(theta)
     if not math.isfinite(theta) or theta <= 0.0:
@@ -223,7 +225,6 @@ def theta_profile_overrides(
         "asymptomatic_shedding_log10": [
             round(v - peak, 6) for v in asymptomatic
         ],
-        "environmental_release_log10_per_day": 0.0,
         "dose_response": {
             "model": "beta_poisson",
             "alpha": alpha,
@@ -231,6 +232,10 @@ def theta_profile_overrides(
             "susceptibility_scale": theta * (alpha + beta) / alpha,
         },
     }
+    if "emission_shape" in profile:
+        emission_shape = copy.deepcopy(profile["emission_shape"])
+        emission_shape["peak_positive_log10_copies_per_day"] = 0.0
+        overrides["emission_shape"] = emission_shape
     if "incubation" in profile:
         # The reference is the mean host's susceptibility: ln 2 / Theta.
         # Re-reference there so a typical infection keeps the profile's median.

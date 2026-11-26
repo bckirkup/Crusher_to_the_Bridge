@@ -6,11 +6,15 @@
 ## 1. Per-Agent Shedding Variance
 
 ### Mechanism
-At infection time, each agent draws a shedding multiplier from a log-normal distribution:
+At infection time, each agent draws a persistent shedding multiplier. Most
+profiles use a log-normal distribution:
 ```
 agent.shedding_multiplier = 10^(rng.normal(0, shedding_variance_log10))
 ```
-This multiplier persists for the duration of infection and scales all shedding output.
+A profile may instead declare `shedding_multiplier_mixture`, a mean-normalized
+two-class high/low emitter representation. The active COVID arm does so under
+COVID-SHED-SHAPE-01. The multiplier persists for the duration of infection and
+scales all shedding output.
 A multiplier of 1.0 (the median) gives the baseline curve value. A multiplier of 10
 means 10x higher shedding. A multiplier of 0.1 means 10x lower.
 
@@ -27,7 +31,7 @@ Based on published QMRA and epidemiological data:
 | Pathogen | shedding_variance_log10 | Source / Rationale |
 |---|---|---|
 | norovirus_gii4 | 1.5 | Teunis et al 2015: fecal shedding ranges 10^4 to 10^11 copies/g across individuals. Atmar et al 2008 volunteer study: ~3 log10 IQR. Asymptomatic shedders at lower end. |
-| sars_cov2_resp | 1.2 | Kissler et al 2021 (eLife): peak viral loads vary ~2-3 log10 across individuals. Chen et al 2021 (PMC): 20% of individuals responsible for 80% of transmission. |
+| sars_cov2_resp | — (`shedding_multiplier_mixture`) | Zhou et al. 2023 direct emitted-RNA overdispersion; see COVID-SHED-SHAPE-01. |
 | influenza_a | 1.0 | Ip et al 2017 (JID): heterogeneity in shedding, ~2 log10 range in peak viral load. Leung et al 2020: aerosol shedding varies ~2 log10 between individuals. |
 | measles_virus | 0.8 | Less documented. Moderate variation expected. |
 | legionella_pneumophila | 0.5 | Environmental source, not person-to-person shedding. Low individual variation — the exposure is from the water system, not the patient. |
@@ -39,7 +43,7 @@ Based on published QMRA and epidemiological data:
 
 ### Implementation
 In `KorkinAgent.infect_with_pathogen()`:
-- Draw `shedding_multiplier = 10 ** rng.normal(0, profile.get('shedding_variance_log10', 0.0))`
+- Draw from `shedding_multiplier_mixture` when present, otherwise `shedding_multiplier = 10 ** rng.normal(0, profile.get('shedding_variance_log10', 0.0))`
 - Store in `inf['shedding_multiplier']`
 - In `get_pathogen_shedding()`: `return math.pow(10, curve[idx] - adj) * inf.get('shedding_multiplier', 1.0)`
 

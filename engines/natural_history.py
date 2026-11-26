@@ -593,11 +593,32 @@ def _advance_one_infection(
     # day four is still being shed when the primary infection would have
     # ended. A lineage is carried for as long as it is shed, not only for
     # as long as the host is ill.
+    clearance_by_strain = None
+    tracked_lineages = bool(agent.resident_strains(pid))
+    if prof.get("emission_shape"):
+        residents = agent.resident_strains(pid)
+        duration_after_onset = shedding_clearance_day - onset
+        clearance_by_strain = {}
+        for strain_id, resident in residents.items():
+            primary = resident.primary_course
+            strain_onset = onset if primary else agent._resident_virtual_incubation(
+                prof, resident,
+            )
+            clearance_by_strain[strain_id] = strain_onset + duration_after_onset
     residents_left = agent.advance_resident_strains(
         pid, shedding_clearance_day, cleared,
+        shedding_clearance_by_strain=clearance_by_strain,
+        preserve_primary_course=bool(prof.get("emission_shape")),
     )
     record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
-    if days_infected >= shedding_clearance_day and residents_left == 0:
+    last_tracked_lineage_closed = (
+        bool(prof.get("emission_shape"))
+        and tracked_lineages
+        and residents_left == 0
+    )
+    if (
+        days_infected >= shedding_clearance_day and residents_left == 0
+    ) or last_tracked_lineage_closed:
         if not cleared:
             record_unlabeled_clearance_immunity(agent, pid, epoch)
         # The hand load has to survive convalescent shedding, so it is

@@ -1537,6 +1537,38 @@ def _index_host(engine: Any) -> Any | None:
     )
 
 
+def _boarding_emission_positive(
+    inf: dict[str, Any],
+    profile: dict[str, Any],
+    age: float,
+    incubation: float | None,
+) -> bool:
+    """Whether the seeded infection emitted at boarding, not later."""
+    if incubation is None:
+        return False
+    presymptomatic = float(profile.get("presymptomatic_shedding_days", 0.0))
+    onset_relative = age - float(incubation)
+    if onset_relative < -presymptomatic:
+        return False
+    shape = profile.get("emission_shape")
+    if not shape:
+        return True
+    daily = list(shape.get("daily") or [])
+    day = int(np.floor(onset_relative))
+    occurrence_rows = inf.get("emission_shape_occurrence") or []
+    if len(occurrence_rows) != len(daily):
+        return False
+    for row, occurrence in zip(daily, occurrence_rows):
+        if int(row.get("day")) != day:
+            continue
+        return (
+            float(occurrence)
+            < float(row.get("detection_probability", 0.0))
+            and float(row.get("conditional_positive_relative_shape", 0.0)) > 0.0
+        )
+    return False
+
+
 def _index_geometry(
     engine: Any,
     cell: ScreenCell,
@@ -1573,12 +1605,9 @@ def _index_geometry(
             + float(incubation)
             - age
         )
-    shedding_day0 = False
-    if incubation is not None:
-        presymptomatic = float(profile.get("presymptomatic_shedding_days", 0.0))
-        # The same gate _shedding_curve_point applies, evaluated at the
-        # boarding age: in-window means the host emits at epoch 0.
-        shedding_day0 = age - float(incubation) >= -presymptomatic
+    shedding_day0 = _boarding_emission_positive(
+        inf, profile, age, incubation,
+    )
     return {
         KEY_INDEX_ONSET_DAY: onset_day,
         KEY_INDEX_SHEDDING_AT_DAY0: shedding_day0,

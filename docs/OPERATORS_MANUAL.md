@@ -952,6 +952,8 @@ pools per room.  Key properties:
 | `shedding_curve_log10` | array | Day-by-day symptomatic shedding (log10 copies), typically 15 entries |
 | `dose_adjustment` | float | Log10 shedding offset: `10^(curve − dose_adjustment)`; campaigns calibrate via `pathogen_overrides` |
 | `shedding_variance_log10` | float | σ of log-normal host shedding multiplier (0 = no variance; see `docs/SHEDDING_AND_CABINMATES.md`) |
+| `shedding_multiplier_mixture` | object | Optional mean-normalized persistent high/low host emission classes (`high_emitter_fraction`, `high_to_low_ratio`, `notes`); active COVID uses Zhou 2023 overdispersion |
+| `emission_shape` | object | Optional onset-aligned zero-inflated daily emission shape; `detection_probability` controls occurrence and `conditional_positive_relative_shape` scales positive mass |
 | `transmission_route_weights` | object | Relative pathway dose multipliers (sum ≈ 1.0); absent → identity (all 1.0) |
 | `innate_nonsusceptible_fraction` | float | Per-pathogen zero-susceptibility draw (e.g. FUT2); orthogonal to `immune_fraction` |
 | `environmental_contamination` | object | Optional; `source_zones` scopes colonization (absent → ship-wide legacy) |

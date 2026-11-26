@@ -159,7 +159,17 @@ def specimen_genotype_mixture(
     if not residents:
         return {}
     shares = agent.strain_shedding_shares(pathogen_id, dict(profile))
-    if not shares:
+    if not shares and profile.get("emission_shape"):
+        inocula = {
+            sid: max(float(resident.acquired_particles), 0.0)
+            for sid, resident in residents.items()
+        }
+        pool = sum(inocula.values())
+        shares = {
+            sid: value / pool if pool > 0.0 else 1.0 / len(residents)
+            for sid, value in inocula.items()
+        }
+    elif not shares:
         shares = {sid: 1.0 / len(residents) for sid in residents}
     mixture: dict[str, float] = {}
     for strain_id, share in shares.items():

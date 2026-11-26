@@ -439,10 +439,112 @@
         2.0
       ],
       "asymptomatic_shedding_notes": "Equal to shedding_curve_log10: no symptom-conditioned offset is claimed on this arm. The shipped curve carried a 1.0-1.5 log10 offset below the symptomatic peak with no source, and it is REFUTED - measured upper-respiratory viral loads are similar between symptomatic and asymptomatic people through the first week (docs/literature/mql_tranche_9_sars_cov2.md, corroborated in docs/literature/edison_covid_influenza_bundle_review.md). Removing it is #31's action on the register's asymptomatic_shedding_log10 row. Equality is the null, not a claim that the two curves are identical past week one, where the measurements thin out; a separate asymptomatic curve returns only with a measurement to put in it.",
+      "emission_shape": {
+        "model": "zero_inflated_daily",
+        "axis": "days_since_first_symptom",
+        "source_family": "zhou2023_mask_rna_onset_aligned_zero_inflated",
+        "peak_positive_log10_copies_per_day": 7.0755,
+        "daily": [
+          {
+            "day": -5,
+            "detection_probability": 0.5,
+            "conditional_positive_relative_shape": 0.02041738
+          },
+          {
+            "day": -4,
+            "detection_probability": 0.0,
+            "conditional_positive_relative_shape": 0.0
+          },
+          {
+            "day": -3,
+            "detection_probability": 0.1,
+            "conditional_positive_relative_shape": 0.06025596
+          },
+          {
+            "day": -2,
+            "detection_probability": 0.2,
+            "conditional_positive_relative_shape": 1.0
+          },
+          {
+            "day": -1,
+            "detection_probability": 0.1765,
+            "conditional_positive_relative_shape": 0.41399967
+          },
+          {
+            "day": 0,
+            "detection_probability": 0.4118,
+            "conditional_positive_relative_shape": 0.4130475
+          },
+          {
+            "day": 1,
+            "detection_probability": 0.4118,
+            "conditional_positive_relative_shape": 0.26730064
+          },
+          {
+            "day": 2,
+            "detection_probability": 0.4118,
+            "conditional_positive_relative_shape": 0.4852885
+          },
+          {
+            "day": 3,
+            "detection_probability": 0.6471,
+            "conditional_positive_relative_shape": 0.35481339
+          },
+          {
+            "day": 4,
+            "detection_probability": 0.5882,
+            "conditional_positive_relative_shape": 0.21183611
+          },
+          {
+            "day": 5,
+            "detection_probability": 0.5294,
+            "conditional_positive_relative_shape": 0.2032357
+          },
+          {
+            "day": 6,
+            "detection_probability": 0.5625,
+            "conditional_positive_relative_shape": 0.18030177
+          },
+          {
+            "day": 7,
+            "detection_probability": 0.3125,
+            "conditional_positive_relative_shape": 0.61094202
+          },
+          {
+            "day": 8,
+            "detection_probability": 0.5625,
+            "conditional_positive_relative_shape": 0.17947336
+          },
+          {
+            "day": 9,
+            "detection_probability": 0.375,
+            "conditional_positive_relative_shape": 0.00831764
+          },
+          {
+            "day": 10,
+            "detection_probability": 0.5333,
+            "conditional_positive_relative_shape": 0.0610942
+          },
+          {
+            "day": 11,
+            "detection_probability": 0.3333,
+            "conditional_positive_relative_shape": 0.03715352
+          },
+          {
+            "day": 12,
+            "detection_probability": 0.2857,
+            "conditional_positive_relative_shape": 0.09885531
+          },
+          {
+            "day": 13,
+            "detection_probability": 0.2857,
+            "conditional_positive_relative_shape": 0.07328245
+          }
+        ],
+        "notes": "Zero-inflated onset-aligned daily exhaled-mask RNA shape from Zhou et al. 2023, digitized and validated in COVID-SHED-SHAPELIB-01. detection_probability drives occurrence; conditional_positive_relative_shape is 10**mean_log10_positive normalized to its maximum, keeping occurrence and positive magnitude separate as the source library directs. peak_positive_log10_copies_per_day is the independently declared measured exhaled-emission central level 10^7.0755 = 1.19e7 RNA copies/day (4.9e5 copies/hour), the geometric midpoint of the Grade-B emitted-material bracket; it is an amplitude normalization owner decision, not a fit. Grade B for emitted RNA in the analogous human-challenge setting; Grade C for viable-virus-weighted emission, transfer to shipboard transmission, onset alignment within \u00b11 day, and using a geometric conditional-positive magnitude as a per-positive-host emission. Because this representation preserves geometric positive magnitudes rather than high-burst arithmetic means, its onset-negative expected-mass share is 16.8%; the paper-reported linear pre-symptomatic log-AUC share is about 10%. The persistent high/low emitter mixture supplies cross-host overdispersion rather than re-using the mass-weighted burst shape inside every host. Asymptomatic hosts read the same virtual-onset shape as a declared null. Not selected against Diamond Princess or any scored anchor."
+      },
       "airborne_emission_mode": "continuous_fraction",
-      "airborne_emission_notes": "Fine (<=5 um) share of this arm's measured exhaled emission (COVID-EMIT-FINE-01): 0.85, Coleman 2021 (Clin Infect Dis, DOI 10.1093/cid/ciab691) - 85.4% of detected exhaled SARS-CoV-2 RNA in the <=5 um fraction, paired size-resolved exhaled-aerosol sampling of COVID-19 patients over 30-60-min activities, n=59 as tabulated in tranche 54. Setting: clinical patients, analogous to a vessel rather than measured on one, hence Grade B. Origin: R (Results chunk, docs/literature/consensus_tranche_54_covid_emission_level.md; the abstract-only read in tranche 27 gave 85%). Interval: [0.76, 0.92], Grade B, frozen 2026-09-05 in docs/literature/consensus_tranche_27_airborne_fraction_and_drying_axis.md sections 2 and 6 - floor Yan 2018 influenza 0.76, ceiling Chow 2023 influenza ~0.92 implied by fine load ~12x coarse; 0.85 is this virus's own published point estimate inside it, declared and selected against no anchor (not VSP, Park, the DP record or any attack rate), and the span is the declared sweep axis. Dimensionless because the arm's level is a measured exhaled rate (environmental_release_log10_per_day 1.93, COVID-EMIT-LEVEL-01), which is the condition tranche 27 section 6 set for adoption: numerator and denominator are both exhaled RNA copies. Replaces 5e-5, a unit-bearing titre-to-emission conversion (norovirus's 1e-4 halved, no stated reason) that deposited ~25 copies/epoch at the shipped peak, ~170x under the measured bracket floor [4.2e3, 5.8e7] copies/epoch; at 0.85 the peak deposit is 4.9e5 x 0.85 = 4.2e5 copies/epoch, in-bracket. Scope of the move: this field is read at one site only, the zone airborne reservoir deposit (orchestrator_epoch._accumulate_pathogen_zone_mass), which rises x1.7e4 (0.85 / 5e-5); the droplet/near-field route still uses the uniform engine DROPLET_AEROSOL_FRACTION and does not read this share (a separate open item), and direct and fomite do not read it either - so the route mix shifts toward the room-pool airborne route and every Theta measured before this change is in the old units and is not convertible by a single factor. The coarse remainder (0.15) is not separately deposited by this field.",
-      "environmental_release_log10_per_day": 1.93,
-      "environmental_release_notes": "Level, not shape. Emission is 10^(curve - this value) per day, converted to the epoch by SimClock, so 1.93 sets the symptomatic peak (curve 9.0) to 10^7.07 = 1.19e7 RNA copies/day = 4.9e5 copies per hour - the geometric midpoint of the arm's declared measured exhaled-emission bracket [4.2e3, 5.8e7] copies/epoch (docs/literature/mql_tranche_9_sars_cov2.md; register shedding_curve_log10 row). Bounds: Alsved 2022 (n=38, DOI 10.1080/23744235.2022.2140822) medians 70/110/80 copies/min breathing/talking/singing at the floor; Zheng 2022 (MQL ref 82) 4.4-5.8e7 copies/h in 11 of 25 Omicron patients at the top. Corroborating inside the span: Coleman 2021 (DOI 10.1093/cid/ciab691 - Edison's 'Coleman 2022' pointer; the repo's own docs cite this DOI under both years) 63-5,821 copies per 30-60-min activity with 85% of the load in the fine fraction; Ma 2021 (DOI 10.1093/cid/ciaa1283) up to 1e5 viruses/min in earlier-stage patients; Li 2021 (DOI 10.3389/fmed.2021.604392) ~1.7-4.6e3 copies/min; Malik 2023 (DOI 10.1016/j.infpip.2023.100299) 8.6e3-2e5 copies/h, n=2, Grade C. Grade B: direct measurements of exhaled aerosol RNA rate in COVID-19 patients - analogous setting (clinical, not a vessel); the bracket is 4.1 orders wide, so the shipped point is the stated central value of a declared interval rather than any single study's number, and the span is the declared sweep axis, not a fit. Origins: Alsved not re-queried this pass (Ab per tranche 9), Zheng Ab + R (Discussion), Coleman R (Results chunk), Ma R (Discussion), per docs/parameter_provenance_register.md. The nasal-indexed curve supplies only the temporal shape, as on the influenza arm (Yan 2018). Replaces dose_adjustment 3.0, the norovirus stool-mass normalizer that served as this arm's emission fallback (#30). Declared, and selected against no anchor.",
+      "airborne_emission_notes": "Fine (<=5 um) share of this arm's measured exhaled emission (COVID-EMIT-FINE-01): 0.85, Coleman 2021 (Clin Infect Dis, DOI 10.1093/cid/ciab691) - 85.4% of detected exhaled SARS-CoV-2 RNA in the <=5 um fraction, paired size-resolved exhaled-aerosol sampling of COVID-19 patients over 30-60-min activities, n=59 as tabulated in tranche 54. Setting: clinical patients, analogous to a vessel rather than measured on one, hence Grade B. Origin: R (Results chunk, docs/literature/consensus_tranche_54_covid_emission_level.md; the abstract-only read in tranche 27 gave 85%). Interval: [0.76, 0.92], Grade B, frozen 2026-09-05 in docs/literature/consensus_tranche_27_airborne_fraction_and_drying_axis.md sections 2 and 6 - floor Yan 2018 influenza 0.76, ceiling Chow 2023 influenza ~0.92 implied by fine load ~12x coarse; 0.85 is this virus's own published point estimate inside it, declared and selected against no anchor (not VSP, Park, the DP record or any attack rate), and the span is the declared sweep axis. Dimensionless because the arm's level is a measured exhaled rate (emission_shape.peak_positive_log10_copies_per_day 7.0755, COVID-EMIT-LEVEL-01), which is the condition tranche 27 section 6 set for adoption: numerator and denominator are both exhaled RNA copies. Replaces 5e-5, a unit-bearing titre-to-emission conversion (norovirus's 1e-4 halved, no stated reason) that deposited ~25 copies/epoch at the shipped peak, ~170x under the measured bracket floor [4.2e3, 5.8e7] copies/epoch; at 0.85 the peak deposit is 4.9e5 x 0.85 = 4.2e5 copies/epoch, in-bracket. Scope of the move: this field is read at one site only, the zone airborne reservoir deposit (orchestrator_epoch._accumulate_pathogen_zone_mass), which rises x1.7e4 (0.85 / 5e-5); the droplet/near-field route still uses the uniform engine DROPLET_AEROSOL_FRACTION and does not read this share (a separate open item), and direct and fomite do not read it either - so the route mix shifts toward the room-pool airborne route and every Theta measured before this change is in the old units and is not convertible by a single factor. The coarse remainder (0.15) is not separately deposited by this field.",
       "dose_response": {
         "model": "beta_poisson",
         "alpha": 0.18,
@@ -745,7 +847,11 @@
         }
       },
       "initial_time_infected": 0,
-      "shedding_variance_log10": 1.2,
+      "shedding_multiplier_mixture": {
+        "high_emitter_fraction": 0.111111,
+        "high_to_low_ratio": 49.142857,
+        "notes": "Persistent high/low emitter class transfer from Zhou et al. 2023 as digitized in COVID-SHED-SHAPELIB-01: two of 18 participants produced 86% of airborne viral RNA on three individual timepoints. Taking 2/18 as the high-emitter fraction and solving the per-capita ratio that would produce an 86/14 mass split gives high/low = (0.86/2)/(0.14/16) = 49.14; the engine normalizes the two class multipliers to population mean 1. Grade B for the underlying emitted-RNA overdispersion measurement in the human-challenge setting; Grade C for transferring three timepoints into a persistent whole-course two-class host multiplier. Replaces shedding_variance_log10 1.2, a smooth lognormal representation whose specimen/emission-rate dispersion evidence did not express the episodic zero-inflated emitted-RNA process measured by Zhou. Declared heterogeneity, not fitted to Diamond Princess or any scored anchor."
+      },
       "clinical_presentation": {
         "syndromes": [
           "respiratory"

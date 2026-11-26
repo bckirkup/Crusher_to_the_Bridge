@@ -123,6 +123,15 @@ class TestDoseAdjustmentContracts:
         data = json.loads((REPO_ROOT / "data/pathogens" / bundle).read_text())
         for p in data["pathogens"]:
             declared = [key for key in accepted if key in p]
+            if not declared and "emission_shape" in p:
+                # COVID-SHED-SHAPE-01 replaces the curve-normalizer pair with
+                # a direct emitted-material amplitude. Requiring the old key
+                # would keep a second, dead scale beside it.
+                amplitude = p["emission_shape"].get(
+                    "peak_positive_log10_copies_per_day",
+                )
+                assert isinstance(amplitude, (int, float)), p["pathogen_id"]
+                continue
             assert declared, p["pathogen_id"]
             for key in declared:
                 assert isinstance(p[key], (int, float)), (
@@ -191,7 +200,8 @@ class TestNorovirusAirborneContracts:
         assert profile["airborne_emission_mode"] == "continuous_fraction"
         assert profile["airborne_emission_fraction"] == pytest.approx(0.85)
         assert 0.76 <= _airborne_emission_fraction(profile) <= 0.92
-        assert "environmental_release_log10_per_day" in profile
+        assert "emission_shape" in profile
+        assert "environmental_release_log10_per_day" not in profile
         assert "dose_adjustment" not in profile
 
     def test_covid_edison_bundle_airborne_scope_guard(self) -> None:
@@ -203,6 +213,11 @@ class TestNorovirusAirborneContracts:
         )
         assert profile["surface_deposition_fraction"] == pytest.approx(5e-5)
         assert "airborne_emission_mode" not in profile
+        # Edison is the deliberately frozen mixed-pathogen reference bundle.
+        # COVID-SHED-SHAPE-01 scopes the Zhou shape correction to the active
+        # COVID arm; mirroring it into Edison is a separate owner decision.
+        assert "emission_shape" not in profile
+        assert "shedding_multiplier_mixture" not in profile
 
 
 class TestInfluenzaPresentationContract:

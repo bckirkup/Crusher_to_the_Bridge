@@ -35,6 +35,7 @@ The bridge outputs agent states compatible with ``telemetry_buffer.schema``.
 from __future__ import annotations
 
 import math
+import zlib
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Iterable
@@ -761,19 +762,74 @@ def earliest_shed_epoch(
     return max(int(infection_epoch), start)
 
 
+def _draw_shedding_multiplier_entropy(
+    rng: np.random.Generator,
+    profile: dict[str, Any],
+) -> tuple[float, float | None]:
+    """Draw the multiplier and return the random scalar that produced it."""
+    mixture = profile.get("shedding_multiplier_mixture")
+    if mixture:
+        high_fraction = float(mixture["high_emitter_fraction"])
+        ratio = float(mixture["high_to_low_ratio"])
+        low = 1.0 / (high_fraction * ratio + (1.0 - high_fraction))
+        high = ratio * low
+        entropy = float(rng.random())
+        return (high if entropy < high_fraction else low), entropy
+    variance = float(profile.get("shedding_variance_log10", 0.0))
+    if variance <= 0:
+        return 1.0, None
+    entropy = float(rng.normal(0.0, variance))
+    return 10.0**entropy, entropy
+
+
+def _initial_emission_shape_seed(
+    rng: np.random.Generator | None,
+    profile: dict[str, Any],
+    pathogen_id: str,
+    agent_id: int,
+    epoch: int,
+    time_infected: int,
+    shedding_entropy: float | None,
+) -> int | None:
+    """Seed episodic shape occurrence without another simulation-RNG draw."""
+    if rng is None or not profile.get("emission_shape"):
+        return None
+    if shedding_entropy is None:
+        return None
+    material = (
+        f"{shedding_entropy!r}:{pathogen_id}:{agent_id}:"
+        f"{epoch}:{time_infected}"
+    )
+    return zlib.crc32(material.encode("utf-8"))
+
+
+def _write_emission_shape_state(
+    infection: dict[str, Any],
+    profile: dict[str, Any],
+    emission_shape_seed: int | None,
+) -> None:
+    """Store the seeded daily occurrence sequence on an infection record."""
+    if emission_shape_seed is None:
+        return
+    infection["emission_shape_seed"] = emission_shape_seed
+    shape_rows = list(profile.get("emission_shape", {}).get("daily") or ())
+    infection["emission_shape_occurrence"] = (
+        np.random.default_rng(emission_shape_seed).random(len(shape_rows)).tolist()
+    )
+
+
 def draw_shedding_multiplier(
     rng: np.random.Generator,
     profile: dict[str, Any],
 ) -> float:
-    """Draw a persistent per-agent shedding multiplier from a log-normal.
+    """Draw this infection's persistent host shedding multiplier.
 
-    ``shedding_variance_log10`` is the σ of the normal in log10 space; median
-    multiplier is 1.0.  σ=0 (or absent) yields exactly 1.0.
+    A profile declaring ``shedding_multiplier_mixture`` uses that measured
+    two-class high/low emitter representation, normalized to population mean
+    one. Otherwise ``shedding_variance_log10`` is the σ of the normal in
+    log10 space; median multiplier is 1.0. σ=0 (or absent) yields exactly 1.0.
     """
-    variance = float(profile.get("shedding_variance_log10", 0.0))
-    if variance <= 0:
-        return 1.0
-    return 10.0 ** float(rng.normal(0.0, variance))
+    return _draw_shedding_multiplier_entropy(rng, profile)[0]
 
 
 # ── Co-resident strains ──────────────────────────────────────────────────
@@ -794,6 +850,7 @@ class StrainInfection:
     shedding_multiplier: float = 1.0
     incubation_modifier: float = 0.0
     infection_epoch: int = 0
+    primary_course: bool = False
 
 
 # ── Agent class ──────────────────────────────────────────────────────────
@@ -1369,10 +1426,15 @@ class KorkinAgent:
         self.hand_protected_pending_by_pathogen.pop(pathogen_id, None)
         self.hand_sequester_capacity_by_pathogen.pop(pathogen_id, None)
         self.hand_self_pool_by_pathogen.pop(pathogen_id, None)
-        shedding_mult = (
-            draw_shedding_multiplier(rng, profile or {})
-            if rng is not None
-            else 1.0
+        shedding_mult = 1.0
+        shedding_entropy = None
+        if rng is not None:
+            shedding_mult, shedding_entropy = _draw_shedding_multiplier_entropy(
+                rng, profile or {},
+            )
+        emission_shape_seed = _initial_emission_shape_seed(
+            rng, profile or {}, pathogen_id, self.agent_id, epoch,
+            time_infected, shedding_entropy,
         )
         prior = self.infections.get(pathogen_id)
         self.infections[pathogen_id] = {
@@ -1393,6 +1455,9 @@ class KorkinAgent:
             ),
             "shedding_multiplier": shedding_mult,
         }
+        _write_emission_shape_state(
+            self.infections[pathogen_id], profile or {}, emission_shape_seed,
+        )
         # A chronic shedder carries its own infectious period, so the record
         # states the duration this host will shed for and the clearance seam
         # reads the record before the profile.
@@ -1466,6 +1531,8 @@ class KorkinAgent:
         pathogen_id: str,
         shedding_clearance_day: float,
         cleared: list[str] | None = None,
+        shedding_clearance_by_strain: dict[str, float] | None = None,
+        preserve_primary_course: bool = False,
     ) -> int:
         """Age each resident lineage by an epoch and clear those done shedding.
 
@@ -1481,21 +1548,33 @@ class KorkinAgent:
         residents = self.resident_strains(pathogen_id)
         for strain_id, resident in tuple(residents.items()):
             resident.time_infected += 1
+            clearance_day = shedding_clearance_day
+            if shedding_clearance_by_strain is not None:
+                clearance_day = float(
+                    shedding_clearance_by_strain.get(
+                        strain_id, shedding_clearance_day,
+                    ),
+                )
             if (
                 self.clock.days_elapsed(resident.time_infected)
-                >= shedding_clearance_day
+                >= clearance_day
             ):
                 del residents[strain_id]
                 if cleared is not None:
                     cleared.append(strain_id)
         if residents:
-            self._promote_primary_strain(pathogen_id, residents)
+            self._promote_primary_strain(
+                pathogen_id, residents,
+                preserve_primary_course=preserve_primary_course,
+            )
         return len(residents)
 
     def _promote_primary_strain(
         self,
         pathogen_id: str,
         residents: dict[str, StrainInfection],
+        *,
+        preserve_primary_course: bool = False,
     ) -> None:
         """Hand the pathogen-level strain fields to a surviving lineage.
 
@@ -1509,7 +1588,8 @@ class KorkinAgent:
         heir = min(residents.values(), key=lambda r: r.infection_epoch)
         inf["strain_id"] = heir.strain_id
         inf["strain_shedding_multiplier"] = heir.shedding_multiplier
-        inf["strain_incubation_modifier"] = heir.incubation_modifier
+        if not preserve_primary_course:
+            inf["strain_incubation_modifier"] = heir.incubation_modifier
 
     def is_infected_with(self, pathogen_id: str) -> bool:
         """Check if agent is infected with a specific pathogen."""
@@ -1588,6 +1668,7 @@ class KorkinAgent:
             shedding_multiplier=pheno.shedding_multiplier,
             incubation_modifier=pheno.incubation_modifier,
             infection_epoch=resident.infection_epoch,
+            primary_course=resident.primary_course,
         )
         inf = self.infections[pathogen_id]
         if inf.get("strain_id") == old_strain_id:
@@ -1622,6 +1703,7 @@ class KorkinAgent:
             shedding_multiplier=pheno.shedding_multiplier,
             incubation_modifier=pheno.incubation_modifier,
             infection_epoch=int(inf["infection_epoch"]),
+            primary_course=True,
         )}
 
     def _shedding_curve_point(
@@ -1662,8 +1744,164 @@ class KorkinAgent:
         idx = min(max(curve_index, 0), len(curve) - 1)
         return inf, curve, idx
 
+    def _emission_shape_seed(self, pathogen_id: str, inf: dict[str, Any]) -> int:
+        """Stable per-infection seed for a zero-inflated emission shape."""
+        stored = inf.get("emission_shape_seed")
+        if stored is not None:
+            return int(stored)
+        material = (
+            f"{pathogen_id}:{self.agent_id}:"
+            f"{inf.get('infection_epoch', 0)}:{inf.get('episode', 1)}"
+        )
+        return zlib.crc32(material.encode("utf-8"))
+
+    @staticmethod
+    def _shape_row_for_age(
+        shape: dict[str, Any], days_since_onset: float,
+    ) -> tuple[int, dict[str, Any]] | None:
+        """The daily shape row containing one onset-relative age."""
+        day = math.floor(days_since_onset)
+        daily = list(shape.get("daily") or [])
+        matches = [
+            (index, row) for index, row in enumerate(daily)
+            if int(row.get("day")) == day
+        ]
+        return matches[0] if matches else None
+
+    def _shape_positive_mass(
+        self,
+        pathogen_id: str,
+        inf: dict[str, Any],
+        shape: dict[str, Any],
+        days_since_onset: float,
+        strain_key: str | None = None,
+    ) -> float:
+        """Conditional-positive mass after one episodic occurrence draw."""
+        row_match = self._shape_row_for_age(shape, days_since_onset)
+        if row_match is None:
+            return 0.0
+        row_index, row = row_match
+        probability = float(row.get("detection_probability", 0.0))
+        relative_mass = float(row.get("conditional_positive_relative_shape", 0.0))
+        if probability <= 0.0 or relative_mass <= 0.0:
+            return 0.0
+        daily = list(shape.get("daily") or [])
+        base_seed = self._emission_shape_seed(pathogen_id, inf)
+        if strain_key is None:
+            occurrence_rows = inf.get("emission_shape_occurrence")
+            if not isinstance(occurrence_rows, list) or len(occurrence_rows) != len(daily):
+                occurrence_rows = np.random.default_rng(base_seed).random(len(daily)).tolist()
+                inf["emission_shape_occurrence"] = occurrence_rows
+        else:
+            material = f"{base_seed}:{strain_key}".encode("utf-8")
+            strain_seed = zlib.crc32(material)
+            occurrence_rows = np.random.default_rng(strain_seed).random(len(daily)).tolist()
+        if float(occurrence_rows[row_index]) >= probability:
+            return 0.0
+        return relative_mass
+
+    @staticmethod
+    def _resident_virtual_incubation(
+        profile: dict[str, Any], resident: StrainInfection,
+    ) -> float:
+        """Declared onset default for a later co-resident lineage."""
+        incubation = profile.get("incubation") or {}
+        median = float(incubation.get(
+            "median_days",
+            profile.get("symptom_onset_day", ONSET_DAY),
+        ))
+        return max(0.0, median + float(resident.incubation_modifier))
+
+    def _shape_resident_positive_masses(
+        self,
+        pathogen_id: str,
+        inf: dict[str, Any],
+        residents: dict[str, StrainInfection],
+        shape: dict[str, Any],
+        profile: dict[str, Any],
+    ) -> dict[str, float]:
+        """Per-lineage positive relative mass under the declared default.
+
+        Co-resident lineages are separate courses for timing, but partition one
+        host's emission capacity by inoculum. A later lineage uses the profile's
+        median incubation plus its phenotype modifier as its virtual onset.
+        """
+        inocula = {
+            sid: max(resident.acquired_particles, 0.0)
+            for sid, resident in residents.items()
+        }
+        pool = sum(inocula.values())
+        masses: dict[str, float] = {}
+        for sid, resident in residents.items():
+            primary = resident.primary_course
+            clock_inf = inf if primary else {
+                "incubation_days": self._resident_virtual_incubation(
+                    profile, resident,
+                ),
+            }
+            days_since_onset, _curve_index = self._shedding_age(
+                resident.time_infected, clock_inf, profile, self.clock,
+            )
+            if days_since_onset < -float(
+                profile.get("presymptomatic_shedding_days", 0.0),
+            ):
+                continue
+            share = inocula[sid] / pool if pool > 0.0 else 1.0 / len(residents)
+            positive = self._shape_positive_mass(
+                pathogen_id, inf, shape, days_since_onset,
+                None if primary else sid,
+            )
+            masses[sid] = share * positive * resident.shedding_multiplier
+        return masses
+
+    def _zero_inflated_shape_emission(
+        self,
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> float:
+        """Emission under an onset-aligned zero-inflated daily shape."""
+        inf = self.infections.get(pathogen_id)
+        if inf is None or inf["status"] != InfectionStatus.INFECTED:
+            return 0.0
+        epochs_infected = inf.get("time_infected")
+        if epochs_infected is None or epochs_infected < 0:
+            return 0.0
+        shape = profile["emission_shape"]
+        residents = self.resident_strains(pathogen_id)
+        strain_factor = float(inf.get("strain_shedding_multiplier", 1.0))
+        if residents:
+            resident_masses = self._shape_resident_positive_masses(
+                pathogen_id, inf, residents, shape, profile,
+            )
+            relative_mass = sum(resident_masses.values())
+            strain_factor = 1.0
+        else:
+            days_since_onset, _curve_index = self._shedding_age(
+                epochs_infected, inf, profile, self.clock,
+            )
+            if days_since_onset < -float(
+                profile.get("presymptomatic_shedding_days", 0.0),
+            ):
+                return 0.0
+            relative_mass = self._shape_positive_mass(
+                pathogen_id, inf, shape, days_since_onset,
+            )
+        if relative_mass <= 0.0:
+            return 0.0
+        peak_positive = math.pow(
+            10.0, float(shape["peak_positive_log10_copies_per_day"]),
+        )
+        return self.clock.amount_per_epoch(
+            peak_positive
+            * relative_mass
+            * float(inf.get("shedding_multiplier", 1.0))
+            * strain_factor
+        )
+
     def get_pathogen_shedding(self, pathogen_id: str, profile: dict) -> float:
         """Shedding value for a specific pathogen based on its profile."""
+        if profile.get("emission_shape"):
+            return self._zero_inflated_shape_emission(pathogen_id, profile)
         point = self._shedding_curve_point(pathogen_id, profile)
         if point is None:
             # A pre-gate host cannot be emitting residents either: each
@@ -1741,6 +1979,19 @@ class KorkinAgent:
         if len(residents) < 2:
             return {}
         inf = self.infections[pathogen_id]
+        if profile.get("emission_shape"):
+            masses = self._shape_resident_positive_masses(
+                pathogen_id, inf, residents,
+                profile["emission_shape"], profile,
+            )
+            total_mass = sum(masses.values())
+            if total_mass <= 0.0:
+                return {}
+            return {
+                sid: value / total_mass
+                for sid, value in masses.items()
+                if value > 0.0
+            }
         is_symp = ever_presented(inf)
         curve = profile.get(
             "shedding_curve_log10",
@@ -1815,7 +2066,9 @@ class KorkinAgent:
         """
         onset_time = inf.get("onset_time_infected")
         if onset_time is not None:
-            elapsed_epochs = max(0, epochs_infected - int(onset_time))
+            elapsed_epochs = epochs_infected - int(onset_time)
+            if not profile.get("emission_shape"):
+                elapsed_epochs = max(0, elapsed_epochs)
             return (
                 clock.days_elapsed(elapsed_epochs),
                 clock.day_index(elapsed_epochs),

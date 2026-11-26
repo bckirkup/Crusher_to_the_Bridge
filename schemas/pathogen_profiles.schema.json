@@ -894,6 +894,44 @@
           "minimum": 0,
           "description": "σ of log-normal host shedding multiplier (0 = no variance)"
         },
+        "shedding_multiplier_mixture": {
+          "type": "object",
+          "required": ["high_emitter_fraction", "high_to_low_ratio", "notes"],
+          "properties": {
+            "high_emitter_fraction": {"type": "number", "minimum": 0, "maximum": 1},
+            "high_to_low_ratio": {"type": "number", "exclusiveMinimum": 0},
+            "notes": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false,
+          "description": "Optional persistent two-class host emission mixture; the engine normalizes class multipliers to population mean one. Use only with explicit literature provenance."
+        },
+        "emission_shape": {
+          "type": "object",
+          "required": ["model", "axis", "peak_positive_log10_copies_per_day", "daily", "notes"],
+          "properties": {
+            "model": {"type": "string", "enum": ["zero_inflated_daily"]},
+            "axis": {"type": "string", "minLength": 1},
+            "source_family": {"type": "string"},
+            "peak_positive_log10_copies_per_day": {"type": "number"},
+            "daily": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["day", "detection_probability", "conditional_positive_relative_shape"],
+                "properties": {
+                  "day": {"type": "integer"},
+                  "detection_probability": {"type": "number", "minimum": 0, "maximum": 1},
+                  "conditional_positive_relative_shape": {"type": "number", "minimum": 0, "maximum": 1}
+                },
+                "additionalProperties": false
+              }
+            },
+            "notes": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false,
+          "description": "Optional onset-aligned zero-inflated daily emission shape. Detection probability and conditional positive relative mass stay separate; amplitude is an independently sourced peak positive daily RNA emission."
+        },
         "route_efficiency_multipliers": {
           "type": "object",
           "description": "Independent per-route dose multipliers, one per TransmissionCore pathway. They are NOT normalised shares: they neither do nor need to sum to 1, and where route efficiency has been measured it spans orders of magnitude (influenza intranasal vs aerosol ID50). Absent → all 1.0 (identity). This is the model's only parameterisation of route efficiency: a measured per-route clearance rate enters through engines.transmission_core.route_efficiency_from_clearance_rates and is declared here, never as a clearance layer beside it.",

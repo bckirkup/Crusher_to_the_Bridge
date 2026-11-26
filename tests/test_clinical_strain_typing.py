@@ -440,6 +440,32 @@ class TestSpecimenTruthFromStrainState:
         assert set(mixture) == {"GII.4", "GII.2"}
         assert sum(mixture.values()) == pytest.approx(1.0)
 
+    def test_zero_inflated_respiratory_silence_keeps_inoculum_weights(self):
+        registry = StrainRegistry()
+        agent = _infected_agent(registry, ["GII.4", "GII.2"])
+        residents = agent.resident_strains(PATHOGEN)
+        residents["s0"].acquired_particles = 100.0
+        residents["s1"].acquired_particles = 300.0
+        profile = {
+            **PROFILE,
+            "presymptomatic_shedding_days": 2.0,
+            "emission_shape": {
+                "model": "zero_inflated_daily",
+                "axis": "days_since_first_symptom",
+                "peak_positive_log10_copies_per_day": 7.0,
+                "daily": [{
+                    "day": 0,
+                    "detection_probability": 0.0,
+                    "conditional_positive_relative_shape": 1.0,
+                }],
+            },
+        }
+
+        mixture = specimen_genotype_mixture(agent, PATHOGEN, profile, registry)
+
+        assert mixture["GII.4"] == pytest.approx(0.25)
+        assert mixture["GII.2"] == pytest.approx(0.75)
+
     def test_two_lineages_of_one_genotype_collapse(self):
         registry = StrainRegistry()
         agent = _infected_agent(registry, ["GII.4", "GII.4"])
