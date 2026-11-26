@@ -240,4 +240,7 @@ declarations is not required before downstream use. Any voyage recipient-dose
 magnitude quoted downstream must carry the band (and this readout's
 event-conditioned, selection-enriched single-realization caveat) rather than a
 point value; a future decision to interpret magnitude inside the band, rather
-than use the band itself, reopens the narrowing question.
+than use the band itself, reopens the narrowing question. This decision changes
+nothing in `docs/norovirus/norovirus_open_ledger.md`: the withdrawals recorded
+there stay in force, and the band licenses quoting declared sensitivity, never
+the withdrawn dose magnitudes.
