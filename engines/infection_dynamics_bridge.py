@@ -782,6 +782,42 @@ def _draw_shedding_multiplier_entropy(
     return 10.0**entropy, entropy
 
 
+def _initial_emission_shape_seed(
+    rng: np.random.Generator | None,
+    profile: dict[str, Any],
+    pathogen_id: str,
+    agent_id: int,
+    epoch: int,
+    time_infected: int,
+    shedding_entropy: float | None,
+) -> int | None:
+    """Seed episodic shape occurrence without another simulation-RNG draw."""
+    if rng is None or not profile.get("emission_shape"):
+        return None
+    if shedding_entropy is None:
+        return None
+    material = (
+        f"{shedding_entropy!r}:{pathogen_id}:{agent_id}:"
+        f"{epoch}:{time_infected}"
+    )
+    return zlib.crc32(material.encode("utf-8"))
+
+
+def _write_emission_shape_state(
+    infection: dict[str, Any],
+    profile: dict[str, Any],
+    emission_shape_seed: int | None,
+) -> None:
+    """Store the seeded daily occurrence sequence on an infection record."""
+    if emission_shape_seed is None:
+        return
+    infection["emission_shape_seed"] = emission_shape_seed
+    shape_rows = list(profile.get("emission_shape", {}).get("daily") or ())
+    infection["emission_shape_occurrence"] = (
+        np.random.default_rng(emission_shape_seed).random(len(shape_rows)).tolist()
+    )
+
+
 def draw_shedding_multiplier(
     rng: np.random.Generator,
     profile: dict[str, Any],
@@ -1395,14 +1431,10 @@ class KorkinAgent:
             shedding_mult, shedding_entropy = _draw_shedding_multiplier_entropy(
                 rng, profile or {},
             )
-        emission_shape_seed = None
-        if rng is not None and (profile or {}).get("emission_shape"):
-            if shedding_entropy is not None:
-                material = (
-                    f"{shedding_entropy!r}:{pathogen_id}:{self.agent_id}:"
-                    f"{epoch}:{time_infected}"
-                )
-                emission_shape_seed = zlib.crc32(material.encode("utf-8"))
+        emission_shape_seed = _initial_emission_shape_seed(
+            rng, profile or {}, pathogen_id, self.agent_id, epoch,
+            time_infected, shedding_entropy,
+        )
         prior = self.infections.get(pathogen_id)
         self.infections[pathogen_id] = {
             "status": InfectionStatus.INFECTED,
@@ -1422,13 +1454,9 @@ class KorkinAgent:
             ),
             "shedding_multiplier": shedding_mult,
         }
-        if emission_shape_seed is not None:
-            infection = self.infections[pathogen_id]
-            infection["emission_shape_seed"] = emission_shape_seed
-            shape_rows = list((profile or {}).get("emission_shape", {}).get("daily") or ())
-            infection["emission_shape_occurrence"] = (
-                np.random.default_rng(emission_shape_seed).random(len(shape_rows)).tolist()
-            )
+        _write_emission_shape_state(
+            self.infections[pathogen_id], profile or {}, emission_shape_seed,
+        )
         # A chronic shedder carries its own infectious period, so the record
         # states the duration this host will shed for and the clearance seam
         # reads the record before the profile.
