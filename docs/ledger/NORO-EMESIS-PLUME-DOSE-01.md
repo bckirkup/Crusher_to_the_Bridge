@@ -5,6 +5,12 @@
 **Status:** measured
 **Measured at:** ead2ce799606262d97fd6745cf9c4dda05172054
 
+Post-repair note: the nonoccupant-fallback defect quantified below is repaired
+and re-measured in
+[NORO-EMESIS-PLUME-FALLBACK-01](NORO-EMESIS-PLUME-FALLBACK-01.md). The dose
+magnitudes in this entry remain measurements of the pre-repair implementation,
+not current behavior.
+
 Paired-seed local readout of recipient-inhaled emesis-aerosol dose under the
 merged event-moment plume. No engine mechanism, profile, constant, or campaign
 configuration is changed here, and no AWS job was submitted. The measurement

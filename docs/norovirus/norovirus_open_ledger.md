@@ -16,6 +16,16 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`NORO-EMESIS-PLUME-FALLBACK-01` (ledger entry): pre-repair `event_pulse`
+recipient-dose figures are historical on the recipient-opportunity channel.**
+In particular, `NORO-EMESIS-PLUME-DOSE-01` measured at
+`ead2ce799606262d97fd6745cf9c4dda05172054` is pre-repair implementation
+behavior because nonoccupants with no rhythm-commitment evidence received the
+occupant-only full-pulse fallback. The repair is measured at
+`953c6eab619ad1b5db694c4ad46a2efce8ce6b45`; figures not resting on the
+`event_pulse` recipient-opportunity channel, including the labelled
+`compartment_average` baseline control, stand at their own `Measured at` SHAs.
+
 **`CONTAM-SANITARY-DIR-01` (ledger entry): every airborne/downstream-map
 dose figure measured before this change on a hull with `Sanitary_Makeup`
 links is historical on the reverse-sanitary-edge channel.** The 585 links

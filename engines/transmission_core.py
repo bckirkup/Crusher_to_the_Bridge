@@ -11173,7 +11173,8 @@ class TransmissionCore:
 
         This catches the pre-egress part of an exit hour and arrivals inside a
         short pulse. Confinement, ashore/departed state, and isolation still
-        refuse the booking; ordinary fallback placement does not, because a
+        refuse the booking. The epoch-occupant fallback is not licensed here:
+        a nonoccupant with no rhythm commitment is not a candidate, while a
         later commitment in the pulse is exactly the evidence needed for an
         arrival across the epoch boundary.
         """
@@ -11197,9 +11198,16 @@ class TransmissionCore:
                 continue
             for _emitter, _load, event_fraction in entries:
                 fraction = self._emesis_event_epoch_fraction(event_fraction)
-                windows = self._emesis_opportunity_windows(
-                    agent, zone_name, epoch, fraction,
+                offset = fraction * self.clock.hours_per_epoch * 60.0
+                windows = schedule.presence_overlap_window(
+                    agent,
+                    zone_name,
+                    self.clock.hour_of_day(epoch),
+                    offset,
+                    self.emesis_event_plume.pulse_minutes,
                 )
+                if windows is None:
+                    continue
                 if any(exit_min > entry_min for entry_min, exit_min in windows):
                     candidates.append(agent)
                     break
