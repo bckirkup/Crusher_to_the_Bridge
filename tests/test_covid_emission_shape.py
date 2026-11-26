@@ -186,6 +186,31 @@ class TestZeroInflatedDailyEmission:
         assert agent.resident_strains(PATHOGEN) == {}
         assert infection["status"] == InfectionStatus.RECOVERED
 
+    def test_within_host_replacement_inherits_the_primary_course_role(self) -> None:
+        profile = _shape_profile(1.0, presymptomatic_days=1.0)
+        profile["incubation"] = {"median_days": 3.0}
+        agent = _agent(7, profile)
+        infection = agent.infections[PATHOGEN]
+        infection["incubation_days"] = 1.0
+        assert agent.superinfect_with_strain(
+            PATHOGEN, "s:invader", 3000.0, 0,
+            phenotype=Phenotype(),
+        )
+
+        agent.replace_strain(
+            PATHOGEN, "s:index", "s:child", phenotype=Phenotype(),
+        )
+        residents = agent.resident_strains(PATHOGEN)
+        assert residents["s:child"].primary_course
+        assert not residents["s:invader"].primary_course
+
+        masses = agent._shape_resident_positive_masses(
+            PATHOGEN, infection, residents,
+            profile["emission_shape"], profile,
+        )
+        assert masses.get("s:child", 0.0) > 0.0
+        assert masses.get("s:invader", 0.0) == pytest.approx(0.0)
+
     def test_later_strain_clearance_uses_its_own_virtual_course(self) -> None:
         profile = _shape_profile(1.0)
         agent = _agent(7, profile)

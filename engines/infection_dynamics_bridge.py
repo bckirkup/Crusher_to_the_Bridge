@@ -1532,6 +1532,7 @@ class KorkinAgent:
         shedding_clearance_day: float,
         cleared: list[str] | None = None,
         shedding_clearance_by_strain: dict[str, float] | None = None,
+        preserve_primary_course: bool = False,
     ) -> int:
         """Age each resident lineage by an epoch and clear those done shedding.
 
@@ -1562,13 +1563,18 @@ class KorkinAgent:
                 if cleared is not None:
                     cleared.append(strain_id)
         if residents:
-            self._promote_primary_strain(pathogen_id, residents)
+            self._promote_primary_strain(
+                pathogen_id, residents,
+                preserve_primary_course=preserve_primary_course,
+            )
         return len(residents)
 
     def _promote_primary_strain(
         self,
         pathogen_id: str,
         residents: dict[str, StrainInfection],
+        *,
+        preserve_primary_course: bool = False,
     ) -> None:
         """Hand the pathogen-level strain fields to a surviving lineage.
 
@@ -1582,6 +1588,8 @@ class KorkinAgent:
         heir = min(residents.values(), key=lambda r: r.infection_epoch)
         inf["strain_id"] = heir.strain_id
         inf["strain_shedding_multiplier"] = heir.shedding_multiplier
+        if not preserve_primary_course:
+            inf["strain_incubation_modifier"] = heir.incubation_modifier
 
     def is_infected_with(self, pathogen_id: str) -> bool:
         """Check if agent is infected with a specific pathogen."""

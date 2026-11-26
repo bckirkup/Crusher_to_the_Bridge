@@ -608,6 +608,7 @@ def _advance_one_infection(
     residents_left = agent.advance_resident_strains(
         pid, shedding_clearance_day, cleared,
         shedding_clearance_by_strain=clearance_by_strain,
+        preserve_primary_course=bool(prof.get("emission_shape")),
     )
     record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
     last_tracked_lineage_closed = (
