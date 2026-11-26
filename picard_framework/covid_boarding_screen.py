@@ -1573,13 +1573,30 @@ def _index_geometry(
             + float(incubation)
             - age
         )
-    # Measure the emitted value itself. Zero-inflated source shapes make a
-    # host inside the presymptomatic eligibility window legitimately silent.
-    shedding_day0 = (
-        agent.get_pathogen_shedding(PATHOGEN_ID, profile) > 0.0
-        if incubation is not None
-        else False
-    )
+    shedding_day0 = False
+    if incubation is not None:
+        presymptomatic = float(profile.get("presymptomatic_shedding_days", 0.0))
+        onset_relative = age - float(incubation)
+        eligible = onset_relative >= -presymptomatic
+        shape = profile.get("emission_shape")
+        if eligible and shape:
+            daily = list(shape.get("daily") or [])
+            day = int(np.floor(onset_relative))
+            matches = [
+                (index, row) for index, row in enumerate(daily)
+                if int(row.get("day")) == day
+            ]
+            if matches:
+                row_index, row = matches[0]
+                occurrence_rows = inf.get("emission_shape_occurrence") or []
+                if len(occurrence_rows) == len(daily):
+                    shedding_day0 = (
+                        float(occurrence_rows[row_index])
+                        < float(row.get("detection_probability", 0.0))
+                        and float(row.get("conditional_positive_relative_shape", 0.0)) > 0.0
+                    )
+        elif eligible:
+            shedding_day0 = True
     return {
         KEY_INDEX_ONSET_DAY: onset_day,
         KEY_INDEX_SHEDDING_AT_DAY0: shedding_day0,
