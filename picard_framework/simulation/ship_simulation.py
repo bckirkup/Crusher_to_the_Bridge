@@ -540,6 +540,7 @@ class ShipSimulation:
             cfg=self.cfg,
             food_zone_multipliers=food_zone_multipliers,
             clock=self.clock,
+            rhythm_layer=getattr(self.engine, "_rhythm", None),
         )
 
     def initialize(self) -> WorldState:

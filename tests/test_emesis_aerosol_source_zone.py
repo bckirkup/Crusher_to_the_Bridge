@@ -81,7 +81,14 @@ def _core(
     *,
     seed: int = 11,
     volume: float = 50.0,
+    tx_overrides: dict | None = None,
+    rhythm_layer: object | None = None,
 ) -> TransmissionCore:
+    tx = {
+        "droplet_emission_mode": "shipped_uniform",
+        "droplet_field_split": {"mode": "off"},
+    }
+    tx.update(tx_overrides or {})
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes={ZONE: volume, DOWNSTREAM: volume},
@@ -95,10 +102,8 @@ def _core(
         # keeps the whole pool under the partition while a respiratory arm
         # carries only far_field_share — the route-separation invariant is
         # asserted on the labelled pre-change pool.
-        cfg={"transmission": {
-            "droplet_emission_mode": "shipped_uniform",
-            "droplet_field_split": {"mode": "off"},
-        }},
+        cfg={"transmission": tx},
+        rhythm_layer=rhythm_layer,
     )
     core.initialize_zones([ZONE, DOWNSTREAM])
     return core
@@ -317,3 +322,197 @@ class TestInvariants:
         ]
         assert downstream
         assert downstream[0]["dose"] > 0.0
+
+
+class _WindowSchedule:
+    def __init__(self, windows: list | None) -> None:
+        self.windows = windows
+
+    def presence_overlap_window(self, *_args: object) -> list | None:
+        return self.windows
+
+
+class TestEventPulseExposure:
+    def _single_dose(
+        self,
+        *,
+        tx_overrides: dict | None = None,
+        rhythm_layer: object | None = None,
+    ) -> tuple[float, dict]:
+        core = _core(
+            _profile(),
+            tx_overrides=tx_overrides,
+            rhythm_layer=rhythm_layer,
+        )
+        shedder = _emetic_shedder(core)
+        target = _agent(2)
+        matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+        rows = _emesis_dose_rows(matrix)
+        assert len(rows) == 1
+        return rows[0]["dose"], rows[0]
+
+    def test_pulse_duration_scales_event_exposure_time(self) -> None:
+        short, _ = self._single_dose(tx_overrides={
+            "emesis_event_plume": {"pulse_minutes": 15.0},
+        })
+        long, row = self._single_dose(tx_overrides={
+            "emesis_event_plume": {"pulse_minutes": 30.0},
+        })
+        assert long == pytest.approx(short * 2.0, rel=1e-4)
+        assert row["opportunity_minutes"] == pytest.approx(30.0)
+
+    def test_declared_removal_reduces_time_integrated_exposure(self) -> None:
+        def dose_at_ach(ach: float) -> float:
+            core = _core(_profile(), tx_overrides={
+                "room_air_removal": {"mode": "first_order"},
+            })
+            core.zone_air_exchange_per_hour[ZONE] = ach
+            shedder = _emetic_shedder(core)
+            target = _agent(2)
+            matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+            rows = _emesis_dose_rows(matrix)
+            assert len(rows) == 1
+            return rows[0]["dose"]
+
+        assert dose_at_ach(4.0) < dose_at_ach(2.0)
+
+    def test_minute_resolution_recipient_window_is_the_inhaled_time(self) -> None:
+        full, _ = self._single_dose()
+        half, row = self._single_dose(
+            rhythm_layer=_WindowSchedule([(5.0, 10.0)]),
+        )
+        assert half == pytest.approx(full / 3.0, rel=1e-4)
+        assert row["opportunity_windows"] == [[5.0, 10.0]]
+        assert row["exposure_hours"] == pytest.approx(5.0 / 60.0, rel=1e-4)
+
+    def test_compartment_average_is_the_labelled_baseline_arm(self) -> None:
+        _, row = self._single_dose(tx_overrides={
+            "emesis_event_plume": {"mode": "compartment_average"},
+        })
+        assert row["exposure_model"] == "compartment_average"
+        assert "distance_class" not in row
+
+    def test_coarse_table_distance_classes_order_by_receiving_volume(self) -> None:
+        core = _core(_profile())
+        shedder = _emetic_shedder(core)
+        shedder.dining_party_ids = frozenset({1})
+        shedder.dining_table_index = 0
+        targets = []
+        for aid, table_index in ((2, 0), (3, 1), (4, 3)):
+            target = _agent(aid)
+            target.dining_party_ids = frozenset({aid})
+            target.dining_table_index = table_index
+            targets.append(target)
+        matrix, _ = _run_epoch(core, [shedder, *targets], epoch=1)
+        rows = {
+            row["target_id"]: row for row in _emesis_dose_rows(matrix)
+        }
+        assert rows[2]["distance_class"] == "local"
+        assert rows[3]["distance_class"] == "adjacent"
+        assert rows[4]["distance_class"] == "room"
+        assert rows[2]["dose"] > rows[3]["dose"] > rows[4]["dose"]
+        assert rows[2]["receiving_volume_m3"] < rows[3]["receiving_volume_m3"]
+        assert rows[3]["receiving_volume_m3"] < rows[4]["receiving_volume_m3"]
+
+    def test_table_numbers_do_not_join_different_sittings(self) -> None:
+        core = _core(_profile())
+        shedder = _emetic_shedder(core)
+        shedder.dining_party_ids = frozenset({1})
+        shedder.dining_table_index = 0
+        shedder.meal_seating = 0
+        target = _agent(2)
+        target.dining_party_ids = frozenset({2})
+        target.dining_table_index = 0
+        target.meal_seating = 1
+        matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+        rows = _emesis_dose_rows(matrix)
+        assert len(rows) == 1
+        assert rows[0]["distance_class"] == "room"
+
+
+def test_event_fraction_comes_from_infection_age_not_absolute_epoch() -> None:
+    core = _core(_profile())
+    shedder = _emetic_shedder(core, event_age=1.0 / 48.0)
+    shedder.infections[PATHOGEN]["time_infected"] = 1
+    target = _agent(2)
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=20)
+    rows = _emesis_dose_rows(matrix)
+    assert len(rows) == 1
+    assert rows[0]["event_epoch_fraction"] == pytest.approx(0.5)
+
+
+def test_rhythm_committed_pre_egress_candidate_is_dosed() -> None:
+    core = _core(
+        _profile(),
+        rhythm_layer=_WindowSchedule([(0.0, 10.0)]),
+    )
+    shedder = _emetic_shedder(core)
+    target = _agent(2)
+    target.current_location = "Corridor"
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+    rows = _emesis_dose_rows(matrix)
+    assert [row["target_id"] for row in rows] == [2]
+    assert rows[0]["opportunity_minutes"] == pytest.approx(10.0)
+
+
+def test_confinement_override_does_not_use_an_unused_booking() -> None:
+    core = _core(
+        _profile(),
+        rhythm_layer=_WindowSchedule([(0.0, 10.0)]),
+    )
+    shedder = _emetic_shedder(core)
+    target = _agent(2)
+    target.current_location = "Corridor"
+    target._rhythm_confinement_overrode = True
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+    assert _emesis_dose_rows(matrix) == []
+
+
+def test_per_meal_table_deal_ignores_fixed_sitting_labels() -> None:
+    core = _core(_profile())
+    shedder = _emetic_shedder(core)
+    target = _agent(2)
+    shedder.meal_seating = 0
+    target.meal_seating = 1
+    core._meal_tables[(ZONE, 1)] = {
+        1: (0, frozenset({2})),
+        2: (0, frozenset({1})),
+    }
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+    rows = _emesis_dose_rows(matrix)
+    assert len(rows) == 1
+    assert rows[0]["distance_class"] == "local"
+
+
+def test_disjoint_repeated_visits_sum_both_exposure_segments() -> None:
+    full_core = _core(_profile(), rhythm_layer=_WindowSchedule([(0.0, 15.0)]))
+    split_core = _core(
+        _profile(),
+        rhythm_layer=_WindowSchedule([(0.0, 5.0), (10.0, 15.0)]),
+    )
+    doses = []
+    rows = []
+    for core in (full_core, split_core):
+        shedder = _emetic_shedder(core)
+        target = _agent(2)
+        matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+        found = _emesis_dose_rows(matrix)
+        assert len(found) == 1
+        doses.append(found[0]["dose"])
+        rows.append(found[0])
+    assert doses[1] == pytest.approx(doses[0] * 2.0 / 3.0, rel=1e-4)
+    assert rows[1]["opportunity_windows"] == [[0.0, 5.0], [10.0, 15.0]]
+    assert rows[1]["opportunity_minutes"] == pytest.approx(10.0)
+
+
+def test_bedside_caregiver_booking_does_not_create_venue_exposure() -> None:
+    core = _core(
+        _profile(),
+        rhythm_layer=_WindowSchedule([(0.0, 10.0)]),
+    )
+    shedder = _emetic_shedder(core)
+    target = _agent(2)
+    target.current_location = "Corridor"
+    core._cg_absorbed_ids.add(target.agent_id)
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+    assert _emesis_dose_rows(matrix) == []

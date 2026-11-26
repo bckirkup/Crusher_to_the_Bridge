@@ -865,7 +865,7 @@ class KorkinAgent:
         "clock",
         # SHIP-RHYTHM-02: None = rhythm layer off (baseline emesis path);
         # bool = post-prandial hazard-window flag for the current epoch.
-        "_rhythm_post_prandial",
+        "_rhythm_post_prandial", "_rhythm_confinement_overrode",
         # PPE wear-fatigue channel (ship_function_capacity_spec §7): wear
         # hours per declared type, the declared-source fatigue accumulator,
         # the §5 repair-labor hook, and the endogenous-condition record.
@@ -3126,6 +3126,7 @@ class KorkinShipEngine:
                 agent.agent_id, hour,
             )
         agent.current_activity = agent.scheduled_token(hour)
+        agent._rhythm_confinement_overrode = False
         if agent.has_departed(self.epoch):
             agent.current_location = departed_location
             return
@@ -3134,6 +3135,7 @@ class KorkinShipEngine:
             return
         if agent.agent_id in self.isolated_ids:
             agent.current_location = "Isolated_In_Quarters"
+            agent._rhythm_confinement_overrode = True
             return
         if agent.agent_id in self.quarantined_ids:
             # DP-REPLAY-ENVIRON-01: an authorized outing — a staggered
@@ -3145,6 +3147,7 @@ class KorkinShipEngine:
                     agent.current_location = outing
                     return
             agent.current_location = agent.home_zone
+            agent._rhythm_confinement_overrode = True
             return
         tending_zone = self.caregiver_tending_zones.get(agent.agent_id)
         if tending_zone is not None:
