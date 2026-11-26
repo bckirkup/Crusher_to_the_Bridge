@@ -135,6 +135,15 @@ def test_run_seed_resolves_the_fomite_arm_and_witnesses_delivery(arm):
     # delivery window goes sterile (mode: off reproduces the authored
     # fomite_witness counters on this seed).
     spec["config_overrides"]["transmission"]["caregiver"] = {"mode": "off"}
+    # COVID-PRESHED-GATE-01 widened SARS-CoV-2 presymptomatic emission. The
+    # active bundle introduces covid mid-window, and the wider gate moves
+    # this fixed seed's concurrent-covid trajectory enough that the authored
+    # norovirus delivery window goes sterile. That trajectory is outside the
+    # witness's contract, so pin the unrelated covid gate to its legacy value
+    # here just as the unrelated behavioural arms are pinned above.
+    spec["pathogen_overrides"] = {
+        "sars_cov2_resp": {"presymptomatic_shedding_days": 2.0},
+    }
     summary = pdc.run_seed(
         seed=9000, platform="classic_cruise_1900",
         bundle="active_profiles", epochs=20, pathogen_id="norwalk_gi",
