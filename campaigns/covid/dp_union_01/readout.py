@@ -434,6 +434,7 @@ def _theta_row(
             in_band < int(contract["representative_min_seeds"])
         ),
         "audit_deviations": audits,
+        "audit_clean": not audits,
         "reported_only": {
             "legs_on_takeoff_class": _class_legs(classes["takeoff"], contract),
             "legs_on_all_seeds": _class_legs(classes["all"], contract),
@@ -444,7 +445,10 @@ def _theta_row(
 
 def _joint(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """The joint verdict over complete rows, including the split verdict."""
-    live = [r for r in rows if not r["dead"] and not r["saturated"]]
+    live = [
+        r for r in rows
+        if not r["dead"] and not r["saturated"] and not r["audit_deviations"]
+    ]
     passes_at = {
         name: [r["theta"] for r in live if r["legs"][name]["pass"]]
         for name in _LEGS

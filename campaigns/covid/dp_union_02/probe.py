@@ -98,7 +98,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     probe_design_path = (
         _REPO_ROOT / "out" / "dp_union_02_probe"
-        / f"probe_design_{design_sha[:12]}_{len(candidates)}.json"
+        / f"probe_design_{design_sha[:12]}_{args.start_date}_{len(candidates)}.json"
     )
     probe_design_path.parent.mkdir(parents=True, exist_ok=True)
     probe_design_path.write_text(
