@@ -227,24 +227,72 @@ def shared_event_dose(
     return {"rows": rows, "dose_gec": total, "local_dose_gec": local}
 
 
+def select_axis_cells(
+    cells: list[dict[str, Any]],
+    *,
+    axis: str,
+    seed: int,
+) -> list[dict[str, Any]]:
+    if axis == "pulse_minutes":
+        selected = filter_cells(
+            cells, seed=seed, mode="event_pulse", volume_scale=1.0,
+        )
+    elif axis == "receiving_volume_scale":
+        selected = filter_cells(
+            cells, seed=seed, mode="event_pulse", pulse_minutes=15.0,
+        )
+    else:
+        raise ValueError(f"unknown axis {axis!r}")
+    return sorted(selected, key=lambda cell: cell[axis])
+
+
+def shared_exposure_signature(
+    cell: dict[str, Any],
+    shared_keys: set[tuple[Any, ...]],
+) -> tuple[tuple[int, str], ...] | None:
+    signature = []
+    for key in sorted(shared_keys):
+        record = next(
+            (
+                item for item in cell["events"]["records"]
+                if tuple(item["key"]) == key
+            ),
+            None,
+        )
+        if record is None:
+            return None
+        exposure_keys = record["exposure"]["exposure_keys"]
+        signature.append((exposure_keys["count"], exposure_keys["sha256"]))
+    return tuple(signature)
+
+
+def shared_exposure_keys_match(
+    cells: list[dict[str, Any]],
+    shared_keys: set[tuple[Any, ...]],
+    *,
+    axis_complete: bool,
+) -> bool:
+    if not axis_complete or not shared_keys:
+        return False
+    signatures = [
+        shared_exposure_signature(cell, shared_keys) for cell in cells
+    ]
+    return len(set(signatures)) == 1 and signatures[0] is not None
+
+
+def doses_in_declared_order(doses: list[float], axis: str) -> bool:
+    if axis == "pulse_minutes":
+        return doses == sorted(doses)
+    return doses == sorted(doses, reverse=True)
+
+
 def axis_summary(
     cells: list[dict[str, Any]],
     *,
     axis: str,
     seed: int,
 ) -> dict[str, Any]:
-    if axis == "pulse_minutes":
-        selected = filter_cells(
-            cells, seed=seed, mode="event_pulse", volume_scale=1.0,
-        )
-        selected.sort(key=lambda cell: cell["pulse_minutes"])
-    elif axis == "receiving_volume_scale":
-        selected = filter_cells(
-            cells, seed=seed, mode="event_pulse", pulse_minutes=15.0,
-        )
-        selected.sort(key=lambda cell: cell["receiving_volume_scale"])
-    else:
-        raise ValueError(f"unknown axis {axis!r}")
+    selected = select_axis_cells(cells, axis=axis, seed=seed)
     key_sets = []
     for cell in selected:
         key_sets.append({
@@ -253,28 +301,10 @@ def axis_summary(
     shared_keys = set.intersection(*key_sets) if key_sets else set()
     observed_axis_values = sorted(cell[axis] for cell in selected)
     axis_complete = observed_axis_values == EXPECTED_AXIS_VALUES[axis]
-    exposure_signatures = []
-    for cell in selected:
-        signature = []
-        for key in sorted(shared_keys):
-            record = next(
-                (
-                    item for item in cell["events"]["records"]
-                    if tuple(item["key"]) == key
-                ),
-                None,
-            )
-            if record is None:
-                signature.append(None)
-                continue
-            exposure_keys = record["exposure"]["exposure_keys"]
-            signature.append((exposure_keys["count"], exposure_keys["sha256"]))
-        exposure_signatures.append(tuple(signature))
-    shared_exposure_keys_identical = (
-        axis_complete
-        and bool(shared_keys)
-        and len(set(exposure_signatures)) == 1
-        and None not in exposure_signatures[0]
+    shared_exposure_keys_identical = shared_exposure_keys_match(
+        selected,
+        shared_keys,
+        axis_complete=axis_complete,
     )
     rows = []
     for cell in selected:
@@ -301,12 +331,8 @@ def axis_summary(
         and shared_exposure_keys_identical
         and shared_exposure_rows_positive
     )
-    if axis == "pulse_minutes":
-        voyage_ordered = voyage_doses == sorted(voyage_doses)
-        shared_ordered = shared_doses == sorted(shared_doses)
-    else:
-        voyage_ordered = voyage_doses == sorted(voyage_doses, reverse=True)
-        shared_ordered = shared_doses == sorted(shared_doses, reverse=True)
+    voyage_ordered = doses_in_declared_order(voyage_doses, axis)
+    shared_ordered = doses_in_declared_order(shared_doses, axis)
     return {
         "axis": axis,
         "seed": seed,
@@ -317,7 +343,7 @@ def axis_summary(
         "shared_exposure_keys_identical": shared_exposure_keys_identical,
         "shared_exposure_rows_positive": shared_exposure_rows_positive,
         "voyage_dose_order_matches_arithmetic": (
-            ordering_evaluable and voyage_ordered
+            axis_complete and voyage_ordered
         ),
         "shared_event_dose_order_matches_arithmetic": (
             ordering_evaluable and shared_ordered
