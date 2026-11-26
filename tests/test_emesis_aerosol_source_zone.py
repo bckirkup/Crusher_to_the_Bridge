@@ -455,6 +455,18 @@ def test_rhythm_committed_pre_egress_candidate_is_dosed() -> None:
     assert rows[0]["opportunity_minutes"] == pytest.approx(10.0)
 
 
+def test_uncommitted_nonoccupant_is_not_a_schedule_candidate() -> None:
+    core = _core(
+        _profile(),
+        rhythm_layer=_WindowSchedule(None),
+    )
+    shedder = _emetic_shedder(core)
+    target = _agent(2)
+    target.current_location = "Corridor"
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+    assert _emesis_dose_rows(matrix) == []
+
+
 def test_confinement_override_does_not_use_an_unused_booking() -> None:
     core = _core(
         _profile(),
