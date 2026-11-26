@@ -1,0 +1,1777 @@
+{
+ "artifact_dir": "docs/norovirus/noro_emesis_plume_sensitivity_01/classic_cruise_1900",
+ "axes": {
+  "pulse_minutes": {
+   "axis": "pulse_minutes",
+   "cells": [
+    {
+     "adjacent_dose_gec": 456.93224452226536,
+     "axis_value": 5.0,
+     "cell": "seed8002_event_pulse_p5_v1",
+     "emitted_aerosol_gec": 23716.81533457467,
+     "events": 3,
+     "local_dose_gec": 349.83874971235946,
+     "room_dose_gec": 71.25183205901567,
+     "shared_event_dose": {
+      "dose_gec": 878.0181544617587,
+      "local_dose_gec": 349.83874971235946,
+      "rows": 104
+     },
+     "voyage_dose_gec": 878.0228262936408,
+     "voyage_rows": 145
+    },
+    {
+     "adjacent_dose_gec": 1018.9353411089447,
+     "axis_value": 15.0,
+     "cell": "seed8002_event_pulse_p15_v1",
+     "emitted_aerosol_gec": 23807.637674681846,
+     "events": 2,
+     "local_dose_gec": 780.1223705365359,
+     "room_dose_gec": 158.95420492023132,
+     "shared_event_dose": {
+      "dose_gec": 1957.935204707892,
+      "local_dose_gec": 780.1223705365359,
+      "rows": 104
+     },
+     "voyage_dose_gec": 1958.0119165657143,
+     "voyage_rows": 222
+    },
+    {
+     "adjacent_dose_gec": 1393.7807049859364,
+     "axis_value": 30.0,
+     "cell": "seed8002_event_pulse_p30_v1",
+     "emitted_aerosol_gec": 23734.866056711202,
+     "events": 2,
+     "local_dose_gec": 1068.890689392871,
+     "room_dose_gec": 217.69453630115012,
+     "shared_event_dose": {
+      "dose_gec": 2678.2193136657265,
+      "local_dose_gec": 1067.1133522548575,
+      "rows": 104
+     },
+     "voyage_dose_gec": 2680.365930679938,
+     "voyage_rows": 206
+    }
+   ],
+   "seed": 8002,
+   "shared_event_count": 1,
+   "shared_event_dose_order_matches_arithmetic": true,
+   "shared_event_keys": [
+    [
+     14,
+     "MainDining_U",
+     1216,
+     0,
+     23695.400038972446,
+     107081401.63139151,
+     200.37781751404364
+    ]
+   ],
+   "voyage_dose_order_matches_arithmetic": true
+  },
+  "receiving_volume_scale": {
+   "axis": "receiving_volume_scale",
+   "cells": [
+    {
+     "adjacent_dose_gec": 10191.464012976023,
+     "axis_value": 0.1,
+     "cell": "seed8002_event_pulse_p15_v0.1",
+     "emitted_aerosol_gec": 23705.21647265723,
+     "events": 2,
+     "local_dose_gec": 7807.687423642995,
+     "room_dose_gec": 158.97455002854903,
+     "shared_event_dose": {
+      "dose_gec": 18149.454609517234,
+      "local_dose_gec": 7801.22370536536,
+      "rows": 104
+     },
+     "voyage_dose_gec": 18158.125986647527,
+     "voyage_rows": 283
+    },
+    {
+     "adjacent_dose_gec": 1018.9353411089447,
+     "axis_value": 1.0,
+     "cell": "seed8002_event_pulse_p15_v1",
+     "emitted_aerosol_gec": 23807.637674681846,
+     "events": 2,
+     "local_dose_gec": 780.1223705365359,
+     "room_dose_gec": 158.95420492023132,
+     "shared_event_dose": {
+      "dose_gec": 1957.935204707892,
+      "local_dose_gec": 780.1223705365359,
+      "rows": 104
+     },
+     "voyage_dose_gec": 1958.0119165657143,
+     "voyage_rows": 222
+    },
+    {
+     "adjacent_dose_gec": 101.89353411089448,
+     "axis_value": 10.0,
+     "cell": "seed8002_event_pulse_p15_v10",
+     "emitted_aerosol_gec": 23796.30382992078,
+     "events": 3,
+     "local_dose_gec": 78.01223705365359,
+     "room_dose_gec": 158.92631860960108,
+     "shared_event_dose": {
+      "dose_gec": 338.7832642269604,
+      "local_dose_gec": 78.01223705365359,
+      "rows": 104
+     },
+     "voyage_dose_gec": 338.83208977414546,
+     "voyage_rows": 235
+    }
+   ],
+   "seed": 8002,
+   "shared_event_count": 1,
+   "shared_event_dose_order_matches_arithmetic": true,
+   "shared_event_keys": [
+    [
+     14,
+     "MainDining_U",
+     1216,
+     0,
+     23695.400038972446,
+     107081401.63139151,
+     200.37781751404364
+    ]
+   ],
+   "voyage_dose_order_matches_arithmetic": true
+  }
+ },
+ "cells": [
+  {
+   "artifact_file": "seed8002_compartment_average_p15_v1.json.gz",
+   "cell": "seed8002_compartment_average_p15_v1",
+   "configuration_witness": {
+    "adjacent_volume_m3": 8.82,
+    "local_volume_m3": 2.88,
+    "plume_mode_resolved": "compartment_average",
+    "pulse_minutes": 15.0,
+    "receiving_volume_scale_requested": 1.0,
+    "rhythm_catalogued_platform": true,
+    "rhythm_layer_active": true,
+    "room_air_removal_mode": "first_order"
+   },
+   "engine_git_sha": "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7",
+   "events": {
+    "aerosol_mass_gec": 23695.400038972446,
+    "count": 1,
+    "emitting_hosts": 1,
+    "records": [
+     {
+      "aerosol_load_gec": 23695.400038972446,
+      "agent_id": 1216,
+      "epoch": 14,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "local": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "room": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        }
+       },
+       "dose_gec": 259.19849779795646,
+       "recipients": 104,
+       "rows": 104
+      },
+      "host_event_index": 0,
+      "key": [
+       14,
+       "MainDining_U",
+       1216,
+       0,
+       23695.400038972446,
+       107081401.63139151,
+       200.37781751404364
+      ],
+      "zone": "MainDining_U"
+     }
+    ]
+   },
+   "exposures": {
+    "distance_classes": {
+     "adjacent": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     },
+     "local": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     },
+     "room": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     }
+    },
+    "dose_gec": 259.19849779795646,
+    "observer_uncommitted_nonoccupant": {
+     "dose_gec": {
+      "count": 0,
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "q25": null,
+      "q75": null,
+      "sum": 0.0
+     },
+     "recipients": 0,
+     "rows": 0
+    },
+    "recipients": 104,
+    "rows": 104
+   },
+   "mode": "compartment_average",
+   "proof": {
+    "emesis_event_count_positive": true,
+    "event_pulse_exposure_rows_present": false,
+    "event_pulse_required_fields_complete": true,
+    "event_pulse_required_fields_missing": {},
+    "mode_matches_request": true,
+    "mode_requested": "compartment_average",
+    "mode_resolved": "compartment_average",
+    "rhythm_layer_active": true
+   },
+   "pulse_minutes": 15.0,
+   "receiving_volume_scale": 1.0,
+   "seed": 8002
+  },
+  {
+   "artifact_file": "seed8002_event_pulse_p15_v0.1.json.gz",
+   "cell": "seed8002_event_pulse_p15_v0.1",
+   "configuration_witness": {
+    "adjacent_volume_m3": 0.8820000000000001,
+    "local_volume_m3": 0.288,
+    "plume_mode_resolved": "event_pulse",
+    "pulse_minutes": 15.0,
+    "receiving_volume_scale_requested": 0.1,
+    "rhythm_catalogued_platform": true,
+    "rhythm_layer_active": true,
+    "room_air_removal_mode": "first_order"
+   },
+   "engine_git_sha": "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7",
+   "events": {
+    "aerosol_mass_gec": 23705.21647265723,
+    "count": 2,
+    "emitting_hosts": 2,
+    "records": [
+     {
+      "aerosol_load_gec": 23695.400038972446,
+      "agent_id": 1216,
+      "epoch": 14,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 10189.353411089447,
+         "exposure_hours_total": 0.63212,
+         "opportunity_minutes_total": 60.0,
+         "receiving_volume_m3_values": [
+          0.882
+         ],
+         "recipients": 4,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 4
+        },
+        "local": {
+         "dose_gec": 7801.22370536536,
+         "exposure_hours_total": 0.15803,
+         "opportunity_minutes_total": 15.0,
+         "receiving_volume_m3_values": [
+          0.288
+         ],
+         "recipients": 1,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 1
+        },
+        "room": {
+         "dose_gec": 158.8774930624123,
+         "exposure_hours_total": 15.64497000000001,
+         "opportunity_minutes_total": 1485.0,
+         "receiving_volume_m3_values": [
+          1400.0
+         ],
+         "recipients": 99,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 99
+        }
+       },
+       "dose_gec": 18149.454609517234,
+       "recipients": 104,
+       "rows": 104
+      },
+      "host_event_index": 0,
+      "key": [
+       14,
+       "MainDining_U",
+       1216,
+       0,
+       23695.400038972446,
+       107081401.63139151,
+       200.37781751404364
+      ],
+      "zone": "MainDining_U"
+     },
+     {
+      "aerosol_load_gec": 9.81643368478382,
+      "agent_id": 1193,
+      "epoch": 80,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 2.1106018865744987,
+         "exposure_hours_total": 0.31606,
+         "opportunity_minutes_total": 30.0,
+         "receiving_volume_m3_values": [
+          0.882
+         ],
+         "recipients": 2,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 2
+        },
+        "local": {
+         "dose_gec": 6.463718277634403,
+         "exposure_hours_total": 0.31606,
+         "opportunity_minutes_total": 30.0,
+         "receiving_volume_m3_values": [
+          0.288
+         ],
+         "recipients": 2,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 2
+        },
+        "room": {
+         "dose_gec": 0.0970569661373795,
+         "exposure_hours_total": 23.070102000000013,
+         "opportunity_minutes_total": 2207.108,
+         "receiving_volume_m3_values": [
+          1400.0
+         ],
+         "recipients": 175,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 175
+        }
+       },
+       "dose_gec": 8.67137713034626,
+       "recipients": 179,
+       "rows": 179
+      },
+      "host_event_index": 0,
+      "key": [
+       80,
+       "MainDining_U",
+       1193,
+       0,
+       9.81643368478382,
+       526967.7179465132,
+       83.8497486322559
+      ],
+      "zone": "MainDining_U"
+     }
+    ]
+   },
+   "exposures": {
+    "distance_classes": {
+     "adjacent": {
+      "dose_gec": 10191.464012976023,
+      "exposure_hours_total": 0.94818,
+      "opportunity_minutes_total": 90.0,
+      "receiving_volume_m3_values": [
+       0.882
+      ],
+      "recipients": 6,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 6
+     },
+     "local": {
+      "dose_gec": 7807.687423642995,
+      "exposure_hours_total": 0.47409,
+      "opportunity_minutes_total": 45.0,
+      "receiving_volume_m3_values": [
+       0.288
+      ],
+      "recipients": 3,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 3
+     },
+     "room": {
+      "dose_gec": 158.97455002854903,
+      "exposure_hours_total": 38.71507199999991,
+      "opportunity_minutes_total": 3692.108,
+      "receiving_volume_m3_values": [
+       1400.0
+      ],
+      "recipients": 249,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 274
+     }
+    },
+    "dose_gec": 18158.125986647527,
+    "observer_uncommitted_nonoccupant": {
+     "dose_gec": {
+      "count": 0,
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "q25": null,
+      "q75": null,
+      "sum": 0.0
+     },
+     "recipients": 0,
+     "rows": 0
+    },
+    "recipients": 255,
+    "rows": 283
+   },
+   "mode": "event_pulse",
+   "proof": {
+    "emesis_event_count_positive": true,
+    "event_pulse_exposure_rows_present": true,
+    "event_pulse_required_fields_complete": true,
+    "event_pulse_required_fields_missing": {},
+    "mode_matches_request": true,
+    "mode_requested": "event_pulse",
+    "mode_resolved": "event_pulse",
+    "rhythm_layer_active": true
+   },
+   "pulse_minutes": 15.0,
+   "receiving_volume_scale": 0.1,
+   "seed": 8002
+  },
+  {
+   "artifact_file": "seed8002_event_pulse_p15_v1.json.gz",
+   "cell": "seed8002_event_pulse_p15_v1",
+   "configuration_witness": {
+    "adjacent_volume_m3": 8.82,
+    "local_volume_m3": 2.88,
+    "plume_mode_resolved": "event_pulse",
+    "pulse_minutes": 15.0,
+    "receiving_volume_scale_requested": 1.0,
+    "rhythm_catalogued_platform": true,
+    "rhythm_layer_active": true,
+    "room_air_removal_mode": "first_order"
+   },
+   "engine_git_sha": "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7",
+   "events": {
+    "aerosol_mass_gec": 23807.637674681846,
+    "count": 2,
+    "emitting_hosts": 2,
+    "records": [
+     {
+      "aerosol_load_gec": 23695.400038972446,
+      "agent_id": 1216,
+      "epoch": 14,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 1018.9353411089447,
+         "exposure_hours_total": 0.63212,
+         "opportunity_minutes_total": 60.0,
+         "receiving_volume_m3_values": [
+          8.82
+         ],
+         "recipients": 4,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 4
+        },
+        "local": {
+         "dose_gec": 780.1223705365359,
+         "exposure_hours_total": 0.15803,
+         "opportunity_minutes_total": 15.0,
+         "receiving_volume_m3_values": [
+          2.88
+         ],
+         "recipients": 1,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 1
+        },
+        "room": {
+         "dose_gec": 158.8774930624123,
+         "exposure_hours_total": 15.64497000000001,
+         "opportunity_minutes_total": 1485.0,
+         "receiving_volume_m3_values": [
+          1400.0
+         ],
+         "recipients": 99,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 99
+        }
+       },
+       "dose_gec": 1957.935204707892,
+       "recipients": 104,
+       "rows": 104
+      },
+      "host_event_index": 0,
+      "key": [
+       14,
+       "MainDining_U",
+       1216,
+       0,
+       23695.400038972446,
+       107081401.63139151,
+       200.37781751404364
+      ],
+      "zone": "MainDining_U"
+     },
+     {
+      "aerosol_load_gec": 112.23763570939995,
+      "agent_id": 1193,
+      "epoch": 88,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "local": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "room": {
+         "dose_gec": 0.07671185781903538,
+         "exposure_hours_total": 2.3922139999999987,
+         "opportunity_minutes_total": 1770.0,
+         "receiving_volume_m3_values": [
+          2100.0
+         ],
+         "recipients": 118,
+         "removal_per_hour_values": [
+          49.327381
+         ],
+         "rows": 118
+        }
+       },
+       "dose_gec": 0.07671185781903538,
+       "recipients": 118,
+       "rows": 118
+      },
+      "host_event_index": 0,
+      "key": [
+       88,
+       "PoolDeck",
+       1193,
+       0,
+       112.23763570939995,
+       434047.2248507446,
+       69.06447863653999
+      ],
+      "zone": "PoolDeck"
+     }
+    ]
+   },
+   "exposures": {
+    "distance_classes": {
+     "adjacent": {
+      "dose_gec": 1018.9353411089447,
+      "exposure_hours_total": 0.63212,
+      "opportunity_minutes_total": 60.0,
+      "receiving_volume_m3_values": [
+       8.82
+      ],
+      "recipients": 4,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 4
+     },
+     "local": {
+      "dose_gec": 780.1223705365359,
+      "exposure_hours_total": 0.15803,
+      "opportunity_minutes_total": 15.0,
+      "receiving_volume_m3_values": [
+       2.88
+      ],
+      "recipients": 1,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 1
+     },
+     "room": {
+      "dose_gec": 158.95420492023132,
+      "exposure_hours_total": 18.037183999999957,
+      "opportunity_minutes_total": 3255.0,
+      "receiving_volume_m3_values": [
+       1400.0,
+       2100.0
+      ],
+      "recipients": 205,
+      "removal_per_hour_values": [
+       4.0,
+       49.327381
+      ],
+      "rows": 217
+     }
+    },
+    "dose_gec": 1958.0119165657143,
+    "observer_uncommitted_nonoccupant": {
+     "dose_gec": {
+      "count": 0,
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "q25": null,
+      "q75": null,
+      "sum": 0.0
+     },
+     "recipients": 0,
+     "rows": 0
+    },
+    "recipients": 210,
+    "rows": 222
+   },
+   "mode": "event_pulse",
+   "proof": {
+    "emesis_event_count_positive": true,
+    "event_pulse_exposure_rows_present": true,
+    "event_pulse_required_fields_complete": true,
+    "event_pulse_required_fields_missing": {},
+    "mode_matches_request": true,
+    "mode_requested": "event_pulse",
+    "mode_resolved": "event_pulse",
+    "rhythm_layer_active": true
+   },
+   "pulse_minutes": 15.0,
+   "receiving_volume_scale": 1.0,
+   "seed": 8002
+  },
+  {
+   "artifact_file": "seed8002_event_pulse_p15_v10.json.gz",
+   "cell": "seed8002_event_pulse_p15_v10",
+   "configuration_witness": {
+    "adjacent_volume_m3": 88.2,
+    "local_volume_m3": 28.799999999999997,
+    "plume_mode_resolved": "event_pulse",
+    "pulse_minutes": 15.0,
+    "receiving_volume_scale_requested": 10.0,
+    "rhythm_catalogued_platform": true,
+    "rhythm_layer_active": true,
+    "room_air_removal_mode": "first_order"
+   },
+   "engine_git_sha": "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7",
+   "events": {
+    "aerosol_mass_gec": 23796.30382992078,
+    "count": 3,
+    "emitting_hosts": 2,
+    "records": [
+     {
+      "aerosol_load_gec": 23695.400038972446,
+      "agent_id": 1216,
+      "epoch": 14,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 101.89353411089448,
+         "exposure_hours_total": 0.63212,
+         "opportunity_minutes_total": 60.0,
+         "receiving_volume_m3_values": [
+          88.2
+         ],
+         "recipients": 4,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 4
+        },
+        "local": {
+         "dose_gec": 78.01223705365359,
+         "exposure_hours_total": 0.15803,
+         "opportunity_minutes_total": 15.0,
+         "receiving_volume_m3_values": [
+          28.8
+         ],
+         "recipients": 1,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 1
+        },
+        "room": {
+         "dose_gec": 158.8774930624123,
+         "exposure_hours_total": 15.64497000000001,
+         "opportunity_minutes_total": 1485.0,
+         "receiving_volume_m3_values": [
+          1400.0
+         ],
+         "recipients": 99,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 99
+        }
+       },
+       "dose_gec": 338.7832642269604,
+       "recipients": 104,
+       "rows": 104
+      },
+      "host_event_index": 0,
+      "key": [
+       14,
+       "MainDining_U",
+       1216,
+       0,
+       23695.400038972446,
+       107081401.63139151,
+       200.37781751404364
+      ],
+      "zone": "MainDining_U"
+     },
+     {
+      "aerosol_load_gec": 64.34782021894819,
+      "agent_id": 1193,
+      "epoch": 81,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "local": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "room": {
+         "dose_gec": 0.04882554718717232,
+         "exposure_hours_total": 2.6557629999999985,
+         "opportunity_minutes_total": 1965.0,
+         "receiving_volume_m3_values": [
+          2100.0
+         ],
+         "recipients": 131,
+         "removal_per_hour_values": [
+          49.327381
+         ],
+         "rows": 131
+        }
+       },
+       "dose_gec": 0.04882554718717232,
+       "recipients": 131,
+       "rows": 131
+      },
+      "host_event_index": 0,
+      "key": [
+       81,
+       "PoolDeck",
+       1193,
+       0,
+       64.34782021894819,
+       7444773.386572329,
+       587.6693110011621
+      ],
+      "zone": "PoolDeck"
+     },
+     {
+      "aerosol_load_gec": 36.55597072938646,
+      "agent_id": 1193,
+      "epoch": 141,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "local": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "room": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        }
+       },
+       "dose_gec": 0,
+       "recipients": 0,
+       "rows": 0
+      },
+      "host_event_index": 1,
+      "key": [
+       141,
+       "PC_D8_P_A::cabin1193",
+       1193,
+       1,
+       36.55597072938646,
+       883609.5404753508,
+       69.7496327801969
+      ],
+      "zone": "PC_D8_P_A::cabin1193"
+     }
+    ]
+   },
+   "exposures": {
+    "distance_classes": {
+     "adjacent": {
+      "dose_gec": 101.89353411089448,
+      "exposure_hours_total": 0.63212,
+      "opportunity_minutes_total": 60.0,
+      "receiving_volume_m3_values": [
+       88.2
+      ],
+      "recipients": 4,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 4
+     },
+     "local": {
+      "dose_gec": 78.01223705365359,
+      "exposure_hours_total": 0.15803,
+      "opportunity_minutes_total": 15.0,
+      "receiving_volume_m3_values": [
+       28.8
+      ],
+      "recipients": 1,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 1
+     },
+     "room": {
+      "dose_gec": 158.92631860960108,
+      "exposure_hours_total": 18.30073299999995,
+      "opportunity_minutes_total": 3450.0,
+      "receiving_volume_m3_values": [
+       1400.0,
+       2100.0
+      ],
+      "recipients": 215,
+      "removal_per_hour_values": [
+       4.0,
+       49.327381
+      ],
+      "rows": 230
+     }
+    },
+    "dose_gec": 338.83208977414546,
+    "observer_uncommitted_nonoccupant": {
+     "dose_gec": {
+      "count": 0,
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "q25": null,
+      "q75": null,
+      "sum": 0.0
+     },
+     "recipients": 0,
+     "rows": 0
+    },
+    "recipients": 219,
+    "rows": 235
+   },
+   "mode": "event_pulse",
+   "proof": {
+    "emesis_event_count_positive": true,
+    "event_pulse_exposure_rows_present": true,
+    "event_pulse_required_fields_complete": true,
+    "event_pulse_required_fields_missing": {},
+    "mode_matches_request": true,
+    "mode_requested": "event_pulse",
+    "mode_resolved": "event_pulse",
+    "rhythm_layer_active": true
+   },
+   "pulse_minutes": 15.0,
+   "receiving_volume_scale": 10.0,
+   "seed": 8002
+  },
+  {
+   "artifact_file": "seed8002_event_pulse_p30_v1.json.gz",
+   "cell": "seed8002_event_pulse_p30_v1",
+   "configuration_witness": {
+    "adjacent_volume_m3": 8.82,
+    "local_volume_m3": 2.88,
+    "plume_mode_resolved": "event_pulse",
+    "pulse_minutes": 30.0,
+    "receiving_volume_scale_requested": 1.0,
+    "rhythm_catalogued_platform": true,
+    "rhythm_layer_active": true,
+    "room_air_removal_mode": "first_order"
+   },
+   "engine_git_sha": "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7",
+   "events": {
+    "aerosol_mass_gec": 23734.866056711202,
+    "count": 2,
+    "emitting_hosts": 2,
+    "records": [
+     {
+      "aerosol_load_gec": 23695.400038972446,
+      "agent_id": 1216,
+      "epoch": 14,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 1393.7807049859364,
+         "exposure_hours_total": 0.864664,
+         "opportunity_minutes_total": 120.0,
+         "receiving_volume_m3_values": [
+          8.82
+         ],
+         "recipients": 4,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 4
+        },
+        "local": {
+         "dose_gec": 1067.1133522548575,
+         "exposure_hours_total": 0.216166,
+         "opportunity_minutes_total": 30.0,
+         "receiving_volume_m3_values": [
+          2.88
+         ],
+         "recipients": 1,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 1
+        },
+        "room": {
+         "dose_gec": 217.32525642493192,
+         "exposure_hours_total": 21.40043400000001,
+         "opportunity_minutes_total": 2970.0,
+         "receiving_volume_m3_values": [
+          1400.0
+         ],
+         "recipients": 99,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 99
+        }
+       },
+       "dose_gec": 2678.2193136657265,
+       "recipients": 104,
+       "rows": 104
+      },
+      "host_event_index": 0,
+      "key": [
+       14,
+       "MainDining_U",
+       1216,
+       0,
+       23695.400038972446,
+       107081401.63139151,
+       200.37781751404364
+      ],
+      "zone": "MainDining_U"
+     },
+     {
+      "aerosol_load_gec": 39.46601773875592,
+      "agent_id": 1193,
+      "epoch": 86,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "local": {
+         "dose_gec": 1.7773371380135528,
+         "exposure_hours_total": 0.216166,
+         "opportunity_minutes_total": 30.0,
+         "receiving_volume_m3_values": [
+          2.88
+         ],
+         "recipients": 1,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 1
+        },
+        "room": {
+         "dose_gec": 0.3692798762181297,
+         "exposure_hours_total": 21.832766000000014,
+         "opportunity_minutes_total": 3030.0,
+         "receiving_volume_m3_values": [
+          1400.0
+         ],
+         "recipients": 101,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 101
+        }
+       },
+       "dose_gec": 2.1466170142316807,
+       "recipients": 102,
+       "rows": 102
+      },
+      "host_event_index": 0,
+      "key": [
+       86,
+       "MainDining_U",
+       1193,
+       0,
+       39.46601773875592,
+       448547.5130767902,
+       71.37172722396217
+      ],
+      "zone": "MainDining_U"
+     }
+    ]
+   },
+   "exposures": {
+    "distance_classes": {
+     "adjacent": {
+      "dose_gec": 1393.7807049859364,
+      "exposure_hours_total": 0.864664,
+      "opportunity_minutes_total": 120.0,
+      "receiving_volume_m3_values": [
+       8.82
+      ],
+      "recipients": 4,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 4
+     },
+     "local": {
+      "dose_gec": 1068.890689392871,
+      "exposure_hours_total": 0.432332,
+      "opportunity_minutes_total": 60.0,
+      "receiving_volume_m3_values": [
+       2.88
+      ],
+      "recipients": 2,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 2
+     },
+     "room": {
+      "dose_gec": 217.69453630115012,
+      "exposure_hours_total": 43.23320000000013,
+      "opportunity_minutes_total": 6000.0,
+      "receiving_volume_m3_values": [
+       1400.0
+      ],
+      "recipients": 167,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 200
+     }
+    },
+    "dose_gec": 2680.365930679938,
+    "observer_uncommitted_nonoccupant": {
+     "dose_gec": {
+      "count": 0,
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "q25": null,
+      "q75": null,
+      "sum": 0.0
+     },
+     "recipients": 0,
+     "rows": 0
+    },
+    "recipients": 172,
+    "rows": 206
+   },
+   "mode": "event_pulse",
+   "proof": {
+    "emesis_event_count_positive": true,
+    "event_pulse_exposure_rows_present": true,
+    "event_pulse_required_fields_complete": true,
+    "event_pulse_required_fields_missing": {},
+    "mode_matches_request": true,
+    "mode_requested": "event_pulse",
+    "mode_resolved": "event_pulse",
+    "rhythm_layer_active": true
+   },
+   "pulse_minutes": 30.0,
+   "receiving_volume_scale": 1.0,
+   "seed": 8002
+  },
+  {
+   "artifact_file": "seed8002_event_pulse_p5_v1.json.gz",
+   "cell": "seed8002_event_pulse_p5_v1",
+   "configuration_witness": {
+    "adjacent_volume_m3": 8.82,
+    "local_volume_m3": 2.88,
+    "plume_mode_resolved": "event_pulse",
+    "pulse_minutes": 5.0,
+    "receiving_volume_scale_requested": 1.0,
+    "rhythm_catalogued_platform": true,
+    "rhythm_layer_active": true,
+    "room_air_removal_mode": "first_order"
+   },
+   "engine_git_sha": "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7",
+   "events": {
+    "aerosol_mass_gec": 23716.81533457467,
+    "count": 3,
+    "emitting_hosts": 2,
+    "records": [
+     {
+      "aerosol_load_gec": 23695.400038972446,
+      "agent_id": 1216,
+      "epoch": 14,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 456.93224452226536,
+         "exposure_hours_total": 0.283468,
+         "opportunity_minutes_total": 20.0,
+         "receiving_volume_m3_values": [
+          8.82
+         ],
+         "recipients": 4,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 4
+        },
+        "local": {
+         "dose_gec": 349.83874971235946,
+         "exposure_hours_total": 0.070867,
+         "opportunity_minutes_total": 5.0,
+         "receiving_volume_m3_values": [
+          2.88
+         ],
+         "recipients": 1,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 1
+        },
+        "room": {
+         "dose_gec": 71.24716022713416,
+         "exposure_hours_total": 7.0158329999999856,
+         "opportunity_minutes_total": 495.0,
+         "receiving_volume_m3_values": [
+          1400.0
+         ],
+         "recipients": 99,
+         "removal_per_hour_values": [
+          4.0
+         ],
+         "rows": 99
+        }
+       },
+       "dose_gec": 878.0181544617587,
+       "recipients": 104,
+       "rows": 104
+      },
+      "host_event_index": 0,
+      "key": [
+       14,
+       "MainDining_U",
+       1216,
+       0,
+       23695.400038972446,
+       107081401.63139151,
+       200.37781751404364
+      ],
+      "zone": "MainDining_U"
+     },
+     {
+      "aerosol_load_gec": 20.000456522456243,
+      "agent_id": 1193,
+      "epoch": 78,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "local": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "room": {
+         "dose_gec": 0.004671831881360646,
+         "exposure_hours_total": 0.8175399999999996,
+         "opportunity_minutes_total": 205.0,
+         "receiving_volume_m3_values": [
+          2100.0
+         ],
+         "recipients": 41,
+         "removal_per_hour_values": [
+          49.327381
+         ],
+         "rows": 41
+        }
+       },
+       "dose_gec": 0.004671831881360646,
+       "recipients": 41,
+       "rows": 41
+      },
+      "host_event_index": 0,
+      "key": [
+       78,
+       "PoolDeck",
+       1193,
+       0,
+       20.000456522456243,
+       4821379.225346276,
+       380.58601119342944
+      ],
+      "zone": "PoolDeck"
+     },
+     {
+      "aerosol_load_gec": 1.4148390797679287,
+      "agent_id": 1193,
+      "epoch": 138,
+      "exposure": {
+       "distance_classes": {
+        "adjacent": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "local": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        },
+        "room": {
+         "dose_gec": 0,
+         "exposure_hours_total": 0,
+         "opportunity_minutes_total": 0,
+         "receiving_volume_m3_values": [],
+         "recipients": 0,
+         "removal_per_hour_values": [],
+         "rows": 0
+        }
+       },
+       "dose_gec": 0,
+       "recipients": 0,
+       "rows": 0
+      },
+      "host_event_index": 1,
+      "key": [
+       138,
+       "PC_D8_P_A::cabin1193",
+       1193,
+       1,
+       1.4148390797679287,
+       1521887.730435177,
+       120.13350407402271
+      ],
+      "zone": "PC_D8_P_A::cabin1193"
+     }
+    ]
+   },
+   "exposures": {
+    "distance_classes": {
+     "adjacent": {
+      "dose_gec": 456.93224452226536,
+      "exposure_hours_total": 0.283468,
+      "opportunity_minutes_total": 20.0,
+      "receiving_volume_m3_values": [
+       8.82
+      ],
+      "recipients": 4,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 4
+     },
+     "local": {
+      "dose_gec": 349.83874971235946,
+      "exposure_hours_total": 0.070867,
+      "opportunity_minutes_total": 5.0,
+      "receiving_volume_m3_values": [
+       2.88
+      ],
+      "recipients": 1,
+      "removal_per_hour_values": [
+       4.0
+      ],
+      "rows": 1
+     },
+     "room": {
+      "dose_gec": 71.25183205901567,
+      "exposure_hours_total": 7.833372999999988,
+      "opportunity_minutes_total": 700.0,
+      "receiving_volume_m3_values": [
+       1400.0,
+       2100.0
+      ],
+      "recipients": 138,
+      "removal_per_hour_values": [
+       4.0,
+       49.327381
+      ],
+      "rows": 140
+     }
+    },
+    "dose_gec": 878.0228262936408,
+    "observer_uncommitted_nonoccupant": {
+     "dose_gec": {
+      "count": 0,
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "q25": null,
+      "q75": null,
+      "sum": 0.0
+     },
+     "recipients": 0,
+     "rows": 0
+    },
+    "recipients": 143,
+    "rows": 145
+   },
+   "mode": "event_pulse",
+   "proof": {
+    "emesis_event_count_positive": true,
+    "event_pulse_exposure_rows_present": true,
+    "event_pulse_required_fields_complete": true,
+    "event_pulse_required_fields_missing": {},
+    "mode_matches_request": true,
+    "mode_requested": "event_pulse",
+    "mode_resolved": "event_pulse",
+    "rhythm_layer_active": true
+   },
+   "pulse_minutes": 5.0,
+   "receiving_volume_scale": 1.0,
+   "seed": 8002
+  },
+  {
+   "artifact_file": "seed8105_compartment_average_p15_v1.json.gz",
+   "cell": "seed8105_compartment_average_p15_v1",
+   "configuration_witness": {
+    "adjacent_volume_m3": 8.82,
+    "local_volume_m3": 2.88,
+    "plume_mode_resolved": "compartment_average",
+    "pulse_minutes": 15.0,
+    "receiving_volume_scale_requested": 1.0,
+    "rhythm_catalogued_platform": true,
+    "rhythm_layer_active": true,
+    "room_air_removal_mode": "first_order"
+   },
+   "engine_git_sha": "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7",
+   "events": {
+    "aerosol_mass_gec": 0.0,
+    "count": 0,
+    "emitting_hosts": 0,
+    "records": []
+   },
+   "exposures": {
+    "distance_classes": {
+     "adjacent": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     },
+     "local": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     },
+     "room": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     }
+    },
+    "dose_gec": 0.0,
+    "observer_uncommitted_nonoccupant": {
+     "dose_gec": {
+      "count": 0,
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "q25": null,
+      "q75": null,
+      "sum": 0.0
+     },
+     "recipients": 0,
+     "rows": 0
+    },
+    "recipients": 0,
+    "rows": 0
+   },
+   "mode": "compartment_average",
+   "proof": {
+    "emesis_event_count_positive": false,
+    "event_pulse_exposure_rows_present": false,
+    "event_pulse_required_fields_complete": true,
+    "event_pulse_required_fields_missing": {},
+    "mode_matches_request": true,
+    "mode_requested": "compartment_average",
+    "mode_resolved": "compartment_average",
+    "rhythm_layer_active": true
+   },
+   "pulse_minutes": 15.0,
+   "receiving_volume_scale": 1.0,
+   "seed": 8105
+  },
+  {
+   "artifact_file": "seed8105_event_pulse_p15_v1.json.gz",
+   "cell": "seed8105_event_pulse_p15_v1",
+   "configuration_witness": {
+    "adjacent_volume_m3": 8.82,
+    "local_volume_m3": 2.88,
+    "plume_mode_resolved": "event_pulse",
+    "pulse_minutes": 15.0,
+    "receiving_volume_scale_requested": 1.0,
+    "rhythm_catalogued_platform": true,
+    "rhythm_layer_active": true,
+    "room_air_removal_mode": "first_order"
+   },
+   "engine_git_sha": "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7",
+   "events": {
+    "aerosol_mass_gec": 0.0,
+    "count": 0,
+    "emitting_hosts": 0,
+    "records": []
+   },
+   "exposures": {
+    "distance_classes": {
+     "adjacent": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     },
+     "local": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     },
+     "room": {
+      "dose_gec": 0,
+      "exposure_hours_total": 0,
+      "opportunity_minutes_total": 0,
+      "receiving_volume_m3_values": [],
+      "recipients": 0,
+      "removal_per_hour_values": [],
+      "rows": 0
+     }
+    },
+    "dose_gec": 0.0,
+    "observer_uncommitted_nonoccupant": {
+     "dose_gec": {
+      "count": 0,
+      "max": null,
+      "mean": null,
+      "median": null,
+      "min": null,
+      "q25": null,
+      "q75": null,
+      "sum": 0.0
+     },
+     "recipients": 0,
+     "rows": 0
+    },
+    "recipients": 0,
+    "rows": 0
+   },
+   "mode": "event_pulse",
+   "proof": {
+    "emesis_event_count_positive": false,
+    "event_pulse_exposure_rows_present": false,
+    "event_pulse_required_fields_complete": true,
+    "event_pulse_required_fields_missing": {},
+    "mode_matches_request": true,
+    "mode_requested": "event_pulse",
+    "mode_resolved": "event_pulse",
+    "rhythm_layer_active": true
+   },
+   "pulse_minutes": 15.0,
+   "receiving_volume_scale": 1.0,
+   "seed": 8105
+  }
+ ],
+ "completeness": {
+  "duplicate_cells": [],
+  "expected_cells": [
+   "seed8002_compartment_average_p15_v1",
+   "seed8002_event_pulse_p15_v0.1",
+   "seed8002_event_pulse_p15_v1",
+   "seed8002_event_pulse_p15_v10",
+   "seed8002_event_pulse_p30_v1",
+   "seed8002_event_pulse_p5_v1",
+   "seed8105_compartment_average_p15_v1",
+   "seed8105_event_pulse_p15_v1"
+  ],
+  "missing_cells": [],
+  "observed_cells": [
+   "seed8002_compartment_average_p15_v1",
+   "seed8002_event_pulse_p15_v0.1",
+   "seed8002_event_pulse_p15_v1",
+   "seed8002_event_pulse_p15_v10",
+   "seed8002_event_pulse_p30_v1",
+   "seed8002_event_pulse_p5_v1",
+   "seed8105_compartment_average_p15_v1",
+   "seed8105_event_pulse_p15_v1"
+  ],
+  "unexpected_cells": []
+ },
+ "engine_git_shas": [
+  "f07c97a30b398ef4e2419d2db7bd6da0c3e121d7"
+ ],
+ "measurement": "emesis_plume_sensitivity_readout_v1",
+ "paired_central_contrasts": {
+  "8002": {
+   "compartment_average_dose_gec": 259.19849779795646,
+   "complete": true,
+   "contrast_gec": 1698.8134187677579,
+   "event_pulse_dose_gec": 1958.0119165657143,
+   "event_records_identical": false,
+   "exposure_keys_identical": false,
+   "shared_compartment_average_dose": {
+    "dose_gec": 259.19849779795646,
+    "local_dose_gec": 0.0,
+    "rows": 104
+   },
+   "shared_distance_decomposition": {
+    "adjacent": {
+     "compartment_average_dose_gec": 9.969172992229083,
+     "contrast_gec": 1008.9661681167156,
+     "event_pulse_dose_gec": 1018.9353411089447,
+     "opportunity_minutes_total": 60.0,
+     "receiving_volume_m3_values": [
+      8.82
+     ],
+     "recipients": 4,
+     "removal_per_hour_values": [
+      4.0
+     ],
+     "rows": 4
+    },
+    "local": {
+     "compartment_average_dose_gec": 2.492293248057271,
+     "contrast_gec": 777.6300772884786,
+     "event_pulse_dose_gec": 780.1223705365359,
+     "opportunity_minutes_total": 15.0,
+     "receiving_volume_m3_values": [
+      2.88
+     ],
+     "recipients": 1,
+     "removal_per_hour_values": [
+      4.0
+     ],
+     "rows": 1
+    },
+    "room": {
+     "compartment_average_dose_gec": 246.73703155767012,
+     "contrast_gec": -87.85953849525745,
+     "event_pulse_dose_gec": 158.8774930624123,
+     "opportunity_minutes_total": 1485.0,
+     "receiving_volume_m3_values": [
+      1400.0
+     ],
+     "recipients": 99,
+     "removal_per_hour_values": [
+      4.0
+     ],
+     "rows": 99
+    }
+   },
+   "shared_event_contrast_gec": 1698.7367069099355,
+   "shared_event_count": 1,
+   "shared_event_pulse_dose": {
+    "dose_gec": 1957.935204707892,
+    "local_dose_gec": 780.1223705365359,
+    "rows": 104
+   },
+   "shared_exposure_keys_identical": true
+  },
+  "8105": {
+   "compartment_average_dose_gec": 0.0,
+   "complete": true,
+   "contrast_gec": 0.0,
+   "event_pulse_dose_gec": 0.0,
+   "event_records_identical": true,
+   "exposure_keys_identical": true,
+   "shared_compartment_average_dose": {
+    "dose_gec": 0.0,
+    "local_dose_gec": 0.0,
+    "rows": 0
+   },
+   "shared_distance_decomposition": {
+    "adjacent": {
+     "compartment_average_dose_gec": 0.0,
+     "contrast_gec": 0.0,
+     "event_pulse_dose_gec": 0.0,
+     "opportunity_minutes_total": 0.0,
+     "receiving_volume_m3_values": [],
+     "recipients": 0,
+     "removal_per_hour_values": [],
+     "rows": 0
+    },
+    "local": {
+     "compartment_average_dose_gec": 0.0,
+     "contrast_gec": 0.0,
+     "event_pulse_dose_gec": 0.0,
+     "opportunity_minutes_total": 0.0,
+     "receiving_volume_m3_values": [],
+     "recipients": 0,
+     "removal_per_hour_values": [],
+     "rows": 0
+    },
+    "room": {
+     "compartment_average_dose_gec": 0.0,
+     "contrast_gec": 0.0,
+     "event_pulse_dose_gec": 0.0,
+     "opportunity_minutes_total": 0.0,
+     "receiving_volume_m3_values": [],
+     "recipients": 0,
+     "removal_per_hour_values": [],
+     "rows": 0
+    }
+   },
+   "shared_event_contrast_gec": 0.0,
+   "shared_event_count": 0,
+   "shared_event_pulse_dose": {
+    "dose_gec": 0.0,
+    "local_dose_gec": 0.0,
+    "rows": 0
+   },
+   "shared_exposure_keys_identical": true
+  }
+ },
+ "seed_declaration": {
+  "axis_seed": 8002,
+  "canonical_floor_seed_not_rerun": 8106,
+  "power_limitation": "one event-firing realization selected from historical event-bearing candidates cannot size population frequency, represent a random firing-voyage magnitude, or support a significance claim; zero-event realizations are part of the rare-event mass",
+  "substitution_basis": "seed 8105 fired zero events in both central arms at the measurement commit on current main; historical event-bearing candidates were qualified in the predeclared order 8002 then 8018, and 8002 was selected because it is first in that order",
+  "zero_event_witness_seed": 8105
+ }
+}
