@@ -118,3 +118,5 @@ Local validation at the pre-commit working tree:
   the moved shedding-clock expectations are attributed to replacement of
   deterministic curve emission by the zero-inflated emitted-RNA shape, not to
   an unattributed baseline move.
+- The full non-slow pytest tier passed at the pre-PR working tree: **9,357
+  passed, 11 skipped** (`pytest tests/ -m 'not slow' -n auto -q --tb=short`).
