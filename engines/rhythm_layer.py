@@ -1233,28 +1233,54 @@ class RhythmLayer:
         """
         start = hour * 60 + float(event_offset_minutes)
         end = start + float(duration_minutes)
-        base_zone = str(zone_name).split("::cabin", 1)[0]
-        overlapping = []
-        same_zone: list[tuple[float, float]] = []
-        same_zone_epoch_claim = False
-        for commitment in self._commitments.get(agent.agent_id, ()):
-            occupancy_end = commitment.end_min
+        zone_name = str(zone_name)
+        commitments = list(self._commitments.get(agent.agent_id, ()))
+
+        def occupancy_end(commitment: _Commitment) -> float:
+            end_min = float(commitment.end_min)
             if commitment.egress_min is not None:
-                occupancy_end = min(occupancy_end, commitment.egress_min)
-            if commitment.zone == base_zone and commitment.covers(hour):
-                same_zone_epoch_claim = True
+                end_min = min(end_min, float(commitment.egress_min))
+            return end_min
+
+        bounds = {start, end}
+        for commitment in commitments:
             lo = max(start, float(commitment.start_min))
-            hi = min(end, float(occupancy_end))
+            hi = min(end, occupancy_end(commitment))
+            if hi > lo:
+                bounds.add(lo)
+                bounds.add(hi)
+        ordered = sorted(bounds)
+        overlapping = False
+        source_segments: list[tuple[float, float]] = []
+        for lo, hi in zip(ordered, ordered[1:]):
             if hi <= lo:
                 continue
-            overlapping.append(commitment)
-            if commitment.zone == base_zone:
-                same_zone.append((lo - start, hi - start))
-        if same_zone:
-            return (
-                min(lo for lo, _ in same_zone),
-                max(hi for _, hi in same_zone),
-            )
+            midpoint = (lo + hi) / 2.0
+            active = [
+                commitment for commitment in commitments
+                if float(commitment.start_min) <= midpoint < occupancy_end(commitment)
+            ]
+            if not active:
+                continue
+            overlapping = True
+            winner = min(active, key=lambda c: (c.priority, c.start_min))
+            if winner.zone == zone_name:
+                source_segments.append((lo - start, hi - start))
+
+        if source_segments:
+            merged: list[list[float]] = []
+            for lo, hi in source_segments:
+                if merged and abs(lo - merged[-1][1]) < 1e-9:
+                    merged[-1][1] = hi
+                else:
+                    merged.append([lo, hi])
+            widest = max(merged, key=lambda segment: segment[1] - segment[0])
+            return widest[0], widest[1]
+
+        same_zone_epoch_claim = any(
+            commitment.zone == zone_name and commitment.covers(hour)
+            for commitment in commitments
+        )
         if overlapping or same_zone_epoch_claim:
             zero = float(duration_minutes)
             return zero, zero

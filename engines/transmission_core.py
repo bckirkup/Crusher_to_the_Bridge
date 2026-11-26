@@ -11122,10 +11122,20 @@ class TransmissionCore:
             return "room"
         target_table = self._table_party(zone_name, target, epoch)
         emitter_table = self._table_party(zone_name, emitter, epoch)
+        fixed_sitting_pair = (
+            zone_name == target.dining_zone
+            and zone_name == emitter.dining_zone
+            and bool(target.dining_party_ids)
+            and bool(emitter.dining_party_ids)
+        )
+        same_fixed_sitting = (
+            not fixed_sitting_pair
+            or target.meal_seating == emitter.meal_seating
+        )
         if (
             target_table is not None
             and emitter_table is not None
-            and target.meal_seating == emitter.meal_seating
+            and same_fixed_sitting
         ):
             target_index = target_table[1]
             emitter_index = emitter_table[1]

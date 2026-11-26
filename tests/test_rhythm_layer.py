@@ -556,3 +556,77 @@ def test_presence_overlap_window_zero_when_pulse_misses_epoch_visit() -> None:
         agent, "Restaurant", hour=2, event_offset_minutes=55.0,
         duration_minutes=15.0,
     ) == (15.0, 15.0)
+
+
+def test_presence_overlap_window_uses_the_winning_booking() -> None:
+    layer = _layer()
+    assert layer is not None
+    agent = _agent(1)
+    restaurant = _Commitment(
+        priority=3,
+        start_min=120,
+        end_min=180,
+        zone="Restaurant",
+        event_id="late-meal",
+        event_class="meal_seating",
+        egress_min=None,
+        corridor_zone=None,
+        is_meal=True,
+        port_span=None,
+    )
+    theatre = _Commitment(
+        priority=1,
+        start_min=120,
+        end_min=180,
+        zone="Theatre",
+        event_id="show",
+        event_class="show_performance",
+        egress_min=None,
+        corridor_zone=None,
+        is_meal=False,
+        port_span=None,
+    )
+    layer._commitments[agent.agent_id] = [restaurant, theatre]
+    assert layer.presence_overlap_window(
+        agent, "Restaurant", hour=2, event_offset_minutes=30.0,
+        duration_minutes=15.0,
+    ) == (15.0, 15.0)
+    winning_restaurant = _Commitment(
+        priority=0,
+        start_min=120,
+        end_min=180,
+        zone="Restaurant",
+        event_id="early-meal",
+        event_class="meal_seating",
+        egress_min=None,
+        corridor_zone=None,
+        is_meal=True,
+        port_span=None,
+    )
+    layer._commitments[agent.agent_id] = [theatre, winning_restaurant]
+    assert layer.presence_overlap_window(
+        agent, "Restaurant", hour=2, event_offset_minutes=30.0,
+        duration_minutes=15.0,
+    ) == (0.0, 15.0)
+
+
+def test_corridor_commitment_does_not_enter_a_stateroom_compartment() -> None:
+    layer = _layer()
+    assert layer is not None
+    agent = _agent(1)
+    layer._commitments[agent.agent_id] = [_Commitment(
+        priority=2,
+        start_min=120,
+        end_min=180,
+        zone="Cabin_A",
+        event_id="cleaning",
+        event_class="cleaning_rotation",
+        egress_min=None,
+        corridor_zone=None,
+        is_meal=False,
+        port_span=None,
+    )]
+    assert layer.presence_overlap_window(
+        agent, "Cabin_A::cabin7", hour=2, event_offset_minutes=30.0,
+        duration_minutes=15.0,
+    ) == (15.0, 15.0)

@@ -469,3 +469,19 @@ def test_confinement_override_does_not_use_an_unused_booking() -> None:
     target._rhythm_confinement_overrode = True
     matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
     assert _emesis_dose_rows(matrix) == []
+
+
+def test_per_meal_table_deal_ignores_fixed_sitting_labels() -> None:
+    core = _core(_profile())
+    shedder = _emetic_shedder(core)
+    target = _agent(2)
+    shedder.meal_seating = 0
+    target.meal_seating = 1
+    core._meal_tables[(ZONE, 1)] = {
+        1: (0, frozenset({2})),
+        2: (0, frozenset({1})),
+    }
+    matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+    rows = _emesis_dose_rows(matrix)
+    assert len(rows) == 1
+    assert rows[0]["distance_class"] == "local"
