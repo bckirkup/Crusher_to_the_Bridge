@@ -601,7 +601,12 @@ def audit_fixed_delivery_echoes(
 def audit_index_geometry(
     failures: list[str], payload: dict, record_seed_spec: dict,
 ) -> None:
-    """Index onset −1.0 + day-0 shedding + float-tolerant seed_spec echo."""
+    """Index onset −1.0 + day-0 shedding + float-tolerant seed_spec echo.
+
+    Positive day-0 emission is intentional ascertainment conditioning for the
+    DP/GM replay class, not an assumption that emission is never episodic
+    (ledger COVID-SEED-ASCERTAIN-01).
+    """
     if float(payload.get("index_onset_day") or 0.0) != -1.0:
         failures.append(
             f"index_onset_day {payload.get('index_onset_day')!r} != -1.0",
