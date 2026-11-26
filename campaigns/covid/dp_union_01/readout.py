@@ -36,12 +36,14 @@ _LEGS = ("timing_ignition", "timing_before_share", "attack", "during",
          "capture", "t3", "onboard_table")
 
 
-def _load_cells(cells_dir: Path) -> dict[float, dict[int, dict[str, Any]]]:
+def _load_cells(cells_dir: Path, design_id: str) -> dict[float, dict[int, dict[str, Any]]]:
     """Every ``cell_<seed>.json`` under ``cells_dir``, keyed theta -> seed."""
     cells: dict[float, dict[int, dict[str, Any]]] = {}
     for path in sorted(cells_dir.rglob("cell_*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
         block = payload.get("dp_union") or {}
+        if payload.get("design_id") != design_id:
+            continue
         if block.get("arm_id") != _ARM or block.get("smoke_num_epochs") is not None:
             continue
         by_seed = cells.setdefault(float(block["theta"]), {})
@@ -59,7 +61,11 @@ def _audit_inherited(cell: dict[str, Any], theta: float) -> dict[str, bool]:
     scale = (cell.get("dose_response") or {}).get("susceptibility_scale")
     return {
         "platform": fidelity.get("resolved_platform_id") == "diamond_princess",
-        "index_onset_day": cell.get("index_onset_day") == _ONSET_DAY,
+        "index_onset_day": math.isclose(
+            float(cell.get("index_onset_day") or math.nan), _ONSET_DAY,
+            rel_tol=0.0, abs_tol=1e-9,
+        ),
+        "index_shedding_at_day0": cell.get("index_shedding_at_day0") is True,
         "susceptibility_scale": scale is not None and math.isclose(
             scale, theta * (_ALPHA + _BETA) / _ALPHA, rel_tol=1e-9,
         ),
@@ -421,13 +427,14 @@ def _theta_row(
         "consistent": (
             None if provisional else
             all(legs[name]["pass"] for name in _LEGS)
-            and not dead and not saturated
+            and not dead and not saturated and not audits
         ),
         "seeds_in_band": in_band,
         "median_not_representative": (
             in_band < int(contract["representative_min_seeds"])
         ),
         "audit_deviations": audits,
+        "audit_clean": not audits,
         "reported_only": {
             "legs_on_takeoff_class": _class_legs(classes["takeoff"], contract),
             "legs_on_all_seeds": _class_legs(classes["all"], contract),
@@ -438,13 +445,16 @@ def _theta_row(
 
 def _joint(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """The joint verdict over complete rows, including the split verdict."""
-    live = [r for r in rows if not r["dead"] and not r["saturated"]]
+    live = [
+        r for r in rows
+        if not r["dead"] and not r["saturated"] and not r["audit_deviations"]
+    ]
     passes_at = {
         name: [r["theta"] for r in live if r["legs"][name]["pass"]]
         for name in _LEGS
     }
     consistent = [r["theta"] for r in rows if r["consistent"]]
-    never = [name for name in _LEGS if not passes_at[name]]
+    never = [name for name in _LEGS if live and not passes_at[name]]
     disjoint = [
         [first, second]
         for i, first in enumerate(_LEGS) for second in _LEGS[i + 1:]
@@ -455,10 +465,13 @@ def _joint(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "consistent_thetas": consistent,
         "leg_pass_thetas": passes_at,
         "legs_failing_at_every_theta": never,
-        "split_verdict": bool(not consistent and not never and rows),
+        "split_verdict": bool(not consistent and not never and live),
         "disjoint_leg_pairs": disjoint,
         "dead_thetas": [r["theta"] for r in rows if r["dead"]],
         "saturated_thetas": [r["theta"] for r in rows if r["saturated"]],
+        "audit_deviation_thetas": [
+            r["theta"] for r in rows if r["audit_deviations"]
+        ],
         "not_representative_thetas": [
             r["theta"] for r in rows
             if r["consistent"] and r["median_not_representative"]
@@ -502,13 +515,20 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cells-dir", required=True,
                         help="local directory holding the synced cell artifacts")
+    parser.add_argument("--design", default=str(_DESIGN),
+                        help="design JSON; defaults to the DP-UNION-01 design")
+    parser.add_argument("--task-id", default=None,
+                        help="readout task id; defaults to the design's task_id")
     parser.add_argument("--out", default=None)
     args = parser.parse_args(argv)
 
-    design = json.loads(_DESIGN.read_text(encoding="utf-8"))
+    design_path = Path(args.design)
+    if not design_path.is_absolute():
+        design_path = _REPO_ROOT / design_path
+    design = json.loads(design_path.read_text(encoding="utf-8"))
     contract = design["joint_contract"]
     expected = int(design["seeds"])
-    cells = _load_cells(Path(args.cells_dir))
+    cells = _load_cells(Path(args.cells_dir), design["design_id"])
     rows = [
         _theta_row(theta, cells[theta], contract, expected)
         for theta in sorted(cells)
@@ -521,7 +541,7 @@ def main(argv: list[str] | None = None) -> int:
         if any(math.isclose(row["theta"], t, rel_tol=1e-12) for t in scored)
     ]
     readout = {
-        "task_id": "DP-UNION-01",
+        "task_id": args.task_id or design.get("task_id", "DP-UNION-01"),
         "design_id": design["design_id"],
         "joint_contract": contract,
         "declared_thetas": design["thetas"],

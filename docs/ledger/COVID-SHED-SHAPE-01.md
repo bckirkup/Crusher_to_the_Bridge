@@ -95,7 +95,8 @@ transmission.
   presymptomatic gate remains 2.0 days. Almost all onset-negative expected mass
   in the implementation shape is on days −2 and −1, so this does not materially
   truncate the adopted correction; widening the gate to day −5 would require a
-  separate owner decision.
+  separate owner decision. **Postscript:** that owner decision was made on
+  2026-11-26; see [COVID-PRESHED-GATE-01](COVID-PRESHED-GATE-01.md).
 - The shape support ends at day +13 because the aligned observations end there;
   later emission is truncation, not measured clearance.
 - Multi-strain COVID co-infection uses an explicit Grade-C default because

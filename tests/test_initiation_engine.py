@@ -569,6 +569,24 @@ class TestExplicitSeeds:
         ]
         assert ages == [int(round(_clock().epochs_for_days(2.0)))]
 
+    def test_seed_onset_uses_the_represented_age_after_epoch_rounding(self) -> None:
+        """The stated onset voyage day survives fractional-age quantization."""
+        engine, _ = _seed_run(
+            [{
+                "pathogen": PATHOGEN, "count": 1, "epoch": 0,
+                "infection_age_days": 2.8, "onset_day": 3.0,
+            }],
+        )
+        infection = next(
+            agent.infections[PATHOGEN]
+            for agent in engine.agents if PATHOGEN in agent.infections
+        )
+        represented_age = _clock().days_elapsed(infection["time_infected"])
+        assert represented_age != pytest.approx(2.8)
+        assert represented_age - infection["incubation_days"] == pytest.approx(
+            -3.0, abs=1e-9,
+        )
+
 
 def _seed_run(
     seeds: list[dict[str, Any]],

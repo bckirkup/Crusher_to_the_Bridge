@@ -215,6 +215,26 @@ def _validate_arms(arms: tuple[Mapping[str, Any], ...]) -> None:
                 )
 
 
+def _validate_explicit_seed_values(
+    values: tuple[int, ...] | None,
+    seeds: int,
+) -> None:
+    if values is None:
+        return
+    if len(values) != seeds:
+        raise ValueError("seed_values must contain exactly seeds entries")
+    if len(set(values)) != len(values):
+        raise ValueError("seed_values must be distinct")
+
+
+def _validate_points(points: tuple[tuple[float, float, int], ...]) -> None:
+    for theta, age, imports in points:
+        if not math.isfinite(theta) or theta <= 0 or age < 0 or imports < 1:
+            raise ValueError(f"malformed refinement point {(theta, age, imports)}")
+    if len(set(points)) != len(points):
+        raise ValueError("refinement points must be distinct")
+
+
 @dataclass(frozen=True)
 class BoardingScreenDesign:
     """The screen as declared before any cell ran."""
@@ -228,6 +248,7 @@ class BoardingScreenDesign:
     seed_base: int
     seeds: int
     takeoff_recorded_onsets: int
+    explicit_seed_values: tuple[int, ...] | None = None
     points: tuple[tuple[float, float, int], ...] = ()
     parent_design: str | None = None
     arms: tuple[Mapping[str, Any], ...] = ()
@@ -254,17 +275,14 @@ class BoardingScreenDesign:
             )
         if self.seeds < 1:
             raise ValueError("a screen needs at least one seed")
+        _validate_explicit_seed_values(self.explicit_seed_values, self.seeds)
         if any(age < 0 for age in self.infection_age_days):
             raise ValueError("infection_age_days must be non-negative")
         if any(n < 1 for n in self.imports):
             raise ValueError("imports must be at least 1")
         if any(not math.isfinite(t) or t <= 0 for t in self.thetas):
             raise ValueError("thetas must be finite and positive")
-        for theta, age, imports in self.points:
-            if not math.isfinite(theta) or theta <= 0 or age < 0 or imports < 1:
-                raise ValueError(f"malformed refinement point {(theta, age, imports)}")
-        if len(set(self.points)) != len(self.points):
-            raise ValueError("refinement points must be distinct")
+        _validate_points(self.points)
         if self.split_day < 0 or self.turn_day < 0:
             raise ValueError("split_day and turn_day must be non-negative")
         _validate_arms(self.arms)
@@ -301,6 +319,9 @@ class BoardingScreenDesign:
 
     @property
     def seed_values(self) -> tuple[int, ...]:
+        """The declared seed sequence, explicit when ascertainment-conditioned."""
+        if self.explicit_seed_values is not None:
+            return self.explicit_seed_values
         return tuple(self.seed_base + i for i in range(self.seeds))
 
     @property
@@ -309,7 +330,7 @@ class BoardingScreenDesign:
         return (0.0, 1)
 
     def as_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "design_id": self.design_id,
             "scenario_id": self.scenario_id,
             "thetas": list(self.thetas),
@@ -329,6 +350,9 @@ class BoardingScreenDesign:
             "split_day": self.split_day,
             "turn_day": self.turn_day,
         }
+        if self.explicit_seed_values is not None:
+            payload["seed_values"] = list(self.explicit_seed_values)
+        return payload
 
 
 def design_path(repo_root: str = REPO_ROOT) -> str:
@@ -355,6 +379,10 @@ def load_design(
         seed_base=int(raw["seed_base"]),
         seeds=int(raw["seeds"]),
         takeoff_recorded_onsets=int(raw["takeoff_recorded_onsets"]),
+        explicit_seed_values=(
+            tuple(int(seed) for seed in raw["seed_values"])
+            if raw.get("seed_values") is not None else None
+        ),
         points=tuple(
             (float(t), float(a), int(n)) for t, a, n in raw.get("points", [])
         ),
@@ -1589,6 +1617,14 @@ def _index_geometry(
         float(cell.infection_age_days) if infection_age_days is None
         else float(infection_age_days)
     )
+    # Infection age is whole epochs in the engine. Normalize direct callers
+    # the same way cell_payload's run-spec readback does; re-quantizing an
+    # already represented age is idempotent.
+    clock = getattr(engine, "clock", None)
+    if clock is not None:
+        age = float(clock.days_elapsed(
+            int(round(clock.epochs_for_days(age))),
+        ))
     agent = _index_host(engine)
     if agent is None:
         return {
@@ -2153,21 +2189,29 @@ def prepare_cell_run_spec(
     return raw
 
 
-def _index_infection_age(raw: dict[str, Any], cell: ScreenCell) -> float:
-    """The age the index host was seeded with, read back off the run spec.
+def _index_infection_age(
+    raw: dict[str, Any], cell: ScreenCell, clock: Any | None,
+) -> float:
+    """The represented age the index host was seeded with.
 
-    Identical to the cell axis under the declared mode; under a generic
-    voyage it is the drawn introduction age stamped on the explicit seed —
-    the index-geometry fields need the value the host boarded with, not the
-    placeholder the cell key carries.
+    Explicit seeds carry a fractional day age, while the engine represents
+    infection age in whole epochs. Onset incubation is stamped against the
+    represented age so the declared onset voyage day survives that rounding;
+    the geometry audit therefore reads the same represented age.
     """
     seeds = (
         raw.get("config_overrides", {})
         .get("initiation", {}).get("explicit_seeds", [])
     )
-    if len(seeds) == 1 and seeds[0].get("infection_age_days") is not None:
-        return float(seeds[0]["infection_age_days"])
-    return float(cell.infection_age_days)
+    age = (
+        float(seeds[0]["infection_age_days"])
+        if len(seeds) == 1 and seeds[0].get("infection_age_days") is not None
+        else float(cell.infection_age_days)
+    )
+    if clock is None:
+        return age
+    epochs = int(round(clock.epochs_for_days(age)))
+    return float(clock.days_elapsed(epochs))
 
 
 def cell_payload(
@@ -2207,7 +2251,9 @@ def cell_payload(
         },
         **_index_geometry(
             sim.engine, cell, sim.pathogen_profiles[PATHOGEN_ID],
-            infection_age_days=_index_infection_age(raw, cell),
+            infection_age_days=_index_infection_age(
+                raw, cell, getattr(sim.engine, "clock", None),
+            ),
         ),
         **_truth_counts(sim.engine),
         "lab_confirmed_total": syndromic.lab_confirmed_count(PATHOGEN_ID),

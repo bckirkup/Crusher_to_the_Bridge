@@ -109,6 +109,16 @@ class TestSeedEpochFields:
         )
         assert (onset_inc, elapsed, dep) == (None, None, None)
 
+    def test_fallback_quantizes_fractional_age_before_stamping_onset(self) -> None:
+        clock = SimClock(epoch_duration_hours=6.0, mode="hours")
+        engine = SimpleNamespace(clock=clock)
+        seed = _seed(epoch=0, infection_age_days=0.3, onset_day=0.2)
+        onset_inc, _, _ = _seed_epoch_fields(
+            seed, engine, epoch=0, location="loc",
+        )
+        assert onset_inc == pytest.approx(0.45)
+        assert onset_inc != pytest.approx(0.5)
+
     def test_onset_cannot_precede_acquisition(self) -> None:
         seed = _seed(onset_day=0.5, infection_age_days=0.2)
         # epoch 24 -> seed_day 1.0; incubation = 0.2 + 0.5 - 1.0 < 0

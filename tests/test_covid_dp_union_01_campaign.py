@@ -183,6 +183,7 @@ def _cell(
         }
 
     return {
+        "design_id": "covid-dp-union-01",
         "infections_total": infections,
         "aboard_total": 3711,
         "attack_rate": infections / 3711,
@@ -190,6 +191,7 @@ def _cell(
         "infections_before_quarantine": 400,
         "infections_during_window": during,
         "index_onset_day": 3.0,
+        "index_shedding_at_day0": True,
         "dose_response": {"susceptibility_scale": 1e9 * 58.18 / 0.18},
         "quarantine_witness": {"activated": True, "activation_epoch": 391},
         "platform_fidelity": {
@@ -333,6 +335,8 @@ def test_dead_cell_and_machinery_gap_are_surfaced():
 @pytest.mark.parametrize(
     "mutate, deviation",
     [
+        (lambda c: c.update(index_shedding_at_day0=False),
+         "index_shedding_at_day0"),
         (lambda c: c["platform_fidelity"].update(
             fired_protocol_ids=["SOP-017-DEDICATED"]), "quarter_order_fired"),
         (lambda c: c["crew_window"].update(
@@ -368,6 +372,18 @@ def test_joint_reports_the_leg_that_fails_at_every_theta():
     assert joint["consistent_thetas"] == []
     assert joint["legs_failing_at_every_theta"] == ["timing_before_share"]
     assert joint["split_verdict"] is False
+
+
+def test_joint_treats_an_all_audit_dirty_grid_as_unreadable():
+    readout = _load("readout")
+    row = _row()
+    row["audit_deviations"] = {"0": ["platform"]}
+    row["audit_clean"] = False
+    row["consistent"] = False
+    joint = readout._joint([row])
+    assert joint["legs_failing_at_every_theta"] == []
+    assert joint["split_verdict"] is False
+    assert joint["audit_deviation_thetas"] == [1e9]
 
 
 def test_joint_reports_a_split_verdict_and_its_disjoint_leg_pair():
