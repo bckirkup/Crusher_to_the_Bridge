@@ -479,6 +479,28 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 # measured geometry, evidence grade B.
 EMESIS_DEPOSITION_AREA_M2 = 7.8
 
+# EMESIS-PLUME-01: coarse event-moment exposure geometry. Tranche 58 licenses
+# a local footprint and an outer splash envelope, but no concentration,
+# distance kernel, receiving volume, removal constant, or pulse duration.
+# These are therefore declared sweep-axis values, not measurements. Booth's
+# 1.2 m x 1.6 m main-bulk rectangle and 7.8 m2 outer decontamination
+# footprint are measured floor geometry (Grade B, origin R/Ab); conversion
+# to receiving volumes uses a declared 1.5 m breathing/mixing height, making
+# the volumes themselves Grade C composite declarations. The adjacent ring
+# volume is the outer shell, not the whole footprint. The 15 min pulse is the
+# midpoint of a declared [5, 30] min pre-cleanup/avoidance window; tranche 58
+# found no measurement of that window.
+EMESIS_EVENT_PLUME_MODES = frozenset({"event_pulse", "compartment_average"})
+DEFAULT_EMESIS_EVENT_PLUME_MODE = "event_pulse"
+DEFAULT_EMESIS_EVENT_PLUME_PULSE_MINUTES = 15.0
+EMESIS_EVENT_PLUME_BREATHING_HEIGHT_M = 1.5
+EMESIS_EVENT_PLUME_LOCAL_VOLUME_M3 = (
+    1.2 * 1.6 * EMESIS_EVENT_PLUME_BREATHING_HEIGHT_M
+)
+EMESIS_EVENT_PLUME_ADJACENT_VOLUME_M3 = (
+    EMESIS_DEPOSITION_AREA_M2 - 1.2 * 1.6
+) * EMESIS_EVENT_PLUME_BREATHING_HEIGHT_M
+
 # ── Caregiver response (NORO-CAREGIVER-01) ───────────────────────────────
 # The family member, spouse or steward who rushes towards an emesis event
 # to clean it up: a discrete high-dose exposure plus the discovery moment
@@ -2420,6 +2442,65 @@ def _droplet_split_fraction(
     return value
 
 
+@dataclass(frozen=True)
+class EmesisEventPlume:
+    """Declared coarse event-moment emesis exposure structure.
+
+    ``event_pulse`` replaces the same-epoch compartment-averaged source-room
+    dose with same-table/unit, adjacent-table/footprint, and room classes.
+    ``compartment_average`` is the labelled pre-change baseline.
+    """
+
+    mode: str = DEFAULT_EMESIS_EVENT_PLUME_MODE
+    pulse_minutes: float = DEFAULT_EMESIS_EVENT_PLUME_PULSE_MINUTES
+    local_volume_m3: float = EMESIS_EVENT_PLUME_LOCAL_VOLUME_M3
+    adjacent_volume_m3: float = EMESIS_EVENT_PLUME_ADJACENT_VOLUME_M3
+
+    @property
+    def active(self) -> bool:
+        return self.mode == "event_pulse"
+
+
+def _positive_plume_value(block: dict[str, Any], key: str, default: float) -> float:
+    raw = block.get(key, default)
+    value = float(raw)
+    if not math.isfinite(value) or value <= 0.0:
+        raise ValueError(
+            f"transmission.emesis_event_plume.{key} must be finite and "
+            f"positive, got {raw!r}",
+        )
+    return value
+
+
+def _parse_emesis_event_plume(tx: dict[str, Any]) -> EmesisEventPlume:
+    raw = tx.get("emesis_event_plume")
+    if isinstance(raw, str):
+        raw = {"mode": raw}
+    block = raw or {}
+    if not isinstance(block, dict):
+        raise ValueError(
+            "transmission.emesis_event_plume must be a mapping or a mode string",
+        )
+    mode = str(block.get("mode", DEFAULT_EMESIS_EVENT_PLUME_MODE))
+    if mode not in EMESIS_EVENT_PLUME_MODES:
+        raise ValueError(
+            "transmission.emesis_event_plume.mode must be 'event_pulse' or "
+            f"'compartment_average', got {mode!r}",
+        )
+    return EmesisEventPlume(
+        mode=mode,
+        pulse_minutes=_positive_plume_value(
+            block, "pulse_minutes", DEFAULT_EMESIS_EVENT_PLUME_PULSE_MINUTES,
+        ),
+        local_volume_m3=_positive_plume_value(
+            block, "local_volume_m3", EMESIS_EVENT_PLUME_LOCAL_VOLUME_M3,
+        ),
+        adjacent_volume_m3=_positive_plume_value(
+            block, "adjacent_volume_m3", EMESIS_EVENT_PLUME_ADJACENT_VOLUME_M3,
+        ),
+    )
+
+
 def _parse_droplet_field_split(tx: dict[str, Any]) -> DropletFieldSplit:
     """Read the AERO-SPLIT-01 emission partition."""
     block = tx.get("droplet_field_split") or {}
@@ -3206,8 +3287,10 @@ class TransmissionCore:
         food_zone_multipliers: dict[str, float] | None = None,
         strain_registry: StrainRegistry | None = None,
         clock: SimClock | None = None,
+        rhythm_layer: Any | None = None,
     ) -> None:
         self.rng = rng
+        self._event_schedule = rhythm_layer
         tx = (cfg or {}).get("transmission", {}) or {}
         self._init_clock_and_kinetics(clock, cfg)
         # ENV-SOURCE-01 emitter model, or None on the labelled baseline.
@@ -4363,6 +4446,7 @@ class TransmissionCore:
         self.cabin_cooccupancy = _parse_cabin_cooccupancy(tx)
         self.cabin_confined_fomite = _parse_cabin_confined_fomite(tx)
         self.room_air_removal = _parse_room_air_removal(tx)
+        self.emesis_event_plume = _parse_emesis_event_plume(tx)
         self.isolated_quarters_deposits = _parse_isolated_quarters_deposits(tx)
         # The isolated-quarters emit draws run on a dedicated stream spawned
         # off the voyage entropy — ``off`` spawns nothing, so the labelled
@@ -4596,11 +4680,12 @@ class TransmissionCore:
         self.aerosol_pools: dict[str, float] = {}  # aggregate (legacy)
         self.aerosol_pools_by_pathogen: dict[str, dict[str, float]] = {}
         self.emesis_aerosol_pending_by_pathogen: dict[str, dict[str, float]] = {}
-        # This epoch's emesis aerosol, per emitting zone as (emitter, mass)
-        # pairs: the source-zone pathway doses it in the event epoch, and the
-        # per-emitter weight is what the strain attribution shares over.
+        # This epoch's emesis aerosol, per emitting zone as
+        # (emitter, mass, onset-relative event age in days): the source-zone
+        # pathway doses it in the event epoch, and the per-emitter weight is
+        # what the strain attribution shares over.
         self._emesis_aerosol_emitted_by_pathogen: dict[
-            str, dict[str, list[tuple[KorkinAgent, float]]],
+            str, dict[str, list[tuple[KorkinAgent, float, float]]],
         ] = {}
 
         # Pathway 5: food contamination pools per Dining zone per pathogen
@@ -10795,7 +10880,7 @@ class TransmissionCore:
             pathogen_id, [],
         )
         pool_gain_total = 0.0
-        for _ in due:
+        for event_age in due:
             volume = math.exp(self.rng.uniform(
                 math.log(volume_low), math.log(volume_high),
             ))
@@ -10812,7 +10897,9 @@ class TransmissionCore:
             emitted = self._emesis_aerosol_emitted_by_pathogen.setdefault(
                 pathogen_id, {},
             )
-            emitted.setdefault(zone_name, []).append((agent, aerosol_load))
+            emitted.setdefault(zone_name, []).append(
+                (agent, aerosol_load, float(event_age)),
+            )
             caregiver_contacted = self._caregiver_response(
                 agent,
                 pathogen_id,
@@ -10962,6 +11049,120 @@ class TransmissionCore:
         """
         return self.flush_aerosol_pending_by_pathogen.pop(pathogen_id, {})
 
+    def _emesis_event_epoch_fraction(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        event_age: float | None,
+        epoch: int,
+    ) -> float:
+        """Scheduled event position inside the current epoch, clamped to [0, 1].
+
+        ``onset_time_infected`` is in integer epochs while the emesis schedule
+        is onset-relative fractional days. A deferred event whose reconstructed
+        position no longer falls in the emitting epoch uses the epoch midpoint:
+        the deferral mechanism does not carry a sub-epoch timestamp.
+        """
+        if event_age is None:
+            return 0.5
+        inf = agent.infections.get(pathogen_id) or {}
+        onset = inf.get("onset_time_infected")
+        if onset is None:
+            return 0.5
+        absolute = float(onset) + self.clock.epochs_for_days(float(event_age))
+        position = absolute - float(epoch - 1)
+        if 0.0 <= position <= 1.0:
+            return position
+        return 0.5
+
+    def _emesis_opportunity_window(
+        self,
+        target: KorkinAgent,
+        zone_name: str,
+        epoch: int,
+        event_fraction: float,
+    ) -> tuple[float, float]:
+        """Recipient presence window in minutes after the event.
+
+        The return is ``(entry, exit)`` relative to emission, clipped to the
+        declared pulse. A rhythm commitment supplies minute-resolution ingress
+        and egress. Without one, an epoch-resolved occupant is the coarse
+        fallback: present for the whole pulse. That fallback is deliberately
+        labelled in the exposure record.
+        """
+        pulse = self.emesis_event_plume.pulse_minutes
+        offset = event_fraction * self.clock.hours_per_epoch * 60.0
+        schedule = self._event_schedule
+        if schedule is not None and hasattr(schedule, "presence_overlap_window"):
+            window = schedule.presence_overlap_window(
+                target,
+                zone_name,
+                self.clock.hour_of_day(epoch),
+                offset,
+                pulse,
+            )
+            if window is not None:
+                entry, exit_ = window
+                return max(0.0, min(float(entry), pulse)), max(
+                    0.0, min(float(exit_), pulse),
+                )
+        return 0.0, pulse
+
+    def _emesis_plume_distance_class(
+        self,
+        zone_name: str,
+        target: KorkinAgent,
+        emitter: KorkinAgent,
+        epoch: int,
+    ) -> str:
+        """Coarse declared exposure class: local, adjacent, or room."""
+        if self.zone_types.get(zone_name) == "Cabin_Corridor" or (
+            self._is_cabin_compartment(zone_name)
+        ):
+            if emitter.agent_id in target.cabin_mate_ids:
+                return "local"
+            return "room"
+        target_table = self._table_party(zone_name, target, epoch)
+        emitter_table = self._table_party(zone_name, emitter, epoch)
+        if target_table is not None and emitter_table is not None:
+            target_index = target_table[1]
+            emitter_index = emitter_table[1]
+            if target_index >= 0 and target_index == emitter_index:
+                return "local"
+            if target_index >= 0 and abs(target_index - emitter_index) == 1:
+                return "adjacent"
+        return "room"
+
+    def _emesis_plume_receiving_volume(
+        self,
+        zone_name: str,
+        distance_class: str,
+    ) -> float:
+        room_volume = max(self._air_unit_volume(zone_name), 1.0)
+        if distance_class == "local":
+            return min(self.emesis_event_plume.local_volume_m3, room_volume)
+        if distance_class == "adjacent":
+            return min(self.emesis_event_plume.adjacent_volume_m3, room_volume)
+        return room_volume
+
+    @staticmethod
+    def _first_order_exposure_hours(
+        entry_minutes: float,
+        exit_minutes: float,
+        removal_per_hour: float,
+    ) -> float:
+        """Integral of exp(-lambda t) over a recipient presence window."""
+        if exit_minutes <= entry_minutes:
+            return 0.0
+        entry_h = entry_minutes / 60.0
+        exit_h = exit_minutes / 60.0
+        if removal_per_hour <= 0.0:
+            return exit_h - entry_h
+        return (
+            math.exp(-removal_per_hour * entry_h)
+            - math.exp(-removal_per_hour * exit_h)
+        ) / removal_per_hour
+
     def _pathway_emesis_aerosol(
         self,
         epoch: int,
@@ -11007,8 +11208,16 @@ class TransmissionCore:
         # volume (_air_unit_volume), and ventilation resolves through the
         # parent zone below.
         units = self._cabin_compartments(zone_occupants)
-        for zone_name, entries in emitted.items():
-            mass = sum(load for _, load in entries)
+        for zone_name, raw_entries in emitted.items():
+            entries: list[tuple[KorkinAgent, float, float | None]] = []
+            for entry in raw_entries:
+                if len(entry) == 3:
+                    emitter, load, event_age = entry
+                else:  # direct unit-test fixtures predate sub-epoch timestamps
+                    emitter, load = entry
+                    event_age = None
+                entries.append((emitter, load, event_age))
+            mass = sum(load for _, load, _ in entries)
             if mass <= 0.0:
                 continue
             susceptible = self._get_susceptible(
@@ -11016,40 +11225,115 @@ class TransmissionCore:
             )
             if not susceptible:
                 continue
-            volume = max(self._air_unit_volume(zone_name), 1.0)
-            concentration = mass / volume
             # A cabin compartment sits on its parent corridor's HVAC branch,
             # so ventilation resolves through the parent zone key.
             ventilation = self._aerosol_ventilation_factor(
                 self.compartment_parent(zone_name),
             )
             source_attribution = attribution(
-                ledger, self._shedder_mix(entries, pathogen_id),
+                ledger,
+                self._shedder_mix(
+                    [(emitter, load) for emitter, load, _ in entries],
+                    pathogen_id,
+                ),
             )
-            source_ids = [agent.agent_id for agent, _ in entries]
-            residence = self._room_air_residence_factor(zone_name)
+            source_ids = [emitter.agent_id for emitter, _, _ in entries]
+
+            if not self.emesis_event_plume.active:
+                volume = max(self._air_unit_volume(zone_name), 1.0)
+                concentration = mass / volume
+                residence = self._room_air_residence_factor(zone_name)
+                for target in susceptible:
+                    dose = (
+                        concentration
+                        * self.inhaled_air_volume_m3_per_epoch
+                        * ventilation
+                        * residence
+                        * self._cabin_presence_share(target, epoch)
+                    )
+                    dose = self._accumulate(
+                        target.agent_id, "emesis_aerosol", dose,
+                        agent_doses, agent_pathway_doses, source_attribution,
+                    )
+                    matrix.emesis_aerosol_exposures.append({
+                        "target_id": target.agent_id,
+                        "target_zone": zone_name,
+                        "source_zone": zone_name,
+                        "source_agent_ids": source_ids,
+                        "pathogen_id": pathogen_id,
+                        "dose": round(dose, 4),
+                        "airborne_mass": round(mass, 4),
+                        "concentration_per_m3": round(concentration, 6),
+                        "exposure_model": "compartment_average",
+                    })
+                continue
+
+            breathing_m3_per_hour = (
+                self.inhaled_air_volume_m3_per_epoch / self.clock.hours_per_epoch
+            )
+            removal_per_hour = (
+                self._unit_air_exchange_rate(zone_name)
+                if self.room_air_removal.active else 0.0
+            )
+            dose_rows: dict[int, list[dict[str, Any]]] = {}
+            total_doses: dict[int, float] = {}
             for target in susceptible:
-                dose = (
-                    concentration
-                    * self.inhaled_air_volume_m3_per_epoch
-                    * ventilation
-                    * residence
-                    * self._cabin_presence_share(target, epoch)
-                )
-                dose = self._accumulate(
-                    target.agent_id, "emesis_aerosol", dose,
+                presence_share = self._cabin_presence_share(target, epoch)
+                for emitter, load, event_age in entries:
+                    distance_class = self._emesis_plume_distance_class(
+                        zone_name, target, emitter, epoch,
+                    )
+                    receiving_volume = self._emesis_plume_receiving_volume(
+                        zone_name, distance_class,
+                    )
+                    event_fraction = self._emesis_event_epoch_fraction(
+                        emitter, pathogen_id, event_age, epoch,
+                    )
+                    entry_min, exit_min = self._emesis_opportunity_window(
+                        target, zone_name, epoch, event_fraction,
+                    )
+                    exposure_hours = self._first_order_exposure_hours(
+                        entry_min, exit_min, removal_per_hour,
+                    )
+                    concentration = load / receiving_volume
+                    dose = (
+                        concentration
+                        * breathing_m3_per_hour
+                        * exposure_hours
+                        * ventilation
+                        * presence_share
+                    )
+                    if dose <= 0.0:
+                        continue
+                    total_doses[target.agent_id] = (
+                        total_doses.get(target.agent_id, 0.0) + dose
+                    )
+                    dose_rows.setdefault(target.agent_id, []).append({
+                        "target_id": target.agent_id,
+                        "target_zone": zone_name,
+                        "source_zone": zone_name,
+                        "source_agent_ids": [emitter.agent_id],
+                        "pathogen_id": pathogen_id,
+                        "dose": round(dose, 4),
+                        "airborne_mass": round(load, 4),
+                        "concentration_per_m3": round(concentration, 6),
+                        "exposure_model": "event_pulse",
+                        "distance_class": distance_class,
+                        "receiving_volume_m3": round(receiving_volume, 4),
+                        "event_epoch_fraction": round(event_fraction, 4),
+                        "opportunity_entry_minutes": round(entry_min, 4),
+                        "opportunity_exit_minutes": round(exit_min, 4),
+                        "opportunity_minutes": round(exit_min - entry_min, 4),
+                        "removal_per_hour": round(removal_per_hour, 6),
+                        "exposure_hours": round(exposure_hours, 6),
+                        "presence_share": round(presence_share, 4),
+                    })
+            for target_id, dose in total_doses.items():
+                self._accumulate(
+                    target_id, "emesis_aerosol", dose,
                     agent_doses, agent_pathway_doses, source_attribution,
                 )
-                matrix.emesis_aerosol_exposures.append({
-                    "target_id": target.agent_id,
-                    "target_zone": zone_name,
-                    "source_zone": zone_name,
-                    "source_agent_ids": source_ids,
-                    "pathogen_id": pathogen_id,
-                    "dose": round(dose, 4),
-                    "airborne_mass": round(mass, 4),
-                    "concentration_per_m3": round(concentration, 6),
-                })
+                matrix.emesis_aerosol_exposures.extend(dose_rows[target_id])
 
     def _sanitary_exhaust_ach(self, _venue: str) -> float:
         """Air changes per hour of a sanitary venue, from the provisioning

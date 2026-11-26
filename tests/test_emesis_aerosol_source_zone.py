@@ -81,7 +81,14 @@ def _core(
     *,
     seed: int = 11,
     volume: float = 50.0,
+    tx_overrides: dict | None = None,
+    rhythm_layer: object | None = None,
 ) -> TransmissionCore:
+    tx = {
+        "droplet_emission_mode": "shipped_uniform",
+        "droplet_field_split": {"mode": "off"},
+    }
+    tx.update(tx_overrides or {})
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes={ZONE: volume, DOWNSTREAM: volume},
@@ -95,10 +102,8 @@ def _core(
         # keeps the whole pool under the partition while a respiratory arm
         # carries only far_field_share — the route-separation invariant is
         # asserted on the labelled pre-change pool.
-        cfg={"transmission": {
-            "droplet_emission_mode": "shipped_uniform",
-            "droplet_field_split": {"mode": "off"},
-        }},
+        cfg={"transmission": tx},
+        rhythm_layer=rhythm_layer,
     )
     core.initialize_zones([ZONE, DOWNSTREAM])
     return core
@@ -317,3 +322,95 @@ class TestInvariants:
         ]
         assert downstream
         assert downstream[0]["dose"] > 0.0
+
+
+class _WindowSchedule:
+    def __init__(self, window: tuple[float, float] | None) -> None:
+        self.window = window
+
+    def presence_overlap_window(self, *_args: object) -> tuple[float, float] | None:
+        return self.window
+
+
+class TestEventPulseExposure:
+    def _single_dose(
+        self,
+        *,
+        tx_overrides: dict | None = None,
+        rhythm_layer: object | None = None,
+    ) -> tuple[float, dict]:
+        core = _core(
+            _profile(),
+            tx_overrides=tx_overrides,
+            rhythm_layer=rhythm_layer,
+        )
+        shedder = _emetic_shedder(core)
+        target = _agent(2)
+        matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+        rows = _emesis_dose_rows(matrix)
+        assert len(rows) == 1
+        return rows[0]["dose"], rows[0]
+
+    def test_pulse_duration_scales_event_exposure_time(self) -> None:
+        short, _ = self._single_dose(tx_overrides={
+            "emesis_event_plume": {"pulse_minutes": 15.0},
+        })
+        long, row = self._single_dose(tx_overrides={
+            "emesis_event_plume": {"pulse_minutes": 30.0},
+        })
+        assert long == pytest.approx(short * 2.0, rel=1e-4)
+        assert row["opportunity_minutes"] == pytest.approx(30.0)
+
+    def test_declared_removal_reduces_time_integrated_exposure(self) -> None:
+        def dose_at_ach(ach: float) -> float:
+            core = _core(_profile(), tx_overrides={
+                "room_air_removal": {"mode": "first_order"},
+            })
+            core.zone_air_exchange_per_hour[ZONE] = ach
+            shedder = _emetic_shedder(core)
+            target = _agent(2)
+            matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+            rows = _emesis_dose_rows(matrix)
+            assert len(rows) == 1
+            return rows[0]["dose"]
+
+        assert dose_at_ach(4.0) < dose_at_ach(2.0)
+
+    def test_minute_resolution_recipient_window_is_the_inhaled_time(self) -> None:
+        full, _ = self._single_dose()
+        half, row = self._single_dose(
+            rhythm_layer=_WindowSchedule((5.0, 10.0)),
+        )
+        assert half == pytest.approx(full / 3.0, rel=1e-4)
+        assert row["opportunity_entry_minutes"] == pytest.approx(5.0)
+        assert row["opportunity_exit_minutes"] == pytest.approx(10.0)
+        assert row["exposure_hours"] == pytest.approx(5.0 / 60.0, rel=1e-4)
+
+    def test_compartment_average_is_the_labelled_baseline_arm(self) -> None:
+        _, row = self._single_dose(tx_overrides={
+            "emesis_event_plume": {"mode": "compartment_average"},
+        })
+        assert row["exposure_model"] == "compartment_average"
+        assert "distance_class" not in row
+
+    def test_coarse_table_distance_classes_order_by_receiving_volume(self) -> None:
+        core = _core(_profile())
+        shedder = _emetic_shedder(core)
+        shedder.dining_party_ids = frozenset({1})
+        shedder.dining_table_index = 0
+        targets = []
+        for aid, table_index in ((2, 0), (3, 1), (4, 3)):
+            target = _agent(aid)
+            target.dining_party_ids = frozenset({aid})
+            target.dining_table_index = table_index
+            targets.append(target)
+        matrix, _ = _run_epoch(core, [shedder, *targets], epoch=1)
+        rows = {
+            row["target_id"]: row for row in _emesis_dose_rows(matrix)
+        }
+        assert rows[2]["distance_class"] == "local"
+        assert rows[3]["distance_class"] == "adjacent"
+        assert rows[4]["distance_class"] == "room"
+        assert rows[2]["dose"] > rows[3]["dose"] > rows[4]["dose"]
+        assert rows[2]["receiving_volume_m3"] < rows[3]["receiving_volume_m3"]
+        assert rows[3]["receiving_volume_m3"] < rows[4]["receiving_volume_m3"]

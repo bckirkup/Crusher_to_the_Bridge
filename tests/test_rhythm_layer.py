@@ -32,7 +32,7 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-from engines.rhythm_layer import RhythmLayer  # noqa: E402
+from engines.rhythm_layer import RhythmLayer, _Commitment  # noqa: E402
 from engines.sim_clock import HOURS, LEGACY_EPOCH_DAY, SimClock  # noqa: E402
 
 CATALOGED_PLATFORMS = (
@@ -468,3 +468,65 @@ def test_propensity_rejects_unknown_mode() -> None:
     with pytest.raises(ValueError):
         _layer("spirit_cruise_3000",
                participation_propensity={"mode": "bogus"})
+
+
+@pytest.mark.parametrize("platform_id", CATALOGED_PLATFORMS)
+def test_cataloged_platform_builds_when_enabled_is_unspecified(platform_id: str) -> None:
+    layer = RhythmLayer.from_platform(
+        platform_id,
+        _load_zones(platform_id),
+        seed=42,
+        clock=SimClock(mode=HOURS),
+        config={},
+    )
+    assert layer is not None
+
+
+def test_presence_overlap_window_resolves_minute_level_egress() -> None:
+    layer = _layer()
+    assert layer is not None
+    agent = _agent(1)
+    layer._commitments[agent.agent_id] = [_Commitment(
+        priority=1,
+        start_min=120,
+        end_min=180,
+        zone="Restaurant",
+        event_id="meal",
+        event_class="meal_seating",
+        egress_min=175,
+        corridor_zone="Corridor",
+        is_meal=True,
+        port_span=None,
+    )]
+    assert layer.presence_overlap_window(
+        agent, "Restaurant", hour=2, event_offset_minutes=30.0,
+        duration_minutes=30.0,
+    ) == (0.0, 25.0)
+
+
+def test_presence_overlap_window_distinguishes_elsewhere_from_unresolved() -> None:
+    layer = _layer()
+    assert layer is not None
+    agent = _agent(1)
+    elsewhere = _Commitment(
+        priority=1,
+        start_min=120,
+        end_min=180,
+        zone="Theatre",
+        event_id="show",
+        event_class="show_performance",
+        egress_min=None,
+        corridor_zone=None,
+        is_meal=False,
+        port_span=None,
+    )
+    layer._commitments[agent.agent_id] = [elsewhere]
+    assert layer.presence_overlap_window(
+        agent, "Restaurant", hour=2, event_offset_minutes=30.0,
+        duration_minutes=30.0,
+    ) == (30.0, 30.0)
+    layer._commitments[agent.agent_id] = []
+    assert layer.presence_overlap_window(
+        agent, "Restaurant", hour=2, event_offset_minutes=30.0,
+        duration_minutes=30.0,
+    ) is None

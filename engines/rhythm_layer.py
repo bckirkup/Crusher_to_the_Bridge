@@ -1214,6 +1214,49 @@ class RhythmLayer:
                 return True
         return False
 
+    def presence_overlap_window(
+        self,
+        agent: Any,
+        zone_name: str,
+        hour: int,
+        event_offset_minutes: float,
+        duration_minutes: float,
+    ) -> tuple[float, float] | None:
+        """Minute-resolution occupancy overlap for one short event pulse.
+
+        ``event_offset_minutes`` is measured from the start of ``hour`` and the
+        return is ``(entry, exit)`` in minutes after the event. A synchronized
+        egress ends occupancy at its front minute rather than the catalog
+        window end. ``None`` means no commitment resolves the pulse window,
+        so the caller falls back to epoch occupancy; a zero-width tuple means
+        a commitment affirmatively places the agent somewhere else.
+        """
+        start = hour * 60 + float(event_offset_minutes)
+        end = start + float(duration_minutes)
+        base_zone = str(zone_name).split("::cabin", 1)[0]
+        overlapping = []
+        same_zone: list[tuple[float, float]] = []
+        for commitment in self._commitments.get(agent.agent_id, ()):
+            occupancy_end = commitment.end_min
+            if commitment.egress_min is not None:
+                occupancy_end = min(occupancy_end, commitment.egress_min)
+            lo = max(start, float(commitment.start_min))
+            hi = min(end, float(occupancy_end))
+            if hi <= lo:
+                continue
+            overlapping.append(commitment)
+            if commitment.zone == base_zone:
+                same_zone.append((lo - start, hi - start))
+        if same_zone:
+            return (
+                min(lo for lo, _ in same_zone),
+                max(hi for _, hi in same_zone),
+            )
+        if overlapping:
+            zero = float(duration_minutes)
+            return zero, zero
+        return None
+
     def location_for(self, agent: Any, hour: int, token: str) -> str | None:
         """The agent's rhythm-owned zone this epoch, or None → token fallback.
 
