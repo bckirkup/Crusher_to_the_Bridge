@@ -374,6 +374,18 @@ def test_joint_reports_the_leg_that_fails_at_every_theta():
     assert joint["split_verdict"] is False
 
 
+def test_joint_treats_an_all_audit_dirty_grid_as_unreadable():
+    readout = _load("readout")
+    row = _row()
+    row["audit_deviations"] = {"0": ["platform"]}
+    row["audit_clean"] = False
+    row["consistent"] = False
+    joint = readout._joint([row])
+    assert joint["legs_failing_at_every_theta"] == []
+    assert joint["split_verdict"] is False
+    assert joint["audit_deviation_thetas"] == [1e9]
+
+
 def test_joint_reports_a_split_verdict_and_its_disjoint_leg_pair():
     readout = _load("readout")
     low, high = _row(during=500), _row(infections=1500)
