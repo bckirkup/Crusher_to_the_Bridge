@@ -1737,19 +1737,115 @@ class KorkinAgent:
         )
         return zlib.crc32(material.encode("utf-8"))
 
+    @staticmethod
+    def _shape_row_for_age(
+        shape: dict[str, Any], days_since_onset: float,
+    ) -> tuple[int, dict[str, Any]] | None:
+        """The daily shape row containing one onset-relative age."""
+        day = math.floor(days_since_onset)
+        daily = list(shape.get("daily") or [])
+        matches = [
+            (index, row) for index, row in enumerate(daily)
+            if int(row.get("day")) == day
+        ]
+        return matches[0] if matches else None
+
+    def _shape_positive_mass(
+        self,
+        pathogen_id: str,
+        inf: dict[str, Any],
+        shape: dict[str, Any],
+        days_since_onset: float,
+        strain_key: str | None = None,
+    ) -> float:
+        """Conditional-positive mass after one episodic occurrence draw."""
+        row_match = self._shape_row_for_age(shape, days_since_onset)
+        if row_match is None:
+            return 0.0
+        row_index, row = row_match
+        probability = float(row.get("detection_probability", 0.0))
+        relative_mass = float(row.get("conditional_positive_relative_shape", 0.0))
+        if probability <= 0.0 or relative_mass <= 0.0:
+            return 0.0
+        daily = list(shape.get("daily") or [])
+        base_seed = self._emission_shape_seed(pathogen_id, inf)
+        if strain_key is None:
+            occurrence_rows = inf.get("emission_shape_occurrence")
+            if not isinstance(occurrence_rows, list) or len(occurrence_rows) != len(daily):
+                occurrence_rows = np.random.default_rng(base_seed).random(len(daily)).tolist()
+                inf["emission_shape_occurrence"] = occurrence_rows
+        else:
+            material = f"{base_seed}:{strain_key}".encode("utf-8")
+            strain_seed = zlib.crc32(material)
+            occurrence_rows = np.random.default_rng(strain_seed).random(len(daily)).tolist()
+        if float(occurrence_rows[row_index]) >= probability:
+            return 0.0
+        return relative_mass
+
+    @staticmethod
+    def _resident_virtual_incubation(
+        profile: dict[str, Any], resident: StrainInfection,
+    ) -> float:
+        """Declared onset default for a later co-resident lineage."""
+        incubation = profile.get("incubation") or {}
+        median = float(incubation.get(
+            "median_days",
+            profile.get("symptom_onset_day", ONSET_DAY),
+        ))
+        return max(0.0, median + float(resident.incubation_modifier))
+
+    def _shape_resident_positive_masses(
+        self,
+        pathogen_id: str,
+        inf: dict[str, Any],
+        residents: dict[str, StrainInfection],
+        shape: dict[str, Any],
+        profile: dict[str, Any],
+    ) -> dict[str, float]:
+        """Per-lineage positive relative mass under the declared default.
+
+        Co-resident lineages are separate courses for timing, but partition one
+        host's emission capacity by inoculum. A later lineage uses the profile's
+        median incubation plus its phenotype modifier as its virtual onset.
+        """
+        inocula = {
+            sid: max(resident.acquired_particles, 0.0)
+            for sid, resident in residents.items()
+        }
+        pool = sum(inocula.values())
+        masses: dict[str, float] = {}
+        infection_epoch = int(inf.get("infection_epoch", -1))
+        for sid, resident in residents.items():
+            primary = (
+                sid == inf.get("strain_id")
+                and resident.infection_epoch == infection_epoch
+            )
+            clock_inf = inf if primary else {
+                "incubation_days": self._resident_virtual_incubation(
+                    profile, resident,
+                ),
+            }
+            days_since_onset, _curve_index = self._shedding_age(
+                resident.time_infected, clock_inf, profile, self.clock,
+            )
+            if days_since_onset < -float(
+                profile.get("presymptomatic_shedding_days", 0.0),
+            ):
+                continue
+            share = inocula[sid] / pool if pool > 0.0 else 1.0 / len(residents)
+            positive = self._shape_positive_mass(
+                pathogen_id, inf, shape, days_since_onset,
+                None if primary else sid,
+            )
+            masses[sid] = share * positive * resident.shedding_multiplier
+        return masses
+
     def _zero_inflated_shape_emission(
         self,
         pathogen_id: str,
         profile: dict[str, Any],
     ) -> float:
-        """Emission under an onset-aligned zero-inflated daily shape.
-
-        The shape rows are already conditional-positive relative mass. A host
-        emits nothing on a nondetection draw; when positive, the row's relative
-        mass is scaled by the profile's independently sourced peak positive
-        daily emission. The per-infection seed makes the occurrence sequence
-        reproducible without consuming the simulation RNG once per epoch.
-        """
+        """Emission under an onset-aligned zero-inflated daily shape."""
         inf = self.infections.get(pathogen_id)
         if inf is None or inf["status"] != InfectionStatus.INFECTED:
             return 0.0
@@ -1757,47 +1853,27 @@ class KorkinAgent:
         if epochs_infected is None or epochs_infected < 0:
             return 0.0
         shape = profile["emission_shape"]
-        days_since_onset, _curve_index = self._shedding_age(
-            epochs_infected, inf, profile, self.clock,
-        )
-        if days_since_onset < -float(
-            profile.get("presymptomatic_shedding_days", 0.0),
-        ):
-            return 0.0
-        day = math.floor(days_since_onset)
-        daily = list(shape.get("daily") or ())
-        matches = [
-            (index, row) for index, row in enumerate(daily)
-            if int(row.get("day")) == day
-        ]
-        if not matches:
-            return 0.0
-        row_index, row = matches[0]
-        probability = float(row.get("detection_probability", 0.0))
-        relative_mass = float(row.get("conditional_positive_relative_shape", 0.0))
-        if probability <= 0.0 or relative_mass <= 0.0:
-            return 0.0
-        occurrence_rows = inf.get("emission_shape_occurrence")
-        if not isinstance(occurrence_rows, list) or len(occurrence_rows) != len(daily):
-            seed = self._emission_shape_seed(pathogen_id, inf)
-            occurrence_rows = np.random.default_rng(seed).random(len(daily)).tolist()
-            inf["emission_shape_occurrence"] = occurrence_rows
-        occurrence = float(occurrence_rows[row_index])
-        if occurrence >= probability:
-            return 0.0
         residents = self.resident_strains(pathogen_id)
         strain_factor = float(inf.get("strain_shedding_multiplier", 1.0))
         if residents:
-            inocula = {
-                sid: max(resident.acquired_particles, 0.0)
-                for sid, resident in residents.items()
-            }
-            pool = sum(inocula.values())
-            strain_factor = sum(
-                (inocula[sid] / pool if pool > 0.0 else 1.0 / len(residents))
-                * resident.shedding_multiplier
-                for sid, resident in residents.items()
+            resident_masses = self._shape_resident_positive_masses(
+                pathogen_id, inf, residents, shape, profile,
             )
+            relative_mass = sum(resident_masses.values())
+            strain_factor = 1.0
+        else:
+            days_since_onset, _curve_index = self._shedding_age(
+                epochs_infected, inf, profile, self.clock,
+            )
+            if days_since_onset < -float(
+                profile.get("presymptomatic_shedding_days", 0.0),
+            ):
+                return 0.0
+            relative_mass = self._shape_positive_mass(
+                pathogen_id, inf, shape, days_since_onset,
+            )
+        if relative_mass <= 0.0:
+            return 0.0
         peak_positive = math.pow(
             10.0, float(shape["peak_positive_log10_copies_per_day"]),
         )
@@ -1890,22 +1966,17 @@ class KorkinAgent:
             return {}
         inf = self.infections[pathogen_id]
         if profile.get("emission_shape"):
-            inocula = {
-                sid: max(resident.acquired_particles, 0.0)
-                for sid, resident in residents.items()
-            }
-            pool = sum(inocula.values())
-            weights = {
-                sid: (inocula[sid] / pool if pool > 0.0 else 1.0 / len(residents))
-                * resident.shedding_multiplier
-                for sid, resident in residents.items()
-            }
-            total_weight = sum(weights.values())
-            if total_weight <= 0.0:
+            masses = self._shape_resident_positive_masses(
+                pathogen_id, inf, residents,
+                profile["emission_shape"], profile,
+            )
+            total_mass = sum(masses.values())
+            if total_mass <= 0.0:
                 return {}
             return {
-                sid: value / total_weight
-                for sid, value in weights.items()
+                sid: value / total_mass
+                for sid, value in masses.items()
+                if value > 0.0
             }
         is_symp = ever_presented(inf)
         curve = profile.get(

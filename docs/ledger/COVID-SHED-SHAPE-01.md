@@ -98,10 +98,17 @@ transmission.
   separate owner decision.
 - The shape support ends at day +13 because the aligned observations end there;
   later emission is truncation, not measured clearance.
-- Multi-strain COVID co-infection does not yet have a literature-backed
-  per-lineage onset/incubation and episodic-occurrence contract. The shape
-  implementation therefore leaves that semantics open for a separate evidence
-  pass rather than inventing a natural-history rule.
+- Multi-strain COVID co-infection uses an explicit Grade-C default because
+  the retrieved literature does not provide a general per-lineage onset or
+  episodic-emission rule: the primary lineage follows the host infection's
+  onset/incubation clock; each later lineage follows its own acquisition clock
+  with a virtual onset at the profile median incubation plus its phenotype
+  modifier; each later lineage receives an independent deterministic episodic
+  occurrence sequence; and co-resident lineages partition, rather than
+  multiply, one host's emission capacity in proportion to inoculum. The dual-
+  lineage evidence found in this pass is case-report-scale composition turnover
+  (for example Pedro et al. 2021, DOI 10.3390/microorganisms9020300), not a
+  measured general kinetic law.
 - This does not implement item 4 (household/service attribution) or item 5
   (person/specimen testing history). Those are explicitly outside this change.
 

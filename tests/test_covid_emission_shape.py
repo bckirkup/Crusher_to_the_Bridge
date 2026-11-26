@@ -127,6 +127,35 @@ class TestZeroInflatedDailyEmission:
         assert agent.get_pathogen_shedding(PATHOGEN, profile) > 0.0
 
 
+    def test_later_resident_strain_uses_the_declared_virtual_onset_default(self) -> None:
+        profile = _shape_profile(1.0, presymptomatic_days=1.0)
+        profile["incubation"] = {"median_days": 3.0}
+        agent = _agent(7, profile)
+        infection = agent.infections[PATHOGEN]
+        infection["incubation_days"] = 1.0
+        added = agent.superinfect_with_strain(
+            PATHOGEN, "s:invader", 3000.0, 0,
+            phenotype=Phenotype(),
+        )
+        assert added
+        residents = agent.resident_strains(PATHOGEN)
+
+        initial = agent._shape_resident_positive_masses(
+            PATHOGEN, infection, residents,
+            profile["emission_shape"], profile,
+        )
+        assert initial.get("s:index", 0.0) > 0.0
+        assert initial.get("s:invader", 0.0) == pytest.approx(0.0)
+
+        for resident in residents.values():
+            resident.time_infected = round(2 * agent.clock.epochs_per_day)
+        later = agent._shape_resident_positive_masses(
+            PATHOGEN, infection, residents,
+            profile["emission_shape"], profile,
+        )
+        assert later.get("s:index", 0.0) == pytest.approx(0.0)
+        assert later.get("s:invader", 0.0) > 0.0
+
     def test_strain_shares_use_the_same_inoculum_weighting_as_shape_emission(self) -> None:
         profile = _shape_profile(1.0)
         agent = _agent(7, profile)
