@@ -1,0 +1,74 @@
+{
+ "campaign": "noro_common_dose_refit_probe_v1",
+ "description": "Short local degeneracy probe for the frozen common-dose refit design: fixed reportable boarding and syndromic_comp65 response; dose_adjustment ladder inside the independently derived NORO-DOSE-REFIT-01 interval [7.14, 8.86]. Probe only; no anchor scoring or fitting.",
+ "platform": "expedition_cruise_450",
+ "default_epochs": 168,
+ "default_num_agents": 1910,
+ "embarkation_date": "2026-01-10",
+ "natural_history_clock": "hours",
+ "pathogen_configs": {
+  "norovirus": {
+   "bundle": "active_profiles",
+   "pathogen_id": "norwalk_gi",
+   "overrides": {
+    "remove": [
+     "sars_cov2_resp"
+    ]
+   }
+  }
+ },
+ "surveillance_configs": {
+  "syndromic_comp65": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "fred_behavior": {
+    "quarantine_compliance": 0.65,
+    "compliance_by_class": {
+     "crew": 0.65,
+     "passenger_elderly": 0.54,
+     "passenger_young": 0.34
+    }
+   }
+  }
+ },
+ "tiers": {
+  "fl_probe_expedition": {
+   "description": "Probe expedition_cruise_450: dose ladder [7.14, 7.57, 8.0, 8.43, 8.86], reportable boarding, syndromic_comp65 fixed, 48 epochs, seeds 8105-8106.",
+   "platform": "expedition_cruise_450",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.14,
+    7.57,
+    8.0,
+    8.43,
+    8.86
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    48
+   ],
+   "boarding_mechanism_rungs": [
+    "reportable"
+   ],
+   "num_agents": 450,
+   "seeds": [
+    8105,
+    8106
+   ],
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment"
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    }
+   }
+  }
+ }
+}

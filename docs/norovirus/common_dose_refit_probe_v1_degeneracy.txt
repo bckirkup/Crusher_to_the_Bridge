@@ -1,0 +1,14 @@
+# Sweep resolution: `parameters.dose_adjustment`
+
+- rows: 10
+- rungs: 5
+- outputs compared: derived.infection_attack_rate_passenger, derived.infection_attack_rate_crew, derived.ever_ill_attack_rate_passenger, derived.reported_case_attack_rate_passenger, derived.peak_prevalence
+- grouped by: parameters.platform_id, parameters.surveillance
+- replicate column: `parameters.seed`
+- resolved fraction: 0.200
+
+## Collapsed rungs
+
+Each group below produced identical outputs at every shared replicate, so the axis carries no information across it.
+
+- 7.14, 7.57, 8.0, 8.43, 8.86
