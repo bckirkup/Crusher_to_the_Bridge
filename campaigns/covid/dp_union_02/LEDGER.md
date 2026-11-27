@@ -216,10 +216,10 @@ Execution stopped exactly after the authorized single child plus 20-seed
 canary. No further campaign cell is authorized or running. The design-level
 review requested after that stop is
 `docs/ledger/DP-UNION-02-DESIGN-REVIEW-01.md`. It recommends the single
-weakest-assumption next experiment: repair the frozen dead-row and
-representativeness readout mismatches without moving scored criteria, then
-complete the already declared 30-cell cross-decade pilot (first five frozen
-seeds at each of the six decade theta values; the theta-`1e8` slice already
-exists, so 25 cells remain unrun) and stop at its readout. No `_rest`,
-20-seed canary, lattice expansion, or mechanism variant is part of that
-recommendation.
+weakest-assumption next experiment: complete the already declared 30-cell
+cross-decade pilot (first five frozen seeds at each of the six decade theta
+values; the theta-`1e8` slice already exists, so 25 cells remain unrun) and
+stop at its readout. No `_rest`, 20-seed canary, lattice expansion, or
+mechanism variant is part of that recommendation. The scored-row dead and
+representativeness conflicts must be resolved before any post-pilot scored
+row, but not before the pilot because the pilot scores no contract leg.

@@ -27,12 +27,15 @@ denominator is exactly reproduced. The canary therefore rules out theta `1e8`
 under the frozen joint contract, but it does not separate theta mis-scale
 from the post-shape early-generation structure, and it does not justify
 invoking a new biological mechanism before the declared cross-decade pilot.
-The weakest-assumption next step is to repair the two readout/design
-mismatches without moving any scored threshold, then complete the already
-frozen 30-cell pilot (25 cells remain unrun) and stop. A broader
-observational-architecture correction is a real open design question, but it
-was already measured in the pre-shape ascertainment campaign and must not be
-silently substituted into DP-UNION-02 after seeing this canary.
+The weakest-assumption next step is to complete the already frozen 30-cell
+pilot (25 cells remain unrun) and stop. That pilot reads only the frozen P31
+selection statistic plus the saturated edge; it scores no contract leg, so
+the row-level dead and representativeness conflicts do not have to be
+resolved before the pilot. They must be resolved before any selected scored
+row is interpreted. A broader observational-architecture correction is a real
+open design question, but it was already measured in the pre-shape
+ascertainment campaign and must not be silently substituted into DP-UNION-02
+after seeing this canary.
 
 ## What is measured, inferred, and hypothetical
 
@@ -61,9 +64,10 @@ the first 20 frozen seeds, image digest
 - median recorded onsets 1755.5, of which 1722.5 are before the split day;
   the artifact echo `onset_recording` is null;
 - median `lab_confirmed_total` is 1959.0 while median campaign positives are
-  188.5; the median outside-campaign confirmation count is therefore
-  1769.5, or 90.1% of lab confirmations when campaign positives are treated
-  as the campaign subset;
+  188.5. Computed per seed as `lab_confirmed_total - campaign_positives`,
+  outside-campaign confirmations have median 1769.5 (range 1245-2184);
+  the median per-seed outside-campaign share is 90.1% (range 87.9%-92.1%,
+  pooled 90.1%), treating campaign positives as the campaign subset;
 - crew duty exclusion removes a median 703.5 hosts and median realized
   working exempt share at activation is 0.0086; implementation reads duty
   exclusion through `quarantined_ids`, so this small working share is not by
@@ -135,25 +139,36 @@ theta, arm, seed cohort, index geometry, protocol, testing wave, retest
 switches, duty exclusion, and capture blocks resolve. The specimen-count
 denominator is present by construction.
 
-Two readout/design mismatches are measured and must be repaired or explicitly
-re-frozen before any further row is interpreted:
+Three readout/design mismatches are measured. The first two do not block the
+pilot, which scores no contract leg, but must be repaired or explicitly
+re-frozen before any further scored row is interpreted; the third is a
+pilot-readout hygiene defect:
 
 1. **Dead-row definition.** DP-UNION-02 freezes `dead` as at least 20 of 24
    seeds with no aboard-window acquisitions
    (`docs/covid/covid_dp_union_02_design.md`), while the inherited readout
    implements DP-UNION-01's `P31 == 0` test. This does not change the theta
    `1e8` verdict: every measured seed has both positive P31 and thousands of
-   aboard-window acquisitions. It does matter for low-theta pilot edge
-   classification.
-2. **Representativeness formula.** DP-UNION-02's text describes an attack
-   representativeness flag, while the inherited implementation applies the
-   legacy FIT-01 P31 band `[317, 1268]`. The flag is report-only and changes
-   no pass/fail leg, so it did not alter the canary result, but the current
-   wording/implementation pair is not a frozen criterion. The minimum repair
-   is to freeze the legacy P31 diagnostic in the design text rather than
-   invent a new report-only statistic.
+   aboard-window acquisitions. It matters for low-theta full-row edge
+   classification after the pilot, not for pilot selection itself.
+2. **Representativeness formula and scoring force.** DP-UNION-02's text says
+   non-representative rows fail and describes an attack-based flag, while the
+   inherited implementation applies the legacy FIT-01 P31 band `[317, 1268]`
+   as a report-only diagnostic. These are not the same contract. The current
+   sentence is also not a mathematically exact formula, so the correct repair
+   is a design-owner decision before scored rows: either implement a scored
+   attack-dispersion rule written exactly, or amend the design back to the
+   inherited report-only P31 diagnostic. This review does not choose silently
+   after seeing outcomes. The ambiguity did not alter the theta `1e8` row,
+   which already fails six scored legs.
+3. **Pilot edge echo.** The machine design correctly says the 20-seed dead
+   test cannot be read from five pilot cells, but the inherited `_pilot`
+   readout copies the row-level `dead` and `saturated` flags into pilot rows.
+   Saturated is meaningful on the pilot median; `dead` is not. Pilot output
+   must null or omit `dead` so a five-cell slice cannot masquerade as a
+   24-seed edge measurement.
 
-A third issue is not a readout implementation error but a comparator
+A separate issue is not a readout implementation error but a comparator
 limitation: `campaign_specimen_log` contains only specimens represented in
 the published campaign roster, while `lab_confirmed_total` pools passive
 sick-call specimens as well. In the canary, outside-campaign confirmations
@@ -205,12 +220,14 @@ when normalized lifetime area is nearly unchanged.
 
 Testing then arrives late relative to the measured incidence. Median 94.47%
 of infections are already acquired by day 4, while the campaign starts day
-16. By then those infections are roughly 12-21 days post infection over the
-main campaign window. The declared PCR sensitivity curve peaks at day 8
-(0.8) and declines to 0.517, 0.375, and 0.34 at days 16, 20, and 21. Finite
-daily capacity, one-specimen/retest rules, and passive prior confirmation
-further restrict who remains swabbable. Low positives with high cumulative
-incidence are therefore an expected geometry of this experiment, not a
+16. A day-0-to-4 infection is 12-21 days post infection on campaign days
+16-21, and 24-30 days post infection on the heavy specimen days 28-30. The
+declared PCR sensitivity curve peaks at day 8 (0.8), declines to 0.517,
+0.375, and 0.34 at days 16, 20, and 21, and then holds its 0.34 tail over
+the late high-volume days. Finite daily capacity, one-specimen/retest rules,
+and passive prior confirmation further restrict who remains swabbable. Low
+positives with high cumulative incidence are therefore an expected geometry
+of this experiment, not a
 paradox. Exact attribution cannot be recovered from the compact artifacts
 because bulky specimen/funnel echoes are dropped by design.
 
@@ -233,7 +250,8 @@ only evidence about the composite's denomination.
 ## Ranked explanations, weakest assumption first
 
 1. **Readout edge-definition mismatches.** Real, small, and repairable; no
-   effect on the theta `1e8` median verdict, material for pilot edges.
+   effect on the theta `1e8` median verdict and no blocker for the pilot,
+   which does not score contract legs, but material before scored rows.
 2. **Theta mis-scale.** Untested and plausible for attack/during magnitude.
    Only the frozen cross-decade pilot can measure it without inventing a
    mechanism.
@@ -254,48 +272,55 @@ only evidence about the composite's denomination.
 
 ## Recommended single next step
 
-**Complete the already frozen DP-UNION-02 cross-decade pilot, after an
-audit-only readout repair, and stop at its readout.** The first five theta
-`1e8` artifacts are already exactly that decade's pilot slice, so the
-remaining execution is five seeds at each of the five unrun decade values:
-25 new cells, not 30. Do not redesign the scored contract, rerun theta
-`1e8`, run `_rest`, submit any 20-seed canary, or implement a new biological
-mechanism in that step.
+**Complete the already frozen DP-UNION-02 cross-decade pilot and stop at its
+readout.** The first five theta `1e8` artifacts are already exactly that
+decade's pilot slice, so the remaining execution is five seeds at each of
+the five unrun decade values: 25 new cells, not 30. Do not redesign the
+scored contract, rerun theta `1e8`, run `_rest`, submit any 20-seed canary,
+or implement a new biological mechanism in that step. Because the pilot
+scores no contract leg, the scored-row representativeness decision is not a
+pilot precondition.
 
 Frozen admissibility criteria before any pilot cell runs:
 
-1. The readout implements the frozen design text's dead-row rule:
-   `aboard_window_acquisitions == 0` on at least 20 of 24 seeds. No scored
-   threshold or target moves.
-2. The design text is corrected to name the inherited report-only
-   representativeness diagnostic exactly: fewer than 6 of 24 seeds with P31
-   in `[317, 1268]` labels the row `median_not_representative`. Because it
-   is report-only, this repair must not change any pass/fail criterion.
-3. The pilot is exactly the first five frozen conditioned seeds at each of
+1. The pilot is exactly the first five frozen conditioned seeds at each of
    the six already declared decade lattice values (`1e5` through `1e10`),
    arm `union_niid`: 30 cells total, of which the five theta `1e8` cells
    already exist and only 25 cells remain to run. No other theta, arm, seed,
    or mechanism variant is added.
-4. Every cell must pass the existing audit invariants, including
+2. Every cell must pass the existing audit invariants, including
    `index_shedding_at_day0` true, the correct theta susceptibility scale,
    epoch-391 quarantine witness, correct dedicated protocol, correct
    exemption echo, duty exclusion enabled, retest/wave arming, specimen
    bounds, and capture-funnel presence. An audit failure is machinery noise,
    not evidence for or against theta.
-5. Pilot medians are reported theta-by-theta for P31, infections,
-   before-share, during-window infections, capture, ignition, founder yield,
-   specimen counts, and dead/saturated edge counts. If P31 is nonmonotone,
-   the nonmonotonicity is reported rather than smoothed.
-6. The original frozen selection rule may be applied only after the clean
-   pilot readout. If no decade reaches the rule's threshold, or live rows
-   are split into extinct and saturated/early-burned classes, that is the
-   result; the grid is not extended and theta is not interpolated in this
-   step.
-7. Execution stops after the pilot readout. Benjamin decides whether a
-   20-seed canary at the selected cell, a design correction, or a structural
-   suite is next.
+3. Pilot output reports the frozen median-P31 statistic and the saturated
+   edge. It must null or omit `dead`, because the 20-of-24 dead rule cannot
+   be measured from five pilot cells. No contract leg is scored from pilot
+   cells.
+4. Pilot medians are reported theta-by-theta only for the frozen P31
+   selection statistic, with saturation reported as the frozen edge read. If
+   P31 is nonmonotone, the nonmonotonicity is reported rather than smoothed.
+   No other observable enters pilot selection or is promoted into a contract
+   leg after seeing the pilot.
+5. The original frozen selection rule may be applied only after the clean
+   pilot readout. If no decade reaches the rule's threshold, or the lowest
+   already does, that is the result; the grid is not extended and theta is
+   not interpolated in this step.
+6. Execution stops after the pilot readout. Before any selected scored row
+   or 20-seed canary is interpreted, the dead-row implementation must match
+   the frozen aboard-window-acquisition rule and Benjamin must explicitly
+   choose the representativeness correction: implement a mathematically exact
+   scored attack-dispersion rule, or amend the design back to the inherited
+   report-only P31 diagnostic. That choice is not needed to run or read the
+   pilot and must not be made silently in the readout.
+7. Benjamin then decides whether a 20-seed canary at the selected cell, a
+   design correction, or a structural suite is next.
 
-Rationale: this is the smallest experiment that separates theta
-re-denomination from structural timing without changing frozen criteria
-after seeing the canary. Existing artifacts are sufficient for the review;
-no new simulation evidence was needed to reach this recommendation.
+Rationale: this is the smallest already frozen experiment that tests theta
+re-denomination without adding a mechanism, moving a criterion, or fitting
+theta to the canary outcome. It does not by itself prove or exclude a
+structural timing defect; it restores the frozen measurement order so that
+any later scored row is interpretable. Existing artifacts are sufficient for
+the review; no new simulation evidence was needed to reach this
+recommendation.
