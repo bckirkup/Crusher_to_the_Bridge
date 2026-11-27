@@ -172,10 +172,14 @@ pilot-readout hygiene defect:
    scored-row readouts because a frozen report is absent.
 4. **Pilot edge echo.** The machine design correctly says the 20-seed dead
    test cannot be read from five pilot cells, but the inherited `_pilot`
-   readout copies the row-level `dead` and `saturated` flags into pilot rows.
-   Saturated is meaningful on the pilot median; `dead` is not. Pilot output
-   must null or omit `dead` so a five-cell slice cannot masquerade as a
-   24-seed edge measurement.
+   readout copies the row-level `dead` and `saturated` flags computed over
+   whatever seeds were loaded for that theta. `dead` is invalid on a
+   five-cell slice. `saturated` is meaningful only as a provisional diagnostic
+   recomputed on the same five pilot cells; copying the row-level flag is not
+   the pilot measurement, especially because the existing theta `1e8` slice
+   has 20 cells while the other decades will have five. Pilot output must
+   null or omit `dead` and must not copy a different cohort's `saturated`
+   flag.
 
 A separate issue is not a readout implementation error but a comparator
 limitation: `campaign_specimen_log` contains only specimens represented in
@@ -316,22 +320,24 @@ Frozen admissibility criteria before any pilot cell runs:
    exemption echo, duty exclusion enabled, retest/wave arming, specimen
    bounds, and capture-funnel presence. An audit failure is machinery noise,
    not evidence for or against theta.
-3. Pilot output reports the frozen median-P31 statistic and the saturated
-   edge. It must null or omit `dead`, because the 20-of-24 dead rule cannot
-   be measured from five pilot cells. No contract leg is scored from pilot
-   cells.
+3. Pilot output reports the frozen median-P31 statistic and a saturated
+   diagnostic recomputed over the same five pilot cells, explicitly labelled
+   provisional rather than the full-row edge. It must null or omit `dead`,
+   because the 20-of-24 dead rule cannot be measured from five pilot cells.
+   No contract leg is scored from pilot cells.
 4. Pilot medians are reported theta-by-theta only for the frozen P31
-   selection statistic, with saturation reported as the frozen edge read. If
-   P31 is nonmonotone, the nonmonotonicity is reported rather than smoothed.
-   No other observable enters pilot selection or is promoted into a contract
-   leg after seeing the pilot.
+   selection statistic, with the five-cell saturation diagnostic reported
+   beside it. If P31 is nonmonotone, the nonmonotonicity is reported rather
+   than smoothed. No other observable enters pilot selection or is promoted
+   into a contract leg after seeing the pilot.
 5. The original frozen selection rule may be applied only after the clean
    pilot readout. If no decade reaches the rule's threshold, or the lowest
    already does, that is the result; the grid is not extended and theta is
    not interpolated in this step.
 6. Execution stops after the pilot readout. The only pilot-specific readout
    repair is the hygiene rule in criterion 3: null or omit the pilot `dead`
-   echo before the pilot readout is interpreted. Separately, before any
+   echo and compute saturation on the pilot cohort before the pilot readout
+   is interpreted. Separately, before any
    selected scored row or post-pilot 20-seed canary is interpreted, the
    full-row dead implementation must match the frozen
    aboard-window-acquisition rule, the specimen-count side-rule counts and
