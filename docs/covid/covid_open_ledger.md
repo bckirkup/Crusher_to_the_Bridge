@@ -56,6 +56,12 @@ at 20/24): it is not consistent, with near-saturating attack, almost all
 incidence before quarantine, and testing positives far below the record. No
 full scored row or fitted operating point exists yet; see
 `docs/ledger/DP-UNION-02.md` and `campaigns/covid/dp_union_02/LEDGER.md`.
+The bounded design review is `docs/ledger/DP-UNION-02-DESIGN-REVIEW-01.md`:
+the canary is internally consistent but only one theta is measured; two
+edge/representativeness readout mismatches must be repaired before pilot
+interpretation, and the weakest-assumption next experiment is the already
+frozen 30-cell cross-decade pilot after that audit-only repair (25 cells
+remain unrun).
 
 **`COVID-PRESHED-GATE-01` (ledger entry): the first post-shape source-law
 correction is the owner-approved presymptomatic-gate and seed-clock fix.** The
