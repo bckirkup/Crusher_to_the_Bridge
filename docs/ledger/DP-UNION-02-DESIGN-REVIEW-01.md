@@ -60,7 +60,8 @@ the first 20 frozen seeds, image digest
   published-volume test denominator;
 - median day-0-through-day-4 acquisition mass is 3080.5, median 94.47% of
   total infections (per-seed range 83.03%-98.36%), computed directly from
-  each artifact's `acquisition_curve.total_by_day`; testing starts on day 16;
+  each artifact's `acquisition_curve.total_by_day`; the published campaign
+  starts on day 16;
 - median recorded onsets 1755.5, of which 1722.5 are before the split day;
   the artifact echo `onset_recording` is null;
 - median `lab_confirmed_total` is 1959.0 while median campaign positives are
@@ -227,9 +228,9 @@ declared PCR sensitivity curve peaks at day 8 (0.8), declines to 0.517,
 the late high-volume days. Finite daily capacity, one-specimen/retest rules,
 and passive prior confirmation further restrict who remains swabbable. Low
 positives with high cumulative incidence are therefore an expected geometry
-of this experiment, not a
-paradox. Exact attribution cannot be recovered from the compact artifacts
-because bulky specimen/funnel echoes are dropped by design.
+of this experiment, not a paradox. Exact attribution cannot be recovered
+from the compact artifacts because bulky specimen/funnel echoes are dropped
+by design.
 
 ## Theta denomination assessment
 
