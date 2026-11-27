@@ -194,13 +194,17 @@ class from `COVID-SEED-ASCERTAIN-01`, but it bounds interpretation: theta
 measured here is conditional on that event class and cannot be quoted as an
 unconditional introduction-scale constant.
 
-The onset channel is weaker. The artifact echo shows no `onset_recording`
-block, and median recorded onsets are 1755.5 against the record's 197 dated
-onsets. The contract's before-share leg is therefore not a strict comparison
-of like-for-like dating channels. However, `ASCERTAIN-V1` already measured
-that arming the existing recording channel does not repair before-share or
-truth incidence; that prior measurement limits how much of the present
-failure can be attributed to onset recording alone.
+The onset channel is the permissive shipped default, not a record-like
+interview/reporting channel. The artifact echo shows no `onset_recording`
+block; in the implementation that null means every confirmed symptomatic
+onset is dated. Median recorded onsets are 1755.5 against the record's 197
+dated onsets. The contract's before-share leg is therefore not a strict
+comparison of like-for-like dating channels, but the null echo is not a
+missing implementation or an additional ascertainment loss. However,
+`ASCERTAIN-V1` already measured that arming the existing recording channel
+does not repair before-share or truth incidence; that prior measurement
+limits how much of the present failure can be attributed to onset recording
+alone.
 
 ## Emission timing and testing capture audit
 
@@ -254,11 +258,12 @@ only evidence about the composite's denomination.
    effect on the theta `1e8` median verdict and no blocker for the pilot,
    which does not score contract legs, but material before scored rows.
 2. **Observation/ascertainment comparator mismatch.** Real and previously
-   measured: passive confirmations outside published volumes, missing onset
-   recording in the arm, and one-specimen/retest dynamics make T3/P34 a
-   compressed ascertainment observable. This explains why T3 must not be
-   read as incidence, but prior ASCERTAIN-V1 evidence says it cannot by
-   itself repair truth timing or attack size.
+   measured: passive confirmations outside published volumes and
+   one-specimen/retest dynamics compress T3/P34, while permissive default
+   onset dating makes before-share a non-record-like channel. This explains
+   why T3 must not be read as incidence, but prior ASCERTAIN-V1 evidence
+   says onset ascertainment cannot by itself repair truth timing or attack
+   size.
 3. **Emission-timing/testing-capture geometry.** Measured timing is a
    qualitative low-positive mechanism: most acquisitions are old by the
    campaign window, PCR sensitivity is on its declining tail, and previously
