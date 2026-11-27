@@ -307,13 +307,16 @@ Frozen admissibility criteria before any pilot cell runs:
    pilot readout. If no decade reaches the rule's threshold, or the lowest
    already does, that is the result; the grid is not extended and theta is
    not interpolated in this step.
-6. Execution stops after the pilot readout. Before any selected scored row
-   or 20-seed canary is interpreted, the dead-row implementation must match
-   the frozen aboard-window-acquisition rule and Benjamin must explicitly
-   choose the representativeness correction: implement a mathematically exact
-   scored attack-dispersion rule, or amend the design back to the inherited
-   report-only P31 diagnostic. That choice is not needed to run or read the
-   pilot and must not be made silently in the readout.
+6. Execution stops after the pilot readout. The only pilot-specific readout
+   repair is the hygiene rule in criterion 3: null or omit the pilot `dead`
+   echo before the pilot readout is interpreted. Separately, before any
+   selected scored row or post-pilot 20-seed canary is interpreted, the
+   full-row dead implementation must match the frozen
+   aboard-window-acquisition rule and Benjamin must explicitly choose the
+   representativeness correction: implement a mathematically exact scored
+   attack-dispersion rule, or amend the design back to the inherited
+   report-only P31 diagnostic. Those scored-row corrections are not needed
+   to run or read the pilot and must not be made silently in the readout.
 7. Benjamin then decides whether a 20-seed canary at the selected cell, a
    design correction, or a structural suite is next.
 
