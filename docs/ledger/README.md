@@ -177,6 +177,8 @@ New ledger entries are registered here as they land; the filename remains the st
 - `NORO-SUPPLY-SOLVER-SCREEN-02.md` — classic + spirit supply contamination solver screen (176 cells): posting not saturated on larger hulls, quiet controls 0/8, paired continuous vs discrete unresolved.
 - `NORO-SUPPLY-SOLVER-SCREEN-03.md` — mega p06 paired `discrete` vs `continuous` contamination-solver screen (88 cells): posting rare (`station_lots` 1/16 each arm, receipts 0/10, quiet 0/8), only one both-posted pair, solver contrast uninformative; supply contamination at these burdens is a weak posting driver on the 7000-agent hull.
 
+- `NORO-DOSE-REFIT-PROBE-01.md` — short common-dose siting probe: all five rungs in `[7.14, 8.86]` collapse on the active mechanism coordinate, design-blocking the `dose_adjustment` refit ladder.
+
 ## For drafting and analysis
 
 Anyone (human or agent) drafting a manuscript, report or analysis from this repository must draw from, in this order:

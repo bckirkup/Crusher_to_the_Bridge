@@ -93,7 +93,7 @@ ever-ill 0.0, crew infection 0.0, reported passenger rate 0.0, and peak
 prevalence 3. The seed differences are realisation differences; the dose axis
 moves nothing.
 
-This is not treated as a short-horizon accident to engineer around, because
+The measurement is registered as `docs/ledger/NORO-DOSE-REFIT-PROBE-01.md`; probe rows were produced with engine source clean at `3fe48d8b1916e1c06cdc92cc2d9c757574f9c53b` (the `-dirty` label reflects the then-uncommitted probe files). This is not treated as a short-horizon accident to engineer around, because
 the active mechanism explains the bit collapse:
 
 - the probe/default contact mode is `per_partner_contact`; direct-contact dose
