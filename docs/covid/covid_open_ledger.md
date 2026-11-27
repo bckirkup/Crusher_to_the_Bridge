@@ -59,9 +59,10 @@ full scored row or fitted operating point exists yet; see
 The bounded design review is `docs/ledger/DP-UNION-02-DESIGN-REVIEW-01.md`:
 the canary is internally consistent but only one theta is measured. The
 weakest-assumption next experiment is completion of the already frozen
-30-cell cross-decade pilot (25 cells remain unrun); the scored-row dead and
-representativeness conflicts must be resolved before any post-pilot scored
-row, but do not block the pilot because it scores no contract leg.
+30-cell cross-decade pilot (25 cells remain unrun); the scored-row dead,
+specimen-report, and representativeness repairs must be resolved before any
+post-pilot scored row, but do not block the pilot because it scores no
+contract leg.
 
 **`COVID-PRESHED-GATE-01` (ledger entry): the first post-shape source-law
 correction is the owner-approved presymptomatic-gate and seed-clock fix.** The

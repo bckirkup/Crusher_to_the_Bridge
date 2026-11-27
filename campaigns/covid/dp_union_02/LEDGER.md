@@ -220,6 +220,7 @@ weakest-assumption next experiment: complete the already declared 30-cell
 cross-decade pilot (first five frozen seeds at each of the six decade theta
 values; the theta-`1e8` slice already exists, so 25 cells remain unrun) and
 stop at its readout. No `_rest`, 20-seed canary, lattice expansion, or
-mechanism variant is part of that recommendation. The scored-row dead and
-representativeness conflicts must be resolved before any post-pilot scored
-row, but not before the pilot because the pilot scores no contract leg.
+mechanism variant is part of that recommendation. The scored-row dead,
+specimen-report, and representativeness repairs must be resolved before any
+post-pilot scored row, but not before the pilot because the pilot scores no
+contract leg.

@@ -140,9 +140,9 @@ theta, arm, seed cohort, index geometry, protocol, testing wave, retest
 switches, duty exclusion, and capture blocks resolve. The specimen-count
 denominator is present by construction.
 
-Three readout/design mismatches are measured. The first two do not block the
-pilot, which scores no contract leg, but must be repaired or explicitly
-re-frozen before any further scored row is interpreted; the third is a
+Four readout/design mismatches are measured. The first three do not block
+the pilot, which scores no contract leg, but must be repaired or explicitly
+re-frozen before any further scored row is interpreted; the fourth is a
 pilot-readout hygiene defect:
 
 1. **Dead-row definition.** DP-UNION-02 freezes `dead` as at least 20 of 24
@@ -162,7 +162,15 @@ pilot-readout hygiene defect:
    inherited report-only P31 diagnostic. This review does not choose silently
    after seeing outcomes. The ambiguity did not alter the theta `1e8` row,
    which already fails six scored legs.
-3. **Pilot edge echo.** The machine design correctly says the 20-seed dead
+3. **Specimen-count side-rule omission.** The frozen design says the
+   specimen-count side rules are reported: at least 75% of scored-class cells
+   within ±50% of 3063 day-31 specimens and 3894 day-34 specimens. The
+   inherited readout reports only the medians, not the per-row counts or
+   side-rule result. The omission is immaterial to this canary: all 20 cells
+   have exactly 3063 day-31 specimens, and day-34 specimens range 3470-3745,
+   inside the frozen [1947, 5841] interval. It matters before future
+   scored-row readouts because a frozen report is absent.
+4. **Pilot edge echo.** The machine design correctly says the 20-seed dead
    test cannot be read from five pilot cells, but the inherited `_pilot`
    readout copies the row-level `dead` and `saturated` flags into pilot rows.
    Saturated is meaningful on the pilot median; `dead` is not. Pilot output
@@ -326,9 +334,10 @@ Frozen admissibility criteria before any pilot cell runs:
    echo before the pilot readout is interpreted. Separately, before any
    selected scored row or post-pilot 20-seed canary is interpreted, the
    full-row dead implementation must match the frozen
-   aboard-window-acquisition rule and Benjamin must explicitly choose the
-   representativeness correction: implement a mathematically exact scored
-   attack-dispersion rule, or amend the design back to the inherited
+   aboard-window-acquisition rule, the specimen-count side-rule counts and
+   result must be reported as frozen, and Benjamin must explicitly choose
+   the representativeness correction: implement a mathematically exact
+   scored attack-dispersion rule, or amend the design back to the inherited
    report-only P31 diagnostic. Those scored-row corrections are not needed
    to run or read the pilot and must not be made silently in the readout.
 7. Benjamin then decides whether a 20-seed canary at the selected cell, a

@@ -79,6 +79,6 @@ The design-level review is now recorded in
 the open-ended decision list above: complete the already frozen 30-cell
 cross-decade pilot and stop (25 cells remain unrun; the first five
 theta-`1e8` artifacts are already that decade's pilot slice). The scored-row
-dead/representativeness conflicts must be resolved before any post-pilot
-scored row, but not before the pilot because the pilot scores no contract
-leg.
+dead, specimen-report, and representativeness repairs must be resolved
+before any post-pilot scored row, but not before the pilot because the pilot
+scores no contract leg.
