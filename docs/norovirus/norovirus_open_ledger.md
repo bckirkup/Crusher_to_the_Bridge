@@ -4665,7 +4665,8 @@ hand-load deposits), so no second object kind needed a mode. The v1
 `"independent"` lot event is an implicated mint too — it draws the
 implicated band under `two_mode`.
 
-**`NORO-ENTRAIN-01` (declared — design frozen, nothing submitted):**
+**`NORO-ENTRAIN-01` (measured — 27,000/27,000 cells at `dbbd5395`,
+readout `docs/norovirus/noro_entrain_01_readout.md`):**
 the next measurement stage on the SCORE-01 frame, two levers aimed at
 raising VSP posting appropriately per hull. Lever A (event shape)
 sweeps the config-expressible extent axes of the shipped lot object
@@ -4687,7 +4688,7 @@ saturates short of its wire) × 9 arms × 1,000 seeds on SCORE-01 seed
 lists and fixed coordinates; frozen admissibility, must-not-move
 list and canary-then-STOP in
 `docs/norovirus/noro_entrain_01_sweep_design.md`; package
-`campaigns/noro/noro_entrain_01/`.
+`campaigns/noro/noro_entrain_01/`. Measured outcome: Lever A moved nothing; Lever B bought in-band posting on cls/spr without the posted-AR or burst signature.
 
 **`NORO-CS-EXTENT-01` (open — mechanism landed, no numbers):** the
 §4.3 `cs_extent` contract is implemented —

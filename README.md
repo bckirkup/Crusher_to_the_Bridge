@@ -665,6 +665,7 @@ baseline mode for paired measurement):
 | `transmission.cabin_air_mode` | `cabin_compartment` | `docs/cabin_air_compartment_spec.md` (AERO-CABIN-01) |
 | `transmission.droplet_emission_mode` | `profile_conditioned` | `docs/density_contact_spec.md` (ledger item 40) |
 | `transmission.droplet_field_split.mode` | `partition` | `docs/droplet_field_split_spec.md` (AERO-SPLIT-01) |
+| `transmission.emesis_event_plume.mode` | `event_pulse` | `docs/ledger/NORO-EMESIS-PLUME-01.md`; `compartment_average` is the labelled pre-change baseline |
 | `transmission.near_field_air.mode` | `two_box` | `docs/near_field_air_spec.md` (AERO-NEAR-02) |
 | `transmission.exposure_cap.enabled` | `true` (cruise hulls) | `docs/exposure_cap_spec.md` (EXPO-CAP-01) |
 | `transmission.activity_contacts.enabled` | `true` | `docs/contact_architecture_spec.md` (CONTACT-ARCH-01) |

@@ -2,7 +2,8 @@
 **Date:** 2026-10-15
 **Commit:** #998
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 49e1993b
 
 Frozen evaluation design — the bracket on the mint-rate axis that
 NORO-FOOD-SHAPES-01 identified as the operative margin on the object
@@ -47,3 +48,7 @@ zero-lot bookkeeping), vacuity rule and canary-then-STOP in
 `noro_mint_rate_01_manifest.json`, 27 tiers, 33 blocks). Carries no
 numbers; nothing submitted under this design until the user gates
 image build, canary and each wave.
+
+## Measurement
+
+Measured readout: `docs/norovirus/noro_mint_rate_01_readout.md` — 27,000/27,000 cells. Per-hull in-band mint-gate windows are exp [0.005, 0.0105], cls [0.005, ~0.020], spr [0.008, 0.024]; no hull satisfies D2+D3+D4 jointly at in-band rate.

@@ -2,7 +2,8 @@
 **Date:** 2026-10-10
 **Commit:** 13cf35a5
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** dbbd5395
 
 Two approved levers aimed at raising VSP posting rates appropriately
 per hull, on the SCORE-01 measurement frame, plus a design-note-only
@@ -41,3 +42,7 @@ image build, canary and each wave.
 Mechanism legs landing under this design are recorded in their own
 entries: `NORO-CS-EXTENT-01` (the §4.3 `cs_extent` contract —
 `lot_extent_mode` + `lot_state_redraw`, shipped as arm knobs).
+
+## Measurement
+
+Measured readout: `docs/norovirus/noro_entrain_01_readout.md` — 27,000/27,000 cells. Lever A is posting-identical to `ship`; Lever B can buy in-band posting on cls/spr but not the posted-AR or burst signature.

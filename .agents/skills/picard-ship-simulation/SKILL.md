@@ -60,9 +60,12 @@ ShipSimulation(spec).run()
 | `transmission.hand_donor_mode` | `shedders_only` default; `carriers` adds gate-passing loaded carriers to the direct-contact donor pool — CARRIER-DISTRIBUTE arm (see `docs/norovirus/hand_carrier_distribute_spec.md`). Effective only under `contact_mode: per_partner_contact`; zone-dose modes read shedding values, so carriers move no dose there |
 | `agent_behavior` | Dining/free rotation probabilities (default `0.0` for golden stability) — see `docs/multi_pathogen_model_changes_spec.md` |
 
-Pathogen profiles may include `transmission_route_weights`, formal `dose_adjustment`
-(log10 shedding offset), `innate_nonsusceptible_fraction`, and zone-scoped
-`environmental_contamination.source_zones`.
+Pathogen profiles may include `route_efficiency_multipliers`,
+`environmental_faecal_release_log10_g_per_epoch` (−log10 environmental stool
+release; `dose_adjustment` is a deprecated alias), the canonical
+`secretor_negative_fraction` / `secretor_negative_relative_susceptibility` pair
+(`innate_nonsusceptible_fraction` is deprecated sterile immunity), and
+zone-scoped `environmental_contamination.source_zones`.
 
 ## Emitting a sentinel observation bundle from a real run
 

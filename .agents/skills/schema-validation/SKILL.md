@@ -94,7 +94,7 @@ python -m pytest tests/test_data_contracts.py -v --tb=short
 
 | Schema | Validates | Data Path |
 |--------|-----------|-----------|
-| `pathogen_profiles.schema.json` | Pathogen definitions (route weights, dose_adjustment, nonsusceptibility, env source_zones) | `data/pathogens/active_profiles.json` |
+| `pathogen_profiles.schema.json` | Pathogen definitions (`route_efficiency_multipliers`, environmental release, host nonsusceptibility, env source_zones) | `data/pathogens/active_profiles.json` |
 | `spatial_layout.schema.json` | Zone/room structure (dining_service_type, food_contamination_multiplier, max_occupancy, cabin fields) | `data/platforms/*/spatial_layout.json` |
 | `air_flow_paths.schema.json` | HVAC zones, links, adjacency | `data/platforms/*/air_flow_paths.json` |
 | `protocols.schema.json` | SOP definitions | `data/config/protocols.json` |
@@ -110,7 +110,7 @@ python -m pytest tests/test_data_contracts.py -v --tb=short
 - When adding new platforms or pathogens (including Enterprise fiction-adapted bundles)
 - As part of the CI-equivalent local validation
 
-CI: `.github/workflows/picard-presidio.yml` validates all nine platforms plus Stackelberg social schemas on `main` and `cursor/**` branches.
+CI: `.github/workflows/picard-presidio.yml` validates every `data/platforms/*/spatial_layout.json` / `air_flow_paths.json` pair plus the pathogen and Stackelberg social schemas on pushes to `main` and `cursor/**`, and on PRs to `main`.
 
 ## Picard / Presidio / Stackelberg schemas
 
