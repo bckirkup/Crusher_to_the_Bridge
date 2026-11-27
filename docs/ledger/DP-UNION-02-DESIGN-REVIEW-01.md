@@ -259,10 +259,12 @@ only evidence about the composite's denomination.
    compressed ascertainment observable. This explains why T3 must not be
    read as incidence, but prior ASCERTAIN-V1 evidence says it cannot by
    itself repair truth timing or attack size.
-3. **Emission-timing/testing-capture geometry.** Measured timing alone can
-   produce low positives despite high incidence: most acquisitions are old
-   by the campaign window, PCR sensitivity is on its declining tail, and
-   previously confirmed hosts are barred. This is an observational/timing
+3. **Emission-timing/testing-capture geometry.** Measured timing is a
+   qualitative low-positive mechanism: most acquisitions are old by the
+   campaign window, PCR sensitivity is on its declining tail, and previously
+   confirmed hosts are barred. The artifacts do not establish that timing
+   alone quantitatively accounts for the observed positives, nor isolate it
+   from passive-channel skimming. This is an observational/timing
    explanation, not a missing biological mechanism.
 4. **Theta mis-scale.** Untested and plausible for attack/during magnitude.
    Only the frozen cross-decade pilot can measure it without inventing a
