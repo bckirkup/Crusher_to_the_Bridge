@@ -252,20 +252,26 @@ only evidence about the composite's denomination.
 1. **Readout edge-definition mismatches.** Real, small, and repairable; no
    effect on the theta `1e8` median verdict and no blocker for the pilot,
    which does not score contract legs, but material before scored rows.
-2. **Theta mis-scale.** Untested and plausible for attack/during magnitude.
-   Only the frozen cross-decade pilot can measure it without inventing a
-   mechanism.
-3. **Observation/ascertainment comparator mismatch.** Real and previously
+2. **Observation/ascertainment comparator mismatch.** Real and previously
    measured: passive confirmations outside published volumes, missing onset
    recording in the arm, and one-specimen/retest dynamics make T3/P34 a
    compressed ascertainment observable. This explains why T3 must not be
    read as incidence, but prior ASCERTAIN-V1 evidence says it cannot by
    itself repair truth timing or attack size.
-4. **Post-shape early-generation structure.** Plausible and strongly
+3. **Emission-timing/testing-capture geometry.** Measured timing alone can
+   produce low positives despite high incidence: most acquisitions are old
+   by the campaign window, PCR sensitivity is on its declining tail, and
+   previously confirmed hosts are barred. This is an observational/timing
+   explanation, not a missing biological mechanism.
+4. **Theta mis-scale.** Untested and plausible for attack/during magnitude.
+   Only the frozen cross-decade pilot can measure it without inventing a
+   mechanism; moving down the grid would be a denomination result, not a
+   structural repair.
+5. **Post-shape early-generation structure.** Plausible and strongly
    suggested by the timing pattern: zero-inflated pre-onset emission,
    ascertainment-conditioned day-0 emission, and dose-shortened incubation
    can burn the ship before quarantine. Not yet proven at other theta.
-5. **Missing participation/routine-stage coolant or another structural
+6. **Missing participation/routine-stage coolant or another structural
    transmission mechanism.** Still possible, especially if the pilot shows
    only dead/saturated or early-burning rows. Invoking it from one theta is
    over-attribution.
