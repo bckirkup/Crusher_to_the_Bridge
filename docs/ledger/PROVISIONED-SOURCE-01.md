@@ -2,7 +2,8 @@
 **Date:** 2026-10-15
 **Commit:** #1019
 **Pathogens:** all
-**Status:** open
+**Status:** measured
+**Measured at:** a9f4a517b37baf6b1f18a623e6d0c33bac83b407
 
 The fiat `lot_mode: "object"` voyage gate — one Bernoulli on
 `lot_object_probability` plus a geometric `extra_lot_probability`
@@ -129,3 +130,6 @@ registry extension (`q_source_by_item_line`, log-uniform shape,
 shared-lot correlation per Rispens 2020) is proposed in tranche 55 §7;
 the grammar reads a scalar|[lo, hi] only today.
 
+## Measurement
+
+Measured campaign state: waves 1–3 complete, 46,000 cells; see `campaigns/noro/provisioned_source_01/LEDGER.md` and `docs/norovirus/norovirus_open_ledger.md`. The small-hull common-q window is real, while mega requires a higher per-lot prevalence because posting conditional on minting dilutes by hull.

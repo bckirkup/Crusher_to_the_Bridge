@@ -20,7 +20,7 @@ means 10x higher shedding. A multiplier of 0.1 means 10x lower.
 
 The shedding function becomes:
 ```
-shedding = 10^(curve[days_since_onset] - dose_adjustment) *
+shedding = 10^(curve[days_since_onset] - environmental_faecal_release_log10_g_per_epoch) *
 agent.shedding_multiplier
 ```
 

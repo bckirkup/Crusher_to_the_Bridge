@@ -51,15 +51,14 @@ Profiles live in `data/pathogens/active_profiles.json`. Each pathogen entry requ
   "initial_infected": 1,
   "initial_time_infected": 0,
   "shedding_variance_log10": 0.0,
-  "transmission_route_weights": {
-    "direct_contact": 0.4,
-    "droplet": 0.1,
-    "hvac_airborne": 0.0,
-    "fomite": 0.3,
-    "food_contamination": 0.2,
-    "environmental_source": 0.0
+  "route_efficiency_multipliers": {
+    "direct_contact": 1.0,
+    "droplet": 1.0,
+    "hvac_airborne": 1.0,
+    "fomite": 1.0,
+    "food_contamination": 1.0,
+    "environmental_source": 1.0
   },
-  "innate_nonsusceptible_fraction": 0.0,
   "nonsusceptible_mechanism": "none",
   "microflora_disruption": {
     "causes_disruption": false,
@@ -80,16 +79,21 @@ It is not a dose-response α/β scaler. The deprecated
 `pathogen_overrides.<id>.dose_adjustment` alias remains supported for
 campaign compatibility.
 
-**`transmission_route_weights`** (optional; default all 1.0) scale each
-pathway's dose contribution. Prefer weights that sum to ≈1.0.
+**`route_efficiency_multipliers`** (optional; default all 1.0) scale each
+pathway's dose contribution independently. They are not normalised shares and
+neither do nor need to sum to 1.0. `transmission_route_weights` is a deprecated
+compatibility alias; do not use it for a new profile.
 
 **`surface_decay_log10_per_day`** is a **log10 reduction per day**, the unit
 every surface-persistence source measures in; it is converted once, at the
 resolution site, to the fractional daily loss the clock consumes.
 
-**`innate_nonsusceptible_fraction`** draws per-agent zero susceptibility for
-this pathogen only (e.g. FUT2 for norovirus). Orthogonal to
-`ship_graph.immune_fraction`.
+When host-genetic nonsusceptibility is modelled, use the canonical partial
+protection pair **`secretor_negative_fraction`** and
+**`secretor_negative_relative_susceptibility`** (orthogonal to
+`ship_graph.immune_fraction`). `innate_nonsusceptible_fraction` is a deprecated
+alias for sterile immunity in a removed fraction and is refuted for GII
+norovirus.
 
 Optional blocks for extended transmission pathways (PR #43):
 

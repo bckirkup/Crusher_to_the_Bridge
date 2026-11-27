@@ -1,6 +1,6 @@
 # Shared sanitary zones across every hull — structural design v1
 
-> **Status:** Implemented — heads on all 12 platforms
+> **Status:** Implemented — heads on every platform bundle
 > (`data/platforms/*/spatial_layout.json`), exhaust-only one-way air
 > wiring, `transmission.sanitary_visit_mode` (`none` default /
 > `dwell_weighted`), Bridge zones on the three cruise hulls that lacked
