@@ -73,3 +73,12 @@ four `_rest` seeds are worth running for completeness despite the fixed
 row-level failures, whether another already-declared lattice theta canary
 should run, or whether the post-shape union arm requires design-level review
 before further AWS execution.
+
+The design-level review is now recorded in
+`docs/ledger/DP-UNION-02-DESIGN-REVIEW-01.md`. Its recommendation supersedes
+the open-ended decision list above: complete the already frozen 30-cell
+cross-decade pilot and stop (25 cells remain unrun; the first five
+theta-`1e8` artifacts are already that decade's pilot slice). The scored-row
+dead, specimen-report, and representativeness repairs must be resolved
+before any post-pilot scored row, but not before the pilot because the pilot
+scores no contract leg.
