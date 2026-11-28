@@ -400,9 +400,10 @@ def _theta_row(
     scored = contract["conditioning"]["scored_class"]
     legs = _class_legs(classes[scored], contract)
     dead = sum(1 for p in p31 if p == 0) >= int(contract["dead_seeds"])
-    saturated = statistics.median(secondaries) >= (
+    saturation_threshold = (
         float(contract["saturation_fraction"]) * (cells[0]["aboard_total"] - 1)
     )
+    saturated = statistics.median(secondaries) >= saturation_threshold
     provisional = len(seeds) != expected_seeds
     low, high = (
         int(contract["t3"]["cumulative_positives"]) * f
@@ -424,6 +425,7 @@ def _theta_row(
         "failing_legs": [name for name in _LEGS if not legs[name]["pass"]],
         "dead": dead,
         "saturated": saturated,
+        "aboard_total": cells[0]["aboard_total"],
         "consistent": (
             None if provisional else
             all(legs[name]["pass"] for name in _LEGS)
@@ -496,17 +498,43 @@ def _pilot(
             for t in pilot.get("thetas", [])
         ):
             continue
-        per_seed = row["reported_only"]["p31_per_seed"]
+        reported = row["reported_only"]
+        per_seed = reported["p31_per_seed"]
         p31 = [per_seed[s] for s in seeds if s in per_seed]
         median = statistics.median(p31) if p31 else None
+        secondaries_per_seed = reported["secondaries_per_seed"]
+        pilot_secondaries = [
+            secondaries_per_seed[s] for s in seeds if s in secondaries_per_seed
+        ]
+        median_secondaries = (
+            statistics.median(pilot_secondaries) if pilot_secondaries else None
+        )
+        saturation_threshold = (
+            float(contract["saturation_fraction"]) * (row["aboard_total"] - 1)
+        )
+        saturated = (
+            None if median_secondaries is None
+            else median_secondaries >= saturation_threshold
+        )
         out.append({
             "theta": row["theta"],
             "n": len(p31),
             "p31": p31,
             "median_p31": median,
             "at_or_above_t3": None if median is None else median >= target,
-            "dead": row["dead"],
-            "saturated": row["saturated"],
+            "dead": None,
+            "dead_provenance": (
+                "null: the frozen 20-of-24 dead-row rule cannot be measured "
+                "on pilot cells"
+            ),
+            "saturated": saturated,
+            "saturation_diagnostic": {
+                "provisional": True,
+                "cohort": "pilot_seeds",
+                "n": len(pilot_secondaries),
+                "median_secondaries": median_secondaries,
+                "threshold_secondaries": saturation_threshold,
+            },
             "provenance": (
                 "pilot-seed slice of artifacts present in cells-dir; "
                 "does not establish whether a separate pilot ran"
