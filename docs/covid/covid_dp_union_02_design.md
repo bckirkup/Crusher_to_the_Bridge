@@ -1,9 +1,12 @@
 # DP-UNION-02: post-shape Diamond Princess union refit
 
-**Status: design frozen. The separately authorized `union_t1e8_canary` stage
-at theta `1e8` was measured on 2026-11-26 through one inspected single child
-and one 20-seed array; no cross-decade pilot, `_rest` block, other lattice
-cell, or further array has run.**
+**Status: design frozen; cross-decade pilot measured on 2026-11-28. The
+separately authorized `union_t1e8_canary` stage at theta `1e8` was measured
+on 2026-11-26, and the frozen first-five decade pilot has now run. No pilot
+decade reaches median P31 634, so the frozen selection rule declares no
+scored grid. No `_rest` block, half-decade lattice block, full 24-seed row,
+post-pilot canary, or further array has run. The text below remains the
+frozen design of record.**
 
 DP-UNION-02 is the first Diamond Princess theta refit under the replacement
 COVID source law. It inherits the DP-UNION-01 union arm and joint conditioned

@@ -110,8 +110,16 @@
       ],
       "median_p31": 186,
       "at_or_above_t3": false,
-      "dead": false,
+      "dead": null,
+      "dead_provenance": "null: the frozen 20-of-24 dead-row rule cannot be measured on pilot cells",
       "saturated": false,
+      "saturation_diagnostic": {
+        "provisional": true,
+        "cohort": "pilot_seeds",
+        "n": 5,
+        "median_secondaries": 3269,
+        "threshold_secondaries": 3524.5
+      },
       "provenance": "pilot-seed slice of artifacts present in cells-dir; does not establish whether a separate pilot ran"
     }
   ],
@@ -205,6 +213,7 @@
       ],
       "dead": false,
       "saturated": false,
+      "aboard_total": 3711,
       "consistent": null,
       "seeds_in_band": 0,
       "median_not_representative": true,
