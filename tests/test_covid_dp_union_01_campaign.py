@@ -69,22 +69,49 @@ def test_pilot_reads_the_t3_side_from_pilot_seeds_only():
     contract = _DESIGN["joint_contract"]
     grid = {"pilot": {"thetas": [1e7, 1e8], "seeds": [20200205, 20200206, 20200207]}}
 
-    def row(theta, p31):
+    def row(theta, p31, secondaries):
         return {
-            "theta": theta, "dead": False, "saturated": False,
-            "reported_only": {"p31_per_seed": p31},
+            "theta": theta, "dead": True, "saturated": True, "aboard_total": 101,
+            "reported_only": {
+                "p31_per_seed": p31,
+                "secondaries_per_seed": secondaries,
+            },
         }
 
     rows = [
-        row(1e7, {"20200205": 0, "20200206": 100, "20200207": 700, "20200208": 9000}),
-        row(1e8, {"20200205": 634, "20200206": 800}),
-        row(3.16e8, {"20200205": 900}),
+        row(
+            1e7,
+            {"20200205": 0, "20200206": 100, "20200207": 700, "20200208": 9000},
+            {"20200205": 90, "20200206": 94, "20200207": 100, "20200208": 10000},
+        ),
+        row(
+            1e8,
+            {"20200205": 634, "20200206": 800},
+            {"20200205": 96, "20200206": 98},
+        ),
+        row(
+            3.16e8,
+            {"20200205": 900},
+            {"20200205": 100},
+        ),
     ]
     pilot = readout._pilot(rows, grid, contract)
     assert [p["theta"] for p in pilot] == [1e7, 1e8]
     assert [p["median_p31"] for p in pilot] == [100, 717.0]
     assert [p["at_or_above_t3"] for p in pilot] == [False, True]
     assert [p["n"] for p in pilot] == [3, 2]
+    assert [p["dead"] for p in pilot] == [None, None]
+    assert [p["saturated"] for p in pilot] == [False, True]
+    first, second = pilot
+    assert first["saturation_diagnostic"]["n"] == 3
+    assert first["saturation_diagnostic"]["median_secondaries"] == 94
+    assert first["saturation_diagnostic"]["provisional"] is True
+    assert first["saturation_diagnostic"]["cohort"] == "pilot_seeds"
+    assert second["saturation_diagnostic"]["n"] == 2
+    assert all(
+        "cannot be measured" in p["dead_provenance"]
+        for p in pilot
+    )
     assert all(
         "does not establish whether a separate pilot ran" in p["provenance"]
         for p in pilot
@@ -326,7 +353,9 @@ def test_no_leg_passes_without_founder_class_mass():
     "infections, saturated", [(3524, False), (3525, True)],
 )
 def test_saturation_edge_excludes_the_index_exactly_once(infections, saturated):
-    assert _row(infections=infections)["saturated"] is saturated
+    row = _row(infections=infections)
+    assert row["saturated"] is saturated
+    assert row["aboard_total"] == 3711
 
 
 def test_dead_cell_and_machinery_gap_are_surfaced():
